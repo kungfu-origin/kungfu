@@ -1,6 +1,4 @@
-# Prerequisites
-*.d
-
+### C++ template
 # Compiled Object files
 *.slo
 *.lo
@@ -18,7 +16,6 @@
 
 # Fortran module files
 *.mod
-*.smod
 
 # Compiled Static libraries
 *.lai
@@ -30,3 +27,32 @@
 *.exe
 *.out
 *.app
+### CMake template
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Created by .ignore support plugin (hsz.mobi)
+.arcconfig
+.idea/
+
+# VS related
+*.VC.*
+*.sln
+*.vcxproj*
+Debug/
+.vs/
+.idea/
+
+*_build/
+*/tmp/
+*.pyc
+*.rpm
+
+cmake-build-debug/
+extra_dump.py
+doc/
+.DS_Store

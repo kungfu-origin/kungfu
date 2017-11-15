@@ -1,0 +1,35 @@
+{
+  "md":
+  {
+    "ctp":
+    {
+      "FrontUri": "tcp://180.168.212.228:41213",
+      "UserId": "YOUR_USER_ID",
+      "BrokerId": "YOUR_BROKER_ID",
+      "Password": "YOUR_PASSWORD"
+    }
+  },
+  "td":
+  {
+    "ctp":
+    {
+      "FrontUri": "tcp://180.168.146.187:10000",
+      "NeedAuth": false,
+      "NeedSettleConfirm": true,
+      "accounts":
+      [
+        {
+          "info":
+          {
+            "UserId": "YOUR_USER_ID",
+            "InvestorId": "YOUR_INVESTOR_ID",
+            "BrokerId": "YOUR_BROKER_ID",
+            "Password": "YOUR_PASSWORD"
+          },
+          "clients": ["YOUR_STRATEGY1","YOUR_STRATEGY2","YOUR_STRATEGY3"],
+          "is_default": true
+        }
+      ]
+    }
+  }
+}

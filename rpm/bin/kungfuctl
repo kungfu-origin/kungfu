@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+/usr/bin/supervisorctl -c /opt/kungfu/master/etc/supervisor/supervisord.conf
