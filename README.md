@@ -275,4 +275,4 @@ $ wingchun report -n band_demo -a
 Contribute 开发
 =============
 
-开发文档即将上线，请关注 [taurus.ai](http://Taurus.ai) 官网。
+开发文档即将上线，请关注 [Taurus.ai](http://taurus.ai) 官网。
