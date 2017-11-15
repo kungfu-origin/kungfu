@@ -1,7 +1,7 @@
 Intro 简介
 ========
 
-功夫是 [taurus.ai](http://taurus.ai) 团队专为量化交易者设计的低延迟交易执行系统。功夫想要解决两个核心问题：
+功夫是 [Taurus.ai](http://taurus.ai) 团队专为量化交易者设计的低延迟交易执行系统。功夫想要解决两个核心问题：
 * 交易数据实时存储 - 为了追求交易速度，很多情况下交易者不得不放弃存储功能以换取更高的执行速度，这给盘后分析带来很大困难，使分析缺乏必要的数据支持。
 * 交易延迟分析及优化 - 交易者缺乏测量交易延迟的标准化工具，关于延迟的统计数据往往只能凭感觉估算，在缺乏可靠的数据采集手段的情况下，优化工作变得更加艰难。
 
@@ -11,13 +11,13 @@ Intro 简介
 * 长拳(longfist) - 交易数据标准化定义及转换器，支持灵活对接不同交易柜台。
 
 功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 柜台对接的实现。
-如果需要接入更多柜台请通过 [taurus.ai](http://taurus.ai) 官网联系我们。
+如果需要接入更多柜台请通过 [Taurus.ai](http://taurus.ai) 官网联系我们。
 开发者也可根据长拳标准自行开发新的柜台接口。
 
 License
 ==========
 
-功夫采用 Apache Software License 2.0 发布。
+功夫采用 Apache License 2.0 发布。
 
 Setup 编译及运行环境
 =============
@@ -207,7 +207,7 @@ TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d
 委托记录：
 
 ```
-$ wingchun report -n cpp_test -o
+$ wingchun report -n band_demo -o
 
 +--------------------------------------------------------------------------------------------------+
 |                                  Kungfu order latency report                                     |
@@ -229,7 +229,7 @@ $ wingchun report -n cpp_test -o
 成交记录：
 
 ```
-$ wingchun report -n cpp_test -t
+$ wingchun report -n band_demo -t
 
 +-------------------------------------------------------------------------------------------+
 |                                  Kungfu trade latency report                              |
@@ -249,7 +249,7 @@ $ wingchun report -n cpp_test -t
 延迟统计：
 
 ```
-$ wingchun report -n cpp_test -a
+$ wingchun report -n band_demo -a
 
 +------------------------------------------------------------------------------------------------------+
 |                                       Kungfu latency statistics                                      |
@@ -275,4 +275,4 @@ $ wingchun report -n cpp_test -a
 Contribute 开发
 =============
 
-开发文档即将上线，请关注 [taurus.ai](http://taurus.ai) 官网。
+开发文档即将上线，请关注 [taurus.ai](http://Taurus.ai) 官网。
