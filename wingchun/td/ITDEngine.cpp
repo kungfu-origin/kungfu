@@ -397,17 +397,17 @@ bool ITDEngine::add_client(const string& client_name, const json& j_request)
      * failed: {'name': 'bl_test', 'ok': false}
      */
     json json_ack = user_helper->get_pos(client_name);
-    string json_content = json_ack.dump();
     if (json_ack["ok"].get<bool>())
     {
-        PosHandlerPtr pos_handler = PosHandler::create(source_id, json_content);
+        PosHandlerPtr pos_handler = PosHandler::create(source_id, json_ack);
         clients[client_name].pos_handler = pos_handler;
         if (json_ack.find("nano") != json_ack.end() && json_ack["nano"].get<long>() < last_switch_day)
         {
             pos_handler->switch_day();
-            json_content = pos_handler->to_string();
+            json_ack["Pos"] = pos_handler->to_json()["Pos"];
         }
     }
+    string json_content = json_ack.dump();
     writer->write_frame(json_content.c_str(), json_content.length() + 1, source_id, MSG_TYPE_TRADE_ENGINE_ACK, 1, -1);
     return true;
 }

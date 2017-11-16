@@ -60,13 +60,19 @@ public:
     void init(const string& js_str)
     {
         json _js = json::parse(js_str);
-        is_poisoned = !_js["ok"];
-        positions = _js["Pos"];
-        source = _js["Source"];
+        init_js(_js);
+    }
+
+    void init_js(json js)
+    {
+        is_poisoned = !js["ok"];
+        positions = js["Pos"];
+        source = js["Source"];
     }
 
     static PosHandlerPtr create(short source);
     static PosHandlerPtr create(short source, const string& js_str);
+    static PosHandlerPtr create(short source, json js);
 
     inline string to_string() const
     {
@@ -375,6 +381,13 @@ inline PosHandlerPtr PosHandler::create(short source, const string& js_str)
 {
     PosHandlerPtr res = PosHandlerPtr(new PosHandler(source));
     res->init(js_str);
+    return res;
+}
+
+inline PosHandlerPtr PosHandler::create(short source, json js)
+{
+    PosHandlerPtr res = PosHandlerPtr(new PosHandler(source));
+    res->init_js(js);
     return res;
 }
 

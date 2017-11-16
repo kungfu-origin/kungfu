@@ -353,7 +353,7 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
             if (ready)
             {
                 PosHandlerPtr handler = PosHandler::create(source, content);
-                internal_pos[source] = handler;
+                set_internal_pos(handler, source);
                 tds[source] = CONNECT_TD_STATUS_ACK_POS;
                 processor->on_rsp_position(handler, -1, source, cur_time);
             }
@@ -374,13 +374,24 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
 
 void WCDataWrapper::set_pos(PosHandlerPtr handler, short source)
 {
-    internal_pos[source] = handler;
+    set_internal_pos(handler, source);
     if (handler.get() != nullptr && !handler->poisoned())
     {
         json j_req = json::parse(handler->to_string());
         j_req["name"] = processor->get_name();
         util->set_pos_back(source, j_req.dump().c_str());
         tds[source] = CONNECT_TD_STATUS_SET_BACK;
+    }
+}
+
+void WCDataWrapper::set_internal_pos(PosHandlerPtr handler, short source)
+{
+    internal_pos[source] = handler;
+    // here we need to subscribe all market data (both for trade engine and strategy)
+    if (handler.get() != nullptr)
+    {
+        vector<string> tickers = handler->get_tickers();
+        util->subscribeMarketData(tickers, source);
     }
 }
 

@@ -59,6 +59,8 @@ protected:
     void process_rsp_position(const LFRspPositionField* pos, bool is_last, int request_id, short source, long rcv_time);
     /** process ack of td */
     void process_td_ack(const string& content, short source, long rcv_time);
+    /** set internal position */
+    void set_internal_pos(PosHandlerPtr handler, short source);
 
 protected:
     /** init bar */
