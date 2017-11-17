@@ -94,7 +94,7 @@ inline struct LFInputOrderField parseFrom(const struct CThostFtdcInputOrderField
 	struct LFInputOrderField res = {};
 	memcpy(res.BrokerID, ori.BrokerID, 11);
 	memcpy(res.UserID, ori.UserID, 16);
-	memcpy(res.InvestorID, ori.InvestorID, 19);
+	memcpy(res.InvestorID, ori.InvestorID, 13);
 	memcpy(res.BusinessUnit, ori.BusinessUnit, 21);
 	memcpy(res.ExchangeID, ori.ExchangeID, 9);
 	memcpy(res.InstrumentID, ori.InstrumentID, 31);
@@ -120,7 +120,7 @@ inline struct CThostFtdcInputOrderField parseTo(const struct LFInputOrderField& 
 	struct CThostFtdcInputOrderField res = {};
 	memcpy(res.BrokerID, lf.BrokerID, 11);
 	memcpy(res.UserID, lf.UserID, 16);
-	memcpy(res.InvestorID, lf.InvestorID, 19);
+	memcpy(res.InvestorID, lf.InvestorID, 13);
 	memcpy(res.BusinessUnit, lf.BusinessUnit, 21);
 	memcpy(res.ExchangeID, lf.ExchangeID, 9);
 	memcpy(res.InstrumentID, lf.InstrumentID, 31);

@@ -26,6 +26,7 @@
 #include <sys/mman.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <cstdio>
 #include <sstream>
 
@@ -94,6 +95,7 @@ PageHeader PageUtil::GetPageHeader(const string &dir, const string &jname, short
     size_t length = fread(&header, 1, sizeof(PageHeader), pfile);
     if (length != sizeof(PageHeader))
         perror("cannot get page header in PageUtil::GetPageNumWithTime");
+    fclose(pfile);
     return header;
 }
 
@@ -138,9 +140,11 @@ void* PageUtil::LoadPageBuffer(const string& path, int size, bool isWriting, boo
         exit(EXIT_FAILURE);
     }
 
-    if (!quickMode && mlock(buffer, size) != 0)
+    if (!quickMode && madvise(buffer, size, MADV_RANDOM) != 0 && mlock(buffer, size) != 0)
     {
-        perror("ERROR in mlock");
+        munmap(buffer, size);
+        close(fd);
+        perror("Error in madvise or mlock");
         exit(EXIT_FAILURE);
     }
 
@@ -165,5 +169,11 @@ void PageUtil::ReleasePageBuffer(void *buffer, int size, bool quickMode)
 
 bool PageUtil::FileExists(const string& filename)
 {
-    return (open(filename.c_str(), O_RDONLY, (mode_t)0600) >= 0);
+    int fd = open(filename.c_str(), O_RDONLY, (mode_t)0600);
+    if (fd >= 0)
+    {
+        close(fd);
+        return true;
+    }
+    return false;
 }
