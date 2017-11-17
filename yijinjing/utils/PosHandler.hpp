@@ -332,13 +332,15 @@ protected:
             {
                 // first open first close, for all four future exchange in China
                 LfPosiDirectionType position_dir = (direction == LF_CHAR_Buy) ? LF_CHAR_Short : LF_CHAR_Long;
+                // if there is yesterday position, minus
+                int yd = pos_array[POS_ARRAY_IDX(position_dir, YESTD_INDEX)].get<int>() - volume;
+                if (yd >= 0)
+                    pos_array[POS_ARRAY_IDX(position_dir, YESTD_INDEX)] = yd;
+                // then tot position needs to be revised.
                 int tot = pos_array[POS_ARRAY_IDX(position_dir, TOTAL_INDEX)].get<int>() - volume;
                 if (tot < pos_array[POS_ARRAY_IDX(position_dir, YESTD_INDEX)] || tot < 0)
                     is_poisoned = true;
                 pos_array[POS_ARRAY_IDX(position_dir, TOTAL_INDEX)] = tot;
-                int yd = pos_array[POS_ARRAY_IDX(position_dir, YESTD_INDEX)].get<int>() - volume;
-                if (yd >= 0)
-                    pos_array[POS_ARRAY_IDX(position_dir, YESTD_INDEX)] = yd;
                 break;
             }
             case LF_CHAR_CloseToday:
