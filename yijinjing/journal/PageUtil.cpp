@@ -148,6 +148,7 @@ void* PageUtil::LoadPageBuffer(const string& path, int size, bool isWriting, boo
         exit(EXIT_FAILURE);
     }
 
+    close(fd);
     return buffer;
 }
 
