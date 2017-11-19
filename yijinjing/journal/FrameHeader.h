@@ -62,7 +62,7 @@ typedef int     FH_TYPE_ERR_ID;
 struct FrameHeader
 {
     /** JournalFrameStatus */
-    FH_TYPE_STATUS      status;
+    volatile FH_TYPE_STATUS      status;
     /** source (system id) of this frame */
     FH_TYPE_SOURCE      source;
     /** nano time of the frame data */

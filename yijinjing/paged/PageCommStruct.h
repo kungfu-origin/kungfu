@@ -62,7 +62,7 @@ YJJ_NAMESPACE_START
 struct PageCommMsg
 {
     /** PagedCommTypeConstants (by both server and client) */
-    byte    status;
+    volatile byte    status;
     /** journal folder (by client) */
     char    folder[JOURNAL_FOLDER_MAX_LENGTH];
     /** journal name (by client) */
