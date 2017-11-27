@@ -291,7 +291,7 @@ protected:
             case LF_CHAR_Buy:
             {
                 pos_array[POS_ARRAY_IDX(LF_CHAR_Net, TOTAL_INDEX)] =
-                    pos_array[POS_ARRAY_IDX(LF_CHAR_Net, TOTAL_INDEX)].get<int>() - volume;
+                    pos_array[POS_ARRAY_IDX(LF_CHAR_Net, TOTAL_INDEX)].get<int>() + volume;
                 break;
             }
             case LF_CHAR_Sell:
