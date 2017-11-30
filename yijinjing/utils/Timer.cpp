@@ -21,9 +21,15 @@
  */
 
 #include "Timer.h"
+#include "json.hpp"
+#include "PageSocketStruct.h"
 #include <chrono>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
 
 USING_YJJ_NAMESPACE
+
+using json = nlohmann::json;
 
 boost::shared_ptr<NanoTimer> NanoTimer::m_ptr = boost::shared_ptr<NanoTimer>(nullptr);
 
@@ -36,19 +42,57 @@ NanoTimer* NanoTimer::getInstance()
     return m_ptr.get();
 }
 
-NanoTimer::NanoTimer()
+inline std::chrono::steady_clock::time_point get_time_now()
+{
+    timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    return std::chrono::steady_clock::time_point(
+            std::chrono::steady_clock::duration(
+                    std::chrono::seconds(tp.tv_sec) + std::chrono::nanoseconds(tp.tv_nsec)
+            )
+    );
+}
+
+inline long get_socket_diff()
+{
+    using namespace boost::asio;
+    boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> input, output;
+    io_service io_service;
+    local::stream_protocol::socket socket(io_service);
+    socket.connect(local::stream_protocol::endpoint(PAGED_SOCKET_FILE));
+    boost::system::error_code error;
+    input[0] = TIMER_SEC_DIFF_REQUEST;
+    write(socket, buffer(input), error);
+    socket.read_some(buffer(output), error);
+    json socket_info = json::parse(string(&output[0]));
+    return socket_info["secDiff"].get<long>();
+}
+
+inline long get_local_diff()
 {
     int unix_second_num = std::chrono::seconds(std::time(NULL)).count();
     int tick_second_num = std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
+            get_time_now().time_since_epoch()
     ).count();
-    secDiff = (unix_second_num - tick_second_num) * NANOSECONDS_PER_SECOND;
+    return (unix_second_num - tick_second_num) * NANOSECONDS_PER_SECOND;
 }
 
-long NanoTimer::getNano()
+NanoTimer::NanoTimer()
+{
+    try
+    {
+        secDiff = get_socket_diff();
+    }
+    catch(...)
+    {
+        secDiff = get_local_diff();
+    }
+}
+
+long NanoTimer::getNano() const
 {
     long _nano = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
+            get_time_now().time_since_epoch()
     ).count();
     return _nano + secDiff;
 }

@@ -24,10 +24,13 @@
 
 #include "YJJ_DECLARE.h"
 #include "KfLog.h"
+#include "json.hpp"
 #include "PageSocketStruct.h"
 #include <boost/enable_shared_from_this.hpp>
 
 YJJ_NAMESPACE_START
+
+using json = nlohmann::json;
 
 /** utilities for socket usage */
 class IPageSocketUtil

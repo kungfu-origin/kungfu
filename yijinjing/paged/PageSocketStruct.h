@@ -48,6 +48,8 @@ YJJ_NAMESPACE_START
                                              * affected by SOCKET_MESSAGE_MAX_LENGTH */
 // trade engine req 30 ~ 39
 #define PAGED_SOCKET_TD_LOGIN           22 /**< login trade engine */
+// timer req
+#define TIMER_SEC_DIFF_REQUEST          99 /**< timer update request */
 
 /**
  * Socket Request msg, fully utilized by "register"

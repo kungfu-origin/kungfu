@@ -81,7 +81,11 @@ public:
     IWCStrategy(const string& name);
     /* start data thread */
     virtual void start();
-    /* stop data thread */
+    /* run strategy in front end */
+    void run();
+    /* terminate data thread, should never be called within data thread */
+    void terminate();
+    /* stop send stop signal to data thread */
     void stop();
     /* block process by data thread */
     void block();

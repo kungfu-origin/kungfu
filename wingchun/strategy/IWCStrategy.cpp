@@ -25,21 +25,26 @@
 
 USING_WC_NAMESPACE
 
-IWCStrategy::IWCStrategy(const string &name): name(name)
-{
-    logger = yijinjing::KfLog::getStrategyLogger(name, name);
-    util = WCStrategyUtilPtr(new WCStrategyUtil(name));
-    data = WCDataWrapperPtr(new WCDataWrapper(this, util.get()));
-}
-
-/* start data thread */
-void IWCStrategy::start()
+void setup_signal_callback()
 {
     std::signal(SIGTERM, IWCDataProcessor::signal_handler);
     std::signal(SIGINT, IWCDataProcessor::signal_handler);
     std::signal(SIGHUP, IWCDataProcessor::signal_handler);
     std::signal(SIGQUIT, IWCDataProcessor::signal_handler);
     std::signal(SIGKILL, IWCDataProcessor::signal_handler);
+}
+
+IWCStrategy::IWCStrategy(const string &name): name(name)
+{
+    logger = yijinjing::KfLog::getStrategyLogger(name, name);
+    util = WCStrategyUtilPtr(new WCStrategyUtil(name));
+    data = WCDataWrapperPtr(new WCDataWrapper(this, util.get()));
+    setup_signal_callback();
+}
+
+/* start data thread */
+void IWCStrategy::start()
+{
     data_thread = ThreadPtr(new std::thread(&WCDataWrapper::run, data.get()));
     KF_LOG_INFO(logger, "[start] data started");
 }
@@ -53,16 +58,30 @@ IWCStrategy::~IWCStrategy()
     util.reset();
 }
 
-/* stop data thread */
-void IWCStrategy::stop()
+/* terminate data thread */
+void IWCStrategy::terminate()
 {
-    data->stop();
+    stop();
     if (data_thread.get() != nullptr)
     {
         data_thread->join();
         data_thread.reset();
     }
-    KF_LOG_INFO(logger, "[stop] stopped");
+    KF_LOG_INFO(logger, "[terminate] terminated!");
+}
+
+/* stop send stop signal to data thread */
+void IWCStrategy::stop()
+{
+    if (data.get() != nullptr)
+    {
+        data->stop();
+    }
+}
+
+void IWCStrategy::run()
+{
+    data->run();
 }
 
 /* block process by data thread */

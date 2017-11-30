@@ -20,6 +20,7 @@
  */
 
 #include "PageSocketHandler.h"
+#include "Timer.h"
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
@@ -95,10 +96,18 @@ void PageSocketHandler::process_msg()
 
     switch (req_type)
     {
+        case TIMER_SEC_DIFF_REQUEST:
+        {
+            json timer;
+            timer["secDiff"] = getSecDiff();
+            timer["nano"] = getNanoTime();
+            strcpy(&_data[0], timer.dump().c_str());
+            break;
+        }
         case PAGED_SOCKET_CONNECTION_TEST:
         {
             string greetings = "Hello, world!";
-            memcpy(&_data[0], greetings.c_str(), greetings.length() + 1);
+            strcpy(&_data[0], greetings.c_str());
             break;
         }
         case PAGED_SOCKET_JOURNAL_REGISTER:

@@ -44,7 +44,10 @@ def dump_csv(csv_file, folders, names, t_msg_type, start_nano, end_nano, visuali
         msg_type = frame.msg_type()
         if msg_type == t_msg_type:
             row = lfutil.get_contents(frame)
-            row.append(('h_nano_s', 's', strfnano(frame.nano())) if visualized else ('h_nano', 'l', frame.nano()))
+            row.append(('h_extra_nano', 'l', frame.extra_nano()))
+            row.append(('h_nano', 'l', frame.nano()))
+            if visualized:
+                row.append(('h_nano_s', 's', strfnano(frame.nano())))
             row.append(('h_msg_type', 'i', msg_type))
             row.append(('h_request_id', 'i', frame.request_id()))
             row.append(('h_source', 'i', frame.source()))
