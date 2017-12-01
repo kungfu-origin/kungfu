@@ -21,6 +21,7 @@
 
 #include "ITDEngine.h"
 #include "PageCommStruct.h" /**< REQUEST_ID_RANGE */
+#include "Timer.h"
 #include "longfist/LFConstants.h"
 #include "longfist/LFUtils.h"
 #include "longfist/sys_messages.h"
@@ -197,10 +198,11 @@ void ITDEngine::listening()
                         user_helper->record_order(name, local_id, requestId, order->InstrumentID);
                         local_id ++;
                         strcpy(order->OrderRef, order_ref.c_str());
-                        KF_LOG_DEBUG(logger, "[insert_order] (rid)" << requestId << " (ticker)" << order->InstrumentID << " (ref)" << order_ref);
+                        long before_nano = kungfu::yijinjing::getNanoTime();
                         req_order_insert(order, idx, requestId, cur_time);
                         // insert order, we need to track in send
-                        send_writer->write_frame_extra(order, sizeof(LFInputOrderField), source_id, MSG_TYPE_LF_ORDER, 1/*ISLAST*/, requestId, frame->getExtraNano());
+                        send_writer->write_frame_extra(order, sizeof(LFInputOrderField), source_id, MSG_TYPE_LF_ORDER, 1/*ISLAST*/, requestId, before_nano);
+                        KF_LOG_DEBUG(logger, "[insert_order] (rid)" << requestId << " (ticker)" << order->InstrumentID << " (ref)" << order_ref);
                         break;
                     }
                     case MSG_TYPE_LF_ORDER_ACTION:

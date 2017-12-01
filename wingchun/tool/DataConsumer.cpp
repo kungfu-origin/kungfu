@@ -59,6 +59,7 @@ void DataConsumer::run()
             string name = reader->getFrameName();
             void* data = frame->getData();
             cur_time = frame->getNano();
+            long extra_nano = frame->getExtraNano();
 
             if (msg_type == MSG_TYPE_LF_MD) // md
             {
@@ -145,11 +146,11 @@ void DataConsumer::run()
                 LFInputOrderField* order = (LFInputOrderField*)data;
                 if (!name.compare(0, 8, "TD_SEND_"))
                 {
-                    on_order_send(order, msg_source, request_id, cur_time);
+                    on_order_send(order, msg_source, request_id, cur_time, extra_nano);
                 }
                 else
                 {
-                    on_order_origin(order, msg_source, request_id, cur_time, frame->getExtraNano(), name);
+                    on_order_origin(order, msg_source, request_id, cur_time, extra_nano, name);
                 }
             }
             else if (msg_type == MSG_TYPE_LF_RTN_ORDER) // td

@@ -270,8 +270,8 @@ inline void Frame::setErrorData(FH_TYPE_ERR_ID errorId,
     {
         frame->err_id = errorId;
         char* errorMsgStartAddr = (char*)ADDRESS_ADD(frame, BASIC_FRAME_HEADER_LENGTH);
-        strncpy(errorMsgStartAddr, errorMsg, ERROR_MSG_MAX_LENGTH - 1);
-        errorMsgStartAddr[ERROR_MSG_MAX_LENGTH - 1] = '\0';
+        if (errorMsg != nullptr)
+            strncpy(errorMsgStartAddr, errorMsg, ERROR_MSG_MAX_LENGTH - 1);
         memcpy(ADDRESS_ADD(frame, ERROR_FRAME_HEADER_LENGTH), data, dataLength);
         setFrameLength(ERROR_FRAME_HEADER_LENGTH + dataLength);
 #ifdef FRAME_AUTO_SET_HASHCODE

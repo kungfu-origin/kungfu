@@ -59,7 +59,7 @@ protected:
     virtual void on_td_connect(json& j_request, short source, long rcv_time, const string& name) {};
     virtual void on_td_ack(json& j_ack, short source, long rcv_time, const string& name) {};
     virtual void on_order_origin(LFInputOrderField* order, short source, int order_id, long rcv_time, long md_nano, const string& name) {};
-    virtual void on_order_send(LFInputOrderField* order, short source, int order_id, long rcv_time) {};
+    virtual void on_order_send(LFInputOrderField* order, short source, int order_id, long after_nano, long before_nano) {};
     virtual void on_rtn_order(LFRtnOrderField* order, short source, int order_id, long rcv_time) {};
     virtual void on_rtn_trade(LFRtnTradeField* trade, short source, int order_id, long rcv_time) {};
 public:

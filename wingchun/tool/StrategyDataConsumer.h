@@ -43,14 +43,16 @@ struct OrderLatencyUnit
     // time
     long    md_time;
     long    oe_time;
-    long    send_time;
+    long    send_before_time;
+    long    send_after_time;
     long    rsp_time;
     long    first_rtn_order_time;
     long    first_rtn_trade_time;
 
     OrderLatencyUnit(): md_time(-1),
                         oe_time(-1),
-                        send_time(-1),
+                        send_before_time(-1),
+                        send_after_time(-1),
                         rsp_time(-1),
                         number_rtn_order(0),
                         number_rtn_trade(0),
@@ -86,7 +88,7 @@ protected:
     virtual void on_td_ack(json& j_ack, short source, long rcv_time, const string& name);
 
     virtual void on_order_origin(LFInputOrderField* order, short source, int order_id, long rcv_time, long md_nano, const string& name);
-    virtual void on_order_send(LFInputOrderField* order, short source, int order_id, long rcv_time);
+    virtual void on_order_send(LFInputOrderField* order, short source, int order_id, long after_nano, long before_nano);
     virtual void on_rtn_order(LFRtnOrderField* order, short source, int order_id, long rcv_time);
     virtual void on_rtn_trade(LFRtnTradeField* trade, short source, int order_id, long rcv_time);
 
