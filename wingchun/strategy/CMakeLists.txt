@@ -21,4 +21,3 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} journal kflog python ${Boost_LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "lib/wingchun")
 
 INSTALL(FILES ../base/WC_DECLARE.h IWCDataProcessor.h IWCStrategy.h WCDataWrapper.h WCStrategyUtil.h DESTINATION "include")
-ADD_SUBDIRECTORY(cpp_demo)
