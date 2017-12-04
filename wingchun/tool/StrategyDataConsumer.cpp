@@ -193,8 +193,8 @@ void StrategyDataConsumer::on_rtn_trade(LFRtnTradeField* trade, short source, in
 void StrategyDataConsumer::print_order() const
 {
     cout << endl;
-    cout << "+--------------------------------------------------------------------------------------------------+" << endl;
-    cout << "|                                  Kungfu order latency report                                     |" << endl;
+    cout << "+-----------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|                                  Kungfu order latency report                                                    |" << endl;
     cout << "+-----------+-----------------+--------------+--------------+----------+----------+----------+--------------+-----+" << endl;
     cout << "| order_id  | rcv_time        | TTT-b(ns)    | TTT-a(ns)    | ticker   | price    | volume   | offset       | dir |" << endl;
     cout << "+-----------+-----------------+--------------+--------------+----------+----------+----------+--------------+-----+" << endl;
