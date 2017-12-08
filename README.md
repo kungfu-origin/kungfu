@@ -16,6 +16,8 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
+策略开发请参考 [策略开发文档](https://github.com/taurusai/kungfu/wiki/Strategy)。
+
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
 License
@@ -43,6 +45,12 @@ $ sudo systemctl status docker
 $ sudo docker pull taurusai/kungfu-devel
 ```
 
+或使用我们提供的国内高速镜像：
+
+```
+$ sudo docker pull image.taurusai.com/library/kungfu-devel
+```
+
 成功获取镜像后，使用镜像启动 Docker 实例：
 
 ```
@@ -64,6 +72,16 @@ $ docker start kungfu-devel
 
 ```
 $ sudo docker exec -it kungfu-devel bash
+```
+
+如果不使用我们提供的 Docker 编译环境，需要自行安装如下依赖包：
+
+```
+boost 1.62
+rfoo 1.3.1
+pid 2.1.1
+log4cplus2 2.0.0_RC1
+supervisor 3.1.0
 ```
 
 Compile 编译
@@ -92,6 +110,12 @@ $ make package
 $ yum install kungfu-0.0.1-Linux.rpm
 ```
 
+如需再次安装，建议先删除已安装版本：
+
+```
+$ yum erase kungfu
+```
+
 Run 启动
 ======
 
@@ -116,6 +140,14 @@ $ sudo systemctl status kungfu
            |-24786 /usr/bin/python -u /opt/kungfu/master/bin/yjj server
            `-24787 /usr/bin/python -u /opt/kungfu/master/bin/yjj server
 ```
+
+如果启动有问题，可以使用如下命令手动启动后台服务：
+
+```
+$ sudo systemctl start kungfu
+```
+
+相关日志存放在 /shared/kungfu/log/supervisor 下。
 
 使用 kungfuctl 命令控制后台进程：
 
@@ -163,12 +195,63 @@ kungfu/wingchun/strategy/py_demo
 $ sudo -u bruce wingchun strategy -n band_demo -p /your/path/band_demo_strategy.py
 ```
 
+C++版本的策略 Demo 默认不编译，如需编译可参考如下步骤：
+
+```
+$ mkdir cpp_build
+$ cd cpp_build
+$ cmake ../../wingchun/strategy/cpp_demo
+$ make
+```
+
+C++ Demo 编译后生成可执行文件，运行策略不是通过 wingchun 命令而是直接执行：
+
+```
+$ ./kungfu_strategy_demo
+```
+
 策略运行期间及结束后，可以使用 wingchun 命令查看策略运行状态：
 
 ```
 $ wingchun help pos
 $ wingchun help report
 ```
+
+### 系统信息
+
+系统运行期间，可使用如下命令查看系统后台信息，其中包括了系统所有进程的 PID、启动和换日时间等信息：
+
+```
+$ yjj status
+{'Client': {'MDEngineCTP': {'hash_code': 1788426942,
+                            'is_strategy': False,
+                            'is_writing': True,
+                            'pid': 15493,
+                            'registerTime': 1512726147926855797,
+                            'rid_start': -1,
+                            'trade_engine_vec': [],
+                            'users': [4]},
+
+ 'Pid': {15423: ['paged'],
+         15493: ['MDEngineCTP_R', 'MDEngineCTP', 'RAW_MDEngineCTP'],
+         15494: ['TDEngineCTP_SR',
+                 'TDEngineCTP',
+                 'SEND_TDEngineCTP',
+                 'RAW_TDEngineCTP'],
+         16664: ['demo_test', 'demo_test_R']},
+ 'Task': ('running',
+          10000,
+          {'KfController': {'engine_ends': ['2017-12-09 16:30:00'],
+                            'engine_starts': ['2017-12-09 09:15:00'],
+                            'switch_day': '2017-12-09 17:00:00'},
+           'PidCheck': {},
+           'TempPage': {}}),
+ 'Time': '2017-12-08 17:52:58'
+```
+
+### 日志
+
+系统日志存放在 /shared/kungfu/log 目录下。
 
 ### 内存数据库 yjj journal 数据导出展示
 
@@ -299,6 +382,8 @@ Version 版本
     * 修正没有 close 的 file 句柄
     * 修正了 memcpy 的潜在越界问题
     * 编译选项优化为 O3
+* 0.0.3:
+    增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
 
 Contribute 开发
 =============
