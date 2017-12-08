@@ -18,6 +18,8 @@ Intro 简介
 
 策略开发请参考 [策略开发文档](https://github.com/taurusai/kungfu/wiki/Strategy)。
 
+常见问题请参考 [Q&A](https://github.com/taurusai/kungfu/wiki/QA)。
+
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
 License
