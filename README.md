@@ -16,9 +16,11 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
-策略开发请参考 [策略开发文档](https://github.com/taurusai/kungfu/wiki/Strategy)。
+python策略开发请参考 [python策略开发文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)。
 
-常见问题请参考 [Q&A](https://github.com/taurusai/kungfu/doc/Q&A.md)。
+C++策略开发请参考 [C++策略开发文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+
+常见问题请参考 [Q&A](https://github.com/lqyhost/kungfu/blob/master/doc/QA.md)。
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
