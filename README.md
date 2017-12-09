@@ -18,7 +18,7 @@ Intro 简介
 
 python策略开发请参考 [python策略开发文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)。
 
-C++策略开发请参考 [C++策略开发文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+C++策略开发请参考 [C++策略开发说明](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md) [C++策略开发文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
 
 常见问题请参考 [Q&A](https://github.com/lqyhost/kungfu/blob/master/doc/QA.md)。
 
