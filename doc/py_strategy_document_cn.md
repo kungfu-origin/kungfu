@@ -3,13 +3,13 @@
 
 ## 回调函数
 
-initialize(#initialize)	              初始化函数
-on_bar	                  bar数据回调
-on_tick	                  ticker数据回调
-on_pos	                  持仓返回回调
-on_error	              错误回调
-on_rtn_order	          下单回报回调
-on_rtn_trade	          成交回报回调
+* [initialize](#initialize)	              初始化函数 
+* on_bar	                  bar数据回调 
+* on_tick	                  ticker数据回调 
+* on_pos	                  持仓返回回调 
+* on_error	              错误回调 
+* on_rtn_order	          下单回报回调 
+* on_rtn_trade	          成交回报回调 
 
 ## 功能函数
 
