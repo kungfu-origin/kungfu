@@ -73,25 +73,20 @@
 
 ### 回调函数
 
-<h3 id="initialize">initialize(context)</h3>
+<h3 id="initialize">initialize(context(context))</h3>
 功能描述: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作
 
 context : 系统定义用于调用功能函数和存放任意数据的综合体
 
-<h3 id="on_bar">on_bar</h3>
+<h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
 功能描述: 当收到分钟线数据的时候函数触发
-
 参数数据类型及解释：
-
 context	系统定义用于调用功能函数和存放任意数据的综合体
-
 dictionary((ticker(str) -> [LFBarMarketDataField](#LFBarMarketDataField))) bar结构list
-
 [SOURCE](#SOURCE)	行情交易接口常量
-
 long	返回纳秒时间
 
-<h3 id="on_tick">on_tick</h3>
+<h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
 功能描述: 收到tick数据时被触发
 
 参数数据类型及解释：
@@ -104,7 +99,7 @@ context	系统定义用于调用功能函数和存放任意数据的综合体
 
 long	返回纳秒时间
 
-<h3 id="on_pos"> on_pos </h3>
+<h3 id="on_pos"> on_pos(context, pos_handler, request_id, souce, rcv_time) </h3>
 功能描述: 当策略注册到TD时被触发一次，回报request_id为-1，如果策略首次运行，pos_handler为空值，如果策略之前运行且设置过持仓，pos_handler为策略持仓。同时该函数在该策略查询了持仓以后会被触发，request_id为查询持仓时的请求序号，pos_handler为账户持仓
 
 参数数据类型及解释：
@@ -119,7 +114,7 @@ int	请求编号
 
 long	返回纳秒时间
 
-<h3 id="on_error"> on_error </h3>
+<h3 id="on_error"> on_error(context, error_id, error_msg, request_id, souce, rcv_time) </h3>
 功能描述:当收到错误回报时被触发
 
 参数数据类型及解释：
@@ -137,7 +132,7 @@ int	请求编号
 long	返回纳秒时间 
 
 
-<h3 id="on_rtn_order"> on_rtn_order </h3>
+<h3 id="on_rtn_order"> on_rtn_order(context, rtn_order, order_id, souce, rcv_time) </h3>
 功能描述: 收到策略下单的下单回报时被触发，非本策略下单的下单回报不会触发该函数
 参数数据类型及解释：
 
@@ -152,7 +147,7 @@ int	下单编号
 long	返回纳秒时间
 
 
-<h3 id="on_rtn_trade"> on_rtn_trade </h3>
+<h3 id="on_rtn_trade"> on_rtn_trade(context, rtn_trade, order_id, souce, rcv_time) </h3>
 功能描述: 收到策略下单的成交回报时被触发，非本策略下单的成交回报不会触发该函数
 参数数据类型及解释：
 
@@ -166,14 +161,14 @@ int	下单编号
 
 long	返回纳秒时间
 
-<h3 id="context.stop">context.stop</h3>
+<h3 id="context.stop">context.stop()</h3>
 功能描述: 停止策略（但不是立即停止，可能会在真正停止之前等待几秒）
 
 参数数据类型及解释：
 
 返回值类型及解释：
 
-<h3 id="context.new_pos">context.new_pos</h3>
+<h3 id="context.new_pos">context.new_pos(source)</h3>
 功能描述:创建一个空的持仓 
 
 参数数据类型及解释：
@@ -184,7 +179,7 @@ long	返回纳秒时间
 
 PosHandler	持仓数据结构(空持仓)
 
-<h3 id="context.get_nano">context.get_nano</h3>
+<h3 id="context.get_nano">context.get_nano()</h3>
 功能描述: 获得当前纳秒时间
 
 参数数据类型及解释：
@@ -193,7 +188,7 @@ PosHandler	持仓数据结构(空持仓)
 
 long	系统当前纳秒时间
 
-<h3 id="context.get_name">context.get_name</h3>
+<h3 id="context.get_name">context.get_name()</h3>
 功能描述: 获取策略名
 
 参数数据类型及解释：
@@ -202,7 +197,7 @@ long	系统当前纳秒时间
 
 string	策略名称
 
-<h3 id="context.parse_time">context.parse_time</h3>
+<h3 id="context.parse_time">context.parse_time(time_str)</h3>
 功能描述: 将时间字符串转换为纳秒时间 
 
 参数数据类型及解释：
@@ -213,7 +208,7 @@ string	时间字符串("%Y-%m-%d %H:%M:%S")
 
 long	纳秒时间
 
-<h3 id="context.parse_nano">context.parse_nano</h3>
+<h3 id="context.parse_nano">context.parse_nano(nano)</h3>
 功能描述: 将纳秒时间转换为字符串时间
 
 参数数据类型及解释：
@@ -224,7 +219,7 @@ long	纳秒时间
 
 string	时间字符串("%Y-%m-%d %H:%M:%S")
 
-<h3 id="context.print_pos">context.print_pos</h3>
+<h3 id="context.print_pos">context.print_pos()</h3>
 功能描述: 打印持仓
 
 参数数据类型及解释：
@@ -233,7 +228,7 @@ string	时间字符串("%Y-%m-%d %H:%M:%S")
 
 PosHandler	持仓数据
 
-<h3 id="context.add_md">context.add_md</h3>
+<h3 id="context.add_md">context.add_md(source)</h3>
 功能描述: 给策略添加行情服务
 
 参数数据类型及解释：
@@ -242,7 +237,7 @@ PosHandler	持仓数据
 
 返回值类型及解释：
 
-<h3 id="context.add_td">context.add_td</h3>
+<h3 id="context.add_td">context.add_td(source)</h3>
 功能描述: 给策略添加交易服务
 
 参数数据类型及解释：
@@ -251,7 +246,7 @@ PosHandler	持仓数据
 
 返回值类型及解释：
 
-<h3 id="context.req_pos">context.req_pos</h3>
+<h3 id="context.req_pos">context.req_pos(source)</h3>
 功能描述: 查询账户持仓，如果查询失败返回-1，查询成功则返回request_id，当收到交易所返回持仓时通过回调on_pos传回持仓
 
 参数数据类型及解释：
@@ -262,7 +257,7 @@ PosHandler	持仓数据
 
 int	请求编号
 
-<h3 id="context.cancel_order">context.cancel_order</h3>
+<h3 id="context.cancel_order">context.cancel_order(source, order_id)</h3>
 功能描述: 使用下单编号撤销订单，如果失败则返回-1
 
 参数数据类型及解释：
@@ -275,7 +270,7 @@ int	下单编号
 
 int	请求编号
 
-<h3 id="context.set_pos">context.set_pos</h3>
+<h3 id="context.set_pos">context.set_pos(pos_handler, source)</h3>
 功能描述: 设置策略持仓。
 
 参数数据类型及解释：
@@ -286,7 +281,7 @@ PosHandler	持仓数据结构
 
 返回值类型及解释：
 
-<h3 id="context.get_pos">context.get_pos</h3>
+<h3 id="context.get_pos">context.get_pos(source)</h3>
 功能描述:获得策略持仓 
 
 参数数据类型及解释：
@@ -297,7 +292,7 @@ PosHandler	持仓数据结构
 
 PosHandler	持仓数据结构
 
-<h3 id="context.subscribe">context.subscribe</h3>
+<h3 id="context.subscribe">context.subscribe(tick_list, source)</h3>
 功能描述: 订阅行情
 
 参数数据类型及解释：
@@ -308,7 +303,7 @@ list 订阅合约列表
 
 返回值类型及解释：
 
-<h3 id="context.register_bar">context.register_bar</h3>
+<h3 id="context.register_bar">context.register_bar(source, min_inerval, start_time, ent_time)</h3>
 功能描述: 订阅分钟线行情，间隔时间可为自定义整数
 
 参数数据类型及解释：
@@ -324,7 +319,7 @@ string	bar数据结束时间
 返回值类型及解释：
 
 
-<h3 id="context.insert_func_at">context.context.insert_func_at</h3>
+<h3 id="context.insert_func_at">context.context.insert_func_at(nano, function)</h3>
 功能描述: 在指定纳秒时间添加回调函数
 
 参数数据类型及解释：
@@ -336,7 +331,7 @@ func	回调函数
 返回值类型及解释：
 
 
-<h3 id="context.insert_func_at_c">context.insert_func_at_c</h3>
+<h3 id="context.insert_func_at_c">context.insert_func_at_c(nano, function)</h3>
 功能描述: 在指定纳秒时间添加以context为参数的回调函数
 
 参数数据类型及解释：
@@ -347,7 +342,7 @@ func	回调函数（以context为默认参数）
 
 返回值类型及解释：
 
-<h3 id="context.insert_func_after">context.insert_func_after</h3>
+<h3 id="context.insert_func_after">context.insert_func_after(seconds, function)</h3>
 功能描述: 在指定秒数后添加回调函数
 
 参数数据类型及解释：
@@ -358,7 +353,7 @@ func	回调函数
 
 返回值类型及解释：
 
-<h3 id="context.insert_func_after_c">context.insert_func_after_c</h3>
+<h3 id="context.insert_func_after_c">context.insert_func_after_c(seconds, function)</h3>
 功能描述: 在指定秒数后添加以context为参数的回调函数
 
 参数数据类型及解释：
@@ -369,7 +364,7 @@ func	回调函数（以context为参数）
 
 返回值类型及解释：
 
-<h3 id="context.insert_market_order">context.insert_market_order</h3>
+<h3 id="context.insert_market_order">context.insert_market_order(source, ticker, exchange_id, volume, direction, offset)</h3>
 功能描述: 下市价单，如果失败返回-1
 
 参数数据类型及解释：
@@ -390,7 +385,7 @@ int	数量
 
 int	下单编号
 
-<h3 id="context.insert_limit_order">context.insert_limit_order</h3>
+<h3 id="context.insert_limit_order">context.insert_limit_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
 功能描述: 下限价单，如果失败返回-1
 
 参数数据类型及解释：
@@ -413,7 +408,7 @@ int	数量
 
 int	下单编号
 
-<h3 id="context.insert_fok_order">context.insert_fok_order</h3>
+<h3 id="context.insert_fok_order">context.insert_fok_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
 功能描述: 下FOK类型订单（全部成交或则全部撤销），如果失败返回-1
 
 参数数据类型及解释：
@@ -436,7 +431,7 @@ int	数量
 
 int	下单编号
 
-<h3 id="context.insert_fak_order">context.insert_fak_order</h3>
+<h3 id="context.insert_fak_order">context.insert_fak_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
 功能描述: 下FAK类型订单（成交且为成交部分撤销），如果失败返回-1
 
 参数数据类型及解释：
@@ -459,7 +454,7 @@ int	数量
 
 int	下单编号
 
-<h3 id="context.log_debug">context.log_debug</h3>
+<h3 id="context.log_debug">context.log_debug(msg)</h3>
 功能描述: 输出debug日志
 
 参数数据类型及解释：
@@ -468,7 +463,7 @@ string	日志字符串
 
 返回值类型及解释：
 
-<h3 id="context.log_info">context.log_info</h3>
+<h3 id="context.log_info">context.log_info(msg)</h3>
 功能描述: 输出info日志
 
 参数数据类型及解释：
@@ -477,7 +472,7 @@ string	日志字符串
 
 返回值类型及解释：
 
-<h3 id="context.log_error">context.log_error</h3>
+<h3 id="context.log_error">context.log_error(msg)</h3>
 功能描述: 输出错误日志
 
 参数数据类型及解释：
@@ -486,7 +481,7 @@ string	日志字符串
 
 返回值类型及解释：
 
-<h3 id="context.log_fatal">context.log_fatal</h3>
+<h3 id="context.log_fatal">context.log_fatal(msg)</h3>
 功能描述: 输出fatal日志
 
 参数数据类型及解释：
@@ -495,7 +490,7 @@ string	日志字符串
 
 返回值类型及解释：
 
-<h3 id="PosHandler.add_pos">PosHandler.add_pos</h3>
+<h3 id="PosHandler.add_pos">PosHandler.add_pos(ticker, direction, tot_pos, yd_pos)</h3>
 功能描述: 向持仓数据项中添加持仓增量
 
 参数数据类型及解释：
@@ -511,7 +506,7 @@ int	昨仓位
 返回值类型及解释：
 
 
-<h3 id="PosHandler.set_pos">PosHandler.set_pos</h3>
+<h3 id="PosHandler.set_pos">PosHandler.set_pos(ticker, direction, tot_pos, yd_pos)</h3>
 功能描述: 向持仓数据项中添加持仓（会替换原有项）
 
 参数数据类型及解释：
@@ -526,7 +521,7 @@ int	昨仓位
 
 返回值类型及解释：
 
-<h3 id="PosHandler.dump">PosHandler.dump</h3>
+<h3 id="PosHandler.dump">PosHandler.dump()</h3>
 功能描述: 持仓转换为json格式字符串
 
 参数数据类型及解释：
@@ -535,7 +530,7 @@ int	昨仓位
 
 string	json标准格式的持仓字符串
 
-<h3 id="PosHandler.load">PosHandler.load</h3>
+<h3 id="PosHandler.load">PosHandler.load(pos_str)</h3>
 功能描述: 将json格式的持仓数据设置为持仓
 
 参数数据类型及解释：
@@ -545,7 +540,7 @@ string	json标准格式的持仓字符串
 返回值类型及解释：
 
 
-<h3 id="PosHandler.get_tickers">PosHandler.get_tickers</h3>
+<h3 id="PosHandler.get_tickers">PosHandler.get_tickers()</h3>
 功能描述: 获得持仓数据的合约列表
 
 参数数据类型及解释：
@@ -554,7 +549,7 @@ string	json标准格式的持仓字符串
 
 list	有持仓的合约list
 
-<h3 id="PosHandler.get_net_tot">PosHandler.get_net_tot</h3>
+<h3 id="PosHandler.get_net_tot">PosHandler.get_net_tot(ticker)</h3>
 功能描述: 获取某只股票总持仓
 
 参数数据类型及解释：
@@ -565,7 +560,7 @@ string	要获取仓位的合约
 
 int	指定合约总净持仓
 
-<h3 id="PosHandler.get_net_yd">PosHandler.get_net_yd</h3>
+<h3 id="PosHandler.get_net_yd">PosHandler.get_net_yd(ticker)</h3>
 功能描述: 获取某只股票昨仓
 
 参数数据类型及解释：
@@ -576,7 +571,7 @@ string	要获取仓位的合约
 
 int	指定合约昨日净持仓
 
-<h3 id="PosHandler.get_long_tot">PosHandler.get_long_tot</h3>
+<h3 id="PosHandler.get_long_tot">PosHandler.get_long_tot(ticker)</h3>
 功能描述: 获取期货某合约做多总持仓
 
 参数数据类型及解释：
@@ -587,7 +582,7 @@ string	要获取仓位的合约
 
 int	指定合约总多仓
 
-<h3 id="PosHandler.get_long_yd">PosHandler.get_long_yd</h3>
+<h3 id="PosHandler.get_long_yd">PosHandler.get_long_yd(ticker)</h3>
 功能描述: 获取期货某合约做多昨仓
 
 参数数据类型及解释：
@@ -598,7 +593,7 @@ string	要获取仓位的合约
 
 int	指定合约昨多仓
 
-<h3 id="PosHandler.get_short_tot">PosHandler.get_short_tot</h3>
+<h3 id="PosHandler.get_short_tot">PosHandler.get_short_tot(ticker)</h3>
 功能描述: 获取期货某合约做空总持仓
 
 参数数据类型及解释：
@@ -609,7 +604,7 @@ string	要获取仓位的合约
 
 int	指定合约总空仓
 
-<h3 id="PosHandler.get_short_yd">PosHandler.get_short_yd</h3>
+<h3 id="PosHandler.get_short_yd">PosHandler.get_short_yd(ticker)</h3>
 功能描述: 获取期货某合约做空昨仓
 
 参数数据类型及解释：
