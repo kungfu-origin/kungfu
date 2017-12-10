@@ -1,45 +1,43 @@
 函数索引
 =======
 
-## 回调函数
+* 回调函数
 
-* [initialize](#initialize)	              初始化函数 
-* on_bar	                  bar数据回调 
-* on_tick	                  ticker数据回调 
-* on_pos	                  持仓返回回调 
-* on_error	              错误回调 
-* on_rtn_order	          下单回报回调 
-* on_rtn_trade	          成交回报回调 
-
-## 功能函数
-
-context.stop	                停止策略
-context.new_pos	                生成空持仓
-context.get_nano	            获取系统当前纳秒时间
-context.get_name	            获取策略名
-context.parse_time	            时间字符串转纳秒时间
-context.parse_nano	            纳秒时间转时间字符串
-context.print_pos	            打印持仓
-context.add_md	                添加行情接口
-context.add_td	                添加交易接口
-context.req_pos	                查询持仓
-context.cancel_order	        撤销订单
-context.set_pos	                设置策略持仓
-context.get_pos	                获取策略持仓
-context.subscribe	            订阅行情
-context.register_bar	        订阅行情bar数据
-context.insert_func_at	        在指定nano时间添加函数回调（无参数）
-context.insert_func_after    	在当前时间后n秒添加回调（无参数）
-context.insert_func_at_c	    在指定nano时间添加函数回调（context为参数）
-context.insert_func_after_c	    在当前时间后n秒添加回调（context为参数）
-context.insert_market_order	    下市价单
-context.insert_limit_order	    下限价单
-context.insert_fok_order	    下fok单
-context.insert_fak_order    	下fak单
-context.log_debug	            输入debug日志
-context.log_info	            输出info日志
-context.log_error	            输出error日志
-context.log_fatal	            输出fatal日志
+  * [initialize](#initialize)	              初始化函数 
+  * on_bar	                  bar数据回调 
+  * on_tick	                  ticker数据回调 
+  * on_pos	                  持仓返回回调 
+  * on_error	              错误回调 
+  * on_rtn_order	          下单回报回调 
+  * on_rtn_trade	          成交回报回调 
+* 功能函数
+  * context.stop	                停止策略
+  * context.new_pos	                生成空持仓
+  * context.get_nano	            获取系统当前纳秒时间
+  * context.get_name	            获取策略名
+  * context.parse_time	            时间字符串转纳秒时间
+  * context.parse_nano	            纳秒时间转时间字符串
+  * context.print_pos	            打印持仓
+  * context.add_md	                添加行情接口
+  * context.add_td	                添加交易接口
+  * context.req_pos	                查询持仓
+  * context.cancel_order	        撤销订单
+  * context.set_pos	                设置策略持仓
+  * context.get_pos	                获取策略持仓
+  * context.subscribe	            订阅行情
+  * context.register_bar	        订阅行情bar数据
+  * context.insert_func_at	        在指定nano时间添加函数回调（无参数）
+  * context.insert_func_after    	在当前时间后n秒添加回调（无参数）
+  * context.insert_func_at_c	    在指定nano时间添加函数回调（context为参数）
+  * context.insert_func_after_c	    在当前时间后n秒添加回调（context为参数）
+  * context.insert_market_order	    下市价单
+  * context.insert_limit_order	    下限价单
+  * context.insert_fok_order	    下fok单
+  * context.insert_fak_order    	下fak单
+  * context.log_debug	            输入debug日志
+  * context.log_info	            输出info日志
+  * context.log_error	            输出error日志
+  * context.log_fatal	            输出fatal日志
 
 #持仓成员函数
 
@@ -74,15 +72,23 @@ TIME_CONDITION	                订单交易时间限制常量
 函数定义
 =======
 
-函数名：
-<h3 id="initialize">initialize</h3>
-initialize
-功能描述：  
-策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作		
-输入参数名	            类型	                  参数说明
-context	              context	  系统定义用于调用功能函数和存放任意数据的综合体
-输出参数名	            类型	                  参数说明
+<h3 id="initialize">initialize(context)</h3>
+功能描述: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作
+context : 系统定义用于调用功能函数和存放任意数据的综合体
 
+| 输入参数名 | 类型	| 参数说明 |
+| :--------: | :-----------: | :-----------: |
+| context | context | 系统定义用于调用功能函数和存放任意数据的综合体 |
+
+<h3 id="on_bar">on_bar</h3>
+功能描述: 当收到分钟线数据的时候函数触发
+
+| 输入参数名 | 类型 | 参数说明 |
+| :--------: | :-----------: | :-----------: |
+| context | context | 系统定义用于调用功能函数和存放任意数据的综合体 |
+| bars | dictionary((ticker(str) -> LFBarMarketDataField)) | bar结构list |
+| souce | SOURCE | 行情交易接口常量 |
+| rcv_time | long	返回纳秒时间 |
 
 
 数据结构定义
