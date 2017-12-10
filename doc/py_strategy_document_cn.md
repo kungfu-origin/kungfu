@@ -82,16 +82,11 @@ context : 系统定义用于调用功能函数和存放任意数据的综合体
 
 <h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
 功能描述: 当收到分钟线数据的时候函数触发.   
-
 参数数据类型及解释：	
-
-context	系统定义用于调用功能函数和存放任意数据的综合体.  
-
-dictionary((ticker(str) -> [LFBarMarketDataField](#LFBarMarketDataField))) bar结构list.  
- 
-[SOURCE](#SOURCE)	行情交易接口常量.  
- 
-long	返回纳秒时间.   
+   context	系统定义用于调用功能函数和存放任意数据的综合体.   
+   dictionary((ticker(str) -> [LFBarMarketDataField](#LFBarMarketDataField))) bar结构list.    
+   [SOURCE](#SOURCE)	行情交易接口常量.  
+   long	返回纳秒时间.   
 
 <h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
 功能描述: 收到tick数据时被触发
