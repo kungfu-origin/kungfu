@@ -76,8 +76,7 @@
 <h3 id="initialize">initialize(context(context))</h3>
 功能描述: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作.  
  
-参数数据类型及解释： 
-   
+参数数据类型及解释： <br />
 context : 系统定义用于调用功能函数和存放任意数据的综合体
 
 <h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
