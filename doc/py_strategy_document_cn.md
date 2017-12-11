@@ -112,6 +112,14 @@ long	返回纳秒时间 <br />
 	[SOURCE](#SOURCE)	行情交易接口常量      
 	long	返回纳秒时间    
 
+<h3 id="on_pos"> on_pos(context, pos_handler, request_id, souce, rcv_time) </h3>
+功能描述: 当策略注册到TD时被触发一次，回报request_id为-1，如果策略首次运行，pos_handler为空值，如果策略之前运行且设置过持仓，pos_handler为策略持仓。同时该函数在该策略查询了持仓以后会被触发，request_id为查询持仓时的请求序号，pos_handler为账户持仓    
+参数数据类型及解释：    
+   context	系统定义用于调用功能函数和存放任意数据的综合体     
+	PosHandler	持仓数据     
+	int	请求编号    [SOURCE](#SOURCE)	行情交易接口常量      
+	long	返回纳秒时间 
+
 <h3 id="on_error"> on_error(context, error_id, error_msg, request_id, souce, rcv_time) </h3>
 功能描述:当收到错误回报时被触发
 
