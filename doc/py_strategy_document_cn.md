@@ -74,31 +74,25 @@
 ### 回调函数
 
 <h3 id="initialize">initialize(context(context))</h3>
-功能描述: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作.  
- 
+功能描述: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作.  <br /> 
 参数数据类型及解释： <br />
 context : 系统定义用于调用功能函数和存放任意数据的综合体
 
 <h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
-功能描述: 当收到分钟线数据的时候函数触发.   
-参数数据类型及解释：	
-   context	系统定义用于调用功能函数和存放任意数据的综合体.   
-   dictionary((ticker(str) -> [LFBarMarketDataField](#LFBarMarketDataField))) bar结构list.    
-   [SOURCE](#SOURCE)	行情交易接口常量.  
-   long	返回纳秒时间.   
+功能描述: 当收到分钟线数据的时候函数触发.   <br /> 
+参数数据类型及解释： <br />
+   context	系统定义用于调用功能函数和存放任意数据的综合体.   <br /> 
+   dictionary((ticker(str) -> [LFBarMarketDataField](#LFBarMarketDataField))) bar结构list.   <br />  
+   [SOURCE](#SOURCE)	行情交易接口常量.   <br />
+   long	返回纳秒时间.    <br />
 
 <h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
-功能描述: 收到tick数据时被触发
-
-参数数据类型及解释：
-
-context	系统定义用于调用功能函数和存放任意数据的综合体
-
-[LFMarketDataField](#LFMarketDataField)	行情数据
-
-[SOURCE](#SOURCE)	行情交易接口常量
-
-long	返回纳秒时间
+功能描述: 收到tick数据时被触发 <br />
+参数数据类型及解释： <br />
+context	系统定义用于调用功能函数和存放任意数据的综合体 <br />
+[LFMarketDataField](#LFMarketDataField)	行情数据 <br />
+[SOURCE](#SOURCE)	行情交易接口常量 <br />
+long	返回纳秒时间 <br />
 
 <h3 id="on_pos"> on_pos(context, pos_handler, request_id, souce, rcv_time) </h3>
 功能描述: 当策略注册到TD时被触发一次，回报request_id为-1，如果策略首次运行，pos_handler为空值，如果策略之前运行且设置过持仓，pos_handler为策略持仓。同时该函数在该策略查询了持仓以后会被触发，request_id为查询持仓时的请求序号，pos_handler为账户持仓
