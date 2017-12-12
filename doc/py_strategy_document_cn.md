@@ -599,7 +599,7 @@ func	回调函数（以context为默认参数）
 常量定义
 =======
 
-<h3 id="[SOURCE]">SOURCE</h3>
+<h3 id="SOURCE">SOURCE</h3>
 内容: 接口常量
 
 |标记|值|常量含义|
