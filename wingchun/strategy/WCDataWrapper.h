@@ -29,6 +29,8 @@
 WC_NAMESPACE_START
 
 using kungfu::yijinjing::JournalReaderPtr;
+using kungfu::yijinjing::FeeHandlerPtr;
+using kungfu::yijinjing::FeeHandler;
 
 class WCStrategyUtil;
 
@@ -101,19 +103,30 @@ public:
     PosHandlerPtr get_pos(short source);
     /** get td status */
     byte get_td_status(short source) const;
+    /** get ticker status */
+    double get_ticker_pnl(short source, string ticker) const;
+    /** get effective orders */
+    vector<int> get_effective_orders() const;
 
 protected:
     /** from request id to pos_handler, for each req_position */
     map<int, PosHandlerPtr> pos_handlers;
     /** from source to pos_handler, internal position */
     map<short, PosHandlerPtr> internal_pos;
-    BarMdManager bars;
-    vector<string> folders;
-    vector<string> names;
-    map<short, byte> tds;
-    JournalReaderPtr reader;
-    IWCDataProcessor* processor;
-    WCStrategyUtil* util;
+    /** last price warehouse */
+    umap<string, double> last_prices;
+    /** request_id to order_status */
+    umap<int, char> order_statuses;
+    /** fee handler from td */
+    map<short, FeeHandlerPtr> fee_handlers;
+
+    BarMdManager        bars;
+    vector<string>      folders;
+    vector<string>      names;
+    map<short, byte>    tds;
+    JournalReaderPtr    reader;
+    IWCDataProcessor*   processor;
+    WCStrategyUtil*     util;
     int rid_start;
     int rid_end;
     bool force_stop;

@@ -33,7 +33,9 @@
 WC_NAMESPACE_START
 
 using kungfu::yijinjing::PosHandlerPtr;
+using kungfu::yijinjing::FeeHandlerPtr;
 using kungfu::yijinjing::PosHandler;
+using kungfu::yijinjing::FeeHandler;
 
 /**
  * client info, store in trade engine
@@ -59,6 +61,7 @@ struct TradeAccount
     char InvestorID[19];
     char BusinessUnit[21];
     char Password[21];
+    FeeHandlerPtr fee_handler;
 };
 
 /**
@@ -75,6 +78,8 @@ protected:
     vector<TradeAccount> accounts;
     /** -1 if do not accept unregistered account, else return index of accounts */
     int default_account_index;
+    /** default handler, will be utilized if user do not assign fee structure in account info */
+    FeeHandlerPtr default_fee_handler;
     /** trade engine user info helper */
     TDUserInfoHelperPtr user_helper;
     /** trade engine user info helper */

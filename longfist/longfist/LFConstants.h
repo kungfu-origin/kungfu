@@ -20,6 +20,7 @@ const short SOURCE_SOCKETSNIFFER = 11;
 const short SOURCE_EXANICSNIFFER = 12;
 const short SOURCE_OES = 13;
 const short SOURCE_SANDBOX = 14;
+const short SOURCE_XTP = 15;
 
 // Exchange names
 #define EXCHANGE_SSE "SSE" //上海证券交易所

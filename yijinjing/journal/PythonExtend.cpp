@@ -12,7 +12,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *****************************************************************************/
-
 /**
  * Basic Journal Python Bindings.
  * @Author cjiang (changhao.jiang@taurus.ai)
@@ -122,7 +121,13 @@ BOOST_PYTHON_MODULE(libjournal)
     .def("get_short_yd", &PosHandler::get_short_yestd)
     .def("get_net_tot", &PosHandler::get_net_total)
     .def("get_net_yd", &PosHandler::get_net_yestd)
+    .def("get_net_fee", &PosHandler::get_net_fee)
+    .def("get_net_balance", &PosHandler::get_net_balance)
+    .def("get_long_fee", &PosHandler::get_long_fee)
+    .def("get_long_balance", &PosHandler::get_long_balance)
+    .def("get_short_fee", &PosHandler::get_short_fee)
+    .def("get_short_balance", &PosHandler::get_short_balance)
     .def("get_tickers", &PosHandler::get_py_tickers)
-    .def("set_pos", &PosHandler::set_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0))
-    .def("add_pos", &PosHandler::add_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0));
+    .def("set_pos", &PosHandler::set_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0))
+    .def("add_pos", &PosHandler::add_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0));
 }

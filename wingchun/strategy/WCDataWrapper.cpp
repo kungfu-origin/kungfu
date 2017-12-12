@@ -246,8 +246,10 @@ void WCDataWrapper::run()
                     {
                         case MSG_TYPE_LF_MD:
                         {
-                            process_bar((LFMarketDataField *) data, msg_source, cur_time);
-                            processor->on_market_data((LFMarketDataField *) data, msg_source, cur_time);
+                            LFMarketDataField * md = (LFMarketDataField *) data;
+                            last_prices[md->InstrumentID] = md->LastPrice;
+                            process_bar(md, msg_source, cur_time);
+                            processor->on_market_data(md, msg_source, cur_time);
                             break;
                         }
                         case MSG_TYPE_LF_L2_MD:
@@ -290,7 +292,9 @@ void WCDataWrapper::run()
                         }
                         case MSG_TYPE_LF_RTN_ORDER:
                         {
-                            processor->on_rtn_order((LFRtnOrderField *) data, request_id, msg_source, cur_time);
+                            LFRtnOrderField * rtn_order = (LFRtnOrderField *) data;
+                            order_statuses[request_id] = rtn_order->OrderStatus;
+                            processor->on_rtn_order(rtn_order, request_id, msg_source, cur_time);
                             break;
                         }
                         case MSG_TYPE_LF_RTN_TRADE:
@@ -332,7 +336,7 @@ void WCDataWrapper::process_rsp_position(const LFRspPositionField* pos, bool is_
     }
     if (strlen(pos->InstrumentID) > 0)
     {
-        handler->add_pos(pos->InstrumentID, pos->PosiDirection, pos->Position, pos->YdPosition);
+        handler->add_pos(pos->InstrumentID, pos->PosiDirection, pos->Position, pos->YdPosition, pos->PositionCost);
     }
     if (is_last)
     {
@@ -350,6 +354,10 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
         {
             bool ready = j_ack["ok"].get<bool>();
             processor->on_td_login(ready, j_ack, source);
+            if (j_ack.find(PH_FEE_SETUP_KEY) != j_ack.end())
+            {
+                fee_handlers[source] = FeeHandlerPtr(new FeeHandler(j_ack[PH_FEE_SETUP_KEY]));
+            }
             if (ready)
             {
                 PosHandlerPtr handler = PosHandler::create(source, content);
@@ -375,6 +383,10 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
 void WCDataWrapper::set_pos(PosHandlerPtr handler, short source)
 {
     set_internal_pos(handler, source);
+    if (fee_handlers[source].get() != nullptr)
+    {
+        handler->set_fee(fee_handlers[source]);
+    }
     if (handler.get() != nullptr && !handler->poisoned())
     {
         json j_req = json::parse(handler->to_string());
@@ -410,4 +422,47 @@ byte WCDataWrapper::get_td_status(short source) const
         return CONNECT_TD_STATUS_UNKNOWN;
     else
         return iter->second;
+}
+
+double WCDataWrapper::get_ticker_pnl(short source, string ticker) const
+{
+    using kungfu::yijinjing::VOLUME_DATA_TYPE;
+    auto pos_iter = internal_pos.find(source);
+    auto price_iter = last_prices.find(ticker);
+    if (pos_iter != internal_pos.end() && price_iter != last_prices.end())
+    {
+        PosHandlerPtr handler = pos_iter->second;
+        double last_price = price_iter->second;
+        VOLUME_DATA_TYPE net_pos = handler->get_net_total(ticker);
+        VOLUME_DATA_TYPE long_pos = handler->get_long_total(ticker);
+        VOLUME_DATA_TYPE short_pos = handler->get_short_total(ticker);
+        double holding_value = (net_pos + long_pos - short_pos) * last_price;
+        double net_balance = handler->get_net_balance(ticker);
+        double long_balance = handler->get_long_balance(ticker);
+        double short_balance = handler->get_short_balance(ticker);
+        double net_fee = handler->get_net_fee(ticker);
+        double long_fee = handler->get_long_fee(ticker);
+        double short_fee = handler->get_short_fee(ticker);
+        double holding_cost = (net_balance + long_balance - short_balance)
+                              + (net_fee + long_fee + short_fee);
+        return holding_value - holding_cost;
+    }
+    return 0;
+}
+/** get effective orders */
+vector<int> WCDataWrapper::get_effective_orders() const
+{
+    vector<int> res;
+    for (auto iter: order_statuses)
+    {
+        char status = iter.second;
+        if (status != LF_CHAR_Error
+            && status != LF_CHAR_AllTraded
+            && status != LF_CHAR_Canceled
+            && status != LF_CHAR_PartTradedNotQueueing)
+        {
+            res.push_back(iter.first);
+        }
+    }
+    return res;
 }

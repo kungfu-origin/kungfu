@@ -29,7 +29,49 @@
           "clients": ["YOUR_STRATEGY1","YOUR_STRATEGY2","YOUR_STRATEGY3"],
           "is_default": true
         }
-      ]
+      ],
+      "FeeSetup":
+      {
+        "stock":
+        {
+          "type": "amount",
+          "multiplier": 0.0003,
+          "min_fee": 0
+        },
+        "future":
+        {
+          "type": "amount",
+          "multiplier": [0.000023, 0.00069, 0.000023],
+          "min_fee": 0
+        },
+        "future_exotic":
+        {
+          "rb":
+          {
+            "type": "amount",
+            "multiplier": 0.0001,
+            "min_fee": 0
+          },
+          "rb1801":
+          {
+            "type": "amount",
+            "multiplier": [0.0001, 0.0005, 0.0001],
+            "min_fee": 0
+          },
+          "c":
+          {
+            "type": "volume",
+            "multiplier": 1.2,
+            "min_fee": 0
+          },
+          "c1803":
+          {
+            "type": "volume",
+            "multiplier": 0.2,
+            "min_fee": 0
+          }
+        }
+      }
     }
   }
 }

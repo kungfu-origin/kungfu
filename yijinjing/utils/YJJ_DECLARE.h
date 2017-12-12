@@ -32,10 +32,14 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 using std::string; /**< default using string */
 using std::vector; /**< default using vector */
 using std::map;    /**< default using map */
+
+template<class Key, class T>
+using umap = std::unordered_map<Key, T>; /** unordered_map usage, will merge more */
 
 typedef unsigned char byte;
 typedef unsigned int uint;

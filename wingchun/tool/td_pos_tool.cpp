@@ -12,6 +12,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *****************************************************************************/
+
 /**
  * Tool for td position show and set.
  * @Author cjiang (changhao.jiang@taurus.ai)
@@ -60,15 +61,21 @@ void fill_data(PosHandlerPtr pos, vector<string>& data, int indice[])
 {
     if (indice[0] >= 0 && indice[1] >= 0)
     {
-        pos->set_pos(data[0], LF_CHAR_Net, std::stoi(data[indice[0]]), std::stoi(data[indice[1]]));
+        pos->set_pos(data[0], LF_CHAR_Net, std::stoi(data[indice[0]]), std::stoi(data[indice[1]]),
+                     (indice[6] >= 0) ? std::stod(data[indice[6]]) : 0.0,
+                     (indice[7] >= 0) ? std::stod(data[indice[7]]) : 0.0);
     }
     if (indice[2] >= 0 && indice[3] >= 0)
     {
-        pos->set_pos(data[0], LF_CHAR_Long, std::stoi(data[indice[2]]), std::stoi(data[indice[3]]));
+        pos->set_pos(data[0], LF_CHAR_Long, std::stoi(data[indice[2]]), std::stoi(data[indice[3]]),
+                     (indice[8] >= 0) ? std::stod(data[indice[8]]) : 0.0,
+                     (indice[9] >= 0) ? std::stod(data[indice[9]]) : 0.0);
     }
     if (indice[4] >= 0 && indice[5] >= 0)
     {
-        pos->set_pos(data[0], LF_CHAR_Short, std::stoi(data[indice[4]]), std::stoi(data[indice[5]]));
+        pos->set_pos(data[0], LF_CHAR_Short, std::stoi(data[indice[4]]), std::stoi(data[indice[5]]),
+                     (indice[10] >= 0) ? std::stod(data[indice[10]]) : 0.0,
+                     (indice[11] >= 0) ? std::stod(data[indice[11]]) : 0.0);
     }
 }
 
@@ -93,7 +100,10 @@ bool set_pos_tool(const string& user_name, short source, const string& file_name
         bool started = false;
         int number_idx[] = { -1/*net_tot*/, -1/*net_yd*/,
                              -1/*long_tot*/, -1/*long_yd*/,
-                             -1/*short_tot*/, -1/*short_yd*/};
+                             -1/*short_tot*/, -1/*short_yd*/,
+                             -1/*net_amt*/, -1/*net_fee*/,
+                             -1/*long_amt*/, -1/*long_fee*/,
+                             -1/*short_amt*/, -1/*short_fee*/};
         while (std::getline(my_file, line))
         {
             data = split_text(line);
@@ -133,6 +143,18 @@ bool set_pos_tool(const string& user_name, short source, const string& file_name
                             number_idx[4] = i;
                         else if (column.compare("short_yd") == 0)
                             number_idx[5] = i;
+                        else if (column.compare("net_balance") == 0)
+                            number_idx[6] = i;
+                        else if (column.compare("net_fee") == 0)
+                            number_idx[7] = i;
+                        else if (column.compare("long_balance") == 0)
+                            number_idx[8] = i;
+                        else if (column.compare("long_fee") == 0)
+                            number_idx[9] = i;
+                        else if (column.compare("short_balance") == 0)
+                            number_idx[10] = i;
+                        else if (column.compare("short_fee") == 0)
+                            number_idx[11] = i;
                     }
                 }
                 started = true;
@@ -228,6 +250,9 @@ bool get_pos_tool(const string& user_name, short source, bool print_raw, bool ne
         std::cout << "\t(net)" << pos->get_net_total(ticker) << "," << pos->get_net_yestd(ticker)
                   << "\t(long)" << pos->get_long_total(ticker) << "," << pos->get_long_yestd(ticker)
                   << "\t(short)" << pos->get_short_total(ticker) << "," << pos->get_short_yestd(ticker)
+                  << "\t(net_c)" << pos->get_net_balance(ticker) << "," << pos->get_net_fee(ticker)
+                  << "\t(long_c)" << pos->get_long_balance(ticker) << "," << pos->get_long_fee(ticker)
+                  << "\t(short_c)" << pos->get_short_balance(ticker) << "," << pos->get_short_fee(ticker)
                   << std::endl;
     }
     std::cout << "-------" << std::endl;
@@ -240,12 +265,15 @@ bool get_pos_tool(const string& user_name, short source, bool print_raw, bool ne
         {
             if (is_csv)
             {
-                of << "ticker, net_tot, net_yd, long_tot, long_yd, short_tot, short_yd\n";
+                of << "ticker, net_tot, net_yd, long_tot, long_yd, short_tot, short_yd, net_amt, net_fee, long_amt, long_fee, short_amt, short_fee\n";
                 for (auto ticker: tickers)
                 {
                     of << ticker << ", " << pos->get_net_total(ticker) << ", " << pos->get_net_yestd(ticker)
                        << ", " << pos->get_long_total(ticker) << ", " << pos->get_long_yestd(ticker)
-                       << ", " << pos->get_short_total(ticker) << ", " << pos->get_short_yestd(ticker) << std::endl;
+                       << ", " << pos->get_short_total(ticker) << ", " << pos->get_short_yestd(ticker)
+                       << ", " << pos->get_net_balance(ticker) << ", " << pos->get_net_fee(ticker)
+                       << ", " << pos->get_long_balance(ticker) << ", " << pos->get_long_fee(ticker)
+                       << ", " << pos->get_short_balance(ticker) << ", " << pos->get_short_fee(ticker) << std::endl;
                 }
                 std::cout << "printed to csv file: " << output_file << std::endl;
             }
