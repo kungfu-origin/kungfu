@@ -188,7 +188,6 @@
 |:--:|:--:|:--:|
 |nano|long|纳秒时间|
 |返回|返回值类型|返回值说明|
-|:--:|:--:|:--:|
 |time_str|string|时间字符串("%Y-%m-%d %H:%M:%S")|
 
 <h3 id="context.print_pos">context.print_pos()</h3>
