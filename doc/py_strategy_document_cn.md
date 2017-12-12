@@ -161,14 +161,14 @@
 <h3 id="context.get_nano">context.get_nano()</h3>
 功能: 获得当前纳秒时间
 
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
 |nano|long|系统当前纳秒时间|
 
 <h3 id="context.get_name">context.get_name()</h3>
 功能: 获取策略名
 
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
 |stre_name|string|策略名称|
 
@@ -178,7 +178,7 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |time_str|string|时间字符串("%Y-%m-%d %H:%M:%S")|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |nano|long|纳秒时间|
 
 <h3 id="context.parse_nano">context.parse_nano(nano)</h3>
@@ -187,7 +187,7 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |nano|long|纳秒时间|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
 |time_str|string|时间字符串("%Y-%m-%d %H:%M:%S")|
 
@@ -214,7 +214,7 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |source|[SOURCE](#SOURCE)|行情交易接口常量|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |request_id|int|请求编号|
 
 <h3 id="context.cancel_order">context.cancel_order(source, order_id)</h3>
@@ -224,7 +224,7 @@
 |:--:|:--:|:--:|
 |source|[SOURCE](#SOURCE)|行情交易接口常量|
 |order_id|int|下单编号|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |request_id|int|请求编号|
 
 <h3 id="context.set_pos">context.set_pos(pos_handler, source)</h3>
@@ -241,7 +241,7 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |source|[SOURCE](#SOURCE)|行情交易接口常量|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos_handler|PosHandler|持仓数据结构|
 
 <h3 id="context.subscribe">context.subscribe(tick_list, source)</h3>
@@ -308,7 +308,7 @@ func	回调函数（以context为默认参数）
 |volume|int|数量|
 |direction|[DIRECTION](#DIRECTION)|买卖方向|
 |offset|[OFFSET](#OFFSET)|开平方向|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |order_id|int|下单编号|
 
 <h3 id="context.insert_limit_order">context.insert_limit_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
@@ -323,7 +323,7 @@ func	回调函数（以context为默认参数）
 |volume|int|数量|
 |direction|[DIRECTION](#DIRECTION)|买卖方向|
 |offset|[OFFSET](#OFFSET)|开平方向|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |order_id|int|下单编号|
 
 <h3 id="context.insert_fok_order">context.insert_fok_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
@@ -338,7 +338,7 @@ func	回调函数（以context为默认参数）
 |volume|int|数量|
 |direction|[DIRECTION](#DIRECTION)|买卖方向|
 |offset|[OFFSET](#OFFSET)|开平方向|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |order_id|int|下单编号|
 
 <h3 id="context.insert_fak_order">context.insert_fak_order(source, ticker, exchange_id, price, volume, direction, offset)</h3>
@@ -353,7 +353,7 @@ func	回调函数（以context为默认参数）
 |volume|int|数量|
 |direction|[DIRECTION](#DIRECTION)|买卖方向|
 |offset|[OFFSET](#OFFSET)|开平方向|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |order_id|int|下单编号|
 
 <h3 id="context.log_debug">context.log_debug(msg)</h3>
@@ -408,7 +408,7 @@ func	回调函数（以context为默认参数）
 <h3 id="PosHandler.dump">PosHandler.dump()</h3>
 功能: 持仓转换为json格式字符串
 
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
 |pos_str|string|json标准格式的持仓字符串|
 
@@ -424,7 +424,7 @@ func	回调函数（以context为默认参数）
 功能: 获得持仓数据的合约列表
 
 
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
 |tickers|list|有持仓的合约list|
 
@@ -434,7 +434,7 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定股票总持仓|
 
 <h3 id="PosHandler.get_net_yd">PosHandler.get_net_yd(ticker)</h3>
@@ -442,7 +442,7 @@ func	回调函数（以context为默认参数）
 
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定股票昨仓|
 
 <h3 id="PosHandler.get_long_tot">PosHandler.get_long_tot(ticker)</h3>
@@ -451,7 +451,7 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定合约总多仓|
 
 <h3 id="PosHandler.get_long_yd">PosHandler.get_long_yd(ticker)</h3>
@@ -460,7 +460,7 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定合约昨多仓|
 
 <h3 id="PosHandler.get_short_tot">PosHandler.get_short_tot(ticker)</h3>
@@ -469,7 +469,7 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定合约总空仓|
 
 <h3 id="PosHandler.get_short_yd">PosHandler.get_short_yd(ticker)</h3>
@@ -478,7 +478,7 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |ticker|string|要获取仓位的合约|
-|输出参数名|类型|参数说明|
+|返回|返回值类型|返回值说明|
 |pos|int|指定合约昨空仓|
 
 
