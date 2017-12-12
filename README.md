@@ -386,6 +386,8 @@ Version 版本
     * 编译选项优化为 O3
 * 0.0.3:
     增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+* 0.0.4:
+    增加 FeeHandler 模块，增加策略中的 Pnl 实时计算支持
 
 Contribute 开发
 =============
