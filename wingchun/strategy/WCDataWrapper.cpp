@@ -48,11 +48,6 @@ WCDataWrapper::WCDataWrapper(IWCDataProcessor *processor, WCStrategyUtil* util):
 void WCDataWrapper::add_market_data(short source)
 {
     ADD_JOURNAL(getMdJournalPair, source);
-    if (source == SOURCE_EXANICSNIFFER)
-    {
-        // exanic has l2 md only
-        ADD_JOURNAL(getL2MdJournalPair, source);
-    }
 }
 
 void WCDataWrapper::add_market_data_l2(short source)
@@ -79,11 +74,6 @@ void WCDataWrapper::add_register_td(short source)
 {
     tds[source] = CONNECT_TD_STATUS_ADDED;
     ADD_JOURNAL(getTdJournalPair, source);
-    if (source == SOURCE_LTS)
-    {
-        // LTS need QD journal besides td
-        ADD_JOURNAL(getTdQJournalPair, source);
-    }
 }
 
 void WCDataWrapper::register_bar_md(short source, int min_interval, string start_time, string end_time)

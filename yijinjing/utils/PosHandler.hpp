@@ -181,7 +181,7 @@ public:
 
     static inline bool is_stock(short source)
     {
-        return (source == SOURCE_LTS || source == SOURCE_HUNDSUN || source == SOURCE_OES || source == SOURCE_XTP);
+        return false;
     }
 
     inline bool update(const string& ticker, VOLUME_DATA_TYPE volume, LfDirectionType direction, LfOffsetFlagType offset)

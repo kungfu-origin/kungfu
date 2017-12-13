@@ -321,20 +321,7 @@ class_details = [
 ]
 
 wingchun_constants = [
-    ('SOURCE', 'int', [('CTP', 1, ''),
-                       ('LTS', 2, ''),
-                       ('FEMAS', 3, ''),
-                       ('XONE', 4, ''),
-                       ('XSPEED', 5, ''),
-                       ('XELE', 6, ''),
-                       ('XSPEEDL2', 7, ''),
-                       ('YISHENG', 8, ''),
-                       ('HUNDSUN', 10, ''),
-                       ('SOCKETSNIFFER', 11, ''),
-                       ('EXANICSNIFFER', 12, ''),
-                       ('OES', 13, ''),
-                       ('SANDBOX', 14, ''),
-                       ('XTP', 15, ''),
+    ('SOURCE', 'int', [('CTP', 1, '')
                        ],
      'source index'),
     ('DIRECTION', 'char', [('Buy', '0', '买'),
