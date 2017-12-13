@@ -96,6 +96,8 @@ void WCDataWrapper::register_bar_md(short source, int min_interval, string start
     end_tm.tm_hour = tmp_tm.tm_hour;
     end_tm.tm_min = tmp_tm.tm_min;
     long end_nano = kungfu::yijinjing::parseTm(end_tm);
+    if (end_nano < start_nano)
+        end_nano += kungfu::yijinjing::NANOSECONDS_PER_DAY;
     long delta = min_interval * kungfu::yijinjing::NANOSECONDS_PER_MINUTE;
 
     bool inited = false;
