@@ -104,7 +104,7 @@ public:
     /** get td status */
     byte get_td_status(short source) const;
     /** get ticker status */
-    double get_ticker_pnl(short source, string ticker) const;
+    double get_ticker_pnl(short source, string ticker, bool include_fee=true) const;
     /** get effective orders */
     vector<int> get_effective_orders() const;
 

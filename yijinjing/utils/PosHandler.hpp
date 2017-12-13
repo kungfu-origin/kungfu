@@ -12,7 +12,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *****************************************************************************/
-
 /**
  * Handle position automated update (replace PosMap)
  * @Author cjiang (changhao.jiang@taurus.ai)
@@ -71,11 +70,13 @@ protected:
     bool is_poisoned;
     short source;
     FeeHandlerPtr fee_handler;
+    bool is_stock_flag;
 
 public:
     PosHandler(short source): is_poisoned(false), source(source)
     {
         fee_handler = FeeHandlerPtr(new FeeHandler());
+        is_stock_flag = is_stock(source);
     };
 
     void init(const string& js_str)
@@ -186,7 +187,7 @@ public:
 
     inline bool update(const string& ticker, VOLUME_DATA_TYPE volume, LfDirectionType direction, LfOffsetFlagType offset)
     {
-        if (is_stock(source))
+        if (is_stock_flag)
             stock_update(ticker, volume, 0, direction, offset);
         else
             future_update(ticker, volume, 0, direction, offset);
@@ -200,7 +201,7 @@ public:
 
     inline bool update(const LFRtnTradeField* rtn_trade)
     {
-        if (is_stock(source))
+        if (is_stock_flag)
             stock_update(rtn_trade->InstrumentID, rtn_trade->Volume, rtn_trade->Price, rtn_trade->Direction, rtn_trade->OffsetFlag);
         else
             future_update(rtn_trade->InstrumentID, rtn_trade->Volume, rtn_trade->Price, rtn_trade->Direction, rtn_trade->OffsetFlag);
@@ -271,6 +272,49 @@ public:
     void set_pos_py(const string& ticker, const string& dir, VOLUME_DATA_TYPE tot, VOLUME_DATA_TYPE yd, double balance, double fee)
     {
         set_pos(ticker, dir[0], tot, yd, balance, fee);
+    }
+
+    inline double get_holding_value(const string& ticker, double last_price) const
+    {
+        int multiplier = fee_handler->get_contract_multiplier(ticker, is_stock_flag);
+        if (positions.find(ticker) == positions.end())
+            return 0;
+        const json& pos_array = positions[ticker];
+
+        VOLUME_DATA_TYPE net_pos = (is_stock_flag)
+                                   ? pos_array[POS_ARRAY_IDX(LF_CHAR_Net, TOTAL_INDEX)].get<VOLUME_DATA_TYPE>()
+                                   : pos_array[POS_ARRAY_IDX(LF_CHAR_Long, TOTAL_INDEX)].get<VOLUME_DATA_TYPE>()
+                                     - pos_array[POS_ARRAY_IDX(LF_CHAR_Short, TOTAL_INDEX)].get<VOLUME_DATA_TYPE>();
+
+        return last_price * multiplier * net_pos;
+    }
+
+    inline double get_holding_balance(const string& ticker) const
+    {
+        if (costs.find(ticker) == costs.end())
+            return 0;
+        const json &cost_array = costs[ticker];
+
+        double net_balance = (is_stock_flag)
+                             ? cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_BALANCE_INDEX)].get<double>()
+                             : cost_array[COST_ARRAY_IDX(LF_CHAR_Long, PH_BALANCE_INDEX)].get<double>()
+                               - cost_array[COST_ARRAY_IDX(LF_CHAR_Short, PH_BALANCE_INDEX)].get<double>();
+
+        return net_balance;
+    }
+
+    inline double get_holding_fee(const string& ticker) const
+    {
+        if (costs.find(ticker) == costs.end())
+            return 0;
+        const json& cost_array = costs[ticker];
+
+        double net_fee = (is_stock_flag)
+                         ? cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_POS_FEE_INDEX)].get<double>()
+                         : cost_array[COST_ARRAY_IDX(LF_CHAR_Long, PH_POS_FEE_INDEX)].get<double>()
+                           + cost_array[COST_ARRAY_IDX(LF_CHAR_Short, PH_POS_FEE_INDEX)].get<double>();
+
+        return net_fee;
     }
 
     /***********************/
@@ -425,9 +469,11 @@ protected:
                 is_poisoned = true;
             }
         }
+
         cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_POS_FEE_INDEX)]
                 = cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_POS_FEE_INDEX)].get<double>()
                   + fee_handler->get_fee(ticker, volume, price, direction, offset, true, false);
+
         cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_BALANCE_INDEX)]
                 = cost_array[COST_ARRAY_IDX(LF_CHAR_Net, PH_BALANCE_INDEX)].get<double>()
                   + price * volume * ((direction == LF_CHAR_Buy) ? 1: -1);
@@ -494,12 +540,16 @@ protected:
                 is_poisoned = true;
             }
         }
+
+        int multiplier = fee_handler->get_contract_multiplier(ticker, is_stock_flag);
+
         cost_array[COST_ARRAY_IDX(position_dir, PH_POS_FEE_INDEX)]
                 = cost_array[COST_ARRAY_IDX(position_dir, PH_POS_FEE_INDEX)].get<double>()
                   + fee_handler->get_fee(ticker, volume, price, direction, offset, false, close_today);
+
         cost_array[COST_ARRAY_IDX(position_dir, PH_BALANCE_INDEX)]
                 = cost_array[COST_ARRAY_IDX(position_dir, PH_BALANCE_INDEX)].get<double>()
-                  + price * volume * ((offset == LF_CHAR_Open) ? 1: -1);
+                  + price * volume * multiplier * ((offset == LF_CHAR_Open) ? 1: -1);
     }
 };
 

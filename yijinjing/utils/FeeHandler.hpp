@@ -31,6 +31,9 @@ using json = nlohmann::json;
 
 YJJ_NAMESPACE_START
 
+#define CONTRACT_MULTIPLIER_KEY "ctr_multi"
+#define FEE_MULTIPLIER_KEY      "fee_multi"
+
 #define STOCK_BUY_MULTI_IDX     0
 #define STOCK_SELL_MULTI_IDX    1
 #define FUTURE_OPEN_MULTI_IDX   0
@@ -44,9 +47,10 @@ struct FeeDetail
      *      at least [0] and [1] is effective, [2] will be useful
      */
     double multiplier[3];
+    int    contract_multiplier;
     bool   using_volume;
     double min_fee;
-    FeeDetail(): min_fee(0), using_volume(true)
+    FeeDetail(): min_fee(0), using_volume(true), contract_multiplier(1)
     {
         for (size_t i = 0; i < 3; i++)
             multiplier[i] = 0;
@@ -55,7 +59,7 @@ struct FeeDetail
 
 inline void from_json(const json& j, FeeDetail& fee)
 {
-    const json& j_multi = j["multiplier"];
+    const json& j_multi = j[FEE_MULTIPLIER_KEY];
     if (j_multi.is_array())
     {
         size_t i = 0;
@@ -72,6 +76,10 @@ inline void from_json(const json& j, FeeDetail& fee)
     }
     fee.using_volume = (j["type"].get<string>() == "volume");
     fee.min_fee = j["min_fee"].get<double>();
+    if (j.find(CONTRACT_MULTIPLIER_KEY) != j.end())
+    {
+        fee.contract_multiplier = j[CONTRACT_MULTIPLIER_KEY].get<int>();
+    }
 }
 
 inline void to_json(json& j, const FeeDetail& fee)
@@ -94,7 +102,8 @@ inline void to_json(json& j, const FeeDetail& fee)
             j_multi.push_back(fee.multiplier[i]);
         }
     }
-    j["multiplier"] = j_multi;
+    j[FEE_MULTIPLIER_KEY] = j_multi;
+    j[CONTRACT_MULTIPLIER_KEY] = fee.contract_multiplier;
 }
 
 class FeeHandler
@@ -162,7 +171,54 @@ public:
         return get_fee(rtn_trade->InstrumentID, rtn_trade->Volume, rtn_trade->Price, rtn_trade->Direction, rtn_trade->OffsetFlag, is_stock, close_today);
     }
 
-    inline double get_fee(const string& _ticker, int volume, double price, LfDirectionType direction, LfOffsetFlagType offset, bool is_stock, bool close_today=false) const
+    inline int get_contract_multiplier(const string& ticker, bool is_stock)
+    {
+        if (is_stock)
+            return 1;
+        else
+        {
+            const FeeDetail* detail = get_future_fee_detail(ticker);
+            return detail->contract_multiplier;
+        }
+    }
+
+    inline const FeeDetail* get_future_fee_detail(const string& _ticker) const
+    {
+        const FeeDetail* detail = nullptr;
+        if (future_exotic.size() > 0)
+        {
+            string ticker = _ticker;
+            std::transform(ticker.begin(), ticker.end(), ticker.begin(), ::tolower);
+            auto iter = future_exotic.find(ticker);
+            if (iter == future_exotic.end())
+            {
+                int idx = 0;
+                char c = ticker[idx];
+                while ((c > '9' || c < '0') && idx < ticker.size() - 1)
+                {
+                    idx ++;
+                    c = ticker[idx];
+                }
+                string product = ticker.substr(0, idx);
+                auto iter_prod = future_exotic.find(product);
+                if (iter_prod != future_exotic.end())
+                {
+                    detail = &iter_prod->second;
+                }
+            }
+            else
+            {
+                detail = &iter->second;
+            }
+        }
+        if (detail == nullptr)
+        {
+            detail = &future;
+        }
+        return detail;
+    }
+
+    inline double get_fee(const string& ticker, int volume, double price, LfDirectionType direction, LfOffsetFlagType offset, bool is_stock, bool close_today=false) const
     {
         if (is_stock)
         {
@@ -171,42 +227,11 @@ public:
         }
         else
         {
-            const FeeDetail* detail = nullptr;
-            if (future_exotic.size() > 0)
-            {
-                string ticker = _ticker;
-                std::transform(ticker.begin(), ticker.end(), ticker.begin(), ::tolower);
-                auto iter = future_exotic.find(ticker);
-                if (iter == future_exotic.end())
-                {
-                    int idx = 0;
-                    char c = ticker[idx];
-                    while ((c > '9' || c < '0') && idx < ticker.size() - 1)
-                    {
-                        idx ++;
-                        c = ticker[idx];
-                    }
-                    string product = ticker.substr(0, idx);
-                    auto iter_prod = future_exotic.find(product);
-                    if (iter_prod != future_exotic.end())
-                    {
-                        detail = &iter_prod->second;
-                    }
-                }
-                else
-                {
-                    detail = &iter->second;
-                }
-            }
-            if (detail == nullptr)
-            {
-                detail = &future;
-            }
-
+            const FeeDetail* detail = get_future_fee_detail(ticker);
             double base = volume;
             if (!detail->using_volume)
             {
-                base *= price;
+                base *= price * detail->contract_multiplier;
             }
             switch (offset)
             {

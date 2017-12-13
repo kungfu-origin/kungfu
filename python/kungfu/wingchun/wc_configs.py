@@ -95,7 +95,7 @@ context_usage = \
         # pnl
         ('get_ticker_pnl', lambda strategy: strategy.get_data_wrapper().get_ticker_pnl,
          'return ticker\'s pnl, position value minus trade cost and fees',
-         (None, [('int', 'source'), ('str', 'ticker')])),
+         (None, [('int', 'source'), ('str', 'ticker'), ('bool', 'include_fee')])),
         # market data
         ('subscribe', lambda strategy: strategy.get_strategy_util().subscribe_market_data,
          'subscribe market data. ATTENTION: tickers is list of string, eg: \"IF1712\", \"600000@SSZ\"',

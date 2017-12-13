@@ -35,13 +35,15 @@
         "stock":
         {
           "type": "amount",
-          "multiplier": 0.0003,
+          "fee_multi": 0.0003,
+          "ctr_multi": 1,
           "min_fee": 0
         },
         "future":
         {
           "type": "amount",
-          "multiplier": [0.000023, 0.00069, 0.000023],
+          "fee_multi": [0.000023, 0.00069, 0.000023],
+          "ctr_multi": 200,
           "min_fee": 0
         },
         "future_exotic":
@@ -49,25 +51,36 @@
           "rb":
           {
             "type": "amount",
-            "multiplier": 0.0001,
+            "fee_multi": 0.0001,
+            "ctr_multi": 10,
             "min_fee": 0
           },
           "rb1801":
           {
             "type": "amount",
-            "multiplier": [0.0001, 0.0005, 0.0001],
+            "fee_multi": [0.0001, 0.0005, 0.0001],
+            "ctr_multi": 10,
             "min_fee": 0
           },
           "c":
           {
             "type": "volume",
-            "multiplier": 1.2,
+            "fee_multi": 1.2,
+            "ctr_multi": 10,
             "min_fee": 0
           },
           "c1803":
           {
             "type": "volume",
-            "multiplier": 0.2,
+            "fee_multi": 0.2,
+            "ctr_multi": 10,
+            "min_fee": 0
+          },
+          "ic":
+          {
+            "type": "amount",
+            "fee_multi": [0.000023, 0.00069, 0.000023],
+            "ctr_multi": 200,
             "min_fee": 0
           }
         }

@@ -410,11 +410,10 @@ bool ITDEngine::add_client(const string& client_name, const json& j_request)
      * failed: {'name': 'bl_test', 'ok': false}
      */
     json json_ack = user_helper->get_pos(client_name);
+    json_ack[PH_FEE_SETUP_KEY] = accounts[clients[client_name].account_index].fee_handler->to_json();
     if (json_ack["ok"].get<bool>())
     {
-        //json_ack[PH_FEE_SETUP_KEY] = accounts[clients[client_name].account_index].fee_handler->to_json();
         PosHandlerPtr pos_handler = PosHandler::create(source_id, json_ack);
-        pos_handler->set_fee(accounts[clients[client_name].account_index].fee_handler);
         clients[client_name].pos_handler = pos_handler;
         if (json_ack.find("nano") != json_ack.end() && json_ack["nano"].get<long>() < last_switch_day)
         {

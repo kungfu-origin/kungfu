@@ -414,7 +414,7 @@ byte WCDataWrapper::get_td_status(short source) const
         return iter->second;
 }
 
-double WCDataWrapper::get_ticker_pnl(short source, string ticker) const
+double WCDataWrapper::get_ticker_pnl(short source, string ticker, bool include_fee) const
 {
     using kungfu::yijinjing::VOLUME_DATA_TYPE;
     auto pos_iter = internal_pos.find(source);
@@ -423,19 +423,15 @@ double WCDataWrapper::get_ticker_pnl(short source, string ticker) const
     {
         PosHandlerPtr handler = pos_iter->second;
         double last_price = price_iter->second;
-        VOLUME_DATA_TYPE net_pos = handler->get_net_total(ticker);
-        VOLUME_DATA_TYPE long_pos = handler->get_long_total(ticker);
-        VOLUME_DATA_TYPE short_pos = handler->get_short_total(ticker);
-        double holding_value = (net_pos + long_pos - short_pos) * last_price;
-        double net_balance = handler->get_net_balance(ticker);
-        double long_balance = handler->get_long_balance(ticker);
-        double short_balance = handler->get_short_balance(ticker);
-        double net_fee = handler->get_net_fee(ticker);
-        double long_fee = handler->get_long_fee(ticker);
-        double short_fee = handler->get_short_fee(ticker);
-        double holding_cost = (net_balance + long_balance - short_balance)
-                              + (net_fee + long_fee + short_fee);
-        return holding_value - holding_cost;
+
+        double holding_value = handler->get_holding_value(ticker, last_price);
+        double holding_balance = handler->get_holding_balance(ticker);
+
+        double pnl = holding_value - holding_balance;
+        if (include_fee)
+            pnl -= handler->get_holding_fee(ticker);
+
+        return pnl;
     }
     return 0;
 }
