@@ -1,0 +1,111 @@
+
+
+#策略编译与头文件
+
+##策略编译
+ docker环境中已经集成了cmake编译工具，CMake文件可以参考源代码目录下wingchun/strategy/cpp_demo/CMakeLists.txt。
+ 
+ 其中主要工作是添加boost头文件和库，kungfu头文件和库，设置编译对象。
+ 
+ 由于cpp_demo默认不编译，如需使用，需要手动编译。编译和运行方法如下：
+ 
+ ```
+ cd cpp_demo
+ mkdir cpp_build
+ cd cpp_build
+ cmake ../
+ make
+ .kungfu_strategy_demo
+ ``` 
+ ##头文件
+ 功夫系统的头文件位于/opt/kungfu/master/include/
+ 
+ IWCStrategy.h头文件为策略基类定义
+  
+# 策略继承与运行逻辑
+  
+##C++策略需要继承IWCStrategy
+
+C++策略通过继承IWCStrategy获得信号回调函数，在回调函数中可以实现自己的业务逻辑
+
+```
+#include "IWCStrategy.h"
+
+class Strategy: public IWCStrategy
+{
+protected:
+    bool td_connected;
+    int rid;
+public:
+    virtual void init();
+    virtual void on_market_data(const LFMarketDataField* data, short source, long rcv_time);
+    virtual void on_rsp_position(const PosHandlerPtr posMap, int request_id, short source, long rcv_time);
+    virtual void on_rtn_trade(const LFRtnTradeField* data, int request_id, short source, long rcv_time);
+    virtual void on_rsp_order(const LFInputOrderField* data, int request_id, short source, long rcv_time, short errorId=0, const char* errorMsg=nullptr);
+
+public:
+    Strategy(const string& name);
+};
+```
+
+##策略的运行
+策略的实现过程如下：
+创建策略对象并命名
+运行初始化函数
+启动策略进程
+阻塞并保持策略运行
+
+```
+int main(int argc, const char* argv[])
+{
+    Strategy str(string("cpp_test"));
+    str.init();
+    str.start();
+    str.block();
+    return 0;
+}
+```
+
+#策略回调
+
+策略回调函数包括行情回调，交易回调和系统回调
+行情回调在策略订阅行情以后从交易所收到行情时候回调
+交易回调在下单或查询持仓后。从交易所收到下单回报或持仓回报时被回调
+系统回调在一些系统内部逻辑运行时被回调，比如系统内有一个换天逻辑，会在这个时间将系统持仓中今仓转换为昨仓，此时
+on_switch_day函数就会被调用，在需要持续运行的策略中，如果用户需要在交易日切换时对内部数据进行一些处理的话，可以在其中予以实现。 
+```
+/* market data */
+on_market_data(const LFMarketDataField* data, short source, long rcv_time);
+on_market_bar(const BarMdMap& data, int min_interval, short source, long rcv_time);
+
+/* trade data */
+on_rtn_order(const LFRtnOrderField* data, int request_id, short source, long rcv_time);
+on_rtn_trade(const LFRtnTradeField* data, int request_id, short source, long rcv_time);
+void on_rsp_order(const LFInputOrderField* data, int request_id, short source, long rcv_time, short errorId=0, const char* errorMsg=nullptr);
+on_rsp_position(const PosHandlerPtr posMap, int request_id, short source, long rcv_time);
+
+/* system utilities */
+on_switch_day(long rcv_time);
+on_time(long cur_time);
+on_td_login(bool ready, const json& js, short source);
+```
+
+
+#策略功能接口
+
+功夫交易系统C++策略通过IWCStrategy中保护成员的函数实现功能
+其中logger对象实现日志输出
+utils为功能成员对象，其定义在/opt/kungfu/master/include/WCDataWrapper.h。如下示例为通过util成员实现下限价单：
+
+```
+rid = util->insert_limit_order(SOURCE_INDEX, M_TICKER, M_EXCHANGE,
+                               md->LowerLimitPrice, signal.trade_size,
+                               LF_CHAR_Sell, LF_CHAR_CloseToday);
+```
+
+data为数据成员对象，其定义在/opt/kungfu/master/include/WCStrategyUtil.h。如下示例为通过data成员为策略添加行情和交易数据接入
+
+```
+data->add_market_data(SOURCE_INDEX);
+data->add_register_td(SOURCE_INDEX);
+```
