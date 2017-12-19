@@ -16,10 +16,10 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
-python策略开发请参考 [python策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_readme_cn.md)，[python策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+python策略开发请参考 [python策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_readme.md)，[python策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
 
 
-C++策略开发请参考 [C++策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_readme_cn.md) [C++策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_document_cn.md)
+C++策略开发请参考 [C++策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_readme.md) [C++策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_document_cn.md)
 
 常见问题请参考 [Q&A](https://github.com/lqyhost/kungfu/blob/master/doc/QA.md)。
 
