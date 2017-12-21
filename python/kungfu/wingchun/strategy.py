@@ -18,8 +18,6 @@ import os, sys, importlib, ctypes
 import kungfu.longfist.longfist_constants as lf
 import kungfu.longfist.longfist_structs as structs
 from functools import partial
-
-sys.path.append('/opt/kungfu/wingchun/lib/wingchun')
 import libwingchunstrategy
 from wc_configs import context
 from wc_configs import context_usage

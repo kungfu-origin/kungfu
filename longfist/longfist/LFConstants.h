@@ -8,6 +8,7 @@
 #include <stdio.h>
 // Index for Sources...
 const short SOURCE_CTP = 1;
+const short SOURCE_XTP = 15;
 
 // Exchange names
 #define EXCHANGE_SSE "SSE" //上海证券交易所
@@ -52,6 +53,13 @@ const short MSG_TYPE_LF_RTN_TRADE_CTP = 1206; // CThostFtdcTradeField from ctp/T
 const short MSG_TYPE_LF_ORDER_ACTION_CTP = 1207; // CThostFtdcInputOrderActionField from ctp/ThostFtdcUserApiStruct.h
 const short MSG_TYPE_LF_QRY_ACCOUNT_CTP = 1208; // CThostFtdcQryTradingAccountField from ctp/ThostFtdcUserApiStruct.h
 const short MSG_TYPE_LF_RSP_ACCOUNT_CTP = 1209; // CThostFtdcTradingAccountField from ctp/ThostFtdcUserApiStruct.h
+
+// xtp, idx=15
+const short MSG_TYPE_LF_MD_XTP        = 15101; // XTPMarketDataStruct from xtp/xquote_api_struct.h
+const short MSG_TYPE_LF_RSP_POS_XTP   = 15202; // XTPQueryStkPositionRsp from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_ORDER_XTP     = 15204; // XTPOrderInsertInfo from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_RTN_ORDER_XTP = 15205; // XTPOrderInfo from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_RTN_TRADE_XTP = 15206; // XTPTradeReport from xtp/xoms_api_struct.h
 
 ///////////////////////////////////
 // LfActionFlagType: 报单操作标志

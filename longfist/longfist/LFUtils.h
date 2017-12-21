@@ -51,6 +51,8 @@ inline JournalPair getMdJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/MD/CTP/", "MD_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/MD/XTP/", "MD_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -62,6 +64,8 @@ inline JournalPair getMdRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/MD_RAW/CTP/", "MDRAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/MD_RAW/XTP/", "MDRAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -73,6 +77,8 @@ inline JournalPair getTdJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/TD/CTP/", "TD_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/TD/XTP/", "TD_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -84,6 +90,8 @@ inline JournalPair getTdSendJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/TD_SEND/CTP/", "TD_SEND_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_SEND/XTP/", "TD_SEND_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -95,6 +103,8 @@ inline JournalPair getTdRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/TD_RAW/CTP/", "TD_RAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_RAW/XTP/", "TD_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -106,6 +116,8 @@ inline JournalPair getTdQJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/TD_Q/CTP/", "TD_Q_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_Q/XTP/", "TD_Q_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -117,6 +129,8 @@ inline JournalPair getL2MdJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2MD/CTP/", "L2MD_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2MD/XTP/", "L2MD_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -128,6 +142,8 @@ inline JournalPair getL2MdRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2MD_RAW/CTP/", "L2MD_RAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2MD_RAW/XTP/", "L2MD_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -139,6 +155,8 @@ inline JournalPair getL2IndexJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Index/CTP/", "L2INDEX_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Index/XTP/", "L2INDEX_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -150,6 +168,8 @@ inline JournalPair getL2IndexRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Index_RAW/CTP/", "L2INDEX_RAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Index_RAW/XTP/", "L2INDEX_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -161,6 +181,8 @@ inline JournalPair getL2OrderJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Order/CTP/", "L2ORDER_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Order/XTP/", "L2ORDER_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -172,6 +194,8 @@ inline JournalPair getL2OrderRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Order_RAW/CTP/", "L2ORDER_RAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Order_RAW/XTP/", "L2ORDER_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -183,6 +207,8 @@ inline JournalPair getL2TradeJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Trade/CTP/", "L2TRADE_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Trade/XTP/", "L2TRADE_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -194,6 +220,8 @@ inline JournalPair getL2TradeRawJournalPair(short source)
 	{
 		case 1:
 			return {"/shared/kungfu/journal/L2Trade_RAW/CTP/", "L2TRADE_RAW_CTP"};
+		case 15:
+			return {"/shared/kungfu/journal/L2Trade_RAW/XTP/", "L2TRADE_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
