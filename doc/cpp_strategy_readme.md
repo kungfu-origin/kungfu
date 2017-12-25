@@ -107,8 +107,8 @@ on_td_login(bool ready, const json& js, short source);
 # 策略功能接口
 
 功夫交易系统C++策略通过IWCStrategy中保护成员的函数实现功能
-其中logger对象实现日志输出
-utils为功能成员对象，其定义在/opt/kungfu/master/include/WCDataWrapper.h。如下示例为通过util成员实现下限价单：
+
+utils为策略执行功能成员对象，其定义在/opt/kungfu/master/include/WCDataWrapper.h。如下示例为通过util成员实现下限价单：
 
 ```
 rid = util->insert_limit_order(SOURCE_INDEX, M_TICKER, M_EXCHANGE,
@@ -116,7 +116,7 @@ rid = util->insert_limit_order(SOURCE_INDEX, M_TICKER, M_EXCHANGE,
                                LF_CHAR_Sell, LF_CHAR_CloseToday);
 ```
 
-data为数据成员对象，其定义在/opt/kungfu/master/include/WCStrategyUtil.h。如下示例为通过data成员为策略添加行情和交易数据接入
+data为策略数据功能成员对象，其定义在/opt/kungfu/master/include/WCStrategyUtil.h。如下示例为通过data成员为策略添加行情和交易数据接入
 
 ```
 data->add_market_data(SOURCE_INDEX);
