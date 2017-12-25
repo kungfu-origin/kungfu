@@ -15,8 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-import sys
-sys.path.append('/opt/kungfu/master/lib/wingchun/')
 import libwingchunstrategy
 import datetime, time
 from functools import partial

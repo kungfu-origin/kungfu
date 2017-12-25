@@ -19,6 +19,7 @@ PROJECT(wingchun)
 
 INCLUDE_DIRECTORIES(../longfist)
 INCLUDE_DIRECTORIES(../longfist/api/ctp/v6.3.6_20160606/include)
+INCLUDE_DIRECTORIES(../longfist/api/xtp/XTP_API_20171115_1.1.16.9/include)
 
 INCLUDE_DIRECTORIES(../yijinjing/journal)
 INCLUDE_DIRECTORIES(../yijinjing/log)

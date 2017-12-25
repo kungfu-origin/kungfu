@@ -28,6 +28,8 @@
 /** almost all wingchun engine needs multi-threading */
 #include <thread>
 
+#define KUNGFU_RUNTIME_FOLDER KUNGFU_FOLDER "runtime/"
+
 typedef boost::shared_ptr<std::thread> ThreadPtr;
 
 #define WC_NAMESPACE_START namespace kungfu { namespace wingchun {
