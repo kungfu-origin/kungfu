@@ -1,4 +1,4 @@
-#函数列表
+# 函数列表
 * 回调函数 
  * [on_market_data](#on_market_data)回调返回tick行情数据
  * [on_market_data_level2](*on_market_data_level2)回调返回L2行情数据
@@ -31,20 +31,27 @@
  * [stop](*stop)停止策略
  * [get_td_status](*get_td_status) 获取策略连接的交易接口状态
  * [set_pos](*set_pos) 设置策略持仓
- * [data.get_ticker_pnl](*data.get_ticker_pnl)获取某合约或股票的持仓盈亏
- * [data.get_effective_orders](*data.get_effective_orders)获取有效（下单未全部成交）合约
+ * [get_ticker_pnl](*get_ticker_pnl)获取某合约或股票的持仓盈亏
+ * [get_effective_orders](*get_effective_orders)获取有效（下单未全部成交）合约
 
-* util成语函数
- * [](*)
- * [](*)
- * [](*)
- * [](*)
- * [](*)
- * [](*)
- * [](*)
- * [](*)
- * [](*)
-##回调函数
+* util成员函数
+ * [insert_market_order](*insert_market_order)下市价单
+ * [insert_limit_order](*insert_limit_order)下限价单
+ * [insert_fok_order](*insert_fok_order)下FOK类型订单（全部成交或则全部撤销），如果失败返回-1
+ * [insert_fak_order](*insert_fak_order)下FAK类型订单（成交且为成交部分撤销），如果失败返回-1
+ * [req_position](*req_position)查询账户持仓
+ * [cancel_order](*cancel_order)撤消指定合约
+ * [process_callback](*process_callback)
+ * [insert_callback](*insert_callback)添加回调函数（python）
+ * [set_md_nano](*set_md_nano)
+ * [set_pos_back](*set_pos_back)设置策略持仓
+ * [get_nano](*get_nano)获取当前纳秒时间
+ * [get_time](*get_time)获取当前时间
+ * [parse_time](*parse_time)将字符串时间转换为纳秒时间
+ * [parse_nano](*parse_nano)将纳秒时间转换为字符串时间
+
+
+## 回调函数
 
 <h3 id="on_market_data">on_market_data(const LFMarketDataField* data, short source, long rcv_time)</h3>
 
@@ -192,16 +199,21 @@
 |js|json&|持仓json格式文件|
 |source|short|交易接口标记|
 
-##功能函数
+## 功能函数
 
 <h3 id="debug">debug(const char* msg)</h3>
 
+功能描述：输出debug日志
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|msg|char*|debug日志内容|
 
 <h3 id="get_name">get_name()</h3>
 
 功能描述: 获得策略名
 
-|输入参数名|类型|参数说明|
+|输出参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |name|string|策略名|
 
@@ -211,7 +223,7 @@
 
 
 
-#data成员函数
+# data成员函数
 
 <h3 id="add_market_data">add_market_data(short source)</h3>
 
@@ -280,7 +292,6 @@
 
 功能描述:停止策略
 
-
 <h3 id="get_td_status">get_td_status(short source)</h3>
 
 功能描述:获取策略连接的交易接口状态
@@ -288,9 +299,19 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |source|short|行情交易接口常量|
+|输出参数名|类型|参数说明|
+||byte|td状态|
+
+<h3 id="set_pos">set_pos(PosHandlerPtr pos, short source)</h3>
+
+功能描述:获取策略连接的交易接口状态
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|pos|PosHandlerPtr|持仓数据|
+|source|short|行情交易接口常量|
 
 
-|:--:|:--:|:--:|byte|td状态|
 
 <h3 id="get_ticker_pnl">get_ticker_pnl(short source, string ticker, bool include_fee=true)</h3>
 
@@ -302,8 +323,7 @@
 |ticker|string|合约或股票编号|
 |include_fee|bool|是否包含交易费用|
 |输出参数名|类型|参数说明|
-
-|:--:|:--:|:--:|double|该合约或股票持仓盈亏|
+||double|该合约或股票持仓盈亏|
 
 <h3 id="get_effective_orders">get_effective_orders()</h3>
 
@@ -316,7 +336,7 @@
 
 
 
-#util成语函数
+# util成员函数
 
 <h3 id="insert_market_order">insert_market_order(short source, string instrument_id, string exchange_id, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 

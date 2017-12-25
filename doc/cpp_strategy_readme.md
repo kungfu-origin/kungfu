@@ -1,8 +1,8 @@
 
 
-#策略编译与头文件
+# 策略编译与头文件
 
-##策略编译
+## 策略编译与执行
  docker环境中已经集成了cmake编译工具，CMake文件可以参考源代码目录下wingchun/strategy/cpp_demo/CMakeLists.txt。
  
  其中主要工作是添加boost头文件和库，kungfu头文件和库，设置编译对象。
@@ -17,14 +17,27 @@
  make
  .kungfu_strategy_demo
  ``` 
- ##头文件
- 功夫系统的头文件位于/opt/kungfu/master/include/
+ 
+##  头文件
+ 功夫系统的头文件位于/opt/kungfu/master/include/目录
  
  IWCStrategy.h头文件为策略基类定义
+ 
+ WCDataWrapper.h文件为策略数据功能对象data定义
+ 
+ WCStrategyUtil.h文件为策略执行功能对象util定义
+ 
+ 数据结构和常量定义的头文件位于/opt/kungfu/master/include/longfist/目录
+ 
+ LFConstants.h文件为交易常量定义
+ 
+ LFDataStruct.h文件为数据结构定义
+ 
+ sys_messages.h为系统消息类别定义
   
 # 策略继承与运行逻辑
   
-##C++策略需要继承IWCStrategy
+## C++策略需要继承IWCStrategy
 
 C++策略通过继承IWCStrategy获得信号回调函数，在回调函数中可以实现自己的业务逻辑
 
@@ -48,7 +61,7 @@ public:
 };
 ```
 
-##策略的运行
+## 策略的运行
 策略的实现过程如下：
 创建策略对象并命名
 运行初始化函数
@@ -66,7 +79,7 @@ int main(int argc, const char* argv[])
 }
 ```
 
-#策略回调
+# 策略回调
 
 策略回调函数包括行情回调，交易回调和系统回调
 行情回调在策略订阅行情以后从交易所收到行情时候回调
@@ -91,7 +104,7 @@ on_td_login(bool ready, const json& js, short source);
 ```
 
 
-#策略功能接口
+# 策略功能接口
 
 功夫交易系统C++策略通过IWCStrategy中保护成员的函数实现功能
 其中logger对象实现日志输出
