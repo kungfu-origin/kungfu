@@ -1,72 +1,72 @@
-函数
+函数列表
 =======
 
 * 回调函数
-  * [initialize](#initialize)初始化函数 
-  * [on_bar](#on_bar)bar数据回调 
-  * [on_tick](#on_tick)	 ticker数据回调 
-  * [on_pos](#on_pos) 持仓返回回调 
-  * [on_error](#on_error) 错误回调 
-  * [on_rtn_order](#on_rtn_order)	 下单回报回调 
-  * [on_rtn_trade](#on_rtn_trade)	 成交回报回调 
+  * [initialize](#initialize) &emsp;&emsp;&emsp;&emsp; 初始化函数 
+  * [on_tick](#on_tick) &emsp;&emsp;&emsp;&emsp; tick 行情回调函数
+  * [on_bar](#on_bar) &emsp;&emsp;&emsp;&emsp; 分钟线行情回调函数
+  * [on_pos](#on_pos) &emsp;&emsp;&emsp;&emsp; 持仓返回回调函数 
+  * [on_rtn_order](#on_rtn_order)	 &emsp;&emsp;&emsp;&emsp; 下单回报回调函数 
+  * [on_rtn_trade](#on_rtn_trade)	 &emsp;&emsp;&emsp;&emsp; 成交回报回调函数 
+  * [on_error](#on_error) &emsp;&emsp;&emsp;&emsp;错误回调函数 
 * 功能函数
-  * [context.stop](#context.stop)	 停止策略
-  * [context.new_pos](#context.new_pos) 生成空持仓
-  * [context.get_nano](#context.get_nano) 获取系统当前纳秒时间
-  * [context.get_name](#context.get_name) 获取策略名
-  * [context.parse_time](#context.parse_time) 时间字符串转纳秒时间
-  * [context.parse_nano](#context.parse_nano) 纳秒时间转时间字符串
-  * [context.print_pos](#context.print_pos) 打印持仓
-  * [context.add_md](#context.add_md) 添加行情接口
-  * [context.add_td](#context.add_td) 添加交易接口
-  * [context.req_pos](#context.req_pos) 查询持仓
-  * [context.cancel_order](#context.cancel_order) 撤销订单
-  * [context.set_pos](#context.set_pos) 设置策略持仓
-  * [context.get_pos](#context.get_pos) 获取策略持仓
-  * [context.subscribe](#context.subscribe) 订阅行情
-  * [context.register_bar](#context.register_bar) 订阅行情bar数据
-  * [context.insert_func_at](#context.insert_func_at) 在指定nano时间添加函数回调（无参数）
-  * [context.insert_func_after](#context.insert_func_after) 在当前时间后n秒添加回调（无参数）
-  * [context.insert_func_at_c](#context.insert_func_at_c) 在指定nano时间添加函数回调（context为参数）
-  * [context.insert_func_after_c](#context.insert_func_after_c) 在当前时间后n秒添加回调（context为参数）
-  * [context.insert_market_order](#context.insert_market_order) 下市价单
-  * [context.insert_limit_order](#context.insert_limit_order) 下限价单
-  * [context.insert_fok_order](#context.insert_fok_order) 下fok单
-  * [context.insert_fak_order](#context.insert_fak_order) 下fak单
-  * [context.log_debug](#context.log_debug) 输入debug日志
-  * [context.log_info](#context.log_info) 输出info日志
-  * [context.log_error](#context.log_error) 输出error日志
-  * [context.log_fatal](#context.log_fatal) 输出fatal日志
+  * [context.add_md](#context.add_md) &emsp;&emsp;&emsp;&emsp; 连接行情
+  * [context.add_td](#context.add_td) &emsp;&emsp;&emsp;&emsp; 连接交易
+  * [context.req_pos](#context.req_pos) &emsp;&emsp;&emsp;&emsp; 查询持仓
+  * [context.new_pos](#context.new_pos) &emsp;&emsp;&emsp;&emsp; 生成空持仓
+  * [context.set_pos](#context.set_pos) &emsp;&emsp;&emsp;&emsp; 设置策略持仓
+  * [context.get_pos](#context.get_pos) &emsp;&emsp;&emsp;&emsp; 获取策略持仓
+  * [context.print_pos](#context.print_pos) &emsp;&emsp;&emsp;&emsp; 打印持仓
+  * [context.subscribe](#context.subscribe) &emsp;&emsp;&emsp;&emsp; 订阅行情
+  * [context.register_bar](#context.register_bar) &emsp;&emsp;&emsp;&emsp; 订阅行情分钟线数据
+  * [context.stop](#context.stop)	&emsp;&emsp;&emsp;&emsp; 停止策略
+  * [context.get_nano](#context.get_nano) &emsp;&emsp;&emsp;&emsp; 获取系统当前纳秒时间
+  * [context.get_name](#context.get_name) &emsp;&emsp;&emsp;&emsp; 获取策略名
+  * [context.parse_time](#context.parse_time) &emsp;&emsp;&emsp;&emsp; 时间字符串转纳秒时间
+  * [context.parse_nano](#context.parse_nano) &emsp;&emsp;&emsp;&emsp; 纳秒时间转时间字符串
+  * [context.insert_func_at](#context.insert_func_at) &emsp;&emsp;&emsp;&emsp; 在指定纳秒时间添加函数回调（无参数）
+  * [context.insert_func_after](#context.insert_func_after) &emsp;&emsp;&emsp;&emsp; 在当前时间指定秒后添加回调（无参数）
+  * [context.insert_func_at_c](#context.insert_func_at_c) &emsp;&emsp;&emsp;&emsp; 在指定纳秒时间添加函数回调（context为参数）
+  * [context.insert_func_after_c](#context.insert_func_after_c) &emsp;&emsp;&emsp;&emsp; 在当前时间后指定秒添加回调（context为参数）
+  * [context.insert_market_order](#context.insert_market_order) &emsp;&emsp;&emsp;&emsp; 下市价单
+  * [context.insert_limit_order](#context.insert_limit_order) &emsp;&emsp;&emsp;&emsp; 下限价单
+  * [context.insert_fok_order](#context.insert_fok_order) &emsp;&emsp;&emsp;&emsp; 下fok订单
+  * [context.insert_fak_order](#context.insert_fak_order) &emsp;&emsp;&emsp;&emsp; 下fak订单
+  * [context.cancel_order](#context.cancel_order) &emsp;&emsp;&emsp;&emsp; 撤销订单
+  * [context.log_debug](#context.log_debug) &emsp;&emsp;&emsp;&emsp; 输入debug日志
+  * [context.log_info](#context.log_info) &emsp;&emsp;&emsp;&emsp; 输出info日志
+  * [context.log_error](#context.log_error) &emsp;&emsp;&emsp;&emsp; 输出error日志
+  * [context.log_fatal](#context.log_fatal) &emsp;&emsp;&emsp;&emsp; 输出fatal日志
 * 持仓成员函数
-  * [PosHandler.add_pos](#PosHandler.add_pos) 添加持仓
-  * [PosHandler.set_pos](#PosHandler.set_pos) 设置持仓
-  * [PosHandler.dump](#PosHandler.dump) 持仓转为json格式规范的string
-  * [PosHandler.load](#PosHandler.load) load符合json的持仓字符串持仓
-  * [PosHandler.get_tickers](#PosHandler.get_tickers) 获取有持仓的tickerlist
-  * [PosHandler.get_net_tot](#PosHandler.get_net_tot) 获取指定ticker的总净持仓
-  * [PosHandler.get_net_yd](#PosHandler.get_net_yd) 获取指定ticker的昨日净持仓
-  * [PosHandler.get_long_tot](#PosHandler.get_long_tot) 获取指定ticker的总多仓
-  * [PosHandler.get_long_yd](#PosHandler.get_long_yd) 获取指定ticker的昨日多仓
-  * [PosHandler.get_short_tot](#PosHandler.get_short_tot) 获取指定ticker的总空仓
-  * [PosHandler.get_short_yd](#PosHandler.get_short_yd) 获取指定ticker的昨日空仓
+  * [PosHandler.add_pos](#PosHandler.add_pos) &emsp;&emsp;&emsp;&emsp; 添加持仓
+  * [PosHandler.set_pos](#PosHandler.set_pos) &emsp;&emsp;&emsp;&emsp; 设置持仓
+  * [PosHandler.dump](#PosHandler.dump) &emsp;&emsp;&emsp;&emsp; 持仓转为 json 格式的string
+  * [PosHandler.load](#PosHandler.load) &emsp;&emsp;&emsp;&emsp; 载入 json 格式的持仓字符串持仓
+  * [PosHandler.get_tickers](#PosHandler.get_tickers) &emsp;&emsp;&emsp;&emsp; 获取有持仓的合约列表 
+  * [PosHandler.get_net_tot](#PosHandler.get_net_tot) &emsp;&emsp;&emsp;&emsp; 获取指定股票合约的总持仓
+  * [PosHandler.get_net_yd](#PosHandler.get_net_yd) &emsp;&emsp;&emsp;&emsp; 获取指定股票合约的昨仓
+  * [PosHandler.get_long_tot](#PosHandler.get_long_tot) &emsp;&emsp;&emsp;&emsp; 获取指定合约的总多仓
+  * [PosHandler.get_long_yd](#PosHandler.get_long_yd) &emsp;&emsp;&emsp;&emsp; 获取指定合约的昨日多仓
+  * [PosHandler.get_short_tot](#PosHandler.get_short_tot) &emsp;&emsp;&emsp;&emsp; 获取指定合约的总空仓
+  * [PosHandler.get_short_yd](#PosHandler.get_short_yd) &emsp;&emsp;&emsp;&emsp; 获取指定合约的昨日空仓
 
 数据结构
 ===============
-* [LFMarketDataField](#LFMarketDataField) 行情数据结构
-* [LFBarMarketDataField](#LFBarMarketDataField) bar行情数据结构
-* [LFRtnOrderField](#LFRtnOrderField)	下单回报数据结构
-* [LFRtnTradeField](#LFRtnTradeField) 成交回报数据结构
+* [LFMarketDataField](#LFMarketDataField) &emsp;&emsp;&emsp;&emsp; 行情数据结构
+* [LFBarMarketDataField](#LFBarMarketDataField) &emsp;&emsp;&emsp;&emsp; 分钟线行情数据结构
+* [LFRtnOrderField](#LFRtnOrderField) &emsp;&emsp;&emsp;&emsp; 下单回报数据结构
+* [LFRtnTradeField](#LFRtnTradeField)  &emsp;&emsp;&emsp;&emsp; 成交回报数据结构
 
 常量
 ====
-* [SOURCE](#SOURCE) 接口常量
-* [DIRECTION](#DIRECTION) 买卖方向常量
-* [OFFSET](#OFFSET) 买卖方向常量
-* [PRICE_TYPE](#PRICE_TYPE) 报单价格类型常量
-* [ORDER_STATUS](#ORDER_STATUS)	 订单状态常量
-* [POS_DIRECTION](#POS_DIRECTION) 持仓方向常量
-* [VOLUME_TYPE](#VOLUME_TYPE) 订单交易量限制常量
-* [TIME_CONDITION](#TIME_CONDITION) 订单交易时间限制常量
+* [SOURCE](#SOURCE) &emsp;&emsp;&emsp;&emsp; 接口常量
+* [DIRECTION](#DIRECTION) &emsp;&emsp;&emsp;&emsp; 买卖方向常量
+* [OFFSET](#OFFSET) &emsp;&emsp;&emsp;&emsp; 开平方向常量
+* [PRICE_TYPE](#PRICE_TYPE) &emsp;&emsp;&emsp;&emsp; 报单价格类型常量
+* [ORDER_STATUS](#ORDER_STATUS) &emsp;&emsp;&emsp;&emsp; 订单状态常量
+* [POS_DIRECTION](#POS_DIRECTION) &emsp;&emsp;&emsp;&emsp; 持仓方向常量
+* [VOLUME_TYPE](#VOLUME_TYPE) &emsp;&emsp;&emsp;&emsp; 订单交易量限制常量
+* [TIME_CONDITION](#TIME_CONDITION) &emsp;&emsp;&emsp;&emsp; 订单交易时间限制常量
 
 函数定义
 =======
@@ -74,31 +74,12 @@
 ### 回调函数
 
 <h3 id="initialize">initialize(context(context))</h3>
-功能: 策略初始化的时候被触发，可以在其中添加行情和交易服务，以及完成其他需要在策略开始时初始化的操作.   
+功能: 策略初始化的时候被回调，可在该函数中连接行情和交易，订阅行情等.   
 
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |context|context|系统定义用于调用功能函数和存放任意数据的综合体|
 
-<h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
-功能: 当收到分钟线数据的时候函数触发.       
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|context|context|系统定义用于调用功能函数和存放任意数据的综合体|
-|bars|dictionary((ticker(str) -> LFBarMarketDataField))|bar结构list|
-|souce|[SOURCE](#SOURCE)|行情交易接口常量|
-|rcv_time|long|返回纳秒时间|
-
-<h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
-功能: 收到tick数据时被触发  
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|context|context|系统定义用于调用功能函数和存放任意数据的综合体|
-|md|LFMarketDataField|行情数据|
-|souce|[SOURCE](#SOURCE)|行情交易接口常量|
-|rcv_time|long|返回纳秒时间|
 
 <h3 id="on_pos"> on_pos(context, pos_handler, request_id, souce, rcv_time) </h3>
 功能: 当策略注册到TD时被触发一次，回报request_id为-1，如果策略首次运行，pos_handler为空值，如果策略之前运行且设置过持仓，pos_handler为策略持仓。同时该函数在该策略查询了持仓以后会被触发，request_id为查询持仓时的请求序号，pos_handler为账户持仓    
@@ -111,17 +92,26 @@
 |souce|[SOURCE](#SOURCE)|行情交易接口常量|
 |rcv_time|long|返回纳秒时间|
 
-<h3 id="on_error"> on_error(context, error_id, error_msg, request_id, souce, rcv_time) </h3>
-功能:当收到错误回报时被触发
+<h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
+功能: 收到tick数据时回调，需要前面有订阅行情  
 
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |context|context|系统定义用于调用功能函数和存放任意数据的综合体|
-|error_id|int|错误ID|
-|error_msg|string|错误信息|
-|request_id|int|请求编号|
+|md|LFMarketDataField|行情数据|
 |souce|[SOURCE](#SOURCE)|行情交易接口常量|
 |rcv_time|long|返回纳秒时间|
+
+<h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
+功能: 当收到分钟线数据的时回调，需要前面有订阅分钟线行情      
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|context|context|系统定义用于调用功能函数和存放任意数据的综合体|
+|bars|dictionary((ticker(str) -> LFBarMarketDataField))|bar结构list|
+|souce|[SOURCE](#SOURCE)|行情交易接口常量|
+|rcv_time|long|返回纳秒时间|
+
 
 <h3 id="on_rtn_order"> on_rtn_order(context, rtn_order, order_id, souce, rcv_time) </h3>
 功能: 收到策略下单的下单回报时被触发，非本策略下单的下单回报不会触发该函数
@@ -145,18 +135,93 @@
 |souce|[SOURCE](#SOURCE)|行情交易接口常量|
 |rcv_time|long|返回纳秒时间|
 
-<h3 id="context.stop">context.stop()</h3>
-功能: 停止策略（但不是立即停止，可能会在真正停止之前等待几秒）
+<h3 id="on_error"> on_error(context, error_id, error_msg, request_id, souce, rcv_time) </h3>
+
+功能:当收到错误回报时回调
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|context|context|系统定义用于调用功能函数和存放任意数据的综合体|
+|error_id|int|错误ID|
+|error_msg|string|错误信息|
+|request_id|int|请求编号|
+|souce|[SOURCE](#SOURCE)|行情交易接口常量|
+|rcv_time|long|返回纳秒时间|
+
+## 功能函数
+
+<h3 id="context.add_md">context.add_md(source)</h3>
+功能: 连接行情
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+
+<h3 id="context.add_td">context.add_td(source)</h3>
+功能: 连接交易
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+
+<h3 id="context.req_pos">context.req_pos(source)</h3>
+功能: 查询账户持仓，如果查询失败返回-1，查询成功则返回request_id，当收到交易所返回持仓时通过回调on_pos返回持仓
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+|返回|返回值类型|返回值说明|
+|request_id|int|请求编号|
 
 <h3 id="context.new_pos">context.new_pos(source)</h3>
 功能:创建一个空的持仓
-
 
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |source|[SOURCE](#SOURCE)|行情交易接口常量|
 |返回值|类型|参数说明|
 |pos_handler|PosHandler|持仓数据结构(空持仓)|
+
+<h3 id="context.set_pos">context.set_pos(pos_handler, source)</h3>
+功能: 设置策略持仓。
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|pos_handler|PosHandler|持仓数据结构|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+
+<h3 id="context.get_pos">context.get_pos(source)</h3>
+功能:获得策略持仓 
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+|返回|返回值类型|返回值说明|
+|pos_handler|PosHandler|持仓数据结构|
+
+<h3 id="context.print_pos">context.print_pos()</h3>
+功能: 打印持仓
+
+<h3 id="context.subscribe">context.subscribe(tick_list, source)</h3>
+功能: 订阅行情
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|tickers|list|订阅合约列表|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+
+<h3 id="context.register_bar">context.register_bar(source, min_inerval, start_time, ent_time)</h3>
+功能: 订阅分钟线行情，间隔时间可为自定义整数
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+|min_inerval|int|bar间隔分钟数|
+|start_time|string|bar数据开始时间|
+|ent_time|string|bar数据结束时间|
+
+<h3 id="context.stop">context.stop()</h3>
+功能: 停止策略（但不是立即停止，可能会在真正停止之前等待几秒）
 
 <h3 id="context.get_nano">context.get_nano()</h3>
 功能: 获得当前纳秒时间
@@ -189,112 +254,6 @@
 |nano|long|纳秒时间|
 |返回|返回值类型|返回值说明|
 |time_str|string|时间字符串("%Y-%m-%d %H:%M:%S")|
-
-<h3 id="context.print_pos">context.print_pos()</h3>
-功能: 打印持仓
-
-<h3 id="context.add_md">context.add_md(source)</h3>
-功能: 给策略添加行情服务
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-
-<h3 id="context.add_td">context.add_td(source)</h3>
-功能: 给策略添加交易服务
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-
-<h3 id="context.req_pos">context.req_pos(source)</h3>
-功能: 查询账户持仓，如果查询失败返回-1，查询成功则返回request_id，当收到交易所返回持仓时通过回调on_pos传回持仓
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-|返回|返回值类型|返回值说明|
-|request_id|int|请求编号|
-
-<h3 id="context.cancel_order">context.cancel_order(source, order_id)</h3>
-功能: 使用下单编号撤销订单，如果失败则返回-1
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-|order_id|int|下单编号|
-|返回|返回值类型|返回值说明|
-|request_id|int|请求编号|
-
-<h3 id="context.set_pos">context.set_pos(pos_handler, source)</h3>
-功能: 设置策略持仓。
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|pos_handler|PosHandler|持仓数据结构|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-
-<h3 id="context.get_pos">context.get_pos(source)</h3>
-功能:获得策略持仓 
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-|返回|返回值类型|返回值说明|
-|pos_handler|PosHandler|持仓数据结构|
-
-<h3 id="context.subscribe">context.subscribe(tick_list, source)</h3>
-功能: 订阅行情
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|tickers|list|订阅合约列表|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-
-<h3 id="context.register_bar">context.register_bar(source, min_inerval, start_time, ent_time)</h3>
-功能: 订阅分钟线行情，间隔时间可为自定义整数
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|source|[SOURCE](#SOURCE)|行情交易接口常量|
-|min_inerval|int|bar间隔分钟数|
-|start_time|string|bar数据开始时间|
-|ent_time|string|bar数据结束时间|
-
-
-<h3 id="context.insert_func_at">context.context.insert_func_at(nano, function)</h3>
-功能: 在指定纳秒时间添加回调函数
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|nano|long|回调纳秒时间|
-|function|func|回调函数|
-
-<h3 id="context.insert_func_at_c">context.insert_func_at_c(nano, function)</h3>
-功能: 在指定纳秒时间添加以context为参数的回调函数
-
-
-long	回调纳秒时间
-
-func	回调函数（以context为默认参数）
-
-返回值类型及解释：
-
-<h3 id="context.insert_func_after">context.insert_func_after(seconds, function)</h3>
-功能: 在指定秒数后添加回调函数
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|seconds|int|需要在多少秒之后回调|
-|function|func|回调函数|
-
-<h3 id="context.insert_func_after_c">context.insert_func_after_c(seconds, function)</h3>
-功能: 在指定秒数后添加以context为参数的回调函数
-
-|输入参数名|类型|参数说明|
-|:--:|:--:|:--:|
-|nano[long]|long|回调纳秒时间|
-|function|func|回调函数（以context为默认参数）|
 
 <h3 id="context.insert_market_order">context.insert_market_order(source, ticker, exchange_id, volume, direction, offset)</h3>
 功能: 下市价单，如果失败返回-1
@@ -355,6 +314,49 @@ func	回调函数（以context为默认参数）
 |返回|返回值类型|返回值说明|
 |order_id|int|下单编号|
 
+<h3 id="context.cancel_order">context.cancel_order(source, order_id)</h3>
+功能: 使用下单编号撤销订单，如果失败则返回-1
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|source|[SOURCE](#SOURCE)|行情交易接口常量|
+|order_id|int|下单编号|
+|返回|返回值类型|返回值说明|
+|request_id|int|请求编号|
+
+<h3 id="context.insert_func_at">context.context.insert_func_at(nano, function)</h3>
+功能: 在指定纳秒时间添加回调函数
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|nano|long|回调纳秒时间|
+|function|func|回调函数|
+
+<h3 id="context.insert_func_at_c">context.insert_func_at_c(nano, function)</h3>
+功能: 在指定纳秒时间添加以context为参数的回调函数
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+| nano |long|回调纳秒时间|
+|function|func|回调函数（以context为默认参数）|
+
+
+<h3 id="context.insert_func_after">context.insert_func_after(seconds, function)</h3>
+功能: 在指定秒数后添加回调函数
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|seconds|int|需要在多少秒之后回调|
+|function|func|回调函数|
+
+<h3 id="context.insert_func_after_c">context.insert_func_after_c(seconds, function)</h3>
+功能: 在指定秒数后添加以context为参数的回调函数
+
+|输入参数名|类型|参数说明|
+|:--:|:--:|:--:|
+|nano[long]|long|回调纳秒时间|
+|function|func|回调函数（以context为默认参数）|
+
 <h3 id="context.log_debug">context.log_debug(msg)</h3>
 功能: 输出debug日志
 
@@ -382,6 +384,9 @@ func	回调函数（以context为默认参数）
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |msg|string|日志字符串|
+
+
+## 持仓成员函数
 
 <h3 id="PosHandler.add_pos">PosHandler.add_pos(ticker, direction, tot_pos, yd_pos)</h3>
 功能: 向持仓数据项中添加持仓增量
@@ -421,7 +426,6 @@ func	回调函数（以context为默认参数）
 
 <h3 id="PosHandler.get_tickers">PosHandler.get_tickers()</h3>
 功能: 获得持仓数据的合约列表
-
 
 |返回|返回值类型|返回值说明|
 |:--:|:--:|:--:|
@@ -614,7 +618,7 @@ func	回调函数（以context为默认参数）
 |Sell|‘2'|卖|
 
 <h3 id="OFFSET"> OFFSET </h3>
-功能: 买卖方向常量
+功能: 开平方向常量
 
 |标记|值|常量含义|
 |:--:|:--:|:--:|
