@@ -1,4 +1,4 @@
-# 快速上手
+快速上手
 =======
 
 功夫开源交易系统框架介绍请关注[硅商冲击](https://zhuanlan.zhihu.com/silicontrader)
