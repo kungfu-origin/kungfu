@@ -324,7 +324,8 @@
 |返回|返回值类型|返回值说明|
 |request_id|int|请求编号|
 
-<h3 id="context.insert_func_at">context.context.insert_func_at(nano, function)</h3>
+<h3 id="context.insert_func_at">context.context.insert_func_at(nano
+, function)</h3>
 功能: 在指定纳秒时间添加回调函数
 
 |输入参数名|类型|参数说明|
@@ -332,7 +333,8 @@
 |nano|long|回调纳秒时间|
 |function|func|回调函数|
 
-<h3 id="context.insert_func_at_c">context.insert_func_at_c(nano, function)</h3>
+<h3 id="context.insert_func_at_c">context.insert_func_at_c(nano
+, function)</h3>
 功能: 在指定纳秒时间添加以context为参数的回调函数
 
 |输入参数名|类型|参数说明|
@@ -341,7 +343,8 @@
 |function|func|回调函数（以context为默认参数）|
 
 
-<h3 id="context.insert_func_after">context.insert_func_after(seconds, function)</h3>
+<h3 id="context.insert_func_after">context.insert_func_after(seconds
+, function)</h3>
 功能: 在指定秒数后添加回调函数
 
 |输入参数名|类型|参数说明|
@@ -349,7 +352,8 @@
 |seconds|int|需要在多少秒之后回调|
 |function|func|回调函数|
 
-<h3 id="context.insert_func_after_c">context.insert_func_after_c(seconds, function)</h3>
+<h3 id="context.insert_func_after_c">context.insert_func_after_c(seconds
+, function)</h3>
 功能: 在指定秒数后添加以context为参数的回调函数
 
 |输入参数名|类型|参数说明|
@@ -384,7 +388,6 @@
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
 |msg|string|日志字符串|
-
 
 ## 持仓成员函数
 
@@ -483,8 +486,6 @@
 |ticker|string|要获取仓位的合约|
 |返回|返回值类型|返回值说明|
 |pos|int|指定合约昨空仓|
-
-
 	
 数据结构定义
 ==========
@@ -597,7 +598,6 @@
 |TradeTime|string|成交时间|
 |direction|[DIRECTION](#DIRECTION)|买卖方向|
 |OffsetFlag|[OFFSET](#OFFSET)|开平标志|
-
 
 常量定义
 =======
