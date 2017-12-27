@@ -127,14 +127,14 @@ on_td_login(bool ready, const json& js, short source);
 data为策略数据功能成员对象，其定义在/opt/kungfu/master/include/WCStrategyUtil.h。如下示例为通过data成员为策略添加行情和交易数据接入
 
 ```
-data->add_market_data(SOURCE_INDEX);
-data->add_register_td(SOURCE_INDEX);
+data->add_market_data(SOURCE.CTP);
+data->add_register_td(SOURCE.CTP);
 ```
 
 utils为策略执行功能成员对象，其定义在/opt/kungfu/master/include/WCDataWrapper.h。如下示例为通过util成员实现下限价单：
 
 ```
-rid = util->insert_limit_order(SOURCE_INDEX, M_TICKER, M_EXCHANGE,
+rid = util->insert_limit_order(SOURCE.CTP, M_TICKER, M_EXCHANGE,
                                md->LowerLimitPrice, signal.trade_size,
                                LF_CHAR_Sell, LF_CHAR_CloseToday);
 ```

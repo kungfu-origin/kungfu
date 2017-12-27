@@ -16,15 +16,14 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
-系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document_cn.md)
 系统使用方法请查看文档[功夫交易系统使用文档](doc/kungfu_document_cn.md)
 
-python策略开发请参考 [python策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_readme.md)，[python策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+python策略开发请参考 [python策略开发帮助](doc/py_strategy_readme.md)，[python策略接口文档](doc/py_strategy_document_cn.md)
 
 
-C++策略开发请参考 [C++策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_readme.md) [C++策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_document_cn.md)
+C++策略开发请参考 [C++策略开发帮助](doc/cpp_strategy_readme.md) [C++策略接口文档](doc/cpp_strategy_document_cn.md)
 
-常见问题请参考 [Q&A](https://github.com/lqyhost/kungfu/blob/master/doc/QA.md)。
+常见问题请参考 [Q&A](doc/QA.md)。
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
