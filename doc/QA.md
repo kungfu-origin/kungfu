@@ -38,18 +38,13 @@ A:建议首先通过结合帮助和py_demo目录下demo策略，熟悉策略框�
 
 A:我们提供了策略文档来说明策略逻辑，提供了系统文档说明系统逻辑和运维方法，demo中也添加了功能注释，详细的函数和类型介绍可以使用"wingchun help"具体查阅，如果有不理解的地方可以在github上或讨论群中提出。
 
-### Q:交易账户配置中各项是什么意思？
-A：kungfu.json为交易账户配置文件，其中FrontUri是前置地址，如果是simnow仿真账户可以在simnow官网查找，推荐180.168.146.187:10001/10011,UserId和InvestorId均为投资者账户，BrokerId为券商代码，simnow账户一般为9999，simnow投资者账户需要使用客户端登录并修改密码以后方可使用。
-
-账户列表后的FeeSetup是交易费率设置，stock为默认股票费率，future为默认期货费率，future_exotic为指定期货费率。其中type为计费方式，其中volume是根据合约数目计费，amount是根据合约金额计费，fee_multi是单位费用或费用比例，ctr_multi为单位合约标的数量，min_fee为最小费率
-
 #### Q:为什么py_demo里面的策略运行了但是什么输出也没有，感觉像是卡住了。
 
 A：py_demo里面的代码，除了band_demo_strategy.py是一个完整的策略之外，其他策略都是单项或者简单功能展示，而kungfu交易系统是多账户多策略系统，策略如果首次运行，需要set策略的持仓。demo中initial_pos_test正是演示的这个过程。所以按照如下顺序执行就没有问题。
+
 ```
 wingchun strategy -n test -p initial_pos_test.py
 wingchun strategy -n test -p order_cancel_test.py
-...
 ```
 
 #### Q:为什么策略运行会报"RuntimeError: cannot register client: strategy_name "错误

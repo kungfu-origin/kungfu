@@ -8,7 +8,7 @@
   * [on_pos](#on_pos) &emsp;&emsp;&emsp;&emsp; 持仓返回回调函数 
   * [on_rtn_order](#on_rtn_order)	 &emsp;&emsp;&emsp;&emsp; 下单回报回调函数 
   * [on_rtn_trade](#on_rtn_trade)	 &emsp;&emsp;&emsp;&emsp; 成交回报回调函数 
-  * [on_error](#on_error) &emsp;&emsp;&emsp;&emsp;错误回调函数 
+  * [on_error](#on_error) &emsp;&emsp;&emsp;&emsp;错误消息回调函数 
 * 功能函数
   * [context.add_md](#context.add_md) &emsp;&emsp;&emsp;&emsp; 连接行情
   * [context.add_td](#context.add_td) &emsp;&emsp;&emsp;&emsp; 连接交易
@@ -73,7 +73,7 @@
 
 ### 回调函数
 
-<h3 id="initialize">initialize(context(context))</h3>
+<h3 id="initialize">initialize(context)</h3>
 功能: 策略初始化的时候被回调，可在该函数中连接行情和交易，订阅行情等.   
 
 |输入参数名|类型|参数说明|
@@ -93,7 +93,7 @@
 |rcv_time|long|返回纳秒时间|
 
 <h3 id="on_tick">on_tick(context, md, souce, rcv_time)</h3>
-功能: 收到tick数据时回调，需要前面有订阅行情  
+功能: 收到tick行情数据时回调，需要订阅行情  
 
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
@@ -103,7 +103,7 @@
 |rcv_time|long|返回纳秒时间|
 
 <h3 id="on_bar">on_bar(context, bars, souce, rcv_time)</h3>
-功能: 当收到分钟线数据的时回调，需要前面有订阅分钟线行情      
+功能: 收到分钟线数据的时回调，需要订阅分钟线行情      
 
 |输入参数名|类型|参数说明|
 |:--:|:--:|:--:|
