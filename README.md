@@ -20,7 +20,7 @@ Intro 简介
 python策略开发请参考 [python策略开发快速入门](doc/py_strategy_readme.md)，[python策略api文档](doc/py_strategy_document_cn.md)
 
 
-C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_readme.md) [C++策略api文档](doc/cpp_strategy_document_cn.md)
+C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_readme.md)， [C++策略api文档](doc/cpp_strategy_document_cn.md)
 
 常见问题请参考 [Q&A](doc/QA.md)。
 
