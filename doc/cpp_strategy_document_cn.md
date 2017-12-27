@@ -266,7 +266,7 @@ C++策略基类有一个类型为 WCDataWrapper 的 data 成员对象，用户�
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||byte|td状态|
 
 <h3 id="set_pos">set_pos(PosHandlerPtr pos, short source)</h3>
@@ -289,14 +289,14 @@ C++策略基类有一个类型为 WCDataWrapper 的 data 成员对象，用户�
 |source|short|行情交易接口常量|
 |ticker|string|合约或股票编号|
 |include_fee|bool|是否包含交易费用|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||double|该合约或股票持仓盈亏|
 
 <h3 id="get_effective_orders">get_effective_orders()</h3>
 
 功能：获取有效（下单未全部成交）合约
 
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 |:--:|:--:|:--:|
 ||vector<int>|下单请求编号列表|
 
@@ -313,7 +313,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 | tickers |boost::python::list|合约列表|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|订阅函数是否成功|
 
 <h3 id="subscribe_market_data_l2">subscribe_market_data_l2(boost::python::list tickers, short source)</h3>
@@ -324,7 +324,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 | tickers |boost::python::list|合约列表|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|订阅函数是否成功|
 
 <h3 id="subscribe_l2_index">subscribe_l2_index(boost::python::list tickers, short source)</h3>
@@ -335,7 +335,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 | tickers |boost::python::list|合约列表|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|订阅函数是否成功|
 
 <h3 id="subscribe_l2_order">subscribe_l2_order(boost::python::list tickers, short source)</h3>
@@ -346,7 +346,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 | tickers |boost::python::list|合约列表|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|订阅函数是否成功|
 
 <h3 id="subscribe_l2_trade">subscribe_l2_trade(boost::python::list tickers, short source)</h3>
@@ -357,7 +357,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 | tickers |boost::python::list|合约列表|
 |source|short|行情交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|订阅函数是否成功|
 
 <h3 id="insert_market_order">insert_market_order(short source, string instrument_id, string exchange_id, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
@@ -372,7 +372,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |volume|int|数量|
 |direction|LfDirectionType|开平方向|
 |offset|LfOffsetFlagType|多空方向|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||int|下单请求编号，若失败则返回-1|
 
 <h3 id="insert_limit_order">insert_limit_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
@@ -388,12 +388,12 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |volume|int|数量|
 |direction|LfDirectionType|开平方向|
 |offset|LfOffsetFlagType|多空方向|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||int|下单请求编号，若失败则返回-1|
 
 <h3 id="insert_fok_order">insert_fok_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下FOK类型订单（全部成交或则全部撤销），如果失败返回-1
+功能：下 FOK 类型订单（全部成交或则全部撤销），如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -404,12 +404,12 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |volume|int|数量|
 |direction|LfDirectionType|开平方向|
 |offset|LfOffsetFlagType|多空方向|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||int|下单请求编号，若失败则返回-1|
 
 <h3 id="insert_fak_order">insert_fak_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下FAK类型订单（成交且为成交部分撤销），如果失败返回-1
+功能：下 FAK 类型订单（成交且为成交部分撤销），如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -420,7 +420,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |volume|int|数量|
 |direction|LfDirectionType|开平方向|
 |offset|LfOffsetFlagType|多空方向|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||int|下单请求编号，若失败则返回-1|
 
 <h3 id="req_position">req_position(short source)</h3>
@@ -430,7 +430,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
 |source|short|交易接口常量|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||int|查询请求序号，若失败返回-1|
 
 <h3 id="cancel_order">cancel_order(short source, int order_id)</h3>
@@ -441,7 +441,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 |source|short|行情交易接口常量|
 |order_id|int|要撤销的订单的下单请求编号|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 |request_id|int|请求编号|
 
 <h3 id="insert_callback">insert_callback(long nano, BLCallback& callback)</h3>
@@ -452,7 +452,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |:--:|:--:|:--:|
 |nano|long|回调纳秒时间|
 |callback| BLCallback&|回调函数|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|回调函数是否添加成功|
 
 <h3 id="insert_callback_py">insert_callback_py(long nano, boost::python::object func)</h3>
@@ -462,7 +462,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |参数|类型|回调|
 |nano|nano|回调纳秒时间|
 |func|boost::python::object|回调函数|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||bool|回调函数是否添加成功|
 
 <h3 id="set_pos_back">set_pos_back(short source, const char* pos_str)</h3>
@@ -478,7 +478,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 功能：获取当前纳秒时间
 
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 |:--:|:--:|:--:|
 ||long|当前纳秒时间|
 
@@ -486,7 +486,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 功能：获取当前时间
 
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 |:--:|:--:|:--:|
 ||string|时间字符串|
 
@@ -497,7 +497,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
 |time_str|string|字符串时间|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||long|纳秒时间|
 
 <h3 id="parse_nano">parse_nano(long nano)</h3>
@@ -507,12 +507,5 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
 |nano|long|纳秒时间|
-|返回值|类型|参数说明|
+|返回值|类型|返回值说明|
 ||string|字符串时间|
-
-
-Version 版本
-=============
-
-* 0.0.1:
-    初始化版本

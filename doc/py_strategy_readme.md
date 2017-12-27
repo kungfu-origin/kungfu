@@ -1,18 +1,14 @@
-快速上手
-=======
+# python策略开发快速入门
 
-功夫开源交易系统框架介绍请关注[硅商冲击](https://zhuanlan.zhihu.com/silicontrader)
 
-系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document_cn.md)
-
-python策略api文档请查看[python策略api文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+策略api文档请查看[python策略api文档](doc/py_strategy_document_cn.md)
 
 ## python 策略运行过程
 
 策略运行命令如下，其中 -n 参数后的信息为策略名，是系统识别策略的唯一标识，-p 参数后信息为策略脚本文件。
 
 ```
-wingchun strategy -n test -p st_test.py
+$ wingchun strategy -n test -p st_test.py
 ```
 
 python策略启动以后会首先执行initialize函数，用户可以在其中进行连接行情和交易，订阅行情，初始化自定义变量等操作。
@@ -22,11 +18,12 @@ python策略启动以后会首先执行initialize函数，用户可以在其中�
 用户也可以使用策略提供的接口来添加回调函数。
 
 ## 策略持仓初始化
+
 功夫交易系统支持一个账户对应多个策略，系统为每个策略维护了一个独立的持仓。
 
-策略在启动以后，on_pos函数会回调一次，返回策略的持仓，如果策略为首次运行，则回调返回pos_handler为None，需要用户设置策略持仓，如果该策略存在历史持仓，则回调返回pos_handler为该策略的历史持仓。
+策略在启动以后，on_pos 函数会回调一次，返回策略的持仓，如果策略为首次运行，则回调返回 pos_handler 为None，需要用户设置策略持仓，如果该策略存在历史持仓，则回调返回 pos_handler 为该策略的历史持仓。
 
-策略查询账户持仓也是通过该回调返回查询到的持仓信息，这种情况下request_id为请求序号（一个正值），pos_handler为策略持仓。
+策略查询账户持仓也是通过该回调返回查询到的持仓信息，这种情况下 request_id 为请求序号（一个正值），pos_handler 为账户持仓。
 
 如下代码演示了策略判断策略为首次运行的情况下，查询账户持仓，并将收到的账户持仓设置为策略持仓：
 
@@ -57,11 +54,11 @@ def on_pos(context, pos_handler, request_id, source, rcv_time):
         context.stop()
 ```
 
-## tick行情驱动
+## tick行情回调中下单
 
-可以通过subscribe订阅行情，订阅后on_tick函数会回调返回行情，行情订阅列表可以为任意合约组成的list。
+可以通过 subscribe 订阅行情，订阅后 on_tick 函数会回调返回行情，行情订阅列表可以为任意合约组成的 list。
 
-如下示例演示了订阅行情，在on_tick回调中下单的过程：
+如下示例演示了订阅行情，在 on_tick 回调中下单的过程：
 
 ```
 def initialize(context):
@@ -94,11 +91,11 @@ def on_tick(context, market_data, source, rcv_time):
                                                          offset=OFFSET.Open)
 ```
 
-## bar行情驱动
+## bar行情回调中下单
 
-可以通过register_bar订阅分钟线行情，订阅后on_bar函数会回调返回分钟线行情，分钟线可以同时订阅多种，可以通过on_bar的min_interval进行区分。
+可以通过 register_bar 订阅分钟线行情，订阅后 on_bar 函数会回调返回分钟线行情，分钟线可以同时订阅多种，可以通过 on_bar 的 min_interval 进行区分。
 
-如下示例演示了订阅分钟线行情，并在on_bar回调中下单的过程：
+如下示例演示了订阅分钟线行情，并在 on_bar 回调中下单的过程：
 
 ```
 def initialize(context):
@@ -134,7 +131,7 @@ def on_bar(context, bars, min_interval, source, rcv_time):
                                                          offset=OFFSET.Open)
 ```
 
-## 时间驱动
+## 自定义的回调函数中下单
 
 可以通过添加回调函数来实现在指定时间运行某个函数，添加回调有多种方法，可以指定绝对纳秒时间运行回调函数，可以指定一定秒数后运行回调函数，也可以指定在下一个时间（字符格式如 ‘09:35:00’）运行回调函数。
 
@@ -182,7 +179,7 @@ def call_insert_order(context):
 策略常用操作
 =================
 
-策略通过context实现如下常用操作：
+策略通过 context 实现如下常用操作：
 
 * 连接行情和交易
 * 查询账户持仓
@@ -252,17 +249,17 @@ context.cancel_order(source=SOURCE.CTP, order_id=rid)
 
 使用不同的方式添加回调，根据回调时间计法不同和是否带 context 参数一共六个，以下函数意义分别为：
 
-在1511943580122869902纳秒时间点回调call_back()函数
+在 1511943580122869902 纳秒时间点回调 call_back() 函数
 
-在当前时间十秒后，回调call_back()函数
+在当前时间十秒后，回调 call_back() 函数
 
-在1511943580122869902纳秒时间点回调call_back_c(context)函数
+在 1511943580122869902 纳秒时间点回调 call_back_c(context) 函数
 
-在当前时间十秒后，回调call_back_c(context)函数
+在当前时间十秒后，回调 call_back_c(context) 函数
 
-在下一个'14:50:00'，回调call_back()函数
+在下一个'14:50:00'，回调 call_back() 函数
 
-在下一个'14:50:00'，回调call_back_c(context)函数
+在下一个'14:50:00'，回调 call_back_c(context) 函数
 
 ```
 context.insert_func_at(nano=1511943580122869902, function=call_back)
@@ -274,7 +271,7 @@ context.insert_func_at_next_c(time='14:50:00', function=call_back_c)
 ```
 ## 输出日志
 
-功夫支持四种级别的日志，分为为debug，info，error，fatal，下面为日志输出示例
+功夫支持四种级别的日志，分为为 debug，info，error，fatal，下面为日志输出示例
 ```
 context.log_debug("dubug")
 context.log_info("info")
