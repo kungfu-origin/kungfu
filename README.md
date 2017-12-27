@@ -16,7 +16,7 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
-系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document.md)
+系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document_cn.md)
 
 python策略开发请参考 [python策略开发帮助](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_readme.md)，[python策略接口文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
 

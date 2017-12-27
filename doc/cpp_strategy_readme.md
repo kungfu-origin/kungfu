@@ -2,7 +2,7 @@
 
 功夫开源交易系统框架介绍请关注[硅商冲击](https://zhuanlan.zhihu.com/silicontrader)
 
-系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document.md)
+系统使用方法请查看文档[功夫交易系统使用文档](https://github.com/lqyhost/kungfu/blob/master/doc/kungfu_document_cn.md)
 
 python策略api文档请查看[C++策略api文档](https://github.com/lqyhost/kungfu/blob/master/doc/cpp_strategy_document_cn.md)
 
