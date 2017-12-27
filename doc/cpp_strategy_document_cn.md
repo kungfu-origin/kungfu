@@ -19,9 +19,9 @@
 * WCDataWrapper 成员函数
   * [add_market_data](#add_market_data) &emsp;&emsp;&emsp;&emsp; 连接行情服务
   * [add_market_data_l2](#data.add_market_data_l2)  &emsp;&emsp;&emsp;&emsp; 连接二档行情服务
-  * [add_l2_index](#add_l2_index)  &emsp;&emsp;&emsp;&emsp; 连接指数行情服务
-  * [data.add_l2_order](#data.add_l2_order)  &emsp;&emsp;&emsp;&emsp; 连接逐笔委托行情服务
-  * [data.add_l2_trade](#data.add_l2_trade)  &emsp;&emsp;&emsp;&emsp; 连接逐笔成交行情服务
+  * [add_l2_index](#add_l2_index)  &emsp;&emsp;&emsp;&emsp; 连接指数信息服务
+  * [data.add_l2_order](#data.add_l2_order)  &emsp;&emsp;&emsp;&emsp; 连接逐笔委托信息服务
+  * [data.add_l2_trade](#data.add_l2_trade)  &emsp;&emsp;&emsp;&emsp; 连接逐笔成交信息服务
   * [add_register_td](#add_register_td)  &emsp;&emsp;&emsp;&emsp; 连接交易服务
   * [register_bar_md](#register_bar_md)  &emsp;&emsp;&emsp;&emsp; 订阅分钟线行情
   * [run](#run)  &emsp;&emsp;&emsp;&emsp; 启动策略(行情和交易)
@@ -34,9 +34,9 @@
 * WCStrategyUtil 成员函数
   * [subscribe_market_data](subscribe_market_data) &emsp;&emsp;&emsp;&emsp; 订阅行情
   * [subscribe_market_data_l2](subscribe_market_data_l2) &emsp;&emsp;&emsp;&emsp; 订阅二档行情
-  * [subscribe_l2_index](subscribe_l2_index) &emsp;&emsp;&emsp;&emsp; 订阅指数数据
-  * [subscribe_l2_order](subscribe_l2_order) &emsp;&emsp;&emsp;&emsp; 订阅逐笔委托行情
-  * [subscribe_l2_trade](subscribe_l2_trade) &emsp;&emsp;&emsp;&emsp; 订阅逐笔成交行情
+  * [subscribe_l2_index](subscribe_l2_index) &emsp;&emsp;&emsp;&emsp; 订阅指数信息
+  * [subscribe_l2_order](subscribe_l2_order) &emsp;&emsp;&emsp;&emsp; 订阅逐笔委托信息
+  * [subscribe_l2_trade](subscribe_l2_trade) &emsp;&emsp;&emsp;&emsp; 订阅逐笔成交信息
   * [insert_market_order](#insert_market_order) &emsp;&emsp;&emsp;&emsp; 下市价单
   * [insert_limit_order](#insert_limit_order) &emsp;&emsp;&emsp;&emsp; 下限价单
   * [insert_fok_order](#insert_fok_order) &emsp;&emsp;&emsp;&emsp; 下FOK类型订单（全部成交或则全部撤销），如果失败返回-1
@@ -65,7 +65,7 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFMarketDataField *|tick行情数据|
+|data|LFMarketDataField *|tick 行情数据|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -75,8 +75,8 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|BarMdMap&|bar行情数据|
-|min_interval|int|bar行情分钟间隔|
+|data|BarMdMap&|bar 行情数据|
+|min_interval|int|bar 行情分钟间隔|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -86,7 +86,7 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFL2MarketDataField*|L2行情数据|
+|data|LFL2MarketDataField*|二档行情数据|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -96,7 +96,7 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFL2IndexField|指数行情数据结构|
+|data|LFL2IndexField|指数行情数据|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -107,7 +107,7 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFL2OrderField*|委托数据|
+|data|LFL2OrderField*|逐笔委托数据|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -117,7 +117,7 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFL2TradeField*|成交数据|
+|data|LFL2TradeField*|逐笔成交数据|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
 
@@ -149,11 +149,11 @@
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
-|data|LFInputOrderField*|报单数据结构|
+|data|LFInputOrderField* |报单数据结构|
 |request_id|int|请求编号|
 |source|short|行情数据源|
 |rcv_time|long|收到行情纳秒时间|
-|errorId|short|错误ID|
+|errorId|short|错误 ID|
 |errorMsg| char* |错误信息|
 
 <h3 id="on_rsp_position">on_rsp_position(const PosHandlerPtr posMap, int request_id, short source, long rcv_time)</h3>
@@ -362,7 +362,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 <h3 id="insert_market_order">insert_market_order(short source, string instrument_id, string exchange_id, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下市价单
+功能：下市价单，需要交易所和交易接口支持，如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -377,7 +377,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 <h3 id="insert_limit_order">insert_limit_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下限价单
+功能：下限价单，如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -393,7 +393,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 <h3 id="insert_fok_order">insert_fok_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下 FOK 类型订单（全部成交或则全部撤销），如果失败返回-1
+功能：下 FOK 类型订单（全部成交或则全部撤销），需要交易所和交易接口支持，如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -409,7 +409,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 <h3 id="insert_fak_order">insert_fak_order(short source, string instrument_id, string exchange_id, double price, int volume, LfDirectionType direction, LfOffsetFlagType offset)</h3>
 
-功能：下 FAK 类型订单（成交且为成交部分撤销），如果失败返回-1
+功能：下 FAK 类型订单（成交且为成交部分撤销），需要交易所和交易接口支持，如果失败返回-1
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|
@@ -425,7 +425,7 @@ C++策略基类有一个类型为 WCStrategyUtil 的 util 成员对象，用户�
 
 <h3 id="req_position">req_position(short source)</h3>
 
-功能：查询账户持仓
+功能：查询账户持仓，持仓数据通过on_rsp_position回调返回
 
 |参数|类型|参数说明|
 |:--:|:--:|:--:|

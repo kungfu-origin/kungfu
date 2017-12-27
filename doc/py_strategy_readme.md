@@ -1,7 +1,7 @@
 # python策略开发快速入门
 
 
-策略api文档请查看[python策略api文档](doc/py_strategy_document_cn.md)
+策略api文档请查看[python策略api文档](py_strategy_document_cn.md)
 
 ## python 策略运行过程
 
@@ -11,9 +11,9 @@
 $ wingchun strategy -n test -p st_test.py
 ```
 
-python策略启动以后会首先执行initialize函数，用户可以在其中进行连接行情和交易，订阅行情，初始化自定义变量等操作。
+python 策略启动以后会首先执行 initialize 函数，用户可以在其中进行连接行情和交易，订阅行情，初始化自定义变量等操作。
 
-策略通过回调函数返回信号，如on_pos返回持仓信息，on_tick返回行情信息，on_bar返回分钟行情信息，on_rtn_order返回下单回报信息，on_rtn_trade返回下单成交回报信息等。
+策略通过回调函数返回信号，如 on_pos 返回持仓信息，on_tick 返回行情信息，on_bar 返回分钟行情信息，on_rtn_order 返回下单回报信息，on_rtn_trade 返回下单成交回报信息等。
 
 用户也可以使用策略提供的接口来添加回调函数。
 
@@ -23,7 +23,7 @@ python策略启动以后会首先执行initialize函数，用户可以在其中�
 
 策略在启动以后，on_pos 函数会回调一次，返回策略的持仓，如果策略为首次运行，则回调返回 pos_handler 为None，需要用户设置策略持仓，如果该策略存在历史持仓，则回调返回 pos_handler 为该策略的历史持仓。
 
-策略查询账户持仓也是通过该回调返回查询到的持仓信息，这种情况下 request_id 为请求序号（一个正值），pos_handler 为账户持仓。
+策略查询账户持仓也是通过on_pos回调返回，这种情况下 request_id 为请求序号（一个正整数），pos_handler 为账户持仓。
 
 如下代码演示了策略判断策略为首次运行的情况下，查询账户持仓，并将收到的账户持仓设置为策略持仓：
 
@@ -58,7 +58,7 @@ def on_pos(context, pos_handler, request_id, source, rcv_time):
 
 可以通过 subscribe 订阅行情，订阅后 on_tick 函数会回调返回行情，行情订阅列表可以为任意合约组成的 list。
 
-如下示例演示了订阅行情，在 on_tick 回调中下单的过程：
+如下示例演示了订阅行情，在 on_tick 回调中下单：
 
 ```
 def initialize(context):
@@ -95,7 +95,7 @@ def on_tick(context, market_data, source, rcv_time):
 
 可以通过 register_bar 订阅分钟线行情，订阅后 on_bar 函数会回调返回分钟线行情，分钟线可以同时订阅多种，可以通过 on_bar 的 min_interval 进行区分。
 
-如下示例演示了订阅分钟线行情，并在 on_bar 回调中下单的过程：
+如下示例演示了订阅分钟线行情，并在 on_bar 回调中下单：
 
 ```
 def initialize(context):
@@ -234,14 +234,10 @@ context.new_pos(source=SOURCE.CTP)
 撤单函数包括接口和要撤销的订单的 rid。
 
 ```
-context.insert_limit_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
-                           price=6003.0, volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)
-context.insert_market_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
-                            volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)
-context.insert_fok_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
-                         price=6003.0, volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)
-context.insert_fak_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
-                         price=6003.0, volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)                     
+rid = context.insert_limit_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
+                                 price=6003.0, volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)
+rid = context.insert_market_order(source=SOURCE.CTP, ticker='rb1805', exchange_id=EXCHANGE.SHFE, 
+                                 volume=1, direction=DIRECTION.Buy, offset=OFFSET.Open)                  
 context.cancel_order(source=SOURCE.CTP, order_id=rid)
 ```
 

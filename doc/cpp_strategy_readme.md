@@ -26,9 +26,9 @@ api文档请查看[C++策略api文档](cpp_strategy_document_cn.md)
  
 * IWCStrategy.h 策略基类定义
  
-* WCDataWrapper.h 策略数据功能对象data定义
+* WCDataWrapper.h 策略功能对象data定义
  
-* WCStrategyUtil.h 为策略执行功能对象util定义
+* WCStrategyUtil.h 策略功能对象util定义
  
  数据结构和常量定义的头文件位于 /opt/kungfu/master/include/longfist/ 目录下：
  
