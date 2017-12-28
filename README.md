@@ -415,11 +415,33 @@ $ wingchun report -n band_demo -a
 
 ```
 $ wingchun pos -h
+Options:
+  -h [ --help ]         Help screen
+  -t [ --type ] arg     type ("set"/"get")
+  -s [ --source ] arg   source index (eg CTP=1)
+  -n [ --name ] arg     strategy name
+  -o [ --output ]       output to file
+  -r [ --raw ]          print raw data
+  -d [ --detail ]       print user info details
+  -l [ --list ]         list all files
+  -j [ --json ] arg     json_file
+  -c [ --csv ] arg      csv_file format:
+                        ticker, net_tot, net_yd, long_tot, long_yd, short_tot,
+                        short_yd                    
+```
 
-$ wingchun report -t get -n band_demo -s 1 -o -c band_demo.csv
-
-$ wingchun report -t set -n band_demo -s 1 -c band_demo.csv
-
+```                        
+$ wingchun pos -t get -n band_demo -s 1 -o -c band_demo.csv
+=========== (name) band_demo (source)14 =========
+nano:	1514453987908204897 (20171228-17:39:47)
+ok:	Yes
+-------
+rb1805	(net)0,0	(long)6,6	(short)6,6	(net_c)0,0	(long_c)0,0	(short_c)0,0
+-------
+printed to csv file: band_demo.csv
+-------
+$ wingchun pos -t set -n band_demo -s 1 -c band_demo.csv
+set pos from csv file: band_demo.csv
 ```
 
 Version 版本
