@@ -16,9 +16,13 @@ Intro 简介
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
-策略开发请参考 [策略开发文档](https://github.com/taurusai/kungfu/wiki/Strategy)。
 
-常见问题请参考 [Q&A](https://github.com/taurusai/kungfu/wiki/QA)。
+python策略开发请参考 [python策略开发快速入门](doc/py_strategy_readme.md)，[python策略api文档](doc/py_strategy_doc.md)
+
+
+C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_readme.md)， [C++策略api文档](doc/cpp_strategy_doc.md)
+
+常见问题请参考 [Q&A](doc/QA.md)。
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
@@ -167,6 +171,9 @@ yijinjing                        RUNNING   pid 25763, uptime 0:00:11
 $ cp /opt/kungfu/master/etc/kungfu/kungfu.json.sample /opt/kungfu/master/etc/kungfu/kungfu.json
 $ vi /opt/kungfu/master/etc/kungfu/kungfu.json
 ```
+账户的配置信息中 FrontUri 是前置地址，如果使用的是 simnow 仿真账户可以在 simnow 官网查询, UserId 和 InvestorId 均为投资者账户，BrokerId 为券商代码，simnow 账户 BrokerId 一般为 9999。simnow投资者账户需要使用客户端登录并修改密码以后方可使用。
+
+账户列表后的 FeeSetup 是交易费率设置，stock 为默认股票费率，future 为默认期货费率，future_exotic 为指定期货费率。其中type 为计费方式，其中 volume 是根据合约数目计费，amount 是根据合约金额计费，fee_multi 是单位费用或费用比例，ctr_multi 为单位合约标的数量，min_fee 为最小费率
 
 正确配置功夫之后，通过 kungfuctl 命令启动行情及交易服务，检查确保服务启动正常：
 
@@ -223,6 +230,8 @@ $ wingchun help report
 
 系统运行期间，可使用如下命令查看系统后台信息，其中包括了系统所有进程的 PID、启动和换日时间等信息：
 
+示例中'Pid'项表示现在'paged'内存数据服务正在运行，'MD‘行情服务正在运行，’TD‘交易服务正在运行，还有一个策略名为'demo_test’的策略正在运行。
+
 ```
 $ yjj status
 {'Client': {'MDEngineCTP': {'hash_code': 1788426942,
@@ -255,9 +264,19 @@ $ yjj status
 
 系统日志存放在 /shared/kungfu/log 目录下。
 
-### 内存数据库 yjj journal 数据导出展示
+|日志文件|日志内容|功能|
+|:--:|:--:|:--:|
+|page_engine.log|内存数据库日志|记录内存数据库及其他功能使用内存数据库的情况|
+|engine_md.log|行情服务项日志|记录行情服务启动和运行情况|
+|engine_trade.log|交易服务项日志|记录交易服务启动和执行情况|
+|strategy/xxx.log|策略运行日志|记录策略的运行情况|
+|wingchun/xxx.log|行情和交易服务的分接口详细日志|分接口记录了行情和交易服务的详细日志|
 
-使用 yjj 命令查看及导出易筋经内存数据库中的内容：
+### 内存数据库数据查看与导出工具
+
+系统提供了内存数据库查看和导出工具，如下为查看内存数据库和导出内存数据库的示例：
+
+示例展示了如何查看工具帮助和查看内存数据库中指定信息：
 
 ```
 $ yjj journal -h
@@ -288,17 +307,31 @@ $ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 
             HedgeFlag:   (t) Speculation
 ```
 
+示例展示了如何查看工具帮助和导出内存数据库中指定信息：
+
 ```
+$ yjj dump -h
 $ yjj dump -f /shared/kungfu/journal/MD/CTP/ -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
-$ head -n 5 md_20171114.csv
+$ head -n 3 md_20171114.csv
 TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d),PreSettlementPrice(d),PreClosePrice(d),PreOpenInterest(d),OpenPrice(d),HighestPrice(d),LowestPrice(d),Volume(i),Turnover(d),OpenInterest(d),ClosePrice(d),SettlementPrice(d),UpperLimitPrice(d),LowerLimitPrice(d),PreDelta(d),CurrDelta(d),UpdateTime(c13),UpdateMillisec(i),BidPrice1(d),BidVolume1(i),AskPrice1(d),AskVolume1(i),BidPrice2(d),BidVolume2(i),AskPrice2(d),AskVolume2(i),BidPrice3(d),BidVolume3(i),AskPrice3(d),AskVolume3(i),BidPrice4(d),BidVolume4(i),AskPrice4(d),AskVolume4(i),BidPrice5(d),BidVolume5(i),AskPrice5(d),AskVolume5(i),h_nano(l),h_msg_type(i),h_request_id(i),h_source(i),h_is_last(i),h_error_id(i),j_name(s)
 20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821770,32084979660.0,1697634.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:08,500,3941.0,24,3942.0,340,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640349349309138,101,-1,1,1,0,MD_CTP
 20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821772,32085058480.0,1697634.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:09,0,3941.0,23,3942.0,341,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640349845391063,101,-1,1,1,0,MD_CTP
-20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821814,32086713700.0,1697614.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:09,500,3941.0,4,3942.0,341,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640350560025741,101,-1,1,1,0,MD_CTP
-20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821824,32087107800.0,1697616.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:10,0,3940.0,22,3942.0,343,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640351260245676,101,-1,1,1,0,MD_CTP
 ```
+示例中-m参数为信息分类标记，常用的信息分类如下表，全部信息分类可查看源代码 /longfist/longfist/LFConstants.h
 
-### 统计分析工具 wingchun report 样本输出展示
+|名称|值|含义|
+|:--:|:--:|:--:|
+| MSG_TYPE_LF_MD |101|tick行情数据，在journal/MD目录下相应接口目录下数据库文件中|
+| MSG_TYPE_LF_BAR_MD |110|bar行情数据，在journal/MD目录下相应接口目录下数据库文件中|
+| MSG_TYPE_LF_QRY_POS |201|查询持仓请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RSP_POS |202|查询持仓返回数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_ORDER |204|下单请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RTN_ORDER |205|下单回报数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_RTN_TRADE |206|成交回报数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_ORDER_ACTION |207|撤单请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RSP_ACCOUNT |209|撤单回报数据，在journal/TD/相应接口目录下数据库文件中|
+
+### 统计分析工具
 
 委托记录：
 
@@ -374,6 +407,21 @@ $ wingchun report -n band_demo -a
 
 注：以上样例主要展示功能性，延迟具体数字在开发机上得到，不具备参考性。关于如何得到更优的延迟数字，稍后会添加相关文档说明。
 
+### 持仓设置工具
+
+交易系统支持持仓导出为 csv 文件以及 csv 文件设置为持仓。
+
+示例展示了查看帮助，将 band_demo 策略的持仓导出为 csv 和将 csv 格式的持仓导入到策略中的过程。
+
+```
+$ wingchun pos -h
+
+$ wingchun report -t get -n band_demo -s 1 -o -c band_demo.csv
+
+$ wingchun report -t set -n band_demo -s 1 -c band_demo.csv
+
+```
+
 Version 版本
 =============
 
@@ -386,11 +434,6 @@ Version 版本
     * 编译选项优化为 O3
 * 0.0.3:
     增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
-* 0.0.4:
-    增加 FeeHandler 模块，增加策略中的 Pnl 实时计算支持
-* 0.0.5:
-    * 增加对股票交易柜台 xtp 的支持
-    * 在系统 docker 中增加了 numa（xtp 的依赖），不希望更新 docker 的用户可以通过 yum install numactl 来手动安装
 
 Contribute 开发
 =============
