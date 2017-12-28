@@ -20,8 +20,8 @@
   * [add_market_data](#add_market_data) &emsp;&emsp;&emsp;&emsp; 连接行情服务
   * [add_market_data_l2](#data.add_market_data_l2)  &emsp;&emsp;&emsp;&emsp; 连接二档行情服务
   * [add_l2_index](#add_l2_index)  &emsp;&emsp;&emsp;&emsp; 连接指数信息服务
-  * [data.add_l2_order](#data.add_l2_order)  &emsp;&emsp;&emsp;&emsp; 连接逐笔委托信息服务
-  * [data.add_l2_trade](#data.add_l2_trade)  &emsp;&emsp;&emsp;&emsp; 连接逐笔成交信息服务
+  * [add_l2_order](#add_l2_order)  &emsp;&emsp;&emsp;&emsp; 连接逐笔委托信息服务
+  * [add_l2_trade](#add_l2_trade)  &emsp;&emsp;&emsp;&emsp; 连接逐笔成交信息服务
   * [add_register_td](#add_register_td)  &emsp;&emsp;&emsp;&emsp; 连接交易服务
   * [register_bar_md](#register_bar_md)  &emsp;&emsp;&emsp;&emsp; 订阅分钟线行情
   * [run](#run)  &emsp;&emsp;&emsp;&emsp; 启动策略(行情和交易)

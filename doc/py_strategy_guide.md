@@ -1,11 +1,11 @@
-# python策略开发快速入门
+# python 策略开发快速入门
 
 
-策略api文档请查看[python策略api文档](py_strategy_api.md)
+参考策略的 python API，请[查看](py_strategy_api.md)
 
 ## python 策略运行过程
 
-策略运行命令如下，其中 -n 参数后的信息为策略名，是系统识别策略的唯一标识，-p 参数后信息为策略脚本文件。
+策略运行命令如下（其中 -n 参数后的信息为策略名，是系统识别策略的唯一标识，-p 参数后信息为策略脚本文件）
 
 ```
 $ wingchun strategy -n test -p st_test.py
@@ -21,9 +21,9 @@ python 策略启动以后会首先执行 initialize 函数，用户可以在其�
 
 功夫交易系统支持一个账户对应多个策略，系统为每个策略维护了一个独立的持仓。
 
-策略在启动以后，on_pos 函数会回调一次，返回策略的持仓，如果策略为首次运行，则回调返回 pos_handler 为None，需要用户设置策略持仓，如果该策略存在历史持仓，则回调返回 pos_handler 为该策略的历史持仓。
+策略在启动以后，每连接成功一个交易引擎，on_pos 函数会回调一次（此时 request_id 为 -1），返回该策略在该柜台上的持仓 pos_handler，如果策略从未被设定初始持仓，则 pos_handler 为 None。此时需要用户通过（1）策略内 set_pos 或者（2）wingchun pos 命令来为策略设定初始持仓。
 
-策略查询账户持仓也是通过on_pos回调返回，这种情况下 request_id 为请求序号（一个正整数），pos_handler 为账户持仓。
+策略查询账户持仓的返回也是通过on_pos回调返回，这种情况下 request_id 为请求序号（一个正整数），pos_handler 为账户持仓。
 
 如下代码演示了策略判断策略为首次运行的情况下，查询账户持仓，并将收到的账户持仓设置为策略持仓：
 
@@ -58,7 +58,7 @@ def on_pos(context, pos_handler, request_id, source, rcv_time):
 
 可以通过 subscribe 订阅行情，订阅后 on_tick 函数会回调返回行情，行情订阅列表可以为任意合约组成的 list。
 
-如下示例演示了订阅行情，在 on_tick 回调中下单：
+如下示例演示了订阅行情，并在 on_tick 回调中下单：
 
 ```
 def initialize(context):
@@ -188,13 +188,13 @@ def call_insert_order(context):
 * 添加回调
 * 输出日志
 
-详细的函数使用方法可以参考[python策略api文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+详细的函数使用方法可以[查看](py_strategy_api.md)
 
 也可以在安装了功夫开源交易系统的环境中使用 wingchun help context 查询
 
 ## 连接行情和交易
 
-功夫系统支持多行情多交易连接，可使用 context.add_md 和 context.add_td 连接行情和交易。
+功夫系统支持多行情多交易连接，可使用 context.add_md 和 context.add_td 连接行情和交易（需要对应柜台的行情引擎和交易引擎处于正常运行状态）。
 
 ```
 context.add_md(source=SOURCE.CTP)
@@ -213,11 +213,11 @@ context.req_pos(source=SOURCE.CTP)
 
 策略持仓操作包含了获取策略持仓和设置策略持仓等
 
-context.get_pos 函数会返回策略在该 source 上的持仓，返回数据类型为 PosHandler，PosHandler 数据格式和函数可以参考 [python策略api文档](https://github.com/lqyhost/kungfu/blob/master/doc/py_strategy_document_cn.md)
+context.get_pos 函数会返回策略在该 source 上的持仓，返回数据类型为 PosHandler，PosHandler 数据格式和函数可以参考[python策略api文档](py_strategy_api.md)
 
-context.set_pos 函数将持仓数据(类型为 PosHandler )设置为该策略的策略持仓，本函数可用于首次运行需要设置持仓为空仓或者需要将一个账户中的持仓分割到数个策略中时使用。
+context.set_pos 函数将持仓数据（类型为 PosHandler）设置为该策略的策略持仓，本函数可用于首次运行需要设置持仓为空仓或者需要将一个账户中的持仓分割到数个策略中时使用。
 
-context.new_pos 函数返回一个空持仓，可以用于上文中设置策略初始持仓为空的情况。
+context.new_pos 函数返回一个持仓为空的结构，可以用于上文中设置策略初始持仓为空的情况。
 
 ```
 context.set_pos(pos_handler=pos, source=SOURCE.CTP)
@@ -258,9 +258,15 @@ context.cancel_order(source=SOURCE.CTP, order_id=rid)
 在下一个'14:50:00'，回调 call_back_c(context) 函数
 
 ```
+def call_back():
+    print 'this is a basic callback function
+    
+def call_back_c(context):
+    context.log_debug('this is a callback function with context as first parameter')
+
 context.insert_func_at(nano=1511943580122869902, function=call_back)
-context.insert_func_after(seconds=10, function=call_back_c)
-context.insert_func_at_c(nano=1511943580122869902, function=call_back)
+context.insert_func_at_c(nano=1511943580122869902, function=call_back_c)
+context.insert_func_after(seconds=10, function=call_back)
 context.insert_func_after_c(seconds=10, function=call_back_c)
 context.insert_func_at_next(time='14:50:00', function=call_back)
 context.insert_func_at_next_c(time='14:50:00', function=call_back_c)
