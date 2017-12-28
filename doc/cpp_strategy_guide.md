@@ -1,7 +1,7 @@
 # C++策略开发快速入门
 
 
-api文档请查看[C++策略api文档](cpp_strategy_doc.md)
+api文档请查看[C++策略api文档](cpp_strategy_api.md)
 
 ## C++策略demo编译与执行
 

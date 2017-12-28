@@ -1,7 +1,7 @@
 # python策略开发快速入门
 
 
-策略api文档请查看[python策略api文档](py_strategy_doc.md)
+策略api文档请查看[python策略api文档](py_strategy_api.md)
 
 ## python 策略运行过程
 

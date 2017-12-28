@@ -17,10 +17,10 @@ Intro 简介
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
 
 
-python策略开发请参考 [python策略开发快速入门](doc/py_strategy_readme.md)，[python策略api文档](doc/py_strategy_doc.md)
+python策略开发请参考 [python策略开发快速入门](doc/py_strategy_guide.md)，[python策略api文档](doc/py_strategy_api.md)
 
 
-C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_readme.md)， [C++策略api文档](doc/cpp_strategy_doc.md)
+C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_guide.md)， [C++策略api文档](doc/cpp_strategy_api.md)
 
 常见问题请参考 [Q&A](doc/QA.md)。
 
