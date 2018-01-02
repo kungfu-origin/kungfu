@@ -10,7 +10,7 @@ Intro 简介
 * 咏春(wingchun) - 策略执行引擎，提供 C++ 及 Python (2.7) 开发接口，利用易筋经特性，咏春还提供一系列交易数据分析工具。
 * 长拳(longfist) - 交易数据标准化定义及转换器，支持灵活对接不同交易柜台。
 
-功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 柜台对接的实现。
+功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 和 XTP 柜台对接的实现。
 如果需要接入更多柜台请通过 [Taurus.ai](http://taurus.ai) 官网联系我们。
 开发者也可根据长拳标准自行开发新的柜台接口。
 
@@ -153,7 +153,7 @@ $ sudo systemctl status kungfu
 $ sudo systemctl start kungfu
 ```
 
-相关日志存放在 /shared/kungfu/log/supervisor 下。
+相关日志存放在 /shared/kungfu/log 下。
 
 使用 kungfuctl 命令控制后台进程：
 
@@ -193,12 +193,12 @@ Run Strategy 运行策略
 功夫提供 C++ 及 Python (2.7) 策略开发接口，相关样例 demo 程序可在以下代码路径找到：
 
 ```
-kungfu/wingchun/strategy/cpp_demo
-kungfu/wingchun/strategy/py_demo
+$ cd kungfu/wingchun/strategy/cpp_demo
+$ cd kungfu/wingchun/strategy/py_demo
 ```
 
 功夫默认安装在名为 bruce 的用户下，策略程序应以 bruce 身份运行以确保得到正确的文件读取权限（sudo -u bruce）。
-以 py_demo/band_demo_strategy.py 为例，使用以下方式运行策略，需要注意 -n 参数指定的策略名称是系统内对该策略的唯一标识，所有相关的交易记录都通过该标识关联：
+以 py_demo/band_demo_strategy.py 为例，使用以下方式运行策略，需要注意 -n 参数指定的策略名称，是交易系统内对该策略的唯一标识，所有相关的交易记录都通过该标识关联：
 
 ```
 $ sudo -u bruce wingchun strategy -n band_demo -p /your/path/band_demo_strategy.py
@@ -226,7 +226,7 @@ $ wingchun help pos
 $ wingchun help report
 ```
 
-### 系统信息
+### 系统运行信息
 
 系统运行期间，可使用如下命令查看系统后台信息，其中包括了系统所有进程的 PID、启动和换日时间等信息：
 
@@ -274,12 +274,33 @@ $ yjj status
 
 ### 内存数据库数据查看与导出工具
 
-系统提供了内存数据库查看和导出工具，如下为查看内存数据库和导出内存数据库的示例：
+系统提供了内存数据库查看和导出工具：
 
-示例展示了如何查看工具帮助和查看内存数据库中指定信息：
+内存数据库查看工具帮助
 
 ```
 $ yjj journal -h
+Options:
+  -h [ --help ]                         Help screen
+  -f [ --folder ] arg                   Journal Folder
+  -n [ --name ] arg                     Journal Name
+  -p [ --page ]                         Just Page Header
+  -v [ --verify ]                       Verify hash code
+  -k [ --keep ]                         keep listening
+  -t [ --time ]                         time visualized
+  -d [ --detail ]                       data details
+  -c [ --current ]                      start from current
+  -l [ --length ] arg (=20)             Char num of frame data to print
+  -m [ --msgtype ] arg                  Message type printed, -eg: -m 10,11
+  -r [ --rmsgtype ] arg                 Message type not printed, -eg: -r 10,11
+  -s [ --start_time ] arg (=20000101-13:30:00)
+                                        start time (%Y%m%d-%H:%M:%S)
+  -e [ --end_time ] arg (=20200101-00:00:00)
+                                        end time (%Y%m%d-%H:%M:%S)
+```
+查看内存数据库中指定信息：
+
+```
 $ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 -e 20171114-14:45:00 -d -t -m 206
   StartTime:      20171114-14:40:00
   EndTime:        20171114-14:45:00
@@ -307,10 +328,31 @@ $ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 
             HedgeFlag:   (t) Speculation
 ```
 
-示例展示了如何查看工具帮助和导出内存数据库中指定信息：
+内存数据库导出工具帮助：
 
 ```
 $ yjj dump -h
+usage: journal_dumper [-h] [-f FOLDER] [-n NAME] [-m MSG_TYPE] [-o OUTPUT] [-v] [-p] [-s START] [-e END]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FOLDER, --folder FOLDER
+                        folder name
+  -n NAME, --name NAME  journal name
+  -m MSG_TYPE, --msg_type MSG_TYPE
+                        msg type to dump
+  -o OUTPUT, --output OUTPUT
+                        output file name
+  -v, --visualize       visualize the time
+  -p, --print_out       print to console while dumping
+  -s START, --start START
+                        start time (&Y&m&d-&H:&M:&S)
+  -e END, --end END     end time (&Y&m&d-&H:&M:&S)
+```
+
+导出内存数据库中指定信息：
+
+```
 $ yjj dump -f /shared/kungfu/journal/MD/CTP/ -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
 $ head -n 3 md_20171114.csv
 TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d),PreSettlementPrice(d),PreClosePrice(d),PreOpenInterest(d),OpenPrice(d),HighestPrice(d),LowestPrice(d),Volume(i),Turnover(d),OpenInterest(d),ClosePrice(d),SettlementPrice(d),UpperLimitPrice(d),LowerLimitPrice(d),PreDelta(d),CurrDelta(d),UpdateTime(c13),UpdateMillisec(i),BidPrice1(d),BidVolume1(i),AskPrice1(d),AskVolume1(i),BidPrice2(d),BidVolume2(i),AskPrice2(d),AskVolume2(i),BidPrice3(d),BidVolume3(i),AskPrice3(d),AskVolume3(i),BidPrice4(d),BidVolume4(i),AskPrice4(d),AskVolume4(i),BidPrice5(d),BidVolume5(i),AskPrice5(d),AskVolume5(i),h_nano(l),h_msg_type(i),h_request_id(i),h_source(i),h_is_last(i),h_error_id(i),j_name(s)
@@ -332,6 +374,25 @@ TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d
 | MSG_TYPE_LF_RSP_ACCOUNT |209|撤单回报数据，在journal/TD/相应接口目录下数据库文件中|
 
 ### 统计分析工具
+
+统计分析工具帮助：
+
+```
+$ wingchun report -h
+Options:
+  -h [ --help ]                         Help screen
+  -n [ --name ] arg                     strategy name
+  -l [ --list ]                         list all sessions with index
+  -o [ --order ]                        show orders
+  -t [ --trade ]                        show trades
+  -a [ --aggregate ]                    show aggregated latency stat
+  -d [ --detail ]                       list order detail nanos
+  -i [ --index ] arg (=-1)              session index
+  -s [ --start_time ] arg (=20000101-13:30:00)
+                                        start time (%Y%m%d-%H:%M:%S)
+  -e [ --end_time ] arg (=20200101-00:00:00)
+                                        end time (%Y%m%d-%H:%M:%S)
+```
 
 委托记录：
 
@@ -411,7 +472,7 @@ $ wingchun report -n band_demo -a
 
 交易系统支持持仓导出为 csv 文件以及 csv 文件设置为持仓。
 
-示例展示了查看帮助，将 band_demo 策略的持仓导出为 csv 和将 csv 格式的持仓导入到策略中的过程。
+查看持仓设置工具帮助：
 
 ```
 $ wingchun pos -h
@@ -429,6 +490,8 @@ Options:
                         ticker, net_tot, net_yd, long_tot, long_yd, short_tot,
                         short_yd                    
 ```
+
+导出持仓和使用csv文件设置持仓：
 
 ```                        
 $ wingchun pos -t get -n band_demo -s 1 -o -c band_demo.csv
@@ -455,7 +518,12 @@ Version 版本
     * 修正了 memcpy 的潜在越界问题
     * 编译选项优化为 O3
 * 0.0.3:
-    增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+    * 增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+* 0.0.4:
+    * 增加 FeeHandler 模块，增加策略中的 Pnl 实时计算支持
+* 0.0.5:
+    * 增加对股票交易柜台 xtp 的支持
+    * 在系统 docker 中增加了 numa（xtp 的依赖），不希望更新 docker 的用户可以通过 yum install numactl 来手动安装
 
 Contribute 开发
 =============
