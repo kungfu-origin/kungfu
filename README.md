@@ -518,7 +518,12 @@ Version 版本
     * 修正了 memcpy 的潜在越界问题
     * 编译选项优化为 O3
 * 0.0.3:
-    增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+    * 增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+* 0.0.4:
+    * 增加 FeeHandler 模块，增加策略中的 Pnl 实时计算支持
+* 0.0.5:
+    * 增加对股票交易柜台 xtp 的支持
+    * 在系统 docker 中增加了 numa（xtp 的依赖），不希望更新 docker 的用户可以通过 yum install numactl 来手动安装
 
 Contribute 开发
 =============
