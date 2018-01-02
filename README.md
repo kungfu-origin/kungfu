@@ -529,3 +529,4 @@ Contribute 开发
 =============
 
 开发文档即将上线，请关注 [Taurus.ai](http://taurus.ai) 官网。
+QQ 交流群 312745666，入群问题答案：taurus.ai
