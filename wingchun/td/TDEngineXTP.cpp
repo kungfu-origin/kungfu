@@ -126,13 +126,12 @@ void TDEngineXTP::logout()
 
     for (int idx = 0; idx < account_units.size(); idx++)
     {
-        if (account_units[idx].logged_in)
+        if (account_units[idx].session_id > 0)
         {
             long session_id = account_units[idx].session_id;
             if (api->Logout(session_id) == 0)
             {
                 account_units[idx].session_id = -1;
-                account_units[idx].logged_in = false;
                 KF_LOG_INFO(logger, "[Logout] logout succeed!" << " (user_id)" << accounts[idx].UserID
                                                                << " (session)" << session_id
                                                                << " (idx)" << idx);
@@ -143,6 +142,7 @@ void TDEngineXTP::logout()
                 int err_id = error_info->error_id;
                 KF_LOG_ERROR(logger, "[request] logout failed! (errId)" << err_id << " (errMsg)" << GBK2UTF8(error_info->error_msg));
             }
+            account_units[idx].logged_in = false;
         }
     }
 }

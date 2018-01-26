@@ -220,6 +220,7 @@ void TDEngineCTP::release_api()
         unit.connected = false;
         unit.authenticated = false;
         unit.settle_confirmed = false;
+        unit.logged_in = false;
         unit.api = nullptr;
     }
 }
