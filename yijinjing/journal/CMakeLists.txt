@@ -27,9 +27,9 @@ SET(LIB_UTIL_INCLUDE_FILES ../utils/Timer.h ../utils/Hash.hpp ../utils/TypeConve
 SET(LIB_UTIL_SOURCE_FILES ../utils/Timer.cpp)
 SET(LIB_INCLUDE_FILES ../utils/constants.h ../utils/YJJ_DECLARE.h Frame.hpp FrameHeader.h Journal.h JournalHandler.h
         JournalReader.h JournalWriter.h Page.h PageUtil.h PageHeader.h PageProvider.h IPageProvider.h
-        StrategySocketHandler.h StrategyUtil.h IJournalVisitor.h IStrategyUtil.h)
+        StrategySocketHandler.h StrategyUtil.h IJournalVisitor.h IStrategyUtil.h JournalFinder.h)
 SET(LIB_SOURCE_FILES Journal.cpp JournalHandler.cpp JournalReader.cpp JournalWriter.cpp Page.cpp PageUtil.cpp
-        PythonExtend.cpp PageProvider.cpp StrategyUtil.cpp)
+        PythonExtend.cpp PageProvider.cpp StrategyUtil.cpp JournalFinder.cpp)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${LIB_SOURCE_FILES} ${LIB_INCLUDE_FILES} ${LIB_UTIL_SOURCE_FILES} ${LIB_UTIL_INCLUDE_FILES} )
 

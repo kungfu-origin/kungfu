@@ -19,6 +19,7 @@
  * Centralized Python Object & Function binding.
  */
 
+#include "JournalFinder.h"
 #include "JournalReader.h"
 #include "JournalWriter.h"
 #include "StrategyUtil.h"
@@ -55,6 +56,30 @@ PosHandlerPtr createPosHandler(short source, const string& js_str)
 PosHandlerPtr createEmptyPosHandler(short source)
 {
     return PosHandler::create(source);
+}
+
+boost::python::list get_all_journal_names()
+{
+    JournalFinder finder;
+    return std_vector_to_py_list(finder.getAllJournalNames());
+}
+
+boost::python::list get_available_journal_names()
+{
+    JournalFinder finder;
+    return std_vector_to_py_list(finder.getAvailableJournalNames());
+}
+
+boost::python::list get_available_journal_folders()
+{
+    JournalFinder finder;
+    return std_vector_to_py_list(finder.getAvailableJournalFolders());
+}
+
+std::string get_journal_folder(const std::string & name)
+{
+    JournalFinder finder;
+    return finder.getJournalFolder(name);
 }
 
 BOOST_PYTHON_MODULE(libjournal)
@@ -130,4 +155,10 @@ BOOST_PYTHON_MODULE(libjournal)
     .def("get_tickers", &PosHandler::get_py_tickers)
     .def("set_pos", &PosHandler::set_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0))
     .def("add_pos", &PosHandler::add_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0));
+
+    // JournalFinder
+    def("get_all_journal_names", &get_all_journal_names);
+    def("get_available_journal_names", &get_available_journal_names);
+    def("get_available_journal_folders", &get_available_journal_folders);
+    def("get_journal_folder", &get_journal_folder);
 }
