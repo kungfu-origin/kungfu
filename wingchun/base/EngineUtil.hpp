@@ -99,23 +99,19 @@ inline void EngineUtil::splitTicker(const char* ticker, char* commodityNo, char*
 
 inline short EngineUtil::getExchangeIdFromStockTicker(const char* ticker)
 {
-    char first_d = ticker[0];
-    switch (first_d)
+    switch (ticker[0])
     {
-        // common first
-        case '6': // 600/601 - A stock
-            return EXCHANGE_ID_SSE;
-        case '3': // 300 - 创业板
         case '0': // 000 - A stock; 002 - 中小板; 080 - 配股; 031 - 权证
-            return EXCHANGE_ID_SZE;
-            // exotics
-        case '5': // 权证
-        case '9': // 900 - B stock
-        case '7': // 730 - new stock; 700 - 配股
-            return EXCHANGE_ID_SSE;
+        case '1': // funds of sz
         case '2': // 200 - B stock
+        case '3': // 300 - 创业板
             return EXCHANGE_ID_SZE;
-        default:
+        case '5': // fund of sh, etc
+        case '6': // 600/601 - A stock
+        case '7': // 730 - new stock; 700 - 配股
+        case '9': // 900 - B stock
+            return EXCHANGE_ID_SSE;
+        default: // 4,8 新三板
             return -1;
     }
 }
