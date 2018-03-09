@@ -25,14 +25,20 @@
 
 #include "YJJ_DECLARE.h"
 
+#include "StrategyUtil.h"
 #include "longfist/LFUtils.h"
 
 #include <string>
+#include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 
 YJJ_NAMESPACE_START
 
+#define JOURNAL_NAME_PATTERN JOURNAL_PREFIX + "\\.(\\w+)\\.[0-9]+\\." + JOURNAL_SUFFIX
+
 class JournalFinder {
 private:
+    void addJournalInfo(std::string name, std::string folder);
     void loadJournalInfo(short source, JournalPair (*getJournalPair)(short));
     void loadJournalInfo(short source);
 protected:

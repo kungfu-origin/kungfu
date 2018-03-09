@@ -26,6 +26,21 @@
 
 USING_YJJ_NAMESPACE
 
+JournalPair getSystemJournalPair(short source) {
+    return {PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME};
+}
+
+void JournalFinder::addJournalInfo(std::string name, std::string folder) {
+    all_journal[name] = folder;
+    all_journal_names.push_back(name);
+
+    vector<short> pageNums = PageUtil::GetPageNums(folder, name);
+    if (!pageNums.empty()) {
+        avaliable_journal_names.push_back(name);
+        avaliable_journal_folders.push_back(folder);
+    }
+}
+
 void JournalFinder::loadJournalInfo(short source, JournalPair (*getJournalPair)(short)) {
     JournalPair pair = getJournalPair(source);
     if (pair.first.length() > 0) {
@@ -60,4 +75,18 @@ void JournalFinder::loadJournalInfo(short source) {
 JournalFinder::JournalFinder() {
     loadJournalInfo(SOURCE_CTP);
     loadJournalInfo(SOURCE_XTP);
+
+    loadJournalInfo(0, getSystemJournalPair);
+
+    boost::filesystem::path bl_journal_folder(BL_BASE_FOLDER);
+    boost::regex pattern(JOURNAL_NAME_PATTERN);
+    vector<short> res;
+    for (auto &file : boost::filesystem::directory_iterator(bl_journal_folder)) {
+        std::string filename = file.path().filename().string();
+        boost::smatch result;
+        if (boost::regex_match(filename, result, pattern)) {
+            std::string journal_name(result[1].first, result[1].second);
+            addJournalInfo(journal_name, BL_BASE_FOLDER);
+        }
+    }
 }
