@@ -24,6 +24,8 @@
 
 #include "PageUtil.h"
 
+#include <boost/unordered_set.hpp>
+
 USING_YJJ_NAMESPACE
 
 JournalPair getSystemJournalPair(short source) {
@@ -81,12 +83,16 @@ JournalFinder::JournalFinder() {
     boost::filesystem::path bl_journal_folder(BL_BASE_FOLDER);
     boost::regex pattern(JOURNAL_NAME_PATTERN);
     vector<short> res;
+    boost::unordered_set<string> strategy_names;
     for (auto &file : boost::filesystem::directory_iterator(bl_journal_folder)) {
         std::string filename = file.path().filename().string();
         boost::smatch result;
         if (boost::regex_match(filename, result, pattern)) {
             std::string journal_name(result[1].first, result[1].second);
-            addJournalInfo(journal_name, BL_BASE_FOLDER);
+            if (strategy_names.find(journal_name) == strategy_names.end()) {
+                addJournalInfo(journal_name, BL_BASE_FOLDER);
+                strategy_names.insert(journal_name);
+            }
         }
     }
 }
