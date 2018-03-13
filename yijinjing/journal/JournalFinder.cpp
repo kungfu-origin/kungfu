@@ -60,14 +60,6 @@ void JournalFinder::loadJournalInfo(short source, JournalPair (*getJournalPair)(
 void JournalFinder::loadJournalInfo(short source) {
     loadJournalInfo(source, getMdJournalPair);
     loadJournalInfo(source, getMdRawJournalPair);
-    loadJournalInfo(source, getL2MdJournalPair);
-    loadJournalInfo(source, getL2MdRawJournalPair);
-    loadJournalInfo(source, getL2IndexJournalPair);
-    loadJournalInfo(source, getL2IndexRawJournalPair);
-    loadJournalInfo(source, getL2OrderJournalPair);
-    loadJournalInfo(source, getL2OrderRawJournalPair);
-    loadJournalInfo(source, getL2TradeJournalPair);
-    loadJournalInfo(source, getL2TradeRawJournalPair);
     loadJournalInfo(source, getTdJournalPair);
     loadJournalInfo(source, getTdRawJournalPair);
     loadJournalInfo(source, getTdSendJournalPair);
