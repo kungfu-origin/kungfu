@@ -79,10 +79,6 @@ public:
 
     /** add market data */
     void add_market_data(short source);
-    void add_market_data_l2(short source);
-    void add_l2_index(short source);
-    void add_l2_order(short source);
-    void add_l2_trade(short source);
     /** register td */
     void add_register_td(short source);
     /**

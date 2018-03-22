@@ -52,8 +52,8 @@ inline void TradingDayFromLong(char* trading_day, long datetime)
 inline void UpdateTimeFromLong(char* update_time, long datetime)
 {
     int time_int = datetime % 1000000000;
-    datetime /= 1000;
-    sprintf(update_time, "%02d:%02d:%02d", datetime / 10000, datetime / 100 % 100, datetime % 100);
+    time_int /= 1000;
+    sprintf(update_time, "%02d:%02d:%02d", time_int / 10000, time_int / 100 % 100, time_int % 100);
 }
 
 /*

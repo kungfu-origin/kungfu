@@ -262,7 +262,7 @@ void TDEngineXTP::OnError(XTPRI *error_info)
     KF_LOG_ERROR(logger, "[OnError] " << " (errId)" << err_id << " (errMsg)" << err_msg);
 }
 
-void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info)
+void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t session_id)
 {
     auto rtn_order = parseFrom(*order_info);
     if (error_info == nullptr || error_info->error_id == 0)
@@ -282,7 +282,7 @@ void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info)
     }
 }
 
-void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info)
+void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
 {
     auto rtn_trade = parseFrom(*trade_info);
     on_rtn_trade(&rtn_trade);
@@ -290,12 +290,12 @@ void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info)
                             source_id, MSG_TYPE_LF_RTN_TRADE_XTP, 1/*islast*/, -1/*invalidRid*/);
 }
 
-void TDEngineXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info)
+void TDEngineXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id)
 {
     OnError(error_info);
 }
 
-void TDEngineXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last)
+void TDEngineXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
 {
     if (error_info == nullptr || error_info->error_id == 0)
     {

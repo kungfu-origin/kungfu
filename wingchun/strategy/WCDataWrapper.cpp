@@ -50,26 +50,6 @@ void WCDataWrapper::add_market_data(short source)
     ADD_JOURNAL(getMdJournalPair, source);
 }
 
-void WCDataWrapper::add_market_data_l2(short source)
-{
-    ADD_JOURNAL(getL2MdJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_index(short source)
-{
-    ADD_JOURNAL(getL2IndexJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_order(short source)
-{
-    ADD_JOURNAL(getL2OrderJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_trade(short source)
-{
-    ADD_JOURNAL(getL2TradeJournalPair, source);
-}
-
 void WCDataWrapper::add_register_td(short source)
 {
     tds[source] = CONNECT_TD_STATUS_ADDED;
