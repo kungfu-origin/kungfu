@@ -10,11 +10,19 @@ Intro 简介
 * 咏春(wingchun) - 策略执行引擎，提供 C++ 及 Python (2.7) 开发接口，利用易筋经特性，咏春还提供一系列交易数据分析工具。
 * 长拳(longfist) - 交易数据标准化定义及转换器，支持灵活对接不同交易柜台。
 
-功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 柜台对接的实现。
+功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 和 XTP 柜台对接的实现。
 如果需要接入更多柜台请通过 [Taurus.ai](http://taurus.ai) 官网联系我们。
 开发者也可根据长拳标准自行开发新的柜台接口。
 
 初次使用可观看我们的 [视频教程](https://www.bilibili.com/video/av16713275/)。
+
+
+python策略开发请参考 [python策略开发快速入门](doc/py_strategy_guide.md)，[python策略api文档](doc/py_strategy_api.md)
+
+
+C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_guide.md)， [C++策略api文档](doc/cpp_strategy_api.md)
+
+常见问题请参考 [Q&A](doc/QA.md)。
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
@@ -43,6 +51,12 @@ $ sudo systemctl status docker
 $ sudo docker pull taurusai/kungfu-devel
 ```
 
+或使用我们提供的国内高速镜像：
+
+```
+$ sudo docker pull image.taurusai.com/library/kungfu-devel
+```
+
 成功获取镜像后，使用镜像启动 Docker 实例：
 
 ```
@@ -64,6 +78,16 @@ $ docker start kungfu-devel
 
 ```
 $ sudo docker exec -it kungfu-devel bash
+```
+
+如果不使用我们提供的 Docker 编译环境，需要自行安装如下依赖包：
+
+```
+boost 1.62
+rfoo 1.3.1
+pid 2.1.1
+log4cplus2 2.0.0_RC1
+supervisor 3.1.0
 ```
 
 Compile 编译
@@ -92,6 +116,12 @@ $ make package
 $ yum install kungfu-0.0.1-Linux.rpm
 ```
 
+如需再次安装，建议先删除已安装版本：
+
+```
+$ yum erase kungfu
+```
+
 Run 启动
 ======
 
@@ -117,6 +147,14 @@ $ sudo systemctl status kungfu
            `-24787 /usr/bin/python -u /opt/kungfu/master/bin/yjj server
 ```
 
+如果启动有问题，可以使用如下命令手动启动后台服务：
+
+```
+$ sudo systemctl start kungfu
+```
+
+相关日志存放在 /shared/kungfu/log 下。
+
 使用 kungfuctl 命令控制后台进程：
 
 ```
@@ -133,6 +171,9 @@ yijinjing                        RUNNING   pid 25763, uptime 0:00:11
 $ cp /opt/kungfu/master/etc/kungfu/kungfu.json.sample /opt/kungfu/master/etc/kungfu/kungfu.json
 $ vi /opt/kungfu/master/etc/kungfu/kungfu.json
 ```
+账户的配置信息中 FrontUri 是前置地址，如果使用的是 simnow 仿真账户可以在 simnow 官网查询, UserId 和 InvestorId 均为投资者账户，BrokerId 为券商代码，simnow 账户 BrokerId 一般为 9999。simnow投资者账户需要使用客户端登录并修改密码以后方可使用。
+
+账户列表后的 FeeSetup 是交易费率设置，stock 为默认股票费率，future 为默认期货费率，future_exotic 为指定期货费率。其中type 为计费方式，其中 volume 是根据合约数目计费，amount 是根据合约金额计费，fee_multi 是单位费用或费用比例，ctr_multi 为单位合约标的数量，min_fee 为最小费率
 
 正确配置功夫之后，通过 kungfuctl 命令启动行情及交易服务，检查确保服务启动正常：
 
@@ -152,15 +193,30 @@ Run Strategy 运行策略
 功夫提供 C++ 及 Python (2.7) 策略开发接口，相关样例 demo 程序可在以下代码路径找到：
 
 ```
-kungfu/wingchun/strategy/cpp_demo
-kungfu/wingchun/strategy/py_demo
+$ cd kungfu/wingchun/strategy/cpp_demo
+$ cd kungfu/wingchun/strategy/py_demo
 ```
 
 功夫默认安装在名为 bruce 的用户下，策略程序应以 bruce 身份运行以确保得到正确的文件读取权限（sudo -u bruce）。
-以 py_demo/band_demo_strategy.py 为例，使用以下方式运行策略，需要注意 -n 参数指定的策略名称是系统内对该策略的唯一标识，所有相关的交易记录都通过该标识关联：
+以 py_demo/band_demo_strategy.py 为例，使用以下方式运行策略，需要注意 -n 参数指定的策略名称，是交易系统内对该策略的唯一标识，所有相关的交易记录都通过该标识关联：
 
 ```
 $ sudo -u bruce wingchun strategy -n band_demo -p /your/path/band_demo_strategy.py
+```
+
+C++版本的策略 Demo 默认不编译，如需编译可参考如下步骤：
+
+```
+$ mkdir cpp_build
+$ cd cpp_build
+$ cmake ../../wingchun/strategy/cpp_demo
+$ make
+```
+
+C++ Demo 编译后生成可执行文件，运行策略不是通过 wingchun 命令而是直接执行：
+
+```
+$ ./kungfu_strategy_demo
 ```
 
 策略运行期间及结束后，可以使用 wingchun 命令查看策略运行状态：
@@ -170,13 +226,81 @@ $ wingchun help pos
 $ wingchun help report
 ```
 
-### 内存数据库 yjj journal 数据导出展示
+### 系统运行信息
 
-使用 yjj 命令查看及导出易筋经内存数据库中的内容：
+系统运行期间，可使用如下命令查看系统后台信息，其中包括了系统所有进程的 PID、启动和换日时间等信息：
+
+示例中'Pid'项表示现在'paged'内存数据服务正在运行，'MD‘行情服务正在运行，’TD‘交易服务正在运行，还有一个策略名为'demo_test’的策略正在运行。
+
+```
+$ yjj status
+{'Client': {'MDEngineCTP': {'hash_code': 1788426942,
+                            'is_strategy': False,
+                            'is_writing': True,
+                            'pid': 15493,
+                            'registerTime': 1512726147926855797,
+                            'rid_start': -1,
+                            'trade_engine_vec': [],
+                            'users': [4]},
+
+ 'Pid': {15423: ['paged'],
+         15493: ['MDEngineCTP_R', 'MDEngineCTP', 'RAW_MDEngineCTP'],
+         15494: ['TDEngineCTP_SR',
+                 'TDEngineCTP',
+                 'SEND_TDEngineCTP',
+                 'RAW_TDEngineCTP'],
+         16664: ['demo_test', 'demo_test_R']},
+ 'Task': ('running',
+          10000,
+          {'KfController': {'engine_ends': ['2017-12-09 16:30:00'],
+                            'engine_starts': ['2017-12-09 09:15:00'],
+                            'switch_day': '2017-12-09 17:00:00'},
+           'PidCheck': {},
+           'TempPage': {}}),
+ 'Time': '2017-12-08 17:52:58'
+```
+
+### 日志
+
+系统日志存放在 /shared/kungfu/log 目录下。
+
+|日志文件|日志内容|功能|
+|:--:|:--:|:--:|
+|page_engine.log|内存数据库日志|记录内存数据库及其他功能使用内存数据库的情况|
+|engine_md.log|行情服务项日志|记录行情服务启动和运行情况|
+|engine_trade.log|交易服务项日志|记录交易服务启动和执行情况|
+|strategy/xxx.log|策略运行日志|记录策略的运行情况|
+|wingchun/xxx.log|行情和交易服务的分接口详细日志|分接口记录了行情和交易服务的详细日志|
+
+### 内存数据库数据查看与导出工具
+
+系统提供了内存数据库查看和导出工具：
+
+内存数据库查看工具帮助
 
 ```
 $ yjj journal -h
-$ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 -e 20171114-14:45:00 -d -t -m 206
+Options:
+  -h [ --help ]                         Help screen
+  -n [ --name ] arg                     Journal Name
+  -p [ --page ]                         Just Page Header
+  -v [ --verify ]                       Verify hash code
+  -k [ --keep ]                         keep listening
+  -t [ --time ]                         time visualized
+  -d [ --detail ]                       data details
+  -c [ --current ]                      start from current
+  -l [ --length ] arg (=20)             Char num of frame data to print
+  -m [ --msgtype ] arg                  Message type printed, -eg: -m 10,11
+  -r [ --rmsgtype ] arg                 Message type not printed, -eg: -r 10,11
+  -s [ --start_time ] arg (=20000101-13:30:00)
+                                        start time (%Y%m%d-%H:%M:%S)
+  -e [ --end_time ] arg (=20200101-00:00:00)
+                                        end time (%Y%m%d-%H:%M:%S)
+```
+查看内存数据库中指定信息：
+
+```
+$ yjj journal -n TD_CTP -s 20171114-14:40:00 -e 20171114-14:45:00 -d -t -m 206
   StartTime:      20171114-14:40:00
   EndTime:        20171114-14:45:00
   Folder: /shared/kungfu/journal/TD/CTP/
@@ -203,17 +327,69 @@ $ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 
             HedgeFlag:   (t) Speculation
 ```
 
+内存数据库导出工具帮助：
+
 ```
-$ yjj dump -f /shared/kungfu/journal/MD/CTP/ -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
-$ head -n 5 md_20171114.csv
+$ yjj dump -h
+usage: journal_dumper [-h] [-n NAME] [-m MSG_TYPE] [-o OUTPUT] [-v] [-p] [-s START] [-e END]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NAME, --name NAME  journal name
+  -m MSG_TYPE, --msg_type MSG_TYPE
+                        msg type to dump
+  -o OUTPUT, --output OUTPUT
+                        output file name
+  -v, --visualize       visualize the time
+  -p, --print_out       print to console while dumping
+  -s START, --start START
+                        start time (&Y&m&d-&H:&M:&S)
+  -e END, --end END     end time (&Y&m&d-&H:&M:&S)
+```
+
+导出内存数据库中指定信息：
+
+```
+$ yjj dump -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
+$ head -n 3 md_20171114.csv
 TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d),PreSettlementPrice(d),PreClosePrice(d),PreOpenInterest(d),OpenPrice(d),HighestPrice(d),LowestPrice(d),Volume(i),Turnover(d),OpenInterest(d),ClosePrice(d),SettlementPrice(d),UpperLimitPrice(d),LowerLimitPrice(d),PreDelta(d),CurrDelta(d),UpdateTime(c13),UpdateMillisec(i),BidPrice1(d),BidVolume1(i),AskPrice1(d),AskVolume1(i),BidPrice2(d),BidVolume2(i),AskPrice2(d),AskVolume2(i),BidPrice3(d),BidVolume3(i),AskPrice3(d),AskVolume3(i),BidPrice4(d),BidVolume4(i),AskPrice4(d),AskVolume4(i),BidPrice5(d),BidVolume5(i),AskPrice5(d),AskVolume5(i),h_nano(l),h_msg_type(i),h_request_id(i),h_source(i),h_is_last(i),h_error_id(i),j_name(s)
 20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821770,32084979660.0,1697634.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:08,500,3941.0,24,3942.0,340,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640349349309138,101,-1,1,1,0,MD_CTP
 20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821772,32085058480.0,1697634.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:09,0,3941.0,23,3942.0,341,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640349845391063,101,-1,1,1,0,MD_CTP
-20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821814,32086713700.0,1697614.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:09,500,3941.0,4,3942.0,341,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640350560025741,101,-1,1,1,0,MD_CTP
-20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821824,32087107800.0,1697616.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:10,0,3940.0,22,3942.0,343,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640351260245676,101,-1,1,1,0,MD_CTP
 ```
+示例中-m参数为信息分类标记，常用的信息分类如下表，全部信息分类可查看源代码 /longfist/longfist/LFConstants.h
 
-### 统计分析工具 wingchun report 样本输出展示
+|名称|值|含义|
+|:--:|:--:|:--:|
+| MSG_TYPE_LF_MD |101|tick行情数据，在journal/MD目录下相应接口目录下数据库文件中|
+| MSG_TYPE_LF_BAR_MD |110|bar行情数据，在journal/MD目录下相应接口目录下数据库文件中|
+| MSG_TYPE_LF_QRY_POS |201|查询持仓请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RSP_POS |202|查询持仓返回数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_ORDER |204|下单请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RTN_ORDER |205|下单回报数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_RTN_TRADE |206|成交回报数据，在journal/TD/相应接口目录下数据库文件中|
+| MSG_TYPE_LF_ORDER_ACTION |207|撤单请求数据，在journal/strategy/相应策略数据库文件中|
+| MSG_TYPE_LF_RSP_ACCOUNT |209|撤单回报数据，在journal/TD/相应接口目录下数据库文件中|
+
+### 统计分析工具
+
+统计分析工具帮助：
+
+```
+$ wingchun report -h
+Options:
+  -h [ --help ]                         Help screen
+  -n [ --name ] arg                     strategy name
+  -l [ --list ]                         list all sessions with index
+  -o [ --order ]                        show orders
+  -t [ --trade ]                        show trades
+  -a [ --aggregate ]                    show aggregated latency stat
+  -d [ --detail ]                       list order detail nanos
+  -i [ --index ] arg (=-1)              session index
+  -s [ --start_time ] arg (=20000101-13:30:00)
+                                        start time (%Y%m%d-%H:%M:%S)
+  -e [ --end_time ] arg (=20200101-00:00:00)
+                                        end time (%Y%m%d-%H:%M:%S)
+```
 
 委托记录：
 
@@ -289,6 +465,45 @@ $ wingchun report -n band_demo -a
 
 注：以上样例主要展示功能性，延迟具体数字在开发机上得到，不具备参考性。关于如何得到更优的延迟数字，稍后会添加相关文档说明。
 
+### 持仓设置工具
+
+交易系统支持持仓导出为 csv 文件以及 csv 文件设置为持仓。
+
+查看持仓设置工具帮助：
+
+```
+$ wingchun pos -h
+Options:
+  -h [ --help ]         Help screen
+  -t [ --type ] arg     type ("set"/"get")
+  -s [ --source ] arg   source index (eg CTP=1)
+  -n [ --name ] arg     strategy name
+  -o [ --output ]       output to file
+  -r [ --raw ]          print raw data
+  -d [ --detail ]       print user info details
+  -l [ --list ]         list all files
+  -j [ --json ] arg     json_file
+  -c [ --csv ] arg      csv_file format:
+                        ticker, net_tot, net_yd, long_tot, long_yd, short_tot,
+                        short_yd                    
+```
+
+导出持仓和使用csv文件设置持仓：
+
+```                        
+$ wingchun pos -t get -n band_demo -s 1 -o -c band_demo.csv
+=========== (name) band_demo (source)14 =========
+nano:	1514453987908204897 (20171228-17:39:47)
+ok:	Yes
+-------
+rb1805	(net)0,0	(long)6,6	(short)6,6	(net_c)0,0	(long_c)0,0	(short_c)0,0
+-------
+printed to csv file: band_demo.csv
+-------
+$ wingchun pos -t set -n band_demo -s 1 -c band_demo.csv
+set pos from csv file: band_demo.csv
+```
+
 Version 版本
 =============
 
@@ -299,8 +514,16 @@ Version 版本
     * 修正没有 close 的 file 句柄
     * 修正了 memcpy 的潜在越界问题
     * 编译选项优化为 O3
+* 0.0.3:
+    * 增强 wingchun report 中的延迟统计工具，新增调用API前的系统内耗时 (TTT before API)
+* 0.0.4:
+    * 增加 FeeHandler 模块，增加策略中的 Pnl 实时计算支持
+* 0.0.5:
+    * 增加对股票交易柜台 xtp 的支持
+    * 在系统 docker 中增加了 numa（xtp 的依赖），不希望更新 docker 的用户可以通过 yum install numactl 来手动安装
 
 Contribute 开发
 =============
 
 开发文档即将上线，请关注 [Taurus.ai](http://taurus.ai) 官网。
+QQ 交流群 312745666，入群问题答案：taurus.ai

@@ -133,7 +133,9 @@ void ITDEngine::listening()
                         string client_name = j_request["name"].get<string>();
                         user_helper->set_pos(client_name, j_request);
                         clients[client_name].pos_handler = PosHandler::create(source_id, content);
-                        KF_LOG_INFO(logger, "[user] set pos: (client)" << client_name << " (pos)" << content);
+                        clients[client_name].pos_handler->set_fee(accounts[clients[client_name].account_index].fee_handler);
+                        KF_LOG_INFO(logger, "[user] set pos: (client)" << client_name
+                                                                       << " (pos)" << clients[client_name].pos_handler->to_string());
                     }
                     catch (...)
                     {
@@ -258,6 +260,7 @@ void ITDEngine::on_rsp_position(const LFRspPositionField* pos, bool isLast, int 
         KF_LOG_DEBUG(logger, "[RspPosition]" << " (rid)" << requestId
                                              << " (ticker)" << pos->InstrumentID
                                              << " (dir)" << pos->PosiDirection
+                                             << " (cost)" << pos->PositionCost
                                              << " (pos)" << pos->Position
                                              << " (yd)" << pos->YdPosition);
     }
@@ -350,7 +353,15 @@ void ITDEngine::on_rtn_trade(const LFRtnTradeField* rtn_trade)
     string name = rid_manager.get(rid);
     auto iter = clients.find(name);
     if (iter != clients.end() && iter->second.pos_handler.get() != nullptr)
+    {
         iter->second.pos_handler->update(rtn_trade);
+        KF_LOG_DEBUG(logger, "[cost]"
+                << " (long_amt)" << iter->second.pos_handler->get_long_balance(rtn_trade->InstrumentID)
+                << " (long_fee)" << iter->second.pos_handler->get_long_fee(rtn_trade->InstrumentID)
+                << " (short_amt)" << iter->second.pos_handler->get_short_balance(rtn_trade->InstrumentID)
+                << " (short_fee)" << iter->second.pos_handler->get_short_fee(rtn_trade->InstrumentID)
+        );
+    }
 }
 
 bool ITDEngine::add_client(const string& client_name, const json& j_request)
@@ -399,6 +410,7 @@ bool ITDEngine::add_client(const string& client_name, const json& j_request)
      * failed: {'name': 'bl_test', 'ok': false}
      */
     json json_ack = user_helper->get_pos(client_name);
+    json_ack[PH_FEE_SETUP_KEY] = accounts[clients[client_name].account_index].fee_handler->to_json();
     if (json_ack["ok"].get<bool>())
     {
         PosHandlerPtr pos_handler = PosHandler::create(source_id, json_ack);
@@ -427,25 +439,28 @@ bool ITDEngine::remove_client(const string &client_name, const json &j_request)
         user_helper->set_pos(client_name, j_pos);
         iter->second.pos_handler.reset();
     }
-    // cancel all pending orders, and clear the memory
-    auto orders = user_helper->get_existing_orders(client_name);
-    int idx = iter->second.account_index;
-    for (int order_id: orders)
+    if (is_logged_in())
     {
-        LFOrderActionField action = {};
-        action.ActionFlag = LF_CHAR_Delete;
-        action.KfOrderID = order_id;
-        action.LimitPrice = 0;
-        action.VolumeChange = 0;
-        strcpy(action.BrokerID, accounts[idx].BrokerID);
-        strcpy(action.InvestorID, accounts[idx].InvestorID);
-        int local_id;
-        if (user_helper->get_order(client_name, order_id, local_id, action.InstrumentID))
+        // cancel all pending orders, and clear the memory
+        auto orders = user_helper->get_existing_orders(client_name);
+        int idx = iter->second.account_index;
+        for (int order_id: orders)
         {
-            string order_ref = std::to_string(local_id);
-            strcpy(action.OrderRef, order_ref.c_str());
-            KF_LOG_DEBUG(logger, "[cancel_remain_order] (rid)" << order_id << " (ticker)" << action.InstrumentID << " (ref)" << order_ref);
-            req_order_action(&action, iter->second.account_index, order_id, cur_time);
+            LFOrderActionField action = {};
+            action.ActionFlag = LF_CHAR_Delete;
+            action.KfOrderID = order_id;
+            action.LimitPrice = 0;
+            action.VolumeChange = 0;
+            strcpy(action.BrokerID, accounts[idx].BrokerID);
+            strcpy(action.InvestorID, accounts[idx].InvestorID);
+            int local_id;
+            if (user_helper->get_order(client_name, order_id, local_id, action.InstrumentID))
+            {
+                string order_ref = std::to_string(local_id);
+                strcpy(action.OrderRef, order_ref.c_str());
+                KF_LOG_DEBUG(logger, "[cancel_remain_order] (rid)" << order_id << " (ticker)" << action.InstrumentID << " (ref)" << order_ref);
+                req_order_action(&action, iter->second.account_index, order_id, cur_time);
+            }
         }
     }
     user_helper->remove(client_name);
@@ -454,6 +469,10 @@ bool ITDEngine::remove_client(const string &client_name, const json &j_request)
 
 void ITDEngine::load(const json& j_config)
 {
+    if (j_config.find(PH_FEE_SETUP_KEY) != j_config.end())
+    {
+        default_fee_handler = FeeHandlerPtr(new FeeHandler(j_config[PH_FEE_SETUP_KEY]));
+    }
     auto iter = j_config.find("accounts");
     if (iter != j_config.end())
     {
@@ -468,6 +487,26 @@ void ITDEngine::load(const json& j_config)
         {
             const json& j_info = j_account["info"];
             accounts[account_idx] = load_account(account_idx, j_info);
+            auto &fee_handler = accounts[account_idx].fee_handler;
+            if (fee_handler.get() == nullptr)
+            {
+                if (j_info.find(PH_FEE_SETUP_KEY) != j_info.end())
+                {
+                    fee_handler = FeeHandlerPtr(new FeeHandler(j_info[PH_FEE_SETUP_KEY]));
+                }
+                else
+                {
+                    if (default_fee_handler.get() == nullptr)
+                    {
+                        KF_LOG_ERROR(logger, "[client] no fee_handler (idx)" << account_idx);
+                        throw std::runtime_error("cannot find fee_handler for account!");
+                    }
+                    else
+                    {
+                        fee_handler = default_fee_handler;
+                    }
+                }
+            }
             /** parse client */
             const json& j_clients = j_account["clients"];
             for (auto& j_client: j_clients)

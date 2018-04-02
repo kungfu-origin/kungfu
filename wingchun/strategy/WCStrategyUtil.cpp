@@ -42,34 +42,6 @@ bool WCStrategyUtil::subscribe_market_data(boost::python::list tickers, short so
     return subscribeMarketData(vec_ticker, source);
 }
 
-/** subscribe md with L2_MD flag */
-bool WCStrategyUtil::subscribe_market_data_l2(boost::python::list tickers, short source)
-{
-    vector<string> vec_ticker = kungfu::yijinjing::py_list_to_std_vector<string>(tickers);
-    return subscribeL2MD(vec_ticker, source);
-}
-
-/** subscribe md with INDEX flag */
-bool WCStrategyUtil::subscribe_l2_index(boost::python::list tickers, short source)
-{
-    vector<string> vec_ticker = kungfu::yijinjing::py_list_to_std_vector<string>(tickers);
-    return subscribeIndex(vec_ticker, source);
-}
-
-/** subscribe md with ORDER flag */
-bool WCStrategyUtil::subscribe_l2_order(boost::python::list tickers, short source)
-{
-    vector<string> vec_ticker = kungfu::yijinjing::py_list_to_std_vector<string>(tickers);
-    return subscribeOrderTrade(vec_ticker, source);
-}
-
-/** subscribe md with TRADE flag */
-bool WCStrategyUtil::subscribe_l2_trade(boost::python::list tickers, short source)
-{
-    vector<string> vec_ticker = kungfu::yijinjing::py_list_to_std_vector<string>(tickers);
-    return subscribeOrderTrade(vec_ticker, source);
-}
-
 int WCStrategyUtil::process_callback(long cur_time)
 {
     cur_nano = cur_time;

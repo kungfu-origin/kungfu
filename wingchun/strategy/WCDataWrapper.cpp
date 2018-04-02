@@ -48,42 +48,12 @@ WCDataWrapper::WCDataWrapper(IWCDataProcessor *processor, WCStrategyUtil* util):
 void WCDataWrapper::add_market_data(short source)
 {
     ADD_JOURNAL(getMdJournalPair, source);
-    if (source == SOURCE_EXANICSNIFFER)
-    {
-        // exanic has l2 md only
-        ADD_JOURNAL(getL2MdJournalPair, source);
-    }
-}
-
-void WCDataWrapper::add_market_data_l2(short source)
-{
-    ADD_JOURNAL(getL2MdJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_index(short source)
-{
-    ADD_JOURNAL(getL2IndexJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_order(short source)
-{
-    ADD_JOURNAL(getL2OrderJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_trade(short source)
-{
-    ADD_JOURNAL(getL2TradeJournalPair, source);
 }
 
 void WCDataWrapper::add_register_td(short source)
 {
     tds[source] = CONNECT_TD_STATUS_ADDED;
     ADD_JOURNAL(getTdJournalPair, source);
-    if (source == SOURCE_LTS)
-    {
-        // LTS need QD journal besides td
-        ADD_JOURNAL(getTdQJournalPair, source);
-    }
 }
 
 void WCDataWrapper::register_bar_md(short source, int min_interval, string start_time, string end_time)
@@ -106,6 +76,8 @@ void WCDataWrapper::register_bar_md(short source, int min_interval, string start
     end_tm.tm_hour = tmp_tm.tm_hour;
     end_tm.tm_min = tmp_tm.tm_min;
     long end_nano = kungfu::yijinjing::parseTm(end_tm);
+    if (end_nano < start_nano)
+        end_nano += kungfu::yijinjing::NANOSECONDS_PER_DAY;
     long delta = min_interval * kungfu::yijinjing::NANOSECONDS_PER_MINUTE;
 
     bool inited = false;
@@ -246,8 +218,10 @@ void WCDataWrapper::run()
                     {
                         case MSG_TYPE_LF_MD:
                         {
-                            process_bar((LFMarketDataField *) data, msg_source, cur_time);
-                            processor->on_market_data((LFMarketDataField *) data, msg_source, cur_time);
+                            LFMarketDataField * md = (LFMarketDataField *) data;
+                            last_prices[md->InstrumentID] = md->LastPrice;
+                            process_bar(md, msg_source, cur_time);
+                            processor->on_market_data(md, msg_source, cur_time);
                             break;
                         }
                         case MSG_TYPE_LF_L2_MD:
@@ -290,7 +264,9 @@ void WCDataWrapper::run()
                         }
                         case MSG_TYPE_LF_RTN_ORDER:
                         {
-                            processor->on_rtn_order((LFRtnOrderField *) data, request_id, msg_source, cur_time);
+                            LFRtnOrderField * rtn_order = (LFRtnOrderField *) data;
+                            order_statuses[request_id] = rtn_order->OrderStatus;
+                            processor->on_rtn_order(rtn_order, request_id, msg_source, cur_time);
                             break;
                         }
                         case MSG_TYPE_LF_RTN_TRADE:
@@ -332,7 +308,7 @@ void WCDataWrapper::process_rsp_position(const LFRspPositionField* pos, bool is_
     }
     if (strlen(pos->InstrumentID) > 0)
     {
-        handler->add_pos(pos->InstrumentID, pos->PosiDirection, pos->Position, pos->YdPosition);
+        handler->add_pos(pos->InstrumentID, pos->PosiDirection, pos->Position, pos->YdPosition, pos->PositionCost);
     }
     if (is_last)
     {
@@ -350,6 +326,10 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
         {
             bool ready = j_ack["ok"].get<bool>();
             processor->on_td_login(ready, j_ack, source);
+            if (j_ack.find(PH_FEE_SETUP_KEY) != j_ack.end())
+            {
+                fee_handlers[source] = FeeHandlerPtr(new FeeHandler(j_ack[PH_FEE_SETUP_KEY]));
+            }
             if (ready)
             {
                 PosHandlerPtr handler = PosHandler::create(source, content);
@@ -375,6 +355,10 @@ void WCDataWrapper::process_td_ack(const string& content, short source, long rcv
 void WCDataWrapper::set_pos(PosHandlerPtr handler, short source)
 {
     set_internal_pos(handler, source);
+    if (fee_handlers[source].get() != nullptr)
+    {
+        handler->set_fee(fee_handlers[source]);
+    }
     if (handler.get() != nullptr && !handler->poisoned())
     {
         json j_req = json::parse(handler->to_string());
@@ -410,4 +394,43 @@ byte WCDataWrapper::get_td_status(short source) const
         return CONNECT_TD_STATUS_UNKNOWN;
     else
         return iter->second;
+}
+
+double WCDataWrapper::get_ticker_pnl(short source, string ticker, bool include_fee) const
+{
+    using kungfu::yijinjing::VOLUME_DATA_TYPE;
+    auto pos_iter = internal_pos.find(source);
+    auto price_iter = last_prices.find(ticker);
+    if (pos_iter != internal_pos.end() && price_iter != last_prices.end())
+    {
+        PosHandlerPtr handler = pos_iter->second;
+        double last_price = price_iter->second;
+
+        double holding_value = handler->get_holding_value(ticker, last_price);
+        double holding_balance = handler->get_holding_balance(ticker);
+
+        double pnl = holding_value - holding_balance;
+        if (include_fee)
+            pnl -= handler->get_holding_fee(ticker);
+
+        return pnl;
+    }
+    return 0;
+}
+/** get effective orders */
+vector<int> WCDataWrapper::get_effective_orders() const
+{
+    vector<int> res;
+    for (auto iter: order_statuses)
+    {
+        char status = iter.second;
+        if (status != LF_CHAR_Error
+            && status != LF_CHAR_AllTraded
+            && status != LF_CHAR_Canceled
+            && status != LF_CHAR_PartTradedNotQueueing)
+        {
+            res.push_back(iter.first);
+        }
+    }
+    return res;
 }

@@ -15,8 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-import sys
-sys.path.append('/opt/kungfu/wingchun/lib/wingchun')
 import libwingchunstrategy
 import datetime, time
 from functools import partial
@@ -56,6 +54,9 @@ context_usage = \
         ('get_nano', lambda strategy: strategy.get_strategy_util().get_nano,
          'get current nanoseconds',
          ('long', [])),
+        ('get_effective_orders', lambda strategy: strategy.get_effective_orders,
+         'get effective order ids (effective means still on the order book)',
+         ('list', [])),
         ('get_name', lambda strategy: strategy.get_name,
          'get current strategy name',
          ('str', [])),
@@ -89,6 +90,10 @@ context_usage = \
         ('get_pos', lambda strategy: strategy.get_data_wrapper().get_pos,
          'get internal position',
          ('PosHandler', [('int', 'source')])),
+        # pnl
+        ('get_ticker_pnl', lambda strategy: strategy.get_data_wrapper().get_ticker_pnl,
+         'return ticker\'s pnl, position value minus trade cost and fees',
+         (None, [('int', 'source'), ('str', 'ticker'), ('bool', 'include_fee')])),
         # market data
         ('subscribe', lambda strategy: strategy.get_strategy_util().subscribe_market_data,
          'subscribe market data. ATTENTION: tickers is list of string, eg: \"IF1712\", \"600000@SSZ\"',
@@ -194,12 +199,16 @@ class_details = [
     ('PosHandler', [], [('add_pos', (None, [('str', 'ticker'),
                                             ('POS_DIRECTION', 'direction'),
                                             ('int', 'tot_pos'),
-                                            ('int', 'yd_pos')]),
+                                            ('int', 'yd_pos'),
+                                            ('float', 'balance'),
+                                            ('float', 'fee')]),
                          'add position number of some ticker to existing holdings'),
                         ('set_pos', (None, [('str', 'ticker'),
                                             ('POS_DIRECTION', 'direction'),
                                             ('int', 'tot_pos'),
-                                            ('int', 'yd_pos')]),
+                                            ('int', 'yd_pos'),
+                                            ('float', 'balance'),
+                                            ('float', 'fee')]),
                          'set position number of some ticker'),
                         ('dump', ('str', []), 'dump to string'),
                         ('load', (None, [('str', 'json_str')]), 'load from string'),
@@ -210,6 +219,12 @@ class_details = [
                         ('get_long_yd', ('int', [('str', 'ticker')]), 'get yesterday position of ticker with LONG direction'),
                         ('get_short_tot', ('int', [('str', 'ticker')]), 'get total position of ticker with SHORT direction'),
                         ('get_short_yd', ('int', [('str', 'ticker')]), 'get yesterday position of ticker with SHORT direction'),
+                        ('get_net_balance', ('float', [('str', 'ticker')]), 'get total trade amount of the ticker\'s NET position'),
+                        ('get_net_fee', ('float', [('str', 'ticker')]), 'get total transaction fee of the ticker\'s NET position'),
+                        ('get_long_balance', ('float', [('str', 'ticker')]), 'get total trade amount of the ticker\'s LONG position'),
+                        ('get_long_fee', ('float', [('str', 'ticker')]), 'get total transaction fee of the ticker\'s LONG position'),
+                        ('get_short_balance', ('float', [('str', 'ticker')]), 'get total trade amount of the ticker\'s SHORT position'),
+                        ('get_short_fee', ('float', [('str', 'ticker')]), 'get total transaction fee of the ticker\'s SHORT position'),
                         ],
      'wrapper of position information, both internal strategy position and requested account position'),
     ('LFMarketDataField', [('TradingDay', 'str', '交易日'),
@@ -304,19 +319,7 @@ class_details = [
 ]
 
 wingchun_constants = [
-    ('SOURCE', 'int', [('CTP', 1, ''),
-                       ('LTS', 2, ''),
-                       ('FEMAS', 3, ''),
-                       ('XONE', 4, ''),
-                       ('XSPEED', 5, ''),
-                       ('XELE', 6, ''),
-                       ('XSPEEDL2', 7, ''),
-                       ('YISHENG', 8, ''),
-                       ('HUNDSUN', 10, ''),
-                       ('SOCKETSNIFFER', 11, ''),
-                       ('EXANICSNIFFER', 12, ''),
-                       ('OES', 13, ''),
-                       ('SANDBOX', 14, ''),
+    ('SOURCE', 'int', [('CTP', 1, '')
                        ],
      'source index'),
     ('DIRECTION', 'char', [('Buy', '0', '买'),
@@ -473,8 +476,11 @@ override functions: functions with mark (*) are necessary.
 
 def print_pos(pos_handler):
     for ticker in pos_handler.get_tickers():
-        print '{}\t(net){},{} (long){},{} (short){},{}'.format(
+        print '{}\t(net){},{}[{},{}] (long){},{}[{},{}] (short){},{}[{},{}]'.format(
             ticker, pos_handler.get_net_tot(ticker), pos_handler.get_net_yd(ticker),
+            pos_handler.get_net_balance(ticker), pos_handler.get_net_fee(ticker),
             pos_handler.get_long_tot(ticker), pos_handler.get_long_yd(ticker),
-            pos_handler.get_short_tot(ticker), pos_handler.get_short_yd(ticker)
+            pos_handler.get_long_balance(ticker), pos_handler.get_long_fee(ticker),
+            pos_handler.get_short_tot(ticker), pos_handler.get_short_yd(ticker),
+            pos_handler.get_short_balance(ticker), pos_handler.get_short_fee(ticker)
         )

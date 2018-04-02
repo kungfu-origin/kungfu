@@ -20,8 +20,9 @@
 #ifndef LONGFIST_TRANSFER_M_H
 #define LONGFIST_TRANSFER_M_H
 
+#include "LFConstants.h"
 /*
- * 150006320 -> '15:00:00'
+ * 150006320 -> '15:00:06'
  */
 inline void UpdateTimeFromMilSecInt(char* time_str, int time_int)
 {
@@ -37,87 +38,139 @@ inline void UpdateMillisecFromMilSecInt(int& mil_sec, int time_int)
     mil_sec = time_int % 1000;
 }
 
-#ifdef KUNGFU_LF_OES
-inline void FromOesMktId(char* exchangeId, uint8 mktId)
+/*
+ * YYYYMMDDHHMMSSsss -> 'YYYYMMDD'
+ */
+inline void TradingDayFromLong(char* trading_day, long datetime)
 {
-    if (mktId == OES_MKT_ID_SH_A)
-        strcpy(exchangeId, "SSE");
-    else if (mktId == OES_MKT_ID_SZ_A)
-        strcpy(exchangeId, "SZE");
+    sprintf(trading_day, "%d", (int)(datetime / 1000000000));
+}
+
+/*
+ * YYYYMMDDHHMMSSsss -> 'DD:HH:MM'
+ */
+inline void UpdateTimeFromLong(char* update_time, long datetime)
+{
+    int time_int = datetime % 1000000000;
+    time_int /= 1000;
+    sprintf(update_time, "%02d:%02d:%02d", time_int / 10000, time_int / 100 % 100, time_int % 100);
+}
+
+/*
+ * YYYYMMDDHHMMSSsss -> sss
+ */
+inline void MillisecFromLong(int& mil_sec, long datetime)
+{
+    mil_sec = datetime % 1000;
+}
+
+#ifdef KUNGFU_LF_XTP
+/**************************************************************/
+/*                          XTP                               */
+/**************************************************************/
+inline void FromXtpExchangeId(char* exchangeId, XTP_EXCHANGE_TYPE exId)
+{
+    if (exId == XTP_EXCHANGE_SH)
+        strcpy(exchangeId, EXCHANGE_SSE);
+    else if (exId == XTP_EXCHANGE_SZ)
+        strcpy(exchangeId, EXCHANGE_SZE);
     else
         strcpy(exchangeId, "None");
 }
 
-inline void ToOesMktId(uint8& mktId, const char* exchangeId)
+inline void ToXtpExchangeId(XTP_EXCHANGE_TYPE& exId, const char* exchangeId)
 {
-    if (!strcmp(exchangeId, "SSE"))
-        mktId = OES_MKT_ID_SH_A;
-    else if (!strcmp(exchangeId, "SZE"))
-        mktId = OES_MKT_ID_SZ_A;
+    if (!strcmp(exchangeId, EXCHANGE_SSE))
+        exId = XTP_EXCHANGE_SH;
+    else if (!strcmp(exchangeId, EXCHANGE_SZE))
+        exId = XTP_EXCHANGE_SZ;
     else
-        mktId = -1;
+        exId = XTP_EXCHANGE_UNKNOWN;
 }
 
-inline void FromOesBsType(char& direction, uint8 bsType)
+inline void FromXtpMarket(char* exchangeId, XTP_MARKET_TYPE marketId)
 {
-    if (bsType == 1)
-        direction = LF_CHAR_Buy;
-    else if (bsType == 2)
-        direction = LF_CHAR_Sell;
+    if (marketId == XTP_MKT_SH_A)
+        strcpy(exchangeId, EXCHANGE_SSE);
+    else if (marketId == XTP_MKT_SZ_A)
+        strcpy(exchangeId, EXCHANGE_SZE);
+    else
+        strcpy(exchangeId, "None");
 }
 
-inline void ToOesBsType(uint8& bsType, char direction)
+inline void ToXtpMarket(XTP_MARKET_TYPE& marketId, const char* exchangeId)
+{
+    if (!strcmp(exchangeId, EXCHANGE_SSE))
+        marketId = XTP_MKT_SH_A;
+    else if (!strcmp(exchangeId, EXCHANGE_SZE))
+        marketId = XTP_MKT_SZ_A;
+    else
+        marketId = XTP_MKT_UNKNOWN;
+}
+
+inline void FromXtpPosiDirection(char& posi_direction, XTP_MARKET_TYPE marketId)
+{
+    posi_direction = LF_CHAR_Net;
+}
+
+inline void FromXtpPriceType(char& order_price_type, XTP_PRICE_TYPE xtp_type)
+{
+    if (xtp_type == XTP_PRICE_LIMIT)
+        order_price_type = LF_CHAR_LimitPrice;
+    else
+        order_price_type = LF_CHAR_BestPrice;
+}
+
+inline void ToXtpPriceType(XTP_PRICE_TYPE& xtp_type, char order_price_type)
+{
+    if (order_price_type == LF_CHAR_LimitPrice)
+        xtp_type = XTP_PRICE_LIMIT;
+    else
+        xtp_type = XTP_PRICE_BEST5_OR_CANCEL;
+}
+
+inline void FromXtpDirection(char& direction, XTP_SIDE_TYPE xtp_side)
+{
+    if (xtp_side == XTP_SIDE_BUY || xtp_side == XTP_SIDE_BUY_OPEN || xtp_side == XTP_SIDE_BUY_CLOSE)
+        direction = LF_CHAR_Buy;
+    else if (xtp_side == XTP_SIDE_SELL || xtp_side == XTP_SIDE_SELL_OPEN || xtp_side == XTP_SIDE_SELL_CLOSE)
+        direction = LF_CHAR_Sell;
+    else
+        direction = '\0';
+}
+
+inline void ToXtpDirection(XTP_SIDE_TYPE& xtp_side, char direction)
 {
     if (direction == LF_CHAR_Buy)
-        bsType = 1;
+        xtp_side = XTP_SIDE_BUY;
     else if (direction == LF_CHAR_Sell)
-        bsType = 2;
+        xtp_side = XTP_SIDE_SELL;
     else
-        bsType = 0;
+        xtp_side = XTP_SIDE_UNKNOWN;
 }
 
-inline void FromOesOrdType(char& orderPriceType, uint8 ordType)
+inline void FromXtpOrderStatus(char& orderStatus, byte ordStatus)
 {
-    if (ordType == OES_ORD_TYPE_LMT)
-        orderPriceType = LF_CHAR_LimitPrice;
-    else if (ordType == OES_ORD_TYPE_MTL_BEST_5 ||
-             ordType == OES_ORD_TYPE_MTL_BEST ||
-             ordType == OES_ORD_TYPE_FAK_BEST_5 ||
-             ordType == OES_ORD_TYPE_MTL_SAMEPARTY_BEST)
-        orderPriceType = LF_CHAR_BestPrice;
-    else
-        orderPriceType = LF_CHAR_AnyPrice;
-}
-
-inline void ToOesOrdType(uint8& ordType, char orderPriceType)
-{
-    if (orderPriceType == LF_CHAR_LimitPrice)
-        ordType = OES_ORD_TYPE_LMT;
-    else
-        ordType = OES_ORD_TYPE_MTL_BEST;
-}
-
-inline void FromOesOrderStatus(char& orderStatus, uint8 ordStatus)
-{
-    if (ordStatus == OES_ORD_STATUS_NORMAL)
+    if (ordStatus == XTP_ORDER_STATUS_INIT)
         orderStatus = LF_CHAR_NotTouched;
-    else if (ordStatus == OES_ORD_STATUS_DECLARING)
-        orderStatus = LF_CHAR_AcceptedNoReply;
-    else if (ordStatus == OES_ORD_STATUS_DECLARED)
-        orderStatus = LF_CHAR_NoTradeQueueing;
-    else if (ordStatus == OES_ORD_STATUS_CANCEL_DONE)
-        orderStatus = LF_CHAR_Canceled;
-    else if (ordStatus == OES_ORD_STATUS_PARTIALLY_FILLED)
+    else if (ordStatus == XTP_ORDER_STATUS_UNKNOWN)
+        orderStatus = LF_CHAR_Unknown;
+    else if (ordStatus == XTP_ORDER_STATUS_PARTTRADEDQUEUEING)
         orderStatus = LF_CHAR_PartTradedQueueing;
-    else if (ordStatus == OES_ORD_STATUS_PARTIALLY_CANCELED)
+    else if (ordStatus == XTP_ORDER_STATUS_NOTRADEQUEUEING)
+        orderStatus = LF_CHAR_NoTradeQueueing;
+    else if (ordStatus == XTP_ORDER_STATUS_PARTTRADEDNOTQUEUEING)
         orderStatus = LF_CHAR_PartTradedNotQueueing;
-    else if (ordStatus == OES_ORD_STATUS_CANCELED)
+    else if (ordStatus == XTP_ORDER_STATUS_CANCELED)
         orderStatus = LF_CHAR_Canceled;
-    else if (ordStatus == OES_ORD_STATUS_FILLED)
+    else if (ordStatus == XTP_ORDER_STATUS_ALLTRADED)
         orderStatus = LF_CHAR_AllTraded;
+    else if (ordStatus == XTP_ORDER_STATUS_REJECTED)
+        orderStatus = LF_CHAR_Error;
     else
         orderStatus = LF_CHAR_Error;
 }
+
 #endif
 
 #endif //LONGFIST_TRANSFER_M_H

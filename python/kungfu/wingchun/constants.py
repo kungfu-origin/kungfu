@@ -17,18 +17,7 @@ limitations under the License.
 
 class SOURCE:
     CTP = 1
-    LTS = 2
-    FEMAS = 3
-    XONE = 4
-    XSPEED = 5
-    XELE = 6
-    XSPEEDL2 = 7
-    YISHENG = 8
-    HUNDSUN = 10
-    SOCKETSNIFFER = 11
-    EXANICSNIFFER = 12
-    OES = 13
-    SANDBOX = 14
+    XTP = 15
 
 class EXCHANGE:
     SSE = 'SSE' #上海证券交易所

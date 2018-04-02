@@ -8,18 +8,7 @@
 #include <stdio.h>
 // Index for Sources...
 const short SOURCE_CTP = 1;
-const short SOURCE_LTS = 2;
-const short SOURCE_FEMAS = 3;
-const short SOURCE_XONE = 4;
-const short SOURCE_XSPEED = 5;
-const short SOURCE_XELE = 6;
-const short SOURCE_XSPEEDL2 = 7;
-const short SOURCE_YISHENG = 8;
-const short SOURCE_HUNDSUN = 10;
-const short SOURCE_SOCKETSNIFFER = 11;
-const short SOURCE_EXANICSNIFFER = 12;
-const short SOURCE_OES = 13;
-const short SOURCE_SANDBOX = 14;
+const short SOURCE_XTP = 15;
 
 // Exchange names
 #define EXCHANGE_SSE "SSE" //上海证券交易所
@@ -65,105 +54,12 @@ const short MSG_TYPE_LF_ORDER_ACTION_CTP = 1207; // CThostFtdcInputOrderActionFi
 const short MSG_TYPE_LF_QRY_ACCOUNT_CTP = 1208; // CThostFtdcQryTradingAccountField from ctp/ThostFtdcUserApiStruct.h
 const short MSG_TYPE_LF_RSP_ACCOUNT_CTP = 1209; // CThostFtdcTradingAccountField from ctp/ThostFtdcUserApiStruct.h
 
-// lts, idx=2
-const short MSG_TYPE_LF_MD_LTS        = 2101; // CSecurityFtdcDepthMarketDataField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_L2_MD_LTS     = 2102; // _LTS_::CSecurityFtdcL2MarketDataField from lts/SecurityFtdcL2MDUserApiStruct.h
-const short MSG_TYPE_LF_L2_INDEX_LTS  = 2103; // _LTS_::CSecurityFtdcL2IndexField from lts/SecurityFtdcL2MDUserApiStruct.h
-const short MSG_TYPE_LF_L2_ORDER_LTS  = 2104; // _LTS_::CSecurityFtdcL2OrderField from lts/SecurityFtdcL2MDUserApiStruct.h
-const short MSG_TYPE_LF_L2_TRADE_LTS  = 2105; // _LTS_::CSecurityFtdcL2TradeField from lts/SecurityFtdcL2MDUserApiStruct.h
-const short MSG_TYPE_LF_QRY_POS_LTS   = 2201; // CSecurityFtdcQryInvestorPositionField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RSP_POS_LTS   = 2202; // CSecurityFtdcInvestorPositionField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_ORDER_LTS     = 2204; // CSecurityFtdcInputOrderField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RTN_ORDER_LTS = 2205; // CSecurityFtdcOrderField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RTN_TRADE_LTS = 2206; // CSecurityFtdcTradeField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_ORDER_ACTION_LTS = 2207; // CSecurityFtdcInputOrderActionField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_QRY_ACCOUNT_LTS = 2208; // CSecurityFtdcQryTradingAccountField from lts/SecurityFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RSP_ACCOUNT_LTS = 2209; // CSecurityFtdcTradingAccountField from lts/SecurityFtdcUserApiStruct.h
-
-// femas, idx=3
-const short MSG_TYPE_LF_MD_FEMAS      = 3101; // CUstpFtdcDepthMarketDataField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_QRY_POS_FEMAS = 3201; // CUstpFtdcQryInvestorPositionField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RSP_POS_FEMAS = 3202; // CUstpFtdcRspInvestorPositionField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_ORDER_FEMAS   = 3204; // CUstpFtdcInputOrderField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RTN_ORDER_FEMAS = 3205; // CUstpFtdcOrderField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RTN_TRADE_FEMAS = 3206; // CUstpFtdcTradeField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_ORDER_ACTION_FEMAS = 3207; // CUstpFtdcOrderActionField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_QRY_ACCOUNT_FEMAS = 3208; // CUstpFtdcQryInvestorAccountField from femas/USTPFtdcUserApiStruct.h
-const short MSG_TYPE_LF_RSP_ACCOUNT_FEMAS = 3209; // CUstpFtdcRspInvestorAccountField from femas/USTPFtdcUserApiStruct.h
-
-// xone, idx=4
-const short MSG_TYPE_LF_QRY_POS_XONE  = 4201; // CX1FtdcQryPositionField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_ORDER_XONE    = 4204; // CX1FtdcInsertOrderField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_RTN_ORDER_XONE = 4205; // CX1FtdcRspPriOrderField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_RTN_TRADE_XONE = 4206; // CX1FtdcRspPriMatchInfoField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_RSP_ACCOUNT_XONE = 4209; // CX1FtdcRspCapitalField from xone/X1FtdcApiStruct.h
-// extra messages...
-const short MSG_TYPE_LF_RTN_CANCEL_XONE = 4801; // CX1FtdcRspPriCancelOrderField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_RSP_OPER_ORDER_XONE = 4802; // CX1FtdcRspOperOrderField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_REQ_CANCEL_ORDER_XONE = 4803; // CX1FtdcCancelOrderField from xone/X1FtdcApiStruct.h
-const short MSG_TYPE_LF_RSP_POSITION_XONE = 4804; // CX1FtdcRspPositionField from xone/X1FtdcApiStruct.h
-
-// xspeed, idx=5
-const short MSG_TYPE_LF_MD_XSPEED     = 5101; // DFITCDepthMarketDataField from xspeed/DFITCApiStruct.h
-
-// xele, idx=6
-const short MSG_TYPE_LF_MD_XELE       = 6101; // CXeleMdFtdcDepthMarketDataField from xele/XeleMdFtdcUserApiStruct.h
-// extra messages...
-const short MSG_TYPE_LF_SHFE_MARKET_DATA_UNION_XELE = 6901; // CXeleShfeMarketDataUnion from xele/XeleMdFtdcUserApiStruct.h
-
-// xspeedl2, idx=7
-const short MSG_TYPE_LF_MD_XSPEEDL2   = 7101; // DFITC_L2::MDBestAndDeep from xspeed/DFITCL2ApiDataType.h
-
-// yisheng, idx=8
-const short MSG_TYPE_LF_MD_YISHENG    = 8101; // TapAPIQuoteWhole from yisheng/TapQuoteAPIDataType.h
-const short MSG_TYPE_LF_QRY_POS_YISHENG = 8201; // TapAPIPositionQryReq from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_RSP_POS_YISHENG = 8202; // TapAPIPositionInfo from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_ORDER_YISHENG = 8204; // TapAPINewOrder from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_RTN_ORDER_YISHENG = 8205; // TapAPIOrderInfo from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_RTN_TRADE_YISHENG = 8206; // TapAPIFillInfo from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_ORDER_ACTION_YISHENG = 8207; // TapAPIOrderCancelReq from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_QRY_ACCOUNT_YISHENG = 8208; // TapAPIFundReq from yisheng/TapTradeAPIDataType.h
-const short MSG_TYPE_LF_RSP_ACCOUNT_YISHENG = 8209; // TapAPIFundData from yisheng/TapTradeAPIDataType.h
-
-// hundsun, idx=10
-
-// socketsniffer, idx=11
-// extra messages...
-const short MSG_TYPE_LF_XSPEED_L1_SOCKETSNIFFER = 11901; // XSPEED_L1 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_SOCKETSNIFFER = 11902; // XSPEED_L2 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L1_ANLIANG_SOCKETSNIFFER = 11903; // XSPEED_L1_ANLIANG from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ANLIANG_SOCKETSNIFFER = 11904; // XSPEED_L2_ANLIANG from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ENTRUST_TEN_SOCKETSNIFFER = 11905; // XSPEED_L2_ORDER10 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_MATCH_BY_PRICE_SOCKETSNIFFER = 11906; // XSPEED_L2_MATCH_BY_PRICE from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ORDER_STATISTICS_SOCKETSNIFFER = 11907; // XSPEED_L2_ORDER_STATISTICS from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_CURRENT_SETTLE_SOCKETSNIFFER = 11908; // XSPEED_L2_CURRENT_SETTLE from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ARB_SOCKETSNIFFER = 11909; // XSPEED_L2_ARB from sniffer/MdStruct.h
-const short MSG_TYPE_LF_USTP_L2_SOCKETSNIFFER = 11910; // USTP_L2 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_GUAVA_L1_SOCKETSNIFFER = 11911; // GUAVA_L1 from sniffer/MdStruct.h
-
-// exanicsniffer, idx=12
-// extra messages...
-const short MSG_TYPE_LF_XSPEED_L1_EXANICSNIFFER = 12901; // XSPEED_L1 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_EXANICSNIFFER = 12902; // XSPEED_L2 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L1_ANLIANG_EXANICSNIFFER = 12903; // XSPEED_L1_ANLIANG from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ANLIANG_EXANICSNIFFER = 12904; // XSPEED_L2_ANLIANG from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ENTRUST_TEN_EXANICSNIFFER = 12905; // XSPEED_L2_ORDER10 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_MATCH_BY_PRICE_EXANICSNIFFER = 12906; // XSPEED_L2_MATCH_BY_PRICE from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ORDER_STATISTICS_EXANICSNIFFER = 12907; // XSPEED_L2_ORDER_STATISTICS from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_CURRENT_SETTLE_EXANICSNIFFER = 12908; // XSPEED_L2_CURRENT_SETTLE from sniffer/MdStruct.h
-const short MSG_TYPE_LF_XSPEED_L2_ARB_EXANICSNIFFER = 12909; // XSPEED_L2_ARB from sniffer/MdStruct.h
-const short MSG_TYPE_LF_USTP_L2_EXANICSNIFFER = 12910; // USTP_L2 from sniffer/MdStruct.h
-const short MSG_TYPE_LF_GUAVA_L1_EXANICSNIFFER = 12911; // GUAVA_L1 from sniffer/MdStruct.h
-
-// oes, idx=13
-const short MSG_TYPE_LF_MD_OES        = 13101; // _MdsMktDataSnapshot from oes/mds_api/mds_api.h
-const short MSG_TYPE_LF_ORDER_OES     = 13204; // _OesOrdBaseInfo from oes/oes_global/oes_base_model.h
-const short MSG_TYPE_LF_RTN_ORDER_OES = 13205; // _OesOrdCnfm from oes/oes_global/oes_base_model.h
-const short MSG_TYPE_LF_RTN_TRADE_OES = 13206; // _OesTrdCnfm from oes/oes_global/oes_base_model.h
-const short MSG_TYPE_LF_QRY_ACCOUNT_OES = 13208; // _OesQryCashAssetFilter from oes/oes_global/oes_qry_packets.h
-const short MSG_TYPE_LF_RSP_ACCOUNT_OES = 13209; // _OesCashAssetItem from oes/oes_global/oes_qry_packets.h
-
-// sandbox, idx=14
+// xtp, idx=15
+const short MSG_TYPE_LF_MD_XTP        = 15101; // XTPMarketDataStruct from xtp/xquote_api_struct.h
+const short MSG_TYPE_LF_RSP_POS_XTP   = 15202; // XTPQueryStkPositionRsp from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_ORDER_XTP     = 15204; // XTPOrderInsertInfo from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_RTN_ORDER_XTP = 15205; // XTPOrderInfo from xtp/xoms_api_struct.h
+const short MSG_TYPE_LF_RTN_TRADE_XTP = 15206; // XTPTradeReport from xtp/xoms_api_struct.h
 
 ///////////////////////////////////
 // LfActionFlagType: 报单操作标志

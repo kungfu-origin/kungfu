@@ -49,32 +49,10 @@ inline JournalPair getMdJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/MD/LTS/", "MD_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/MD/XELE/", "MD_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/MD/CTP/", "MD_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/MD/XSPEED/", "MD_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/MD/OES/", "MD_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/MD/YISHENG/", "MD_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/MD/SOCKETSNIFFER/", "MD_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/MD/XONE/", "MD_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/MD/SANDBOX/", "MD_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/MD/HUNDSUN/", "MD_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/MD/XSPEEDL2/", "MD_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/MD/FEMAS/", "MD_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/MD/EXANICSNIFFER/", "MD_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/MD/XTP/", "MD_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -84,32 +62,10 @@ inline JournalPair getMdRawJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/MD_RAW/LTS/", "MDRAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/MD_RAW/XELE/", "MDRAW_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/MD_RAW/CTP/", "MDRAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/MD_RAW/XSPEED/", "MDRAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/MD_RAW/OES/", "MDRAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/MD_RAW/YISHENG/", "MDRAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/MD_RAW/SOCKETSNIFFER/", "MDRAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/MD_RAW/XONE/", "MDRAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/MD_RAW/SANDBOX/", "MDRAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/MD_RAW/HUNDSUN/", "MDRAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/MD_RAW/XSPEEDL2/", "MDRAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/MD_RAW/FEMAS/", "MDRAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/MD_RAW/EXANICSNIFFER/", "MDRAW_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/MD_RAW/XTP/", "MDRAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -119,32 +75,10 @@ inline JournalPair getTdJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/TD/LTS/", "TD_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/TD/XELE/", "TD_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/TD/CTP/", "TD_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/TD/XSPEED/", "TD_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/TD/OES/", "TD_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/TD/YISHENG/", "TD_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/TD/SOCKETSNIFFER/", "TD_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/TD/XONE/", "TD_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/TD/SANDBOX/", "TD_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/TD/HUNDSUN/", "TD_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/TD/XSPEEDL2/", "TD_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/TD/FEMAS/", "TD_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/TD/EXANICSNIFFER/", "TD_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/TD/XTP/", "TD_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -154,32 +88,10 @@ inline JournalPair getTdSendJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/TD_SEND/LTS/", "TD_SEND_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/TD_SEND/XELE/", "TD_SEND_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/TD_SEND/CTP/", "TD_SEND_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/TD_SEND/XSPEED/", "TD_SEND_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/TD_SEND/OES/", "TD_SEND_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/TD_SEND/YISHENG/", "TD_SEND_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/TD_SEND/SOCKETSNIFFER/", "TD_SEND_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/TD_SEND/XONE/", "TD_SEND_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/TD_SEND/SANDBOX/", "TD_SEND_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/TD_SEND/HUNDSUN/", "TD_SEND_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/TD_SEND/XSPEEDL2/", "TD_SEND_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/TD_SEND/FEMAS/", "TD_SEND_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/TD_SEND/EXANICSNIFFER/", "TD_SEND_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_SEND/XTP/", "TD_SEND_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -189,32 +101,10 @@ inline JournalPair getTdRawJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/TD_RAW/LTS/", "TD_RAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/TD_RAW/XELE/", "TD_RAW_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/TD_RAW/CTP/", "TD_RAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/TD_RAW/XSPEED/", "TD_RAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/TD_RAW/OES/", "TD_RAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/TD_RAW/YISHENG/", "TD_RAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/TD_RAW/SOCKETSNIFFER/", "TD_RAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/TD_RAW/XONE/", "TD_RAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/TD_RAW/SANDBOX/", "TD_RAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/TD_RAW/HUNDSUN/", "TD_RAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/TD_RAW/XSPEEDL2/", "TD_RAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/TD_RAW/FEMAS/", "TD_RAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/TD_RAW/EXANICSNIFFER/", "TD_RAW_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_RAW/XTP/", "TD_RAW_XTP"};
 		default:
 			return {"", ""};
 	}
@@ -224,312 +114,10 @@ inline JournalPair getTdQJournalPair(short source)
 {
 	switch(source)
 	{
-		case 2:
-			return {"/shared/kungfu/journal/TD_Q/LTS/", "TD_Q_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/TD_Q/XELE/", "TD_Q_XELE"};
 		case 1:
 			return {"/shared/kungfu/journal/TD_Q/CTP/", "TD_Q_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/TD_Q/XSPEED/", "TD_Q_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/TD_Q/OES/", "TD_Q_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/TD_Q/YISHENG/", "TD_Q_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/TD_Q/SOCKETSNIFFER/", "TD_Q_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/TD_Q/XONE/", "TD_Q_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/TD_Q/SANDBOX/", "TD_Q_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/TD_Q/HUNDSUN/", "TD_Q_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/TD_Q/XSPEEDL2/", "TD_Q_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/TD_Q/FEMAS/", "TD_Q_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/TD_Q/EXANICSNIFFER/", "TD_Q_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2MdJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2MD/LTS/", "L2MD_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2MD/XELE/", "L2MD_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2MD/CTP/", "L2MD_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2MD/XSPEED/", "L2MD_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2MD/OES/", "L2MD_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2MD/YISHENG/", "L2MD_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2MD/SOCKETSNIFFER/", "L2MD_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2MD/XONE/", "L2MD_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2MD/SANDBOX/", "L2MD_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2MD/HUNDSUN/", "L2MD_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2MD/XSPEEDL2/", "L2MD_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2MD/FEMAS/", "L2MD_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2MD/EXANICSNIFFER/", "L2MD_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2MdRawJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2MD_RAW/LTS/", "L2MD_RAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2MD_RAW/XELE/", "L2MD_RAW_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2MD_RAW/CTP/", "L2MD_RAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2MD_RAW/XSPEED/", "L2MD_RAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2MD_RAW/OES/", "L2MD_RAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2MD_RAW/YISHENG/", "L2MD_RAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2MD_RAW/SOCKETSNIFFER/", "L2MD_RAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2MD_RAW/XONE/", "L2MD_RAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2MD_RAW/SANDBOX/", "L2MD_RAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2MD_RAW/HUNDSUN/", "L2MD_RAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2MD_RAW/XSPEEDL2/", "L2MD_RAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2MD_RAW/FEMAS/", "L2MD_RAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2MD_RAW/EXANICSNIFFER/", "L2MD_RAW_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2IndexJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Index/LTS/", "L2INDEX_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Index/XELE/", "L2INDEX_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Index/CTP/", "L2INDEX_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Index/XSPEED/", "L2INDEX_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Index/OES/", "L2INDEX_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Index/YISHENG/", "L2INDEX_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Index/SOCKETSNIFFER/", "L2INDEX_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Index/XONE/", "L2INDEX_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Index/SANDBOX/", "L2INDEX_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Index/HUNDSUN/", "L2INDEX_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Index/XSPEEDL2/", "L2INDEX_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Index/FEMAS/", "L2INDEX_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Index/EXANICSNIFFER/", "L2INDEX_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2IndexRawJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Index_RAW/LTS/", "L2INDEX_RAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Index_RAW/XELE/", "L2INDEX_RAW_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Index_RAW/CTP/", "L2INDEX_RAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Index_RAW/XSPEED/", "L2INDEX_RAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Index_RAW/OES/", "L2INDEX_RAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Index_RAW/YISHENG/", "L2INDEX_RAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Index_RAW/SOCKETSNIFFER/", "L2INDEX_RAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Index_RAW/XONE/", "L2INDEX_RAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Index_RAW/SANDBOX/", "L2INDEX_RAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Index_RAW/HUNDSUN/", "L2INDEX_RAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Index_RAW/XSPEEDL2/", "L2INDEX_RAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Index_RAW/FEMAS/", "L2INDEX_RAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Index_RAW/EXANICSNIFFER/", "L2INDEX_RAW_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2OrderJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Order/LTS/", "L2ORDER_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Order/XELE/", "L2ORDER_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Order/CTP/", "L2ORDER_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Order/XSPEED/", "L2ORDER_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Order/OES/", "L2ORDER_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Order/YISHENG/", "L2ORDER_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Order/SOCKETSNIFFER/", "L2ORDER_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Order/XONE/", "L2ORDER_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Order/SANDBOX/", "L2ORDER_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Order/HUNDSUN/", "L2ORDER_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Order/XSPEEDL2/", "L2ORDER_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Order/FEMAS/", "L2ORDER_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Order/EXANICSNIFFER/", "L2ORDER_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2OrderRawJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Order_RAW/LTS/", "L2ORDER_RAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Order_RAW/XELE/", "L2ORDER_RAW_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Order_RAW/CTP/", "L2ORDER_RAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Order_RAW/XSPEED/", "L2ORDER_RAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Order_RAW/OES/", "L2ORDER_RAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Order_RAW/YISHENG/", "L2ORDER_RAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Order_RAW/SOCKETSNIFFER/", "L2ORDER_RAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Order_RAW/XONE/", "L2ORDER_RAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Order_RAW/SANDBOX/", "L2ORDER_RAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Order_RAW/HUNDSUN/", "L2ORDER_RAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Order_RAW/XSPEEDL2/", "L2ORDER_RAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Order_RAW/FEMAS/", "L2ORDER_RAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Order_RAW/EXANICSNIFFER/", "L2ORDER_RAW_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2TradeJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Trade/LTS/", "L2TRADE_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Trade/XELE/", "L2TRADE_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Trade/CTP/", "L2TRADE_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Trade/XSPEED/", "L2TRADE_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Trade/OES/", "L2TRADE_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Trade/YISHENG/", "L2TRADE_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Trade/SOCKETSNIFFER/", "L2TRADE_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Trade/XONE/", "L2TRADE_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Trade/SANDBOX/", "L2TRADE_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Trade/HUNDSUN/", "L2TRADE_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Trade/XSPEEDL2/", "L2TRADE_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Trade/FEMAS/", "L2TRADE_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Trade/EXANICSNIFFER/", "L2TRADE_EXANICSNIFFER"};
-		default:
-			return {"", ""};
-	}
-}
-
-inline JournalPair getL2TradeRawJournalPair(short source)
-{
-	switch(source)
-	{
-		case 2:
-			return {"/shared/kungfu/journal/L2Trade_RAW/LTS/", "L2TRADE_RAW_LTS"};
-		case 6:
-			return {"/shared/kungfu/journal/L2Trade_RAW/XELE/", "L2TRADE_RAW_XELE"};
-		case 1:
-			return {"/shared/kungfu/journal/L2Trade_RAW/CTP/", "L2TRADE_RAW_CTP"};
-		case 5:
-			return {"/shared/kungfu/journal/L2Trade_RAW/XSPEED/", "L2TRADE_RAW_XSPEED"};
-		case 13:
-			return {"/shared/kungfu/journal/L2Trade_RAW/OES/", "L2TRADE_RAW_OES"};
-		case 8:
-			return {"/shared/kungfu/journal/L2Trade_RAW/YISHENG/", "L2TRADE_RAW_YISHENG"};
-		case 11:
-			return {"/shared/kungfu/journal/L2Trade_RAW/SOCKETSNIFFER/", "L2TRADE_RAW_SOCKETSNIFFER"};
-		case 4:
-			return {"/shared/kungfu/journal/L2Trade_RAW/XONE/", "L2TRADE_RAW_XONE"};
-		case 14:
-			return {"/shared/kungfu/journal/L2Trade_RAW/SANDBOX/", "L2TRADE_RAW_SANDBOX"};
-		case 10:
-			return {"/shared/kungfu/journal/L2Trade_RAW/HUNDSUN/", "L2TRADE_RAW_HUNDSUN"};
-		case 7:
-			return {"/shared/kungfu/journal/L2Trade_RAW/XSPEEDL2/", "L2TRADE_RAW_XSPEEDL2"};
-		case 3:
-			return {"/shared/kungfu/journal/L2Trade_RAW/FEMAS/", "L2TRADE_RAW_FEMAS"};
-		case 12:
-			return {"/shared/kungfu/journal/L2Trade_RAW/EXANICSNIFFER/", "L2TRADE_RAW_EXANICSNIFFER"};
+		case 15:
+			return {"/shared/kungfu/journal/TD_Q/XTP/", "TD_Q_XTP"};
 		default:
 			return {"", ""};
 	}

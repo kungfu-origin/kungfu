@@ -18,7 +18,6 @@ PROJECT(yijinjing)
 ############################################################
 
 INCLUDE_DIRECTORIES(../longfist)
-INCLUDE_DIRECTORIES(../longfist/api/ctp/v6.3.6_20160606/include)
 
 INCLUDE_DIRECTORIES(journal)
 INCLUDE_DIRECTORIES(log)

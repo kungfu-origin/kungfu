@@ -22,6 +22,7 @@
 #include "Timer.h"
 #include "Hash.hpp"
 #include "JournalReader.h"
+#include "JournalFinder.h"
 #include "Frame.hpp"
 #include "Page.h"
 #include "PageUtil.h"
@@ -44,7 +45,6 @@ int main(int argc, const char* argv[])
     string format("%Y%m%d-%H:%M:%S");
     desc.add_options()
             ("help,h", "Help screen")
-            ("folder,f", value<string>(), "Journal Folder")
             ("name,n", value<string>(), "Journal Name")
             ("page,p", "Just Page Header")
             ("verify,v", "Verify hash code")
@@ -61,6 +61,8 @@ int main(int argc, const char* argv[])
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
+
+    JournalFinder finder;
 
     if (vm.count("help"))
     {
@@ -102,17 +104,24 @@ int main(int argc, const char* argv[])
     {
         std::cout << "EndTime:\t" << vm["end_time"].as<string>() << std::endl;
     }
-    if (vm.count("folder"))
-    {
-        std::cout << "Folder:\t" << vm["folder"].as<string>() << std::endl;
-    }
+
     if (vm.count("name"))
     {
         std::cout << "ShortName:\t" << vm["name"].as<string>() << std::endl;
     }
+    else
+    {
+        vector<std::string> available_journal_names = finder.getAvailableJournalNames();
+        std::cout << "usage: kungfu journal -n [--name] journal_name <options>" << std::endl;
+        std::cout << "available journal names:" << std::endl;
+        for (vector<std::string>::iterator it = available_journal_names.begin(); it != available_journal_names.end(); it++) {
+            std::cout << '\t' << *it << std::endl;
+        }
+        return -1;
+    }
 
-    string folder = vm["folder"].as<string>();
     string jname = vm["name"].as<string>();
+    string folder = finder.getJournalFolder(jname);
 
     if (vm.count("page"))
     {

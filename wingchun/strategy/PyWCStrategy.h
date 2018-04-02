@@ -59,6 +59,8 @@ public:
 
     WCStrategyUtilPtr get_strategy_util() const { return util; }
     WCDataWrapperPtr  get_data_wrapper()  const { return data; }
+    /** get effective orders */
+    boost::python::list get_effective_orders() const;
 
 public:
     // python binding, no char allowed, use string and transfer manually.
