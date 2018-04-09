@@ -190,5 +190,5 @@ on error happened,
     fail order here don't need to cancel.
 '''
 def on_error(context, error_id, error_msg, order_id, source, rcv_time):
-    context.log_error("[ERROR] (err_id){} (err_msg){} (order_id){} (source){}".format(error_id, error_msg, request_id, source))
+    context.log_error("[ERROR] (err_id){} (err_msg){} (order_id){} (source){}".format(error_id, error_msg, order_id, source))
 
