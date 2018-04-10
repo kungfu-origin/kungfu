@@ -56,6 +56,8 @@ private:
     string password;
     string front_ip;
     int front_port;
+    /// @brief udp_buffer_size > 0 then use udp, otherwise use tcp
+    int udp_buffer_size; 
     // internal flags
     bool connected;
     bool logged_in;
