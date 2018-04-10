@@ -31,7 +31,7 @@ USING_WC_NAMESPACE
 volatile int IWCDataProcessor::signal_received = -1;
 
 WCDataWrapper::WCDataWrapper(IWCDataProcessor *processor, WCStrategyUtil* util):
-    processor(processor), util(util), force_stop(false)
+    processor(processor), util(util), force_stop(false), auto_sub_mode_enabled(true)
 {
     auto rids = util->getRequestIds();
     rid_start = rids.first;
@@ -375,7 +375,14 @@ void WCDataWrapper::set_internal_pos(PosHandlerPtr handler, short source)
     if (handler.get() != nullptr)
     {
         vector<string> tickers = handler->get_tickers();
-        util->subscribeMarketData(tickers, source);
+        if (auto_sub_mode_enabled)
+        {
+            util->subscribeMarketData(tickers, source);
+        }
+        else
+        {
+            processor->debug("[auto-sub] disabled!");
+        }
     }
 }
 

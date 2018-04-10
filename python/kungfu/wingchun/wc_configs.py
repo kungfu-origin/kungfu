@@ -101,6 +101,9 @@ context_usage = \
         ('register_bar', lambda strategy: strategy.get_data_wrapper().register_bar_md,
          'register bar market data with specified interval',
          (None, [('int', 'source'), ('int', 'min_interval'), ('str', 'start_time eg:\"09:30:00\"'), ('str', 'end_time eg:\"11:30:00\"')])),
+        ('disable_auto_sub', lambda strategy: strategy.get_data_wrapper().disable_auto_sub_mode,
+         'disable auto subscription of existing holdings',
+         (None, [])),
         # callback
         ('insert_func_at', lambda strategy: lambda x, y: strategy.get_strategy_util().insert_callback(long(x), y),
          'insert callback function with nano time',
