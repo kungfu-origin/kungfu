@@ -42,6 +42,14 @@ void MDEngineXTP::load(const json& j_config)
     password = j_config[WC_CONFIG_KEY_PASSWORD].get<string>();
     front_ip = j_config["Ip"].get<string>();
     front_port = j_config["Port"].get<int>();
+    if(j_config.count("UdpBufferSize") > 0){
+        udp_buffer_size = j_config["UdpBufferSize"].get<int>();
+        
+        KF_LOG_ERROR(logger, "[Using Udp UdpBufferSize] " << udp_buffer_size );
+    }else{
+        udp_buffer_size = 0;
+        KF_LOG_ERROR(logger, "[Using Tcp UdpBufferSize] " << udp_buffer_size );
+    }
 }
 
 void MDEngineXTP::connect(long timeout_nsec)
@@ -58,7 +66,11 @@ void MDEngineXTP::connect(long timeout_nsec)
     }
     if (!connected)
     {
-        int res = api->Login(front_ip.c_str(), front_port, user_id.c_str(), password.c_str(), XTP_PROTOCOL_TCP);
+        XTP_PROTOCOL_TYPE protocol_type = udp_buffer_size > 0 ? XTP_PROTOCOL_UDP : XTP_PROTOCOL_TCP;
+        if(XTP_PROTOCOL_UDP == protocol_type){
+            api->SetUDPBufferSize(udp_buffer_size);//设置UDP接收缓冲区大小，单位为MB
+        }
+        int res = api->Login(front_ip.c_str(), front_port, user_id.c_str(), password.c_str(), protocol_type);
         if (res != 0)
         {
             XTPRI* error_info = api->GetApiLastError();
