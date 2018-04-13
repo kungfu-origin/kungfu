@@ -55,8 +55,18 @@ FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs)
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
-LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/longfist/api/ctp/v6.3.6_20160606/lib)
-LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/longfist/api/xtp/XTP_API_20171115_1.1.16.9/lib)
+############################################################
+
+file(STRINGS config.in ConfigContents)
+foreach(NameAndValue ${ConfigContents})
+    string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+    string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+    string(REPLACE "${Name}=" "" Value ${NameAndValue})
+    set(${Name} "${Value}")
+    MESSAGE( STATUS ${Name} " = " ${Value} )
+endforeach()
+
+############################################################
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
