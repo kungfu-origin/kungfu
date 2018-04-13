@@ -1,0 +1,95 @@
+version 1.1.16.20
+（1）去除对sodium库的依赖
+（2）修复某些虚拟机环境下，由于无法获取mac地址，导致crash的bug
+（3）修复行情api在使用UDP连接时，丢包严重导致连续丢包的bug
+（4）添加mac os系统支持
+
+version 1.1.16.13
+（1）修复使用win32版本的库进行查询操作，查询结果可能与查询条件不匹配的bug
+
+version 1.1.16.9
+（1）QuoteAPI新增UDP连接方式
+（2）QuoteAPI新增全订阅、全退订接口
+（3）QuoteAPI支持OrderBook（即level2plus）订阅、退订
+（4）QuoteAPI支持逐笔委托/成交的订阅、退订
+（5）QuoteAPI新增查询合约最新价接口
+（6）QuoteSPI弃用原有OnMarketData()回调函数
+（7）QuoteSPI启用含有买一卖一队列的OnDepthMarketData()回调函数
+（8）QuoteAPI新增修改默认缓存队列的大小接口SetUDPBufferSize()，单位为MB，默认大小为64MB（不可更改为比64MB更小的缓存）
+（9）TradeAPI新增新股申购额度查询接口QueryIPOQuotaInfo()
+（10）TradeAPI新增新股申购信息列表查询接口QueryIPOInfoList()
+（11）TradeAPI回调接口中新增session_id参数
+（12）TradeAPI和QuoteAPI新增心跳检测超时时间设置接口SetHeartBeatInterval()
+
+version 1.1.16.1
+（1）TradeAPI新增查询ETF清单接口QueryETF
+（2）TradeAPI新增查询ETF股票篮接口QueryETFTickerBasket
+（3）TradeAPI新增支持ETF申赎业务（business_type = XTP_BUSINESS_TYPE_ETF， side = XTP_SIDE_PURCHASE或XTP_SIDE_REDEMPTION）
+（4）查询资金回报结构体XTPQueryAssetRsp增加部分字段
+（5）查询持仓回报的结构体XTPQueryStkPositionRsp增加了部分字段
+
+version 1.1.15.101
+（1）TradeAPI新增分级基金申赎业务（business_type = XTP_BUSINESS_TYPE_STRUCTURED_FUND_PURCHASE_REDEMPTION，side = XTP_SIDE_PURCHASE或者XTP_SIDE_REDEMPTION）
+（2）TradeAPI新增分级基金拆分合并业务（business_type = XTP_BUSINESS_TYPE_STRUCTURED_FUND_SPLIT_MERGE，side = XTP_SIDE_SPLIT或XTP_SIDE_MERGE）
+（3）TradeAPI新增分级基金查询功能QueryStructuredFund
+（4）TradeAPI新增客户资金划拨功能接口FundTransfer
+（5）TradeAPI新增查询客户资金划拨接口QueryFundTransfer
+
+version 1.1.14.1
+（1）XTP_BUSINESS_TYPE 新增部分业务类型
+（2）XTP系统支持逆回购和配股业务
+（3）XTP_TICKER_TYPE证券类型中新增XTP_TICKER_TYPE_BOND债券类型
+
+version 1.1.13.10
+（1）结构体XTPQuoteStaticInfo中新增一个字段：
+	///最小变动价位
+	double  price_tick;
+
+version 1.1.13.8
+（1）结构体XTPQueryAssetRsp新增1个字段：
+	///预扣的资金（包括购买卖股票时预扣的交易资金+预扣手续费）
+	double withholding_amount;
+
+version 1.1.13.3
+（1）结构体XTPOrderInsertInfo，XTPOrderInfo，XTPTradeReport新增business_type字段
+（2）结构体XTPMarketDataStruct中部分字段类型由int32_t变为int64_t
+（3）新增新股申购业务功能
+（4）开放order_client_id字段，去除限制
+
+version 1.1.12.7
+（1）修复linux下使用相对路径或者多线程创建日志目录导致程序core dump的bug
+（2）api的Create接口中增加调整日志输出级别参数
+（3）修复调用Release()导致程序崩溃的bug
+
+version 1.1.10.0
+（1）XTPQuoteAPI新增查询所有可交易合约接口
+（2）去掉部分无用的数据结构和宏定义：包括
+（	XTP_TICKER_LEN
+	XTP_TICKER_NAME_LEN
+	XTP_TICKERNAME_LEN
+
+	XTP_API_TICKER_LEN
+	XTP_API_TICKER_NAME_LEN
+
+	TXTPTickerType
+	TXTPTickerNameType	）
+     统一归整成：
+	XTP_TICKER_LEN
+	XTP_TICKER_NAME_LEN
+
+version 1.1.8.2
+（1）修正多个用户登录服务器，当部分用户断线，而部分用户不断线，此时断线用户重新登录时可能会丢失部分消息包的bug
+
+version 1.1.8.0
+ (1) 修改通讯协议
+
+version 1.1.7.2
+（1）清除目录下一周前的日志文件
+（2）当传入的路径不存在时，尝试创建路径
+（3）增加SetSoftwareKey()接口，其中key为客户申请开户时分配
+（4）减少SetSoftwareCode()接口
+（5）获取不到mac地址或者硬盘序列号时，强制性登录失败
+
+version 1.1.6.2
+（1）GetApiLastError（）接口的返回值，从 int32_t 变为 XTPRI*
+（2）查询持仓响应接口中增加 market 字段
