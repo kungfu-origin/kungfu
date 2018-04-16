@@ -30,7 +30,7 @@ USING_WC_NAMESPACE
 
 #define GBK2UTF8(msg) kungfu::yijinjing::gbk2utf8(string(msg))
 
-MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP), api(nullptr), connected(false), logged_in(false), reqId(0)
+MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP), api(nullptr), connected(false), logged_in(false), reqId(0), udp_buffer_size(0), gateway_log_level(0)
 {
     logger = yijinjing::KfLog::getLogger("MdEngine.XTP");
 }
@@ -42,13 +42,51 @@ void MDEngineXTP::load(const json& j_config)
     password = j_config[WC_CONFIG_KEY_PASSWORD].get<string>();
     front_ip = j_config["Ip"].get<string>();
     front_port = j_config["Port"].get<int>();
-    if(j_config.count("UdpBufferSize") > 0){
-        udp_buffer_size = j_config["UdpBufferSize"].get<int>();
-        
-        KF_LOG_ERROR(logger, "[Using Udp UdpBufferSize] " << udp_buffer_size );
-    }else{
-        udp_buffer_size = 0;
-        KF_LOG_ERROR(logger, "[Using Tcp UdpBufferSize] " << udp_buffer_size );
+    udp_buffer_size = j_config.value("UdpBufferSize", 0);
+    if(udp_buffer_size > 0)
+    {
+        KF_LOG_INFO(logger, "[Protocol] UDP (buffer_size)" << udp_buffer_size);
+    }
+    else
+    {
+        KF_LOG_INFO(logger, "[Protocol] TCP");
+    }
+
+    string log_level_string = j_config.value("GatewayLogLevel", "DEBUG");
+    if (log_level_string.compare("FATAL") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_FATAL;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] FATAL");
+    }
+    else if (log_level_string.compare("ERROR") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_ERROR;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] ERROR");
+    }
+    else if (log_level_string.compare("WARNING") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_WARNING;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] WARNING");
+    }
+    else if (log_level_string.compare("INFO") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_INFO;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] INFO");
+    }
+    else if (log_level_string.compare("DEBUG") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_DEBUG;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] DEBUG");
+    }
+    else if (log_level_string.compare("TRACE") == 0)
+    {
+        gateway_log_level = XTP_LOG_LEVEL_TRACE;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] TRACE");
+    }
+    else
+    {
+        gateway_log_level = XTP_LOG_LEVEL_DEBUG;
+        KF_LOG_INFO(logger, "[GatewayLogLevel] DEBUG (default)");
     }
 }
 
@@ -57,7 +95,7 @@ void MDEngineXTP::connect(long timeout_nsec)
     // xtp is using sync api, no need to set timeout limit.
     if (api == nullptr)
     {
-        api = XTP::API::QuoteApi::CreateQuoteApi(client_id, KUNGFU_RUNTIME_FOLDER);
+        api = XTP::API::QuoteApi::CreateQuoteApi(client_id, KUNGFU_RUNTIME_FOLDER, (XTP_LOG_LEVEL)gateway_log_level);
         if (!api)
         {
             throw std::runtime_error("XTP_MD failed to create api");
@@ -67,7 +105,8 @@ void MDEngineXTP::connect(long timeout_nsec)
     if (!connected)
     {
         XTP_PROTOCOL_TYPE protocol_type = udp_buffer_size > 0 ? XTP_PROTOCOL_UDP : XTP_PROTOCOL_TCP;
-        if(XTP_PROTOCOL_UDP == protocol_type){
+        if(XTP_PROTOCOL_UDP == protocol_type)
+        {
             api->SetUDPBufferSize(udp_buffer_size);//设置UDP接收缓冲区大小，单位为MB
         }
         int res = api->Login(front_ip.c_str(), front_port, user_id.c_str(), password.c_str(), protocol_type);

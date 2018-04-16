@@ -57,7 +57,9 @@ private:
     string front_ip;
     int front_port;
     /// @brief udp_buffer_size > 0 then use udp, otherwise use tcp
-    int udp_buffer_size; 
+    int udp_buffer_size;
+    /** xtp's internal logger level */
+    int gateway_log_level;
     // internal flags
     bool connected;
     bool logged_in;
