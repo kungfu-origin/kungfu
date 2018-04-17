@@ -24,6 +24,8 @@ C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_guide.md
 
 常见问题请参考 [Q&A](doc/QA.md)。
 
+想要在自己的机器上直接运行kungfu（不用docker）可以参考 [环境准备](doc/env_prep.md)
+
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
 License
