@@ -30,7 +30,7 @@ USING_WC_NAMESPACE
 
 #define GBK2UTF8(msg) kungfu::yijinjing::gbk2utf8(string(msg))
 
-MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP), api(nullptr), connected(false), logged_in(false), reqId(0), udp_buffer_size(0), gateway_log_level(0)
+MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP), api(nullptr), connected(false), logged_in(false), reqId(0), udp_buffer_size(0), gateway_log_level(0), to_dump_static_info(false)
 {
     logger = yijinjing::KfLog::getLogger("MdEngine.XTP");
 }
@@ -51,6 +51,7 @@ void MDEngineXTP::load(const json& j_config)
     {
         KF_LOG_INFO(logger, "[Protocol] TCP");
     }
+    to_dump_static_info = j_config.value("DumpStatic", false);
 
     string log_level_string = j_config.value("GatewayLogLevel", "DEBUG");
     if (log_level_string.compare("FATAL") == 0)
@@ -128,6 +129,20 @@ void MDEngineXTP::connect(long timeout_nsec)
             connected = true;
             logged_in = true;
             KF_LOG_INFO(logger, "[Login] login succeed! (user_id)" << user_id << " (client_id)" << client_id);
+
+            if (to_dump_static_info)
+            {
+                int res1 = api->QueryAllTickers(XTP_EXCHANGE_SH);
+                int res2 = api->QueryAllTickers(XTP_EXCHANGE_SZ);
+                if (res1 == 0 && res2 == 0)
+                {
+                    KF_LOG_INFO(logger, "[QueryAllTickers] success");
+                }
+                else
+                {
+                    KF_LOG_ERROR(logger, "[QueryAllTickers] failed (SH)" << res1 << " (SZ)" << res2);
+                }
+            }
         }
     }
 }
@@ -245,6 +260,28 @@ void MDEngineXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int3
     // if need to write raw data...
     // raw_writer->write_frame(pDepthMarketData, sizeof(CThostFtdcDepthMarketDataField),
     //                         source_id, MSG_TYPE_LF_MD_CTP, 1/*islast*/, -1/*invalidRid*/);
+}
+
+void MDEngineXTP::OnQueryAllTickers(XTPQSI* ticker_info, XTPRI *error_info, bool is_last)
+{
+    if (error_info != nullptr && error_info->error_id != 0)
+    {
+        KF_LOG_ERROR(logger, "[OnQueryAllTickers] FAILED" << " (errID)" << error_info->error_id
+                                                          << " (errMsg)" << GBK2UTF8(error_info->error_msg)
+                                                          << " (isLast)" << is_last);
+    }
+    else
+    {
+        KF_LOG_INFO(logger, "[OnQueryAllTickers] (exchange_id)"<<ticker_info->exchange_id
+                                                               << " (ticker)" <<ticker_info->ticker
+                                                               << " (ticker_name)" <<ticker_info->ticker_name
+                                                               << " (ticker_type)" <<ticker_info->ticker_type
+                                                               << " (pre_close_price)" <<ticker_info->pre_close_price
+                                                               << " (upper_limit_price)" <<ticker_info->upper_limit_price
+                                                               << " (lower_limit_price)" <<ticker_info->lower_limit_price
+                                                               << " (buy_qty_unit)" <<ticker_info->buy_qty_unit
+                                                               << " (sell_qty_unit)" <<ticker_info->sell_qty_unit);
+    }
 }
 
 BOOST_PYTHON_MODULE(libxtpmd)
