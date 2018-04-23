@@ -36,6 +36,7 @@ public:
     virtual void go() {};
     virtual string getName() const { return "Base"; };
     virtual boost::python::dict getInfo() const { return boost::python::dict(); }
+    virtual ~PstBase() {};
 };
 DECLARE_PTR(PstBase);
 

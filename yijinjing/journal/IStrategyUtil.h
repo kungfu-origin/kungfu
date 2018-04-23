@@ -37,6 +37,8 @@ public:
     virtual bool td_connect(short source) = 0;
     /** subscribe market data */
     virtual bool md_subscribe(const vector<string>& tickers, short source, short msg_type) = 0;
+    /** destructor */
+    virtual ~IStrategyUtil() {};
 };
 
 YJJ_NAMESPACE_END

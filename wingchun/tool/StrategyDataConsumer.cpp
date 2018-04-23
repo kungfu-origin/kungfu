@@ -263,7 +263,7 @@ private:
     long sum;
     long square_sum;
 public:
-    Calculator(): n(0), tot_n(0), min(-1), max(0), sum(0), square_sum(0) {}
+    Calculator(): tot_n(0), n(0), min(-1), max(0), sum(0), square_sum(0) {}
     void update(long d)
     {
         n++;

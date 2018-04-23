@@ -53,7 +53,7 @@ public:
     /** default constructor with outside page provider */
     JournalHandler(PageProviderPtr ptr): page_provider(ptr) {};
     /** default destructor */
-    ~JournalHandler();
+    virtual ~JournalHandler();
     /** return the journal's index in the vector */
     virtual size_t addJournal(const string& dir, const string& jname);
     /** default name */

@@ -52,7 +52,7 @@ public:
 /** manage rid and client_name matching */
 RidClientManager rid_manager;
 
-ITDEngine::ITDEngine(short source): IEngine(source), default_account_index(-1), local_id(1), request_id(1)
+ITDEngine::ITDEngine(short source): IEngine(source), default_account_index(-1), request_id(1), local_id(1)
 {}
 
 void ITDEngine::set_reader_thread()

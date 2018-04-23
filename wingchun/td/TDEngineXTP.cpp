@@ -26,7 +26,7 @@ USING_WC_NAMESPACE
 
 #define GBK2UTF8(msg) kungfu::yijinjing::gbk2utf8(string(msg))
 
-TDEngineXTP::TDEngineXTP(): ITDEngine(SOURCE_XTP), client_id(-1), api(nullptr)
+TDEngineXTP::TDEngineXTP(): ITDEngine(SOURCE_XTP), api(nullptr), front_port(-1), client_id(-1)
 {
     logger = yijinjing::KfLog::getLogger("TradeEngine.XTP");
 }
@@ -83,7 +83,7 @@ void TDEngineXTP::connect(long timeout_nsec)
         api->SetSoftwareKey(account_key.c_str());
         api->RegisterSpi(this);
     }
-    for (int idx = 0; idx < account_units.size(); idx ++)
+    for (size_t idx = 0; idx < account_units.size(); idx ++)
     {
         if (!account_units[idx].logged_in)
         {
@@ -124,7 +124,7 @@ void TDEngineXTP::logout()
     if (api == nullptr)
         return;
 
-    for (int idx = 0; idx < account_units.size(); idx++)
+    for (size_t idx = 0; idx < account_units.size(); idx++)
     {
         if (account_units[idx].session_id > 0)
         {

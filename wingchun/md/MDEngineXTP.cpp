@@ -30,7 +30,9 @@ USING_WC_NAMESPACE
 
 #define GBK2UTF8(msg) kungfu::yijinjing::gbk2utf8(string(msg))
 
-MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP), api(nullptr), connected(false), logged_in(false), reqId(0), udp_buffer_size(0), gateway_log_level(0), to_dump_static_info(false)
+MDEngineXTP::MDEngineXTP(): IMDEngine(SOURCE_XTP),
+    api(nullptr), client_id(1), front_port(-1), udp_buffer_size(0), gateway_log_level(0),
+    connected(false), logged_in(false), reqId(0), to_dump_static_info(false)
 {
     logger = yijinjing::KfLog::getLogger("MdEngine.XTP");
 }

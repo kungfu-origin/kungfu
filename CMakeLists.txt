@@ -68,7 +68,7 @@ endforeach()
 
 ############################################################
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wall")
 OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
 OPTION(USE_SERVICE "use memory service" ON)
 OPTION(USE_HASH_CODE "use hash code when writing" ON)

@@ -66,8 +66,9 @@ void PageEngine::release_mutex() const
     paged_mtx.unlock();
 }
 
-PageEngine::PageEngine(): commFile(commFileName), maxIdx(0), microsecFreq(INTERVAL_IN_MILLISEC),
-                          task_running(false), comm_running(false), last_switch_nano(0)
+PageEngine::PageEngine(): commBuffer(nullptr), commFile(commFileName), maxIdx(0),
+                          microsecFreq(INTERVAL_IN_MILLISEC),
+                          task_running(false), last_switch_nano(0), comm_running(false)
 {
     // setup logger
     logger = KfLog::getLogger("PageEngine");
@@ -212,7 +213,7 @@ void PageEngine::start_socket()
 
 int PageEngine::reg_journal(const string& clientName)
 {
-    int idx = 0;
+    size_t idx = 0;
     for (; idx < MAX_COMM_USER_NUMBER; idx++)
         if (GET_COMM_MSG(commBuffer, idx)->status == PAGED_COMM_RAW)
             break;

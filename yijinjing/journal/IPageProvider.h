@@ -39,6 +39,8 @@ public:
     virtual void releasePage(void* buffer, int size, int serviceIdx) = 0;
     /** return true if this is for writing */
     virtual bool isWriter() const = 0;
+    /** destructor */
+    virtual ~IPageProvider() {};
 };
 DECLARE_PTR(IPageProvider);
 

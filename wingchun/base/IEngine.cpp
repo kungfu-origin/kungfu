@@ -39,7 +39,7 @@ USING_WC_NAMESPACE
 
 volatile int IEngine::signal_received = -1;
 
-IEngine::IEngine(short source): isRunning(false), source_id(source)
+IEngine::IEngine(short source): source_id(source), isRunning(false)
 {}
 
 IEngine::~IEngine()

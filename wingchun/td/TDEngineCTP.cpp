@@ -91,7 +91,7 @@ TradeAccount TDEngineCTP::load_account(int idx, const json& j_config)
 
 void TDEngineCTP::connect(long timeout_nsec)
 {
-    for (int idx = 0; idx < account_units.size(); idx ++)
+    for (size_t idx = 0; idx < account_units.size(); idx ++)
     {
         AccountUnitCTP& unit = account_units[idx];
         if (unit.api == nullptr)
@@ -124,7 +124,7 @@ void TDEngineCTP::connect(long timeout_nsec)
 
 void TDEngineCTP::login(long timeout_nsec)
 {
-    for (int idx = 0; idx < account_units.size(); idx ++)
+    for (size_t idx = 0; idx < account_units.size(); idx ++)
     {
         AccountUnitCTP& unit = account_units[idx];
         TradeAccount& account = accounts[idx];
@@ -185,7 +185,7 @@ void TDEngineCTP::login(long timeout_nsec)
 
 void TDEngineCTP::logout()
 {
-    for (int idx = 0; idx < account_units.size(); idx++)
+    for (size_t idx = 0; idx < account_units.size(); idx++)
     {
         AccountUnitCTP& unit = account_units[idx];
         TradeAccount& account = accounts[idx];

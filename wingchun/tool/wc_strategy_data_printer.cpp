@@ -91,7 +91,7 @@ int main(int argc, const char* argv[])
     bool show_stat = vm.count("aggregate");
     bool show_detail = vm.count("detail");
 
-    if (vm.count("list") || (!show_order) && (!show_trade) && (!show_stat) && (!show_detail))
+    if (vm.count("list") || ((!show_order) && (!show_trade) && (!show_stat) && (!show_detail)))
     {
         list_strategy_sessions(name, sn, en, idx);
         return 0;

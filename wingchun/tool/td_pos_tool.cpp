@@ -128,7 +128,7 @@ bool set_pos_tool(const string& user_name, short source, const string& file_name
                 }
                 else
                 {
-                    for (int i = 1; i < data.size(); i++)
+                    for (size_t i = 1; i < data.size(); i++)
                     {
                         string column = data[i];
                         if (column.compare("net_tot") == 0)
@@ -176,6 +176,7 @@ bool set_pos_tool(const string& user_name, short source, const string& file_name
     }
     js["is_manual"] = true;
     helper->set_pos(user_name, js);
+    return true;
 }
 
 bool get_pos_tool(const string& user_name, short source, bool print_raw, bool need_detail, bool print_file, bool is_csv, const string& output_file)
@@ -282,14 +283,16 @@ bool get_pos_tool(const string& user_name, short source, bool print_raw, bool ne
                 of << js.dump() << std::endl;
                 std::cout << "printed to json file: " << output_file << std::endl;
             }
+            of.close();
+            std::cout << "-------" << std::endl;
         }
         else
         {
             std::cout << "[ERROR] cannot open file: " << output_file << std::endl;
+            return false;
         }
-        of.close();
-        std::cout << "-------" << std::endl;
     }
+    return true;
 }
 
 WC_NAMESPACE_END

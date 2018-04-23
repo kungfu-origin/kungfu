@@ -34,7 +34,7 @@ WC_NAMESPACE_START
 struct AccountUnitXTP
 {
     // extra information
-    long    session_id;
+    uint64_t    session_id;
     // internal flags
     bool    logged_in;
 };

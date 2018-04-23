@@ -62,7 +62,7 @@ protected:
     /** default constructor */
     IEngine(short source_id);
     /** default destructor, stop */
-    ~IEngine();
+    virtual ~IEngine();
     /** try to connect and login, return login status */
     bool try_login();
     /* signal received */
