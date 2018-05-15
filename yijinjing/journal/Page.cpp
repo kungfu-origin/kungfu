@@ -27,7 +27,7 @@ USING_YJJ_NAMESPACE
 
 #define PAGE_INIT_POSITION sizeof(PageHeader)
 
-Page::Page(void *buffer) : buffer(buffer), frame(ADDRESS_ADD(buffer, PAGE_INIT_POSITION)), position(PAGE_INIT_POSITION), frameNum(0) {}
+Page::Page(void *buffer) : frame(ADDRESS_ADD(buffer, PAGE_INIT_POSITION)), buffer(buffer), position(PAGE_INIT_POSITION), frameNum(0), pageNum(-1) {}
 
 void Page::finishPage()
 {

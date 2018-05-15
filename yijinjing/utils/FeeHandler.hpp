@@ -50,7 +50,7 @@ struct FeeDetail
     int    contract_multiplier;
     bool   using_volume;
     double min_fee;
-    FeeDetail(): min_fee(0), using_volume(true), contract_multiplier(1)
+    FeeDetail(): contract_multiplier(1), using_volume(true), min_fee(0)
     {
         for (size_t i = 0; i < 3; i++)
             multiplier[i] = 0;
@@ -86,7 +86,7 @@ inline void to_json(json& j, const FeeDetail& fee)
 {
     j["type"] = fee.using_volume ? "volume": "amount";
     j["min_fee"] = fee.min_fee;
-    int idx = 2;
+    size_t idx = 2;
     while (idx > 0 && fee.multiplier[idx] == fee.multiplier[idx - 1])
         idx --;
     json j_multi;
@@ -192,7 +192,7 @@ public:
             auto iter = future_exotic.find(ticker);
             if (iter == future_exotic.end())
             {
-                int idx = 0;
+                size_t idx = 0;
                 char c = ticker[idx];
                 while ((c > '9' || c < '0') && idx < ticker.size() - 1)
                 {

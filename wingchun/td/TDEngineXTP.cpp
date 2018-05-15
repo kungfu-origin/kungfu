@@ -26,7 +26,7 @@ USING_WC_NAMESPACE
 
 #define GBK2UTF8(msg) kungfu::yijinjing::gbk2utf8(string(msg))
 
-TDEngineXTP::TDEngineXTP(): ITDEngine(SOURCE_XTP), client_id(-1), api(nullptr)
+TDEngineXTP::TDEngineXTP(): ITDEngine(SOURCE_XTP), api(nullptr), front_port(-1), client_id(-1)
 {
     logger = yijinjing::KfLog::getLogger("TradeEngine.XTP");
 }
@@ -83,7 +83,7 @@ void TDEngineXTP::connect(long timeout_nsec)
         api->SetSoftwareKey(account_key.c_str());
         api->RegisterSpi(this);
     }
-    for (int idx = 0; idx < account_units.size(); idx ++)
+    for (size_t idx = 0; idx < account_units.size(); idx ++)
     {
         if (!account_units[idx].logged_in)
         {
@@ -124,15 +124,14 @@ void TDEngineXTP::logout()
     if (api == nullptr)
         return;
 
-    for (int idx = 0; idx < account_units.size(); idx++)
+    for (size_t idx = 0; idx < account_units.size(); idx++)
     {
-        if (account_units[idx].logged_in)
+        if (account_units[idx].session_id > 0)
         {
             long session_id = account_units[idx].session_id;
             if (api->Logout(session_id) == 0)
             {
                 account_units[idx].session_id = -1;
-                account_units[idx].logged_in = false;
                 KF_LOG_INFO(logger, "[Logout] logout succeed!" << " (user_id)" << accounts[idx].UserID
                                                                << " (session)" << session_id
                                                                << " (idx)" << idx);
@@ -143,6 +142,7 @@ void TDEngineXTP::logout()
                 int err_id = error_info->error_id;
                 KF_LOG_ERROR(logger, "[request] logout failed! (errId)" << err_id << " (errMsg)" << GBK2UTF8(error_info->error_msg));
             }
+            account_units[idx].logged_in = false;
         }
     }
 }
@@ -262,7 +262,7 @@ void TDEngineXTP::OnError(XTPRI *error_info)
     KF_LOG_ERROR(logger, "[OnError] " << " (errId)" << err_id << " (errMsg)" << err_msg);
 }
 
-void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info)
+void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t session_id)
 {
     auto rtn_order = parseFrom(*order_info);
     if (error_info == nullptr || error_info->error_id == 0)
@@ -282,7 +282,7 @@ void TDEngineXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info)
     }
 }
 
-void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info)
+void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
 {
     auto rtn_trade = parseFrom(*trade_info);
     on_rtn_trade(&rtn_trade);
@@ -290,12 +290,12 @@ void TDEngineXTP::OnTradeEvent(XTPTradeReport *trade_info)
                             source_id, MSG_TYPE_LF_RTN_TRADE_XTP, 1/*islast*/, -1/*invalidRid*/);
 }
 
-void TDEngineXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info)
+void TDEngineXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id)
 {
     OnError(error_info);
 }
 
-void TDEngineXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last)
+void TDEngineXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
 {
     if (error_info == nullptr || error_info->error_id == 0)
     {

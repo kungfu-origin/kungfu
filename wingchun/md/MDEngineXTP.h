@@ -56,10 +56,15 @@ private:
     string password;
     string front_ip;
     int front_port;
+    /// @brief udp_buffer_size > 0 then use udp, otherwise use tcp
+    int udp_buffer_size;
+    /** xtp's internal logger level */
+    int gateway_log_level;
     // internal flags
     bool connected;
     bool logged_in;
     int  reqId;
+    bool to_dump_static_info;
 
 public:
     // SPI
@@ -77,6 +82,12 @@ public:
 
     ///深度行情通知
     virtual void OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count);
+
+    ///查询可交易合约的应答
+    ///@param ticker_info 可交易合约信息
+    ///@param error_info 查询可交易合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+    ///@param is_last 是否此次查询可交易合约的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+    virtual void OnQueryAllTickers(XTPQSI* ticker_info, XTPRI *error_info, bool is_last);
 
     ///错误应答
     virtual void OnError(XTPRI *error_info,bool is_last);

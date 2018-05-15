@@ -49,13 +49,16 @@ struct OrderLatencyUnit
     long    first_rtn_order_time;
     long    first_rtn_trade_time;
 
-    OrderLatencyUnit(): md_time(-1),
+    OrderLatencyUnit(): order_id(0),
+                        price(0.0),
+                        volume(0),
+                        number_rtn_order(0),
+                        number_rtn_trade(0),
+                        md_time(-1),
                         oe_time(-1),
                         send_before_time(-1),
                         send_after_time(-1),
                         rsp_time(-1),
-                        number_rtn_order(0),
-                        number_rtn_trade(0),
                         first_rtn_order_time(-1),
                         first_rtn_trade_time(-1){};
 };

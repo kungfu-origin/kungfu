@@ -24,6 +24,8 @@ C++策略开发请参考 [C++策略开发快速入门](doc/cpp_strategy_guide.md
 
 常见问题请参考 [Q&A](doc/QA.md)。
 
+想要在自己的机器上直接运行kungfu（不用docker）可以参考 [环境准备](doc/env_prep.md)
+
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
 License
@@ -282,7 +284,6 @@ $ yjj status
 $ yjj journal -h
 Options:
   -h [ --help ]                         Help screen
-  -f [ --folder ] arg                   Journal Folder
   -n [ --name ] arg                     Journal Name
   -p [ --page ]                         Just Page Header
   -v [ --verify ]                       Verify hash code
@@ -301,7 +302,7 @@ Options:
 查看内存数据库中指定信息：
 
 ```
-$ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 -e 20171114-14:45:00 -d -t -m 206
+$ yjj journal -n TD_CTP -s 20171114-14:40:00 -e 20171114-14:45:00 -d -t -m 206
   StartTime:      20171114-14:40:00
   EndTime:        20171114-14:45:00
   Folder: /shared/kungfu/journal/TD/CTP/
@@ -332,12 +333,10 @@ $ yjj journal -f /shared/kungfu/journal/TD/CTP/ -n TD_CTP  -s 20171114-14:40:00 
 
 ```
 $ yjj dump -h
-usage: journal_dumper [-h] [-f FOLDER] [-n NAME] [-m MSG_TYPE] [-o OUTPUT] [-v] [-p] [-s START] [-e END]
+usage: journal_dumper [-h] [-n NAME] [-m MSG_TYPE] [-o OUTPUT] [-v] [-p] [-s START] [-e END]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FOLDER, --folder FOLDER
-                        folder name
   -n NAME, --name NAME  journal name
   -m MSG_TYPE, --msg_type MSG_TYPE
                         msg type to dump
@@ -353,7 +352,7 @@ optional arguments:
 导出内存数据库中指定信息：
 
 ```
-$ yjj dump -f /shared/kungfu/journal/MD/CTP/ -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
+$ yjj dump -n MD_CTP -s 20171114-09:30:00 -e 20171114-16:00:00 -m 101 -o md_20171114.csv
 $ head -n 3 md_20171114.csv
 TradingDay(c13),InstrumentID(c31),ExchangeID(c9),ExchangeInstID(c64),LastPrice(d),PreSettlementPrice(d),PreClosePrice(d),PreOpenInterest(d),OpenPrice(d),HighestPrice(d),LowestPrice(d),Volume(i),Turnover(d),OpenInterest(d),ClosePrice(d),SettlementPrice(d),UpperLimitPrice(d),LowerLimitPrice(d),PreDelta(d),CurrDelta(d),UpdateTime(c13),UpdateMillisec(i),BidPrice1(d),BidVolume1(i),AskPrice1(d),AskVolume1(i),BidPrice2(d),BidVolume2(i),AskPrice2(d),AskVolume2(i),BidPrice3(d),BidVolume3(i),AskPrice3(d),AskVolume3(i),BidPrice4(d),BidVolume4(i),AskPrice4(d),AskVolume4(i),BidPrice5(d),BidVolume5(i),AskPrice5(d),AskVolume5(i),h_nano(l),h_msg_type(i),h_request_id(i),h_source(i),h_is_last(i),h_error_id(i),j_name(s)
 20171114,rb1801,,,3941.0,3860.0,3894.0,1794552.0,3900.0,3950.0,3873.0,821770,32084979660.0,1697634.0,1.79769313486e+308,1.79769313486e+308,4130.0,3589.0,1.79769313486e+308,1.79769313486e+308,14:19:08,500,3941.0,24,3942.0,340,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1.79769313486e+308,0,1510640349349309138,101,-1,1,1,0,MD_CTP
@@ -529,3 +528,4 @@ Contribute 开发
 =============
 
 开发文档即将上线，请关注 [Taurus.ai](http://taurus.ai) 官网。
+QQ 交流群 312745666，入群问题答案：taurus.ai

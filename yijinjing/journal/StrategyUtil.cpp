@@ -28,9 +28,6 @@
 
 USING_YJJ_NAMESPACE
 
-#define BL_BASE_FOLDER KUNGFU_JOURNAL_FOLDER "strategy/"
-#define BL_REPLAY_FOLDER KUNGFU_JOURNAL_FOLDER "strategy_replay/"
-
 StrategyUtil::StrategyUtil(const string& strategyName, bool isReplay)
 {
     if (isReplay)

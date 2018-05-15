@@ -70,7 +70,6 @@ def dump_csv(csv_file, folders, names, t_msg_type, start_nano, end_nano, visuali
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--folder', help='folder name', type=str, default='')
     parser.add_argument('-n', '--name', help='journal name', type=str, default='')
     parser.add_argument('-m', '--msg_type', help='msg type to dump', type=int, default=0)
     parser.add_argument('-o', '--output', help='output file name', type=str, default='')
@@ -80,11 +79,9 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--end', help='end time ({})'.format(format_d_str), type=str, default='29990101-00:00:00')
     args = parser.parse_args()
     ready_to_dump = True
-    if len(args.folder) == 0:
-        print 'folder (-f) need to be specified'
-        ready_to_dump = False
     if len(args.name) == 0:
         print 'name (-n) need to be specified'
+        print 'available names: ', libjournal.get_available_journal_names()
         ready_to_dump = False
     if args.msg_type == 0:
         print 'msg_type (-m) need to be specified'
@@ -95,9 +92,8 @@ if __name__ == '__main__':
         
     if ready_to_dump:
         print 'dumping: '
-        print 'folder', args.folder
         print 'name', args.name
         print 'msg_type', args.msg_type
         print 'start', args.start
         print 'end', args.end
-        dump_csv(args.output, [args.folder], [args.name], args.msg_type, nanofstr(args.start), nanofstr(args.end), args.visualize > 0, args.print_out > 0)
+        dump_csv(args.output, [libjournal.get_journal_folder(args.name)], [args.name], args.msg_type, nanofstr(args.start), nanofstr(args.end), args.visualize > 0, args.print_out > 0)

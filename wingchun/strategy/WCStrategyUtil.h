@@ -68,14 +68,6 @@ public:
     /** subscribe */
     /** subscribe md with MARKET_DATA flag */
     bool subscribe_market_data(boost::python::list tickers, short source);
-    /** subscribe md with L2_MD flag */
-    bool subscribe_market_data_l2(boost::python::list tickers, short source);
-    /** subscribe md with INDEX flag */
-    bool subscribe_l2_index(boost::python::list tickers, short source);
-    /** subscribe md with ORDER flag */
-    bool subscribe_l2_order(boost::python::list tickers, short source);
-    /** subscribe md with TRADE flag */
-    bool subscribe_l2_trade(boost::python::list tickers, short source);
 
     /** take actions */
     int insert_market_order(short source, string instrument_id, string exchange_id, int volume, LfDirectionType direction, LfOffsetFlagType offset);

@@ -55,10 +55,20 @@ FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs)
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
-LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/longfist/api/ctp/v6.3.6_20160606/lib)
-LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/longfist/api/xtp/XTP_API_20171115_1.1.16.9/lib)
+############################################################
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+file(STRINGS config.in ConfigContents)
+foreach(NameAndValue ${ConfigContents})
+    string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+    string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+    string(REPLACE "${Name}=" "" Value ${NameAndValue})
+    set(${Name} "${Value}")
+    MESSAGE( STATUS ${Name} " = " ${Value} )
+endforeach()
+
+############################################################
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wall")
 OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
 OPTION(USE_SERVICE "use memory service" ON)
 OPTION(USE_HASH_CODE "use hash code when writing" ON)
@@ -79,7 +89,12 @@ SET(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/
 SET(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/pre_uninstall.sh")
 SET(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/post_uninstall.sh")
 
-SET(CPACK_RPM_PACKAGE_REQUIRES "rfoo >= 1.3.1, pid >= 2.1.1, log4cplus2 == 2.0.0_RC1, supervisor >= 3.1.0")
+OPTION(SKIP_DEPENDENCY_CHECKING "SKIP_CHECK_KUNGFU_DEPENDENCY, default OFF." OFF)
+IF(SKIP_DEPENDENCY_CHECKING)
+    MESSAGE(WARNING "DEPENDENCY CHECKING SKIPPED...")
+ELSE()
+    SET(CPACK_RPM_PACKAGE_REQUIRES "rfoo >= 1.3.1, pid >= 2.1.1, log4cplus2 == 2.0.0_RC1, supervisor >= 3.1.0")
+ENDIF()
 
 INSTALL(DIRECTORY "${BOOST_LIBRARYDIR}/" DESTINATION "lib/boost")
 INSTALL(DIRECTORY "rpm/bin/" DESTINATION "bin")

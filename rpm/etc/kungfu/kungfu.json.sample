@@ -14,7 +14,10 @@
       "Port": 6016,
       "UserId": "YOUR_USER_ID",
       "Password": "YOUR_PASSWORD",
-      "ClientId": 1
+      "ClientId": 1,
+      "UdpBufferSize": 0,
+      "GatewayLogLevel": "DEBUG",
+      "DumpStatic": false
     }
   },
   "td":

@@ -76,7 +76,7 @@ public: // util functions, wrap upon WCStrategyUtil
 
 public:
     /** default destructor */
-    ~IWCStrategy();
+    virtual ~IWCStrategy();
     /** default constructor */
     IWCStrategy(const string& name);
     /* start data thread */

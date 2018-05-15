@@ -31,7 +31,7 @@ USING_WC_NAMESPACE
 volatile int IWCDataProcessor::signal_received = -1;
 
 WCDataWrapper::WCDataWrapper(IWCDataProcessor *processor, WCStrategyUtil* util):
-    processor(processor), util(util), force_stop(false)
+    processor(processor), util(util), force_stop(false), auto_sub_mode_enabled(true)
 {
     auto rids = util->getRequestIds();
     rid_start = rids.first;
@@ -48,26 +48,6 @@ WCDataWrapper::WCDataWrapper(IWCDataProcessor *processor, WCStrategyUtil* util):
 void WCDataWrapper::add_market_data(short source)
 {
     ADD_JOURNAL(getMdJournalPair, source);
-}
-
-void WCDataWrapper::add_market_data_l2(short source)
-{
-    ADD_JOURNAL(getL2MdJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_index(short source)
-{
-    ADD_JOURNAL(getL2IndexJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_order(short source)
-{
-    ADD_JOURNAL(getL2OrderJournalPair, source);
-}
-
-void WCDataWrapper::add_l2_trade(short source)
-{
-    ADD_JOURNAL(getL2TradeJournalPair, source);
 }
 
 void WCDataWrapper::add_register_td(short source)
@@ -395,7 +375,14 @@ void WCDataWrapper::set_internal_pos(PosHandlerPtr handler, short source)
     if (handler.get() != nullptr)
     {
         vector<string> tickers = handler->get_tickers();
-        util->subscribeMarketData(tickers, source);
+        if (auto_sub_mode_enabled)
+        {
+            util->subscribeMarketData(tickers, source);
+        }
+        else
+        {
+            processor->debug("[auto-sub] disabled!");
+        }
     }
 }
 

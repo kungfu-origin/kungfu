@@ -52,7 +52,7 @@ public:
 /** manage rid and client_name matching */
 RidClientManager rid_manager;
 
-ITDEngine::ITDEngine(short source): IEngine(source), default_account_index(-1), local_id(1), request_id(1)
+ITDEngine::ITDEngine(short source): IEngine(source), default_account_index(-1), request_id(1), local_id(1)
 {}
 
 void ITDEngine::set_reader_thread()
@@ -439,25 +439,28 @@ bool ITDEngine::remove_client(const string &client_name, const json &j_request)
         user_helper->set_pos(client_name, j_pos);
         iter->second.pos_handler.reset();
     }
-    // cancel all pending orders, and clear the memory
-    auto orders = user_helper->get_existing_orders(client_name);
-    int idx = iter->second.account_index;
-    for (int order_id: orders)
+    if (is_logged_in())
     {
-        LFOrderActionField action = {};
-        action.ActionFlag = LF_CHAR_Delete;
-        action.KfOrderID = order_id;
-        action.LimitPrice = 0;
-        action.VolumeChange = 0;
-        strcpy(action.BrokerID, accounts[idx].BrokerID);
-        strcpy(action.InvestorID, accounts[idx].InvestorID);
-        int local_id;
-        if (user_helper->get_order(client_name, order_id, local_id, action.InstrumentID))
+        // cancel all pending orders, and clear the memory
+        auto orders = user_helper->get_existing_orders(client_name);
+        int idx = iter->second.account_index;
+        for (int order_id: orders)
         {
-            string order_ref = std::to_string(local_id);
-            strcpy(action.OrderRef, order_ref.c_str());
-            KF_LOG_DEBUG(logger, "[cancel_remain_order] (rid)" << order_id << " (ticker)" << action.InstrumentID << " (ref)" << order_ref);
-            req_order_action(&action, iter->second.account_index, order_id, cur_time);
+            LFOrderActionField action = {};
+            action.ActionFlag = LF_CHAR_Delete;
+            action.KfOrderID = order_id;
+            action.LimitPrice = 0;
+            action.VolumeChange = 0;
+            strcpy(action.BrokerID, accounts[idx].BrokerID);
+            strcpy(action.InvestorID, accounts[idx].InvestorID);
+            int local_id;
+            if (user_helper->get_order(client_name, order_id, local_id, action.InstrumentID))
+            {
+                string order_ref = std::to_string(local_id);
+                strcpy(action.OrderRef, order_ref.c_str());
+                KF_LOG_DEBUG(logger, "[cancel_remain_order] (rid)" << order_id << " (ticker)" << action.InstrumentID << " (ref)" << order_ref);
+                req_order_action(&action, iter->second.account_index, order_id, cur_time);
+            }
         }
     }
     user_helper->remove(client_name);

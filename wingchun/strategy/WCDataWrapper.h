@@ -77,12 +77,9 @@ public:
     WCDataWrapper(IWCDataProcessor* processor,
                   WCStrategyUtil* util);
 
+    void disable_auto_sub_mode() { auto_sub_mode_enabled = false; };
     /** add market data */
     void add_market_data(short source);
-    void add_market_data_l2(short source);
-    void add_l2_index(short source);
-    void add_l2_order(short source);
-    void add_l2_trade(short source);
     /** register td */
     void add_register_td(short source);
     /**
@@ -131,6 +128,7 @@ protected:
     int rid_end;
     bool force_stop;
     long cur_time;
+    bool auto_sub_mode_enabled;
 };
 
 DECLARE_PTR(WCDataWrapper);
