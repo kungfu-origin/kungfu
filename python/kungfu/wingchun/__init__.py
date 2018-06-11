@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from engine import Engine
-from strategy import Strategy
+from .engine import Engine
+from .strategy import Strategy
 
 def run_engine(name, type):
     engine = Engine(name, type)

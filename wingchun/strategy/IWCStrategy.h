@@ -88,7 +88,7 @@ public:
     /* stop send stop signal to data thread */
     void stop();
     /* block process by data thread */
-    void block();
+    virtual void block();
 
 protected:
     /** logger, will be improved later */

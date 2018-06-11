@@ -29,6 +29,7 @@
 #include "longfist/LFConstants.h"
 #include "longfist/LFDataStruct.h"
 
+
 using json = nlohmann::json;
 
 YJJ_NAMESPACE_START
@@ -146,14 +147,6 @@ public:
         vector<string> tickers;
         for (json::const_iterator iter = positions.begin(); iter != positions.end(); ++iter)
             tickers.push_back(iter.key());
-        return tickers;
-    }
-
-    boost::python::list get_py_tickers() const
-    {
-        boost::python::list tickers;
-        for (json::const_iterator iter = positions.begin(); iter != positions.end(); ++iter)
-            tickers.append((string)iter.key());
         return tickers;
     }
 

@@ -25,49 +25,22 @@
 #include <vector>
 
 #include "YJJ_DECLARE.h"
-#include <boost/python/object.hpp>
 #include <boost/locale.hpp>
-#include <boost/python/stl_iterator.hpp>
-
+namespace py = pybind11;
 YJJ_NAMESPACE_START
-
-/**
- * transform python list into vector with template
- */
-template<typename T>
-inline vector <T> py_list_to_std_vector(const boost::python::object &iterable)
-{
-    return vector<T>(boost::python::stl_input_iterator<T>(iterable),
-                          boost::python::stl_input_iterator<T>());
-}
-
-/**
- * transform vector with template into python list
- */
-template<class T>
-inline boost::python::list std_vector_to_py_list(const vector <T> &vector)
-{
-    typename vector<T>::const_iterator iter;
-    boost::python::list list;
-    for (iter = vector.begin(); iter != vector.end(); ++iter)
-    {
-        list.append(*iter);
-    }
-    return list;
-}
 
 /**
  * extract int from python dict with key, store in value
  */
-inline void getInt(const boost::python::dict &d, const string &key, int *value)
+inline void getInt(const py::dict &d, const string &key, int *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<int> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::int_>(o))
         {
-            *value = x();
+            *value = o.cast<int>();
         }
     }
 }
@@ -75,15 +48,15 @@ inline void getInt(const boost::python::dict &d, const string &key, int *value)
 /**
  * extract long from python dict with key, store in value
  */
-inline void getLong(const boost::python::dict &d, const string &key, long *value)
+inline void getLong(const py::dict &d, const string &key, long *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<int> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::int_>(o))
         {
-            *value = x();
+            *value = o.cast<long>();
         }
     }
 }
@@ -91,15 +64,15 @@ inline void getLong(const boost::python::dict &d, const string &key, long *value
 /**
  * extract short from python dict with key, store in value
  */
-inline void getShort(const boost::python::dict &d, const string &key, short *value)
+inline void getShort(const py::dict &d, const string &key, short *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<int> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::int_>(o))
         {
-            *value = x();
+            *value = o.cast<short>();
         }
     }
 }
@@ -107,15 +80,15 @@ inline void getShort(const boost::python::dict &d, const string &key, short *val
 /**
  * extract double from python dict with key, store in value
  */
-inline void getDouble(const boost::python::dict &d, const string &key, double *value)
+inline void getDouble(const py::dict &d, const string &key, double *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<double> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::float_>(o))
         {
-            *value = x();
+            *value = o.cast<double>();
         }
     }
 }
@@ -123,15 +96,15 @@ inline void getDouble(const boost::python::dict &d, const string &key, double *v
 /**
  * extract char from python dict with key, store in value
  */
-inline void getChar(const boost::python::dict &d, const string &key, char *value)
+inline void getChar(const py::dict &d, const string &key, char *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<string> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::str>(o))
         {
-            string s = x();
+            string s = o.cast<std::string>();
             const char *buffer = s.c_str();
             *value = *buffer;
         }
@@ -141,15 +114,15 @@ inline void getChar(const boost::python::dict &d, const string &key, char *value
 /**
  * extract string(char*) from python dict with key, store in value
  */
-inline void getString(const boost::python::dict &d, const string &key, char *value)
+inline void getString(const py::dict &d, const string &key, char *value)
 {
-    if (d.has_key(key))
+    const char* c = key.c_str();
+    if (d.contains(c))
     {
-        boost::python::object o = d[key];
-        boost::python::extract<string> x(o);
-        if (x.check())
+        py::object o = d[c];
+        if (py::isinstance<py::str>(o))
         {
-            string s = x();
+            string s = o.cast<std::string>();
             const char *buffer = s.c_str();
             strcpy(value, buffer);
         }

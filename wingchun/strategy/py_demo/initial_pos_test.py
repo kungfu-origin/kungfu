@@ -27,16 +27,16 @@ def initialize(context):
 def on_pos(context, pos_handler, request_id, source, rcv_time):
     if request_id == -1:
         if pos_handler is None:
-            print '-- got no pos in initial, so req pos --'
+            print('-- got no pos in initial, so req pos --')
             context.req_pos(source=SOURCE.CTP)
             context.pos_set = False
             return
         else:
-            print '-- got pos in initial --'
+            print('-- got pos in initial --')
             context.print_pos(pos_handler)
             context.stop()
     else:
-        print '-- got pos requested --'
+        print('-- got pos requested --')
         context.print_pos(pos_handler)
         if not context.pos_set:
             context.data_wrapper.set_pos(pos_handler, source)

@@ -77,15 +77,14 @@ IntPair StrategyUtil::getRequestIds() const
     return std::make_pair(rid_start, rid_end);
 }
 
-boost::python::tuple StrategyUtil::getPyRids() const
+pybind11::tuple StrategyUtil::getPyRids() const
 {
-    return boost::python::make_tuple(rid_start, rid_end);
+    return pybind11::make_tuple(rid_start, rid_end);
 }
 
-bool StrategyUtil::pySubscribe(boost::python::list pyTickers, int source)
+bool StrategyUtil::pySubscribe(vector<string> pyTickers, int source)
 {
-    vector<string> tickers = py_list_to_std_vector<string>(pyTickers);
-    return subscribeMarketData(tickers, source);
+    return subscribeMarketData(pyTickers, source);
 }
 
 bool StrategyUtil::md_subscribe(const vector<string>& tickers, short source, short msg_type)

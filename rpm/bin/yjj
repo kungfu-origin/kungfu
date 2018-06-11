@@ -131,19 +131,19 @@ class RConsoleDaemon(object):
                 os.remove(rconsole_sock)
             namespace = sys._getframe(0).f_globals
             try:
-                print 'rconsole server starting'
+                print('rconsole server starting')
                 self.server = rfoo.UnixServer(ConsoleHandler, namespace)
                 self.server.start(rconsole_sock)
-                print 'rcosnole server stopped'
+                print('rcosnole server stopped')
             except:
                 print('Error occurred when running rconsole: ', sys.exc_info())
 
     def stop(self):
-        print 'Stopping rconsole daemon...'
+        print('Stopping rconsole daemon...')
         self.live = False
         if self.server != None:
             self.server.stop()
-        print 'Stopped rconsole daemon'
+        print('Stopped rconsole daemon')
 
 class KungFu(object):
 
@@ -165,7 +165,7 @@ The most commonly used kungfu commands are:
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
-            print 'Unrecognized command'
+            print('Unrecognized command')
             parser.print_help()
             exit(1)
         # use dispatch pattern to invoke method with same name
@@ -222,7 +222,7 @@ The most commonly used kungfu commands are:
     def status(self):
         try:
             console = ProxyConsole(rconsole_sock)
-            print console.runsource_noout("engine.status()")
+            print(console.runsource_noout("engine.status()"))
         except:
             print('Failed in status', sys.exc_info())
             pass

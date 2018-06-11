@@ -22,7 +22,7 @@ wingchun strategy -n my_test -p basic_usage.py
 
 def initialize(context):
     context.add_md(source=SOURCE.CTP)
-    context.ticker = 'rb1801'
+    context.ticker = 'rb1901'
     context.exchange_id = EXCHANGE.SHFE
     context.buy_price = -1
     context.sell_price = -1
@@ -45,7 +45,7 @@ def on_tick(context, market_data, source, rcv_time):
                                                          offset=OFFSET.Open)
 
 def on_error(context, error_id, error_msg, request_id, source, rcv_time):
-    print 'on_error:', error_id, error_msg
+    print ('on_error:{} {}'.format(error_id, error_msg))
 
 def on_rtn_trade(context, rtn_trade, order_id, source, rcv_time):
     print '----on rtn trade----'
@@ -55,9 +55,9 @@ def on_rtn_trade(context, rtn_trade, order_id, source, rcv_time):
 def on_pos(context, pos_handler, request_id, source, rcv_time):
     if request_id == -1:
         if pos_handler is not None:
-            print '----init----'
+            print('----init----')
             context.print_pos(pos_handler)
     elif request_id == context.req_rid:
-        print '----rsp pos----'
+        print('----rsp pos----')
         context.print_pos(pos_handler)
         context.stop()

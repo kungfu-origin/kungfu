@@ -184,11 +184,11 @@ void MDEngineCTP::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMar
     //                         source_id, MSG_TYPE_LF_MD_CTP, 1/*islast*/, -1/*invalidRid*/);
 }
 
-BOOST_PYTHON_MODULE(libctpmd)
+namespace py = pybind11;
+PYBIND11_MODULE(libctpmd,m)
 {
-    using namespace boost::python;
-    class_<MDEngineCTP, boost::shared_ptr<MDEngineCTP> >("Engine")
-    .def(init<>())
+    py::class_<MDEngineCTP, boost::shared_ptr<MDEngineCTP> >(m, "Engine")
+    .def(py::init<>())
     .def("init", &MDEngineCTP::initialize)
     .def("start", &MDEngineCTP::start)
     .def("stop", &MDEngineCTP::stop)

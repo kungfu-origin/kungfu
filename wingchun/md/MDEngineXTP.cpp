@@ -286,11 +286,12 @@ void MDEngineXTP::OnQueryAllTickers(XTPQSI* ticker_info, XTPRI *error_info, bool
     }
 }
 
-BOOST_PYTHON_MODULE(libxtpmd)
+namespace py = pybind11;
+
+PYBIND11_MODULE(libxtpmd, m)
 {
-    using namespace boost::python;
-    class_<MDEngineXTP, boost::shared_ptr<MDEngineXTP> >("Engine")
-    .def(init<>())
+    py::class_<MDEngineXTP, boost::shared_ptr<MDEngineXTP> >(m, "Engine")
+    .def(py::init<>())
     .def("init", &MDEngineXTP::initialize)
     .def("start", &MDEngineXTP::start)
     .def("stop", &MDEngineXTP::stop)

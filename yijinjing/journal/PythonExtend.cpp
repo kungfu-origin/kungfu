@@ -28,13 +28,13 @@
 #include "PosHandler.hpp"
 #include "TypeConvert.hpp"
 
-USING_YJJ_NAMESPACE
-using namespace boost::python;
+namespace py = pybind11;
 
-JournalReaderPtr createReader(const boost::python::list& _dirs, const boost::python::list& _jnames, const string& readerName, long startTime)
+
+USING_YJJ_NAMESPACE
+
+JournalReaderPtr createReader(const vector<string>& dirs, const vector<string>& jnames, const string& readerName, long startTime)
 {
-    vector<string> dirs = py_list_to_std_vector<string>(_dirs);
-    vector<string> jnames = py_list_to_std_vector<string>(_jnames);
     return JournalReader::create(dirs, jnames, startTime, readerName);
 }
 
@@ -58,22 +58,22 @@ PosHandlerPtr createEmptyPosHandler(short source)
     return PosHandler::create(source);
 }
 
-boost::python::list get_all_journal_names()
+vector<std::string> get_all_journal_names()
 {
     JournalFinder finder;
-    return std_vector_to_py_list(finder.getAllJournalNames());
+    return finder.getAllJournalNames();
 }
 
-boost::python::list get_available_journal_names()
+vector<std::string> get_available_journal_names()
 {
     JournalFinder finder;
-    return std_vector_to_py_list(finder.getAvailableJournalNames());
+    return finder.getAvailableJournalNames();
 }
 
-boost::python::list get_available_journal_folders()
+vector<std::string> get_available_journal_folders()
 {
     JournalFinder finder;
-    return std_vector_to_py_list(finder.getAvailableJournalFolders());
+    return finder.getAvailableJournalFolders();
 }
 
 std::string get_journal_folder(const std::string & name)
@@ -82,38 +82,38 @@ std::string get_journal_folder(const std::string & name)
     return finder.getJournalFolder(name);
 }
 
-BOOST_PYTHON_MODULE(libjournal)
+PYBIND11_MODULE(libjournal, m)
 {
     // nanosecond-time related
-    def("nano", &getNanoTime);
+    m.def("nano", &getNanoTime);
     /** two functions named of parseNano with different inputs, we needs to specify here. */
     string (*pyParseNano)(long, const char*) = &parseNano;
-    def("parse_time", &parseTime);
-    def("parse_nano", pyParseNano);
+    m.def("parse_time", &parseTime);
+    m.def("parse_nano", pyParseNano);
 
     // create reader / writer / strategy-writer
-    def("createReader", &createReader);
-    def("createWriter", &createWriter);
-    def("createBL", &createBL);
-    def("createPosHandler", &createPosHandler, (arg("source"), arg("js_str")));
-    def("createPosHandler0", &createEmptyPosHandler, (arg("source")));
+    m.def("createReader", &createReader);
+    m.def("createWriter", &createWriter);
+    m.def("createBL", &createBL);
+    m.def("createPosHandler", &createPosHandler, py::arg("source"), py::arg("js_str"));
+    m.def("createPosHandler0", &createEmptyPosHandler, py::arg("source"));
 
     // JournalReader
-    class_<JournalReader, boost::shared_ptr<JournalReader> >("Reader", no_init)
-    .def("addJ", &JournalReader::addJournal, (arg("folder"), arg("jname")))
-    .def("expireJ", &JournalReader::expireJournalByName, (arg("jname")))
-    .def("restartJ", &JournalReader::seekTimeJournalByName, (arg("jname"), arg("nano")))
+    py::class_<JournalReader, boost::shared_ptr<JournalReader> >(m, "Reader")
+    .def("addJ", &JournalReader::addJournal, py::arg("folder"), py::arg("jname"))
+    .def("expireJ", &JournalReader::expireJournalByName, py::arg("jname"))
+    .def("restartJ", &JournalReader::seekTimeJournalByName, py::arg("jname"), py::arg("nano"))
     .def("next", &JournalReader::getNextFrame)
     .def("name", &JournalReader::getFrameName);
 
     // JournalWriter
-    class_<JournalWriter, boost::shared_ptr<JournalWriter> >("Writer", no_init)
+    py::class_<JournalWriter, boost::shared_ptr<JournalWriter> >(m, "Writer")
     .def("write_str", &JournalWriter::writeStr)
     .def("get_page_num", &JournalWriter::getPageNum)
     .def("write", &JournalWriter::writePyData);
 
     // StrategyUtil
-    class_<StrategyUtil, boost::shared_ptr<StrategyUtil> >("StrategyUtil", no_init)
+    py::class_<StrategyUtil, boost::shared_ptr<StrategyUtil> >(m, "StrategyUtil")
     .def("rids", &StrategyUtil::getPyRids)
     .def("subscribe", &StrategyUtil::pySubscribe)
     .def("login_trade", &StrategyUtil::td_connect)
@@ -121,7 +121,7 @@ BOOST_PYTHON_MODULE(libjournal)
     .def("write", &StrategyUtil::writePyData);
 
     // Frame
-    class_<Frame, boost::shared_ptr<Frame> >("Frame", no_init)
+    py::class_<Frame, boost::shared_ptr<Frame> >(m, "Frame")
     .def("status", &Frame::getStatus)
     .def("nano", &Frame::getNano)
     .def("extra_nano", &Frame::getExtraNano)
@@ -135,8 +135,8 @@ BOOST_PYTHON_MODULE(libjournal)
     .def("get_data", &Frame::getPyData);
 
     // PosMap
-    class_<PosHandler, boost::shared_ptr<PosHandler> >("PosHandler", no_init)
-    .def("update", &PosHandler::update_py, (arg("ticker"), arg("volume"), arg("direction"), arg("trade_off"), arg("order_off")))
+    py::class_<PosHandler, boost::shared_ptr<PosHandler> >(m, "PosHandler")
+    .def("update", &PosHandler::update_py, py::arg("ticker"), py::arg("volume"), py::arg("direction"), py::arg("trade_off"))
     .def("switch_day", &PosHandler::switch_day)
     .def("is_poisoned", &PosHandler::poisoned)
     .def("dump", &PosHandler::to_string)
@@ -152,13 +152,13 @@ BOOST_PYTHON_MODULE(libjournal)
     .def("get_long_balance", &PosHandler::get_long_balance)
     .def("get_short_fee", &PosHandler::get_short_fee)
     .def("get_short_balance", &PosHandler::get_short_balance)
-    .def("get_tickers", &PosHandler::get_py_tickers)
-    .def("set_pos", &PosHandler::set_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0))
-    .def("add_pos", &PosHandler::add_pos_py, (arg("ticker"), arg("posi_direction"), arg("tot")=0, arg("yd")=0, arg("balance")=0, arg("fee")=0));
+    .def("get_tickers", &PosHandler::get_tickers)
+    .def("set_pos", &PosHandler::set_pos_py, py::arg("ticker"), py::arg("posi_direction"), py::arg("tot")=0, py::arg("yd")=0, py::arg("balance")=0, py::arg("fee")=0)
+    .def("add_pos", &PosHandler::add_pos_py, py::arg("ticker"), py::arg("posi_direction"), py::arg("tot")=0, py::arg("yd")=0, py::arg("balance")=0, py::arg("fee")=0);
 
     // JournalFinder
-    def("get_all_journal_names", &get_all_journal_names);
-    def("get_available_journal_names", &get_available_journal_names);
-    def("get_available_journal_folders", &get_available_journal_folders);
-    def("get_journal_folder", &get_journal_folder);
+    m.def("get_all_journal_names", &get_all_journal_names);
+    m.def("get_available_journal_names", &get_available_journal_names);
+    m.def("get_available_journal_folders", &get_available_journal_folders);
+    m.def("get_journal_folder", &get_journal_folder);
 }

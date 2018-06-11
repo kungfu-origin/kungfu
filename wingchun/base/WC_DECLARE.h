@@ -39,11 +39,12 @@ typedef boost::shared_ptr<std::thread> ThreadPtr;
 #define TICKER_MARKET_DELIMITER '@'
 
 #define START_PYTHON_FUNC_CALLING \
+        py::gil_scoped_acquire acquire;\
         try{
-
 #define END_PYTHON_FUNC_CALLING \
-        } catch(boost::python::error_already_set& e) \
+        } catch(pybind11::error_already_set& e) \
         {\
+            e.restore();\
             PyErr_Print();\
             throw std::runtime_error(__func__); \
         }

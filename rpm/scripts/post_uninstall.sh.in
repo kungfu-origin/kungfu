@@ -9,5 +9,6 @@ rm -f /usr/bin/yjj
 rm -f /usr/bin/wingchun
 rm -f /usr/bin/kungfuctl
 
-rm -f /usr/lib64/python2.7/site-packages/kungfu.pth
+# flowing KF_PYTHON_VERSION is compile var from CMAKE
+rm -f /usr/lib64/python@KF_PYTHON_VERSION@/site-packages/kungfu.pth
 rm -rf /opt/kungfu/master/lib

@@ -16,13 +16,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7)
 PROJECT(wingchuntool)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED DataConsumer.cpp DataConsumer.h StrategyDataConsumer.cpp StrategyDataConsumer.h)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} journal kflog python ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} journal kflog ${PYTHON_LIBRARY} ${Boost_LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "lib/wingchun")
 
 ADD_EXECUTABLE(wc_printer wc_strategy_data_printer.cpp)
-TARGET_LINK_LIBRARIES(wc_printer ${PROJECT_NAME} journal python ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(wc_printer ${PROJECT_NAME} journal ${PYTHON_LIBRARY} ${Boost_LIBRARIES})
 INSTALL(TARGETS wc_printer DESTINATION "bin")
 
 ADD_EXECUTABLE(td_pos_tool td_pos_tool.cpp ../base/TDUserStruct.cpp ../base/TDUserStruct.h)
-TARGET_LINK_LIBRARIES(td_pos_tool journal python ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(td_pos_tool journal ${PYTHON_LIBRARY} ${Boost_LIBRARIES})
 INSTALL(TARGETS td_pos_tool DESTINATION "bin")

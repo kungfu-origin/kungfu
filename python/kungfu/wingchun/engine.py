@@ -19,7 +19,7 @@ from kungfu.longfist.longfist_utils import _byteify as _byteify
 
 def register_exit_handler(engine, name, tp):
     def exit_handler(*args):
-        print 'stop engine: {}_{}'.format(tp, name)
+        print('stop engine: {}_{}'.format(tp, name))
         engine.stop()
     signal.signal(signal.SIGTERM, exit_handler)
 
@@ -33,7 +33,7 @@ class Engine(object):
         try:
             lib = __import__(lib_name)
         except:
-            print 'Unexpected lib is imported', lib_name
+            print('Unexpected lib is imported', lib_name)
             exit(1)
 
         globals()[lib_name] = lib
@@ -43,12 +43,12 @@ class Engine(object):
         fin = open(self.account_file)
         try:
             # we first parse account.json and get account info
-            json_info = json.load(fin, object_hook=_byteify)[tp][name]
+            json_info = json.load(fin)[tp][name]
             # then simply dump to str and will init
             self.info = json.dumps(json_info)
         except Exception as e:
-            print 'Cannot find related account info: ', tp, name, ' in ', self.account_file
-            print e
+            print('Cannot find related account info: ', tp, name, ' in ', self.account_file)
+            print(e)
             exit(1)
 
     def start(self):

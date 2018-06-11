@@ -21,9 +21,7 @@
 
 #include "WCStrategyUtil.h"
 #include "IWCDataProcessor.h"
-#include "TypeConvert.hpp"
 #include "Timer.h"
-#include "longfist/LFDataStruct.h"
 #include "longfist/sys_messages.h"
 
 USING_WC_NAMESPACE
@@ -36,10 +34,9 @@ WCStrategyUtil::WCStrategyUtil(const string& strategyName):
 }
 
 /** subscribe md with MARKET_DATA flag */
-bool WCStrategyUtil::subscribe_market_data(boost::python::list tickers, short source)
+bool WCStrategyUtil::subscribe_market_data(vector<string> tickers, short source)
 {
-    vector<string> vec_ticker = kungfu::yijinjing::py_list_to_std_vector<string>(tickers);
-    return subscribeMarketData(vec_ticker, source);
+    return subscribeMarketData(tickers, source);
 }
 
 int WCStrategyUtil::process_callback(long cur_time)
@@ -78,7 +75,7 @@ bool WCStrategyUtil::insert_callback(long nano, BLCallback& callback)
     return false;
 }
 
-bool WCStrategyUtil::insert_callback_py(long nano, boost::python::object func)
+bool WCStrategyUtil::insert_callback_py(long nano, pybind11::object func)
 {
     BLCallback callback = static_cast<BLCallback>(func);
     return insert_callback(nano, callback);

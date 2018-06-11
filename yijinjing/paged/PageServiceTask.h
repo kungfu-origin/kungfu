@@ -35,7 +35,7 @@ class PstBase
 public:
     virtual void go() {};
     virtual string getName() const { return "Base"; };
-    virtual boost::python::dict getInfo() const { return boost::python::dict(); }
+    virtual pybind11::dict getInfo() const { return pybind11::dict(); }
     virtual ~PstBase() {};
 };
 DECLARE_PTR(PstBase);
@@ -84,7 +84,7 @@ public:
     PstKfController(PageEngine* pe);
     void go();
     string getName() const { return "KfController"; }
-    boost::python::dict getInfo() const;
+    pybind11::dict getInfo() const;
     void setDaySwitch(std::string formatTime);
     void addEngineStart(std::string formatTime);
     void addEngineEnd(std::string formatTime);

@@ -18,4 +18,4 @@ def initialize(context):
     import module_to_import
     module_to_import.hello()
     context.insert_func_after(1, context.stop)
-    print 'test ORDER_STATUS: ', ORDER_STATUS.AllTraded
+    print('test ORDER_STATUS: ' + str(ORDER_STATUS.AllTraded))
