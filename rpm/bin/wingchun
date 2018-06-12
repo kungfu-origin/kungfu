@@ -42,7 +42,7 @@ The most commonly used wingchun commands are:
    
 ''')
         if len(sys.argv) == 1:
-            print parser.usage
+            print(parser.usage)
             return
 
         parser.add_argument('command', help='Subcommand to run')
@@ -50,7 +50,7 @@ The most commonly used wingchun commands are:
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
-            print 'Unrecognized command'
+            print('Unrecognized command')
             parser.print_help()
             exit(1)
         # use dispatch pattern to invoke method with same name
@@ -108,11 +108,11 @@ The most commonly used wingchun commands are:
                     if not (ss[0] in strs):
                         strs[ss[0]] = []
                     strs[ss[0]].append(ss[1])
-            print 'Please specify strategy name with "-n".'
-            print 'For more details, please check "wingchun report -h"'
-            print '#%3s %14s: [%s]' % ('idx', 'strategy_name', 'td1_idx, $td2_idx, ...')
+            print('Please specify strategy name with "-n".')
+            print('For more details, please check "wingchun report -h"')
+            print('#%3s %14s: [%s]' % ('idx', 'strategy_name', 'td1_idx, $td2_idx, ...'))
             for idx, str in enumerate(strs):
-                print '%3s %15s: [%s]' % (idx + 1, str, ', '.join(strs[str]))
+                print('%3s %15s: [%s]' % (idx + 1, str, ', '.join(strs[str])))
 
 if __name__ == '__main__':
     if "WINGCHUN_HOME" in os.environ:

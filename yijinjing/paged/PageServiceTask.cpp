@@ -151,12 +151,12 @@ void PstKfController::go()
     }
 }
 
-boost::python::dict PstKfController::getInfo() const
+pybind11::dict PstKfController::getInfo() const
 {
-    boost::python::dict res;
+    pybind11::dict res;
     string switch_day;
-    boost::python::list engine_starts;
-    boost::python::list engine_ends;
+    pybind11::list engine_starts;
+    pybind11::list engine_ends;
     for (size_t i = 0; i < next_nanos.size(); i++)
     {
         string time_str = parseNano(next_nanos[i], "%Y-%m-%d %H:%M:%S");

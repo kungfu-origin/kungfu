@@ -27,6 +27,8 @@
 #include "longfist/LFConstants.h"
 #include <queue>
 #include <boost/function.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 WC_NAMESPACE_START
 
@@ -67,7 +69,7 @@ public:
 
     /** subscribe */
     /** subscribe md with MARKET_DATA flag */
-    bool subscribe_market_data(boost::python::list tickers, short source);
+    bool subscribe_market_data(vector<string> tickers, short source);
 
     /** take actions */
     int insert_market_order(short source, string instrument_id, string exchange_id, int volume, LfDirectionType direction, LfOffsetFlagType offset);
@@ -83,7 +85,7 @@ public:
     /** insert callback functions */
     bool insert_callback(long nano, BLCallback& callback);
     /** insert python callback functions */
-    bool insert_callback_py(long nano, boost::python::object func);
+    bool insert_callback_py(long nano, pybind11::object func);
     /** set md nano time */
     void set_md_nano(long cur_time) { md_nano = cur_time; };
     /** set pos back */

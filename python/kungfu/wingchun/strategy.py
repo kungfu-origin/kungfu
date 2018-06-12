@@ -19,9 +19,9 @@ import kungfu.longfist.longfist_constants as lf
 import kungfu.longfist.longfist_structs as structs
 from functools import partial
 import libwingchunstrategy
-from wc_configs import context
-from wc_configs import context_usage
-from constants import ORDER_STATUS
+from .wc_configs import context
+from .wc_configs import context_usage
+from .constants import ORDER_STATUS
 
 class Strategy:
 
@@ -55,16 +55,14 @@ class Strategy:
     def set_func(self, msg_type, func_name):
         func = getattr(self.module, func_name, None)
         if func != None:
-            def func_parse(func, msg_type, raw_data, source, nano):
-                data = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[msg_type])).contents
+            def func_parse(func, msg_type, data, source, nano):
                 return func(context, data, source, nano)
             self.strategy.set_on_data(msg_type, partial(func_parse, func, msg_type))
 
     def set_func_rid(self, msg_type, func_name):
         func = getattr(self.module, func_name, None)
         if func != None:
-            def func_parse(func, msg_type, raw_data, request_id, source, nano):
-                data = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[msg_type])).contents
+            def func_parse(func, msg_type, data, request_id, source, nano):
                 return func(context, data, request_id, source, nano)
             self.strategy.set_on_data(msg_type, partial(func_parse, func, msg_type))
 
@@ -72,10 +70,7 @@ class Strategy:
         bar_func = getattr(self.module, func_name, None)
         if bar_func is not None:
             def func_parse(func, raw_dict, min_interval, source, nano):
-                new_dict = {}
-                for ticker, raw_data in raw_dict.items():
-                    new_dict[ticker] = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[lf.MsgTypes.BAR_MD])).contents
-                return func(context, new_dict, min_interval, source, nano)
+                return func(context, raw_dict, min_interval, source, nano)
             self.strategy.set_on_data(lf.MsgTypes.BAR_MD, partial(func_parse, bar_func))
 
     def set_func_error(self, func_name):

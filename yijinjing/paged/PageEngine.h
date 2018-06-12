@@ -37,6 +37,7 @@ YJJ_NAMESPACE_START
 
 FORWARD_DECLARE_PTR(PstBase);
 typedef boost::shared_ptr<std::thread> ThreadPtr;
+namespace py = pybind11;
 
 /** we call each journal handler (writer or reader)
  *      -- a client for page engine.
@@ -114,7 +115,7 @@ public:
     /** return true if msg is written in system journal */
     bool switch_trading_day();
     /** get status in python dictionary */
-    boost::python::dict  getStatus() const;
+    pybind11::dict  getStatus() const;
 
 public:
     // functions required by IPageSocketUtil
@@ -163,13 +164,13 @@ private:
     byte initiate_page(const PageCommMsg& msg);
 
     /** helper functions for getStatus */
-    boost::python::dict  getClientInfo() const;
-    boost::python::dict  getPidInfo() const;
-    boost::python::dict  getUserInfo() const;
-    boost::python::dict  getFileReaderInfo() const;
-    boost::python::dict  getFileWriterInfo() const;
-    boost::python::list  getLockingFiles() const;
-    boost::python::tuple getTaskInfo() const;
+    py::dict  getClientInfo() const;
+    py::dict  getPidInfo() const;
+    py::dict  getUserInfo() const;
+    py::dict  getFileReaderInfo() const;
+    py::dict  getFileWriterInfo() const;
+    py::list  getLockingFiles() const;
+    py::tuple getTaskInfo() const;
 };
 
 YJJ_NAMESPACE_END

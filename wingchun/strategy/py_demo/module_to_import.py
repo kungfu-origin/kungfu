@@ -15,4 +15,4 @@ limitations under the License.
 '''
 
 def hello():
-    print 'module imported successfully!'
+    print('module imported successfully!')

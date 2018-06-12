@@ -54,8 +54,9 @@ ln -sf /opt/kungfu/master/bin/yjj /usr/bin/yjj
 ln -sf /opt/kungfu/master/bin/wingchun /usr/bin/wingchun
 ln -sf /opt/kungfu/master/bin/kungfuctl /usr/bin/kungfuctl
 
-cat <<EOT > /usr/lib64/python2.7/site-packages/kungfu.pth
-/opt/kungfu/master/lib/python2.7/site-packages
+# flowing KF_PYTHON_VERSION is compile var from CMAKE
+cat <<EOT > /usr/lib64/python@KF_PYTHON_VERSION@/site-packages/kungfu.pth
+/opt/kungfu/master/lib/python@KF_PYTHON_VERSION@/site-packages
 EOT
 
 ln -sf /opt/kungfu/master/etc/systemd/user/kungfu.service /etc/systemd/system/kungfu.service

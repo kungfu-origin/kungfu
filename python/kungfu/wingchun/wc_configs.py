@@ -16,7 +16,7 @@ limitations under the License.
 '''
 
 import libwingchunstrategy
-import datetime, time
+import datetime, time, sys
 from functools import partial
 
 class dotdict(dict):
@@ -43,6 +43,9 @@ help_art = '''\
 .......................................................................
 '''
 
+if sys.version_info.major > 2:
+    def long(i):
+        return int(i)
 context_usage = \
     [   # utilities
         ('stop', lambda strategy: strategy.get_data_wrapper().stop,
@@ -375,16 +378,16 @@ wingchun_constants = [
 ]
 
 def help_constant():
-    print  help_art, '''
+    print(help_art, '''
 wingchun constants:
 
 eg: insert a buy order, you may set direction as DIRECTION.Buy or \"0\" directly
-        '''
+        ''')
     name_length = max(map(lambda x: len(x[0]), wingchun_constants)) + 2
     for struct_name, type_name, constants, comment in wingchun_constants:
         struct_name = '[\033[1;31;40m{}\033[0m]'.format(struct_name).ljust(name_length + 14)
         type_name_ = '[\033[1;35;40m{}\033[0m]'.format(type_name).ljust(20)
-        print '{} {} {}'.format(struct_name, type_name_, comment)
+        print('{} {} {}'.format(struct_name, type_name_, comment))
         for constant_name, value, c_comment in constants:
             constant_name_length = max(map(lambda x: len(str(x[0])), constants)) + 2
             constant_name = '\033[4;36;40m{}\033[0m'.format(constant_name).ljust(constant_name_length + 14)
@@ -393,35 +396,35 @@ eg: insert a buy order, you may set direction as DIRECTION.Buy or \"0\" directly
                 value = '\'\033[1;33;40m{}\033[0m\''.format(value).ljust(value_length + 14)
             else:
                 value = '\033[1;33;40m{}\033[0m'.format(value).ljust(value_length + 14)
-            print '{} {}{} {}'.format(' ' * (name_length + 7), constant_name, value, c_comment)
+            print('{} {}{} {}'.format(' ' * (name_length + 7), constant_name, value, c_comment))
 
 def help_class():
-    print  help_art, '''
+    print(help_art, '''
 wingchun classes:
-        '''
+        ''')
     name_length = max(map(lambda x: len(x[0]), class_details)) + 2
     output_length = max(map(lambda x: len(x[2][1]) if len(x[2]) > 1 else 0 , class_details))
     for class_name, fields, functions, comment in class_details:
         class_name = '[\033[1;31;40m{}\033[0m]'.format(class_name).ljust(name_length + 14)
-        print '{} {}'.format(class_name, comment)
+        print('{} {}'.format(class_name, comment))
         for func_name, in_outs, func_comment in functions:
             func_name_length = max(map(lambda x: len(x[0]), functions)) + 2
             func_name = '[\033[1;35;40m{}\033[0m]'.format(func_name).ljust(func_name_length + 14)
-            print '{} {}{}'.format(' ' * name_length, func_name, func_comment)
+            print('{} {}{}'.format(' ' * name_length, func_name, func_comment))
             output_str = 'None' if in_outs[0] is None else in_outs[0]
             input_str = ', '.join(map(lambda x: '{}[{}]'.format(x[1], x[0]), in_outs[1]))
             param_str = '\033[4;33;40m{}\033[0m <- (\033[4;36;40m{}\033[0m)'.format(output_str.ljust(output_length), input_str)
-            print '{} {}'.format(' ' * (name_length + func_name_length), param_str)
+            print('{} {}'.format(' ' * (name_length + func_name_length), param_str))
         for field_name, type_name, field_comment in fields:
             field_name_length = max(map(lambda x: len(x[0]), fields)) + 2
             field_name = '\033[4;36;40m{}\033[0m'.format(field_name).ljust(field_name_length + 14)
             type_name_length = max(map(lambda x: len(x[1]), fields)) + 2
             type_name = '[\033[4;33;40m{}\033[0m]'.format(type_name).ljust(type_name_length + 14)
-            print '{} {}{} {}'.format(' ' * name_length, field_name, type_name, field_comment)
+            print('{} {}{} {}'.format(' ' * name_length, field_name, type_name, field_comment))
 
 
 def help():
-    print  help_art, '''
+    print(help_art, '''
 usage: 
     wingchun md ${gateway_name} // run market data engine on gateway_name (eg: ctp)
     wingchun td ${gateway_name} // run trade engine on gateway_name (eg: ctp)
@@ -437,12 +440,12 @@ usage:
     
     wingchun help pos      // help "wingchun pos" usage
     wingchun help report   // help "wingchun report" usage
-    '''
+    ''')
 
 def help_context():
-    print  help_art, '''
+    print(help_art, '''
 context methods:
-        '''
+        ''')
     name_length = max(map(lambda x: len(x[0]), context_usage)) + 2
     output_length = max(map(lambda x: 0 if x[3][0] is None else len(x[3][0]), context_usage))
     for _func_name, transfer_func, comment, params in context_usage:
@@ -451,16 +454,16 @@ context methods:
         input_str = ', '.join(map(lambda x: '{}[{}]'.format(x[1], x[0]), params[1]))
         param_str = '\033[4;33;40m{}\033[0m <- (\033[4;36;40m{}\033[0m)'.format(output_str.ljust(output_length), input_str)
         cmts = comment.split('\n')
-        print '{} {}'.format(func_name, cmts[0])
+        print('{} {}'.format(func_name, cmts[0]))
         for cmt in cmts[1:]:
-            print '{} {}'.format(' '.ljust(name_length), cmt)
-        print '{} {}'.format(' ' * (name_length), param_str)
+            print('{} {}'.format(' '.ljust(name_length), cmt))
+        print('{} {}'.format(' ' * (name_length), param_str))
 
 
 def help_function():
-    print  help_art, '''
+    print(help_art, '''
 override functions: functions with mark (*) are necessary.
-        '''
+        ''')
     name_length = max(map(lambda x: len(x[0]), override_methods)) + 2
     for func_name, params, comment, must_be in override_methods:
         func_name = '[\033[1;31;40m{}\033[0m]'.format(func_name).ljust(name_length + 14)
@@ -468,22 +471,22 @@ override functions: functions with mark (*) are necessary.
             comment = '\033[4;36;40m(*)\033[0m' + comment
         if '\n' in comment:
             comments = comment.split('\n')
-            print '{} {}'.format(func_name, comments[0])
+            print('{} {}'.format(func_name, comments[0]))
             for i in range(1, len(comments)):
-                print ' ' * name_length, comments[i]
+                print(' ' * name_length, comments[i])
         else:
-            print '{} {}'.format(func_name, comment)
+            print('{} {}'.format(func_name, comment))
         for param in params[1]:
-            print ' ' * name_length, '\033[4;33;40m{} [{}]\033[0m'.format(param[0], param[1]).ljust(20), param[2]
+            print(' ' * name_length, '\033[4;33;40m{} [{}]\033[0m'.format(param[0], param[1]).ljust(20), param[2])
 
 
 def print_pos(pos_handler):
     for ticker in pos_handler.get_tickers():
-        print '{}\t(net){},{}[{},{}] (long){},{}[{},{}] (short){},{}[{},{}]'.format(
+        print ('{}\t(net){},{}[{},{}] (long){},{}[{},{}] (short){},{}[{},{}]'.format(
             ticker, pos_handler.get_net_tot(ticker), pos_handler.get_net_yd(ticker),
             pos_handler.get_net_balance(ticker), pos_handler.get_net_fee(ticker),
             pos_handler.get_long_tot(ticker), pos_handler.get_long_yd(ticker),
             pos_handler.get_long_balance(ticker), pos_handler.get_long_fee(ticker),
             pos_handler.get_short_tot(ticker), pos_handler.get_short_yd(ticker),
-            pos_handler.get_short_balance(ticker), pos_handler.get_short_fee(ticker)
+            pos_handler.get_short_balance(ticker), pos_handler.get_short_fee(ticker))
         )

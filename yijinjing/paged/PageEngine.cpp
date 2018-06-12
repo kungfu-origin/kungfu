@@ -27,11 +27,10 @@
 #include <sstream>
 #include <mutex>
 #include <signal.h>
-#include <boost/bind.hpp>
 
 USING_YJJ_NAMESPACE
 
-using namespace boost::python;
+namespace py = pybind11;
 using json = nlohmann::json;
 
 std::mutex paged_mtx;
@@ -519,15 +518,15 @@ bool PageEngine::switch_trading_day()
     return write("", MSG_TYPE_SWITCH_TRADING_DAY);
 }
 
-dict PageEngine::getStatus() const
+py::dict PageEngine::getStatus() const
 {
     acquire_mutex();
-    dict res;
+    py::dict res;
     res["Client"] = getClientInfo();
     res["Pid"] = getPidInfo();
     res["Task"] = getTaskInfo();
     res["User"] = getUserInfo();
-    res["File"] = dict();
+    res["File"] = py::dict();
     res["File"]["Read"] = getFileReaderInfo();
     res["File"]["Write"] = getFileWriterInfo();
     res["File"]["Locking"] = getLockingFiles();
@@ -536,96 +535,97 @@ dict PageEngine::getStatus() const
     return res;
 }
 
-dict PageEngine::getClientInfo() const
+py::dict PageEngine::getClientInfo() const
 {
-    dict info;
+    py::dict info;
     for (auto const &item: clientJournals)
     {
         const string& key = item.first;
-        info[key] = dict();
-        list uIndice;
-        list tds;
+        const char* c = key.c_str();
+        info[c] = py::dict();
+        py::list uIndice;
+        py::list tds;
         const PageClientInfo& cInfo = item.second;
         for (auto idx: cInfo.user_index_vec)
             uIndice.append(idx);
         for (auto idx: cInfo.trade_engine_vec)
             tds.append(idx);
-        info[key]["users"] = uIndice;
-        info[key]["trade_engine_vec"] = tds;
-        info[key]["registerTime"] = cInfo.reg_nano;
-        info[key]["is_writing"] = cInfo.is_writing;
-        info[key]["is_strategy"] = cInfo.is_strategy;
-        info[key]["rid_start"] = cInfo.rid_start;
-        info[key]["pid"] = cInfo.pid;
-        info[key]["hash_code"] = cInfo.hash_code;
+        info[c]["users"] = uIndice;
+        info[c]["trade_engine_vec"] = tds;
+        info[c]["registerTime"] = cInfo.reg_nano;
+        info[c]["is_writing"] = cInfo.is_writing;
+        info[c]["is_strategy"] = cInfo.is_strategy;
+        info[c]["rid_start"] = cInfo.rid_start;
+        info[c]["pid"] = cInfo.pid;
+        info[c]["hash_code"] = cInfo.hash_code;
     }
     return info;
 }
 
-dict PageEngine::getUserInfo() const
+py::dict PageEngine::getUserInfo() const
 {
-    dict info;
+    py::dict info;
     for (size_t idx = 0; idx < maxIdx; idx++)
     {
         PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
         if (msg->status == PAGED_COMM_ALLOCATED)
         {
-            info[idx] = boost::python::make_tuple(msg->folder, msg->name, msg->page_num);
+            info[py::cast(idx)] = py::make_tuple(msg->folder, msg->name, py::cast(msg->page_num));
         }
     }
     return info;
 }
 
-boost::python::tuple PageEngine::getTaskInfo() const
+py::tuple PageEngine::getTaskInfo() const
 {
-    dict info;
+    py::dict info;
     for (auto const &item: tasks)
     {
-        info[item.first] = item.second->getInfo();
+        info[item.first.c_str()] = item.second->getInfo();
     }
-    return boost::python::make_tuple(((task_running)? "running": "stopped"), microsecFreq, info);
+    return py::make_tuple(((task_running)? "running": "stopped"), microsecFreq, info);
 }
 
-dict PageEngine::getPidInfo() const
+py::dict PageEngine::getPidInfo() const
 {
-    dict info;
+    py::dict info;
     for (auto const &item: pidClient)
     {
-        list names;
+        py::list names;
         for (auto const name: item.second)
             names.append(name);
-        info[item.first] = names;
+        info[py::cast(item.first)] = names;
     }
     return info;
 }
 
-dict PageEngine::getFileReaderInfo() const
+py::dict PageEngine::getFileReaderInfo() const
 {
-    dict info;
+    py::dict info;
     for (auto const &item: fileReaderCounts)
     {
         const PageCommMsg& msg = item.first;
-        boost::python::tuple key = boost::python::make_tuple(msg.folder, msg.name, msg.page_num, msg.last_page_num, msg.is_writer);
+        py::tuple key = py::make_tuple(msg.folder, msg.name, msg.page_num, msg.last_page_num, msg.is_writer);
         info[key] = item.second;
     }
     return info;
 }
 
-dict PageEngine::getFileWriterInfo() const
+py::dict PageEngine::getFileWriterInfo() const
 {
-    dict info;
+    py::dict info;
     for (auto const &item: fileWriterCounts)
     {
         const PageCommMsg& msg = item.first;
-        boost::python::tuple key = boost::python::make_tuple(msg.folder, msg.name, msg.page_num, msg.last_page_num, msg.is_writer);
+        py::tuple key = py::make_tuple(msg.folder, msg.name, msg.page_num, msg.last_page_num, msg.is_writer);
         info[key] = item.second;
     }
     return info;
 }
 
-list PageEngine::getLockingFiles() const
+py::list PageEngine::getLockingFiles() const
 {
-    list files;
+    py::list files;
     for (auto const &iter: fileAddrs)
         files.append(iter.first);
     return files;
@@ -646,27 +646,30 @@ string getJournalName()
     return PAGED_JOURNAL_NAME;
 }
 
-BOOST_PYTHON_MODULE(libpaged)
+namespace py = pybind11;
+PYBIND11_MODULE(libpaged, m)
 {
-    class_<PageEngine, boost::shared_ptr<PageEngine> >("PageEngine", init<>())
+    py::class_<PageEngine, boost::shared_ptr<PageEngine> >(m, "PageEngine")
+    .def(py::init<>())
     .def("start", &PageEngine::start)
     .def("stop", &PageEngine::stop)
-    .def("setFreq", &PageEngine::set_freq, (arg("seconds")=0.1))
+    .def("setFreq", &PageEngine::set_freq, py::arg("seconds")=0.1)
     .def("addTask", &PageEngine::add_task)
     .def("removeTask", &PageEngine::remove_task)
     .def("status", &PageEngine::getStatus)
-    .def("write", &PageEngine::write, (arg("content"), arg("msg_type"), arg("is_last")=true, arg("source")=0))
+    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
     .def("switch_trading_day", &PageEngine::switch_trading_day);
 
-    class_<PstBase, boost::shared_ptr<PstBase>, boost::noncopyable>("PstBase", no_init);
-    class_<PstTimeTick, bases<PstBase>, boost::shared_ptr<PstTimeTick> >("TimeTick", init<PageEngine* >());
-    class_<PstTempPage, bases<PstBase>, boost::shared_ptr<PstTempPage> >("TempPage", init<PageEngine* >());
-    class_<PstKfController, bases<PstBase>, boost::shared_ptr<PstKfController> >("Controller", init<PageEngine* >())
+    // TODO boost::noncopyable ??
+    py::class_<PstBase, boost::shared_ptr<PstBase>>(m, "PstBase");
+    py::class_<PstTimeTick, PstBase, boost::shared_ptr<PstTimeTick> >(m, "TimeTick").def(py::init<PageEngine* >());
+    py::class_<PstTempPage, PstBase, boost::shared_ptr<PstTempPage> >(m, "TempPage").def(py::init<PageEngine* >());
+    py::class_<PstKfController, PstBase, boost::shared_ptr<PstKfController> >(m, "Controller").def(py::init<PageEngine* >())
     .def("set_switch_day_time", &PstKfController::setDaySwitch)
     .def("add_engine_start_time", &PstKfController::addEngineStart)
     .def("add_engine_end_time", &PstKfController::addEngineEnd);
 
-    def("socketf", &getSocketFileName);
-    def("jfolder", &getJournalFolder);
-    def("jname", &getJournalName);
+    m.def("socketf", &getSocketFileName);
+    m.def("jfolder", &getJournalFolder);
+    m.def("jname", &getJournalName);
 }

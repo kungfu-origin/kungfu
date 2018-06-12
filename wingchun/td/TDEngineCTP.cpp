@@ -500,11 +500,11 @@ void TDEngineCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTrading
     raw_writer->write_error_frame(pTradingAccount, sizeof(CThostFtdcTradingAccountField), source_id, MSG_TYPE_LF_RSP_ACCOUNT_CTP, bIsLast, nRequestID, errorId, errorMsg);
 }
 
-BOOST_PYTHON_MODULE(libctptd)
+namespace py = pybind11;
+PYBIND11_MODULE(libctptd, m)
 {
-    using namespace boost::python;
-    class_<TDEngineCTP, boost::shared_ptr<TDEngineCTP> >("Engine")
-    .def(init<>())
+    py::class_<TDEngineCTP, boost::shared_ptr<TDEngineCTP> >(m,"Engine")
+    .def(py::init<>())
     .def("init", &TDEngineCTP::initialize)
     .def("start", &TDEngineCTP::start)
     .def("stop", &TDEngineCTP::stop)

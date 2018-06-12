@@ -308,12 +308,11 @@ void TDEngineXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error
         on_rsp_position(&pos, is_last, request_id, error_info->error_id, error_info->error_msg);
     }
 }
-
-BOOST_PYTHON_MODULE(libxtptd)
+namespace py = pybind11;
+PYBIND11_MODULE(libxtptd, m)
 {
-    using namespace boost::python;
-    class_<TDEngineXTP, boost::shared_ptr<TDEngineXTP> >("Engine")
-    .def(init<>())
+    py::class_<TDEngineXTP, boost::shared_ptr<TDEngineXTP> >(m, "Engine")
+    .def(py::init<>())
     .def("init", &TDEngineXTP::initialize)
     .def("start", &TDEngineXTP::start)
     .def("stop", &TDEngineXTP::stop)

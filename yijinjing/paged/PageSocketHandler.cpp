@@ -22,7 +22,6 @@
 #include "PageSocketHandler.h"
 #include "Timer.h"
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/array.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/thread/mutex.hpp>

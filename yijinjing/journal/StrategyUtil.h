@@ -96,9 +96,9 @@ public:
     /** get request id range */
     IntPair getRequestIds() const;
     /** get request id (python) */
-    boost::python::tuple getPyRids() const;
+    pybind11::tuple getPyRids() const;
     /** python interface for subscription */
-    bool pySubscribe(boost::python::list tickers, int source);
+    bool pySubscribe(vector<string> tickers, int source);
 
 public:
     /** destructor */

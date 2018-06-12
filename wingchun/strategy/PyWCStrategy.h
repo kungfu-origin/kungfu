@@ -24,69 +24,113 @@
 
 #include "IWCStrategy.h"
 
+namespace py = pybind11;
+
 WC_NAMESPACE_START
 
-class PyWCStrategy: public IWCStrategy
-{
-private:
-    boost::python::object py_init;
-    boost::python::object py_on_switch_day;
-    boost::python::object py_on_pos;
-    boost::python::object py_on_error;
-    map<short, boost::python::object> py_on_data;
+        class PyWCStrategy : public IWCStrategy {
+        private:
+            py::object py_init = py::none();
+            py::object py_on_switch_day = py::none();
+            py::object py_on_pos = py::none();
+            py::object py_on_error = py::none();
+            py::object py_on_market_data = py::none();
+            py::object py_on_market_bar = py::none();
+            py::object py_on_rtn_order = py::none();
+            py::object py_on_rtn_trade = py::none();
 
-public:
-    virtual void start();
-    virtual void init();
-    virtual void on_market_bar(const BarMdMap& data, int min_interval, short source, long rcv_time);
-    virtual void on_market_data(const LFMarketDataField* data, short source, long rcv_time);
-    virtual void on_rtn_order(const LFRtnOrderField* data, int request_id, short source, long rcv_time);
-    virtual void on_rtn_trade(const LFRtnTradeField* data, int request_id, short source, long rcv_time);
-    virtual void on_rsp_order(const LFInputOrderField* data, int request_id, short source, long rcv_time, short errorId=0, const char* errorMsg=nullptr);
-    virtual void on_rsp_position(const PosHandlerPtr posMap, int request_id, short source, long rcv_time);
-    virtual void on_switch_day(long rcv_time);
-    //py log
-    virtual void log_debug(string msg) { KF_LOG_DEBUG(logger, msg); };
-    virtual void log_info(string msg) { KF_LOG_INFO(logger, msg); };
-    virtual void log_error(string msg) { KF_LOG_ERROR(logger, msg); };
-    virtual void log_fatal(string msg) { KF_LOG_FATAL(logger, msg); };
-    //set py function
-    void set_init(boost::python::object func);
-    void set_on_data(short msg_type, boost::python::object func);
-    void set_on_pos(boost::python::object func);
-    void set_on_error(boost::python::object func);
-    void set_on_switch_day(boost::python::object func);
+        public:
+            virtual void start();
+            virtual void block();
 
-    WCStrategyUtilPtr get_strategy_util() const { return util; }
-    WCDataWrapperPtr  get_data_wrapper()  const { return data; }
-    /** get effective orders */
-    boost::python::list get_effective_orders() const;
+            virtual void init();
 
-public:
-    // python binding, no char allowed, use string and transfer manually.
-    inline int insert_market_order_py(short source, string instrument_id, string exchange_id, int volume, string direction, string offset)
-    {
-        return insert_market_order(source, instrument_id, exchange_id, volume, direction[0], offset[0]);
-    }
-    inline int insert_limit_order_py(short source, string instrument_id, string exchange_id, double price, int volume, string direction, string offset)
-    {
-        return insert_limit_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
-    }
-    inline int insert_fok_order_py(short source, string instrument_id, string exchange_id, double price, int volume, string direction, string offset)
-    {
-        return insert_fok_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
-    }
-    inline int insert_fak_order_py(short source, string instrument_id, string exchange_id, double price, int volume, string direction, string offset)
-    {
-        return insert_fak_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
-    }
+            virtual void on_market_bar(const BarMdMap &data, int min_interval, short source, long rcv_time);
 
-public:
-    PyWCStrategy(const string& name): IWCStrategy(name) {}
-    PyWCStrategy(): IWCStrategy("Default") {}
-};
+            virtual void on_market_data(const LFMarketDataField *data, short source, long rcv_time);
 
-DECLARE_PTR(PyWCStrategy);
+            virtual void on_rtn_order(const LFRtnOrderField *data, int request_id, short source, long rcv_time);
+
+            virtual void on_rtn_trade(const LFRtnTradeField *data, int request_id, short source, long rcv_time);
+
+            virtual void
+            on_rsp_order(const LFInputOrderField *data, int request_id, short source, long rcv_time, short errorId = 0,
+                         const char *errorMsg = nullptr);
+
+            virtual void on_rsp_position(const PosHandlerPtr posMap, int request_id, short source, long rcv_time);
+
+            virtual void on_switch_day(long rcv_time);
+
+            virtual void on_time(long cur_time);
+
+            //py log
+            virtual void log_debug(string msg) { KF_LOG_DEBUG(logger, msg); };
+
+            virtual void log_info(string msg) { KF_LOG_INFO(logger, msg); };
+
+            virtual void log_error(string msg) { KF_LOG_ERROR(logger, msg); };
+
+            virtual void log_fatal(string msg) { KF_LOG_FATAL(logger, msg); };
+
+            //set py function
+            void set_init(py::object func);
+
+            void set_on_data(short msg_type, py::object func);
+
+            void set_on_pos(py::object func);
+
+            void set_on_error(py::object func);
+
+            void set_on_switch_day(py::object func);
+
+            void set_on_market_data(py::object func);
+
+            void set_on_market_bar(py::object func);
+
+            void set_on_rtn_order(py::object func);
+
+            void set_on_rtn_trade(py::object func);
+
+            WCStrategyUtilPtr get_strategy_util() const { return util; }
+
+            WCDataWrapperPtr get_data_wrapper() const { return data; }
+
+            /** get effective orders */
+            std::vector<int> get_effective_orders() const;
+
+        public:
+            // python binding, no char allowed, use string and transfer manually.
+            inline int
+            insert_market_order_py(short source, string instrument_id, string exchange_id, int volume, string direction,
+                                   string offset) {
+                return insert_market_order(source, instrument_id, exchange_id, volume, direction[0], offset[0]);
+            }
+
+            inline int
+            insert_limit_order_py(short source, string instrument_id, string exchange_id, double price, int volume,
+                                  string direction, string offset) {
+                return insert_limit_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
+            }
+
+            inline int
+            insert_fok_order_py(short source, string instrument_id, string exchange_id, double price, int volume,
+                                string direction, string offset) {
+                return insert_fok_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
+            }
+
+            inline int
+            insert_fak_order_py(short source, string instrument_id, string exchange_id, double price, int volume,
+                                string direction, string offset) {
+                return insert_fak_order(source, instrument_id, exchange_id, price, volume, direction[0], offset[0]);
+            }
+
+        public:
+            PyWCStrategy(const string &name) : IWCStrategy(name) {}
+
+            PyWCStrategy() : IWCStrategy("Default") {}
+        };
+
+        DECLARE_PTR(PyWCStrategy);
 
 WC_NAMESPACE_END
 

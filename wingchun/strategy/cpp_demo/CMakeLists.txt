@@ -25,7 +25,7 @@ SET(Boost_USE_MULTITHREADED ON)
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_STATIC_RUNTIME OFF)
 
-FIND_PACKAGE(Boost 1.62.0 COMPONENTS date_time filesystem system thread serialization math_tr1 python chrono regex program_options unit_test_framework  locale REQUIRED)
+FIND_PACKAGE(Boost 1.62.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework  locale REQUIRED)
 INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 
 FIND_PACKAGE(PythonInterp)
@@ -44,4 +44,4 @@ LINK_DIRECTORIES(/opt/kungfu/master/lib/wingchun)
 ############################################################
 SET(STRATEGY_SOURCE_FILE kungfu_strategy_demo.cpp)
 ADD_EXECUTABLE(${PROJECT_NAME} ${STRATEGY_SOURCE_FILE})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} wingchunstrategy python journal kflog log4cplus ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} wingchunstrategy ${PYTHON_LIBRARY} journal kflog log4cplus ${Boost_LIBRARIES})

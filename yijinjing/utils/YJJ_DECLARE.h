@@ -26,9 +26,13 @@
 /** python is necessary in most situation,
  * to remove the annoying warning on _POSIX_C_SOURCE,
  * simply put it in the top position. */
-#include <boost/python.hpp>
+//#include <boost/python.hpp>
 /** we use boost shared_ptr as our smart pointer */
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+#include <pybind11/pybind11.h>
+PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
+#include <pybind11/stl.h>
 #include <string>
 #include <vector>
 #include <map>
