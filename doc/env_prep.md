@@ -24,7 +24,9 @@ Instruments for preparing independent kungfu environment
         * ./bootstrap.sh --prefix=/opt/kungfu/toolchain/boost-1.62.0
         * ./b2 install --prefix=/opt/kungfu/toolchain/boost-1.62.0
 
-    * install cmake-[3.8.*] 
+    * install pybind11 [https://github.com/pybind/pybind11]
+
+    * install cmake-[3.8.*]
 
     * library search path:
         ```
@@ -39,5 +41,6 @@ Instruments for preparing independent kungfu environment
         ```
         
     * compiling kungfu and install kungfu
+        * add CMAKE arg -DKF_USE_PYTHON3=ON to compile for python 3.6
     
 **Contributed by Aimin Huang.**
