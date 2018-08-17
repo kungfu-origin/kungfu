@@ -18,6 +18,8 @@
  * @Author cjiang (changhao.jiang@taurus.ai)
  * @since   September, 2017
  */
+#include <exception> 
+#include <iostream>
 
 #include "WCStrategyUtil.h"
 #include "IWCDataProcessor.h"
