@@ -50,9 +50,15 @@ int WCStrategyUtil::process_callback(long cur_time)
         {
             if (IWCDataProcessor::signal_received <= 0)
             {
-                START_PYTHON_FUNC_CALLING
-                callbackUnit.func();
-                END_PYTHON_FUNC_CALLING
+                // START_PYTHON_FUNC_CALLING
+                try
+                {
+                    callbackUnit.func();
+                }catch(std::exception& e)
+                {
+                    throw std::runtime_error(__func__);
+                }
+                // END_PYTHON_FUNC_CALLING
             }
             callback_heap.pop();
             count ++;
