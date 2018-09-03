@@ -196,22 +196,7 @@ bool get_pos_tool(const string& user_name, short source, bool print_raw, bool ne
             std::cout << "end_time:\t" << info->end_time
                       << " (" << yijinjing::parseNano(info->end_time, TIME_FORMAT) << ")"
                       << std::endl;
-
-            std::cout << "last_order_index:\t" << info->last_order_index << std::endl;
             std::cout << "name:\t" << info->name << std::endl;
-            std::cout << "========" << std::endl;
-            std::cout << "orders:" << std::endl;
-            for (int i = 0; i <= info->last_order_index; i++)
-            {
-                const TDOrderInfo& order = info->orders[i];
-                if (order.status != ORDER_INFO_RAW)
-                {
-                    std::cout << "\t(order_id)" << order.order_id
-                              << " (local_id)" << order.local_id
-                              << " (ticker)" << order.ticker
-                              << " (status)" << order.status << std::endl;
-                }
-            }
             std::cout << "========" << std::endl;
         }
     }

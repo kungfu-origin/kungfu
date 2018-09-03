@@ -42,13 +42,15 @@ struct TDOrderInfo
     /** LfOrderStatusType, ORDER_INFO_RAW means nothing */
     char status;
     /** InstrumentID name */
-    char ticker[ORDER_INFO_TICKER_LIMIT];
-} __attribute__((packed));
+    string ticker;
 
-/** for one single strategy,
- * how many available orders can be supported.
- * available order */
-#define AVAILABLE_ORDER_LIMIT  10000
+    // set default values
+    TDOrderInfo(): order_id(-1), local_id(-1), status('\0')
+    {
+        ticker[0] = '\0';
+    }
+};
+
 /** enough space to store json for pos map */
 #define POS_JSON_STR_LENGTH  100000
 
@@ -68,17 +70,12 @@ struct TDUserInfo
     long start_time;
     /** last end time */
     long end_time;
-    /** last order request id (located order index)*/
-    int  last_order_index;
     /** strategy name */
     char name[JOURNAL_SHORT_NAME_MAX_LENGTH];
     /** folder name */
     char folder[JOURNAL_FOLDER_MAX_LENGTH];
     /** strategy-wise position */
     char pos_str[POS_JSON_STR_LENGTH];
-    /** order info hash-map base */
-    TDOrderInfo orders[AVAILABLE_ORDER_LIMIT];
-
 } __attribute__((packed));
 
 #define TD_USER_INFO_FOLDER KUNGFU_JOURNAL_FOLDER "user/" /**< where we put user info files */
@@ -97,13 +94,8 @@ private:
     map<string, TDUserInfo*> address_book;
     /** source */
     short source;
-
-protected:
-    /** internal locate at readable order with order_id, return nullptr if no available */
-    TDOrderInfo* locate_readable(const string& user_name, int order_id) const;
-    /** internal locate at writable order position with order_id, return nullptr if no available */
-    TDOrderInfo* locate_writable(const string& user_name, int order_id);
-
+    /** orders */
+    map<string, map<int, TDOrderInfo>> orders;
 protected:
     /** constructor with "write" authority */
     TDUserInfoHelper(short source);
@@ -117,8 +109,6 @@ protected:
     void record_order(const string& user_name, int local_id, int order_id, const char* ticker);
     /** set position json string */
     void set_pos(const string& user_name, const json& pos);
-    /** clean up user info */
-    void clean_up(TDUserInfo* info);
     /** get info block address for internal usage only */
     inline TDUserInfo* get_user_info(const string& user_name) const
     {
@@ -147,44 +137,6 @@ public:
 
 DECLARE_PTR(TDUserInfoHelper);
 
-/** for whole td engine,
- * how many orders can be supported.
- * available order */
-#define TD_AVAILABLE_ORDER_LIMIT  100000
-
-struct TDBasicOrderInfo
-{
-    /** request id of the order */
-    int  order_id;
-    /** assigned by TradeEngine */
-    int  local_id;
-    /** LfOrderStatusType, ORDER_INFO_RAW means nothing */
-    char status;
-} __attribute__((packed));
-
-/** VERSION */
-#define TD_ENGINE_INFO_VERSION 1
-
-struct TDEngineInfo
-{
-    /** TD_INFO_NORMAL / TD_INFO_WRITING / TD_INFO_FORCE_QUIT, others raw */
-    char status;
-    /** version */
-    short version;
-    /** start time */
-    long start_time;
-    /** last end time */
-    long end_time;
-    /** last order local id */
-    int  last_local_index;
-    /** source id name */
-    short source;
-    /** orders by local_id */
-    TDBasicOrderInfo orders[TD_AVAILABLE_ORDER_LIMIT];
-} __attribute__((packed));
-
-const int TD_ENGINE_INFO_SIZE = sizeof(TDEngineInfo) + 1024;
-
 class TDEngineInfoHelper
 {
     /** all method that may modify data must be private
@@ -192,11 +144,9 @@ class TDEngineInfoHelper
     friend class ITDEngine;
 
 private:
-    TDEngineInfo* info;
+    map<int, TDOrderInfo> orders;
 
 protected:
-    TDBasicOrderInfo* locate_readable(int local_id) const;
-    TDBasicOrderInfo* locate_writable(int local_id);
     void cleanup();
 
 protected:

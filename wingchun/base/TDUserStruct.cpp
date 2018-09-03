@@ -61,7 +61,6 @@ void TDUserInfoHelper::remove(const string& user_name)
     if (address_book.find(user_name) != address_book.end())
     {
         TDUserInfo* address = address_book[user_name];
-        clean_up(address);
         address->end_time = getNanoTime();
         address->status = TD_INFO_NORMAL;
         address_book.erase(user_name);
@@ -83,34 +82,7 @@ TDUserInfoHelper::~TDUserInfoHelper()
 
 void TDUserInfoHelper::switch_day()
 {
-    for (auto iter: address_book)
-    {
-        clean_up(iter.second);
-    }
-}
-
-void TDUserInfoHelper::clean_up(TDUserInfo* info)
-{
-    info->last_order_index = -1;
-    memset(info->orders, '\0', AVAILABLE_ORDER_LIMIT * sizeof(TDOrderInfo));
-}
-
-TDOrderInfo* TDUserInfoHelper::locate_readable(const string& user_name, int order_id) const
-{
-    TDUserInfo* info = get_user_info(user_name);
-    if (info == nullptr)
-        return nullptr;
-    int idx = order_id % AVAILABLE_ORDER_LIMIT;
-    int count = 0;
-    while (info->orders[idx].order_id != order_id && count < AVAILABLE_ORDER_LIMIT)
-    {
-        idx = (idx + 1) % AVAILABLE_ORDER_LIMIT;
-        count++;
-    }
-    if (count == AVAILABLE_ORDER_LIMIT)
-        return nullptr;
-    else
-        return &(info->orders[idx]);
+    orders.clear();
 }
 
 inline bool order_is_existing(char status)
@@ -122,55 +94,32 @@ inline bool order_is_existing(char status)
            && status != LF_CHAR_PartTradedNotQueueing;
 }
 
-TDOrderInfo* TDUserInfoHelper::locate_writable(const string &user_name, int order_id)
-{
-    TDUserInfo* info = get_user_info(user_name);
-    if (info == nullptr)
-        return nullptr;
-    int idx = order_id % AVAILABLE_ORDER_LIMIT;
-    int count = 0;
-    char status = info->orders[idx].status;
-    while (order_is_existing(status) && count < AVAILABLE_ORDER_LIMIT)
-    {
-        idx = (idx + 1) % AVAILABLE_ORDER_LIMIT;
-        status = info->orders[idx].status;
-        count++;
-    }
-    if (count == AVAILABLE_ORDER_LIMIT)
-        return nullptr;
-    else
-    {
-        if (idx > info->last_order_index)
-            info->last_order_index = idx;
-        return &(info->orders[idx]);
-    }
-}
-
 void TDUserInfoHelper::record_order(const string& user_name, int local_id, int order_id, const char* ticker)
 {
-    TDOrderInfo* order_info = locate_writable(user_name, order_id);
-    if (order_info != nullptr)
-    {
-        order_info->order_id = order_id;
-        order_info->local_id = local_id;
-        order_info->status = LF_CHAR_OrderInserted;
-        strncpy(order_info->ticker, ticker, ORDER_INFO_TICKER_LIMIT);
-    }
+    auto& order_info = orders[user_name][local_id];
+    order_info.order_id = order_id;
+    order_info.local_id = local_id;
+    order_info.status = LF_CHAR_OrderInserted;
+    order_info.ticker = ticker;
 }
 
 bool TDUserInfoHelper::get_order(const string& user_name, int order_id, int &local_id, char* ticker) const
 {
-    TDOrderInfo* order_info = locate_readable(user_name, order_id);
-    if (order_info != nullptr)
+    auto iter = orders.find(user_name);
+    if (iter != orders.end())
     {
-        local_id = order_info->local_id;
-        strncpy(ticker, order_info->ticker, ORDER_INFO_TICKER_LIMIT);
-        return true;
+        for (auto o_iter = iter->second.begin(); o_iter != iter->second.end(); ++o_iter)
+        {
+            if (o_iter->second.order_id == order_id)
+            {
+                local_id = o_iter->second.local_id;
+                strncpy(ticker, o_iter->second.ticker.c_str(), ORDER_INFO_TICKER_LIMIT);
+                return true;
+            }
+        }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 json TDUserInfoHelper::get_pos(const string& user_name) const
@@ -184,6 +133,7 @@ json TDUserInfoHelper::get_pos(const string& user_name) const
     else
     {
         pos = json::parse(info->pos_str);
+        pos["ok"] = true;
     }
     pos["name"] = user_name;
     return pos;
@@ -202,26 +152,31 @@ void TDUserInfoHelper::set_pos(const string& user_name, const json& pos)
 
 void TDUserInfoHelper::set_order_status(const string& user_name, int order_id, char status)
 {
-    TDOrderInfo* order_info = locate_readable(user_name, order_id);
-    if (order_info != nullptr)
+    auto& user_orders = orders[user_name];
+    for (auto iter = user_orders.begin(); iter != user_orders.end(); ++iter)
     {
-        order_info->status = status;
+        if (iter->second.order_id == order_id)
+        {
+            iter->second.status = status;
+        }
     }
 }
 
 vector<int> TDUserInfoHelper::get_existing_orders(const string& user_name) const
 {
     vector<int> order_ids;
-    auto info = get_user_info(user_name);
-    if (info != nullptr)
+    auto iter = orders.find(user_name);
+    if (iter != orders.end())
     {
-        for (int idx = 0; idx <= info->last_order_index; idx++)
+        for (auto o_iter = iter->second.begin(); o_iter != iter->second.end(); ++o_iter)
         {
-            TDOrderInfo& order = info->orders[idx];
-            if (order_is_existing(order.status))
-                order_ids.push_back(order.order_id);
+            if (order_is_existing(o_iter->second.status))
+            {
+                order_ids.push_back(o_iter->second.order_id);
+            }
         }
     }
+
     return order_ids;
 }
 
@@ -230,65 +185,16 @@ const TDUserInfo* TDUserInfoHelper::get_const_user_info(const string& user_name)
     return get_user_info(user_name);
 }
 
+/***********************/
 /** TDEngineInfoHelper */
+/***********************/
+
 TDEngineInfoHelper::TDEngineInfoHelper(short source, const string& name)
 {
-    std::stringstream ss;
-    ss << TD_USER_INFO_FOLDER << name;
-    info = (TDEngineInfo*)PageUtil::LoadPageBuffer(ss.str(), TD_ENGINE_INFO_SIZE, true, true);
-    if (info->status != TD_INFO_NORMAL)
-    {
-        memset(info, '\0', TD_ENGINE_INFO_SIZE);
-        info->version = TD_ENGINE_INFO_VERSION;
-        info->source = source;
-    }
-    info->status = TD_INFO_WRITING;
-    info->start_time = getNanoTime();
-    info->end_time = -1;
-    cleanup();
 }
 
 TDEngineInfoHelper::~TDEngineInfoHelper()
 {
-    info->end_time = getNanoTime();
-    info->status = TD_INFO_NORMAL;
-    PageUtil::ReleasePageBuffer(info, USER_INFO_SIZE, true);
-}
-
-TDBasicOrderInfo* TDEngineInfoHelper::locate_readable(int local_id) const
-{
-    int idx = local_id % TD_AVAILABLE_ORDER_LIMIT;
-    int count = 0;
-    while (info->orders[idx].local_id != local_id && count < TD_AVAILABLE_ORDER_LIMIT)
-    {
-        idx = (idx + 1) % TD_AVAILABLE_ORDER_LIMIT;
-        count ++;
-    }
-    if (count == TD_AVAILABLE_ORDER_LIMIT)
-        return nullptr;
-    else
-        return &(info->orders[idx]);
-}
-
-TDBasicOrderInfo* TDEngineInfoHelper::locate_writable(int local_id)
-{
-    int idx = local_id % TD_AVAILABLE_ORDER_LIMIT;
-    int count = 0;
-    char status = info->orders[idx].status;
-    while (order_is_existing(status) && count < TD_AVAILABLE_ORDER_LIMIT)
-    {
-        idx = (idx + 1) % TD_AVAILABLE_ORDER_LIMIT;
-        status = info->orders[idx].status;
-        count ++;
-    }
-    if (count == TD_AVAILABLE_ORDER_LIMIT)
-        return nullptr;
-    else
-    {
-        if (idx > info->last_local_index)
-            info->last_local_index = idx;
-        return &(info->orders[idx]);
-    }
 }
 
 void TDEngineInfoHelper::switch_day()
@@ -298,35 +204,33 @@ void TDEngineInfoHelper::switch_day()
 
 void TDEngineInfoHelper::cleanup()
 {
-    info->last_local_index = -1;
-    memset(info->orders, '\0', TD_AVAILABLE_ORDER_LIMIT * sizeof(TDBasicOrderInfo));
+    orders.clear();
 }
 
 void TDEngineInfoHelper::set_order_status(int local_id, char status)
 {
-    TDBasicOrderInfo* order = locate_readable(local_id);
-    if (order != nullptr)
+    auto iter = orders.find(local_id);
+    if (iter != orders.end())
     {
-        order->status = status;
+        iter->second.status = status;
     }
 }
 
 int TDEngineInfoHelper::get_order_id(int local_id)
 {
-    TDBasicOrderInfo* order = locate_readable(local_id);
-    if (order != nullptr)
-        return order->order_id;
-    else
-        return -1;
+    auto iter = orders.find(local_id);
+    if (iter != orders.end())
+    {
+        return iter->second.order_id;
+    }
+
+    return -1;
 }
 
 void TDEngineInfoHelper::record_order(int local_id, int order_id)
 {
-    TDBasicOrderInfo* order = locate_writable(local_id);
-    if (order != nullptr)
-    {
-        order->order_id = order_id;
-        order->local_id = local_id;
-        order->status = LF_CHAR_OrderInserted;
-    }
+    auto& order = orders[local_id];
+    order.order_id = order_id;
+    order.local_id = local_id;
+    order.status = LF_CHAR_OrderInserted;
 }
