@@ -1,0 +1,11 @@
+[[source]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+sqlalchemy = "~=1.2"
+pyinstaller = ">=3.0"
+
+[dev-packages]
+pytest = "*"

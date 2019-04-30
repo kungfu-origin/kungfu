@@ -1,0 +1,22 @@
+{
+    "task": [
+        {
+            "table": "task",
+            "sql": "CREATE TABLE IF NOT EXISTS kungfu_task(name VARCHAR(250) NOT NULL PRIMARY KEY, task_type char(10), config VARCHAR NOT NULL); "
+        }
+    ],
+    "accounts": [
+        {
+            "table": "accounts",
+            "sql": "create table if not exists account_config(account_id char(50) PRIMARY KEY, source_name char(50), receive_md bool, config);"
+        }
+    ],
+
+    "strategys": [
+        {
+            "table": "strategys",
+            "sql": "create table if not exists strategys(strategy_id char(20) PRIMARY KEY, strategy_path char(250), add_time int);"
+
+        }
+    ]
+}

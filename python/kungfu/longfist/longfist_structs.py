@@ -4,9 +4,9 @@
 
 from ctypes import *
 
-import longfist_constants as lf
+from . import longfist_constants as lf
 
-from longfist_structs_sniffer import *
+from .longfist_structs_sniffer import *
 
 class LFMarketDataField(Structure):
     _fields_ = [

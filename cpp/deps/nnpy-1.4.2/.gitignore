@@ -1,0 +1,4 @@
+.eggs
+nnpy.egg-info
+build
+dist

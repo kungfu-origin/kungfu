@@ -1,0 +1,183 @@
+{
+  "name": "kungfu",
+  "author": "taurus.ai",
+  "version": "2.0.0",
+  "description": "KungFu Trader",
+  "config": {
+    "pyver": "three",
+    "cmakejsopt": ""
+  },
+  "main": "./dist/main.js",
+  "engines": {
+    "node": "8"
+  },
+  "scripts": {
+    "postinstall": "pipenv install && pipenv run python python/cmakesetup.py && electron-builder install-app-deps",
+    "config": "npm run config:cpp && npm run config:py",
+    "config:cpp": "cross-var cmake-js configure --$npm_package_config_cmakejsopt",
+    "config:py": "cross-var pipenv --$npm_package_config_pyver",
+    "config:echo": "cross-var echo cmakejsopt:$npm_package_config_cmakejsopt pyver:$npm_package_config_pyver",
+    "postconfig:py": "pipenv install && pipenv run python python/cmakesetup.py",
+    "clean": "npm run clean:engine && npm run clean:view",
+    "clean:engine": "cmake-js clean",
+    "clean:view": "rimraf .node-gyp .electron-gyp dist",
+    "build": "npm run build:engine && npm run build:view",
+    "build:engine": "cross-var cmake-js build --$npm_package_config_cmakejsopt",
+    "postbuild:engine": "cross-var cross-env CMAKEJSOPT=\"$npm_package_config_cmakejsopt\" pipenv run python python/pyinstaller.py",
+    "build:view": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
+    "dev": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && node .electron-kungfu/dev-runner.js",
+    "dist": "npm run dist:render && npm run dist:main",
+    "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
+    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js"
+  },
+  "build": {
+    "productName": "Kungfu.Trader",
+    "appId": "taurus.ai.KungFu.Trader",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "dist/**/*",
+      {
+        "from": ".",
+        "to": "dist",
+        "filter": [
+          "resources"
+        ]
+      },
+      {
+        "from": "wingchun/resources",
+        "to": "dist/resources/default",
+        "filter": [
+          "commission.db"
+        ]
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "build/kfc",
+        "to": "kfc"
+      }
+    ],
+    "asar": true,
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "./resources/logo/icon.icns",
+      "type": "distribution",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "icon": "./resources/logo/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "./resources/logo"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./resources/logo/icon.ico",
+      "uninstallerIcon": "./resources/logo/icon.ico",
+      "installerHeaderIcon": "./resources/logo/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "codemirror": "^5.44.0",
+    "element-ui": "2.4.8",
+    "fkill": "^6.1.0",
+    "fs-extra": "^7.0.1",
+    "log4js": "^4.0.2",
+    "mime": "^2.4.0",
+    "moment": "^2.24.0",
+    "nan": "2",
+    "nanomsg": "^4.0.2",
+    "pm2": "^3.5.0",
+    "sqlite3": "^4.0.6",
+    "tail": "^2.0.2",
+    "vue": "^2.6.10",
+    "vue-router": "^3.0.1",
+    "vue-virtual-scroller": "^1.0.0-rc.2",
+    "vuex": "^3.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.395.0",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-component": "^1.1.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "babili-webpack-plugin": "^0.1.2",
+    "bindings": "^1.5.0",
+    "boost-lib": "^0.11.3",
+    "cfonts": "^1.1.3",
+    "chai": "^4.0.0",
+    "chalk": "^2.1.0",
+    "cmake-js": "^5.1.0",
+    "compression-webpack-plugin": "^2.0.0",
+    "copyfiles": "^2.1.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^5.0.5",
+    "cross-var": "^1.1.0",
+    "css-loader": "^2.1.1",
+    "del": "^3.0.0",
+    "devtron": "^1.4.0",
+    "electron": "4.0.3",
+    "electron-builder": "^20.38.5",
+    "electron-debug": "^1.4.0",
+    "electron-devtools-installer": "^2.2.0",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^0.11.2",
+    "html-webpack-plugin": "^2.30.1",
+    "inject-loader": "^3.0.0",
+    "mkdirp": "^0.5.1",
+    "multispinner": "^0.2.1",
+    "node-loader": "^0.6.0",
+    "node-sass": "^4.11.0",
+    "optimize-js-plugin": "^0.0.4",
+    "preload-webpack-plugin": "^2.3.0",
+    "require-dir": "^0.3.0",
+    "rimraf": "^2.6.3",
+    "sass-loader": "^7.0.3",
+    "spectron": "^3.7.1",
+    "style-loader": "^0.21.0",
+    "url-loader": "^1.1.2",
+    "vue-electron": "^1.0.6",
+    "vue-html-loader": "^1.2.4",
+    "vue-loader": "^13.0.5",
+    "vue-style-loader": "^3.0.1",
+    "vue-template-compiler": "^2.4.2",
+    "webpack": "^3.5.2",
+    "webpack-bundle-analyzer": "^3.1.0",
+    "webpack-dev-server": "3.0.0",
+    "webpack-hot-middleware": "^2.18.2",
+    "webpack-merge": "^4.1.0",
+    "webpack-permissions-plugin": "^1.0.0"
+  }
+}

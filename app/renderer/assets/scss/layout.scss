@@ -1,0 +1,179 @@
+@charset 'utf-8';
+@import './skin.scss';
+
+
+.tr-container{
+    background: $bg;
+    width:100%;
+    height: 100%;
+    
+    .tr-aside{
+        background: $bg_card;
+        box-shadow: 2px 0 6px 0 #0C0F1C;
+        transition: width 0.4s;
+        position: relative;
+        .el-menu{
+            background: $bg_card;
+            border-right: none;
+            .el-menu-item{
+                height: 40px;
+                line-height: 40px;
+                padding: 0 10px !important;
+                span{
+                    padding-left: 16px;
+                }
+                &:hover, &:focus{
+                    background: $bg_light;
+                    color: $vi;
+                    i{
+                        color: $vi;
+                    }
+                }
+                .is-active{
+                    background:  $bg_light
+                }
+            }
+            .el-submenu{
+                .el-submenu__title{
+                    height: 40px;
+                    line-height: 40px;
+                    padding: 0 10px !important;
+                    span{
+                        padding-left: 16px;
+                    }
+                    .el-submenu__icon-arrow{
+                        right: 10px;
+                    }
+                    .fa-gear{
+                        font-size: 18px;
+                    }
+                    .fa-lightbulb-o{
+                        font-size: 20px;
+                    }
+                    &:hover{
+                        background: $bg_light;
+                        color: $vi;
+                        i{
+                            color: $vi;
+                        }
+                    }
+                }
+                //内部的子节点
+                .el-menu{
+                    .el-menu-item{
+                        padding: 0 40px !important;
+                    }
+                }
+            }
+            //当缩小的的时候添加padding
+            .tr-submenu-collapse{
+                .el-submenu__title{
+                    padding: 0 20px !important;
+                }
+                .color-vi{
+                    color: $vi;
+                }
+            }
+        }
+    
+    }
+    .el-container{
+        height: 100%;
+    }
+    
+
+    .el-header{
+        background: $bg_card;
+        line-height: 50px;
+        padding-left: 0px;
+        padding-right: 18px;
+        margin-bottom: 8px;
+    }
+    .pop-header{
+        margin-left: 0px;
+    }
+    .el-footer{
+        background: $bg;
+        padding: 8px 0 0 0;
+        .footer-content{
+            background: $bg_card;
+            height: 100%;
+        }
+    }
+    .tr-main{
+        background: $bg;
+        height: 100%;
+        padding: 0px 8px 0 8px;
+        overflow-x: hidden;
+        >div{
+            width: 100%;
+            position: relative;
+        }
+    }
+    .pop-main{
+        // padding: 0px 8px 8px 8px;
+        padding: 0px 0px 0px 0px;
+        height: 100%;
+        .top{
+            height: $tabHeight;
+            line-height: $tabHeight;
+            padding: 0 10px;
+            box-sizing: border-box;
+            background: $bg_card;
+            &.no-bg{
+                background: none;
+            }
+        }
+        .main-breadcrumb{
+            height: 24px;
+            line-height: 24px;
+            margin-top: 6px;
+            float: left;
+        }
+        .pop-content{
+            height: calc(100% - 36px);
+            width: 100%;
+        }
+        .top-right{
+            float: right;
+            // margin-right: 8px;
+            // margin-top: 5px;
+        }
+    }
+    i{
+        color: $icon
+    }
+    .fa{
+        font-size: 16px
+    }
+    .fa-fw{
+        width: 20px;
+    }
+
+}
+
+
+
+
+//二级菜单悬浮定位，所以无法属于哪个class下
+.el-menu--vertical{
+    background: $bg_light;
+    .el-menu{
+        background: $bg_light;
+        li:hover{
+            background: $font;
+            color: $vi;
+        }
+    }
+    .el-menu--popup{
+        padding: 0px;
+        min-width: 120px;
+    }
+    .el-menu--popup-right-start{
+        margin: 0px;
+        .el-menu-item{
+            height: 40px;
+            line-height: 40px;
+        }
+    }
+}

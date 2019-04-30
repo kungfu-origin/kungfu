@@ -1,0 +1,30 @@
+Switch to C++11 for v3.0.0
+
+Add a Tutorial for SQLite newbies
+Add a real example in the form of a small interactive console application
+
+Improve Github Wiki pages with the FAQ: Installation, Examples, Tutorial, How to contribute
+Publish the Doxygen Documentation in the Github Pages (gh-pages branch)
+
+Missing features in v2.0.0:
+- #24: executemany() like in Python https://docs.python.org/2/library/sqlite3.html#sqlite3.Connection.executemany
+- #34: Better type for getColumn
+
+Missing documentation in v2.0.0:
+- explain the noncopyable property for RAII design
+- comment on returning error code instead of exception that shall not be thrown when expected (!?)
+
+Missing unit tests in v2.0.0:
+- Load Extension (not practicable, and easy to verify by code review)
+
+Advanced missing features:
+- #39: SAVEPOINT https://www.sqlite.org/lang_savepoint.html
+
+- Add optional usage of experimental sqlite3_trace() function to enable statistics
+- Agregate ?
+
+- support for different transaction mode ? NO: too specific
+- operator<< binding ? NO: redundant with bind()
+- ATTACH Database ? NO: can already be done by "ATTACH" Statement
+
+Post an article to CodeProject: Is there a license issue ?

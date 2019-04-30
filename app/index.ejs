@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>KungFu.Trade</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<% if (htmlWebpackPlugin.options.nodeModules) { %>
+	<!-- Add `node_modules/` to global paths so `require` works properly in development -->
+	<script>
+		require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
+	</script>
+	<% } %>
+	<style>
+		html{color:#000;background:#FFF;} 
+		body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form, 
+		fieldset,input,textarea,p,blockquote,th,td { 
+		margin:0; 
+		padding:0; 
+		} 
+		table { 
+		border-collapse:collapse; 
+		border-spacing:0; 
+		} 
+		fieldset,img { 
+		border:0; 
+		} 
+		address,caption,cite,code,dfn,em,strong,th,var { 
+		font-style:normal; 
+		font-weight:normal; 
+		} 
+		ol,ul { 
+		list-style:none; 
+		} 
+		caption,th { 
+		text-align:left; 
+		} 
+		h1,h2,h3,h4,h5,h6 { 
+		font-size:100%; 
+		font-weight:normal; 
+		} 
+		q:before,q:after { 
+		content:''; 
+		} 
+		abbr,acronym { border:0; 
+		}
+
+		html,body{
+		height: 100%;
+		/* font-family: STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑"; */
+		font-family: Arial, sans-serif;
+		}
+		#loading{
+		background-color: #161B2E;
+		height: 100%;
+		width: 100%;
+		position: fixed;
+		z-index: 1;
+		margin-top: 0px;
+		top: 0px;
+		}
+		#loading-center{
+		width: 100%;
+		height: 100%;
+		position: relative;
+		}
+		#loading-center-absolute {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		height: 50px;
+		width: 150px;
+		margin-top: -25px;
+		margin-left: -75px;
+		display: flex;
+		align-items: flex-end;
+
+		}
+		.object{
+		width: 8px;
+		height: 40px;
+		margin-right:5px;
+		background-color: #FAAD14;
+		-webkit-animation: animate 1s infinite;
+		animation: animate 1s infinite;
+		float: left;
+		transform-origin : 50% 100%;
+		}
+
+		.object:nth-child(6){
+		-webkit-animation-delay: 0.5s;
+		animation-delay: 0.5s;	
+		}
+		.object:nth-child(5){
+		-webkit-animation-delay: 0.4s;
+		animation-delay: 0.4s;
+		}
+		.object:nth-child(4){
+		-webkit-animation-delay: 0.3s;
+		animation-delay: 0.3s;		
+		}
+		.object:nth-child(3){
+		-webkit-animation-delay: 0.2s;
+		animation-delay: 0.2s;	
+		}
+		.object:nth-child(2){
+		-webkit-animation-delay: 0.1s;
+		animation-delay: 0.1s;
+		}	
+		@-webkit-keyframes animate {
+		50% {
+		-ms-transform: scaleY(0.5); 
+		-webkit-transform: scaleY(0.5);
+		transform: scaleY(0.5);
+		}
+		}
+		@keyframes animate {
+		50% {
+		-ms-transform: scaleY(0.5); 
+		-webkit-transform: scaleY(0.5);
+		transform: scaleY(0.5);
+		}
+		}
+	</style>
+</head>
+<body>
+	<div id="loading">
+	<div id="loading-center">
+		<div id="loading-center-absolute">
+		<div class="object"></div>
+		<div class="object"></div>
+		<div class="object"></div>
+		<div class="object"></div>
+		<div class="object"></div>
+		<div class="object"></div>
+		</div>
+	</div>
+	</div>
+	<div id="app"></div>
+</body>
+<script>
+	if (process.env.NODE_ENV !== 'development') window.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')
+</script>
+</html>

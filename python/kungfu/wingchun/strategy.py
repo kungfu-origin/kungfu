@@ -1,108 +1,197 @@
-'''
-Copyright [2017] [taurus.ai]
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-'''
-
-import os, sys, importlib, ctypes
-import kungfu.longfist.longfist_constants as lf
-import kungfu.longfist.longfist_structs as structs
+import os
+import sys
+import importlib
+import ctypes
+import nnpy
+import json
 from functools import partial
-import libwingchunstrategy
-from wc_configs import context
-from wc_configs import context_usage
-from constants import ORDER_STATUS
+from kungfu.wingchun.structs import *
+from kungfu.wingchun.EventLoop import EventLoop
+from kungfu.wingchun.context import context
+import pystrategy
+import pyyjj
 
 class Strategy:
+    def __init__(self, name, path):
+        self._base_dir = os.environ['KF_HOME']
 
-    def __init__(self, strategy_name, file_name):
-        self.strategy = libwingchunstrategy.Strategy(strategy_name)
-        context.data_wrapper = self.strategy.get_data_wrapper()
-        context.strategy_util = self.strategy.get_strategy_util()
-        for func_name, transfer_func, comment, params in context_usage:
-            context[func_name] = transfer_func(self.strategy)
-        sys.path.append(os.path.dirname(file_name))
-        self.module = self.get_module(file_name)
-        self.setup_functions()
+        self._name = name
+        self._event_loop = EventLoop(name)
+        self._util = pystrategy.Util(name)
 
-    def get_module(self, file_name):
-        tmp_folder = '/shared/kungfu/runtime/'
-        module_name = os.path.splitext(os.path.basename(file_name))[0] + '_kungfu'
-        fout = open('{}{}.py'.format(tmp_folder, module_name), 'w')
-        fout.write('''from kungfu.wingchun.constants import *\n''')
-        fout.write(open(file_name).read())
-        fout.close()
-        sys.path.append(tmp_folder)
-        module = importlib.import_module(module_name)
-        sys.path.remove(tmp_folder)
-        return module
+        self._on_quote = None
+        self._on_order = None
+        self._on_trade = None
+        self.__init_context()
+        self.__init_strategy(path)
+
+    def __init_context(self):
+
+        context.stop = self.stop
+
+        context.add_md = self.add_md
+        context.add_account = self.add_account
+        context.register_algo_service = self.register_algo_service
+
+        context.get_nano = self.get_nano
+        context.get_last_md = self.get_last_md
+
+        context.set_log_level = self._util.set_log_level
+        context.log_info = self._util.log_info
+        context.log_error = self._util.log_error
+        context.log_warn = self._util.log_warn
+
+        context.subscribe = self._util.subscribe
+
+        context.insert_limit_order = self._util.insert_limit_order
+        context.insert_fok_order = self._util.insert_fok_order
+        context.insert_fak_order = self._util.insert_fak_order
+        context.insert_market_order = self._util.insert_market_order
+        context.cancel_order = self._util.cancel_order
+
+        context.get_initial_equity = self._util.get_initial_equity
+        context.get_static_equity = self._util.get_static_equity
+        context.get_dynamic_equity = self._util.get_dynamic_equity
+        context.get_accumulated_pnl = self._util.get_accumulated_pnl
+        context.get_accumulated_pnl_ratio = self._util.get_accumulated_pnl_ratio
+        context.get_intraday_pnl = self._util.get_intraday_pnl
+        context.get_intraday_pnl_ratio = self._util.get_intraday_pnl_ratio
+
+        context.get_long_tot = self._util.get_long_tot
+        context.get_long_tot_avail = self._util.get_long_tot_avail
+        context.get_long_tot_fro = self._util.get_long_tot_fro
+        context.get_long_yd = self._util.get_long_yd
+        context.get_long_yd_avail = self._util.get_long_yd_avail
+        context.get_long_yd_fro = self._util.get_long_yd_fro
+        context.get_long_realized_pnl = self._util.get_long_realized_pnl
+        context.get_long_unrealized_pnl = self._util.get_long_unrealized_pnl
+        context.get_long_cost_price = self._util.get_long_cost_price
+        context.get_long_pos = self._util.get_long_pos
+
+        context.get_short_tot = self._util.get_short_tot
+        context.get_short_tot_avail = self._util.get_short_tot_avail
+        context.get_short_tot_fro = self._util.get_short_tot_fro
+        context.get_short_yd = self._util.get_short_yd
+        context.get_short_yd_avail = self._util.get_short_yd_avail
+        context.get_short_yd_fro = self._util.get_short_yd_fro
+        context.get_short_realized_pnl = self._util.get_short_realized_pnl
+        context.get_short_unrealized_pnl = self._util.get_short_unrealized_pnl
+        context.get_short_cost_price = self._util.get_short_cost_price
+        context.get_short_pos = self._util.get_short_pos
+
+        context.register_nanotime_callback = self.register_nanotime_callback
+        context.register_nanotime_callback_with_context = self.register_nanotime_callback_with_context
+        context.parse_nano = pyyjj.parse_nano
+        context.parse_time = pyyjj.parse_time
+
+    def __init_strategy(self, path):
+        strategy_dir = os.path.dirname(path)
+        name_no_ext = os.path.split(os.path.basename(path))
+        sys.path.append(os.path.relpath(strategy_dir))
+        impl = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
+        self._on_quote = getattr(impl, 'on_quote', lambda ctx, quote: None)
+        self._on_entrust = getattr(impl, 'on_entrust', lambda ctx, entrust: None)
+        self._on_transaction = getattr(impl, "on_transaction", lambda ctx, transaction: None)
+        self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
+        self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
+        self._pre_run = getattr(impl, 'pre_run', lambda ctx: None)
+        self._pre_quit = getattr(impl, 'pre_quit', lambda ctx: None)
+        self._on_switch_day = getattr(impl, "on_switch_day", lambda ctx, trading_day: None)
+        self._util.register_switch_day_callback(lambda trading_day: self._on_switch_day(context, trading_day))
+
+        getattr(impl, 'init', lambda ctx: None)(context)
 
     def run(self):
-        self.strategy.init()
-        self.strategy.start()
-        self.strategy.block()
 
-    def set_func(self, msg_type, func_name):
-        func = getattr(self.module, func_name, None)
-        if func != None:
-            def func_parse(func, msg_type, raw_data, source, nano):
-                data = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[msg_type])).contents
-                return func(context, data, source, nano)
-            self.strategy.set_on_data(msg_type, partial(func_parse, func, msg_type))
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano()), self.__on_1min_timer)
+        self._event_loop.register_nanotime_callback_at_next('15:30:00', self.__on_1day_timer)
 
-    def set_func_rid(self, msg_type, func_name):
-        func = getattr(self.module, func_name, None)
-        if func != None:
-            def func_parse(func, msg_type, raw_data, request_id, source, nano):
-                data = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[msg_type])).contents
-                return func(context, data, request_id, source, nano)
-            self.strategy.set_on_data(msg_type, partial(func_parse, func, msg_type))
+        self._event_loop.register_quote_callback(self.__process_quote)
+        self._event_loop.register_entrust_callback(self.__process_entrust)
+        self._event_loop.register_transaction_callback(self.__process_transaction)
+        self._event_loop.register_order_callback(self.__process_order)
+        self._event_loop.register_trade_callback(self.__process_trade)
 
-    def set_bar(self, func_name):
-        bar_func = getattr(self.module, func_name, None)
-        if bar_func is not None:
-            def func_parse(func, raw_dict, min_interval, source, nano):
-                new_dict = {}
-                for ticker, raw_data in raw_dict.items():
-                    new_dict[ticker] = ctypes.cast(raw_data, ctypes.POINTER(structs.MsgType2LFStruct[lf.MsgTypes.BAR_MD])).contents
-                return func(context, new_dict, min_interval, source, nano)
-            self.strategy.set_on_data(lf.MsgTypes.BAR_MD, partial(func_parse, bar_func))
+        self._event_loop.register_signal_callback(lambda sig: self._pre_quit(context))
 
-    def set_func_error(self, func_name):
-        bar_func = getattr(self.module, func_name, None)
-        if bar_func is not None:
-            self.strategy.set_on_error(partial(bar_func, context))
+        self._pre_run(context)
+        self._event_loop.run()
 
-    def set_func_pos(self, func_name):
-        pos_func = getattr(self.module, func_name, None)
-        if pos_func is not None:
-            self.strategy.set_on_pos(partial(pos_func, context))
+    def stop(self):
+        self._event_loop.stop()
+        self._pre_quit(context)
 
-    def set_func_switch_day(self, func_name):
-        switch_day_func = getattr(self.module, func_name, None)
-        if switch_day_func is not None:
-            self.strategy.set_on_switch_day(partial(switch_day_func, context))
+    def add_md(self, source_id):
+        self._event_loop.subscribe_yjj_journal(self.__get_md_journal_folder(source_id), self.__get_md_journal_name(source_id), pyyjj.nano())
+        return self._util.add_md(source_id)
 
-    def setup_functions(self):
-        init_func = getattr(self.module, 'initialize', None)
-        if init_func is None:
-            raise Exception('No \"initialize\" function')
-        self.strategy.set_init(partial(init_func, context))
+    def add_account(self, source_id, account_id, cash_limit):
+        self._event_loop.subscribe_yjj_journal(self.__get_td_journal_folder(source_id, account_id), self.__get_td_journal_name(source_id, account_id), pyyjj.nano())
+        return self._util.add_account(source_id, account_id, cash_limit)
 
-        self.set_bar('on_bar')
-        self.set_func(lf.MsgTypes.MD, 'on_tick')
-        self.set_func_rid(lf.MsgTypes.RTN_ORDER, 'on_rtn_order')
-        self.set_func_rid(lf.MsgTypes.RTN_TRADE, 'on_rtn_trade')
-        self.set_func_error('on_error')
-        self.set_func_pos('on_pos')
-        self.set_func_switch_day('on_switch_day')
+    def register_algo_service(self):
+        return self._util.register_algo_service()
+
+    def register_nanotime_callback(self, nano, callback):
+        self._event_loop.register_nanotime_callback(nano, callback)
+
+    def register_nanotime_callback_with_context(self, nano, callback):
+        self._event_loop.register_nanotime_callback(nano, partial(callback, context))
+
+    def get_nano(self):
+        return self._event_loop.get_nano()
+
+    def get_last_md(self, instrument_id, exchange_id):
+        return ctypes.cast(self._util.get_last_md(instrument_id, exchange_id),ctypes.POINTER(Quote)).contents
+
+    def __on_1min_timer(self, nano):
+        self._util.on_push_by_min()
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(nano), self.__on_1min_timer)
+
+    def __on_1day_timer(self, nano):
+        self._util.on_push_by_day()
+        self._event_loop.register_nanotime_callback_at_next('15:30:00', self.__on_1day_timer)
+
+    def __get_md_journal_folder(self, source):
+        return self._base_dir + '/journal/md/' + source
+
+    def __get_md_journal_name(self, source):
+        return "md_" + source
+
+    def __get_td_journal_folder(self, source, account_id):
+        return self._base_dir + '/journal/td/' + source + '/' + account_id
+
+    def __get_td_journal_name(self, source, account_id):
+        return "td_{}_{}".format(source, account_id)
+
+    def __nseconds_next_min(self, nano):
+        cur_time = pyyjj.parse_nano(nano, '%Y%m%d %H:%M:%S')
+        return pyyjj.parse_time(cur_time[:-2] + '00', '%Y%m%d %H:%M:%S') + 60 * 1e9
+
+    def __process_quote(self, quote):
+        ctype_quote = ctypes.cast(quote,ctypes.POINTER(Quote)).contents
+        if self._util.is_subscribed(ctype_quote.source_id, ctype_quote.instrument_id, ctype_quote.exchange_id):
+            self._util.on_quote(quote)
+            self._on_quote(context, ctype_quote)
+
+    def __process_entrust(self, entrust):
+        ctype_entrust = ctypes.cast(entrust,ctypes.POINTER(Entrust)).contents
+        if self._util.is_subscribed(ctype_entrust.source_id, ctype_entrust.instrument_id, ctype_entrust.exchange_id):
+            self._on_entrust(context, ctype_entrust)
+
+    def __process_transaction(self, transaction):
+        ctype_transaction = ctypes.cast(transaction,ctypes.POINTER(Transaction)).contents
+        if self._util.is_subscribed(ctype_transaction.source_id, ctype_transaction.instrument_id, ctype_transaction.exchange_id):
+            self._on_transaction(context, ctype_transaction)
+
+    def __process_order(self, order):
+        ctype_order = ctypes.cast(order,ctypes.POINTER(Order)).contents
+        if self._name == ctype_order.client_id.decode('utf-8'):
+            self._util.on_order(order)
+            self._on_order(context, ctype_order)
+
+    def __process_trade(self, trade):
+        ctype_trade = ctypes.cast(trade,ctypes.POINTER(Trade)).contents
+        if self._name == ctype_trade.client_id.decode('utf-8'):
+            self._util.on_trade(trade)
+            self._on_trade(context, ctype_trade)

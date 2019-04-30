@@ -1,0 +1,171 @@
+<html>
+    <script type="text/javascript">
+        const ipc = require('electron').ipcRenderer
+        const BrowserWindow = require('electron').remote.BrowserWindow
+        const Vue = require('Vue')
+        const sqlite3 = require('sqlite3').verbose();
+        const fs = require('fs');
+        const path = require('path')
+        const mainProcess = require('electron').app
+        const renderProcess = require('electron').remote
+        const ELEC_BASE_DIR = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
+
+        //账户的order数据库的地址
+        const buildAccountOrdersDBPath = (accountId) => {
+            return path.join(ELEC_BASE_DIR, 'app', 'accounts', accountId, 'orders.db')
+        }
+        //某策略的账户的数据库地址
+        const buildStrategyAccountsDBPath = (strategyId) => {
+            return path.join(ELEC_BASE_DIR, 'app', 'strategy', strategyId, 'account_list.db')
+        }
+
+        //查询数据库
+        const runSelectDB = (dbPath, sql, args) =>{
+            return new Promise((resolve, reject) => {
+                if(!fs.existsSync(dbPath)){
+                    resolve([])
+                    return new Error(`${dbPath} 不存在！`)
+                }
+                const db = new sqlite3.Database(dbPath)
+                db.serialize(() => {
+                    db.all(sql, args, (err, res) => {
+                        if(!err){
+                            resolve(res)
+                            db.close();
+                        }else{
+                            reject(err)
+                            db.close();
+                        }
+                    })
+                })
+            })
+        }
+
+        //保留几位数据
+        //(数据，保留位数，结果乘几个10，类型)
+        const toDecimal = (num, digit = 2, multiply = 0, type = 'round') => {
+            if(isNaN(parseFloat(num))) return ''; //如果为转换后为NaN,返回空
+
+            //如果存在科学计数法的数据则返回不做处理
+            if(num.toString().indexOf('e') != -1) return num
+
+            const multiplyNum = Math.pow(10,multiply);
+            let floatNum = parseFloat(num);
+            const digitNum = Math.pow(10,digit);
+
+            floatNum = Math[type](floatNum * digitNum)/(digitNum/multiplyNum);
+
+            return floatNum;
+        }
+
+
+        //获取撤单比需要获取orders
+        function getMakeCancelOrderRate(posDataByKey, pageType, currentId){
+
+            const targetAPI = pageType == 'account' ? getAccountOrder : getStrategyOrder
+            return new Promise((resolve, reject) => {
+                if(!posDataByKey) {
+                    resolve(Object.freeze([]))
+                    return
+                } 
+                
+                //clear
+                const promises = Object.values(posDataByKey || {}).map(item => {                    
+                    const ticker = item.instrumentId
+                    const direction = item.direction
+                    return targetAPI(
+                        currentId,
+                        ticker
+                    ).then(orders => {
+                        const makeCancelOrderRate = calcMakeCancelOrderRate(orders, direction);
+                        item.makeCancelRate = makeCancelOrderRate
+                    })
+                })
+
+                Promise.all(promises).then(() => {
+                    resolve(posDataByKey)                 
+                })
+            })
+        }
+
+        function calcMakeCancelOrderRate(orders, direction){
+            let makeVol = 0.000001;
+            let cancelVol = 0;
+            orders.forEach(o => {
+                if(direction == '多'){
+                    //开平 - 买
+                    if(o.side != 0)return
+                }else{
+                    //开平 - 卖
+                    if(o.side != 1) return;
+                }
+
+                const orderStatus = o.status
+                switch(orderStatus){
+                    case "3": //全部撤单
+                        cancelVol += o.volume;
+                        break;
+                    case "5": //全部成交
+                        makeVol += o.volume;
+                        break;                       
+                    case "6": //部成部撤
+                        makeVol += o.volume_traded;
+                        cancelVol += o.volume_left;
+                        break;
+                }
+            })
+            return toDecimal(cancelVol / makeVol * 100, 2) + '%'
+        }
+
+        //获取账户下的委托
+        function getAccountOrder(accountId, ticker) {
+            return runSelectDB(buildAccountOrdersDBPath(accountId), 
+            `SELECT * FROM orders WHERE price_type = '3' AND instrument_id = '${ticker}'`)
+        }
+
+        /**
+         * 获取某策略下的账户
+         */
+        function getStrategyAccounts(strategyId) {
+            return runSelectDB(buildStrategyAccountsDBPath(strategyId), 'SELECT * FROM account_list')
+        }
+
+        //获取策略下的委托
+        function getStrategyOrder(strategyId, ticker) {
+            return new Promise((resolve, reject) => {
+                let tableData = []
+                getStrategyAccounts(strategyId).then(accounts => {
+                    if(accounts.length == 0) {
+                        resolve([])
+                        return
+                    } 
+                    const promises = accounts.map(item => 
+                            (runSelectDB(buildAccountOrdersDBPath(
+                                item.account_id), 
+                                `SELECT * FROM orders WHERE client_id = '${strategyId}' AND price_type = '3' AND instrument_id = '${ticker}'`
+                            ).then(orders => {
+                                tableData = tableData.concat(orders)
+                            }))
+                    )
+                    //用这种方式处理map+promise
+                    Promise.all(promises).then(() => {
+                        resolve(tableData)
+                    })
+                }).catch(err => {
+                    reject(err)
+                })
+            })
+        }
+
+        ipc.on('get-cancle-order-rate', function(event, {winId, posDataByKey, pageType, currentId}){
+            const fromWinId = winId
+            const fromWindow = BrowserWindow.fromId(fromWinId)
+            getMakeCancelOrderRate(posDataByKey, pageType, currentId).then(posDataByKey => {
+                if(!Object.values(posDataByKey || {}).length) return;
+                fromWindow.webContents.send(`res-cancel-order-rate-${pageType}`, posDataByKey)
+            }).finally(() => {
+                window.close()
+            })
+        })
+    </script>
+</html>

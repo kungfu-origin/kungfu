@@ -1,97 +1,108 @@
-# -*- coding: utf-8 -*-
-'''
-Copyright [2017] [taurus.ai]
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+class Source:
+    CTP = "ctp"
+    XTP = "xtp"
+    OES = "oes"
 
-    http://www.apache.org/licenses/LICENSE-2.0
+class Exchange:
+    SSE = "SSE"
+    SZE = "SZE"
+    SHFE = "SHFE"
+    DCE = "DCE"
+    CZCE = "CZCE"
+    CFFEX = "CFFEX"
+    INE = "INE"
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-'''
+class Side:
+    Buy = "0"
+    Sell = "1"
 
-class SOURCE:
-    CTP = 1
-    XTP = 15
 
-class EXCHANGE:
-    SSE = 'SSE' #上海证券交易所
-    SZE = 'SZE' #深圳证券交易所
-    CFFEX = 'CFFEX' #中国金融期货交易所
-    SHFE = 'SHFE' #上海期货交易所
-    DCE = 'DCE' #大连商品交易所
-    CZCE = 'CZCE' #郑州商品交易所
+class Offset:
+    Open = "0"
+    Close = "1"
+    CloseToday = "2"
+    CloseYesterday = "3"
 
-###################################
-# LfDirectionType: 买卖方向
-###################################
-class DIRECTION:
-    Buy = '0' #买
-    Sell = '1' #卖
 
-###################################
-# LfOffsetFlagType: 开平标志
-###################################
-class OFFSET:
-    Open = '0' #开仓
-    Close = '1' #平仓
-    CloseToday = '3' #平今
-    CloseYesterday = '4' #平昨
+class OrderStatus:
+    Unknown = "0"
+    Submitted = "1"
+    Pending = "2"
+    Canceled = "3"
+    Error = "4"
+    Filled = "5"
+    PartialFilledNotActive = "6"
+    PartialFilledActive = "7"
 
-###################################
-# LfOrderPriceTypeType: 报单价格条件
-###################################
-class PRICE_TYPE:
-    AnyPrice = '1' #任意价
-    LimitPrice = '2' #限价
-    BestPrice = '3' #最优价
+    @classmethod
+    def is_final_status(cls, status):
+        status = status.decode("utf-8")
+        if status == OrderStatus.Error or status == OrderStatus.Canceled or status == OrderStatus.Filled or status == OrderStatus.PartialFilledNotActive:
+            return True
+        else:
+            return False
 
-###################################
-# LfOrderStatusType: 报单状态
-###################################
-class ORDER_STATUS:
-    AllTraded = '0' #全部成交（最终状态）
-    PartTradedQueueing = '1' #部分成交还在队列中
-    PartTradedNotQueueing = '2' #部分成交不在队列中（部成部撤， 最终状态）
-    NoTradeQueueing = '3' #未成交还在队列中
-    NoTradeNotQueueing = '4' #未成交不在队列中（被拒绝，最终状态）
-    Canceled = '5' #撤单
-    AcceptedNoReply = '6' #订单已报入交易所未应答
-    Unknown = 'a' #未知
-    NotTouched = 'b' #尚未触发
-    Touched = 'c' #已触发
-    Error = 'd' #废单错误（最终状态）
-    OrderInserted = 'i' #订单已写入
-    OrderAccepted = 'j' #前置已接受
+    @classmethod
+    def to_str(cls, status):
+        status = status.decode('utf-8')
+        if status == OrderStatus.Submitted:
+            return "Submitted"
+        elif status == OrderStatus.Pending:
+            return "Pending"
+        elif status == OrderStatus.Canceled:
+            return "Canceled"
+        elif status == OrderStatus.Error:
+            return "Error"
+        elif status == OrderStatus.Filled:
+            return "Filled"
+        elif status == OrderStatus.PartialFilledNotActive:
+            return "PartialFilledNotActive"
+        elif status == OrderStatus.PartialFilledActive:
+            return "PartialFilledActive"
+        else:
+            return "Unknown"
 
-###################################
-# LfPosiDirectionType: 持仓多空方向
-###################################
-class POS_DIRECTION:
-    Net = '1' #净
-    Long = '2' #多头
-    Short = '3' #空头
+class Direction:
+    Long = "0"
+    Short = "1"
 
-###################################
-# LfVolumeConditionType: 成交量类型
-###################################
-class VOLUME_TYPE:
-    AV = '1' #任何数量
-    MV = '2' #最小数量
-    CV = '3' #全部数量
 
-###################################
-# LfTimeConditionType: 有效期类型
-###################################
-class TIME_CONDITION:
-    IOC = '1' #立即完成，否则撤销
-    GFS = '2' #本节有效
-    GFD = '3' #当日有效
-    GTD = '4' #指定日期前有效
-    GTC = '5' #撤销前有效
-    GFA = '6' #集合竞价有效
+class MsgType:
+    Quote = 101
+    Entrust = 102
+    Transaction = 103
+
+    OrderInput = 201
+    OrderAction = 202
+    Order = 203
+    Trade = 204
+    Position = 205
+    AccountInfo = 206
+    Portfolio = 207
+    AccountInfoByMin = 208
+    PortfolioByMin = 209
+
+    ReqLogin = 301
+    Subscribe = 302
+
+    GatewayState = 401
+
+    AlgoOrderInput = 501
+    AlgoOrderUpdate = 502
+
+    SwitchDay = 601
+    RspTradingDay = 602
+
+
+class InstrumentType:
+    Unknown = '0'
+    Stock = '1'
+    Future = '2'
+    Bond = '3'
+    StockOption = '4'
+
+
+class Region:
+    CN = 'CN'
+    HK = 'HK'

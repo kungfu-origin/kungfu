@@ -1,0 +1,254 @@
+@charset 'utf-8';
+@import './skin.scss';
+
+// ----------------------------- 策略列表
+.strategy{
+    // background:$bg;
+    height: 100%;
+
+    .el-dropdown {
+        font-size: 14px;
+        &:hover {
+            color: $vi;
+        }
+    }
+
+    // 策略列表 - C++图标颜色
+    .tr-language-cpp {  
+        color: #9B4F96 !important;
+    }
+    // 策略列表 - Python图标颜色
+    .tr-socialpython {
+        color: #879636 !important;
+    }
+}
+
+// 策略列表上传dropdown
+.strategy-upload-dropdown {
+    padding: 0;
+    .el-dropdown-menu__item:hover{
+        background-color: #5F688D;
+    }
+    .el-dropdown-menu__item {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 21px;
+    }
+}
+
+// ----------------------------- 策略编辑页面
+.strategy-editing {
+
+    background:$bg;
+    height: 100%; // breadcrumb 36px; padding-top 8px;
+    
+    .el-container {
+        height: 100%;
+        margin: 0;
+        overflow:auto;
+        
+        .el-main {
+            width: 100%;
+            background: $bg_card;
+            padding: 0;
+            position: relative;
+            overflow: visible;
+        }
+
+        .el-aside{
+            height: 100%;
+            margin-left: 8px;
+            width: 0px; /* 0 width - change this with JavaScript */
+            transition: width 0.5s ease; /* 0.5 second transition effect to slide in the sidenav */
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    // 侧面板开关
+    #side-panel-switch {
+        width: 8px;
+        height: 56px;
+        background: #2C3450 ;
+        border: 0px solid #2C3450;
+        border-radius: 40px;
+        position: absolute;
+        right: -8px;
+        top: 50%;
+    
+        .triangle{
+            width:0;
+            height:0;
+            border-width:4px; // 三角形高
+            border-style:solid;
+            margin: 24px 2px;
+            position:relative;
+        }
+        .triangle-right {
+            border-color:transparent transparent transparent $icon;/*透明 透明 透明 灰*/
+            margin: 24px 2px; // (56 - 三角形底（8）)/ 2 = 24； (8 - 高 )/ 2 = 2px
+        }
+        .triangle-left {
+            border-color:transparent $icon transparent transparent ;/*透明 灰 透明 透明*/
+            margin: 24px -2px;
+        }
+    
+        &:hover {
+            cursor: pointer;
+            .triangle-right {
+                border-color:transparent transparent transparent $vi;/*透明 透明 透明 白*/
+            }
+            .triangle-left {
+                border-color:transparent $vi transparent transparent ;/*透明 白 透明 透明*/
+            }
+        }
+    }
+}
+
+// ----------------------------- 面包屑导航设置
+
+.breadcrumb-nav {
+    // background: #879636;
+    // 使用flex布局居中
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+ 
+
+// ----------------------------- 回测导航面板
+.backtest-side-panel {
+    height: 100%;
+    // 上面板部分
+    .stop-btn{
+        position: absolute;
+        right: 16px;
+        top: 22px;
+    }
+    .setting-form {
+        width: 660px;
+        height: 48px;
+        .setting-form-first-row {
+            margin-bottom: 8px;
+        }
+    }
+    .progress-status {
+        width: calc(100% - 900px);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        .progress-percentage {
+            font-size:36px;
+            color: $font_5;
+        }
+    }
+
+    // 下面板部分
+    .lower-panel-tabs {
+        height: 100%;
+
+        //标签设置
+        .el-tabs {
+            height: 100%;
+            .el-tabs__content {
+                height: calc(100% - 55px); // 标签的高度是40px + 15px margin
+                .el-tab-pane {
+                    height: 100%;
+                }
+            }
+            .el-tabs__nav-wrap::after{
+                background-color: $bg_light;
+                height: 1px;
+            }
+        }
+
+        // 盈利标签
+        .lower-panel-tab-profit {
+            .profit-data {
+                // background: lightblue;
+                height: 28px;
+                & > .el-row > .el-col > span {
+                    color: $font_5;
+                    font-size: 20px;
+                }
+            }
+            .profit-graph-module {
+                height: calc(50% - 28px - 16px); 
+                position: relative;
+                .profit-graph-switch {
+                    position: absolute;
+                    top: 8px;
+                    left: 8px;
+                    z-index: 1;
+                }
+                .profit-graph {
+                    margin-top: 8px;
+                    height: calc(100% - 8px);
+                    background: #191E34;
+                }
+            } 
+            .log-content {
+                height: 100%;
+                .profit-log {
+                    margin-top: 8px;
+                    height: calc(100% - 20px - 16px); // header(20px) + 2 * 16px;
+                    width: 100%
+                }
+            }
+        }
+    
+        // 成交记录标签
+        .lower-panel-tab-records {
+            .records-table {
+                height: calc(100% - 36px);
+                background: #444A63 20%;
+            }
+            .el-pagination {
+                .btn-prev, .btn-next, .el-pager li {
+                    background-color: transparent;
+                }
+            }
+        }
+        
+    }
+}
+
+// ----------------------------- 编译弹窗
+.compile-status-dialog {
+    .compile-status {
+        height: 368px;
+        background: $bg_light;
+        overflow: scroll;
+        &::-webkit-scrollbar {
+            width: 8px;
+            background: $bg_light; 
+        }
+    }
+}
+
+// ----------------------------- 回测/调优弹窗
+.dialog-remark-input {
+    margin-top: 6px; // 用于防止表单验证提示覆盖备注框；
+}
+
+// ----------------------------- CodeMirror 编辑器
+.code-editor {
+    height: calc(100% - 120px);
+    margin: 0 8px 0 8px;
+    width: calc(100% - 16px);
+    .code {
+        height: 100%;
+        width: 100%;
+        .CodeMirror{
+            height: 98%;
+            background: transparent;
+            clear: both;
+        }
+        .CodeMirror-gutters{
+            background: transparent;
+
+        }
+    }
+    
+}

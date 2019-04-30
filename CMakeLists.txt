@@ -1,4 +1,4 @@
-# Copyright [2017] [taurus.ai]
+# Copyright [2019] [taurus.ai]
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,95 +12,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.7)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(kungfu)
 
 ############################################################
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+ADD_COMPILE_DEFINITIONS(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
-INCLUDE(GetGitRevisionDescription)
-GET_GIT_HEAD_REVISION(GIT_REFSPEC GIT_HASH)
+SET(CMAKE_CXX_STANDARD 14)
 
-STRING(TIMESTAMP BUILDTIME "%Y%m%d%H%M%S")
+if(UNIX AND NOT APPLE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+    SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+    OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
+endif()
+if(APPLE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+    SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+endif()
+if(WIN32)
+    # install boost using binaries from https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/
+    SET(BOOST_ROOT "C:\\local\\boost_1_64_0")
+#    ADD_COMPILE_DEFINITIONS(_WIN32_WINNT=0x0A00) # Target Windows 10 https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt?view=vs-2019
+    ADD_COMPILE_DEFINITIONS(BOOST_ALL_NO_LIB)
+    ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
+#    ADD_COMPILE_DEFINITIONS(BOOST_ALL_DYN_LINK)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w")
+    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+#    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /VERBOSE")
+endif()
 
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Kungfu Master Trading System")
-SET(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
-SET(CPACK_PACKAGE_VENDOR "taurus.ai")
-SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "0")
-SET(CPACK_PACKAGE_VERSION_PATCH "5")
-
-SET(CPACK_GENERATOR "RPM")
-SET(CPACK_RPM_PACKAGE_RELEASE "${BUILDTIME}")
-SET(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
-SET(CPACK_RPM_PACKAGE_GROUP "${PROJECT_NAME}")
-SET(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/kungfu/master")
-SET(CPACK_PACKAGING_INSTALL_PREFIX "/opt/kungfu/master")
-
-############################################################
-SET(TOOLCHAIN_DIR "/opt/kungfu/toolchain")
-
-SET(BOOST_INCLUDEDIR "${TOOLCHAIN_DIR}/boost-1.62.0/include")
-SET(BOOST_LIBRARYDIR "${TOOLCHAIN_DIR}/boost-1.62.0/lib")
-
-SET(Boost_USE_MULTITHREADED ON)
-SET(Boost_USE_STATIC_LIBS OFF)
-SET(Boost_USE_STATIC_RUNTIME OFF)
-
-FIND_PACKAGE(Boost 1.62.0 COMPONENTS locale date_time filesystem system thread serialization math_tr1 python chrono regex program_options REQUIRED)
-INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
-
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-
-############################################################
-
-file(STRINGS config.in ConfigContents)
-foreach(NameAndValue ${ConfigContents})
-    string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
-    string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
-    string(REPLACE "${Name}=" "" Value ${NameAndValue})
-    set(${Name} "${Value}")
-    MESSAGE( STATUS ${Name} " = " ${Value} )
-endforeach()
-
-############################################################
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wall")
-OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
 OPTION(USE_SERVICE "use memory service" ON)
 OPTION(USE_HASH_CODE "use hash code when writing" ON)
-############################################################
+OPTION(test "Build all tests." ON) # Makes boolean 'test' available.
 
-ADD_SUBDIRECTORY(longfist)
-ADD_SUBDIRECTORY(yijinjing)
-ADD_SUBDIRECTORY(wingchun)
+ENABLE_TESTING()
 
 ############################################################
-SET(INFO_TXT_IN "${CMAKE_CURRENT_SOURCE_DIR}/rpm/INFO.txt")
-SET(INFO_TXT    "${CMAKE_CURRENT_BINARY_DIR}/rpm/INFO.txt")
-CONFIGURE_FILE(${INFO_TXT_IN} ${INFO_TXT})
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_BINARY_DIR}/rpm/INFO.txt")
 
-SET(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/pre_install.sh")
-SET(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/post_install.sh")
-SET(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/pre_uninstall.sh")
-SET(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpm/scripts/post_uninstall.sh")
+FILE(GLOB_RECURSE boostlib_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/node_modules" "BoostLib.cmake")
+LIST(GET boostlib_cmake_path 0 boostlib_cmake_path)
+GET_FILENAME_COMPONENT(boostlib_cmake_path "${boostlib_cmake_path}" DIRECTORY)
+SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${boostlib_cmake_path}")
+INCLUDE(BoostLib)
 
-OPTION(SKIP_DEPENDENCY_CHECKING "SKIP_CHECK_KUNGFU_DEPENDENCY, default OFF." OFF)
-IF(SKIP_DEPENDENCY_CHECKING)
-    MESSAGE(WARNING "DEPENDENCY CHECKING SKIPPED...")
-ELSE()
-    SET(CPACK_RPM_PACKAGE_REQUIRES "rfoo >= 1.3.1, pid >= 2.1.1, log4cplus2 == 2.0.0_RC1, supervisor >= 3.1.0")
-ENDIF()
+REQUIRE_BOOST_LIBS("1.64.0" "locale;date_time;filesystem;system;thread;serialization;math_tr1;chrono;regex;program_options")
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-INSTALL(DIRECTORY "${BOOST_LIBRARYDIR}/" DESTINATION "lib/boost")
-INSTALL(DIRECTORY "rpm/bin/" DESTINATION "bin")
-INSTALL(DIRECTORY "rpm/etc/" DESTINATION "etc")
+############################################################
+ADD_SUBDIRECTORY(cpp)
 
-INSTALL(DIRECTORY "python/" DESTINATION "lib/python2.7/site-packages")
-
-SET(CPACK_RPM_PACKAGE_AUTOREQ " no")
-INCLUDE(CPack)

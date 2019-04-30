@@ -1,0 +1,74 @@
+@charset 'utf-8';
+@import './skin.scss';
+@import './element-variables.scss';
+@import './commonStyle.scss';
+@import './assets/scss/coverElement.scss';
+
+
+/*
+系统共用部分
+*/
+body {
+    color: $font;
+    font-family: 'HanHei SC', 'PingFang SC',"Microsoft YaHei" ;
+    font-size: 14px;
+    direction: ltr;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-rendering: optimizelegibility;
+    position: relative;
+    overflow: hidden;
+}
+body,html{
+    height: 100%;
+    width: 100%;
+    font: caption;
+}
+
+/* 内外边距通常让各个浏览器样式的表现位置不同 */
+body,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+button,
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+menu,
+nav,
+i,
+select,
+section {
+    margin: 0;
+    padding: 0;
+}
+i{
+    color: $icon
+}
+
+*{
+    -webkit-user-select:none;
+    outline:none;
+}

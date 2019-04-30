@@ -1,0 +1,70 @@
+sudo: required
+dist: trusty
+language: cpp
+os:
+  - linux
+matrix:
+  include:
+    - os: linux
+      env: COMPILER=g++-4.9
+      addons:
+        apt:
+          packages:
+            - g++-4.9
+          sources: &sources
+            - llvm-toolchain-trusty-3.8
+            - llvm-toolchain-trusty-5.0
+            - ubuntu-toolchain-r-test
+    - os: linux
+      env: COMPILER=g++-4.9 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - g++-4.9
+          sources: *sources
+    - os: linux
+      env: COMPILER=g++-5
+      addons:
+        apt:
+          packages:
+            - g++-5
+          sources: *sources
+    - os: linux
+      env: COMPILER=g++-5 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - g++-5
+          sources: *sources
+    - os: linux
+      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - libc++-dev
+          sources: *sources
+    - os: linux
+      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++ UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - libc++-dev
+          sources: *sources
+    - os: linux
+      env: COMPILER=clang++-5.0 CMAKE_OPTIONS=-DCXXOPTS_CXX_STANDARD=17
+      addons:
+        apt:
+          packages:
+            - clang-5.0
+            - g++-5
+          sources: *sources
+script: >
+    cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
+    -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS $CMAKE_OPTIONS .
+    && make && make ARGS=--output-on-failure test
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install icu4c; fi

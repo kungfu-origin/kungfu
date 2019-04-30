@@ -16,8 +16,8 @@ limitations under the License.
 
 import ctypes
 import datetime
-import longfist_constants as lf
-import longfist_structs as structs
+from . import longfist_constants as lf
+from . import longfist_structs as structs
 
 cast_data = lambda x, y: ctypes.cast(x, ctypes.POINTER(y)).contents
 
