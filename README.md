@@ -44,9 +44,11 @@ Setup 编译及运行环境
 git
 Node.js (>=8 <11)
 yarn
-python (2/3)
+Python 2
 pipenv
 cmake (>3.12)
+
+功夫的编译需要系统默认（$PATH指向）的 Python 版本为 2。如果系统中也存在 Python 3，则可以通过下述 pipenv 的方式使得最终输出的 app 使用 Python 3，但仍然需要默认的 Python 是 2。
 
 #### MacOSX
 
@@ -58,7 +60,7 @@ $ pip install pipenv
 
 #### Windows
 
-开发组在 Visual Studio 2017 15.9.11 环境下进行工作。
+开发组在 Visual Studio 2017 15.9.11 环境下进行工作，安装时需要勾选 VC140（Visual Studio 2015) toolset。
 
 下载并安装 [git](https://git-scm.com/download/win)，[Python](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[Node.js LTS 10.15.3](https://nodejs.org/en/download/) 并添加相应路径至 %PATH% 环境变量。
 

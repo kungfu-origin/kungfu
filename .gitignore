@@ -19,6 +19,7 @@ Debug/
 # Build related
 cmake-build-debug/
 build/
+build-*/
 
 # NPM related
 node_modules/

@@ -4,8 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-sqlalchemy = "~=1.2"
+pywin32 = {version = "*", sys_platform = "== 'win32'"}
 pyinstaller = ">=3.0"
+sqlalchemy = "~=1.2"
 
 [dev-packages]
 pytest = "*"
