@@ -4,7 +4,7 @@ const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
 const electron = require('electron');
 //base setting, init db
 const {initDB, killAll} = require('./base');
-const {killGodDaemon, killAllProcess} = require('__gUtils/processUtils');
+const {killGodDaemon} = require('__gUtils/processUtils');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 

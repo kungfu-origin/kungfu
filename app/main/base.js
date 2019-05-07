@@ -35,11 +35,12 @@ export const initDB = () => {
 }
 
 
-export const killAll = () => {
-    const killList = platform === 'win' ? ['kfc.exe'] : ['kfc', 'pm2']
-    return fkill(killList, {
+export const killAll = async() => {
+    const killList = platform === 'win' ? ['kfc.exe'] : ['pm2', 'kfc']
+    const options = {
         force: true,
-        tree: true,
         ignoreCase: true
-    })
+    }
+    if(platform === 'win') options.tree = true;
+    return fkill(killList, options)
 }

@@ -2,6 +2,7 @@ const path = require('path');
 const {BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath} = require('__gConfig/pathConfig');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
+const fkill = require('fkill');
 export const pm2 = require('pm2')
 
 
@@ -203,41 +204,14 @@ export const listProcessStatus = () => {
 
 //删除进程
 export const deleteProcess = async(processName) => {
-    const processDescribe = await describeProcess(processName)
-    if(processDescribe instanceof Error) return new Promise((resolve, reject) => reject(processDescribe)); 
-    //判断进程是否存在
-    if(!processDescribe.length) return new Promise((resolve) => resolve(true))
+    try{
+        const p = await describeProcess(processName)
+        const pids = p.map(prc => prc.pid);
+        fkill(pids).catch(err => console.error(err))
+    }catch(err){
+        return err
+    }
     return pm2Delete(processName)
-}
-
-
-//干掉所有进程
-export const killAllProcess = () => {
-    return new Promise((resolve, reject) => {
-        pm2List().then(list => {
-            const len = list.length;
-            if(!len){
-                resolve([])
-                return;
-            }
-            //要保证page, calendar最后一个退出
-            (async() => {
-                let i, len = list.length;
-                try{
-                    for(i = 0; i < len; i++){
-                        const name = list[i].name
-                        if(name === 'page_engine') continue;
-                        await pm2Delete(name)
-                    }
-                }catch(err){
-                    logger.error(err)
-                }
-            })()
-            .then(() => pm2Delete('page_engine'))
-            .then(() => resolve(true))
-            .catch(err => reject(err))
-        }).catch(err => reject(err))
-    })
 }
 
 //干掉守护进程
