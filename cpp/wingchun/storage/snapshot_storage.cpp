@@ -15,6 +15,8 @@ namespace kungfu
             create_table_if_not_exists(daily, account);
         }
 
+        SnapshotStorage::~SnapshotStorage() {}
+        
         void SnapshotStorage::create_table_if_not_exists(bool daily, bool account)
         {
             static std::string columns =

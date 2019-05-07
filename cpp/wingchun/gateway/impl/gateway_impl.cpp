@@ -123,10 +123,8 @@ namespace kungfu
 
         std::string subscription_db_file = SUBSCRIPTION_DB_FILE(get_name());
 #ifdef _WINDOWS
-        SPDLOG_INFO("subscription file: {}", subscription_db_file);
         std::replace(subscription_db_file.begin(), subscription_db_file.end(), '/', '\\');
 #endif
-        SPDLOG_INFO("subscription file: {}", subscription_db_file);
         std::shared_ptr<kungfu::SubscriptionStorage> subscription_storage = std::shared_ptr<kungfu::SubscriptionStorage>(new kungfu::SubscriptionStorage(subscription_db_file));
         register_subscription_storage(subscription_storage);
 
@@ -313,7 +311,7 @@ namespace kungfu
 
     uint64_t TdGatewayImpl::next_id()
     {
-        long seconds = kungfu::yijinjing::getNanoTime() / kungfu::yijinjing::NANOSECONDS_PER_SECOND;
+        int64_t seconds = kungfu::yijinjing::getNanoTime() / kungfu::yijinjing::NANOSECONDS_PER_SECOND;
         return uid_generator_->next_id(seconds);
     }
 
@@ -427,7 +425,7 @@ namespace kungfu
         account_manager_->on_account(account);
     }
 
-    void TdGatewayImpl::on_1min_timer(long nano)
+    void TdGatewayImpl::on_1min_timer(int64_t nano)
     {
         auto account_info = account_manager_->get_account_info();
         bool is_open = calendar_->is_open(nano, account_info.type == AccountTypeFuture ? EXCHANGE_SHFE : EXCHANGE_SSE);
@@ -439,10 +437,9 @@ namespace kungfu
             DUMP_1M_SNAPSHOT(this->get_account_id(), account_info);
         }
         loop_->register_nanotime_callback(nano + kungfu::yijinjing::NANOSECONDS_PER_MINUTE, std::bind(&TdGatewayImpl::on_1min_timer, this, std::placeholders::_1));
-
     }
 
-    void TdGatewayImpl::on_daily_timer(long nano)
+    void TdGatewayImpl::on_daily_timer(int64_t nano)
     {
         TIMER_TRACE(fmt::format("[on_daily_timer] (nano) {}", nano));
         auto account_info = account_manager_->get_account_info();

@@ -12,7 +12,6 @@ class MDSandbox:
     def run(self):
         print(self.name)
         config = get_task_config(self.name)
-        print(config)
         account_id = config["account_id"]
         db_file = config["db_file"]
         is_loop = config["is_loop"]

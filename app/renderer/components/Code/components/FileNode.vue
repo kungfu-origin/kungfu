@@ -125,6 +125,8 @@ export default {
          //点击文件或文件树
         handleClickFile(file){
             const t = this;
+            //正在编辑的input
+            if(Object.keys(file).length === 1) return
             //更新active file id
             t.$store.dispatch('setCurrentFile', file)
             //如果为dir

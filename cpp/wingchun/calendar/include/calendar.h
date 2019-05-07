@@ -40,7 +40,7 @@ namespace kungfu
         //@param nano 纳秒时间戳
         //@param exchange_id 交易所ID
         //@return 如果在交易时段返回 true, 否则返回 false
-        bool is_open(long nano, const std::string& exchange_id);
+        bool is_open(int64_t nano, const std::string& exchange_id);
 
         //获取开盘时间
         //@param trading_day 交易日 "%Y%m%d"
@@ -48,7 +48,7 @@ namespace kungfu
         //@param slot 上午/下午/夜盘
         //@return 交易日开盘时间纳秒时间戳，默认取夜盘开盘，若无夜盘则取上午开盘
         //@remark 必须保证 trading_day 为实际交易日
-        long get_open_time(const std::string& trading_day, const std::string& exchange_id, int slot = DEFAULT_SLOT);
+        int64_t get_open_time(const std::string& trading_day, const std::string& exchange_id, int slot = DEFAULT_SLOT);
 
         //获取收盘时间
         //@param trading_day 交易日 "%Y%m%d"
@@ -56,26 +56,26 @@ namespace kungfu
         //@param slot 上午/下午/夜盘
         //@return 交易所收盘时间纳秒时间戳，默认下午收盘
         //@remark 必须保证 trading_day 为实际交易日
-        long get_close_time(const std::string& trading_day, const std::string& exchange_id, int slot = DEFAULT_SLOT);
+        int64_t get_close_time(const std::string& trading_day, const std::string& exchange_id, int slot = DEFAULT_SLOT);
 
         //获取下一个开盘时间
         //@param nano 纳秒时间戳
         //@param exchange_id 交易所ID
         //@return 交易日下一个开盘时间纳秒时间戳，默认上午开盘
-        long next_open(long nano, const std::string& exchange_id, int slot = DEFAULT_SLOT);
+        int64_t next_open(int64_t nano, const std::string& exchange_id, int slot = DEFAULT_SLOT);
 
         //获取下一个收盘时间
         //@param nano 纳秒时间戳
         //@param exchange_id 交易所ID
         //@return 交易日下一个收盘时间纳秒时间戳，默认下午收盘
-        long next_close(long nano, const std::string& exchange_id, int slot = DEFAULT_SLOT);
+        int64_t next_close(int64_t nano, const std::string& exchange_id, int slot = DEFAULT_SLOT);
 
         //获取时间区间内的 trading session
         //@param start_nano 开始纳秒时间戳
         //@param end_nano 结束纳秒时间戳
         //@param exchange_id 交易所ID
         //@return 交易所交易时段列表
-        std::vector<TradingSession> get_trading_sessions(long start_nano, long end_nano, const std::string& exchange_id);
+        std::vector<TradingSession> get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id);
 
         //获取当前交易日
         //@param via_net 是否通过网络获取，如果为 true，发送请求到 calendar service 获取当前交易日

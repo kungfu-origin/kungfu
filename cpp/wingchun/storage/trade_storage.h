@@ -18,6 +18,7 @@ namespace kungfu
         {
         public:
             TradeStorage(const std::string& file_path);
+            ~TradeStorage();
             void create_table_if_not_exist();
             long long add_trade(const Trade &trade);
         private:

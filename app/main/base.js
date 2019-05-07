@@ -6,6 +6,7 @@ const initGobalDB = require('__gConfig/initGlobalDB.json');
 const {GLOBAL_DIR} = require('__gConfig/pathConfig');
 const {logger} = require('__gUtils/logUtils');
 const fkill = require('fkill');
+const {platform} = require('__gConfig/platformConfig');
 
 
 export const initDB = () => {
@@ -35,5 +36,10 @@ export const initDB = () => {
 
 
 export const killAll = () => {
-    return fkill(['kfc', 'pm2'], {force: true})
+    const killList = platform === 'win' ? ['kfc.exe'] : ['kfc', 'pm2']
+    return fkill(killList, {
+        force: true,
+        tree: true,
+        ignoreCase: true
+    })
 }

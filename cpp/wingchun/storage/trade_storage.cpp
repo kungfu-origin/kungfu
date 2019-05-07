@@ -15,6 +15,8 @@ namespace kungfu
             create_table_if_not_exist();
         }
 
+        TradeStorage::~TradeStorage() {}
+        
         void TradeStorage::create_table_if_not_exist()
         {
             try

@@ -42,7 +42,8 @@ Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
 git
-npm
+Node.js (>=8 <11)
+yarn
 python (2/3)
 pipenv
 cmake (>3.12)
@@ -50,7 +51,8 @@ cmake (>3.12)
 #### MacOSX
 
 ```
-$ brew install git npm cmake
+$ brew install git cmake node@10
+$ npm install -g yarn electron-builder
 $ pip install pipenv
 ```
 
@@ -58,18 +60,20 @@ $ pip install pipenv
 
 开发组在 Visual Studio 2017 15.9.11 环境下进行工作。
 
-下载并安装 [git](https://git-scm.com/download/win)，[Python](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[nodejs 8](https://nodejs.org/download/release/v8.16.0/) 并添加相应路径至 %PATH% 环境变量。
+下载并安装 [git](https://git-scm.com/download/win)，[Python](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[Node.js LTS 10.15.3](https://nodejs.org/en/download/) 并添加相应路径至 %PATH% 环境变量。
 
 Windows需要额外安装 [Boost 1.64.0](https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/)，下载并安装 boost_1_64_0-msvc-14.1-64.exe。
 
 ```
+C:\> npm instal -g yarn electron-builder
 C:\> pip install pipenv
 ```
 
 #### Linux
 
 ```
-$ yum install git npm cmake
+$ # install git cmake node.js
+$ node-v10.15.3-linux-x64/bin/npm install -g yarn electron-builder
 $ pip install pipenv
 ```
 
@@ -92,21 +96,20 @@ $ npm config set PUPPETEER_DOWNLOAD_HOST https://npm.taobao.org/mirrors
 $ npm config set puppeteer_download_host https://npm.taobao.org/mirrors
 $ npm config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
 
-$ npm install yarn -g
 $ npm install electron-builder -g
 ```
 
 设置完成后可以进行编译：
 ```
 $ yarn install
-$ npm run build
+$ yarn run build
 ```
 
 编译结果输出在 build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 build/mac/Kungfu.Trader.app。
 
 遇到编译问题需要完整的重新编译时，执行以下命令清理临时文件：
 ```
-$ npm run clean
+$ yarn run clean
 ```
 
 #### 选择编译模式
@@ -125,7 +128,7 @@ $ npm config set kungfu:cmakejsopt
 
 切换编译模式后，需要执行以下命令重新生成配置文件：
 ```
-$ npm run config
+$ yarn run config
 ```
 
 
@@ -134,17 +137,17 @@ $ npm run config
 功夫支持 Python 2 及 Python 3，在系统预装了相应版本的情况下，编译时可以自行选择所需的 Python 版本。
 执行以下命令选择 Python 3：
 ```
-$ npm config set kungfu:pyver three
+$ yarn config set kungfu:pyver three
 ```
 
 执行以下命令选择 Python 2：
 ```
-$ npm config set kungfu:pyver two
+$ yarn config set kungfu:pyver two
 ```
 
 切换 Python 版本后，需要执行以下命令重新生成配置文件：
 ```
-$ npm run config
+$ yarn run config
 ```
 
 #### 编译过程产生的临时文件
@@ -157,7 +160,7 @@ dist
 ```
 通常情况下可通过执行如下命令对 build 和 dist 进行清理：
 ```
-$ npm run clean
+$ yarn run clean
 ```
 需要注意 node_modules 目录为 npm 产生的包目录，一般情况下无需清除，如有特殊需要可手动删除。
 

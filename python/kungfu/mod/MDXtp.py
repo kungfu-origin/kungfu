@@ -12,7 +12,6 @@ class MDXtp:
 
     def run(self):
         self.config = get_task_config(self.name)
-        print("run {} with config {}".format(self.name, self.config))
         self.client_id = self.config.get("client_id", 1)
         self.user_id = self.config["user_id"]
         self.password = self.config["password"]

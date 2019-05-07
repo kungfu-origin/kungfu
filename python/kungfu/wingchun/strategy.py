@@ -8,6 +8,7 @@ from functools import partial
 from kungfu.wingchun.structs import *
 from kungfu.wingchun.EventLoop import EventLoop
 from kungfu.wingchun.context import context
+from kungfu.wingchun.constants import *
 import pystrategy
 import pyyjj
 
@@ -35,7 +36,9 @@ class Strategy:
 
         context.get_nano = self.get_nano
         context.get_last_md = self.get_last_md
-
+        context.get_position = self.get_position
+        context.get_portfolio_info = self.get_portfolio_info
+        context.get_sub_portfolio_info = self.get_sub_portfolio_info
         context.set_log_level = self._util.set_log_level
         context.log_info = self._util.log_info
         context.log_error = self._util.log_error
@@ -143,6 +146,15 @@ class Strategy:
 
     def get_last_md(self, instrument_id, exchange_id):
         return ctypes.cast(self._util.get_last_md(instrument_id, exchange_id),ctypes.POINTER(Quote)).contents
+
+    def get_position(self, instrument_id, exchange_id, direction = Direction.Long, account_id = ""):
+        return ctypes.cast(self._util.get_position(instrument_id, exchange_id, direction, account_id), ctypes.POINTER(Position)).contents
+
+    def get_portfolio_info(self):
+        return ctypes.cast(self._util.get_portfolio_info(), ctypes.POINTER(PortfolioInfo)).contents
+
+    def get_sub_portfolio_info(self, account_id):
+        return ctypes.cast(self._util.get_sub_portfolio_info(account_id), ctypes.POINTER(SubPortfolioInfo)).contents
 
     def __on_1min_timer(self, nano):
         self._util.on_push_by_min()

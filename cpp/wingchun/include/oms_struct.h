@@ -223,26 +223,37 @@ namespace kungfu
     //投资组合信息
     struct PortfolioInfo
     {
-        char trading_day[DATE_LEN];   //交易日
-        int64_t update_time;          //数据更新时间
+        char trading_day[DATE_LEN];    //交易日
+        int64_t update_time;           //数据更新时间
 
-        double initial_equity;        //期初权益
-        double static_equity;         //静态权益
-        double dynamic_equity;        //动态权益
-        double accumulated_pnl;       //累计收益
-        double accumulated_pnl_ratio; //累计收益率
-        double intraday_pnl;          //日内收益
-        double intraday_pnl_ratio;    //日内收益率
+        char client_id[CLIENT_ID_LEN]; //Client ID
+
+        double initial_equity;         //期初权益
+        double static_equity;          //静态权益
+        double dynamic_equity;         //动态权益
+        double accumulated_pnl;        //累计收益
+        double accumulated_pnl_ratio;  //累计收益率
+        double intraday_pnl;           //日内收益
+        double intraday_pnl_ratio;     //日内收益率
     };
 
-    //策略账户使用信息
-    struct StrategyUsedAccountInfo
+    struct SubPortfolioInfo
     {
+        char trading_day[DATE_LEN];             //交易日
+        int64_t update_time;                    //数据更新时间
+
         char client_id[CLIENT_ID_LEN];          //Client ID
         char account_id[ACCOUNT_ID_LEN];        //账号ID
         char source_id[SOURCE_ID_LEN];          //柜台ID
         AccountType type;                       //账号类型
-        double init_cash;                       //初始资金
+
+        double initial_equity;                  //期初权益
+        double static_equity;                   //静态权益
+        double dynamic_equity;                  //动态权益
+        double accumulated_pnl;                 //累计收益
+        double accumulated_pnl_ratio;           //累计收益率
+        double intraday_pnl;                    //日内收益
+        double intraday_pnl_ratio;              //日内收益率
     };
 
     //持仓冻结信息

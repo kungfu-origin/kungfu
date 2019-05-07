@@ -122,7 +122,7 @@ namespace kungfu
             event_loop_->register_nanotime_callback(nano + yijinjing::NANOSECONDS_PER_DAY, std::bind(&Strategy::impl::on_daily_timer, this, std::placeholders::_1));
         }
 
-        long get_nano() const { return event_loop_->get_nano(); }
+        int64_t get_nano() const { return event_loop_->get_nano(); }
 
     private:
         Strategy* strategy_;
@@ -180,11 +180,26 @@ namespace kungfu
         return impl_->register_algo_service();
     }
 
-    long Strategy::get_nano() const { return impl_->get_nano(); }
+    int64_t Strategy::get_nano() const { return impl_->get_nano(); }
 
     const Quote* const Strategy::get_last_md(const std::string& instrument_id, const std::string& exchange_id) const
     {
         return impl_->get_util()->get_last_md(instrument_id, exchange_id);
+    }
+
+    const Position* const Strategy::get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    {
+        return impl_->get_util()->get_position(instrument_id, exchange_id, direction, account_id);
+    }
+
+    const PortfolioInfo* const Strategy::get_portfolio_info() const
+    {
+        return impl_->get_util()->get_portfolio_info();
+    }
+
+    const SubPortfolioInfo* const Strategy::get_sub_portfolio_info(const std::string& account_id) const
+    {
+        return impl_->get_util()->get_sub_portfolio_info(account_id);
     }
 
     void Strategy::subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string& exchange_id, bool is_level2)

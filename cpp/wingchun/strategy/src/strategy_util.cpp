@@ -82,14 +82,13 @@ namespace kungfu
                                    const double cash_limit)
     {
 
-        StrategyUsedAccountInfo info = {};
+        SubPortfolioInfo info = {};
         strcpy(info.client_id, this->name_.c_str());
         strcpy(info.source_id, source_id.c_str());
         strcpy(info.account_id, account_id.c_str());
-        info.init_cash = cash_limit;
 
-        storage::AccountListStorage(STRATEGY_ACCOUNT_LIST_DB_FILE(name_)).add_account(info);
-        publisher_->publish_strategy_used_account(info);
+        storage::AccountListStorage(STRATEGY_ACCOUNT_LIST_DB_FILE(name_)).add_account(this->name_, account_id, source_id);
+        publisher_->publish_sub_portfolio_info(info);
 
         auto rsp = gateway::register_trade_account(source_id, account_id, this->name_);
         info.type = rsp.type;
@@ -386,6 +385,39 @@ namespace kungfu
         return  (uintptr_t) this->get_last_md(instrument_id, exchange_id);
     }
 
+    const Position* const StrategyUtil::get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    {
+        //TODO
+        return nullptr;
+    }
+
+    uintptr_t StrategyUtil::get_position_py(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    {
+        return  (uintptr_t) this->get_position(instrument_id, exchange_id, direction, account_id);
+    }
+
+    const PortfolioInfo* const StrategyUtil::get_portfolio_info() const
+    {
+        //TODO
+        return nullptr;
+    }
+
+    uintptr_t StrategyUtil::get_portfolio_info_py() const
+    {
+        return (uintptr_t) this->get_portfolio_info();
+    }
+
+    const SubPortfolioInfo* const StrategyUtil::get_sub_portfolio_info(const std::string& account_id) const
+    {
+        //TODO
+        return nullptr;
+    }
+
+    uintptr_t StrategyUtil::get_sub_portfolio_info_py(const std::string& account_id) const
+    {
+        return (uintptr_t) this->get_sub_portfolio_info(account_id);
+    }
+
     void StrategyUtil::on_push_by_min()
     {
         long nano = yijinjing::getNanoTime();
@@ -573,7 +605,7 @@ namespace kungfu
         return storage::SourceListStorage(STRATEGY_MD_FEED_DB_FILE(name_)).get_sources();
     }
 
-    std::vector<StrategyUsedAccountInfo> StrategyUtil::get_accounts()
+    std::vector<SubPortfolioInfo> StrategyUtil::get_accounts()
     {
         return storage::AccountListStorage(STRATEGY_ACCOUNT_LIST_DB_FILE(name_)).get_accounts();
     }

@@ -6,7 +6,7 @@ from subprocess import check_call
 
 build = os.environ['BUILD']
 config = os.environ['CONFIGURATION']
-platform = os.environ['PLATFORM']
+platform = os.environ['platform']
 path = os.environ['PATH']
 image = os.environ['APPVEYOR_BUILD_WORKER_IMAGE']
 jobid = os.environ['APPVEYOR_JOB_ID']

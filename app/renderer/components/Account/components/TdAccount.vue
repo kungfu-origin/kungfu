@@ -63,7 +63,8 @@
                     >
                     <template slot-scope="props">
                         <span @click.stop>
-                        <el-switch :value="$utils.ifProcessRunning('td_' + props.row.account_id, processStatus)"
+                        <el-switch 
+                        :value="$utils.ifProcessRunning('td_' + props.row.account_id, processStatus)"
                         @change="handleTdSwitch($event, props.row)"></el-switch>
                         </span>
                     </template>
@@ -202,7 +203,7 @@ export default {
             sourceFirstAccount: false, //来标记是否是某柜台下添加的第一个账户
             taskList: [], //存放kungfu_task数据表内容
             renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
-            processStatus: Object.freeze({})
+            processStatus: Object.freeze({}),
  
         }
     },
@@ -294,14 +295,16 @@ export default {
             })
         },
 
+        //选择柜台
         handleSelectSource() {
             const t = this
-            t.method = 'add'
-            //是否是该柜台下的第一个账户记住
-            let index = t.accountList.findIndex(item => {
-                return item.source_name == t.selectedSource
-            })
-            t.sourceFirstAccount = index === -1
+            t.method = 'add';
+            if(!t.selectedSource) {
+                t.$message.warning('还没有选择柜台！')
+                return;
+            };
+            //是否是该柜台下的第一个账户记住，行情自动选中
+            t.sourceFirstAccount = -1 === t.accountList.findIndex(item => (item.source_name == t.selectedSource))
             // 加上某些参数的默认值
             accountSource[t.selectedSource].map(item => {
                 if(item.default !== undefined) {
@@ -327,6 +330,7 @@ export default {
             }
         },
 
+        //当前行高亮
         handleRowClick(row) {
             const t = this;
             t.$store.dispatch('setCurrentAccount', row)
@@ -425,7 +429,7 @@ export default {
         //清空数据
         refreshData() {
             const t = this
-            t.selectedSource = 'ctp'
+            t.selectedSource = ''
         },
 
         //计算持仓盈亏

@@ -153,3 +153,64 @@ class Trade(ctypes.Structure):
         ('tax', ctypes.c_double),
         ('commission', ctypes.c_double),
     ]
+
+class Position(ctypes.Structure):
+    _fields_ = [
+        ("rcv_time", ctypes.c_longlong),
+        ('update_time', ctypes.c_longlong),
+        ('trading_day', ctypes.c_char * 9),
+        ('instrument_id', ctypes.c_char * 32),
+        ('instrument_type', ctypes.c_char),
+        ('exchange_id', ctypes.c_char * 16),
+        ('account_id', ctypes.c_char * 32),
+        ('client_id', ctypes.c_char * 32),
+        ('direction', ctypes.c_char),
+        ('volume', ctypes.c_longlong),
+        ('yesterday_volume', ctypes.c_longlong),
+        ('frozen_total', ctypes.c_longlong),
+        ('frozen_yesterday', ctypes.c_longlong),
+        ('last_price', ctypes.c_double),
+        ('open_price', ctypes.c_double),
+        ('cost_price', ctypes.c_double),
+        ('close_price', ctypes.c_double),
+        ('pre_close_price', ctypes.c_double),
+        ('settlement_price', ctypes.c_double),
+        ('pre_settlement_price', ctypes.c_double),
+        ('margin', ctypes.c_double),
+        ('position_pnl', ctypes.c_double),
+        ('close_pnl', ctypes.c_double),
+        ('realized_pnl', ctypes.c_double),
+        ('unrealized_pnl', ctypes.c_double),
+        ('open_date', ctypes.c_char * 9),
+        ('expire_date', ctypes.c_char * 9),
+    ]
+
+class PortfolioInfo(ctypes.Structure):
+    _fields_ = [
+        ('trading_day', ctypes.c_char * 9),
+        ('update_time', ctypes.c_longlong),
+        ('client_id', ctypes.c_char * 32),
+        ('initial_equity', ctypes.c_double),
+        ('static_equity', ctypes.c_double),
+        ('dynamic_equity', ctypes.c_double),
+        ('accumulated_pnl', ctypes.c_double),
+        ('accumulated_pnl_ratio', ctypes.c_double),
+        ('intraday_pnl', ctypes.c_double),
+        ('intraday_pnl_ratio', ctypes.c_double),
+    ]
+
+class  SubPortfolioInfo(ctypes.Structure):
+    _fields_ = [
+        ('trading_day', ctypes.c_char * 9),
+        ('update_time', ctypes.c_longlong),
+        ('client_id', ctypes.c_char * 32),
+        ('account_id', ctypes.c_char * 32),
+        ('source_id', ctypes.c_char * 16),
+        ('initial_equity', ctypes.c_double),
+        ('static_equity', ctypes.c_double),
+        ('dynamic_equity', ctypes.c_double),
+        ('accumulated_pnl', ctypes.c_double),
+        ('accumulated_pnl_ratio', ctypes.c_double),
+        ('intraday_pnl', ctypes.c_double),
+        ('intraday_pnl_ratio', ctypes.c_double),
+    ]

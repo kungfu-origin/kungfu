@@ -26,13 +26,11 @@
 PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include <pybind11/stl.h>
 
-#include "JournalFinder.h"
 #include "JournalReader.h"
 #include "JournalWriter.h"
 #include "StrategyUtil.h"
 #include "Frame.hpp"
 #include "Timer.h"
-#include "PosHandler.hpp"
 #include "TypeConvert.hpp"
 
 namespace py = pybind11;
@@ -55,16 +53,7 @@ StrategyUtilPtr createBL(const string& strategyName)
     return StrategyUtil::create(strategyName);
 }
 
-PosHandlerPtr createPosHandler(short source, const string& js_str)
-{
-    return PosHandler::create(source, js_str);
-}
-
-PosHandlerPtr createEmptyPosHandler(short source)
-{
-    return PosHandler::create(source);
-}
-
+/*
 vector<std::string> get_all_journal_names()
 {
     JournalFinder finder;
@@ -88,6 +77,7 @@ std::string get_journal_folder(const std::string & name)
     JournalFinder finder;
     return finder.getJournalFolder(name);
 }
+*/
 
 pybind11::tuple getPyRids(const StrategyUtil & util)
 {
@@ -108,8 +98,6 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("createReader", &createReader);
     m.def("createWriter", &createWriter);
     m.def("createBL", &createBL);
-    m.def("createPosHandler", &createPosHandler, py::arg("source"), py::arg("js_str"));
-    m.def("createPosHandler0", &createEmptyPosHandler, py::arg("source"));
 
     // JournalReader
     py::class_<JournalReader, boost::shared_ptr<JournalReader> >(m, "Reader")
@@ -149,32 +137,10 @@ PYBIND11_MODULE(pyyjj, m)
     .def("get_str", &Frame::getStr)
     .def("get_data", &Frame::getPyData);
 
-    // PosMap
-    py::class_<PosHandler, boost::shared_ptr<PosHandler> >(m, "PosHandler")
-    .def("update", &PosHandler::update_py, py::arg("ticker"), py::arg("volume"), py::arg("direction"), py::arg("trade_off"))
-    .def("switch_day", &PosHandler::switch_day)
-    .def("is_poisoned", &PosHandler::poisoned)
-    .def("dump", &PosHandler::to_string)
-    .def("get_long_tot", &PosHandler::get_long_total)
-    .def("get_long_yd", &PosHandler::get_long_yestd)
-    .def("get_short_tot", &PosHandler::get_short_total)
-    .def("get_short_yd", &PosHandler::get_short_yestd)
-    .def("get_net_tot", &PosHandler::get_net_total)
-    .def("get_net_yd", &PosHandler::get_net_yestd)
-    .def("get_net_fee", &PosHandler::get_net_fee)
-    .def("get_net_balance", &PosHandler::get_net_balance)
-    .def("get_long_fee", &PosHandler::get_long_fee)
-    .def("get_long_balance", &PosHandler::get_long_balance)
-    .def("get_short_fee", &PosHandler::get_short_fee)
-    .def("get_short_balance", &PosHandler::get_short_balance)
-    .def("get_tickers", &PosHandler::get_tickers)
-    .def("set_pos", &PosHandler::set_pos_py, py::arg("ticker"), py::arg("posi_direction"), py::arg("tot")=0, py::arg("yd")=0, py::arg("balance")=0, py::arg("fee")=0)
-    .def("add_pos", &PosHandler::add_pos_py, py::arg("ticker"), py::arg("posi_direction"), py::arg("tot")=0, py::arg("yd")=0, py::arg("balance")=0, py::arg("fee")=0);
-
     // JournalFinder
-    m.def("get_all_journal_names", &get_all_journal_names);
-    m.def("get_available_journal_names", &get_available_journal_names);
-    m.def("get_available_journal_folders", &get_available_journal_folders);
-    m.def("get_journal_folder", &get_journal_folder);
+//    m.def("get_all_journal_names", &get_all_journal_names);
+//    m.def("get_available_journal_names", &get_available_journal_names);
+//    m.def("get_available_journal_folders", &get_available_journal_folders);
+//    m.def("get_journal_folder", &get_journal_folder);
 
 }

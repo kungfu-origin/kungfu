@@ -77,7 +77,14 @@ namespace kungfu
         void log_error(const string& msg);
 
         const Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
+        const Position* const get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
+        const PortfolioInfo* const get_portfolio_info() const;
+        const SubPortfolioInfo* const get_sub_portfolio_info(const std::string& account_id) const;
+
         uintptr_t get_last_md_py(const std::string& instrument_id, const std::string& exchange_id) const;
+        uintptr_t get_position_py(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
+        uintptr_t get_portfolio_info_py() const;
+        uintptr_t get_sub_portfolio_info_py(const std::string& account_id) const;
 
         void on_push_by_min();
         void on_push_by_day();
@@ -115,7 +122,7 @@ namespace kungfu
     private:
         uint64_t next_id();
         std::vector<std::string> get_md_sources();
-        std::vector<StrategyUsedAccountInfo> get_accounts();
+        std::vector<SubPortfolioInfo> get_accounts();
         void on_switch_day(const std::string& trading_day);
         void init_portfolio_manager();
 

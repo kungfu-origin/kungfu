@@ -10,6 +10,8 @@ addFile('', ELEC_BASE_DIR, 'folder')
 //BASE
 addFile(ELEC_BASE_DIR, 'app', 'folder')
 export const BASE_DIR = path.join(ELEC_BASE_DIR, 'app')
+console.log(BASE_DIR)
+
 
 //pm2
 addFile(BASE_DIR, 'pm2', 'folder')
@@ -52,7 +54,6 @@ export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
 ? path.join(process.resourcesPath)
 : path.join(__dirname, '..', '..', 'build')
-
 
 //gateway
 export const buildGatewayPath = (gatewayName) => {

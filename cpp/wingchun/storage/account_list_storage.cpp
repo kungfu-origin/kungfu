@@ -15,6 +15,8 @@ namespace kungfu
             create_table_if_not_exist();
         }
 
+        AccountListStorage::~AccountListStorage() {}
+        
         void AccountListStorage::create_table_if_not_exist()
         {
             try
@@ -28,38 +30,34 @@ namespace kungfu
             }
         }
 
-        void AccountListStorage::add_account(const StrategyUsedAccountInfo& info)
+        void AccountListStorage::add_account(const std::string& client_id, const std::string& account_id, const std::string& source_id)
         {
             try
             {
-                SQLite::Statement insert(db_, "INSERT INTO account_list (client_id, account_id, source, type, init_cash) VALUES(?, ?, ?, ?, ?)");
-                insert.bind(1, info.client_id);
-                insert.bind(2, info.account_id);
-                insert.bind(3, info.source_id);
-                insert.bind(4, info.type);
-                insert.bind(5, info.init_cash);
+                SQLite::Statement insert(db_, "INSERT INTO account_list (client_id, account_id, source) VALUES(?, ?, ?)");
+                insert.bind(1, client_id);
+                insert.bind(2, account_id);
+                insert.bind(3, source_id);
                 insert.exec();
             }
             catch (std::exception &e)
             {
-                SPDLOG_ERROR("failed to add account({}, {}), exception: {}\n", info.source_id, info.account_id, e.what());
+                SPDLOG_ERROR("failed to add account({}, {}), exception: {}\n", source_id, account_id, e.what());
             }
         }
 
-        std::vector<StrategyUsedAccountInfo> AccountListStorage::get_accounts()
+        std::vector<SubPortfolioInfo> AccountListStorage::get_accounts()
         {
-            std::vector<StrategyUsedAccountInfo> accounts;
+            std::vector<SubPortfolioInfo> accounts;
             try
             {
                 SQLite::Statement query(db_, "SELECT * FROM account_list");
                 while (query.executeStep())
                 {
-                    StrategyUsedAccountInfo account = {};
+                    SubPortfolioInfo account = {};
                     strcpy(account.client_id,query.getColumn(0));
                     strcpy(account.account_id, query.getColumn(1));
                     strcpy(account.source_id, query.getColumn(2));
-                    account.type = query.getColumn(3).getString()[0];
-                    account.init_cash = query.getColumn(4);
                     accounts.push_back(account);
                 }
             }
@@ -69,5 +67,6 @@ namespace kungfu
             }
             return accounts;
         }
+
     }
 }

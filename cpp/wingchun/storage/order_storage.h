@@ -17,6 +17,7 @@ namespace kungfu
         {
         public:
             OrderStorage(const std::string& file_path);
+            ~OrderStorage();
             void create_table_if_not_exist();
             void add_order(uint64_t order_id, const Order &order);
             const Order get_order(uint64_t order_id);

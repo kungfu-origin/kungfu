@@ -14,7 +14,7 @@ namespace kungfu
         {
             create_table_if_not_exist();
         }
-
+        SourceListStorage::~SourceListStorage() {};
         void SourceListStorage::create_table_if_not_exist()
         {
             try

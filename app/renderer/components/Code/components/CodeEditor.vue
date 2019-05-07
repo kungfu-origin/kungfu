@@ -117,7 +117,8 @@ export default {
     watch: {
         currentFile(newFile) {
             const t = this;
-            if (!newFile.isDir) {
+            if(Object.keys(newFile).length === 1) return
+            if(!newFile.isDir) {
                 const filePath = newFile.filePath;
                 CODE_UTILS.getCodeText(filePath).then(codeText => {
                     t.$nextTick().then(() => {

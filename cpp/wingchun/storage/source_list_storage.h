@@ -17,7 +17,7 @@ namespace kungfu
         {
         public:
             SourceListStorage(const std::string& file_name);
-
+            ~SourceListStorage();
             void create_table_if_not_exist();
             void add_source(const std::string& source);
             std::vector<std::string> get_sources();

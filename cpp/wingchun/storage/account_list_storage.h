@@ -18,10 +18,10 @@ namespace kungfu
         {
         public:
             AccountListStorage(const std::string& file_name);
+            ~AccountListStorage();
             void create_table_if_not_exist();
-            void add_account(const StrategyUsedAccountInfo& info);
-            std::vector<StrategyUsedAccountInfo> get_accounts();
-
+            void add_account(const std::string& client_id, const std::string& account_id, const std::string& source_id);
+            std::vector<SubPortfolioInfo> get_accounts();
         private:
             SQLite::Database db_;
         };

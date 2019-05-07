@@ -40,7 +40,7 @@ namespace kungfu
         SwitchDay = 601,
         RspTradingDay = 602,
 
-        StrategyUsedAccountUpdate = 701
+        SubPortfolioInfo = 701
     };
 }
 

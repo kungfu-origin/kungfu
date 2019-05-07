@@ -37,7 +37,7 @@ namespace kungfu
         started_ = false;
     }
 
-    void TaskScheduler::insert_callback_at(long nano, kungfu::TSCallback cb, bool async)
+    void TaskScheduler::insert_callback_at(int64_t nano, kungfu::TSCallback cb, bool async)
     {
         int id = get_id();
         TSCallbackUnit unit{id, nano, cb, async};
@@ -57,7 +57,7 @@ namespace kungfu
     {
         string cur_time_str = yijinjing::parseNano(nano_, "%Y%m%d-");
         string date_time_str = cur_time_str + time_str;
-        long nano = yijinjing::parseTime(date_time_str.c_str(), "%Y%m%d-%H:%M:%S");
+        int64_t nano = yijinjing::parseTime(date_time_str.c_str(), "%Y%m%d-%H:%M:%S");
         if (nano < nano_)
         {
             nano += yijinjing::NANOSECONDS_PER_DAY;
@@ -65,7 +65,7 @@ namespace kungfu
         insert_callback_at(nano, cb, async);
     }
 
-    void TaskScheduler::update_nano(long nano)
+    void TaskScheduler::update_nano(int64_t nano)
     {
         if (nano <= nano_)
         {
@@ -108,7 +108,7 @@ namespace kungfu
         }
     }
 
-    void TaskScheduler::remove_async_unit(long nano, int id)
+    void TaskScheduler::remove_async_unit(int64_t nano, int id)
     {
         cbs_.erase(id);
     }

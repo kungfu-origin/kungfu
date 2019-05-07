@@ -98,8 +98,12 @@ export const openWin = (htmlPath) => {
     : `file://${__dirname}/index.html#${htmlPath}`
     
     let win = new BrowserWindow({
-        width: 1080, height: 766,
+        width: 1080, 
+        height: 766,
         backgroundColor: '#161B2E',
+        webPreferences: {
+            nodeIntegration: true
+        },
     });
     win.loadURL(modalPath)
     win.show()
@@ -128,7 +132,7 @@ export const buildTask = (taskPath, preCurWin = BrowserWindow.getFocusedWindow()
             height: 0,
             show: false,
             webPreferences: {
-                webSecurity: false
+                nodeIntegration: true
             },
             ...debugOptions
         })

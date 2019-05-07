@@ -2,7 +2,7 @@
 <tr-dashboard title="交易日志">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
-            <el-checkbox v-model="ifScrollToBottom">跟踪至底部</el-checkbox>
+            <el-checkbox v-model="ifScrollToBottom">跟踪至底部</el-checkbox>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
@@ -95,6 +95,7 @@ export default {
     watch: {
         searchKeyword: debounce(function(newVal){
             const t = this;
+            t.resetData(true)
             t.processId && t.init(t.processId, t.logPath, t.searchKeyword)
         }),
 
@@ -118,6 +119,7 @@ export default {
     },
 
     destroyed(){
+        this.resetData()
         ipcRenderer.removeAllListeners('res-strategy-log')
     },
 
@@ -131,6 +133,7 @@ export default {
             })
             .then(() => clearFileContent(buildProcessLogPath(t.processId)))
             .then(() => {
+                t.resetData();
                 t.processId && t.init(t.processId, t.logPath)
                 t.$message.success('操作成功！')
             })
@@ -195,8 +198,10 @@ export default {
             let throttleClearLog = throttle(() => {
                     const len = t.tableData.length
                     if(len > 1000) t.tableData = t.tableData.slice(len - 1000, len)
-                }, 60000)
-            t.tailObserver = new Tail(logPath);            
+                }, 60000);
+                
+            t.tailObserver = new Tail(logPath);   
+            t.tailObserver.watch();    
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
                 if(curProcId !== processId) return;
@@ -210,7 +215,7 @@ export default {
             })(processId, searchKeyword))
 
             t.tailObserver.on('error', err => {
-                if(t.tailObserver !== null) t.tailObserver.unwatch();
+                if(t.tailObserver !== null) t.clearTailWatcher();
                 t.tailObserver = null;
             }) 
         },
@@ -291,11 +296,17 @@ export default {
         resetData(ifSearchKeyword=false) {
             const t = this;
             t.logCount = 10000;
-            t.searchKeyword = '';
-            if(t.tailObserver != null) t.tailObserver.unwatch();
-            t.tailObserver = null;
+            !ifSearchKeyword && (t.searchKeyword = '');
+            t.clearTailWatcher();
             t.tableData = Object.freeze([]);
             t.ifScrollToBottom = false;
+        },
+
+        clearTailWatcher(){
+            const t = this;
+            if(t.tailObserver != null) t.tailObserver.unwatch();
+            t.tailObserver = null;
+            return true;
         },
 
         //加载完数据

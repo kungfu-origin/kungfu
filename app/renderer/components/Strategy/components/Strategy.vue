@@ -98,7 +98,8 @@
                 { min: 1, max: 20, message: '长度不能超过 20 个字符', trigger: 'blur' },
                 {validator: validateDuplicateStrategyId, trigger: 'blur'},
                 {validator: chineseValidator, trigger: 'blur'},
-                {validator: specialStrValidator, trigger: 'blur'}
+                {validator: specialStrValidator, trigger: 'blur'},
+                {validator: noZeroAtFirstValidator, trigger: 'blur'}
                 ]"
             >
                 <el-input v-model.trim="setStrategyForm.strategyId" :disabled="setStrategyDialogType == 'set'"></el-input>
@@ -129,7 +130,7 @@ import {startStrategy, deleteProcess} from '__gUtils/processUtils.js';
 import * as STRATEGY_API from '@/io/strategy';
 import {debounce} from '@/assets/js/utils';
 import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
-import {chineseValidator, specialStrValidator} from '@/assets/js/validator';
+import {chineseValidator, specialStrValidator, noZeroAtFirstValidator} from '@/assets/js/validator';
 import path from 'path';
 import {remote} from 'electron'
 
@@ -137,6 +138,7 @@ export default {
     data(){
         this.chineseValidator = chineseValidator;
         this.specialStrValidator = specialStrValidator;
+        this.noZeroAtFirstValidator = noZeroAtFirstValidator;
         return {
             searchKeyword: '',
             searchKeywordDebounce: '',
@@ -224,14 +226,14 @@ export default {
         //删除策略
         handleDeleteStrategy(row){
             const t = this;
-            const {strategy_id} = row
+            const strategy_id = row.strategy_id + ''
             const strategyProcessStatus = t.$utils.ifProcessRunning(strategy_id, t.processStatus)
             if(strategyProcessStatus){
                 t.$message.warning("需先停止该策略运行！")
                 return;
             }
 
-            t.$confirm(`删除策略 ${row.strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {
+            t.$confirm(`删除策略 ${strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消'})
             .then(() => t.$store.dispatch('deleteStrategy', strategy_id))

@@ -46,6 +46,7 @@ export const closeGlobalGatewayNanomsg = (gatewayName) => {
     window.globalGatewaysNanomsg[gatewayName].close()
     window.globalGatewaysNanomsg[gatewayName] = null;
     delete window.globalGatewaysNanomsg[gatewayName]
+    return true;
 }
 
 //接收策略的相关推送

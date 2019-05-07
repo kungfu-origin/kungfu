@@ -19,7 +19,6 @@ class TDXtp:
         self.save_path_file = "{}/runtime".format(os.environ['KF_HOME'])
 
     def run(self):
-        print("run {} with config {}".format(self.name, self.config))
         self.xtp = xtp.TdGateway(self.client_id, self.software_key, self.save_path_file, self.ip, self.port, self.user_id, self.password, self.log_level)
         self.xtp.init()
         self.xtp.start()

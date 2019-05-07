@@ -16,6 +16,8 @@ namespace kungfu
         {
         public:
             SnapshotStorage(const std::string& file_path, const std::string& table, bool daily, bool account);
+            ~SnapshotStorage();
+
             void insert(const PortfolioInfo& portfolio_info);
             void insert(const AccountInfo& account_info);
         private:

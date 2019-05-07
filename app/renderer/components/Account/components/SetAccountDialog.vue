@@ -95,7 +95,7 @@ export default {
         }
         return {}
     },
-    
+
     computed:{
         ...mapState({
             processStatus: state => state.BASE.processStatus,

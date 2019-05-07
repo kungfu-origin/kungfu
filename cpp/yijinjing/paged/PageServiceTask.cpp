@@ -35,6 +35,8 @@
 #include <Processthreadsapi.h>
 #elif defined __APPLE__
 #include <libproc.h>
+#elif defined __linux__
+#include <sstream>
 #endif
 
 USING_YJJ_NAMESPACE

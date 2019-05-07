@@ -9,3 +9,4 @@ pyinstaller = ">=3.0"
 
 [dev-packages]
 pytest = "*"
+pylint = "*"

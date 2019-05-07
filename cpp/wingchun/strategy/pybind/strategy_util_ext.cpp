@@ -44,7 +44,9 @@ PYBIND11_MODULE(pystrategy, m)
     .def("log_error", &kungfu::StrategyUtil::log_error, py::arg("msg"))
 
     .def("get_last_md", &kungfu::StrategyUtil::get_last_md_py, py::arg("instrument_id"), py::arg("exchange_id"))
-
+    .def("get_position", &kungfu::StrategyUtil::get_position_py, py::arg("instrument_id"), py::arg("exchange_id"), py::arg("direction")=kungfu::DirectionLong, py::arg("account_id")="")
+    .def("get_portfolio_info", &kungfu::StrategyUtil::get_portfolio_info_py)
+    .def("get_sub_portfolio_info", &kungfu::StrategyUtil::get_sub_portfolio_info_py, py::arg("account_id"))
     .def("on_push_by_min", &kungfu::StrategyUtil::on_push_by_min)
     .def("on_push_by_day", &kungfu::StrategyUtil::on_push_by_day)
 

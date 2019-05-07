@@ -23,7 +23,7 @@ namespace kungfu
         void publish_pos(const kungfu::Position& pos) const ;
         void publish_portfolio_info(const kungfu::PortfolioInfo& portfolio, kungfu::MsgType msg_type = kungfu::MsgType::Portfolio) const ;
         void publish_account_info(const kungfu::AccountInfo& account_info, kungfu::MsgType msg_type = kungfu::MsgType::AccountInfo) const ;
-        void publish_strategy_used_account(const kungfu::StrategyUsedAccountInfo& info) const;
+        void publish_sub_portfolio_info(const kungfu::SubPortfolioInfo& info) const;
         void publish(kungfu::MsgType msg_type, nlohmann::json& data) const ;
 
     private:

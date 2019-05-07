@@ -30,7 +30,7 @@ matrix:
       platform: x86
 install:
 - ps: |
-    if ($env:PLATFORM -eq "x64") { $env:CMAKE_ARCH = "x64" }
+    if ($env:platform -eq "x64") { $env:CMAKE_ARCH = "x64" }
     if ($env:APPVEYOR_JOB_NAME -like "*Visual Studio 2017*") {
       $env:CMAKE_GENERATOR = "Visual Studio 15 2017"
       $env:CMAKE_INCLUDE_PATH = "C:\Libraries\boost_1_64_0"
@@ -39,13 +39,13 @@ install:
       $env:CMAKE_GENERATOR = "Visual Studio 14 2015"
     }
     if ($env:PYTHON) {
-      if ($env:PLATFORM -eq "x64") { $env:PYTHON = "$env:PYTHON-x64" }
+      if ($env:platform -eq "x64") { $env:PYTHON = "$env:PYTHON-x64" }
       $env:PATH = "C:\Python$env:PYTHON\;C:\Python$env:PYTHON\Scripts\;$env:PATH"
       python -m pip install --upgrade pip wheel
       python -m pip install pytest numpy --no-warn-script-location
     } elseif ($env:CONDA) {
       if ($env:CONDA -eq "27") { $env:CONDA = "" }
-      if ($env:PLATFORM -eq "x64") { $env:CONDA = "$env:CONDA-x64" }
+      if ($env:platform -eq "x64") { $env:CONDA = "$env:CONDA-x64" }
       $env:PATH = "C:\Miniconda$env:CONDA\;C:\Miniconda$env:CONDA\Scripts\;$env:PATH"
       $env:PYTHONHOME = "C:\Miniconda$env:CONDA"
       conda install -y -q pytest numpy scipy

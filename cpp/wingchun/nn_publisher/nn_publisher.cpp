@@ -11,7 +11,6 @@ namespace kungfu
 {
     NNPublisher::NNPublisher(const std::string& url)
     {
-        SPDLOG_TRACE(url);
         pub_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_PUB));
         pub_socket_->bind(url.c_str());
     }
@@ -50,10 +49,10 @@ namespace kungfu
         publish(msg_type, j);
     }
 
-    void NNPublisher::publish_strategy_used_account(const kungfu::StrategyUsedAccountInfo &info) const
+    void NNPublisher::publish_sub_portfolio_info(const kungfu::SubPortfolioInfo &info) const
     {
         nlohmann::json j = info;
-        publish(kungfu::MsgType::StrategyUsedAccountUpdate, j);
+        publish(kungfu::MsgType::SubPortfolioInfo, j);
     }
 
     void NNPublisher::publish_account_info(const kungfu::AccountInfo &account_info, kungfu::MsgType msg_type) const

@@ -22,6 +22,14 @@ export const specialStrValidator = (rule, value, callback) => {
     }
 }
 
+//不能以0开头
+export const noZeroAtFirstValidator = (rule, value, callback) => {
+    if(value[0].toString() === '0') {
+        callback(new Error('不能以数字0开头！'))
+    }else{
+        callback()
+    }
+}
 
 //不能有中文
 export const chineseValidator = (rule, value, callback) => {

@@ -102,13 +102,15 @@ Vue.filter('moment', function (value, formatString) {
 
 
 //循环获取processStatus
+var listProcessTimer;
 export const startGetProcessStatus = () => {
-    setInterval(() => {
-        listProcessStatus().then(res => {
-            if(res instanceof Error) return err;
-            EVENT_BUS.$emit('update-process-status', Object.freeze(res))
-        }).catch(err => console.error(err))
-    }, 2000);
+    clearTimeout(listProcessTimer)
+    listProcessStatus()
+    .then(res => {
+        res && EVENT_BUS.$emit('update-process-status', Object.freeze(res))
+    })
+    .catch(err => console.error(err))
+    .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 }
 
  //start pm2 kungfu engine
@@ -117,16 +119,11 @@ export const startGetProcessStatus = () => {
  startPageEngine(false)
  .then(() => startCalendarEngine(false))
  .then(() => startGetProcessStatus())
- .catch(err => {
-     console.error(err)
- })
+ .catch(err => console.error(err))
 
 /* eslint-disable no-new */
 new Vue({
     router,
     store,
     render: h => h(App)
-  }).$mount('#app', true)
-
-
- 
+}).$mount('#app', true)

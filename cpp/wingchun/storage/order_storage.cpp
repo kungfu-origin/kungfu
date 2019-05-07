@@ -15,6 +15,8 @@ namespace kungfu
             create_table_if_not_exist();
         }
 
+        OrderStorage::~OrderStorage() {}
+        
         void OrderStorage::create_table_if_not_exist()
         {
             try

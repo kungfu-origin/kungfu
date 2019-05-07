@@ -1,10 +1,9 @@
 const path = require('path');
-const {BASE_DIR, PM2_DIR, KUNGFU_ENGINE, buildProcessLogPath} = require('__gConfig/pathConfig');
+const {BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath} = require('__gConfig/pathConfig');
 const {logger} = require('__gUtils/logUtils');
+const {platform} = require('__gConfig/platformConfig');
 export const pm2 = require('pm2')
 
-
-// process.env.PM2_HOME = PM2_DIR;
 
 const pm2Connect = () => {
     return new Promise((resolve, reject) => {
@@ -29,23 +28,19 @@ const pm2Connect = () => {
 
 const pm2List = () => {
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try{
-                pm2.list((err, pList) => {
-                    pm2.disconnect()
-                    if(err){
-                        logger.error(err)
-                        reject(err)
-                        return;
-                    }
-                    resolve(pList)
-                })
-            }catch(err){
-                pm2.disconnect()
-                logger.error(err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
+        try{
+            pm2.list((err, pList) => {
+                if(err){
+                    logger.error(err)
+                    reject(err)
+                    return;
+                }
+                resolve(pList)
+            })
+        }catch(err){
+            logger.error(err)
+            reject(err)
+        }
     })
 }
 
@@ -54,7 +49,6 @@ const pm2Delete = (target) => {
         pm2Connect().then(() => {
             try{
                 pm2.delete(target, err => {
-                    pm2.disconnect();
                     if(err) {
                         logger.error(err)
                         reject(err)
@@ -63,7 +57,6 @@ const pm2Delete = (target) => {
                     resolve(true)
                 })
             }catch(err){
-                pm2.disconnect()
                 logger.error(err)
                 reject(err)
             }
@@ -73,7 +66,8 @@ const pm2Delete = (target) => {
 
 
 const dealSpaceInPath = (pathname) => {
-    return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
+    if (platform === 'win') return pathname
+    else return path.resolve(eval('"' + pathname.replace(/ /g, '\\ ') + '"'))
 }
 
 export const describeProcess = (name) => {
@@ -81,7 +75,6 @@ export const describeProcess = (name) => {
         pm2Connect().then(() => {
             try{
                 pm2.describe(name, (err, res) => {
-                    pm2.disconnect();
                     if(err){
                         logger.error(err)
                         reject(err);
@@ -90,7 +83,6 @@ export const describeProcess = (name) => {
                     resolve(res)
                 })
             }catch(err){
-                pm2.disconnect();
                 logger.error(err)
                 reject(err)
             }
@@ -99,10 +91,11 @@ export const describeProcess = (name) => {
 }
 
 export const startProcess = async (options) => {
+    const extensionName = platform === 'win' ? '.exe' : ''
     options = {
         ...options,
         "cwd": path.join(KUNGFU_ENGINE, 'kfc'),
-        "script": "kfc",
+        "script": `kfc${extensionName}`,
         "log_type": "json",
         "out_file": buildProcessLogPath(options.name),
         "err_file": buildProcessLogPath(options.name),
@@ -125,7 +118,6 @@ export const startProcess = async (options) => {
         pm2Connect().then(() => {
             try{
                 pm2.start(options, (err, apps) => { 
-                    pm2.disconnect();
                     if(err) {
                         logger.error(err)
                         reject(err);
@@ -134,7 +126,6 @@ export const startProcess = async (options) => {
                     resolve(apps);
                 })
             }catch(err){
-                pm2.disconnect();
                 logger.error(err)
                 reject(err)
             }
@@ -230,7 +221,6 @@ export const killAllProcess = () => {
                 return;
             }
             //要保证page, calendar最后一个退出
-            
             (async() => {
                 let i, len = list.length;
                 try{

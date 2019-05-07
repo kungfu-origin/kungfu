@@ -1,8 +1,8 @@
 import {blankValidator, validateTCPUri, validate099, validateInt} from '@/assets/js/validator'
-const systemVari = process.platform;
+import {platform} from '__gConfig/platformConfig';
 
 export const ifSourceDisable = {
-    ctp: systemVari === 'darwin',
+    ctp: platform === 'mac',
     xtp: false
 }
 
@@ -64,6 +64,13 @@ export const accountSource = {
             validator: [blankValidator] //不能包含空格
         },
         {
+            key: 'software_key',
+            name: 'software_key',
+            type: 'str',
+            rule: '请填写software_key！',
+            required: true
+        },
+        {
             key: 'md_ip',
             name: 'md_ip',
             type: 'str',
@@ -91,13 +98,6 @@ export const accountSource = {
             type: 'int',
             rule: '请填写td_port！',
             validator: [validateInt],
-            required: true
-        },
-        {
-            key: 'software_key',
-            name: 'software_key',
-            type: 'str',
-            rule: '请填写software_key！',
             required: true
         },
         {

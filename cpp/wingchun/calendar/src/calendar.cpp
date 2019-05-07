@@ -34,27 +34,27 @@ namespace kungfu
         }
     }
 
-    bool Calendar::is_open(long nano, const std::string& exchange_id)
+    bool Calendar::is_open(int64_t nano, const std::string& exchange_id)
     {
         std::string trading_day = get_trading_day_from_nano(nano);
         trading_day = get_next_trading_day(trading_day.c_str(),0);
         if(trading_evening[exchange_id])
         {
-            long evening_start = get_open_time(trading_day, exchange_id, EVENING);
-            long evening_end = get_close_time(trading_day, exchange_id, EVENING);
+            int64_t evening_start = get_open_time(trading_day, exchange_id, EVENING);
+            int64_t evening_end = get_close_time(trading_day, exchange_id, EVENING);
             if(nano>=evening_start&&nano<=evening_end)
             {
                 return true;
             }
         }
-        long morning_start = get_open_time(trading_day, exchange_id, MORNING);
-        long morning_end = get_close_time(trading_day, exchange_id, MORNING);
-        long afternoon_start = get_open_time(trading_day, exchange_id, AFTERNOON);
-        long afternoon_end = get_close_time(trading_day, exchange_id, AFTERNOON);
+        int64_t morning_start = get_open_time(trading_day, exchange_id, MORNING);
+        int64_t morning_end = get_close_time(trading_day, exchange_id, MORNING);
+        int64_t afternoon_start = get_open_time(trading_day, exchange_id, AFTERNOON);
+        int64_t afternoon_end = get_close_time(trading_day, exchange_id, AFTERNOON);
         return ((nano>=morning_start&&nano<=morning_end)||(nano>=afternoon_start&&nano<=afternoon_end));
     }
 
-    long Calendar::get_open_time(const std::string& trading_day, const std::string& exchange_id, int slot)
+    int64_t Calendar::get_open_time(const std::string& trading_day, const std::string& exchange_id, int slot)
     {
         if(slot == DEFAULT_SLOT)
         {
@@ -63,7 +63,7 @@ namespace kungfu
         return get_nano_from_trading_day(trading_day, trading_times[exchange_id][0][slot]);
     }
 
-    long Calendar::get_close_time(const std::string& trading_day, const std::string& exchange_id, int slot)
+    int64_t Calendar::get_close_time(const std::string& trading_day, const std::string& exchange_id, int slot)
     {
         if(slot == DEFAULT_SLOT)
         {
@@ -72,7 +72,7 @@ namespace kungfu
         return get_nano_from_trading_day(trading_day, trading_times[exchange_id][1][slot]);
     }
 
-    long Calendar::next_open(long nano, const std::string& exchange_id, int slot)
+    int64_t Calendar::next_open(int64_t nano, const std::string& exchange_id, int slot)
     {
         std::string trading_day = get_trading_day_from_nano(nano);
         trading_day = get_next_trading_day(trading_day.c_str(),0);
@@ -80,7 +80,7 @@ namespace kungfu
         {
             slot = MORNING;
         }
-        long start = get_open_time(trading_day, exchange_id, slot);
+        int64_t start = get_open_time(trading_day, exchange_id, slot);
         if(nano<=start)
         {
             return start;
@@ -89,7 +89,7 @@ namespace kungfu
         return get_open_time(trading_day, exchange_id, slot);
     }
 
-    long Calendar::next_close(long nano, const std::string& exchange_id, int slot)
+    int64_t Calendar::next_close(int64_t nano, const std::string& exchange_id, int slot)
     {
         std::string trading_day = get_trading_day_from_nano(nano);
         trading_day = get_next_trading_day(trading_day.c_str(),0);
@@ -97,7 +97,7 @@ namespace kungfu
         {
             slot = AFTERNOON;
         }
-        long start = get_close_time(trading_day, exchange_id, slot);
+        int64_t start = get_close_time(trading_day, exchange_id, slot);
         if(nano<=start)
         {
             return start;
@@ -106,7 +106,7 @@ namespace kungfu
         return get_close_time(trading_day, exchange_id, slot);
     }
 
-    std::vector<TradingSession> Calendar::get_trading_sessions(long start_nano, long end_nano, const std::string& exchange_id)
+    std::vector<TradingSession> Calendar::get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id)
     {
         std::vector<TradingSession> result;
         if(end_nano<start_nano)
@@ -115,13 +115,13 @@ namespace kungfu
         }
         std::string start_trading_day = get_trading_day_from_nano(start_nano);
         std::string end_trading_day = get_trading_day_from_nano(end_nano);
-        long start,end;
+        int64_t start,end;
         while(true)
         {
             if(trading_evening[exchange_id])
             {
-                long evening_start = get_open_time(start_trading_day, exchange_id, EVENING);
-                long evening_end = get_close_time(start_trading_day, exchange_id, EVENING);
+                int64_t evening_start = get_open_time(start_trading_day, exchange_id, EVENING);
+                int64_t evening_end = get_close_time(start_trading_day, exchange_id, EVENING);
                 start = evening_start<start_nano?start_nano:evening_start;
                 end = evening_end<end_nano?evening_end:end_nano;
                 if(start<=end)
@@ -129,16 +129,16 @@ namespace kungfu
                     result.push_back({exchange_id, start_trading_day, start, end});
                 }
             }
-            long morning_start = get_open_time(start_trading_day, exchange_id, MORNING);
-            long morning_end = get_close_time(start_trading_day, exchange_id, MORNING);
+            int64_t morning_start = get_open_time(start_trading_day, exchange_id, MORNING);
+            int64_t morning_end = get_close_time(start_trading_day, exchange_id, MORNING);
             start = morning_start<start_nano?start_nano:morning_start;
             end = morning_end<end_nano?morning_end:end_nano;
             if(start<=end)
             {
                 result.push_back({exchange_id, start_trading_day, start, end});
             }
-            long afternoon_start = get_open_time(start_trading_day, exchange_id, AFTERNOON);
-            long afternoon_end = get_close_time(start_trading_day, exchange_id, AFTERNOON);
+            int64_t afternoon_start = get_open_time(start_trading_day, exchange_id, AFTERNOON);
+            int64_t afternoon_end = get_close_time(start_trading_day, exchange_id, AFTERNOON);
             start = afternoon_start<start_nano?start_nano:afternoon_start;
             end = afternoon_end<end_nano?afternoon_end:end_nano;
             if(start<=end)

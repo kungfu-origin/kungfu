@@ -11,7 +11,6 @@ class MDCtp:
 
     def run(self):
         self.config = get_task_config(self.name)
-        print("run {} with config {}".format(self.name, self.config))
         self.account_id = self.config["account_id"]
         self.broker_id = self.config["broker_id"]
         self.password = self.config["password"]

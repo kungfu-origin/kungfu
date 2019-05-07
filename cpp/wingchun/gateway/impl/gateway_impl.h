@@ -165,8 +165,8 @@ namespace kungfu
         void on_position_detail(const Position& pos_detail, bool is_last);
         void on_account(AccountInfo& account);
         void on_quote(const Quote& quote);
-        void on_1min_timer(long nano);
-        void on_daily_timer(long nano);
+        void on_1min_timer(int64_t nano);
+        void on_daily_timer(int64_t nano);
         void on_switch_day(const std::string& trading_day);
 
     private:

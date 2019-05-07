@@ -91,8 +91,8 @@ class EventLoop:
     def run(self):
         signal.signal(signal.SIGINT, self.__handle_signal)
         signal.signal(signal.SIGTERM, self.__handle_signal)
-        signal.signal(signal.SIGHUP, self.__handle_signal)
-        signal.signal(signal.SIGQUIT, self.__handle_signal)
+        #signal.signal(signal.SIGHUP, self.__handle_signal)
+        #signal.signal(signal.SIGQUIT, self.__handle_signal)
 
         self._quit = False
         while not self._quit and self._signal_received < 0:

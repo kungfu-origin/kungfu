@@ -64,11 +64,26 @@ namespace kungfu
 
         //获取当前纳秒时间
         //@return            当前纳秒时间
-        long get_nano() const;
+        int64_t get_nano() const;
 
         //获取接收到的最新一条行情数据
-        //@return            行情数据指针(nullptr 表示暂未收到行情数据)
+        //@param instrument_id 合约ID
+        //@param exchange_id   交易所ID
+        //@param account_id    账户ID
+        //@return              行情数据指针(nullptr 表示暂未收到行情数据)
         const Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
+
+        //获取持仓信息
+        //@param instrument_id 合约ID
+        //@param exchange_id   交易所ID
+        //@param direction     持仓方向
+        //@param account_id    账户ID("" 表示获取策略在所有账户下持仓汇总信息)
+        //@return              持仓数据指针(nullptr 表示无持仓)
+        const Position* const get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
+
+        const PortfolioInfo* const get_portfolio_info() const;
+
+        const SubPortfolioInfo* const get_sub_portfolio_info(const std::string& account_id) const;
 
         //订阅行情
         //@param source_id   柜台ID

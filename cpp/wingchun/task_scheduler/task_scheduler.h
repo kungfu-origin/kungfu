@@ -23,7 +23,7 @@ namespace kungfu
      *
      * insert_callback_at_next中time_str格式为"09:01:07"
      */
-    typedef std::function<void (long)> TSCallback;
+    typedef std::function<void (int64_t)> TSCallback;
     class TaskScheduler
     {
     public:
@@ -32,17 +32,17 @@ namespace kungfu
         void run();
         void stop();
 
-        void insert_callback_at(long nano, TSCallback cb, bool async = false);
+        void insert_callback_at(int64_t nano, TSCallback cb, bool async = false);
         void insert_callback_after(int msec, TSCallback cb, bool async = false);
         void insert_callback_at_next(const char* time_str, TSCallback cb, bool async= false);
 
-        void update_nano(long nano);
-        long get_nano() const { return nano_; }
+        void update_nano(int64_t nano);
+        int64_t get_nano() const { return nano_; }
     protected:
         struct TSCallbackUnit
         {
             int         id_;
-            long        nano_;
+            int64_t        nano_;
             TSCallback  cb_;
             bool        async_;
         };
@@ -50,12 +50,12 @@ namespace kungfu
     protected:
         int get_id() const;
         void run_async_unit(const TSCallbackUnit& unit);
-        void remove_async_unit(long nano, int id);
+        void remove_async_unit(int64_t nano, int id);
 
     protected:
         std::map<int, std::shared_ptr<std::thread>>     threads_;
         std::atomic<bool>                               started_;
-        std::atomic<long>                               nano_;
+        std::atomic<int64_t>                               nano_;
         std::map<int, TSCallbackUnit>                   cbs_;
         // TODO: consider priority_queue
     };
