@@ -50,6 +50,15 @@ cmake (>3.12)
 
 功夫的编译需要系统默认（$PATH指向）的 Python 版本为 2。如果系统中也存在 Python 3，则可以通过下述 pipenv 的方式使得最终输出的 app 使用 Python 3，但仍然需要默认的 Python 是 2。
 
+功夫编译依赖 [Node.js](https://nodejs.org)，建议预先进行如下设置加速依赖包的下载：
+```
+$ npm config set registry https://registry.npm.taobao.org
+$ npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
+$ npm config set PUPPETEER_DOWNLOAD_HOST https://npm.taobao.org/mirrors
+$ npm config set puppeteer_download_host https://npm.taobao.org/mirrors
+$ npm config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
+```
+
 #### MacOSX
 
 ```
@@ -84,25 +93,10 @@ Compile 编译
 
 #### 常规操作
 
-获取代码：
+获取代码并编译：
 ```
 $ git clone https://github.com/taurusai/kungfu
 $ cd kungfu
-```
-
-功夫使用 [npm](https://npmjs.com) 进行编译，建议预先对 npm 进行如下设置：
-```
-$ npm config set registry https://registry.npm.taobao.org
-$ npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
-$ npm config set PUPPETEER_DOWNLOAD_HOST https://npm.taobao.org/mirrors
-$ npm config set puppeteer_download_host https://npm.taobao.org/mirrors
-$ npm config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
-
-$ npm install electron-builder -g
-```
-
-设置完成后可以进行编译：
-```
 $ yarn install
 $ yarn run build
 ```
@@ -118,12 +112,12 @@ $ yarn run clean
 
 功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/v3.12/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
 ```
-$ npm config set kungfu:cmakejsopt "debug"
+$ yarn config set kungfu:cmakejsopt "debug"
 ```
 
 执行以下命令恢复 Release 模式：
 ```
-$ npm config set kungfu:cmakejsopt
+$ yarn config set kungfu:cmakejsopt
 ```
 
 更多可选设置请参考 [CMake.js Options](https://www.npmjs.com/package/cmake-js)。
