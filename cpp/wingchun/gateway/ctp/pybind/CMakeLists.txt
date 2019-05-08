@@ -1,4 +1,7 @@
 PROJECT(pyctp)
+if(WIN32)
+    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+endif()
 PYBIND11_ADD_MODULE(ctp SHARED "gateway_ext.cpp")
 TARGET_LINK_LIBRARIES(ctp PRIVATE ctp_md ctp_td)
 file(COPY test_md.py DESTINATION .)
