@@ -196,7 +196,6 @@ export const listProcessStatus = () => {
                 const status = p.pm2_env.status
                 processStatus[name] = status
             })
-            console.log(processStatus,'----')
             resolve(processStatus)
         }).catch(err => reject(err))
     })
