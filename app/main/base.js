@@ -35,7 +35,7 @@ export const initDB = () => {
 }
 
 
-export const killAll = () => {
+export const killExtra = () => {
     const killList = ['kfc.exe', 'pm2', 'kfc', 'node']
     return fkill(killList, {
         force: true,

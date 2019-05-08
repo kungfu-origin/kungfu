@@ -229,9 +229,6 @@ export const killAllProcess = async() => {
 }
 
 
-
-
-
 //干掉守护进程
 export const killGodDaemon = () => {
     return new Promise((resolve, reject) => {
