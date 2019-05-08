@@ -67,11 +67,11 @@ const pm2Delete = (target) => {
 
 
 const dealSpaceInPath = (pathname) => {
-    if (platform === 'win') return pathname.replace(/\\/g, '\\\\').replace(/ /g, '\\ ') + '"'
-    console.log(22222)
+    if (platform === 'win') return pathname
     return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
 }
-
+// .replace(/ /g, '\\ ')
+// .replace(/\\/g, '\\\\').replace(/ /g, '\\ ')
 export const describeProcess = (name) => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -179,7 +179,6 @@ export const startTd = (resource, processName) => {
 //启动strategy
 export const startStrategy = (strategyId, strategyPath) => {
     strategyPath = dealSpaceInPath(strategyPath)
-    console.log(strategyPath,'~~~')
     return startProcess({
         "name": strategyId,
         "args": `strategy --name ${strategyId} --path ${strategyPath}`,
@@ -212,7 +211,6 @@ export const deleteProcess = async(processName) => {
     }catch(err){
         console.error(err)
     }
-
     const pids = processes.map(prc => prc.pid);
     fkill(pids).catch(err => console.error(err))
     return pm2Delete(processName)
@@ -225,7 +223,6 @@ export const killAllProcess = async() => {
     const pids = processes.map(p => p.pid).filter(p => !!p)
     return fkill(pids, {
         force: true,
-        tree: platform === 'win',
         ignoreCase: true
     })
 }
@@ -246,10 +243,11 @@ export const killGodDaemon = () => {
                     resolve(true)
                 })
             }catch(err){
-                logger.error(err)
                 pm2.disconnect()
+                logger.error(err)
                 reject(err)
             }
+            pm2.disconnect()
         }).catch(err => reject(err))
     })
 }

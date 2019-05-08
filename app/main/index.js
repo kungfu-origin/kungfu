@@ -155,9 +155,8 @@ app.on('will-quit', (e) => {
 		message: "退出应用会结束所有交易进程，确认退出吗？",
 		buttons: ['是', '最小化到托盘'],
 		icon: path.join(__resources, 'icon', 'icon.png')
-	}, async(index) => {
+	}, async (index) => {
 		if(index === 0){
-			appIcon && appIcon.destroy && appIcon.destroy();
 			appIcon = null;
 			console.log('starting quit process ')
 		
@@ -186,12 +185,15 @@ app.on('will-quit', (e) => {
 			}
 			console.timeEnd('kill extra')
 
+			appIcon && appIcon.destroy && appIcon.destroy();
+
+
 			allowQuit = true;
 			app.quit();
 
 			console.time('kill finall')
 			try{
-				(platform === 'win') && killFinal();
+				(platform === 'win') && await killFinal();
 			}catch(err){
 				console.error(err)				
 			}
