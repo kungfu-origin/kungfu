@@ -1,3 +1,4 @@
+PROJECT(wingchun)
 
 include_directories(../yijinjing/journal)
 

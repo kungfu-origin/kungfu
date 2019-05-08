@@ -1,4 +1,3 @@
-
 PROJECT(calendar)
 
 SET(CALENDAR_SOURCE_FILES src/calendar_service.cpp src/calendar_service_daemon.cpp src/calendar.cpp src/calendar_storage.hpp)
@@ -16,11 +15,5 @@ endif()
 
 ADD_EXECUTABLE(calendar_service_daemon src/calendar_service_daemon.cpp)
 TARGET_LINK_LIBRARIES(calendar_service_daemon calendar)
-
-#if (test)
-#   ADD_EXECUTABLE(test_calendar test/test_calendar.cpp)
-#   target_link_libraries(test_calendar calendar gtest_main)
-#   add_test(NAME test-calendar COMMAND test_calendar)
-#endif()
 
 ADD_SUBDIRECTORY(pybind)
