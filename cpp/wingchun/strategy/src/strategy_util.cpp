@@ -78,12 +78,9 @@ namespace kungfu
         }
     }
 
-    bool StrategyUtil::add_account(const std::string &source_id, const std::string &account_id,
-                                   const double cash_limit)
+    bool StrategyUtil::add_account(const std::string &source_id, const std::string &account_id, double cash_limit)
     {
-
         SubPortfolioInfo info = {};
-        strcpy(info.client_id, this->name_.c_str());
         strcpy(info.source_id, source_id.c_str());
         strcpy(info.account_id, account_id.c_str());
 
@@ -323,7 +320,7 @@ namespace kungfu
 
         input.algo_type = algo_type;
         input.order_id = uid;
-        input.client_id = std::string(this->name_.c_str());
+        input.client_id = name_;
         input.input = order_input_msg;
         std::string js = to_string(input);
         
@@ -380,42 +377,28 @@ namespace kungfu
         }
     }
 
-    uintptr_t StrategyUtil::get_last_md_py(const std::string& instrument_id, const std::string& exchange_id) const
+    Position StrategyUtil::get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction, const std::string& account_id) const
     {
-        return  (uintptr_t) this->get_last_md(instrument_id, exchange_id);
+        if (direction == DirectionLong)
+        {
+            auto pos = portfolio_manager_->get_long_pos(account_id.c_str(), instrument_id.c_str(), exchange_id.c_str());
+            SPDLOG_INFO("fuck pos {}", to_string(pos));
+            return pos;
+        }
+        else
+        {
+            return portfolio_manager_->get_short_pos(account_id.c_str(), instrument_id.c_str(), exchange_id.c_str());
+        }
     }
 
-    const Position* const StrategyUtil::get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    PortfolioInfo StrategyUtil::get_portfolio_info() const
     {
-        //TODO
-        return nullptr;
+        return portfolio_manager_->get_portfolio();
     }
 
-    uintptr_t StrategyUtil::get_position_py(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    SubPortfolioInfo StrategyUtil::get_sub_portfolio_info(const std::string& account_id) const
     {
-        return  (uintptr_t) this->get_position(instrument_id, exchange_id, direction, account_id);
-    }
-
-    const PortfolioInfo* const StrategyUtil::get_portfolio_info() const
-    {
-        //TODO
-        return nullptr;
-    }
-
-    uintptr_t StrategyUtil::get_portfolio_info_py() const
-    {
-        return (uintptr_t) this->get_portfolio_info();
-    }
-
-    const SubPortfolioInfo* const StrategyUtil::get_sub_portfolio_info(const std::string& account_id) const
-    {
-        //TODO
-        return nullptr;
-    }
-
-    uintptr_t StrategyUtil::get_sub_portfolio_info_py(const std::string& account_id) const
-    {
-        return (uintptr_t) this->get_sub_portfolio_info(account_id);
+        return portfolio_manager_->get_sub_portfolio(account_id.c_str());
     }
 
     void StrategyUtil::on_push_by_min()
@@ -433,7 +416,7 @@ namespace kungfu
 
         if (is_open)
         {
-            auto pnl = *(portfolio_manager_->get_pnl());
+            auto pnl = portfolio_manager_->get_portfolio();
             pnl.update_time = (int64_t)std::round((double)nano / 1000000000)* 1000000000;
             publisher_->publish_portfolio_info(pnl, kungfu::MsgType::PortfolioByMin);
             DUMP_1M_SNAPSHOT(name_, pnl);
@@ -442,143 +425,9 @@ namespace kungfu
 
     void StrategyUtil::on_push_by_day()
     {
-        auto pnl = *(portfolio_manager_->get_pnl());
+        auto pnl = portfolio_manager_->get_portfolio();
         pnl.update_time = (int64_t)std::round((double)yijinjing::getNanoTime() / 1000000000) * 1000000000;
         DUMP_1D_SNAPSHOT(name_, pnl);
-    }
-
-    double StrategyUtil::get_initial_equity() const
-    {
-        return portfolio_manager_->get_initial_equity();
-    }
-
-    double StrategyUtil::get_static_equity() const
-    {
-        return portfolio_manager_->get_static_equity();
-    }
-    double StrategyUtil::get_dynamic_equity() const
-    {
-        return portfolio_manager_->get_dynamic_equity();
-    }
-
-    double StrategyUtil::get_accumulated_pnl() const
-    {
-        return portfolio_manager_->get_accumulated_pnl();
-    }
-
-    double StrategyUtil::get_accumulated_pnl_ratio() const
-    {
-        return portfolio_manager_->get_accumulated_pnl_ratio();
-    }
-
-    double StrategyUtil::get_intraday_pnl() const
-    {
-        return portfolio_manager_->get_intraday_pnl();
-    }
-
-    double StrategyUtil::get_intraday_pnl_ratio() const
-    {
-        return portfolio_manager_->get_intraday_pnl_ratio();
-    }
-
-    int64_t StrategyUtil::get_long_tot(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_tot(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_long_tot_avail(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_tot_avail(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_long_tot_fro(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_tot_fro(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_long_yd(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_yd(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_long_yd_avail(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_yd_avail(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_long_yd_fro(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_yd_fro(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_long_realized_pnl(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_realized_pnl(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_long_unrealized_pnl(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_unrealized_pnl(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_long_cost_price(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_cost_price(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    Position StrategyUtil::get_long_pos(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_long_pos(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_tot(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_tot(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_tot_avail(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_tot_avail(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_tot_fro(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_tot_fro(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_yd(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_yd(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_yd_avail(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_yd_avail(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    int64_t StrategyUtil::get_short_yd_fro(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_yd_fro(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_short_realized_pnl(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_realized_pnl(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_short_unrealized_pnl(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_unrealized_pnl(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    double StrategyUtil::get_short_cost_price(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_cost_price(instrument_id.c_str(), exchange_id.c_str());
-    }
-
-    Position StrategyUtil::get_short_pos(const string &instrument_id, const string &exchange_id) const
-    {
-        return portfolio_manager_->get_short_pos(instrument_id.c_str(), exchange_id.c_str());
     }
 
     uint64_t StrategyUtil::next_id()

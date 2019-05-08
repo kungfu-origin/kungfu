@@ -40,7 +40,7 @@ namespace kungfu
         ~StrategyUtil();
 
         bool add_md(const std::string& source_id);
-        bool add_account(const std::string& source_id, const std::string& account_id, const double cash_limit);
+        bool add_account(const std::string& source_id, const std::string& account_id, double cash_limit);
         bool register_algo_service();
 
         void on_quote(const Quote& quote);
@@ -77,47 +77,12 @@ namespace kungfu
         void log_error(const string& msg);
 
         const Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
-        const Position* const get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
-        const PortfolioInfo* const get_portfolio_info() const;
-        const SubPortfolioInfo* const get_sub_portfolio_info(const std::string& account_id) const;
-
-        uintptr_t get_last_md_py(const std::string& instrument_id, const std::string& exchange_id) const;
-        uintptr_t get_position_py(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
-        uintptr_t get_portfolio_info_py() const;
-        uintptr_t get_sub_portfolio_info_py(const std::string& account_id) const;
+        Position get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction = DirectionLong, const std::string& account_id = "") const;
+        PortfolioInfo get_portfolio_info() const;
+        SubPortfolioInfo get_sub_portfolio_info(const std::string& account_id) const;
 
         void on_push_by_min();
         void on_push_by_day();
-
-        double get_initial_equity() const;
-        double get_static_equity() const;
-        double get_dynamic_equity() const;
-        double get_accumulated_pnl() const;
-        double get_accumulated_pnl_ratio() const;
-        double get_intraday_pnl() const;
-        double get_intraday_pnl_ratio() const;
-
-        int64_t get_long_tot(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_long_tot_avail(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_long_tot_fro(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_long_yd(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_long_yd_avail(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_long_yd_fro(const string& instrument_id, const string& exchange_id) const;
-        double get_long_realized_pnl(const string& instrument_id, const string& exchange_id) const;
-        double get_long_unrealized_pnl(const string& instrument_id, const string& exchange_id) const;
-        double get_long_cost_price(const string& instrument_id, const string& exchange_id) const;
-        Position get_long_pos(const string& instrument_id, const string& exchange_id) const;
-
-        int64_t get_short_tot(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_short_tot_avail(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_short_tot_fro(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_short_yd(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_short_yd_avail(const string& instrument_id, const string& exchange_id) const;
-        int64_t get_short_yd_fro(const string& instrument_id, const string& exchange_id) const;
-        double get_short_realized_pnl(const string& instrument_id, const string& exchange_id) const;
-        double get_short_unrealized_pnl(const string& instrument_id, const string& exchange_id) const;
-        double get_short_cost_price(const string& instrument_id, const string& exchange_id) const;
-        Position get_short_pos(const string& instrument_id, const string& exchange_id) const;
 
     private:
         uint64_t next_id();

@@ -2,10 +2,57 @@
 // Created by qlu on 2019/2/19.
 //
 
+#include "md_struct.h"
+#include "oms_struct.h"
 #include "strategy/src/strategy_util.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
+
+uintptr_t py_get_last_md(const kungfu::StrategyUtil& util, const std::string& instrument_id, const std::string& exchange_id)
+{
+    auto* quote = util.get_last_md(instrument_id, exchange_id);
+    kungfu::Quote* py_quote = nullptr;
+    if (nullptr != quote)
+    {
+        py_quote = (kungfu::Quote*)malloc(sizeof(kungfu::Quote));
+        memcpy(py_quote, quote, sizeof(kungfu::Quote));
+    }
+    return (uintptr_t)py_quote;
+}
+
+uintptr_t py_get_position(const kungfu::StrategyUtil& util, const std::string& instrument_id, const std::string& exchange_id, kungfu::Direction direction = kungfu::DirectionLong, const std::string& account_id = "")
+{
+    auto pos = util.get_position(instrument_id, exchange_id, direction, account_id);
+    auto* py_pos = (kungfu::Position*)malloc(sizeof(kungfu::Position));
+    memcpy(py_pos, &pos, sizeof(kungfu::Position));
+    return (uintptr_t)py_pos;
+}
+
+uintptr_t py_get_portfolio_info(const kungfu::StrategyUtil& util)
+{
+    auto pnl = util.get_portfolio_info();
+    auto* py_pnl = (kungfu::PortfolioInfo*)malloc(sizeof(kungfu::PortfolioInfo));
+    memcpy(py_pnl, &pnl, sizeof(kungfu::PortfolioInfo));
+    return (uintptr_t)py_pnl;
+}
+
+uintptr_t py_get_sub_portfolio_info(const kungfu::StrategyUtil& util, const std::string& account_id)
+{
+    auto sub_pnl = util.get_sub_portfolio_info(account_id);
+    auto* py_sub_pnl = (kungfu::SubPortfolioInfo*)malloc(sizeof(kungfu::SubPortfolioInfo));
+    memcpy(py_sub_pnl, &sub_pnl, sizeof(kungfu::SubPortfolioInfo));
+    return (uintptr_t)py_sub_pnl;
+}
+
+void py_release_ptr(uintptr_t ptr)
+{
+    auto p = (void*)ptr;
+    if (nullptr != p)
+    {
+        free(p);
+    }
+}
 
 namespace py = pybind11;
 PYBIND11_MODULE(pystrategy, m)
@@ -43,39 +90,14 @@ PYBIND11_MODULE(pystrategy, m)
     .def("log_warn", &kungfu::StrategyUtil::log_warn, py::arg("msg"))
     .def("log_error", &kungfu::StrategyUtil::log_error, py::arg("msg"))
 
-    .def("get_last_md", &kungfu::StrategyUtil::get_last_md_py, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_position", &kungfu::StrategyUtil::get_position_py, py::arg("instrument_id"), py::arg("exchange_id"), py::arg("direction")=kungfu::DirectionLong, py::arg("account_id")="")
-    .def("get_portfolio_info", &kungfu::StrategyUtil::get_portfolio_info_py)
-    .def("get_sub_portfolio_info", &kungfu::StrategyUtil::get_sub_portfolio_info_py, py::arg("account_id"))
     .def("on_push_by_min", &kungfu::StrategyUtil::on_push_by_min)
     .def("on_push_by_day", &kungfu::StrategyUtil::on_push_by_day)
-
-    .def("get_initial_equity", &kungfu::StrategyUtil::get_initial_equity)
-    .def("get_static_equity", &kungfu::StrategyUtil::get_static_equity)
-    .def("get_dynamic_equity", &kungfu::StrategyUtil::get_dynamic_equity)
-    .def("get_accumulated_pnl", &kungfu::StrategyUtil::get_accumulated_pnl)
-    .def("get_accumulated_pnl_ratio", &kungfu::StrategyUtil::get_accumulated_pnl_ratio)
-    .def("get_intraday_pnl", &kungfu::StrategyUtil::get_intraday_pnl)
-    .def("get_intraday_pnl_ratio", &kungfu::StrategyUtil::get_intraday_pnl_ratio)
-    .def("get_long_tot", &kungfu::StrategyUtil::get_long_tot, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_tot_avail", &kungfu::StrategyUtil::get_long_tot_avail, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_tot_fro", &kungfu::StrategyUtil::get_long_tot_fro, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_yd", &kungfu::StrategyUtil::get_long_yd, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_yd_avail", &kungfu::StrategyUtil::get_long_yd_avail, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_yd_fro", &kungfu::StrategyUtil::get_long_yd_fro, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_realized_pnl", &kungfu::StrategyUtil::get_long_realized_pnl, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_unrealized_pnl", &kungfu::StrategyUtil::get_long_unrealized_pnl, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_cost_price", &kungfu::StrategyUtil::get_long_cost_price, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_long_pos", &kungfu::StrategyUtil::get_long_pos, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_tot", &kungfu::StrategyUtil::get_short_tot, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_tot_avail", &kungfu::StrategyUtil::get_short_tot_avail, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_tot_fro", &kungfu::StrategyUtil::get_short_tot_fro, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_yd", &kungfu::StrategyUtil::get_short_yd, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_yd_avail", &kungfu::StrategyUtil::get_short_yd_avail, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_yd_fro", &kungfu::StrategyUtil::get_short_yd_fro, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_realized_pnl", &kungfu::StrategyUtil::get_short_realized_pnl, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_unrealized_pnl", &kungfu::StrategyUtil::get_short_unrealized_pnl, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_cost_price", &kungfu::StrategyUtil::get_short_cost_price, py::arg("instrument_id"), py::arg("exchange_id"))
-    .def("get_short_pos", &kungfu::StrategyUtil::get_short_pos, py::arg("instrument_id"), py::arg("exchange_id"))
     ;
+
+    m.def("get_last_md", &py_get_last_md, py::arg("strategy"), py::arg("instrument_id"), py::arg("exchange_id"));
+    m.def("get_position", &py_get_position, py::arg("strategy"), py::arg("instrument_id"), py::arg("exchange_id"), py::arg("direction")=kungfu::DirectionLong, py::arg("account_id")="");
+    m.def("get_portfolio_info", &py_get_portfolio_info, py::arg("strategy"));
+    m.def("get_sub_portfolio_info", &py_get_sub_portfolio_info, py::arg("strategy"), py::arg("account_id"));
+    m.def("release_ptr", &py_release_ptr, py::arg("ptr"));
+
 }

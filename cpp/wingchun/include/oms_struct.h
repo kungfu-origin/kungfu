@@ -237,24 +237,7 @@ namespace kungfu
         double intraday_pnl_ratio;     //日内收益率
     };
 
-    struct SubPortfolioInfo
-    {
-        char trading_day[DATE_LEN];             //交易日
-        int64_t update_time;                    //数据更新时间
-
-        char client_id[CLIENT_ID_LEN];          //Client ID
-        char account_id[ACCOUNT_ID_LEN];        //账号ID
-        char source_id[SOURCE_ID_LEN];          //柜台ID
-        AccountType type;                       //账号类型
-
-        double initial_equity;                  //期初权益
-        double static_equity;                   //静态权益
-        double dynamic_equity;                  //动态权益
-        double accumulated_pnl;                 //累计收益
-        double accumulated_pnl_ratio;           //累计收益率
-        double intraday_pnl;                    //日内收益
-        double intraday_pnl_ratio;              //日内收益率
-    };
+    typedef AccountInfo SubPortfolioInfo; // 策略中的单个账户数据
 
     //持仓冻结信息
     struct PositionFrozen

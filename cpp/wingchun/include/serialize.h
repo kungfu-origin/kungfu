@@ -211,23 +211,6 @@ namespace kungfu
         j["close_pnl"] = FORMAT_DOUBLE(account.close_pnl);
     }
 
-    inline void to_json(nlohmann::json& j, const SubPortfolioInfo& info)
-    {
-        j["trading_day"] = std::string(info.trading_day);
-        j["update_time"] = info.update_time;
-        j["client_id"] = std::string(info.client_id);
-        j["account_id"] = std::string(info.account_id);
-        j["source_id"] = std::string(info.source_id);
-        j["type"] = std::string(1, info.type);
-        j["initial_equity"] = FORMAT_DOUBLE(info.initial_equity);
-        j["static_equity"] = FORMAT_DOUBLE(info.static_equity);
-        j["dynamic_equity"] = FORMAT_DOUBLE(info.dynamic_equity);
-        j["accumulated_pnl"] = FORMAT_DOUBLE(info.accumulated_pnl);
-        j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(info.accumulated_pnl_ratio);
-        j["intraday_pnl"] = FORMAT_DOUBLE(info.intraday_pnl);
-        j["intraday_pnl_ratio"] = FORMAT_DOUBLE(info.intraday_pnl_ratio);
-    }
-
     inline void to_json(nlohmann::json& j, const Position& position)
     {
         j["rcv_time"] = position.rcv_time;

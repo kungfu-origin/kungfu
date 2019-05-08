@@ -16,64 +16,21 @@
 
 namespace kungfu
 {
-    class PortfolioManager::impl final : public IPnLDataHandler, public IPosDataFetcher, public IAccDataFetcher
+    class PortfolioManager::impl final : public IPnLDataHandler
     {
     public:
         explicit impl(const char* db);
         virtual ~impl();
 
-        // IPosDataFetcher
-        int64_t get_long_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_long_pos(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_short_pos(const char* instrument_id, const char* exchange_id) const override;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
-        std::vector<Instrument> get_all_pos_instruments() const override;
-        // IPosDataFetcher
+        Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
+        Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const;
+        std::vector<Instrument> get_all_pos_instruments(const char* account_id) const;
 
-        // IAccDataFetcher
-        double get_initial_equity() const override;
-        double get_static_equity() const override;
-        double get_dynamic_equity() const override;
-        double get_accumulated_pnl() const override;
-        double get_accumulated_pnl_ratio() const override;
-        double get_intraday_pnl() const override;
-        double get_intraday_pnl_ratio() const override;
-        double get_avail() const override;
-        double get_market_value() const override;
-        double get_margin() const override;
-        double get_accumulated_fee() const override;
-        double get_intraday_fee() const override;
-        double get_frozen_cash() const override;
-        double get_frozen_margin() const override;
-        double get_frozen_fee() const override;
-        double get_position_pnl() const override;
-        double get_close_pnl() const override;
-        // IAccDataFetcher
+        SubPortfolioInfo get_sub_portfolio(const char* account_id) const;
+        PortfolioInfo get_portfolio() const;
+
+        const AccountManagerPtr get_account(const char* account_id) const;
 
         // IPnLDataHandler
         void on_quote(const Quote* quote) override;
@@ -95,9 +52,6 @@ namespace kungfu
         void set_initial_equity(double equity) override;
         void set_static_equity(double equity) override;
         // IPnLDataHandler
-
-        const PortfolioInfo* get_pnl() const;
-        const AccountManagerPtr get_account(const char* account_id) const;
 
     private:
         bool recalc_pnl();
@@ -134,131 +88,44 @@ namespace kungfu
         storage_.save(last_update_, trading_day_, pnl_);
     }
 
-#define IMPLEMENT_POS_FUNC(ret_type, func_name) \
-    ret_type PortfolioManager::impl::func_name(const char *instrument_id, const char *exchange_id) const \
-    { \
-        ret_type ret = 0; \
-        for (const auto& iter : accounts_) \
-        { \
-            if (nullptr != iter.second) \
-            { \
-                ret += iter.second->func_name(instrument_id, exchange_id); \
-            } \
-        } \
-        return ret; \
-    }
-
-    IMPLEMENT_POS_FUNC(int64_t, get_long_tot)
-    IMPLEMENT_POS_FUNC(int64_t, get_long_tot_avail)
-    IMPLEMENT_POS_FUNC(int64_t, get_long_tot_fro)
-    IMPLEMENT_POS_FUNC(int64_t, get_long_yd)
-    IMPLEMENT_POS_FUNC(int64_t, get_long_yd_avail)
-    IMPLEMENT_POS_FUNC(int64_t, get_long_yd_fro)
-    IMPLEMENT_POS_FUNC(double, get_long_realized_pnl)
-    IMPLEMENT_POS_FUNC(double, get_long_unrealized_pnl)
-    IMPLEMENT_POS_FUNC(double, get_long_margin)
-    IMPLEMENT_POS_FUNC(double, get_long_position_pnl)
-    IMPLEMENT_POS_FUNC(double, get_long_close_pnl)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_tot)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_tot_avail)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_tot_fro)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_yd)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_yd_avail)
-    IMPLEMENT_POS_FUNC(int64_t, get_short_yd_fro)
-    IMPLEMENT_POS_FUNC(double, get_short_realized_pnl)
-    IMPLEMENT_POS_FUNC(double, get_short_unrealized_pnl)
-    IMPLEMENT_POS_FUNC(double, get_short_margin)
-    IMPLEMENT_POS_FUNC(double, get_short_position_pnl)
-    IMPLEMENT_POS_FUNC(double, get_short_close_pnl)
-
-    double PortfolioManager::impl::get_long_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        int64_t vol_tot = 0;
-        double open_tot = 0.0;
-        for (const auto& iter : accounts_)
-        {
-            if (nullptr != iter.second)
-            {
-                vol_tot += iter.second->get_long_tot(instrument_id, exchange_id);
-                open_tot += iter.second->get_long_tot(instrument_id, exchange_id) *
-                            iter.second->get_long_open_price(instrument_id, exchange_id);
-            }
-        }
-        return open_tot / vol_tot;
-    }
-
-    double PortfolioManager::impl::get_long_cost_price(const char *instrument_id, const char *exchange_id) const
-    {
-        int64_t vol_tot = 0;
-        double cost_tot = 0.0;
-        for (const auto& iter : accounts_)
-        {
-            if (nullptr != iter.second)
-            {
-                vol_tot += iter.second->get_long_tot(instrument_id, exchange_id);
-                cost_tot += iter.second->get_long_tot(instrument_id, exchange_id) *
-                        iter.second->get_long_cost_price(instrument_id, exchange_id);
-            }
-        }
-        return cost_tot / vol_tot;
-    }
-
-    Position PortfolioManager::impl::get_long_pos(const char *instrument_id, const char *exchange_id) const
+    Position PortfolioManager::impl::get_long_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
     {
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
         strcpy(pos.exchange_id, exchange_id);
+        pos.instrument_type = get_instrument_type(instrument_id, exchange_id);
         pos.direction = DirectionLong;
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)
             {
-                auto cur_pos = iter.second->get_long_pos(instrument_id, exchange_id);
-                pos.open_price = (pos.open_price * pos.volume + cur_pos.open_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
-                pos.cost_price = (pos.cost_price * pos.volume + cur_pos.cost_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
-                pos.margin += cur_pos.margin;
-                pos.position_pnl += cur_pos.position_pnl;
-                pos.close_pnl += cur_pos.close_pnl;
-                pos.realized_pnl += cur_pos.realized_pnl;
-                pos.unrealized_pnl += cur_pos.unrealized_pnl;
+                if (nullptr == account_id || strlen(account_id) == 0 || strcmp(account_id, iter.first.c_str()) == 0)
+                {
+                    auto cur_pos = iter.second->get_long_pos(instrument_id, exchange_id);
+                    strcpy(pos.client_id, cur_pos.client_id);
+                    pos.volume += cur_pos.volume;
+                    pos.yesterday_volume += cur_pos.yesterday_volume;
+                    pos.frozen_total += cur_pos.frozen_total;
+                    pos.frozen_yesterday += cur_pos.frozen_yesterday;
+                    pos.last_price = cur_pos.last_price;
+                    pos.open_price = (pos.open_price * pos.volume + cur_pos.open_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
+                    pos.cost_price = (pos.cost_price * pos.volume + cur_pos.cost_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
+                    pos.close_price = cur_pos.close_price;
+                    pos.pre_close_price = cur_pos.pre_close_price;
+                    pos.settlement_price = cur_pos.settlement_price;
+                    pos.pre_settlement_price = cur_pos.pre_settlement_price;
+                    pos.margin += cur_pos.margin;
+                    pos.position_pnl += cur_pos.position_pnl;
+                    pos.close_pnl += cur_pos.close_pnl;
+                    pos.realized_pnl += cur_pos.realized_pnl;
+                    pos.unrealized_pnl += cur_pos.unrealized_pnl;
+                }
             }
         }
         return pos;
     }
 
-    double PortfolioManager::impl::get_short_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        int64_t vol_tot = 0;
-        double open_tot = 0.0;
-        for (const auto& iter : accounts_)
-        {
-            if (nullptr != iter.second)
-            {
-                vol_tot += iter.second->get_short_tot(instrument_id, exchange_id);
-                open_tot += iter.second->get_short_tot(instrument_id, exchange_id) *
-                            iter.second->get_short_open_price(instrument_id, exchange_id);
-            }
-        }
-        return open_tot / vol_tot;
-    }
-
-    double PortfolioManager::impl::get_short_cost_price(const char *instrument_id, const char *exchange_id) const
-    {
-        int64_t vol_tot = 0;
-        double cost_tot = 0.0;
-        for (const auto& iter : accounts_)
-        {
-            if (nullptr != iter.second)
-            {
-                vol_tot += iter.second->get_short_tot(instrument_id, exchange_id);
-                cost_tot += iter.second->get_short_tot(instrument_id, exchange_id) *
-                            iter.second->get_short_cost_price(instrument_id, exchange_id);
-            }
-        }
-        return cost_tot / vol_tot;
-    }
-
-    Position PortfolioManager::impl::get_short_pos(const char *instrument_id, const char *exchange_id) const
+    Position PortfolioManager::impl::get_short_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
     {
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
@@ -268,14 +135,27 @@ namespace kungfu
         {
             if (nullptr != iter.second)
             {
-                auto cur_pos = iter.second->get_short_pos(instrument_id, exchange_id);
-                pos.open_price = (pos.open_price * pos.volume + cur_pos.open_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
-                pos.cost_price = (pos.cost_price * pos.volume + cur_pos.cost_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
-                pos.margin += cur_pos.margin;
-                pos.position_pnl += cur_pos.position_pnl;
-                pos.close_pnl += cur_pos.close_pnl;
-                pos.realized_pnl += cur_pos.realized_pnl;
-                pos.unrealized_pnl += cur_pos.unrealized_pnl;
+                if (nullptr == account_id || strlen(account_id) == 0 || strcmp(account_id, iter.first.c_str()) == 0)
+                {
+                    auto cur_pos = iter.second->get_short_pos(instrument_id, exchange_id);
+                    strcpy(pos.client_id, cur_pos.client_id);
+                    pos.volume += cur_pos.volume;
+                    pos.yesterday_volume += cur_pos.yesterday_volume;
+                    pos.frozen_total += cur_pos.frozen_total;
+                    pos.frozen_yesterday += cur_pos.frozen_yesterday;
+                    pos.last_price = cur_pos.last_price;
+                    pos.open_price = (pos.open_price * pos.volume + cur_pos.open_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
+                    pos.cost_price = (pos.cost_price * pos.volume + cur_pos.cost_price * cur_pos.volume) / (pos.volume + cur_pos.volume);
+                    pos.close_price = cur_pos.close_price;
+                    pos.pre_close_price = cur_pos.pre_close_price;
+                    pos.settlement_price = cur_pos.settlement_price;
+                    pos.pre_settlement_price = cur_pos.pre_settlement_price;
+                    pos.margin += cur_pos.margin;
+                    pos.position_pnl += cur_pos.position_pnl;
+                    pos.close_pnl += cur_pos.close_pnl;
+                    pos.realized_pnl += cur_pos.realized_pnl;
+                    pos.unrealized_pnl += cur_pos.unrealized_pnl;
+                }
             }
         }
         return pos;
@@ -298,20 +178,23 @@ namespace kungfu
         return 0;
     }
 
-    std::vector<Instrument> PortfolioManager::impl::get_all_pos_instruments() const
+    std::vector<Instrument> PortfolioManager::impl::get_all_pos_instruments(const char *account_id) const
     {
         std::map<std::string, Instrument> m;
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)
             {
-                auto ins_vec = iter.second->get_all_pos_instruments();
-                for (const auto& pos : ins_vec)
+                if (nullptr == account_id || strlen(account_id) == 0 || strcmp(account_id, iter.first.c_str()) == 0)
                 {
-                    auto key = get_symbol(pos.instrument_id, pos.exchange_id);
-                    if (m.find(key) == m.end())
+                    auto ins_vec = iter.second->get_all_pos_instruments();
+                    for (const auto& pos : ins_vec)
                     {
-                        m[key] = pos;
+                        auto key = get_symbol(pos.instrument_id, pos.exchange_id);
+                        if (m.find(key) == m.end())
+                        {
+                            m[key] = pos;
+                        }
                     }
                 }
             }
@@ -324,44 +207,33 @@ namespace kungfu
         return ret;
     }
 
-#define IMPLEMENT_PNL_FUNC(ret_type, field_name) \
-    ret_type PortfolioManager::impl::get_##field_name() const \
-    { \
-        return pnl_.field_name; \
+    SubPortfolioInfo PortfolioManager::impl::get_sub_portfolio(const char *account_id) const
+    {
+        if (accounts_.find(account_id) != accounts_.end())
+        {
+            return accounts_.at(account_id)->get_account_info();
+        }
+        else
+        {
+            SubPortfolioInfo subPortfolioInfo = {};
+            strcpy(subPortfolioInfo.account_id, account_id);
+            return subPortfolioInfo;
+        }
     }
 
-    IMPLEMENT_PNL_FUNC(double, initial_equity)
-    IMPLEMENT_PNL_FUNC(double, static_equity)
-    IMPLEMENT_PNL_FUNC(double, dynamic_equity)
-    IMPLEMENT_PNL_FUNC(double, accumulated_pnl)
-    IMPLEMENT_PNL_FUNC(double, accumulated_pnl_ratio)
-    IMPLEMENT_PNL_FUNC(double, intraday_pnl)
-    IMPLEMENT_PNL_FUNC(double, intraday_pnl_ratio)
-
-#define IMPLEMENT_ACC_FUNC(ret_type, func_name) \
-    ret_type PortfolioManager::impl::func_name() const \
-    { \
-        ret_type ret = 0; \
-        for (const auto& iter : accounts_) \
-        { \
-            if (nullptr != iter.second) \
-            { \
-                ret += iter.second->func_name(); \
-            } \
-        } \
-        return ret; \
+    PortfolioInfo PortfolioManager::impl::get_portfolio() const
+    {
+        return pnl_;
     }
 
-    IMPLEMENT_ACC_FUNC(double, get_avail)
-    IMPLEMENT_ACC_FUNC(double, get_market_value)
-    IMPLEMENT_ACC_FUNC(double, get_margin)
-    IMPLEMENT_ACC_FUNC(double, get_accumulated_fee)
-    IMPLEMENT_ACC_FUNC(double, get_intraday_fee)
-    IMPLEMENT_ACC_FUNC(double, get_frozen_cash)
-    IMPLEMENT_ACC_FUNC(double, get_frozen_margin)
-    IMPLEMENT_ACC_FUNC(double, get_frozen_fee)
-    IMPLEMENT_ACC_FUNC(double, get_position_pnl)
-    IMPLEMENT_ACC_FUNC(double, get_close_pnl)
+    const AccountManagerPtr PortfolioManager::impl::get_account(const char *account_id) const
+    {
+        if (accounts_.find(account_id) != accounts_.end())
+        {
+            return accounts_.at(account_id);
+        }
+        return AccountManagerPtr();
+    }
 
 #define IMPLEMENT_DATA_BODY(func_name, ...) \
     for (const auto& iter : accounts_) \
@@ -529,9 +401,10 @@ namespace kungfu
         pnl_.dynamic_equity = 0;
         for (const auto& iter : accounts_)
         {
-            pnl_.initial_equity += iter.second->get_initial_equity();
-            pnl_.static_equity += iter.second->get_static_equity();
-            pnl_.dynamic_equity += iter.second->get_dynamic_equity();
+            auto account_info = iter.second->get_account_info();
+            pnl_.initial_equity += account_info.initial_equity;
+            pnl_.static_equity += account_info.static_equity;
+            pnl_.dynamic_equity += account_info.dynamic_equity;
         }
         pnl_.accumulated_pnl = pnl_.dynamic_equity - pnl_.initial_equity;
         pnl_.accumulated_pnl_ratio = is_zero(pnl_.initial_equity) ? 0 : pnl_.accumulated_pnl / pnl_.initial_equity;
@@ -548,55 +421,11 @@ namespace kungfu
         }
     }
 
-    const PortfolioInfo* PortfolioManager::impl::get_pnl() const
-    {
-        return &pnl_;
-    }
-
-    const AccountManagerPtr PortfolioManager::impl::get_account(const char *account_id) const
-    {
-        if (accounts_.find(account_id) != accounts_.end())
-        {
-            return accounts_.at(account_id);
-        }
-        return AccountManagerPtr();
-    }
-
     void PortfolioManager::impl::on_pos_callback(const kungfu::Position &pos) const
     {
-        Position total_pos = {};
-        memcpy(&total_pos, &pos, sizeof(Position));
-        strcpy(total_pos.account_id, "");
-        total_pos.volume = total_pos.direction == DirectionLong ?
-                get_long_tot(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_tot(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.yesterday_volume = total_pos.direction == DirectionLong ?
-                get_long_yd(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_yd(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.frozen_total = total_pos.direction == DirectionLong ?
-                get_long_tot_fro(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_tot_fro(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.frozen_yesterday = total_pos.direction == DirectionLong ?
-                get_long_yd_fro(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_yd_fro(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.cost_price = total_pos.direction == DirectionLong ?
-                get_long_cost_price(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_cost_price(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.margin = total_pos.direction == DirectionLong ?
-                get_long_margin(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_margin(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.position_pnl = total_pos.direction == DirectionLong ?
-                get_long_position_pnl(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_position_pnl(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.close_pnl = total_pos.direction == DirectionLong ?
-                get_long_close_pnl(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_close_pnl(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.realized_pnl = total_pos.direction == DirectionLong ?
-                get_long_realized_pnl(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_realized_pnl(total_pos.instrument_id, total_pos.exchange_id);
-        total_pos.unrealized_pnl = total_pos.direction == DirectionLong ?
-                get_long_unrealized_pnl(total_pos.instrument_id, total_pos.exchange_id) :
-                get_short_unrealized_pnl(total_pos.instrument_id, total_pos.exchange_id);
+        auto total_pos = pos.direction == DirectionLong ?
+                get_long_pos(nullptr, pos.instrument_id, pos.exchange_id) :
+                get_short_pos(nullptr, pos.instrument_id, pos.exchange_id);
 
         for (auto& cb : pos_cbs_)
         {

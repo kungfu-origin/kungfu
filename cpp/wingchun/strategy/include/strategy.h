@@ -56,7 +56,7 @@ namespace kungfu
         //@param account_id  账户ID
         //@param cash_limit  可用资金限制
         //@return            成功或者失败
-        bool add_account(const std::string& source_id, const std::string& account_id, const double cash_limit);
+        bool add_account(const std::string& source_id, const std::string& account_id, double cash_limit);
 
         //注册算法订单服务
         //@return            成功或者失败
@@ -78,12 +78,12 @@ namespace kungfu
         //@param exchange_id   交易所ID
         //@param direction     持仓方向
         //@param account_id    账户ID("" 表示获取策略在所有账户下持仓汇总信息)
-        //@return              持仓数据指针(nullptr 表示无持仓)
-        const Position* const get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction = DirectionLong, const std::string& account_id = "") const;
+        //@return              持仓数据(无持仓时volume是0)
+        Position get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction = DirectionLong, const std::string& account_id = "") const;
 
-        const PortfolioInfo* const get_portfolio_info() const;
+        PortfolioInfo get_portfolio_info() const;
 
-        const SubPortfolioInfo* const get_sub_portfolio_info(const std::string& account_id) const;
+        SubPortfolioInfo get_sub_portfolio_info(const std::string& account_id) const;
 
         //订阅行情
         //@param source_id   柜台ID

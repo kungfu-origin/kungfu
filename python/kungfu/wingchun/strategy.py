@@ -34,17 +34,8 @@ class Strategy:
         context.add_account = self.add_account
         context.register_algo_service = self.register_algo_service
 
-        context.get_nano = self.get_nano
-        context.get_last_md = self.get_last_md
-        context.get_position = self.get_position
-        context.get_portfolio_info = self.get_portfolio_info
-        context.get_sub_portfolio_info = self.get_sub_portfolio_info
-        context.set_log_level = self._util.set_log_level
-        context.log_info = self._util.log_info
-        context.log_error = self._util.log_error
-        context.log_warn = self._util.log_warn
-
         context.subscribe = self._util.subscribe
+        context.is_subscribed = self._util.is_subscribed
 
         context.insert_limit_order = self._util.insert_limit_order
         context.insert_fok_order = self._util.insert_fok_order
@@ -52,36 +43,17 @@ class Strategy:
         context.insert_market_order = self._util.insert_market_order
         context.cancel_order = self._util.cancel_order
 
-        context.get_initial_equity = self._util.get_initial_equity
-        context.get_static_equity = self._util.get_static_equity
-        context.get_dynamic_equity = self._util.get_dynamic_equity
-        context.get_accumulated_pnl = self._util.get_accumulated_pnl
-        context.get_accumulated_pnl_ratio = self._util.get_accumulated_pnl_ratio
-        context.get_intraday_pnl = self._util.get_intraday_pnl
-        context.get_intraday_pnl_ratio = self._util.get_intraday_pnl_ratio
+        context.set_log_level = self._util.set_log_level
+        context.log_info = self._util.log_info
+        context.log_error = self._util.log_error
+        context.log_warn = self._util.log_warn
 
-        context.get_long_tot = self._util.get_long_tot
-        context.get_long_tot_avail = self._util.get_long_tot_avail
-        context.get_long_tot_fro = self._util.get_long_tot_fro
-        context.get_long_yd = self._util.get_long_yd
-        context.get_long_yd_avail = self._util.get_long_yd_avail
-        context.get_long_yd_fro = self._util.get_long_yd_fro
-        context.get_long_realized_pnl = self._util.get_long_realized_pnl
-        context.get_long_unrealized_pnl = self._util.get_long_unrealized_pnl
-        context.get_long_cost_price = self._util.get_long_cost_price
-        context.get_long_pos = self._util.get_long_pos
+        context.get_last_md = self.get_last_md
+        context.get_position = self.get_position
+        context.get_portfolio_info = self.get_portfolio_info
+        context.get_sub_portfolio_info = self.get_sub_portfolio_info
 
-        context.get_short_tot = self._util.get_short_tot
-        context.get_short_tot_avail = self._util.get_short_tot_avail
-        context.get_short_tot_fro = self._util.get_short_tot_fro
-        context.get_short_yd = self._util.get_short_yd
-        context.get_short_yd_avail = self._util.get_short_yd_avail
-        context.get_short_yd_fro = self._util.get_short_yd_fro
-        context.get_short_realized_pnl = self._util.get_short_realized_pnl
-        context.get_short_unrealized_pnl = self._util.get_short_unrealized_pnl
-        context.get_short_cost_price = self._util.get_short_cost_price
-        context.get_short_pos = self._util.get_short_pos
-
+        context.get_nano = self.get_nano
         context.register_nanotime_callback = self.register_nanotime_callback
         context.register_nanotime_callback_with_context = self.register_nanotime_callback_with_context
         context.parse_nano = pyyjj.parse_nano
@@ -145,16 +117,28 @@ class Strategy:
         return self._event_loop.get_nano()
 
     def get_last_md(self, instrument_id, exchange_id):
-        return ctypes.cast(self._util.get_last_md(instrument_id, exchange_id),ctypes.POINTER(Quote)).contents
+        quote_ptr = pystrategy.get_last_md(self._util, instrument_id, exchange_id)
+        ctypes_quote = ctypes.cast(quote_ptr, ctypes.POINTER(Quote)).contents
+        pystrategy.release_ptr(quote_ptr)
+        return ctypes_quote
 
     def get_position(self, instrument_id, exchange_id, direction = Direction.Long, account_id = ""):
-        return ctypes.cast(self._util.get_position(instrument_id, exchange_id, direction, account_id), ctypes.POINTER(Position)).contents
+        pos_ptr = pystrategy.get_position(self._util, instrument_id, exchange_id, direction, account_id)
+        ctypes_pos = ctypes.cast(pos_ptr, ctypes.POINTER(Position)).contents
+        pystrategy.release_ptr(pos_ptr)
+        return ctypes_pos
 
     def get_portfolio_info(self):
-        return ctypes.cast(self._util.get_portfolio_info(), ctypes.POINTER(PortfolioInfo)).contents
+        pnl_ptr = pystrategy.get_portfolio_info(self._util)
+        ctypes_pnl = ctypes.cast(pnl_ptr, ctypes.POINTER(PortfolioInfo)).contents
+        pystrategy.release_ptr(pnl_ptr)
+        return ctypes_pnl
 
     def get_sub_portfolio_info(self, account_id):
-        return ctypes.cast(self._util.get_sub_portfolio_info(account_id), ctypes.POINTER(SubPortfolioInfo)).contents
+        sub_pnl_ptr = pystrategy.get_sub_portfolio_info(self._util, account_id)
+        ctypes_sub_pnl = ctypes.cast(sub_pnl_ptr, ctypes.POINTER(SubPortfolioInfo)).contents
+        pystrategy.release_ptr(sub_pnl_ptr)
+        return ctypes_sub_pnl
 
     def __on_1min_timer(self, nano):
         self._util.on_push_by_min()

@@ -55,7 +55,6 @@ namespace kungfu
                 while (query.executeStep())
                 {
                     SubPortfolioInfo account = {};
-                    strcpy(account.client_id,query.getColumn(0));
                     strcpy(account.account_id, query.getColumn(1));
                     strcpy(account.source_id, query.getColumn(2));
                     accounts.push_back(account);

@@ -170,7 +170,7 @@ namespace kungfu
         return impl_->add_md(source_id);
     }
 
-    bool Strategy::add_account(const std::string &source_id, const std::string &account_id, const double cash_limit)
+    bool Strategy::add_account(const std::string &source_id, const std::string &account_id, double cash_limit)
     {
         return impl_->add_account(source_id, account_id, cash_limit);
     }
@@ -187,17 +187,17 @@ namespace kungfu
         return impl_->get_util()->get_last_md(instrument_id, exchange_id);
     }
 
-    const Position* const Strategy::get_position(const std::string& instrument_id, const std::string& exchange_id, const Direction direction, const std::string& account_id) const
+    Position Strategy::get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction, const std::string& account_id) const
     {
         return impl_->get_util()->get_position(instrument_id, exchange_id, direction, account_id);
     }
 
-    const PortfolioInfo* const Strategy::get_portfolio_info() const
+    PortfolioInfo Strategy::get_portfolio_info() const
     {
         return impl_->get_util()->get_portfolio_info();
     }
 
-    const SubPortfolioInfo* const Strategy::get_sub_portfolio_info(const std::string& account_id) const
+    SubPortfolioInfo Strategy::get_sub_portfolio_info(const std::string& account_id) const
     {
         return impl_->get_util()->get_sub_portfolio_info(account_id);
     }
