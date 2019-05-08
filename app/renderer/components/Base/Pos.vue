@@ -222,7 +222,7 @@ export default {
         //获取数据
         getData() {
             const t = this
-            if(t.getDataLock) return new Promise((resolve, reject) => reject('get-data-lock'));
+            if(t.getDataLock) throw new Error('get data lock！');
             t.getDataLock = true
             t.tableData = []
             t.posDataByKey = {}

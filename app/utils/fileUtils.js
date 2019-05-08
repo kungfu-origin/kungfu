@@ -212,7 +212,7 @@ export const removeFileFolder = (targetPath) => {
 
 //获取文件内容
 export const getCodeText = (targetPath) => {
-    if(!targetPath) return new Promise((resolve, reject) => reject(new Error('文件路径不存在！')))
+    if(!targetPath) throw new Error('文件路径不存在！')
     targetPath = path.normalize(targetPath)
     return new Promise((resolve, reject) => {
         fs.readFile(targetPath, (err, data) => {

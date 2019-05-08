@@ -68,7 +68,7 @@ const pm2Delete = (target) => {
 
 const dealSpaceInPath = (pathname) => {
     if (platform === 'win') return pathname
-    else return path.resolve(eval('"' + pathname.replace(/ /g, '\\ ') + '"'))
+    else return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
 }
 
 export const describeProcess = (name) => {
@@ -138,8 +138,8 @@ export const startProcess = async (options) => {
 export const startPageEngine = async(force) => {
     const processName = 'page_engine'
     const pageEngines = await describeProcess(processName);
-    if(pageEngines instanceof Error) return new Promise((resolve, reject) => reject(new Error(pageEngines)))
-    if(!force && pageEngines.length) return new Promise(resolve => resolve(new Error('page_engine正在运行！')))
+    if(pageEngines instanceof Error) throw pageEngines
+    if(!force && pageEngines.length) throw new Error('page_engine正在运行！')
     return startProcess({
         "name": processName,
         "args": "paged --name paged",
@@ -150,8 +150,8 @@ export const startPageEngine = async(force) => {
 export const startCalendarEngine = async(force) => {
     const processName = 'calendar_engine'
     const calendarEngines = await describeProcess(processName);
-    if(calendarEngines instanceof Error) return new Promise((resolve, reject) => reject(calendarEngines))
-    if(!force && calendarEngines.length) return new Promise(resolve => resolve(new Error('calendar_engine正在运行！')))
+    if(calendarEngines instanceof Error) throw calendarEngines
+    if(!force && calendarEngines.length) throw new Error('calendar_engine正在运行！')
     return startProcess({
         "name": "calendar_engine",
         "args": "calendar --name calendar",
@@ -204,15 +204,33 @@ export const listProcessStatus = () => {
 
 //删除进程
 export const deleteProcess = async(processName) => {
+    let processes;
     try{
-        const p = await describeProcess(processName)
-        const pids = p.map(prc => prc.pid);
-        fkill(pids).catch(err => console.error(err))
+        processes = await describeProcess(processName)
     }catch(err){
-        return err
+        console.error(err)
     }
+
+    const pids = processes.map(prc => prc.pid);
+    fkill(pids).catch(err => console.error(err))
     return pm2Delete(processName)
 }
+
+
+//删除所有进程
+export const killAllProcess = async() => {
+    const processes = await pm2List();
+    const pids = processes.map(p => p.pid)
+    return fkill(pids, {
+        force: true,
+        tree: platform === 'win',
+        ignoreCase: true
+    })
+}
+
+
+
+
 
 //干掉守护进程
 export const killGodDaemon = () => {

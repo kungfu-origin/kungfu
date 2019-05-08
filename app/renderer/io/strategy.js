@@ -68,7 +68,7 @@ export const getStrategyAccounts = (strategyId) => {
 export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
-    if(!strategys[0]) return new Promise((resolve, reject) => reject(new Error('找不到该策略！')));
+    if(!strategys[0]) throw new Error('找不到该策略！');
     const strategyAddTime = strategys[0].add_time;
     //获取当天是日期范围
     const startDate = Math.max((moment(moment().format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
@@ -111,7 +111,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
 export const getStrategyTrade = async(strategyId, {id, dateRange}) => {
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
-    if(!strategys[0]) return new Promise((resolve, reject) => reject(new Error('找不到该策略！')))
+    if(!strategys[0]) throw new Error('找不到该策咯！')
     const strategyAddTime = strategys[0].add_time;
     //获取当天是日期范围
     const startDate = Math.max((moment(moment().format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
@@ -184,7 +184,7 @@ export const getStrategyPos = (strategyId, {instrumentId, type}) => {
 export const getStrategyPnlMin = (strategyId) => {
     // 在vuex中获得交易日
     const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day
-    if(!tradingDay) return new Promise((resolve, reject) => reject(new Error('无交易日！')))
+    if(!tradingDay) throw new Error('无交易日！')
     return runSelectDB(buildStrategySnapshortsDBPath(strategyId), `SELECT * FROM portfolio_1m_snapshots WHERE trading_day = '${tradingDay}'`)
 }
 /**

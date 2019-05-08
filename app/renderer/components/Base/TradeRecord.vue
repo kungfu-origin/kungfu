@@ -181,7 +181,7 @@ export default {
         //首次获取数据
         getData() {
             const t = this
-            if(t.getDataLock) return new Promise((resolve, reject) => reject(new Error('get-data-lock')));
+            if(t.getDataLock) throw new Error('get-data-lock');
             //获得获取数据的方法名
             t.getDataLock = true
             t.tableData = Object.freeze([])

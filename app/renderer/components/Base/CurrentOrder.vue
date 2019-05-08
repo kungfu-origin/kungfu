@@ -162,7 +162,7 @@ export default {
 
         getData() {
             const t = this
-            if(t.getDataLock) return new Promise((resolve, reject) => reject(new Error('get-data-lock')))
+            if(t.getDataLock) throw new Error('get-data-lock')
             t.getDataLock = true
             //clear Data
             t.orderDataByKey = {};
