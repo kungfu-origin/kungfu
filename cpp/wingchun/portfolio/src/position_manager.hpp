@@ -16,44 +16,17 @@
 
 namespace kungfu
 {
-    class PositionManager::impl final : public IPnLDataHandler, public IPosDataFetcher
+    class PositionManager::impl final : public IPnLDataHandler
     {
     public:
         explicit impl(const char* account_id, const char* db);
         virtual ~impl();
 
-        // IPosDataFetcher
-        int64_t get_long_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_long_pos(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_short_pos(const char* instrument_id, const char* exchange_id) const override;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
-        std::vector<Instrument> get_all_pos_instruments() const override;
-        // IPosDataFetcher
+        Position get_long_pos(const char* instrument_id, const char* exchange_id) const;
+        Position get_short_pos(const char* instrument_id, const char* exchange_id) const;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const;
+        std::vector<Instrument> get_all_pos_instruments() const;
+        double get_market_value() const; // for stock only
 
         // IPnLDataHandler
         void on_quote(const Quote* quote) override;
@@ -75,8 +48,6 @@ namespace kungfu
         void set_initial_equity(double equity) override;
         void set_static_equity(double equity) override;
         // IPnLDataHandler
-
-        double get_market_value() const; // for stock only
 
     private:
         double choose_price(const Position& pos) const;
@@ -116,97 +87,6 @@ namespace kungfu
         storage_.save(last_update_, trading_day_, long_pos_map_, short_pos_map_, bond_map_, long_detail_map_, short_detail_map_, frozen_map_);
     }
 
-    int64_t PositionManager::impl::get_long_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.volume;
-    }
-
-    int64_t PositionManager::impl::get_long_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : (iter->second.yesterday_volume - iter->second.frozen_total);
-    }
-
-    int64_t PositionManager::impl::get_long_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.frozen_total;
-    }
-
-    int64_t PositionManager::impl::get_long_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.yesterday_volume;
-    }
-
-    int64_t PositionManager::impl::get_long_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.yesterday_volume - iter->second.frozen_yesterday;
-    }
-
-    int64_t PositionManager::impl::get_long_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.frozen_yesterday;
-    }
-
-    double PositionManager::impl::get_long_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.realized_pnl;
-    }
-
-    double PositionManager::impl::get_long_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.unrealized_pnl;
-    }
-
-    double PositionManager::impl::get_long_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.open_price;
-    }
-
-    double PositionManager::impl::get_long_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.cost_price;
-    }
-
-    double PositionManager::impl::get_long_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.margin;
-    }
-
-    double PositionManager::impl::get_long_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.position_pnl;
-    }
-
-    double PositionManager::impl::get_long_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = long_pos_map_.find(key);
-        return iter == long_pos_map_.end() ? 0 : iter->second.close_pnl;
-    }
-
     Position PositionManager::impl::get_long_pos(const char *instrument_id, const char *exchange_id) const
     {
         auto key = get_symbol(instrument_id, exchange_id);
@@ -223,97 +103,6 @@ namespace kungfu
             pos.instrument_type = get_instrument_type(instrument_id, exchange_id);
             return pos;
         }
-    }
-
-    int64_t PositionManager::impl::get_short_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.volume;
-    }
-
-    int64_t PositionManager::impl::get_short_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : (iter->second.volume - iter->second.frozen_total);
-    }
-
-    int64_t PositionManager::impl::get_short_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.frozen_total;
-    }
-
-    int64_t PositionManager::impl::get_short_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.yesterday_volume;
-    }
-
-    int64_t PositionManager::impl::get_short_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : (iter->second.yesterday_volume - iter->second.frozen_yesterday);
-    }
-
-    int64_t PositionManager::impl::get_short_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.frozen_yesterday;
-    }
-
-    double PositionManager::impl::get_short_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.realized_pnl;
-    }
-
-    double PositionManager::impl::get_short_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.unrealized_pnl;
-    }
-
-    double PositionManager::impl::get_short_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.open_price;
-    }
-
-    double PositionManager::impl::get_short_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.cost_price;
-    }
-
-    double PositionManager::impl::get_short_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.margin;
-    }
-
-    double PositionManager::impl::get_short_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.position_pnl;
-    }
-
-    double PositionManager::impl::get_short_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        auto key = get_symbol(instrument_id, exchange_id);
-        auto iter = short_pos_map_.find(key);
-        return iter == short_pos_map_.end() ? 0 : iter->second.close_pnl;
     }
 
     Position PositionManager::impl::get_short_pos(const char *instrument_id, const char *exchange_id) const
@@ -377,6 +166,27 @@ namespace kungfu
             ret.emplace_back(iter.second);
         }
         return ret;
+    }
+
+    double PositionManager::impl::get_market_value() const
+    {
+        double market_value = 0.0;
+        for (const auto& iter : long_pos_map_)
+        {
+            if (iter.second.instrument_type == InstrumentTypeStock || iter.second.instrument_type == InstrumentTypeBond)
+            {
+                double price = choose_price(iter.second);
+                if (is_reverse_repurchase(iter.second.instrument_id, iter.second.exchange_id))
+                {
+                    market_value += iter.second.volume;
+                }
+                else
+                {
+                    market_value += iter.second.volume * price;
+                }
+            }
+        }
+        return market_value;
     }
 
     void PositionManager::impl::on_quote(const kungfu::Quote *quote)
@@ -724,27 +534,6 @@ namespace kungfu
     void PositionManager::impl::set_static_equity(double equity)
     {
         boost::ignore_unused(equity);
-    }
-
-    double PositionManager::impl::get_market_value() const
-    {
-        double market_value = 0.0;
-        for (const auto& iter : long_pos_map_)
-        {
-            if (iter.second.instrument_type == InstrumentTypeStock || iter.second.instrument_type == InstrumentTypeBond)
-            {
-                double price = choose_price(iter.second);
-                if (is_reverse_repurchase(iter.second.instrument_id, iter.second.exchange_id))
-                {
-                    market_value += iter.second.volume;
-                }
-                else
-                {
-                    market_value += iter.second.volume * price;
-                }
-            }
-        }
-        return market_value;
     }
 
     double PositionManager::impl::choose_price(const kungfu::Position &pos) const

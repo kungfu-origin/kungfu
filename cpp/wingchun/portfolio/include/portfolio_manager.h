@@ -10,64 +10,21 @@
 
 namespace kungfu
 {
-    class PortfolioManager final : public IPnLDataHandler, public IPosDataFetcher, public IAccDataFetcher
+    class PortfolioManager final : public IPnLDataHandler
     {
     public:
         explicit PortfolioManager(const char* db);
         virtual ~PortfolioManager();
 
-        // IPosDataFetcher
-        int64_t get_long_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_long_pos(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_short_pos(const char* instrument_id, const char* exchange_id) const override;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
-        std::vector<Instrument> get_all_pos_instruments() const override;
-        // IPosDataFetcher
+        Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
+        Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const;
+        std::vector<Instrument> get_all_pos_instruments(const char* account_id) const;
 
-        // IAccDataFetcher
-        double get_initial_equity() const override;
-        double get_static_equity() const override;
-        double get_dynamic_equity() const override;
-        double get_accumulated_pnl() const override;
-        double get_accumulated_pnl_ratio() const override;
-        double get_intraday_pnl() const override;
-        double get_intraday_pnl_ratio() const override;
-        double get_avail() const override;
-        double get_market_value() const override;
-        double get_margin() const override;
-        double get_accumulated_fee() const override;
-        double get_intraday_fee() const override;
-        double get_frozen_cash() const override;
-        double get_frozen_margin() const override;
-        double get_frozen_fee() const override;
-        double get_position_pnl() const override;
-        double get_close_pnl() const override;
-        // IAccDataFetcher
+        SubPortfolioInfo get_sub_portfolio(const char* account_id) const;
+        PortfolioInfo get_portfolio() const;
+
+        const AccountManagerPtr get_account(const char* account_id) const;
 
         // IPnLDataHandler
         void on_quote(const Quote* quote) override;
@@ -90,8 +47,6 @@ namespace kungfu
         void set_static_equity(double equity) override;
         // IPnLDataHandler
 
-        const PortfolioInfo* get_pnl() const;
-        const AccountManagerPtr get_account(const char* account_id) const;
 
     private:
         class impl;

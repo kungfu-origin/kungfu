@@ -20,139 +20,9 @@ namespace kungfu
         }
     }
 
-    int64_t PositionManager::get_long_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_tot(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_long_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_tot_avail(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_long_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_tot_fro(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_long_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_yd(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_long_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_yd_avail(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_long_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_yd_fro(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_realized_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_unrealized_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_open_price(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_cost_price(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_margin(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_position_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_long_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_long_close_pnl(instrument_id, exchange_id);
-    }
-
     Position PositionManager::get_long_pos(const char *instrument_id, const char *exchange_id) const
     {
         return impl_->get_long_pos(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_tot(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_tot_avail(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_tot_fro(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_yd(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_yd_avail(instrument_id, exchange_id);
-    }
-
-    int64_t PositionManager::get_short_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_yd_fro(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_realized_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_unrealized_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_open_price(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_cost_price(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_margin(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_position_pnl(instrument_id, exchange_id);
-    }
-
-    double PositionManager::get_short_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return impl_->get_short_close_pnl(instrument_id, exchange_id);
     }
 
     Position PositionManager::get_short_pos(const char *instrument_id, const char *exchange_id) const
@@ -168,6 +38,11 @@ namespace kungfu
     std::vector<Instrument> PositionManager::get_all_pos_instruments() const
     {
         return impl_->get_all_pos_instruments();
+    }
+
+    double PositionManager::get_market_value() const
+    {
+        return impl_->get_market_value();
     }
 
     void PositionManager::on_quote(const kungfu::Quote *quote)
@@ -258,10 +133,5 @@ namespace kungfu
     void PositionManager::set_static_equity(double equity)
     {
         impl_->set_static_equity(equity);
-    }
-
-    double PositionManager::get_market_value() const
-    {
-        return impl_->get_market_value();
     }
 }

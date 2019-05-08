@@ -20,66 +20,40 @@ namespace kungfu
         }
     }
 
-#define IMPLEMENT_IMPL_POS_FUNC(ret_type, func_name) \
-    ret_type PortfolioManager::func_name(const char *instrument_id, const char *exchange_id) const \
-    { \
-        return impl_->func_name(instrument_id, exchange_id); \
+    Position PortfolioManager::get_long_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
+    {
+        return impl_->get_long_pos(account_id, instrument_id, exchange_id);
     }
 
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_tot)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_tot_avail)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_tot_fro)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_yd)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_yd_avail)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_long_yd_fro)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_realized_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_unrealized_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_open_price)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_cost_price)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_margin)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_position_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_long_close_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(Position, get_long_pos)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_tot)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_tot_avail)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_tot_fro)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_yd)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_yd_avail)
-    IMPLEMENT_IMPL_POS_FUNC(int64_t, get_short_yd_fro)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_realized_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_unrealized_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_open_price)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_cost_price)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_margin)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_position_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_short_close_pnl)
-    IMPLEMENT_IMPL_POS_FUNC(Position, get_short_pos)
-    IMPLEMENT_IMPL_POS_FUNC(double, get_last_price)
-
-#define IMPLEMENT_IMPL_ACC_FUNC(ret_type, func_name) \
-    ret_type PortfolioManager::func_name() const \
-    { \
-       return impl_->func_name(); \
+    Position PortfolioManager::get_short_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
+    {
+        return impl_->get_short_pos(account_id, instrument_id, exchange_id);
     }
 
-    IMPLEMENT_IMPL_ACC_FUNC(std::vector<Instrument>, get_all_pos_instruments)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_initial_equity)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_static_equity)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_dynamic_equity)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_accumulated_pnl)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_accumulated_pnl_ratio)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_intraday_pnl)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_intraday_pnl_ratio)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_avail)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_market_value)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_margin)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_accumulated_fee)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_intraday_fee)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_frozen_cash)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_frozen_margin)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_frozen_fee)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_position_pnl)
-    IMPLEMENT_IMPL_ACC_FUNC(double, get_close_pnl)
+    double PortfolioManager::get_last_price(const char *instrument_id, const char *exchange_id) const
+    {
+        return impl_->get_last_price(instrument_id, exchange_id);
+    }
+
+    std::vector<Instrument> PortfolioManager::get_all_pos_instruments(const char *account_id) const
+    {
+        return impl_->get_all_pos_instruments(account_id);
+    }
+
+    SubPortfolioInfo PortfolioManager::get_sub_portfolio(const char *account_id) const
+    {
+        return impl_->get_sub_portfolio(account_id);
+    }
+
+    PortfolioInfo PortfolioManager::get_portfolio() const
+    {
+        return impl_->get_portfolio();
+    }
+
+    const AccountManagerPtr PortfolioManager::get_account(const char *account_id) const
+    {
+        return impl_->get_account(account_id);
+    }
 
     void PortfolioManager::on_quote(const kungfu::Quote *quote)
     {
@@ -169,15 +143,5 @@ namespace kungfu
     void PortfolioManager::set_static_equity(double equity)
     {
         impl_->set_static_equity(equity);
-    }
-
-    const PortfolioInfo* PortfolioManager::get_pnl() const
-    {
-        return impl_->get_pnl();
-    }
-
-    const AccountManagerPtr PortfolioManager::get_account(const char *account_id) const
-    {
-        return impl_->get_account(account_id);
     }
 }

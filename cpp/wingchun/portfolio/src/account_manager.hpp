@@ -19,64 +19,16 @@
 
 namespace kungfu
 {
-    class AccountManager::impl final : public IPnLDataHandler, public IPosDataFetcher, public IAccDataFetcher
+    class AccountManager::impl final : public IPnLDataHandler
     {
     public:
         explicit impl(const char* account_id, AccountType type, const char* db);
         virtual ~impl();
 
-        // IPosDataFetcher
-        int64_t get_long_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_long_pos(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_short_pos(const char* instrument_id, const char* exchange_id) const override;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
-        std::vector<Instrument> get_all_pos_instruments() const override;
-        // IPosDataFetcher
-
-        // IAccDataFetcher
-        double get_initial_equity() const override;
-        double get_static_equity() const override;
-        double get_dynamic_equity() const override;
-        double get_accumulated_pnl() const override;
-        double get_accumulated_pnl_ratio() const override;
-        double get_intraday_pnl() const override;
-        double get_intraday_pnl_ratio() const override;
-        double get_avail() const override;
-        double get_market_value() const override;
-        double get_margin() const override;
-        double get_accumulated_fee() const override;
-        double get_intraday_fee() const override;
-        double get_frozen_cash() const override;
-        double get_frozen_margin() const override;
-        double get_frozen_fee() const override;
-        double get_position_pnl() const override;
-        double get_close_pnl() const override;
-        // IAccDataFetcher
+        Position get_long_pos(const char* instrument_id, const char* exchange_id) const;
+        Position get_short_pos(const char* instrument_id, const char* exchange_id) const;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const;
+        std::vector<Instrument> get_all_pos_instruments() const;
 
         // IPnLDataHandler
         void on_quote(const Quote* quote) override;
@@ -136,139 +88,9 @@ namespace kungfu
         storage_.save(last_update_, trading_day_, account_, bond_map_, frozen_map_);
     }
 
-    int64_t AccountManager::impl::get_long_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_tot(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_long_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_tot_avail(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_long_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_tot_fro(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_long_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_yd(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_long_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_yd_avail(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_long_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_yd_fro(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_realized_pnl(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_unrealized_pnl(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_open_price(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_cost_price(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_margin(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_position_pnl(instrument_id, exchange_id);
-    }
-
     Position AccountManager::impl::get_long_pos(const char *instrument_id, const char *exchange_id) const
     {
         return pos_manager_.get_long_pos(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_long_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_long_close_pnl(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_tot(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_tot(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_tot_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_tot_avail(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_tot_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_tot_fro(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_yd(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_yd(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_yd_avail(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_yd_avail(instrument_id, exchange_id);
-    }
-
-    int64_t AccountManager::impl::get_short_yd_fro(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_yd_fro(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_realized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_realized_pnl(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_unrealized_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_unrealized_pnl(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_open_price(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_open_price(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_cost_price(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_cost_price(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_margin(const char *instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_margin(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_position_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_position_pnl(instrument_id, exchange_id);
-    }
-
-    double AccountManager::impl::get_short_close_pnl(const char* instrument_id, const char *exchange_id) const
-    {
-        return pos_manager_.get_short_close_pnl(instrument_id, exchange_id);
     }
 
     Position AccountManager::impl::get_short_pos(const char *instrument_id, const char *exchange_id) const
@@ -286,101 +108,16 @@ namespace kungfu
         return pos_manager_.get_all_pos_instruments();
     }
 
-    double AccountManager::impl::get_initial_equity() const
-    {
-        return account_.initial_equity;
-    }
-
-    double AccountManager::impl::get_static_equity() const
-    {
-        return account_.static_equity;
-    }
-
-    double AccountManager::impl::get_dynamic_equity() const
-    {
-        return account_.dynamic_equity;
-    }
-
-    double AccountManager::impl::get_accumulated_pnl() const
-    {
-        return account_.accumulated_pnl;
-    }
-
-    double AccountManager::impl::get_accumulated_pnl_ratio() const
-    {
-        return account_.accumulated_pnl_ratio;
-    }
-
-    double AccountManager::impl::get_intraday_pnl() const
-    {
-        return account_.intraday_pnl;
-    }
-
-    double AccountManager::impl::get_intraday_pnl_ratio() const
-    {
-        return account_.intraday_pnl_ratio;
-    }
-
-    double AccountManager::impl::get_avail() const
-    {
-        return account_.avail;
-    }
-
-    double AccountManager::impl::get_market_value() const
-    {
-        return account_.market_value;
-    }
-
-    double AccountManager::impl::get_margin() const
-    {
-        return account_.margin;
-    }
-
-    double AccountManager::impl::get_accumulated_fee() const
-    {
-        return account_.accumulated_fee;
-    }
-
-    double AccountManager::impl::get_intraday_fee() const
-    {
-        return account_.intraday_fee;
-    }
-
-    double AccountManager::impl::get_frozen_cash() const
-    {
-        return account_.frozen_cash;
-    }
-
-    double AccountManager::impl::get_frozen_margin() const
-    {
-        return account_.frozen_margin;
-    }
-
-    double AccountManager::impl::get_frozen_fee() const
-    {
-        return account_.frozen_fee;
-    }
-
-    double AccountManager::impl::get_position_pnl() const
-    {
-        return account_.position_pnl;
-    }
-
-    double AccountManager::impl::get_close_pnl() const
-    {
-        return account_.close_pnl;
-    }
-
     void AccountManager::impl::on_quote(const kungfu::Quote *quote)
     {
         last_update_ = quote->rcv_time;
 
         // 账户初次创建并登陆td时查询回来的pos如果没有成本价的话，则用现价对其赋值，忽略其被加入功夫系统前的pnl
         // 这样计算不会太离谱
-        if (is_zero(pos_manager_.get_long_cost_price(quote->instrument_id, quote->exchange_id)) &&
-            pos_manager_.get_long_tot(quote->instrument_id, quote->exchange_id) > 0)
+        auto long_pos = pos_manager_.get_long_pos(quote->instrument_id, quote->exchange_id);
+        if (is_zero(long_pos.cost_price) && long_pos.volume > 0)
         {
-            double base = quote->last_price * pos_manager_.get_long_tot(quote->instrument_id, quote->exchange_id);
+            double base = quote->last_price * long_pos.volume;
             if (quote->instrument_type == InstrumentTypeFuture)
             {
                 auto* instrument = InstrumentManager::get_instrument_manager()->get_future_instrument(quote->instrument_id, quote->exchange_id);
@@ -389,10 +126,10 @@ namespace kungfu
             account_.initial_equity += base;
             account_.static_equity += base;
         }
-        if (is_zero(pos_manager_.get_short_cost_price(quote->instrument_id, quote->exchange_id)) &&
-            pos_manager_.get_short_tot(quote->instrument_id, quote->exchange_id) > 0)
+        auto short_pos = pos_manager_.get_short_pos(quote->instrument_id, quote->exchange_id);
+        if (is_zero(short_pos.cost_price) && short_pos.volume > 0)
         {
-            double base = quote->last_price * pos_manager_.get_short_tot(quote->instrument_id, quote->exchange_id);
+            double base = quote->last_price * short_pos.volume;
             if (quote->instrument_type == InstrumentTypeFuture)
             {
                 auto* instrument = InstrumentManager::get_instrument_manager()->get_future_instrument(quote->instrument_id, quote->exchange_id);
@@ -511,7 +248,7 @@ namespace kungfu
     void AccountManager::impl::on_position_details(const vector<kungfu::Position> &details)
     {
         // 股票期权可能跟期货类似的逻辑, 目前不支持
-        boost::ignore_unused(details);
+        pos_manager_.on_position_details(details);
     }
 
     void AccountManager::impl::on_account(const kungfu::AccountInfo &account)

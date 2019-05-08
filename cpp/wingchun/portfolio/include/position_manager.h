@@ -11,44 +11,17 @@
 
 namespace kungfu
 {
-    class PositionManager final : public IPnLDataHandler, public IPosDataFetcher
+    class PositionManager final : public IPnLDataHandler
     {
     public:
         explicit PositionManager(const char* account_id, const char* db);
-        virtual ~PositionManager();
+        ~PositionManager();
 
-        // IPosDataFetcher
-        int64_t get_long_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_long_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_long_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_long_pos(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_tot_fro(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_avail(const char* instrument_id, const char* exchange_id) const override;
-        int64_t get_short_yd_fro(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_realized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_unrealized_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_open_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_cost_price(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_margin(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_position_pnl(const char* instrument_id, const char* exchange_id) const override;
-        double get_short_close_pnl(const char* instrument_id, const char* exchange_id) const override;
-        Position get_short_pos(const char* instrument_id, const char* exchange_id) const override;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
-        std::vector<Instrument> get_all_pos_instruments() const override;
-        // IPosDataFetcher
+        Position get_long_pos(const char* instrument_id, const char* exchange_id) const;
+        Position get_short_pos(const char* instrument_id, const char* exchange_id) const;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const;
+        std::vector<Instrument> get_all_pos_instruments() const;
+        double get_market_value() const; // stock only
 
         // IPnLDataHandler
         void on_quote(const Quote* quote) override;
@@ -70,8 +43,6 @@ namespace kungfu
         void set_initial_equity(double equity) override;
         void set_static_equity(double equity) override;
         // IPnLDataHandler
-
-        double get_market_value() const;
 
     private:
         class impl;
