@@ -68,7 +68,6 @@ const pm2Delete = (target) => {
 
 const dealSpaceInPath = (pathname) => {
     const normalizePath = path.normalize(pathname);
-    if (platform === 'win') return normalizePath
     return normalizePath.replace(/ /g, '\ ')
 }
 
@@ -215,7 +214,6 @@ export const deleteProcess = async(processName) => {
     fkill(pids).catch(err => console.error(err))
     return pm2Delete(processName)
 }
-
 
 //干掉守护进程
 export const killGodDaemon = () => {

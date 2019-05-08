@@ -3,7 +3,7 @@ const path = require('path');
 const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
 const electron = require('electron');
 //base setting, init db
-const {initDB, killExtra, killFinal} = require('./base');
+const {initDB, killExtra, KillKfc} = require('./base');
 const {killGodDaemon} = require('__gUtils/processUtils');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
@@ -72,7 +72,7 @@ function createWindow () {
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
-		if (platform === 'win') {
+		if (platform === 'win' && !allowQuit) {
 			showQuitMessageBox();	
 			e.preventDefault();
 		}else return
@@ -112,7 +112,7 @@ app.on('window-all-closed', function (e) {
 app.on('activate', function () {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-	if ((mainWindow === null) || mainWindow.isDestroyed()) createWindow()
+	if (mainWindow || mainWindow.isDestroyed()) createWindow()
 	else mainWindow.show()
 })
 
@@ -126,21 +126,33 @@ function showQuitMessageBox(){
 	dialog.showMessageBox({
 		type: 'question',
 		title: '提示',
+		defaultId: 0,
+		cancelId: 1,
 		message: "退出应用会结束所有交易进程，确认退出吗？",
 		buttons: ['确认', `最小化至${platform === 'win' ? '任务栏' : ' Dock'}`],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
+			allowQuit = true;
+			if(mainWindow || !mainWindow.isDestroyed()) mainWindow.hide()
 			console.log('----- starting quit process -----');
-			console.time('kill daemon');
-			killGodDaemon().finally(() => {
-				console.timeEnd('kill daemon');
-				console.time('kill extra');
-				killExtra().finally(() => {
-					console.timeEnd('kill extra');	
-					allowQuit = true;
-					app.quit();
-					if (platform === 'win') killFinal();
+			console.time('kill kfcs');
+			KillKfc()
+			.catch(err => console.error(err)) 
+			.finally(() => {
+				console.timeEnd('kill kfcs');
+				console.time('kill daemon');
+				killGodDaemon()
+				.catch(err => console.error(err)) 				
+				.finally(() => {
+					console.timeEnd('kill daemon');
+					console.time('kill extra');
+					killExtra()
+					.catch(err => console.error(err)) 								
+					.finally(() => {
+						console.timeEnd('kill extra');	
+						app.quit();
+					})
 				})
 			})
 		}else{
