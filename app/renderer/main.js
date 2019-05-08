@@ -113,13 +113,13 @@ export const startGetProcessStatus = () => {
     .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 }
 
- //start pm2 kungfu engine
- process.env.ELECTRON_RUN_AS_NODE = true;
- const {startPageEngine, startCalendarEngine} = require('__gUtils/processUtils');
- startPageEngine(false)
- .then(() => startCalendarEngine(false))
- .then(() => startGetProcessStatus())
- .catch(err => console.error(err))
+//start pm2 kungfu engine
+process.env.ELECTRON_RUN_AS_NODE = true;
+const {startPageEngine, startCalendarEngine} = require('__gUtils/processUtils');
+startPageEngine(false)
+.then(() => startCalendarEngine(false))
+.catch(err => console.error(err))
+.finally(() => startGetProcessStatus())
 
 /* eslint-disable no-new */
 new Vue({

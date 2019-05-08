@@ -4,7 +4,7 @@ const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
 const electron = require('electron');
 //base setting, init db
 const {initDB, killExtra, killFinal} = require('./base');
-const {killGodDaemon, killAllProcess} = require('__gUtils/processUtils');
+const {killGodDaemon} = require('__gUtils/processUtils');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 
@@ -70,6 +70,9 @@ function createWindow () {
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
+		if(platform === 'mac') return;
+
+		//windows
 		mainWindow.hide()
 		mainWindow.setSkipTaskbar(true)
 		e.preventDefault()
@@ -85,14 +88,6 @@ function createWindow () {
 		mainWindow && mainWindow.reload()
 	})
 
-	mainWindow.on('show', () => {
-		appIcon.setHighlightMode('always')
-	})
-	
-	mainWindow.on('hide', () => {
-		appIcon.setHighlightMode('never')
-	})
-
 	mainWindow.on('ready-to-show', function() {
 		mainWindow.show();
 		mainWindow.focus();
@@ -101,28 +96,28 @@ function createWindow () {
 	//create db
 	initDB()
 
-	//tray
-	console.log('current process:', process.platform)
-	const iconName = platform === 'win' ? '20_white@3x.png' : '20.png';
-	const iconPath = path.join(__resources, 'icon', iconName)
-	const contextMenu = Menu.buildFromTemplate([
-		{label: '退出  ', click: () => {mainWindow.destroy(); mainWindow = null}},//我们需要在这里有一个真正的退出（这里直接强制退出）
-	])
+	// //tray
+	// console.log('current process:', process.platform)
+	// const iconName = platform === 'win' ? '20_white@3x.png' : '20.png';
+	// const iconPath = path.join(__resources, 'icon', iconName)
+	// const contextMenu = Menu.buildFromTemplate([
+	// 	{label: '退出  ', click: () => app.quit()},//我们需要在这里有一个真正的退出（这里直接强制退出）
+	// ])
 
-	if(appIcon === null) {
-		appIcon =  new Tray(iconPath);
-		appIcon.setToolTip('kungfu.trader')
-		appIcon.setContextMenu(contextMenu)
-		appIcon.on('click', () => {
-			if(mainWindow){
-				mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-				mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
-				!mainWindow.isVisible() && mainWindow.focus() 
-			}else{
-				createWindow()
-			}
-		})
-	}
+	// if(appIcon === null) {
+	// 	appIcon =  new Tray(iconPath);
+	// 	appIcon.setToolTip('kungfu.trader')
+	// 	appIcon.setContextMenu(contextMenu)
+	// 	appIcon.on('click', () => {
+	// 		if(mainWindow){
+	// 			mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+	// 			mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
+	// 			!mainWindow.isVisible() && mainWindow.focus() 
+	// 		}else{
+	// 			createWindow()
+	// 		}
+	// 	})
+	// }
 }
 
 // This method will be called when Electron has finished
@@ -134,15 +129,14 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function (e) {
 // On macOS it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
-	if (platform !== 'mac') {
-		app.quit()
-	}
+	if(platform !== 'mac') app.quit();
 })
 
 app.on('activate', function () {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-	if (mainWindow === null) createWindow()
+	if (mainWindow === null || mainWindow.isDestroyed()) createWindow()
+	else mainWindow.show()
 })
 
 var allowQuit = false;
@@ -153,51 +147,24 @@ app.on('will-quit', (e) => {
 		type: 'question',
 		title: '提示',
 		message: "退出应用会结束所有交易进程，确认退出吗？",
-		buttons: ['是', '最小化到托盘'],
+		buttons: ['确认', `最小化至${platform === 'win' ? '任务栏' : ' Dock'}`],
 		icon: path.join(__resources, 'icon', 'icon.png')
-	}, async (index) => {
+	}, (index) => {
 		if(index === 0){
-			appIcon = null;
-			console.log('starting quit process ')
-		
-			//todo kill all process to save time
-			console.time('kill all process')
-			try{
-				await killAllProcess();
-			}catch(err){
-				console.error(err)
-			}
-			console.timeEnd('kill all process')
-			
-			console.time('kill daemon')
-			try {
-				await killGodDaemon();
-			} catch (err) {
-				console.error(err)
-			}
-			console.timeEnd('kill daemon')
-
-			console.time('kill extra')
-			try {
-				await killExtra()
-			} catch (err) {
-				console.error(err)
-			}
-			console.timeEnd('kill extra')
-
-			appIcon && appIcon.destroy && appIcon.destroy();
-
-
-			allowQuit = true;
-			app.quit();
-
-			console.time('kill finall')
-			try{
-				(platform === 'win') && await killFinal();
-			}catch(err){
-				console.error(err)				
-			}
-			console.timeEnd('kill final')
+			console.log('starting quit process ');
+			console.time('kill daemon');
+			killGodDaemon().finally(() => {
+				console.timeEnd('kill daemon');
+				console.time('kill extra');
+				killExtra().finally(() => {
+					console.timeEnd('kill extra');	
+					allowQuit = true;
+					app.quit();
+					(platform === 'win') && killFinal();
+				})
+			})
+		}else{
+			mainWindow.hide();
 		}
 	})
 })

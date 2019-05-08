@@ -67,11 +67,11 @@ const pm2Delete = (target) => {
 
 
 const dealSpaceInPath = (pathname) => {
-    if (platform === 'win') return pathname
-    return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
+    const normalizePath = path.normalize(pathname);
+    if (platform === 'win') return normalizePath
+    return normalizePath.replace(/ /g, '\ ')
 }
-// .replace(/ /g, '\\ ')
-// .replace(/\\/g, '\\\\').replace(/ /g, '\\ ')
+
 export const describeProcess = (name) => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -112,7 +112,6 @@ export const startProcess = async (options) => {
             // "PM2_HOME": PM2_DIR,
             "KF_HOME": dealSpaceInPath(BASE_DIR),
             // "ELECTRON_RUN_AS_NODE": true,
-            NODE_ENV: "production",
         }
     }
 
@@ -198,6 +197,7 @@ export const listProcessStatus = () => {
                 const status = p.pm2_env.status
                 processStatus[name] = status
             })
+            console.log(processStatus,'----')
             resolve(processStatus)
         }).catch(err => reject(err))
     })
@@ -214,17 +214,6 @@ export const deleteProcess = async(processName) => {
     const pids = processes.map(prc => prc.pid);
     fkill(pids).catch(err => console.error(err))
     return pm2Delete(processName)
-}
-
-
-//删除所有进程
-export const killAllProcess = async() => {
-    const processes = await pm2List();
-    const pids = processes.map(p => p.pid).filter(p => !!p)
-    return fkill(pids, {
-        force: true,
-        ignoreCase: true
-    })
 }
 
 
@@ -247,7 +236,6 @@ export const killGodDaemon = () => {
                 logger.error(err)
                 reject(err)
             }
-            pm2.disconnect()
         }).catch(err => reject(err))
     })
 }
