@@ -45,7 +45,7 @@ export const killExtra = () => {
 
 
 export const killFinal = () => {
-    return fkill(['node.exe', 'Kungfu.Trader.exe', 'electron.exe'], {
+    return fkill(['node.exe', 'Kungfu.Trader.exe', 'electron.exe', 'electron'], {
         force: true,
         ignoreCase: true,
         tree: platform === 'win'        

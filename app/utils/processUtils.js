@@ -67,8 +67,9 @@ const pm2Delete = (target) => {
 
 
 const dealSpaceInPath = (pathname) => {
-    if (platform === 'win') return pathname
-    else return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
+    if (platform === 'win') return pathname.replace(/\\/g, '\\\\').replace(/ /g, '\\ ') + '"'
+    console.log(22222)
+    return eval('"' + pathname.replace(/ /g, '\\ ') + '"')
 }
 
 export const describeProcess = (name) => {
@@ -178,6 +179,7 @@ export const startTd = (resource, processName) => {
 //启动strategy
 export const startStrategy = (strategyId, strategyPath) => {
     strategyPath = dealSpaceInPath(strategyPath)
+    console.log(strategyPath,'~~~')
     return startProcess({
         "name": strategyId,
         "args": `strategy --name ${strategyId} --path ${strategyPath}`,
@@ -220,7 +222,7 @@ export const deleteProcess = async(processName) => {
 //删除所有进程
 export const killAllProcess = async() => {
     const processes = await pm2List();
-    const pids = processes.map(p => p.pid)
+    const pids = processes.map(p => p.pid).filter(p => !!p)
     return fkill(pids, {
         force: true,
         tree: platform === 'win',
