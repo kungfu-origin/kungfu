@@ -57,6 +57,15 @@ namespace kungfu
 
         uint64_t parent_id;                      //母订单ID
     };
+
+    //订单输入反馈(手动下单)
+    struct OrderInputRsp
+    {
+        uint64_t order_id;                       //订单ID
+
+        int error_id;                            //错误ID
+        char error_msg[ERROR_MSG_LEN];           //错误信息
+    };
     
     //订单操作
     struct OrderAction
@@ -68,6 +77,16 @@ namespace kungfu
 
         double price;                            //价格
         int64_t volume;                          //数量
+    };
+
+    //订单操作反馈(手动下单)
+    struct OrderActionRsp
+    {
+        uint64_t order_id;                       //订单ID
+        uint64_t order_action_id;                //订单操作ID
+
+        int error_id;                            //错误ID
+        char error_msg[ERROR_MSG_LEN];           //错误信息
     };
 
     //订单消息

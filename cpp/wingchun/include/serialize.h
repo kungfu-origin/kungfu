@@ -139,6 +139,7 @@ namespace kungfu
 
     inline void from_json(const nlohmann::json& j, OrderInput& input)
     {
+        input = {};
         input.order_id = j["order_id"].get<uint64_t>();
         strncpy(input.instrument_id, j["instrument_id"].get<std::string>().c_str(), INSTRUMENT_ID_LEN);
         strncpy(input.exchange_id, j["exchange_id"].get<std::string>().c_str(), EXCHANGE_ID_LEN);
@@ -181,6 +182,13 @@ namespace kungfu
         {
             input.parent_id = j["parent_id"].get<uint64_t>();
         }
+    }
+
+    inline void to_json(nlohmann::json& j, const OrderInputRsp& input_rsp)
+    {
+        j["order_id"] = input_rsp.order_id;
+        j["error_id"] = input_rsp.error_id;
+        j["error_msg"] = input_rsp.error_msg;
     }
 
     inline void to_json(nlohmann::json& j, const AccountInfo& account)
@@ -261,6 +269,39 @@ namespace kungfu
         j["action_flag"] = std::string(1, action.action_flag);
         j["price"] = FORMAT_DOUBLE(action.price);
         j["volume"] = action.volume;
+    }
+
+    inline void from_json(const nlohmann::json& j, OrderAction& action)
+    {
+        action = {};
+        if (j.find("order_id") != j.end())
+        {
+            action.order_id = j["order_id"].get<uint64_t>();
+        }
+        if (j.find("order_action_id") != j.end())
+        {
+            action.order_action_id = j["order_action_id"].get<uint64_t>();
+        }
+        if (j.find("action_flag") != j.end())
+        {
+            action.action_flag = j["action_flag"].get<std::string>()[0];
+        }
+        if (j.find("price") != j.end())
+        {
+            action.price = j["price"].get<double>();
+        }
+        if (j.find("volume") != j.end())
+        {
+            action.volume = j["volume"].get<int64_t>();
+        }
+    }
+
+    inline void to_json(nlohmann::json& j, const OrderActionRsp& action_rsp)
+    {
+        j["order_id"] = action_rsp.order_id;
+        j["order_action_id"] = action_rsp.order_action_id;
+        j["error_id"] = action_rsp.error_id;
+        j["error_msg"] = action_rsp.error_msg;
     }
 
     inline void to_json(nlohmann::json& j, const Order& order)

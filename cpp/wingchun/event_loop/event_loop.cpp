@@ -3,7 +3,6 @@
 //
 
 #include "event_loop.h"
-#include "msg.h"
 #include "reqrsp.h"
 #include "serialize.h"
 #include <nanomsg/nn.h>
@@ -321,10 +320,28 @@ namespace kungfu
                         }
                         case MsgType::Subscribe:
                         {
-                            SubscribeRequest req = msg.data;
                             if (sub_callback_)
                             {
+                                SubscribeRequest req = msg.data;
                                 sub_callback_(req.recipient, req.instruments, req.is_level2);
+                            }
+                            break;
+                        }
+                        case MsgType::OrderInput:
+                        {
+                            if (order_input_callback_)
+                            {
+                                OrderInput order_input = msg.data;
+                                order_input_callback_(order_input);
+                            }
+                            break;
+                        }
+                        case MsgType::OrderAction:
+                        {
+                            if (order_action_callback_)
+                            {
+                                OrderAction order_action = msg.data;
+                                order_action_callback_(order_action);
                             }
                             break;
                         }

@@ -191,6 +191,17 @@ namespace kungfu
             SPDLOG_ERROR("failed to create account folder {}", ACCOUNT_FOLDER(this->get_account_id()));
         }
 
+        std::string rep_url = ACCOUNT_REP_URL(get_account_id());
+        acc_rsp_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
+        try
+        {
+            acc_rsp_socket_->bind(rep_url.c_str());
+        }
+        catch(std::exception &e)
+        {
+            SPDLOG_ERROR("failed to bind to acc_rep_url {}, exception: {}", rep_url.c_str(), e.what());
+        }
+
         kungfu::storage::SnapshotStorage s1(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_DAY_SNAPSHOT_TABLE_NAME, true, true);
         kungfu::storage::SnapshotStorage s2(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true);
 
@@ -224,6 +235,8 @@ namespace kungfu
         loop_->register_quote_callback(std::bind(&TdGatewayImpl::on_quote, this, std::placeholders::_1));
 
         calendar_->register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
+
+        loop_->add_socket(acc_rsp_socket_);
     }
 
     void TdGatewayImpl::on_started()
@@ -357,12 +370,45 @@ namespace kungfu
     {
         if (order_input.account_id == this->get_account_id())
         {
+            if (order_input.order_id == 0)
+            {
+                auto order_input_ptr = (OrderInput*)(&order_input);
+                auto order_id = next_id();
+                order_input_ptr->order_id = order_id;
+
+                OrderInputRsp rsp = {};
+                rsp.order_id = order_id;
+                NNMsg msg = {};
+                msg.msg_type = MsgType::RspOrderInput;
+                msg.data = rsp;
+                std::string js = to_string(msg);
+                SPDLOG_TRACE("sending {} ", js);
+                acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+            }
+
             insert_order(order_input);
         }
     }
 
     void TdGatewayImpl::on_order_action(const OrderAction &order_action)
     {
+        if (order_action.order_id == 0)
+        {
+            auto order_action_ptr = (OrderAction*)(&order_action);
+            auto order_action_id = next_id();
+            order_action_ptr->order_action_id = order_action_id;
+
+            OrderActionRsp rsp = {};
+            rsp.order_id = order_action.order_id;
+            rsp.order_action_id = order_action_id;
+            NNMsg msg = {};
+            msg.msg_type = MsgType::RspOrderAction;
+            msg.data = rsp;
+            std::string js = to_string(msg);
+            SPDLOG_TRACE("sending {} ", js);
+            acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+        }
+
         cancel_order(order_action);
     }
 

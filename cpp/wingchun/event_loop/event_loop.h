@@ -11,6 +11,7 @@
 #include "JournalReader.h"
 #include "md_struct.h"
 #include "oms_struct.h"
+#include "msg.h"
 #include "task_scheduler/task_scheduler.h"
 
 namespace kungfu

@@ -26,6 +26,9 @@ namespace kungfu
         PortfolioByMin = 209,
         PositionDetail = 210,
 
+        RspOrderInput = 251,
+        RspOrderAction = 252,
+
         ReqLogin = 301,
         Subscribe = 302,
         RspLogin = 303,
