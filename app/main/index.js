@@ -17,7 +17,9 @@ killExtra().catch(err => console.error(err))
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-var mainWindow = null, appIcon = null;
+var mainWindow = null;
+var appIcon = null;
+var allowQuit = false;
 function createWindow () {
 	//添加快捷键
 	if (platform === 'mac') {
@@ -66,16 +68,12 @@ function createWindow () {
 	// mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
-	mainWindow.on('close', function (e) {
+	mainWindow.on('close', (e) => {
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
-		if(platform === 'mac') return;
-
-		//windows
-		mainWindow.hide()
-		mainWindow.setSkipTaskbar(true)
-		e.preventDefault()
+		if (platform === 'win') showQuitMessageBox();	
+		e.preventDefault();
 	})
 
 	mainWindow.on('crashed', () => {
@@ -95,29 +93,6 @@ function createWindow () {
 
 	//create db
 	initDB()
-
-	// //tray
-	// console.log('current process:', process.platform)
-	// const iconName = platform === 'win' ? '20_white@3x.png' : '20.png';
-	// const iconPath = path.join(__resources, 'icon', iconName)
-	// const contextMenu = Menu.buildFromTemplate([
-	// 	{label: '退出  ', click: () => app.quit()},//我们需要在这里有一个真正的退出（这里直接强制退出）
-	// ])
-
-	// if(appIcon === null) {
-	// 	appIcon =  new Tray(iconPath);
-	// 	appIcon.setToolTip('kungfu.trader')
-	// 	appIcon.setContextMenu(contextMenu)
-	// 	appIcon.on('click', () => {
-	// 		if(mainWindow){
-	// 			mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-	// 			mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
-	// 			!mainWindow.isVisible() && mainWindow.focus() 
-	// 		}else{
-	// 			createWindow()
-	// 		}
-	// 	})
-	// }
 }
 
 // This method will be called when Electron has finished
@@ -129,20 +104,25 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function (e) {
 // On macOS it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
-	if(platform !== 'mac') app.quit();
+	console.log('all closed -------')
+ 	if (platform !== 'mac') app.quit()
 })
 
 app.on('activate', function () {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-	if (mainWindow === null || mainWindow.isDestroyed()) createWindow()
+	console.log(mainWindow)
+	if ((mainWindow === null) || mainWindow.isDestroyed()) createWindow()
 	else mainWindow.show()
 })
 
-var allowQuit = false;
 app.on('will-quit', (e) => {
 	if(allowQuit) return
-	else e.preventDefault()
+	else e.preventDefault();
+	if (platform === 'mac') showQuitMessageBox()
+})
+
+function showQuitMessageBox(){
 	dialog.showMessageBox({
 		type: 'question',
 		title: '提示',
@@ -151,6 +131,8 @@ app.on('will-quit', (e) => {
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
+			mainWindow.destroy();
+			mainWindow = null;
 			console.log('starting quit process ');
 			console.time('kill daemon');
 			killGodDaemon().finally(() => {
@@ -160,14 +142,16 @@ app.on('will-quit', (e) => {
 					console.timeEnd('kill extra');	
 					allowQuit = true;
 					app.quit();
-					(platform === 'win') && killFinal();
+					if (platform === 'win') killFinal();
 				})
 			})
 		}else{
-			mainWindow.hide();
+			if((mainWindow !== null) && !mainWindow.isDestroyed()){
+				mainWindow.minimize();
+			}
 		}
 	})
-})
+}
 
 
 // In this file you can include the rest of your app's specific main process

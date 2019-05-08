@@ -180,23 +180,6 @@ export const editFileFolderName = (oldPath, newPath) => {
 }
 
 
-// function deleteall(targetPath) {
-//     targetPath = path.normalize(targetPath)
-// 	var files = [];
-// 	if(fs.existsSync(targetPath)) {
-//         if(fs.statSync(targetPath).isDirectory()){
-//             files = fs.readdirSync(targetPath);
-//             files.forEach(function(file) {
-//                 var curPath = targetPath + "/" + file;
-//                 deleteall(curPath);
-//             });
-//             fs.rmdirSync(targetPath);
-//         }else{
-//             fs.unlinkSync(targetPath);            
-//         }
-// 	}
-// }
-
 //删除文件或
 export const removeFileFolder = (targetPath) => {
     targetPath = path.normalize(targetPath)
@@ -258,7 +241,7 @@ export const clearFileContent = (filePath) => {
 
 //打开查看文件
 export const openReadFile = (logPath) => {
-    if(!fs.existsSync(logPath)) return new Error(logPath, 'is not exist！');
+    addFile('', logPath, 'file')
     const shell = require('electron').shell;
     shell.openItem(logPath)
 };

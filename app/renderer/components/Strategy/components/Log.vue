@@ -20,10 +20,6 @@
                 >
                 </el-input>
         </tr-dashboard-header-item>
-        <!-- <tr-dashboard-header-item>
-            <i class="fa fa-refresh mouse-over" title="刷新"  @click="init(processId, logPath)"></i>
-        </tr-dashboard-header-item> -->
-        
         <tr-dashboard-header-item>
             <el-button size="mini" @click="handleClearLog">清空</el-button>
         </tr-dashboard-header-item>
