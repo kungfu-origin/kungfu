@@ -72,8 +72,10 @@ function createWindow () {
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
-		if (platform === 'win') showQuitMessageBox();	
-		e.preventDefault();
+		if (platform === 'win') {
+			showQuitMessageBox();	
+			e.preventDefault();
+		}else return
 	})
 
 	mainWindow.on('crashed', () => {
@@ -104,22 +106,20 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function (e) {
 // On macOS it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
-	console.log('all closed -------')
  	if (platform !== 'mac') app.quit()
 })
 
 app.on('activate', function () {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-	console.log(mainWindow)
 	if ((mainWindow === null) || mainWindow.isDestroyed()) createWindow()
 	else mainWindow.show()
 })
 
 app.on('will-quit', (e) => {
 	if(allowQuit) return
-	else e.preventDefault();
-	if (platform === 'mac') showQuitMessageBox()
+	if (platform === 'mac') showQuitMessageBox();
+	e.preventDefault()
 })
 
 function showQuitMessageBox(){
@@ -131,9 +131,7 @@ function showQuitMessageBox(){
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
-			mainWindow.destroy();
-			mainWindow = null;
-			console.log('starting quit process ');
+			console.log('----- starting quit process -----');
 			console.time('kill daemon');
 			killGodDaemon().finally(() => {
 				console.timeEnd('kill daemon');
@@ -147,7 +145,8 @@ function showQuitMessageBox(){
 			})
 		}else{
 			if((mainWindow !== null) && !mainWindow.isDestroyed()){
-				mainWindow.minimize();
+				if(platform === 'win') mainWindow.minimize();
+				if(platform === 'mac') mainWindow.hide();
 			}
 		}
 	})
