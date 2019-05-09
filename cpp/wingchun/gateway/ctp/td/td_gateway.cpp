@@ -12,6 +12,7 @@
 #include <thread>
 #include <algorithm>
 #include "util/include/code_convert.h"
+#include "util/include/nanomsg_util.h"
 #include "util/instrument/instrument.h"
 #include "util/include/business_helper.h"
 #include "gateway/include/macro.h"
@@ -198,6 +199,7 @@ namespace kungfu
 
         bool TdGateway::req_qry_instrument()
         {
+            future_instruments_.clear();
             CThostFtdcQryInstrumentField req = {};
             int rtn = api_->ReqQryInstrument(&req, ++request_id_);
             return rtn == 0;
@@ -424,11 +426,18 @@ namespace kungfu
                     FutureInstrument instrument;
                     from_ctp(*pInstrument, instrument);
                     INSTRUMENT_TRACE(kungfu::to_string(instrument));
-                    FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).add_future_instrument(instrument);
+                    future_instruments_.emplace_back(instrument);
                 }
                 if (bIsLast)
                 {
                     set_state(GatewayState::InstrumentInfoConfirmed);
+
+                    FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).set_future_instruments(future_instruments_);
+                    NNMsg msg = {MsgType::ReloadFutureInstrument, {}};
+                    std::string js = to_string(msg);
+                    SPDLOG_TRACE("sending {}", js);
+                    acc_pub_socket_->send(js.c_str(), js.size() + 1, 0);
+
                     std::this_thread::sleep_for(std::chrono::seconds(1));
 
                     req_account();

@@ -70,6 +70,7 @@ namespace kungfu
 #define ACCOUNT_ASSET_DB_FILE_FORMAT "{}/accounts/{}/assets.db"
 #define ACCOUNT_SNAPSHOT_DB_FILE_FORMAT "{}/accounts/{}/snapshots.db"
 #define ACCOUNT_REP_URL_FORMAT "ipc://{}/accounts/{}/rep.ipc"
+#define ACCOUNT_PUB_URL_FORMAT "ipc://{}/accounts/{}/pub.ipc"
 
 #define ACCOUNT_FOLDER(account_id) fmt::format("{}/accounts/{}", get_base_dir(), account_id)
 #define ORDER_DB_FILE(account_id) fmt::format(ORDER_DB_FILE_FORMAT, get_base_dir(), account_id)
@@ -77,6 +78,7 @@ namespace kungfu
 #define ACCOUNT_ASSET_DB_FILE(account_id) fmt::format(ACCOUNT_ASSET_DB_FILE_FORMAT, get_base_dir(), account_id)
 #define ACCOUNT_SNAPSHOT_DB_FILE(account_id) fmt::format(ACCOUNT_SNAPSHOT_DB_FILE_FORMAT, get_base_dir(), account_id)
 #define ACCOUNT_REP_URL(account_id) fmt::format(ACCOUNT_REP_URL_FORMAT, get_base_dir(), account_id)
+#define ACCOUNT_PUB_URL(account_id) fmt::format(ACCOUNT_PUB_URL_FORMAT, get_base_dir(), account_id)
 
 // strategy configuration
 

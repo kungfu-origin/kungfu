@@ -63,6 +63,8 @@ namespace kungfu
 
             static const std::unordered_map<int, std::string> kDisconnectedReasonMap;
 
+            std::vector<FutureInstrument> future_instruments_;
+
             bool login();
             bool req_settlement_confirm();
             bool req_qry_instrument();
