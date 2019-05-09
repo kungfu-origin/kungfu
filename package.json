@@ -60,6 +60,7 @@
       }
     ],
     "asar": false,
+    "asarUnpack": ["node_modules\\pm2\\lib\\Daemon.js"],
     "dmg": {
       "contents": [
         {
@@ -175,7 +176,7 @@
     "vue-template-compiler": "^2.4.2",
     "webpack": "^3.5.2",
     "webpack-bundle-analyzer": "^3.1.0",
-    "webpack-dev-server": ">=3.1.11",
+    "webpack-dev-server": "3.0.0",
     "webpack-hot-middleware": "^2.18.2",
     "webpack-merge": "^4.1.0",
     "webpack-permissions-plugin": "^1.0.0"
