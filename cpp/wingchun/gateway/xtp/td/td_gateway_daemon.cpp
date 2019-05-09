@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
             ("i, ip", "ip", cxxopts::value<std::string>()->default_value("120.27.164.69"))
             ("p, port", "port",  cxxopts::value<int>()->default_value("6001"))
             ("k, software-key", "software key", cxxopts::value<std::string>()->default_value("b8aa7173bba3470e390d787219b2112e"))
-            ("u, user-id", "user id",cxxopts::value<std::string>()->default_value("15040900"))
-            ("password", "password", cxxopts::value<std::string>()->default_value("ZJgFwv6V"))
+            ("u, user-id", "user id",cxxopts::value<std::string>()->default_value("xxxxxxx"))
+            ("password", "password", cxxopts::value<std::string>()->default_value("xxxxxxx"))
             ("save-path", "save path", cxxopts::value<std::string>()->default_value("/shared/kungfu/runtime"))
             ("log-level", "log level", cxxopts::value<int>()->default_value("2"));
             ;

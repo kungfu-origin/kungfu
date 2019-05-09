@@ -12,8 +12,8 @@ int main(int argc, char* argv[])
     options.add_options()
             ("front-uri", "front uri", cxxopts::value<std::string>()->default_value("tcp://180.168.146.187:10010"))
             (" broker-id", "broker id", cxxopts::value<std::string>()->default_value("9999"))
-            ("account-id", "account id",  cxxopts::value<std::string>()->default_value("115796"))
-            ("password", "password", cxxopts::value<std::string>()->default_value("ctp123456"))
+            ("account-id", "account id",  cxxopts::value<std::string>()->default_value("xxxxxx"))
+            ("password", "password", cxxopts::value<std::string>()->default_value("xxxxx"))
             ("log-level", "log level", cxxopts::value<int>()->default_value("0"))
             ;
 
