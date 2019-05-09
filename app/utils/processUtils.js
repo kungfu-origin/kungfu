@@ -45,7 +45,7 @@ const pm2List = () => {
     })
 }
 
-const pm2Delete = (target) => {
+const pm2Delete = async(target) => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
@@ -56,6 +56,7 @@ const pm2Delete = (target) => {
                         return;
                     }
                     resolve(true)
+                    
                 })
             }catch(err){
                 logger.error(err)
@@ -210,8 +211,13 @@ export const deleteProcess = async(processName) => {
         console.error(err)
     }
     const pids = processes.map(prc => prc.pid);
-    fkill(pids).catch(err => console.error(err))
-    return pm2Delete(processName)
+    return new Promise((resolve, reject) => {
+        pm2Delete(processName)
+        .then(() => resolve(true))
+        .catch(err => reject(err))
+        .finally(() => fkill(pids).catch(err => console.error(err)))
+    }) 
+    
 }
 
 //干掉守护进程

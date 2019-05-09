@@ -97,8 +97,11 @@ export const switchTd = ({dispatch}, {account, value}) => {
     const tdProcessId = `td_${account_id}`
     if(!value){
         return deleteProcess(tdProcessId)
+        .then(() => console.log('111======', tdProcessId))
         .then(() => dispatch('deleteOneMdTdState', tdProcessId))
+        .then(() => console.log('222======', tdProcessId))
         .then(() => closeGlobalGatewayNanomsg(tdProcessId))
+        .then(() => console.log('333======', tdProcessId))
         .then(() => Vue.message.success('操作成功！'))        
         .catch(err => Vue.message.error(err.message || '操作失败！'))
     }
