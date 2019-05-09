@@ -201,10 +201,12 @@ class PortfolioInfo(ctypes.Structure):
 
 class  SubPortfolioInfo(ctypes.Structure):
     _fields_ = [
-        ('trading_day', ctypes.c_char * 9),
+        ('rcv_time', ctypes.c_longlong),
         ('update_time', ctypes.c_longlong),
-        ('client_id', ctypes.c_char * 32),
+        ('trading_day', ctypes.c_char * 9),
         ('account_id', ctypes.c_char * 32),
+        ('type', ctypes.c_char),
+        ('broker_id', ctypes.c_char * 32),
         ('source_id', ctypes.c_char * 16),
         ('initial_equity', ctypes.c_double),
         ('static_equity', ctypes.c_double),
@@ -213,4 +215,14 @@ class  SubPortfolioInfo(ctypes.Structure):
         ('accumulated_pnl_ratio', ctypes.c_double),
         ('intraday_pnl', ctypes.c_double),
         ('intraday_pnl_ratio', ctypes.c_double),
+        ('avail', ctypes.c_double),
+        ('market_value', ctypes.c_double),
+        ('margin', ctypes.c_double),
+        ('accumulated_fee', ctypes.c_double),
+        ('intraday_fee', ctypes.c_double),
+        ('frozen_cash', ctypes.c_double),
+        ('frozen_margin', ctypes.c_double),
+        ('frozen_fee', ctypes.c_double),
+        ('position_pnl', ctypes.c_double),
+        ('close_pnl', ctypes.c_double),
     ]

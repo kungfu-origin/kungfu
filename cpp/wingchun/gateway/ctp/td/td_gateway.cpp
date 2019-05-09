@@ -433,10 +433,7 @@ namespace kungfu
                     set_state(GatewayState::InstrumentInfoConfirmed);
 
                     FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).set_future_instruments(future_instruments_);
-                    NNMsg msg = {MsgType::ReloadFutureInstrument, {}};
-                    std::string js = to_string(msg);
-                    SPDLOG_TRACE("sending {}", js);
-                    acc_pub_socket_->send(js.c_str(), js.size() + 1, 0);
+                    get_publisher()->publish(MsgType::ReloadFutureInstrument, {});
 
                     std::this_thread::sleep_for(std::chrono::seconds(1));
 

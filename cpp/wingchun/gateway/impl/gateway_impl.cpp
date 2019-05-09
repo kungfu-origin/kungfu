@@ -202,17 +202,6 @@ namespace kungfu
             SPDLOG_ERROR("failed to bind to acc_rep_url {}, exception: {}", rep_url.c_str(), e.what());
         }
 
-        std::string pub_url = ACCOUNT_PUB_URL(get_account_id());
-        acc_pub_socket_ = std::make_shared<nn::socket>(AF_SP, NN_PUB);
-        try
-        {
-            acc_pub_socket_->bind(pub_url.c_str());
-        }
-        catch(std::exception &e)
-        {
-            SPDLOG_ERROR("failed to bind to acc_pub_url {}, exception: {}", pub_url.c_str(), e.what());
-        }
-
         kungfu::storage::SnapshotStorage s1(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_DAY_SNAPSHOT_TABLE_NAME, true, true);
         kungfu::storage::SnapshotStorage s2(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true);
 
