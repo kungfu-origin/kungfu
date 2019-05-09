@@ -6,7 +6,7 @@ python_path = subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE).stdou
 yarn_path = "yarn"
 if platform.system() == 'Windows':
     python_path = python_path.decode('utf8')
-    for line in subprocess.Popen(["where", "yarn"], stdout=subprocess.PIPE).stdout.readlines():
+    for line in subprocess.Popen(["where", "npm"], stdout=subprocess.PIPE).stdout.readlines():
         path = line.decode('utf8').strip()
         if path.endswith('.cmd'):
             yarn_path = path
