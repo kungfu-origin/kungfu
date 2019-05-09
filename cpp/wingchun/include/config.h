@@ -138,5 +138,6 @@ namespace kungfu
 #define PORTFOLIO_ONE_MIN_SNAPSHOT_TABLE_NAME "portfolio_1m_snapshots"
 #define PORTFOLIO_ONE_DAY_SNAPSHOT_TABLE_NAME "portfolio_1d_snapshots"
 
+#define RUNTIME_FOLDER fmt::format("{}/runtime", get_base_dir())
 }
 #endif // PROJECT_CONFIG_H

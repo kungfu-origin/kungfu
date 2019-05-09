@@ -29,7 +29,13 @@ namespace kungfu
 
         void MdGateway::start()
         {
-            api_ = CThostFtdcMdApi::CreateFtdcMdApi();
+            std::string runtime_folder = RUNTIME_FOLDER;
+            SPDLOG_INFO(runtime_folder);
+#ifdef  _WINDOWS
+            std::replace(runtime_folder.begin(), runtime_folder.end(), '/', '\\');
+#endif
+            SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
+            api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
             api_->RegisterSpi(this);
             api_->RegisterFront((char*)front_uri_.c_str());
             api_->Init();

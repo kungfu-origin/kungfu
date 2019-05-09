@@ -46,7 +46,12 @@ namespace kungfu
 
         void TdGateway::start()
         {
-            api_ = CThostFtdcTraderApi::CreateFtdcTraderApi();
+            std::string runtime_folder = RUNTIME_FOLDER;
+#ifdef  _WINDOWS
+            std::replace(runtime_folder.begin(), runtime_folder.end(), '/', '\\');
+#endif
+            SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
+            api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
             api_->RegisterSpi(this);
             api_->RegisterFront((char*)front_uri_.c_str());
             api_->SubscribePublicTopic(THOST_TERT_QUICK);
