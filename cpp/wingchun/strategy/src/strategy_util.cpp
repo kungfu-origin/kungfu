@@ -116,6 +116,7 @@ namespace kungfu
             AccountInfo acc = {};
             acc.update_time = yijinjing::getNanoTime();
             strcpy(acc.account_id, account_id.c_str());
+            strcpy(acc.source_id, source_id.c_str());
             acc.type = rsp.type;
             acc.initial_equity = cash_limit;
             acc.static_equity = cash_limit;

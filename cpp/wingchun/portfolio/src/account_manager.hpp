@@ -263,6 +263,14 @@ namespace kungfu
         account_.type = account.type;
         strcpy(account_.broker_id, account.broker_id);
         strcpy(account_.source_id, account.source_id);
+        if (is_zero(account_.initial_equity))
+        {
+            account_.initial_equity = account.initial_equity;
+        }
+        if (is_zero(account_.static_equity))
+        {
+            account_.static_equity = account.static_equity;
+        }
         account_.avail = account.avail;
         account_.margin = account.margin;
         recalc_acc();

@@ -203,6 +203,7 @@ namespace kungfu
         }
 
         std::string pub_url = ACCOUNT_PUB_URL(get_account_id());
+        acc_pub_socket_ = std::make_shared<nn::socket>(AF_SP, NN_PUB);
         try
         {
             acc_pub_socket_->bind(pub_url.c_str());
