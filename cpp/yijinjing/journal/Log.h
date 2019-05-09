@@ -46,6 +46,9 @@ public:
         logger->set_level(DEFAULT_LOG_LEVEL);
         logger->set_pattern(DEFAULT_LOG_PATTERN);
         spdlog::set_default_logger(logger);
+    #ifdef _WINDOWS    
+        spdlog::flush_every(std::chrono::seconds(1));
+     #endif   
     }
 
     static inline void set_log_level(int level)
