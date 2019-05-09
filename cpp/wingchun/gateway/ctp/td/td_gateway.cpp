@@ -438,7 +438,8 @@ namespace kungfu
                     set_state(GatewayState::InstrumentInfoConfirmed);
 
                     FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).set_future_instruments(future_instruments_);
-                    get_publisher()->publish(MsgType::ReloadFutureInstrument, {});
+                    nlohmann::json j;
+                    get_publisher()->publish(MsgType::ReloadFutureInstrument, j);
 
                     std::this_thread::sleep_for(std::chrono::seconds(1));
 
