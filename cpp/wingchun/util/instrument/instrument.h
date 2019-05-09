@@ -21,7 +21,7 @@ namespace kungfu
     public:
         FutureInstrumentStorage(const std::string& file_name);
         void create_table_if_not_exist();
-        void add_future_instrument(const FutureInstrument& future_instrument);
+        void set_future_instruments(const std::vector<FutureInstrument>& future_instruments);
         void get_future_instrument(std::pair<std::string, std::string>& key, std::map<std::pair<std::string, std::string>, FutureInstrument>& future_instruments);
         void get_future_instruments(std::map<std::pair<std::string, std::string>, FutureInstrument>& future_instruments);
 
@@ -32,6 +32,7 @@ namespace kungfu
     class InstrumentManager
     {
     public:
+        void reload_from_db();
         static std::shared_ptr<InstrumentManager> get_instrument_manager();
         const FutureInstrument* get_future_instrument(const char* instrument_id, const char* exchange_id);
         int get_future_multiplier(const char* instrument_id, const char* exchange_id);

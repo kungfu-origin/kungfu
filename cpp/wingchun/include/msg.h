@@ -25,6 +25,7 @@ namespace kungfu
         AccountInfoByMin = 208,
         PortfolioByMin = 209,
         PositionDetail = 210,
+        SubPortfolioInfo = 211,
 
         RspOrderInput = 251,
         RspOrderAction = 252,
@@ -43,7 +44,7 @@ namespace kungfu
         SwitchDay = 601,
         RspTradingDay = 602,
 
-        SubPortfolioInfo = 701
+        ReloadFutureInstrument = 701
     };
 }
 

@@ -90,11 +90,15 @@ namespace kungfu
         std::vector<SubPortfolioInfo> get_accounts();
         void on_switch_day(const std::string& trading_day);
         void init_portfolio_manager();
+        void loop_instrumnet();
 
     private:
         std::string name_;
         CalendarPtr calendar_;
         std::shared_ptr<NNPublisher> publisher_;
+        int instrument_socket_;
+        std::shared_ptr<std::thread> thread_;
+        std::atomic<bool> started_;
         std::unique_ptr<PortfolioManager> portfolio_manager_;
         std::shared_ptr<oms::OrderManager> order_manager_;
         yijinjing::JournalWriterPtr writer_;

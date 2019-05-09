@@ -45,31 +45,40 @@ namespace kungfu
         }
     }
 
-    void FutureInstrumentStorage::add_future_instrument(const FutureInstrument& future_instrument)
+    void FutureInstrumentStorage::set_future_instruments(const std::vector<FutureInstrument> &future_instruments)
     {
+        db_.exec("BEGIN");
         try
         {
-            SQLite::Statement insert(db_, "INSERT INTO future_instrument VALUES(?, ?, ?, ?, ?, ?, ?, ?, "
-                    "?, ?, ?, ?, ?, ?)");
-            insert.bind(1, future_instrument.instrument_id);
-            insert.bind(2, future_instrument.exchange_id);
-            insert.bind(3, std::string(1, future_instrument.instrument_type));
-            insert.bind(4, future_instrument.product_id);
-            insert.bind(5, future_instrument.contract_multiplier);
-            insert.bind(6, future_instrument.price_tick);
-            insert.bind(7, future_instrument.open_date);
-            insert.bind(8, future_instrument.create_date);
-            insert.bind(9, future_instrument.expire_date);
-            insert.bind(10, future_instrument.delivery_year);
-            insert.bind(11, future_instrument.delivery_month);
-            insert.bind(12, future_instrument.is_trading);
-            insert.bind(13, future_instrument.long_margin_ratio);
-            insert.bind(14, future_instrument.short_margin_ratio);
-            insert.exec();
+            db_.exec("DELETE FROM future_instrument");
+
+            for (const auto& future_instrument : future_instruments)
+            {
+                SQLite::Statement insert(db_, "INSERT INTO future_instrument VALUES(?, ?, ?, ?, ?, ?, ?, ?, "
+                                              "?, ?, ?, ?, ?, ?)");
+                insert.bind(1, future_instrument.instrument_id);
+                insert.bind(2, future_instrument.exchange_id);
+                insert.bind(3, std::string(1, future_instrument.instrument_type));
+                insert.bind(4, future_instrument.product_id);
+                insert.bind(5, future_instrument.contract_multiplier);
+                insert.bind(6, future_instrument.price_tick);
+                insert.bind(7, future_instrument.open_date);
+                insert.bind(8, future_instrument.create_date);
+                insert.bind(9, future_instrument.expire_date);
+                insert.bind(10, future_instrument.delivery_year);
+                insert.bind(11, future_instrument.delivery_month);
+                insert.bind(12, future_instrument.is_trading);
+                insert.bind(13, future_instrument.long_margin_ratio);
+                insert.bind(14, future_instrument.short_margin_ratio);
+                insert.exec();
+            }
+
+            db_.exec("COMMIT");
         }
         catch (std::exception& e)
         {
             SPDLOG_ERROR(e.what());
+            db_.exec("ROLLBACK");
         }
     }
 
@@ -148,6 +157,12 @@ namespace kungfu
         default_future_instrument_.is_trading = true;
         default_future_instrument_.long_margin_ratio = 0.2;
         default_future_instrument_.short_margin_ratio = 0.2;
+        reload_from_db();
+    }
+
+    void InstrumentManager::reload_from_db()
+    {
+        future_instruments_.clear();
         FutureInstrumentStorage storage_(fmt::format(FUTURE_INSTRUMENT_DB_FILE_FORMAT, get_base_dir()));
         storage_.get_future_instruments(future_instruments_);
     }
