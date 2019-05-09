@@ -23,6 +23,7 @@
 #define YIJINJING_PAGESOCKETSTRUCT_H
 
 #include "constants.h"
+#include <boost/array.hpp>
 
 #define PAGED_SOCKET_FILE KUNGFU_SOCKET_FOLDER + "paged.sock"
 #define PAGED_SOCKET_PORT 10086
@@ -58,13 +59,13 @@ YJJ_NAMESPACE_START
 struct PagedSocketRequest
 {
     /** PagedSocketTypeConstants */
-    byte    type;
+    int8_t    type;
     /** name utilized for CLIENT / JOURNAL / STRATEGY */
     char    name[JOURNAL_SHORT_NAME_MAX_LENGTH];
     /** process id (only utilized when registering client) */
-    int     pid;
+    int32_t     pid;
     /** process id (only take effect when exiting client) */
-    int     hash_code;
+    int32_t     hash_code;
     /** source id (only take effect when login trade engine) */
     short   source;
 #ifndef _WIN32
@@ -77,7 +78,7 @@ struct PagedSocketRequest
 struct PagedSocketResponse
 {
     /** PagedSocketTypeConstants */
-    byte    type;
+    int8_t    type;
     /** return true if success */
     bool    success;
     /** error message if failure '\0' if success. */
@@ -94,24 +95,42 @@ struct PagedSocketRspClient: public PagedSocketResponse
     /** comm_file is provided for further page usage */
     char    comm_file[JOURNAL_FOLDER_MAX_LENGTH];
     /** size of comm_file */
-    int     file_size;
+    int32_t     file_size;
     /** hash code of this client */
-    int     hash_code;
+    int32_t     hash_code;
+#ifndef _WIN32
+} __attribute__((packed));
+#else
 };
+#pragma pack(pop)
+#endif
 
 struct PagedSocketRspJournal: public PagedSocketResponse
 {
     /** the index in the comm_file */
-    int     comm_idx;
+    int32_t     comm_idx;
+#ifndef _WIN32
+} __attribute__((packed));
+#else
 };
+#pragma pack(pop)
+#endif
 
 struct PagedSocketRspStrategy: public PagedSocketResponse
 {
     /** start of request id */
-    int     rid_start;
+    int32_t     rid_start;
     /** end of request id */
-    int     rid_end;
+    int32_t     rid_end;
+#ifndef _WIN32
+} __attribute__((packed));
+#else
 };
+#pragma pack(pop)
+#endif
+
+typedef boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> PagedSocketRequestBuf;
+typedef boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> PagedSocketResponseBuf;
 
 YJJ_NAMESPACE_END
 

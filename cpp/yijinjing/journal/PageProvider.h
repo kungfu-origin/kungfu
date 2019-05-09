@@ -75,6 +75,7 @@ protected:
     string  client_name;
     void*   comm_buffer;
     int     hash_code;
+    int     client_request_socket;
 protected:
     /** register to service as a client */
     void register_client();

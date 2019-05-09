@@ -70,9 +70,9 @@ struct PageCommMsg
     /** return true if the client is writer (by client) */
     bool    is_writer;
     /** page number to request (by client) */
-    short   page_num;
+    int16_t   page_num;
     /** page number requested (by server) */
-    short   last_page_num;
+    int16_t   last_page_num;
 
     // operators for map key
     bool const operator == (const PageCommMsg &p) const

@@ -22,27 +22,14 @@
 #include "PageSocketHandler.h"
 #include "Timer.h"
 #include "Journal.h"
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/make_shared.hpp>
+#include <spdlog/spdlog.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
+#include <nanomsg/nn.h>
+#include <nanomsg/reqrep.h>
 
 USING_YJJ_NAMESPACE
 
-using namespace boost::asio;
-
-boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> _data;
-
-#ifdef _WINDOWS
-boost::shared_ptr<ip::tcp::acceptor> _acceptor;
-boost::shared_ptr<ip::tcp::socket> _socket;
-#else
-boost::shared_ptr<boost::asio::local::stream_protocol::acceptor> _acceptor;
-boost::shared_ptr<local::stream_protocol::socket> _socket;
-#endif // _WINDOWS
-
-boost::shared_ptr<io_service> _io;
 boost::shared_ptr<PageSocketHandler> PageSocketHandler::m_ptr = boost::shared_ptr<PageSocketHandler>(nullptr);
 
 PageSocketHandler::PageSocketHandler(): io_running(false)
@@ -60,30 +47,42 @@ PageSocketHandler* PageSocketHandler::getInstance()
 void PageSocketHandler::run(IPageSocketUtil* _util)
 {
     util = _util;
-    _io.reset(new io_service());
-
     boost::filesystem::path socket_path = PAGED_SOCKET_FILE;
     boost::filesystem::path socket_folder_path = socket_path.parent_path();
-    if(!boost::filesystem::exists(socket_folder_path)) {
+    if(!boost::filesystem::exists(socket_folder_path))
+    {
         boost::filesystem::create_directories(socket_folder_path);
     }
 
-#ifdef _WINDOWS
-    _acceptor.reset(new ip::tcp::acceptor(*_io));
-    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), PAGED_SOCKET_PORT);
-    _acceptor->open(endpoint.protocol());
-    _acceptor->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-    _acceptor->bind(endpoint);
-    _acceptor->listen();
-    _socket.reset(new ip::tcp::socket(*_io));
-#else
-    _acceptor.reset(new local::stream_protocol::acceptor(*_io, local::stream_protocol::endpoint(PAGED_SOCKET_FILE)));
-    _socket.reset(new local::stream_protocol::socket(*_io));
-#endif // _WINDOWS
-
-    _acceptor->async_accept(*_socket, boost::bind(&PageSocketHandler::handle_accept, this));
+    string server_url = "ipc://" + socket_path.string();
+    server_response_socket = nn_socket(AF_SP, NN_REP);
+    if (server_response_socket < 0)
+    {
+        SPDLOG_ERROR("Fail to create nanomsg socket");
+    }
+    int rv = nn_bind(server_response_socket, server_url.c_str());
+    if (rv < 0)
+    {
+        SPDLOG_ERROR("Fail to bind nanomsg socket at {}", server_url);
+    }
+    SPDLOG_INFO("Start serve nanomsg at {}", server_url);
+    
     io_running = true;
-    _io->run();
+
+    while(io_running)
+    {
+        int bytes = nn_recv(server_response_socket, data_request_.data(), SOCKET_MESSAGE_MAX_LENGTH, 0);
+        if (bytes < 0)
+        {
+            SPDLOG_ERROR("nn_recv");
+        }
+        else
+        {
+            util->acquire_mutex();
+            process_msg();
+            util->release_mutex();
+        }
+    }
 }
 
 bool PageSocketHandler::is_running()
@@ -93,34 +92,14 @@ bool PageSocketHandler::is_running()
 
 void PageSocketHandler::stop()
 {
-    if (_io.get() != nullptr)
-        _io->stop();
-    if (_socket.get() != nullptr)
-        _socket->close();
-    if (_acceptor.get() != nullptr)
-        _acceptor->close();
     io_running = false;
-}
-
-void PageSocketHandler::handle_accept()
-{
-    _socket->read_some(buffer(_data));
-    util->acquire_mutex();
-    process_msg();
-    util->release_mutex();
-#ifdef _WINDOWS
-    _socket.reset(new ip::tcp::socket(*_io));
-#else
-    _socket.reset(new local::stream_protocol::socket(*_io));
-#endif // _WINDOWS
-    _acceptor->async_accept(*_socket, boost::bind(&PageSocketHandler::handle_accept, this));
+    nn_shutdown(server_response_socket, 0);
 }
 
 void PageSocketHandler::process_msg()
 {
-    PagedSocketRequest* req = (PagedSocketRequest*)&_data[0];
+    PagedSocketRequest* req = (PagedSocketRequest*)&data_request_[0];
     byte req_type = req->type;
-    SPDLOG_INFO("[socket] (status) ", req_type);
 
     switch (req_type)
     {
@@ -129,13 +108,13 @@ void PageSocketHandler::process_msg()
             json timer;
             timer["secDiff"] = getSecDiff();
             timer["nano"] = getNanoTime();
-            strcpy(&_data[0], timer.dump().c_str());
+            strcpy(&data_response_[0], timer.dump().c_str());
             break;
         }
         case PAGED_SOCKET_CONNECTION_TEST:
         {
             string greetings = "Hello, world!";
-            strcpy(&_data[0], greetings.c_str());
+            strcpy(&data_response_[0], greetings.c_str());
             break;
         }
         case PAGED_SOCKET_JOURNAL_REGISTER:
@@ -145,7 +124,7 @@ void PageSocketHandler::process_msg()
             rsp.type = req_type;
             rsp.success = idx >= 0;
             rsp.comm_idx = idx;
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
         case PAGED_SOCKET_STRATEGY_REGISTER:
@@ -156,7 +135,7 @@ void PageSocketHandler::process_msg()
             rsp.success = rid_pair.first < rid_pair.second && rid_pair.first > 0;
             rsp.rid_start = rid_pair.first;
             rsp.rid_end = rid_pair.second;
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
         case PAGED_SOCKET_READER_REGISTER:
@@ -172,7 +151,7 @@ void PageSocketHandler::process_msg()
             rsp.file_size = file_size;
             rsp.hash_code = has_code;
             memcpy(rsp.comm_file, comm_file.c_str(), comm_file.length() + 1);
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
         case PAGED_SOCKET_CLIENT_EXIT:
@@ -181,20 +160,20 @@ void PageSocketHandler::process_msg()
             PagedSocketResponse rsp = {};
             rsp.type = req_type;
             rsp.success = true;
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
         case PAGED_SOCKET_SUBSCRIBE:
         case PAGED_SOCKET_SUBSCRIBE_TBC:
         {
-            short source = _data[1];
-            short msg_type = _data[2];
+            short source = data_request_[1];
+            short msg_type = data_request_[2];
             vector<string> tickers;
             int pos = 3;
             string cur;
             while (pos < (int)SOCKET_MESSAGE_MAX_LENGTH - 1)
             {
-                cur = string(&_data[pos]);
+                cur = string(&data_request_[pos]);
                 if (cur.length() > 0)
                 {
                     tickers.push_back(cur);
@@ -207,7 +186,7 @@ void PageSocketHandler::process_msg()
             PagedSocketResponse rsp = {};
             rsp.type = req_type;
             rsp.success = ret;
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
         case PAGED_SOCKET_TD_LOGIN:
@@ -216,9 +195,14 @@ void PageSocketHandler::process_msg()
             PagedSocketResponse rsp = {};
             rsp.type = req_type;
             rsp.success = ret;
-            memcpy(&_data[0], &rsp, sizeof(rsp));
+            memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
     }
-    write(*_socket, buffer(_data));
+
+    int bytes = nn_send(server_response_socket, data_response_.data(), data_response_.size(), 0);
+    if (bytes < 0)
+    {
+        SPDLOG_ERROR("nn_send");
+    }
 }

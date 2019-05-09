@@ -27,6 +27,9 @@
 #include "YJJ_DECLARE.h"
 #include "Log.h"
 #include "PageSocketStruct.h"
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 YJJ_NAMESPACE_START
@@ -67,9 +70,10 @@ private:
     IPageSocketUtil* util;
     /** singleton */
     static boost::shared_ptr<PageSocketHandler> m_ptr;
+    PagedSocketRequestBuf data_request_;
+    PagedSocketResponseBuf data_response_;
+    int server_response_socket;
 private:
-    /** callback when accept new msg*/
-    void handle_accept();
     /** minor unit for msg processing */
     void process_msg();
     /** private constructor for singleton */
