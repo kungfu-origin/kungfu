@@ -116,6 +116,7 @@ namespace kungfu
             AccountInfo acc = {};
             acc.update_time = yijinjing::getNanoTime();
             strcpy(acc.account_id, account_id.c_str());
+            strcpy(acc.source_id, source_id.c_str());
             acc.type = rsp.type;
             acc.initial_equity = cash_limit;
             acc.static_equity = cash_limit;
@@ -131,7 +132,8 @@ namespace kungfu
         }
         else
         {
-            nn_connect(instrument_socket_, ACCOUNT_PUB_URL(account_id).c_str());
+            auto gateway_name = "td_" + source_id + "_" + account_id;
+            nn_connect(instrument_socket_, GATEWAY_PUB_URL(gateway_name).c_str());
             return true;
         }
     }

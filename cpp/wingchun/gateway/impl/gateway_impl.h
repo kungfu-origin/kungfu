@@ -180,9 +180,7 @@ namespace kungfu
         std::vector<Position> rsp_pos_;
         std::vector<Position> rsp_pos_detail_;
 
-    protected:
         std::shared_ptr<nn::socket> acc_rsp_socket_;
-        std::shared_ptr<nn::socket> acc_pub_socket_;
     };
 }
 

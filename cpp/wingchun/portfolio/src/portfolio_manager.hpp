@@ -95,6 +95,10 @@ namespace kungfu
         strcpy(pos.exchange_id, exchange_id);
         pos.instrument_type = get_instrument_type(instrument_id, exchange_id);
         pos.direction = DirectionLong;
+        if (nullptr != account_id)
+        {
+            strcpy(pos.account_id, account_id);
+        }
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)
@@ -102,6 +106,7 @@ namespace kungfu
                 if (nullptr == account_id || strlen(account_id) == 0 || strcmp(account_id, iter.first.c_str()) == 0)
                 {
                     auto cur_pos = iter.second->get_long_pos(instrument_id, exchange_id);
+                    pos.update_time = std::max<int64_t>(pos.update_time, cur_pos.update_time);
                     strcpy(pos.client_id, cur_pos.client_id);
                     pos.volume += cur_pos.volume;
                     pos.yesterday_volume += cur_pos.yesterday_volume;
@@ -396,6 +401,8 @@ namespace kungfu
     {
         double old_dynamic = pnl_.dynamic_equity;
 
+        pnl_.update_time = yijinjing::getNanoTime();
+        strcpy(pnl_.trading_day, trading_day_.c_str());
         pnl_.initial_equity = 0;
         pnl_.static_equity = 0;
         pnl_.dynamic_equity = 0;
