@@ -153,8 +153,8 @@ function showQuitMessageBox(){
 					.finally(() => {
 						console.timeEnd('kill extra');	
 						app.quit();
-						console.time('kill final');	
-						if (platform === 'win') killFinal().catch(err => console.error(err)).finally(() => console.timeEnd('kill final'))
+						//console.time('kill final');	
+						//if (platform === 'win') killFinal().catch(err => console.error(err)).finally(() => console.timeEnd('kill final'))
 					})
 				})
 			})
