@@ -37,7 +37,13 @@ export const initDB = () => {
 export const KillKfc = () => {
     return fkill(['kfc.exe', 'kfc'],  {
         force: true,
-        ignoreCase: true,
+        tree: platform === 'win'      
+    })
+}
+
+export const KillNode = () => {
+    return fkill(['node.exe', 'node'], {
+        force: true,
         tree: platform === 'win'      
     })
 }
@@ -47,15 +53,13 @@ export const killExtra = () => {
     const killList = ['kfc.exe', 'pm2', 'kfc', 'Daemon', 'God Daemon', 'God\\ Daemon', '.pm2']
     return fkill(killList, {
         force: true,
-        ignoreCase: true,
         tree: platform === 'win'      
     })
 }
 
 export const killFinal = () => {
-    return fkill(['node.exe', 'node', 'Kungfu.Trader.exe', 'electron.exe', 'electron'], {
+    return fkill(['node.exe', 'node', 'Kungfu.Trader.exe', 'Kungfu.Trader', 'electron.exe', 'electron'], {
         force: true,
-        ignoreCase: true,
         tree: platform === 'win'      
     })
 }

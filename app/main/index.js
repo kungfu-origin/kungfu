@@ -3,7 +3,7 @@ const path = require('path');
 const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
 const electron = require('electron');
 //base setting, init db
-const {initDB, killExtra, KillKfc} = require('./base');
+const {initDB, killExtra, KillKfc, KillNode, killFinal} = require('./base');
 const {killGodDaemon} = require('__gUtils/processUtils');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
@@ -14,6 +14,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 killExtra().catch(err => console.error(err))
+if (process.env.NODE_ENV !== 'development') KillNode().catch(err => console.error(err))
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -152,6 +153,8 @@ function showQuitMessageBox(){
 					.finally(() => {
 						console.timeEnd('kill extra');	
 						app.quit();
+						//console.time('kill final');	
+						//if (platform === 'win') killFinal().catch(err => console.error(err)).finally(() => console.timeEnd('kill final'))
 					})
 				})
 			})
