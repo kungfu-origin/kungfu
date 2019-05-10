@@ -17,8 +17,6 @@
 // Created by cjiang on 17/3/24.
 //
 
-#include "nlohmann/json.hpp"
-
 #include "PageEngine.h"
 #include "Journal.h"
 #include "Page.h"
@@ -30,6 +28,7 @@
 #include <sstream>
 #include <mutex>
 #include <signal.h>
+#include <nlohmann/json.hpp>
 
 USING_YJJ_NAMESPACE
 

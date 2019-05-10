@@ -26,7 +26,6 @@
 #include "PageSocketStruct.h"
 #include "PageUtil.h"
 #include "Page.h"
-#include "StrategySocketHandler.h"
 
 #include <spdlog/spdlog.h>
 #include <boost/asio.hpp>
@@ -37,8 +36,10 @@
 USING_YJJ_NAMESPACE
 
 /** get socket response via paged_socket */
-void getSocketRsp(int client_request_socket, PagedSocketRequestBuf &input, PagedSocketResponseBuf &output)
+void getSocketRsp(int client_request_socket, PagedSocketRequest &req, PagedSocketResponseBuf &output)
 {
+    PagedSocketRequestBuf input;
+    memcpy(&input[0], &req, sizeof(req));
     int bytes;
     bytes = nn_send(client_request_socket, input.data(), input.size(), 0);
     if (bytes < 0)
@@ -50,30 +51,13 @@ void getSocketRsp(int client_request_socket, PagedSocketRequestBuf &input, Paged
     {
         SPDLOG_ERROR("nn_recv");
     }
-
-//     using namespace boost::asio;
-//     io_service io_service;
-
-// #ifdef _WINDOWS
-//     ip::tcp::socket socket(io_service);
-//     socket.connect(ip::tcp::endpoint(ip::address_v4::from_string("127.0.0.1"),PAGED_SOCKET_PORT));
-// #else
-//     local::stream_protocol::socket socket(io_service);
-//     socket.connect(local::stream_protocol::endpoint(PAGED_SOCKET_FILE));
-// #endif // _WINDOWS
-
-//     boost::system::error_code error;
-//     write(socket, buffer(input), error);
-//     socket.read_some(buffer(output), error);
 }
 
 /** send req via socket and get response in data */
 void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, PagedSocketResponseBuf& data, const string& name)
 {
     memcpy(req.name, name.c_str(), name.length() + 1);
-    PagedSocketRequestBuf reqBuf;
-    memcpy(&reqBuf[0], &req, sizeof(req));
-    getSocketRsp(client_request_socket, reqBuf, data);
+    getSocketRsp(client_request_socket, req, data);
 }
 
 ClientPageProvider::ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed):
@@ -191,69 +175,4 @@ PagePtr LocalPageProvider::getPage(const string &dir, const string &jname, int s
 void LocalPageProvider::releasePage(void* buffer, int size, int serviceIdx)
 {
     PageUtil::ReleasePageBuffer(buffer, size, false);
-}
-
-StrategySocketHandler::StrategySocketHandler(const string& strategyName):
-        ClientPageProvider(strategyName, true)
-{}
-
-bool StrategySocketHandler::td_connect(short source)
-{
-    PagedSocketResponseBuf rspArray;
-    PagedSocketRequest req = {};
-    req.type = PAGED_SOCKET_TD_LOGIN;
-    req.source = source;
-    getSocketRspOnReq(client_request_socket, req, rspArray, client_name);
-    PagedSocketResponse* rsp = (PagedSocketResponse*)&rspArray[0];
-    return rsp->type == req.type && rsp->success;
-}
-
-bool StrategySocketHandler::md_subscribe(const vector<string>& tickers, short source, short msg_type)
-{
-    size_t idx = 0;
-    PagedSocketRequestBuf reqArray;
-    memset(&reqArray[0], '\0', SOCKET_MESSAGE_MAX_LENGTH);
-    int pos = 3; // from pos1
-    PagedSocketResponseBuf rspArray;
-    while (idx < tickers.size())
-    {
-        const string& ticker = tickers[idx];
-        int tickerLen = ticker.length() + 1;
-        if (pos + tickerLen < SOCKET_MESSAGE_MAX_LENGTH - 1)
-        {
-            memcpy(&reqArray[pos], ticker.c_str(), tickerLen);
-            pos += tickerLen;
-            idx += 1;
-        }
-        else
-        {
-            reqArray[0] = PAGED_SOCKET_SUBSCRIBE_TBC;
-            reqArray[1] = source;
-            reqArray[2] = msg_type;
-            getSocketRsp(client_request_socket, reqArray, rspArray);
-            PagedSocketResponse* rsp = (PagedSocketResponse*)&rspArray[0];
-            if (rsp->type != reqArray[0] || !rsp->success)
-                return false;
-            memset(&reqArray[0], '\0', SOCKET_MESSAGE_MAX_LENGTH);
-            pos = 3;
-        }
-    }
-    reqArray[0] = PAGED_SOCKET_SUBSCRIBE;
-    reqArray[1] = source;
-    reqArray[2] = msg_type;
-    getSocketRsp(client_request_socket, reqArray, rspArray);
-    PagedSocketResponse* rsp = (PagedSocketResponse*)&rspArray[0];
-    return rsp->type == reqArray[0] && rsp->success;
-}
-
-bool StrategySocketHandler::register_strategy(int& requestIdStart, int& requestIdEnd)
-{
-    PagedSocketRequest req = {};
-    req.type = PAGED_SOCKET_STRATEGY_REGISTER;
-    PagedSocketResponseBuf rspArray;
-    getSocketRspOnReq(client_request_socket, req, rspArray, client_name);
-    PagedSocketRspStrategy* rsp = (PagedSocketRspStrategy*)(&rspArray[0]);
-    requestIdStart = rsp->rid_start;
-    requestIdEnd = rsp->rid_end;
-    return rsp->type == req.type && rsp->success;
 }

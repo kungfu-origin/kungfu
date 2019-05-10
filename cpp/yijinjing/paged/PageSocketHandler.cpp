@@ -22,6 +22,9 @@
 #include "PageSocketHandler.h"
 #include "Timer.h"
 #include "Journal.h"
+
+#include <nlohmann/json.hpp>
+
 #include <spdlog/spdlog.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
@@ -127,17 +130,6 @@ void PageSocketHandler::process_msg()
             memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }
-        case PAGED_SOCKET_STRATEGY_REGISTER:
-        {
-            IntPair rid_pair = util->register_strategy(req->name);
-            PagedSocketRspStrategy rsp = {};
-            rsp.type = req_type;
-            rsp.success = rid_pair.first < rid_pair.second && rid_pair.first > 0;
-            rsp.rid_start = rid_pair.first;
-            rsp.rid_end = rid_pair.second;
-            memcpy(&data_response_[0], &rsp, sizeof(rsp));
-            break;
-        }
         case PAGED_SOCKET_READER_REGISTER:
         case PAGED_SOCKET_WRITER_REGISTER:
         {
@@ -160,41 +152,6 @@ void PageSocketHandler::process_msg()
             PagedSocketResponse rsp = {};
             rsp.type = req_type;
             rsp.success = true;
-            memcpy(&data_response_[0], &rsp, sizeof(rsp));
-            break;
-        }
-        case PAGED_SOCKET_SUBSCRIBE:
-        case PAGED_SOCKET_SUBSCRIBE_TBC:
-        {
-            short source = data_request_[1];
-            short msg_type = data_request_[2];
-            vector<string> tickers;
-            int pos = 3;
-            string cur;
-            while (pos < (int)SOCKET_MESSAGE_MAX_LENGTH - 1)
-            {
-                cur = string(&data_request_[pos]);
-                if (cur.length() > 0)
-                {
-                    tickers.push_back(cur);
-                    pos += cur.length() + 1;
-                }
-                else
-                    break;
-            }
-            bool ret = util->sub_md(tickers, source, msg_type, req_type == PAGED_SOCKET_SUBSCRIBE);
-            PagedSocketResponse rsp = {};
-            rsp.type = req_type;
-            rsp.success = ret;
-            memcpy(&data_response_[0], &rsp, sizeof(rsp));
-            break;
-        }
-        case PAGED_SOCKET_TD_LOGIN:
-        {
-            bool ret = util->login_td(req->name, req->source);
-            PagedSocketResponse rsp = {};
-            rsp.type = req_type;
-            rsp.success = ret;
             memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
         }

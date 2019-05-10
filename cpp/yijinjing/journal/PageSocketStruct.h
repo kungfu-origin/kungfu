@@ -67,13 +67,8 @@ struct PagedSocketRequest
     /** process id (only take effect when exiting client) */
     int32_t     hash_code;
     /** source id (only take effect when login trade engine) */
-    short   source;
-#ifndef _WIN32
-} __attribute__((packed));
-#else
+    int16_t   source;
 };
-#pragma pack(pop)
-#endif
 
 struct PagedSocketResponse
 {
@@ -83,12 +78,7 @@ struct PagedSocketResponse
     bool    success;
     /** error message if failure '\0' if success. */
     char    error_msg[SOCKET_ERROR_MAX_LENGTH];
-#ifndef _WIN32
-} __attribute__((packed));
-#else
 };
-#pragma pack(pop)
-#endif
 
 struct PagedSocketRspClient: public PagedSocketResponse
 {
@@ -98,23 +88,13 @@ struct PagedSocketRspClient: public PagedSocketResponse
     int32_t     file_size;
     /** hash code of this client */
     int32_t     hash_code;
-#ifndef _WIN32
-} __attribute__((packed));
-#else
 };
-#pragma pack(pop)
-#endif
 
 struct PagedSocketRspJournal: public PagedSocketResponse
 {
     /** the index in the comm_file */
     int32_t     comm_idx;
-#ifndef _WIN32
-} __attribute__((packed));
-#else
 };
-#pragma pack(pop)
-#endif
 
 struct PagedSocketRspStrategy: public PagedSocketResponse
 {
@@ -122,12 +102,7 @@ struct PagedSocketRspStrategy: public PagedSocketResponse
     int32_t     rid_start;
     /** end of request id */
     int32_t     rid_end;
-#ifndef _WIN32
-} __attribute__((packed));
-#else
 };
-#pragma pack(pop)
-#endif
 
 typedef boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> PagedSocketRequestBuf;
 typedef boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> PagedSocketResponseBuf;

@@ -28,7 +28,6 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 
 #include "JournalReader.h"
 #include "JournalWriter.h"
-#include "StrategyUtil.h"
 #include "Frame.hpp"
 #include "Timer.h"
 #include "TypeConvert.hpp"
@@ -46,11 +45,6 @@ JournalReaderPtr createReader(const vector<string>& dirs, const vector<string>& 
 JournalWriterPtr createWriter(const string& dir, const string& jname, const string& writerName)
 {
     return JournalWriter::create(dir, jname, writerName);
-}
-
-StrategyUtilPtr createBL(const string& strategyName)
-{
-    return StrategyUtil::create(strategyName);
 }
 
 /*
@@ -79,12 +73,6 @@ std::string get_journal_folder(const std::string & name)
 }
 */
 
-pybind11::tuple getPyRids(const StrategyUtil & util)
-{
-    auto pair = util.getRequestIds();
-    return pybind11::make_tuple(pair.first, pair.second);
-}
-
 PYBIND11_MODULE(pyyjj, m)
 {
     // nanosecond-time related
@@ -97,7 +85,6 @@ PYBIND11_MODULE(pyyjj, m)
     // create reader / writer / strategy-writer
     m.def("createReader", &createReader);
     m.def("createWriter", &createWriter);
-    m.def("createBL", &createBL);
 
     // JournalReader
     py::class_<JournalReader, boost::shared_ptr<JournalReader> >(m, "Reader")
@@ -113,15 +100,6 @@ PYBIND11_MODULE(pyyjj, m)
     .def("write_str", &JournalWriter::writeStr)
     .def("get_page_num", &JournalWriter::getPageNum)
     .def("write", &JournalWriter::writePyData);
-
-    // StrategyUtil
-    py::class_<StrategyUtil, boost::shared_ptr<StrategyUtil> >(m, "StrategyUtil")
-    .def("subscribe", &StrategyUtil::pySubscribe)
-    .def("login_trade", &StrategyUtil::td_connect)
-    .def("write_str", &StrategyUtil::writeStr)
-    .def("write", &StrategyUtil::writePyData);
-
-    m.def("rids", &getPyRids, py::arg("util"));
 
     // Frame
     py::class_<Frame, boost::shared_ptr<Frame> >(m, "Frame")
