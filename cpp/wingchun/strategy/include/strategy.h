@@ -21,9 +21,6 @@ namespace kungfu
         explicit Strategy(const std::string& name);
         virtual ~Strategy();
 
-        // 算法订单状态更新回调
-        virtual void on_algo_order_status(uint64_t order_id, const std::string& algo_type, const std::string& event_msg) {};
-
         // 开始运行
         void run();
 
@@ -141,6 +138,11 @@ namespace kungfu
         //@return              撤单操作ID
         uint64_t cancel_order(uint64_t order_id);
 
+        //注册时间回调函数
+        //@param nano          纳秒时间
+        //@param callback      回调函数
+        void register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback);
+
         //算法订单报单
         //@param algo_type     算法订单类型
         //@param input         算法订单输入信息
@@ -192,130 +194,6 @@ namespace kungfu
         //@return              成功或者失败
         bool commit_modify_position(uint64_t op_id, const std::string& account_id);
 
-        //获取期初权益
-        //@return              期初权益
-        double get_initial_equity() const;
-
-        //获取静态权益
-        //@return              静态权益
-        double get_static_equity() const;
-
-        //获取动态权益
-        //@return              动态权益
-        double get_dynamic_equity() const;
-
-        //获取累计盈亏
-        //@return              累计盈亏
-        double get_accumulated_pnl() const;
-
-        //获取累计盈亏比例
-        //@return              累计盈亏比例
-        double get_accumulated_pnl_ratio() const;
-
-        //获取日内盈亏
-        //@return              日内盈亏
-        double get_intraday_pnl() const;
-
-        //获取日内盈亏比例
-        //@return              日内盈亏比例
-        double get_intraday_pnl_ratio() const;
-
-        //获取多头总持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_tot(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取多头可用持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_tot_avail(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取多头冻结持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_tot_frozen(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取多头昨仓持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_yd(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取多头昨仓可用持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_yd_avail(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取多头昨仓冻结持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_long_yd_frozen(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取合约多头已实现盈亏
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   盈亏
-        double get_long_realized_pnl(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取合约多头未实现盈亏
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   盈亏
-        double get_long_unrealized_pnl(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头总持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_tot(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头可用持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_tot_avail(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头冻结持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_tot_frozen(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头昨仓持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_yd(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头昨仓可用持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_yd_avail(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取空头昨仓冻结持仓量
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   持仓量
-        int64_t get_short_yd_frozen(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取合约空头已实现盈亏
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   盈亏
-        double get_short_realized_pnl(const std::string& instrument_id, const std::string& exchange_id) const;
-
-        //获取合约空头未实现盈亏
-        //@param instrument_id      合约ID
-        //@param exchange_id        交易所ID
-        //@return                   盈亏
-        double get_short_unrealized_pnl(const std::string& instrument_id, const std::string& exchange_id) const;
-
         //初始化接
         virtual void init() {};
 
@@ -352,8 +230,8 @@ namespace kungfu
         //算法订单状态更新回调
         //@param order_id          订单ID
         //@param algo_type         订单类型
-        //@param event_msg         订单更新时间
-        virtual void on_algo_order(uint64_t order_id, const std::string& algo_type, const std::string& event_msg) {};
+        //@param event_msg         订单更新事件
+        virtual void on_algo_order_status(uint64_t order_id, const std::string& algo_type, const std::string& event_msg) {};
 
     private:
         class impl;
