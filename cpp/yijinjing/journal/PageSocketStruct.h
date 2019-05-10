@@ -39,17 +39,10 @@ YJJ_NAMESPACE_START
 // test 0~9
 #define PAGED_SOCKET_CONNECTION_TEST    0  /**< test connection, return "hello world!" */
 // register / exit 10 ~ 19
-#define PAGED_SOCKET_STRATEGY_REGISTER  10 /**< register strategy (has to be writer) */
 #define PAGED_SOCKET_JOURNAL_REGISTER   11 /**< register journal */
 #define PAGED_SOCKET_READER_REGISTER    12 /**< register client (reader) */
 #define PAGED_SOCKET_WRITER_REGISTER    13 /**< register client (writer) */
 #define PAGED_SOCKET_CLIENT_EXIT        19 /**< exit a client */
-// subscribe 20 ~ 29
-#define PAGED_SOCKET_SUBSCRIBE          20 /**< subscribe market data */
-#define PAGED_SOCKET_SUBSCRIBE_TBC      21 /**< subscribe market data (to be continued)
-                                             * affected by SOCKET_MESSAGE_MAX_LENGTH */
-// trade engine req 30 ~ 39
-#define PAGED_SOCKET_TD_LOGIN           22 /**< login trade engine */
 // timer req
 #define TIMER_SEC_DIFF_REQUEST          99 /**< timer update request */
 
@@ -60,14 +53,14 @@ struct PagedSocketRequest
 {
     /** PagedSocketTypeConstants */
     int8_t    type;
-    /** name utilized for CLIENT / JOURNAL / STRATEGY */
-    char    name[JOURNAL_SHORT_NAME_MAX_LENGTH];
     /** process id (only utilized when registering client) */
     int32_t     pid;
     /** process id (only take effect when exiting client) */
     int32_t     hash_code;
     /** source id (only take effect when login trade engine) */
     int16_t   source;
+    /** name utilized for CLIENT / JOURNAL / STRATEGY */
+    string    name;
 };
 
 struct PagedSocketResponse

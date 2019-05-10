@@ -28,6 +28,7 @@
 #include "Page.h"
 
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <nanomsg/nn.h>
@@ -35,13 +36,21 @@
 
 USING_YJJ_NAMESPACE
 
+using json = nlohmann::json;
+
 /** get socket response via paged_socket */
 void getSocketRsp(int client_request_socket, PagedSocketRequest &req, PagedSocketResponseBuf &output)
 {
-    PagedSocketRequestBuf input;
-    memcpy(&input[0], &req, sizeof(req));
+    json input_json = json{
+        {"type", req.type},
+        {"name", req.name},
+        {"pid", req.pid},
+        {"hash_code", req.hash_code},
+        {"source", req.source}
+    };
+    string input = input_json.dump();
     int bytes;
-    bytes = nn_send(client_request_socket, input.data(), input.size(), 0);
+    bytes = nn_send(client_request_socket, input.c_str(), input.length() + 1, 0);
     if (bytes < 0)
     {
         SPDLOG_ERROR("nn_send");
@@ -56,7 +65,8 @@ void getSocketRsp(int client_request_socket, PagedSocketRequest &req, PagedSocke
 /** send req via socket and get response in data */
 void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, PagedSocketResponseBuf& data, const string& name)
 {
-    memcpy(req.name, name.c_str(), name.length() + 1);
+    // memcpy(req.name, name.c_str(), name.length() + 1);
+    req.name = name;
     getSocketRsp(client_request_socket, req, data);
 }
 

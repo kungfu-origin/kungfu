@@ -23,8 +23,6 @@
 #include "Timer.h"
 #include "Journal.h"
 
-#include <nlohmann/json.hpp>
-
 #include <spdlog/spdlog.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
@@ -101,10 +99,16 @@ void PageSocketHandler::stop()
 
 void PageSocketHandler::process_msg()
 {
-    PagedSocketRequest* req = (PagedSocketRequest*)&data_request_[0];
-    byte req_type = req->type;
+    string req_str = string(data_request_.data());
+    json req_json = json::parse(req_str);
+    PagedSocketRequest req;
+    req_json.at("type").get_to(req.type);
+    req_json.at("name").get_to(req.name);
+    req_json.at("pid").get_to(req.pid);
+    req_json.at("hash_code").get_to(req.hash_code);
+    req_json.at("source").get_to(req.source);
 
-    switch (req_type)
+    switch (req.type)
     {
         case TIMER_SEC_DIFF_REQUEST:
         {
@@ -114,17 +118,11 @@ void PageSocketHandler::process_msg()
             strcpy(&data_response_[0], timer.dump().c_str());
             break;
         }
-        case PAGED_SOCKET_CONNECTION_TEST:
-        {
-            string greetings = "Hello, world!";
-            strcpy(&data_response_[0], greetings.c_str());
-            break;
-        }
         case PAGED_SOCKET_JOURNAL_REGISTER:
         {
-            int idx = util->reg_journal(req->name);
+            int idx = util->reg_journal(req.name);
             PagedSocketRspJournal rsp = {};
-            rsp.type = req_type;
+            rsp.type = req.type;
             rsp.success = idx >= 0;
             rsp.comm_idx = idx;
             memcpy(&data_response_[0], &rsp, sizeof(rsp));
@@ -136,9 +134,9 @@ void PageSocketHandler::process_msg()
             string comm_file;
             int file_size;
             int has_code;
-            bool ret = util->reg_client(comm_file, file_size, has_code, req->name, req->pid, req_type==PAGED_SOCKET_WRITER_REGISTER);
+            bool ret = util->reg_client(comm_file, file_size, has_code, req.name, req.pid, req.type==PAGED_SOCKET_WRITER_REGISTER);
             PagedSocketRspClient rsp = {};
-            rsp.type = req_type;
+            rsp.type = req.type;
             rsp.success = ret;
             rsp.file_size = file_size;
             rsp.hash_code = has_code;
@@ -148,9 +146,9 @@ void PageSocketHandler::process_msg()
         }
         case PAGED_SOCKET_CLIENT_EXIT:
         {
-            util->exit_client(req->name, req->hash_code, true);
+            util->exit_client(req.name, req.hash_code, true);
             PagedSocketResponse rsp = {};
-            rsp.type = req_type;
+            rsp.type = req.type;
             rsp.success = true;
             memcpy(&data_response_[0], &rsp, sizeof(rsp));
             break;
@@ -160,6 +158,6 @@ void PageSocketHandler::process_msg()
     int bytes = nn_send(server_response_socket, data_response_.data(), data_response_.size(), 0);
     if (bytes < 0)
     {
-        SPDLOG_ERROR("nn_send");
+        SPDLOG_ERROR("nn_send failed {}", bytes);
     }
 }
