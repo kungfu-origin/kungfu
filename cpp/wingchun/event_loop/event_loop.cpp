@@ -363,4 +363,10 @@ namespace kungfu
             }
         }
     }
+
+    int64_t EventLoop::get_nano() const
+    {
+        int64_t nano = scheduler_->get_nano();
+        return nano > 0 ? nano : kungfu::yijinjing::getNanoTime();
+    }
 }

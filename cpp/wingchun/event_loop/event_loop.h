@@ -68,7 +68,7 @@ namespace kungfu
 
         void iteration();
 
-        int64_t get_nano() const { return scheduler_->get_nano(); };
+        int64_t get_nano() const;
 
     private:
         bool quit_;
