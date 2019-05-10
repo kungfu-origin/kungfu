@@ -47,7 +47,10 @@ class EventLoop:
             self._reader.seekJ(idx, offset_nano)
 
     def get_nano(self):
-        return self._scheduler.get_nano()
+        nano = self._scheduler.get_nano()
+        if nano == 0:
+            nano = pyyjj.nano()
+        return nano
 
     def register_nanotime_callback(self, nano, callback):
         self._scheduler.insert_callback_at(nano, callback)

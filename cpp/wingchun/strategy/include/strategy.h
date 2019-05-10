@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #include "md_struct.h"
 #include "oms_struct.h"

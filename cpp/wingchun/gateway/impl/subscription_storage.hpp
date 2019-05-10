@@ -68,31 +68,25 @@ namespace kungfu
 
         std::vector<Instrument> get_subscriptions()
         {
-            SPDLOG_TRACE("");
             std::vector<Instrument> result;
             try
             {
-                SPDLOG_TRACE("");
                 SQLite::Database db(file_name_.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
                 create_table_if_not_exist(db);
                 SQLite::Statement query(db, "SELECT * FROM subscription");
-                SPDLOG_TRACE("");            
                 Instrument inst = {};
                 while (query.executeStep())
                 {
-                    SPDLOG_TRACE("");
                     strcpy(inst.instrument_id, query.getColumn(0));
                     strcpy(inst.exchange_id, query.getColumn(1));
                     inst.instrument_type = (kungfu::InstrumentType)query.getColumn(2).getText()[0];
                     result.push_back(inst);
-                    SPDLOG_TRACE("");            
                 }
             }
             catch (std::exception &e)
             {
                 SPDLOG_ERROR("exception: {}", e.what());
             }
-            SPDLOG_TRACE(""); 
             return result;
         }
 
