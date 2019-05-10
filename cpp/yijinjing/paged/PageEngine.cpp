@@ -652,20 +652,8 @@ PYBIND11_MODULE(paged, m)
     .def("start", &PageEngine::start)
     .def("stop", &PageEngine::stop)
     .def("setFreq", &PageEngine::set_freq, py::arg("seconds")=0.1)
-    .def("addTask", &PageEngine::add_task)
-    .def("removeTask", &PageEngine::remove_task)
     .def("status", &PageEngine::getStatus)
-    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
-    .def("switch_trading_day", &PageEngine::switch_trading_day);
-
-    // TODO boost::noncopyable ??
-    py::class_<PstBase, boost::shared_ptr<PstBase>>(m, "PstBase");
-    py::class_<PstTimeTick, PstBase, boost::shared_ptr<PstTimeTick> >(m, "TimeTick").def(py::init<PageEngine* >());
-    py::class_<PstTempPage, PstBase, boost::shared_ptr<PstTempPage> >(m, "TempPage").def(py::init<PageEngine* >());
-    py::class_<PstKfController, PstBase, boost::shared_ptr<PstKfController> >(m, "Controller").def(py::init<PageEngine* >())
-    .def("set_switch_day_time", &PstKfController::setDaySwitch)
-    .def("add_engine_start_time", &PstKfController::addEngineStart)
-    .def("add_engine_end_time", &PstKfController::addEngineEnd);
+    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0);
 
     m.def("jfolder", &getJournalFolder);
     m.def("jname", &getJournalName);

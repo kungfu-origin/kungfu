@@ -81,27 +81,6 @@ private:
 };
 DECLARE_PTR(PstTempPage);
 
-#define CONTROLLER_SWITCH_DAY       1
-#define CONTROLLER_ENGINE_STARTS    2
-#define CONTROLLER_ENGINE_ENDS      3
-
-class PstKfController: public PstBase
-{
-public:
-    PstKfController(PageEngine* pe);
-    void go();
-    string getName() const { return "KfController"; }
-    pybind11::dict getInfo() const;
-    void setDaySwitch(std::string formatTime);
-    void addEngineStart(std::string formatTime);
-    void addEngineEnd(std::string formatTime);
-private:
-    PageEngine* engine;
-    vector<long> next_nanos;
-    vector<short> nano_types;
-};
-DECLARE_PTR(PstKfController);
-
 YJJ_NAMESPACE_END
 
 #endif //YIJINJING_PAGESERVICETASK_H
