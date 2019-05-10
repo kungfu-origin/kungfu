@@ -9,4 +9,4 @@ TARGET_LINK_LIBRARIES(strategy_util journal uid_generator nanomsg nn_publisher f
 TARGET_LINK_LIBRARIES(strategy strategy_util event_loop)
 
 ADD_SUBDIRECTORY(pybind)
-
+add_subdirectory(demo)

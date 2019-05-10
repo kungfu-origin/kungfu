@@ -45,6 +45,11 @@ namespace kungfu
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 
+        void register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback)
+        {
+            event_loop_->register_nanotime_callback(nano, callback);
+        }
+
         void run()
         {
             QuoteCallback quote_callback = std::bind(&Strategy::impl::process_quote, this, std::placeholders::_1);
@@ -233,6 +238,11 @@ namespace kungfu
     uint64_t Strategy::cancel_order(uint64_t order_id)
     {
         return impl_->get_util()->cancel_order(order_id);
+    }
+
+    void Strategy::register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback)
+    {
+        return impl_->register_nanotime_callback(nano, callback);
     }
 
     uint64_t Strategy::insert_algo_order(const std::string &algo_type, const std::string &algo_order_input)
