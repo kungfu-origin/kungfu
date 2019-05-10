@@ -119,11 +119,8 @@ public:
 public:
     // functions required by IPageSocketUtil
     int     reg_journal(const string& clientName);
-    IntPair register_strategy(const string& strategyName);
     bool    reg_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
     void    exit_client(const string& clientName, int hashCode, bool needHashCheck);
-    bool    sub_md(const vector<string>& tickers, short source, short msgType, bool isLast);
-    bool    login_td(const string& clientName, short source);
     void    acquire_mutex() const;
     void    release_mutex() const;
     void    set_last_switch_nano(int64_t nano) { last_switch_nano = nano; }

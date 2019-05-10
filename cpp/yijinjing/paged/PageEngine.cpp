@@ -386,35 +386,6 @@ byte PageEngine::initiate_page(const PageCommMsg& msg)
     return PAGED_COMM_ALLOCATED;
 }
 
-bool PageEngine::login_td(const string& clientName, short source)
-{
-    SPDLOG_INFO("[TELogin] (name) {} (source) {}", clientName, source);
-
-    map<string, PageClientInfo>::iterator it = clientJournals.find(clientName);
-    if (it == clientJournals.end())
-    {
-        SPDLOG_ERROR("[ERROR][TELogin] client {} does not exist!", clientName);
-        return false;
-    }
-    PageClientInfo& info = it->second;
-    if (info.user_index_vec.size() != 1)
-    {
-        SPDLOG_ERROR("[ERROR][TELogin] this client suppose to have only one journal! (name) {}", clientName);
-        return false;
-    }
-    PageCommMsg* msg = GET_COMM_MSG(commBuffer, info.user_index_vec[0]);
-    json j_request;
-    j_request["name"] = clientName;
-    j_request["folder"] = msg->folder;
-    j_request["rid_s"] = info.rid_start;
-    j_request["rid_e"] = info.rid_end;
-    j_request["pid"] = info.pid;
-    j_request["last_switch_nano"] = last_switch_nano;
-    write(j_request.dump(), MSG_TYPE_TRADE_ENGINE_LOGIN, true, source);
-    info.trade_engine_vec.push_back(source);
-    return true;
-}
-
 void  PageEngine::exit_client(const string& clientName, int hashCode, bool needHashCheck)
 {
     map<string, PageClientInfo>::iterator it = clientJournals.find(clientName);
@@ -453,44 +424,6 @@ void  PageEngine::exit_client(const string& clientName, int hashCode, bool needH
     if (clients.size() == 0)
         pidClient.erase(info.pid);
     clientJournals.erase(it);
-}
-
-IntPair PageEngine::register_strategy(const string& strategyName)
-{
-    map<string, PageClientInfo>::iterator it = clientJournals.find(strategyName);
-    if (it == clientJournals.end())
-    {
-        SPDLOG_ERROR("[ERROR] cannot find client {} ", strategyName);
-        return std::make_pair(-1, -1);
-    }
-
-    PageClientInfo& info = it->second;
-    int idx = info.user_index_vec[0]; // strategy must be a writer, therefore only one user
-    info.is_strategy = true;
-    // make sure this rid start from REQUEST_ID_RANGE,
-    // [0, REQUEST_ID_RANGE - 1] belongs to trade engine themselves.
-    info.rid_start = (idx + 1) * REQUEST_ID_RANGE;
-    info.rid_end = (idx + 2) * REQUEST_ID_RANGE - 1;
-    PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
-    json j_request;
-    j_request["name"] = strategyName;
-    j_request["folder"] = msg->folder;
-    j_request["rid_s"] = info.rid_start;
-    j_request["rid_e"] = info.rid_end;
-    j_request["pid"] = info.pid;
-    j_request["last_switch_nano"] = last_switch_nano;
-    write(j_request.dump(), MSG_TYPE_STRATEGY_START);
-    SPDLOG_INFO("[RegStrategy] (name) {} (rid) {} - {}", strategyName, info.rid_start, info.rid_end);
-    return std::make_pair(info.rid_start, info.rid_end);
-};
-
-bool PageEngine::sub_md(const vector<string>& tickers, short source, short msg_type, bool isLast)
-{
-    SPDLOG_INFO("(subscribe) (source) {} (msg) {} (num) {} (last) {}", source, msg_type, tickers.size(), isLast);
-    bool written = true;
-    for (size_t i = 0; i < tickers.size(); i++)
-        written &= write(tickers[i], msg_type, isLast && (i == tickers.size() - 1), source);
-    return written;
 }
 
 void PageEngine::start_comm()
