@@ -16,7 +16,6 @@ import TrSearchInput from './tr/TrSearchInput.vue';
 import MainContent from '@/components/Layout/MainContent';
 import PopFrame from '@/components/Layout/PopFrame';
 
-
 const components = [
     TrNoData,
     TableHeader,
@@ -58,42 +57,6 @@ const saveFile = ({
     })
 }
 
-//message 换
-const Message = {
-    error: function(message){
-        Vue.notify({
-            title: '错误',
-            message: message,
-            position: "bottom-right",
-            type: 'error'
-        })
-    },
-    warning: function(message){
-        Vue.notify({
-            title: '警告',
-            message: message,
-            position: "bottom-right",
-            type: 'warning'
-        })
-    },
-    success: function(message){
-        Vue.notify({
-            title: '成功',
-            message: message,
-            position: "bottom-right",
-            type: 'success'
-        })
-    },
-
-    start: function(message){
-        Vue.notify({
-            title: '启动中',
-            message: message,
-            position: "bottom-right",
-            type: 'info'
-        })
-    }
-}
 
 
 
@@ -104,6 +67,45 @@ export default function (Vue) {
     })
 
     Vue.saveFile = Vue.prototype.$saveFile = saveFile;
+
+
+
+    //message 换
+    const Message = {
+        error: function(message){
+            Vue.notify({
+                title: '错误',
+                message: message,
+                position: "bottom-right",
+                type: 'error'
+            })
+        },
+        warning: function(message){
+            Vue.notify({
+                title: '警告',
+                message: message,
+                position: "bottom-right",
+                type: 'warning'
+            })
+        },
+        success: function(message){
+            Vue.notify({
+                title: '成功',
+                message: message,
+                position: "bottom-right",
+                type: 'success'
+            })
+        },
+
+        start: function(message){
+            Vue.notify({
+                title: '启动中',
+                message: message,
+                position: "bottom-right",
+                type: 'info'
+            })
+        }
+    }
     Vue.message = Vue.prototype.$message = Message
 }
 

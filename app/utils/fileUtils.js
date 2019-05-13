@@ -228,14 +228,14 @@ export const writeFile = (filePath, data) => {
 
 export const writeCSV = (filePath, data) => {
     filePath = path.normalize(filePath)
-    const ws = fse.createWriteStream(filePath, {encoding: "gbk"});
-    fse.writeFileSync(filename, '\ufeff');
-    csv.write(data, {
-        headers: true,
-        transform: (row) => {
-            
-        }
-    }).pipe(ws);
+    return new Promise((resolve) => {
+        csv.writeToPath(filePath, data, {
+            headers: true,
+        }).on("finish", function(){
+            resolve(true)
+        })
+    })
+    
 }
 
 //清空文件内容
