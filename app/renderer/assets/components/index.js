@@ -57,6 +57,42 @@ const saveFile = ({
     })
 }
 
+//message 换
+const Message = {
+    error: function(message){
+        Vue.notify({
+            title: '错误',
+            message: message,
+            position: "bottom-right",
+            type: 'error'
+        })
+    },
+    warning: function(message){
+        Vue.notify({
+            title: '警告',
+            message: message,
+            position: "bottom-right",
+            type: 'warning'
+        })
+    },
+    success: function(message){
+        Vue.notify({
+            title: '成功',
+            message: message,
+            position: "bottom-right",
+            type: 'success'
+        })
+    },
+
+    start: function(message){
+        Vue.notify({
+            title: '启动中',
+            message: message,
+            position: "bottom-right",
+            type: 'info'
+        })
+    }
+}
 
 
 
@@ -67,6 +103,7 @@ export default function (Vue) {
     })
 
     Vue.saveFile = Vue.prototype.$saveFile = saveFile;
+<<<<<<< HEAD
 
 
 
@@ -106,6 +143,8 @@ export default function (Vue) {
             })
         }
     }
+=======
+>>>>>>> [add] export csv
     Vue.message = Vue.prototype.$message = Message
 }
 
