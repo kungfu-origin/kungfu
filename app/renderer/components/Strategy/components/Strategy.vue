@@ -243,6 +243,7 @@ export default {
                     t.$store.dispatch('setCurrentStrategy', currentStrategy)
                 }
             })
+            .then(() => deleteProcess(strategyId))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
