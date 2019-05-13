@@ -31,6 +31,7 @@
                 v-else-if="id === 'pending'"
                 ref="add-pending" 
                 :class="{'error': editError}" 
+                v-model.trim="fileName"
                 @click.stop="() => {}"
                 @focus.stop="() => {}"
                 @keyup.enter.native="e => handleAddFileBlur(e, 'enter')"
