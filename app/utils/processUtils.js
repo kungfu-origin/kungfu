@@ -203,21 +203,26 @@ export const listProcessStatus = () => {
 }
 
 //删除进程
-export const deleteProcess = async(processName) => {
-    let processes;
-    try{
-        processes = await describeProcess(processName)
-    }catch(err){
-        console.error(err)
-    }
-    const pids = processes.map(prc => prc.pid);
-    return new Promise((resolve, reject) => {
+export const deleteProcess = (processName) => {
+    return new Promise(async(resolve, reject) => {
+        let processes = [];
+        try{
+            processes = await describeProcess(processName)
+        }catch(err){
+            console.error(err)
+        }
+        //如果進程不存在，會跳過刪除步驟
+        if(!processes || !processes.length) {
+            resolve(true)
+            return;
+        }
+        const pids = processes.map(prc => prc.pid);
         pm2Delete(processName)
-        .then(() => resolve(true))
+        .then(() => {
+            resolve(true)})
         .catch(err => reject(err))
         .finally(() => fkill(pids).catch(err => console.error(err)))
-    }) 
-    
+    })
 }
 
 //干掉守护进程
