@@ -115,13 +115,13 @@ namespace kungfu
             strategy_->on_algo_order_status(order_id, algo_type, status_msg);
         }
 
-        void on_1min_timer(long nano)
+        void on_1min_timer(int64_t nano)
         {
             util_->on_push_by_min();
             event_loop_->register_nanotime_callback(nano + yijinjing::NANOSECONDS_PER_MINUTE, std::bind(&Strategy::impl::on_1min_timer, this, std::placeholders::_1));
         }
 
-        void on_daily_timer(long nano)
+        void on_daily_timer(int64_t nano)
         {
             util_->on_push_by_day();
             event_loop_->register_nanotime_callback(nano + yijinjing::NANOSECONDS_PER_DAY, std::bind(&Strategy::impl::on_daily_timer, this, std::placeholders::_1));

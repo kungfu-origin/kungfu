@@ -114,7 +114,9 @@ namespace kungfu
         if (portfolio_manager_->get_account(account_id.c_str()) == nullptr)
         {
             AccountInfo acc = {};
-            acc.update_time = yijinjing::getNanoTime();
+            int64_t nano = yijinjing::getNanoTime();
+            acc.rcv_time = nano;
+            acc.update_time = nano;
             strcpy(acc.account_id, account_id.c_str());
             strcpy(acc.source_id, source_id.c_str());
             acc.type = rsp.type;
@@ -553,6 +555,7 @@ namespace kungfu
 
     void StrategyUtil::loop_instrumnet()
     {
+		/*
         while (started_)
         {
             char* buf = nullptr;
@@ -582,5 +585,6 @@ namespace kungfu
             }
         }
         nn_shutdown(instrument_socket_, 0);
+		*/
     }
 }

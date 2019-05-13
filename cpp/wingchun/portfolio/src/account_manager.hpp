@@ -257,6 +257,7 @@ namespace kungfu
         {
             return;
         }
+        last_update_ = account.rcv_time;
         account_.rcv_time = account.rcv_time;
         account_.update_time = account.update_time;
         strcpy(account_.trading_day, account.trading_day);
