@@ -8,7 +8,7 @@
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
+            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
