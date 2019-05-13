@@ -228,18 +228,17 @@ export default {
             const t = this;
             const strategy_id = row.strategy_id + ''
             const strategyProcessStatus = t.$utils.ifProcessRunning(strategy_id, t.processStatus)
+            console.log(strategyProcessStatus, '====')
             if(strategyProcessStatus){
                 t.$message.warning("需先停止该策略运行！")
                 return;
             }
 
-            t.$confirm(`删除策略 ${strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {
-                confirmButtonText: '确 定',
-                cancelButtonText: '取 消'})
+            t.$confirm(`删除策略 ${strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'})
             .then(() => t.$store.dispatch('deleteStrategy', strategy_id))
             .then(() => {
                  //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
-                if(t.currentStrategy.strategy_id === strategy_id) {
+                if (t.currentStrategy.strategy_id === strategy_id) {
                     const currentStrategy = t.strategyList.length ? t.strategyList[0] : {}
                     t.$store.dispatch('setCurrentStrategy', currentStrategy)
                 }
