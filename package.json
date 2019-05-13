@@ -115,7 +115,6 @@
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
     "fs-extra": "^7.0.1",
-    "getprocesses": "^1.1.1",
     "log4js": "^4.0.2",
     "mime": "^2.4.0",
     "moment": "^2.24.0",
