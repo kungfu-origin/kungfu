@@ -8,7 +8,7 @@
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
          <tr-dashboard-header-item>
-            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
+            <i class="fa fa-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -21,11 +21,11 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from 'vuex'
-import {debounce, throttle} from '@/assets/js/utils'
+import { mapState, mapGetters } from 'vuex'
+import { debounce, throttle } from '@/assets/js/utils'
 import { posDirection } from "@/assets/config/tradingConfig"
 import { ipcRenderer } from 'electron'
-import { clearTimeout, setTimeout } from 'timers';
+import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     name: 'positions',
@@ -180,6 +180,20 @@ export default {
             const t = this;
             t.resetData();
             t.currentId && t.init();
+        },
+
+        handleExport(){
+            const t = this;
+            t.$saveFile({
+                title: '保存持仓信息',
+            }).then(filename => {
+                if(!filename) return;
+                // const data = t.tableData.length 
+                // ? [Object.keys(t.tableData[0]), ...t.tableData.map(row => Object.values(row))]
+                // : []
+                // console.log(data,'---')
+                writeCSV(filename, t.tableData)
+            })
         },
 
         init: debounce(function() {

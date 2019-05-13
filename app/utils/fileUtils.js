@@ -1,7 +1,8 @@
 import Vue from 'vue';
 const path = require("path");
-const fs = require('fs');
+// const fs = require('fs');
 const fse = require('fs-extra');
+const csv = require("fast-csv");
 
 export const getTreeByFilePath = ({strategy, fileTree}) => {
     let strategyPath = strategy.filePath;
@@ -16,7 +17,7 @@ export const getTreeByFilePath = ({strategy, fileTree}) => {
 
     const ignoreList = ['.git', '.DS_Store']
     return new Promise((resolve, reject) => {
-        fs.readdir(filePath, (err, files) => {
+        fse.readdir(filePath, (err, files) => {
             if(err) {
                 console.error(err)
                 reject(err)
@@ -24,7 +25,7 @@ export const getTreeByFilePath = ({strategy, fileTree}) => {
                 files.forEach(file => {
                     if(ignoreList.indexOf(file) !== -1) return;
                     const fileDir = path.join(filePath, file);
-                    const stats = fs.statSync(fileDir)
+                    const stats = fse.statSync(fileDir)
                     if(stats){
                         const isDir = stats.isDirectory();
                         const fileInfo = buildFileObj({
@@ -168,7 +169,7 @@ export const editFileFolderName = (oldPath, newPath) => {
     oldPath = path.normalize(oldPath)
     newPath = path.normalize(newPath)
     return new Promise((resolve, reject) => {
-        fs.rename(oldPath, newPath, err => {
+        fse.rename(oldPath, newPath, err => {
             if(err){
                 console.error(err)
                 reject(err)
@@ -184,7 +185,7 @@ export const editFileFolderName = (oldPath, newPath) => {
 export const removeFileFolder = (targetPath) => {
     targetPath = path.normalize(targetPath)
     return new Promise(resolve => {
-        if(!fs.existsSync(targetPath)) {
+        if(!fse.existsSync(targetPath)) {
             resolve()
             return
         } 
@@ -198,7 +199,7 @@ export const getCodeText = (targetPath) => {
     if(!targetPath) throw new Error('文件路径不存在！')
     targetPath = path.normalize(targetPath)
     return new Promise((resolve, reject) => {
-        fs.readFile(targetPath, (err, data) => {
+        fse.readFile(targetPath, (err, data) => {
             if(err){
                 console.error(err)
                 reject(err)
@@ -223,6 +224,18 @@ export const writeFile = (filePath, data) => {
             resolve({})
         })
     })
+}
+
+export const writeCSV = (filePath, data) => {
+    filePath = path.normalize(filePath)
+    const ws = fse.createWriteStream(filePath, {encoding: "gbk"});
+    fse.writeFileSync(filename, '\ufeff');
+    csv.write(data, {
+        headers: true,
+        transform: (row) => {
+            
+        }
+    }).pipe(ws);
 }
 
 //清空文件内容

@@ -112,6 +112,7 @@
     "@babel/polyfill": "^7.2.5",
     "codemirror": "^5.44.0",
     "element-ui": "^2.8.2",
+    "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
     "fs-extra": "^7.0.1",
     "getprocesses": "^1.1.1",

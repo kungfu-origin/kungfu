@@ -45,7 +45,6 @@ Vue.use(RadioGroup)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Loading)
-Vue.use(Components)
 Vue.use(Tooltip)
 Vue.use(Checkbox)
 Vue.config.productionTip = false
@@ -55,44 +54,9 @@ Vue.loading =  Vue.prototype.$loading = Loading.service;
 Vue.confirm = Vue.prototype.$confirm = MessageBox.confirm;
 Vue.notify =  Vue.prototype.$notify = Notification;
 
-//message 换
-const Message = {
-    error: function(message){
-        Vue.notify({
-            title: '错误',
-            message: message,
-            position: "bottom-right",
-            type: 'error'
-        })
-    },
-    warning: function(message){
-        Vue.notify({
-            title: '警告',
-            message: message,
-            position: "bottom-right",
-            type: 'warning'
-        })
-    },
-    success: function(message){
-        Vue.notify({
-            title: '成功',
-            message: message,
-            position: "bottom-right",
-            type: 'success'
-        })
-    },
+//tr的
+Vue.use(Components)
 
-    start: function(message){
-        Vue.notify({
-            title: '启动中',
-            message: message,
-            position: "bottom-right",
-            type: 'info'
-        })
-    }
-}
-
-Vue.message = Vue.prototype.$message = Message
 
 //moment 格式
 Vue.filter('moment', function (value, formatString) {
