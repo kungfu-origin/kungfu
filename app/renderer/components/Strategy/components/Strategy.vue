@@ -228,7 +228,6 @@ export default {
             const t = this;
             const strategy_id = row.strategy_id + ''
             const strategyProcessStatus = t.$utils.ifProcessRunning(strategy_id, t.processStatus)
-            console.log(strategyProcessStatus, '====')
             if(strategyProcessStatus){
                 t.$message.warning("需先停止该策略运行！")
                 return;
@@ -243,7 +242,7 @@ export default {
                     t.$store.dispatch('setCurrentStrategy', currentStrategy)
                 }
             })
-            .then(() => deleteProcess(strategyId))
+            .then(() => deleteProcess(strategy_id))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
