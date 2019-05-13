@@ -57,7 +57,7 @@ export const accountSource = {
         },
         {
             key: 'password',
-            name: 'Password',
+            name: 'password',
             type: 'password',
             rule: '请填写password！',
             required: true,

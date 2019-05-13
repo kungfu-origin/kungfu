@@ -89,8 +89,9 @@ export default {
         padding-left: 8px;
         
         .el-button{
-            background: $bg_light;
-            color: $font_1;
+            // background: $bg_light;
+            // color: $font_1;
+            border: none;
             i{
                 color: $font_1;
             }

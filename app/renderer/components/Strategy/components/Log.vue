@@ -5,23 +5,16 @@
             <el-checkbox v-model="ifScrollToBottom">跟踪至底部</el-checkbox>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
+            <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <i class="fa fa-file-text-o mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath)"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item width="101px">
-            <el-input 
-                size="mini"
-                placeholder="关键字"
-                prefix-icon="el-icon-search"
-                v-model.trim="searchKeyword"
-                type="search"
-                >
-                </el-input>
-        </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <el-button size="mini" @click="handleClearLog">清空</el-button>
+            <el-button size="mini" @click="handleClearLog" icon="el-icon-delete" title="清空"></el-button>
         </tr-dashboard-header-item>
     </div>
         <tr-table

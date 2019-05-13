@@ -2,32 +2,14 @@
 <tr-dashboard title="持仓">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
+            <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+        </tr-dashboard-header-item>
+         <tr-dashboard-header-item>
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item width="101px" v-if="pageType == 'strategy'">
-            <el-select v-model.trim="filter.type" size="mini" clearable placeholder="类型">
-                <el-option
-                v-for="item in accountTypeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-                </el-option>
-            </el-select>
+         <tr-dashboard-header-item>
+            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
-        
-        <tr-dashboard-header-item width="101px">
-            <!-- <i class="mouse-over fa fa-search" style="font-size: 14px; top: -2px"></i>             -->
-            <el-input 
-                size="mini"
-                placeholder="代码"
-                prefix-icon="el-icon-search"
-                v-model.trim="searchKeyword"
-                >
-                </el-input>
-        </tr-dashboard-header-item>
-         <!-- <tr-dashboard-header-item >
-            <el-button size="mini" @click="handleDownload">导出</el-button>
-        </tr-dashboard-header-item> -->
     </div>
     <tr-table
         v-if="rendererTable"

@@ -1,21 +1,11 @@
 <template>
 <tr-dashboard title="策略">
     <div slot="dashboard-header">
-      
-        <tr-dashboard-header-item width="101px">
-            <el-input 
-                size="mini"
-                placeholder="策略"
-                prefix-icon="el-icon-search"
-                v-model.trim="searchKeyword"
-                >
-              </el-input>
-        </tr-dashboard-header-item>
-        <!-- <tr-dashboard-header-item>
-            <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
-        </tr-dashboard-header-item> -->
         <tr-dashboard-header-item>
-            <el-button size="mini" @click="handleAddStrategy">添加</el-button>
+            <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-button size="mini" @click="handleAddStrategy" icon="el-icon-plus" title="添加"></el-button>
         </tr-dashboard-header-item>
     </div>
     <div class="table-body">
@@ -102,7 +92,7 @@
                 {validator: noZeroAtFirstValidator, trigger: 'blur'}
                 ]"
             >
-                <el-input v-model.trim="setStrategyForm.strategyId" :disabled="setStrategyDialogType == 'set'"></el-input>
+                <el-input v-model.trim="setStrategyForm.strategyId" :disabled="setStrategyDialogType == 'set'" placeholder="请输入策略名称"></el-input>
             </el-form-item>
             <el-form-item
             label="入口文件"

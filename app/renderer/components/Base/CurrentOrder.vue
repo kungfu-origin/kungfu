@@ -1,26 +1,28 @@
 <template>
   <tr-dashboard :title="filter.dateRange ? '委托记录':'未完成委托'">
     <div slot="dashboard-header">
-         <tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item width="101px">
-            <el-input 
-            size="mini" 
-            placeholder="关键字" 
-            prefix-icon="el-icon-search" 
-            v-model.trim="searchKeyword"></el-input>
+        <tr-dashboard-header-item>
+            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item width="199px">
-            <el-date-picker
+         <tr-dashboard-header-item>
+            <el-button size="mini" type="danger" style="color: #fff" title="全部撤单">CANCEL</el-button>
+        </tr-dashboard-header-item>
+        <!-- <tr-dashboard-header-item width="199px"> -->
+            <!-- <el-date-picker
                 v-model.trim="filter.dateRange"
                 size="mini"
                 type="daterange"
                 range-separator="～"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
-            </el-date-picker>
-        </tr-dashboard-header-item>
+            </el-date-picker> -->            
+        <!-- </tr-dashboard-header-item> -->
     </div>
     <tr-table
     v-if="rendererTable"

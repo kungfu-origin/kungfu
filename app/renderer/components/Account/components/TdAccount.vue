@@ -1,18 +1,11 @@
 <template>
     <tr-dashboard title="交易账户">
         <div slot="dashboard-header">
-            <tr-dashboard-header-item width="101px">
-                <el-input 
-                    size="mini"
-                    placeholder="关键字"
-                    prefix-icon="el-icon-search"
-                    v-model.trim="accountIdKey"
-                    >
-                </el-input>
-            </tr-dashboard-header-item>
-
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleAddAccount">添加</el-button>
+                <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
+            </tr-dashboard-header-item>
+            <tr-dashboard-header-item>
+                <el-button size="mini" @click="handleAddAccount" icon="el-icon-plus" title="添加"></el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="table-body">

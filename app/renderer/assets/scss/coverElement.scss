@@ -59,6 +59,11 @@
     border-color: $tab_header;
     color: $icon;
 }
+
+.el-input .el-input__inner{
+    background-color: $bg_card;
+}
+
 .el-select .el-input.is-disabled .el-input__inner:hover{
     border-color: $input_bg
 }
@@ -371,29 +376,54 @@ p.el-select-dropdown__empty{
 
 /* Button 
 -------------------------- */
-.el-button--default{
+.el-button{
+    border: none;
+}
+
+.el-button:hover, .el-button:focus{
+    color: #fff;
+}
+
+.el-button.el-button--default{
+    background-color: $bg_light;
+}
+
+.el-button.el-button--primary{
+    background-color: $vi;
+}
+
+.el-button.el-button--default{
     box-sizing: border-box;
     &:hover{
-        border: 1px solid $vi;
-        background: $bg_card;
+        border: none;
+        background: $input_bg;
     }
     &:focus{
-        border: 1px solid $bg_card;
-    }
+        border: none;
+        background: $input_bg;
 
+    }
     .el-icon-loading {
         color: #fff;
     }
 }
-.el-button--default.is-loading{
+
+.el-button.el-button--default.el-button--primary:focus{
+    background: $vi;
+}
+
+.el-button.el-button--default.is-loading{
     background: $vi
 }
 
 .el-button.el-button--mini{
-    padding: 7px 10px
-;}
-.el-button:focus{
-    // background: $bg_card !important;
+    padding: 7px 10px;
+}
+
+.el-message-box__btns{
+    .el-button--primary:hover{
+        background: lighten($vi, 20%); //颜色变浅
+    }
 }
 
 /* Tabs 
@@ -466,11 +496,6 @@ p.el-select-dropdown__empty{
 .el-message-box{
     background: $bg_card;
     border-color: $bg_card;
-    .el-message-box__btns{
-        .el-button--primary:hover{
-            background: lighten($vi, 20%); //颜色变浅
-        }
-    }
 }
 
 /* Notification
