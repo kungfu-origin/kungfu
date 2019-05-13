@@ -89,7 +89,6 @@ export default function (Vue) {
                 type: 'success'
             })
         },
-
         start: function(message){
             Vue.notify({
                 title: '启动中',
@@ -98,7 +97,6 @@ export default function (Vue) {
                 type: 'info'
             })
         },
-
         info: function(message){
             Vue.notify({
                 title: '消息',
