@@ -1,7 +1,8 @@
 <template>
     <el-dialog 
     width="360px" 
-     :title="`切换${currentMdSourceAccount.source_name}行情源`"  
+    v-if="visible"
+    :title="`切换${currentMdSourceAccount.source_name}行情源`"  
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
@@ -18,7 +19,7 @@
         </el-radio-group>
         <div slot="footer" class="dialog-footer">
             <el-button @click="handleClose" size="small">取 消</el-button>
-            <el-button type="primary" size="small" :loading="loading" @click="handleSubmitSetting">确 定</el-button>
+            <el-button type="primary" size="small" @click="handleSubmitSetting">确 定</el-button>
         </div>
     </el-dialog>    
 </template>
@@ -46,8 +47,7 @@ export default {
     data(){
         const t = this;
         return{
-            loading: false,
-            selectedMdAccountId: t.currentMdSourceAccount.account_id
+            selectedMdAccountId: (t.currentMdSourceAccount || {}).account_id
         }
     },
 
@@ -65,7 +65,7 @@ export default {
             //check if the md source change
             const ifMdSourceChange = !t.accountsFromSameSource.filter(a => (a.account_id === t.selectedMdAccountId))[0].receive_md
             if(ifMdSourceChange){
-                const oldId = t.currentMdSourceAccount.account_id;
+                const oldId = (t.currentMdSourceAccount || {}).account_id;
                 const newId = t.selectedMdAccountId;
                 try{
                     await changeAccountMd(oldId, false)

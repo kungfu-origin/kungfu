@@ -113,11 +113,13 @@
                 <el-table-column
                     label=""
                     align="right"
+                    min-width="100"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="fa fa-file-text-o mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleUpdateAccount(props.row)"><i class="mouse-over fa fa-cog" title="更新账户设置"></i></span>
-                        <span class="tr-oper-delete" @click.stop="handleDeleteAccount(props.row)"><i class="mouse-over fa fa-trash-o" title="删除账户"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="fa fa-money mouse-over" title="费率设置"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="mouse-over fa fa-cog mouse-over" title="账户设置"></i></span>
+                        <span class="tr-oper-delete" @click.stop="handleDeleteAccount(props.row)"><i class="mouse-over fa fa-trash-o mouse-over" title="删除账户"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -150,7 +152,6 @@
 
             <!-- 设置账户 -->
             <SetAccountDialog
-            v-if="visiblity.setAccount"
             v-model.trim="accountForm"
             :visible.sync="visiblity.setAccount"
             :method="method" 
@@ -160,6 +161,10 @@
             :firstAccount="sourceFirstAccount"
             :sourceAccounts="accountList.filter(a => (a.source_name === selectedSource))"
             />
+
+            <SetFeeDialog
+            :visible.sync="visiblity.setFee"
+            ></SetFeeDialog>
     </tr-dashboard>
 </template>
 
@@ -170,6 +175,7 @@ import * as ACCOUNT_API from '@/io/account'
 import * as BASE_API from '@/io/base'
 import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accountConfig'
 import SetAccountDialog from './SetAccountDialog'
+import SetFeeDialog from './SetFeeDialog'
 import {deleteProcess} from '__gUtils/processUtils'
 import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 import {ACCOUNTS_DIR, LOG_DIR, buildGatewayPath} from '__gConfig/pathConfig'
@@ -191,7 +197,8 @@ export default {
             selectedSource: '',
             visiblity: {
                 selectSource: false,
-                setAccount: false
+                setAccount: false,
+                setFee: false,
             },
             sourceFirstAccount: false, //来标记是否是某柜台下添加的第一个账户
             taskList: [], //存放kungfu_task数据表内容
@@ -202,7 +209,8 @@ export default {
     },
 
     components: {
-        SetAccountDialog
+        SetAccountDialog,
+        SetFeeDialog
     },
 
     computed:{
@@ -253,7 +261,7 @@ export default {
         },
 
         //编辑账户
-        handleUpdateAccount(row) {
+        handleOpenUpdateAccountDialog(row) {
             const t = this
             t.method = 'update'
             t.accountForm = JSON.parse(row.config) 
@@ -288,6 +296,12 @@ export default {
                 if(err == 'cancel') return
                 t.$message.error(err.message || '操作失败！')
             })
+        },
+
+        //费率设置
+        handleOpenFeeSettingDialog(){
+            const t = this;
+            t.visiblity.setFee = true;
         },
 
         //选择柜台
@@ -360,8 +374,7 @@ export default {
                         t.$store.dispatch('setCurrentAccount', accountList[0] || {})
                     }
                 })
-            })
-            
+            })   
         },
 
         //删除账户需要将所关联的数据库以及进程都关掉

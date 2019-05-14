@@ -2,6 +2,7 @@
      <el-dialog 
     width="360px" 
     title="日期范围"  
+    v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"

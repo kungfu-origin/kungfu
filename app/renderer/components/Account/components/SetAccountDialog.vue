@@ -2,6 +2,7 @@
     <el-dialog 
     width="540px" 
     :title=" (method == 'add' ? '添加' : '设置') + source + '柜台账户'"  
+    v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleCancel"

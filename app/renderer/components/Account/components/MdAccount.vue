@@ -64,10 +64,9 @@
             </el-table>
         </div>
         <SetMdSourceDialog 
-        v-if="setMdSourceDialogVisiblity"
         :visible.sync="setMdSourceDialogVisiblity"
         :currentMdSourceAccount="currentMdSourceAccount"
-        :accountsFromSameSource="accountList.filter(a => (a.source_name === currentMdSourceAccount.source_name))"
+        :accountsFromSameSource="accountList.filter(a => (a.source_name === (currentMdSourceAccount || {}).source_name))"
         @afterSetting="getAccountList"
         ></SetMdSourceDialog>
     </tr-dashboard>
