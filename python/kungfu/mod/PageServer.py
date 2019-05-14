@@ -39,11 +39,8 @@ class PageServer:
         return self.page_service.register_journal(request['name'])
 
     def register_client(self, request):
-        comm_file = ''
-        file_size = 0
-        hash_code = 0
         is_writer = request['type'] == 13
-        return self.page_service.register_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
+        return self.page_service.register_client(request['name'], request['pid'], is_writer)
 
     def exit_client(self, request):
         return self.page_service.exit_client(request['name'], request['hash_code'], True)
@@ -63,7 +60,7 @@ class PageServer:
     def run(self):
         self.page_service.start()
         while self.running:
-            self.page_service.process_one_message()
+            self.page_service.process_memory_message()
             self.process_socket_message()
         self.page_service.stop()
 

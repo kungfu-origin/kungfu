@@ -59,7 +59,7 @@ YJJ_NAMESPACE_START
 #define PAGED_COMM_MORE_THAN_ONE_WRITE      13  /**< default position */
 #define PAGED_COMM_CANNOT_RENAME_FROM_TEMP  14  /**< default position */
 
-struct PageCommMsg
+struct PageServiceMsg
 {
     /** PagedCommTypeConstants (by both server and client) */
     volatile byte    status;
@@ -75,12 +75,12 @@ struct PageCommMsg
     int16_t   last_page_num;
 
     // operators for map key
-    bool const operator == (const PageCommMsg &p) const
+    bool const operator == (const PageServiceMsg &p) const
     {
         return page_num == p.page_num && strcmp(folder, p.folder) == 0 && strcmp(name, p.name) == 0;
     }
 
-    bool const operator < (const PageCommMsg &p) const
+    bool const operator < (const PageServiceMsg &p) const
     {
         return (strcmp(folder, p.folder) != 0) ? strcmp(folder, p.folder) < 0
                                                : (strcmp(name, p.name) != 0) ? strcmp(name, p.name) < 0
@@ -97,10 +97,10 @@ struct PageCommMsg
 #define MAX_COMM_USER_NUMBER 1000
 /** REQUEST_ID_RANGE * MAX_COMM_USER_NUMBER < 2147483647(max num of int) */
 #define REQUEST_ID_RANGE 1000000
-/** based on the max number, the comm file size is determined */
-const int COMM_SIZE = MAX_COMM_USER_NUMBER * sizeof(PageCommMsg) + 1024;
+/** based on the max number, the memory message file size is determined */
+const int MEMORY_MSG_FILE_SIZE = MAX_COMM_USER_NUMBER * sizeof(PageServiceMsg) + 1024;
 /** fast type convert */
-#define GET_COMM_MSG(buffer, idx) ((PageCommMsg*)(ADDRESS_ADD(buffer, idx * sizeof(PageCommMsg))))
+#define GET_MEMORY_MSG(buffer, idx) ((PageServiceMsg*)(ADDRESS_ADD(buffer, idx * sizeof(PageServiceMsg))))
 
 YJJ_NAMESPACE_END
 

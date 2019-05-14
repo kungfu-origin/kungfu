@@ -29,8 +29,6 @@ USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
 
-#define COMM_FILE KUNGFU_JOURNAL_FOLDER + "PAGE_ENGINE_COMM"
-
 void signal_callback(int signum)
 {
     SPDLOG_INFO("PageService Caught signal {}", signum);
@@ -45,7 +43,7 @@ bool PageService::write(string content, byte msg_type, bool is_last, short sourc
     return true;
 }
 
-PageService::PageService(const string& _base_dir) : base_dir(_base_dir), msg_buffer(nullptr), msg_buffer_idx(0), msg_buffer_idx_limit(0), commFile(COMM_FILE) {
+PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_message_buffer(nullptr), memory_message_limit(0), memory_msg_file(MEMORY_MSG_FILE) {
     KungfuLog::setup_log("paged");
     KungfuLog::set_log_level(spdlog::level::info);
 
@@ -59,9 +57,9 @@ void PageService::start()
 {
     getNanoTime(); // init NanoTimer before ReqClient, avoid deadlock
 
-    SPDLOG_INFO("Loading page buffer {}", commFile);
-    msg_buffer = PageUtil::LoadPageBuffer(commFile, COMM_SIZE, true, true);
-    memset(msg_buffer, 0, COMM_SIZE);
+    SPDLOG_INFO("Loading page buffer {}", memory_msg_file);
+    memory_message_buffer = PageUtil::LoadPageBuffer(memory_msg_file, MEMORY_MSG_FILE_SIZE, true, true);
+    memset(memory_message_buffer, 0, MEMORY_MSG_FILE_SIZE);
 
     SPDLOG_INFO("Creating writer for {}/{}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
     writer = JournalWriter::create(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME, "paged", false);
@@ -78,30 +76,32 @@ void PageService::stop()
     SPDLOG_INFO("PageService stopped");
 }
 
-void PageService::process_one_message()
+void PageService::process_memory_message()
 {
-    PageCommMsg* msg = GET_COMM_MSG(msg_buffer, msg_buffer_idx);
-    if (msg->status == PAGED_COMM_REQUESTING)
+    for (int idx = 0; idx < memory_message_limit; idx++)
     {
-        SPDLOG_INFO("Request page for id {}", msg_buffer_idx);
-        if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
+        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+        if (msg->status == PAGED_COMM_REQUESTING)
         {
-            short curPage = msg->page_num;
-            msg->page_num = msg->last_page_num;
-            release_page(*msg);
-            msg->page_num = curPage;
+            SPDLOG_INFO("Request page for id {}/{}", idx, memory_message_limit);
+            if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
+            {
+                short curPage = msg->page_num;
+                msg->page_num = msg->last_page_num;
+                release_page(*msg);
+                msg->page_num = curPage;
+            }
+            msg->status = initiate_page(*msg);
+            msg->last_page_num = msg->page_num;
         }
-        msg->status = initiate_page(*msg);
-        msg->last_page_num = msg->page_num;
     }
-    msg_buffer_idx = (msg_buffer_idx + 1) % (msg_buffer_idx_limit + 1);
 }
 
 std::string PageService::register_journal(const string& clientName)
 {
-    size_t idx = 0;
+    int idx = 0;
     for (; idx < MAX_COMM_USER_NUMBER; idx++)
-        if (GET_COMM_MSG(msg_buffer, idx)->status == PAGED_COMM_RAW)
+        if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGED_COMM_RAW)
             break;
 
     if (idx >= MAX_COMM_USER_NUMBER)
@@ -111,13 +111,15 @@ std::string PageService::register_journal(const string& clientName)
             {"type", PAGED_SOCKET_JOURNAL_REGISTER},
             {"success", false},
             {"error_msg", "idx exceeds limit"},
-            {"comm_idx", idx}
+            {"memory_msg_idx", idx}
         }.dump();
     }
-    if (idx > msg_buffer_idx_limit)
-        msg_buffer_idx_limit = idx;
+    if (idx >= memory_message_limit)
+    {
+        memory_message_limit = idx + 1;
+    }
 
-    PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
+    PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
     msg->status = PAGED_COMM_OCCUPIED;
     msg->last_page_num = 0;
     auto it = clientJournals.find(clientName);
@@ -128,7 +130,7 @@ std::string PageService::register_journal(const string& clientName)
             {"type", PAGED_SOCKET_JOURNAL_REGISTER},
             {"success", false},
             {"error_msg", "cannot find the client"},
-            {"comm_idx", idx}
+            {"memory_msg_idx", idx}
         }.dump();
     }
     it->second.user_index_vec.push_back(idx);
@@ -137,19 +139,19 @@ std::string PageService::register_journal(const string& clientName)
         {"type", PAGED_SOCKET_JOURNAL_REGISTER},
         {"success", true},
         {"error_msg", ""},
-        {"comm_idx", idx}
+        {"memory_msg_idx", idx}
     }.dump();
 }
 
-std::string PageService::register_client(string& _commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter)
+std::string PageService::register_client(const string& clientName, int pid, bool isWriter)
 {
     SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
     if (clientJournals.find(clientName) != clientJournals.end())
         return json{
             {"success", false},
             {"error_msg", "client already exists"},
-            {"comm_file", this->commFile},
-            {"file_size", COMM_SIZE},
+            {"memory_msg_file", this->memory_msg_file},
+            {"file_size", MEMORY_MSG_FILE_SIZE},
             {"hash_code", -1}
         }.dump();
 
@@ -161,7 +163,7 @@ std::string PageService::register_client(string& _commFile, int& fileSize, int& 
 
     std::stringstream ss;
     ss << clientName << getNanoTime() << pid;
-    hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
+    int hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
     PageClientInfo& clientInfo = clientJournals[clientName];
     clientInfo.user_index_vec.clear();
     clientInfo.reg_nano = getNanoTime();
@@ -171,14 +173,12 @@ std::string PageService::register_client(string& _commFile, int& fileSize, int& 
     clientInfo.rid_end = -1;
     clientInfo.pid = pid;
     clientInfo.hash_code = hashCode;
-    _commFile = this->commFile;
-    fileSize = COMM_SIZE;
     return json{
         {"type", isWriter ? PAGED_SOCKET_WRITER_REGISTER : PAGED_SOCKET_READER_REGISTER},
         {"success", true},
         {"error_msg", ""},
-        {"comm_file", this->commFile},
-        {"file_size", COMM_SIZE},
+        {"memory_msg_file", this->memory_msg_file},
+        {"file_size", MEMORY_MSG_FILE_SIZE},
         {"hash_code", hashCode}
     }.dump();
 }
@@ -205,7 +205,7 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
     if (info.is_strategy)
     {
         int idx = info.user_index_vec[0]; // strategy must be a writer, therefore only one user
-        PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
+        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
         json j_request;
         j_request["name"] = clientName;
         j_request["folder"] = msg->folder;
@@ -217,7 +217,7 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
 
     for (auto idx: info.user_index_vec)
     {
-        PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
+        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
         if (msg->status == PAGED_COMM_ALLOCATED)
             release_page(*msg);
         msg->status = PAGED_COMM_RAW;
@@ -236,7 +236,7 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
     }.dump();
 }
 
-byte PageService::initiate_page(const PageCommMsg& msg)
+byte PageService::initiate_page(const PageServiceMsg& msg)
 {
     SPDLOG_INFO("Initiate page at {} for {}", msg.folder, msg.name);
 
@@ -298,11 +298,11 @@ byte PageService::initiate_page(const PageCommMsg& msg)
     return PAGED_COMM_ALLOCATED;
 }
 
-void PageService::release_page(const PageCommMsg& msg)
+void PageService::release_page(const PageServiceMsg& msg)
 {
-    SPDLOG_INFO("Release page at {}/{}.{}", msg.folder, msg.name, msg.page_num);
+    SPDLOG_INFO("Release page in {} for {}", msg.folder, msg.name);
 
-    map<PageCommMsg, int>::iterator count_it;
+    map<PageServiceMsg, int>::iterator count_it;
     if (msg.is_writer)
     {
         count_it = fileWriterCounts.find(msg);

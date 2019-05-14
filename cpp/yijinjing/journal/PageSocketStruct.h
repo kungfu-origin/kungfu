@@ -73,8 +73,8 @@ struct PagedSocketResponse
 
 struct PagedSocketRspClient: public PagedSocketResponse
 {
-    /** comm_file is provided for further page usage */
-    string    comm_file;
+    /** memory_msg_file is provided for further page usage */
+    string    memory_msg_file;
     /** size of comm_file */
     int32_t     file_size;
     /** hash code of this client */
@@ -83,8 +83,8 @@ struct PagedSocketRspClient: public PagedSocketResponse
 
 struct PagedSocketRspJournal: public PagedSocketResponse
 {
-    /** the index in the comm_file */
-    int32_t     comm_idx;
+    /** the index in the memory message buffer */
+    int32_t     memory_msg_idx;
 };
 
 struct PagedSocketRspStrategy: public PagedSocketResponse

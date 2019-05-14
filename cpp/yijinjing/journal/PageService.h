@@ -31,6 +31,7 @@
 YJJ_NAMESPACE_START
 
 #define TEMP_PAGE KUNGFU_JOURNAL_FOLDER + "TEMP_PAGE"
+#define MEMORY_MSG_FILE KUNGFU_JOURNAL_FOLDER + "PAGE_SERVICE_MSG"
 
 /** we call each journal handler (writer or reader)
  *      -- a client for page engine.
@@ -62,10 +63,6 @@ struct PageClientInfo
 
 class PageService
 {
-    friend class PstPidCheck;
-    friend class PstTimeTick;
-    friend class PstTempPage;
-    friend class PstKfController;
 private:
     // internal data structures. be careful on its thread-safety
     /** map: client -> all info (all journal usage) */
@@ -73,19 +70,17 @@ private:
     /** map: pid -> client */
     map<int, vector<string> > pidClient;
     /** map: file attached with number of writers */
-    map<PageCommMsg, int> fileWriterCounts;
+    map<PageServiceMsg, int> fileWriterCounts;
     /** map: file attached with number of readers */
-    map<PageCommMsg, int> fileReaderCounts;
+    map<PageServiceMsg, int> fileReaderCounts;
     /** map: file to its page buffer */
     map<string, void*> fileAddrs;
 
     const string base_dir;
     JournalWriterPtr writer; /**< writer for system journal */
-    void*   msg_buffer; /**< message buffer */
-    int     msg_buffer_idx;
-    size_t  msg_buffer_idx_limit;     /**< max index of current assigned comm block */
-    string  commFile;   /**< comm file linked to memory */
-    volatile bool    comm_running;  /**< comm buffer checking thread is running */
+    void*   memory_message_buffer; /**< message buffer */
+    size_t  memory_message_limit;     /**< max index of current assigned comm block */
+    string  memory_msg_file;   /**< comm file linked to memory */
 
 public:
     /** default constructor */
@@ -99,16 +94,16 @@ public:
     /** write string content to system journal */
     bool write(string content, byte msg_type, bool is_last=true, short source=0);
 
-    void process_one_message();
+    void process_memory_message();
     std::string    register_journal(const string& clientName);
-    std::string    register_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
+    std::string    register_client(const string& clientName, int pid, bool isWriter);
     std::string    exit_client(const string& clientName, int hashCode, bool needHashCheck);
 
 private:
     /** release the page assigned in comm msg */
-    void release_page(const PageCommMsg& msg);
+    void release_page(const PageServiceMsg& msg);
     /** initialize the page assigned in comm msg */
-    byte initiate_page(const PageCommMsg& msg);
+    byte initiate_page(const PageServiceMsg& msg);
 };
 
 YJJ_NAMESPACE_END

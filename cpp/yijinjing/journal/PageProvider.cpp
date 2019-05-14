@@ -63,7 +63,7 @@ void ClientPageProvider::getSocketRspOnReq(int client_request_socket, PagedSocke
 }
 
 ClientPageProvider::ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed):
-        client_name(clientName), comm_buffer(nullptr)
+        client_name(clientName), memory_msg_buffer(nullptr)
 {
     is_writer = isWriting;
     revise_allowed = is_writer || reviseAllowed;
@@ -97,13 +97,13 @@ void ClientPageProvider::register_client()
     rsp_json.at("type").get_to(rsp.type);
     rsp_json.at("success").get_to(rsp.success);
     rsp_json.at("error_msg").get_to(rsp.error_msg);
-    rsp_json.at("comm_file").get_to(rsp.comm_file);
+    rsp_json.at("memory_msg_file").get_to(rsp.memory_msg_file);
     rsp_json.at("file_size").get_to(rsp.file_size);
     rsp_json.at("hash_code").get_to(rsp.hash_code);
     hash_code = rsp.hash_code;
     if (rsp.type == req.type && rsp.success)
     {
-        comm_buffer = PageUtil::LoadPageBuffer(string(rsp.comm_file), rsp.file_size, true, false /*server lock this already*/);
+        memory_msg_buffer = PageUtil::LoadPageBuffer(string(rsp.memory_msg_file), rsp.file_size, true, false /*server lock this already*/);
     }
     else
     {
@@ -130,37 +130,37 @@ int ClientPageProvider::register_journal(const string& dir, const string& jname)
     rsp_json.at("type").get_to(rsp.type);
     rsp_json.at("success").get_to(rsp.success);
     rsp_json.at("error_msg").get_to(rsp.error_msg);
-    rsp_json.at("comm_idx").get_to(rsp.comm_idx);
-    int comm_idx = -1;
+    rsp_json.at("memory_msg_idx").get_to(rsp.memory_msg_idx);
+    int memory_msg_idx = -1;
     if (rsp.type == req.type && rsp.success)
-        comm_idx = rsp.comm_idx;
+        memory_msg_idx = rsp.memory_msg_idx;
     else
         throw std::runtime_error("cannot register journal: " + client_name);
 
-    PageCommMsg* serverMsg = GET_COMM_MSG(comm_buffer, comm_idx);
-    if (serverMsg->status == PAGED_COMM_OCCUPIED)
+    PageServiceMsg* server_msg = GET_MEMORY_MSG(memory_msg_buffer, memory_msg_idx);
+    if (server_msg->status == PAGED_COMM_OCCUPIED)
     {
-        memcpy(serverMsg->folder, dir.c_str(), dir.length() + 1);
-        memcpy(serverMsg->name, jname.c_str(), jname.length() + 1);
-        serverMsg->is_writer = is_writer;
-        serverMsg->status = PAGED_COMM_HOLDING;
+        memcpy(server_msg->folder, dir.c_str(), dir.length() + 1);
+        memcpy(server_msg->name, jname.c_str(), jname.length() + 1);
+        server_msg->is_writer = is_writer;
+        server_msg->status = PAGED_COMM_HOLDING;
     }
     else
         throw std::runtime_error("server buffer is not allocated: " + client_name);
 
-    return comm_idx;
+    return memory_msg_idx;
 }
 
-PagePtr ClientPageProvider::getPage(const string &dir, const string &jname, int serviceIdx, short pageNum)
+PagePtr ClientPageProvider::getPage(const string &dir, const string &jname, int service_id, short pageNum)
 {
-    PageCommMsg* serverMsg = GET_COMM_MSG(comm_buffer, serviceIdx);
-    serverMsg->page_num = pageNum;
-    serverMsg->status = PAGED_COMM_REQUESTING;
-    while (serverMsg->status == PAGED_COMM_REQUESTING) {}
+    PageServiceMsg* server_msg = GET_MEMORY_MSG(memory_msg_buffer, service_id);
+    server_msg->page_num = pageNum;
+    server_msg->status = PAGED_COMM_REQUESTING;
+    while (server_msg->status == PAGED_COMM_REQUESTING) {}
 
-    if (serverMsg->status != PAGED_COMM_ALLOCATED)
+    if (server_msg->status != PAGED_COMM_ALLOCATED)
     {
-        if (serverMsg->status == PAGED_COMM_MORE_THAN_ONE_WRITE)
+        if (server_msg->status == PAGED_COMM_MORE_THAN_ONE_WRITE)
             throw std::runtime_error("more than one writer is writing " + dir + " " + jname);
         else
             return PagePtr();
@@ -168,7 +168,7 @@ PagePtr ClientPageProvider::getPage(const string &dir, const string &jname, int 
     return Page::load(dir, jname, pageNum, revise_allowed, true);
 }
 
-void ClientPageProvider::releasePage(void* buffer, int size, int serviceIdx)
+void ClientPageProvider::releasePage(void* buffer, int size, int service_id)
 {
     PageUtil::ReleasePageBuffer(buffer, size, true);
 }
@@ -179,12 +179,12 @@ LocalPageProvider::LocalPageProvider(bool isWriting, bool reviseAllowed)
     revise_allowed = is_writer || reviseAllowed;
 }
 
-PagePtr LocalPageProvider::getPage(const string &dir, const string &jname, int serviceIdx, short pageNum)
+PagePtr LocalPageProvider::getPage(const string &dir, const string &jname, int service_id, short pageNum)
 {
     return Page::load(dir, jname, pageNum, is_writer, false);
 }
 
-void LocalPageProvider::releasePage(void* buffer, int size, int serviceIdx)
+void LocalPageProvider::releasePage(void* buffer, int size, int service_id)
 {
     PageUtil::ReleasePageBuffer(buffer, size, false);
 }

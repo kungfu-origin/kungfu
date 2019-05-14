@@ -81,9 +81,9 @@ PYBIND11_MODULE(pyyjj, m)
     .def("start", &PageService::start)
     .def("stop", &PageService::stop)
     .def("write", &PageService::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
-    .def("process_one_message", &PageService::process_one_message)
+    .def("process_memory_message", &PageService::process_memory_message)
     .def("register_journal", &PageService::register_journal, py::arg("clientName"))
-    .def("register_client", &PageService::register_client, py::arg("commFile"), py::arg("fileSize"), py::arg("hashCode"), py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
+    .def("register_client", &PageService::register_client, py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
     .def("exit_client", &PageService::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
     ;
 
@@ -95,15 +95,15 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("parse_nano", pyParseNano);
 
     // create reader / writer / strategy-writer
-    m.def("createReader", &createReader);
-    m.def("createWriter", &createWriter);
+    m.def("create_reader", &createReader);
+    m.def("create_writer", &createWriter);
 
     // JournalReader
     py::class_<JournalReader, boost::shared_ptr<JournalReader> >(m, "Reader")
-    .def("addJ", &JournalReader::addJournal, py::arg("folder"), py::arg("jname"))
-    .def("expireJ", &JournalReader::expireJournalByName, py::arg("jname"))
-    .def("restartJ", &JournalReader::seekTimeJournalByName, py::arg("jname"), py::arg("nano"))
-    .def("seekJ", &JournalReader::seekTimeJournal, py::arg("idx"), py::arg("nano"))
+    .def("add_journal", &JournalReader::addJournal, py::arg("folder"), py::arg("jname"))
+    .def("expire_journal", &JournalReader::expireJournalByName, py::arg("jname"))
+    .def("seek_time_by_name", &JournalReader::seekTimeJournalByName, py::arg("jname"), py::arg("nano"))
+    .def("seek_time", &JournalReader::seekTimeJournal, py::arg("idx"), py::arg("nano"))
     .def("next", &JournalReader::getNextFrame)
     .def("name", &JournalReader::getFrameName);
 

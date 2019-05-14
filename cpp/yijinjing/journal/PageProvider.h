@@ -61,9 +61,9 @@ public:
     /** constructor */
     LocalPageProvider(bool isWriting, bool reviseAllowed=false);
     /** override IPageProvider */
-    virtual PagePtr getPage(const string &dir, const string &jname, int serviceIdx, short pageNum);
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short pageNum);
     /** override IPageProvider */
-    virtual void releasePage(void* buffer, int size, int serviceIdx);
+    virtual void releasePage(void* buffer, int size, int service_id);
 };
 
 /**
@@ -76,7 +76,7 @@ protected:
     string  client_name;
     char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
     string  response;
-    void*   comm_buffer;
+    void*   memory_msg_buffer;
     int     hash_code;
     int     client_request_socket;
 protected:
@@ -90,9 +90,9 @@ public:
     /** override PageProvider */
     virtual void exit_client();
     /** override IPageProvider */
-    virtual PagePtr getPage(const string &dir, const string &jname, int serviceIdx, short pageNum);
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short pageNum);
     /** override IPageProvider */
-    virtual void releasePage(void* buffer, int size, int serviceIdx);
+    virtual void releasePage(void* buffer, int size, int service_id);
 private:
     void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, const string& name);
 };
