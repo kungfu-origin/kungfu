@@ -125,7 +125,7 @@ private:
     void print_range_(const fmt::memory_buffer &formatted, size_t start, size_t end)
     {
         auto size = static_cast<DWORD>(end - start);
-        ::WriteConsoleA(out_handle_, formatted.data() + start, size, nullptr, nullptr);
+        ::WriteFile(out_handle_, formatted.data() + start, size, nullptr, nullptr);
     }
 
     HANDLE out_handle_;

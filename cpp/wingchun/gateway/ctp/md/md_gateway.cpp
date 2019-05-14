@@ -186,6 +186,7 @@ namespace kungfu
                 Quote quote = {};
                 from_ctp(*pDepthMarketData, quote);
                 quote.rcv_time = kungfu::yijinjing::getNanoTime();
+                strcpy(quote.exchange_id, get_exchange_id_from_future_instrument_id(quote.instrument_id).c_str()); 
                 on_quote(quote);
             }
         }

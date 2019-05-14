@@ -283,6 +283,43 @@ namespace kungfu
             return false;
         }
     }
+
+    inline std::string get_exchange_id_from_future_instrument_id(const char* instrument_id)
+    {
+        std::string product = std::string(instrument_id).substr(0, strlen(instrument_id) - 4);
+        std::transform(product.begin(), product.end(), product.begin(), ::tolower);
+        if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
+            product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
+            product == "pp" || product == "j" || product == "jm" || product == "i")
+        {
+            return EXCHANGE_DCE;
+        }
+        else if (product == "wh" || product == "pm" || product == "cf" || product == "sr" || product == "ta" || product == "oi" ||
+                product == "ri" || product == "ma" || product == "fg" || product == "rs" || product == "rm" || product == "zc" ||
+                product == "jr" || product == "lr" || product == "sm" || product == "sf" || product == "cy" || product == "ap")
+        {
+            return EXCHANGE_CZCE;
+        }
+        else if (product == "cu" || product == "al" || product == "zn" || product == "pb" || product == "ni" || product == "sn" ||
+                product == "au" || product == "ag" || product == "rb" || product == "wr" || product == "hc" || product == "fu" ||
+                product == "bu" || product == "ru")
+        {
+            return EXCHANGE_SHFE;
+        }
+        else if (product == "if" || product == "ic" || product == "ih" || product == "tf" || product == "t")
+        {
+            return EXCHANGE_CFFEX;
+        }
+        else if (product == "sc")
+        {
+            return EXCHANGE_INE;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
 }
 
 #endif //KUNGFU_BUSINESS_HELPER_H
