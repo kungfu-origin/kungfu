@@ -94,6 +94,8 @@ class MsgType:
     SwitchDay = 601
     RspTradingDay = 602
 
+    ReloadFutureInstrument = 701
+
 
 class InstrumentType:
     Unknown = '0'

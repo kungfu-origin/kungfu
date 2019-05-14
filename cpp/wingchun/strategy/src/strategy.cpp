@@ -42,6 +42,9 @@ namespace kungfu
         bool add_account(const std::string& source_id, const std::string& account_id, const double cash_limit)
         {
             event_loop_->subscribe_yjj_journal(TD_JOURNAL_FOLDER(source_id, account_id), TD_JOURNAL_NAME(source_id, account_id), yijinjing::getNanoTime());
+            event_loop_->register_reload_instruments_callback(std::bind(&StrategyUtil::reload_instruments, util_));
+            auto gateway_name = "td_" + source_id + "_" + account_id;
+            event_loop_->subscribe_nanomsg(GATEWAY_PUB_URL(gateway_name));
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 

@@ -28,7 +28,8 @@ namespace kungfu
     typedef std::function<void (uint64_t order_id, const std::string& client_id, const std::string& algo_type, const std::string& algo_order_input)> AlgoOrderInputCallback;
     typedef std::function<void (uint64_t order_id, const std::string& algo_type, const std::string& status)> AlgoOrderStatusCallback;
     typedef std::function<void (uint64_t order_id, uint64_t order_action_id, const std::string& cmd)> AlgoOrderActionCallback;
-    typedef std::function<void(int sig)> SignalCallback;
+    typedef std::function<void ()> ReloadInstrumentsCallback;
+    typedef std::function<void (int sig)> SignalCallback;
 
     class EventLoop
     {
@@ -60,6 +61,8 @@ namespace kungfu
         void register_algo_order_input_callback(AlgoOrderInputCallback callback);
         void register_algo_order_status_callback(AlgoOrderStatusCallback callback);
         void register_algo_order_action_callback(AlgoOrderActionCallback callback);
+
+        void register_reload_instruments_callback(ReloadInstrumentsCallback callback);
 
         void register_signal_callback(SignalCallback handler);
 
@@ -96,6 +99,8 @@ namespace kungfu
         AlgoOrderInputCallback algo_order_input_callback_;
         AlgoOrderStatusCallback algo_order_status_callback_;
         AlgoOrderActionCallback algo_order_action_callback_;
+
+        ReloadInstrumentsCallback reload_instruments_callback_;
 
         static void signal_handler(int signal);
     };

@@ -33,7 +33,7 @@ namespace kungfu
 #define DUMP_1M_SNAPSHOT(name, portfolio_manager) storage::SnapshotStorage(\
     STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_MIN_SNAPSHOT_TABLE_NAME, false, false).insert(pnl)
 
-    StrategyUtil::StrategyUtil(const std::string& name): name_(name), calendar_(new Calendar()), instrument_socket_(0), has_stock_account_(false), has_future_account_(false)
+    StrategyUtil::StrategyUtil(const std::string& name): name_(name), calendar_(new Calendar()), has_stock_account_(false), has_future_account_(false)
     {
         kungfu::yijinjing::KungfuLog::setup_log(name);
         kungfu::yijinjing::KungfuLog::set_log_level(spdlog::level::info);
@@ -48,13 +48,6 @@ namespace kungfu
 
         calendar_->register_switch_day_callback(std::bind(&StrategyUtil::on_switch_day, this, std::placeholders::_1));
 
-        instrument_socket_ = nn_socket(AF_SP, NN_SUB);
-        nn_setsockopt(instrument_socket_, NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
-        int timeout = 1000;
-        nn_setsockopt(instrument_socket_, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
-        started_ = true;
-        thread_ = std::make_shared<std::thread>(&StrategyUtil::loop_instrumnet, this);
-
         int worker_id = UidWorkerStorage::get_instance(fmt::format(UID_WORKER_DB_FILE_FORMAT, get_base_dir()))->get_uid_worker_id(name);
         if (worker_id <= 0)
         {
@@ -68,17 +61,10 @@ namespace kungfu
         init_portfolio_manager();
 
         order_manager_ = oms::create_order_manager();
-
     }
 
     StrategyUtil::~StrategyUtil()
     {
-        if (started_)
-        {
-            started_ = false;
-            nn_shutdown(instrument_socket_, 0);
-            thread_ ->join();
-        }
     }
 
     bool StrategyUtil::add_md(const std::string &source_id)
@@ -138,8 +124,6 @@ namespace kungfu
         }
         else
         {
-            auto gateway_name = "td_" + source_id + "_" + account_id;
-            nn_connect(instrument_socket_, GATEWAY_PUB_URL(gateway_name).c_str());
             return true;
         }
     }
@@ -409,7 +393,6 @@ namespace kungfu
         if (direction == DirectionLong)
         {
             auto pos = portfolio_manager_->get_long_pos(account_id.c_str(), instrument_id.c_str(), exchange_id.c_str());
-            SPDLOG_INFO("fuck pos {}", to_string(pos));
             return pos;
         }
         else
@@ -455,6 +438,11 @@ namespace kungfu
         auto pnl = portfolio_manager_->get_portfolio();
         pnl.update_time = (int64_t)std::round((double)yijinjing::getNanoTime() / 1000000000) * 1000000000;
         DUMP_1D_SNAPSHOT(name_, pnl);
+    }
+
+    void StrategyUtil::reload_instruments()
+    {
+        InstrumentManager::get_instrument_manager()->reload_from_db();
     }
 
     uint64_t StrategyUtil::next_id()
@@ -555,40 +543,5 @@ namespace kungfu
         }
         portfolio_manager_->set_current_trading_day(calendar_->get_current_trading_day());
         SPDLOG_INFO("portfolio_manager inited and set trading_day to {}", portfolio_manager_->get_current_trading_day());
-    }
-
-    void StrategyUtil::loop_instrumnet()
-    {
-		/*
-        while (started_)
-        {
-            char* buf = nullptr;
-            int rc = nn_recv(instrument_socket_, buf, NN_MSG, 0);
-            if (rc > 0)
-            {
-                try
-                {
-                    nlohmann::json content = nlohmann::json::parse(std::string(buf));
-                    NNMsg msg = content;
-                    switch (msg.msg_type)
-                    {
-                        case MsgType::ReloadFutureInstrument:
-                            InstrumentManager::get_instrument_manager()->reload_from_db();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                catch(std::exception &e)
-                {
-                    SPDLOG_ERROR("failed to parse data[{}], exception: {}", (char*)buf, e.what());
-                    continue;
-                }
-
-                nn_freemsg(buf);
-            }
-        }
-        nn_shutdown(instrument_socket_, 0);
-		*/
     }
 }

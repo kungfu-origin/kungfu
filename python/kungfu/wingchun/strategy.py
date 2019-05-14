@@ -102,6 +102,9 @@ class Strategy:
 
     def add_account(self, source_id, account_id, cash_limit):
         self._event_loop.subscribe_yjj_journal(self.__get_td_journal_folder(source_id, account_id), self.__get_td_journal_name(source_id, account_id), pyyjj.nano())
+        self._event_loop.register_reload_instruments_callback(self._util.reload_instruments)
+        url = 'ipc://' + self._base_dir + '/gateway/td_' + source_id + '_' + account_id + '/pub.ipc'
+        self._event_loop.subscribe_nanomsg(url)
         return self._util.add_account(source_id, account_id, cash_limit)
 
     def register_algo_service(self):

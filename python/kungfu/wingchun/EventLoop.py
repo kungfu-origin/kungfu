@@ -22,6 +22,7 @@ class EventLoop:
         self._order_cb = None
         self._trade_cb = None
         self._algo_input_cb = None
+        self._reload_instruments_cb = None
         self._signal_received = -1
         self._signal_callbacks = []
 
@@ -88,6 +89,9 @@ class EventLoop:
     def register_algo_order_input_callback(self, callback):
         self._algo_input_cb = callback
 
+    def register_reload_instruments_callback(self, callback):
+        self._reload_instruments_cb = callback
+
     def register_signal_callback(self, callback):
         self._signal_callbacks.append(callback)
 
@@ -128,7 +132,8 @@ class EventLoop:
                 data = j_reply["data"]
                 self.__handle_nanomsg(msg_type, recipient, sender, data)
             except nnpy.NNError as nnpy_e:
-                print(nnpy_e)
+                # if nothing received, nnpy will throw exception, wtf!!!!!
+                pass
             except Exception as e:
                 print(e)
 
@@ -172,6 +177,9 @@ class EventLoop:
         elif msg_type == MsgType.Subscribe:
             if self._sub_cb is not None:
                 self._sub_cb(recipient, data)
+        elif msg_type == MsgType.ReloadFutureInstrument:
+            if self._reload_instruments_cb is not None:
+                self._reload_instruments_cb()
         else:
             pass
 

@@ -115,6 +115,11 @@ namespace kungfu
         algo_order_action_callback_ = callback;
     }
 
+    void EventLoop::register_reload_instruments_callback(kungfu::ReloadInstrumentsCallback callback)
+    {
+        reload_instruments_callback_ = callback;
+    }
+
     void EventLoop::register_signal_callback(SignalCallback signal_callback)
     {
         signal_callbacks_.push_back(signal_callback);
@@ -345,6 +350,14 @@ namespace kungfu
                             }
                             break;
                         }
+                        case MsgType::ReloadFutureInstrument:
+                        {
+                            if (reload_instruments_callback_)
+                            {
+                                reload_instruments_callback_();
+                            }
+                        }
+                        break;
                         default:
                         {
                             break;
