@@ -106,6 +106,10 @@ namespace kungfu
         publisher_->publish_sub_portfolio_info(info);
 
         auto rsp = gateway::register_trade_account(source_id, account_id, this->name_);
+		if (rsp.error_msg != "")
+		{
+			return false;
+		}
         info.type = rsp.type;
 
         has_stock_account_ = has_stock_account_ || (info.type == AccountTypeStock || info.type == AccountTypeCredit);

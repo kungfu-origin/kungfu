@@ -27,6 +27,7 @@ namespace kungfu
         {
             AccountType type; // TdGateway 需要返回账号类型
             GatewayState state;
+            std::string error_msg;
         };
 
         inline void to_json(nlohmann::json& j, const GatewayLoginRsp& login_rsp)
@@ -54,6 +55,10 @@ namespace kungfu
             else
             {
                 login_rsp.state = GatewayState::Unknown;
+            }
+            if(j.find("error_msg") != j.end())
+            {
+                login_rsp.error_msg = j["error_msg"].get<std::string>();
             }
         }
 

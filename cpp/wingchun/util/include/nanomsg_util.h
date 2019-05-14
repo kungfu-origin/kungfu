@@ -54,7 +54,7 @@ namespace kungfu
 
         char* buffer = nullptr;
         NNMsg rsp = {};
-        rsp.data["error"] = "no response";
+        rsp.data["error_msg"] = "no response";
         int rc = nn_recv(socket, &buffer, NN_MSG, 0);
         if (rc > 0)
         {
