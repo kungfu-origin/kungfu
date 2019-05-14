@@ -63,20 +63,17 @@ void PageEngine::release_mutex() const
     paged_mtx.unlock();
 }
 
-PageEngine::PageEngine(const string& _base_dir) : base_dir(_base_dir), commBuffer(nullptr), commFile(COMM_FILE), maxIdx(0),
-                                          microsecFreq(INTERVAL_IN_MILLISEC),
-                                          task_running(false), last_switch_nano(0), comm_running(false) {
-    for (int s = 1; s < 32; s++)
-        signal(s, signal_callback);
-
+PageEngine::PageEngine(const string& _base_dir) : base_dir(_base_dir),
+                                                msg_buffer(nullptr), msg_buffer_idx(0), msg_buffer_idx_limit(0), commFile(COMM_FILE),
+                                                microsecFreq(INTERVAL_IN_MILLISEC),
+                                                task_running(false), last_switch_nano(0), comm_running(false) {
     KungfuLog::setup_log("paged");
     KungfuLog::set_log_level(spdlog::level::info);
 
-    // setup basic tasks
-    tasks.clear();
-    add_task(PstBasePtr(new PstPidCheck(this))); // pid check is a necessary task.
-
     SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
+
+    for (int s = 1; s < 32; s++)
+        signal(s, signal_callback);
 }
 
 PageEngine::~PageEngine()
@@ -86,22 +83,26 @@ PageEngine::~PageEngine()
 
 void PageEngine::start()
 {
+    // setup basic tasks
+    tasks.clear();
+    add_task(PstBasePtr(new PstPidCheck(this))); // pid check is a necessary task.
+
     getNanoTime(); // init NanoTimer before ReqClient, avoid deadlock
 
     SPDLOG_INFO("Loading page buffer {}", commFile);
-    commBuffer = PageUtil::LoadPageBuffer(commFile, COMM_SIZE, true, true);
-    memset(commBuffer, 0, COMM_SIZE);
-
-    commThread = ThreadPtr(new std::thread(boost::bind(&PageEngine::start_comm, this)));
+    msg_buffer = PageUtil::LoadPageBuffer(commFile, COMM_SIZE, true, true);
+    memset(msg_buffer, 0, COMM_SIZE);
 
     SPDLOG_INFO("Creating writer at {} for {}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
     writer = JournalWriter::create(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME, "paged", false);
+    write("", MSG_TYPE_PAGED_START);
+
+    SPDLOG_INFO("PageEngine started");
 
     if (microsecFreq <= 0)
         throw std::runtime_error("unaccepted task time interval");
     task_running = true;
     taskThread = ThreadPtr(new std::thread(boost::bind(&PageEngine::start_task, this)));
-    write("", MSG_TYPE_PAGED_START);
 }
 
 void PageEngine::set_freq(double secondFreq)
@@ -123,18 +124,7 @@ void PageEngine::stop()
         taskThread->join();
         taskThread.reset();
     }
-    SPDLOG_INFO("PageEngine taskThread stopped");
 
-    /* stop comm thread */
-    comm_running = false;
-    if (commThread.get() != nullptr)
-    {
-        commThread->join();
-        commThread.reset();
-    }
-    SPDLOG_INFO("PageEngine commThread stopped");
-
-    /* finish up */
     SPDLOG_INFO("PageEngine stopped");
 }
 
@@ -193,7 +183,7 @@ std::string PageEngine::reg_journal(const string& clientName)
 {
     size_t idx = 0;
     for (; idx < MAX_COMM_USER_NUMBER; idx++)
-        if (GET_COMM_MSG(commBuffer, idx)->status == PAGED_COMM_RAW)
+        if (GET_COMM_MSG(msg_buffer, idx)->status == PAGED_COMM_RAW)
             break;
 
     if (idx >= MAX_COMM_USER_NUMBER)
@@ -206,10 +196,10 @@ std::string PageEngine::reg_journal(const string& clientName)
             {"comm_idx", idx}
         }.dump();
     }
-    if (idx > maxIdx)
-        maxIdx = idx;
+    if (idx > msg_buffer_idx_limit)
+        msg_buffer_idx_limit = idx;
 
-    PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
+    PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
     msg->status = PAGED_COMM_OCCUPIED;
     msg->last_page_num = 0;
     auto it = clientJournals.find(clientName);
@@ -411,7 +401,7 @@ std::string  PageEngine::exit_client(const string& clientName, int hashCode, boo
     if (info.is_strategy)
     {
         int idx = info.user_index_vec[0]; // strategy must be a writer, therefore only one user
-        PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
+        PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
         json j_request;
         j_request["name"] = clientName;
         j_request["folder"] = msg->folder;
@@ -424,7 +414,7 @@ std::string  PageEngine::exit_client(const string& clientName, int hashCode, boo
 
     for (auto idx: info.user_index_vec)
     {
-        PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
+        PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
         if (msg->status == PAGED_COMM_ALLOCATED)
             release_page(*msg);
         msg->status = PAGED_COMM_RAW;
@@ -443,28 +433,25 @@ std::string  PageEngine::exit_client(const string& clientName, int hashCode, boo
     }.dump();
 }
 
-void PageEngine::start_comm()
+void PageEngine::process_one_message()
 {
-    comm_running = true;
-    for (size_t idx = 0; comm_running; idx = (idx + 1) % (maxIdx + 1))
+    PageCommMsg* msg = GET_COMM_MSG(msg_buffer, msg_buffer_idx);
+    if (msg->status == PAGED_COMM_REQUESTING)
     {
-        PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
-        if (msg->status == PAGED_COMM_REQUESTING)
+        acquire_mutex();
+        SPDLOG_INFO("Request page for id {}", msg_buffer_idx);
+        if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
         {
-            acquire_mutex();
-            SPDLOG_INFO("Request page for id {}", idx);
-            if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
-            {
-                short curPage = msg->page_num;
-                msg->page_num = msg->last_page_num;
-                release_page(*msg);
-                msg->page_num = curPage;
-            }
-            msg->status = initiate_page(*msg);
-            msg->last_page_num = msg->page_num;
-            release_mutex();
+            short curPage = msg->page_num;
+            msg->page_num = msg->last_page_num;
+            release_page(*msg);
+            msg->page_num = curPage;
         }
+        msg->status = initiate_page(*msg);
+        msg->last_page_num = msg->page_num;
+        release_mutex();
     }
+    msg_buffer_idx = (msg_buffer_idx + 1) % (msg_buffer_idx_limit + 1);
 }
 
 py::dict PageEngine::getStatus() const
@@ -513,9 +500,9 @@ py::dict PageEngine::getClientInfo() const
 py::dict PageEngine::getUserInfo() const
 {
     py::dict info;
-    for (size_t idx = 0; idx < maxIdx; idx++)
+    for (size_t idx = 0; idx < msg_buffer_idx_limit; idx++)
     {
-        PageCommMsg* msg = GET_COMM_MSG(commBuffer, idx);
+        PageCommMsg* msg = GET_COMM_MSG(msg_buffer, idx);
         if (msg->status == PAGED_COMM_ALLOCATED)
         {
             info[py::cast(idx)] = py::make_tuple(msg->folder, msg->name, py::cast(msg->page_num));
@@ -593,6 +580,7 @@ PYBIND11_MODULE(paged, m)
 {
     py::class_<PageEngine, boost::shared_ptr<PageEngine> >(m, "PageEngine")
     .def(py::init<const std::string&>())
+    .def("process_one_message", &PageEngine::process_one_message)
     .def("start", &PageEngine::start)
     .def("stop", &PageEngine::stop)
     .def("setFreq", &PageEngine::set_freq, py::arg("seconds")=0.1)

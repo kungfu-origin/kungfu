@@ -114,6 +114,8 @@ public:
     /** get status in python dictionary */
     pybind11::dict  getStatus() const;
 
+    void process_one_message();
+
 public:
     // functions required by IPageSocketUtil
     std::string    reg_journal(const string& clientName);
@@ -126,9 +128,10 @@ public:
 private:
     const string base_dir;
     JournalWriterPtr writer; /**< writer for system journal */
-    void*   commBuffer; /**< comm memory */
+    void*   msg_buffer; /**< message buffer */
+    int     msg_buffer_idx;
+    size_t  msg_buffer_idx_limit;     /**< max index of current assigned comm block */
     string  commFile;   /**< comm file linked to memory */
-    size_t  maxIdx;     /**< max index of current assigned comm block */
     int     microsecFreq;  /**< task frequency in microseconds */
     bool    task_running;  /**< task thread is running */
     int64_t    last_switch_nano; /**< last switch day nano time */
@@ -136,14 +139,8 @@ private:
 
     /** thread for task running */
     ThreadPtr taskThread;
-    /** thread for comm buffer checking */
-    ThreadPtr commThread;
 
 private:
-    // several threading to run:
-    // 1. check communicate memory (main, need efficiency)
-    void start_comm();
-    // 3. run all tasks
     void start_task();
 
 private:

@@ -16,6 +16,13 @@ class PageManager:
         self.name = name
         self.timeout = timeout
 
+        self.request_handlers = {
+            11: self.register_journal,
+            12: self.register_client,
+            13: self.register_client,
+            19: self.exit_client
+        }
+
         base_dir = os.environ["KF_HOME"]
         socket_folder = os.path.join(base_dir, 'socket')
         if not os.path.exists(socket_folder):
@@ -29,13 +36,6 @@ class PageManager:
 
         self.page_engine = paged.PageEngine(base_dir)
 
-        self.request_handlers = {
-            11: self.register_journal,
-            12: self.register_client,
-            13: self.register_client,
-            19: self.exit_client
-        }
-
     def register_journal(self, request):
         return self.page_engine.reg_journal(request['name'])
 
@@ -48,6 +48,14 @@ class PageManager:
 
     def exit_client(self, request):
         return self.page_engine.exit_client(request['name'], request['hash_code'], True)
+    
+    def process_socket_message(self):
+        readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
+        if readable:
+            request_data = self.paged_socket.recv()
+            request_json = json.loads(request_data.decode('utf-8'))
+            response_json = self.request_handlers[request_json['type']](request_json)
+            send_bytes = self.paged_socket.send(response_json)
 
     def start(self):
         self.running = True
@@ -56,12 +64,8 @@ class PageManager:
     def run(self):
         self.page_engine.start()
         while self.running:
-            readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
-            if readable:
-                request_data = self.paged_socket.recv()
-                request_json = json.loads(request_data.decode('utf-8'))
-                response_json = self.request_handlers[request_json['type']](request_json)
-                send_bytes = self.paged_socket.send(response_json)
+            self.page_engine.process_one_message()
+            self.process_socket_message()
         self.page_engine.stop()
 
     def stop(self):
