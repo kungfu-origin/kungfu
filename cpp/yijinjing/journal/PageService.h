@@ -22,7 +22,7 @@
 #ifndef YIJINJING_PAGEENGINE_H
 #define YIJINJING_PAGEENGINE_H
 
-#include "PageCommStruct.h"
+#include "PageServiceMessage.h"
 #include "PageSocketStruct.h"
 #include "JournalWriter.h"
 
@@ -70,9 +70,9 @@ private:
     /** map: pid -> client */
     map<int, vector<string> > pidClient;
     /** map: file attached with number of writers */
-    map<PageServiceMsg, int> fileWriterCounts;
+    map<PageServiceMessage, int> fileWriterCounts;
     /** map: file attached with number of readers */
-    map<PageServiceMsg, int> fileReaderCounts;
+    map<PageServiceMessage, int> fileReaderCounts;
     /** map: file to its page buffer */
     map<string, void*> fileAddrs;
 
@@ -101,9 +101,9 @@ public:
 
 private:
     /** release the page assigned in comm msg */
-    void release_page(const PageServiceMsg& msg);
+    void release_page(const PageServiceMessage& msg);
     /** initialize the page assigned in comm msg */
-    byte initiate_page(const PageServiceMsg& msg);
+    byte initiate_page(const PageServiceMessage& msg);
 };
 
 YJJ_NAMESPACE_END

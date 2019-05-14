@@ -80,8 +80,8 @@ void PageService::process_memory_message()
 {
     for (int idx = 0; idx < memory_message_limit; idx++)
     {
-        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
-        if (msg->status == PAGED_COMM_REQUESTING)
+        PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+        if (msg->status == PAGE_REQUESTING)
         {
             SPDLOG_INFO("Request page for id {}/{}", idx, memory_message_limit);
             if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
@@ -100,13 +100,13 @@ void PageService::process_memory_message()
 std::string PageService::register_journal(const string& clientName)
 {
     int idx = 0;
-    for (; idx < MAX_COMM_USER_NUMBER; idx++)
-        if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGED_COMM_RAW)
+    for (; idx < MAX_MEMORY_MSG_NUMBER; idx++)
+        if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGE_RAW)
             break;
 
-    if (idx >= MAX_COMM_USER_NUMBER)
+    if (idx >= MAX_MEMORY_MSG_NUMBER)
     {
-        SPDLOG_ERROR("idx {} exceeds limit {}", idx, MAX_COMM_USER_NUMBER);
+        SPDLOG_ERROR("idx {} exceeds limit {}", idx, MAX_MEMORY_MSG_NUMBER);
         return json{
             {"type", PAGED_SOCKET_JOURNAL_REGISTER},
             {"success", false},
@@ -119,8 +119,8 @@ std::string PageService::register_journal(const string& clientName)
         memory_message_limit = idx + 1;
     }
 
-    PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
-    msg->status = PAGED_COMM_OCCUPIED;
+    PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+    msg->status = PAGE_OCCUPIED;
     msg->last_page_num = 0;
     auto it = clientJournals.find(clientName);
     if (it == clientJournals.end())
@@ -205,7 +205,7 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
     if (info.is_strategy)
     {
         int idx = info.user_index_vec[0]; // strategy must be a writer, therefore only one user
-        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+        PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
         json j_request;
         j_request["name"] = clientName;
         j_request["folder"] = msg->folder;
@@ -217,10 +217,10 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
 
     for (auto idx: info.user_index_vec)
     {
-        PageServiceMsg* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
-        if (msg->status == PAGED_COMM_ALLOCATED)
+        PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+        if (msg->status == PAGE_ALLOCATED)
             release_page(*msg);
-        msg->status = PAGED_COMM_RAW;
+        msg->status = PAGE_RAW;
     }
     SPDLOG_INFO("Client {} exited, used from {} to {}", clientName, info.reg_nano, getNanoTime());
     vector<string>& clients = pidClient[info.pid];
@@ -236,7 +236,7 @@ std::string  PageService::exit_client(const string& clientName, int hashCode, bo
     }.dump();
 }
 
-byte PageService::initiate_page(const PageServiceMsg& msg)
+byte PageService::initiate_page(const PageServiceMessage& msg)
 {
     SPDLOG_INFO("Initiate page at {} for {}", msg.folder, msg.name);
 
@@ -247,7 +247,7 @@ byte PageService::initiate_page(const PageServiceMsg& msg)
         if (!PageUtil::FileExists(path))
         {   // this file is not exist....
             if (!msg.is_writer)
-                return PAGED_COMM_NON_EXIST;
+                return PAGE_NON_EXIST;
             else
             {
                 auto tempPageIter = fileAddrs.find(TEMP_PAGE);
@@ -257,7 +257,7 @@ byte PageService::initiate_page(const PageServiceMsg& msg)
                     if (ret < 0)
                     {
                         SPDLOG_ERROR("Cannot rename from {} to {}", TEMP_PAGE, path);
-                        return PAGED_COMM_CANNOT_RENAME_FROM_TEMP;
+                        return PAGE_CANNOT_RENAME_FROM_TEMP;
                     }
                     else
                     {
@@ -285,7 +285,7 @@ byte PageService::initiate_page(const PageServiceMsg& msg)
         if (count_it == fileWriterCounts.end())
             fileWriterCounts[msg] = 1;
         else
-            return PAGED_COMM_MORE_THAN_ONE_WRITE;
+            return PAGE_MORE_THAN_ONE_WRITE;
     }
     else
     {
@@ -295,14 +295,14 @@ byte PageService::initiate_page(const PageServiceMsg& msg)
         else
             count_it->second ++;
     }
-    return PAGED_COMM_ALLOCATED;
+    return PAGE_ALLOCATED;
 }
 
-void PageService::release_page(const PageServiceMsg& msg)
+void PageService::release_page(const PageServiceMessage& msg)
 {
     SPDLOG_INFO("Release page in {} for {}", msg.folder, msg.name);
 
-    map<PageServiceMsg, int>::iterator count_it;
+    map<PageServiceMessage, int>::iterator count_it;
     if (msg.is_writer)
     {
         count_it = fileWriterCounts.find(msg);

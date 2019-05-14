@@ -45,21 +45,21 @@ YJJ_NAMESPACE_START
  *
  */
 //////////////////////////////////////////
-/// (byte) PagedCommTypeConstants
+/// (byte) PagedServiceMessage types
 //////////////////////////////////////////
 // status in process 0 ~ 9
-#define PAGED_COMM_RAW          0   /**< this msg block is not allocated (default) */
-#define PAGED_COMM_OCCUPIED     1   /**< comm msg idx occupied (by server) */
-#define PAGED_COMM_HOLDING      2   /**< folder / name ready (by client) */
-#define PAGED_COMM_REQUESTING   3   /**< page number specified (by client) */
-#define PAGED_COMM_ALLOCATED    4   /**< finish allocated, user may getPage (by server) */
+#define PAGE_RAW          0   /**< this msg block is not allocated (default) */
+#define PAGE_OCCUPIED     1   /**< comm msg idx occupied (by server) */
+#define PAGE_HOLDING      2   /**< folder / name ready (by client) */
+#define PAGE_REQUESTING   3   /**< page number specified (by client) */
+#define PAGE_ALLOCATED    4   /**< finish allocated, user may getPage (by server) */
 // failures 10 ~ 19
-#define PAGED_COMM_NON_EXIST    11  /**< default position */
-#define PAGED_COMM_MEM_OVERFLOW 12  /**< default position */
-#define PAGED_COMM_MORE_THAN_ONE_WRITE      13  /**< default position */
-#define PAGED_COMM_CANNOT_RENAME_FROM_TEMP  14  /**< default position */
+#define PAGE_NON_EXIST    11  /**< default position */
+#define PAGE_MEM_OVERFLOW 12  /**< default position */
+#define PAGE_MORE_THAN_ONE_WRITE      13  /**< default position */
+#define PAGE_CANNOT_RENAME_FROM_TEMP  14  /**< default position */
 
-struct PageServiceMsg
+struct PageServiceMessage
 {
     /** PagedCommTypeConstants (by both server and client) */
     volatile byte    status;
@@ -75,12 +75,12 @@ struct PageServiceMsg
     int16_t   last_page_num;
 
     // operators for map key
-    bool const operator == (const PageServiceMsg &p) const
+    bool const operator == (const PageServiceMessage &p) const
     {
         return page_num == p.page_num && strcmp(folder, p.folder) == 0 && strcmp(name, p.name) == 0;
     }
 
-    bool const operator < (const PageServiceMsg &p) const
+    bool const operator < (const PageServiceMessage &p) const
     {
         return (strcmp(folder, p.folder) != 0) ? strcmp(folder, p.folder) < 0
                                                : (strcmp(name, p.name) != 0) ? strcmp(name, p.name) < 0
@@ -94,13 +94,13 @@ struct PageServiceMsg
 #endif
 
 /** max number of communication users in the same time */
-#define MAX_COMM_USER_NUMBER 1000
-/** REQUEST_ID_RANGE * MAX_COMM_USER_NUMBER < 2147483647(max num of int) */
+#define MAX_MEMORY_MSG_NUMBER 1000
+/** REQUEST_ID_RANGE * MAX_MEMORY_MSG_NUMBER < 2147483647(max num of int) */
 #define REQUEST_ID_RANGE 1000000
 /** based on the max number, the memory message file size is determined */
-const int MEMORY_MSG_FILE_SIZE = MAX_COMM_USER_NUMBER * sizeof(PageServiceMsg) + 1024;
+const int MEMORY_MSG_FILE_SIZE = MAX_MEMORY_MSG_NUMBER * sizeof(PageServiceMessage) + 1024;
 /** fast type convert */
-#define GET_MEMORY_MSG(buffer, idx) ((PageServiceMsg*)(ADDRESS_ADD(buffer, idx * sizeof(PageServiceMsg))))
+#define GET_MEMORY_MSG(buffer, idx) ((PageServiceMessage*)(ADDRESS_ADD(buffer, idx * sizeof(PageServiceMessage))))
 
 YJJ_NAMESPACE_END
 

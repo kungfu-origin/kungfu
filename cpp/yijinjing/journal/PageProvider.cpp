@@ -21,10 +21,10 @@
  */
 
 #include "Journal.h"
-#include "PageProvider.h"
-#include "PageCommStruct.h"
-#include "PageUtil.h"
 #include "Page.h"
+#include "PageUtil.h"
+#include "PageProvider.h"
+#include "PageServiceMessage.h"
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
@@ -137,13 +137,13 @@ int ClientPageProvider::register_journal(const string& dir, const string& jname)
     else
         throw std::runtime_error("cannot register journal: " + client_name);
 
-    PageServiceMsg* server_msg = GET_MEMORY_MSG(memory_msg_buffer, memory_msg_idx);
-    if (server_msg->status == PAGED_COMM_OCCUPIED)
+    PageServiceMessage* server_msg = GET_MEMORY_MSG(memory_msg_buffer, memory_msg_idx);
+    if (server_msg->status == PAGE_OCCUPIED)
     {
         memcpy(server_msg->folder, dir.c_str(), dir.length() + 1);
         memcpy(server_msg->name, jname.c_str(), jname.length() + 1);
         server_msg->is_writer = is_writer;
-        server_msg->status = PAGED_COMM_HOLDING;
+        server_msg->status = PAGE_HOLDING;
     }
     else
         throw std::runtime_error("server buffer is not allocated: " + client_name);
@@ -153,14 +153,14 @@ int ClientPageProvider::register_journal(const string& dir, const string& jname)
 
 PagePtr ClientPageProvider::getPage(const string &dir, const string &jname, int service_id, short pageNum)
 {
-    PageServiceMsg* server_msg = GET_MEMORY_MSG(memory_msg_buffer, service_id);
+    PageServiceMessage* server_msg = GET_MEMORY_MSG(memory_msg_buffer, service_id);
     server_msg->page_num = pageNum;
-    server_msg->status = PAGED_COMM_REQUESTING;
-    while (server_msg->status == PAGED_COMM_REQUESTING) {}
+    server_msg->status = PAGE_REQUESTING;
+    while (server_msg->status == PAGE_REQUESTING) {}
 
-    if (server_msg->status != PAGED_COMM_ALLOCATED)
+    if (server_msg->status != PAGE_ALLOCATED)
     {
-        if (server_msg->status == PAGED_COMM_MORE_THAN_ONE_WRITE)
+        if (server_msg->status == PAGE_MORE_THAN_ONE_WRITE)
             throw std::runtime_error("more than one writer is writing " + dir + " " + jname);
         else
             return PagePtr();
