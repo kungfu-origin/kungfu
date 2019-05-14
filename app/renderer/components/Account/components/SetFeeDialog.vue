@@ -1,35 +1,38 @@
 <template>
     <el-dialog 
-    width="450px" 
+    width="700px" 
     title="手续费设置"  
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
     >
-        <el-form :model="feeSettingForm" ref="feeSettingForm">
-            <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="index">
+        <el-form class="fee-setting-form" :model="feeSettingForm" ref="feeSettingForm" label-width="80px" size="mini">
+            <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="index" size="mini">
                 <div slot="header">
-                    <span>{{feeSetting.default ? '默认' : feeSetting.instrumnet_id}}</span>
-                    <i class="fa-minus"></i>
+                    <span>{{feeSetting.default ? '默认' : (feeSetting.instrument_id || '新费率设置')}}</span>
+                    <el-button class="fee-setting-oper" size="mini" @click="handleAddFeeSetting(index)" icon="el-icon-plus" title="添加"></el-button>            
+                    <el-button v-if="!feeSetting.default" class="fee-setting-oper" size="mini" @click="handleRemoveFeeSetting(index)" icon="el-icon-minus" title="删除"></el-button>            
                 </div>
                 <el-form-item 
-                v-for="key in Object.keys(feeSetting)" 
+                v-for="(value, key) in feeSetting" 
+                v-if="feeTmp[key]"
                 :key="key"
-                :label="feeSetting[key].lable"
-                :prop="`feeSettingForm.${index}.${key}`"
+                :label="feeTmp[key].label"
+                :prop="`fees.${index}.${key}`"
+                size="mini"
+                :rules="buildRules(feeSetting, key)"
                 >
-                    <template v-if="feeSetting[key].type === 'string'">
-                        <el-input></el-input>
-                    </template>
-                    <template v-else-if="feeSetting[key].type === 'number'">
-                        <el-input-number></el-input-number>
-                    </template>
-                    <template v-else-if="feeSetting[key].type === 'select'">
-                        <el-select>
-                            <el-option v-for="value in feeSetting[key].options" :key="value"></el-option>
-                        </el-select>
-                    </template>
-                    
+                    <template v-if="feeSetting.default && key === 'instrument_id'"> 默认 </template>
+                    <el-input size="mini" v-else-if="feeTmp[key].type === 'string'" :type="feeTmp[key].key" v-model.trim="feeSettingForm.fees[index][key]"></el-input>
+                    <el-input-number size="mini" v-else-if="feeTmp[key].type === 'number'"  :controls="false" v-model.trim="feeSettingForm.fees[index][key]"></el-input-number>
+                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" placeholder="请选择">
+                        <el-option
+                            v-for="(value, key) in feeTmp[key].options"
+                            :key="key"
+                            :label="value"
+                            :value="key">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
             </el-card>
         </el-form>
@@ -54,19 +57,24 @@ export default {
             type: Boolean,
             default: false,
         },
+        accountType: {
+            type: String,
+            default: 'stock'
+        }
     },
 
     data(){
-        this.feeTemplate = feeTemplate;
+        const t = this;
+        const feeTmp = feeTemplate(t.accountType);
         //初始化
-        let defaultFeeSetting = {
-            default: true
-        };
-        Object.keys(feeTemplate).forEach(key => defaultFeeSetting[key] = '')
-        return{
+        let defaultFeeSetting = {};
+        Object.keys(feeTmp || {}).forEach(key => defaultFeeSetting[key] = '')
+        t.defaultFeeSetting = Object.freeze(defaultFeeSetting)
+        return {
+            feeTmp,
             feeSettingForm: {
                 fees: [
-                    defaultFeeSetting
+                    {...t.defaultFeeSetting, default: true}
                 ]
             }
         }
@@ -74,20 +82,88 @@ export default {
 
     methods: {
         //关闭窗口的时候清空数据
-        handleClose() {
-            this.$emit('update:visible', false)
+        handleClose(){
+            const t = this;
+            t.clearData();
         },
 
+        //添加费率设置
+        handleAddFeeSetting(index){
+            const t = this;
+            t.feeSettingForm.fees.splice(index + 1, 0, {...t.defaultFeeSetting})
+
+        },
+
+        //删除费率设置
+        handleRemoveFeeSetting(index){
+            const t = this;
+            t.feeSettingForm.fees.splice(index, 1)
+        },
 
         //确认更改
         handleSubmitSetting(){
             const t = this;
+            t.$refs['feeSettingForm'].validate(valid => {
+                if(valid){
+                    console.log(Object.freeze(t.feeSettingForm.fees))
+                    t.$emit('confirm', Object.freeze(t.feeSettingForm.fees))
+                    t.clearData()
+                }
+            })
+        },
+
+        buildRules(feeSetting, key){
+            const t = this;
+            let rules = []
+            if(feeSetting.default && key === 'instrument_id'){
+                return []
+            }else if(!feeSetting.default && key === 'instrument_id'){
+                return [
+                    ...(t.feeTmp[key].validators || []),
+                    {required: true, message: '不能为空！', trigger: 'blur'},
+                    {validator: t.repeatInstrumentIdvalidator, trigger: 'blur'},                    
+                ]
+            }
+            else{
+                return [
+                    ...(t.feeTmp[key].validators || []),
+                    {required: true, message: '不能为空！', trigger: 'blur'}]
+            }
+        },
+
+        repeatInstrumentIdvalidator(rule, value, callback){
+            const t = this;
+            const existInstrumentIds = t.feeSettingForm.fees.map(f => f.instrument_id).filter(id => !!id)
+            if(existInstrumentIds.filter(id => id === value).length >= 2) {
+                callback(new Error('已存在！'))
+            }else{
+                callback()
+            }
         },
 
         clearData(){
             const t = this;
+            t.feeSettingForm.fees = [];
+            t.$emit('update:visible', false)
         }
     }
 }
 </script>
+<style lang="scss">
+.fee-setting-form{
+    .fee-setting-oper{
+        float: right;
+        margin-left: 10px;
+    }
+    .el-form-item{
+        display: inline-block;
+        width: 190px;
+        margin-bottom: 12px;
+        .el-form-item__label{
+            font-size: 12px;
+        }
+    }
+}
+</style>
+
 

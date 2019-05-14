@@ -60,6 +60,10 @@
     color: $icon;
 }
 
+.tr-container .el-input__suffix-inner .fa{
+    font-size: 10px;
+}
+
 .el-input .el-input__inner, .el-date-editor.el-input__inner{
     background-color: $bg_card;
 }
@@ -485,7 +489,7 @@ p.el-select-dropdown__empty{
 
     //报错上面间距
     .el-form-item__error{
-        padding-top: 0px;
+        padding-top: 1px;
     }
     
     

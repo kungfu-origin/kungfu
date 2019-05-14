@@ -153,6 +153,7 @@
             <!-- 设置账户 -->
             <SetAccountDialog
             v-model.trim="accountForm"
+            v-if="visiblity.setAccount"
             :visible.sync="visiblity.setAccount"
             :method="method" 
             :source="selectedSource"
@@ -163,7 +164,9 @@
             />
 
             <SetFeeDialog
+            v-if="visiblity.setFee"
             :visible.sync="visiblity.setFee"
+            :accountType="(config[currentAccount.source_name] || {}).typeName"
             ></SetFeeDialog>
     </tr-dashboard>
 </template>

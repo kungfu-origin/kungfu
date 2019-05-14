@@ -185,13 +185,13 @@ export const sourceType = {
     ctp: {
         source: 'ctp',
         type: 'danger',
-        typeName: '期货',
+        typeName: 'future',
         key:'account_id'
     },
     xtp: {
         source: 'xtp',
         type: '',
-        typeName: '股票',
+        typeName: 'stock',
         key:'user_id'
     },
     // oes: {
