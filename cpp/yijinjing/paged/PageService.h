@@ -67,7 +67,7 @@ struct PageClientInfo
     vector<short> trade_engine_vec;
 };
 
-class PageEngine
+class PageService
 {
     friend class PstPidCheck;
     friend class PstTimeTick;
@@ -90,10 +90,10 @@ private:
 
 public:
     /** default constructor */
-    PageEngine(const string& _base_dir);
+    PageService(const string& _base_dir);
 
     /** default destructor */
-    virtual ~PageEngine();
+    virtual ~PageService();
 
     /** start paged service, mainly start tasks */
     void start();

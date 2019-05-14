@@ -36,7 +36,7 @@ YJJ_NAMESPACE_START
 
 #define TEMP_PAGE KUNGFU_JOURNAL_FOLDER + "TEMP_PAGE"
 
-class PageEngine;
+class PageService;
 
 class PstBase
 {
@@ -51,33 +51,33 @@ DECLARE_PTR(PstBase);
 class PstPidCheck: public PstBase
 {
 public:
-    PstPidCheck(PageEngine* pe);
+    PstPidCheck(PageService* pe);
     void go();
     string getName() const { return "PidCheck"; }
 private:
-    PageEngine* engine;
+    PageService* engine;
 };
 DECLARE_PTR(PstPidCheck);
 
 class PstTimeTick: public PstBase
 {
 public:
-    PstTimeTick(PageEngine* pe);
+    PstTimeTick(PageService* pe);
     void go();
     string getName() const { return "TimeTick"; }
 private:
-    PageEngine* engine;
+    PageService* engine;
 };
 DECLARE_PTR(PstTimeTick);
 
 class PstTempPage: public PstBase
 {
 public:
-    PstTempPage(PageEngine* pe);
+    PstTempPage(PageService* pe);
     void go();
     string getName() const { return "TempPage"; }
 private:
-    PageEngine* engine;
+    PageService* engine;
 };
 DECLARE_PTR(PstTempPage);
 

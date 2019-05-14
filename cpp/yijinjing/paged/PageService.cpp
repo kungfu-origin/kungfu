@@ -17,7 +17,7 @@
 // Created by cjiang on 17/3/24.
 //
 
-#include "PageEngine.h"
+#include "PageService.h"
 #include "Journal.h"
 #include "Page.h"
 #include "Timer.h"
@@ -41,11 +41,11 @@ const int INTERVAL_IN_MILLISEC = 1000000;
 
 void signal_callback(int signum)
 {
-    SPDLOG_INFO("PageEngine Caught signal {}", signum);
+    SPDLOG_INFO("PageService Caught signal {}", signum);
     exit(signum);
 }
 
-bool PageEngine::write(string content, byte msg_type, bool is_last, short source)
+bool PageService::write(string content, byte msg_type, bool is_last, short source)
 {
     if (writer.get() == nullptr)
         return false;
@@ -53,17 +53,17 @@ bool PageEngine::write(string content, byte msg_type, bool is_last, short source
     return true;
 }
 
-void PageEngine::acquire_mutex() const
+void PageService::acquire_mutex() const
 {
     paged_mtx.lock();
 }
 
-void PageEngine::release_mutex() const
+void PageService::release_mutex() const
 {
     paged_mtx.unlock();
 }
 
-PageEngine::PageEngine(const string& _base_dir) : base_dir(_base_dir),
+PageService::PageService(const string& _base_dir) : base_dir(_base_dir),
                                                 msg_buffer(nullptr), msg_buffer_idx(0), msg_buffer_idx_limit(0), commFile(COMM_FILE),
                                                 microsecFreq(INTERVAL_IN_MILLISEC),
                                                 task_running(false), last_switch_nano(0), comm_running(false) {
@@ -76,12 +76,12 @@ PageEngine::PageEngine(const string& _base_dir) : base_dir(_base_dir),
         signal(s, signal_callback);
 }
 
-PageEngine::~PageEngine()
+PageService::~PageService()
 {
     Py_Finalize();
 }
 
-void PageEngine::start()
+void PageService::start()
 {
     // setup basic tasks
     tasks.clear();
@@ -93,25 +93,25 @@ void PageEngine::start()
     msg_buffer = PageUtil::LoadPageBuffer(commFile, COMM_SIZE, true, true);
     memset(msg_buffer, 0, COMM_SIZE);
 
-    SPDLOG_INFO("Creating writer at {} for {}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
+    SPDLOG_INFO("Creating writer for {}/{}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
     writer = JournalWriter::create(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME, "paged", false);
     write("", MSG_TYPE_PAGED_START);
 
-    SPDLOG_INFO("PageEngine started");
+    SPDLOG_INFO("PageService started");
 
     if (microsecFreq <= 0)
         throw std::runtime_error("unaccepted task time interval");
     task_running = true;
-    taskThread = ThreadPtr(new std::thread(boost::bind(&PageEngine::start_task, this)));
+    taskThread = ThreadPtr(new std::thread(boost::bind(&PageService::start_task, this)));
 }
 
-void PageEngine::set_freq(double secondFreq)
+void PageService::set_freq(double secondFreq)
 {
     microsecFreq = (int)(secondFreq * MICROSECONDS_PER_SECOND);
     SPDLOG_INFO("Microsecond frequency updated to {}", microsecFreq);
 }
 
-void PageEngine::stop()
+void PageService::stop()
 {
     /* write paged end in system journal */
     write("", MSG_TYPE_PAGED_END);
@@ -125,10 +125,10 @@ void PageEngine::stop()
         taskThread.reset();
     }
 
-    SPDLOG_INFO("PageEngine stopped");
+    SPDLOG_INFO("PageService stopped");
 }
 
-void PageEngine::start_task()
+void PageService::start_task()
 {
     SPDLOG_INFO("(startTasks) (microseconds) {}", microsecFreq);
     while (task_running)
@@ -143,7 +143,7 @@ void PageEngine::start_task()
     }
 }
 
-bool PageEngine::add_task(PstBasePtr task)
+bool PageService::add_task(PstBasePtr task)
 {
     acquire_mutex();
     string name = task->getName();
@@ -160,7 +160,7 @@ bool PageEngine::add_task(PstBasePtr task)
     return !exist;
 }
 
-bool PageEngine::remove_task(PstBasePtr task)
+bool PageService::remove_task(PstBasePtr task)
 {
     string name = task->getName();
     acquire_mutex();
@@ -169,7 +169,7 @@ bool PageEngine::remove_task(PstBasePtr task)
     return ret;
 }
 
-bool PageEngine::remove_task_by_name(string taskName)
+bool PageService::remove_task_by_name(string taskName)
 {
     auto task_iter = tasks.find(taskName);
     if (task_iter == tasks.end())
@@ -179,7 +179,7 @@ bool PageEngine::remove_task_by_name(string taskName)
     return true;
 }
 
-std::string PageEngine::reg_journal(const string& clientName)
+std::string PageService::reg_journal(const string& clientName)
 {
     size_t idx = 0;
     for (; idx < MAX_COMM_USER_NUMBER; idx++)
@@ -223,7 +223,7 @@ std::string PageEngine::reg_journal(const string& clientName)
     }.dump();
 }
 
-std::string PageEngine::reg_client(string& _commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter)
+std::string PageService::reg_client(string& _commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter)
 {
     SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
     if (clientJournals.find(clientName) != clientJournals.end())
@@ -265,7 +265,7 @@ std::string PageEngine::reg_client(string& _commFile, int& fileSize, int& hashCo
     }.dump();
 }
 
-void PageEngine::release_page(const PageCommMsg& msg)
+void PageService::release_page(const PageCommMsg& msg)
 {
     SPDLOG_INFO("Release page at {}/{}.{}", msg.folder, msg.name, msg.page_num);
 
@@ -317,7 +317,7 @@ void PageEngine::release_page(const PageCommMsg& msg)
     }
 }
 
-byte PageEngine::initiate_page(const PageCommMsg& msg)
+byte PageService::initiate_page(const PageCommMsg& msg)
 {
     SPDLOG_INFO("Initiate page at {} for {}", msg.folder, msg.name);
 
@@ -379,7 +379,7 @@ byte PageEngine::initiate_page(const PageCommMsg& msg)
     return PAGED_COMM_ALLOCATED;
 }
 
-std::string  PageEngine::exit_client(const string& clientName, int hashCode, bool needHashCheck)
+std::string  PageService::exit_client(const string& clientName, int hashCode, bool needHashCheck)
 {
     map<string, PageClientInfo>::iterator it = clientJournals.find(clientName);
     if (it == clientJournals.end())
@@ -433,7 +433,7 @@ std::string  PageEngine::exit_client(const string& clientName, int hashCode, boo
     }.dump();
 }
 
-void PageEngine::process_one_message()
+void PageService::process_one_message()
 {
     PageCommMsg* msg = GET_COMM_MSG(msg_buffer, msg_buffer_idx);
     if (msg->status == PAGED_COMM_REQUESTING)
@@ -454,7 +454,7 @@ void PageEngine::process_one_message()
     msg_buffer_idx = (msg_buffer_idx + 1) % (msg_buffer_idx_limit + 1);
 }
 
-py::dict PageEngine::getStatus() const
+py::dict PageService::getStatus() const
 {
     acquire_mutex();
     py::dict res;
@@ -470,7 +470,7 @@ py::dict PageEngine::getStatus() const
     return res;
 }
 
-py::dict PageEngine::getClientInfo() const
+py::dict PageService::getClientInfo() const
 {
     py::dict info;
     for (auto const &item: clientJournals)
@@ -497,7 +497,7 @@ py::dict PageEngine::getClientInfo() const
     return info;
 }
 
-py::dict PageEngine::getUserInfo() const
+py::dict PageService::getUserInfo() const
 {
     py::dict info;
     for (size_t idx = 0; idx < msg_buffer_idx_limit; idx++)
@@ -511,7 +511,7 @@ py::dict PageEngine::getUserInfo() const
     return info;
 }
 
-py::tuple PageEngine::getTaskInfo() const
+py::tuple PageService::getTaskInfo() const
 {
     py::dict info;
     for (auto const &item: tasks)
@@ -521,7 +521,7 @@ py::tuple PageEngine::getTaskInfo() const
     return py::make_tuple(((task_running)? "running": "stopped"), microsecFreq, info);
 }
 
-py::dict PageEngine::getPidInfo() const
+py::dict PageService::getPidInfo() const
 {
     py::dict info;
     for (auto const &item: pidClient)
@@ -534,7 +534,7 @@ py::dict PageEngine::getPidInfo() const
     return info;
 }
 
-py::dict PageEngine::getFileReaderInfo() const
+py::dict PageService::getFileReaderInfo() const
 {
     py::dict info;
     for (auto const &item: fileReaderCounts)
@@ -546,7 +546,7 @@ py::dict PageEngine::getFileReaderInfo() const
     return info;
 }
 
-py::dict PageEngine::getFileWriterInfo() const
+py::dict PageService::getFileWriterInfo() const
 {
     py::dict info;
     for (auto const &item: fileWriterCounts)
@@ -558,7 +558,7 @@ py::dict PageEngine::getFileWriterInfo() const
     return info;
 }
 
-py::list PageEngine::getLockingFiles() const
+py::list PageService::getLockingFiles() const
 {
     py::list files;
     for (auto const &iter: fileAddrs)
@@ -578,17 +578,17 @@ string getJournalName()
 
 PYBIND11_MODULE(paged, m)
 {
-    py::class_<PageEngine, boost::shared_ptr<PageEngine> >(m, "PageEngine")
+    py::class_<PageService, boost::shared_ptr<PageService> >(m, "PageService")
     .def(py::init<const std::string&>())
-    .def("process_one_message", &PageEngine::process_one_message)
-    .def("start", &PageEngine::start)
-    .def("stop", &PageEngine::stop)
-    .def("setFreq", &PageEngine::set_freq, py::arg("seconds")=0.1)
-    .def("status", &PageEngine::getStatus)
-    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
-    .def("reg_journal", &PageEngine::reg_journal, py::arg("clientName"))
-    .def("reg_client", &PageEngine::reg_client, py::arg("commFile"), py::arg("fileSize"), py::arg("hashCode"), py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
-    .def("exit_client", &PageEngine::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
+    .def("process_one_message", &PageService::process_one_message)
+    .def("start", &PageService::start)
+    .def("stop", &PageService::stop)
+    .def("setFreq", &PageService::set_freq, py::arg("seconds")=0.1)
+    .def("status", &PageService::getStatus)
+    .def("write", &PageService::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
+    .def("reg_journal", &PageService::reg_journal, py::arg("clientName"))
+    .def("reg_client", &PageService::reg_client, py::arg("commFile"), py::arg("fileSize"), py::arg("hashCode"), py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
+    .def("exit_client", &PageService::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
     ;
 
     m.def("jfolder", &getJournalFolder);

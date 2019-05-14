@@ -50,10 +50,10 @@ The supported kungfu commands are:
             getattr(self, args.command)(args.name, args.timeout)
 
     def paged(self, name, timeout):
-        from kungfu.mod import PageManager
-        manager = PageManager.PageManager(name, timeout)
-        atexit.register(exit_handler, task=manager)
-        manager.start()
+        from kungfu.mod import PageServer
+        server = PageServer.PageServer(name, timeout)
+        atexit.register(exit_handler, task=server)
+        server.start()
 
     def client(self, name, timeout):
         from kungfu.mod import PageClient

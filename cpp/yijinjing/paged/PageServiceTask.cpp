@@ -22,7 +22,7 @@
  */
 
 #include "PageServiceTask.h"
-#include "PageEngine.h"
+#include "PageService.h"
 #include "PageUtil.h"
 #include "Timer.h"
 #include "Journal.h"
@@ -41,7 +41,7 @@
 
 USING_YJJ_NAMESPACE
 
-PstPidCheck::PstPidCheck(PageEngine *pe): engine(pe) {}
+PstPidCheck::PstPidCheck(PageService *pe): engine(pe) {}
 
 void PstPidCheck::go()
 {
@@ -87,14 +87,14 @@ void PstPidCheck::go()
     }
 }
 
-PstTimeTick::PstTimeTick(PageEngine *pe): engine(pe) {}
+PstTimeTick::PstTimeTick(PageService *pe): engine(pe) {}
 
 void PstTimeTick::go()
 {
     engine->write("", MSG_TYPE_TIME_TICK);
 }
 
-PstTempPage::PstTempPage(PageEngine *pe): engine(pe) {}
+PstTempPage::PstTempPage(PageService *pe): engine(pe) {}
 
 void PstTempPage::go()
 {

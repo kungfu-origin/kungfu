@@ -11,7 +11,7 @@ import paged
 
 from kungfu import Constants
 
-class PageManager:
+class PageServer:
     def __init__(self, name, timeout):
         self.name = name
         self.timeout = timeout
@@ -34,20 +34,20 @@ class PageManager:
         self.paged_socket.bind(socket_addr)
         self.paged_fd = self.paged_socket.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
 
-        self.page_engine = paged.PageEngine(base_dir)
+        self.page_service = paged.PageService(base_dir)
 
     def register_journal(self, request):
-        return self.page_engine.reg_journal(request['name'])
+        return self.page_service.reg_journal(request['name'])
 
     def register_client(self, request):
         comm_file = ''
         file_size = 0
         hash_code = 0
         is_writer = request['type'] == 13
-        return self.page_engine.reg_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
+        return self.page_service.reg_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
 
     def exit_client(self, request):
-        return self.page_engine.exit_client(request['name'], request['hash_code'], True)
+        return self.page_service.exit_client(request['name'], request['hash_code'], True)
     
     def process_socket_message(self):
         readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
@@ -62,11 +62,11 @@ class PageManager:
         self.run()
 
     def run(self):
-        self.page_engine.start()
+        self.page_service.start()
         while self.running:
-            self.page_engine.process_one_message()
+            self.page_service.process_one_message()
             self.process_socket_message()
-        self.page_engine.stop()
+        self.page_service.stop()
 
     def stop(self):
         self.running = False
