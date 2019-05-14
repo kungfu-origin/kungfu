@@ -33,40 +33,9 @@ YJJ_NAMESPACE_START
 #define TEMP_PAGE KUNGFU_JOURNAL_FOLDER + "TEMP_PAGE"
 #define MEMORY_MSG_FILE KUNGFU_JOURNAL_FOLDER + "PAGE_SERVICE_MSG"
 
-/** we call each journal handler (writer or reader)
- *      -- a client for page engine.
- *  we call each "journal" linked by client
- *      -- a user for page engine.
- *  then each writer client may only have 1 user,
- *  while each reader client may have several users.
- *  all the necessary information are stored here.
- */
-struct PageClientInfo
-{
-    /** the index of each user linked by this client */
-    vector<int> user_index_vec;
-    /** register nano time */
-    int64_t  reg_nano;
-    /** process id */
-    int   pid;
-    /** hash code for the client */
-    int   hash_code;
-    /** true if this client is a writer */
-    bool  is_writing;
-    /** true if this writer is associated with a strategy */
-    bool  is_strategy;
-    /** start rid of the strategy (strategy only) */
-    int   rid_start;
-    /** end rid of the strategy (strategy only) */
-    int   rid_end;
-};
-
 class PageService
 {
 private:
-    // internal data structures. be careful on its thread-safety
-    /** map: client -> all info (all journal usage) */
-    map<string, PageClientInfo> clientJournals;
     /** map: pid -> client */
     map<int, vector<string> > pidClient;
     /** map: file attached with number of writers */
@@ -86,6 +55,9 @@ public:
     /** default constructor */
     PageService(const string& _base_dir);
 
+    string get_memory_msg_file();
+    size_t get_memory_msg_file_size();
+
     /** start paged service, mainly start tasks */
     void start();
     /** sync stop paged service */
@@ -95,9 +67,9 @@ public:
     bool write(string content, byte msg_type, bool is_last=true, short source=0);
 
     void process_memory_message();
-    std::string    register_journal(const string& clientName);
-    std::string    register_client(const string& clientName, int pid, bool isWriter);
-    std::string    exit_client(const string& clientName, int hashCode, bool needHashCheck);
+    int32_t register_journal(const string& clientName);
+    uint32_t register_client(const string& clientName, int pid, bool isWriter);
+    void release_page_at(int idx);
 
 private:
     /** release the page assigned in comm msg */

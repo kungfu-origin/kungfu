@@ -78,7 +78,7 @@ struct PagedSocketRspClient: public PagedSocketResponse
     /** size of comm_file */
     int32_t     file_size;
     /** hash code of this client */
-    int32_t     hash_code;
+    uint32_t     hash_code;
 };
 
 struct PagedSocketRspJournal: public PagedSocketResponse

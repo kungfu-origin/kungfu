@@ -78,17 +78,19 @@ PYBIND11_MODULE(pyyjj, m)
 {
     py::class_<PageService, boost::shared_ptr<PageService> >(m, "PageService")
     .def(py::init<const std::string&>())
+    .def("memory_msg_file", &PageService::get_memory_msg_file)
+    .def("memory_msg_file_size", &PageService::get_memory_msg_file_size)
     .def("start", &PageService::start)
     .def("stop", &PageService::stop)
     .def("write", &PageService::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
     .def("process_memory_message", &PageService::process_memory_message)
     .def("register_journal", &PageService::register_journal, py::arg("clientName"))
     .def("register_client", &PageService::register_client, py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
-    .def("exit_client", &PageService::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
+    .def("release_page", &PageService::release_page_at, py::arg("idx"))
     ;
 
     // nanosecond-time related
-    m.def("nano", &getNanoTime);
+    m.def("nano_time", &getNanoTime);
     /** two functions named of parseNano with different inputs, we needs to specify here. */
     string (*pyParseNano)(int64_t, const char*) = &parseNano;
     m.def("parse_time", &parseTime);

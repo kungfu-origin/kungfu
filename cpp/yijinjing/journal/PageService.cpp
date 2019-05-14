@@ -53,6 +53,16 @@ PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_
         signal(s, signal_callback);
 }
 
+string PageService::get_memory_msg_file()
+{
+    return memory_msg_file;
+}
+
+size_t PageService::get_memory_msg_file_size()
+{
+    return MEMORY_MSG_FILE_SIZE;
+}
+
 void PageService::start()
 {
     getNanoTime(); // init NanoTimer before ReqClient, avoid deadlock
@@ -78,7 +88,7 @@ void PageService::stop()
 
 void PageService::process_memory_message()
 {
-    for (int idx = 0; idx < memory_message_limit; idx++)
+    for (int32_t idx = 0; idx < memory_message_limit; idx++)
     {
         PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
         if (msg->status == PAGE_REQUESTING)
@@ -97,9 +107,9 @@ void PageService::process_memory_message()
     }
 }
 
-std::string PageService::register_journal(const string& clientName)
+int32_t PageService::register_journal(const string& clientName)
 {
-    int idx = 0;
+    int32_t idx = 0;
     for (; idx < MAX_MEMORY_MSG_NUMBER; idx++)
         if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGE_RAW)
             break;
@@ -107,12 +117,7 @@ std::string PageService::register_journal(const string& clientName)
     if (idx >= MAX_MEMORY_MSG_NUMBER)
     {
         SPDLOG_ERROR("idx {} exceeds limit {}", idx, MAX_MEMORY_MSG_NUMBER);
-        return json{
-            {"type", PAGED_SOCKET_JOURNAL_REGISTER},
-            {"success", false},
-            {"error_msg", "idx exceeds limit"},
-            {"memory_msg_idx", idx}
-        }.dump();
+        return idx;
     }
     if (idx >= memory_message_limit)
     {
@@ -122,38 +127,13 @@ std::string PageService::register_journal(const string& clientName)
     PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
     msg->status = PAGE_OCCUPIED;
     msg->last_page_num = 0;
-    auto it = clientJournals.find(clientName);
-    if (it == clientJournals.end())
-    {
-        SPDLOG_ERROR("cannot find the client in reg_journal");
-        return json{
-            {"type", PAGED_SOCKET_JOURNAL_REGISTER},
-            {"success", false},
-            {"error_msg", "cannot find the client"},
-            {"memory_msg_idx", idx}
-        }.dump();
-    }
-    it->second.user_index_vec.push_back(idx);
     SPDLOG_INFO("Register journal for {} with id {}", clientName, idx);
-    return json{
-        {"type", PAGED_SOCKET_JOURNAL_REGISTER},
-        {"success", true},
-        {"error_msg", ""},
-        {"memory_msg_idx", idx}
-    }.dump();
+    return idx;
 }
 
-std::string PageService::register_client(const string& clientName, int pid, bool isWriter)
+uint32_t PageService::register_client(const string& clientName, int pid, bool isWriter)
 {
     SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
-    if (clientJournals.find(clientName) != clientJournals.end())
-        return json{
-            {"success", false},
-            {"error_msg", "client already exists"},
-            {"memory_msg_file", this->memory_msg_file},
-            {"file_size", MEMORY_MSG_FILE_SIZE},
-            {"hash_code", -1}
-        }.dump();
 
     map<int, vector<string> >::iterator it = pidClient.find(pid);
     if (it == pidClient.end())
@@ -163,82 +143,21 @@ std::string PageService::register_client(const string& clientName, int pid, bool
 
     std::stringstream ss;
     ss << clientName << getNanoTime() << pid;
-    int hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
-    PageClientInfo& clientInfo = clientJournals[clientName];
-    clientInfo.user_index_vec.clear();
-    clientInfo.reg_nano = getNanoTime();
-    clientInfo.is_writing = isWriter;
-    clientInfo.is_strategy = false;
-    clientInfo.rid_start = -1;
-    clientInfo.rid_end = -1;
-    clientInfo.pid = pid;
-    clientInfo.hash_code = hashCode;
-    return json{
-        {"type", isWriter ? PAGED_SOCKET_WRITER_REGISTER : PAGED_SOCKET_READER_REGISTER},
-        {"success", true},
-        {"error_msg", ""},
-        {"memory_msg_file", this->memory_msg_file},
-        {"file_size", MEMORY_MSG_FILE_SIZE},
-        {"hash_code", hashCode}
-    }.dump();
+    uint32_t hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
+    return hashCode;
 }
 
-std::string  PageService::exit_client(const string& clientName, int hashCode, bool needHashCheck)
+void PageService::release_page_at(int idx)
 {
-    map<string, PageClientInfo>::iterator it = clientJournals.find(clientName);
-    if (it == clientJournals.end())
-        return json{
-            {"type", PAGED_SOCKET_CLIENT_EXIT},
-            {"success", false},
-            {"error_msg", "client does not exist"}
-        }.dump();
-    PageClientInfo& info = it->second;
-    if (needHashCheck && hashCode != info.hash_code)
-    {
-        SPDLOG_ERROR("Failed to get hash for {}, server {} client {}", clientName, info.hash_code, hashCode);
-        return json{
-            {"type", PAGED_SOCKET_CLIENT_EXIT},
-            {"success", false},
-            {"error_msg", "hash code validation failed"}
-        }.dump();
-    }
-    if (info.is_strategy)
-    {
-        int idx = info.user_index_vec[0]; // strategy must be a writer, therefore only one user
-        PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
-        json j_request;
-        j_request["name"] = clientName;
-        j_request["folder"] = msg->folder;
-        j_request["rid_s"] = info.rid_start;
-        j_request["rid_e"] = info.rid_end;
-        j_request["pid"] = info.pid;
-        write(j_request.dump(), MSG_TYPE_STRATEGY_END);
-    }
-
-    for (auto idx: info.user_index_vec)
-    {
-        PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
-        if (msg->status == PAGE_ALLOCATED)
-            release_page(*msg);
-        msg->status = PAGE_RAW;
-    }
-    SPDLOG_INFO("Client {} exited, used from {} to {}", clientName, info.reg_nano, getNanoTime());
-    vector<string>& clients = pidClient[info.pid];
-    clients.erase(remove(clients.begin(), clients.end(), clientName), clients.end());
-    if (clients.size() == 0)
-        pidClient.erase(info.pid);
-    clientJournals.erase(it);
-
-    return json{
-        {"type", PAGED_SOCKET_CLIENT_EXIT},
-        {"success", true},
-        {"error_msg", ""}
-    }.dump();
+    PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
+    if (msg->status == PAGE_ALLOCATED)
+        release_page(*msg);
+    msg->status = PAGE_RAW;
 }
 
 byte PageService::initiate_page(const PageServiceMessage& msg)
 {
-    SPDLOG_INFO("Initiate page at {} for {}", msg.folder, msg.name);
+    SPDLOG_INFO("Initiate page {}/{}", msg.folder, msg.name);
 
     string path = PageUtil::GenPageFullPath(msg.folder, msg.name, msg.page_num);
     if (fileAddrs.find(path) == fileAddrs.end())
@@ -300,7 +219,7 @@ byte PageService::initiate_page(const PageServiceMessage& msg)
 
 void PageService::release_page(const PageServiceMessage& msg)
 {
-    SPDLOG_INFO("Release page in {} for {}", msg.folder, msg.name);
+    SPDLOG_INFO("Release page {}/{}", msg.folder, msg.name);
 
     map<PageServiceMessage, int>::iterator count_it;
     if (msg.is_writer)

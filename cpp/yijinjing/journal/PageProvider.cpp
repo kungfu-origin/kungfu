@@ -107,7 +107,7 @@ void ClientPageProvider::register_client()
     }
     else
     {
-        SPDLOG_ERROR("failed to register client {}", client_name);
+        SPDLOG_ERROR("failed to register client {}, error: {}", client_name, rsp.error_msg);
         throw std::runtime_error("cannot register client: " + client_name);
     }
 }

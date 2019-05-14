@@ -13,12 +13,6 @@
  *  limitations under the License.
  *****************************************************************************/
 
-/**
- * Hash method.
- * @Author cjiang (changhao.jiang@taurus.ai)
- * @since   March, 2017
- */
-
 #ifndef YIJINJING_HASH_H
 #define YIJINJING_HASH_H
 
@@ -33,17 +27,17 @@ YJJ_NAMESPACE_START
  * @param seed
  * @return hash result
  */
-inline unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
+inline uint32_t MurmurHash2 ( const void * key, int32_t len, uint32_t seed )
 {
     // 'm' and 'r' are mixing constants generated offline.
     // They're not really 'magic', they just happen to work well.
 
-    const unsigned int m = 0x5bd1e995;
-    const int r = 24;
+    const uint32_t m = 0x5bd1e995;
+    const int32_t r = 24;
 
     // Initialize the hash to a 'random' value
 
-    unsigned int h = seed ^ len;
+    uint32_t h = seed ^ len;
 
     // Mix 4 bytes at a time into the hash
 
@@ -51,7 +45,7 @@ inline unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
 
     while(len >= 4)
     {
-        unsigned int k = *(unsigned int *)data;
+        uint32_t k = *(uint32_t *)data;
 
         k *= m;
         k ^= k >> r;

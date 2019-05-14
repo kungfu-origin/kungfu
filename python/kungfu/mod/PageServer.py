@@ -33,17 +33,81 @@ class PageServer:
         self.paged_socket.bind(socket_addr)
         self.paged_fd = self.paged_socket.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
 
+        self.clients = {}
         self.page_service = pyyjj.PageService(base_dir)
 
     def register_journal(self, request):
-        return self.page_service.register_journal(request['name'])
+        name = request['name']
+        result = {
+            'type': 11,
+            'success': False,
+            'error_msg': '',
+            'memory_msg_idx': -1
+        }
+        if not name in self.clients:
+            result['error_msg'] = 'client ' + name + ' does not exist'
+        else:
+            client = self.clients[name]
+            idx = self.page_service.register_journal(name)
+            if idx >= 1000:
+                result['error_msg'] = 'idx exceeds limit'
+            else:
+                client['journals'].append(idx)
+                result['success'] = True
+                result['memory_msg_idx'] = idx
+        return json.dumps(result)
 
     def register_client(self, request):
+        name = request['name']
+        pid = request['pid']
         is_writer = request['type'] == 13
-        return self.page_service.register_client(request['name'], request['pid'], is_writer)
+        result = {
+            'type': 13 if is_writer else 12,
+            'success': False,
+            'error_msg': '',
+            'memory_msg_file': self.page_service.memory_msg_file(),
+            'file_size': self.page_service.memory_msg_file_size(),
+            'hash_code': -1
+        }
+        if name in self.clients:
+            result['error_msg'] = 'client ' + name + ' already exists'
+        else:
+            hash_code = self.page_service.register_client(name, pid, is_writer)
+            self.clients[name] = {
+                'journals': [],
+                'reg_nano': pyyjj.nano_time(),
+                'is_writing': is_writer,
+                'is_strategy': False,
+                'rid_start': -1,
+                'rid_end': -1,
+                'pid': pid,
+                'hash_code': hash_code
+            }
+            result['success'] = True
+            result['hash_code'] = hash_code
+        return json.dumps(result)
 
     def exit_client(self, request):
-        return self.page_service.exit_client(request['name'], request['hash_code'], True)
+        name = request['name']
+        hash_code = request['hash_code']
+        result = {
+            'type': 19,
+            'success': False,
+            'error_msg': ''
+        }
+
+        if not name in self.clients:
+            result['error_msg'] = 'client ' + name + ' does not exist'
+
+        client = self.clients[name]
+        if hash_code != client['hash_code']:
+            result['error_msg'] = 'hash code validation failed ' + str(hash_code) + '!=' + str(client['hash_code'])
+        else:
+            for idx in client['journals']:
+                self.page_service.release_page(idx)
+            del self.clients[name]
+            result['success'] = True
+        return json.dumps(result)
     
     def process_socket_message(self):
         readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
