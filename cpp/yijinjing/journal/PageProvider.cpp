@@ -23,7 +23,6 @@
 #include "Journal.h"
 #include "PageProvider.h"
 #include "PageCommStruct.h"
-#include "PageSocketStruct.h"
 #include "PageUtil.h"
 #include "Page.h"
 
@@ -38,36 +37,29 @@ USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
 
-/** get socket response via paged_socket */
-void getSocketRsp(int client_request_socket, PagedSocketRequest &req, PagedSocketResponseBuf &output)
+/** send req via socket and get response in data */
+void ClientPageProvider::getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, const string& name)
 {
     json input_json = json{
         {"type", req.type},
-        {"name", req.name},
+        {"name", name},
         {"pid", req.pid},
         {"hash_code", req.hash_code},
         {"source", req.source}
     };
     string input = input_json.dump();
     int bytes;
-    bytes = nn_send(client_request_socket, input.c_str(), input.length() + 1, 0);
+    bytes = nn_send(client_request_socket, input.c_str(), input.length(), 0);
     if (bytes < 0)
     {
         SPDLOG_ERROR("nn_send");
     }
-    bytes = nn_recv(client_request_socket, output.data(), SOCKET_MESSAGE_MAX_LENGTH, 0);
+    bytes = nn_recv(client_request_socket, response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);
     if (bytes < 0)
     {
         SPDLOG_ERROR("nn_recv");
     }
-}
-
-/** send req via socket and get response in data */
-void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, PagedSocketResponseBuf& data, const string& name)
-{
-    // memcpy(req.name, name.c_str(), name.length() + 1);
-    req.name = name;
-    getSocketRsp(client_request_socket, req, data);
+    response.assign(response_buf, bytes);
 }
 
 ClientPageProvider::ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed):
@@ -98,13 +90,20 @@ void ClientPageProvider::register_client()
 #else
     req.pid = getpid();
 #endif
-    PagedSocketResponseBuf rspArray;
-    getSocketRspOnReq(client_request_socket, req, rspArray, client_name);
-    PagedSocketRspClient* rsp = (PagedSocketRspClient*)(&rspArray[0]);
-    hash_code = rsp->hash_code;
-    if (rsp->type == req.type && rsp->success)
+    getSocketRspOnReq(client_request_socket, req, client_name);
+    SPDLOG_INFO("parse register client response {}", response);
+    json rsp_json = json::parse(response);
+    PagedSocketRspClient rsp;
+    rsp_json.at("type").get_to(rsp.type);
+    rsp_json.at("success").get_to(rsp.success);
+    rsp_json.at("error_msg").get_to(rsp.error_msg);
+    rsp_json.at("comm_file").get_to(rsp.comm_file);
+    rsp_json.at("file_size").get_to(rsp.file_size);
+    rsp_json.at("hash_code").get_to(rsp.hash_code);
+    hash_code = rsp.hash_code;
+    if (rsp.type == req.type && rsp.success)
     {
-        comm_buffer = PageUtil::LoadPageBuffer(string(rsp->comm_file), rsp->file_size, true, false /*server lock this already*/);
+        comm_buffer = PageUtil::LoadPageBuffer(string(rsp.comm_file), rsp.file_size, true, false /*server lock this already*/);
     }
     else
     {
@@ -118,20 +117,23 @@ void ClientPageProvider::exit_client()
     PagedSocketRequest req = {};
     req.type = PAGED_SOCKET_CLIENT_EXIT;
     req.hash_code = hash_code;
-    PagedSocketResponseBuf rspArray;
-    getSocketRspOnReq(client_request_socket, req, rspArray, client_name);
+    getSocketRspOnReq(client_request_socket, req, client_name);
 }
 
 int ClientPageProvider::register_journal(const string& dir, const string& jname)
 {
     PagedSocketRequest req = {};
     req.type = PAGED_SOCKET_JOURNAL_REGISTER;
-    PagedSocketResponseBuf rspArray;
-    getSocketRspOnReq(client_request_socket, req, rspArray, client_name);
-    PagedSocketRspJournal* rsp = (PagedSocketRspJournal*)(&rspArray[0]);
+    getSocketRspOnReq(client_request_socket, req, client_name);
+    json rsp_json = json::parse(response);
+    PagedSocketRspJournal rsp;
+    rsp_json.at("type").get_to(rsp.type);
+    rsp_json.at("success").get_to(rsp.success);
+    rsp_json.at("error_msg").get_to(rsp.error_msg);
+    rsp_json.at("comm_idx").get_to(rsp.comm_idx);
     int comm_idx = -1;
-    if (rsp->type == req.type && rsp->success)
-        comm_idx = rsp->comm_idx;
+    if (rsp.type == req.type && rsp.success)
+        comm_idx = rsp.comm_idx;
     else
         throw std::runtime_error("cannot register journal: " + client_name);
 

@@ -42,10 +42,7 @@ if(WIN32)
 #    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /VERBOSE")
 endif()
 
-OPTION(USE_SERVICE "use memory service" ON)
-OPTION(USE_HASH_CODE "use hash code when writing" ON)
 OPTION(test "Build all tests." ON) # Makes boolean 'test' available.
-
 ENABLE_TESTING()
 
 ############################################################

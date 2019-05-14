@@ -77,11 +77,20 @@ int64_t JournalWriter::write_frame_full(const void* data, FH_TYPE_LENGTH length,
 
 JournalWriterPtr JournalWriter::create(const string& dir, const string& jname, const string& writerName)
 {
-#ifdef USE_PAGED_SERVICE
-    PageProviderPtr provider = PageProviderPtr(new ClientPageProvider(writerName, true));
-#else
-    PageProviderPtr provider = PageProviderPtr(new LocalPageProvider(true));
-#endif
+    return JournalWriter::create(dir, jname, writerName, true);
+}
+
+JournalWriterPtr JournalWriter::create(const string& dir, const string& jname, const string& writerName, const bool client)
+{
+    PageProviderPtr provider;
+    if (client)
+    {
+        provider = PageProviderPtr(new ClientPageProvider(writerName, true));
+    }
+    else
+    {
+        provider = PageProviderPtr(new LocalPageProvider(true));
+    }
     return JournalWriter::create(dir, jname, provider);
 }
 

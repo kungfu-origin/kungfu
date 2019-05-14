@@ -20,7 +20,7 @@ PROJECT(paged)
 INCLUDE_DIRECTORIES(../longfist)
 INCLUDE_DIRECTORIES(../journal)
 
-SET(LIB_SOURCE_FILES PageEngine.h PageEngine.cpp PageSocketHandler.cpp PageSocketHandler.h PageServiceTask.cpp PageServiceTask.h)
+SET(LIB_SOURCE_FILES PageEngine.h PageEngine.cpp PageServiceTask.cpp PageServiceTask.h)
 
 PYBIND11_ADD_MODULE(${PROJECT_NAME} ${LIB_SOURCE_FILES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE journal ${Boost_LIBRARIES})

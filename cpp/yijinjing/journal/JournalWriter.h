@@ -86,6 +86,7 @@ public:
 public:
     // creators
     static JournalWriterPtr create(const string& dir, const string& jname, const string& writerName);
+    static JournalWriterPtr create(const string& dir, const string& jname, const string& writerName, const bool client);
     static JournalWriterPtr create(const string& dir, const string& jname, PageProviderPtr ptr);
     static JournalWriterPtr create(const string& dir, const string& jname);
 

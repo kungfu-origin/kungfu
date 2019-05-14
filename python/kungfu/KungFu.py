@@ -51,7 +51,7 @@ The supported kungfu commands are:
 
     def paged(self, name, timeout):
         from kungfu.mod import PageManager
-        manager = PageManager.PageManager(name, timeout, os.environ["KF_HOME"])
+        manager = PageManager.PageManager(name, timeout)
         atexit.register(exit_handler, task=manager)
         manager.start()
 

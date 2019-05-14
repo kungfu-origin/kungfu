@@ -57,11 +57,7 @@ JournalReaderPtr JournalReader::create(const vector<string>& dirs, const vector<
     std::stringstream ss;
     ss << readerName << "_R";
     string clientName = ss.str();
-#ifdef USE_PAGED_SERVICE
     PageProviderPtr provider = PageProviderPtr(new ClientPageProvider(clientName, false));
-#else
-    PageProviderPtr provider = PageProviderPtr(new LocalPageProvider(false));
-#endif
     JournalReaderPtr jrp = JournalReaderPtr(new JournalReader(provider));
 
     assert(dirs.size() == jnames.size());
@@ -121,13 +117,8 @@ JournalReaderPtr JournalReader::createRevisableReader(const string& readerName)
     std::stringstream ss;
     ss << readerName << "_SR";
     string clientName = ss.str();
-#ifdef USE_PAGED_SERVICE
     PageProviderPtr provider = PageProviderPtr(new ClientPageProvider(clientName, false, true));
-#else
-    PageProviderPtr provider = PageProviderPtr(new LocalPageProvider(false, true));
-#endif
     JournalReaderPtr jrp = JournalReaderPtr(new JournalReader(provider));
-
     jrp->addJournal(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
     jrp->jumpStart(getNanoTime());
     return jrp;

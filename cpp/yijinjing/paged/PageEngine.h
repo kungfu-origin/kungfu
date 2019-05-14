@@ -25,8 +25,8 @@
 #define YIJINJING_PAGEENGINE_H
 
 #include "PageCommStruct.h"
-#include "PageSocketHandler.h"
 #include "PageServiceTask.h"
+#include "PageSocketStruct.h"
 #include "JournalWriter.h"
 
 #include <utility>
@@ -67,7 +67,7 @@ struct PageClientInfo
     vector<short> trade_engine_vec;
 };
 
-class PageEngine: public IPageSocketUtil
+class PageEngine
 {
     friend class PstPidCheck;
     friend class PstTimeTick;
@@ -111,16 +111,14 @@ public:
 
     /** write string content to system journal */
     bool write(string content, byte msg_type, bool is_last=true, short source=0);
-    /** return true if msg is written in system journal */
-    bool switch_trading_day();
     /** get status in python dictionary */
     pybind11::dict  getStatus() const;
 
 public:
     // functions required by IPageSocketUtil
-    int     reg_journal(const string& clientName);
-    bool    reg_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
-    void    exit_client(const string& clientName, int hashCode, bool needHashCheck);
+    std::string    reg_journal(const string& clientName);
+    std::string    reg_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
+    std::string    exit_client(const string& clientName, int hashCode, bool needHashCheck);
     void    acquire_mutex() const;
     void    release_mutex() const;
     void    set_last_switch_nano(int64_t nano) { last_switch_nano = nano; }
@@ -140,15 +138,11 @@ private:
     ThreadPtr taskThread;
     /** thread for comm buffer checking */
     ThreadPtr commThread;
-    /** thread for socket listening */
-    ThreadPtr socketThread;
 
 private:
     // several threading to run:
     // 1. check communicate memory (main, need efficiency)
     void start_comm();
-    // 2. socket listening
-    void start_socket();
     // 3. run all tasks
     void start_task();
 

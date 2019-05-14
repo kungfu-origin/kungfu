@@ -126,7 +126,7 @@ void* PageUtil::LoadPageBuffer(const string& path, int size, bool isWriting, boo
 		FILE_ATTRIBUTE_NORMAL,
 		NULL);
 
-	if (dumpFileDescriptor == NULL)
+	if (dumpFileDescriptor == INVALID_HANDLE_VALUE)
 	{
 		if (!isWriting) return nullptr;
 
@@ -245,7 +245,7 @@ bool PageUtil::FileExists(const string& filename)
 		FILE_ATTRIBUTE_NORMAL,
 		NULL);
 
-	if (dumpFileDescriptor == NULL) return false;
+	if (dumpFileDescriptor == INVALID_HANDLE_VALUE) return false;
 	else return true;
 #else
     int fd = open(filename.c_str(), O_RDONLY, (mode_t)0600);

@@ -24,6 +24,7 @@
 #define YIJINJING_PAGEPROVIDER_H
 
 #include "IPageProvider.h"
+#include "PageSocketStruct.h"
 
 YJJ_NAMESPACE_START
 
@@ -73,6 +74,8 @@ class ClientPageProvider: public PageProvider
 {
 protected:
     string  client_name;
+    char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
+    string  response;
     void*   comm_buffer;
     int     hash_code;
     int     client_request_socket;
@@ -90,6 +93,8 @@ public:
     virtual PagePtr getPage(const string &dir, const string &jname, int serviceIdx, short pageNum);
     /** override IPageProvider */
     virtual void releasePage(void* buffer, int size, int serviceIdx);
+private:
+    void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, const string& name);
 };
 
 YJJ_NAMESPACE_END

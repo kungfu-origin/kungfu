@@ -36,8 +36,6 @@ YJJ_NAMESPACE_START
 //////////////////////////////////////////
 /// (byte) PagedSocketTypeConstants
 //////////////////////////////////////////
-// test 0~9
-#define PAGED_SOCKET_CONNECTION_TEST    0  /**< test connection, return "hello world!" */
 // register / exit 10 ~ 19
 #define PAGED_SOCKET_JOURNAL_REGISTER   11 /**< register journal */
 #define PAGED_SOCKET_READER_REGISTER    12 /**< register client (reader) */
@@ -69,14 +67,14 @@ struct PagedSocketResponse
     int8_t    type;
     /** return true if success */
     bool    success;
-    /** error message if failure '\0' if success. */
-    char    error_msg[SOCKET_ERROR_MAX_LENGTH];
+    /** error message */
+    string    error_msg;
 };
 
 struct PagedSocketRspClient: public PagedSocketResponse
 {
     /** comm_file is provided for further page usage */
-    char    comm_file[JOURNAL_FOLDER_MAX_LENGTH];
+    string    comm_file;
     /** size of comm_file */
     int32_t     file_size;
     /** hash code of this client */

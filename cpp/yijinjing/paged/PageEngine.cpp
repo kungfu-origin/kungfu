@@ -76,7 +76,7 @@ PageEngine::PageEngine(const string& _base_dir) : base_dir(_base_dir), commBuffe
     tasks.clear();
     add_task(PstBasePtr(new PstPidCheck(this))); // pid check is a necessary task.
 
-    SPDLOG_INFO("page engine base dir {}", get_kungfu_home());
+    SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
 }
 
 PageEngine::~PageEngine()
@@ -87,24 +87,15 @@ PageEngine::~PageEngine()
 void PageEngine::start()
 {
     getNanoTime(); // init NanoTimer before ReqClient, avoid deadlock
-    SPDLOG_INFO("reset socket: {}", PAGED_SOCKET_FILE);
-    remove(string(PAGED_SOCKET_FILE).c_str());
-    // step 0: init commBuffer
-    SPDLOG_INFO("loading page buffer: {}", commFile);
+
+    SPDLOG_INFO("Loading page buffer {}", commFile);
     commBuffer = PageUtil::LoadPageBuffer(commFile, COMM_SIZE, true, true);
     memset(commBuffer, 0, COMM_SIZE);
-    // step 1: start commBuffer checking thread
-    comm_running = false;
+
     commThread = ThreadPtr(new std::thread(boost::bind(&PageEngine::start_comm, this)));
-    // step 2: start socket listening
-    socketThread = ThreadPtr(new std::thread(boost::bind(&PageEngine::start_socket, this)));
-    // make sure buffer / socket are running
-    while (!(PageSocketHandler::getInstance()->is_running() && comm_running))
-    {
-        std::this_thread::sleep_for(std::chrono::microseconds(INTERVAL_IN_MILLISEC / 10));
-    }
-    SPDLOG_INFO("creating writer: {} {}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
-    writer = JournalWriter::create(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME, "paged");
+
+    SPDLOG_INFO("Creating writer at {} for {}", PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME);
+    writer = JournalWriter::create(PAGED_JOURNAL_FOLDER, PAGED_JOURNAL_NAME, "paged", false);
 
     if (microsecFreq <= 0)
         throw std::runtime_error("unaccepted task time interval");
@@ -116,13 +107,11 @@ void PageEngine::start()
 void PageEngine::set_freq(double secondFreq)
 {
     microsecFreq = (int)(secondFreq * MICROSECONDS_PER_SECOND);
-    SPDLOG_INFO("microsecond frequency updated to {}", microsecFreq);
+    SPDLOG_INFO("Microsecond frequency updated to {}", microsecFreq);
 }
 
 void PageEngine::stop()
 {
-    SPDLOG_INFO("(stop) try...");
-
     /* write paged end in system journal */
     write("", MSG_TYPE_PAGED_END);
     writer.reset();
@@ -134,7 +123,7 @@ void PageEngine::stop()
         taskThread->join();
         taskThread.reset();
     }
-    SPDLOG_INFO("(stopTask) done");
+    SPDLOG_INFO("PageEngine taskThread stopped");
 
     /* stop comm thread */
     comm_running = false;
@@ -143,19 +132,10 @@ void PageEngine::stop()
         commThread->join();
         commThread.reset();
     }
-    SPDLOG_INFO("(stopComm) done");
-
-    /* stop socket io thread */
-    PageSocketHandler::getInstance()->stop();
-    if (socketThread.get() != nullptr)
-    {
-        socketThread->join();
-        socketThread.reset();
-    }
-    SPDLOG_INFO("(stopSocket) done");
+    SPDLOG_INFO("PageEngine commThread stopped");
 
     /* finish up */
-    SPDLOG_INFO("(stop) done");
+    SPDLOG_INFO("PageEngine stopped");
 }
 
 void PageEngine::start_task()
@@ -209,12 +189,7 @@ bool PageEngine::remove_task_by_name(string taskName)
     return true;
 }
 
-void PageEngine::start_socket()
-{
-    PageSocketHandler::getInstance()->run(this);
-}
-
-int PageEngine::reg_journal(const string& clientName)
+std::string PageEngine::reg_journal(const string& clientName)
 {
     size_t idx = 0;
     for (; idx < MAX_COMM_USER_NUMBER; idx++)
@@ -224,7 +199,12 @@ int PageEngine::reg_journal(const string& clientName)
     if (idx >= MAX_COMM_USER_NUMBER)
     {
         SPDLOG_ERROR("idx {} exceeds limit {}", idx, MAX_COMM_USER_NUMBER);
-        return -1;
+        return json{
+            {"type", PAGED_SOCKET_JOURNAL_REGISTER},
+            {"success", false},
+            {"error_msg", "idx exceeds limit"},
+            {"comm_idx", idx}
+        }.dump();
     }
     if (idx > maxIdx)
         maxIdx = idx;
@@ -236,18 +216,34 @@ int PageEngine::reg_journal(const string& clientName)
     if (it == clientJournals.end())
     {
         SPDLOG_ERROR("cannot find the client in reg_journal");
-        return -1;
+        return json{
+            {"type", PAGED_SOCKET_JOURNAL_REGISTER},
+            {"success", false},
+            {"error_msg", "cannot find the client"},
+            {"comm_idx", idx}
+        }.dump();
     }
     it->second.user_index_vec.push_back(idx);
-    SPDLOG_INFO("[RegJournal] (client) {} (idx) {}", clientName, idx);
-    return idx;
+    SPDLOG_INFO("Register journal for {} with id {}", clientName, idx);
+    return json{
+        {"type", PAGED_SOCKET_JOURNAL_REGISTER},
+        {"success", true},
+        {"error_msg", ""},
+        {"comm_idx", idx}
+    }.dump();
 }
 
-bool PageEngine::reg_client(string& _commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter)
+std::string PageEngine::reg_client(string& _commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter)
 {
-    SPDLOG_INFO("[RegClient] (name) {} (writer?) {}", clientName, isWriter);
+    SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
     if (clientJournals.find(clientName) != clientJournals.end())
-        return false;
+        return json{
+            {"success", false},
+            {"error_msg", "client already exists"},
+            {"comm_file", this->commFile},
+            {"file_size", COMM_SIZE},
+            {"hash_code", -1}
+        }.dump();
 
     map<int, vector<string> >::iterator it = pidClient.find(pid);
     if (it == pidClient.end())
@@ -269,12 +265,19 @@ bool PageEngine::reg_client(string& _commFile, int& fileSize, int& hashCode, con
     clientInfo.hash_code = hashCode;
     _commFile = this->commFile;
     fileSize = COMM_SIZE;
-    return true;
+    return json{
+        {"type", isWriter ? PAGED_SOCKET_WRITER_REGISTER : PAGED_SOCKET_READER_REGISTER},
+        {"success", true},
+        {"error_msg", ""},
+        {"comm_file", this->commFile},
+        {"file_size", COMM_SIZE},
+        {"hash_code", hashCode}
+    }.dump();
 }
 
 void PageEngine::release_page(const PageCommMsg& msg)
 {
-    SPDLOG_INFO("[RmPage] (folder) {} (jname) {} (pNum) {} (lpNum) {}", msg.folder, msg.name, msg.page_num, msg.last_page_num);
+    SPDLOG_INFO("Release page at {}/{}.{}", msg.folder, msg.name, msg.page_num);
 
     map<PageCommMsg, int>::iterator count_it;
     if (msg.is_writer)
@@ -316,7 +319,7 @@ void PageEngine::release_page(const PageCommMsg& msg)
             if (file_it != fileAddrs.end())
             {
                 void* addr = file_it->second;
-                SPDLOG_INFO("[AddrRm] (path) {} (addr) {}", path, addr);
+                SPDLOG_INFO("Release page at {} with address {}", path, addr);
                 PageUtil::ReleasePageBuffer(addr, JOURNAL_PAGE_SIZE, true);
                 fileAddrs.erase(file_it);
             }
@@ -326,7 +329,7 @@ void PageEngine::release_page(const PageCommMsg& msg)
 
 byte PageEngine::initiate_page(const PageCommMsg& msg)
 {
-    SPDLOG_INFO("[InPage] (folder) {} (jname) {} (pNum) {} (lpNum) {} (writer?) {}", msg.folder, msg.name, msg.page_num, msg.last_page_num, msg.is_writer);
+    SPDLOG_INFO("Initiate page at {} for {}", msg.folder, msg.name);
 
     string path = PageUtil::GenPageFullPath(msg.folder, msg.name, msg.page_num);
     if (fileAddrs.find(path) == fileAddrs.end())
@@ -344,12 +347,12 @@ byte PageEngine::initiate_page(const PageCommMsg& msg)
                     int ret = rename((TEMP_PAGE).c_str(), path.c_str());
                     if (ret < 0)
                     {
-                        SPDLOG_ERROR("[InPage] ERROR: Cannot rename from {} to {}", TEMP_PAGE, path);
+                        SPDLOG_ERROR("Cannot rename from {} to {}", TEMP_PAGE, path);
                         return PAGED_COMM_CANNOT_RENAME_FROM_TEMP;
                     }
                     else
                     {
-                        SPDLOG_INFO("[InPage] TEMP_POOL: {} to {}", TEMP_PAGE, path);
+                        SPDLOG_INFO("Renamed {} to {}", TEMP_PAGE, path);
                         buffer = tempPageIter->second;
                         fileAddrs.erase(tempPageIter);
                     }
@@ -363,7 +366,7 @@ byte PageEngine::initiate_page(const PageCommMsg& msg)
             buffer = PageUtil::LoadPageBuffer(path, JOURNAL_PAGE_SIZE, false, true);
         }
 
-        SPDLOG_INFO("[AddrAdd] (path) {} (addr) {}", path, buffer);
+        SPDLOG_INFO("Added buffer {} to {}", buffer, path);
         fileAddrs[path] = buffer;
     }
 
@@ -386,16 +389,24 @@ byte PageEngine::initiate_page(const PageCommMsg& msg)
     return PAGED_COMM_ALLOCATED;
 }
 
-void  PageEngine::exit_client(const string& clientName, int hashCode, bool needHashCheck)
+std::string  PageEngine::exit_client(const string& clientName, int hashCode, bool needHashCheck)
 {
     map<string, PageClientInfo>::iterator it = clientJournals.find(clientName);
     if (it == clientJournals.end())
-        return;
+        return json{
+            {"type", PAGED_SOCKET_CLIENT_EXIT},
+            {"success", false},
+            {"error_msg", "client does not exist"}
+        }.dump();
     PageClientInfo& info = it->second;
     if (needHashCheck && hashCode != info.hash_code)
     {
-        SPDLOG_ERROR("[RmClient] HASH FAILED.. (name) {} (serverHash) {} (clientHash) {}", clientName, info.hash_code, hashCode);
-        return;
+        SPDLOG_ERROR("Failed to get hash for {}, server {} client {}", clientName, info.hash_code, hashCode);
+        return json{
+            {"type", PAGED_SOCKET_CLIENT_EXIT},
+            {"success", false},
+            {"error_msg", "hash code validation failed"}
+        }.dump();
     }
     if (info.is_strategy)
     {
@@ -418,12 +429,18 @@ void  PageEngine::exit_client(const string& clientName, int hashCode, bool needH
             release_page(*msg);
         msg->status = PAGED_COMM_RAW;
     }
-    SPDLOG_INFO("[RmClient] (name) {} (start) {} (end) {}", clientName, info.reg_nano, getNanoTime());
+    SPDLOG_INFO("Client {} exited, used from {} to {}", clientName, info.reg_nano, getNanoTime());
     vector<string>& clients = pidClient[info.pid];
     clients.erase(remove(clients.begin(), clients.end(), clientName), clients.end());
     if (clients.size() == 0)
         pidClient.erase(info.pid);
     clientJournals.erase(it);
+
+    return json{
+        {"type", PAGED_SOCKET_CLIENT_EXIT},
+        {"success", true},
+        {"error_msg", ""}
+    }.dump();
 }
 
 void PageEngine::start_comm()
@@ -435,7 +452,7 @@ void PageEngine::start_comm()
         if (msg->status == PAGED_COMM_REQUESTING)
         {
             acquire_mutex();
-            SPDLOG_INFO("[Demand] (idx) {}", idx);
+            SPDLOG_INFO("Request page for id {}", idx);
             if (msg->last_page_num > 0 && msg->last_page_num != msg->page_num)
             {
                 short curPage = msg->page_num;
@@ -448,11 +465,6 @@ void PageEngine::start_comm()
             release_mutex();
         }
     }
-}
-
-bool PageEngine::switch_trading_day()
-{
-    return write("", MSG_TYPE_SWITCH_TRADING_DAY);
 }
 
 py::dict PageEngine::getStatus() const
@@ -585,7 +597,11 @@ PYBIND11_MODULE(paged, m)
     .def("stop", &PageEngine::stop)
     .def("setFreq", &PageEngine::set_freq, py::arg("seconds")=0.1)
     .def("status", &PageEngine::getStatus)
-    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0);
+    .def("write", &PageEngine::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
+    .def("reg_journal", &PageEngine::reg_journal, py::arg("clientName"))
+    .def("reg_client", &PageEngine::reg_client, py::arg("commFile"), py::arg("fileSize"), py::arg("hashCode"), py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
+    .def("exit_client", &PageEngine::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
+    ;
 
     m.def("jfolder", &getJournalFolder);
     m.def("jname", &getJournalName);

@@ -27,9 +27,7 @@
 #include "FrameHeader.h"
 #include <string.h> // memcpy
 
-#ifdef FRAME_AUTO_SET_HASHCODE
 #include "Hash.hpp"
-#endif
 
 YJJ_NAMESPACE_START
 
@@ -274,9 +272,7 @@ inline void Frame::setErrorData(FH_TYPE_ERR_ID errorId,
             strncpy(errorMsgStartAddr, errorMsg, ERROR_MSG_MAX_LENGTH - 1);
         memcpy(ADDRESS_ADD(frame, ERROR_FRAME_HEADER_LENGTH), data, dataLength);
         setFrameLength(ERROR_FRAME_HEADER_LENGTH + dataLength);
-#ifdef FRAME_AUTO_SET_HASHCODE
         setHashCode(MurmurHash2(data, dataLength, HASH_SEED));
-#endif
     }
 }
 
@@ -285,9 +281,7 @@ inline void Frame::setData(const void* data, size_t dataLength)
     frame->err_id = 0;
     memcpy(ADDRESS_ADD(frame, BASIC_FRAME_HEADER_LENGTH), data, dataLength);
     setFrameLength(BASIC_FRAME_HEADER_LENGTH + dataLength);
-#ifdef FRAME_AUTO_SET_HASHCODE
     setHashCode(MurmurHash2(data, dataLength, HASH_SEED));
-#endif
 }
 
 inline void Frame::setStatusWritten()

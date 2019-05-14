@@ -1,8 +1,10 @@
 import time
+import os
 import select
+import json
 import cffi
 import nnpy
-from nnpy import ffi, nanomsg
+from nnpy import nanomsg
 
 import pyyjj
 import paged
@@ -10,43 +12,57 @@ import paged
 from kungfu import Constants
 
 class PageManager:
-    def __init__(self, name, timeout, base_dir):
+    def __init__(self, name, timeout):
         self.name = name
         self.timeout = timeout
 
-        self.pub = nnpy.Socket(nnpy.AF_SP, nnpy.PUB)
-        self.pub.bind(Constants.pub_addr)
+        base_dir = os.environ["KF_HOME"]
+        socket_folder = os.path.join(base_dir, 'socket')
+        if not os.path.exists(socket_folder):
+            os.path.mkdirs(socket_folder)
+        socket_path = os.path.join(socket_folder, 'paged.sock')
+        socket_addr = 'ipc://' + socket_path
 
-        self.clients = {}
-        self.client_inputs = []
-
-        self.reg_sock = nnpy.Socket(nnpy.AF_SP, nnpy.REP)
-        self.reg_sock.bind(Constants.reg_addr)
-        reg_fd = self.reg_sock.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
-        self.clients[reg_fd] = self.reg_sock
-        self.client_inputs.append(reg_fd)
+        self.paged_socket = nnpy.Socket(nnpy.AF_SP, nnpy.REP)
+        self.paged_socket.bind(socket_addr)
+        self.paged_fd = self.paged_socket.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
 
         self.page_engine = paged.PageEngine(base_dir)
-        self.running = False
-        self.finished = False
+
+        self.request_handlers = {
+            11: self.register_journal,
+            12: self.register_client,
+            13: self.register_client,
+            19: self.exit_client
+        }
+
+    def register_journal(self, request):
+        return self.page_engine.reg_journal(request['name'])
+
+    def register_client(self, request):
+        comm_file = ''
+        file_size = 0
+        hash_code = 0
+        is_writer = request['type'] == 13
+        return self.page_engine.reg_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
+
+    def exit_client(self, request):
+        return self.page_engine.exit_client(request['name'], request['hash_code'], True)
 
     def start(self):
         self.running = True
         self.run()
 
     def run(self):
-        self.pub.send('now: ' + str(pyyjj.nano()))
         self.page_engine.start()
         while self.running:
-            self.pub.send('now: ' + str(pyyjj.nano()))
-            readable, writable, exceptional = select.select(self.client_inputs, [], self.client_inputs, self.timeout)
-            for fd in readable:
-                print(str(fd) + ': ' + str(self.clients[fd].recv()))
-            self.pub.send(str(self.page_engine.status()))
+            readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
+            if readable:
+                request_data = self.paged_socket.recv()
+                request_json = json.loads(request_data.decode('utf-8'))
+                response_json = self.request_handlers[request_json['type']](request_json)
+                send_bytes = self.paged_socket.send(response_json)
         self.page_engine.stop()
-        self.finished = True
 
     def stop(self):
         self.running = False
-        while not self.finished:
-            time.sleep(self.timeout)
