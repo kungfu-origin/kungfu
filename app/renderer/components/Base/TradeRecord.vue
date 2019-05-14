@@ -8,7 +8,7 @@
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
+            <i class="fa fa-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -17,15 +17,22 @@
         :schema="schema"
         :renderCellClass="renderCellClass"
     ></tr-table>
+    <date-range-selector 
+    @confirm="handleConfirmDateRange"
+    :visible.sync="dateRangeDialogVisiblity"    
+    ></date-range-selector>
 </tr-dashboard>
 
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 import moment from 'moment'
-import {offsetName} from '@/assets/config/tradingConfig'
+import { offsetName } from '@/assets/config/tradingConfig'
 import { debounce, throttleInsert, throttle } from "@/assets/js/utils"
+import { writeCSV } from '__gUtils/fileUtils';
+import DateRangeSelector from './components/DateRangeSelector';
+
 export default {
     name: 'trades-record',
     props: {
@@ -58,8 +65,13 @@ export default {
                 dateRange: null
             },
             getDataLock: false,
-            tableData: Object.freeze([])
+            tableData: Object.freeze([]),
+            dateRangeDialogVisiblity: false
         }
+    },
+
+    components: {
+        DateRangeSelector
     },
 
     computed:{
@@ -144,6 +156,24 @@ export default {
             const t = this;
             t.resetData();
             t.currentId && t.init();
+        },
+
+        //选择日期以及保存
+        handleConfirmDateRange(dateRange){
+            const t = this;
+            console.log(dateRange)
+            t.getDataMethod(t.currentId, {
+                id: t.filter.id,
+                dateRange
+            }).then(res => {
+                if(!res.data) return;
+                t.$saveFile({
+                    title: '成交记录',
+                }).then(filename => {
+                    if(!filename) return;
+                    writeCSV(filename, res.data)
+                })
+            })
         },
 
         //重置数据

@@ -4,10 +4,10 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-         <tr-dashboard-header-item>
+        <tr-dashboard-header-item>
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
-         <tr-dashboard-header-item>
+        <tr-dashboard-header-item>
             <i class="fa fa-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
     </div>
@@ -188,10 +188,6 @@ export default {
                 title: '保存持仓信息',
             }).then(filename => {
                 if(!filename) return;
-                // const data = t.tableData.length 
-                // ? [Object.keys(t.tableData[0]), ...t.tableData.map(row => Object.values(row))]
-                // : []
-                // console.log(data,'---')
                 writeCSV(filename, t.tableData)
             })
         },

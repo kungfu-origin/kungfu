@@ -1,7 +1,7 @@
 <template>
     <el-dialog 
     width="540px" 
-     :title=" (method == 'add' ? '添加' : '设置') + source + '柜台账户'"  
+    :title=" (method == 'add' ? '添加' : '设置') + source + '柜台账户'"  
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleCancel"

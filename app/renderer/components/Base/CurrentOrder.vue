@@ -8,21 +8,11 @@
             <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
+            <i class="fa fa-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
         </tr-dashboard-header-item>
          <tr-dashboard-header-item>
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单">CANCEL</el-button>
         </tr-dashboard-header-item>
-        <!-- <tr-dashboard-header-item width="199px"> -->
-            <!-- <el-date-picker
-                v-model.trim="filter.dateRange"
-                size="mini"
-                type="daterange"
-                range-separator="～"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
-            </el-date-picker> -->            
-        <!-- </tr-dashboard-header-item> -->
     </div>
     <tr-table
     v-if="rendererTable"
@@ -30,6 +20,10 @@
     :schema="schema"
     :renderCellClass="renderCellClass"
     ></tr-table>
+    <date-range-selector 
+    @confirm="handleConfirmDateRange"
+    :visible.sync="dateRangeDialogVisiblity"    
+    ></date-range-selector>
   </tr-dashboard>
 </template>
 
@@ -37,6 +31,8 @@
 import moment from "moment"
 import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig";
 import { debounce, throttle } from "@/assets/js/utils";
+import { writeCSV } from '__gUtils/fileUtils';
+import DateRangeSelector from './components/DateRangeSelector';
 export default {
     name: "current-orders",
     props: {
@@ -55,7 +51,7 @@ export default {
         nanomsgBackData: '',
     },
 
-  data() {
+    data() {
         this.orderDataByKey = {}; //为了把object 转为数据要用的list
         return {
             rendererTable: false,
@@ -65,8 +61,14 @@ export default {
                 dateRange: null 
             },
             getDataLock: false,
-            tableData: Object.freeze([])
+            tableData: Object.freeze([]),
+
+            dateRangeDialogVisiblity: false
         };
+    },
+
+    components: {
+        DateRangeSelector
     },
 
     computed:{
@@ -155,6 +157,24 @@ export default {
             t.currentId && t.init()
         },
 
+        //选择日期以及保存
+        handleConfirmDateRange(dateRange){
+            const t = this;
+            console.log(dateRange)
+            t.getDataMethod(t.currentId, {
+                id: t.filter.id,
+                dateRange
+            }).then(res => {
+                if(!res.data) return;
+                t.$saveFile({
+                    title: '委托记录',
+                }).then(filename => {
+                    if(!filename) return;
+                    writeCSV(filename, res.data)
+                })
+            })
+        },
+
         init: debounce(function() {
             const t = this
             t.$emit('startNanomsg');
@@ -227,8 +247,6 @@ export default {
             t.getDataLock = false;
             return true;
         },
-
-        handleDownload(){},
 
         //对nanomsg推送回来的数据进行处理
         dealNanomsg(data) {

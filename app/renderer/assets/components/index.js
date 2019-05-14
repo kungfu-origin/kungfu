@@ -32,7 +32,7 @@ const components = [
     TrDashboardHeaderItem,
     TrPnl,
     TrTable,
-    TrSearchInput
+    TrSearchInput,
 ]
 
 
