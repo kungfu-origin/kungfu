@@ -290,23 +290,23 @@ namespace kungfu
         std::transform(product.begin(), product.end(), product.begin(), ::tolower);
         if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
             product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
-            product == "pp" || product == "j" || product == "jm" || product == "i")
+            product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg")
         {
             return EXCHANGE_DCE;
         }
-        else if (product == "wh" || product == "pm" || product == "cf" || product == "sr" || product == "ta" || product == "oi" ||
-                product == "ri" || product == "ma" || product == "fg" || product == "rs" || product == "rm" || product == "zc" ||
-                product == "jr" || product == "lr" || product == "sm" || product == "sf" || product == "cy" || product == "ap")
+        else if (product == "sr" || product == "cf" || product == "pm" || product == "wh" || product == "ri" || product == "lr" ||
+                product == "jr" || product == "rm" || product == "rs" || product == "rs" || product == "rm" || product == "oi" ||
+                product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm")
         {
             return EXCHANGE_CZCE;
         }
         else if (product == "cu" || product == "al" || product == "zn" || product == "pb" || product == "ni" || product == "sn" ||
                 product == "au" || product == "ag" || product == "rb" || product == "wr" || product == "hc" || product == "fu" ||
-                product == "bu" || product == "ru")
+                product == "bu" || product == "ru" || product == "sp")
         {
             return EXCHANGE_SHFE;
         }
-        else if (product == "if" || product == "ic" || product == "ih" || product == "tf" || product == "t")
+        else if (product == "if" || product == "ic" || product == "ih" || product == "tf" || product == "tf" || product == "t")
         {
             return EXCHANGE_CFFEX;
         }
@@ -319,7 +319,6 @@ namespace kungfu
             return "";
         }
     }
-
 }
 
 #endif //KUNGFU_BUSINESS_HELPER_H

@@ -9,6 +9,7 @@
 #include <boost/filesystem.hpp>
 #include <spdlog/spdlog.h>
 #include <SQLiteCpp/Transaction.h>
+#include <util/include/business_helper.h>
 
 namespace kungfu
 {
@@ -65,12 +66,15 @@ namespace kungfu
                 rate.close_today_ratio = query.getColumn(8);
                 rate.min_commission = query.getColumn(9);
 
+                strcpy(rate.account_id, account_id_.c_str());
+
                 if (rate.instrument_type == InstrumentTypeStock || rate.instrument_type == InstrumentTypeBond)
                 {
                     memcpy(&stock_rate, &rate, sizeof(InstrumentCommissionRate));
                 }
                 else
                 {
+                    strcpy(rate.exchange_id, get_exchange_id_from_future_instrument_id(rate.instrument_id).c_str());
                     future_rates[rate.instrument_id] = rate;
                 }
             }
