@@ -18,11 +18,7 @@ PROJECT(yijinjing)
 ############################################################
 
 INCLUDE_DIRECTORIES(longfist)
-
 INCLUDE_DIRECTORIES(journal)
-INCLUDE_DIRECTORIES(paged)
 
 ADD_SUBDIRECTORY(journal)
-ADD_SUBDIRECTORY(paged)
-
 ADD_SUBDIRECTORY(pybind)

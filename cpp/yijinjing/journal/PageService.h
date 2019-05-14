@@ -14,9 +14,7 @@
  *****************************************************************************/
 
 /**
- * Page engine, memory service of yijinjing.
- * @Author cjiang (changhao.jiang@taurus.ai)
- * @since   March, 2017
+ * Memory service for YiJinJing
  * Provide centralized memory mapped file "load and lock" service
  * Enable manual controlling on the whole kungfu system via system journal
  */
@@ -25,17 +23,14 @@
 #define YIJINJING_PAGEENGINE_H
 
 #include "PageCommStruct.h"
-#include "PageServiceTask.h"
 #include "PageSocketStruct.h"
 #include "JournalWriter.h"
 
 #include <utility>
-#include <thread>
 
 YJJ_NAMESPACE_START
 
-FORWARD_DECLARE_PTR(PstBase);
-typedef boost::shared_ptr<std::thread> ThreadPtr;
+#define TEMP_PAGE KUNGFU_JOURNAL_FOLDER + "TEMP_PAGE"
 
 /** we call each journal handler (writer or reader)
  *      -- a client for page engine.
@@ -63,8 +58,6 @@ struct PageClientInfo
     int   rid_start;
     /** end rid of the strategy (strategy only) */
     int   rid_end;
-    /** all sources of trade engine that registered (strategy only) */
-    vector<short> trade_engine_vec;
 };
 
 class PageService
@@ -85,78 +78,37 @@ private:
     map<PageCommMsg, int> fileReaderCounts;
     /** map: file to its page buffer */
     map<string, void*> fileAddrs;
-    /** map: task name to task body */
-    map<string, PstBasePtr> tasks;
 
-public:
-    /** default constructor */
-    PageService(const string& _base_dir);
-
-    /** default destructor */
-    virtual ~PageService();
-
-    /** start paged service, mainly start tasks */
-    void start();
-    /** sync stop paged service */
-    void stop();
-
-    /** set task frequency in seconds, default 1 second */
-    void set_freq(double second_interval);
-    /** return true if this task is inserted the first time, false if exits and updated */
-    bool add_task(PstBasePtr task);
-    /** return true if exits and removed */
-    bool remove_task(PstBasePtr task);
-    /** return true if exits and removed */
-    bool remove_task_by_name(string taskName);
-
-    /** write string content to system journal */
-    bool write(string content, byte msg_type, bool is_last=true, short source=0);
-    /** get status in python dictionary */
-    pybind11::dict  getStatus() const;
-
-    void process_one_message();
-
-public:
-    // functions required by IPageSocketUtil
-    std::string    reg_journal(const string& clientName);
-    std::string    reg_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
-    std::string    exit_client(const string& clientName, int hashCode, bool needHashCheck);
-    void    acquire_mutex() const;
-    void    release_mutex() const;
-    void    set_last_switch_nano(int64_t nano) { last_switch_nano = nano; }
-
-private:
     const string base_dir;
     JournalWriterPtr writer; /**< writer for system journal */
     void*   msg_buffer; /**< message buffer */
     int     msg_buffer_idx;
     size_t  msg_buffer_idx_limit;     /**< max index of current assigned comm block */
     string  commFile;   /**< comm file linked to memory */
-    int     microsecFreq;  /**< task frequency in microseconds */
-    bool    task_running;  /**< task thread is running */
-    int64_t    last_switch_nano; /**< last switch day nano time */
     volatile bool    comm_running;  /**< comm buffer checking thread is running */
 
-    /** thread for task running */
-    ThreadPtr taskThread;
+public:
+    /** default constructor */
+    PageService(const string& _base_dir);
 
-private:
-    void start_task();
+    /** start paged service, mainly start tasks */
+    void start();
+    /** sync stop paged service */
+    void stop();
+
+    /** write string content to system journal */
+    bool write(string content, byte msg_type, bool is_last=true, short source=0);
+
+    void process_one_message();
+    std::string    register_journal(const string& clientName);
+    std::string    register_client(string& commFile, int& fileSize, int& hashCode, const string& clientName, int pid, bool isWriter);
+    std::string    exit_client(const string& clientName, int hashCode, bool needHashCheck);
 
 private:
     /** release the page assigned in comm msg */
     void release_page(const PageCommMsg& msg);
     /** initialize the page assigned in comm msg */
     byte initiate_page(const PageCommMsg& msg);
-
-    /** helper functions for getStatus */
-    py::dict  getClientInfo() const;
-    py::dict  getPidInfo() const;
-    py::dict  getUserInfo() const;
-    py::dict  getFileReaderInfo() const;
-    py::dict  getFileWriterInfo() const;
-    py::list  getLockingFiles() const;
-    py::tuple getTaskInfo() const;
 };
 
 YJJ_NAMESPACE_END

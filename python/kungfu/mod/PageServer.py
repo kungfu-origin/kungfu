@@ -7,7 +7,6 @@ import nnpy
 from nnpy import nanomsg
 
 import pyyjj
-import paged
 
 from kungfu import Constants
 
@@ -34,17 +33,17 @@ class PageServer:
         self.paged_socket.bind(socket_addr)
         self.paged_fd = self.paged_socket.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
 
-        self.page_service = paged.PageService(base_dir)
+        self.page_service = pyyjj.PageService(base_dir)
 
     def register_journal(self, request):
-        return self.page_service.reg_journal(request['name'])
+        return self.page_service.register_journal(request['name'])
 
     def register_client(self, request):
         comm_file = ''
         file_size = 0
         hash_code = 0
         is_writer = request['type'] == 13
-        return self.page_service.reg_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
+        return self.page_service.register_client(comm_file, file_size, hash_code, request['name'], request['pid'], is_writer)
 
     def exit_client(self, request):
         return self.page_service.exit_client(request['name'], request['hash_code'], True)

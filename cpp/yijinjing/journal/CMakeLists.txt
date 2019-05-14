@@ -19,9 +19,9 @@ SET(LIB_UTIL_INCLUDE_FILES Timer.h Hash.hpp TypeConvert.hpp)
 SET(LIB_UTIL_SOURCE_FILES Timer.cpp)
 SET(LIB_INCLUDE_FILES constants.h YJJ_DECLARE.h Frame.hpp FrameHeader.h Journal.h JournalHandler.h
         JournalReader.h JournalWriter.h Page.h PageUtil.h PageHeader.h PageProvider.h IPageProvider.h
-        IJournalVisitor.h Log.h)
+        IJournalVisitor.h Log.h PageService.h)
 SET(LIB_SOURCE_FILES Journal.cpp JournalHandler.cpp JournalReader.cpp JournalWriter.cpp Page.cpp PageUtil.cpp
-        PageProvider.cpp)
+        PageProvider.cpp PageService.cpp)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${LIB_SOURCE_FILES} ${LIB_INCLUDE_FILES} ${LIB_UTIL_SOURCE_FILES} ${LIB_UTIL_INCLUDE_FILES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SOVERSION 1.1 VERSION 1.1)

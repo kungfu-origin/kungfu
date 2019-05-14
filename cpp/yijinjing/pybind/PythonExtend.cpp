@@ -26,6 +26,7 @@
 PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include <pybind11/stl.h>
 
+#include "PageService.h"
 #include "JournalReader.h"
 #include "JournalWriter.h"
 #include "Frame.hpp"
@@ -75,6 +76,17 @@ std::string get_journal_folder(const std::string & name)
 
 PYBIND11_MODULE(pyyjj, m)
 {
+    py::class_<PageService, boost::shared_ptr<PageService> >(m, "PageService")
+    .def(py::init<const std::string&>())
+    .def("start", &PageService::start)
+    .def("stop", &PageService::stop)
+    .def("write", &PageService::write, py::arg("content"), py::arg("msg_type"), py::arg("is_last")=true, py::arg("source")=0)
+    .def("process_one_message", &PageService::process_one_message)
+    .def("register_journal", &PageService::register_journal, py::arg("clientName"))
+    .def("register_client", &PageService::register_client, py::arg("commFile"), py::arg("fileSize"), py::arg("hashCode"), py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
+    .def("exit_client", &PageService::exit_client, py::arg("clientName"), py::arg("hashCode"), py::arg("needHashCheck"))
+    ;
+
     // nanosecond-time related
     m.def("nano", &getNanoTime);
     /** two functions named of parseNano with different inputs, we needs to specify here. */
