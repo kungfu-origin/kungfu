@@ -291,6 +291,7 @@ namespace kungfu
         if (accounts_.find(account.account_id) == accounts_.end())
         {
             auto account_manager = std::make_shared<AccountManager>(account.account_id, account.type, db_.c_str());
+            account_manager->set_current_trading_day(trading_day_);
             accounts_[account.account_id] = account_manager;
             account_manager->register_pos_callback(std::bind(&PortfolioManager::impl::on_pos_callback, this, std::placeholders::_1));
             account_manager->register_acc_callback(std::bind(&PortfolioManager::impl::on_acc_callback, this, std::placeholders::_1));
@@ -350,6 +351,7 @@ namespace kungfu
 
     void PortfolioManager::impl::set_current_trading_day(const std::string &trading_day)
     {
+        SPDLOG_INFO("current trading day : {}, trading day to set :{}", trading_day_, trading_day);
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)
