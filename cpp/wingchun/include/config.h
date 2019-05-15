@@ -7,6 +7,8 @@
 
 namespace kungfu
 {
+// app id
+#define KF_APP_ID "TAURUS_KUNGFU_2.0"
 
 // uid generator configuration
 #define UID_EPOCH_SECONDS 1463673600 // "2016-05-20"

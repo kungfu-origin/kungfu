@@ -6,13 +6,14 @@
 #define KUNGFU_ACCOUNT_MANAGER_H
 
 #include "pnl_def.h"
-#include <memory>
 
 namespace kungfu
 {
+    class AccountStorage;
     class AccountManager final : public IPnLDataHandler
     {
     public:
+        friend class AccountStorage;
         explicit AccountManager(const char* account_id, AccountType type, const char* db);
         virtual ~AccountManager();
 
@@ -46,9 +47,13 @@ namespace kungfu
         double calc_tax(const Trade* trade) const;
         AccountInfo get_account_info() const;
 
+        void dump_to_db(SQLite::Database* db, bool save_meta) const;
+
     private:
         class impl;
         impl* impl_;
+        std::string db_file_;
+        AccountStorage* storage_;
     };
     typedef std::shared_ptr<AccountManager> AccountManagerPtr;
 }

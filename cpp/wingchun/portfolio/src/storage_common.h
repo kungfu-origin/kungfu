@@ -131,6 +131,22 @@ namespace kungfu
             db.exec("ROLLBACK");
         }
     }
+
+    inline void save_meta_inner(SQLite::Database& db, int64_t last_update, const std::string& trading_day)
+    {
+        db.exec("DELETE FROM meta");
+        db.exec(fmt::format("INSERT INTO meta(update_time, trading_day) VALUES({}, '{}')", last_update, trading_day));
+    }
+
+    inline void load_meta_inner(SQLite::Database& db, int64_t& last_update, std::string& trading_day)
+    {
+        SQLite::Statement query(db, "SELECT * from meta");
+        if (query.executeStep())
+        {
+            last_update = query.getColumn(0);
+            trading_day = query.getColumn(1).getString();
+        }
+    }
 }
 
 #endif //KUNGFU_STORAGE_COMMON_H

@@ -2,17 +2,24 @@
 // Created by PolarAir on 2019-04-18.
 //
 
-#include "portfolio_manager.hpp"
+#include "portfolio_manager.hxx"
 
 namespace kungfu
 {
-    PortfolioManager::PortfolioManager(const char *db) : impl_(new impl(db))
+    PortfolioManager::PortfolioManager(const char* name, const char *db)
+    : impl_(new impl(db)), db_file_(db), storage_(new PortfolioStorage(name))
     {
-
+        SQLite::Database pnl_db(db, SQLite::OPEN_READONLY);
+        storage_->load(pnl_db, this);
     }
 
     PortfolioManager::~PortfolioManager()
     {
+        if (nullptr != storage_)
+        {
+            delete storage_;
+            storage_ = nullptr;
+        }
         if (nullptr != impl_)
         {
             delete impl_;
@@ -143,5 +150,12 @@ namespace kungfu
     void PortfolioManager::set_static_equity(double equity)
     {
         impl_->set_static_equity(equity);
+    }
+
+    void PortfolioManager::dump_to_db() const
+    {
+        SQLite::Database db(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        db.exec("BEGIN");
+        db.exec(storage_->save(db, this) ? "COMMIT" : "ROLLBACK");
     }
 }

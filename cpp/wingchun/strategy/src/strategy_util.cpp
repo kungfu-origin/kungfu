@@ -65,6 +65,7 @@ namespace kungfu
 
     StrategyUtil::~StrategyUtil()
     {
+        portfolio_manager_->dump_to_db();
     }
 
     bool StrategyUtil::add_md(const std::string &source_id)
@@ -155,6 +156,7 @@ namespace kungfu
     void StrategyUtil::on_trade(const kungfu::Trade& trade)
     {
         portfolio_manager_->on_trade(&trade);
+        portfolio_manager_->dump_to_db();
     }
 
     void StrategyUtil::on_trade_py(uintptr_t trade)
@@ -457,6 +459,7 @@ namespace kungfu
         if (nullptr != portfolio_manager_)
         {
             portfolio_manager_->switch_day(trading_day);
+            portfolio_manager_->dump_to_db();
         }
 
         for (const auto& cb : cbs_)
@@ -477,8 +480,8 @@ namespace kungfu
 
     void StrategyUtil::init_portfolio_manager()
     {
-        std::string asset_db_file = STRATEGY_ASSET_DB_FILE(this->name_);
-        portfolio_manager_ = std::unique_ptr<PortfolioManager>(new PortfolioManager(asset_db_file.c_str()));
+        std::string asset_db_file = STRATEGY_ASSET_DB_FILE(name_);
+        portfolio_manager_ = std::unique_ptr<PortfolioManager>(new PortfolioManager(name_.c_str(), asset_db_file.c_str()));
 
         portfolio_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, publisher_.get(), std::placeholders::_1));
         portfolio_manager_->register_pnl_callback(std::bind(&NNPublisher::publish_portfolio_info, publisher_.get(), std::placeholders::_1,MsgType::Portfolio));
@@ -543,6 +546,7 @@ namespace kungfu
             SPDLOG_INFO("forward portfolio manager from {}|{} to {}|{}", last_update, kungfu::yijinjing::parseNano(last_update, "%Y%m%d-%H:%M:%S"), portfolio_manager_->get_last_update(), kungfu::yijinjing::parseNano(portfolio_manager_->get_last_update(), "%Y%m%d-%H:%M:%S"));
         }
         portfolio_manager_->set_current_trading_day(calendar_->get_current_trading_day());
+        portfolio_manager_->dump_to_db();
         SPDLOG_INFO("portfolio_manager inited and set trading_day to {}", portfolio_manager_->get_current_trading_day());
     }
 }

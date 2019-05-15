@@ -4,25 +4,22 @@
 
 #include "portfolio_storage.h"
 #include "storage_common.h"
-#include <SQLiteCpp/SQLiteCpp.h>
+#include "portfolio_manager.hpp"
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
 namespace kungfu
 {
-    PortfolioStorage::PortfolioStorage(const char *db_file) : db_file_(db_file)
+    PortfolioStorage::PortfolioStorage(const char *name) : name_(name)
     {
-        create_pos_tables(db_file);
-        create_acc_tables(db_file);
-        create_pnl_tables(db_file);
+
     }
 
-    void PortfolioStorage::save(int64_t last_update, const std::string &trading_day, const kungfu::PortfolioInfo &pnl)
+    bool PortfolioStorage::save(SQLite::Database &db, const kungfu::PortfolioManager *pnl_manager)
     {
-        SQLite::Database db(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        db.exec("BEGIN");
         try
         {
+            const auto& pnl = pnl_manager->impl_->pnl_;
             db.exec("DELETE FROM portfolio");
             db.exec("DELETE FROM meta");
 
@@ -33,47 +30,36 @@ namespace kungfu
                                 pnl.trading_day, pnl.update_time, pnl.initial_equity, pnl.static_equity, pnl.dynamic_equity,
                                 pnl.accumulated_pnl, pnl.accumulated_pnl_ratio, pnl.intraday_pnl, pnl.intraday_pnl_ratio));
 
-            db.exec(fmt::format("INSERT INTO meta(update_time, trading_day) VALUES({}, '{}')", last_update, trading_day));
+            for (const auto& acc_iter : pnl_manager->impl_->accounts_)
+            {
+                if (nullptr != acc_iter.second)
+                {
+                    acc_iter.second->dump_to_db(&db, false);
+                }
+            }
 
-            db.exec("COMMIT");
+            save_meta_inner(db, pnl_manager->impl_->last_update_, pnl_manager->impl_->trading_day_);
+            return true;
         } catch (std::exception& e)
         {
-            SPDLOG_ERROR(e.what());
-            db.exec("ROLLBACK");
+            SPDLOG_ERROR("failed to save pnl to db, {}", e.what());
+            return false;
         }
     }
 
-    void PortfolioStorage::save_meta(int64_t last_update, const std::string &trading_day)
+    void PortfolioStorage::load(SQLite::Database &db, kungfu::PortfolioManager *pnl_manager)
     {
-        SQLite::Database db(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        db.exec("BEGIN");
-        try
-        {
-            db.exec(fmt::format("DELETE FROM meta"));
-            db.exec(fmt::format("INSERT INTO meta(update_time, trading_day) VALUES({}, '{}')", last_update, trading_day));
-
-            db.exec("COMMIT");
-        } catch (std::exception& e)
-        {
-            SPDLOG_ERROR(e.what());
-            db.exec("ROLLBACK");
-        }
-    }
-
-    void PortfolioStorage::load(int64_t &last_update, std::string &trading_day, kungfu::PortfolioInfo &pnl,
-            std::map<std::string, AccountManagerPtr> &stock_accounts)
-    {
-        SQLite::Database db(db_file_, SQLite::OPEN_READONLY);
         db.exec("BEGIN");
         try
         {
             SQLite::Statement query_meta(db, "SELECT * FROM meta");
             if (query_meta.executeStep())
             {
-                last_update = query_meta.getColumn(0);
-                trading_day = query_meta.getColumn(1).getString();
+                pnl_manager->impl_->last_update_ = query_meta.getColumn(0);
+                pnl_manager->impl_->trading_day_ = query_meta.getColumn(1).getString();
             }
 
+            auto& pnl = pnl_manager->impl_->pnl_;
             pnl = {};
             SQLite::Statement query_pnl(db, "SELECT * FROM portfolio");
             if (query_pnl.executeStep())
@@ -89,26 +75,20 @@ namespace kungfu
                 pnl.intraday_pnl_ratio = query_pnl.getColumn(8);
             }
 
-            stock_accounts.clear();
-            SQLite::Statement query_count(db, "SELECT count(type) FROM sqlite_master where type = 'table' and name = 'account'");
-            if (query_count.executeStep())
+            pnl_manager->impl_->accounts_.clear();
+            SQLite::Statement query_account(db, "SELECT account_id, type FROM account");
+            while (query_account.executeStep())
             {
-                if (query_count.getColumn(0).getInt() == 1)
-                {
-                    SQLite::Statement query_acc(db, "SELECT account_id FROM account where type = ?");
-                    query_acc.bind(1, std::string(1, AccountTypeStock));
-                    while (query_acc.executeStep())
-                    {
-                        std::string account_id = query_acc.getColumn(0).getString();
-                        stock_accounts[account_id] = std::make_shared<AccountManager>(account_id.c_str(), AccountTypeStock, db_file_.c_str());
-                    }
-                }
+                std::string account_id = query_account.getColumn(0).getString();
+                AccountType type = query_account.getColumn(1).getString()[0];
+                pnl_manager->impl_->accounts_[account_id] = std::make_shared<AccountManager>(account_id.c_str(), type,
+                        db.getFilename().c_str());
             }
 
             db.exec("COMMIT");
         } catch (std::exception& e)
         {
-            SPDLOG_ERROR(e.what());
+            SPDLOG_ERROR("failed to load pnl from db, {}", e.what());
             db.exec("ROLLBACK");
         }
     }

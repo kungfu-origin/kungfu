@@ -131,7 +131,7 @@ namespace kungfu
     {
     public:
         TdGatewayImpl(const std::string& source, const std::string& name, int log_level = SPDLOG_LEVEL_INFO): GatewayImpl(source, name, log_level) {}
-        virtual ~TdGatewayImpl() {}
+        virtual ~TdGatewayImpl();
 
         virtual void init() override;
         virtual void on_started() override;

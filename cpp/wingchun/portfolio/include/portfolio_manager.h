@@ -10,10 +10,12 @@
 
 namespace kungfu
 {
+    class PortfolioStorage;
     class PortfolioManager final : public IPnLDataHandler
     {
     public:
-        explicit PortfolioManager(const char* db);
+        friend class PortfolioStorage;
+        explicit PortfolioManager(const char* name, const char* db);
         virtual ~PortfolioManager();
 
         Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
@@ -47,10 +49,13 @@ namespace kungfu
         void set_static_equity(double equity) override;
         // IPnLDataHandler
 
+        void dump_to_db() const;
 
     private:
         class impl;
         impl* impl_;
+        std::string db_file_;
+        PortfolioStorage* storage_;
     };
     typedef std::shared_ptr<PortfolioManager> PortfolioManagerPtr;
 }

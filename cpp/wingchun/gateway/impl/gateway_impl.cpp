@@ -183,6 +183,11 @@ namespace kungfu
         }
     }
 
+    TdGatewayImpl::~TdGatewayImpl()
+    {
+        account_manager_->dump_to_db(nullptr, true);
+    }
+
     void TdGatewayImpl::init()
     {
         GatewayImpl::init();
@@ -315,6 +320,7 @@ namespace kungfu
         }
 
         account_manager_->set_current_trading_day(get_calendar()->get_current_trading_day());
+        account_manager_->dump_to_db(nullptr, true);
         SPDLOG_INFO("account_manager inited and set to {}", account_manager_->get_current_trading_day());
 
         account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
@@ -431,6 +437,7 @@ namespace kungfu
 
         feed_handler_->on_trade(&trade);
         account_manager_->on_trade(&trade);
+        account_manager_->dump_to_db(nullptr, true);
 
         auto trade_id = trade_storage_->add_trade(trade);
         trade.id = trade_id;
@@ -499,6 +506,7 @@ namespace kungfu
         if (nullptr != account_manager_)
         {
             account_manager_->switch_day(trading_day);
+            account_manager_->dump_to_db(nullptr, true);
         }
     }
 }

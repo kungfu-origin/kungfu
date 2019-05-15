@@ -2,17 +2,27 @@
 // Created by PolarAir on 2019-04-16.
 //
 
-#include "position_manager.hpp"
+#include "position_manager.hxx"
+#include "position_storage.h"
+#include "storage_common.h"
 
 namespace kungfu
 {
-    PositionManager::PositionManager(const char* account_id, const char *db) : impl_(new impl(account_id, db))
+    PositionManager::PositionManager(const char* account_id, const char *db)
+    : impl_(new impl(account_id, db)), db_file_(db), storage_(new PositionStorage(account_id))
     {
-
+        create_pos_tables(db);
+        SQLite::Database pos_db(db, SQLite::OPEN_READONLY);
+        storage_->load(pos_db, this);
     }
 
     PositionManager::~PositionManager()
     {
+        if (nullptr != storage_)
+        {
+            delete storage_;
+            storage_ = nullptr;
+        }
         if (nullptr != impl_)
         {
             delete impl_;
@@ -133,5 +143,25 @@ namespace kungfu
     void PositionManager::set_static_equity(double equity)
     {
         impl_->set_static_equity(equity);
+    }
+
+    void PositionManager::dump_to_db(SQLite::Database *db, bool save_meta) const
+    {
+        if (nullptr != storage_)
+        {
+            bool new_db = nullptr == db;
+            if (new_db)
+            {
+                db = new SQLite::Database(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+                db->exec("BEGIN");
+            }
+            bool ret = storage_->save(*db, this, save_meta);
+            if (new_db)
+            {
+                db->exec(ret ? "COMMIT" : "ROLLBACK");
+                delete db;
+                db = nullptr;
+            }
+        }
     }
 }

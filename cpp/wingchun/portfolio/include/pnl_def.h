@@ -7,7 +7,9 @@
 
 #include "md_struct.h"
 #include "oms_struct.h"
+#include <SQLiteCpp/SQLiteCpp.h>
 #include <functional>
+#include <memory>
 
 namespace kungfu
 {

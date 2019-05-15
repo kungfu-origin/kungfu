@@ -6,15 +6,15 @@
 #define KUNGFU_POSITION_MANAGER_H
 
 #include "pnl_def.h"
-#include <functional>
-#include <memory>
 
 namespace kungfu
 {
+    class PositionStorage;
     class PositionManager final : public IPnLDataHandler
     {
     public:
-        explicit PositionManager(const char* account_id, const char* db);
+        friend class PositionStorage;
+        PositionManager(const char* account_id, const char* db);
         ~PositionManager();
 
         Position get_long_pos(const char* instrument_id, const char* exchange_id) const;
@@ -44,9 +44,13 @@ namespace kungfu
         void set_static_equity(double equity) override;
         // IPnLDataHandler
 
+        void dump_to_db(SQLite::Database* db, bool save_meta) const;
+
     private:
         class impl;
         impl* impl_;
+        std::string db_file_;
+        PositionStorage* storage_;
     };
     typedef std::shared_ptr<PositionManager> PositionManagerPtr;
 }

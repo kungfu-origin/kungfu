@@ -4,26 +4,25 @@
 
 #include "account_storage.h"
 #include "storage_common.h"
-#include <SQLiteCpp/SQLiteCpp.h>
+#include "account_manager.hpp"
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
 namespace kungfu
 {
-    AccountStorage::AccountStorage(const char *account_id, const char *db_file) : account_id_(account_id), db_file_(db_file)
+    AccountStorage::AccountStorage(const char *account_id) : account_id_(account_id)
     {
-        create_pos_tables(db_file);
-        create_acc_tables(db_file);
+
     }
 
-    void AccountStorage::save(int64_t last_update, const std::string &trading_day, const kungfu::AccountInfo &account,
-                              const std::map<std::string, double> &bond_map,
-                              const std::map<int64_t, double> &frozen_map)
+    bool AccountStorage::save(SQLite::Database &db, const kungfu::AccountManager *acc_manager, bool save_meta)
     {
-        SQLite::Database db(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        db.exec("BEGIN");
+        if (nullptr == acc_manager || account_id_ != acc_manager->impl_->account_.account_id)
+            return false;
+
         try
         {
+            const auto& account = acc_manager->impl_->account_;
             db.exec(fmt::format("DELETE FROM account WHERE account_id = '{}' and type = '{}' and source_id = '{}'",
                     account_id_, account.type, account.source_id));
             db.exec(fmt::format("DELETE FROM bond_expire where account_id = '{}'", account_id_));
@@ -44,58 +43,45 @@ namespace kungfu
                                 account.margin, account.accumulated_fee, account.intraday_fee, account.frozen_cash,
                                 account.frozen_margin, account.frozen_fee, account.position_pnl, account.close_pnl));
 
-            for (const auto& iter : bond_map)
+            for (const auto& iter : acc_manager->impl_->bond_map_)
             {
                 db.exec(fmt::format("INSERT INTO bond_expire(date, account_id, amount) VALUES('{}', '{}', {})",
                         iter.first, account_id_, iter.second));
             }
 
-            for (const auto& iter : frozen_map)
+            for (const auto& iter : acc_manager->impl_->frozen_map_)
             {
                 db.exec(fmt::format("INSERT INTO acc_frozen(order_id, account_id, amount) VALUES({}, '{}', {})",
                         iter.first, account_id_, iter.second));
             }
 
-            db.exec(fmt::format("INSERT INTO meta(update_time, trading_day) VALUES({}, '{}')", last_update, trading_day));
+            acc_manager->impl_->pos_manager_.dump_to_db(&db, false);
 
-            db.exec("COMMIT");
+            if (save_meta)
+                save_meta_inner(db, acc_manager->impl_->last_update_, acc_manager->impl_->trading_day_);
+
+            return true;
         } catch (std::exception& e)
         {
-            SPDLOG_ERROR(e.what());
-            db.exec("ROLLBACK");
+            SPDLOG_ERROR("failed to save account to db, {}", e.what());
+
+            return false;
         }
     }
 
-    void AccountStorage::save_meta(int64_t last_update, const std::string &trading_day)
+    void AccountStorage::load(SQLite::Database &db, kungfu::AccountManager *acc_manager)
     {
-        SQLite::Database db(db_file_, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        db.exec("BEGIN");
-        try
-        {
-            db.exec(fmt::format("DELETE FROM meta"));
-            db.exec(fmt::format("INSERT INTO meta(update_time, trading_day) VALUES({}, '{}')", last_update, trading_day));
-
-            db.exec("COMMIT");
-        } catch (std::exception& e)
-        {
-            SPDLOG_ERROR(e.what());
-            db.exec("ROLLBACK");
-        }
-    }
-
-    void AccountStorage::load(int64_t &last_update, std::string &trading_day, kungfu::AccountInfo &account,
-                              std::map<std::string, double> &bond_map, std::map<int64_t, double> &frozen_map)
-    {
-        SQLite::Database db(db_file_, SQLite::OPEN_READONLY);
         db.exec("BEGIN");
         try
         {
             SQLite::Statement query_meta(db, "SELECT * FROM meta");
             if (query_meta.executeStep())
             {
-                last_update = query_meta.getColumn(0);
-                trading_day = query_meta.getColumn(1).getString();
+                acc_manager->impl_->last_update_ = query_meta.getColumn(0);
+                acc_manager->impl_->trading_day_ = query_meta.getColumn(1).getString();
             }
+
+            auto& account = acc_manager->impl_->account_;
             account = {};
             strcpy(account.account_id, account_id_.c_str());
             SQLite::Statement query_account(db, "SELECT * FROM account WHERE account_id = ?");
@@ -128,27 +114,27 @@ namespace kungfu
                 account.close_pnl = query_account.getColumn(23);
             }
 
-            bond_map.clear();
+            acc_manager->impl_->bond_map_.clear();
             SQLite::Statement query_bond(db, "SELECT date, amount FROM bond_expire WHERE account_id = ?");
             query_bond.bind(1, account_id_);
             while (query_bond.executeStep())
             {
-                bond_map[query_bond.getColumn(0).getString()] = query_bond.getColumn(1);
+                acc_manager->impl_->bond_map_[query_bond.getColumn(0).getString()] = query_bond.getColumn(1);
             }
 
-            frozen_map.clear();
+            acc_manager->impl_->frozen_map_.clear();
             SQLite::Statement query_frozen(db, "SELECT order_id, amount FROM acc_frozen WHERE account_id = ?");
             query_frozen.bind(1, account_id_);
             while (query_frozen.executeStep())
             {
-                frozen_map[query_frozen.getColumn(0)] = query_frozen.getColumn(1);
+                acc_manager->impl_->frozen_map_[query_frozen.getColumn(0)] = query_frozen.getColumn(1);
             }
 
             db.exec("COMMIT");
         } catch (std::exception& e)
         {
-            SPDLOG_ERROR(e.what());
             db.exec("ROLLBACK");
+            SPDLOG_ERROR("failed to load account from db, {}", e.what());
         }
     }
 }

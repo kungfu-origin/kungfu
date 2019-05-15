@@ -5,24 +5,21 @@
 #ifndef KUNGFU_PORTFOLIO_STORAGE_H
 #define KUNGFU_PORTFOLIO_STORAGE_H
 
-#include "oms_struct.h"
-#include "../include/account_manager.h"
-#include <map>
+#include <SQLiteCpp/SQLiteCpp.h>
 
 namespace kungfu
 {
+    class PortfolioManager;
     class PortfolioStorage
     {
     public:
-        explicit PortfolioStorage(const char* db_file);
+        explicit PortfolioStorage(const char* name);
 
-        void save(int64_t last_update, const std::string& trading_day, const PortfolioInfo& pnl);
-        void save_meta(int64_t last_update, const std::string& trading_day);
-
-        void load(int64_t& last_update, std::string& trading_day, PortfolioInfo& pnl, std::map<std::string, AccountManagerPtr>& stock_accounts);
+        bool save(SQLite::Database& db, const PortfolioManager* pnl_manager);
+        void load(SQLite::Database& db, PortfolioManager* pnl_manager);
 
     protected:
-        std::string db_file_;
+        std::string name_;
     };
 }
 
