@@ -20,7 +20,6 @@ killExtra().catch(err => console.error(err))
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
-var appIcon = null;
 var allowQuit = false;
 function createWindow () {
 	//添加快捷键
