@@ -286,7 +286,7 @@ namespace kungfu
             des.turnover = ori.Turnover;
             des.open_interest = ori.OpenInterest;
             des.close_price = ori.ClosePrice;
-            des.settlement_price = ori.SettlementPrice;
+            des.settlement_price = is_too_large(ori.SettlementPrice) ? 0.0 : ori.SettlementPrice;
             des.upper_limit_price = ori.UpperLimitPrice;
             des.lower_limit_price = ori.LowerLimitPrice;
 
@@ -401,7 +401,7 @@ namespace kungfu
             }
             des.cost_price = ori.PositionCost; //TODO
             des.pre_settlement_price = ori.PreSettlementPrice;
-            des.settlement_price = ori.SettlementPrice;
+            des.settlement_price = is_too_large(ori.SettlementPrice) ? 0.0 : ori.SettlementPrice;
 
             des.margin = ori.UseMargin;
 
