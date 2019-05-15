@@ -454,6 +454,7 @@ namespace kungfu
         if (is_last)
         {
             account_manager_->on_positions(rsp_pos_);
+            account_manager_->dump_to_db(nullptr, true);
             rsp_pos_.clear();
         }
     }
@@ -466,6 +467,7 @@ namespace kungfu
         if (is_last)
         {
             account_manager_->on_position_details(rsp_pos_detail_);
+            account_manager_->dump_to_db(nullptr, true);
             rsp_pos_detail_.clear();
         }
     }
@@ -476,6 +478,7 @@ namespace kungfu
         ACCOUNT_TRACE( kungfu::to_string(account));
         feed_handler_->on_account(&account);
         account_manager_->on_account(account);
+        account_manager_->dump_to_db(nullptr, true);
     }
 
     void TdGatewayImpl::on_1min_timer(int64_t nano)
