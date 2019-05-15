@@ -113,6 +113,7 @@ int32_t PageService::register_journal(const string& clientName)
     for (; idx < MAX_MEMORY_MSG_NUMBER; idx++)
         if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGE_RAW)
             break;
+    SPDLOG_INFO("Register journal for {} with id {}", clientName, idx);
 
     if (idx >= MAX_MEMORY_MSG_NUMBER)
     {
@@ -127,14 +128,12 @@ int32_t PageService::register_journal(const string& clientName)
     PageServiceMessage* msg = GET_MEMORY_MSG(memory_message_buffer, idx);
     msg->status = PAGE_OCCUPIED;
     msg->last_page_num = 0;
-    SPDLOG_INFO("Register journal for {} with id {}", clientName, idx);
     return idx;
 }
 
 uint32_t PageService::register_client(const string& clientName, int pid, bool isWriter)
 {
     SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
-
     map<int, vector<string> >::iterator it = pidClient.find(pid);
     if (it == pidClient.end())
         pidClient[pid] = {clientName};

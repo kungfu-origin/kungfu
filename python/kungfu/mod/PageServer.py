@@ -2,6 +2,7 @@ import time
 import os
 import select
 import json
+import psutil
 import cffi
 import nnpy
 from nnpy import nanomsg
@@ -34,6 +35,7 @@ class PageServer:
         self.paged_fd = self.paged_socket.getsockopt(level=nnpy.SOL_SOCKET, option=nnpy.RCVFD)
 
         self.clients = {}
+        self.processes = {}
         self.page_service = pyyjj.PageService(base_dir)
 
     def register_journal(self, request):
@@ -73,6 +75,11 @@ class PageServer:
             result['error_msg'] = 'client ' + name + ' already exists'
         else:
             hash_code = self.page_service.register_client(name, pid, is_writer)
+            if not pid in self.processes:
+                self.processes[pid] = {}
+                self.processes[pid]['process'] = psutil.Process(pid)
+                self.processes[pid]['clients'] = []
+            self.processes[pid]['clients'].append(name)
             self.clients[name] = {
                 'journals': [],
                 'reg_nano': pyyjj.nano_time(),
@@ -95,19 +102,21 @@ class PageServer:
             'success': False,
             'error_msg': ''
         }
+        self.release_client(name, hash_code, True, result)
+        return json.dumps(result)
 
+    def release_client(self, name, hash_code, validation, result):
         if not name in self.clients:
             result['error_msg'] = 'client ' + name + ' does not exist'
-
+            return
         client = self.clients[name]
-        if hash_code != client['hash_code']:
+        if validation and hash_code != client['hash_code']:
             result['error_msg'] = 'hash code validation failed ' + str(hash_code) + '!=' + str(client['hash_code'])
         else:
             for idx in client['journals']:
                 self.page_service.release_page(idx)
             del self.clients[name]
             result['success'] = True
-        return json.dumps(result)
     
     def process_socket_message(self):
         readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
@@ -116,6 +125,16 @@ class PageServer:
             request_json = json.loads(request_data.decode('utf-8'))
             response_json = self.request_handlers[request_json['type']](request_json)
             send_bytes = self.paged_socket.send(response_json)
+
+    def health_check(self):
+        stale_pids = []
+        for pid in self.processes:
+            if not self.processes[pid]['process'].is_running():
+                for name in self.processes[pid]['clients']:
+                    self.release_client(name, 0, False, {})
+                stale_pids.append(pid)
+        for pid in stale_pids:
+            del self.processes[pid]
 
     def start(self):
         self.running = True
@@ -126,6 +145,7 @@ class PageServer:
         while self.running:
             self.page_service.process_memory_message()
             self.process_socket_message()
+            self.health_check()
         self.page_service.stop()
 
     def stop(self):
