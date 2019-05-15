@@ -388,7 +388,7 @@ namespace kungfu
             strcpy(des.account_id, ori.InvestorID);
             strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(ori.InstrumentID).c_str());
             des.volume = ori.Position;
-            des.yesterday_volume = ori.YdPosition;
+            des.yesterday_volume = ori.Position - ori.TodayPosition;
 
             from_ctp_pos_direction(ori.PosiDirection, des.direction);
             if (des.direction == DirectionLong)
