@@ -71,7 +71,6 @@ export const runClearDB = (dbPath, tableName) => {
 export const runSelectDB = (dbPath, sql, args) =>{
     return new Promise((resolve, reject) => {
         if(!fs.existsSync(dbPath)){
-            
             resolve([]);
             return;
         }
