@@ -127,10 +127,8 @@ class EventLoop:
                 reply = socket.recv(nnpy.DONTWAIT)
                 j_reply = json.loads(reply.decode('utf-8')[:-1])
                 msg_type = j_reply["msg_type"]
-                recipient = j_reply["recipient"]
-                sender = j_reply["sender"]
                 data = j_reply["data"]
-                self.__handle_nanomsg(msg_type, recipient, sender, data)
+                self.__handle_nanomsg(msg_type, data)
             except nnpy.NNError as nnpy_e:
                 # if nothing received, nnpy will throw exception, wtf!!!!!
                 pass
@@ -170,13 +168,18 @@ class EventLoop:
         else:
             pass
 
-    def __handle_nanomsg(self, msg_type, recipient, sender, data):
+    def __handle_nanomsg(self, msg_type, data):
         if msg_type == MsgType.ReqLogin:
             if self._login_cb is not None:
+                recipient = data["recipient"]
+                sender = data["sender"]
                 self._login_cb(recipient, sender)
         elif msg_type == MsgType.Subscribe:
             if self._sub_cb is not None:
-                self._sub_cb(recipient, data)
+                recipient = data["recipient"]
+                instruments = data["instruments"]
+                is_level2 = data["is_level2"]
+                self._sub_cb(recipient, instruments, is_level2)
         elif msg_type == MsgType.ReloadFutureInstrument:
             if self._reload_instruments_cb is not None:
                 self._reload_instruments_cb()
