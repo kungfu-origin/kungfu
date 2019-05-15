@@ -77,7 +77,8 @@ function createWindow () {
 		if (platform === 'win' && !allowQuit) {
 			showQuitMessageBox();	
 			e.preventDefault();
-		}else return
+		}
+		else return
 	})
 
 	mainWindow.on('crashed', () => {
@@ -108,7 +109,8 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function (e) {
 // On macOS it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
- 	if (platform !== 'mac') app.quit()
+	 if (platform !== 'mac') app.quit()
+	 console.log(2222)
 })
 
 app.on('activate', function () {
