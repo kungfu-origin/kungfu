@@ -116,7 +116,7 @@ class PageServer:
             result['success'] = True
     
     def process_socket_message(self):
-        readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], 1)
+        readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], 0)
         if readable:
             request_data = self.paged_socket.recv()
             request_json = json.loads(request_data.decode('utf-8'))
