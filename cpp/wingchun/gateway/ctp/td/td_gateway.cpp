@@ -59,8 +59,6 @@ namespace kungfu
             api_->Init();
 
             GatewayImpl::start();
-            api_->Join();
-
         }
 
         bool TdGateway::login()

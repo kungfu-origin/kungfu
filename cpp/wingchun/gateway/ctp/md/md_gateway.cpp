@@ -41,8 +41,6 @@ namespace kungfu
             api_->Init();
 
             GatewayImpl::start();
-
-            api_->Join();
         }
 
         bool MdGateway::login()

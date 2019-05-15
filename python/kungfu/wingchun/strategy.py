@@ -78,7 +78,7 @@ class Strategy:
 
     def run(self):
 
-        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano()), self.__on_1min_timer)
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano_time()), self.__on_1min_timer)
         self._event_loop.register_nanotime_callback_at_next('15:30:00', self.__on_1day_timer)
 
         self._event_loop.register_quote_callback(self.__process_quote)
@@ -97,11 +97,11 @@ class Strategy:
         self._pre_quit(context)
 
     def add_md(self, source_id):
-        self._event_loop.subscribe_yjj_journal(self.__get_md_journal_folder(source_id), self.__get_md_journal_name(source_id), pyyjj.nano())
+        self._event_loop.subscribe_yjj_journal(self.__get_md_journal_folder(source_id), self.__get_md_journal_name(source_id), pyyjj.nano_time())
         return self._util.add_md(source_id)
 
     def add_account(self, source_id, account_id, cash_limit):
-        self._event_loop.subscribe_yjj_journal(self.__get_td_journal_folder(source_id, account_id), self.__get_td_journal_name(source_id, account_id), pyyjj.nano())
+        self._event_loop.subscribe_yjj_journal(self.__get_td_journal_folder(source_id, account_id), self.__get_td_journal_name(source_id, account_id), pyyjj.nano_time())
         self._event_loop.register_reload_instruments_callback(self._util.reload_instruments)
         url = 'ipc://' + self._base_dir + '/gateway/td_' + source_id + '_' + account_id + '/pub.ipc'
         self._event_loop.subscribe_nanomsg(url)

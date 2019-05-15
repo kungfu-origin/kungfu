@@ -42,15 +42,15 @@ class EventLoop:
 
     def subscribe_yjj_journal(self, journal_folder, journal_name, offset_nano):
         if self._reader is None:
-            self._reader = pyyjj.createReader([journal_folder], [journal_name], offset_nano, self._name)
+            self._reader = pyyjj.create_reader([journal_folder], [journal_name], offset_nano, self._name)
         else:
-            idx = self._reader.addJ(journal_folder, journal_name)
-            self._reader.seekJ(idx, offset_nano)
+            idx = self._reader.add_journal(journal_folder, journal_name)
+            self._reader.seek_time(idx, offset_nano)
 
     def get_nano(self):
         nano = self._scheduler.get_nano()
         if nano == 0:
-            nano = pyyjj.nano()
+            nano = pyyjj.nano_time()
         return nano
 
     def register_nanotime_callback(self, nano, callback):
@@ -120,7 +120,7 @@ class EventLoop:
                 nano = frame.nano()
                 self.__handle_frame(frame)
         if nano == -1:
-            nano = pyyjj.nano()
+            nano = pyyjj.nano_time()
         self._scheduler.update_nano(nano)
         for socket in self._sockets:
             try:
