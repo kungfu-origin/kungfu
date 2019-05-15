@@ -355,7 +355,9 @@ namespace kungfu
                 strcpy(account.account_id, get_account_id().c_str());
                 account.type = AccountTypeFuture;
                 from_ctp(*pTradingAccount, account);
-
+                int64_t nano = kungfu::yijinjing::getNanoTime();
+                account.rcv_time = nano;
+                account.update_time = nano;
                 on_account(account);
 
                 set_state(GatewayState::AccountInfoConfirmed);
@@ -378,6 +380,9 @@ namespace kungfu
                     POSITION_TRACE(to_string(*pInvestorPosition));
                     Position pos = {};
                     from_ctp(*pInvestorPosition, pos);
+                    int64_t nano = kungfu::yijinjing::getNanoTime();
+                    pos.rcv_time = nano;
+                    pos.update_time = nano;
                     on_position(pos, bIsLast);
                 }
 
@@ -406,6 +411,9 @@ namespace kungfu
                     POSITION_DETAIL_TRACE(to_string(*pInvestorPositionDetail));
                     Position pos_detail = {};
                     from_ctp(*pInvestorPositionDetail, pos_detail);
+                    int64_t nano = kungfu::yijinjing::getNanoTime();
+                    pos.rcv_time = nano;
+                    pos.update_time = nano;
                     on_position_detail(pos_detail, bIsLast);
                 }
                 if (bIsLast)

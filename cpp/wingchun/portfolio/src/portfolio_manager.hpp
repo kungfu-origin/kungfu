@@ -351,7 +351,6 @@ namespace kungfu
 
     void PortfolioManager::impl::set_current_trading_day(const std::string &trading_day)
     {
-        SPDLOG_INFO("current trading day : {}, trading day to set :{}", trading_day_, trading_day);
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)

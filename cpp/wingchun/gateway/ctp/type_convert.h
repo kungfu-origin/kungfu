@@ -386,7 +386,7 @@ namespace kungfu
             strcpy(des.instrument_id, ori.InstrumentID);
             des.instrument_type = InstrumentTypeFuture;
             strcpy(des.account_id, ori.InvestorID);
-
+            strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(ori.InstrumentID).c_str());
             des.volume = ori.Position;
             des.yesterday_volume = ori.YdPosition;
 

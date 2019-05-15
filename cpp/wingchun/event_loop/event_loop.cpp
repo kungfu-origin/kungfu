@@ -132,13 +132,15 @@ namespace kungfu
 
     void EventLoop::run()
     {
-        for (int s = 1; s < 32; s++)
-        {
-            signal(s, EventLoop::signal_handler);
-        }
-        
-        quit_ = false;
+        signal(SIGINT, EventLoop::signal_handler);
+        signal(SIGTERM, EventLoop::signal_handler);
+#ifndef _WINDOWS
+        signal(SIGHUP,  EventLoop::signal_handler);
+        signal(SIGQUIT, EventLoop::signal_handler);
+        signal(SIGKILL, EventLoop::signal_handler);
+#endif
 
+        quit_ = false;
         while (! quit_ && signal_received_ < 0)
         {
             iteration();
