@@ -167,6 +167,9 @@
             v-if="visiblity.setFee"
             :visible.sync="visiblity.setFee"
             :accountType="(config[currentAccount.source_name] || {}).typeName"
+            :accountId="currentId"
+            :setFeeSettingData="setFeeSettingData"
+            :getFeeSettingData="getFeeSettingData"
             ></SetFeeDialog>
     </tr-dashboard>
 </template>
@@ -207,7 +210,8 @@ export default {
             taskList: [], //存放kungfu_task数据表内容
             renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
             processStatus: Object.freeze({}),
- 
+            setFeeSettingData: ACCOUNT_API.setFeeSettingData,
+            getFeeSettingData: ACCOUNT_API.getFeeSettingData
         }
     },
 
@@ -357,6 +361,7 @@ export default {
             })
         },
 
+        //打开日志
         handleOpenLogFile(row){
             const logPath = path.join(LOG_DIR, `td_${row.account_id}.log`);
             openReadFile(logPath)

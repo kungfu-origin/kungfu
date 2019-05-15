@@ -13,7 +13,6 @@ export const feeTemplate = (type) => {
             label: '类型',
             type: 'select',
             options: {
-                0: '无',
                 1: '股票',
                 2: '期货',
                 3: '债券',
@@ -21,7 +20,7 @@ export const feeTemplate = (type) => {
             }
         },
         mode: {
-            label: '收取模式',
+            label: '模式',
             type: 'select',
             options: {
                 0: '成交金额',

@@ -16,7 +16,7 @@ console.log(BASE_DIR)
 // addFile(BASE_DIR, 'pm2', 'folder')
 // export const PM2_DIR = path.join(BASE_DIR, 'pm2')
 
-//strategys, accounts, tasks
+//GLOBAL_DIR strategys, accounts, tasks
 addFile(BASE_DIR, 'global', 'folder')
 export const GLOBAL_DIR = path.join(BASE_DIR, 'global');
 
@@ -57,6 +57,21 @@ export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production'
 //gateway
 export const buildGatewayPath = (gatewayName) => {
     return path.join(GATEWAY_DIR, gatewayName)
+}
+
+//account folder
+export const buildAccountFolderPath = (accountId) => {
+    return path.join(ACCOUNTS_DIR, accountId)
+}
+
+//account commission 手续费
+export const buildAccountCommissionDBPath = (accountId) => {
+    return path.join(ACCOUNTS_DIR, accountId, 'commission.db')    
+}
+
+//global commission 手续费
+export const buildGloablCommissionDBPath = () => {
+    return path.join(GLOBAL_DIR, 'commission.db')    
 }
 
 //gateway state

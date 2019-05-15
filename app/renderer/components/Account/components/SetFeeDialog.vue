@@ -6,7 +6,7 @@
     :close-on-click-modal="false"
     @close="handleClose"
     >
-        <el-form class="fee-setting-form" :model="feeSettingForm" ref="feeSettingForm" label-width="80px" size="mini">
+        <el-form class="fee-setting-form" :model="feeSettingForm" ref="feeSettingForm" label-width="90px" size="mini">
             <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="index" size="mini">
                 <div slot="header">
                     <span>{{feeSetting.default ? '默认' : (feeSetting.instrument_id || '新费率设置')}}</span>
@@ -48,7 +48,6 @@
 import Vue from 'vue';
 import {feeTemplate} from '../config/feeConfig.js';
 import {Card} from 'element-ui';
-
 Vue.use(Card)
 
 export default {
@@ -60,6 +59,18 @@ export default {
         accountType: {
             type: String,
             default: 'stock'
+        },
+        accountId: {
+            type: String,
+            default: ''
+        },
+        setFeeSettingData: {
+            type: Function,
+            default: () => {}
+        },
+        getFeeSettingData: {
+            type: Function,
+            default: () => {}
         }
     },
 
@@ -78,6 +89,22 @@ export default {
                 ]
             }
         }
+    },
+
+    mounted(){
+        const t = this;
+        //获取数据
+        //需要保证与当前账户类型一致，
+        //过滤 stock: 股票 债券 etf, 
+        //    future: 其他
+        const targetTypes = t.accountType === 'stock' ? [0, 1, 3] : [2, 4]
+        t.getFeeSettingData(t.accountId.toAccountId()).then(res => {
+            t.feeSettingForm.fees = res.map(res => {
+                //指定默认
+                if (res.instrument_id === '')  res.default = true
+                return res;    
+            }).filter(f => targetTypes.indexOf(+f.instrument_type) !== -1)
+        })
     },
 
     methods: {
@@ -105,9 +132,25 @@ export default {
             const t = this;
             t.$refs['feeSettingForm'].validate(valid => {
                 if(valid){
-                    console.log(Object.freeze(t.feeSettingForm.fees))
-                    t.$emit('confirm', Object.freeze(t.feeSettingForm.fees))
-                    t.clearData()
+                    const feeSettingData = t.resolveFeeSettingData(t.feeSettingForm.fees, t.sourceType)
+                    t.setFeeSettingData(t.accountId.toAccountId(), feeSettingData).then(res => {
+                        t.$message.success('操作成功！')
+                        t.clearData()
+                    })
+                    .catch(err => t.$message.error(err || '操作失败！'))
+                }
+            })
+        },
+
+        resolveFeeSettingData(fees, sourceType){
+            const instrumentType = sourceType === 'future' ? '2' : '1'
+            return fees.map(fee => {
+                const f = JSON.parse(JSON.stringify(fee));
+                f.default = null;
+                delete f.default;
+                return {
+                    ...f,
+                    instrument_type: instrumentType
                 }
             })
         },
