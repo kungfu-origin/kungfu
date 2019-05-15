@@ -186,6 +186,8 @@ namespace kungfu
 
         bool TdGateway::req_position()
         {
+            long_pos_map_.clear();
+            short_pos_map_.clear();
             CThostFtdcQryInvestorPositionField req = {};
             strcpy(req.BrokerID, broker_id_.c_str());
             strcpy(req.InvestorID, account_id_.c_str());
@@ -383,11 +385,21 @@ namespace kungfu
                     int64_t nano = kungfu::yijinjing::getNanoTime();
                     pos.rcv_time = nano;
                     pos.update_time = nano;
+                    auto& pos_map = pos.direction == DirectionLong ? long_pos_map_ : short_pos_map_;
+                    auto iter = pos_map.find(std::string(pInvestorPosition->InstrumentID));
+                    if (iter != pos_map.end())
+                    {
+                        pos.volume += iter->second.volume;
+                        pos.yesterday_volume += iter->second.yesterday_volume;
+                    }
+                    pos_map[std::string(pInvestorPosition->InstrumentID)] = pos;
                     on_position(pos, bIsLast);
                 }
 
                 if (bIsLast)
                 {
+                    long_pos_map_.clear();
+                    short_pos_map_.clear();
                     set_state(GatewayState::PositionInfoConfirmed);
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                     req_position_detail();

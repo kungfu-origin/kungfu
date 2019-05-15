@@ -68,6 +68,9 @@ namespace kungfu
             bool login();
             bool req_settlement_confirm();
             bool req_qry_instrument();
+
+            std::unordered_map<std::string, Position> long_pos_map_;
+            std::unordered_map<std::string, Position> short_pos_map_;
         };
     }
 }
