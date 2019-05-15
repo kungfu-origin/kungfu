@@ -10,7 +10,7 @@ class KungFu(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description='Kung Fu Backend',
+            description='Kung Fu Command',
             usage='''kungfu <command> [<args>]
 
 The supported kungfu commands are:
@@ -27,8 +27,8 @@ The supported kungfu commands are:
         journal_group.add_argument("--folder", "-f", dest = "folder", help = "Journal Folder")
         journal_group.add_argument("--journal-name", "-j", dest = "jname", help = "Journal Name")
         journal_group.add_argument("--detail", "-d", action='store_true', dest = "need_detail", help = "Print Data Detail Or Not")
-        journal_group.add_argument("--start-time", "-s", dest= "start_time", help="Start Time (%Y%m%d-%H:%M:%S)")
-        journal_group.add_argument("--end-time", "-e", dest="end_time", help = "End Time(%Y%m%d-%H:%M:%S)")
+        journal_group.add_argument("--start-time", "-s", dest= "start_time", help="Start Time (%%Y%%m%%d-%%H:%%M:%%S)")
+        journal_group.add_argument("--end-time", "-e", dest="end_time", help = "End Time(%%Y%%m%%d-%%H:%%M:%%S)")
         journal_group.add_argument("--keep", "-k", action = "store_true", dest="keep", help = "Keep listening")
 
         strategy_group = parser.add_argument_group('strategy options')
