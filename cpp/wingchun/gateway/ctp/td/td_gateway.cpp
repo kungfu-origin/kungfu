@@ -412,8 +412,8 @@ namespace kungfu
                     Position pos_detail = {};
                     from_ctp(*pInvestorPositionDetail, pos_detail);
                     int64_t nano = kungfu::yijinjing::getNanoTime();
-                    pos.rcv_time = nano;
-                    pos.update_time = nano;
+                    pos_detail.rcv_time = nano;
+                    pos_detail.update_time = nano;
                     on_position_detail(pos_detail, bIsLast);
                 }
                 if (bIsLast)
