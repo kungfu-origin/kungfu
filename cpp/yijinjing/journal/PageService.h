@@ -36,8 +36,6 @@ YJJ_NAMESPACE_START
 class PageService
 {
 private:
-    /** map: pid -> client */
-    map<int, vector<string> > pidClient;
     /** map: file attached with number of writers */
     map<PageServiceMessage, int> fileWriterCounts;
     /** map: file attached with number of readers */

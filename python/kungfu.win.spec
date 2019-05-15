@@ -3,7 +3,6 @@ a = Analysis(['kungfu\\KungFu.py'],
      pathex=['python'],
      binaries=[('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
                ('..\\build\\cpp\\yijinjing\\pybind\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.pyd', '.'),
-               ('..\\build\\cpp\\yijinjing\\paged\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.pyd', '.'),
                ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.'),
                ('C:\\local\\boost_1_64_0\\lib64-msvc-14.1\\*.dll', '.')
                ],

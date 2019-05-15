@@ -134,12 +134,6 @@ int32_t PageService::register_journal(const string& clientName)
 uint32_t PageService::register_client(const string& clientName, int pid, bool isWriter)
 {
     SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
-    map<int, vector<string> >::iterator it = pidClient.find(pid);
-    if (it == pidClient.end())
-        pidClient[pid] = {clientName};
-    else
-        pidClient[pid].push_back(clientName);
-
     std::stringstream ss;
     ss << clientName << getNanoTime() << pid;
     uint32_t hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
