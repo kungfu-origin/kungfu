@@ -12,10 +12,7 @@ import pyyjj
 from kungfu import Constants
 
 class PageServer:
-    def __init__(self, name, timeout):
-        self.name = name
-        self.timeout = timeout
-
+    def __init__(self):
         self.request_handlers = {
             11: self.register_journal,
             12: self.register_client,
@@ -119,7 +116,7 @@ class PageServer:
             result['success'] = True
     
     def process_socket_message(self):
-        readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], self.timeout)
+        readable, writable, exceptional = select.select([self.paged_fd], [], [self.paged_fd], 1)
         if readable:
             request_data = self.paged_socket.recv()
             request_json = json.loads(request_data.decode('utf-8'))
