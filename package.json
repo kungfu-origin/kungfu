@@ -22,10 +22,11 @@
     "clean:view": "rimraf .node-gyp .electron-gyp dist",
     "clean:engine": "cmake-js clean",
     "build": "yarn run build:engine && yarn run build:view",
-    "build:view": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
+    "build:view": "yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "build:engine": "cross-var cmake-js build --$npm_package_config_cmakejsopt",
     "postbuild:engine": "cross-var cross-env CMAKEJSOPT=\"$npm_package_config_cmakejsopt\" pipenv run python python/pyinstaller.py",
-    "dev": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && node .electron-kungfu/dev-runner.js",
+    "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
+    "copy": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && copyfiles -f cpp/wingchun/resources/holidays.db resources/default",
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js"

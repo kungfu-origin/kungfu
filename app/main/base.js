@@ -32,8 +32,8 @@ export const initDB = () => {
         if(err) logger.error(err);
     })
 
-    //commission.db
-    fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(GLOBAL_DIR, 'commission.db'), err => {
+    //holidays.db
+    fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(GLOBAL_DIR, 'holidays.db'), err => {
         if(err) logger.error(err);
     })
 
