@@ -22,7 +22,7 @@
     "clean:view": "rimraf .node-gyp .electron-gyp dist",
     "clean:engine": "cmake-js clean",
     "build": "yarn run build:engine && yarn run build:view",
-    "build:view": "yarn run cover && yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
+    "build:view": "yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "build:engine": "cross-var cmake-js build --$npm_package_config_cmakejsopt",
     "postbuild:engine": "cross-var cross-env CMAKEJSOPT=\"$npm_package_config_cmakejsopt\" pipenv run python python/pyinstaller.py",
     "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
@@ -61,7 +61,7 @@
         "to": "kfc"
       }
     ],
-    "asar": true,
+    "asar": false,
     "asarUnpack": [
       "node_modules\\pm2"
     ],
