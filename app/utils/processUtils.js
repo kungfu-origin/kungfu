@@ -189,16 +189,15 @@ export const startStrategy = (strategyId, strategyPath) => {
 
 //列出所有进程
 export const listProcessStatus = () => {
-    return new Promise((resolve, reject) => {
-        pm2List().then(pList => {
-            let processStatus = {}
-            Object.freeze(pList).forEach(p => {
-                const name = p.name;
-                const status = p.pm2_env.status
-                processStatus[name] = status
-            })
-            resolve(processStatus)
-        }).catch(err => reject(err))
+
+    return pm2List().then(pList => {
+        let processStatus = {}
+        Object.freeze(pList).forEach(p => {
+            const name = p.name;
+            const status = p.pm2_env.status
+            processStatus[name] = status
+        })
+        return processStatus
     })
 }
 
@@ -218,8 +217,7 @@ export const deleteProcess = (processName) => {
         }
         const pids = processes.map(prc => prc.pid);
         pm2Delete(processName)
-        .then(() => {
-            resolve(true)})
+        .then(() => (true))
         .catch(err => reject(err))
         .finally(() => fkill(pids).catch(err => console.error(err)))
     })

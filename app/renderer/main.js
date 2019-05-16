@@ -120,7 +120,9 @@ const {startPageEngine, startCalendarEngine} = require('__gUtils/processUtils');
 startPageEngine(false)
 .then(() => startCalendarEngine(false))
 .catch(err => console.error(err))
-.finally(() => startGetProcessStatus())
+.finally(() => {
+    startGetProcessStatus()
+})
 
 /* eslint-disable no-new */
 new Vue({
