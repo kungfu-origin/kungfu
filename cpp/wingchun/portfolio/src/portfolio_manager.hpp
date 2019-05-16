@@ -7,7 +7,6 @@
 
 #include "../include/portfolio_manager.h"
 #include "../include/account_manager.h"
-#include "portfolio_storage.h"
 #include "util/include/business_helper.h"
 #include "serialize.h"
 #include <spdlog/spdlog.h>

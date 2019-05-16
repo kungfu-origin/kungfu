@@ -3,12 +3,15 @@
 //
 
 #include "portfolio_manager.hxx"
+#include "portfolio_storage.h"
+#include "storage_common.h"
 
 namespace kungfu
 {
     PortfolioManager::PortfolioManager(const char* name, const char *db)
     : impl_(new impl(db)), db_file_(db), storage_(new PortfolioStorage(name))
     {
+        create_pnl_tables(db);
         SQLite::Database pnl_db(db, SQLite::OPEN_READONLY);
         storage_->load(pnl_db, this);
     }

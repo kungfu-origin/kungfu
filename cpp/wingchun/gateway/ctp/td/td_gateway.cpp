@@ -387,8 +387,14 @@ namespace kungfu
                     auto iter = pos_map.find(std::string(pInvestorPosition->InstrumentID));
                     if (iter != pos_map.end())
                     {
+                        pos.cost_price = (pos.cost_price * pos.volume + iter->second.cost_price * iter->second.volume) /
+                                (pos.volume + iter->second.volume);
                         pos.volume += iter->second.volume;
                         pos.yesterday_volume += iter->second.yesterday_volume;
+                        pos.margin += iter->second.margin;
+                        pos.realized_pnl += iter->second.realized_pnl;
+                        pos.unrealized_pnl += iter->second.unrealized_pnl;
+                        pos.position_pnl = pos.realized_pnl + pos.unrealized_pnl;
                     }
                     pos_map[std::string(pInvestorPosition->InstrumentID)] = pos;
                     on_position(pos, bIsLast);

@@ -15,6 +15,7 @@
 
 #include "util/include/business_helper.h"
 #include "util/include/code_convert.h"
+#include "util/instrument/instrument.h"
 
 #include "Timer.h"
 
@@ -399,13 +400,15 @@ namespace kungfu
             {
                 des.frozen_total = ori.ShortFrozen;
             }
-            des.cost_price = ori.PositionCost; //TODO
+
+            int multiplier = InstrumentManager::get_instrument_manager()->get_future_multiplier(des.instrument_id, des.exchange_id);
+            des.cost_price = ori.PositionCost / multiplier / des.volume;
+
             des.pre_settlement_price = ori.PreSettlementPrice;
             des.settlement_price = is_too_large(ori.SettlementPrice) ? 0.0 : ori.SettlementPrice;
 
             des.margin = ori.UseMargin;
 
-            //des.position_cost = ori.OpenAmount;
             des.realized_pnl = ori.CloseProfit;
             des.unrealized_pnl = ori.PositionProfit;
             des.position_pnl = des.realized_pnl + des.unrealized_pnl;
