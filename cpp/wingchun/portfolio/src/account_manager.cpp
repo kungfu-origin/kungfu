@@ -12,6 +12,7 @@ namespace kungfu
     : impl_(new impl(account_id, type, db)), db_file_(db), storage_(new AccountStorage(account_id))
     {
         create_acc_tables(db);
+        create_pos_tables(db);
         SQLite::Database acc_db(db, SQLite::OPEN_READONLY);
         storage_->load(acc_db, this);
     }

@@ -12,6 +12,8 @@ namespace kungfu
     : impl_(new impl(db)), db_file_(db), storage_(new PortfolioStorage(name))
     {
         create_pnl_tables(db);
+        create_acc_tables(db);
+        create_pos_tables(db);
         SQLite::Database pnl_db(db, SQLite::OPEN_READONLY);
         storage_->load(pnl_db, this);
     }
