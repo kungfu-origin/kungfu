@@ -26,6 +26,7 @@
 #include "Journal.h"
 #include "PageProvider.h"
 #include "Timer.h"
+#include "Log.h"
 #include "sys_messages.h"
 #include <mutex> // used by JournalSafeWriter
 
@@ -78,8 +79,7 @@ int64_t JournalWriter::write_frame_full(const void* data, FH_TYPE_LENGTH length,
 JournalWriterPtr JournalWriter::create(const string& dir, const string& jname, const string& writerName)
 {
 #ifdef _WINDOWS
-    #include "Log.h"
-    setup_log(writerName);
+    KungfuLog::setup_log(writerName);
 #endif
     return JournalWriter::create(dir, jname, writerName, true);
 }
