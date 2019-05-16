@@ -90,13 +90,6 @@ export const getAccountTrade = (accountId, {id, dateRange}) => {
     })
 }
 
-/**
- * 获取成交总行数
- * 
- */
-export const getTradeCount = (accountId, sql) => {
-    return runSelectDB(buildAccountTradesDBPath(accountId),`SELECT COUNT(*) FROM trade ${sql}`)
-}
 
 /**
  * 获取账户委托情况

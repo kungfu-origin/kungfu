@@ -77,9 +77,18 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
     const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
     const filterDate = dateRange ? [dateRange0, dateRange1] : [startDate, endDate];
+    console.log(1111)
     return new Promise((resolve, reject) => {
         let tableData = []
         getStrategyAccounts(strategyId).then(accounts => {
+        
+            console.log(accounts, strategyId, id, filterDate, dateRange)
+            console.log(buildAccountOrdersDBPath, '---')
+            console.log(
+                `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
+                ` AND (order_id LIKE '%${id}%' OR instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+                ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
+                (dateRange ? `` : ` AND status NOT IN (3,4,5,6)`), '------=====')
             if(accounts.length == 0) resolve({count: 0, data: []});
             const promises = accounts.map(item => 
                     (runSelectDB(buildAccountOrdersDBPath(
@@ -89,6 +98,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
                         ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
                         (dateRange ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
                     ).then(orders => {
+                        console.log(orders, '--------')
                         tableData = tableData.concat(orders)
                     }))
             )
