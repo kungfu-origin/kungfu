@@ -5,7 +5,9 @@ a = Analysis(['kungfu/KungFu.py'],
                ('../build/cpp/deps/nnpy-1.4.2/build/lib*/*.so', '.')
               ],
      datas=None,
-     hiddenimports=[],
+     hiddenimports=[
+          'cffi'
+          ],
      hookspath=None,
      runtime_hooks=None,
      excludes=None,

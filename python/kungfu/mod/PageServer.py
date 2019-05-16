@@ -3,12 +3,9 @@ import os
 import select
 import json
 import psutil
-import cffi
 import nnpy
-from nnpy import nanomsg
 
 import pyyjj
-
 from kungfu import Constants
 
 class PageServer:
@@ -20,7 +17,7 @@ class PageServer:
             19: self.exit_client
         }
 
-        base_dir = os.environ["KF_HOME"]
+        base_dir = os.getenv('KF_HOME')
         socket_folder = os.path.join(base_dir, 'socket')
         if not os.path.exists(socket_folder):
             os.path.mkdirs(socket_folder)

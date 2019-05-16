@@ -63,7 +63,7 @@ class KungFu(object):
 
     def calendar(self, args):
         from kungfu.mod import Calendar
-        service = Calendar.Calendar(os.environ["KF_HOME"])
+        service = Calendar.Calendar(os.getenv('KF_HOME'))
         service.start()
 
     def md_sandbox(self, args):
