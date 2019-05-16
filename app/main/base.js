@@ -32,6 +32,13 @@ export const initDB = () => {
         if(err) logger.error(err);
     })
 
+    //commission.db
+    fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(GLOBAL_DIR, 'commission.db'), err => {
+        if(err) logger.error(err);
+    })
+
+
+
 }
 
 export const KillKfc = () => {
