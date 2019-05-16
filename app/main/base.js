@@ -6,9 +6,6 @@ const initGobalDB = require('__gConfig/initGlobalDB.json');
 const {GLOBAL_DIR} = require('__gConfig/pathConfig');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
-const fkill = require('fkill');
-const {getProcesses} = require('getprocesses');
-const taskkill = require('taskkill')
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
@@ -38,38 +35,4 @@ export const initDB = () => {
         if(err) logger.error(err);
     })
 }
-
-const winKill = (tasks) => {
-    let pIdList = [];
-    return getProcesses().then(processes => {
-        processes.forEach(p => {
-            const rawCommandLine = p.rawCommandLine
-            tasks.forEach(task => {
-                if(rawCommandLine.indexOf(task) !== -1) pIdList.push(p.pid)
-            })
-        })
-        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
-        return taskkill(pIdList, {
-            force: true,
-            tree: platform === 'win' 
-        })
-    })
-}
-
-const unixKill = (tasks) => {
-    return fkill(tasks, {
-        force: true,
-        tree: platform === 'win'      
-    })
-}
-
-const kfKill = (tasks) => {
-    if(platform !== 'win') return unixKill(tasks)
-    else return winKill(tasks)
-}
-
-
-export const KillKfc = () => kfKill(['kfc'])
-
-export const killExtra = () => kfKill(['kfc', 'pm2'])
 

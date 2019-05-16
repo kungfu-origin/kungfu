@@ -207,11 +207,9 @@ Client.prototype.launchDaemon = function(opts, cb) {
 
   var that = this
   var ClientJS = path.resolve(path.dirname(module.filename), 'Daemon.js');
-
-  if(process.env.NODE_ENV !== 'development') {
-    ClientJS = path.join(process.resourcesPath, 'app.asar.unpacked', 'pm2', 'lib', 'Daemon.js')
-    console.log(ClientJS, '----')
-  }
+  //重新定位Daemon.js位置
+  if(process.env.NODE_ENV !== 'development')
+    ClientJS = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2', 'lib', 'Daemon.js')
 
   var node_args = [];
   var out, err;
