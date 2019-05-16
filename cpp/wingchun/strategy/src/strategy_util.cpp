@@ -38,14 +38,14 @@ namespace kungfu
     {
         kungfu::yijinjing::KungfuLog::setup_log(name);
         kungfu::yijinjing::KungfuLog::set_log_level(spdlog::level::info);
-
-        kungfu::calendar_util::set_logger(spdlog::default_logger());
+        auto logger = spdlog::default_logger();
+        kungfu::calendar_util::set_logger(logger);
 
         create_folder_if_not_exists(STRATEGY_FOLDER(name));
 
         std::string pub_url = STRATEGY_PUB_URL(name);
         publisher_ = std::shared_ptr<NNPublisher>(new NNPublisher(pub_url));
-        publisher_->set_logger(spdlog::default_logger());
+        publisher_->set_logger(logger);
 
         calendar_->register_switch_day_callback(std::bind(&StrategyUtil::on_switch_day, this, std::placeholders::_1));
 
@@ -59,8 +59,8 @@ namespace kungfu
 
         writer_ = kungfu::yijinjing::JournalWriter::create(fmt::format(STRATEGY_JOURNAL_FOLDER_FORMAT, get_base_dir()), this->name_, this->name_);
 
-        kungfu::storage::set_logger(spdlog::default_logger());
-        kungfu::portfolio_util::set_logger(spdlog::default_logger());
+        kungfu::storage::set_logger(logger);
+        kungfu::portfolio_util::set_logger(logger);
 
         init_portfolio_manager();
 

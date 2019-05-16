@@ -36,6 +36,7 @@ namespace kungfu
     {
         kungfu::yijinjing::KungfuLog::setup_log(name);
         kungfu::yijinjing::KungfuLog::set_log_level(log_level);
+        logger_ = spdlog::default_logger();
     }
 
     GatewayImpl::~GatewayImpl()
@@ -47,10 +48,10 @@ namespace kungfu
     {
 
         calendar_ = CalendarPtr(new Calendar());
-        kungfu::calendar_util::set_logger(spdlog::default_logger());
+        kungfu::calendar_util::set_logger(get_logger());
 
         loop_ = std::shared_ptr<EventLoop>(new EventLoop(get_name()));
-        loop_->set_logger(spdlog::default_logger());
+        loop_->set_logger(get_logger());
 
         if (!create_folder_if_not_exists(GATEWAY_FOLDER(this->get_name())))
         {
@@ -81,7 +82,7 @@ namespace kungfu
 
         std::string url = GATEWAY_PUB_URL(name_);
         nn_publisher_ = std::unique_ptr<NNPublisher>(new NNPublisher(url));
-        nn_publisher_->set_logger(spdlog::default_logger());
+        nn_publisher_->set_logger(get_logger());
     }
 
     void GatewayImpl::start()
@@ -195,8 +196,8 @@ namespace kungfu
     {
         GatewayImpl::init();
 
-        storage::set_logger(spdlog::default_logger());
-        portfolio_util::set_logger(spdlog::default_logger());
+        storage::set_logger(get_logger());
+        portfolio_util::set_logger(get_logger());
 
         if (!create_folder_if_not_exists(ACCOUNT_FOLDER(this->get_account_id())))
         {
