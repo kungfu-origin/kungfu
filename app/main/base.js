@@ -37,53 +37,39 @@ export const initDB = () => {
     fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(GLOBAL_DIR, 'holidays.db'), err => {
         if(err) logger.error(err);
     })
-
-
-
 }
 
-export const KillKfc = () => {
-    if(platform !== 'win') {
-        const killList = ['kfc.exe', 'kfc']
-        return fkill(killList, {
+const winKill = (tasks) => {
+    let pIdList = [];
+    return getProcesses().then(processes => {
+        processes.forEach(p => {
+            const rawCommandLine = p.rawCommandLine
+            tasks.forEach(task => {
+                if(rawCommandLine.indexOf(task) !== -1) pIdList.push(p.pid)
+            })
+        })
+        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        return taskkill(pIdList, {
             force: true,
-            tree: platform === 'win'      
+            tree: platform === 'win' 
         })
-    }else{
-        let extraList = [];
-        return getProcesses().then(processes => {
-            processes.forEach(p => {
-                const rawCommandLine = p.rawCommandLine
-                if(rawCommandLine.indexOf('kfc') !== -1) extraList.push(p)
-            })
-            return taskkill(extraList.map(l => l.pid), {
-                force: true,
-                tree: platform === 'win' 
-            })
-        })
-    }
+    })
 }
 
-export const killExtra = () => {
-    if(platform !== 'win') {
-        const killList = ['pm2', 'kfc', '.pm2']
-        return fkill(killList, {
-            force: true,
-            tree: platform === 'win'      
-        })
-    }else{
-        let extraList = [];
-        return getProcesses().then(processes => {
-            processes.forEach(p => {
-                const rawCommandLine = p.rawCommandLine
-                if(rawCommandLine.indexOf('pm2') !== -1) extraList.push(p)
-                if(rawCommandLine.indexOf('kfc') !== -1) extraList.push(p)
-            })
-            return taskkill(extraList.map(l => l.pid), {
-                force: true,
-                tree: platform === 'win' 
-            })
-        })
-    }
+const unixKill = (tasks) => {
+    return fkill(tasks, {
+        force: true,
+        tree: platform === 'win'      
+    })
 }
+
+const kfKill = (tasks) => {
+    if(platform !== 'win') return unixKill(tasks)
+    else return winKill(tasks)
+}
+
+
+export const KillKfc = () => kfKill(['kfc'])
+
+export const killExtra = () => kfKill(['kfc', 'pm2'])
 

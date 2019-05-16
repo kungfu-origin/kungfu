@@ -3,8 +3,8 @@ const path = require('path');
 const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
 const electron = require('electron');
 //base setting, init db
-const {initDB, killExtra, KillKfc} = require('./base');
-const {killGodDaemon} = require('__gUtils/processUtils');
+const {initDB} = require('./base');
+const {killGodDaemon,  killExtra, KillKfc} = require('__gUtils/processUtils');
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 

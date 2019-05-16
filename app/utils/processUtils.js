@@ -3,8 +3,48 @@ const {BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath} = require('__gConfig/pathCo
 const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
+const {getProcesses} = require('getprocesses');
+const taskkill = require('taskkill')
 export const pm2 = require('pm2')
 
+
+//=========================== task kill =========================================
+
+const winKill = (tasks) => {
+    let pIdList = [];
+    return getProcesses().then(processes => {
+        processes.forEach(p => {
+            const rawCommandLine = p.rawCommandLine
+            tasks.forEach(task => {
+                if(rawCommandLine.indexOf(task) !== -1) pIdList.push(p.pid)
+            })
+        })
+        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        return taskkill(pIdList, {
+            force: true,
+            tree: platform === 'win' 
+        })
+    })
+}
+
+const unixKill = (tasks) => {
+    return fkill(tasks, {
+        force: true,
+        tree: platform === 'win'      
+    })
+}
+
+const kfKill = (tasks) => {
+    if(platform !== 'win') return unixKill(tasks)
+    else return winKill(tasks)
+}
+
+
+export const KillKfc = () => kfKill(['kfc'])
+
+export const killExtra = () => kfKill(['kfc', 'pm2'])
+
+//=========================== pm2 manager =========================================
 
 const pm2Connect = () => {
     return new Promise((resolve, reject) => {
@@ -189,7 +229,6 @@ export const startStrategy = (strategyId, strategyPath) => {
 
 //列出所有进程
 export const listProcessStatus = () => {
-
     return pm2List().then(pList => {
         let processStatus = {}
         Object.freeze(pList).forEach(p => {
@@ -219,7 +258,7 @@ export const deleteProcess = (processName) => {
         pm2Delete(processName)
         .then(() => (true))
         .catch(err => reject(err))
-        .finally(() => fkill(pids).catch(err => console.error(err)))
+        .finally(() => kfKill(pids).catch(err => console.error(err)))
     })
 }
 
@@ -245,3 +284,5 @@ export const killGodDaemon = () => {
         }).catch(err => reject(err))
     })
 }
+
+
