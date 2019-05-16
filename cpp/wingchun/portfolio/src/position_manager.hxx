@@ -201,12 +201,12 @@ namespace kungfu
     {
         for (const auto& pos : positions)
         {
+            last_update_ = pos.rcv_time;
             auto key = get_symbol(pos.instrument_id, pos.exchange_id);
             auto& pos_map = pos.direction == DirectionLong ? long_pos_map_ : short_pos_map_;
             if (pos_map.find(key) == pos_map.end())
             {
                 pos_map[key] = pos;
-                pos_map[key].cost_price = choose_price(pos);
             }
             else
             {
@@ -215,6 +215,7 @@ namespace kungfu
                 cur_pos.update_time = pos.update_time;
                 cur_pos.volume = pos.volume;
                 cur_pos.yesterday_volume = pos.yesterday_volume;
+                cur_pos.cost_price = pos.cost_price;
                 if (!is_zero(pos.last_price))
                 {
                     cur_pos.last_price = pos.last_price;
@@ -235,10 +236,10 @@ namespace kungfu
                 {
                     cur_pos.pre_settlement_price = pos.pre_settlement_price;
                 }
-                if (recalc_pos_by_price(cur_pos))
-                {
-                    callback(cur_pos);
-                }
+            }
+            if (recalc_pos_by_price(pos_map[key]))
+            {
+                callback(pos_map[key]);
             }
         }
     }
