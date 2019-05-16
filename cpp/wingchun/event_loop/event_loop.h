@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <csignal>
+#include <spdlog/spdlog.h>
 #include "nn.hpp"
 #include "JournalReader.h"
 #include "md_struct.h"
@@ -35,6 +36,8 @@ namespace kungfu
     {
     public:
         EventLoop(const std::string& name): quit_(false), name_(name), reader_(nullptr), scheduler_(new TaskScheduler()) {};
+
+        void set_logger(std::shared_ptr<spdlog::logger> logger) const { spdlog::set_default_logger(logger->clone("event_loop")); };
 
         void subscribe_nanomsg(const std::string& url);
         void bind_nanomsg(const std::string& url);

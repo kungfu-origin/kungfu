@@ -22,6 +22,12 @@ namespace kungfu
             }
         }
 
+        void MdGateway::init()
+        {
+            MdGatewayImpl::init();
+            spdlog::set_default_logger(get_logger());
+        }
+
         void MdGateway::start()
         {
             login();

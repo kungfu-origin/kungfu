@@ -20,9 +20,15 @@
 #include <chrono>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 namespace kungfu
 {
+    namespace calendar_util
+    {
+        void set_logger(std::shared_ptr<spdlog::logger> logger);
+    }
+
     #define MORNING 0
     #define AFTERNOON 1
     #define EVENING 2

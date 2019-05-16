@@ -3,10 +3,17 @@
 //
 
 #include "calendar/include/calendar.h"
-#include "spdlog/spdlog.h"
 
 namespace kungfu
 {
+    namespace calendar_util
+    {
+        void set_logger(std::shared_ptr<spdlog::logger> logger)
+        {
+            spdlog::set_default_logger(logger->clone("calendar"));
+        }
+    }
+
     Calendar::Calendar() : req_socket_(-1), sub_socket_(-1), started_(false), current_(0)
     {
         std::string req_url = fmt::format(CALENDAR_REP_URL, get_base_dir());

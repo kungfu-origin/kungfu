@@ -85,6 +85,7 @@ namespace kungfu
         const NNPublisher* get_publisher() const { return nn_publisher_.get(); }
         std::shared_ptr<GatewayStateStorage> get_state_storage() const { return state_storage_; }
         std::shared_ptr<nn::socket> get_rsp_socket() const { return rsp_socket_; }
+        std::shared_ptr<spdlog::logger> get_logger() const { return spdlog::default_logger(); }
 
     protected:
         std::string source_;

@@ -10,9 +10,18 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <functional>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 namespace kungfu
 {
+    namespace portfolio_util
+    {
+        inline void set_logger(std::shared_ptr<spdlog::logger> logger)
+        {
+            spdlog::set_default_logger(logger->clone("portfolio"));
+        }
+    }
+
     typedef std::function<void (const Position&)> PositionCallback;
     typedef std::function<void (const AccountInfo&)> AccountCallback;
     typedef std::function<void (const PortfolioInfo&)> PnLCallback;
