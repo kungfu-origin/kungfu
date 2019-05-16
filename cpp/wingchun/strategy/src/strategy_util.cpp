@@ -117,8 +117,8 @@ namespace kungfu
             acc.static_equity = cash_limit;
             acc.dynamic_equity = cash_limit;
             acc.avail = cash_limit;
-            SPDLOG_WARN("strategy {} on account {}", name_, account_id);
             portfolio_manager_->on_account(acc);
+            portfolio_manager_->dump_to_db();
         }
 
         if (rsp.state != GatewayState::Ready)

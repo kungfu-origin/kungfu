@@ -32,15 +32,12 @@ namespace kungfu
 
             for (const auto& acc_iter : pnl_manager->impl_->accounts_)
             {
-                SPDLOG_WARN("pnl storage iter to {}", acc_iter.first);
                 if (nullptr != acc_iter.second)
                 {
-                    SPDLOG_WARN("pnl storage about to dump {}", acc_iter.first);
                     acc_iter.second->dump_to_db(&db, false);
                 }
             }
 
-            SPDLOG_WARN("pnl storage about to save meta {}, {}", pnl_manager->impl_->last_update_, pnl_manager->impl_->trading_day_);
             save_meta_inner(db, pnl_manager->impl_->last_update_, pnl_manager->impl_->trading_day_);
             return true;
         } catch (std::exception& e)
