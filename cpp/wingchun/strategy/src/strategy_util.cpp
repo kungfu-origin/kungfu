@@ -65,6 +65,7 @@ namespace kungfu
 
     StrategyUtil::~StrategyUtil()
     {
+        SPDLOG_WARN("strategy save db before quit");
         portfolio_manager_->dump_to_db();
     }
 
@@ -116,6 +117,7 @@ namespace kungfu
             acc.static_equity = cash_limit;
             acc.dynamic_equity = cash_limit;
             acc.avail = cash_limit;
+            SPDLOG_WARN("strategy {} on account {}", name_, account_id);
             portfolio_manager_->on_account(acc);
         }
 
@@ -427,6 +429,7 @@ namespace kungfu
         {
             is_open = is_open || calendar_->is_open(nano, EXCHANGE_SHFE);
         }
+        SPDLOG_INFO("before push, is_open {} nano {}", is_open ? "true" : "false", nano);
 
         if (is_open)
         {

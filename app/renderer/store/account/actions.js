@@ -71,21 +71,23 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
     //如果新的message，则报警
     messageInfo[gatewayName] = ''
     sub.on('data', buf => {
-        const data = JSON.parse(String(buf).replace(/\0/g,''))      
-        //监听td、md状态
-        if(msgType.gatewayState == data.msg_type) {
-            if(data.data && data.data.message) {
-                const message = data.data.message;
-                if(messageInfo[gatewayName] !== message) debounceMessageError(gatewayName, data.data.message)
-            }else {
-                messageInfo[gatewayName] = '';
-            }
-            //更新md/td状态
-            dispatch('setOneMdTdState', {name: gatewayName, oneState: Object.freeze(data.data)})
-        }
-        //监听资金
-        if(msgType.accountInfo == data.msg_type) {
-            dispatch('setAccountAssetById', {accountId, accountAsset: Object.freeze(data.data)})
+        const data = JSON.parse(String(buf).replace(/\0/g,''))  
+        const dataMsgType = data.msg_type;
+        switch(dataMsgType){
+            case msgType.gatewayState: //监听td、md状态
+                console.log('td md status: ', gatewayName, data.data)
+                dispatch('setOneMdTdState', {name: gatewayName, oneState: Object.freeze(data.data)})
+                if(data.data && data.data.message) {
+                    const message = data.data.message;
+                    if(messageInfo[gatewayName] !== message) debounceMessageError(gatewayName, data.data.message)
+                }else {
+                    messageInfo[gatewayName] = '';
+                }
+                //更新md/td状态
+                break;
+            case msgType.accountInfo: //监听资金
+                dispatch('setAccountAssetById', {accountId, accountAsset: Object.freeze(data.data)})
+                break
         }
     })
 }
