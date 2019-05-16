@@ -8,8 +8,11 @@
 #include <memory>
 #include <csignal>
 #include <spdlog/spdlog.h>
-#include "nn.hpp"
+#include <nn.hpp>
+
+#include "passive.h"
 #include "JournalReader.h"
+
 #include "md_struct.h"
 #include "oms_struct.h"
 #include "msg.h"
@@ -37,7 +40,7 @@ namespace kungfu
     class EventLoop
     {
     public:
-        EventLoop(const std::string& name): quit_(false), name_(name), reader_(nullptr), scheduler_(new TaskScheduler()) {};
+        EventLoop(const std::string& name): quit_(false), name_(name), low_latency_(false), reader_(nullptr), scheduler_(new TaskScheduler()) {};
 
         void set_logger(std::shared_ptr<spdlog::logger> logger) const;
 
@@ -85,8 +88,10 @@ namespace kungfu
         bool quit_;
         std::string name_;
 
-        std::vector<std::shared_ptr<nn::socket>> socket_vec_;
+        bool low_latency_;
+        yijinjing::passive::notice notice_;
         yijinjing::JournalReaderPtr reader_;
+        std::vector<std::shared_ptr<nn::socket>> socket_vec_;
 
         std::unique_ptr<TaskScheduler> scheduler_;
 

@@ -45,7 +45,6 @@ bool PageService::write(string content, byte msg_type, bool is_last, short sourc
 
 PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_message_buffer(nullptr), memory_message_limit(0), memory_msg_file(MEMORY_MSG_FILE) {
     KungfuLog::setup_log("paged");
-    KungfuLog::set_log_level(spdlog::level::info);
 
     SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
 

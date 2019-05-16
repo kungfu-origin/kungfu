@@ -5,6 +5,8 @@
 #ifndef KUNGFU_LOG_H
 #define KUNGFU_LOG_H
 
+#include <stdlib.h>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -17,11 +19,24 @@
 
 YJJ_NAMESPACE_START
 
+#define LOG_LEVEL_ENV "KF_LOG_LEVEL"
+#define DEFAULT_LOG_LEVEL_NAME "info"
 #define DEFAULT_LOG_LEVEL spdlog::level::info
 #define DEFAULT_LOG_PATTERN "[%Y-%m-%d %T.%F] [%^%=8l%$] [pid/tid %6P/%-6t] [%@#%!] %v"
 
 class KungfuLog {
 public:
+    static inline spdlog::level::level_enum get_env_log_level()
+    {
+        std::string level_name = DEFAULT_LOG_LEVEL_NAME;
+        const char *level_env_name = LOG_LEVEL_ENV;
+        char *level_env_value = getenv(level_env_name);
+        if (level_env_value != NULL)
+        {
+            level_name = std::string(level_env_value);
+        }
+        return spdlog::level::from_str(level_name);
+    }
     static inline void setup_log(const string & name)
     {
         boost::filesystem::path log_path = get_kungfu_home();
@@ -43,8 +58,9 @@ public:
         auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(daily_log_path.string(), 0, 0);
         spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
         auto logger = std::make_shared<spdlog::logger>(name, log_sinks);
-        logger->set_level(DEFAULT_LOG_LEVEL);
         logger->set_pattern(DEFAULT_LOG_PATTERN);
+        spdlog::level::level_enum env_log_level = get_env_log_level();
+        logger->set_level(env_log_level);
         spdlog::set_default_logger(logger);
     #ifdef _WINDOWS    
 //        spdlog::flush_every(std::chrono::seconds(1));
@@ -60,7 +76,11 @@ public:
         }
         else
         {
-            spdlog::default_logger()->set_level(static_cast<spdlog::level::level_enum>(level));
+            spdlog::level::level_enum env_log_level = get_env_log_level();
+            if (level < env_log_level)
+            {
+                spdlog::default_logger()->set_level(static_cast<spdlog::level::level_enum>(level));
+            }
         }
     }
 };

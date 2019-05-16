@@ -59,21 +59,21 @@ void JournalFinder::loadJournalInfo(short source, JournalPair (*getJournalPair)(
 }
 
 void JournalFinder::loadJournalInfo(short source) {
-    loadJournalInfo(source, getMdJournalPair);
-    loadJournalInfo(source, getMdRawJournalPair);
-    loadJournalInfo(source, getTdJournalPair);
-    loadJournalInfo(source, getTdRawJournalPair);
-    loadJournalInfo(source, getTdSendJournalPair);
-    loadJournalInfo(source, getTdQJournalPair);
+    // loadJournalInfo(source, getMdJournalPair);
+    // loadJournalInfo(source, getMdRawJournalPair);
+    // loadJournalInfo(source, getTdJournalPair);
+    // loadJournalInfo(source, getTdRawJournalPair);
+    // loadJournalInfo(source, getTdSendJournalPair);
+    // loadJournalInfo(source, getTdQJournalPair);
 }
 
 JournalFinder::JournalFinder() {
-    loadJournalInfo(SOURCE_CTP);
-    loadJournalInfo(SOURCE_XTP);
+    // loadJournalInfo(SOURCE_CTP);
+    // loadJournalInfo(SOURCE_XTP);
 
     loadJournalInfo(0, getSystemJournalPair);
 
-    boost::filesystem::path bl_journal_folder(BL_BASE_FOLDER);
+    boost::filesystem::path bl_journal_folder(KUNGFU_JOURNAL_FOLDER);
     boost::regex pattern(JOURNAL_NAME_PATTERN);
     vector<short> res;
     boost::unordered_set<string> strategy_names;
@@ -83,7 +83,7 @@ JournalFinder::JournalFinder() {
         if (boost::regex_match(filename, result, pattern)) {
             std::string journal_name(result[1].first, result[1].second);
             if (strategy_names.find(journal_name) == strategy_names.end()) {
-                addJournalInfo(journal_name, BL_BASE_FOLDER);
+                addJournalInfo(journal_name, KUNGFU_JOURNAL_FOLDER);
                 strategy_names.insert(journal_name);
             }
         }

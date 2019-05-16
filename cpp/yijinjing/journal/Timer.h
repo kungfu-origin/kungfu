@@ -414,8 +414,8 @@ class NanoTimer
 public:
     /** return current nano time: unix-timestamp * 1e9 + nano-part */
     int64_t   getNano() const;
-    /** return secDiff */
-    inline int64_t getSecDiff() const { return secDiff; }
+    /** return basetime_in_nano */
+    inline int64_t getBasetimeInNano() const { return basetime_in_nano; }
     /** singleton */
     static NanoTimer* getInstance();
 
@@ -423,8 +423,7 @@ private:
     NanoTimer();
     /** singleton */
     static boost::shared_ptr<NanoTimer> m_ptr;
-    /** object to be updated every time called */
-    int64_t secDiff;
+    int64_t basetime_in_nano;
 };
 
 /**
@@ -440,9 +439,9 @@ inline int64_t getNanoTime()
  * util function to utilize NanoTimer
  * @return second diff in int64_t for nano time matching
  */
-inline int64_t getSecDiff()
+inline int64_t getBasetimeInNano()
 {
-    return NanoTimer::getInstance()->getSecDiff();
+    return NanoTimer::getInstance()->getBasetimeInNano();
 }
 
 /**

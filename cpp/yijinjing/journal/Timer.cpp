@@ -22,6 +22,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include "Log.h"
 #include "Timer.h"
 #include "Journal.h"
 #include "PageSocketStruct.h"
@@ -39,63 +40,33 @@ NanoTimer* NanoTimer::getInstance()
 {
     if (m_ptr.get() == nullptr)
     {
+        if(spdlog::default_logger()->name().empty())
+        {
+            KungfuLog::setup_log("timer");
+        }
         m_ptr = boost::shared_ptr<NanoTimer>(new NanoTimer());
     }
     return m_ptr.get();
 }
 
-inline std::chrono::steady_clock::time_point get_time_now()
+inline int64_t now_in_nano()
 {
-    return std::chrono::steady_clock::now();
-}
-
-inline int64_t get_socket_diff()
-{
-    using namespace boost::asio;
-    boost::array<char, SOCKET_MESSAGE_MAX_LENGTH> input, output;
-    io_service io_service;
-
-#ifdef _WINDOWS
-    ip::tcp::socket socket(io_service);
-    socket.connect(ip::tcp::endpoint(ip::tcp::v4(), PAGED_SOCKET_PORT));
-#else
-    local::stream_protocol::socket socket(io_service);
-    socket.connect(local::stream_protocol::endpoint(PAGED_SOCKET_FILE));
-#endif // _WINDOWS
-
-    boost::system::error_code error;
-    input[0] = TIMER_SEC_DIFF_REQUEST;
-    write(socket, buffer(input), error);
-    socket.read_some(buffer(output), error);
-    json socket_info = json::parse(string(&output[0]));
-    return socket_info["secDiff"].get<int64_t>();
-}
-
-inline int64_t get_local_diff()
-{
-    int unix_second_num = std::chrono::seconds(time(NULL)).count();
-    int tick_second_num = std::chrono::duration_cast<std::chrono::seconds>(
-            get_time_now().time_since_epoch()
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()
     ).count();
-    return (unix_second_num - tick_second_num) * NANOSECONDS_PER_SECOND;
 }
 
 NanoTimer::NanoTimer()
 {
-    try
-    {
-        secDiff = get_socket_diff();
-    }
-    catch(...)
-    {
-        secDiff = get_local_diff();
-    }
+    int64_t system_nanotime = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    int64_t local_nanotime = now_in_nano();
+    basetime_in_nano = system_nanotime - local_nanotime;
+    SPDLOG_TRACE("Initialized timer from local: now {}, diff {}", now_in_nano(), basetime_in_nano);
 }
 
 int64_t NanoTimer::getNano() const
 {
-    auto _nano = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            get_time_now().time_since_epoch()
-    ).count();
-    return _nano + secDiff;
+    return now_in_nano() + basetime_in_nano;
 }

@@ -6,7 +6,9 @@ a = Analysis(['kungfu/KungFu.py'],
               ],
      datas=None,
      hiddenimports=[
-          'cffi'
+          'cffi',
+          'numpy',
+          'pandas'
           ],
      hookspath=None,
      runtime_hooks=None,

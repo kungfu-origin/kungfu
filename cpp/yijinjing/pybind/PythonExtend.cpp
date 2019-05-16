@@ -21,7 +21,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
-
 #include <pybind11/pybind11.h>
 PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include <pybind11/stl.h>
@@ -29,12 +28,15 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include "PageService.h"
 #include "JournalReader.h"
 #include "JournalWriter.h"
+#include "JournalFinder.h"
 #include "Frame.hpp"
 #include "Timer.h"
 #include "TypeConvert.hpp"
+#include "passive.h"
+
+#include <spdlog/details/os.h>
 
 namespace py = pybind11;
-
 
 USING_YJJ_NAMESPACE
 
@@ -48,7 +50,6 @@ JournalWriterPtr createWriter(const string& dir, const string& jname, const stri
     return JournalWriter::create(dir, jname, writerName);
 }
 
-/*
 vector<std::string> get_all_journal_names()
 {
     JournalFinder finder;
@@ -72,7 +73,6 @@ std::string get_journal_folder(const std::string & name)
     JournalFinder finder;
     return finder.getJournalFolder(name);
 }
-*/
 
 PYBIND11_MODULE(pyyjj, m)
 {
@@ -88,6 +88,20 @@ PYBIND11_MODULE(pyyjj, m)
     .def("register_client", &PageService::register_client, py::arg("clientName"), py::arg("pid"), py::arg("isWriter"))
     .def("release_page", &PageService::release_page_at, py::arg("idx"))
     ;
+
+    py::class_<passive::emitter, boost::shared_ptr<passive::emitter> >(m, "emitter")
+    .def(py::init<>())
+    .def("poke", &passive::emitter::poke)
+    .def("emit", &passive::emitter::emit)
+    ;
+
+    py::class_<passive::notice, boost::shared_ptr<passive::notice> >(m, "notice")
+    .def(py::init<>())
+    .def("wait", &passive::notice::wait)
+    .def("last_messsage", &passive::notice::last_message)
+    ;
+
+    m.def("thread_id", &spdlog::details::os::thread_id);
 
     // nanosecond-time related
     m.def("nano_time", &getNanoTime);
@@ -130,9 +144,9 @@ PYBIND11_MODULE(pyyjj, m)
     .def("get_data", &Frame::getPyData);
 
     // JournalFinder
-//    m.def("get_all_journal_names", &get_all_journal_names);
-//    m.def("get_available_journal_names", &get_available_journal_names);
-//    m.def("get_available_journal_folders", &get_available_journal_folders);
-//    m.def("get_journal_folder", &get_journal_folder);
+    m.def("all_journal_names", &get_all_journal_names);
+    m.def("available_journal_names", &get_available_journal_names);
+    m.def("available_journal_folders", &get_available_journal_folders);
+    m.def("journal_folder", &get_journal_folder, py::arg("name"));
 
 }

@@ -25,8 +25,6 @@
 
 #include "YJJ_DECLARE.h"
 
-#include "LFUtils.h"
-
 #include <string>
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
@@ -34,6 +32,7 @@
 YJJ_NAMESPACE_START
 
 #define JOURNAL_NAME_PATTERN JOURNAL_PREFIX + "\\.(\\w+)\\.[0-9]+\\." + JOURNAL_SUFFIX
+typedef std::pair<std::string, std::string> JournalPair;
 
 class JournalFinder {
 private:

@@ -7,7 +7,11 @@ a = Analysis(['kungfu\\KungFu.py'],
                ('C:\\local\\boost_1_64_0\\lib64-msvc-14.1\\*.dll', '.')
                ],
      datas=None,
-     hiddenimports=[],
+     hiddenimports=[
+          'cffi',
+          'numpy',
+          'pandas'
+          ],
      hookspath=None,
      runtime_hooks=None,
      excludes=None,

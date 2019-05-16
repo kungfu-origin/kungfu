@@ -13,14 +13,12 @@ import pystrategy
 import pyyjj
 
 class Strategy:
-    def __init__(self, name, path):
+    def __init__(self, logger, name, path):
+        self._logger = logger
         self._base_dir = os.environ['KF_HOME']
 
         self._name = name
-        self._event_loop = EventLoop(name)
-        self._rep_socket = nnpy.Socket(nnpy.AF_SP, nnpy.REP)
-        self._rep_socket.bind("ipc://" + self._base_dir + "/strategy/" + name + "/rep.ipc")
-        self._event_loop.add_socket(self._rep_socket)
+        self._event_loop = EventLoop(logger, name)
         self._util = pystrategy.Util(name)
 
         self._on_quote = None
@@ -80,6 +78,7 @@ class Strategy:
         getattr(impl, 'init', lambda ctx: None)(context)
 
     def run(self):
+        self._logger.info('strategy run')
 
         self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano_time()), self.__on_1min_timer)
         self._event_loop.register_nanotime_callback(self.__nseconds_next_day(pyyjj.nano_time()), self.__on_1day_timer)

@@ -32,10 +32,36 @@
 #include <boost/array.hpp>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
+#include <nanomsg/bus.h>
 
 USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
+
+ClientPageProvider::ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed):
+        client_name(clientName), memory_msg_buffer(nullptr)
+{
+    is_writer = isWriting;
+    revise_allowed = is_writer || reviseAllowed;
+    client_request_socket = nn_socket(AF_SP, NN_REQ);
+    if (client_request_socket < 0)
+    {
+        SPDLOG_ERROR("Can not create client request socket");
+    }
+    string paged_socket_url = "ipc://" + PAGED_SOCKET_FILE;
+    int rv = nn_connect(client_request_socket, paged_socket_url.c_str());
+    if (rv < 0)
+    {
+        SPDLOG_ERROR("Can not connect client request socket to {}", paged_socket_url);
+    }
+
+    register_client();
+}
+
+ClientPageProvider::~ClientPageProvider()
+{
+    nn_shutdown(client_request_socket, 0);
+}
 
 /** send req via socket and get response in data */
 void ClientPageProvider::getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, const string& name)
@@ -52,33 +78,15 @@ void ClientPageProvider::getSocketRspOnReq(int client_request_socket, PagedSocke
     bytes = nn_send(client_request_socket, input.c_str(), input.length(), 0);
     if (bytes < 0)
     {
-        SPDLOG_ERROR("nn_send");
+        SPDLOG_ERROR("Can not send to paged socket");
     }
+    emitter.poke();
     bytes = nn_recv(client_request_socket, response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);
     if (bytes < 0)
     {
-        SPDLOG_ERROR("nn_recv");
+        SPDLOG_ERROR("Can not recv from paged socket");
     }
     response.assign(response_buf, bytes);
-}
-
-ClientPageProvider::ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed):
-        client_name(clientName), memory_msg_buffer(nullptr)
-{
-    is_writer = isWriting;
-    revise_allowed = is_writer || reviseAllowed;
-    client_request_socket = nn_socket(AF_SP, NN_REQ);
-    if (client_request_socket < 0)
-    {
-        SPDLOG_ERROR("Can not create client request socket");
-    }
-    string server_url = "ipc://" + PAGED_SOCKET_FILE;
-    int rv = nn_connect(client_request_socket, server_url.c_str());
-    if (rv < 0)
-    {
-        SPDLOG_ERROR("Can not connect client request socket to {}", server_url);
-    }
-    register_client();
 }
 
 void ClientPageProvider::register_client()
@@ -156,6 +164,7 @@ PagePtr ClientPageProvider::getPage(const string &dir, const string &jname, int 
     PageServiceMessage* server_msg = GET_MEMORY_MSG(memory_msg_buffer, service_id);
     server_msg->page_num = pageNum;
     server_msg->status = PAGE_REQUESTING;
+    emitter.poke();
     while (server_msg->status == PAGE_REQUESTING) {}
 
     if (server_msg->status != PAGE_ALLOCATED)

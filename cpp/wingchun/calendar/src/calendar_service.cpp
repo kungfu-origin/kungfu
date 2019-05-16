@@ -78,7 +78,7 @@ namespace kungfu
             return;
         }
 
-        SPDLOG_INFO("[CalendarService] started with:\npub socket: {}\nrsp socket: {}", pub_url, rep_url);
+        SPDLOG_INFO("[CalendarService] started with pub: {}, rep: {}", pub_url, rep_url);
         started_ = true;
         threads_.emplace_back(std::shared_ptr<std::thread>(new std::thread(&CalendarService::loop_new_date, this)));
         threads_.emplace_back(std::shared_ptr<std::thread>(new std::thread(&CalendarService::loop_reqs, this)));

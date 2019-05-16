@@ -23,6 +23,7 @@
 #ifndef YIJINJING_PAGEPROVIDER_H
 #define YIJINJING_PAGEPROVIDER_H
 
+#include "passive.h"
 #include "IPageProvider.h"
 #include "PageSocketStruct.h"
 
@@ -79,12 +80,14 @@ protected:
     void*   memory_msg_buffer;
     int     hash_code;
     int     client_request_socket;
+    passive::emitter emitter;
 protected:
     /** register to service as a client */
     void register_client();
 public:
     /** default constructor with client name and writing flag */
     ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed=false);
+    ~ClientPageProvider();
     /** override PageProvider */
     virtual int  register_journal(const string& dir, const string& jname);
     /** override PageProvider */

@@ -6,7 +6,8 @@ import sys
 import signal
 
 class EventLoop:
-    def __init__(self, name):
+    def __init__(self, logger, name):
+        self._logger = logger
         self._quit = False
         self._name = name
         self._reader = None
@@ -27,6 +28,8 @@ class EventLoop:
         self._reload_instruments_cb = None
         self._signal_received = -1
         self._signal_callbacks = []
+        self._notice = pyyjj.notice()
+        self._low_latency = False
 
     def subscribe_nanomsg(self, url):
         socket = nnpy.Socket(nnpy.AF_SP, nnpy.SUB)
@@ -122,6 +125,8 @@ class EventLoop:
 
     def __iteration(self):
         nano = -1
+        if not self._low_latency and self._notice.wait():
+            self._logger.debug('passive notice %s', self._notice.last_message())
         if self._reader is not None:
             frame = self._reader.next()
             if frame is not None:
