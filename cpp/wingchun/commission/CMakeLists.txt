@@ -1,7 +1,7 @@
 
 project(commission)
 
-SET(COMMISSION_SOURCE_FILES commission_manager.h commission_manager.cpp commission_storage.h commission_storage.cpp)
+SET(COMMISSION_SOURCE_FILES commission_manager.h commission_manager.cpp commission_storage.h commission_storage.cpp log.cpp log.h)
 ADD_LIBRARY(commission SHARED ${COMMISSION_SOURCE_FILES})
 
 if(WIN32)

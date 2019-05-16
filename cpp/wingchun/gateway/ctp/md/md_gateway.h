@@ -19,6 +19,7 @@ namespace kungfu
                     kungfu::MdGatewayImpl(SOURCE_CTP, log_level),front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password) {}
             virtual ~MdGateway() {};
 
+            virtual void init();
             virtual void start();
 
             virtual bool subscribe(const std::vector<Instrument>& instruments, bool is_level2 = false);

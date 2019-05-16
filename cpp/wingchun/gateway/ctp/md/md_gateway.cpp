@@ -27,6 +27,12 @@ namespace kungfu
                 {0x2003, "收到错误报文"}
         };
 
+        void MdGateway::init()
+        {
+            MdGatewayImpl::init();
+            spdlog::set_default_logger(get_logger());
+        }
+
         void MdGateway::start()
         {
             std::string runtime_folder = RUNTIME_FOLDER;

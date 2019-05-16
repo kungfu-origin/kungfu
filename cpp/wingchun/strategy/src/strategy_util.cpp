@@ -16,6 +16,7 @@
 #include "util/include/env.h"
 #include "util/include/filesystem_util.h"
 #include "util/instrument/instrument.h"
+#include "storage/log.h"
 #include "storage/account_list_storage.h"
 #include "storage/snapshot_storage.h"
 
@@ -37,14 +38,14 @@ namespace kungfu
     {
         kungfu::yijinjing::KungfuLog::setup_log(name);
         kungfu::yijinjing::KungfuLog::set_log_level(spdlog::level::info);
-        
+
+        kungfu::calendar_util::set_logger(spdlog::default_logger());
+
         create_folder_if_not_exists(STRATEGY_FOLDER(name));
 
         std::string pub_url = STRATEGY_PUB_URL(name);
         publisher_ = std::shared_ptr<NNPublisher>(new NNPublisher(pub_url));
-
-        storage::SnapshotStorage s1(STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_DAY_SNAPSHOT_TABLE_NAME, true, false);
-        storage::SnapshotStorage s2(STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_MIN_SNAPSHOT_TABLE_NAME, false, false);
+        publisher_->set_logger(spdlog::default_logger());
 
         calendar_->register_switch_day_callback(std::bind(&StrategyUtil::on_switch_day, this, std::placeholders::_1));
 
@@ -57,6 +58,9 @@ namespace kungfu
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
         writer_ = kungfu::yijinjing::JournalWriter::create(fmt::format(STRATEGY_JOURNAL_FOLDER_FORMAT, get_base_dir()), this->name_, this->name_);
+
+        kungfu::storage::set_logger(spdlog::default_logger());
+        kungfu::portfolio_util::set_logger(spdlog::default_logger());
 
         init_portfolio_manager();
 

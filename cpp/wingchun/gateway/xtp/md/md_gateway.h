@@ -23,6 +23,7 @@ namespace kungfu
                     nullptr) {}
             virtual ~MdGateway();
 
+            virtual void init();
             virtual void start();
 
             virtual bool subscribe(const std::vector<Instrument>& instruments, bool is_level2 = false);

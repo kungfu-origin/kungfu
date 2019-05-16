@@ -19,8 +19,9 @@
 #include <nanomsg/nn.h>
 #include <nanomsg/pubsub.h>
 #include <nn.hpp>
-
+#include "storage/log.h"
 #include "storage/snapshot_storage.h"
+#include "calendar/include/calendar.h"
 
 namespace kungfu
 {
@@ -46,8 +47,10 @@ namespace kungfu
     {
 
         calendar_ = CalendarPtr(new Calendar());
+        kungfu::calendar_util::set_logger(spdlog::default_logger());
 
         loop_ = std::shared_ptr<EventLoop>(new EventLoop(get_name()));
+        loop_->set_logger(spdlog::default_logger());
 
         if (!create_folder_if_not_exists(GATEWAY_FOLDER(this->get_name())))
         {
@@ -78,7 +81,7 @@ namespace kungfu
 
         std::string url = GATEWAY_PUB_URL(name_);
         nn_publisher_ = std::unique_ptr<NNPublisher>(new NNPublisher(url));
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        nn_publisher_->set_logger(spdlog::default_logger());
     }
 
     void GatewayImpl::start()
@@ -191,6 +194,10 @@ namespace kungfu
     void TdGatewayImpl::init()
     {
         GatewayImpl::init();
+
+        storage::set_logger(spdlog::default_logger());
+        portfolio_util::set_logger(spdlog::default_logger());
+
         if (!create_folder_if_not_exists(ACCOUNT_FOLDER(this->get_account_id())))
         {
             SPDLOG_ERROR("failed to create account folder {}", ACCOUNT_FOLDER(this->get_account_id()));
@@ -206,9 +213,6 @@ namespace kungfu
         {
             SPDLOG_ERROR("failed to bind to acc_rep_url {}, exception: {}", rep_url.c_str(), e.what());
         }
-
-        kungfu::storage::SnapshotStorage s1(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_DAY_SNAPSHOT_TABLE_NAME, true, true);
-        kungfu::storage::SnapshotStorage s2(ACCOUNT_SNAPSHOT_DB_FILE(get_account_id()), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true);
 
         int worker_id = UidWorkerStorage::get_instance(UID_WORKER_DB_FILE)->get_uid_worker_id(get_name());
         if (worker_id <= 0)

@@ -37,6 +37,7 @@ namespace kungfu
         void TdGateway::init()
         {
             TdGatewayImpl::init();
+            spdlog::set_default_logger(get_logger());
             std::string order_mapper_db_file = ORDER_MAPPER_DB_FILE(this->get_name());
 #ifdef _WINDOWS
             std::replace(order_mapper_db_file.begin(), order_mapper_db_file.end(), '/', '\\');
