@@ -79,7 +79,7 @@ class Strategy:
     def run(self):
 
         self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano_time()), self.__on_1min_timer)
-        self._event_loop.register_nanotime_callback_at_next('15:30:00', self.__on_1day_timer)
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_day(pyyjj.nano_time()), self.__on_1day_timer)
 
         self._event_loop.register_quote_callback(self.__process_quote)
         self._event_loop.register_entrust_callback(self.__process_entrust)
@@ -145,11 +145,11 @@ class Strategy:
 
     def __on_1min_timer(self, nano):
         self._util.on_push_by_min()
-        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(nano), self.__on_1min_timer)
+        self._event_loop.register_nanotime_callback(nano + 60 * 1000000000, self.__on_1min_timer)
 
     def __on_1day_timer(self, nano):
         self._util.on_push_by_day()
-        self._event_loop.register_nanotime_callback_at_next('15:30:00', self.__on_1day_timer)
+        self._event_loop.register_nanotime_callback(nano + 24 * 60 * 60 * 1000000000, self.__on_1day_timer)
 
     def __get_md_journal_folder(self, source):
         return self._base_dir + '/journal/md/' + source
@@ -166,6 +166,13 @@ class Strategy:
     def __nseconds_next_min(self, nano):
         cur_time = pyyjj.parse_nano(nano, '%Y%m%d %H:%M:%S')
         return pyyjj.parse_time(cur_time[:-2] + '00', '%Y%m%d %H:%M:%S') + 60 * 1e9
+
+    def __nseconds_next_day(self, nano):
+        cur_time = pyyjj.parse_nano(nano, '%Y%m%d %H:%M:%S')
+        next_day = pyyjj.parse_time(cur_time[0:9] + '15:30:00', '%Y%m%d %H:%M:%S')
+        if next_day < pyyjj.nano_time():
+            next_day += 24 * 60 * 60 * 1000000000
+        return next_day
 
     def __process_quote(self, quote):
         ctype_quote = ctypes.cast(quote,ctypes.POINTER(Quote)).contents

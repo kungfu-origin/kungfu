@@ -58,7 +58,7 @@ namespace kungfu
         string cur_time_str = yijinjing::parseNano(nano_, "%Y%m%d-");
         string date_time_str = cur_time_str + time_str;
         int64_t nano = yijinjing::parseTime(date_time_str.c_str(), "%Y%m%d-%H:%M:%S");
-        if (nano < nano_)
+        if (nano <= nano_)
         {
             nano += yijinjing::NANOSECONDS_PER_DAY;
         }

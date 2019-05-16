@@ -506,7 +506,7 @@ namespace kungfu
         auto account_info = account_manager_->get_account_info();
         account_info.update_time = (int64_t)std::round((double)yijinjing::getNanoTime() / 1000000000) * 1000000000;
         DUMP_1D_SNAPSHOT(this->get_account_id(), account_info);
-        loop_->register_nanotime_callback_at_next(DAILY_STORAGE_TIME, std::bind(&TdGatewayImpl::on_daily_timer, this, std::placeholders::_1));
+        loop_->register_nanotime_callback(nano + yijinjing::NANOSECONDS_PER_DAY, std::bind(&TdGatewayImpl::on_daily_timer, this, std::placeholders::_1));
     }
 
     void TdGatewayImpl::on_switch_day(const std::string &trading_day)
