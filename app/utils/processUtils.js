@@ -248,7 +248,7 @@ export const startStrategy = (strategyId, strategyPath) => {
 
 
 //列出所有进程
-export const listProcessStatus = async() => {
+export const listProcessStatus = () => {
     return pm2List().then(pList => {
         let processStatus = {}
         Object.freeze(pList).forEach(p => {
