@@ -233,6 +233,7 @@ namespace kungfu
         last_update_ = std::max<int64_t>(last_update_, account.rcv_time);
         if (accounts_.find(account.account_id) == accounts_.end())
         {
+            SPDLOG_WARN("strategy pnl create new account {}", account.account_id);
             auto account_manager = std::make_shared<AccountManager>(account.account_id, account.type, db_.c_str());
             account_manager->set_current_trading_day(trading_day_);
             accounts_[account.account_id] = account_manager;
@@ -240,7 +241,7 @@ namespace kungfu
             account_manager->register_acc_callback(std::bind(&PortfolioManager::impl::on_acc_callback, this, std::placeholders::_1));
         }
         accounts_[account.account_id]->on_account(account);
-        SPDLOG_TRACE("pnl after on_account: {}", to_string(pnl_));
+        SPDLOG_WARN("pnl after on_account: {}", to_string(pnl_));
     }
 
     void PortfolioManager::impl::insert_order(const kungfu::OrderInput *input)
