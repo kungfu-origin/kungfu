@@ -220,7 +220,7 @@ namespace kungfu
         void TdGateway::OnFrontDisconnected(int nReason)
         {
             auto it = kDisconnectedReasonMap.find(nReason);
-            if (it == kDisconnectedReasonMap.end())
+            if (it != kDisconnectedReasonMap.end())
             {
                 DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, it->second));
                 set_state(GatewayState::DisConnected, it->second);
