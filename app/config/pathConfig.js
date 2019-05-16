@@ -86,6 +86,7 @@ export const buildAccountAssetsDBPath = (accountId) => {
 
 //orders
 export const buildAccountOrdersDBPath = (accountId) => {
+    console.log(path.join(ACCOUNTS_DIR, accountId, 'orders.db'), '----')
     return path.join(ACCOUNTS_DIR, accountId, 'orders.db')
 }
 
