@@ -126,6 +126,9 @@ namespace kungfu
             }
             else
             {
+                order.status = OrderStatusSubmitted;
+                on_order(order);
+                
                 CtpOrder order_record = {};
                 order_record.internal_order_id = input.order_id;
                 order_record.broker_id = broker_id_;
