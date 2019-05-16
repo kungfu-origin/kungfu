@@ -148,10 +148,9 @@ export const startProcess = async (options) => {
         "watch": false,
         "force": options.force === undefined ? true : options.force,
         "exec_mode" : "fork",
+        "interpreterArgs": ["~harmony", "~debug"],
         "env": {
-            // "PM2_HOME": PM2_DIR,
             "KF_HOME": dealSpaceInPath(BASE_DIR),
-            // "ELECTRON_RUN_AS_NODE": true,
         }
     }
 

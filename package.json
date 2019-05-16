@@ -63,7 +63,7 @@
     ],
     "asar": true,
     "asarUnpack": [
-      "node_modules\\pm2\\lib\\Daemon.js"
+      "node_modules\\pm2"
     ],
     "dmg": {
       "contents": [
