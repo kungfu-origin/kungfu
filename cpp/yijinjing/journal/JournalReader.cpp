@@ -54,6 +54,10 @@ size_t JournalReader::addJournal(const string& dir, const string& jname)
 
 JournalReaderPtr JournalReader::create(const vector<string>& dirs, const vector<string>& jnames, int64_t startTime, const string& readerName)
 {
+#ifdef _WINDOWS
+    #include "Log.h"
+    setup_log(readerName);
+#endif
     std::stringstream ss;
     ss << readerName << "_R";
     string clientName = ss.str();

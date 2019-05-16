@@ -37,7 +37,7 @@ namespace kungfu
     public:
         EventLoop(const std::string& name): quit_(false), name_(name), reader_(nullptr), scheduler_(new TaskScheduler()) {};
 
-        void set_logger(std::shared_ptr<spdlog::logger> logger) const { spdlog::set_default_logger(logger->clone("event_loop")); };
+        void set_logger(std::shared_ptr<spdlog::logger> logger) const;
 
         void subscribe_nanomsg(const std::string& url);
         void bind_nanomsg(const std::string& url);

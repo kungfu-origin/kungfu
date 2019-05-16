@@ -31,7 +31,7 @@ namespace kungfu
 #define DUMP_1D_SNAPSHOT(name, pnl) storage::SnapshotStorage(\
     STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_DAY_SNAPSHOT_TABLE_NAME, true, false).insert(pnl)
 
-#define DUMP_1M_SNAPSHOT(name, portfolio_manager) storage::SnapshotStorage(\
+#define DUMP_1M_SNAPSHOT(name, pnl) storage::SnapshotStorage(\
     STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_MIN_SNAPSHOT_TABLE_NAME, false, false).insert(pnl)
 
     StrategyUtil::StrategyUtil(const std::string& name): name_(name), calendar_(new Calendar()), has_stock_account_(false), has_future_account_(false)
@@ -433,7 +433,7 @@ namespace kungfu
         {
             is_open = is_open || calendar_->is_open(nano, EXCHANGE_SHFE);
         }
-        SPDLOG_INFO("before push, is_open {} nano {}", is_open ? "true" : "false", nano);
+        SPDLOG_TRACE("before push, is_open {} nano {}", is_open ? "true" : "false", nano);
 
         if (is_open)
         {

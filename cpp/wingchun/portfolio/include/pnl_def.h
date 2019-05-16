@@ -16,10 +16,7 @@ namespace kungfu
 {
     namespace portfolio_util
     {
-        inline void set_logger(std::shared_ptr<spdlog::logger> logger)
-        {
-            spdlog::set_default_logger(logger->clone("portfolio"));
-        }
+        void set_logger(std::shared_ptr<spdlog::logger> logger);
     }
 
     typedef std::function<void (const Position&)> PositionCallback;
