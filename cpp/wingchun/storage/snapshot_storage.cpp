@@ -20,8 +20,8 @@ namespace kungfu
         void SnapshotStorage::create_table_if_not_exists(bool daily, bool account)
         {
             static std::string columns =
-                    "id                    integer primary key autoincrement,"
-                            "update_time           int,"
+                            "id                    INTEGER primary key autoincrement,"
+                            "update_time           INTEGER,"
                             "trading_day           char(50),"
                             "account_id            char(50),"
                             "type                  char,"

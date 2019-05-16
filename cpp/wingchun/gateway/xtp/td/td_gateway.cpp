@@ -64,6 +64,7 @@ namespace kungfu
                 {
                     LOGIN_INFO("login success");
                     set_state(GatewayState::LoggedIn);
+
                     req_account();
                     break;
                 }
@@ -93,10 +94,11 @@ namespace kungfu
             uint64_t xtp_order_id = api_->InsertOrder(& xtp_input, session_id_);
 
             Order order = get_order(input);
-            long nano = kungfu::yijinjing::getNanoTime();
+            int64_t nano = kungfu::yijinjing::getNanoTime();
             order.insert_time = nano;
             order.update_time = nano;
             order.rcv_time = nano;
+            strcpy(order.trading_day, get_calendar()->get_current_trading_day().c_str());
             if (xtp_order_id == 0)
             {
                 XTPRI* error_info = api_->GetApiLastError();
@@ -119,7 +121,7 @@ namespace kungfu
                 info.parent_id = input.parent_id;
                 info.insert_time = order.insert_time;
                 strcpy(info.client_id, input.client_id);
-                strcpy(info.trading_day, get_calendar()->get_current_trading_day().c_str());
+                strcpy(info.trading_day, order.trading_day);
                 order_mapper_->add_order(info);
 
                 INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){}", input.order_id));
@@ -213,7 +215,9 @@ namespace kungfu
                 order.order_id = xtp_order.internal_order_id;
                 order.parent_id = xtp_order.parent_id;
                 order.insert_time = xtp_order.insert_time;
-                order.rcv_time = kungfu::yijinjing::getNanoTime();
+                int64_t nano = kungfu::yijinjing::getNanoTime();
+                order.update_time = nano;
+                order.rcv_time = nano;
                 strcpy(order.client_id, xtp_order.client_id);
                 strcpy(order.account_id, get_account_id().c_str());
                 strcpy(order.trading_day, xtp_order.trading_day);
