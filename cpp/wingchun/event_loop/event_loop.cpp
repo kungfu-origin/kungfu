@@ -17,6 +17,11 @@ namespace kungfu
 {
     volatile sig_atomic_t EventLoop::signal_received_ = -1;
 
+    void EventLoop::set_logger(std::shared_ptr<spdlog::logger> logger) const
+    {
+        spdlog::set_default_logger(logger->clone("event_loop"));
+    };
+
     void EventLoop::subscribe_nanomsg(const std::string& url)
     {
         std::shared_ptr<nn::socket> socket = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_SUB));

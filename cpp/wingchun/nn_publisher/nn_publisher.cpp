@@ -15,6 +15,11 @@ namespace kungfu
         pub_socket_->bind(url.c_str());
     }
 
+    void NNPublisher::set_logger(std::shared_ptr<spdlog::logger> logger) const
+    {
+        spdlog::set_default_logger( logger->clone("nn_publisher"));
+    }
+
     void NNPublisher::publish(kungfu::MsgType msg_type, nlohmann::json& data) const
     {
         nlohmann::json j;

@@ -18,7 +18,7 @@ namespace kungfu
     {
     public:
         NNPublisher(const std::string& url);
-        void set_logger(std::shared_ptr<spdlog::logger> logger) const { spdlog::set_default_logger( logger->clone("nn_publisher")); }
+        void set_logger(std::shared_ptr<spdlog::logger> logger) const;
         void publish_order(const kungfu::Order& order) const;
         void publish_trade(const kungfu::Trade& trade) const ;
         void publish_pos(const kungfu::Position& pos) const ;
