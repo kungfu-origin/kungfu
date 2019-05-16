@@ -360,6 +360,7 @@ namespace kungfu
 
     void StrategyUtil::set_log_level(int level)
     {
+        kungfu::yijinjing::KungfuLog::setup_log(name_);
         kungfu::yijinjing::KungfuLog::set_log_level(level);
     }
 
@@ -416,7 +417,7 @@ namespace kungfu
 
     void StrategyUtil::on_push_by_min()
     {
-        long nano = yijinjing::getNanoTime();
+        int64_t nano = yijinjing::getNanoTime();
         bool is_open = false;
         if (has_stock_account_)
         {
@@ -450,7 +451,7 @@ namespace kungfu
 
     uint64_t StrategyUtil::next_id()
     {
-        long seconds = kungfu::yijinjing::getNanoTime() / kungfu::yijinjing::NANOSECONDS_PER_SECOND;
+        int64_t seconds = kungfu::yijinjing::getNanoTime() / kungfu::yijinjing::NANOSECONDS_PER_SECOND;
         return uid_generator_->next_id(seconds);
     }
 
