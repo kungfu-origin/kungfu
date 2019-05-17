@@ -12,9 +12,11 @@ if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
 else {
     const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
-    const globalPaths = require('module').globalPaths;
-    globalPaths.unshift(asarPath, asarPm2Path)
-    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2')
+    let globalPaths = require('module').globalPaths;
+    let paths = require('module').paths;
+    globalPaths && globalPaths.unshift(asarPath, asarPm2Path);
+    paths && paths.unshift(asarPath, asarPm2Path);
+    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2').replace(/\\/g, '\\\\');
     pm2Module = eval("require('" + pm2Path + "')");    
 }
 export const pm2 = pm2Module;
