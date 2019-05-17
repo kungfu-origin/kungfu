@@ -81,8 +81,12 @@ namespace kungfu
             {
                 std::string account_id = query_account.getColumn(0).getString();
                 AccountType type = query_account.getColumn(1).getString()[0];
-                pnl_manager->impl_->accounts_[account_id] = std::make_shared<AccountManager>(account_id.c_str(), type,
+                auto acc_manager = std::make_shared<AccountManager>(account_id.c_str(), type,
                         db.getFilename().c_str());
+                pnl_manager->impl_->accounts_[account_id] = acc_manager;
+                acc_manager->register_pos_callback(std::bind(&PortfolioManager::impl::on_pos_callback, pnl_manager->impl_, std::placeholders::_1));
+                acc_manager->register_acc_callback(std::bind(&PortfolioManager::impl::on_acc_callback, pnl_manager->impl_, std::placeholders::_1));
+
             }
 
             db.exec("COMMIT");
