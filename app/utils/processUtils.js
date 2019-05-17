@@ -4,22 +4,23 @@ const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
 const {getProcesses} = require('getprocesses');
-const taskkill = require('taskkill')
+const taskkill = require('taskkill');
+export const pm2 = require('pm2');
 
-//pm2 区分 deveploment / production
-let pm2Module;
-if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
-else {
-    const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
-    const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
-    let globalPaths = require('module').globalPaths;
-    let paths = require('module').paths;
-    globalPaths && globalPaths.unshift(asarPath, asarPm2Path);
-    paths && paths.unshift(asarPath, asarPm2Path);
-    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2').replace(/\\/g, '\\\\');
-    pm2Module = eval("require('" + pm2Path + "')");    
-}
-export const pm2 = pm2Module;
+// //pm2 区分 deveploment / production
+// let pm2Module;
+// if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
+// else {
+//     const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
+//     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
+//     let globalPaths = require('module').globalPaths;
+//     let paths = require('module').paths;
+//     globalPaths && globalPaths.unshift(asarPath, asarPm2Path);
+//     paths && paths.unshift(asarPath, asarPm2Path);
+//     const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2').replace(/\\/g, '\\\\');
+//     pm2Module = eval("require('" + pm2Path + "')");    
+// }
+// export const pm2 = pm2Module;
 
 //=========================== task kill =========================================
 
