@@ -10,7 +10,7 @@
 namespace kungfu
 {
     // impl
-    PortfolioManager::impl::impl(const char *db) : db_(db), last_update_(0), pnl_{}
+    PortfolioManager::impl::impl(const char *name, const char *db) : name_(name), db_(db), last_update_(0), pnl_{}
     {
         for (auto& iter : accounts_)
         {
@@ -29,6 +29,7 @@ namespace kungfu
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
         strcpy(pos.exchange_id, exchange_id);
+        strcpy(pos.client_id, name_.c_str());
         pos.instrument_type = get_instrument_type(instrument_id, exchange_id);
         pos.direction = DirectionLong;
         if (nullptr != account_id)
@@ -43,7 +44,6 @@ namespace kungfu
                 {
                     auto cur_pos = iter.second->get_long_pos(instrument_id, exchange_id);
                     pos.update_time = std::max<int64_t>(pos.update_time, cur_pos.update_time);
-                    strcpy(pos.client_id, cur_pos.client_id);
                     pos.volume += cur_pos.volume;
                     pos.yesterday_volume += cur_pos.yesterday_volume;
                     pos.frozen_total += cur_pos.frozen_total;
@@ -71,6 +71,7 @@ namespace kungfu
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
         strcpy(pos.exchange_id, exchange_id);
+        strcpy(pos.client_id, name_.c_str());
         pos.direction = DirectionShort;
         for (const auto& iter : accounts_)
         {
@@ -79,7 +80,6 @@ namespace kungfu
                 if (nullptr == account_id || strlen(account_id) == 0 || strcmp(account_id, iter.first.c_str()) == 0)
                 {
                     auto cur_pos = iter.second->get_short_pos(instrument_id, exchange_id);
-                    strcpy(pos.client_id, cur_pos.client_id);
                     pos.volume += cur_pos.volume;
                     pos.yesterday_volume += cur_pos.yesterday_volume;
                     pos.frozen_total += cur_pos.frozen_total;

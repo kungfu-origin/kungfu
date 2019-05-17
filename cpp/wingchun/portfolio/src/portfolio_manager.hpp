@@ -19,7 +19,7 @@ namespace kungfu
     {
     public:
         friend class PortfolioStorage;
-        explicit impl(const char* db);
+        impl(const char* name, const char* db);
         virtual ~impl();
 
         Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
@@ -60,6 +60,7 @@ namespace kungfu
         void on_pos_callback(const Position& pos) const;
 
     private:
+        std::string                                     name_;
         std::string                                     db_;
         int64_t                                         last_update_;
         std::string                                     trading_day_;

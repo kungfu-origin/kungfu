@@ -9,7 +9,7 @@
 namespace kungfu
 {
     PortfolioManager::PortfolioManager(const char* name, const char *db)
-    : impl_(new impl(db)), db_file_(db), storage_(new PortfolioStorage(name))
+    : impl_(new impl(name, db)), db_file_(db), storage_(new PortfolioStorage(name))
     {
         create_pnl_tables(db);
         create_acc_tables(db);
