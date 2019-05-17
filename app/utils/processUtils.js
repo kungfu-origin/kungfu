@@ -5,11 +5,11 @@ const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
 const {getProcesses} = require('getprocesses');
 const taskkill = require('taskkill')
-export const pm2 = require('@/assets/js/')
 
 //pm2 区分
 let pm2Module;
-if(process.env.NODE_ENV !== 'development') {
+if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
+else {
     const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
     const paths = require('module').paths;
@@ -17,13 +17,18 @@ if(process.env.NODE_ENV !== 'development') {
     globalPaths.unshift(asarPath, asarPm2Path)
     paths.unshift(asarPath, asarPm2Path)
 
-}
-else {
+    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpack', 'node_modules', 'pm2')
+
+    ((pathname) => {
+        console.log(eval("require(pm2Path)"))
+        const aaa = require(pathname)
+        console.log(aaa)
+    })(pm2Path)
     
-    const pm2Path = path.join('@', 'assets', 'js', 'static', 'pm2')
-    logger.info(pm2Path,'===')
-    logger.info(require(pm2Path), '----')
-    pm2Module = require(pm2Path)
+
+    // logger.info(pm2Path,'===')
+    // logger.info(require(pm2Path), '----')
+    // pm2Module = require(pm2Path)
 }
 console.log(pm2Module, '+++++')
 export const pm2 = pm2Module;

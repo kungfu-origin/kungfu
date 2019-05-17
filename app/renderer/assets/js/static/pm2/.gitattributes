@@ -1,4 +1,0 @@
-* text=auto
-*.sh eol=lf
-bin/** eol=lf
-test/fixtures/** eol=lf
