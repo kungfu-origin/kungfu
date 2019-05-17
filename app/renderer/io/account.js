@@ -74,9 +74,11 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
  * 
  */
 export const getAccountTrade = (accountId, {id, dateRange}) => {
+    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+    const momentDay = tradingDay ? moment(tradingDay) : moment();
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const startDate = (moment(moment().format('YYYY-MM-DD')).valueOf()) * 1000000
-    const endDate = (moment(moment().add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
+    const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000
+    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
     const filterDate = dateRange ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
@@ -98,9 +100,11 @@ export const getAccountTrade = (accountId, {id, dateRange}) => {
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
 export const getAccountOrder = (accountId, {id, dateRange}) => {
+    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+    const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
-    const startDate = (moment(moment().format('YYYY-MM-DD')).valueOf()) * 1000000
-    const endDate = (moment(moment().add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
+    const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000
+    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const filterDate = dateRange ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
     return new Promise((resolve, reject) => {

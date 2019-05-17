@@ -269,7 +269,7 @@ export const deleteProcess = (processName) => {
         }
         const pids = processes.map(prc => prc.pid);
         pm2Delete(processName)
-        .then(() => (true))
+        .then(() => resolve(true))
         .catch(err => reject(err))
         .finally(() => kfKill(pids).catch(err => console.error(err)))
     })

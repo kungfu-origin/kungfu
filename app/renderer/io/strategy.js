@@ -70,9 +70,12 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
     const strategyAddTime = strategys[0].add_time;
+    //tradeing day
+    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+    const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
-    const startDate = Math.max((moment(moment().format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
-    const endDate = (moment(moment().add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
+    const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
+    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
     const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
@@ -111,9 +114,12 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}) => {
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策咯！')
     const strategyAddTime = strategys[0].add_time;
+    //tradeing day
+    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+    const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
-    const startDate = Math.max((moment(moment().format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
-    const endDate = (moment(moment().add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
+    const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
+    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
     const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
