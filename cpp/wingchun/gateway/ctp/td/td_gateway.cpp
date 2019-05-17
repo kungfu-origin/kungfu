@@ -127,9 +127,6 @@ namespace kungfu
             }
             else
             {
-                order.status = OrderStatusSubmitted;
-                on_order(order);
-                
                 CtpOrder order_record = {};
                 order_record.internal_order_id = input.order_id;
                 order_record.broker_id = broker_id_;
@@ -143,7 +140,7 @@ namespace kungfu
                 order_record.parent_id = input.parent_id;
                 order_record.insert_time = nano;
                 order_mapper_->add_ctp_order(input.order_id, order_record);
-
+                
                 INSERT_ORDER_INFO(fmt::format("(FrontID) {} (SessionID) {} (OrderRef) {}", front_id_, session_id_, ctp_input.OrderRef));
                 return true;
             }
