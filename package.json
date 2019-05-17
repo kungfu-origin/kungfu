@@ -29,7 +29,7 @@
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
-    "copy": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && copyfiles -f cpp/wingchun/resources/holidays.db resources/default && copyfiles -f node_modules/**/* app/renderer/assets/js/static/pm2"
+    "copy": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && copyfiles -f cpp/wingchun/resources/holidays.db resources/default"
   },
   "build": {
     "productName": "Kungfu.Trader",

@@ -6,31 +6,17 @@ const fkill = require('fkill');
 const {getProcesses} = require('getprocesses');
 const taskkill = require('taskkill')
 
-//pm2 区分
+//pm2 区分 deveploment / production
 let pm2Module;
 if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
 else {
     const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
-    const paths = require('module').paths;
     const globalPaths = require('module').globalPaths;
     globalPaths.unshift(asarPath, asarPm2Path)
-    paths.unshift(asarPath, asarPm2Path)
-
-    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpack', 'node_modules', 'pm2')
-
-    ((pathname) => {
-        console.log(eval("require(pm2Path)"))
-        const aaa = require(pathname)
-        console.log(aaa)
-    })(pm2Path)
-    
-
-    // logger.info(pm2Path,'===')
-    // logger.info(require(pm2Path), '----')
-    // pm2Module = require(pm2Path)
+    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2');
+    pm2Module = eval("require('" + pm2Path + "')");    
 }
-console.log(pm2Module, '+++++')
 export const pm2 = pm2Module;
 
 //=========================== task kill =========================================
