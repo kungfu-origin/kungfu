@@ -14,7 +14,7 @@ else {
     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
     const globalPaths = require('module').globalPaths;
     globalPaths.unshift(asarPath, asarPm2Path)
-    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2').replace(/\\/g, '\\\\');
+    const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2')
     pm2Module = eval("require('" + pm2Path + "')");    
 }
 export const pm2 = pm2Module;
