@@ -285,6 +285,24 @@ namespace kungfu
         {
             if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
             {
+                auto order_info = order_mapper_->get_order_info_by_order_ref(this->front_id_, this->session_id_, pInputOrder->OrderRef);
+                if (order_info.internal_order_id != 0)
+                {
+                    OrderInput input = {};
+                    from_ctp(*pInputOrder, input);
+
+                    auto order = get_order(input);
+                    order.order_id = order_info.internal_order_id;
+                    order.parent_id = order_info.parent_id;
+                    order.insert_time = order_info.insert_time;
+                    order.rcv_time = kungfu::yijinjing::getNanoTime();
+                    strcpy(order.client_id, order_info.client_id.c_str());
+                    order.error_id = pRspInfo->ErrorID;
+                    strcpy(order.error_msg, pRspInfo->ErrorMsg);
+                    order.status = OrderStatusError;
+
+                    on_order(order);
+                }
                 ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
             }
         }

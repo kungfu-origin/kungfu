@@ -264,6 +264,11 @@ namespace kungfu
             nano_sec += millisec * kungfu::yijinjing::NANOSECONDS_PER_MILLISECOND;
         }
 
+        inline void from_ctp_datetime(const TThostFtdcDateType date, const TThostFtdcTimeType time, int64_t& n_secs)
+        {
+            n_secs = kungfu::yijinjing::parseTime((std::string(date) + "-" + std::string(time)).c_str(), "%Y%m%d-%H:%M:%S");
+        }
+
         inline void to_ctp(CThostFtdcDepthMarketDataField& des, const Quote& ori)
         {
             //TODO
@@ -339,14 +344,22 @@ namespace kungfu
             des.LimitPrice = ori.limit_price;
         }
 
-        inline void from_ctp_datetime(const TThostFtdcDateType date, const TThostFtdcTimeType time, int64_t& n_secs)
-        {
-            n_secs = kungfu::yijinjing::parseTime((std::string(date) + "-" + std::string(time)).c_str(), "%Y%m%d-%H:%M:%S");
-        }
-
         inline void from_ctp(const CThostFtdcInputOrderField& ori, OrderInput& des)
         {
-            //TODO
+            strcpy(des.instrument_id, ori.InstrumentID);
+#ifdef __linux__
+            strcpy(des.exchange_id, ori.ExchangeID);
+#else
+            strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(ori.InstrumentID).c_str());
+#endif
+            strcpy(des.account_id, ori.InvestorID);
+            from_ctp_direction(ori.Direction, des.side);
+            from_ctp_comb_offset(ori.CombOffsetFlag, des.offset);
+            des.volume = ori.VolumeTotalOriginal;
+            from_ctp_volume_condition(ori.VolumeCondition, des.volume_condition);
+            from_ctp_time_condition(ori.TimeCondition, des.time_condition);
+            from_ctp_price_type(ori.OrderPriceType, des.price_type);
+            des.limit_price = ori.LimitPrice;
         }
 
         inline void from_ctp(const CThostFtdcOrderField& ori, Order& des)
