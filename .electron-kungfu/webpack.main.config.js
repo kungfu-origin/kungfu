@@ -40,6 +40,7 @@ let mainConfig = {
   ],
   resolve: {
     alias: {
+      '@': path.join(__dirname, '../app/renderer'),
       '__gUtils': path.join(__dirname, '../app/utils'),
       '__gConfig': path.join(__dirname, '../app/config')
     },

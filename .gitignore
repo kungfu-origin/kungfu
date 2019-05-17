@@ -32,3 +32,6 @@ package-lock.json
 # OS files
 .DS_Store
 *.log
+
+
+!/static/pm2/node_modules
