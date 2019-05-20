@@ -36,15 +36,15 @@ YJJ_NAMESPACE_START
 
 // data types of all fields in frame header
 // which need to be fully controlled for data length.
-typedef byte    FH_TYPE_STATUS;
-typedef short   FH_TYPE_SOURCE;
-typedef int64_t    FH_TYPE_NANOTM;
-typedef int     FH_TYPE_LENGTH;
-typedef uint    FH_TYPE_HASHNM;
-typedef short   FH_TYPE_MSG_TP;
-typedef byte    FH_TYPE_LASTFG;
-typedef int     FH_TYPE_REQ_ID;
-typedef int     FH_TYPE_ERR_ID;
+typedef int8_t      FH_TYPE_STATUS;
+typedef int16_t     FH_TYPE_SOURCE;
+typedef int64_t     FH_TYPE_NANOTM;
+typedef int32_t     FH_TYPE_LENGTH;
+typedef uint32_t    FH_TYPE_HASHNM;
+typedef int16_t     FH_TYPE_MSG_TP;
+typedef int8_t      FH_TYPE_LASTFG;
+typedef int32_t     FH_TYPE_REQ_ID;
+typedef int32_t     FH_TYPE_ERR_ID;
 
 //////////////////////////////////////////
 /// (byte) JournalFrameStatus
