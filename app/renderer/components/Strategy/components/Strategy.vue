@@ -62,9 +62,9 @@
                 align="right"       
             >
                 <template slot-scope="props">
-                    <span class="tr-oper" @click.stop="handleSetStrategy(props.row)"><i class="mouse-over fa fa-cog"></i></span>
-                    <span class="tr-oper" @click.stop="handleEditStrategy(props.row)"><i class="mouse-over fa fa-edit"></i></span>
-                    <span class="tr-oper-delete" @click.stop="handleDeleteStrategy(props.row)"><i class="mouse-over fa fa-trash-o"></i></span>
+                    <span class="tr-oper" @click.stop="handleSetStrategy(props.row)"><i class="mouse-over el-icon-setting"></i></span>
+                    <span class="tr-oper" @click.stop="handleEditStrategy(props.row)"><i class="mouse-over el-icon-edit-outline"></i></span>
+                    <span class="tr-oper-delete" @click.stop="handleDeleteStrategy(props.row)"><i class="mouse-over el-icon-delete"></i></span>
                 </template>
             </el-table-column>
         </el-table>

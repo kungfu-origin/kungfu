@@ -29,7 +29,8 @@
                         :class="[
                             renderCellClass(column.prop, item),                        
                             'tr-table-cell', 
-                            'text-overflow'
+                            'text-overflow',
+                            column.type === 'operation' ? 'oper' : ''
                         ]"
                         v-for="column in schema" 
                         :key="column.prop"       
@@ -40,7 +41,7 @@
                                 {{item[column.prop]}}
                             </template>
                             <template v-else-if="column.type === 'operation'">
-                                <span v-for="c in column.operations" :key="c.event" v-html="c.html">{{c.html}}</span>
+                                <slot name="oper" v-bind:props="item"></slot>
                             </template>
                         </li>
                     </ul>
@@ -241,6 +242,10 @@ export default {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
+        .oper{
+            text-align: right;
+            font-size: 14px;
+        }
     }
     .tr-table-row:hover{
         background: $bg_light;
@@ -255,7 +260,8 @@ export default {
         flex: 1;
         color: $font_5;
         font-size: 12px;
-        font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+        font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+        user-select: text;
     }
     .tr-table-cell.red{
         color: $red;

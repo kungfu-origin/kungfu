@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import * as BASE_API from '@/io/base';
-import {reqCalendarNanomsg} from '@/io/nano/buildNmsg'
-import * as msgType from '@/io/nano/msgType'
+import { nanoGetCalendar } from '@/io/nano/nanoReq';
 
 export const setCalendar = ({commit}, calendar) => {
     commit('SET_CALENDAR', calendar)
@@ -47,20 +46,9 @@ export const deleteTask = ({dispatch, state}, taskName) => {
 
 //主动获得交易日
 export const getCalendar = ({dispatch}) => {
-    return new Promise((resolve, reject) => {
-        const reqMessage = JSON.stringify({"req": "current"});
-        const req = reqCalendarNanomsg();
-        if(!req) return;
-        req.send(reqMessage + '\0')
-        req.on('data', buf => {
-            req.close();
-            const data = JSON.parse(String(buf).replace(/\0/g,''))
-            if(msgType.reqCalendar == data.msg_type) {
-                dispatch('setCalendar', data.data)
-                resolve(data.data)
-                req.close()
-            }
-        })
+    return nanoGetCalendar().then((calendar) => {
+        dispatch('setCalendar', calendar)
+        return calendar
     })
 }
 

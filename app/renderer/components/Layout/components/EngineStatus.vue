@@ -59,7 +59,7 @@
             </div>
         </div>
         <span slot="reference" :class="[currentStatus]">
-            <i class="fa fa-server fa-lg"></i>
+            <i class="el-icon-s-operation"></i>
             账户状态
         </span>
     </el-popover>

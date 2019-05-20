@@ -11,8 +11,6 @@ import {EVENT_BUS} from './io/event-bus'
 import {listProcessStatus} from '__gUtils/processUtils';
 
 import './assets/iconfont/iconfont.css';
-import './assets/css/font-awesome.min.css';
-
 
 //element
 Vue.use(Tag)
@@ -71,7 +69,6 @@ export const startGetProcessStatus = () => {
     clearTimeout(listProcessTimer)
     listProcessStatus()
     .then(res => {
-        console.log(JSON.stringify(res))
         res && EVENT_BUS.$emit('update-process-status', Object.freeze(res))
     })
     .catch(err => console.error(err))

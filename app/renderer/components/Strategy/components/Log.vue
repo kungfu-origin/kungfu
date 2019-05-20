@@ -8,10 +8,10 @@
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-file-text-o mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath)"></i>
+            <i class="el-icon-document mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath)"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <el-button size="mini" @click="handleClearLog" icon="el-icon-delete" title="清空"></el-button>

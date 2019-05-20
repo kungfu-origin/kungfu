@@ -16,6 +16,9 @@ export const portfolioByMin = 209 //投资组合信息分钟线，仅策略推�
 export const reqLogin = 301
 export const subscribe = 302
 
+export const makeOrder = 353
+export const cancelOrder = 354
+
 export const gatewayState = 401
 
 export const calendar = 601  //自动推送日期相关信息，目前只有交易日

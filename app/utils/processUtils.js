@@ -4,7 +4,6 @@ const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
 const {getProcesses} = require('getprocesses');
-const ps = require('ps-node');
 const taskkill = require('taskkill');
 export const pm2 = require('pm2');
 
@@ -25,27 +24,6 @@ const winKill = (tasks) => {
             tree: platform === 'win' 
         })
     })
-}
-
-const getKfcs = () => {
-    if(platform === 'win'){
-        return getProcesses().then(processes => {
-            return processes.filter(p => {
-                const rawCommandLine = p.rawCommandLine
-                return rawCommandLine.indexOf('kfc') !== -1
-            })
-        })
-    }else{
-        return new Promise((resolve, reject) => {
-            ps.lookup({
-                command: 'kfc'
-            }, (err, list) => {
-                if(err) throw new Error(err)
-                resolve(list)
-            })
-        })
-    }
-   
 }
 
 const unixKill = (tasks) => {
@@ -169,7 +147,7 @@ export const startProcess = async (options) => {
         "watch": false,
         "force": options.force === undefined ? true : options.force,
         "exec_mode" : "fork",
-        // "interpreterArgs": ["~harmony", "~debug"],
+        "interpreterArgs": ["~harmony"],
         "env": {
             "KF_HOME": dealSpaceInPath(BASE_DIR),
         }

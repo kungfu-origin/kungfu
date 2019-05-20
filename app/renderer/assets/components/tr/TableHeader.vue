@@ -1,7 +1,6 @@
 <template>
     <div :class="{'table-header': true, 'mini': 'size' === 'mini', 'no-bg': noBg}">
         <div class="title">
-            <!-- <i v-if="size != 'mini'" class="mouse-over fa fa-navicon fa-lg" style="top: -1px"></i> -->
             <slot name="title"></slot>
         </div>
         <slot></slot>

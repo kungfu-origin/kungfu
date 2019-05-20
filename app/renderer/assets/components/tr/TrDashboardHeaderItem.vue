@@ -25,7 +25,7 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 12px;
+        font-size: 14px;
         .el-checkbox{
             .el-checkbox__label{
                 font-size: 12px;

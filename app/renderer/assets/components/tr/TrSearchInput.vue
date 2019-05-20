@@ -1,6 +1,6 @@
 <template>
     <div class="tr-search-input">
-		<i v-if="!active" class="fa fa-search mouse-over" title="搜索" @click="handleActive"></i>
+		<i v-if="!active" class="el-icon-search mouse-over" title="搜索" @click="handleActive"></i>
 		<el-input 
 		ref="search-input"
 		v-if="active"

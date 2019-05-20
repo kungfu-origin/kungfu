@@ -71,7 +71,8 @@ export const runClearDB = (dbPath, tableName) => {
 export const runSelectDB = (dbPath, sql, args) =>{
     return new Promise((resolve, reject) => {
         if(!fs.existsSync(dbPath)){
-            throw new Error(`${dbPath} 不存在！`)
+            resolve([]);
+            return;
         }
         const db = new sqlite3.Database(dbPath)
         db.serialize(() => {

@@ -5,13 +5,13 @@
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="fa fa-download mouse-over" title="导出" @click="handleRefresh"></i>
+            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
         </tr-dashboard-header-item>
          <tr-dashboard-header-item>
-            <el-button size="mini" type="danger" style="color: #fff" title="全部撤单">CANCEL</el-button>
+            <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -19,7 +19,11 @@
     :data="tableData"
     :schema="schema"
     :renderCellClass="renderCellClass"
-    ></tr-table>
+    >
+        <template slot="oper" slot-scope="{ props }">
+            <i class="el-icon-close mouse-over" title="撤单" @click="handleCancelOrder(props)"/>
+        </template>
+    </tr-table>
     <date-range-selector 
     @confirm="handleConfirmDateRange"
     :visible.sync="dateRangeDialogVisiblity"    
@@ -33,6 +37,8 @@ import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig
 import { debounce, throttle } from "@/assets/js/utils";
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeSelector from './components/DateRangeSelector';
+import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
+
 export default {
     name: "current-orders",
     props: {
@@ -41,6 +47,10 @@ export default {
             default:''
         },
         pageType: {
+            type: String,
+            default:''
+        },
+        gatewayName: {
             type: String,
             default:''
         },
@@ -72,43 +82,54 @@ export default {
     },
 
     computed:{
-            schema(){
-                return  [{
-                    type: "text",
-                    label: "下单时间",
-                    prop: "insertTime",
-                    width: '160px'
-                    },{
-                    type: "text",
-                    label: "代码",
-                    prop: "instrumentId",
-                    width: '70px'
-                    },{
-                    type: "text",
-                    label: "买卖",
-                    prop: "side",
-                    },{
-                    type: "text",
-                    label: "开平",
-                    prop: "offset",
-                    },{
-                    type: "text",
-                    label: "委托价",
-                    prop: "limitPrice",
-                    },{
-                    type: "text",
-                    label: "已成交/全部",
-                    prop: "volumeTraded",
-                    },{
-                    type: "text",
-                    label: "订单状态",
-                    prop: "status",
-                    },{
-                    type: "text",
-                    label: this.pageType == 'account'?'策略': '账户',
-                    prop: this.pageType == 'account'? 'clientId': 'accountId',
-                }]
-            }
+        schema(){
+            return  [
+            {
+                type: "text",
+                label: "下单时间",
+                prop: "insertTime",
+                width: '160px'
+            },{
+                type: "text",
+                label: "代码",
+                prop: "instrumentId",
+                width: '70px'
+            },{
+                type: "text",
+                label: "买卖",
+                prop: "side",
+            },{
+                type: "text",
+                label: "开平",
+                prop: "offset",
+            },{
+                type: "text",
+                label: "委托价",
+                prop: "limitPrice",
+            },{
+                type: "text",
+                label: "已成交/全部",
+                prop: "volumeTraded",
+            },{
+                type: "text",
+                label: "订单状态",
+                prop: "status",
+            },{
+                type: "text",
+                label: this.pageType == 'account' ? '策略' : '账户',
+                prop: this.pageType == 'account' ? 'clientId' : 'accountId',
+            },{
+                type: 'text',
+                label: 'id',
+                prop: "orderId",
+                flex: 2,
+            },{
+                type: 'operation',
+                label: '',
+                prop: 'oper',
+                width: '40px'
+            }]
+        }
     },
 
     watch: {
@@ -160,7 +181,6 @@ export default {
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
             const t = this;
-            console.log(dateRange)
             t.getDataMethod(t.currentId, {
                 id: t.filter.id,
                 dateRange
@@ -173,6 +193,37 @@ export default {
                     writeCSV(filename, res.data)
                 })
             })
+        },
+
+        handleCancelOrder(props){
+            const t = this;
+            const gatewayName = `td_${props.exchangeId.toLowerCase()}_${props.accountId}`
+            console.log(gatewayName)
+            nanoCancelOrder({
+                gatewayName,
+                orderId: props.orderId
+            }).then(() => {
+                t.$message.info(`撤单指令已发送！`)
+            })
+        },
+
+        handleCancelAllOrders(){
+            const t = this;
+            t.$confirm(`确认全部撤单？`, '提示', {
+                confirmButtonText: '确 定',
+                cancelButtonText: '取 消',
+            })
+            .then(() => nanoCancelAllOrder({
+                gatewayName: t.gatewayName,
+                type: t.pageType,
+                id: t.currentId
+            }))
+            .then(() => t.$message.info('撤单指令已发送！'))
+            .catch((err) => {
+                if(err == 'cancel') return
+                t.$message.error(err.message || '操作失败！')
+            })
+
         },
 
         init: debounce(function() {
@@ -233,6 +284,7 @@ export default {
                 clientId: item.client_id,
                 accountId: item.account_id,
                 orderId: item.order_id,
+                exchangeId: item.exchange_id
             })
         },
 

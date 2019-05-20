@@ -57,8 +57,8 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="fa fa-file-text-o mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleUpdateMdSource(props.row)" title="切换行情源账户"><i class="fa fa-exchange mouse-over"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
+                        <span class="tr-oper" @click.stop="handleUpdateMdSource(props.row)" title="切换行情源"><i class="el-icon-s-data mouse-over"></i></span>
                     </template>
                 </el-table-column>
             </el-table>

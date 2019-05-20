@@ -12,13 +12,13 @@
                     <tr-menu-item
                     route="/"
                     >
-                        <i class="fa fa-desktop fa-lg fa-fw" ></i>
+                        <i class="el-icon-s-platform" ></i>
                         <template slot="title">账户</template>
                     </tr-menu-item>
                     <tr-menu-item
                     route="/strategy"
                     >
-                        <i class="fa fa-tasks fa-lg fa-fw" ></i>
+                        <i class="el-icon-s-order" ></i>
                         <template slot="title">策略</template>
                     </tr-menu-item>
                     

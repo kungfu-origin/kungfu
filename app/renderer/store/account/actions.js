@@ -75,7 +75,6 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
         const dataMsgType = data.msg_type;
         switch(dataMsgType){
             case msgType.gatewayState: //监听td、md状态
-                console.log('td md status: ', gatewayName, data.data)
                 dispatch('setOneMdTdState', {name: gatewayName, oneState: Object.freeze(data.data)})
                 if(data.data && data.data.message) {
                     const message = data.data.message;
@@ -136,6 +135,3 @@ export const switchMd = ({dispatch}, {account, value}) => {
     .then(() => Vue.message.start('正在启动...'))       
     .catch(err => Vue.message.error(err.message || '操作失败！'))          
 }
-
-
-

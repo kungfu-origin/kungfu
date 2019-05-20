@@ -29,6 +29,7 @@
                         ref="current-order"
                         :currentId="currentId"
                         pageType="account" 
+                        :gatewayName="`td_${currentId}`"
                         :getDataMethod="getAccountOrder" 
                         @startNanomsg="buildOrderNanomsgListener"
                         :nanomsgBackData="orderNanomsgListener"

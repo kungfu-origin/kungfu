@@ -116,10 +116,10 @@
                     min-width="100"
                 >
                     <template slot-scope="props">
-                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="fa fa-file-text-o mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="fa fa-money mouse-over" title="费率设置"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="mouse-over fa fa-cog mouse-over" title="账户设置"></i></span>
-                        <span class="tr-oper-delete" @click.stop="handleDeleteAccount(props.row)"><i class="mouse-over fa fa-trash-o mouse-over" title="删除账户"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="el-icon-money mouse-over" title="费率设置"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
+                        <span class="tr-oper-delete" @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
                     </template>
                 </el-table-column>
             </el-table>

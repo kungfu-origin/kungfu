@@ -35,7 +35,6 @@ const components = [
     TrSearchInput,
 ]
 
-
 //导出
 const {dialog} = require('electron').remote;
 const saveFile = ({
@@ -56,10 +55,6 @@ const saveFile = ({
         })
     })
 }
-
-
-
-
 
 export default function (Vue) {
     components.map(component => {
@@ -98,6 +93,15 @@ export default function (Vue) {
         start: function(message){
             Vue.notify({
                 title: '启动中',
+                message: message,
+                position: "bottom-right",
+                type: 'info'
+            })
+        },
+
+        info: function(message){
+            Vue.notify({
+                title: '消息',
                 message: message,
                 position: "bottom-right",
                 type: 'info'
