@@ -10,6 +10,9 @@
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-button size="mini">下单</el-button>
+        </tr-dashboard-header-item>
     </div>
     <tr-table
         v-if="rendererTable"

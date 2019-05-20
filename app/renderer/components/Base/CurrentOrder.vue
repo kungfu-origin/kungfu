@@ -38,6 +38,7 @@ import { debounce, throttle } from "@/assets/js/utils";
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeSelector from './components/DateRangeSelector';
 import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
+import { onUpdateProcessStatusListener, offUpdateProcessStatusListener } from '@/io/event-bus';
 
 export default {
     name: "current-orders",
@@ -54,6 +55,10 @@ export default {
             type: String,
             default:''
         },
+        accountList: {
+            type: Array,
+            default: []
+        },
         getDataMethod: {
             type: Function,
             default: () => {}
@@ -63,6 +68,7 @@ export default {
 
     data() {
         this.orderDataByKey = {}; //为了把object 转为数据要用的list
+        this.processStatus = null
         return {
             rendererTable: false,
             searchKeyword: "",
@@ -73,7 +79,7 @@ export default {
             getDataLock: false,
             tableData: Object.freeze([]),
 
-            dateRangeDialogVisiblity: false
+            dateRangeDialogVisiblity: false,
         };
     },
 
@@ -168,7 +174,14 @@ export default {
         const t = this;
         t.rendererTable = true;
         t.resetData();
-        t.currentId && t.init()
+        t.currentId && t.init();
+        onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+
+    },
+    
+    destroyed() {
+        const t = this;
+        offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
     methods: {
@@ -197,8 +210,22 @@ export default {
 
         handleCancelOrder(props){
             const t = this;
-            const gatewayName = `td_${props.exchangeId.toLowerCase()}_${props.accountId}`
-            console.log(gatewayName)
+            //防止柜台不相同，但accountId相同
+            const accountIds = t.getSourceNameByAccountId(props.accountId)
+            if(accountIds.length < 0) {
+                t.$message.error(`${props.accountId} 不在系统内！`)
+                return;
+            }
+            if(accountIds.length >= 2) {
+                t.$message.error(`系统内存在两个 ${props.accountId} 账户！`)
+                return;
+            }
+            const gatewayName = `td_${accountIds[0]}`
+            if(t.processStatus[gatewayName] !== 'online') {
+                t.$message.warning(`需要先启动 ${accountIds[0]} 交易进程！`)
+                return;
+            }
+            //撤单
             nanoCancelOrder({
                 gatewayName,
                 orderId: props.orderId
@@ -209,6 +236,19 @@ export default {
 
         handleCancelAllOrders(){
             const t = this;
+            //先判断对应进程是否启动
+            if(t.pageType === 'account'){
+                if(t.processStatus[t.gatewayName] !== 'online') {
+                    t.$message.warning(`需要先启动 ${t.gatewayName} 交易进程！`)
+                    return;
+                }
+            }else if(t.pageType === 'strategy'){
+                if(t.processStatus[t.currentId] !== 'online') {
+                    t.$message.warning(`需要先启动 ${t.currentId} 策略进程！`)
+                    return;
+                }
+            }
+
             t.$confirm(`确认全部撤单？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
@@ -341,7 +381,18 @@ export default {
                 else if(['已成交', '部分撤单', '已撤单'].indexOf(item.status) != -1) return 'green'
                 else return 'gray'
             }
-        }
+        },
+
+        getSourceNameByAccountId(accountId){
+            const t = this;
+            return t.accountList.filter(a => a.account_id.indexOf(accountId) !== -1).map(a => a.account_id)
+        },
+
+        updateProcessStatus(res){
+            const t = this;
+            t.processStatus = res
+        },
+
     }
 }
 </script>
