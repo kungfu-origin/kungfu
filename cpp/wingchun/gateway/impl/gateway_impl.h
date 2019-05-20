@@ -38,15 +38,15 @@ namespace kungfu
         virtual ~MarketDataStreamingWriter() {}
         void on_quote(const Quote* quote) override
         {
-            writer_->write_frame(quote, sizeof(Quote), -1, (int)MsgType::Quote, true, -1);
+            writer_->write_frame(quote, sizeof(Quote), -1, (int16_t)MsgType::Quote, true, -1);
         }
         void on_entrust(const Entrust* entrust) override
         {
-            writer_->write_frame(entrust, sizeof(Entrust), -1, (int)MsgType::Entrust, true, -1);
+            writer_->write_frame(entrust, sizeof(Entrust), -1, (int16_t)MsgType::Entrust, true, -1);
         }
         void on_transaction(const Transaction* transaction) override
         {
-            writer_->write_frame(transaction, sizeof(Transaction), -1, (int)MsgType::Transaction, true, -1);
+            writer_->write_frame(transaction, sizeof(Transaction), -1, (int16_t)MsgType::Transaction, true, -1);
         }
 
     private:
@@ -60,11 +60,11 @@ namespace kungfu
         virtual ~TraderDataStreamingWriter() {}
         virtual void on_order(const Order* order)
         {
-            writer_->write_frame(order, sizeof(Order), -1, (int) MsgType::Order, true, -1);
+            writer_->write_frame(order, sizeof(Order), -1, (int16_t)MsgType::Order, true, -1);
         }
         virtual void on_trade(const Trade* trade)
         {
-            writer_->write_frame(trade, sizeof(Trade), -1, (int) MsgType::Trade, true, -1);
+            writer_->write_frame(trade, sizeof(Trade), -1, (int16_t)MsgType::Trade, true, -1);
         }
 
     private:

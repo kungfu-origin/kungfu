@@ -178,12 +178,12 @@ byte PageService::initiate_page(const PageServiceMessage& msg)
                     }
                 }
                 if (buffer == nullptr)
-                    buffer = PageUtil::LoadPageBuffer(path, JOURNAL_PAGE_SIZE, true, true);
+                    buffer = PageUtil::LoadPageBuffer(path, JOURNAL_PAGE_SIZE, msg.is_writer, false);
             }
         }
         else
         {   // exist file but not loaded, map and lock immediately.
-            buffer = PageUtil::LoadPageBuffer(path, JOURNAL_PAGE_SIZE, false, true);
+            buffer = PageUtil::LoadPageBuffer(path, JOURNAL_PAGE_SIZE, msg.is_writer, false);
         }
 
         SPDLOG_INFO("Added buffer {} to {}", buffer, path);

@@ -5,9 +5,11 @@
 #ifndef PROJECT_MSG_H
 #define PROJECT_MSG_H
 
+#include <cstdint>
+
 namespace kungfu
 {
-    enum class MsgType: int
+    enum class MsgType: int16_t
     {
         Error = 0,
 

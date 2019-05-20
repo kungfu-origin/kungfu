@@ -37,14 +37,15 @@ USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
 
-ClientPageProvider::ClientPageProvider(const string& client_name, bool is_writer, bool revise_allowed_):
+ClientPageProvider::ClientPageProvider(const string& client_name, bool is_writer, bool revise_allowed):
         client_name_(client_name), client_request_socket_(AF_SP, NN_REQ), memory_msg_buffer_(nullptr)
 {
     is_writer_ = is_writer;
-    revise_allowed_ = is_writer_ || revise_allowed_;
+    revise_allowed_ = is_writer_ || revise_allowed;
     string url = KFS_SERVICE_URL;
     client_request_socket_.connect(url.c_str());
     register_client();
+    SPDLOG_TRACE("ClientPageProvider {} is_writer {} revise {}", client_name, is_writer_, revise_allowed_);
 }
 
 /** send req via socket and get response in data */
@@ -138,10 +139,11 @@ void ClientPageProvider::releasePage(void* buffer, int size, int service_id)
     PageUtil::ReleasePageBuffer(buffer, size, true);
 }
 
-LocalPageProvider::LocalPageProvider(bool isWriting, bool revise_allowed_)
+LocalPageProvider::LocalPageProvider(bool is_writer, bool revise_allowed)
 {
-    is_writer_ = isWriting;
-    revise_allowed_ = is_writer_ || revise_allowed_;
+    is_writer_ = is_writer;
+    revise_allowed_ = is_writer_ || revise_allowed;
+    SPDLOG_TRACE("LocalPageProvider is_writer {} revise {}", is_writer_, revise_allowed_);
 }
 
 PagePtr LocalPageProvider::getPage(const string &dir, const string &jname, int service_id, short page_num)

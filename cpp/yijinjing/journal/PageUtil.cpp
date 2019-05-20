@@ -22,6 +22,7 @@
 
 #include "PageUtil.h"
 #include "PageHeader.h"
+#include "Log.h"
 
 #ifdef _WINDOWS
 #include <io.h>
@@ -210,6 +211,7 @@ void* PageUtil::LoadPageBuffer(const string& path, int size, bool isWriting, boo
     }
 
     close(fd);
+    SPDLOG_TRACE("loaded buffer for [{}] {}", quickMode, path);
     return buffer;
 #endif // _WINDOWS
 }
