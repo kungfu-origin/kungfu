@@ -1,8 +1,7 @@
 const nano = require('nanomsg');
-const {BASE_DIR, GATEWAY_DIR} = require('__gConfig/pathConfig');
+const { BASE_DIR, GATEWAY_DIR, STRATEGY_DIR } = require('__gConfig/pathConfig');
 const fse = require('fs-extra');
 const path = require('path');
-const {addFile} = require('__gUtils/fileUtils');
 window.nanomsgController = {}
 
 /**
@@ -95,12 +94,24 @@ export const reqCalendarNanomsg = () => {
 }
 
 
-//手动下撤单
-export const reqOrderOperNanomsg = (gatewayName) => {
+//手动下撤单(账户)
+export const reqOrderOperByGatewayNanomsg = (gatewayName) => {
     const req = nano.socket('req', {
         rcvtimeo: 1000
     })
     const ipcDir = path.join(GATEWAY_DIR, gatewayName)
+    fse.ensureDirSync(ipcDir)
+    const ipcPath = path.join(ipcDir, 'rep.ipc');
+    const addr = `ipc://${ipcPath}`
+    req.connect(addr)
+    return req
+}
+
+export const reqOrderOperByStrategyNanomsg = (strategy) => {
+    const req = nano.socket('req', {
+        rcvtimeo: 1000
+    })
+    const ipcDir = path.join(STRATEGY_DIR, strategy)
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'rep.ipc');
     const addr = `ipc://${ipcPath}`

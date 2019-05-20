@@ -68,6 +68,10 @@
     background-color: $bg_card;
 }
 
+.el-input__inner.el-range-editor{
+    background-color: $bg_card;
+}
+
 .el-select .el-input.is-disabled .el-input__inner:hover{
     border-color: $input_bg
 }

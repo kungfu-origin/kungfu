@@ -87,10 +87,7 @@ export default {
         height: 36px;
         line-height: 36px;
         padding-left: 8px;
-        
         .el-button{
-            // background: $bg_light;
-            // color: $font_1;
             border: none;
             i{
                 color: $font_1;

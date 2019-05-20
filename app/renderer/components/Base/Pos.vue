@@ -188,13 +188,6 @@ export default {
                 title: '保存持仓信息',
             }).then(filename => {
                 if(!filename) return;
-<<<<<<< HEAD
-=======
-                // const data = t.tableData.length 
-                // ? [Object.keys(t.tableData[0]), ...t.tableData.map(row => Object.values(row))]
-                // : []
-                // console.log(data,'---')
->>>>>>> [add] export csv
                 writeCSV(filename, t.tableData)
             })
         },

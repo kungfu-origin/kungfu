@@ -1,5 +1,5 @@
 
-import {reqCalendarNanomsg, reqOrderOperNanomsg} from '@/io/nano/buildNmsg'
+import {reqCalendarNanomsg, reqOrderOperByGatewayNanomsg, reqOrderOperByStrategyNanomsg} from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType'
 
 
@@ -20,14 +20,13 @@ export const nanoGetCalendar = () => {
     })
 }
 
-
 //撤单
 export const nanoCancelOrder = ({gatewayName, orderId}) => {
     return new Promise((resolve) => {
         const reqMsg = JSON.stringify({req: 304, data: {
             order_id: [orderId]
         }})
-        const req = reqOrderOperNanomsg(gatewayName)
+        const req = reqOrderOperByGatewayNanomsg(gatewayName)
         req.send(reqMsg + '\0')
         req.close()
         resolve(true)
@@ -40,13 +39,16 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
     })
 }
 
-
-//全部撤单
-export const nanoCancelAllOrder = ({gatewayName, type, id}) => {
+/** 全部撤单
+ * @param  {String} {targetId gatewayname / strategyId
+ * @param  {String} cancelType account / strategy
+ * @param  {String} id strategyId / accountId}
+ */
+export const nanoCancelAllOrder = ({targetId, cancelType, id}) => {
     return new Promise((resolve) => {
-        const postData = type === 'account' ? {account_id: id} : {client_id: id}
+        const postData = cancelType === 'account' ? {account_id: id} : {client_id: id}
         const reqMsg = JSON.stringify({req: 304, data: postData})
-        const req = reqOrderOperNanomsg(gatewayName)
+        const req = cancelType ==='account' ? reqOrderOperByGatewayNanomsg(targetId) : reqOrderOperByStrategyNanomsg(targetId)
         req.send(reqMsg + '\0')
         req.close()
         resolve(true)

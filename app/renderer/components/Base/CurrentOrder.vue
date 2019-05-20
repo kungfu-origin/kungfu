@@ -214,8 +214,8 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => nanoCancelAllOrder({
-                gatewayName: t.gatewayName,
-                type: t.pageType,
+                targetId: t.pageType === 'account' ? t.gatewayName : t.currentId,
+                cancelType: t.pageType,
                 id: t.currentId
             }))
             .then(() => t.$message.info('撤单指令已发送！'))

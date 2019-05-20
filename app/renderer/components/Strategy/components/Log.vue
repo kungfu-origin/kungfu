@@ -14,7 +14,7 @@
             <i class="el-icon-document mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath)"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <el-button size="mini" @click="handleClearLog" icon="el-icon-delete" title="清空"></el-button>
+            <el-button size="mini" @click="handleClearLog" title="清空">清空</el-button>
         </tr-dashboard-header-item>
     </div>
         <tr-table

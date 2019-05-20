@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleAddAccount" icon="el-icon-plus" title="添加"></el-button>
+                <el-button size="mini" @click="handleAddAccount" title="添加">添加</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="table-body">
