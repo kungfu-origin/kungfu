@@ -175,7 +175,7 @@ namespace kungfu
     std::string Calendar::get_next_trading_day(const char* start_date, int delta) const
     {
         nlohmann::json j;
-        j["req"] = "calc";
+        j["request"] = "calendar/calculate";
         j["region"] = REGION_CN;
         j["start_date"] = start_date;
         j["delta"] = delta;
@@ -185,7 +185,8 @@ namespace kungfu
         int bytes = nn_recv(req_socket_, &buf, NN_MSG, 0);
         if (bytes >= 0)
         {
-            nlohmann::json j = nlohmann::json::parse(buf);
+            std::string response(buf, bytes);
+            nlohmann::json j = nlohmann::json::parse(response);
             std::string date = j["data"]["trading_day"];
             nn_freemsg(buf);
             return date;
@@ -209,11 +210,19 @@ namespace kungfu
             int bytes = nn_recv(sub_socket_, &buf, NN_MSG, 0);
             if (bytes > 0)
             {
-                SPDLOG_INFO("[Calendar] receive push: {}", buf);
-                nlohmann::json j = nlohmann::json::parse(buf);
-                date = j["data"]["trading_day"];
-                current_ = std::stoi(date);
-                has_new = true;
+                std::string notice(buf, bytes);
+                nlohmann::json j = nlohmann::json::parse(notice);
+                if (j.find("type") != j.end())
+                {
+                    std::string notice_type = j["type"];
+                    if (notice_type.compare("calendar"))
+                    {
+                        date = j["data"]["trading_day"];
+                        SPDLOG_INFO("Changed trading day to {}", date);
+                        current_ = std::stoi(date);
+                        has_new = true;
+                    }
+                }
                 nn_freemsg(buf);
             }
 
@@ -231,15 +240,16 @@ namespace kungfu
     void Calendar::get_current_via_req()
     {
         nlohmann::json j;
-        j["req"] = "current";
+        j["request"] = "calendar/current";
         j["region"] = REGION_CN;
         std::string req_msg = j.dump();
-        nn_send(req_socket_, req_msg.c_str(), req_msg.size() + 1, 0);
+        nn_send(req_socket_, req_msg.c_str(), req_msg.size(), 0);
         char* buf = nullptr;
         int bytes = nn_recv(req_socket_, &buf, NN_MSG, 0);
         if (bytes > 0)
         {
-            nlohmann::json j = nlohmann::json::parse(buf);
+            std::string response(buf, bytes);
+            nlohmann::json j = nlohmann::json::parse(response);
             std::string date = j["data"]["trading_day"];
             current_ = std::stoi(date);
             nn_freemsg(buf);

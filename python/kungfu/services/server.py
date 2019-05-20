@@ -1,4 +1,4 @@
-import os
+import os, sys, traceback
 import select
 import json
 import nnpy, pyyjj
@@ -9,7 +9,7 @@ from kungfu.services.handlers.calendar import *
 from kungfu.services.handlers.system import *
 from kungfu.services.handlers import kfs_handle, kfs_run_tasks
 
-SECOND_IN_NANO = 1000000000
+SECOND_IN_NANO = 1e9
 
 class Server:
     def __init__(self, logger):
@@ -49,6 +49,7 @@ class Server:
         readable, writable, exceptional = select.select([self._service_fd], [], [], 0)
         if readable:
             request_data = self._service_socket.recv()
+            self._logger.debug("received %s", request_data.decode('utf-8'))
             request_json = json.loads(request_data.decode('utf-8'))
             request_path = request_json['request']
             response = kfs_handle(request_path, self, request_json)
@@ -65,7 +66,8 @@ class Server:
                 rc = self._notice_socket.send(event_msg_str)
                 self._logger.debug('Published passive notice: %d, %s', rc, event_msg)
             except Exception as err:
-                self._logger.error('Invalid passive notice %s, [%s] %s', event_msg_data, type(err), err)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                self._logger.error('Invalid passive notice %s, [%s] %s', event_msg_data, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
                 self._notice_socket.send("{}")
 
     def run_tasks(self):
@@ -89,7 +91,8 @@ class Server:
                 self.process_service_message()
                 self.run_tasks()
             except Exception as err:
-                self._logger.error("Server suffers: [%s] %s", type(err), err)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                self._logger.error("Server suffers: %s %s", exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
         self._service_socket.close()
         self._emitter_socket.close()
         self._notice_socket.close()

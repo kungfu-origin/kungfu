@@ -64,8 +64,8 @@ public:
     bool write(string content, byte msg_type, bool is_last=true, short source=0);
 
     void process_memory_message();
-    int32_t register_journal(const string& clientName);
-    uint32_t register_client(const string& clientName, int pid, bool isWriter);
+    int32_t register_journal(const string& client_name);
+    uint32_t register_client(const string& client_name, int pid, bool is_writer);
     void release_page_at(int idx);
 
 private:

@@ -126,7 +126,7 @@ class EventLoop:
     def __iteration(self):
         nano = -1
         if not self._low_latency and self._notice.wait():
-            self._logger.debug('passive notice %s', self._notice.last_message())
+            self._notice.last_message()
         if self._reader is not None:
             frame = self._reader.next()
             if frame is not None:

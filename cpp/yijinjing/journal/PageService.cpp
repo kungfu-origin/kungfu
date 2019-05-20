@@ -106,13 +106,13 @@ void PageService::process_memory_message()
     }
 }
 
-int32_t PageService::register_journal(const string& clientName)
+int32_t PageService::register_journal(const string& client_name)
 {
     int32_t idx = 0;
     for (; idx < MAX_MEMORY_MSG_NUMBER; idx++)
         if (GET_MEMORY_MSG(memory_message_buffer, idx)->status == PAGE_RAW)
             break;
-    SPDLOG_INFO("Register journal for {} with id {}", clientName, idx);
+    SPDLOG_INFO("Register journal for {} with id {}", client_name, idx);
 
     if (idx >= MAX_MEMORY_MSG_NUMBER)
     {
@@ -130,11 +130,11 @@ int32_t PageService::register_journal(const string& clientName)
     return idx;
 }
 
-uint32_t PageService::register_client(const string& clientName, int pid, bool isWriter)
+uint32_t PageService::register_client(const string& client_name, int pid, bool is_writer)
 {
-    SPDLOG_INFO("Register client {} with isWriter {}", clientName, isWriter);
+    SPDLOG_INFO("Register client {} for pid {} is_writer {}", client_name, pid, is_writer);
     std::stringstream ss;
-    ss << clientName << getNanoTime() << pid;
+    ss << client_name << getNanoTime() << pid;
     uint32_t hashCode = MurmurHash2(ss.str().c_str(), ss.str().length(), HASH_SEED);
     return hashCode;
 }

@@ -61,11 +61,12 @@ json ClientPageProvider::request(const string &path)
     request_["writer"] = is_writer_;
     request_["hash_code"] = hash_code_;
     string request_str = request_.dump();
-    SPDLOG_DEBUG("send request {}", request_str);
-    client_request_socket_.send(request_str.c_str(), request_str.length(), 0);
+    int sent_bytes = client_request_socket_.send(request_str.c_str(), request_str.length(), 0);
+    SPDLOG_TRACE("sent request [{}]: {}", sent_bytes, request_str);
     emitter_.poke();
-    int bytes = client_request_socket_.recv(response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);
-    response_str_.assign(response_buf, bytes);
+    int recv_bytes = client_request_socket_.recv(response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);
+    response_str_.assign(response_buf, recv_bytes);
+    SPDLOG_TRACE("got response [{}]: {}", recv_bytes, response_str_);
     return json::parse(response_str_);
 }
 

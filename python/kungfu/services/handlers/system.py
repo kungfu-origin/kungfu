@@ -11,6 +11,7 @@ def health_check(ctx):
     stale_pids = []
     for pid in ctx._client_processes:
         if not ctx._client_processes[pid]['process'].is_running():
+            ctx._logger.warn('cleaning up stale process pid %s clients %s', pid, ctx._client_processes[pid]['client_info'])
             for name in ctx._client_processes[pid]['client_info']:
                 release_client(ctx, name, 0, False, {})
             stale_pids.append(pid)
@@ -23,5 +24,6 @@ def switch_trading_day(ctx):
     if ctx._current_day < current_day:
         ctx._current_day = current_day
         ctx._notice_socket.send(json.dumps({
+            'type':'calendar',
             'data':{'trading_day':current_day}
         }))

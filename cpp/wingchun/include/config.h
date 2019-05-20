@@ -23,8 +23,8 @@ namespace kungfu
 
 // calendar configuration
 #define CALENDAR_HOLIDAY_DB_FILE_FORMAT "{}/global/holidays.db"
-#define CALENDAR_REP_URL "ipc://{}/calendar/rep.ipc"
-#define CALENDAR_PUB_URL "ipc://{}/calendar/pub.ipc"
+#define CALENDAR_REP_URL "ipc://{}/socket/service.sock"
+#define CALENDAR_PUB_URL "ipc://{}/socket/notice.sock"
 
 // gateway configuration
 
