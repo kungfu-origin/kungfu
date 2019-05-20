@@ -70,13 +70,13 @@ class KungFu(object):
         getattr(self, args.command)(args, logger)
 
     def paged(self, args, logger):
-        from kungfu.mod import PageServer
-        server = PageServer.PageServer(logger)
+        from kungfu.services.server import Server
+        server = Server(logger)
         atexit.register(exit_handler, task=server)
         server.start()
 
     def ping(self, args, logger):
-        from kungfu.mod.Ping import Ping
+        from kungfu.client.ping import Ping
         ping = Ping(logger)
         atexit.register(exit_handler, task=ping)
         ping.ping(args.message, args.times)

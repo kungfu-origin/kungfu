@@ -1,0 +1,95 @@
+import os
+import psutil
+import nnpy, pyyjj
+
+from kungfu.services.handlers import kfs_handler
+
+@kfs_handler(11)
+def register_journal(ctx, request):
+    name = request['name']
+    result = {
+        'type': 11,
+        'success': False,
+        'error_msg': '',
+        'memory_msg_idx': -1
+    }
+    if not name in ctx.client_info:
+        result['error_msg'] = 'client ' + name + ' does not exist'
+    else:
+        client = ctx.client_info[name]
+        idx = ctx.page_service.register_journal(name)
+        if idx >= 1000:
+            result['error_msg'] = 'idx exceeds limit'
+        else:
+            client['journals'].append(idx)
+            result['success'] = True
+            result['memory_msg_idx'] = idx
+    return result
+
+@kfs_handler(12)
+def register_client_read(ctx, request):
+    return register_client(ctx, request)
+
+@kfs_handler(13)
+def register_client_read(ctx, request):
+    return register_client(ctx, request)
+
+@kfs_handler(19)
+def exit_client(ctx, request):
+    name = request['name']
+    hash_code = request['hash_code']
+    result = {
+        'type': 19,
+        'success': False,
+        'error_msg': ''
+    }
+    release_client(ctx, name, hash_code, True, result)
+    return result
+
+def register_client(ctx, request):
+    name = request['name']
+    pid = request['pid']
+    is_writer = request['type'] == 13
+    result = {
+        'type': 13 if is_writer else 12,
+        'success': False,
+        'error_msg': '',
+        'memory_msg_file': ctx.page_service.memory_msg_file(),
+        'file_size': ctx.page_service.memory_msg_file_size(),
+        'hash_code': -1
+    }
+    if name in ctx.client_info:
+        result['error_msg'] = 'client ' + name + ' already exists'
+    else:
+        hash_code = ctx.page_service.register_client(name, pid, is_writer)
+        if not pid in ctx.client_processes:
+            ctx.client_processes[pid] = {}
+            ctx.client_processes[pid]['process'] = psutil.Process(pid)
+            ctx.client_processes[pid]['client_info'] = []
+        ctx.client_processes[pid]['client_info'].append(name)
+        ctx.client_info[name] = {
+            'journals': [],
+            'reg_nano': pyyjj.nano_time(),
+            'is_writing': is_writer,
+            'is_strategy': False,
+            'rid_start': -1,
+            'rid_end': -1,
+            'pid': pid,
+            'hash_code': hash_code
+        }
+        result['success'] = True
+        result['hash_code'] = hash_code
+    return result
+
+def release_client(ctx, name, hash_code, validation, result):
+    if not name in ctx.client_info:
+        result['error_msg'] = 'client ' + name + ' does not exist'
+        return
+    client = ctx.client_info[name]
+    if validation and hash_code != client['hash_code']:
+        result['error_msg'] = 'hash code validation failed ' + str(hash_code) + '!=' + str(client['hash_code'])
+    else:
+        for idx in client['journals']:
+            ctx.page_service.release_page(idx)
+        del ctx.client_info[name]
+        result['success'] = True
