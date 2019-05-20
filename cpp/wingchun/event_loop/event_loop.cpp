@@ -181,10 +181,6 @@ namespace kungfu
         {
             SPDLOG_TRACE("passive notice {}", notice_.last_message());
         }
-        else
-        {
-            SPDLOG_TRACE("passive notice none");
-        }
         
         int64_t nano = -1;
         if (reader_ != nullptr)

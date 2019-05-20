@@ -27,6 +27,7 @@ class KungFu(object):
         parser_ping = create_subparser(subparsers, 'ping', help = 'ping kfc server')
         parser_ping.add_argument('-m', '--message', dest='message', default='{}', type=str, help='message')
         parser_ping.add_argument('-t', '--times', dest='times', type=int, default=4, help='times')
+        parser_time = create_subparser(subparsers, 'time', help = 'test calendar')
 
         parser_calendar = create_subparser(subparsers, 'calendar', help = 'calendar service')
         parser_md_sandbox = create_subparser(subparsers, 'md_sandbox', help = 'Market Data from sandbox')
@@ -80,6 +81,12 @@ class KungFu(object):
         ping = Ping(logger)
         atexit.register(exit_handler, task=ping)
         ping.ping(args.message, args.times)
+
+    def time(self, args, logger):
+        from kungfu.client.calendar import CalendarClient
+        client = CalendarClient(logger)
+        atexit.register(exit_handler, task=client)
+        client.run()
 
     def calendar(self, args, logger):
         from kungfu.mod import Calendar

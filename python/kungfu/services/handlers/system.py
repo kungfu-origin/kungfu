@@ -2,10 +2,10 @@ import os
 import psutil
 import nnpy, pyyjj
 
-from kungfu.services.handlers import kfs_task
+from kungfu.services.handlers import task
 from kungfu.services.handlers.paged import release_client
 
-@kfs_task
+@task
 def health_check(ctx):
     stale_pids = []
     for pid in ctx.client_processes:

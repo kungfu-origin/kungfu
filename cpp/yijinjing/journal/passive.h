@@ -16,8 +16,6 @@ YJJ_NAMESPACE_START
 
 namespace passive
 {
-    #define EMITTER_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "emitter.sock"
-    #define NOTICE_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "notice.sock"
     #define MAC_MSG_LENGTH 256 * 1024
     #define DEFAULT_NOTICE_TIMEOUT 1000
 
@@ -29,7 +27,7 @@ namespace passive
 
     class emitter: nn_socket_holder {
     public:
-        emitter(): nn_socket_holder(NN_PUSH, EMITTER_URL) {}
+        emitter(): nn_socket_holder(NN_PUSH, KFS_EMITTER_URL) {}
         void poke();
         void emit(const std::string& msg);
     private:

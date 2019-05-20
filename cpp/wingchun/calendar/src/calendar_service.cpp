@@ -32,6 +32,7 @@ namespace kungfu
 
     CalendarService::CalendarService(const std::string& base_dir) : rsp_socket_(-1), pub_socket_(-1), current_(0)
     {
+        yijinjing::KungfuLog::setup_log("calendar");
         SPDLOG_INFO("[CalendarService] initing with base dir: {}", base_dir);
         set_base_dir(base_dir);
         CalendarStorage storage(fmt::format(CALENDAR_HOLIDAY_DB_FILE_FORMAT, get_base_dir()));
@@ -142,8 +143,8 @@ namespace kungfu
             {
                 try
                 {
-                    spdlog::info("[CalendarService] receiving request: {}", buf);
                     std::string recv(buf);
+                    SPDLOG_INFO("[CalendarService] receiving request: {}", recv);
                     nlohmann::json recv_j = nlohmann::json::parse(recv);
                     std::string req = recv_j["req"];
 
@@ -157,6 +158,11 @@ namespace kungfu
                         int delta = recv_j["delta"].get<int>();
                         publish_via_nanomsg(rsp_socket_, std::to_string(calc_next_trading_day(day, delta)), MsgType::RspTradingDay);
                     }
+                    else
+                    {
+                        SPDLOG_WARN("invalid request {}", req);
+                    }
+                    
                 }
                 catch (...)
                 {

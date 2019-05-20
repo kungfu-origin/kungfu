@@ -26,7 +26,7 @@ void passive::emitter::emit(const std::string& msg)
     socket_.send(msg.c_str(), msg.length(), 0);
 }
 
-passive::notice::notice(int timeout): nn_socket_holder(NN_SUB, NOTICE_URL), timeout_(timeout)
+passive::notice::notice(int timeout): nn_socket_holder(NN_SUB, KFS_NOTICE_URL), timeout_(timeout)
 {
     socket_.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_, sizeof(timeout_));
     socket_.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);

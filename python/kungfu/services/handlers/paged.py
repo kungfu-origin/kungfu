@@ -2,13 +2,12 @@ import os
 import psutil
 import nnpy, pyyjj
 
-from kungfu.services.handlers import kfs_handler
+from kungfu.services.handlers import kfs_on
 
-@kfs_handler(11)
+@kfs_on('journal/register')
 def register_journal(ctx, request):
     name = request['name']
     result = {
-        'type': 11,
         'success': False,
         'error_msg': '',
         'memory_msg_idx': -1
@@ -21,37 +20,34 @@ def register_journal(ctx, request):
         if idx >= 1000:
             result['error_msg'] = 'idx exceeds limit'
         else:
-            client['journals'].append(idx)
             result['success'] = True
             result['memory_msg_idx'] = idx
+            client['journals'].append(idx)
     return result
 
-@kfs_handler(12)
+@kfs_on('client/register/writer')
 def register_client_read(ctx, request):
-    return register_client(ctx, request)
+    return register_client(ctx, request, False)
 
-@kfs_handler(13)
+@kfs_on('client/register/reader')
 def register_client_read(ctx, request):
-    return register_client(ctx, request)
+    return register_client(ctx, request, True)
 
-@kfs_handler(19)
+@kfs_on('client/exit')
 def exit_client(ctx, request):
     name = request['name']
     hash_code = request['hash_code']
     result = {
-        'type': 19,
         'success': False,
         'error_msg': ''
     }
     release_client(ctx, name, hash_code, True, result)
     return result
 
-def register_client(ctx, request):
+def register_client(ctx, request, is_writer):
     name = request['name']
     pid = request['pid']
-    is_writer = request['type'] == 13
     result = {
-        'type': 13 if is_writer else 12,
         'success': False,
         'error_msg': '',
         'memory_msg_file': ctx.page_service.memory_msg_file(),

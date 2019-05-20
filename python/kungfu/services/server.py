@@ -1,13 +1,14 @@
-import time
 import os
 import select
 import json
-import psutil
 import nnpy, pyyjj
 
-from kungfu.services.handlers import kfs_handle, kfs_run_tasks
 from kungfu.services.handlers.paged import *
+from kungfu.services.handlers.calendar import *
 from kungfu.services.handlers.system import *
+from kungfu.services.handlers import kfs_handle, kfs_run_tasks
+
+SECOND_IN_NANO = 1000000000
 
 class Server:
     def __init__(self, logger):
@@ -23,10 +24,11 @@ class Server:
 
         self.emitter_socket, self.emitter_fd = self.create_socket(socket_folder, 'emitter', nnpy.PULL)
         self.notice_socket, no_fd = self.create_socket(socket_folder, 'notice', nnpy.PUB)
-        self.paged_socket, self.paged_fd = self.create_socket(socket_folder, 'paged', nnpy.REP)
+        self.service_socket, self.service_fd = self.create_socket(socket_folder, 'service', nnpy.REP)
 
         self.client_info = {}
         self.client_processes = {}
+        self.check_interval = 5 * SECOND_IN_NANO
     
     def create_socket(self, socket_folder, name, nn_mode):
         socket_path = os.path.join(socket_folder, name + '.sock')
@@ -39,14 +41,14 @@ class Server:
         self.logger.info('%s ready: %s', name, socket_path)
         return socket, fd
 
-    def process_paged_message(self):
-        readable, writable, exceptional = select.select([self.paged_fd], [], [], 0)
+    def process_service_message(self):
+        readable, writable, exceptional = select.select([self.service_fd], [], [], 0)
         if readable:
-            request_data = self.paged_socket.recv()
+            request_data = self.service_socket.recv()
             request_json = json.loads(request_data.decode('utf-8'))
-            request_type = request_json['type']
-            response = kfs_handle(request_type, self, request_json)
-            send_bytes = self.paged_socket.send(json.dumps(response))
+            request_path = request_json['request']
+            response = kfs_handle(request_path, self, request_json)
+            send_bytes = self.service_socket.send(json.dumps(response))
     
     def process_passive_notice(self):
         readable, writable, exceptional = select.select([self.emitter_fd], [], [], 1)
@@ -61,8 +63,16 @@ class Server:
                 self.logger.error('Invalid passive notice: %s', event_msg_data)
                 self.notice_socket.send("{}")
 
+    def run_tasks(self):
+        time_passed = pyyjj.nano_time() - self.last_check
+        if time_passed > self.check_interval:
+            self.logger.debug('Run system tasks')
+            kfs_run_tasks(self)
+            self.last_check = pyyjj.nano_time()
+
     def start(self):
         self.running = True
+        self.last_check = pyyjj.nano_time()
         self.run()
 
     def run(self):
@@ -70,9 +80,9 @@ class Server:
         while self.running:
             self.process_passive_notice()
             self.page_service.process_memory_message()
-            self.process_paged_message()
-            kfs_run_tasks(self)
-        self.paged_socket.close()
+            self.process_service_message()
+            self.run_tasks()
+        self.service_socket.close()
         self.emitter_socket.close()
         self.notice_socket.close()
         self.page_service.stop()

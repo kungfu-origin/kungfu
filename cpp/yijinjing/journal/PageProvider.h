@@ -25,9 +25,12 @@
 
 #include "passive.h"
 #include "IPageProvider.h"
-#include "PageSocketStruct.h"
+
+#include <nlohmann/json.hpp>
 
 YJJ_NAMESPACE_START
+
+#define SOCKET_MESSAGE_MAX_LENGTH       1024 /**< max length of a socket buffer */
 
 /**
  * PageProvider,
@@ -38,16 +41,16 @@ class PageProvider: public IPageProvider
 {
 protected:
     /** true if provider is used by a JournalWriter */
-    bool    is_writer;
+    bool    is_writer_;
     /** true if it is allowed to revise */
-    bool    revise_allowed;
+    bool    revise_allowed_;
 public:
     /** register journal when added into JournalHandler */
     virtual int  register_journal(const string& dir, const string& jname) { return -1; };
     /** exit client after JournalHandler is released */
     virtual void exit_client() {};
     /** override IPageProvider */
-    virtual bool isWriter() const {return is_writer; };
+    virtual bool isWriter() const {return is_writer_; };
 };
 
 DECLARE_PTR(PageProvider);
@@ -60,9 +63,9 @@ class LocalPageProvider: public PageProvider
 {
 public:
     /** constructor */
-    LocalPageProvider(bool isWriting, bool reviseAllowed=false);
+    LocalPageProvider(bool is_writer, bool revise_allowed=false);
     /** override IPageProvider */
-    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short pageNum);
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short page_num);
     /** override IPageProvider */
     virtual void releasePage(void* buffer, int size, int service_id);
 };
@@ -73,31 +76,31 @@ public:
  */
 class ClientPageProvider: public PageProvider
 {
-protected:
-    string  client_name;
-    char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
-    string  response;
-    void*   memory_msg_buffer;
-    int     hash_code;
-    int     client_request_socket;
-    passive::emitter emitter;
-protected:
-    /** register to service as a client */
-    void register_client();
 public:
     /** default constructor with client name and writing flag */
-    ClientPageProvider(const string& clientName, bool isWriting, bool reviseAllowed=false);
-    ~ClientPageProvider();
+    ClientPageProvider(const string& client_name, bool is_writer, bool revise_allowed=false);
+    /** register to service as a client */
+    void register_client();
     /** override PageProvider */
     virtual int  register_journal(const string& dir, const string& jname);
     /** override PageProvider */
     virtual void exit_client();
     /** override IPageProvider */
-    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short pageNum);
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short page_num);
     /** override IPageProvider */
     virtual void releasePage(void* buffer, int size, int service_id);
+
 private:
-    void getSocketRspOnReq(int client_request_socket, PagedSocketRequest& req, const string& name);
+    string  client_name_;
+    nn::socket     client_request_socket_;
+    passive::emitter emitter_;
+    nlohmann::json request_;
+    char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
+    string  response_str_;
+    void*   memory_msg_buffer_;
+    int     hash_code_;
+
+    nlohmann::json request(const string &path);
 };
 
 YJJ_NAMESPACE_END

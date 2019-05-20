@@ -23,7 +23,6 @@
 #define YIJINJING_PAGEENGINE_H
 
 #include "PageServiceMessage.h"
-#include "PageSocketStruct.h"
 #include "JournalWriter.h"
 
 #include <utility>

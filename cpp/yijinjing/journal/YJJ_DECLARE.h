@@ -59,9 +59,13 @@ inline string get_kungfu_home()
 #define KUNGFU_JOURNAL_FOLDER KUNGFU_FOLDER + "/journal/"  /** where we put journal files */
 #define KUNGFU_SOCKET_FOLDER KUNGFU_FOLDER + "/socket/"    /** where we put socket files */
 #define KUNGFU_LOG_FOLDER KUNGFU_FOLDER + "/log/"          /** where we put log files */
-#define PAGED_JOURNAL_FOLDER KUNGFU_JOURNAL_FOLDER + "system/" /** paged system journal folder */
 
+#define PAGED_JOURNAL_FOLDER KUNGFU_JOURNAL_FOLDER + "system/" /** paged system journal folder */
 #define PAGED_JOURNAL_NAME "SYSTEM"                     /** paged system journal name */
+
+#define KFS_SERVICE_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "service.sock"
+#define KFS_EMITTER_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "emitter.sock"
+#define KFS_NOTICE_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "notice.sock"
 
 #define DECLARE_PTR(X) typedef boost::shared_ptr<X> X##Ptr; /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */

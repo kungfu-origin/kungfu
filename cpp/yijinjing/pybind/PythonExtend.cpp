@@ -98,7 +98,7 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<passive::notice, boost::shared_ptr<passive::notice> >(m, "notice")
     .def(py::init<>())
     .def("wait", &passive::notice::wait)
-    .def("last_messsage", &passive::notice::last_message)
+    .def("last_message", &passive::notice::last_message)
     ;
 
     m.def("thread_id", &spdlog::details::os::thread_id);
