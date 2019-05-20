@@ -135,11 +135,8 @@ function showQuitMessageBox(){
 		buttons: ['确认', `最小化至${platform === 'win' ? '任务栏' : ' Dock'}`],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
-		console.log(index, '===========')
 		if(index === 0){
 			allowQuit = true;
-			console.log(mainWindow, '===1==1=1')
-			console.log(mainWindow.isDestroyed())
 			if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
 			console.log('----- starting quit process -----');
 			console.time('kill kfcs');

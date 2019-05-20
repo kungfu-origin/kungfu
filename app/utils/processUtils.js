@@ -4,23 +4,9 @@ const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
 const {getProcesses} = require('getprocesses');
+const ps = require('ps-node');
 const taskkill = require('taskkill');
 export const pm2 = require('pm2');
-
-// //pm2 区分 deveploment / production
-// let pm2Module;
-// if(process.env.NODE_ENV === 'development') pm2Module = require('pm2');
-// else {
-//     const asarPath = path.join(process.resourcesPath, 'app.asar', 'node_modules')
-//     const asarPm2Path = path.join(process.resourcesPath, 'app.asar', 'node_modules', 'pm2', 'node_modules')
-//     let globalPaths = require('module').globalPaths;
-//     let paths = require('module').paths;
-//     globalPaths && globalPaths.unshift(asarPath, asarPm2Path);
-//     paths && paths.unshift(asarPath, asarPm2Path);
-//     const pm2Path = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'pm2').replace(/\\/g, '\\\\');
-//     pm2Module = eval("require('" + pm2Path + "')");    
-// }
-// export const pm2 = pm2Module;
 
 //=========================== task kill =========================================
 
@@ -39,6 +25,27 @@ const winKill = (tasks) => {
             tree: platform === 'win' 
         })
     })
+}
+
+const getKfcs = () => {
+    if(platform === 'win'){
+        return getProcesses().then(processes => {
+            return processes.filter(p => {
+                const rawCommandLine = p.rawCommandLine
+                return rawCommandLine.indexOf('kfc') !== -1
+            })
+        })
+    }else{
+        return new Promise((resolve, reject) => {
+            ps.lookup({
+                command: 'kfc'
+            }, (err, list) => {
+                if(err) throw new Error(err)
+                resolve(list)
+            })
+        })
+    }
+   
 }
 
 const unixKill = (tasks) => {
@@ -63,7 +70,7 @@ export const killExtra = () => kfKill(['kfc', 'pm2'])
 const pm2Connect = () => {
     return new Promise((resolve, reject) => {
         try{
-            pm2.connect((err) => {
+            pm2.connect(true, (err) => {
                 if(err) {
                     process.exit(2);
                     logger.error(err);
@@ -162,7 +169,7 @@ export const startProcess = async (options) => {
         "watch": false,
         "force": options.force === undefined ? true : options.force,
         "exec_mode" : "fork",
-        "interpreterArgs": ["~harmony", "~debug"],
+        // "interpreterArgs": ["~harmony", "~debug"],
         "env": {
             "KF_HOME": dealSpaceInPath(BASE_DIR),
         }
@@ -241,7 +248,7 @@ export const startStrategy = (strategyId, strategyPath) => {
 
 
 //列出所有进程
-export const listProcessStatus = () => {
+export const listProcessStatus = async() => {
     return pm2List().then(pList => {
         let processStatus = {}
         Object.freeze(pList).forEach(p => {

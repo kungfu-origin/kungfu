@@ -107,7 +107,7 @@ export const startGetProcessStatus = () => {
     clearTimeout(listProcessTimer)
     listProcessStatus()
     .then(res => {
-        console.log(res)
+        console.log(JSON.stringify(res))
         res && EVENT_BUS.$emit('update-process-status', Object.freeze(res))
     })
     .catch(err => console.error(err))
