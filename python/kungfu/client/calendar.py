@@ -8,10 +8,10 @@ class CalendarClient:
     def __init__(self, logger):
         self._logger = logger
         self._req_socket = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
-        self._req_socket.connect('ipc://' + os.environ["KF_HOME"] + '/calendar/rep.ipc')
+        self._req_socket.connect('ipc://' + os.environ["KF_HOME"] + '/socket/service.sock')
         self._sub_socket = nnpy.Socket(nnpy.AF_SP, nnpy.SUB)
         self._sub_socket.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, '')
-        self._sub_socket.connect('ipc://' + os.environ["KF_HOME"] + '/calendar/pub.ipc')
+        self._sub_socket.connect('ipc://' + os.environ["KF_HOME"] + '/socket/notice.sock')
         self._current = 0
         self._cbs = []
         self._lock = threading.Lock()
@@ -20,6 +20,8 @@ class CalendarClient:
         self.register_switch_day_callback(test_callback)
         self.get_current_trading_day(True)
         self._logger.info("current trading day %d", self._current)
+        next_day = self.get_next_trading_day(delta=1)
+        self._logger.info("next trading day %s", next_day)
         self._started = True
         self.__loop()
     
@@ -35,14 +37,14 @@ class CalendarClient:
     def get_next_trading_day(self, start_date='', delta=0):
         if len(start_date) == 0:
             start_date = self.get_current_trading_day()
-        j = dict
-        j["req"] = "calc"
+        j = dict()
+        j["request"] = "calendar/calculate"
         j["region"] = Region.CN
         j["start_date"] = start_date
         j["delta"] = delta
         self._req_socket.send(json.dumps(j))
         reply = self._req_socket.recv()
-        j_reply = json.loads(reply.decode('utf-8')[:-1])
+        j_reply = json.loads(reply.decode('utf-8'))
         ret = ''
         if 'data' in j_reply:
             if 'trading_day' in j_reply['data']:
@@ -80,11 +82,11 @@ class CalendarClient:
 
     def __get_current_via_req(self):
         j = dict()
-        j["req"] = "current"
+        j["request"] = "calendar/current"
         j["region"] = Region.CN
         self._req_socket.send(json.dumps(j))
         reply = self._req_socket.recv()
-        j_reply = json.loads(reply.decode('utf-8')[:-1])
+        j_reply = json.loads(reply.decode('utf-8'))
         if 'data' in j_reply:
             if 'trading_day' in j_reply['data']:
                 self._lock.acquire()

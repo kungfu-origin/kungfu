@@ -23,12 +23,12 @@ namespace kungfu
         void run();
         void join();
         void stop();
+        int get_current_day() const;
+        int calculate_trading_day(int date, int delta) const;
 
     protected:
         void loop_new_date();
         void loop_reqs();
-        int get_current_trading_day() const;
-        int calc_next_trading_day(int date, int delta) const;
         void publish_via_nanomsg(int socket, const std::string& date, MsgType msg_type);
 
     protected:

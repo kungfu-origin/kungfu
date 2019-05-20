@@ -12,11 +12,11 @@ def register_journal(ctx, request):
         'error_msg': '',
         'memory_msg_idx': -1
     }
-    if not name in ctx.client_info:
+    if not name in ctx._client_info:
         result['error_msg'] = 'client ' + name + ' does not exist'
     else:
-        client = ctx.client_info[name]
-        idx = ctx.page_service.register_journal(name)
+        client = ctx._client_info[name]
+        idx = ctx._page_service.register_journal(name)
         if idx >= 1000:
             result['error_msg'] = 'idx exceeds limit'
         else:
@@ -50,20 +50,20 @@ def register_client(ctx, request, is_writer):
     result = {
         'success': False,
         'error_msg': '',
-        'memory_msg_file': ctx.page_service.memory_msg_file(),
-        'file_size': ctx.page_service.memory_msg_file_size(),
+        'memory_msg_file': ctx._page_service.memory_msg_file(),
+        'file_size': ctx._page_service.memory_msg_file_size(),
         'hash_code': -1
     }
-    if name in ctx.client_info:
+    if name in ctx._client_info:
         result['error_msg'] = 'client ' + name + ' already exists'
     else:
-        hash_code = ctx.page_service.register_client(name, pid, is_writer)
-        if not pid in ctx.client_processes:
-            ctx.client_processes[pid] = {}
-            ctx.client_processes[pid]['process'] = psutil.Process(pid)
-            ctx.client_processes[pid]['client_info'] = []
-        ctx.client_processes[pid]['client_info'].append(name)
-        ctx.client_info[name] = {
+        hash_code = ctx._page_service.register_client(name, pid, is_writer)
+        if not pid in ctx._client_processes:
+            ctx._client_processes[pid] = {}
+            ctx._client_processes[pid]['process'] = psutil.Process(pid)
+            ctx._client_processes[pid]['client_info'] = []
+        ctx._client_processes[pid]['client_info'].append(name)
+        ctx._client_info[name] = {
             'journals': [],
             'reg_nano': pyyjj.nano_time(),
             'is_writing': is_writer,
@@ -78,14 +78,14 @@ def register_client(ctx, request, is_writer):
     return result
 
 def release_client(ctx, name, hash_code, validation, result):
-    if not name in ctx.client_info:
+    if not name in ctx._client_info:
         result['error_msg'] = 'client ' + name + ' does not exist'
         return
-    client = ctx.client_info[name]
+    client = ctx._client_info[name]
     if validation and hash_code != client['hash_code']:
         result['error_msg'] = 'hash code validation failed ' + str(hash_code) + '!=' + str(client['hash_code'])
     else:
         for idx in client['journals']:
-            ctx.page_service.release_page(idx)
-        del ctx.client_info[name]
+            ctx._page_service.release_page(idx)
+        del ctx._client_info[name]
         result['success'] = True

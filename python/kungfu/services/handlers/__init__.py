@@ -13,6 +13,8 @@ def kfs_on(request_path):
     return register_handler
 
 def kfs_handle(request_path, *args, **kwargs):
+    if request_path not in HANDLERS:
+        args[0]._logger.error("invalid request path %s", request_path)
     return HANDLERS[request_path](*args, **kwargs)
 
 def task(func):

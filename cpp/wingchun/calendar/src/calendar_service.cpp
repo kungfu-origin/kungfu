@@ -116,7 +116,7 @@ namespace kungfu
     {
         while (started_)
         {
-            int new_current = get_current_trading_day();
+            int new_current = get_current_day();
             if (new_current != current_)
             {
                 if (current_ != 0)
@@ -156,7 +156,7 @@ namespace kungfu
                     {
                         int day = std::stoi(recv_j["start_date"].get<std::string>());
                         int delta = recv_j["delta"].get<int>();
-                        publish_via_nanomsg(rsp_socket_, std::to_string(calc_next_trading_day(day, delta)), MsgType::RspTradingDay);
+                        publish_via_nanomsg(rsp_socket_, std::to_string(calculate_trading_day(day, delta)), MsgType::RspTradingDay);
                     }
                     else
                     {
@@ -175,15 +175,15 @@ namespace kungfu
         nn_shutdown(rsp_socket_, 0);
     }
 
-    int CalendarService::get_current_trading_day() const
+    int CalendarService::get_current_day() const
     {
         auto cur_nano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         int cur_date = std::stoi(yijinjing::parseNano(cur_nano, "%Y%m%d"));
         int cur_hour = std::stoi(yijinjing::parseNano(cur_nano, "%H"));
-        return calc_next_trading_day(cur_date, cur_hour >= SWITCH_HOUR ? 1 : 0);
+        return calculate_trading_day(cur_date, cur_hour >= SWITCH_HOUR ? 1 : 0);
     }
 
-    int CalendarService::calc_next_trading_day(int date, int delta) const
+    int CalendarService::calculate_trading_day(int date, int delta) const
     {
         int trading_days_size = trading_days_.size();
         int lo = 0, hi = trading_days_size;
