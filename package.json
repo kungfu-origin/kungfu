@@ -60,10 +60,7 @@
         "to": "kfc"
       }
     ],
-    "asar": false,
-    "asarUnpack": [
-      "node_modules\\pm2"
-    ],
+    "asar": true,
     "dmg": {
       "contents": [
         {
