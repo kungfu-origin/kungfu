@@ -18,7 +18,7 @@ namespace kungfu
     class CalendarService
     {
     public:
-        CalendarService(const std::string& base_dir = get_base_dir());
+        CalendarService();
         virtual ~CalendarService();
         void run();
         void join();

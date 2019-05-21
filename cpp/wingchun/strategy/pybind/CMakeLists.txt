@@ -1,6 +1,0 @@
-PROJECT(pystrategy)
-if(WIN32)
-    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
-endif()
-PYBIND11_ADD_MODULE(pystrategy SHARED strategy_util_ext.cpp)
-TARGET_LINK_LIBRARIES(pystrategy PRIVATE strategy_util)

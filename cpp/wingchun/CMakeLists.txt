@@ -17,5 +17,6 @@ add_subdirectory(strategy)
 add_subdirectory(gateway)
 add_subdirectory(nn_publisher)
 add_subdirectory(storage)
+add_subdirectory(pybind)
 
 

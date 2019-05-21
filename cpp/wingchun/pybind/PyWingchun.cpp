@@ -1,13 +1,36 @@
-//
-// Created by qlu on 2019/2/19.
-//
+/*****************************************************************************
+ * Copyright [2017] [taurus.ai]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *****************************************************************************/
+/**
+ * Basic Journal Python Bindings.
+ * @Author cjiang (changhao.jiang@taurus.ai)
+ * @since   March, 2017
+ * Centralized Python Object & Function binding.
+ */
 
+#include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+#include <pybind11/pybind11.h>
+PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
+#include <pybind11/stl.h>
+
+#include "calendar/include/calendar_service.h"
 #include "md_struct.h"
 #include "oms_struct.h"
 #include "strategy/src/strategy_util.h"
-#include <pybind11/pybind11.h>
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
+
+namespace py = pybind11;
 
 uintptr_t py_get_last_md(const kungfu::StrategyUtil& util, const std::string& instrument_id, const std::string& exchange_id)
 {
@@ -54,9 +77,14 @@ void py_release_ptr(uintptr_t ptr)
     }
 }
 
-namespace py = pybind11;
-PYBIND11_MODULE(pystrategy, m)
+PYBIND11_MODULE(pywingchun, m)
 {
+    py::class_<kungfu::CalendarService>(m, "CalendarService")
+    .def(py::init())
+    .def("current_day", &kungfu::CalendarService::get_current_day)
+    .def("calculate_trading_day", &kungfu::CalendarService::calculate_trading_day)
+    ;
+
     py::class_<kungfu::StrategyUtil>(m, "Util")
     .def(py::init<const std::string&>())
     .def("add_md", &kungfu::StrategyUtil::add_md, py::arg("source_id"))
@@ -103,5 +131,4 @@ PYBIND11_MODULE(pystrategy, m)
     m.def("get_portfolio_info", &py_get_portfolio_info, py::arg("strategy"));
     m.def("get_sub_portfolio_info", &py_get_sub_portfolio_info, py::arg("strategy"), py::arg("account_id"));
     m.def("release_ptr", &py_release_ptr, py::arg("ptr"));
-
 }

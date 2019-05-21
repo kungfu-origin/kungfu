@@ -2,7 +2,7 @@ import os, sys, traceback
 import select
 import json
 import nnpy, pyyjj
-import pycalendar
+import pywingchun
 
 from kungfu.services.handlers.paged import *
 from kungfu.services.handlers.calendar import *
@@ -31,7 +31,7 @@ class Server:
         self._client_processes = {}
         self._check_interval = 5 * SECOND_IN_NANO
 
-        self._calendar = pycalendar.CalendarService(base_dir)
+        self._calendar = pywingchun.CalendarService()
         self._current_day = self._calendar.current_day()
     
     def create_socket(self, socket_folder, name, nn_mode):

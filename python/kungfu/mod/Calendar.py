@@ -1,4 +1,4 @@
-import pycalendar
+import pywingchun
 import os
 
 class Calendar:
@@ -11,7 +11,7 @@ class Calendar:
             os.makedirs(calendar_path)
 
     def start(self):
-        self.service = pycalendar.CalendarService(self.base_dir)
+        self.service = pywingchun.CalendarService(self.base_dir)
         self.service.run()
         self.service.join()
 

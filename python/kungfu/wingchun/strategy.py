@@ -9,7 +9,7 @@ from kungfu.wingchun.structs import *
 from kungfu.wingchun.EventLoop import EventLoop
 from kungfu.wingchun.context import context
 from kungfu.wingchun.constants import *
-import pystrategy
+import pywingchun
 import pyyjj
 
 class Strategy:
@@ -19,7 +19,7 @@ class Strategy:
 
         self._name = name
         self._event_loop = EventLoop(logger, name)
-        self._util = pystrategy.Util(name)
+        self._util = pywingchun.Util(name)
 
         self._on_quote = None
         self._on_order = None
@@ -124,27 +124,27 @@ class Strategy:
         return self._event_loop.get_nano()
 
     def get_last_md(self, instrument_id, exchange_id):
-        quote_ptr = pystrategy.get_last_md(self._util, instrument_id, exchange_id)
+        quote_ptr = pywingchun.get_last_md(self._util, instrument_id, exchange_id)
         ctypes_quote = ctypes.cast(quote_ptr, ctypes.POINTER(Quote)).contents
-        pystrategy.release_ptr(quote_ptr)
+        pywingchun.release_ptr(quote_ptr)
         return ctypes_quote
 
     def get_position(self, instrument_id, exchange_id, direction = Direction.Long, account_id = ""):
-        pos_ptr = pystrategy.get_position(self._util, instrument_id, exchange_id, direction, account_id)
+        pos_ptr = pywingchun.get_position(self._util, instrument_id, exchange_id, direction, account_id)
         ctypes_pos = ctypes.cast(pos_ptr, ctypes.POINTER(Position)).contents
-        pystrategy.release_ptr(pos_ptr)
+        pywingchun.release_ptr(pos_ptr)
         return ctypes_pos
 
     def get_portfolio_info(self):
-        pnl_ptr = pystrategy.get_portfolio_info(self._util)
+        pnl_ptr = pywingchun.get_portfolio_info(self._util)
         ctypes_pnl = ctypes.cast(pnl_ptr, ctypes.POINTER(PortfolioInfo)).contents
-        pystrategy.release_ptr(pnl_ptr)
+        pywingchun.release_ptr(pnl_ptr)
         return ctypes_pnl
 
     def get_sub_portfolio_info(self, account_id):
-        sub_pnl_ptr = pystrategy.get_sub_portfolio_info(self._util, account_id)
+        sub_pnl_ptr = pywingchun.get_sub_portfolio_info(self._util, account_id)
         ctypes_sub_pnl = ctypes.cast(sub_pnl_ptr, ctypes.POINTER(SubPortfolioInfo)).contents
-        pystrategy.release_ptr(sub_pnl_ptr)
+        pywingchun.release_ptr(sub_pnl_ptr)
         return ctypes_sub_pnl
 
     def __on_1min_timer(self, nano):

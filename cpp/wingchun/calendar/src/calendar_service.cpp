@@ -30,13 +30,16 @@ namespace kungfu
 {
     std::atomic<bool> CalendarService::started_(false);
 
-    CalendarService::CalendarService(const std::string& base_dir) : rsp_socket_(-1), pub_socket_(-1), current_(0)
+    CalendarService::CalendarService(): rsp_socket_(-1), pub_socket_(-1), current_(0)
     {
         yijinjing::KungfuLog::setup_log("calendar");
-        SPDLOG_INFO("[CalendarService] initing with base dir: {}", base_dir);
-        set_base_dir(base_dir);
-        CalendarStorage storage(fmt::format(CALENDAR_HOLIDAY_DB_FILE_FORMAT, get_base_dir()));
+        SPDLOG_INFO("CalendarService initializing with base dir: {}", get_base_dir());
+        std::string calendar_db_file = fmt::format(CALENDAR_HOLIDAY_DB_FILE_FORMAT, get_base_dir());
+        SPDLOG_INFO("CalendarService storage at {}", calendar_db_file);
+        CalendarStorage storage(calendar_db_file);
+        SPDLOG_INFO("CalendarService storage");
         storage.get_trading_days(1990, 2090, trading_days_, REGION_CN);
+        SPDLOG_INFO("CalendarService initialized");
     }
 
     CalendarService::~CalendarService()
