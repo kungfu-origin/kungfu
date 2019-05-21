@@ -26,7 +26,7 @@ export default {
             default: '',
         },
 
-        pageType: {
+        moduleType: {
             type: String,
             default: "",
         },

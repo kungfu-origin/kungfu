@@ -24,7 +24,7 @@ export default {
             type: String,
             default: '',
         },
-        pageType: {
+        moduleType: {
             type: String,
             default: "",
         },

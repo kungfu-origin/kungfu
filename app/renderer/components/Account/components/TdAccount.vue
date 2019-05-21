@@ -132,21 +132,22 @@
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
                             <el-col :span="12" v-for="item of Object.values(config)" :key="item.platform">
+                                <!-- <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]"> -->
                                 <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
                                     v-if="item.typeName"
                                     :type="item.type" 
                                     >
-                                        {{item.typeName}}
+                                        {{item.typeName === 'future' ? '期货' : '股票'}}
                                     </el-tag>
                                 </el-radio>
                             </el-col>
                         </el-row>
                     </el-radio-group>
                 <div slot="footer" class="dialog-footer">
-                    <el-button @click="handleCloseSelectSource" size="small">取 消</el-button>
-                    <el-button type="primary" size="small" @click="handleSelectSource">确 定</el-button>
+                    <el-button @click="handleCloseSelectSource" size="mini">取 消</el-button>
+                    <el-button type="primary" size="mini" @click="handleSelectSource">确 定</el-button>
                 </div>
             </el-dialog>
 

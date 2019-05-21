@@ -17,10 +17,10 @@
         :schema="schema"
         :renderCellClass="renderCellClass"
     ></tr-table>
-    <date-range-selector 
+    <date-range-dialog 
     @confirm="handleConfirmDateRange"
     :visible.sync="dateRangeDialogVisiblity"    
-    ></date-range-selector>
+    ></date-range-dialog>
 </tr-dashboard>
 
 </template>
@@ -31,7 +31,7 @@ import moment from 'moment'
 import { offsetName } from '@/assets/config/tradingConfig'
 import { debounce, throttleInsert, throttle } from "@/assets/js/utils"
 import { writeCSV } from '__gUtils/fileUtils';
-import DateRangeSelector from './components/DateRangeSelector';
+import DateRangeDialog from './DateRangeDialog';
 
 export default {
     name: 'trades-record',
@@ -40,7 +40,7 @@ export default {
             type: String,
             default:''
         },
-        pageType: {
+        moduleType: {
             type: String,
             default:''
         },
@@ -71,7 +71,7 @@ export default {
     },
 
     components: {
-        DateRangeSelector
+        DateRangeDialog
     },
 
     computed:{
@@ -104,8 +104,8 @@ export default {
                 prop: 'volume',
             },{
                 type: 'text',
-                label: this.pageType == 'account' ? '策略': '账户',
-                prop: this.pageType == 'account' ? 'clientId': 'accountId',
+                label: this.moduleType == 'account' ? '策略': '账户',
+                prop: this.moduleType == 'account' ? 'clientId': 'accountId',
             }]
         }
     },

@@ -20,7 +20,7 @@
                     <el-input v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && sourceType[source].key == item.key" show-password></el-input>
                     <el-switch v-if="item.type === 'bool'" v-model.trim="value[item.key]"></el-switch>
                     <el-input-number v-if="item.type === 'int'"  :controls="false" v-model.trim="value[item.key]"></el-input-number>
-                    <el-select v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags size="small"  v-model.trim="value[item.key]" placeholder="请选择">
+                    <el-select size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="value[item.key]" placeholder="请选择">
                         <el-option
                             v-for="item in item.data"
                             :key="item.value"
@@ -38,8 +38,8 @@
 
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="handleCancel" size="small">取 消</el-button>
-            <el-button type="primary" size="small" @click="handleSubmitSetting">确 定</el-button>
+            <el-button @click="handleCancel" size="mini">取 消</el-button>
+            <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
         </div>
     </el-dialog>
 </template>
@@ -109,10 +109,7 @@ export default {
                 if(valid) {
                     let account_id = `${t.source}_${t.value[t.sourceType[t.source].key]}`
                     const gatewayName = 'td_' + account_id
-                    
-                    //去空格
                     const formValue = t.value
-                  
                     let changeAccount 
                     if(t.method == 'add') { //添加账户
                         changeAccount = ACCOUNT_API.addAccount(account_id, t.source, t.firstAccount, JSON.stringify(formValue))

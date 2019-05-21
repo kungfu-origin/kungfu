@@ -18,8 +18,8 @@
             
         </el-radio-group>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="handleClose" size="small">取 消</el-button>
-            <el-button type="primary" size="small" @click="handleSubmitSetting">确 定</el-button>
+            <el-button @click="handleClose" size="mini">取 消</el-button>
+            <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
         </div>
     </el-dialog>    
 </template>

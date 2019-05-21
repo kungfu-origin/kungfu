@@ -100,8 +100,7 @@ export const getAccountTrade = (accountId, {id, dateRange}) => {
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
 export const getAccountOrder = (accountId, {id, dateRange}) => {
-    const tradingDay = undefined
-    // const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
     const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000

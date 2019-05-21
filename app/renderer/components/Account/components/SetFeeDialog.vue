@@ -10,8 +10,8 @@
             <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="index" size="mini">
                 <div slot="header">
                     <span>{{feeSetting.default ? '默认' : (feeSetting.instrument_id || '新费率设置')}}</span>
-                    <el-button class="fee-setting-oper" size="mini" @click="handleAddFeeSetting(index)" icon="el-icon-plus" title="添加"></el-button>            
-                    <el-button v-if="!feeSetting.default" class="fee-setting-oper" size="mini" @click="handleRemoveFeeSetting(index)" icon="el-icon-minus" title="删除"></el-button>            
+                    <el-button v-if="accountType !== 'stock'" class="fee-setting-oper" size="mini" @click="handleAddFeeSetting(index)" icon="el-icon-plus" title="添加"></el-button>            
+                    <el-button v-if="!feeSetting.default && accountType !== 'stock'" class="fee-setting-oper" size="mini" @click="handleRemoveFeeSetting(index)" icon="el-icon-minus" title="删除"></el-button>            
                 </div>
                 <el-form-item 
                 v-for="(value, key) in feeSetting" 
@@ -38,8 +38,8 @@
         </el-form>
         
         <div slot="footer" class="dialog-footer">
-            <el-button @click="handleClose" size="small">取 消</el-button>
-            <el-button type="primary" size="small" @click="handleSubmitSetting">确 定</el-button>
+            <el-button @click="handleClose" size="mini">取 消</el-button>
+            <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
         </div>
     </el-dialog>    
 </template>

@@ -106,8 +106,8 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button  size="small" @click="handleClearAddStrategyDialog">取 消</el-button>
-            <el-button type="primary" size="small" @click="handleConfirmAddEditorStrategy">确 定</el-button>
+            <el-button  size="mini" @click="handleClearAddStrategyDialog">取 消</el-button>
+            <el-button type="primary" size="mini" @click="handleConfirmAddEditorStrategy">确 定</el-button>
         </div>
     </el-dialog>
 </tr-dashboard>

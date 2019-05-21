@@ -24,10 +24,10 @@
             <i class="el-icon-close mouse-over" title="撤单" @click="handleCancelOrder(props)"/>
         </template>
     </tr-table>
-    <date-range-selector 
+    <date-range-dialog 
     @confirm="handleConfirmDateRange"
     :visible.sync="dateRangeDialogVisiblity"    
-    ></date-range-selector>
+    ></date-range-dialog>
   </tr-dashboard>
 </template>
 
@@ -36,7 +36,7 @@ import moment from "moment"
 import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig";
 import { debounce, throttle } from "@/assets/js/utils";
 import { writeCSV } from '__gUtils/fileUtils';
-import DateRangeSelector from './components/DateRangeSelector';
+import DateRangeDialog from './DateRangeDialog';
 import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
 import { onUpdateProcessStatusListener, offUpdateProcessStatusListener } from '@/io/event-bus';
 
@@ -47,7 +47,7 @@ export default {
             type: String,
             default:''
         },
-        pageType: {
+        moduleType: {
             type: String,
             default:''
         },
@@ -84,7 +84,7 @@ export default {
     },
 
     components: {
-        DateRangeSelector
+        DateRangeDialog
     },
 
     computed:{
@@ -122,8 +122,8 @@ export default {
                 prop: "status",
             },{
                 type: "text",
-                label: this.pageType == 'account' ? '策略' : '账户',
-                prop: this.pageType == 'account' ? 'clientId' : 'accountId',
+                label: this.moduleType == 'account' ? '策略' : '账户',
+                prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
             },{
                 type: 'text',
                 label: 'id',
@@ -237,12 +237,12 @@ export default {
         handleCancelAllOrders(){
             const t = this;
             //先判断对应进程是否启动
-            if(t.pageType === 'account'){
+            if(t.moduleType === 'account'){
                 if(t.processStatus[t.gatewayName] !== 'online') {
                     t.$message.warning(`需要先启动 ${t.gatewayName} 交易进程！`)
                     return;
                 }
-            }else if(t.pageType === 'strategy'){
+            }else if(t.moduleType === 'strategy'){
                 if(t.processStatus[t.currentId] !== 'online') {
                     t.$message.warning(`需要先启动 ${t.currentId} 策略进程！`)
                     return;
@@ -254,8 +254,8 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => nanoCancelAllOrder({
-                targetId: t.pageType === 'account' ? t.gatewayName : t.currentId,
-                cancelType: t.pageType,
+                targetId: t.moduleType === 'account' ? t.gatewayName : t.currentId,
+                cancelType: t.moduleType,
                 id: t.currentId
             }))
             .then(() => t.$message.info('撤单指令已发送！'))
@@ -347,7 +347,7 @@ export default {
             if(!!t.filter.dateRange) return
             const {order_id, status, client_id} = data
             //策略页面收到的数据判断该数据是否是本策略的
-            if(t.pageType == 'strategy' && t.currentId != client_id ) return
+            if(t.moduleType == 'strategy' && t.currentId != client_id ) return
             const {id} = t.filter
             //推送的时候也要满足筛选条件
             if(!(order_id.toString().includes(id) || data.instrument_id.includes(id) || data.client_id.includes(id))) return

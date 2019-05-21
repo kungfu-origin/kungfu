@@ -11,7 +11,7 @@
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <el-button size="mini">下单</el-button>
+            <el-button size="mini" @click="makeOrderDialogVisiblity = true">下单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -20,6 +20,12 @@
         :schema="schema"
         :renderCellClass="renderCellClass"
     ></tr-table>
+
+    <make-order-dialog
+        :moduleType="moduleType"
+        :currentId="currentId"
+    >
+    </make-order-dialog>
 </tr-dashboard>
 </template>
 
@@ -29,6 +35,9 @@ import { debounce, throttle } from '@/assets/js/utils'
 import { posDirection } from "@/assets/config/tradingConfig"
 import { ipcRenderer } from 'electron'
 import { writeCSV } from '__gUtils/fileUtils';
+import MakeOrderDialog from './MakeOrderDialog';
+
+
 
 export default {
     name: 'positions',
@@ -39,7 +48,7 @@ export default {
             default:''
         },
         //页面类型，是账户页面用还是交易页面用
-        pageType: {
+        moduleType: {
             type: String,
             default:''
         },
@@ -80,7 +89,9 @@ export default {
             },
             searchKeyword: '',
             getDataLock: false, //防止重复快速的调用
-            tableData: Object.freeze([])
+            tableData: Object.freeze([]),
+
+            makeOrderDialogVisiblity: false
         }
     },
 
@@ -132,6 +143,10 @@ export default {
         }
     },
 
+    components: {
+        MakeOrderDialog
+    },
+
 
     watch: {
         //防抖
@@ -175,7 +190,7 @@ export default {
     },
 
     destroyed(){
-        ipcRenderer.removeAllListeners(`res-cancel-order-rate-${this.pageType}`)
+        ipcRenderer.removeAllListeners(`res-cancel-order-rate-${this.moduleType}`)
     },
     
     methods:{

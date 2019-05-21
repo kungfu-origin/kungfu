@@ -60,9 +60,9 @@
 
 
         //获取撤单比需要获取orders
-        function getMakeCancelOrderRate(posDataByKey, pageType, currentId){
+        function getMakeCancelOrderRate(posDataByKey, moduleType, currentId){
 
-            const targetAPI = pageType == 'account' ? getAccountOrder : getStrategyOrder
+            const targetAPI = moduleType == 'account' ? getAccountOrder : getStrategyOrder
             return new Promise((resolve, reject) => {
                 if(!posDataByKey) {
                     resolve(Object.freeze([]))
@@ -157,12 +157,12 @@
             })
         }
 
-        ipc.on('get-cancle-order-rate', function(event, {winId, posDataByKey, pageType, currentId}){
+        ipc.on('get-cancle-order-rate', function(event, {winId, posDataByKey, moduleType, currentId}){
             const fromWinId = winId
             const fromWindow = BrowserWindow.fromId(fromWinId)
-            getMakeCancelOrderRate(posDataByKey, pageType, currentId).then(posDataByKey => {
+            getMakeCancelOrderRate(posDataByKey, moduleType, currentId).then(posDataByKey => {
                 if(!Object.values(posDataByKey || {}).length) return;
-                fromWindow.webContents.send(`res-cancel-order-rate-${pageType}`, posDataByKey)
+                fromWindow.webContents.send(`res-cancel-order-rate-${moduleType}`, posDataByKey)
             }).finally(() => {
                 window.close()
             })

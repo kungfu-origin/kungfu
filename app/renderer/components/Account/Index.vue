@@ -15,7 +15,7 @@
                         <Pnl 
                         ref="pnl"
                         :currentId="currentId" 
-                        pageType="account"
+                        moduleType="account"
                         :minMethod="getAccountPnlMin"
                         :dayMethod="getAccountPnlDay"
                         @startNanomsg="buildMinNanomsgListener"
@@ -28,7 +28,7 @@
                         <CurrentOrder
                         ref="current-order"
                         :currentId="currentId"
-                        pageType="account" 
+                        moduleType="account" 
                         :gatewayName="`td_${currentAccount.account_id}`"
                         :getDataMethod="getAccountOrder" 
                         @startNanomsg="buildOrderNanomsgListener"
@@ -44,7 +44,7 @@
                     <Pos 
                     ref="pos"
                     :currentId="currentId" 
-                    pageType="account"
+                    moduleType="account"
                     :accountType="accountType"
                     :getDataMethod="getAccountPos"
                     @startNanomsg="buildPosNanomsgListener"
@@ -56,7 +56,7 @@
                     <TradeRecord
                     ref="trade-record"
                     :currentId="currentId"
-                    pageType="account" 
+                    moduleType="account" 
                     :getDataMethod="getAccountTrade"
                     @startNanomsg="buildTradeNanomsgListener"
                     :nanomsgBackData="tradeNanomsgListener"
