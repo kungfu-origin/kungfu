@@ -48,6 +48,14 @@
         text-align: left
     }
 }
+.el-input-number__decrease{
+    background: $bg_light;
+    border-right: 1px solid $bg_light;
+}
+.el-input-number__increase{
+    background: $bg_light;
+    border-left: 1px solid $bg_light;
+}
 
 .el-input-number.is-controls-right .el-input-number__increase, .el-input-number.is-controls-right .el-input-number__decrease{
     height: 14px;

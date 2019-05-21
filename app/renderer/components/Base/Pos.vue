@@ -22,6 +22,7 @@
     ></tr-table>
 
     <make-order-dialog
+        :visible="makeOrderDialogVisiblity"
         :moduleType="moduleType"
         :currentId="currentId"
     >
