@@ -6,7 +6,7 @@
 #define KUNGFU_LOG_H
 
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
@@ -39,7 +39,7 @@ public:
         log_path /= name + ".log";
         daily_log_path /= name + ".log";
 
-        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
         auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(daily_log_path.string(), 0, 0);
         spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
         auto logger = std::make_shared<spdlog::logger>(name, log_sinks);
@@ -47,8 +47,9 @@ public:
         logger->set_pattern(DEFAULT_LOG_PATTERN);
         spdlog::set_default_logger(logger);
     #ifdef _WINDOWS    
-        spdlog::flush_every(std::chrono::seconds(1));
-     #endif   
+//        spdlog::flush_every(std::chrono::seconds(1));
+        spdlog::flush_on(spdlog::level::info);
+    #endif
     }
 
     static inline void set_log_level(int level)
