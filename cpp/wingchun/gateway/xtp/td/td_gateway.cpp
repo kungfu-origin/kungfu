@@ -28,7 +28,7 @@ namespace kungfu
         void TdGateway::init()
         {
             TdGatewayImpl::init();
-
+            spdlog::set_default_logger(get_logger());
             std::string order_mapper_db_file = fmt::format(ORDER_MAPPER_DB_FILE_FORMAT, get_base_dir(), get_name());
 #ifdef _WINDOWS
             std::replace(order_mapper_db_file.begin(), order_mapper_db_file.end(), '/', '\\');
@@ -92,15 +92,15 @@ namespace kungfu
             INSERT_ORDER_TRACE(to_string(xtp_input));
 
             uint64_t xtp_order_id = api_->InsertOrder(& xtp_input, session_id_);
-
-            Order order = get_order(input);
             int64_t nano = kungfu::yijinjing::getNanoTime();
-            order.insert_time = nano;
-            order.update_time = nano;
-            order.rcv_time = nano;
-            strcpy(order.trading_day, get_calendar()->get_current_trading_day().c_str());
             if (xtp_order_id == 0)
             {
+                Order order = get_order(input);
+                order.insert_time = nano;
+                order.update_time = nano;
+                order.rcv_time = nano;
+                strcpy(order.trading_day, get_calendar()->get_current_trading_day().c_str());
+
                 XTPRI* error_info = api_->GetApiLastError();
                 order.error_id = error_info->error_id;
                 strcpy(order.error_msg, error_info->error_msg);
@@ -112,19 +112,16 @@ namespace kungfu
             }
             else
             {
-                order.status = OrderStatusSubmitted;
-                on_order(order);
-
                 XtpOrder info = {};
                 info.internal_order_id = input.order_id;
                 info.xtp_order_id = xtp_order_id;
                 info.parent_id = input.parent_id;
-                info.insert_time = order.insert_time;
+                info.insert_time = nano;
                 strcpy(info.client_id, input.client_id);
-                strcpy(info.trading_day, order.trading_day);
+                strcpy(info.trading_day, get_calendar()->get_current_trading_day().c_str());
                 order_mapper_->add_order(info);
 
-                INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){}", input.order_id));
+                INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id));
                 return true;
             }
         }
