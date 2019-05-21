@@ -160,7 +160,7 @@
             @successSubmitSetting="successSubmitSetting"
             @refreshData="refreshData"
             :firstAccount="sourceFirstAccount"
-            :sourceAccounts="accountList.filter(a => (a.source_name === selectedSource))"
+            :accountList="accountList"
             />
 
             <SetFeeDialog

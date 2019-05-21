@@ -68,7 +68,7 @@ export default {
 
     data() {
         this.orderDataByKey = {}; //为了把object 转为数据要用的list
-        this.processStatus = null
+        this.processStatus = {};
         return {
             rendererTable: false,
             searchKeyword: "",
@@ -212,12 +212,8 @@ export default {
             const t = this;
             //防止柜台不相同，但accountId相同
             const accountIds = t.getSourceNameByAccountId(props.accountId)
-            if(accountIds.length < 0) {
+            if(!accountIds.length) {
                 t.$message.error(`${props.accountId} 不在系统内！`)
-                return;
-            }
-            if(accountIds.length >= 2) {
-                t.$message.error(`系统内存在两个 ${props.accountId} 账户！`)
                 return;
             }
             const gatewayName = `td_${accountIds[0]}`
@@ -390,7 +386,7 @@ export default {
 
         updateProcessStatus(res){
             const t = this;
-            t.processStatus = res
+            t.processStatus = res || {}
         },
 
     }

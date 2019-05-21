@@ -73,7 +73,7 @@ export default {
             default: 'add'
         },
         //选中柜台下的所有账户，字段用于弹窗检查account_id或者user_id是否重名的
-        sourceAccounts: {
+        accountList: {
             type: Array,
             default: () => []
         }
@@ -89,12 +89,6 @@ export default {
             need_settlement_confirm: false,
         }
         return {}
-    },
-
-    computed:{
-        ...mapState({
-            processStatus: state => state.BASE.processStatus,
-        })
     },
 
     methods:{
@@ -119,8 +113,6 @@ export default {
 
                     changeAccount.then(() => {
                         t.$emit('successSubmitSetting')
-                        //查看td连接状态
-                        const state = t.$utils.ifProcessRunning(gatewayName, t.processStatus)
                         t.$message.success('操作成功！')
                     })
                     .catch((err) => {
@@ -158,12 +150,12 @@ export default {
         //检查account_id或者user_id是否重复
         validateAccountId(rule, value, callback) {
             const t = this
-            const index = t.sourceAccounts.findIndex(item => {
-               const account_id = item.account_id.toAccountId();
+            const index = t.accountList.findIndex(a => {
+               const account_id = a.account_id.toAccountId();
                return account_id == value
             })
             if(index != -1) {
-                callback('重名，请重新输入！')
+                callback('已存在该账户ID！')
             }else {
                 callback()
             }

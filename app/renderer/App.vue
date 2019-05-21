@@ -32,6 +32,7 @@ export default {
         this.getMdTdState()
         this.getAccountsCash()
         this.getCalendarNanomsg()
+        this.$store.dispatch('getStrategyList')
     },
     methods: {
         getMdTdState() {
