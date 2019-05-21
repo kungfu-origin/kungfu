@@ -9,6 +9,12 @@ def init(context):
     context.add_account(source, "15040900", 100000000.0)
     context.subscribe(source, ["601988", "600000"], exchange, True)
     context.register_nanotime_callback_with_context(context.get_nano() + 5* 1e9, insert_order)
+    sub_portfolio = context.get_sub_portfolio_info("15040900")
+    print(sub_portfolio)
+    portfolio = context.get_portfolio_info()
+    print(portfolio.trading_day, type(portfolio.trading_day))
+    print(portfolio.client_id, type(portfolio.client_id))
+    print(portfolio)
 
 def pre_run(context):
     pass

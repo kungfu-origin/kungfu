@@ -37,7 +37,6 @@ class OrderStatus:
 
     @classmethod
     def is_final_status(cls, status):
-        status = status.decode("utf-8")
         if status == OrderStatus.Error or status == OrderStatus.Canceled or status == OrderStatus.Filled or status == OrderStatus.PartialFilledNotActive:
             return True
         else:
@@ -45,7 +44,6 @@ class OrderStatus:
 
     @classmethod
     def to_str(cls, status):
-        status = status.decode('utf-8')
         if status == OrderStatus.Submitted:
             return "Submitted"
         elif status == OrderStatus.Pending:

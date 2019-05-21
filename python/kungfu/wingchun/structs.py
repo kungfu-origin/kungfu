@@ -19,6 +19,17 @@ class FutureInstrument(ctypes.Structure):
         ('short_margin_ratio', ctypes.c_double)
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
 class Quote(ctypes.Structure):
     _fields_ = [
         ('source_id', ctypes.c_char * 16),
@@ -48,6 +59,17 @@ class Quote(ctypes.Structure):
         ('ask_volume', ctypes.c_longlong * 10)
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
 class Entrust(ctypes.Structure):
     _fields_ = [
         ('source_id', ctypes.c_char * 16),
@@ -64,6 +86,17 @@ class Entrust(ctypes.Structure):
         ('main_seq', ctypes.c_longlong),
         ('seq', ctypes.c_longlong)
     ]
+
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
 
 class Transaction(ctypes.Structure):
     _fields_ = [
@@ -84,6 +117,17 @@ class Transaction(ctypes.Structure):
         ('seq', ctypes.c_longlong)
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
 class OrderInput(ctypes.Structure):
     _fields_ = [
         ('order_id', ctypes.c_longlong),
@@ -103,6 +147,16 @@ class OrderInput(ctypes.Structure):
         ('parent_id', ctypes.c_longlong)
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
 
 class Order(ctypes.Structure):
     _fields_ = [
@@ -134,6 +188,17 @@ class Order(ctypes.Structure):
         ('time_condition', ctypes.c_char)
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
 class Trade(ctypes.Structure):
     _fields_ = [
         ("rcv_time", ctypes.c_longlong),
@@ -153,6 +218,17 @@ class Trade(ctypes.Structure):
         ('tax', ctypes.c_double),
         ('commission', ctypes.c_double),
     ]
+
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
 
 class Position(ctypes.Structure):
     _fields_ = [
@@ -185,6 +261,17 @@ class Position(ctypes.Structure):
         ('expire_date', ctypes.c_char * 9),
     ]
 
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
 class PortfolioInfo(ctypes.Structure):
     _fields_ = [
         ('trading_day', ctypes.c_char * 9),
@@ -198,6 +285,17 @@ class PortfolioInfo(ctypes.Structure):
         ('intraday_pnl', ctypes.c_double),
         ('intraday_pnl_ratio', ctypes.c_double),
     ]
+
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
 
 class  SubPortfolioInfo(ctypes.Structure):
     _fields_ = [
@@ -226,3 +324,16 @@ class  SubPortfolioInfo(ctypes.Structure):
         ('position_pnl', ctypes.c_double),
         ('close_pnl', ctypes.c_double),
     ]
+
+    def __getattribute__(self, item):
+        value = ctypes.Structure.__getattribute__(self, item)
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        else:
+            return value
+
+    def __str__(self):
+        return "{}: {{{}}}".format(self.__class__.__name__,
+                                   ", ".join(["{}: {}".format(field[0],getattr(self,field[0])) for field in self._fields_]))
+
+

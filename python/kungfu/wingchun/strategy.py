@@ -192,12 +192,12 @@ class Strategy:
 
     def __process_order(self, order):
         ctype_order = ctypes.cast(order,ctypes.POINTER(Order)).contents
-        if self._name == ctype_order.client_id.decode('utf-8'):
+        if self._name == ctype_order.client_id:
             self._util.on_order(order)
             self._on_order(context, ctype_order)
 
     def __process_trade(self, trade):
         ctype_trade = ctypes.cast(trade,ctypes.POINTER(Trade)).contents
-        if self._name == ctype_trade.client_id.decode('utf-8'):
+        if self._name == ctype_trade.client_id:
             self._util.on_trade(trade)
             self._on_trade(context, ctype_trade)
