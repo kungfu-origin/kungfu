@@ -29,10 +29,65 @@ USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
 
-void signal_callback(int signum)
+void page_service_signal_callback(int signum)
 {
-    SPDLOG_INFO("PageService Caught signal {}", signum);
-    exit(signum);
+    switch(signum){
+        case SIGURG:       // discard signal       urgent condition present on socket
+        case SIGCONT:      // discard signal       continue after stop
+        case SIGCHLD:      // discard signal       child status has changed
+        case SIGIO:        // discard signal       I/O is possible on a descriptor (see fcntl(2))
+        case SIGWINCH:     // discard signal       Window size change
+        case SIGINFO:      // discard signal       status request from keyboard
+            SPDLOG_INFO("KungFu server discard signal {}", signum);
+            break;
+        case SIGSTOP:      // stop process         stop (cannot be caught or ignored)
+        case SIGTSTP:      // stop process         stop signal generated from keyboard
+        case SIGTTIN:      // stop process         background read attempted from control terminal
+        case SIGTTOU:      // stop process         background write attempted to control terminal
+            SPDLOG_CRITICAL("KungFu server stopped by signal {}", signum);
+            exit(signum);
+            break;
+        case SIGINT:       // terminate process    interrupt program
+            SPDLOG_INFO("KungFu server interrupted");
+            exit(signum);
+            break;
+        case SIGKILL:      // terminate process    kill program
+        case SIGTERM:      // terminate process    software termination signal
+            SPDLOG_INFO("KungFu server killed");
+            exit(signum);
+            break;
+        case SIGHUP:       // terminate process    terminal line hangup
+        case SIGPIPE:      // terminate process    write on a pipe with no reader
+        case SIGALRM:      // terminate process    real-time timer expired
+        case SIGXCPU:      // terminate process    cpu time limit exceeded (see setrlimit(2))
+        case SIGXFSZ:      // terminate process    file size limit exceeded (see setrlimit(2))
+        case SIGVTALRM:    // terminate process    virtual time alarm (see setitimer(2))
+        case SIGPROF:      // terminate process    profiling timer alarm (see setitimer(2))
+            SPDLOG_CRITICAL("KungFu server terminated by signal {}", signum);
+            exit(signum);
+            break;
+        case SIGUSR1:      // terminate process    User defined signal 1
+        case SIGUSR2:      // terminate process    User defined signal 2
+            SPDLOG_CRITICAL("KungFu server caught user defined signal {}", signum);
+            exit(signum);
+            break;
+        case SIGQUIT:      // create core image    quit program
+        case SIGILL:       // create core image    illegal instruction
+        case SIGTRAP:      // create core image    trace trap
+        case SIGABRT:      // create core image    abort program (formerly SIGIOT)
+        case SIGEMT:       // create core image    emulate instruction executed
+        case SIGFPE:       // create core image    floating-point exception
+        case SIGBUS:       // create core image    bus error
+            SPDLOG_CRITICAL("bus error");
+        case SIGSEGV:      // create core image    segmentation violation
+            SPDLOG_CRITICAL("segmentation violation");
+        case SIGSYS:       // create core image    non-existent system call invoked
+            SPDLOG_CRITICAL("KungFu server caught unexpected signal {}", signum);
+            exit(signum);
+            break;
+        default:
+            SPDLOG_INFO("KungFu server caught unknown signal {}", signum);
+    }
 }
 
 bool PageService::write(string content, byte msg_type, bool is_last, short source)
@@ -49,7 +104,9 @@ PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_
     SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
 
     for (int s = 1; s < 32; s++)
-        signal(s, signal_callback);
+    {
+        signal(s, page_service_signal_callback);
+    }
 }
 
 string PageService::get_memory_msg_file()
