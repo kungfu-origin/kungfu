@@ -78,11 +78,14 @@ void ClientPageProvider::register_client()
     hash_code_ = response["hash_code"];
     if (response["success"])
     {
-        memory_msg_buffer_ = PageUtil::LoadPageBuffer(string(response["memory_msg_file"]), response["file_size"], true, false /*server lock this already*/);
+        std::string file = response["memory_msg_file"];
+        int size = response["file_size"];
+        memory_msg_buffer_ = PageUtil::LoadPageBuffer(file, size, true, false /*server lock this already*/);
     }
     else
     {
-        SPDLOG_ERROR("failed to register client {}, error: {}", client_name_, response["error_msg"]);
+        std::string error_msg = response["error_msg"];
+        SPDLOG_ERROR("failed to register client {}, error: {}", client_name_, error_msg);
         throw std::runtime_error("cannot register client: " + client_name_);
     }
 }

@@ -179,7 +179,7 @@ namespace kungfu
     {
         if (!low_latency_ && notice_.wait())
         {
-            SPDLOG_TRACE("passive notice {}", notice_.last_message());
+            notice_.last_message();
         }
         
         int64_t nano = -1;
