@@ -39,7 +39,7 @@ import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
 import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
 import { onUpdateProcessStatusListener, offUpdateProcessStatusListener } from '@/io/event-bus';
-
+import { mapState } from 'vuex';
 export default {
     name: "current-orders",
     props: {
@@ -54,10 +54,6 @@ export default {
         gatewayName: {
             type: String,
             default:''
-        },
-        accountList: {
-            type: Array,
-            default: []
         },
         getDataMethod: {
             type: Function,
@@ -87,9 +83,19 @@ export default {
         DateRangeDialog
     },
 
-    computed:{
+    computed: {
+        ...mapState({
+            accountList: state => state.ACCOUNT.accountList
+        }),
+
         schema(){
             return  [
+            {
+                type: 'text',
+                label: '',
+                prop: "orderId",
+                width: '60px'
+            },
             {
                 type: "text",
                 label: "下单时间",
@@ -124,11 +130,6 @@ export default {
                 type: "text",
                 label: this.moduleType == 'account' ? '策略' : '账户',
                 prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
-            },{
-                type: 'text',
-                label: 'id',
-                prop: "orderId",
-                flex: 2,
             },{
                 type: 'operation',
                 label: '',

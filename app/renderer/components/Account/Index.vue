@@ -33,7 +33,6 @@
                         :getDataMethod="getAccountOrder" 
                         @startNanomsg="buildOrderNanomsgListener"
                         :nanomsgBackData="orderNanomsgListener"
-                        :accountList="accountList"
                         />   
                     </el-col>              
                 </el-row>
@@ -108,7 +107,6 @@ export default {
     computed:{
         ...mapState({
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
-            accountList: state => state.ACCOUNT.accountList
         }),
 
         //账户的类型，根据是哪个柜台的，可以判断是是期货还是股票还是证券

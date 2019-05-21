@@ -43,7 +43,6 @@
                             :getDataMethod="getStrategyOrder"
                             @startNanomsg="buildOrderNanomsgListener"
                             :nanomsgBackData="orderNanomsgBack"
-                            :accountList="accountList"
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
@@ -94,7 +93,6 @@ export default {
     computed: {
         ...mapState({
             currentStrategy: state => state.STRATEGY.currentStrategy,
-            accountList: state => state.ACCOUNT.accountList
         }),
 
         strategyId(){
