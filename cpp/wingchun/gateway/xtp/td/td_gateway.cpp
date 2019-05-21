@@ -274,6 +274,9 @@ namespace kungfu
                 }
                 stock_pos.instrument_type = get_instrument_type(stock_pos.instrument_id, stock_pos.exchange_id);
                 stock_pos.direction = DirectionLong;
+                int64_t nano = kungfu::yijinjing::getNanoTime();
+                stock_pos.rcv_time = nano;
+                stock_pos.update_time = nano;
                 on_position(stock_pos, is_last);
 
                 if (is_last)
@@ -303,7 +306,9 @@ namespace kungfu
                 {
                     from_xtp(*asset, account);
                 }
-
+                int64_t nano = kungfu::yijinjing::getNanoTime();
+                account.rcv_time = nano;
+                account.update_time = nano;
                 on_account(account);
                 set_state(GatewayState::AccountInfoConfirmed);
 

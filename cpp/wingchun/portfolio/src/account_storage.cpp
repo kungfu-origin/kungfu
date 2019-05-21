@@ -10,10 +10,7 @@
 
 namespace kungfu
 {
-    AccountStorage::AccountStorage(const char *account_id) : account_id_(account_id)
-    {
-
-    }
+    AccountStorage::AccountStorage(const char *account_id) : account_id_(account_id) {}
 
     bool AccountStorage::save(SQLite::Database &db, const kungfu::AccountManager *acc_manager, bool save_meta)
     {
@@ -23,36 +20,71 @@ namespace kungfu
         try
         {
             const auto& account = acc_manager->impl_->account_;
-            db.exec(fmt::format("DELETE FROM account WHERE account_id = '{}' and type = '{}' and source_id = '{}'",
-                    account_id_, account.type, account.source_id));
-            db.exec(fmt::format("DELETE FROM bond_expire where account_id = '{}'", account_id_));
-            db.exec(fmt::format("DELETE FROM acc_frozen WHERE account_id = '{}'", account_id_));
-            db.exec(fmt::format("DELETE FROM meta"));
 
-            db.exec(fmt::format("INSERT INTO account("
-                                "rcv_time, update_time, trading_day, account_id, type, broker_id, source_id, "
-                                "initial_equity, static_equity, dynamic_equity, accumulated_pnl, accumulated_pnl_ratio, "
-                                "intraday_pnl, intraday_pnl_ratio, avail, market_value, margin, accumulated_fee, "
-                                "intraday_fee, frozen_cash, frozen_margin, frozen_fee, position_pnl, close_pnl"
-                                ") "
-                                "VALUES({},{},'{}','{}','{}','{}','{}',{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})",
-                                account.rcv_time, account.update_time, account.trading_day, account.account_id, account.type,
-                                account.broker_id, account.source_id, account.initial_equity, account.static_equity,
-                                account.dynamic_equity, account.accumulated_pnl, account.accumulated_pnl_ratio,
-                                account.intraday_pnl, account.intraday_pnl_ratio, account.avail, account.market_value,
-                                account.margin, account.accumulated_fee, account.intraday_fee, account.frozen_cash,
-                                account.frozen_margin, account.frozen_fee, account.position_pnl, account.close_pnl));
+            SQLite::Statement delete_account(db, "DELETE FROM account WHERE account_id = ? and source_id = ?");
+            delete_account.bind(1, account_id_);
+            delete_account.bind(2, std::string(account.source_id));
+            delete_account.exec();
+
+            SQLite::Statement delete_bond_expired(db, "DELETE FROM bond_expire where account_id = ?");
+            delete_bond_expired.bind(1, account_id_);
+            delete_bond_expired.exec();
+
+            SQLite::Statement delete_acc_frozen(db, "DELETE FROM acc_frozen WHERE account_id = ?");
+            delete_acc_frozen.bind(1, account_id_);
+
+            SQLite::Statement delete_meta(db, "DELETE FROM meta");
+            delete_meta.exec();
+
+            SQLite::Statement save_account_info(db, "INSERT INTO account("
+                                                        "rcv_time, update_time, trading_day, account_id, type, broker_id, source_id, "
+                                                        "initial_equity, static_equity, dynamic_equity, accumulated_pnl, accumulated_pnl_ratio, "
+                                                        "intraday_pnl, intraday_pnl_ratio, avail, market_value, margin, accumulated_fee, "
+                                                        "intraday_fee, frozen_cash, frozen_margin, frozen_fee, position_pnl, close_pnl"
+                                                        ") "
+                                                        "VALUES(?, ?, ?, ?, ?,?, ?, ?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?, ?, ?, ?)");
+            save_account_info.bind(1, account.rcv_time);
+            save_account_info.bind(2, account.update_time);
+            save_account_info.bind(3, account.trading_day);
+            save_account_info.bind(4, account.account_id);
+            save_account_info.bind(5, std::string(1, account.type));
+            save_account_info.bind(6, account.broker_id);
+            save_account_info.bind(7, account.source_id);
+            save_account_info.bind(8, account.initial_equity);
+            save_account_info.bind(9, account.static_equity);
+            save_account_info.bind(10, account.dynamic_equity);
+            save_account_info.bind(11, account.accumulated_pnl);
+            save_account_info.bind(12, account.accumulated_pnl_ratio);
+            save_account_info.bind(13, account.intraday_pnl);
+            save_account_info.bind(14, account.intraday_pnl_ratio);
+            save_account_info.bind(15, account.avail);
+            save_account_info.bind(16, account.market_value);
+            save_account_info.bind(17, account.margin);
+            save_account_info.bind(18, account.accumulated_fee);
+            save_account_info.bind(19, account.intraday_fee);
+            save_account_info.bind(20, account.frozen_cash);
+            save_account_info.bind(21, account.frozen_margin);
+            save_account_info.bind(22, account.frozen_fee);
+            save_account_info.bind(23, account.position_pnl);
+            save_account_info.bind(24, account.close_pnl);
+            save_account_info.exec();
 
             for (const auto& iter : acc_manager->impl_->bond_map_)
             {
-                db.exec(fmt::format("INSERT INTO bond_expire(date, account_id, amount) VALUES('{}', '{}', {})",
-                        iter.first, account_id_, iter.second));
+                SQLite::Statement insert_bond_expired(db, "INSERT INTO bond_expire(date, account_id, amount) VALUES(?, ?, ?)");
+                insert_bond_expired.bind(1, iter.first);
+                insert_bond_expired.bind(2, account_id_);
+                insert_bond_expired.bind(3, iter.second);
+                insert_bond_expired.exec();
             }
 
             for (const auto& iter : acc_manager->impl_->frozen_map_)
             {
-                db.exec(fmt::format("INSERT INTO acc_frozen(order_id, account_id, amount) VALUES({}, '{}', {})",
-                        iter.first, account_id_, iter.second));
+                SQLite::Statement insert_acc_frozen(db, "INSERT INTO acc_frozen(order_id, account_id, amount) VALUES(?, ?, ?)");
+                insert_acc_frozen.bind(1, iter.first);
+                insert_acc_frozen.bind(2, account_id_);
+                insert_acc_frozen.bind(3, iter.second);
+                insert_acc_frozen.exec();
             }
 
             acc_manager->impl_->pos_manager_.dump_to_db(&db, false);
