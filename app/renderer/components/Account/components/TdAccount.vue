@@ -93,7 +93,7 @@
                     show-overflow-tooltip
                     >
                     <template slot-scope="props" >
-                        <template v-if="(config[props.row.source_name] || {}).typeName == '期货'">
+                        <template v-if="(config[props.row.source_name] || {}).typeName == 'future'">
                             {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).margin) + '' || '--'}}
                         </template>
                         <!-- market_value -->
@@ -166,8 +166,8 @@
             <SetFeeDialog
             v-if="visiblity.setFee"
             :visible.sync="visiblity.setFee"
-            :accountType="(config[currentAccount.source_name] || {}).typeName"
-            :accountId="currentId"
+            :accountType="(config[feeAccount.source_name] || {}).typeName"
+            :accountId="feeAccount.account_id"
             :setFeeSettingData="setFeeSettingData"
             :getFeeSettingData="getFeeSettingData"
             ></SetFeeDialog>
@@ -211,7 +211,8 @@ export default {
             renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
             processStatus: Object.freeze({}),
             setFeeSettingData: ACCOUNT_API.setFeeSettingData,
-            getFeeSettingData: ACCOUNT_API.getFeeSettingData
+            getFeeSettingData: ACCOUNT_API.getFeeSettingData,
+            feeAccount: null
         }
     },
 
@@ -306,9 +307,10 @@ export default {
         },
 
         //费率设置
-        handleOpenFeeSettingDialog(){
+        handleOpenFeeSettingDialog(row){
             const t = this;
             t.visiblity.setFee = true;
+            t.feeAccount = row;
         },
 
         //选择柜台

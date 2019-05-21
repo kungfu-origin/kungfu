@@ -1,7 +1,8 @@
 <template>
     <el-dialog 
     width="700px" 
-    title="手续费设置"  
+    :title="`${accountId.toAccountId()} 手续费设置`"  
+    v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
