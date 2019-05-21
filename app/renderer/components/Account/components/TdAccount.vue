@@ -132,7 +132,6 @@
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
                             <el-col :span="12" v-for="item of Object.values(config)" :key="item.platform">
-                                <!-- <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]"> -->
                                 <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
