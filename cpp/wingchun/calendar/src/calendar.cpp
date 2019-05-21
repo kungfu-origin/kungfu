@@ -180,7 +180,7 @@ namespace kungfu
         j["start_date"] = start_date;
         j["delta"] = delta;
         std::string req_msg = j.dump();
-        nn_send(req_socket_, req_msg.c_str(), req_msg.size() + 1, 0);
+        nn_send(req_socket_, req_msg.c_str(), req_msg.size(), 0);
         char* buf = nullptr;
         int bytes = nn_recv(req_socket_, &buf, NN_MSG, 0);
         if (bytes >= 0)

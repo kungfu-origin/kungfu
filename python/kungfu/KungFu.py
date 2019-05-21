@@ -133,6 +133,7 @@ class KungFu(object):
     def strategy(self, args, logger):
         from kungfu.wingchun import strategy
         strategy_process = strategy.Strategy(logger, args.name, args.path)
+        atexit.register(exit_handler, task = strategy_process)
         strategy_process.run()
 
 if __name__ == '__main__':
