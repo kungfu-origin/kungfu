@@ -67,6 +67,7 @@
             prop="limit_price"
             :rules="[
                 { required: true, message: '不能为空！', trigger: 'blur' },
+                { validator: biggerThanZeroValidator, trigger: 'blur'}
             ]">
                 <el-input-number
                 :precision="2"
@@ -79,10 +80,12 @@
             class="make-order-volume"
             :rules="[
                 { required: true, message: '不能为空！', trigger: 'blur' },
+                { validator: biggerThanZeroValidator, trigger: 'blur'}
             ]">
                 <el-input-number 
                 :step="100"  
-                v-model.trim="makeOrderForm.volume"></el-input-number>                
+                v-model.trim="makeOrderForm.volume"
+                ></el-input-number>                
             </el-form-item>
             <el-form-item v-if="makeOrderForm.price_type === 3">
                 <el-radio-group size="mini" v-model="volumeRate" @change="handleChangeVolumeRate">
@@ -108,8 +111,8 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer make-order-footer">
-            <el-button class="buy" size="default" @click="handleBuy">买 入</el-button>
-            <el-button class="sell" size="default" type="primary" @click="handleSell">卖 出</el-button>
+            <el-button class="buy" size="medium" type="danger" @click="handleBuy">买 入</el-button>
+            <el-button class="sell" size="medium" type="success" @click="handleSell">卖 出</el-button>
         </div>
     </el-dialog>
 
@@ -118,7 +121,7 @@
 <script>
 import {mapState} from 'vuex';
 import {sourceType} from '@/assets/config/accountConfig'
-
+import {biggerThanZeroValidator} from '@/assets/js/validator';
 export default {
     name: 'make-order-dialog',
     props: {
@@ -140,16 +143,14 @@ export default {
     },
 
     data(){
-    //     {
-    //     char instrument_id;   //合约代码
-    //     char account_id;         //账号ID
-    //     char client_id;           //Client ID
-    //     double limit_price;                      //价格
-    //     int64_t volume;                          //数量
-    //     Side side;                               //买卖方向 '0': 买, '1': 卖
-    //     Offset offset;                           //开平方向 '0': 开, '1': 平, '2': 平今, '3': 平昨
-    //     PriceType price_type;                    //价格类型 '0': 市价(任意价), '3': 限价 先提供这两选项吧，别的不一定是交易所通用的
-    // };
+        // instrument_id; //合约代码
+        // account_id; //账号ID
+        // client_id; //Client ID
+        // limit_price; //价格
+        // volume; //数量
+        // side; //买卖方向 '0': 买, '1': 卖
+        // offset; //开平方向 '0': 开, '1': 平, '2': 平今, '3': 平昨
+        // price_type; //价格类型 '0': 市价(任意价), '3': 限价 先提供这两选项吧，别的不一定是交易所通用的
         this.sourceType = sourceType;
         return {
             makeOrderForm: {
@@ -164,6 +165,15 @@ export default {
             },
 
             volumeRate: 0,
+            biggerThanZeroValidator
+        }
+    },
+
+    mounted(){
+        const t = this;
+        //附值 account_id
+        if(t.moduleType === 'account') {
+            t.makeOrderForm.account_id = t.getSourceName(t.currentId) + '_' + t.currentId;
         }
     },
 
@@ -180,7 +190,6 @@ export default {
             const targetAccount = t.accountList.filter(a => a.account_id === targetAccountId)
             if(!targetAccount.length) return 'stock'
             const sourceName = targetAccount[0].source_name;
-            console.log(t.sourceType[sourceName].typeName,' ====')
             return t.sourceType[sourceName].typeName
         },
     },
@@ -196,29 +205,52 @@ export default {
             if(rate === 0) return;
             if(t.makeOrderForm.limit_price === 0) return;
             if(!t.makeOrderForm.account_id) return;
-            const avail = getAvailCash(t.makeOrderForm.account_id)
-            return Math.floor((avail / t.makeOrderForm.limit_price) * rate)
+            const avail = t.getAvailCash(t.makeOrderForm.account_id)
+            const volume = Math.floor((avail / t.makeOrderForm.limit_price) * rate || 0) 
+            if(!!volume) t.makeOrderForm.volume =  volume;
         },
 
-        handleBuy(){},
+        handleBuy(){
+            const t = this;
+            //买：0
+            t.makeOrderForm.side = 0;
+            t.submit()
+        },
 
-        handleSell(){},
+        handleSell(){
+            const t = this;
+            //卖：1
+            t.makeOrderForm.side = 1;
+            t.submit()
+        },
 
-        handleSubmitSetting(){
+        submit(){
             const t = this;
             t.$refs['make-order-form'].validate(valid => {
                 if(valid) {
+                    //需要对account_id再处理
+                    const makeOrderForm = t.$utils.deepClone(t.makeOrderForm)
+                    makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
 
+                    console.log(makeOrderForm,' ====')
                 }
             })
         },
 
         getAvailCash(accountId){
             const t = this;
+            if(!accountId) return 0;
             const targetAccount = t.accountsAsset.filter(a => a.accountId === accountId)
             if(!targetAccount.length) return 0
             const cashData = targetAccount[0].cashData || {}
             return cashData.avail || 0
+        },
+
+        getSourceName(accountId){
+            const t = this;
+            const targetAccount = t.accountList.filter(a => a.account_id.indexOf(accountId) !== -1)
+            if(!targetAccount.length) return ''
+            return targetAccount[0].source_name;
         },
 
         getAccountType(sourceName){
@@ -227,7 +259,6 @@ export default {
         
         clearData(){
             const t = this;
-            console.log(1111, t.visible)
             t.$emit('update:visible', false)
             t.volumeRate = 0;
             t.makeOrderForm = {
@@ -246,20 +277,11 @@ export default {
 </script>
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
-    .make-order-dialog{
-        .el-input-number{
-            // width: 200px;
-        }
-    }
     .make-order-footer{
         display: flex;
         .el-button{
             width: 50%;
-            background: $green;
         }
-        .el-button.buy{
-            background: $red;
-            color: #fff;
-        }
+
     }
 </style>

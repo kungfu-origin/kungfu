@@ -401,15 +401,8 @@ p.el-select-dropdown__empty{
 }
 
 .el-button.el-button--default{
-    background-color: $bg_light;
-}
-
-.el-button.el-button--primary{
-    background-color: $vi;
-}
-
-.el-button.el-button--default{
     box-sizing: border-box;
+    background: $bg_light;
     &:hover{
         border: none;
         background: $input_bg;
@@ -424,13 +417,6 @@ p.el-select-dropdown__empty{
     }
 }
 
-.el-button.el-button--default.el-button--primary:focus{
-    background: $vi;
-}
-
-.el-button.el-button--default.is-loading{
-    background: $vi
-}
 
 .el-button.el-button--mini{
     padding: 7px 10px;
