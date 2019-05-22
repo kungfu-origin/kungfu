@@ -66,7 +66,7 @@ class KungFu(object):
         if env_log_level and not args.log_level:
             args.log_level = os.environ['KF_LOG_LEVEL']
         os.environ['KF_LOG_LEVEL'] = args.log_level
-        logger = create_logger(args.name, args.log_level)
+        logger = create_logger(args.name if args.name else args.command, args.log_level)
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)(args, logger)
 
