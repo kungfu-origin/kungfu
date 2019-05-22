@@ -12,8 +12,6 @@ def init(context):
     sub_portfolio = context.get_sub_portfolio_info("15040900")
     print(sub_portfolio)
     portfolio = context.get_portfolio_info()
-    print(portfolio.trading_day, type(portfolio.trading_day))
-    print(portfolio.client_id, type(portfolio.client_id))
     print(portfolio)
 
 def pre_run(context):

@@ -14,15 +14,15 @@ namespace kungfu
     public:
         PortfolioManagerImpl(const char* name);
 
-        Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
-        Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const;
-        std::vector<Instrument> get_all_pos_instruments(const char* account_id) const;
+        Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const override ;
+        Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const override;
+        double get_last_price(const char* instrument_id, const char* exchange_id) const override;
+        std::vector<Instrument> get_all_pos_instruments(const char* account_id) const override;
 
-        SubPortfolioInfo get_sub_portfolio(const char* account_id) const;
-        PortfolioInfo get_portfolio() const;
+        SubPortfolioInfo get_sub_portfolio(const char* account_id) const override;
+        PortfolioInfo get_portfolio() const override;
 
-        const AccountManagerPtr get_account(const char* account_id) const;
+        const AccountManagerPtr get_account(const char* account_id) const override;
 
         void on_quote(const Quote* quote) override;
         void on_order(const Order* order) override;
@@ -41,11 +41,11 @@ namespace kungfu
         void register_acc_callback(AccountCallback cb) override;
         void register_pnl_callback(PnLCallback cb) override;
 
-        virtual void dump_to_db(SQLite::Database& db);
-        virtual void dump_to_db(const char* db_file);
+        virtual void dump_to_db(SQLite::Database& db) override;
+        virtual void dump_to_db(const char* db_file) override;
 
-        virtual void load_from_db(const char* db_file);
-        virtual void load_from_db(SQLite::Database& db);
+        virtual void load_from_db(const char* db_file) override;
+        virtual void load_from_db(SQLite::Database& db) override;
 
     private:
         bool recalc_pnl();

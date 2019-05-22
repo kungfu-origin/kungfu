@@ -186,10 +186,7 @@ namespace kungfu
         }
     }
 
-    TdGatewayImpl::~TdGatewayImpl()
-    {
-        account_manager_->dump_to_db(ACCOUNT_ASSET_DB_FILE(this->get_account_id()).c_str(), true);
-    }
+    TdGatewayImpl::~TdGatewayImpl() {}
 
     void TdGatewayImpl::init()
     {
