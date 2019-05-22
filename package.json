@@ -128,7 +128,7 @@
     "vue": "^2.6.10",
     "vue-router": "^3.0.1",
     "vue-virtual-scroller": "^1.0.0-rc.2",
-    "vuex": "^3.0.1",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "aws-sdk": "^2.395.0",

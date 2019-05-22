@@ -96,7 +96,7 @@ new Vue({
 }).$mount('#app', true)
 
 
-if(process.env.NODE_ENV === 'development') {
-	const easyMonitor = require('easy-monitor');
-	easyMonitor('kungfu renderer')
-}
+// if(process.env.NODE_ENV === 'development') {
+// 	const easyMonitor = require('easy-monitor');
+// 	easyMonitor('kungfu renderer')
+// }
