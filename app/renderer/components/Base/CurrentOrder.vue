@@ -1,5 +1,5 @@
 <template>
-  <tr-dashboard :title="filter.dateRange ? '委托记录':'未完成委托'">
+  <tr-dashboard :title="todayFinish ? '当日委托':'未完成委托'">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -10,8 +10,14 @@
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
         </tr-dashboard-header-item>
-         <tr-dashboard-header-item>
-            <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
+        <tr-dashboard-header-item v-if="!todayFinish">
+            <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-else>
+            <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-button size="mini" type="danger" :disabled="todayFinish" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -79,6 +85,7 @@ export default {
             tableData: Object.freeze([]),
 
             dateRangeDialogVisiblity: false,
+            todayFinish: false, //为 ture 显示当日已完成
         };
     },
 
@@ -88,7 +95,8 @@ export default {
 
     computed: {
         ...mapState({
-            accountList: state => state.ACCOUNT.accountList
+            accountList: state => state.ACCOUNT.accountList,
+            calendar: state => state.BASE.calendar, //日期信息，包含交易日
         }),
 
         schema(){
@@ -191,7 +199,6 @@ export default {
     methods: {
         handleRefresh(){
             const t = this;
-            t.resetData();
             t.currentId && t.init()
         },
 
@@ -213,7 +220,6 @@ export default {
         },
 
         handleCancelOrder(props){
-            console.log(props, '=======')
             const t = this;
             //防止柜台不相同，但accountId相同
             const accountIds = t.getSourceNameByAccountId(props.accountId)
@@ -267,12 +273,30 @@ export default {
 
         },
 
+        //查看当日已完成
+        handleCheckTodayFinished(){
+            const t = this;
+            t.todayFinish = true;
+            const tradingDay = t.calendar.trading_day;
+            const momentDay = tradingDay ? moment(tradingDay) : moment();
+            //获取当天是日期范围
+            const startDate = momentDay.format('YYYY-MM-DD')
+            const endDate = momentDay.add(1,'d').format('YYYY-MM-DD')
+            t.filter.dateRange = [startDate, endDate];
+            !!t.currentId && t.init()
+        },
+
+        handleCheckTodayUnfinished(){
+            const t = this;
+            t.resetData();
+            !!t.currentId && t.init()
+        },
+
         init: debounce(function() {
             const t = this
             t.$emit('startNanomsg');
             t.getData();
         }),
-
 
         getData() {
             const t = this
@@ -331,6 +355,7 @@ export default {
 
         resetData() {
             const t = this;
+            t.todayFinish = false;
             t.searchKeyword = "";
             t.filter = {
                 id: '',
