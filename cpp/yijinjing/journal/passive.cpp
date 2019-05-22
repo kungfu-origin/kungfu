@@ -44,7 +44,7 @@ bool passive::notice::wait()
     {
         if (e.num() != ETIMEDOUT)
         {
-            SPDLOG_ERROR("Unexpected nanomsg error {}", e.what());
+            SPDLOG_ERROR("Unexpected nanomsg error: {}", e.what());
         }
         return false;
     }

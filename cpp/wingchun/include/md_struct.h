@@ -6,6 +6,8 @@
 #define PROJECT_MD_STRUCT_H
 
 #include "constant.h"
+#include <string>
+#include <vector>
 
 namespace kungfu
 {
@@ -15,7 +17,15 @@ namespace kungfu
         char instrument_id[INSTRUMENT_ID_LEN];     //合约ID
         char exchange_id[EXCHANGE_ID_LEN];         //交易所ID
         InstrumentType instrument_type;            //合约类型
+
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     typedef Instrument StockInstrument;
 
@@ -38,7 +48,17 @@ namespace kungfu
 
         double long_margin_ratio;                  //多头保证金率
         double short_margin_ratio;                 //空头保证金率
+
+        std::string get_product_id() {return std::string(product_id);}
+        std::string get_open_date() {return std::string(open_date);}
+        std::string get_create_date() {return std::string(create_date);}
+        std::string get_expire_date() {return std::string(expire_date);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //行情
     struct Quote
@@ -79,7 +99,20 @@ namespace kungfu
         int64_t	bid_volume[10];                     //申买量
         int64_t	ask_volume[10];                     //申卖量
 
+        std::string get_source_id() {return std::string(source_id);}
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::vector<double> get_bid_price() {return std::vector<double>(bid_price, bid_price + 10);}
+        std::vector<double> get_ask_price() {return std::vector<double>(ask_price, ask_price + 10);}
+        std::vector<int64_t> get_bid_volume() {return std::vector<int64_t>(bid_volume, bid_volume + 10);}
+        std::vector<int64_t> get_ask_volume() {return std::vector<int64_t>(ask_volume, ask_volume + 10);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //逐笔委托
     struct Entrust
@@ -103,7 +136,16 @@ namespace kungfu
         int64_t main_seq;                           //主序号
         int64_t seq;                                //子序号
 
+        std::string get_source_id() {return std::string(source_id);}
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //逐笔成交
     struct Transaction
@@ -131,7 +173,16 @@ namespace kungfu
         int64_t main_seq;                               //主序号
         int64_t seq;                                    //子序号
 
+        std::string get_source_id() {return std::string(source_id);}
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
 }
 #endif //PROJECT_MD_STRUCT_H

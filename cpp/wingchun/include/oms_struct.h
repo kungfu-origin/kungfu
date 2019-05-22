@@ -30,7 +30,17 @@ namespace kungfu
         double close_today_ratio;               //平今费率
 
         double min_commission;                  //最小手续费
+
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_broker_id() {return std::string(broker_id);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
     
     //订单输入
     struct OrderInput
@@ -56,7 +66,17 @@ namespace kungfu
         TimeCondition time_condition;            //成交时间类型
 
         uint64_t parent_id;                      //母订单ID
+
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_client_id() {return std::string(client_id);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //订单输入反馈(手动下单)
     struct OrderInputRsp
@@ -77,7 +97,12 @@ namespace kungfu
 
         double price;                            //价格
         int64_t volume;                          //数量
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //订单操作反馈(手动下单)
     struct OrderActionRsp
@@ -130,7 +155,18 @@ namespace kungfu
         PriceType price_type;                    //价格类型
         VolumeCondition volume_condition;        //成交量类型
         TimeCondition time_condition;            //成交时间类型
+
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_client_id() {return std::string(client_id);}
+        std::string get_error_msg() {return std::string(error_msg);}
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
     
     //成交信息
     struct Trade
@@ -159,7 +195,12 @@ namespace kungfu
 
         double tax;                              //税
         double commission;                       //手续费
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //账户信息
     struct AccountInfo

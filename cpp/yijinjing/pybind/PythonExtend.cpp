@@ -19,10 +19,7 @@
  * Centralized Python Object & Function binding.
  */
 
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
 #include <pybind11/pybind11.h>
-PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include <pybind11/stl.h>
 
 #include "PageService.h"
@@ -76,7 +73,7 @@ std::string get_journal_folder(const std::string & name)
 
 PYBIND11_MODULE(pyyjj, m)
 {
-    py::class_<PageService, boost::shared_ptr<PageService> >(m, "PageService")
+    py::class_<PageService>(m, "PageService")
     .def(py::init<const std::string&>())
     .def("memory_msg_file", &PageService::get_memory_msg_file)
     .def("memory_msg_file_size", &PageService::get_memory_msg_file_size)
@@ -89,13 +86,13 @@ PYBIND11_MODULE(pyyjj, m)
     .def("release_page", &PageService::release_page_at, py::arg("idx"))
     ;
 
-    py::class_<passive::emitter, boost::shared_ptr<passive::emitter> >(m, "emitter")
+    py::class_<passive::emitter>(m, "emitter")
     .def(py::init<>())
     .def("poke", &passive::emitter::poke)
     .def("emit", &passive::emitter::emit)
     ;
 
-    py::class_<passive::notice, boost::shared_ptr<passive::notice> >(m, "notice")
+    py::class_<passive::notice>(m, "notice")
     .def(py::init<>())
     .def("wait", &passive::notice::wait)
     .def("last_message", &passive::notice::last_message)
@@ -115,7 +112,7 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("create_writer", &createWriter);
 
     // JournalReader
-    py::class_<JournalReader, boost::shared_ptr<JournalReader> >(m, "Reader")
+    py::class_<JournalReader>(m, "Reader")
     .def("add_journal", &JournalReader::addJournal, py::arg("folder"), py::arg("jname"))
     .def("expire_journal", &JournalReader::expireJournalByName, py::arg("jname"))
     .def("seek_time_by_name", &JournalReader::seekTimeJournalByName, py::arg("jname"), py::arg("nano"))
@@ -124,22 +121,22 @@ PYBIND11_MODULE(pyyjj, m)
     .def("name", &JournalReader::getFrameName);
 
     // JournalWriter
-    py::class_<JournalWriter, boost::shared_ptr<JournalWriter> >(m, "Writer")
+    py::class_<JournalWriter>(m, "Writer")
     .def("write_str", &JournalWriter::writeStr)
     .def("get_page_num", &JournalWriter::getPageNum)
     .def("write", &JournalWriter::writePyData);
 
     // Frame
-    py::class_<Frame, boost::shared_ptr<Frame> >(m, "Frame")
-    .def("status", &Frame::getStatus)
-    .def("nano", &Frame::getNano)
-    .def("extra_nano", &Frame::getExtraNano)
-    .def("source", &Frame::getSource)
-    .def("msg_type", &Frame::getMsgType)
-    .def("is_last", &Frame::getLastFlag)
-    .def("request_id", &Frame::getRequestId)
-    .def("error_id", &Frame::getErrorId)
-    .def("error_msg", &Frame::getPyErrorMsg)
+    py::class_<Frame>(m, "Frame")
+    .def_property_readonly("status", &Frame::getStatus)
+    .def_property_readonly("nano", &Frame::getNano)
+    .def_property_readonly("extra_nano", &Frame::getExtraNano)
+    .def_property_readonly("source", &Frame::getSource)
+    .def_property_readonly("msg_type", &Frame::getMsgType)
+    .def_property_readonly("is_last", &Frame::getLastFlag)
+    .def_property_readonly("request_id", &Frame::getRequestId)
+    .def_property_readonly("error_id", &Frame::getErrorId)
+    .def_property_readonly("error_msg", &Frame::getPyErrorMsg)
     .def("get_str", &Frame::getStr)
     .def("get_data", &Frame::getPyData);
 

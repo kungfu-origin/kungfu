@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright [2017] [taurus.ai]
+ * Copyright [2019] [taurus.ai]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,118 +12,142 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *****************************************************************************/
-/**
- * Basic Journal Python Bindings.
- * @Author cjiang (changhao.jiang@taurus.ai)
- * @since   March, 2017
- * Centralized Python Object & Function binding.
- */
 
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
 #include <pybind11/pybind11.h>
-PYBIND11_DECLARE_HOLDER_TYPE(T, boost::shared_ptr<T>);
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
-#include "calendar/include/calendar_service.h"
 #include "md_struct.h"
 #include "oms_struct.h"
+#include "strategy/include/strategy.h"
 #include "strategy/src/strategy_util.h"
+#include "calendar/include/calendar_service.h"
 
 namespace py = pybind11;
-
-uintptr_t py_get_last_md(const kungfu::StrategyUtil& util, const std::string& instrument_id, const std::string& exchange_id)
-{
-    auto* quote = util.get_last_md(instrument_id, exchange_id);
-    kungfu::Quote* py_quote = nullptr;
-    if (nullptr != quote)
-    {
-        py_quote = (kungfu::Quote*)malloc(sizeof(kungfu::Quote));
-        memcpy(py_quote, quote, sizeof(kungfu::Quote));
-    }
-    return (uintptr_t)py_quote;
-}
-
-uintptr_t py_get_position(const kungfu::StrategyUtil& util, const std::string& instrument_id, const std::string& exchange_id, kungfu::Direction direction = kungfu::DirectionLong, const std::string& account_id = "")
-{
-    auto pos = util.get_position(instrument_id, exchange_id, direction, account_id);
-    auto* py_pos = (kungfu::Position*)malloc(sizeof(kungfu::Position));
-    memcpy(py_pos, &pos, sizeof(kungfu::Position));
-    return (uintptr_t)py_pos;
-}
-
-uintptr_t py_get_portfolio_info(const kungfu::StrategyUtil& util)
-{
-    auto pnl = util.get_portfolio_info();
-    auto* py_pnl = (kungfu::PortfolioInfo*)malloc(sizeof(kungfu::PortfolioInfo));
-    memcpy(py_pnl, &pnl, sizeof(kungfu::PortfolioInfo));
-    return (uintptr_t)py_pnl;
-}
-
-uintptr_t py_get_sub_portfolio_info(const kungfu::StrategyUtil& util, const std::string& account_id)
-{
-    auto sub_pnl = util.get_sub_portfolio_info(account_id);
-    auto* py_sub_pnl = (kungfu::SubPortfolioInfo*)malloc(sizeof(kungfu::SubPortfolioInfo));
-    memcpy(py_sub_pnl, &sub_pnl, sizeof(kungfu::SubPortfolioInfo));
-    return (uintptr_t)py_sub_pnl;
-}
-
-void py_release_ptr(uintptr_t ptr)
-{
-    auto p = (void*)ptr;
-    if (nullptr != p)
-    {
-        free(p);
-    }
-}
+namespace kf = kungfu;
 
 PYBIND11_MODULE(pywingchun, m)
 {
-    py::class_<kungfu::CalendarService>(m, "CalendarService")
-    .def(py::init())
-    .def("current_day", &kungfu::CalendarService::get_current_day)
-    .def("calculate_trading_day", &kungfu::CalendarService::calculate_trading_day)
+    py::class_<kf::Instrument>(m, "Instrument")
+    .def_readonly("instrument_type", &kf::Instrument::instrument_type)
+    .def_property_readonly("instrument_id", &kf::Instrument::get_instrument_id)
+    .def_property_readonly("exchange_id", &kf::Instrument::get_exchange_id)
+    ;
+    py::class_<kf::FutureInstrument>(m, "FutureInstrument")
+    .def_readonly("contract_multiplier", &kf::FutureInstrument::contract_multiplier)
+    .def_readonly("price_tick", &kf::FutureInstrument::price_tick)
+    .def_readonly("delivery_year", &kf::FutureInstrument::delivery_year)
+    .def_readonly("delivery_month", &kf::FutureInstrument::delivery_month)
+    .def_readonly("is_trading", &kf::FutureInstrument::is_trading)
+    .def_readonly("long_margin_ratio", &kf::FutureInstrument::long_margin_ratio)
+    .def_readonly("short_margin_ratio", &kf::FutureInstrument::short_margin_ratio)
+    .def_property_readonly("product_id", &kf::FutureInstrument::get_product_id)
+    .def_property_readonly("open_date", &kf::FutureInstrument::get_open_date)
+    .def_property_readonly("create_date", &kf::FutureInstrument::get_create_date)
+    .def_property_readonly("expire_date", &kf::FutureInstrument::get_expire_date)
+    ;
+    py::class_<kf::Quote>(m, "Quote")
+    .def_property_readonly("source_id", &kf::Quote::get_source_id)
+    .def_property_readonly("trading_day", &kf::Quote::get_trading_day)
+    .def_readonly("rcv_time", &kf::Quote::rcv_time)
+    .def_readonly("data_time", &kf::Quote::data_time)
+    .def_property_readonly("instrument_id", &kf::Quote::get_instrument_id)
+    .def_property_readonly("exchange_id", &kf::Quote::get_exchange_id)
+    .def_readonly("instrument_type", &kf::Quote::instrument_type)
+    .def_readonly("pre_close_price", &kf::Quote::pre_close_price)
+    .def_readonly("pre_settlement_price", &kf::Quote::pre_settlement_price)
+    .def_readonly("last_price", &kf::Quote::last_price)
+    .def_readonly("volume", &kf::Quote::volume)
+    .def_readonly("turnover", &kf::Quote::turnover)
+    .def_readonly("pre_open_interest", &kf::Quote::pre_open_interest)
+    .def_readonly("open_interest", &kf::Quote::open_interest)
+    .def_readonly("open_price", &kf::Quote::open_price)
+    .def_readonly("high_price", &kf::Quote::high_price)
+    .def_readonly("low_price", &kf::Quote::low_price)
+    .def_readonly("upper_limit_price", &kf::Quote::upper_limit_price)
+    .def_readonly("lower_limit_price", &kf::Quote::lower_limit_price)
+    .def_readonly("close_price", &kf::Quote::close_price)
+    .def_readonly("settlement_price", &kf::Quote::settlement_price)
+    .def_property_readonly("bid_price", &kf::Quote::get_bid_price)
+    .def_property_readonly("ask_price", &kf::Quote::get_ask_price)
+    .def_property_readonly("bid_volume", &kf::Quote::get_bid_volume)
+    .def_property_readonly("ask_volume", &kf::Quote::get_ask_volume)
+    ;
+    py::class_<kf::Entrust>(m, "Entrust")
+    .def_property_readonly("source_id", &kf::Entrust::get_source_id)
+    .def_property_readonly("trading_day", &kf::Entrust::get_trading_day)
+    .def_readonly("rcv_time", &kf::Entrust::rcv_time)
+    .def_readonly("data_time", &kf::Entrust::data_time)
+    .def_property_readonly("instrument_id", &kf::Entrust::get_instrument_id)
+    .def_property_readonly("exchange_id", &kf::Entrust::get_exchange_id)
+    .def_readonly("instrument_type", &kf::Entrust::instrument_type)
+    .def_readonly("price", &kf::Entrust::price)
+    .def_readonly("volume", &kf::Entrust::volume)
+    .def_readonly("side", &kf::Entrust::side)
+    .def_readonly("price_type", &kf::Entrust::price_type)
+    .def_readonly("main_seq", &kf::Entrust::main_seq)
+    .def_readonly("seq", &kf::Entrust::seq)
+    ;
+    py::class_<kf::Transaction>(m, "Transaction")
+    .def_property_readonly("source_id", &kf::Transaction::get_source_id)
+    .def_property_readonly("trading_day", &kf::Transaction::get_trading_day)
+    .def_readonly("rcv_time", &kf::Transaction::rcv_time)
+    .def_readonly("data_time", &kf::Transaction::data_time)
+    .def_property_readonly("instrument_id", &kf::Transaction::get_instrument_id)
+    .def_property_readonly("exchange_id", &kf::Transaction::get_exchange_id)
+    .def_readonly("instrument_type", &kf::Transaction::instrument_type)
+    .def_readonly("price", &kf::Transaction::price)
+    .def_readonly("volume", &kf::Transaction::volume)
+    .def_readonly("bid_no", &kf::Transaction::bid_no)
+    .def_readonly("ask_no", &kf::Transaction::ask_no)
+    .def_readonly("exec_type", &kf::Transaction::exec_type)
+    .def_readonly("bs_flag", &kf::Transaction::bs_flag)
+    .def_readonly("main_seq", &kf::Transaction::main_seq)
+    .def_readonly("seq", &kf::Transaction::seq)
     ;
 
-    py::class_<kungfu::StrategyUtil>(m, "Util")
+    py::class_<kf::Strategy>(m, "Strategy")
     .def(py::init<const std::string&>())
-    .def("add_md", &kungfu::StrategyUtil::add_md, py::arg("source_id"))
-    .def("add_account", &kungfu::StrategyUtil::add_account, py::arg("source_id"), py::arg("account_id"), py::arg("cash_limit"))
-    .def("register_algo_service", &kungfu::StrategyUtil::register_algo_service)
-
-    .def("on_quote", &kungfu::StrategyUtil::on_quote_py, py::arg("quote"))
-    .def("on_order", &kungfu::StrategyUtil::on_order_py, py::arg("order"))
-    .def("on_trade", &kungfu::StrategyUtil::on_trade_py, py::arg("trade"))
-
-    .def("register_switch_day_callback", &kungfu::StrategyUtil::register_switch_day_callback, py::arg("cb"))
-
-    .def("subscribe", &kungfu::StrategyUtil::subscribe, py::arg("source"), py::arg("instruments"), py::arg("exchange_id"), py::arg("is_level2")=false)
-    .def("is_subscribed", &kungfu::StrategyUtil::is_subscribed, py::arg("source"), py::arg("instrument"), py::arg("exchange_id"))
-
-    .def("insert_limit_order", &kungfu::StrategyUtil::insert_limit_order, py::arg("instrument_id"), py::arg("exchange_id"),
-         py::arg("account_id"), py::arg("limit_price"), py::arg("volume"), py::arg("side"), py::arg("offset"))
-    .def("insert_fok_order", &kungfu::StrategyUtil::insert_fok_order, py::arg("instrument_id"), py::arg("exchange_id"),
-         py::arg("account_id"), py::arg("limit_price"), py::arg("volume"), py::arg("side"), py::arg("offset"))
-    .def("insert_fak_order", &kungfu::StrategyUtil::insert_fak_order, py::arg("instrument_id"), py::arg("exchange_id"),
-         py::arg("account_id"), py::arg("limit_price"), py::arg("volume"), py::arg("side"), py::arg("offset"))
-    .def("insert_market_order", &kungfu::StrategyUtil::insert_market_order, py::arg("instrument_id"), py::arg("exchange_id"),
-         py::arg("account_id"), py::arg("volume"), py::arg("side"), py::arg("offset"))
-    .def("cancel_order", &kungfu::StrategyUtil::cancel_order, py::arg("order_id"))
-
-    .def("insert_algo_order", &kungfu::StrategyUtil::insert_algo_order, py::arg("algo_type"), py::arg("order_input_msg"))
-    .def("modify_algo_order", &kungfu::StrategyUtil::modify_algo_order, py::arg("order_id"), py::arg("cmd"))
-
-    .def("on_push_by_min", &kungfu::StrategyUtil::on_push_by_min)
-    .def("on_push_by_day", &kungfu::StrategyUtil::on_push_by_day)
-
-    .def("reload_instruments", &kungfu::StrategyUtil::reload_instruments)
-
-    .def("get_pending_orders", &kungfu::StrategyUtil::get_pending_orders, py::arg("account_id")="")
+    .def("run", &kf::Strategy::run)
+    .def("stop", &kf::Strategy::stop)
+    .def("add_md", &kf::Strategy::add_md)
+    .def("add_account", &kf::Strategy::add_account)
+    .def("register_algo_service", &kf::Strategy::register_algo_service)
+    .def("get_nano", &kf::Strategy::get_nano)
+    // .def("get_last_md", &kf::Strategy::get_last_md)
+    .def("get_position", &kf::Strategy::get_position)
+    .def("get_portfolio_info", &kf::Strategy::get_portfolio_info)
+    .def("get_sub_portfolio_info", &kf::Strategy::get_sub_portfolio_info)
+    .def("subscribe", &kf::Strategy::subscribe)
+    .def("insert_limit_order", &kf::Strategy::insert_limit_order)
+    .def("insert_fok_order", &kf::Strategy::insert_fok_order)
+    .def("insert_fak_order", &kf::Strategy::insert_fak_order)
+    .def("insert_market_order", &kf::Strategy::insert_market_order)
+    .def("cancel_order", &kf::Strategy::cancel_order)
+    .def("_register_nanotime_callback", &kf::Strategy::register_nanotime_callback)
+    .def("insert_algo_order", &kf::Strategy::insert_algo_order)
+    .def("modify_algo_order", &kf::Strategy::modify_algo_order)
+    // .def("try_frozen", &kf::Strategy::try_frozen)
+    .def("cancel_frozen", &kf::Strategy::cancel_frozen)
+    .def("commit_frozen", &kf::Strategy::commit_frozen)
+    .def("try_modify_position", &kf::Strategy::try_modify_position)
+    .def("cancel_modify_position", &kf::Strategy::cancel_modify_position)
+    .def("commit_modify_position", &kf::Strategy::commit_modify_position)
+    .def("init", &kf::Strategy::init)
+    .def("pre_run", &kf::Strategy::pre_run)
+    .def("pre_quit", &kf::Strategy::pre_quit)
+    .def("on_switch_day", &kf::Strategy::on_switch_day)
+    .def("on_quote", &kf::Strategy::on_quote)
+    .def("on_entrust", &kf::Strategy::on_entrust)
+    .def("on_transaction", &kf::Strategy::on_transaction)
+    .def("on_order", &kf::Strategy::on_order)
+    .def("on_trade", &kf::Strategy::on_trade)
+    .def("on_algo_order_status", &kf::Strategy::on_algo_order_status)
     ;
 
-    m.def("get_last_md", &py_get_last_md, py::arg("strategy"), py::arg("instrument_id"), py::arg("exchange_id"));
-    m.def("get_position", &py_get_position, py::arg("strategy"), py::arg("instrument_id"), py::arg("exchange_id"), py::arg("direction")=kungfu::DirectionLong, py::arg("account_id")="");
-    m.def("get_portfolio_info", &py_get_portfolio_info, py::arg("strategy"));
-    m.def("get_sub_portfolio_info", &py_get_sub_portfolio_info, py::arg("strategy"), py::arg("account_id"));
-    m.def("release_ptr", &py_release_ptr, py::arg("ptr"));
+    py::class_<kf::CalendarService>(m, "CalendarService")
+    .def(py::init())
+    .def("current_day", &kf::CalendarService::get_current_day)
+    .def("calculate_trading_day", &kf::CalendarService::calculate_trading_day)
+    ;
 }
