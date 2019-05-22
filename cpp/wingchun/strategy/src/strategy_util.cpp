@@ -363,27 +363,6 @@ namespace kungfu
         return uid;
     }
 
-    void StrategyUtil::set_log_level(int level)
-    {
-        kungfu::yijinjing::KungfuLog::setup_log(name_);
-        kungfu::yijinjing::KungfuLog::set_log_level(level);
-    }
-
-    void StrategyUtil::log_info(const string &msg)
-    {
-        SPDLOG_INFO(msg);
-    }
-
-    void StrategyUtil::log_warn(const string &msg)
-    {
-        SPDLOG_WARN(msg);
-    }
-
-    void StrategyUtil::log_error(const string &msg)
-    {
-        SPDLOG_ERROR(msg);
-    }
-
     const Quote* const StrategyUtil::get_last_md(const std::string& instrument_id, const std::string& exchange_id) const
     {
         auto iter = quote_map_.find(get_symbol(instrument_id, exchange_id));

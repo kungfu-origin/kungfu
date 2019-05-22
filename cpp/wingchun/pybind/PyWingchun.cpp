@@ -113,11 +113,6 @@ PYBIND11_MODULE(pywingchun, m)
     .def("insert_algo_order", &kungfu::StrategyUtil::insert_algo_order, py::arg("algo_type"), py::arg("order_input_msg"))
     .def("modify_algo_order", &kungfu::StrategyUtil::modify_algo_order, py::arg("order_id"), py::arg("cmd"))
 
-    .def("set_log_level", &kungfu::StrategyUtil::set_log_level, py::arg("level"))
-    .def("log_info", &kungfu::StrategyUtil::log_info, py::arg("msg"))
-    .def("log_warn", &kungfu::StrategyUtil::log_warn, py::arg("msg"))
-    .def("log_error", &kungfu::StrategyUtil::log_error, py::arg("msg"))
-
     .def("on_push_by_min", &kungfu::StrategyUtil::on_push_by_min)
     .def("on_push_by_day", &kungfu::StrategyUtil::on_push_by_day)
 

@@ -13,7 +13,6 @@ import pyyjj
 
 class Strategy:
     def __init__(self, logger, name, path):
-        self._logger = logger
         self._base_dir = os.environ['KF_HOME']
 
         self._name = name
@@ -23,11 +22,12 @@ class Strategy:
         self._on_quote = None
         self._on_order = None
         self._on_trade = None
-        self.__init_context()
+        self.__init_context(logger)
         self.__init_strategy(path)
 
-    def __init_context(self):
+    def __init_context(self, logger):
 
+        context.log = logger
         context.stop = self.stop
 
         context.add_md = self.add_md
@@ -42,11 +42,6 @@ class Strategy:
         context.insert_fak_order = self._util.insert_fak_order
         context.insert_market_order = self._util.insert_market_order
         context.cancel_order = self._util.cancel_order
-
-        context.set_log_level = self._util.set_log_level
-        context.log_info = self._util.log_info
-        context.log_error = self._util.log_error
-        context.log_warn = self._util.log_warn
 
         context.get_last_md = self.get_last_md
         context.get_position = self.get_position

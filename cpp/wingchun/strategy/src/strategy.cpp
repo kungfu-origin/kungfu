@@ -201,26 +201,6 @@ namespace kungfu
         impl_->stop();
     }
 
-    void Strategy::set_log_level(int level)
-    {
-        impl_->get_util()->set_log_level(level);
-    }
-
-    void Strategy::log_info(const std::string& msg)
-    {
-        impl_->get_util()->log_info(msg);
-    }
-
-    void Strategy::log_warn(const std::string& msg)
-    {
-        impl_->get_util()->log_warn(msg);
-    }
-
-    void Strategy::log_error(const std::string &msg)
-    {
-        impl_->get_util()->log_error(msg);
-    }
-
     bool Strategy::add_md(const std::string& source_id)
     {
         return impl_->add_md(source_id);

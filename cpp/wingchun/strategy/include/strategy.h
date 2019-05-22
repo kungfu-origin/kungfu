@@ -28,22 +28,6 @@ namespace kungfu
         // 结束运行
         void stop();
 
-        //设置Log级别
-        //@param level       log级别
-        void set_log_level(int level);
-
-        //输出INFO级别Log
-        //@param msg         log信息
-        void log_info(const std::string& msg);
-
-        //输出WARN级别Log
-        //@param msg         log信息
-        void log_warn(const std::string& msg);
-
-        //输出ERROR级别Log
-        //@param msg         log信息
-        void log_error(const std::string& msg);
-
         //添加策略使用的行情柜台
         //@param source_id   柜台ID
         //@return            成功或者失败

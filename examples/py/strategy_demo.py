@@ -21,23 +21,27 @@ def pre_run(context):
 def insert_order(context, nano):
 
     order_id = context.insert_market_order("601988", exchange, "15040900", 200, Side.Buy, Offset.Open)
-    context.log_info("insert market order: [order_id] {} [account] {}".format(order_id, "15040900"))
+    context.log.info("insert market order: [order_id] {} [account] {}".format(order_id, "15040900"))
     order_id = context.insert_limit_order("600000", exchange, "15011218", 12.8, 300, Side.Buy, Offset.Open)
-    context.log_info("insert limit order: [order_id] {} [account] {}".format(order_id, "15011218"))
+    context.log.info("insert limit order: [order_id] {} [account] {}".format(order_id, "15011218"))
+
+def on_quote(context, quote):
+    context.log.info("{} {}".format(quote.instrument_id, quote.trading_day))
+    pass
 
 def on_transaction(context, transaction):
-    context.log_info("[on_transaction] {} {}".format(transaction.instrument_id, transaction.exchange_id))
+    context.log.info("{} {}".format(transaction.instrument_id, transaction.exchange_id))
     pass
 
 def on_entrust(context, entrust):
-    context.log_info("[on_entrust] {} {}".format(entrust.instrument_id, entrust.exchange_id))
+    context.log.info("{} {}".format(entrust.instrument_id, entrust.exchange_id))
     pass
 
 def on_order(context, order):
-    context.log_info('[on_order] rcv_time {} ticker {} order_id {}, status {}|{}'.format(order.rcv_time, order.instrument_id, order.order_id, order.status, OrderStatus.to_str(order.status)))
+    context.log.info('rcv_time {} ticker {} order_id {}, status {}|{}'.format(order.rcv_time, order.instrument_id, order.order_id, order.status, OrderStatus.to_str(order.status)))
 
 def on_trade(context, trade):
-    context.log_info('[on_trade] rcv_time {} order_id {}'.format(trade.rcv_time, trade.order_id))
+    context.log.info('rcv_time {} order_id {}'.format(trade.rcv_time, trade.order_id))
 
 def pre_quit(context):
-    context.log_info("pre quit")
+    context.log.info("pre quit")

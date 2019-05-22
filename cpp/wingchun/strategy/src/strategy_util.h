@@ -70,12 +70,6 @@ namespace kungfu
         uint64_t insert_algo_order(const std::string& algo_type, const std::string& order_input_msg);
         uint64_t modify_algo_order(uint64_t order_id, const std::string& cmd);
 
-        void set_log_level(int level);
-
-        void log_info(const string& msg);
-        void log_warn(const string& msg);
-        void log_error(const string& msg);
-
         const Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
         Position get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction = DirectionLong, const std::string& account_id = "") const;
         PortfolioInfo get_portfolio_info() const;
