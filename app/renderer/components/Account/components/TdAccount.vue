@@ -183,7 +183,7 @@ import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accoun
 import SetAccountDialog from './SetAccountDialog'
 import SetFeeDialog from './SetFeeDialog'
 import {deleteProcess} from '__gUtils/processUtils'
-import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
+// import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 import {ACCOUNTS_DIR, LOG_DIR, buildGatewayPath} from '__gConfig/pathConfig'
 import {removeFileFolder, openReadFile} from "__gUtils/fileUtils.js"
 
@@ -209,7 +209,7 @@ export default {
             sourceFirstAccount: false, //来标记是否是某柜台下添加的第一个账户
             taskList: [], //存放kungfu_task数据表内容
             renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
-            processStatus: Object.freeze({}),
+            // processStatus: Object.freeze({}),
             setFeeSettingData: ACCOUNT_API.setFeeSettingData,
             getFeeSettingData: ACCOUNT_API.getFeeSettingData,
             feeAccount: null
@@ -227,7 +227,8 @@ export default {
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             accountList: state => state.ACCOUNT.accountList, 
             currentAccount: state => state.ACCOUNT.currentAccount,
-            currentId: state => (state.ACCOUNT.currentAccount || {}).account_id
+            currentId: state => (state.ACCOUNT.currentAccount || {}).account_id,
+            processStatus: state => state.BASE.processStatus
         }),
 
         //用来存放筛选完的列表
@@ -254,12 +255,12 @@ export default {
     mounted() {
         const t = this;
         t.renderTable = true
-        onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+        // onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
     
     destroyed() {
         const t = this;
-        offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+        // offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
     methods:{
@@ -369,10 +370,10 @@ export default {
             openReadFile(logPath)
         },
 
-        updateProcessStatus(res){
-            const t = this;
-            t.processStatus = res
-        },
+        // updateProcessStatus(res){
+        //     const t = this;
+        //     t.processStatus = res
+        // },
 
         //获取账户列表
         getAccountList() {

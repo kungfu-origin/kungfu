@@ -128,7 +128,7 @@
     "vue": "^2.6.10",
     "vue-router": "^3.0.1",
     "vue-virtual-scroller": "^1.0.0-rc.2",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
   },
   "devDependencies": {
     "aws-sdk": "^2.395.0",
@@ -144,6 +144,7 @@
     "chai": "^4.0.0",
     "chalk": "^2.1.0",
     "cmake-js": "^5.1.0",
+    "easy-monitor": "^2.2.7",
     "compression-webpack-plugin": "^2.0.0",
     "copy-webpack-plugin": "^4.0.1",
     "copyfiles": "^2.1.0",

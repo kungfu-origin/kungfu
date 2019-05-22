@@ -5,14 +5,13 @@ if (process.env.NODE_ENV !== 'development') {
 
 // Modules to control application life and create native browser window
 const path = require('path');
-const {app, BrowserWindow, Menu, dialog, Tray} = require('electron');
+const { app, BrowserWindow, Menu, dialog } = require('electron');
 const electron = require('electron');
 //base setting, init db
-const {initDB} = require('./base');
-const {killGodDaemon,  killExtra, KillKfc} = require('__gUtils/processUtils');
-const {logger} = require('__gUtils/logUtils');
-const {platform} = require('__gConfig/platformConfig');
-
+const { initDB } = require('./base');
+const { killGodDaemon,  killExtra, KillKfc } = require('__gUtils/processUtils');
+const { logger } = require('__gUtils/logUtils');
+const { platform } = require('__gConfig/platformConfig');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -63,7 +62,7 @@ function createWindow () {
 	}
 
 	// Open the DevTools.
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {

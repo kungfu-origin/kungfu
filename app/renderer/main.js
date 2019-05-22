@@ -70,8 +70,8 @@ export const startGetProcessStatus = () => {
     listProcessStatus()
     .then(res => {
         const processStatus = Object.freeze(res);
-        console.log(processStatus, '~~~~')
-        processStatus && EVENT_BUS.$emit('update-process-status', processStatus)
+        console.log(processStatus)
+        // processStatus && EVENT_BUS.$emit('update-process-status', processStatus)
         processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
     })
     .catch(err => console.error(err))
@@ -94,3 +94,9 @@ new Vue({
     store,
     render: h => h(App)
 }).$mount('#app', true)
+
+
+if(process.env.NODE_ENV === 'development') {
+	const easyMonitor = require('easy-monitor');
+	easyMonitor('kungfu renderer')
+}

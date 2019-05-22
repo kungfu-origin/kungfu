@@ -119,7 +119,7 @@ import {openWin} from '@/assets/js/utils';
 import {startStrategy, deleteProcess} from '__gUtils/processUtils.js';
 import * as STRATEGY_API from '@/io/strategy';
 import {debounce} from '@/assets/js/utils';
-import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
+// import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 import {chineseValidator, specialStrValidator, noZeroAtFirstValidator} from '@/assets/js/validator';
 import path from 'path';
 import {remote} from 'electron'
@@ -139,7 +139,7 @@ export default {
                 strategyPath: "",
             },
             renderTable: false,
-            processStatus: Object.freeze({})
+            // processStatus: Object.freeze({})
         }
     },
 
@@ -151,13 +151,13 @@ export default {
     mounted(){
         const t = this;
         t.renderTable = true;
-        onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+        // onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
-    destroyed(){
-        const t = this;
-        offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
-    },
+    // destroyed(){
+    //     const t = this;
+    //     offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+    // },
 
     watch: {
         searchKeyword: debounce(function (value) {
@@ -168,7 +168,8 @@ export default {
     computed: {
         ...mapState({
             currentStrategy: state => state.STRATEGY.currentStrategy,
-            strategyList: state => state.STRATEGY.strategyList
+            strategyList: state => state.STRATEGY.strategyList,
+            processStatus: state => state.BASE.processStatus
         }),
 
         strategyListFilter(){
@@ -337,10 +338,10 @@ export default {
             t.setStrategyDialogType = ''
         },
 
-        updateProcessStatus(res){
-            const t = this;
-            t.processStatus = res
-        },
+        // updateProcessStatus(res){
+        //     const t = this;
+        //     t.processStatus = res
+        // },
 
         //check策略是否重复
         validateDuplicateStrategyId(rule, value, callback){

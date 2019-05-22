@@ -78,7 +78,7 @@ import {mapState, mapGetters} from 'vuex';
 import {sourceType} from '@/assets/config/accountConfig'
 import SetMdSourceDialog from './SetMdSourceDialog';
 import * as ACCOUNT_API from '@/io/account';
-import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
+// import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 import {openReadFile} from '__gUtils/fileUtils';
 import {LOG_DIR} from '__gConfig/pathConfig';
 import path from 'path';
@@ -90,7 +90,7 @@ export default {
             setMdSourceDialogVisiblity: false,
             currentMdSourceAccount: null,
             renderTable: false,
-            processStatus: Object.freeze({})
+            // processStatus: Object.freeze({})
         }
     },
 
@@ -98,6 +98,7 @@ export default {
         ...mapState({
             accountList: state => state.ACCOUNT.accountList,
             mdTdState: state => state.ACCOUNT.mdTdState,
+            processStatus: state => state.BASE.processStatus
         }),
 
         ...mapGetters({
@@ -112,12 +113,12 @@ export default {
     mounted(){
         const t = this;
         t.renderTable = true;
-        onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+        // onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
     destroyed(){
         const t = this;
-        offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
+        // offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
 
@@ -147,10 +148,10 @@ export default {
             openReadFile(logPath);
         },
 
-        updateProcessStatus(res){
-            const t = this;
-            t.processStatus = res
-        },
+        // updateProcessStatus(res){
+        //     const t = this;
+        //     t.processStatus = res
+        // },
 
         //获取账户列表
         getAccountList() {

@@ -56,10 +56,10 @@
             :rules="[
                 { required: true, message: '不能为空！', trigger: 'blur' },
             ]">
-                <el-select v-model.trime="makeOrderForm.price_type">
-                    <el-option label="市价" :value="0"></el-option>
-                    <el-option label="限价" :value="3"></el-option>
-                </el-select>
+                <el-radio-group size="mini" v-model="makeOrderForm.price_type">
+                    <el-radio size="mini" :label="0">市价</el-radio>
+                    <el-radio size="mini" :label="3">限价</el-radio>
+                </el-radio-group>
             </el-form-item>
             <el-form-item
             v-if="makeOrderForm.price_type === 3"
@@ -87,14 +87,6 @@
                 v-model.trim="makeOrderForm.volume"
                 ></el-input-number>                
             </el-form-item>
-            <el-form-item v-if="makeOrderForm.price_type === 3">
-                <el-radio-group size="mini" v-model="volumeRate" @change="handleChangeVolumeRate">
-                    <el-radio size="mini" :label="0">自定义</el-radio>
-                    <el-radio size="mini" :label="0.25">1/4</el-radio>
-                    <el-radio size="mini" :label="0.5">1/2</el-radio>
-                    <el-radio size="mini" :label="1">全部</el-radio>
-                </el-radio-group>
-            </el-form-item>
             <el-form-item
             v-if="accountType === 'future'"
             label="开平"
@@ -102,12 +94,12 @@
             :rules="[
                 { required: true, message: '不能为空！', trigger: 'blur' },
             ]">
-                <el-select v-model.trime="makeOrderForm.offset">
-                    <el-option size="mini" :value="0" label="开"></el-option>
-                    <el-option size="mini" :value="1" label="平"></el-option>
-                    <el-option size="mini" :value="2" label="平今"></el-option>
-                    <el-option size="mini" :value="3" label="平昨"></el-option>
-                </el-select>
+                <el-radio-group size="mini" v-model="makeOrderForm.offset">
+                    <el-radio size="mini" :label="0">开</el-radio>
+                    <el-radio size="mini" :label="1">平</el-radio>
+                    <el-radio size="mini" :label="2">平今</el-radio>
+                    <el-radio size="mini" :label="3">平昨</el-radio>
+                </el-radio-group>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer make-order-footer">
@@ -166,7 +158,7 @@ export default {
                 price_type: 3
             },
 
-            volumeRate: 0,
+            // volumeRate: 0,
             biggerThanZeroValidator
         }
     },
@@ -203,15 +195,15 @@ export default {
             t.clearData();
         },
 
-        handleChangeVolumeRate(rate){
-            const t = this;
-            if(rate === 0) return;
-            if(t.makeOrderForm.limit_price === 0) return;
-            if(!t.makeOrderForm.account_id) return;
-            const avail = t.getAvailCash(t.makeOrderForm.account_id)
-            const volume = Math.floor((avail / t.makeOrderForm.limit_price) * rate || 0) 
-            if(!!volume) t.makeOrderForm.volume =  volume;
-        },
+        // handleChangeVolumeRate(rate){
+        //     const t = this;
+        //     if(rate === 0) return;
+        //     if(t.makeOrderForm.limit_price === 0) return;
+        //     if(!t.makeOrderForm.account_id) return;
+        //     const avail = t.getAvailCash(t.makeOrderForm.account_id)
+        //     const volume = Math.floor((avail / t.makeOrderForm.limit_price) * rate || 0) 
+        //     if(!!volume) t.makeOrderForm.volume =  volume;
+        // },
 
         handleBuy(){
             const t = this;
