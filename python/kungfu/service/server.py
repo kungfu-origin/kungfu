@@ -1,17 +1,18 @@
 import os, sys, traceback
 import select
 import json
+import psutil
 import nnpy, pyyjj
 import pywingchun
 
-from kungfu.services.handlers.paged import *
-from kungfu.services.handlers.calendar import *
-from kungfu.services.handlers.system import *
-from kungfu.services.handlers import kfs_handle, kfs_run_tasks
+import kungfu.service.kfs as kfs
+import kungfu.service.kfs.paged
+import kungfu.service.kfs.calendar
+import kungfu.service.kfs.system
 
-SECOND_IN_NANO = 1e9
+SECOND_IN_NANO = int(1e9)
 
-class Server:
+class Master:
     def __init__(self, logger):
         self._process = psutil.Process()
         self._logger = logger
@@ -52,7 +53,7 @@ class Server:
             self._logger.debug("received %s", request_data.decode('utf-8'))
             request_json = json.loads(request_data.decode('utf-8'))
             request_path = request_json['request']
-            response = kfs_handle(request_path, self, request_json)
+            response = kfs.handle(request_path, self, request_json)
             send_bytes = self._service_socket.send(json.dumps(response))
             self._logger.debug("processed request %s, response %s", request_json, response)
     
@@ -74,7 +75,7 @@ class Server:
         time_passed = pyyjj.nano_time() - self._last_check
         if time_passed > self._check_interval:
             self._logger.debug('Run system tasks')
-            kfs_run_tasks(self)
+            kfs.run_tasks(self)
             self._last_check = pyyjj.nano_time()
 
     def start(self):

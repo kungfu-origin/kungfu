@@ -2,9 +2,9 @@ import os
 import psutil
 import nnpy, pyyjj
 
-from kungfu.services.handlers import kfs_on
+import kungfu.service.kfs as kfs
 
-@kfs_on('journal/register')
+@kfs.on('journal/register')
 def register_journal(ctx, request):
     name = request['name']
     result = {
@@ -25,15 +25,15 @@ def register_journal(ctx, request):
             client['journals'].append(idx)
     return result
 
-@kfs_on('client/register/writer')
+@kfs.on('client/register/writer')
 def register_client_read(ctx, request):
     return register_client(ctx, request, False)
 
-@kfs_on('client/register/reader')
+@kfs.on('client/register/reader')
 def register_client_read(ctx, request):
     return register_client(ctx, request, True)
 
-@kfs_on('client/exit')
+@kfs.on('client/exit')
 def exit_client(ctx, request):
     name = request['name']
     hash_code = request['hash_code']

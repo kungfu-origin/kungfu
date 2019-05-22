@@ -23,8 +23,8 @@ class KungFu(object):
         parser.add_argument('-V', '--version', action='store_true', help='Python version')
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        parser_paged = create_subparser(subparsers, 'paged', help = 'kfc server')
-        parser_ping = create_subparser(subparsers, 'ping', help = 'ping kfc server')
+        parser_master = create_subparser(subparsers, 'master', help = 'kungfu master')
+        parser_ping = create_subparser(subparsers, 'ping', help = 'ping kungfu master')
         parser_ping.add_argument('-m', '--message', dest='message', default='{}', type=str, help='message')
         parser_ping.add_argument('-t', '--times', dest='times', type=int, default=4, help='times')
         parser_time = create_subparser(subparsers, 'time', help = 'test calendar')
@@ -70,9 +70,9 @@ class KungFu(object):
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)(args, logger)
 
-    def paged(self, args, logger):
-        from kungfu.services.server import Server
-        server = Server(logger)
+    def master(self, args, logger):
+        from kungfu.service.server import Master
+        server = Master(logger)
         atexit.register(exit_handler, task=server)
         server.start()
 

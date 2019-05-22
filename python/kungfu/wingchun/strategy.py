@@ -6,7 +6,6 @@ import nnpy
 import json
 from functools import partial
 from kungfu.wingchun.structs import *
-from kungfu.wingchun.EventLoop import EventLoop
 from kungfu.wingchun.context import context
 from kungfu.wingchun.constants import *
 import pywingchun
@@ -18,7 +17,7 @@ class Strategy:
         self._base_dir = os.environ['KF_HOME']
 
         self._name = name
-        self._event_loop = EventLoop(logger, name)
+        self._event_loop = pywingchun.EventLoop(name)
         self._util = pywingchun.Util(name)
 
         self._on_quote = None
@@ -78,16 +77,14 @@ class Strategy:
         getattr(impl, 'init', lambda ctx: None)(context)
 
     def run(self):
-        self._logger.info('strategy run')
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano_time()), lambda nano: self.__on_1min_timer(nano))
+        self._event_loop.register_nanotime_callback(self.__nseconds_next_day(pyyjj.nano_time()), lambda nano: self.__on_1day_timer(nano))
 
-        self._event_loop.register_nanotime_callback(self.__nseconds_next_min(pyyjj.nano_time()), self.__on_1min_timer)
-        self._event_loop.register_nanotime_callback(self.__nseconds_next_day(pyyjj.nano_time()), self.__on_1day_timer)
-
-        self._event_loop.register_quote_callback(self.__process_quote)
-        self._event_loop.register_entrust_callback(self.__process_entrust)
-        self._event_loop.register_transaction_callback(self.__process_transaction)
-        self._event_loop.register_order_callback(self.__process_order)
-        self._event_loop.register_trade_callback(self.__process_trade)
+        self._event_loop.register_quote_callback(lambda quote: self.__process_quote(quote))
+        self._event_loop.register_entrust_callback(lambda entrust: self.__process_entrust(entrust))
+        self._event_loop.register_transaction_callback(lambda transaction: self.__process_transaction(transaction))
+        self._event_loop.register_order_callback(lambda order: self.__process_order(order))
+        self._event_loop.register_trade_callback(lambda trade: self.__process_trade(trade))
 
         self._event_loop.register_manual_order_action_callback(self.__on_manual_order_action)
 
@@ -115,10 +112,10 @@ class Strategy:
         return self._util.register_algo_service()
 
     def register_nanotime_callback(self, nano, callback):
-        self._event_loop.register_nanotime_callback(nano, callback)
+        self._event_loop.register_nanotime_callback(int(nano), callback)
 
     def register_nanotime_callback_with_context(self, nano, callback):
-        self._event_loop.register_nanotime_callback(nano, partial(callback, context))
+        self._event_loop.register_nanotime_callback(int(nano), partial(callback, context))
 
     def get_nano(self):
         return self._event_loop.get_nano()
@@ -169,20 +166,19 @@ class Strategy:
 
     def __nseconds_next_min(self, nano):
         cur_time = pyyjj.parse_nano(nano, '%Y%m%d %H:%M:%S')
-        return pyyjj.parse_time(cur_time[:-2] + '00', '%Y%m%d %H:%M:%S') + 60 * 1e9
+        return int(pyyjj.parse_time(cur_time[:-2] + '00', '%Y%m%d %H:%M:%S') + 60 * 1e9)
 
     def __nseconds_next_day(self, nano):
         cur_time = pyyjj.parse_nano(nano, '%Y%m%d %H:%M:%S')
         next_day = pyyjj.parse_time(cur_time[0:9] + '15:30:00', '%Y%m%d %H:%M:%S')
         if next_day < pyyjj.nano_time():
             next_day += 24 * 60 * 60 * 1000000000
-        return next_day
+        return int(next_day)
 
     def __process_quote(self, quote):
-        ctype_quote = ctypes.cast(quote,ctypes.POINTER(Quote)).contents
-        if self._util.is_subscribed(ctype_quote.source_id, ctype_quote.instrument_id, ctype_quote.exchange_id):
+        if self._util.is_subscribed(quote.source_id, quote.instrument_id, quote.exchange_id):
             self._util.on_quote(quote)
-            self._on_quote(context, ctype_quote)
+            self._on_quote(context, quote)
 
     def __process_entrust(self, entrust):
         ctype_entrust = ctypes.cast(entrust,ctypes.POINTER(Entrust)).contents

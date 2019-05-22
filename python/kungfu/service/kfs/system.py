@@ -3,10 +3,10 @@ import psutil
 import json
 import nnpy, pyyjj
 
-from kungfu.services.handlers import task
-from kungfu.services.handlers.paged import release_client
+import kungfu.service.kfs as kfs
+from kungfu.service.kfs.paged import release_client
 
-@task
+@kfs.task
 def health_check(ctx):
     stale_pids = []
     for pid in ctx._client_processes:
@@ -18,7 +18,7 @@ def health_check(ctx):
     for pid in stale_pids:
         del ctx._client_processes[pid]
 
-@task
+@kfs.task
 def switch_trading_day(ctx):
     current_day = ctx._calendar.current_day()
     if ctx._current_day < current_day:
