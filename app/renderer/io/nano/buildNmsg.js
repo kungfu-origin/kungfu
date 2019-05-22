@@ -102,6 +102,7 @@ export const reqOrderOperByGatewayNanomsg = (gatewayName) => {
     const ipcDir = path.join(GATEWAY_DIR, gatewayName)
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'rep.ipc');
+    console.log(ipcPath)
     const addr = `ipc://${ipcPath}`
     req.connect(addr)
     return req

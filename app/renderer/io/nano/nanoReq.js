@@ -28,12 +28,13 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
         }})
         const req = reqOrderOperByGatewayNanomsg(gatewayName)
         req.send(reqMsg + '\0')
-        req.close()
-        resolve(true)
+        console.log('cancel order send', reqMsg)
         req.on('data', buf => {
             const data = JSON.parse(String(buf).replace(/\0/g,''))
             if(msgType.cancelOrder === data.msg_type){
                 //todo
+                resolve(true)
+                req.close()
             }
         })
     })
