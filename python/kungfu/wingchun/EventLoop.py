@@ -22,6 +22,8 @@ class EventLoop:
         self._order_cb = None
         self._trade_cb = None
         self._algo_input_cb = None
+        self._manual_order_input_cb = None
+        self._manual_order_action_cb = None
         self._reload_instruments_cb = None
         self._signal_received = -1
         self._signal_callbacks = []
@@ -89,6 +91,12 @@ class EventLoop:
     def register_algo_order_input_callback(self, callback):
         self._algo_input_cb = callback
 
+    def register_manual_order_input_callback(self, callback):
+        self._manual_order_input_cb = callback
+
+    def register_manual_order_action_callback(self, callback):
+        self._manual_order_action_cb = callback
+
     def register_reload_instruments_callback(self, callback):
         self._reload_instruments_cb = callback
 
@@ -126,6 +134,9 @@ class EventLoop:
             try:
                 reply = socket.recv(nnpy.DONTWAIT)
                 j_reply = json.loads(reply.decode('utf-8')[:-1])
+                # compatible with req
+                if j_reply.has_key("req") and not j_reply.has_key("msg_type"):
+                    j_reply["msg_type"] = j_reply["req"]
                 msg_type = j_reply["msg_type"]
                 data = j_reply["data"]
                 self.__handle_nanomsg(msg_type, data)
@@ -183,6 +194,19 @@ class EventLoop:
         elif msg_type == MsgType.ReloadFutureInstrument:
             if self._reload_instruments_cb is not None:
                 self._reload_instruments_cb()
+        elif msg_type == MsgType.ReqOrderAction:
+            if self._manual_order_action_cb is not None:
+                account_id = ''
+                if "account_id" in data:
+                    account_id = data["account_id"]
+                client_id = ''
+                if "client_id" in data:
+                    client_id = data["client_id"]
+                order_ids = []
+                if "order_id" in data:
+                    for item in data["order_id"]:
+                        order_ids.append(int(item))
+                self._manual_order_action_cb(account_id, client_id, order_ids)
         else:
             pass
 

@@ -81,6 +81,8 @@ namespace kungfu
         PortfolioInfo get_portfolio_info() const;
         SubPortfolioInfo get_sub_portfolio_info(const std::string& account_id) const;
 
+        std::vector<uint64_t> get_pending_orders(const std::string& account_id = "") const;
+
         void on_push_by_min();
         void on_push_by_day();
 

@@ -120,6 +120,16 @@ namespace kungfu
         algo_order_action_callback_ = callback;
     }
 
+    void EventLoop::register_manual_order_input_callback(kungfu::OrderInputCallback callback)
+    {
+        manual_order_input_callback_ = callback;
+    }
+
+    void EventLoop::register_manual_order_action_callback(kungfu::ManualOrderActionCallback callback)
+    {
+        manual_order_action_callback_ = callback;
+    }
+
     void EventLoop::register_reload_instruments_callback(kungfu::ReloadInstrumentsCallback callback)
     {
         reload_instruments_callback_ = callback;
@@ -296,7 +306,7 @@ namespace kungfu
                     }
                     default:
                     {
-                        ;
+                        break;
                     }
                 }
             }
@@ -318,6 +328,11 @@ namespace kungfu
                 try
                 {
                     nlohmann::json content = nlohmann::json::parse(std::string(buf));
+                    // 兼容req
+                    if (content.find("req") != content.end() && content.find("msg_type") == content.end())
+                    {
+                        content["msg_type"] = content["req"];
+                    }
                     NNMsg msg = content;
                     switch (msg.msg_type)
                     {
@@ -363,8 +378,38 @@ namespace kungfu
                             {
                                 reload_instruments_callback_();
                             }
+                            break;
                         }
-                        break;
+                        case MsgType::ReqOrderAction:
+                        {
+                            if (manual_order_action_callback_)
+                            {
+                                std::string account_id = "";
+                                if (msg.data.find("account_id") != msg.data.end())
+                                {
+                                    account_id = msg.data["account_id"].get<std::string>();
+                                }
+                                std::string client_id = "";
+                                if (msg.data.find("client_id") != msg.data.end())
+                                {
+                                    client_id = msg.data["client_id"].get<std::string>();
+                                }
+                                std::vector<uint64_t> order_ids;
+                                if (msg.data.find("order_id") != msg.data.end())
+                                {
+                                    const auto& j_orders_ids = msg.data["order_id"];
+                                    if (j_orders_ids.is_array())
+                                    {
+                                        for (auto i = 0; i < j_orders_ids.size(); ++i)
+                                        {
+                                            order_ids.emplace_back(std::stoull(j_orders_ids[i].get<std::string>()));
+                                        }
+                                    }
+                                }
+                                manual_order_action_callback_(account_id, client_id, order_ids);
+                            }
+                            break;
+                        }
                         default:
                         {
                             break;

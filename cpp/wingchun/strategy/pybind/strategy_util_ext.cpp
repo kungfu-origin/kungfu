@@ -94,6 +94,8 @@ PYBIND11_MODULE(pystrategy, m)
     .def("on_push_by_day", &kungfu::StrategyUtil::on_push_by_day)
 
     .def("reload_instruments", &kungfu::StrategyUtil::reload_instruments)
+
+    .def("get_pending_orders", &kungfu::StrategyUtil::get_pending_orders, py::arg("account_id")="")
     ;
 
     m.def("get_last_md", &py_get_last_md, py::arg("strategy"), py::arg("instrument_id"), py::arg("exchange_id"));

@@ -18,6 +18,9 @@ class Strategy:
 
         self._name = name
         self._event_loop = EventLoop(name)
+        self._rep_socket = nnpy.Socket(nnpy.AF_SP, nnpy.REP)
+        self._rep_socket.bind("ipc://" + self._base_dir + "/strategy/" + name + "/rep.ipc")
+        self._event_loop.add_socket(self._rep_socket)
         self._util = pystrategy.Util(name)
 
         self._on_quote = None
@@ -86,6 +89,8 @@ class Strategy:
         self._event_loop.register_transaction_callback(self.__process_transaction)
         self._event_loop.register_order_callback(self.__process_order)
         self._event_loop.register_trade_callback(self.__process_trade)
+
+        self._event_loop.register_manual_order_action_callback(self.__on_manual_order_action)
 
         self._event_loop.register_signal_callback(lambda sig: self._pre_quit(context))
 
@@ -201,3 +206,23 @@ class Strategy:
         if self._name == ctype_trade.client_id:
             self._util.on_trade(trade)
             self._on_trade(context, ctype_trade)
+
+    def __on_manual_order_action(self, account_id, client_id, order_ids):
+        error_id = 0
+        error_text = ''
+        cancel_count = 0
+        if order_ids:
+            cancel_count = len(order_ids)
+            for order_id in order_ids:
+                self._util.cancel_order(order_id)
+        else:
+            pending_orders = self._util.get_pending_orders(account_id)
+            cancel_count = len(pending_orders)
+            for order_id in pending_orders:
+                self._util.cancel_order(order_id)
+        msg = json()
+        msg["msg_type"] = MsgType.RspOrderAction
+        msg["data"]["error_id"] = error_id
+        msg["data"]["error_text"] = error_text
+        js = json.dumps(msg)
+        self._rep_socket.send(js)

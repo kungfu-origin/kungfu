@@ -28,6 +28,10 @@ namespace kungfu
 
             uint64_t get_order_id() const { return order_.order_id; }
 
+            std::string get_account_id() const { return order_.account_id; }
+
+            std::string get_client_id() const { return order_.client_id; }
+
             void execute()
             {
                 auto order_id = get_util()->submit(input_);

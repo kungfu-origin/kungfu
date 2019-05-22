@@ -421,6 +421,24 @@ namespace kungfu
         return portfolio_manager_->get_sub_portfolio(account_id.c_str());
     }
 
+    std::vector<uint64_t> StrategyUtil::get_pending_orders(const string &account_id) const
+    {
+        std::vector<uint64_t> order_ids;
+        auto orders = order_manager_->get_pending_orders();
+        for (const auto& order : orders)
+        {
+            auto simple_order = std::dynamic_pointer_cast<oms::SimpleOrder>(order);
+            if (nullptr != simple_order)
+            {
+                if (account_id.empty() || account_id == simple_order->get_account_id())
+                {
+                    order_ids.emplace_back(simple_order->get_order_id());
+                }
+            }
+        }
+        return order_ids;
+    }
+
     void StrategyUtil::on_push_by_min()
     {
         int64_t nano = yijinjing::getNanoTime();

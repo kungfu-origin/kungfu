@@ -25,6 +25,12 @@
 
 namespace kungfu
 {
+    namespace oms
+    {
+        class OrderManager;
+    }
+
+
     class MarketDataStreamingWriter: public MarketDataFeedHandler
     {
     public:
@@ -153,14 +159,17 @@ namespace kungfu
         std::shared_ptr<kungfu::storage::TradeStorage> get_trade_storage(){return trade_storage_;};
         std::shared_ptr<kungfu::AccountManager> get_account_manager() {return account_manager_; }
 
-        uint64_t next_id();
+        std::vector<uint64_t> get_pending_orders(const std::string& client_id = "") const;
 
+        uint64_t next_id();
 
         bool add_market_feed(const std::string& source_name);
         void subscribe_holdings() const;
 
         void on_order_input(const OrderInput& order_input);
         void on_order_action(const OrderAction& order_action);
+
+        void on_manual_order_action(const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids);
 
         void on_order(Order& order);
         void on_trade(Trade& trade);
@@ -177,13 +186,12 @@ namespace kungfu
         std::shared_ptr<kungfu::storage::OrderStorage> order_storage_;
         std::shared_ptr<kungfu::storage::TradeStorage> trade_storage_;
         std::shared_ptr<kungfu::AccountManager> account_manager_;
+        std::shared_ptr<oms::OrderManager> order_manager_;
 
         std::unique_ptr<UidGenerator> uid_generator_;
 
         std::vector<Position> rsp_pos_;
         std::vector<Position> rsp_pos_detail_;
-
-        std::shared_ptr<nn::socket> acc_rsp_socket_;
     };
 }
 

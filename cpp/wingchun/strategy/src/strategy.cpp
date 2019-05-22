@@ -23,7 +23,20 @@ namespace kungfu
     class Strategy::impl
     {
     public:
-        impl(Strategy* strategy, const std::string& name) : strategy_(strategy), name_(name), event_loop_(new EventLoop(name)), util_(new StrategyUtil(name)) {}
+        impl(Strategy* strategy, const std::string& name) : strategy_(strategy), name_(name), event_loop_(new EventLoop(name)), util_(new StrategyUtil(name))
+        {
+            std::string rep_url = STRATEGY_REP_URL(name_);
+            rsp_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
+            try
+            {
+                rsp_socket_->bind(rep_url.c_str());
+            }
+            catch(std::exception &e)
+            {
+                SPDLOG_ERROR("failed to bind to rep_url {}, exception: {}", rep_url.c_str(), e.what());
+                abort();
+            }
+        }
 
         StrategyUtilPtr get_util() const { return util_; }
 
@@ -75,7 +88,10 @@ namespace kungfu
 
             event_loop_->register_algo_order_status_callback(algo_order_status_callback);
 
+            event_loop_->register_manual_order_action_callback(std::bind(&Strategy::impl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
             event_loop_->register_signal_callback(std::bind(&Strategy::pre_quit, strategy_));
+
 
             strategy_->pre_run();
 
@@ -118,6 +134,37 @@ namespace kungfu
             strategy_->on_algo_order_status(order_id, algo_type, status_msg);
         }
 
+        void on_manual_order_action(const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids)
+        {
+            int error_id = 0;
+            std::string error_text = "";
+            int cancel_count = 0;
+            if (!order_ids.empty())
+            {
+                for (const auto& order_id : order_ids)
+                {
+                    util_->cancel_order(order_id);
+                }
+                cancel_count = order_ids.size();
+            }
+            else
+            {
+                auto pending_orders = util_->get_pending_orders(account_id);
+                for (const auto& order_id : pending_orders)
+                {
+                    util_->cancel_order(order_id);
+                }
+                cancel_count = pending_orders.size();
+            }
+
+            NNMsg msg = {MsgType::RspOrderAction, {}};
+            msg.data["error_id"] = error_id;
+            msg.data["error_text"] = error_text;
+            msg.data["cancel_count"] = cancel_count;
+            std::string js = to_string(msg);
+            rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+        }
+
         void on_1min_timer(int64_t nano)
         {
             util_->on_push_by_min();
@@ -137,6 +184,7 @@ namespace kungfu
         std::string name_;
         EventLoopPtr event_loop_;
         StrategyUtilPtr util_;
+        std::shared_ptr<nn::socket> rsp_socket_;
     };
 
     Strategy::Strategy(const std::string& name) : impl_(new impl(this, name)) {}

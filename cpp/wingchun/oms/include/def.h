@@ -34,6 +34,9 @@ namespace kungfu
         {
         public:
             virtual uint64_t get_order_id() const = 0;
+            virtual std::string get_account_id() const = 0;
+            virtual std::string get_client_id() const = 0;
+
             virtual void execute() = 0;
             virtual void cancel() = 0;
 

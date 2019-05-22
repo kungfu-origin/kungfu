@@ -22,6 +22,7 @@
 #include "storage/log.h"
 #include "storage/snapshot_storage.h"
 #include "calendar/include/calendar.h"
+#include "oms/include/def.h"
 
 namespace kungfu
 {
@@ -46,7 +47,6 @@ namespace kungfu
 
     void GatewayImpl::init()
     {
-
         calendar_ = CalendarPtr(new Calendar());
         kungfu::calendar_util::set_logger(get_logger());
 
@@ -70,7 +70,6 @@ namespace kungfu
             SPDLOG_ERROR("failed to bind to rep_url {}, exception: {}", rep_url.c_str(), e.what());
             abort();
         }
-
         loop_->add_socket(rsp_socket_);
 
         std::string state_db_file = GATEWAY_STATE_DB_FILE(get_name());
@@ -196,23 +195,14 @@ namespace kungfu
     {
         GatewayImpl::init();
 
+        order_manager_ = oms::create_order_manager();
+
         storage::set_logger(get_logger());
         portfolio_util::set_logger(get_logger());
 
         if (!create_folder_if_not_exists(ACCOUNT_FOLDER(this->get_account_id())))
         {
             SPDLOG_ERROR("failed to create account folder {}", ACCOUNT_FOLDER(this->get_account_id()));
-        }
-
-        std::string rep_url = ACCOUNT_REP_URL(get_account_id());
-        acc_rsp_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
-        try
-        {
-            acc_rsp_socket_->bind(rep_url.c_str());
-        }
-        catch(std::exception &e)
-        {
-            SPDLOG_ERROR("failed to bind to acc_rep_url {}, exception: {}", rep_url.c_str(), e.what());
         }
 
         int worker_id = UidWorkerStorage::get_instance(UID_WORKER_DB_FILE)->get_uid_worker_id(get_name());
@@ -243,10 +233,9 @@ namespace kungfu
         loop_->register_order_input_callback(std::bind(&TdGatewayImpl::on_order_input, this, std::placeholders::_1));
         loop_->register_order_action_callback(std::bind(&TdGatewayImpl::on_order_action, this, std::placeholders::_1));
         loop_->register_quote_callback(std::bind(&TdGatewayImpl::on_quote, this, std::placeholders::_1));
+        loop_->register_manual_order_action_callback(std::bind(&TdGatewayImpl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
         calendar_->register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
-
-        loop_->add_socket(acc_rsp_socket_);
     }
 
     void TdGatewayImpl::on_started()
@@ -371,6 +360,24 @@ namespace kungfu
         account_manager_->on_quote(&quote);
     }
 
+    std::vector<uint64_t> TdGatewayImpl::get_pending_orders(const string &client_id) const
+    {
+        std::vector<uint64_t> order_ids;
+        auto orders = order_manager_->get_pending_orders();
+        for (const auto& order : orders)
+        {
+            auto simple_order = std::dynamic_pointer_cast<oms::SimpleOrder>(order);
+            if (nullptr != simple_order)
+            {
+                if (client_id.empty() || client_id == simple_order->get_client_id())
+                {
+                    order_ids.emplace_back(simple_order->get_order_id());
+                }
+            }
+        }
+        return order_ids;
+    }
+
     bool TdGatewayImpl::add_market_feed(const std::string &source_name)
     {
         gateway::add_market_feed(source_name, this->get_name());
@@ -381,21 +388,21 @@ namespace kungfu
     {
         if (order_input.account_id == this->get_account_id())
         {
-            if (order_input.order_id == 0)
-            {
-                auto order_input_ptr = (OrderInput*)(&order_input);
-                auto order_id = next_id();
-                order_input_ptr->order_id = order_id;
-
-                OrderInputRsp rsp = {};
-                rsp.order_id = order_id;
-                NNMsg msg = {};
-                msg.msg_type = MsgType::RspOrderInput;
-                msg.data = rsp;
-                std::string js = to_string(msg);
-                SPDLOG_TRACE("sending {} ", js);
-                acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
-            }
+//            if (order_input.order_id == 0)
+//            {
+//                auto order_input_ptr = (OrderInput*)(&order_input);
+//                auto order_id = next_id();
+//                order_input_ptr->order_id = order_id;
+//
+//                OrderInputRsp rsp = {};
+//                rsp.order_id = order_id;
+//                NNMsg msg = {};
+//                msg.msg_type = MsgType::RspOrderInput;
+//                msg.data = rsp;
+//                std::string js = to_string(msg);
+//                SPDLOG_TRACE("sending {} ", js);
+//                acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+//            }
 
             insert_order(order_input);
         }
@@ -403,24 +410,40 @@ namespace kungfu
 
     void TdGatewayImpl::on_order_action(const OrderAction &order_action)
     {
-        if (order_action.order_action_id == 0)
-        {
-            auto order_action_ptr = (OrderAction*)(&order_action);
-            auto order_action_id = next_id();
-            order_action_ptr->order_action_id = order_action_id;
+        cancel_order(order_action);
+    }
 
-            OrderActionRsp rsp = {};
-            rsp.order_id = order_action.order_id;
-            rsp.order_action_id = order_action_id;
-            NNMsg msg = {};
-            msg.msg_type = MsgType::RspOrderAction;
-            msg.data = rsp;
-            std::string js = to_string(msg);
-            SPDLOG_TRACE("sending {} ", js);
-            acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+    void TdGatewayImpl::on_manual_order_action(const std::string &account_id, const std::string &client_id, const std::vector<uint64_t> &order_ids)
+    {
+        int error_id = 0;
+        std::string error_text = "";
+        int cancel_count = 0;
+        if (!order_ids.empty())
+        {
+            for (const auto& order_id : order_ids)
+            {
+                OrderAction order_action{order_id, 0, OrderActionFlagCancel, 0, 0};
+                cancel_order(order_action);
+            }
+            cancel_count = order_ids.size();
+        }
+        else
+        {
+            auto pending_orders = get_pending_orders(client_id);
+            for (const auto& order_id : pending_orders)
+            {
+                OrderAction order_action{order_id, 0, OrderActionFlagCancel, 0, 0};
+                cancel_order(order_action);
+            }
+            cancel_count = pending_orders.size();
         }
 
-        cancel_order(order_action);
+        NNMsg msg = {MsgType::RspOrderAction, {}};
+        msg.data["error_id"] = error_id;
+        msg.data["error_text"] = error_text;
+        msg.data["cancel_count"] = cancel_count;
+        std::string js = to_string(msg);
+        rsp_socket_->send(js.c_str(), js.length() + 1, 0);
     }
 
     void TdGatewayImpl::on_order(Order &order)
@@ -428,6 +451,7 @@ namespace kungfu
         ORDER_TRACE(kungfu::to_string(order));
         feed_handler_->on_order(&order);
         account_manager_->on_order(&order);
+        order_manager_->on_order(&order);
         get_publisher()->publish_order(order);
         order_storage_->add_order(order.order_id, order);
     }
