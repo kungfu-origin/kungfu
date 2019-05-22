@@ -10,54 +10,48 @@
 
 namespace kungfu
 {
-    class PortfolioStorage;
-    class PortfolioManager final : public IPnLDataHandler
+    class PortfolioManager: public IPnLDataHandler
     {
     public:
-        friend class PortfolioStorage;
-        explicit PortfolioManager(const char* name, const char* db);
-        virtual ~PortfolioManager();
+        virtual void on_order_input(const OrderInput* input) = 0;
+        virtual void on_quote(const Quote* quote) = 0;
+        virtual void on_order(const Order* order) = 0;
+        virtual void on_trade(const Trade* trade) = 0;
 
-        Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
-        Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
-        double get_last_price(const char* instrument_id, const char* exchange_id) const;
-        std::vector<Instrument> get_all_pos_instruments(const char* account_id) const;
+        virtual void on_positions(const std::vector<Position>& positions) = 0;
+        virtual void on_position_details(const std::vector<Position>& details) = 0;
+        virtual void on_account(const AccountInfo& account) = 0;
 
-        SubPortfolioInfo get_sub_portfolio(const char* account_id) const;
-        PortfolioInfo get_portfolio() const;
+        virtual void on_switch_day(const std::string& trading_day) = 0;
 
-        const AccountManagerPtr get_account(const char* account_id) const;
+        virtual int64_t get_last_update() const = 0;
 
-        // IPnLDataHandler
-        void on_quote(const Quote* quote) override;
-        void on_order(const Order* order) override;
-        void on_trade(const Trade* trade) override;
-        void on_positions(const std::vector<Position>& positions) override;
-        void on_position_details(const std::vector<Position>& details) override;
-        void on_account(const AccountInfo& account) override;
-        void insert_order(const OrderInput* input) override;
-        bool freeze_algo_order(uint64_t algo_id, const AssetsFrozen& frozen) override;
-        void release_algo_order(uint64_t algo_id) override;
-        void switch_day(const std::string& trading_day) override;
-        int64_t get_last_update() const override;
-        std::string get_current_trading_day() const override;
-        void set_current_trading_day(const std::string& trading_day) override;
-        void register_pos_callback(PositionCallback cb) override;
-        void register_acc_callback(AccountCallback cb) override;
-        void register_pnl_callback(PnLCallback cb) override;
-        void set_initial_equity(double equity) override;
-        void set_static_equity(double equity) override;
-        // IPnLDataHandler
+        virtual std::string get_current_trading_day() const = 0;
+        virtual void set_current_trading_day(const std::string& trading_day) = 0;
 
-        void dump_to_db() const;
+        virtual void register_pos_callback(PositionCallback cb) = 0;
+        virtual void register_acc_callback(AccountCallback cb) = 0;
+        virtual void register_pnl_callback(PnLCallback cb) = 0;
 
-    private:
-        class impl;
-        impl* impl_;
-        std::string db_file_;
-        PortfolioStorage* storage_;
+        virtual Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const = 0;
+        virtual Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const = 0;
+        virtual double get_last_price(const char* instrument_id, const char* exchange_id) const = 0;
+        virtual std::vector<Instrument> get_all_pos_instruments(const char* account_id) const = 0;
+
+        virtual SubPortfolioInfo get_sub_portfolio(const char* account_id) const = 0;
+        virtual PortfolioInfo get_portfolio() const = 0;
+
+        virtual const AccountManagerPtr get_account(const char* account_id) const = 0;
+
+        virtual void dump_to_db(SQLite::Database& db) = 0;
+        virtual void dump_to_db(const char* db_file) = 0;
+
+        virtual void load_from_db(const char* db_file) = 0;
+        virtual void load_from_db(SQLite::Database& db) = 0;
     };
+
     typedef std::shared_ptr<PortfolioManager> PortfolioManagerPtr;
+    PortfolioManagerPtr create_portfolio_manager(const char* name, const char *db = nullptr);
 }
 
 #endif //KUNGFU_PORTFOLIO_MANAGER_H

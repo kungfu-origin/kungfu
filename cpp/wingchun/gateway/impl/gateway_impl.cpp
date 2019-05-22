@@ -188,7 +188,7 @@ namespace kungfu
 
     TdGatewayImpl::~TdGatewayImpl()
     {
-        account_manager_->dump_to_db(nullptr, true);
+        account_manager_->dump_to_db(ACCOUNT_ASSET_DB_FILE(this->get_account_id()).c_str(), true);
     }
 
     void TdGatewayImpl::init()
@@ -240,6 +240,7 @@ namespace kungfu
 
     void TdGatewayImpl::on_started()
     {
+        account_manager_->dump_to_db(ACCOUNT_ASSET_DB_FILE(this->get_account_id()).c_str(), true);
         add_market_feed(this->get_source());
         subscribe_holdings();
     }
@@ -249,7 +250,7 @@ namespace kungfu
         AccountType account_type = get_account_type();
         std::string asset_db_file = ACCOUNT_ASSET_DB_FILE(this->get_account_id());
 
-        account_manager_ = std::shared_ptr<AccountManager>(new AccountManager(this->get_account_id().c_str(), account_type, asset_db_file.c_str()));
+        account_manager_ = create_account_manager(this->get_account_id().c_str(), account_type, asset_db_file.c_str());
 
         int64_t last_update = account_manager_->get_last_update();
         if (last_update > 0)
@@ -314,7 +315,7 @@ namespace kungfu
         }
 
         account_manager_->set_current_trading_day(get_calendar()->get_current_trading_day());
-        account_manager_->dump_to_db(nullptr, true);
+        account_manager_->dump_to_db(asset_db_file.c_str(), true);
         SPDLOG_INFO("account_manager inited and set to {}", account_manager_->get_current_trading_day());
 
         account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
@@ -466,7 +467,7 @@ namespace kungfu
 
         feed_handler_->on_trade(&trade);
         account_manager_->on_trade(&trade);
-        account_manager_->dump_to_db(nullptr, true);
+        account_manager_->dump_to_db(ACCOUNT_ASSET_DB_FILE(this->get_account_id()).c_str(), true);
 
         auto trade_id = trade_storage_->add_trade(trade);
         trade.id = trade_id;
@@ -483,7 +484,6 @@ namespace kungfu
         if (is_last)
         {
             account_manager_->on_positions(rsp_pos_);
-            account_manager_->dump_to_db(nullptr, true);
             rsp_pos_.clear();
         }
     }
@@ -496,7 +496,6 @@ namespace kungfu
         if (is_last)
         {
             account_manager_->on_position_details(rsp_pos_detail_);
-            account_manager_->dump_to_db(nullptr, true);
             rsp_pos_detail_.clear();
         }
     }
@@ -507,7 +506,6 @@ namespace kungfu
         ACCOUNT_TRACE( kungfu::to_string(account));
         feed_handler_->on_account(&account);
         account_manager_->on_account(account);
-        account_manager_->dump_to_db(nullptr, true);
     }
 
     void TdGatewayImpl::on_1min_timer(int64_t nano)
@@ -537,8 +535,8 @@ namespace kungfu
     {
         if (nullptr != account_manager_)
         {
-            account_manager_->switch_day(trading_day);
-            account_manager_->dump_to_db(nullptr, true);
+            account_manager_->on_switch_day(trading_day);
+            account_manager_->dump_to_db(ACCOUNT_ASSET_DB_FILE(this->get_account_id()).c_str(), true);
         }
     }
 }

@@ -99,7 +99,7 @@ namespace kungfu
         std::string name_;
         CalendarPtr calendar_;
         std::shared_ptr<NNPublisher> publisher_;
-        std::unique_ptr<PortfolioManager> portfolio_manager_;
+        std::shared_ptr<PortfolioManager> portfolio_manager_;
         std::shared_ptr<oms::OrderManager> order_manager_;
         yijinjing::JournalWriterPtr writer_;
         std::unique_ptr<UidGenerator> uid_generator_;

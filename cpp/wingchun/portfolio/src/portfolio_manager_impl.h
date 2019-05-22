@@ -1,26 +1,18 @@
 //
-// Created by PolarAir on 2019-04-18.
+// Created by qlu on 2019/5/21.
 //
 
-#ifndef KUNGFU_PORTFOLIO_MANAGER_HPP
-#define KUNGFU_PORTFOLIO_MANAGER_HPP
+#ifndef PROJECT_PORTFOLIO_MANAGER_IMPL_H
+#define PROJECT_PORTFOLIO_MANAGER_IMPL_H
 
-#include "../include/portfolio_manager.h"
-#include "../include/account_manager.h"
-#include "util/include/business_helper.h"
-#include "serialize.h"
-#include <spdlog/spdlog.h>
-#include <map>
-#include <boost/core/ignore_unused.hpp>
+#include "portfolio/include/portfolio_manager.h"
 
 namespace kungfu
 {
-    class PortfolioManager::impl final : public IPnLDataHandler
+    class PortfolioManagerImpl: public PortfolioManager
     {
     public:
-        friend class PortfolioStorage;
-        impl(const char* name, const char* db);
-        virtual ~impl();
+        PortfolioManagerImpl(const char* name);
 
         Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
         Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const;
@@ -32,26 +24,28 @@ namespace kungfu
 
         const AccountManagerPtr get_account(const char* account_id) const;
 
-        // IPnLDataHandler
         void on_quote(const Quote* quote) override;
         void on_order(const Order* order) override;
         void on_trade(const Trade* trade) override;
         void on_positions(const std::vector<Position>& positions) override;
         void on_position_details(const std::vector<Position>& details) override;
         void on_account(const AccountInfo& account) override;
-        void insert_order(const OrderInput* input) override;
-        bool freeze_algo_order(uint64_t algo_id, const AssetsFrozen& frozen) override;
-        void release_algo_order(uint64_t algo_id) override;
-        void switch_day(const std::string& trading_day) override;
+        void on_order_input(const OrderInput* input) override;
+        void on_switch_day(const std::string& trading_day) override;
+
         int64_t get_last_update() const override;
         std::string get_current_trading_day() const override;
         void set_current_trading_day(const std::string& trading_day) override;
+
         void register_pos_callback(PositionCallback cb) override;
         void register_acc_callback(AccountCallback cb) override;
         void register_pnl_callback(PnLCallback cb) override;
-        void set_initial_equity(double equity) override;
-        void set_static_equity(double equity) override;
-        // IPnLDataHandler
+
+        virtual void dump_to_db(SQLite::Database& db);
+        virtual void dump_to_db(const char* db_file);
+
+        virtual void load_from_db(const char* db_file);
+        virtual void load_from_db(SQLite::Database& db);
 
     private:
         bool recalc_pnl();
@@ -61,7 +55,6 @@ namespace kungfu
 
     private:
         std::string                                     name_;
-        std::string                                     db_;
         int64_t                                         last_update_;
         std::string                                     trading_day_;
         std::map<std::string, AccountManagerPtr>        accounts_;
@@ -71,5 +64,4 @@ namespace kungfu
         std::vector<PositionCallback>                   pos_cbs_;
     };
 }
-
-#endif //KUNGFU_PORTFOLIO_MANAGER_HPP
+#endif //PROJECT_PORTFOLIO_MANAGER_IMPL_H

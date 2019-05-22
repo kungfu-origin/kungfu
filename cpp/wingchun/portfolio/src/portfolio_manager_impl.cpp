@@ -1,30 +1,20 @@
 //
-// Created by PolarAir on 2019-05-15.
+// Created by qlu on 2019/5/21.
 //
 
-#ifndef KUNGFU_PORTFOLIO_MANAGER_HXX
-#define KUNGFU_PORTFOLIO_MANAGER_HXX
-
-#include "portfolio_manager.hpp"
+#include "portfolio_manager_impl.h"
+#include "util/include/business_helper.h"
+#include "serialize.h"
+#include <spdlog/spdlog.h>
+#include <map>
+#include <boost/core/ignore_unused.hpp>
+#include "storage.h"
 
 namespace kungfu
 {
-    // impl
-    PortfolioManager::impl::impl(const char *name, const char *db) : name_(name), db_(db), last_update_(0), pnl_{}
-    {
-        for (auto& iter : accounts_)
-        {
-            iter.second->register_pos_callback(std::bind(&PortfolioManager::impl::on_pos_callback, this, std::placeholders::_1));
-            iter.second->register_acc_callback(std::bind(&PortfolioManager::impl::on_acc_callback, this, std::placeholders::_1));
-        }
-    }
+    PortfolioManagerImpl::PortfolioManagerImpl(const char* name): name_(name), last_update_(0), trading_day_(""), pnl_({}) {}
 
-    PortfolioManager::impl::~impl()
-    {
-
-    }
-
-    Position PortfolioManager::impl::get_long_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
+    Position PortfolioManagerImpl::get_long_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
     {
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
@@ -66,7 +56,7 @@ namespace kungfu
         return pos;
     }
 
-    Position PortfolioManager::impl::get_short_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
+    Position PortfolioManagerImpl::get_short_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
     {
         Position pos = {};
         strcpy(pos.instrument_id, instrument_id);
@@ -102,7 +92,7 @@ namespace kungfu
         return pos;
     }
 
-    double PortfolioManager::impl::get_last_price(const char *instrument_id, const char *exchange_id) const
+    double PortfolioManagerImpl::get_last_price(const char *instrument_id, const char *exchange_id) const
     {
         for (const auto& iter : accounts_)
         {
@@ -115,11 +105,10 @@ namespace kungfu
                 }
             }
         }
-
         return 0;
     }
 
-    std::vector<Instrument> PortfolioManager::impl::get_all_pos_instruments(const char *account_id) const
+    std::vector<Instrument> PortfolioManagerImpl::get_all_pos_instruments(const char *account_id) const
     {
         std::map<std::string, Instrument> m;
         for (const auto& iter : accounts_)
@@ -148,7 +137,7 @@ namespace kungfu
         return ret;
     }
 
-    SubPortfolioInfo PortfolioManager::impl::get_sub_portfolio(const char *account_id) const
+    SubPortfolioInfo PortfolioManagerImpl::get_sub_portfolio(const char *account_id) const
     {
         if (accounts_.find(account_id) != accounts_.end())
         {
@@ -162,18 +151,18 @@ namespace kungfu
         }
     }
 
-    PortfolioInfo PortfolioManager::impl::get_portfolio() const
+    PortfolioInfo PortfolioManagerImpl::get_portfolio() const
     {
         return pnl_;
     }
 
-    const AccountManagerPtr PortfolioManager::impl::get_account(const char *account_id) const
+    const AccountManagerPtr PortfolioManagerImpl::get_account(const char *account_id) const
     {
         if (accounts_.find(account_id) != accounts_.end())
         {
             return accounts_.at(account_id);
         }
-        return AccountManagerPtr();
+        return nullptr;
     }
 
 #define IMPLEMENT_DATA_BODY(func_name, ...) \
@@ -189,19 +178,19 @@ namespace kungfu
         callback(); \
     }
 
-    void PortfolioManager::impl::on_quote(const kungfu::Quote *quote)
+    void PortfolioManagerImpl::on_quote(const kungfu::Quote *quote)
     {
         last_update_ = quote->rcv_time;
         IMPLEMENT_DATA_BODY(on_quote, quote)
     }
 
-    void PortfolioManager::impl::on_order(const kungfu::Order *order)
+    void PortfolioManagerImpl::on_order(const kungfu::Order *order)
     {
         last_update_ = order->rcv_time;
         IMPLEMENT_DATA_BODY(on_order, order)
     }
 
-    void PortfolioManager::impl::on_trade(const kungfu::Trade *trade)
+    void PortfolioManagerImpl::on_trade(const kungfu::Trade *trade)
     {
         SPDLOG_TRACE("trade: {}", to_string(*trade));
         SPDLOG_TRACE("pnl before: {}", to_string(pnl_));
@@ -210,7 +199,7 @@ namespace kungfu
         SPDLOG_TRACE("pnl after: {}", to_string(pnl_));
     }
 
-    void PortfolioManager::impl::on_positions(const std::vector<kungfu::Position> &positions)
+    void PortfolioManagerImpl::on_positions(const std::vector<kungfu::Position> &positions)
     {
         if (positions.size() > 0)
         {
@@ -219,7 +208,7 @@ namespace kungfu
         IMPLEMENT_DATA_BODY(on_positions, positions)
     }
 
-    void PortfolioManager::impl::on_position_details(const std::vector<kungfu::Position> &details)
+    void PortfolioManagerImpl::on_position_details(const std::vector<kungfu::Position> &details)
     {
         if (details.size() > 0)
         {
@@ -228,39 +217,28 @@ namespace kungfu
         IMPLEMENT_DATA_BODY(on_position_details, details)
     }
 
-    void PortfolioManager::impl::on_account(const kungfu::AccountInfo &account)
+    void PortfolioManagerImpl::on_account(const kungfu::AccountInfo &account)
     {
         last_update_ = std::max<int64_t>(last_update_, account.rcv_time);
         if (accounts_.find(account.account_id) == accounts_.end())
         {
-            SPDLOG_WARN("strategy pnl create new account {}", account.account_id);
-            auto account_manager = std::make_shared<AccountManager>(account.account_id, account.type, db_.c_str());
+            SPDLOG_INFO("portfolio {} add account{}", name_, account.account_id);
+            auto account_manager = create_account_manager(account.account_id, account.type);
             account_manager->set_current_trading_day(trading_day_);
             accounts_[account.account_id] = account_manager;
-            account_manager->register_pos_callback(std::bind(&PortfolioManager::impl::on_pos_callback, this, std::placeholders::_1));
-            account_manager->register_acc_callback(std::bind(&PortfolioManager::impl::on_acc_callback, this, std::placeholders::_1));
+            account_manager->register_pos_callback(std::bind(&PortfolioManagerImpl::on_pos_callback, this, std::placeholders::_1));
+            account_manager->register_acc_callback(std::bind(&PortfolioManagerImpl::on_acc_callback, this, std::placeholders::_1));
         }
         accounts_[account.account_id]->on_account(account);
-        SPDLOG_WARN("pnl after on_account: {}", to_string(pnl_));
+        SPDLOG_TRACE("pnl after on_account: {}", to_string(pnl_));
     }
 
-    void PortfolioManager::impl::insert_order(const kungfu::OrderInput *input)
+    void PortfolioManagerImpl::on_order_input(const kungfu::OrderInput *input)
     {
-        IMPLEMENT_DATA_BODY(insert_order, input)
+        IMPLEMENT_DATA_BODY(on_order_input, input);
     }
 
-    bool PortfolioManager::impl::freeze_algo_order(uint64_t algo_id, const kungfu::AssetsFrozen &frozen)
-    {
-        IMPLEMENT_DATA_BODY(freeze_algo_order, algo_id, frozen)
-        return true;
-    }
-
-    void PortfolioManager::impl::release_algo_order(uint64_t algo_id)
-    {
-        IMPLEMENT_DATA_BODY(release_algo_order, algo_id)
-    }
-
-    void PortfolioManager::impl::switch_day(const std::string & trading_day)
+    void PortfolioManagerImpl::on_switch_day(const std::string & trading_day)
     {
         if (trading_day <= trading_day_)
         {
@@ -273,7 +251,7 @@ namespace kungfu
         {
             if (nullptr != iter.second)
             {
-                iter.second->switch_day(trading_day);
+                iter.second->on_switch_day(trading_day);
             }
         }
 
@@ -281,19 +259,18 @@ namespace kungfu
         callback();
     }
 
-    int64_t PortfolioManager::impl::get_last_update() const
+    int64_t PortfolioManagerImpl::get_last_update() const
     {
         return last_update_;
     }
 
-    std::string PortfolioManager::impl::get_current_trading_day() const
+    std::string PortfolioManagerImpl::get_current_trading_day() const
     {
         return trading_day_;
     }
 
-    void PortfolioManager::impl::set_current_trading_day(const std::string &trading_day)
+    void PortfolioManagerImpl::set_current_trading_day(const std::string &trading_day)
     {
-        SPDLOG_INFO("current trading day : {}, trading day to set :{}", trading_day_, trading_day);
         for (const auto& iter : accounts_)
         {
             if (nullptr != iter.second)
@@ -306,7 +283,7 @@ namespace kungfu
         {
             if (!trading_day_.empty())
             {
-                switch_day(trading_day);
+                on_switch_day(trading_day);
             }
             else
             {
@@ -316,32 +293,22 @@ namespace kungfu
         }
     }
 
-    void PortfolioManager::impl::register_pos_callback(kungfu::PositionCallback cb)
+    void PortfolioManagerImpl::register_pos_callback(kungfu::PositionCallback cb)
     {
         pos_cbs_.emplace_back(std::move(cb));
     }
 
-    void PortfolioManager::impl::register_acc_callback(kungfu::AccountCallback cb)
+    void PortfolioManagerImpl::register_acc_callback(kungfu::AccountCallback cb)
     {
         acc_cbs_.emplace_back(std::move(cb));
     }
 
-    void PortfolioManager::impl::register_pnl_callback(kungfu::PnLCallback cb)
+    void PortfolioManagerImpl::register_pnl_callback(kungfu::PnLCallback cb)
     {
         cbs_.emplace_back(std::move(cb));
     }
 
-    void PortfolioManager::impl::set_initial_equity(double equity)
-    {
-        boost::ignore_unused(equity);
-    }
-
-    void PortfolioManager::impl::set_static_equity(double equity)
-    {
-        boost::ignore_unused(equity);
-    }
-
-    bool PortfolioManager::impl::recalc_pnl()
+    bool PortfolioManagerImpl::recalc_pnl()
     {
         double old_dynamic = pnl_.dynamic_equity;
 
@@ -364,7 +331,7 @@ namespace kungfu
         return !is_equal(old_dynamic, pnl_.dynamic_equity);
     }
 
-    void PortfolioManager::impl::callback() const
+    void PortfolioManagerImpl::callback() const
     {
         for (const auto& cb : cbs_)
         {
@@ -372,7 +339,7 @@ namespace kungfu
         }
     }
 
-    void PortfolioManager::impl::on_pos_callback(const kungfu::Position &pos) const
+    void PortfolioManagerImpl::on_pos_callback(const kungfu::Position &pos) const
     {
         auto total_pos = pos.direction == DirectionLong ?
                          get_long_pos(nullptr, pos.instrument_id, pos.exchange_id) :
@@ -384,13 +351,99 @@ namespace kungfu
         }
     }
 
-    void PortfolioManager::impl::on_acc_callback(const kungfu::AccountInfo &acc) const
+    void PortfolioManagerImpl::on_acc_callback(const kungfu::AccountInfo &acc) const
     {
         for (auto& cb : acc_cbs_)
         {
             cb(acc);
         }
     }
-}
 
-#endif //KUNGFU_PORTFOLIO_MANAGER_HXX
+    void PortfolioManagerImpl::load_from_db(SQLite::Database& db)
+    {
+        if (!db.tableExists("meta"))
+        {
+            return;
+        }
+        portfolio_util::load_meta_inner(db, last_update_, trading_day_);
+        pnl_ = {};
+        SQLite::Statement query_pnl(db, "SELECT * FROM portfolio");
+        if (query_pnl.executeStep())
+        {
+            strcpy(pnl_.trading_day, query_pnl.getColumn(0));
+            pnl_.update_time = query_pnl.getColumn(1);
+            pnl_.initial_equity = query_pnl.getColumn(2);
+            pnl_.static_equity = query_pnl.getColumn(3);
+            pnl_.dynamic_equity = query_pnl.getColumn(4);
+            pnl_.accumulated_pnl = query_pnl.getColumn(5);
+            pnl_.accumulated_pnl_ratio = query_pnl.getColumn(6);
+            pnl_.intraday_pnl = query_pnl.getColumn(7);
+            pnl_.intraday_pnl_ratio = query_pnl.getColumn(8);
+        }
+
+        accounts_.clear();
+        SQLite::Statement query_account(db, "SELECT account_id, type FROM account");
+        while (query_account.executeStep())
+        {
+            std::string account_id = query_account.getColumn(0).getString();
+            AccountType type = query_account.getColumn(1).getString()[0];
+            auto acc_manager = create_account_manager(account_id.c_str(), type, db.getFilename().c_str());
+            accounts_[account_id] = acc_manager;
+            acc_manager->register_pos_callback(std::bind(&PortfolioManagerImpl::on_pos_callback, this, std::placeholders::_1));
+            acc_manager->register_acc_callback(std::bind(&PortfolioManagerImpl::on_acc_callback, this, std::placeholders::_1));
+        }
+    }
+
+    void PortfolioManagerImpl::load_from_db(const char* db_file)
+    {
+        portfolio_util::init_db(db_file);
+
+        SQLite::Database db(db_file, SQLite::OPEN_READONLY);
+        load_from_db(db);
+    }
+
+    void PortfolioManagerImpl::dump_to_db(SQLite::Database& db)
+    {
+        SQLite::Transaction transaction(db);
+        db.exec("DELETE FROM portfolio");
+        SQLite::Statement insert_portfolio(db, "INSERT INTO portfolio(trading_day, update_time, initial_equity, static_equity, dynamic_equity,"
+                "accumulated_pnl, accumulated_pnl_ratio, intraday_pnl, intraday_pnl_ratio"
+                ") VALUES(?,?,?,?,?,?,?,?,?)");
+        insert_portfolio.bind(1, pnl_.trading_day);
+        insert_portfolio.bind(2, pnl_.update_time);
+        insert_portfolio.bind(3, pnl_.initial_equity);
+        insert_portfolio.bind(4, pnl_.static_equity);
+        insert_portfolio.bind(5, pnl_.dynamic_equity);
+        insert_portfolio.bind(6, pnl_.accumulated_pnl);
+        insert_portfolio.bind(7, pnl_.accumulated_pnl_ratio);
+        insert_portfolio.bind(8, pnl_.intraday_pnl);
+        insert_portfolio.bind(9, pnl_.intraday_pnl_ratio);
+        insert_portfolio.exec();
+
+        for (const auto& acc_iter : accounts_)
+        {
+            if (nullptr != acc_iter.second)
+            {
+                acc_iter.second->dump_to_db(db, false);
+            }
+        }
+        portfolio_util::save_meta_inner(db, last_update_, trading_day_);
+        transaction.commit();
+    }
+
+    void PortfolioManagerImpl::dump_to_db(const char* db_file)
+    {
+        SQLite::Database db(db_file, SQLite::OPEN_READWRITE);
+        dump_to_db(db);
+    }
+
+    PortfolioManagerPtr create_portfolio_manager(const char* name, const char *db)
+    {
+        auto portfolio_manager = PortfolioManagerPtr(new PortfolioManagerImpl(name));
+        if (db != nullptr)
+        {
+            portfolio_manager->load_from_db(db);
+        }
+        return portfolio_manager;
+    }
+}
