@@ -41,7 +41,7 @@
                                 {{item[column.prop]}}
                             </template>
                             <template v-else-if="column.type === 'operation'">
-                                <slot name="oper" v-bind:props="item"></slot>
+                                <slot name="oper" :oper="item"></slot>
                             </template>
                         </li>
                     </ul>
@@ -79,7 +79,7 @@
                                     {{item[column.prop]}}
                                 </template>
                                 <template v-else-if="column.type === 'operation'">
-                                    <span v-for="c in column.operations" :key="c.event" v-html="c.html">{{c.html}}</span>
+                                    <slot name="oper" v-bind:props="item"></slot>
                                 </template>
                             </li>
                         </ul>

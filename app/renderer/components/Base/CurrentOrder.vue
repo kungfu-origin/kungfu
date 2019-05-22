@@ -20,8 +20,11 @@
     :schema="schema"
     :renderCellClass="renderCellClass"
     >
-        <template slot="oper" slot-scope="{ props }">
-            <i class="el-icon-close mouse-over" title="撤单" @click="handleCancelOrder(props)"/>
+        <template v-slot:oper="{ oper }">
+            <i 
+            class="el-icon-close mouse-over" 
+            title="撤单" 
+            @click="handleCancelOrder(oper)"/>
         </template>
     </tr-table>
     <date-range-dialog 
@@ -210,6 +213,7 @@ export default {
         },
 
         handleCancelOrder(props){
+            console.log(props, '=======')
             const t = this;
             //防止柜台不相同，但accountId相同
             const accountIds = t.getSourceNameByAccountId(props.accountId)
