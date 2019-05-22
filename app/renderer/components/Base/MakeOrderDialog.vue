@@ -233,11 +233,14 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     const makeOrderForm = t.$utils.deepClone(t.makeOrderForm)
-                    const gatewayName = `td_${makeOrderForm.account_id}`
+                    const sourceAccountId = makeOrderForm.account_id;
+                    const gatewayName = `td_${sourceAccountId}`
                     makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
-                    if(!processStatus && processStatus[gatewayName] !== 'online'){
-
+                    if((t.processStatus || {})[gatewayName] !== 'online'){
+                        t.$message.warning(`需要先启动 ${sourceAccountId} 交易进程！`)
+                        return;
                     }
+                    t.$message.info('正在发送订单指令...')
                     nanoMakeOrder(gatewayName, makeOrderForm).then(() => t.$message.sucess('下单指令已发送！'))
                 }
             })
