@@ -11,6 +11,8 @@
 #include <string>
 #include <spdlog/spdlog.h>
 
+using namespace kungfu::journal;
+
 namespace kungfu
 {
     FutureInstrumentStorage::FutureInstrumentStorage(const std::string& file_name) : db_(file_name.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE)

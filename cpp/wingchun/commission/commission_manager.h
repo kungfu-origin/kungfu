@@ -8,6 +8,8 @@
 #include "oms_struct.h"
 #include <memory>
 
+namespace kfj = kungfu::journal;
+
 namespace kungfu
 {
     class CommissionManager
@@ -16,12 +18,12 @@ namespace kungfu
         explicit CommissionManager(const char* account_id);
         ~CommissionManager();
 
-        const InstrumentCommissionRate* get_commission_rate(const char* instrument_id, const char* exchange_id) const;
+        const kfj::InstrumentCommissionRate* get_commission_rate(const char* instrument_id, const char* exchange_id) const;
 
-        double calc_commission(const OrderInput* input) const;
+        double calc_commission(const kfj::OrderInput* input) const;
 
-        void update_commission(const InstrumentCommissionRate& commission);
-        void update_commissions(const std::vector<InstrumentCommissionRate>& commissions);
+        void update_commission(const kfj::InstrumentCommissionRate& commission);
+        void update_commissions(const std::vector<kfj::InstrumentCommissionRate>& commissions);
 
     private:
         class impl;

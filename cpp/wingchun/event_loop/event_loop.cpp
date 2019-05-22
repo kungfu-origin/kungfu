@@ -13,6 +13,9 @@
 #include "util/include/nanomsg_util.h"
 #include "oms/include/def.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     volatile sig_atomic_t EventLoop::signal_received_ = -1;

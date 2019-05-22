@@ -10,6 +10,10 @@
 
 #include <unordered_map>
 #include <iostream>
+
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     namespace oms

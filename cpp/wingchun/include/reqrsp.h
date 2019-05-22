@@ -20,7 +20,7 @@ namespace kungfu
         std::string sender;
         std::string recipient;
         bool is_level2;
-        std::vector<Instrument> instruments;
+        std::vector<journal::Instrument> instruments;
     };
 
     struct SubscribeRsp

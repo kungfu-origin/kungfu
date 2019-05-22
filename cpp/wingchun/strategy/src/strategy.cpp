@@ -18,6 +18,9 @@
 
 #include "Log.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     class Strategy::impl
@@ -292,7 +295,7 @@ namespace kungfu
         return 0;
     }
 
-    bool Strategy::try_frozen(uint64_t op_id, const std::string &account_id, const kungfu::AssetsFrozen &frozen)
+    bool Strategy::try_frozen(uint64_t op_id, const std::string &account_id, const AssetsFrozen &frozen)
     {
         //TODO
         return false;

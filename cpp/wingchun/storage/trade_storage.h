@@ -10,6 +10,8 @@
 
 #include "oms_struct.h"
 
+using namespace kungfu::journal;
+
 namespace kungfu
 {
     namespace storage

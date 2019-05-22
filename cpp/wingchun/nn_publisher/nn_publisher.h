@@ -19,12 +19,12 @@ namespace kungfu
     public:
         NNPublisher(const std::string& url);
         void set_logger(std::shared_ptr<spdlog::logger> logger) const;
-        void publish_order(const kungfu::Order& order) const;
-        void publish_trade(const kungfu::Trade& trade) const ;
-        void publish_pos(const kungfu::Position& pos) const ;
-        void publish_portfolio_info(const kungfu::PortfolioInfo& portfolio, kungfu::MsgType msg_type = kungfu::MsgType::Portfolio) const ;
-        void publish_account_info(const kungfu::AccountInfo& account_info, kungfu::MsgType msg_type = kungfu::MsgType::AccountInfo) const ;
-        void publish_sub_portfolio_info(const kungfu::SubPortfolioInfo& info) const;
+        void publish_order(const kungfu::journal::Order& order) const;
+        void publish_trade(const kungfu::journal::Trade& trade) const ;
+        void publish_pos(const kungfu::flying::Position& pos) const ;
+        void publish_portfolio_info(const kungfu::flying::PortfolioInfo& portfolio, kungfu::MsgType msg_type = kungfu::MsgType::Portfolio) const ;
+        void publish_account_info(const kungfu::flying::AccountInfo& account_info, kungfu::MsgType msg_type = kungfu::MsgType::AccountInfo) const ;
+        void publish_sub_portfolio_info(const kungfu::flying::SubPortfolioInfo& info) const;
         void publish(kungfu::MsgType msg_type, nlohmann::json& data) const ;
 
     private:

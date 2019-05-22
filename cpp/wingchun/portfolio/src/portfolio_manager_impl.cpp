@@ -178,28 +178,28 @@ namespace kungfu
         callback(); \
     }
 
-    void PortfolioManagerImpl::on_quote(const kungfu::Quote *quote)
+    void PortfolioManagerImpl::on_quote(const kungfu::journal::Quote *quote)
     {
         last_update_ = quote->rcv_time;
         IMPLEMENT_DATA_BODY(on_quote, quote)
     }
 
-    void PortfolioManagerImpl::on_order(const kungfu::Order *order)
+    void PortfolioManagerImpl::on_order(const kungfu::journal::Order *order)
     {
         last_update_ = order->rcv_time;
         IMPLEMENT_DATA_BODY(on_order, order)
     }
 
-    void PortfolioManagerImpl::on_trade(const kungfu::Trade *trade)
+    void PortfolioManagerImpl::on_trade(const kungfu::journal::Trade *trade)
     {
-        SPDLOG_TRACE("trade: {}", to_string(*trade));
-        SPDLOG_TRACE("pnl before: {}", to_string(pnl_));
+        SPDLOG_TRACE("trade: {}", journal::to_string(*trade));
+        SPDLOG_TRACE("pnl before: {}", flying::to_string(pnl_));
         last_update_ = trade->rcv_time;
         IMPLEMENT_DATA_BODY(on_trade, trade)
-        SPDLOG_TRACE("pnl after: {}", to_string(pnl_));
+        SPDLOG_TRACE("pnl after: {}", flying::to_string(pnl_));
     }
 
-    void PortfolioManagerImpl::on_positions(const std::vector<kungfu::Position> &positions)
+    void PortfolioManagerImpl::on_positions(const std::vector<kungfu::flying::Position> &positions)
     {
         if (positions.size() > 0)
         {
@@ -208,7 +208,7 @@ namespace kungfu
         IMPLEMENT_DATA_BODY(on_positions, positions)
     }
 
-    void PortfolioManagerImpl::on_position_details(const std::vector<kungfu::Position> &details)
+    void PortfolioManagerImpl::on_position_details(const std::vector<kungfu::flying::Position> &details)
     {
         if (details.size() > 0)
         {
@@ -217,7 +217,7 @@ namespace kungfu
         IMPLEMENT_DATA_BODY(on_position_details, details)
     }
 
-    void PortfolioManagerImpl::on_account(const kungfu::AccountInfo &account)
+    void PortfolioManagerImpl::on_account(const kungfu::flying::AccountInfo &account)
     {
         last_update_ = std::max<int64_t>(last_update_, account.rcv_time);
         if (accounts_.find(account.account_id) == accounts_.end())
@@ -230,10 +230,10 @@ namespace kungfu
             account_manager->register_acc_callback(std::bind(&PortfolioManagerImpl::on_acc_callback, this, std::placeholders::_1));
         }
         accounts_[account.account_id]->on_account(account);
-        SPDLOG_TRACE("pnl after on_account: {}", to_string(pnl_));
+        SPDLOG_TRACE("pnl after on_account: {}", flying::to_string(pnl_));
     }
 
-    void PortfolioManagerImpl::on_order_input(const kungfu::OrderInput *input)
+    void PortfolioManagerImpl::on_order_input(const kungfu::journal::OrderInput *input)
     {
         IMPLEMENT_DATA_BODY(on_order_input, input);
     }
@@ -339,7 +339,7 @@ namespace kungfu
         }
     }
 
-    void PortfolioManagerImpl::on_pos_callback(const kungfu::Position &pos) const
+    void PortfolioManagerImpl::on_pos_callback(const kungfu::flying::Position &pos) const
     {
         auto total_pos = pos.direction == DirectionLong ?
                          get_long_pos(nullptr, pos.instrument_id, pos.exchange_id) :
@@ -351,7 +351,7 @@ namespace kungfu
         }
     }
 
-    void PortfolioManagerImpl::on_acc_callback(const kungfu::AccountInfo &acc) const
+    void PortfolioManagerImpl::on_acc_callback(const kungfu::flying::AccountInfo &acc) const
     {
         for (auto& cb : acc_cbs_)
         {

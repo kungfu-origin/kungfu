@@ -17,7 +17,7 @@ namespace kungfu
     AccountManagerImpl::AccountManagerImpl(const char *account_id, AccountType type): last_update_(0), trading_day_(""), commission_(account_id)
     {
         strcpy(account_.account_id, account_id);
-        account_.type = type;
+        account_.account_type = type;
         pos_manager_ = create_position_manager(account_id);
         pos_manager_->register_pos_callback(std::bind(&AccountManagerImpl::on_pos_callback, this, std::placeholders::_1));
     }
@@ -140,8 +140,8 @@ namespace kungfu
 
     void AccountManagerImpl::on_trade(const Trade *trade)
     {
-        SPDLOG_TRACE("trade: {}", to_string(*trade));
-        SPDLOG_TRACE("acc before: {}", to_string(account_));
+        SPDLOG_TRACE("trade: {}", journal::to_string(*trade));
+        SPDLOG_TRACE("acc before: {}", flying::to_string(account_));
 
         if (strcmp(trade->account_id, account_.account_id) != 0)
         {
@@ -191,7 +191,7 @@ namespace kungfu
         recalc_acc();
         callback();
 
-        SPDLOG_TRACE("acc after: {}", to_string(account_));
+        SPDLOG_TRACE("acc after: {}", flying::to_string(account_));
     }
 
     void AccountManagerImpl::on_switch_day(const std::string &trading_day)
@@ -232,9 +232,9 @@ namespace kungfu
         callback();
     }
 
-    void AccountManagerImpl::on_positions(const vector<kungfu::Position> &positions)
+    void AccountManagerImpl::on_positions(const vector<kungfu::flying::Position> &positions)
     {
-        vector<kungfu::Position> filtered;
+        vector<kungfu::flying::Position> filtered;
         for (const auto& pos : positions)
         {
             if (strcmp(pos.account_id, account_.account_id) == 0)
@@ -249,13 +249,13 @@ namespace kungfu
         }
     }
 
-    void AccountManagerImpl::on_position_details(const vector<kungfu::Position> &details)
+    void AccountManagerImpl::on_position_details(const vector<kungfu::flying::Position> &details)
     {
         // 股票期权可能跟期货类似的逻辑, 目前不支持
         pos_manager_->on_position_details(details);
     }
 
-    void AccountManagerImpl::on_account(const kungfu::AccountInfo &account)
+    void AccountManagerImpl::on_account(const kungfu::flying::AccountInfo &account)
     {
         if (strcmp(account.account_id, account_.account_id) != 0)
         {
@@ -265,7 +265,7 @@ namespace kungfu
         account_.rcv_time = account.rcv_time;
         account_.update_time = account.update_time;
         strcpy(account_.trading_day, account.trading_day);
-        account_.type = account.type;
+        account_.account_type = account.account_type;
         strcpy(account_.broker_id, account.broker_id);
         strcpy(account_.source_id, account.source_id);
         if (is_zero(account_.initial_equity))
@@ -282,7 +282,7 @@ namespace kungfu
         callback();
     }
 
-    double AccountManagerImpl::calc_commission(const kungfu::Trade *trade) const
+    double AccountManagerImpl::calc_commission(const kungfu::journal::Trade *trade) const
     {
         if (is_reverse_repurchase(trade->instrument_id, trade->exchange_id))
         {
@@ -296,7 +296,7 @@ namespace kungfu
         }
     }
 
-    double AccountManagerImpl::calc_tax(const kungfu::Trade *trade) const
+    double AccountManagerImpl::calc_tax(const kungfu::journal::Trade *trade) const
     {
         // 税费共有四种，经手费(券商收取)、证管费(证监会收取)、过户费(中登收取)、印花税(国税，卖方收取)
         // 前两种合称佣金，其中征管费由券商代收，本系统内称为commission
@@ -376,7 +376,7 @@ namespace kungfu
         }
     }
     
-    void AccountManagerImpl::on_pos_callback(const kungfu::Position &pos) const
+    void AccountManagerImpl::on_pos_callback(const kungfu::flying::Position &pos) const
     {
         for (const auto& cb : pos_cbs_)
         {
@@ -411,7 +411,7 @@ namespace kungfu
         save_account_info.bind(2, account_.update_time);
         save_account_info.bind(3, account_.trading_day);
         save_account_info.bind(4, account_.account_id);
-        save_account_info.bind(5, std::string(1, account_.type));
+        save_account_info.bind(5, std::string(1, account_.account_type));
         save_account_info.bind(6, account_.broker_id);
         save_account_info.bind(7, account_.source_id);
         save_account_info.bind(8, account_.initial_equity);
@@ -491,7 +491,7 @@ namespace kungfu
             account_.update_time = query_account.getColumn(1);
             strcpy(account_.trading_day, query_account.getColumn(2));
             strcpy(account_.account_id, query_account.getColumn(3));
-            account_.type = query_account.getColumn(4)[0];
+            account_.account_type = query_account.getColumn(4)[0];
             strcpy(account_.broker_id, query_account.getColumn(5));
             strcpy(account_.source_id, query_account.getColumn(6));
             account_.initial_equity = query_account.getColumn(7);

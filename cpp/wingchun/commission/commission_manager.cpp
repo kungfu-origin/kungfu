@@ -7,6 +7,9 @@
 #include "config.h"
 #include "util/include/business_helper.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     class CommissionManager::impl
@@ -64,17 +67,17 @@ namespace kungfu
             }
         }
 
-        void update_commission(const kungfu::InstrumentCommissionRate &commission)
+        void update_commission(const InstrumentCommissionRate &commission)
         {
             storage_->save(commission);
         }
 
-        void udpate_commissions(const vector<kungfu::InstrumentCommissionRate> &commissions)
+        void udpate_commissions(const vector<InstrumentCommissionRate> &commissions)
         {
             storage_->save(commissions);
         }
 
-        void on_commission(const kungfu::InstrumentCommissionRate &commission)
+        void on_commission(const InstrumentCommissionRate &commission)
         {
             if (commission.instrument_type == InstrumentTypeStock || commission.instrument_type == InstrumentTypeFuture)
             {
@@ -113,7 +116,7 @@ namespace kungfu
         return impl_->get_commission_rate(instrument_id, exchange_id);
     }
 
-    double CommissionManager::calc_commission(const kungfu::OrderInput *input) const
+    double CommissionManager::calc_commission(const OrderInput *input) const
     {
         auto rate = get_commission_rate(input->instrument_id, input->exchange_id);
         double base = rate->mode == CommissionRateModeByAmount ? input->frozen_price * input->volume : input->volume;
@@ -140,12 +143,12 @@ namespace kungfu
         }
     }
 
-    void CommissionManager::update_commission(const kungfu::InstrumentCommissionRate &commission)
+    void CommissionManager::update_commission(const InstrumentCommissionRate &commission)
     {
         impl_->update_commission(commission);
     }
 
-    void CommissionManager::update_commissions(const std::vector<kungfu::InstrumentCommissionRate> &commissions)
+    void CommissionManager::update_commissions(const std::vector<InstrumentCommissionRate> &commissions)
     {
         impl_->udpate_commissions(commissions);
     }

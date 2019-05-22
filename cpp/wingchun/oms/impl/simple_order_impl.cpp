@@ -5,6 +5,8 @@
 #include "../include/def.h"
 #include "util/include/business_helper.h"
 
+using namespace kungfu::journal;
+
 namespace kungfu
 {
     namespace oms

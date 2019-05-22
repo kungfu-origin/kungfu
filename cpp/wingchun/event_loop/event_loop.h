@@ -18,17 +18,19 @@
 #include "msg.h"
 #include "task_scheduler/task_scheduler.h"
 
+namespace kfj = kungfu::journal;
+
 namespace kungfu
 {
-    typedef std::function<void (const Quote& quote)> QuoteCallback;
-    typedef std::function<void (const Entrust& entrust)> EntrustCallback;
-    typedef std::function<void (const Transaction& transaction)> TransactionCallback;
-    typedef std::function<void (const std::string& recipient, std::vector<Instrument>&, bool is_level2)> SubscribeCallback;
+    typedef std::function<void (const kfj::Quote& quote)> QuoteCallback;
+    typedef std::function<void (const kfj::Entrust& entrust)> EntrustCallback;
+    typedef std::function<void (const kfj::Transaction& transaction)> TransactionCallback;
+    typedef std::function<void (const std::string& recipient, std::vector<kfj::Instrument>&, bool is_level2)> SubscribeCallback;
     typedef std::function<void (const std::string& recipient, const std::string& client_id)> ReqLoginCallback;
-    typedef std::function<void (const OrderInput& input)> OrderInputCallback;
-    typedef std::function<void (const OrderAction& action)> OrderActionCallback;
-    typedef std::function<void (const Order& order)> OrderCallback;
-    typedef std::function<void (const Trade& trade)> TradeCallback;
+    typedef std::function<void (const kfj::OrderInput& input)> OrderInputCallback;
+    typedef std::function<void (const kfj::OrderAction& action)> OrderActionCallback;
+    typedef std::function<void (const kfj::Order& order)> OrderCallback;
+    typedef std::function<void (const kfj::Trade& trade)> TradeCallback;
     typedef std::function<void (uint64_t order_id, const std::string& client_id, const std::string& algo_type, const std::string& algo_order_input)> AlgoOrderInputCallback;
     typedef std::function<void (uint64_t order_id, const std::string& algo_type, const std::string& status)> AlgoOrderStatusCallback;
     typedef std::function<void (uint64_t order_id, uint64_t order_action_id, const std::string& cmd)> AlgoOrderActionCallback;

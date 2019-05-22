@@ -15,11 +15,12 @@
 #include <cmath>
 #include <cinttypes>
 
-namespace kungfu
-{
 #define FORMAT_DOUBLE(x) rounded(x, 4)
 
-    inline void from_json(const nlohmann::json& j, kungfu::Instrument& instrument)
+namespace kungfu {namespace journal
+{
+
+    inline void from_json(const nlohmann::json& j, kungfu::journal::Instrument& instrument)
     {
         strcpy(instrument.exchange_id, j["exchange_id"].get<std::string>().c_str());
         strcpy(instrument.instrument_id, j["instrument_id"].get<std::string>().c_str());
@@ -29,7 +30,7 @@ namespace kungfu
         }
     }
 
-    inline void to_json(nlohmann::json& j, const kungfu::FutureInstrument& instrument)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::FutureInstrument& instrument)
     {
         j["exchange_id"] = std::string(instrument.exchange_id);
         j["instrument_id"] = std::string(instrument.instrument_id);
@@ -46,7 +47,7 @@ namespace kungfu
         j["short_margin_ratio"] = instrument.short_margin_ratio;
     }
 
-    inline void to_json(nlohmann::json& j, const kungfu::Instrument& instrument)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::Instrument& instrument)
     {
         j["exchange_id"] = std::string(instrument.exchange_id);
         j["instrument_id"] = std::string(instrument.instrument_id);
@@ -60,7 +61,7 @@ namespace kungfu
         }
     }
 
-    inline void to_json(nlohmann::json& j, const kungfu::Quote& quote)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::Quote& quote)
     {
         j["trading_day"] = std::string(quote.trading_day);
         j["rcv_time"] = quote.rcv_time;
@@ -96,7 +97,7 @@ namespace kungfu
         j["ask_volume"] = std::vector<int64_t >(quote.ask_volume, std::end(quote.ask_volume));
     }
 
-    inline void to_json(nlohmann::json& j, const OrderInput& input)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::OrderInput& input)
     {
         j["order_id"] = input.order_id;
         j["instrument_id"] = std::string(input.instrument_id);
@@ -137,7 +138,7 @@ namespace kungfu
         j["parent_id"] = input.parent_id;
     }
 
-    inline void from_json(const nlohmann::json& j, OrderInput& input)
+    inline void from_json(const nlohmann::json& j, kungfu::journal::OrderInput& input)
     {
         input = {};
         input.order_id = j["order_id"].get<uint64_t>();
@@ -184,85 +185,14 @@ namespace kungfu
         }
     }
 
-    inline void to_json(nlohmann::json& j, const OrderInputRsp& input_rsp)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::OrderInputRsp& input_rsp)
     {
         j["order_id"] = input_rsp.order_id;
         j["error_id"] = input_rsp.error_id;
         j["error_msg"] = input_rsp.error_msg;
     }
 
-    inline void to_json(nlohmann::json& j, const AccountInfo& account)
-    {
-        j["rcv_time"] = account.rcv_time;
-        j["update_time"] = account.update_time;
-        j["trading_day"] = std::string(account.trading_day);
-        j["account_id"] = std::string(account.account_id);
-        j["type"] = std::string(1, account.type);
-        j["broker_id"] = std::string(account.broker_id);
-        j["source_id"] = std::string(account.source_id);
-        j["initial_equity"] = FORMAT_DOUBLE(account.initial_equity);
-        j["static_equity"] = FORMAT_DOUBLE(account.static_equity);
-        j["dynamic_equity"] = FORMAT_DOUBLE(account.dynamic_equity);
-        j["accumulated_pnl"] = FORMAT_DOUBLE(account.accumulated_pnl);
-        j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(account.accumulated_pnl_ratio);
-        j["intraday_pnl"] = FORMAT_DOUBLE(account.intraday_pnl);
-        j["intraday_pnl_ratio"] = FORMAT_DOUBLE(account.intraday_pnl_ratio);
-        j["avail"] = FORMAT_DOUBLE(account.avail);
-        j["market_value"] = FORMAT_DOUBLE(account.market_value);
-        j["margin"] = FORMAT_DOUBLE(account.margin);
-        j["accumulated_fee"] = FORMAT_DOUBLE(account.accumulated_fee);
-        j["intraday_fee"] = FORMAT_DOUBLE(account.intraday_fee);
-        j["frozen_cash"] = FORMAT_DOUBLE(account.frozen_cash);
-        j["frozen_margin"] = FORMAT_DOUBLE(account.frozen_margin);
-        j["frozen_fee"] = FORMAT_DOUBLE(account.frozen_fee);
-        j["position_pnl"] = FORMAT_DOUBLE(account.position_pnl);
-        j["close_pnl"] = FORMAT_DOUBLE(account.close_pnl);
-    }
-
-    inline void to_json(nlohmann::json& j, const Position& position)
-    {
-        j["rcv_time"] = position.rcv_time;
-        j["update_time"] = position.update_time;
-        j["instrument_id"] = std::string(position.instrument_id);
-        j["instrument_type"] = std::string(1, position.instrument_type);
-        j["exchange_id"] = std::string(position.exchange_id);
-        j["account_id"] = std::string(position.account_id);
-        j["client_id"] = std::string(position.client_id);
-        j["direction"] = std::string(1, position.direction);
-        j["volume"] = position.volume;
-        j["yesterday_volume"] = position.yesterday_volume;
-        j["frozen_total"] = position.frozen_total;
-        j["frozen_yesterday"] = position.frozen_yesterday;
-        j["last_price"] = FORMAT_DOUBLE(position.last_price);
-        j["open_price"] = FORMAT_DOUBLE(position.open_price);
-        j["cost_price"] = FORMAT_DOUBLE(position.cost_price);
-        j["close_price"] = FORMAT_DOUBLE(position.close_price);
-        j["pre_close_price"] = FORMAT_DOUBLE(position.pre_close_price);
-        j["settlement_price"] = FORMAT_DOUBLE(position.settlement_price);
-        j["pre_settlement_price"] = FORMAT_DOUBLE(position.pre_settlement_price);
-        j["margin"] = FORMAT_DOUBLE(position.margin);
-        j["position_pnl"] = FORMAT_DOUBLE(position.position_pnl);
-        j["close_pnl"] = FORMAT_DOUBLE(position.close_pnl);
-        j["realized_pnl"] = FORMAT_DOUBLE(position.realized_pnl);
-        j["unrealized_pnl"] = FORMAT_DOUBLE(position.unrealized_pnl);
-        j["open_date"] = std::string(position.open_date);
-        j["expire_date"] = std::string(position.expire_date);
-    }
-
-    inline void to_json(nlohmann::json& j, const PortfolioInfo& pnl)
-    {
-        j["trading_day"] = std::string(pnl.trading_day);
-        j["update_time"] = pnl.update_time;
-        j["initial_equity"] = FORMAT_DOUBLE(pnl.initial_equity);
-        j["static_equity"] = FORMAT_DOUBLE(pnl.static_equity);
-        j["dynamic_equity"] = FORMAT_DOUBLE(pnl.dynamic_equity);
-        j["accumulated_pnl"] = FORMAT_DOUBLE(pnl.accumulated_pnl);
-        j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(pnl.accumulated_pnl_ratio);
-        j["intraday_pnl"] = FORMAT_DOUBLE(pnl.intraday_pnl);
-        j["intraday_pnl_ratio"] = FORMAT_DOUBLE(pnl.intraday_pnl_ratio);
-    }
-
-    inline void to_json(nlohmann::json& j, const OrderAction& action)
+    inline void to_json(nlohmann::json& j, const kungfu::journal::OrderAction& action)
     {
         j["order_id"] = action.order_id;
         j["order_action_id"] = action.order_action_id;
@@ -271,7 +201,7 @@ namespace kungfu
         j["volume"] = action.volume;
     }
 
-    inline void from_json(const nlohmann::json& j, OrderAction& action)
+    inline void from_json(const nlohmann::json& j, kungfu::journal::OrderAction& action)
     {
         action = {};
         if (j.find("order_id") != j.end())
@@ -296,7 +226,7 @@ namespace kungfu
         }
     }
 
-    inline void to_json(nlohmann::json& j, const OrderActionRsp& action_rsp)
+    inline void to_json(nlohmann::json& j, const journal::OrderActionRsp& action_rsp)
     {
         j["order_id"] = action_rsp.order_id;
         j["order_action_id"] = action_rsp.order_action_id;
@@ -304,7 +234,7 @@ namespace kungfu
         j["error_msg"] = action_rsp.error_msg;
     }
 
-    inline void to_json(nlohmann::json& j, const Order& order)
+    inline void to_json(nlohmann::json& j, const journal::Order& order)
     {
         j["rcv_time"] = order.rcv_time;
         j["order_id"] = std::to_string(order.order_id);
@@ -345,7 +275,7 @@ namespace kungfu
 
     }
 
-    inline void to_json(nlohmann::json& j, const Trade& trade)
+    inline void to_json(nlohmann::json& j, const journal::Trade& trade)
     {
         j["rcv_time"] = trade.rcv_time;
 
@@ -371,7 +301,7 @@ namespace kungfu
 
     }
 
-    inline void to_json(nlohmann::json& j, const Entrust& entrust)
+    inline void to_json(nlohmann::json& j, const journal::Entrust& entrust)
     {
         j["source_id"] = std::string(entrust.source_id);
         j["trading_day"] = std::string(entrust.trading_day);
@@ -388,7 +318,7 @@ namespace kungfu
         j["seq"] = entrust.seq;
     }
 
-    inline void to_json(nlohmann::json& j, const Transaction& transaction)
+    inline void to_json(nlohmann::json& j, const journal::Transaction& transaction)
     {
         j["source_id"] = std::string(transaction.source_id);
         j["trading_day"] = std::string(transaction.trading_day);
@@ -407,6 +337,141 @@ namespace kungfu
         j["seq"] = transaction.seq;
     }
 
+    template<typename T> std::string to_string(const T& ori)
+    {
+        nlohmann::json j;
+        to_json(j, ori);
+        return j.dump();
+    }
+}}
+
+namespace kungfu {namespace flying
+{
+    inline void to_json(nlohmann::json& j, const kungfu::flying::AccountInfo& account)
+    {
+        j["rcv_time"] = account.rcv_time;
+        j["update_time"] = account.update_time;
+        j["trading_day"] = std::string(account.trading_day);
+        j["account_id"] = std::string(account.account_id);
+        j["type"] = std::string(1, account.type);
+        j["broker_id"] = std::string(account.broker_id);
+        j["source_id"] = std::string(account.source_id);
+        j["initial_equity"] = FORMAT_DOUBLE(account.initial_equity);
+        j["static_equity"] = FORMAT_DOUBLE(account.static_equity);
+        j["dynamic_equity"] = FORMAT_DOUBLE(account.dynamic_equity);
+        j["accumulated_pnl"] = FORMAT_DOUBLE(account.accumulated_pnl);
+        j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(account.accumulated_pnl_ratio);
+        j["intraday_pnl"] = FORMAT_DOUBLE(account.intraday_pnl);
+        j["intraday_pnl_ratio"] = FORMAT_DOUBLE(account.intraday_pnl_ratio);
+        j["avail"] = FORMAT_DOUBLE(account.avail);
+        j["market_value"] = FORMAT_DOUBLE(account.market_value);
+        j["margin"] = FORMAT_DOUBLE(account.margin);
+        j["accumulated_fee"] = FORMAT_DOUBLE(account.accumulated_fee);
+        j["intraday_fee"] = FORMAT_DOUBLE(account.intraday_fee);
+        j["frozen_cash"] = FORMAT_DOUBLE(account.frozen_cash);
+        j["frozen_margin"] = FORMAT_DOUBLE(account.frozen_margin);
+        j["frozen_fee"] = FORMAT_DOUBLE(account.frozen_fee);
+        j["position_pnl"] = FORMAT_DOUBLE(account.position_pnl);
+        j["close_pnl"] = FORMAT_DOUBLE(account.close_pnl);
+    }
+
+    inline void to_json(nlohmann::json& j, const kungfu::flying::Position& position)
+    {
+        j["rcv_time"] = position.rcv_time;
+        j["update_time"] = position.update_time;
+        j["instrument_id"] = std::string(position.instrument_id);
+        j["instrument_type"] = std::string(1, position.instrument_type);
+        j["exchange_id"] = std::string(position.exchange_id);
+        j["account_id"] = std::string(position.account_id);
+        j["client_id"] = std::string(position.client_id);
+        j["direction"] = std::string(1, position.direction);
+        j["volume"] = position.volume;
+        j["yesterday_volume"] = position.yesterday_volume;
+        j["frozen_total"] = position.frozen_total;
+        j["frozen_yesterday"] = position.frozen_yesterday;
+        j["last_price"] = FORMAT_DOUBLE(position.last_price);
+        j["open_price"] = FORMAT_DOUBLE(position.open_price);
+        j["cost_price"] = FORMAT_DOUBLE(position.cost_price);
+        j["close_price"] = FORMAT_DOUBLE(position.close_price);
+        j["pre_close_price"] = FORMAT_DOUBLE(position.pre_close_price);
+        j["settlement_price"] = FORMAT_DOUBLE(position.settlement_price);
+        j["pre_settlement_price"] = FORMAT_DOUBLE(position.pre_settlement_price);
+        j["margin"] = FORMAT_DOUBLE(position.margin);
+        j["position_pnl"] = FORMAT_DOUBLE(position.position_pnl);
+        j["close_pnl"] = FORMAT_DOUBLE(position.close_pnl);
+        j["realized_pnl"] = FORMAT_DOUBLE(position.realized_pnl);
+        j["unrealized_pnl"] = FORMAT_DOUBLE(position.unrealized_pnl);
+        j["open_date"] = std::string(position.open_date);
+        j["expire_date"] = std::string(position.expire_date);
+    }
+
+    inline void to_json(nlohmann::json& j, const kungfu::flying::PortfolioInfo& pnl)
+    {
+        j["trading_day"] = std::string(pnl.trading_day);
+        j["update_time"] = pnl.update_time;
+        j["initial_equity"] = FORMAT_DOUBLE(pnl.initial_equity);
+        j["static_equity"] = FORMAT_DOUBLE(pnl.static_equity);
+        j["dynamic_equity"] = FORMAT_DOUBLE(pnl.dynamic_equity);
+        j["accumulated_pnl"] = FORMAT_DOUBLE(pnl.accumulated_pnl);
+        j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(pnl.accumulated_pnl_ratio);
+        j["intraday_pnl"] = FORMAT_DOUBLE(pnl.intraday_pnl);
+        j["intraday_pnl_ratio"] = FORMAT_DOUBLE(pnl.intraday_pnl_ratio);
+    }
+
+    inline void to_json(nlohmann::json& j, const kungfu::flying::AlgoOrderInput& input)
+    {
+        j["order_id"] = input.order_id;
+        j["client_id"] = input.client_id;
+        j["algo_type"] = input.algo_type;
+        j["input"] = input.input;
+    }
+
+    inline void from_json(const nlohmann::json& j, kungfu::flying::AlgoOrderInput& input)
+    {
+        input.order_id = j["order_id"];
+        input.client_id = j["client_id"];
+        input.algo_type = j["algo_type"];
+        input.input = j["input"];
+    }
+
+    inline void to_json(nlohmann::json& j, const kungfu::flying::AlgoOrderStatus& status)
+    {
+        j["order_id"] = status.order_id;
+        j["algo_type"] = status.algo_type;
+        j["status"] = status.status;
+    }
+
+    inline void from_json(const nlohmann::json& j, kungfu::flying::AlgoOrderStatus& status)
+    {
+        status.order_id = j["order_id"];
+        status.algo_type = j["algo_type"];
+        status.status = j["status"];
+    }
+
+    inline void to_json(nlohmann::json& j, const kungfu::flying::AlgoOrderAction& action)
+    {
+        j["order_id"] = action.order_id;
+        j["order_action_id"] = action.order_action_id;
+        j["action"] = action.action;
+    }
+
+    inline void from_json(const nlohmann::json& j, kungfu::flying::AlgoOrderAction& action)
+    {
+        action.order_id = j["order_id"];
+        action.order_action_id = j["order_action_id"];
+        action.action = j["action"];
+    }
+
+    template<typename T> std::string to_string(const T& ori)
+    {
+        nlohmann::json j;
+        to_json(j, ori);
+        return j.dump();
+    }
+}}
+
+namespace kungfu
+{
     inline void to_json(nlohmann::json& j, const LoginRequest& login_req)
     {
         j["sender"] = login_req.sender;
@@ -446,57 +511,6 @@ namespace kungfu
     inline void to_json(nlohmann::json& j, const SubscribeRsp& rsp)
     {
         j["sender"] = rsp.sender;
-    }
-
-    inline void to_json(nlohmann::json& j, const AlgoOrderInput& input)
-    {
-        j["order_id"] = input.order_id;
-        j["client_id"] = input.client_id;
-        j["algo_type"] = input.algo_type;
-        j["input"] = input.input;
-    }
-
-    inline void from_json(const nlohmann::json& j, AlgoOrderInput& input)
-    {
-        input.order_id = j["order_id"];
-        input.client_id = j["client_id"];
-        input.algo_type = j["algo_type"];
-        input.input = j["input"];
-    }
-
-    inline void to_json(nlohmann::json& j, const AlgoOrderStatus& status)
-    {
-        j["order_id"] = status.order_id;
-        j["algo_type"] = status.algo_type;
-        j["status"] = status.status;
-    }
-
-    inline void from_json(const nlohmann::json& j, AlgoOrderStatus& status)
-    {
-        status.order_id = j["order_id"];
-        status.algo_type = j["algo_type"];
-        status.status = j["status"];
-    }
-
-    inline void to_json(nlohmann::json& j, const AlgoOrderAction& action)
-    {
-        j["order_id"] = action.order_id;
-        j["order_action_id"] = action.order_action_id;
-        j["action"] = action.action;
-    }
-
-    inline void from_json(const nlohmann::json& j, AlgoOrderAction& action)
-    {
-        action.order_id = j["order_id"];
-        action.order_action_id = j["order_action_id"];
-        action.action = j["action"];
-    }
-
-    template<typename T> std::string to_string(const T& ori)
-    {
-        nlohmann::json j;
-        to_json(j, ori);
-        return j.dump();
     }
 }
 

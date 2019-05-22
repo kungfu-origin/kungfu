@@ -96,9 +96,9 @@ namespace kungfu
         return get_symbol(instrument_id.c_str(), exchange_id.c_str());
     }
 
-    inline Order get_order(const OrderInput& input)
+    inline journal::Order get_order(const journal::OrderInput& input)
     {
-        Order order = {};
+        journal::Order order = {};
         order.order_id = input.order_id;
         strcpy(order.instrument_id, input.instrument_id);
         strcpy(order.exchange_id, input.exchange_id);

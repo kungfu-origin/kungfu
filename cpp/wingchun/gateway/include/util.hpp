@@ -23,6 +23,7 @@ namespace kungfu
 {
     namespace gateway
     {
+        using namespace kungfu::flying;
         struct GatewayLoginRsp
         {
             AccountType type; // TdGateway 需要返回账号类型
@@ -93,7 +94,7 @@ namespace kungfu
             return login(gateway, sender);
         }
 
-        inline void subscribe(const std::string& source, const std::vector<Instrument>& instruments, bool is_level2, const std::string& sender)
+        inline void subscribe(const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
         {
             std::string gateway = fmt::format(MD_GATEWAY_NAME_FORMAT, source);
             std::string url = GATEWAY_REP_URL(gateway);

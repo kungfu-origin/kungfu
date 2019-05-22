@@ -26,6 +26,9 @@
 #include "fmt/format.h"
 #include "Log.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
 #define DUMP_1D_SNAPSHOT(name, pnl) storage::SnapshotStorage(\
@@ -135,7 +138,7 @@ namespace kungfu
         }
     }
 
-    void StrategyUtil::on_quote(const kungfu::Quote& quote)
+    void StrategyUtil::on_quote(const kungfu::journal::Quote& quote)
     {
         SPDLOG_TRACE("instrument_id: {}, last_price: {}", quote.instrument_id, quote.last_price);
         quote_map_[get_symbol(quote.instrument_id, quote.exchange_id)] = quote;
@@ -144,10 +147,10 @@ namespace kungfu
 
     void StrategyUtil::on_quote_py(uintptr_t quote)
     {
-        on_quote(*(const kungfu::Quote*)quote);
+        on_quote(*(const kungfu::journal::Quote*)quote);
     }
 
-    void StrategyUtil::on_order(const kungfu::Order& order)
+    void StrategyUtil::on_order(const kungfu::journal::Order& order)
     {
         portfolio_manager_->on_order(&order);
         order_manager_->on_order(&order);
@@ -155,10 +158,10 @@ namespace kungfu
 
     void StrategyUtil::on_order_py(uintptr_t order)
     {
-        on_order(*(const kungfu::Order*)order);
+        on_order(*(const kungfu::journal::Order*)order);
     }
 
-    void StrategyUtil::on_trade(const kungfu::Trade& trade)
+    void StrategyUtil::on_trade(const kungfu::journal::Trade& trade)
     {
         portfolio_manager_->on_trade(&trade);
         portfolio_manager_->dump_to_db(STRATEGY_ASSET_DB_FILE(name_).c_str());
@@ -166,7 +169,7 @@ namespace kungfu
 
     void StrategyUtil::on_trade_py(uintptr_t trade)
     {
-        on_trade(*(const kungfu::Trade*)trade);
+        on_trade(*(const kungfu::journal::Trade*)trade);
     }
 
     void StrategyUtil::on_algo_order_status(uint64_t order_id, const std::string& algo_type, const std::string& status_msg)
@@ -187,10 +190,10 @@ namespace kungfu
 
     void StrategyUtil::subscribe(const std::string &source, const std::vector<std::string> &instruments, const string &exchange_id, bool is_level2)
     {
-        std::vector<Instrument> inst_vec;
+        std::vector<journal::Instrument> inst_vec;
         for (const auto& ins : instruments)
         {
-            Instrument inst = {};
+            journal::Instrument inst = {};
             strcpy(inst.instrument_id, ins.c_str());
             strcpy(inst.exchange_id, exchange_id.c_str());
             inst_vec.emplace_back(inst);
@@ -356,7 +359,7 @@ namespace kungfu
         action.order_id = order_id;
         action.action = cmd;
 
-        std::string js = to_string(action);
+        std::string js = flying::to_string(action);
 
         writer_->write_frame(js.c_str(), js.length() + 1, -1, (int)MsgType::AlgoOrderAction, true, -1);
 

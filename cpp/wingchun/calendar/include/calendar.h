@@ -81,7 +81,7 @@ namespace kungfu
         //@param end_nano 结束纳秒时间戳
         //@param exchange_id 交易所ID
         //@return 交易所交易时段列表
-        std::vector<TradingSession> get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id);
+        std::vector<flying::TradingSession> get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id);
 
         //获取当前交易日
         //@param via_net 是否通过网络获取，如果为 true，发送请求到 calendar service 获取当前交易日

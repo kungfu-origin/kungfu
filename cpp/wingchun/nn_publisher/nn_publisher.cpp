@@ -30,37 +30,37 @@ namespace kungfu
         pub_socket_->send(js.c_str(), js.length() + 1, 0);
     }
 
-    void NNPublisher::publish_order(const kungfu::Order &order) const
+    void NNPublisher::publish_order(const kungfu::journal::Order &order) const
     {
         nlohmann::json j = order;
         publish(kungfu::MsgType::Order, j);
     }
 
-    void NNPublisher::publish_trade(const kungfu::Trade &trade) const
+    void NNPublisher::publish_trade(const kungfu::journal::Trade &trade) const
     {
         nlohmann::json j = trade;
         publish(kungfu::MsgType::Trade, j);
     }
 
-    void NNPublisher::publish_pos(const kungfu::Position& pos) const
+    void NNPublisher::publish_pos(const kungfu::flying::Position& pos) const
     {
         nlohmann::json j = pos;
         publish(kungfu::MsgType::Position, j);
     }
 
-    void NNPublisher::publish_portfolio_info(const kungfu::PortfolioInfo &portfolio, kungfu::MsgType msg_type) const
+    void NNPublisher::publish_portfolio_info(const kungfu::flying::PortfolioInfo &portfolio, kungfu::MsgType msg_type) const
     {
         nlohmann::json j = portfolio;
         publish(msg_type, j);
     }
 
-    void NNPublisher::publish_sub_portfolio_info(const kungfu::SubPortfolioInfo &info) const
+    void NNPublisher::publish_sub_portfolio_info(const kungfu::flying::SubPortfolioInfo &info) const
     {
         nlohmann::json j = info;
         publish(kungfu::MsgType::SubPortfolioInfo, j);
     }
 
-    void NNPublisher::publish_account_info(const kungfu::AccountInfo &account_info, kungfu::MsgType msg_type) const
+    void NNPublisher::publish_account_info(const kungfu::flying::AccountInfo &account_info, kungfu::MsgType msg_type) const
     {
         nlohmann::json j = account_info;
         publish(msg_type, j);

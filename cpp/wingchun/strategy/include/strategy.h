@@ -53,7 +53,7 @@ namespace kungfu
         //@param exchange_id   交易所ID
         //@param account_id    账户ID
         //@return              行情数据指针(nullptr 表示暂未收到行情数据)
-        const Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
+        const journal::Quote* const get_last_md(const std::string& instrument_id, const std::string& exchange_id) const;
 
         //获取持仓信息
         //@param instrument_id 合约ID
@@ -61,11 +61,11 @@ namespace kungfu
         //@param direction     持仓方向
         //@param account_id    账户ID("" 表示获取策略在所有账户下持仓汇总信息)
         //@return              持仓数据(无持仓时volume是0)
-        Position get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction = DirectionLong, const std::string& account_id = "") const;
+        flying::Position get_position(const std::string& instrument_id, const std::string& exchange_id, Direction direction = DirectionLong, const std::string& account_id = "") const;
 
-        PortfolioInfo get_portfolio_info() const;
+        flying::PortfolioInfo get_portfolio_info() const;
 
-        SubPortfolioInfo get_sub_portfolio_info(const std::string& account_id) const;
+        flying::SubPortfolioInfo get_sub_portfolio_info(const std::string& account_id) const;
 
         //订阅行情
         //@param source_id   柜台ID
@@ -144,14 +144,14 @@ namespace kungfu
         //@param account_id    账户ID
         //@param frozen        冻结请求内容
         //@return              操作ID
-        uint64_t try_frozen(const std::string& account_id, const AssetsFrozen& frozen);
+        uint64_t try_frozen(const std::string& account_id, const flying::AssetsFrozen& frozen);
 
         //尝试冻结请求，如果返回 true,表示尝试成功，否则表示失败
         //@param op_id         操作ID
         //@param account_id    账户ID
         //@param frozen        冻结请求内容
         //@return              成功或者失败
-        bool try_frozen(uint64_t op_id, const std::string& account_id, const AssetsFrozen& frozen);
+        bool try_frozen(uint64_t op_id, const std::string& account_id, const flying::AssetsFrozen& frozen);
 
         //取消冻结请求
         //@param op_id         操作ID
@@ -166,7 +166,7 @@ namespace kungfu
         //尝试修改策略在具体某个账户下的持仓，返回0，表示尝试失败，否则返回操作ID
         //@param account_id    账户ID
         //@param pos_modify    持仓修改
-        uint64_t try_modify_position(const std::string& account_id, const PositionModify& pos_modify);
+        uint64_t try_modify_position(const std::string& account_id, const flying::PositionModify& pos_modify);
 
         //取消修改持仓
         //@param op_id         操作ID
@@ -194,23 +194,23 @@ namespace kungfu
 
         //行情数据更新回调
         //@param quote             行情数据
-        virtual void on_quote(const Quote& quote) {};
+        virtual void on_quote(const journal::Quote& quote) {};
 
         //逐笔委托更新回调
         //@param entrust           逐笔委托数据
-        virtual void on_entrust(const Entrust& entrust) {};
+        virtual void on_entrust(const journal::Entrust& entrust) {};
 
         //逐笔成交更新回调
         //@param transaction       逐笔成交数据
-        virtual void on_transaction(const Transaction& transaction) {};
+        virtual void on_transaction(const journal::Transaction& transaction) {};
 
         //订单信息更新回调
         //@param order             订单信息数据
-        virtual void on_order(const Order& order) {};
+        virtual void on_order(const journal::Order& order) {};
 
         //订单成交回报回调
         //@param trade             订单成交数据
-        virtual void on_trade(const Trade& trade) {};
+        virtual void on_trade(const journal::Trade& trade) {};
 
         //算法订单状态更新回调
         //@param order_id          订单ID

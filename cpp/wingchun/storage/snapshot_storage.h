@@ -8,6 +8,8 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include "oms_struct.h"
 
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     namespace storage

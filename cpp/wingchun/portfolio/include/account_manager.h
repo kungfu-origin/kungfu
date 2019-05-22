@@ -7,6 +7,9 @@
 
 #include "pnl_def.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     class AccountManager: public IPnLDataHandler

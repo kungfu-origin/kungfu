@@ -46,15 +46,15 @@ namespace kungfu
             }
         }
 
-        std::vector<SubPortfolioInfo> AccountListStorage::get_accounts()
+        std::vector<flying::SubPortfolioInfo> AccountListStorage::get_accounts()
         {
-            std::vector<SubPortfolioInfo> accounts;
+            std::vector<flying::SubPortfolioInfo> accounts;
             try
             {
                 SQLite::Statement query(db_, "SELECT * FROM account_list");
                 while (query.executeStep())
                 {
-                    SubPortfolioInfo account = {};
+                    flying::SubPortfolioInfo account = {};
                     strcpy(account.account_id, query.getColumn(1));
                     strcpy(account.source_id, query.getColumn(2));
                     accounts.push_back(account);

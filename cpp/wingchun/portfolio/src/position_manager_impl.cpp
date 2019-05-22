@@ -10,9 +10,12 @@
 #include <map>
 #include <boost/core/ignore_unused.hpp>
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
-    void load_single_pos(SQLite::Statement &query, kungfu::Position &pos)
+    void load_single_pos(SQLite::Statement &query, kungfu::flying::Position &pos)
     {
         pos = {};
         pos.rcv_time = query.getColumn(0);
@@ -43,7 +46,7 @@ namespace kungfu
         strcpy(pos.expire_date, query.getColumn(25));
     }
 
-    void save_single_pos(SQLite::Database &db, const char *table, const kungfu::Position &pos)
+    void save_single_pos(SQLite::Database &db, const char *table, const kungfu::flying::Position &pos)
     {
         std::string s = fmt::format("REPLACE INTO {}("
                                             "rcv_time, update_time, instrument_id, instrument_type, exchange_id, account_id, client_id, "
@@ -187,7 +190,7 @@ namespace kungfu
         return market_value;
     }
 
-    void PositionManagerImpl::on_quote(const kungfu::Quote *quote)
+    void PositionManagerImpl::on_quote(const kungfu::journal::Quote *quote)
     {
         last_update_ = quote->rcv_time;
         auto key = get_symbol(quote->instrument_id, quote->exchange_id);
@@ -226,7 +229,7 @@ namespace kungfu
         func(short_pos_map_);
     }
 
-    void PositionManagerImpl::on_order(const kungfu::Order *order)
+    void PositionManagerImpl::on_order(const kungfu::journal::Order *order)
     {
         last_update_ = order->rcv_time;
         if (!is_final_status(order->status) || frozen_map_.find(order->order_id) == frozen_map_.end())
@@ -244,7 +247,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_trade(const kungfu::Trade *trade)
+    void PositionManagerImpl::on_trade(const kungfu::journal::Trade *trade)
     {
         last_update_ = trade->rcv_time;
         if (trade->volume == 0)
@@ -262,7 +265,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_positions(const vector<kungfu::Position> &positions)
+    void PositionManagerImpl::on_positions(const vector<kungfu::flying::Position> &positions)
     {
         for (const auto& pos : positions)
         {
@@ -309,7 +312,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_position_details(const std::vector<kungfu::Position> &details)
+    void PositionManagerImpl::on_position_details(const std::vector<kungfu::flying::Position> &details)
     {
         // detail只能全刷, 因为无法判断前后
         long_detail_map_.clear();
@@ -322,12 +325,12 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_account(const kungfu::AccountInfo &account)
+    void PositionManagerImpl::on_account(const kungfu::flying::AccountInfo &account)
     {
         boost::ignore_unused(account);
     }
 
-    void PositionManagerImpl::on_order_input(const OrderInput *input)
+    void PositionManagerImpl::on_order_input(const kungfu::journal::OrderInput *input)
     {
         // 不处理开仓
         if (is_open(input->instrument_type, input->side, input->offset) || input->volume <= 0)
@@ -508,7 +511,7 @@ namespace kungfu
         boost::ignore_unused(cb);
     }
 
-    double PositionManagerImpl::choose_price(const kungfu::Position &pos) const
+    double PositionManagerImpl::choose_price(const kungfu::flying::Position &pos) const
     {
         if (pos.instrument_type == InstrumentTypeStock || pos.instrument_type == InstrumentTypeBond)
         {
@@ -575,7 +578,7 @@ namespace kungfu
         return changed;
     }
 
-    void PositionManagerImpl::callback(const kungfu::Position &pos) const
+    void PositionManagerImpl::callback(const kungfu::flying::Position &pos) const
     {
         for (const auto& cb : cbs_)
         {
@@ -583,7 +586,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::init_pos_from_input(const kungfu::OrderInput *input)
+    void PositionManagerImpl::init_pos_from_input(const kungfu::journal::OrderInput *input)
     {
         Position pos = {};
         pos.rcv_time = yijinjing::getNanoTime();
@@ -599,7 +602,7 @@ namespace kungfu
         pos_map[get_symbol(input->instrument_id, input->exchange_id)] = pos;
     }
 
-    void PositionManagerImpl::init_pos_from_trade(const kungfu::Trade *trade)
+    void PositionManagerImpl::init_pos_from_trade(const kungfu::journal::Trade *trade)
     {
         Position pos = {};
         pos.rcv_time = trade->rcv_time;
@@ -615,7 +618,7 @@ namespace kungfu
         pos_map[get_symbol(trade->instrument_id, trade->exchange_id)] = pos;
     }
 
-    void PositionManagerImpl::deal_bond_from_buy(const kungfu::Trade *trade)
+    void PositionManagerImpl::deal_bond_from_buy(const kungfu::journal::Trade *trade)
     {
         Position pos = {};
         pos.rcv_time = trade->rcv_time;
@@ -634,7 +637,7 @@ namespace kungfu
         bond_map_[pos.expire_date].emplace_back(pos);
     }
 
-    void PositionManagerImpl::insert_detail_from_trade(const kungfu::Trade *trade)
+    void PositionManagerImpl::insert_detail_from_trade(const kungfu::journal::Trade *trade)
     {
         Position pos = {};
         pos.rcv_time = trade->rcv_time;
@@ -654,11 +657,10 @@ namespace kungfu
         detail_map[get_symbol(trade->instrument_id, trade->exchange_id)].emplace_back(pos);
     }
 
-    void PositionManagerImpl::remove_detail_from_trade(const kungfu::Trade *trade)
+    void PositionManagerImpl::remove_detail_from_trade(const kungfu::journal::Trade *trade)
     {
         auto direction = trade->instrument_type == InstrumentTypeFuture ? get_future_direction(trade->side, trade->offset) : DirectionLong;
         auto& detail_map = direction == DirectionLong ? long_detail_map_ : short_detail_map_;
-
         auto vol_left = trade->volume;
         bool today_only = strcmp(trade->exchange_id, EXCHANGE_SHFE) == 0 && trade->offset == OffsetCloseToday;
         auto key = get_symbol(trade->instrument_id, trade->exchange_id);
@@ -691,7 +693,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_order_stock(const kungfu::Order *order)
+    void PositionManagerImpl::on_order_stock(const kungfu::journal::Order *order)
     {
         auto key = get_symbol(order->instrument_id, order->exchange_id);
         if (long_pos_map_.find(key) != long_pos_map_.end())
@@ -707,7 +709,7 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_order_future(const kungfu::Order *order)
+    void PositionManagerImpl::on_order_future(const kungfu::journal::Order *order)
     {
         auto key = get_symbol(order->instrument_id, order->exchange_id);
         auto& pos_map = get_future_direction(order->side, order->offset) == DirectionLong ? long_pos_map_ : short_pos_map_;
@@ -727,15 +729,11 @@ namespace kungfu
         }
     }
 
-    void PositionManagerImpl::on_trade_stock(const kungfu::Trade *trade)
+    void PositionManagerImpl::on_trade_stock(const kungfu::journal::Trade *trade)
     {
         auto key = get_symbol(trade->instrument_id, trade->exchange_id);
         if (frozen_map_.find(trade->order_id) != frozen_map_.end())
-        {
-            frozen_map_[trade->order_id] -= trade->volume;
-            long_pos_map_[key].frozen_total -= trade->volume;
             long_pos_map_[key].frozen_yesterday -= trade->volume;
-        }
 
         if (long_pos_map_.find(key) == long_pos_map_.end())
         {
@@ -780,7 +778,7 @@ namespace kungfu
         callback(pos);
     }
 
-    void PositionManagerImpl::on_trade_future(const kungfu::Trade *trade)
+    void PositionManagerImpl::on_trade_future(const kungfu::journal::Trade *trade)
     {
         auto key = get_symbol(trade->instrument_id, trade->exchange_id);
         auto direction = get_future_direction(trade->side, trade->offset);

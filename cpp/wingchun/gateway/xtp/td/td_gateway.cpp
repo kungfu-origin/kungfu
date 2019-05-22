@@ -82,7 +82,7 @@ namespace kungfu
 
         bool TdGateway::insert_order(const OrderInput &input)
         {
-            INSERT_ORDER_TRACE(kungfu::to_string(input));
+            INSERT_ORDER_TRACE(kungfu::journal::to_string(input));
             XTPOrderInsertInfo xtp_input = {};
             to_xtp(xtp_input, input);
 
@@ -128,7 +128,7 @@ namespace kungfu
 
         bool TdGateway::cancel_order(const OrderAction &action)
         {
-            CANCEL_ORDER_TRACE(kungfu::to_string(action));
+            CANCEL_ORDER_TRACE(kungfu::journal::to_string(action));
             uint64_t xtp_order_id = order_mapper_->get_xtp_order_id(action.order_id);
             if (xtp_order_id != 0)
             {

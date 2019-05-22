@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace kungfu
+namespace kungfu {namespace journal
 {
     //合约信息
     struct Instrument
@@ -184,5 +184,5 @@ namespace kungfu
     #pragma pack(pop)
 #endif
 
-}
+}}
 #endif //PROJECT_MD_STRUCT_H

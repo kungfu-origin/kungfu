@@ -8,6 +8,9 @@
 #include "pnl_def.h"
 #include "account_manager.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
     class PortfolioManager: public IPnLDataHandler

@@ -16,9 +16,9 @@ public:
 
     virtual void init();
 
-    virtual void on_quote(const Quote& quote);
-    virtual void on_order(const Order& order);
-    virtual void on_trade(const Trade& trade);
+    virtual void on_quote(const journal::Quote& quote);
+    virtual void on_order(const journal::Order& order);
+    virtual void on_trade(const journal::Trade& trade);
 
 private:
     uint64_t order_id_;

@@ -24,6 +24,9 @@
 #include "calendar/include/calendar.h"
 #include "oms/include/def.h"
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
+
 namespace kungfu
 {
 #define DUMP_1D_SNAPSHOT(account_id, account_info) kungfu::storage::SnapshotStorage(\
@@ -154,19 +157,19 @@ namespace kungfu
 
     void MdGatewayImpl::on_quote(const Quote &quote)
     {
-        QUOTE_TRACE(kungfu::to_string(quote));
+        QUOTE_TRACE(kungfu::journal::to_string(quote));
         feed_handler_->on_quote(&quote);
     }
 
     void MdGatewayImpl::on_entrust(const Entrust &entrust)
     {
-        ENTRUST_TRACE(kungfu::to_string(entrust));
+        ENTRUST_TRACE(kungfu::journal::to_string(entrust));
         feed_handler_->on_entrust(&entrust);
     }
 
     void MdGatewayImpl::on_transaction(const Transaction &transaction)
     {
-        TRANSACTION_TRACE(kungfu::to_string(transaction));
+        TRANSACTION_TRACE(kungfu::journal::to_string(transaction));
         feed_handler_->on_transaction(&transaction);
     }
 
@@ -465,7 +468,7 @@ namespace kungfu
 
     void TdGatewayImpl::on_order(Order &order)
     {
-        ORDER_TRACE(kungfu::to_string(order));
+        ORDER_TRACE(kungfu::journal::to_string(order));
         feed_handler_->on_order(&order);
         account_manager_->on_order(&order);
         order_manager_->on_order(&order);
@@ -475,7 +478,7 @@ namespace kungfu
 
     void TdGatewayImpl::on_trade(Trade &trade)
     {
-        TRADE_TRACE(kungfu::to_string(trade));
+        TRADE_TRACE(kungfu::journal::to_string(trade));
         double commission = account_manager_->calc_commission(&trade);
         double tax = account_manager_->calc_tax(&trade);
         trade.commission = commission;
@@ -492,7 +495,7 @@ namespace kungfu
 
     void TdGatewayImpl::on_position(const Position &pos, bool is_last)
     {
-        POSITION_TRACE(kungfu::to_string(pos));
+        POSITION_TRACE(kungfu::flying::to_string(pos));
         feed_handler_->on_position(&pos);
         get_publisher()->publish_pos(pos);
 
@@ -506,7 +509,7 @@ namespace kungfu
 
     void TdGatewayImpl::on_position_detail(const Position &pos_detail, bool is_last)
     {
-        POSITION_DETAIL_TRACE(kungfu::to_string(pos_detail));
+        POSITION_DETAIL_TRACE(kungfu::flying::to_string(pos_detail));
         feed_handler_->on_position_detail(&pos_detail);
         rsp_pos_detail_.push_back(pos_detail);
         if (is_last)
@@ -519,7 +522,7 @@ namespace kungfu
     void TdGatewayImpl::on_account(AccountInfo& account)
     {
         strcpy(account.trading_day, get_calendar()->get_current_trading_day().c_str());
-        ACCOUNT_TRACE( kungfu::to_string(account));
+        ACCOUNT_TRACE( kungfu::flying::to_string(account));
         feed_handler_->on_account(&account);
         account_manager_->on_account(account);
     }

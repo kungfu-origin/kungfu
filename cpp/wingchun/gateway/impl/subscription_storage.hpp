@@ -66,15 +66,15 @@ namespace kungfu
             }
         }
 
-        std::vector<Instrument> get_subscriptions()
+        std::vector<journal::Instrument> get_subscriptions()
         {
-            std::vector<Instrument> result;
+            std::vector<journal::Instrument> result;
             try
             {
                 SQLite::Database db(file_name_.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
                 create_table_if_not_exist(db);
                 SQLite::Statement query(db, "SELECT * FROM subscription");
-                Instrument inst = {};
+                journal::Instrument inst = {};
                 while (query.executeStep())
                 {
                     strcpy(inst.instrument_id, query.getColumn(0));
@@ -111,7 +111,7 @@ namespace kungfu
             return result;
         }
 
-        void add_subscription(const Instrument& instrument)
+        void add_subscription(const journal::Instrument& instrument)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace kungfu
             }
         }
 
-        void del_subscription(const Instrument& instrument)
+        void del_subscription(const journal::Instrument& instrument)
         {
             try
             {

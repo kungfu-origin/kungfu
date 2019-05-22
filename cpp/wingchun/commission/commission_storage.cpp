@@ -41,8 +41,8 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::load(kungfu::InstrumentCommissionRate &stock_rate,
-            std::map<std::string, kungfu::InstrumentCommissionRate> &future_rates) const
+    void CommissionStorage::load(kfj::InstrumentCommissionRate &stock_rate,
+            std::map<std::string, kfj::InstrumentCommissionRate> &future_rates) const
     {
         stock_rate = {};
         future_rates.clear();
@@ -54,7 +54,7 @@ namespace kungfu
             SQLite::Statement query(db, "SELECT * FROM commission;");
             while (query.executeStep())
             {
-                InstrumentCommissionRate rate = {};
+                kfj::InstrumentCommissionRate rate = {};
                 strcpy(rate.instrument_id, query.getColumn(0));
                 strcpy(rate.exchange_id, query.getColumn(1));
                 rate.instrument_type = query.getColumn(2)[0];
@@ -70,7 +70,7 @@ namespace kungfu
 
                 if (rate.instrument_type == InstrumentTypeStock || rate.instrument_type == InstrumentTypeBond)
                 {
-                    memcpy(&stock_rate, &rate, sizeof(InstrumentCommissionRate));
+                    memcpy(&stock_rate, &rate, sizeof(kfj::InstrumentCommissionRate));
                 }
                 else
                 {
@@ -84,7 +84,7 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::save(const kungfu::InstrumentCommissionRate &rate) const
+    void CommissionStorage::save(const kfj::InstrumentCommissionRate &rate) const
     {
         try
         {
@@ -97,7 +97,7 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::save(const std::vector<kungfu::InstrumentCommissionRate> &rates) const
+    void CommissionStorage::save(const std::vector<kfj::InstrumentCommissionRate> &rates) const
     {
         try
         {
@@ -115,8 +115,8 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::save(const kungfu::InstrumentCommissionRate &stock_rate,
-            const std::map<std::string, kungfu::InstrumentCommissionRate> &future_rates) const
+    void CommissionStorage::save(const kfj::InstrumentCommissionRate &stock_rate,
+            const std::map<std::string, kfj::InstrumentCommissionRate> &future_rates) const
     {
         try
         {
@@ -135,7 +135,7 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::register_callback(kungfu::CommissionCallback cb)
+    void CommissionStorage::register_callback(CommissionCallback cb)
     {
         s_cbs_[account_id_].emplace_back(cb);
     }
@@ -178,7 +178,7 @@ namespace kungfu
         }
     }
 
-    void CommissionStorage::single_replace(SQLite::Database &db, const kungfu::InstrumentCommissionRate &rate) const
+    void CommissionStorage::single_replace(SQLite::Database &db, const kfj::InstrumentCommissionRate &rate) const
     {
         SQLite::Statement replace(db, "REPLACE INTO commission(instrument_id, exchange_id, instrument_type, "
                                       "account_id, broker_id, mode, open_ratio, close_ratio, "
@@ -205,7 +205,7 @@ namespace kungfu
             auto func = [](void* p, int count, char** data, char** columns) {
                 if (count == 10)
                 {
-                    InstrumentCommissionRate rate = {};
+                    kfj::InstrumentCommissionRate rate = {};
                     strcpy(rate.instrument_id, data[0]);
                     strcpy(rate.exchange_id, data[1]);
                     rate.instrument_type = data[2][0];

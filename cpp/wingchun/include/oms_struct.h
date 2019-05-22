@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 
-namespace kungfu
+namespace kungfu {namespace journal
 {
     //合约手续费率
     struct InstrumentCommissionRate
@@ -85,7 +85,12 @@ namespace kungfu
 
         int error_id;                            //错误ID
         char error_msg[ERROR_MSG_LEN];           //错误信息
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
     
     //订单操作
     struct OrderAction
@@ -112,7 +117,12 @@ namespace kungfu
 
         int error_id;                            //错误ID
         char error_msg[ERROR_MSG_LEN];           //错误信息
+#ifndef _WIN32
+    } __attribute__((packed));
+#else
     };
+    #pragma pack(pop)
+#endif
 
     //订单消息
     struct Order
@@ -202,6 +212,10 @@ namespace kungfu
     #pragma pack(pop)
 #endif
 
+}}
+
+namespace kungfu {namespace flying
+{
     //账户信息
     struct AccountInfo
     {
@@ -362,6 +376,6 @@ namespace kungfu
         int64_t start_nano;                //开始时间纳秒时间戳
         int64_t end_nano;                  //结束时间纳秒时间戳
     };
-}
+}}
 
 #endif //PROJECT_OMS_STRUCT_H

@@ -33,8 +33,8 @@ namespace kungfu
     class MdGateway: virtual public Gateway
     {
     public:
-        virtual bool subscribe(const std::vector<Instrument>& instruments, bool is_level2) = 0;
-        virtual bool unsubscribe(const std::vector<Instrument>& instruments) = 0;
+        virtual bool subscribe(const std::vector<journal::Instrument>& instruments, bool is_level2) = 0;
+        virtual bool unsubscribe(const std::vector<journal::Instrument>& instruments) = 0;
 
         virtual void on_login(const std::string& recipient, const std::string& client_id) = 0;
         virtual void on_started() = 0;
@@ -46,8 +46,8 @@ namespace kungfu
         virtual const std::string& get_account_id() const  = 0;
         virtual const AccountType get_account_type() const = 0;
 
-        virtual bool insert_order(const OrderInput& input) = 0;
-        virtual bool cancel_order(const OrderAction& action) = 0;
+        virtual bool insert_order(const journal::OrderInput& input) = 0;
+        virtual bool cancel_order(const journal::OrderAction& action) = 0;
 
         virtual bool req_position_detail() = 0;
         virtual bool req_position() = 0;

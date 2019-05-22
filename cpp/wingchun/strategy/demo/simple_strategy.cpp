@@ -14,7 +14,7 @@ void SimpleStrategy::init()
     subscribe(SOURCE_XTP, {"600000"}, EXCHANGE_SSE);
 }
 
-void SimpleStrategy::on_quote(const Quote &quote)
+void SimpleStrategy::on_quote(const journal::Quote &quote)
 {
     if (order_id_ == 0)
     {
@@ -23,11 +23,11 @@ void SimpleStrategy::on_quote(const Quote &quote)
     }
 }
 
-void SimpleStrategy::on_order(const Order &order)
+void SimpleStrategy::on_order(const journal::Order &order)
 {
 }
 
-void SimpleStrategy::on_trade(const Trade &trade)
+void SimpleStrategy::on_trade(const journal::Trade &trade)
 {
 }
 

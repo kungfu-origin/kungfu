@@ -113,9 +113,9 @@ namespace kungfu
         return get_close_time(trading_day, exchange_id, slot);
     }
 
-    std::vector<TradingSession> Calendar::get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id)
+    std::vector<flying::TradingSession> Calendar::get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id)
     {
-        std::vector<TradingSession> result;
+        std::vector<flying::TradingSession> result;
         if(end_nano<start_nano)
         {
             return result;

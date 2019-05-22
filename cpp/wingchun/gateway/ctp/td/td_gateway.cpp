@@ -94,7 +94,7 @@ namespace kungfu
 
         bool TdGateway::insert_order(const OrderInput &input)
         {
-            INSERT_ORDER_TRACE( kungfu::to_string(input));
+            INSERT_ORDER_TRACE( kungfu::journal::to_string(input));
 
             CThostFtdcInputOrderField ctp_input;
             memset(&ctp_input, 0, sizeof(ctp_input));
@@ -473,7 +473,7 @@ namespace kungfu
                 {
                     FutureInstrument instrument;
                     from_ctp(*pInstrument, instrument);
-                    INSTRUMENT_TRACE(kungfu::to_string(instrument));
+                    INSTRUMENT_TRACE(kungfu::journal::to_string(instrument));
                     future_instruments_.emplace_back(instrument);
                 }
                 if (bIsLast)

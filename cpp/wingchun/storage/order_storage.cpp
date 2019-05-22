@@ -56,7 +56,7 @@ namespace kungfu
             }
         }
 
-        void OrderStorage::add_order(uint64_t order_id, const Order &order)
+        void OrderStorage::add_order(uint64_t order_id, const journal::Order &order)
         {
             try
             {
@@ -95,9 +95,9 @@ namespace kungfu
             }
         }
 
-        const Order OrderStorage::get_order(uint64_t order_id)
+        const journal::Order OrderStorage::get_order(uint64_t order_id)
         {
-            Order result = {};
+            journal::Order result = {};
             try
             {
                 SQLite::Statement query(db_, "SELECT * FROM orders WHERE order_id = ?");

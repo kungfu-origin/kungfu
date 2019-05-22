@@ -50,17 +50,17 @@ namespace kungfu
             virtual void set_util(SimpleOrderUtil* util) = 0;
             virtual SimpleOrderUtil* get_util() const = 0;
 
-            virtual void on_order(const Order *order) = 0;
+            virtual void on_order(const journal::Order *order) = 0;
         };
 
         typedef std::shared_ptr<kungfu::oms::SimpleOrder> SimpleOrderPtr;
-        SimpleOrderPtr make_simple_order(const OrderInput& input);
-        SimpleOrderPtr make_simple_order(const Order& order);
+        SimpleOrderPtr make_simple_order(const journal::OrderInput& input);
+        SimpleOrderPtr make_simple_order(const journal::Order& order);
 
         class SimpleOrderUtil
         {
         public:
-            virtual uint64_t submit(OrderInput& input) = 0;
+            virtual uint64_t submit(journal::OrderInput& input) = 0;
             virtual uint64_t cancel(uint64_t order_id) = 0;
         };
 
@@ -80,7 +80,7 @@ namespace kungfu
             //@param order_id (必须输入) 算法订单id
             //@param child_order_input （必须输入） 子订单信息
             //@return 子订单id，如果为0，表示发送失败
-            virtual uint64_t submit_child_order(uint64_t order_id, OrderInput& child_order_input) = 0;
+            virtual uint64_t submit_child_order(uint64_t order_id, journal::OrderInput& child_order_input) = 0;
 
             //保存算法订单信息
             //@param order_id（必须输入）算法订单id
@@ -89,7 +89,7 @@ namespace kungfu
             virtual void save(uint64_t order_id, const std::string& algo_type, const std::string& order_info) = 0;
 
             //尝试冻结请求接口，如果返回 true,表示尝试成功，否则表示失败
-            virtual bool try_frozen(uint64_t order_id, const std::string& account_id, const AssetsFrozen& frozen) { return false;};
+            virtual bool try_frozen(uint64_t order_id, const std::string& account_id, const flying::AssetsFrozen& frozen) { return false;};
 
             //取消冻结请求接口
             virtual void cancel_frozen(uint64_t order_id, const std::string& account_id) {};
@@ -108,7 +108,7 @@ namespace kungfu
             //@param start_nano 开始纳秒时间戳
             //@param end_nano 结束纳秒时间戳
             //@return 交易所交易时段
-            virtual std::vector<kungfu::TradingSession> get_trading_sessions(long start_nano, long end_nano, const std::string& exchange_id) = 0;
+            virtual std::vector<kungfu::flying::TradingSession> get_trading_sessions(long start_nano, long end_nano, const std::string& exchange_id) = 0;
 
         };
 
@@ -159,15 +159,15 @@ namespace kungfu
             //子订单状态更新通知
             //@param order 子订单通知具体信息
             //@remark 子订单状态更新，函数会被调用
-            virtual void on_child_order(const Order& order) = 0;
+            virtual void on_child_order(const journal::Order& order) = 0;
 
             //子订单成交通知
             //@param trade 子订单成交通知具体信息
             //@remark 子订单有成交，函数会被调用
-            virtual void on_child_trade(const Trade& trade) = 0;
+            virtual void on_child_trade(const journal::Trade& trade) = 0;
 
             //行情更新通知
-            virtual void on_quote(const Quote& quote) = 0;
+            virtual void on_quote(const journal::Quote& quote) = 0;
 
             //时间更新通知
             virtual void on_time(long nano) = 0;
@@ -242,7 +242,7 @@ namespace kungfu
         class OrderManager
         {
         public:
-            virtual void on_order(const Order* order) = 0;
+            virtual void on_order(const kungfu::journal::Order* order) = 0;
             virtual void on_algo_order_status(uint64_t order_id, const std::string& algo_type, const std::string& order_status) = 0;
             virtual OrderPtr get_order(uint64_t order_id) const = 0;
             virtual std::vector<OrderPtr> get_pending_orders() const = 0;

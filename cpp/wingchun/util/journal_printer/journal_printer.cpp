@@ -16,22 +16,22 @@ namespace kungfu
             {
                 case kungfu::MsgType::Quote:
                 {
-                    j = *(const kungfu::Quote *) data;
+                    j = *(const kungfu::journal::Quote *) data;
                     break;
                 }
                 case kungfu::MsgType::OrderInput:
                 {
-                    j = *(const kungfu::OrderInput *) data;
+                    j = *(const kungfu::journal::OrderInput *) data;
                     break;
                 }
                 case kungfu::MsgType::Order:
                 {
-                    j = *(const kungfu::Order *) data;;
+                    j = *(const kungfu::journal::Order *) data;;
                     break;
                 }
                 case kungfu::MsgType::Trade:
                 {
-                    j = *(const kungfu::Trade *) data;
+                    j = *(const kungfu::journal::Trade *) data;
                     break;
                 }
                 case kungfu::MsgType::AlgoOrderInput:
