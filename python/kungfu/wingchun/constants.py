@@ -80,18 +80,18 @@ class MsgType:
     Portfolio = 207
     AccountInfoByMin = 208
     PortfolioByMin = 209
-    PositionDetail = 210,
-    SubPortfolioInfo = 211,
+    PositionDetail = 210
+    SubPortfolioInfo = 211
 
     ReqLogin = 301
     Subscribe = 302
-    ReqOrderInput = 303,
-    ReqOrderAction = 304,
+    ReqOrderInput = 303
+    ReqOrderAction = 304
 
-    RspLogin = 351,
-    RspSubscribe = 352,
-    RspOrderInput = 353,
-    RspOrderAction = 354,
+    RspLogin = 351
+    RspSubscribe = 352
+    RspOrderInput = 353
+    RspOrderAction = 354
 
     GatewayState = 401
 

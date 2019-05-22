@@ -207,11 +207,11 @@ class Strategy:
             self._util.on_trade(trade)
             self._on_trade(context, ctype_trade)
 
-    def __on_manual_order_action(self, account_id, client_id, order_ids, data):
+    def __on_manual_order_action(self, account_id, client_id, order_ids):
         error_id = 0
         error_text = ''
         cancel_count = 0
-        if order_ids:
+        if len(order_ids) > 0:
             cancel_count = len(order_ids)
             for order_id in order_ids:
                 self._util.cancel_order(order_id)
@@ -220,10 +220,6 @@ class Strategy:
             cancel_count = len(pending_orders)
             for order_id in pending_orders:
                 self._util.cancel_order(order_id)
-        msg = json()
-        msg["msg_type"] = MsgType.RspOrderAction
-        msg["data"]["error_id"] = error_id
-        msg["data"]["error_text"] = error_text
+        msg = {'msg_type': MsgType.RspOrderAction, 'data': {'error_id': error_id, 'error_text': error_text, 'cancel_count': cancel_count}}
         js = json.dumps(msg)
-        self._util.log_info("[on manual cancel rsp] {}".format(js))
         self._rep_socket.send(js)
