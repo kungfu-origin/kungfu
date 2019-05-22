@@ -47,7 +47,6 @@ import { debounce, throttle } from "@/assets/js/utils";
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
 import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
-import { onUpdateProcessStatusListener, offUpdateProcessStatusListener } from '@/io/event-bus';
 import { mapState } from 'vuex';
 export default {
     name: "current-orders",
@@ -73,7 +72,6 @@ export default {
 
     data() {
         this.orderDataByKey = {}; //为了把object 转为数据要用的list
-        this.processStatus = {};
         return {
             rendererTable: false,
             searchKeyword: "",
@@ -97,6 +95,7 @@ export default {
         ...mapState({
             accountList: state => state.ACCOUNT.accountList,
             calendar: state => state.BASE.calendar, //日期信息，包含交易日
+            processStatus: state => state.BASE.processStatus
         }),
 
         schema(){
@@ -187,13 +186,6 @@ export default {
         t.rendererTable = true;
         t.resetData();
         t.currentId && t.init();
-        onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
-
-    },
-    
-    destroyed() {
-        const t = this;
-        offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
     methods: {
@@ -233,12 +225,12 @@ export default {
                 return;
             }
             //撤单
+            t.$message.info('正在发送撤单指令...')           
             nanoCancelOrder({
                 gatewayName,
                 orderId: props.orderId
-            }).then(() => {
-                t.$message.info(`撤单指令已发送！`)
             })
+            .then(() => t.$message.success(`撤单指令已发送！`))
         },
 
         handleCancelAllOrders(){
@@ -260,12 +252,13 @@ export default {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
+            .then(() => t.$message.info('正在发送撤单指令...'))
             .then(() => nanoCancelAllOrder({
                 targetId: t.moduleType === 'account' ? t.gatewayName : t.currentId,
                 cancelType: t.moduleType,
                 id: t.currentId
             }))
-            .then(() => t.$message.info('撤单指令已发送！'))
+            .then(() => t.$message.success('撤单指令已发送！'))
             .catch((err) => {
                 if(err == 'cancel') return
                 t.$message.error(err.message || '操作失败！')

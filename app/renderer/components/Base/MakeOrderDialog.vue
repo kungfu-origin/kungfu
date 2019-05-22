@@ -1,6 +1,6 @@
 <template>
      <el-dialog 
-    width="450px" 
+    width="400px" 
     :title="`${moduleType === 'strategy' ? '策略' : '账户'} ${currentId} 下单`"
     v-if="visible"
     :visible="visible" 
@@ -119,9 +119,11 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
-import {sourceType} from '@/assets/config/accountConfig'
-import {biggerThanZeroValidator} from '@/assets/js/validator';
+import { mapState } from 'vuex';
+import { sourceType } from '@/assets/config/accountConfig'
+import { biggerThanZeroValidator } from '@/assets/js/validator';
+import { nanoMakeOrder } from '@/io/nano/nanoReq';
+
 export default {
     name: 'make-order-dialog',
     props: {
@@ -182,6 +184,7 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             accountList: state => state.ACCOUNT.accountList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
+            processStatus: state => state.BASE.processStatus
         }),
 
         accountType(){
@@ -230,9 +233,12 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     const makeOrderForm = t.$utils.deepClone(t.makeOrderForm)
+                    const gatewayName = `td_${makeOrderForm.account_id}`
                     makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
+                    if(!processStatus && processStatus[gatewayName] !== 'online'){
 
-                    console.log(makeOrderForm,' ====')
+                    }
+                    nanoMakeOrder(gatewayName, makeOrderForm).then(() => t.$message.sucess('下单指令已发送！'))
                 }
             })
         },

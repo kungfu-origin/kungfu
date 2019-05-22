@@ -6,6 +6,10 @@ export const setCalendar = ({commit}, calendar) => {
     commit('SET_CALENDAR', calendar)
 }
 
+export const setProcessStatus = ({commit}, processStatus) => {
+    commit('SET_PROCESS_STATUS', processStatus)
+}
+
 //获取tasks
 export const getTasks = ({commit}) => {
     return new Promise(resolve => {

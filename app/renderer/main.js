@@ -69,8 +69,10 @@ export const startGetProcessStatus = () => {
     clearTimeout(listProcessTimer)
     listProcessStatus()
     .then(res => {
-        console.log(res, '~~~~')
-        res && EVENT_BUS.$emit('update-process-status', Object.freeze(res))
+        const processStatus = Object.freeze(res);
+        console.log(processStatus, '~~~~')
+        processStatus && EVENT_BUS.$emit('update-process-status', processStatus)
+        processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
     })
     .catch(err => console.error(err))
     .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))

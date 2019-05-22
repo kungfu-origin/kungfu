@@ -13,7 +13,7 @@ window.nanomsgController = {}
 export const connectGatewayNanomsg = (gatewayName) => {
     if(!gatewayName) return false;
     const sub = nano.socket('sub');
-    const ipcDir = path.join(BASE_DIR, 'gateway', gatewayName);
+    const ipcDir = path.join(GATEWAY_DIR, gatewayName);
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'pub.ipc')
     const addr = `ipc://${ipcPath}`
@@ -52,7 +52,7 @@ export const closeGlobalGatewayNanomsg = (gatewayName) => {
 export const connectStrategyNanomsg = (strategyId) => {
     if(!strategyId) return false;
     const sub = nano.socket('sub');
-    const ipcDir = path.join(BASE_DIR, 'strategy', strategyId);
+    const ipcDir = path.join(STRATEGY_DIR, strategyId);
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'pub.ipc')
     const addr = `ipc://${ipcPath}`
@@ -95,24 +95,23 @@ export const reqCalendarNanomsg = () => {
 
 
 //手动下撤单(账户)
-export const reqOrderOperByGatewayNanomsg = (gatewayName) => {
+export const reqGatewayNanomsg = (gatewayName) => {
     const req = nano.socket('req', {
         rcvtimeo: 1000
     })
     const ipcDir = path.join(GATEWAY_DIR, gatewayName)
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'rep.ipc');
-    console.log(ipcPath)
     const addr = `ipc://${ipcPath}`
     req.connect(addr)
     return req
 }
 
-export const reqOrderOperByStrategyNanomsg = (strategy) => {
+export const reqStrategyNanomsg = (strategyId) => {
     const req = nano.socket('req', {
         rcvtimeo: 1000
     })
-    const ipcDir = path.join(STRATEGY_DIR, strategy)
+    const ipcDir = path.join(STRATEGY_DIR, strategyId)
     fse.ensureDirSync(ipcDir)
     const ipcPath = path.join(ipcDir, 'rep.ipc');
     const addr = `ipc://${ipcPath}`

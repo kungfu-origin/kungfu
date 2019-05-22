@@ -12,10 +12,6 @@ addFile(ELEC_BASE_DIR, 'app', 'folder')
 export const BASE_DIR = path.join(ELEC_BASE_DIR, 'app')
 console.log(BASE_DIR)
 
-// // pm2
-// addFile(BASE_DIR, 'pm2', 'folder')
-// export const PM2_DIR = path.join(BASE_DIR, 'pm2')
-
 //GLOBAL_DIR strategys, accounts, tasks
 addFile(BASE_DIR, 'global', 'folder')
 export const GLOBAL_DIR = path.join(BASE_DIR, 'global');

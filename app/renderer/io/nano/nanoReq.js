@@ -1,13 +1,15 @@
 
-import {reqCalendarNanomsg, reqOrderOperByGatewayNanomsg, reqOrderOperByStrategyNanomsg} from '@/io/nano/buildNmsg'
+import {reqCalendarNanomsg, reqGatewayNanomsg, reqStrategyNanomsg} from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType'
 
 
 //日历
 //主动获得交易日
 export const nanoGetCalendar = () => {
-    return new Promise((resolve) => {
-        const reqMsg = JSON.stringify({"req": "current"});
+    return new Promise(resolve => {
+        const reqMsg = JSON.stringify({
+            req: "current"
+        });
         const req = reqCalendarNanomsg();
         req.send(reqMsg + '\0')
         req.on('data', buf => {
@@ -22,19 +24,19 @@ export const nanoGetCalendar = () => {
 
 //撤单
 export const nanoCancelOrder = ({gatewayName, orderId}) => {
-    return new Promise((resolve) => {
-        const reqMsg = JSON.stringify({req: 304, data: {
-            order_id: [orderId]
-        }})
-        const req = reqOrderOperByGatewayNanomsg(gatewayName)
+    return new Promise(resolve => {
+        const reqMsg = JSON.stringify({
+            req: 304, 
+            data: {order_id: [orderId]}
+        })
+        const req = reqGatewayNanomsg(gatewayName)
         req.send(reqMsg + '\0')
-        console.log('cancel order send', reqMsg)
         req.on('data', buf => {
+            req.close()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
             if(msgType.cancelOrder === data.msg_type){
-                //todo
+                console.log('nano-Cancel-Order', data)
                 resolve(true)
-                req.close()
             }
         })
     })
@@ -46,19 +48,40 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
  * @param  {String} id strategyId / accountId}
  */
 export const nanoCancelAllOrder = ({targetId, cancelType, id}) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         const postData = cancelType === 'account' ? {account_id: id} : {client_id: id}
-        const reqMsg = JSON.stringify({req: 304, data: postData})
-        const req = cancelType ==='account' ? reqOrderOperByGatewayNanomsg(targetId) : reqOrderOperByStrategyNanomsg(targetId)
+        const reqMsg = JSON.stringify({
+            req: 304, 
+            data: postData
+        })
+        const req = cancelType ==='account' ? reqGatewayNanomsg(targetId) : reqStrategyNanomsg(targetId)
         req.send(reqMsg + '\0')
-        req.close()
-        resolve(true)
         req.on('data', buf => {
+            req.close()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
             if(msgType.cancelOrder === data.msg_type){
-                //todo
+                console.log('nano-Cancel-All-Order', data)
+                resolve(true)
             }
         })
     })
 }
 
+
+export const nanoMakeOrder = (gatewayName, makeOrderData) => {
+    return new Promise(resolve => {
+        const reqMsg = JSON.stringify({
+            req: 303,
+            data: makeOrderData
+        })
+        const req = reqGatewayNanomsg(gatewayName)
+        req.send(reqMsg + '\0')
+        req.on('data', buf => {
+            req.close()
+            const data = JSON.parse(String(buf).replace(/\0/g,''))
+            if(msgType.makeOrder === data.msg_type){
+                resolve(true)
+            }
+        })
+    })
+}
