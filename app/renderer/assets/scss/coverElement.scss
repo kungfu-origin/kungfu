@@ -416,6 +416,10 @@ p.el-select-dropdown__empty{
         color: #fff;
     }
 }
+.el-button.el-button--default.el-button--primary{
+    background-color: $vi;
+    border-color: $vi;
+}
 
 
 .el-button.el-button--mini{

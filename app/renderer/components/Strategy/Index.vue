@@ -142,6 +142,7 @@ export default {
                         const orderData = JSON.parse(String(buf).replace(/\0/g,''))
                         const {data, msg_type} = orderData
                         if(msgType.order == msg_type && data.client_id === t.strategyId) {
+                            console.log('order nano: ', data, '~~~~~~~')
                             t.orderNanomsgBack = Object.freeze(data)
                         }
                     })
@@ -163,6 +164,7 @@ export default {
                         const tradeData = JSON.parse(String(buf).replace(/\0/g,''))
                         const {data, msg_type} = tradeData
                         if(msgType.trade == msg_type && data.client_id === t.strategyId) {
+                            console.log('trade nano: ', data, '--------')
                             t.tradeNanomsgBack = Object.freeze(data)
                         }
                     })
@@ -180,6 +182,7 @@ export default {
                 const posData = JSON.parse(String(buf).replace(/\0/g,''))
                 const {data, msg_type} = posData
                 if(msgType.position == msg_type && data.client_id === t.strategyId) {
+                    console.log('pos nano: ', data, '========')
                     t.posNanomsgBack = Object.freeze(data)
                 }
             })

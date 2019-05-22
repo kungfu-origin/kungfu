@@ -189,7 +189,11 @@ export default {
                     if(len > 1000) t.tableData = t.tableData.slice(len - 1000, len)
                 }, 60000);
                 
-            t.tailObserver = new Tail(logPath);   
+            t.tailObserver = new Tail(logPath, {
+                flushAtEOF: true,
+                useWatchFile: true,
+                follow: true,
+            });   
             t.tailObserver.watch();    
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
