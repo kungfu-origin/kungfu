@@ -353,7 +353,7 @@ namespace kungfu {namespace flying
         j["update_time"] = account.update_time;
         j["trading_day"] = std::string(account.trading_day);
         j["account_id"] = std::string(account.account_id);
-        j["type"] = std::string(1, account.type);
+        j["type"] = std::string(1, account.account_type);
         j["broker_id"] = std::string(account.broker_id);
         j["source_id"] = std::string(account.source_id);
         j["initial_equity"] = FORMAT_DOUBLE(account.initial_equity);

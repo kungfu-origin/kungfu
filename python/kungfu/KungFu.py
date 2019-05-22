@@ -131,7 +131,7 @@ class KungFu(object):
         printer.run(start_time, end_time, args.keep)
 
     def strategy(self, args, logger):
-        from kungfu.wingchun import strategy
+        from kungfu.client import strategy
         strategy_process = strategy.Strategy(logger, args.name, args.path)
         atexit.register(exit_handler, task = strategy_process)
         strategy_process.run()

@@ -399,7 +399,7 @@ namespace kungfu
         cancel_order(order_action);
     }
 
-    void TdGatewayImpl::on_manual_order_input(kungfu::OrderInput &order_input)
+    void TdGatewayImpl::on_manual_order_input(kungfu::journal::OrderInput &order_input)
     {
         int error_id = 0;
         std::string error_text = "";
@@ -530,7 +530,7 @@ namespace kungfu
     void TdGatewayImpl::on_1min_timer(int64_t nano)
     {
         auto account_info = account_manager_->get_account_info();
-        bool is_open = calendar_->is_open(nano, account_info.type == AccountTypeFuture ? EXCHANGE_SHFE : EXCHANGE_SSE);
+        bool is_open = calendar_->is_open(nano, account_info.account_type == AccountTypeFuture ? EXCHANGE_SHFE : EXCHANGE_SSE);
         TIMER_TRACE(fmt::format("[on_1min_timer] (nano) {} (is_open) {}", nano, is_open));
         if (is_open)
         {

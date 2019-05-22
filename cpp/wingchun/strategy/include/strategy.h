@@ -22,6 +22,8 @@ namespace kungfu
         explicit Strategy(const std::string& name);
         virtual ~Strategy();
 
+        const std::string& get_name();
+
         // 开始运行
         void run();
 
@@ -221,7 +223,7 @@ namespace kungfu
     private:
         class impl;
         std::unique_ptr<impl> impl_;
-
+        std::string name_;
     };
 }
 #endif //WC_2_STRATEGY_H

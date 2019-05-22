@@ -372,7 +372,7 @@ namespace kungfu
 
                 AccountInfo account = {};
                 strcpy(account.account_id, get_account_id().c_str());
-                account.type = AccountTypeFuture;
+                account.account_type = AccountTypeFuture;
                 from_ctp(*pTradingAccount, account);
                 int64_t nano = kungfu::yijinjing::getNanoTime();
                 account.rcv_time = nano;

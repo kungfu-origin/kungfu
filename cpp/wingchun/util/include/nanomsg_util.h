@@ -72,8 +72,10 @@ namespace kungfu
         }
         else
         {
-            SPDLOG_ERROR("no response");
+            SPDLOG_ERROR("no response from {}", url);
         }
+        nn_shutdown(socket, 0);
+        nn_close(socket);
         return rsp;
     }
 }

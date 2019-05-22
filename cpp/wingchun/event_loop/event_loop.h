@@ -34,7 +34,7 @@ namespace kungfu
     typedef std::function<void (uint64_t order_id, const std::string& client_id, const std::string& algo_type, const std::string& algo_order_input)> AlgoOrderInputCallback;
     typedef std::function<void (uint64_t order_id, const std::string& algo_type, const std::string& status)> AlgoOrderStatusCallback;
     typedef std::function<void (uint64_t order_id, uint64_t order_action_id, const std::string& cmd)> AlgoOrderActionCallback;
-    typedef std::function<void (OrderInput& input)> ManualOrderInputCallback;
+    typedef std::function<void (kfj::OrderInput& input)> ManualOrderInputCallback;
     typedef std::function<void (const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids)> ManualOrderActionCallback;
     typedef std::function<void ()> ReloadInstrumentsCallback;
     typedef std::function<void (int sig)> SignalCallback;

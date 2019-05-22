@@ -166,6 +166,7 @@ namespace kungfu {namespace journal
         VolumeCondition volume_condition;        //成交量类型
         TimeCondition time_condition;            //成交时间类型
 
+        std::string get_trading_day() {return std::string(trading_day);}
         std::string get_instrument_id() {return std::string(instrument_id);}
         std::string get_exchange_id() {return std::string(exchange_id);}
         std::string get_account_id() {return std::string(account_id);}
@@ -205,6 +206,11 @@ namespace kungfu {namespace journal
 
         double tax;                              //税
         double commission;                       //手续费
+
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_client_id() {return std::string(client_id);}
 #ifndef _WIN32
     } __attribute__((packed));
 #else
@@ -224,7 +230,7 @@ namespace kungfu {namespace flying
         char trading_day[DATE_LEN];        //交易日
 
         char account_id[ACCOUNT_ID_LEN];   //账号ID
-        AccountType type;                  //账号类型
+        AccountType account_type;                  //账号类型
         char broker_id[BROKER_ID_LEN];     //Broker ID
         char source_id[SOURCE_ID_LEN];     //柜台ID
 
@@ -247,6 +253,11 @@ namespace kungfu {namespace flying
 
         double position_pnl;               //持仓盈亏(期货)
         double close_pnl;                  //平仓盈亏(期货)
+
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_broker_id() {return std::string(broker_id);}
+        std::string get_source_id() {return std::string(source_id);}
     };
 
     //持仓信息
@@ -292,6 +303,14 @@ namespace kungfu {namespace flying
 
         char open_date[DATE_LEN];                //开仓日(YYYYMMDD,仅期货明细和债券)
         char expire_date[DATE_LEN];              //到期日(YYYYMMDD,仅债券)
+
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_instrument_id() {return std::string(instrument_id);}
+        std::string get_exchange_id() {return std::string(exchange_id);}
+        std::string get_account_id() {return std::string(account_id);}
+        std::string get_client_id() {return std::string(client_id);}
+        std::string get_open_date() {return std::string(open_date);}
+        std::string get_expire_date() {return std::string(expire_date);}
     };
 
     //投资组合信息
@@ -309,6 +328,9 @@ namespace kungfu {namespace flying
         double accumulated_pnl_ratio;  //累计收益率
         double intraday_pnl;           //日内收益
         double intraday_pnl_ratio;     //日内收益率
+
+        std::string get_trading_day() {return std::string(trading_day);}
+        std::string get_client_id() {return std::string(client_id);}
     };
 
     typedef AccountInfo SubPortfolioInfo; // 策略中的单个账户数据

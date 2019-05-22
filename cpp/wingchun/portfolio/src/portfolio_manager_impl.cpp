@@ -223,7 +223,7 @@ namespace kungfu
         if (accounts_.find(account.account_id) == accounts_.end())
         {
             SPDLOG_INFO("portfolio {} add account{}", name_, account.account_id);
-            auto account_manager = create_account_manager(account.account_id, account.type);
+            auto account_manager = create_account_manager(account.account_id, account.account_type);
             account_manager->set_current_trading_day(trading_day_);
             accounts_[account.account_id] = account_manager;
             account_manager->register_pos_callback(std::bind(&PortfolioManagerImpl::on_pos_callback, this, std::placeholders::_1));

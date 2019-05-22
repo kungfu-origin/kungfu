@@ -104,10 +104,10 @@ namespace kungfu
 		{
 			return false;
 		}
-        info.type = rsp.type;
+        info.account_type = rsp.type;
 
-        has_stock_account_ = has_stock_account_ || (info.type == AccountTypeStock || info.type == AccountTypeCredit);
-        has_future_account_ = has_future_account_ || info.type == AccountTypeFuture;
+        has_stock_account_ = has_stock_account_ || (info.account_type == AccountTypeStock || info.account_type == AccountTypeCredit);
+        has_future_account_ = has_future_account_ || info.account_type == AccountTypeFuture;
 
         if (portfolio_manager_->get_account(account_id.c_str()) == nullptr)
         {
@@ -118,7 +118,7 @@ namespace kungfu
             strcpy(acc.account_id, account_id.c_str());
             strcpy(acc.source_id, source_id.c_str());
             strcpy(acc.trading_day, calendar_->get_current_trading_day().c_str());
-            acc.type = rsp.type;
+            acc.account_type = rsp.type;
             acc.initial_equity = cash_limit;
             acc.static_equity = cash_limit;
             acc.dynamic_equity = cash_limit;

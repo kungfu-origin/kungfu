@@ -77,7 +77,7 @@ namespace kungfu
             insert.bind(1, account_info.update_time);
             insert.bind(2, account_info.trading_day);
             insert.bind(3, account_info.account_id);
-            insert.bind(4, std::string(1, account_info.type));
+            insert.bind(4, std::string(1, account_info.account_type));
             insert.bind(5, account_info.broker_id);
             insert.bind(6, account_info.source_id);
             insert.bind(7, account_info.initial_equity);

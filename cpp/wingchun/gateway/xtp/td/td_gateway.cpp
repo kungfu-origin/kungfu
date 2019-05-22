@@ -298,7 +298,7 @@ namespace kungfu
             {
                 AccountInfo account = {};
                 strcpy(account.account_id, get_account_id().c_str());
-                account.type = AccountTypeStock;
+                account.account_type = AccountTypeStock;
                 if (error_info == nullptr || error_info->error_id == 0)
                 {
                     from_xtp(*asset, account);

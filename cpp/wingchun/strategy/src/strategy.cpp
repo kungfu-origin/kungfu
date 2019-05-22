@@ -113,7 +113,7 @@ namespace kungfu
             {
                 util_->on_quote(quote);
                 strategy_->on_quote(quote);
-            }
+            }            
         }
         void process_order(const Order& order)
         {
@@ -190,9 +190,14 @@ namespace kungfu
         std::shared_ptr<nn::socket> rsp_socket_;
     };
 
-    Strategy::Strategy(const std::string& name) : impl_(new impl(this, name)) {}
+    Strategy::Strategy(const std::string& name) : name_(name), impl_(new impl(this, name)) {}
 
     Strategy::~Strategy() {}
+
+    const std::string& Strategy::get_name()
+    {
+        return name_;
+    }
 
     void Strategy::run()
     {
