@@ -175,14 +175,14 @@ export const startProcess = async (options) => {
 }
 
 //启动pageEngine
-export const startPageEngine = async(force) => {
+export const startMaster = async(force) => {
     const processName = 'page_engine'
-    const pageEngines = await describeProcess(processName);
-    if(pageEngines instanceof Error) throw pageEngines
-    if(!force && pageEngines.length) throw new Error('page_engine正在运行！')
+    const master = await describeProcess(processName);
+    if(master instanceof Error) throw master
+    if(!force && master.length) throw new Error('master正在运行！')
     return startProcess({
         "name": processName,
-        "args": "paged --name paged",
+        "args": "master",
     }).catch(err => logger.error(err))
 }
 

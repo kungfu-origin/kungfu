@@ -78,11 +78,10 @@ export const startGetProcessStatus = () => {
     .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 }
 
-//start pm2 kungfu engine
+//start pm2 kungfu master
 process.env.ELECTRON_RUN_AS_NODE = true;
-const {startPageEngine, startCalendarEngine} = require('__gUtils/processUtils');
-startPageEngine(false)
-.then(() => startCalendarEngine(false))
+const {startMaster} = require('__gUtils/processUtils');
+startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
     startGetProcessStatus()
