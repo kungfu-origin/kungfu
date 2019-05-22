@@ -135,7 +135,7 @@ class EventLoop:
                 reply = socket.recv(nnpy.DONTWAIT)
                 j_reply = json.loads(reply.decode('utf-8')[:-1])
                 # compatible with req
-                if j_reply.has_key("req") and not j_reply.has_key("msg_type"):
+                if "req" in j_reply and "msg_type" not in j_reply:
                     j_reply["msg_type"] = j_reply["req"]
                 msg_type = j_reply["msg_type"]
                 data = j_reply["data"]
