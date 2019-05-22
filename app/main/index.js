@@ -14,9 +14,6 @@ const {logger} = require('__gUtils/logUtils');
 const {platform} = require('__gConfig/platformConfig');
 
 
-//一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
-killExtra().catch(err => console.error(err))
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
@@ -114,10 +111,27 @@ if(!gotTheLock) {
 	})
 }
 
+
+var appReady = false, killExtraFinished = false;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', () => {
+	appReady = true;
+	if(appReady && killExtraFinished) createWindow()
+})
+
+//一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
+console.time('finish kill extra ------ ')
+killExtra()
+.catch(err => console.error(err))
+.finally(() => {
+	killExtraFinished = true;
+	if(appReady && killExtraFinished) createWindow()
+	console.timeEnd('finish kill extra ------ ')
+	
+})
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function (e) {

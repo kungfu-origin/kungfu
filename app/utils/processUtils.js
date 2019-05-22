@@ -48,7 +48,8 @@ export const killExtra = () => kfKill(['kfc', 'pm2'])
 const pm2Connect = () => {
     return new Promise((resolve, reject) => {
         try{
-            const noDaemon = platform === 'win' ? true : false
+            let noDaemon = platform === 'win' ? true : false
+            if(process.env.NODE_ENV === 'development') noDaemon = false;
             pm2.connect(noDaemon, (err) => {
                 if(err) {
                     process.exit(2);
