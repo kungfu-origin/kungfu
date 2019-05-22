@@ -120,7 +120,7 @@ namespace kungfu
         algo_order_action_callback_ = callback;
     }
 
-    void EventLoop::register_manual_order_input_callback(kungfu::OrderInputCallback callback)
+    void EventLoop::register_manual_order_input_callback(kungfu::ManualOrderInputCallback callback)
     {
         manual_order_input_callback_ = callback;
     }
@@ -379,6 +379,23 @@ namespace kungfu
                                 reload_instruments_callback_();
                             }
                             break;
+                        }
+                        case MsgType::ReqOrderInput:
+                        {
+                            if (manual_order_input_callback_)
+                            {
+                                OrderInput order_input = {};
+                                strcpy(order_input.instrument_id, msg.data["instrument_id"].get<std::string>().c_str());
+                                strcpy(order_input.account_id, msg.data["account_id"].get<std::string>().c_str());
+                                strcpy(order_input.client_id, msg.data["client_id"].get<std::string>().c_str());
+                                order_input.price_type = msg.data["price_type"].get<std::string>()[0];
+                                order_input.limit_price = msg.data["limit_price"].get<double>();
+                                order_input.volume = msg.data["volume"].get<int64_t>();
+                                order_input.side = msg.data["side"].get<std::string>()[0];
+                                order_input.offset = msg.data["offset"].get<std::string>()[0];
+
+                                manual_order_input_callback_(order_input);
+                            }
                         }
                         case MsgType::ReqOrderAction:
                         {

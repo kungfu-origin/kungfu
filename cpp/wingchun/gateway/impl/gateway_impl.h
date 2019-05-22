@@ -169,6 +169,7 @@ namespace kungfu
         void on_order_input(const OrderInput& order_input);
         void on_order_action(const OrderAction& order_action);
 
+        void on_manual_order_input(OrderInput& order_input);
         void on_manual_order_action(const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids);
 
         void on_order(Order& order);

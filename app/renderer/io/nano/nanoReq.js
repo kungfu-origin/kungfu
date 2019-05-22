@@ -80,6 +80,7 @@ export const nanoMakeOrder = (gatewayName, makeOrderData) => {
             req.close()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
             if(msgType.makeOrder === data.msg_type){
+                console.log('nano-Make-Order', data)
                 resolve(true)
             }
         })

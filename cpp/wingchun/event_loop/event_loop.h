@@ -29,6 +29,7 @@ namespace kungfu
     typedef std::function<void (uint64_t order_id, const std::string& client_id, const std::string& algo_type, const std::string& algo_order_input)> AlgoOrderInputCallback;
     typedef std::function<void (uint64_t order_id, const std::string& algo_type, const std::string& status)> AlgoOrderStatusCallback;
     typedef std::function<void (uint64_t order_id, uint64_t order_action_id, const std::string& cmd)> AlgoOrderActionCallback;
+    typedef std::function<void (OrderInput& input)> ManualOrderInputCallback;
     typedef std::function<void (const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids)> ManualOrderActionCallback;
     typedef std::function<void ()> ReloadInstrumentsCallback;
     typedef std::function<void (int sig)> SignalCallback;
@@ -66,7 +67,7 @@ namespace kungfu
         void register_algo_order_status_callback(AlgoOrderStatusCallback callback);
         void register_algo_order_action_callback(AlgoOrderActionCallback callback);
 
-        void register_manual_order_input_callback(OrderInputCallback callback);
+        void register_manual_order_input_callback(ManualOrderInputCallback callback);
         void register_manual_order_action_callback(ManualOrderActionCallback callback);
 
         void register_reload_instruments_callback(ReloadInstrumentsCallback callback);
@@ -107,7 +108,7 @@ namespace kungfu
         AlgoOrderStatusCallback algo_order_status_callback_;
         AlgoOrderActionCallback algo_order_action_callback_;
 
-        OrderInputCallback manual_order_input_callback_;
+        ManualOrderInputCallback manual_order_input_callback_;
         ManualOrderActionCallback manual_order_action_callback_;
 
         ReloadInstrumentsCallback reload_instruments_callback_;

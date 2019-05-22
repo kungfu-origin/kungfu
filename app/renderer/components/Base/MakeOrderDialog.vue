@@ -228,12 +228,16 @@ export default {
                     const sourceAccountId = makeOrderForm.account_id;
                     const gatewayName = `td_${sourceAccountId}`
                     makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
+                    //下面这些需要传string
+                    makeOrderForm.price_type = `${t.makeOrderForm.price_type}`
+                    makeOrderForm.side = `${t.makeOrderForm.side}`
+                    makeOrderForm.offset = `${t.makeOrderForm.offset}`
                     if((t.processStatus || {})[gatewayName] !== 'online'){
                         t.$message.warning(`需要先启动 ${sourceAccountId} 交易进程！`)
                         return;
                     }
                     t.$message.info('正在发送订单指令...')
-                    nanoMakeOrder(gatewayName, makeOrderForm).then(() => t.$message.sucess('下单指令已发送！'))
+                    nanoMakeOrder(gatewayName, makeOrderForm).then(() => t.$message.success('下单指令已发送！'))
                 }
             })
         },

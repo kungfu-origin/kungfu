@@ -230,6 +230,7 @@ namespace kungfu
         loop_->register_order_input_callback(std::bind(&TdGatewayImpl::on_order_input, this, std::placeholders::_1));
         loop_->register_order_action_callback(std::bind(&TdGatewayImpl::on_order_action, this, std::placeholders::_1));
         loop_->register_quote_callback(std::bind(&TdGatewayImpl::on_quote, this, std::placeholders::_1));
+        loop_->register_manual_order_input_callback(std::bind(&TdGatewayImpl::on_manual_order_input, this, std::placeholders::_1));
         loop_->register_manual_order_action_callback(std::bind(&TdGatewayImpl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
         calendar_->register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
@@ -386,22 +387,6 @@ namespace kungfu
     {
         if (order_input.account_id == this->get_account_id())
         {
-//            if (order_input.order_id == 0)
-//            {
-//                auto order_input_ptr = (OrderInput*)(&order_input);
-//                auto order_id = next_id();
-//                order_input_ptr->order_id = order_id;
-//
-//                OrderInputRsp rsp = {};
-//                rsp.order_id = order_id;
-//                NNMsg msg = {};
-//                msg.msg_type = MsgType::RspOrderInput;
-//                msg.data = rsp;
-//                std::string js = to_string(msg);
-//                SPDLOG_TRACE("sending {} ", js);
-//                acc_rsp_socket_->send(js.c_str(), js.length() + 1, 0);
-//            }
-
             insert_order(order_input);
         }
     }
@@ -409,6 +394,40 @@ namespace kungfu
     void TdGatewayImpl::on_order_action(const OrderAction &order_action)
     {
         cancel_order(order_action);
+    }
+
+    void TdGatewayImpl::on_manual_order_input(kungfu::OrderInput &order_input)
+    {
+        int error_id = 0;
+        std::string error_text = "";
+        uint64_t order_id = 0;
+
+        if (strcmp(get_account_id().c_str(), order_input.account_id) == 0)
+        {
+            order_id = next_id();
+            auto type = get_account_type();
+
+            order_input.order_id = order_id;
+            strcpy(order_input.exchange_id, (type == AccountTypeFuture ? get_exchange_id_from_future_instrument_id(order_input.instrument_id) : get_exchange_id_from_stock_instrument_id(order_input.instrument_id)).c_str());
+            order_input.instrument_type = get_instrument_type(order_input.instrument_id, order_input.exchange_id);
+            order_input.frozen_price = order_input.limit_price;
+            order_input.volume_condition = VolumeConditionAny;
+            order_input.time_condition = TimeConditionGFD;
+
+            insert_order(order_input);
+        }
+        else
+        {
+            error_id = -1;
+            error_text = "account id not matched";
+        }
+
+        NNMsg msg = {MsgType::RspOrderInput, {}};
+        msg.data["error_id"] = error_id;
+        msg.data["error_text"] = error_text;
+        msg.data["order_id"] = std::to_string(order_id);
+        std::string js = to_string(msg);
+        rsp_socket_->send(js.c_str(), js.length() + 1, 0);
     }
 
     void TdGatewayImpl::on_manual_order_action(const std::string &account_id, const std::string &client_id, const std::vector<uint64_t> &order_ids)

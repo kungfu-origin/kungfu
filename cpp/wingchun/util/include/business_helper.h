@@ -319,6 +319,36 @@ namespace kungfu
             return "";
         }
     }
+
+    inline std::string get_exchange_id_from_stock_instrument_id(const char* instrument_id)
+    {
+        int code = atoi(instrument_id);
+        int head3 = code / 1000;
+        switch (head3)
+        {
+            case 001:
+            case 201:
+            case 100:
+            case 110:
+            case 120:
+            case 129:
+            case 310:
+            case 500:
+            case 600:
+            case 601:
+            case 700:
+            case 701:
+            case 710:
+            case 720:
+            case 730:
+            case 735:
+            case 737:
+            case 900:
+                return EXCHANGE_SSE;
+            default:
+                return EXCHANGE_SZE;
+        }
+    }
 }
 
 #endif //KUNGFU_BUSINESS_HELPER_H
