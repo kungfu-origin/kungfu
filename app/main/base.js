@@ -4,6 +4,7 @@ const fse = require('fs-extra');
 const initGobalDB = require('__gConfig/initGlobalDB.json');
 const {GLOBAL_DIR} = require('__gConfig/pathConfig');
 const {logger} = require('__gUtils/logUtils');
+const { ipcMain } = require('electron')
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

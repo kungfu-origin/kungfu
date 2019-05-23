@@ -71,6 +71,7 @@ export const startGetProcessStatus = () => {
     listProcessStatus()
     .then(res => {
         const processStatus = Object.freeze(res);
+        console.log(processStatus)
         processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
     })
     .catch(err => console.error(err))
