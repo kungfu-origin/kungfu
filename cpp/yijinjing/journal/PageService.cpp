@@ -32,6 +32,25 @@ using json = nlohmann::json;
 void page_service_signal_callback(int signum)
 {
     switch(signum){
+#ifdef _WINDOWS
+        case  SIGINT:          // interrupt
+        case  SIGBREAK:        // Ctrl-Break sequence
+            SPDLOG_INFO("KungFu server interrupted");
+            exit(signum);
+            break;
+        case  SIGTERM:         // Software termination signal from kill
+            SPDLOG_INFO("KungFu server killed");
+            exit(signum);
+            break;
+        case  SIGILL:          // illegal instruction - invalid function image
+        case  SIGFPE:          // floating point exception
+        case  SIGSEGV:         // segment violation
+        case  SIGABRT:         // abnormal termination triggered by abort call
+        case  SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
+            SPDLOG_CRITICAL("KungFu server stopped by signal {}", signum);
+            exit(signum);
+            break;
+#else
         case SIGURG:       // discard signal       urgent condition present on socket
         case SIGCONT:      // discard signal       continue after stop
         case SIGCHLD:      // discard signal       child status has changed
@@ -85,8 +104,9 @@ void page_service_signal_callback(int signum)
             SPDLOG_CRITICAL("KungFu server caught unexpected signal {}", signum);
             exit(signum);
             break;
+#endif // _WINDOWS
         default:
-            SPDLOG_INFO("KungFu server caught unknown signal {}", signum);
+            SPDLOG_INFO("KungFu server caught unknown signal {}, signal ignored", signum);
     }
 }
 
@@ -103,7 +123,7 @@ PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_
 
     SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
 
-    for (int s = 1; s < 32; s++)
+    for (int s = 1; s < NSIG; s++)
     {
         signal(s, page_service_signal_callback);
     }
