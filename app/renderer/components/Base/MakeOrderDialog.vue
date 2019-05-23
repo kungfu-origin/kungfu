@@ -2,7 +2,6 @@
      <el-dialog 
     width="400px" 
     :title="`${moduleType === 'strategy' ? '策略' : '账户'} ${currentId} 下单`"
-    v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
@@ -166,9 +165,7 @@ export default {
     mounted(){
         const t = this;
         //附值 account_id
-        if(t.moduleType === 'account') {
-            t.makeOrderForm.account_id = t.getSourceName(t.currentId) + '_' + t.currentId;
-        }
+        if(t.moduleType === 'account') t.makeOrderForm.account_id = t.getSourceName(t.currentId) + '_' + t.currentId;
     },
 
     computed: {

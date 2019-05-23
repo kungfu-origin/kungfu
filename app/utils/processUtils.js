@@ -182,7 +182,7 @@ export const startMaster = async(force) => {
     if(!force && master.length) throw new Error('master正在运行！')
     return startProcess({
         "name": processName,
-        "args": "master -l debug",
+        "args": "master",
     }).catch(err => logger.error(err))
 }
 

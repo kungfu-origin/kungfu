@@ -11,15 +11,11 @@ export const nanoGetCalendar = () => {
             request: "calendar/current"
         });
         const req = reqCalendarNanomsg();
-        req.send(reqMsg + '\0')
-        console.log('get calendar ---')
+        req.send(reqMsg)
         req.on('data', buf => {
             req.close();
             const data = JSON.parse(String(buf).replace(/\0/g,''));
-            console.log(data,' ---')
-            if(msgType.reqCalendar === data.msg_type) {
-                resolve(data.data)
-            }
+            if(msgType.reqCalendar === data.msg_type) resolve(data.data)
         })
     })
 }
@@ -35,12 +31,8 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
         req.send(reqMsg + '\0')
         req.on('data', buf => {
             req.close()
-            console.log()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
-            if(msgType.cancelOrder === data.msg_type){
-                console.log('nano-Cancel-Order', data)
-                resolve(true)
-            }
+            if(msgType.cancelOrder === data.msg_type) resolve(true)
         })
     })
 }
@@ -62,10 +54,7 @@ export const nanoCancelAllOrder = ({targetId, cancelType, id}) => {
         req.on('data', buf => {
             req.close()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
-            if(msgType.cancelOrder === data.msg_type){
-                console.log('nano-Cancel-All-Order', data)
-                resolve(true)
-            }
+            if(msgType.cancelOrder === data.msg_type) resolve(true)
         })
     })
 }

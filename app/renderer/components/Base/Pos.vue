@@ -22,6 +22,7 @@
     ></tr-table>
 
     <make-order-dialog
+        v-if="makeOrderDialogVisiblity"
         :visible.sync="makeOrderDialogVisiblity"
         :moduleType="moduleType"
         :currentId="currentId"
