@@ -36,7 +36,7 @@
     "productName": "Kungfu.Trader",
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {
-      "output": "build"
+      "output": "build/app"
     },
     "publish": [
       {
