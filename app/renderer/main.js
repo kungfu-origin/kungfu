@@ -94,6 +94,10 @@ new Vue({
     render: h => h(App)
 }).$mount('#app', true)
 
+//remove只能移除单个事件，单独封装removeAll移除所有事件
+ipcRenderer.removeAllListeners('message')
+ipcRenderer.removeAllListeners('downloadProgress')
+ipcRenderer.removeAllListeners('isUpdateNow')
 
 ipcRenderer.send("checkForUpdate");
 ipcRenderer.on("message", (event, text) => {
