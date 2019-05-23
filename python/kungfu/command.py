@@ -16,7 +16,7 @@ def create_subparser(subparsers, name, help):
     parser.add_argument('-l', '--log-level', dest='log_level', type=str, choices=['trace','debug','info','warning','error','critical'], help='logging level')
     return parser
 
-class KungFu(object):
+class Command(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(description='Kung Fu Command', usage='kfc [<options>] <command> [<args>]')
@@ -130,4 +130,4 @@ class KungFu(object):
         strategy_process.run()
 
 if __name__ == '__main__':
-    KungFu()
+    Command()

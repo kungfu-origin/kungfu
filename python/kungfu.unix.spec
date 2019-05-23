@@ -1,5 +1,5 @@
 block_cipher = None
-a = Analysis(['kungfu/KungFu.py'],
+a = Analysis(['kungfu/command.py'],
      pathex=["python"],
      binaries=[('../build/' + os.environ['CMAKEBUILDTYPE'] + '/*', '.'),
                ('../build/cpp/deps/nnpy-1.4.2/build/lib*/*.so', '.')
