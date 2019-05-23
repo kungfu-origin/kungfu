@@ -38,7 +38,6 @@ export const initDB = () => {
 // 注意这个autoUpdater不是electron中的autoUpdater
 const { autoUpdater } = require("electron-updater");
 const { uploadUrl } = require('__gConfig/updateConfig');
-const {GLOBAL_DIR} = require('__gConfig/pathConfig');
 
 // 检测更新，在你想要检查更新的时候执行，renderer事件触发后的操作自行编写
 export const updateHandle = () => {
