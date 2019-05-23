@@ -3,6 +3,7 @@
 //
 
 #include "calendar/include/calendar.h"
+#include "msg.h"
 
 namespace kungfu
 {
@@ -212,13 +213,13 @@ namespace kungfu
             {
                 std::string notice(buf, bytes);
                 nlohmann::json j = nlohmann::json::parse(notice);
-                if (j.find("type") != j.end())
+                if (j.find("msg_type") != j.end())
                 {
-                    std::string notice_type = j["type"];
-                    if (notice_type.compare("calendar"))
+                    MsgType notice_type = j["msg_type"];
+                    if (notice_type == MsgType::SwitchDay)
                     {
                         date = j["data"]["trading_day"];
-                        SPDLOG_INFO("Changed trading day to {}", date);
+                        SPDLOG_INFO("Switch day to {}", date);
                         current_ = std::stoi(date);
                         has_new = true;
                     }
