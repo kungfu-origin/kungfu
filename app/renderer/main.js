@@ -8,6 +8,7 @@ import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Selec
 import moment from 'moment';
 import App from './App.vue';
 import {listProcessStatus} from '__gUtils/processUtils';
+import {ipcRenderer} from 'electron'
 
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
@@ -70,8 +71,6 @@ export const startGetProcessStatus = () => {
     listProcessStatus()
     .then(res => {
         const processStatus = Object.freeze(res);
-        console.log(processStatus)
-        // processStatus && EVENT_BUS.$emit('update-process-status', processStatus)
         processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
     })
     .catch(err => console.error(err))
@@ -95,7 +94,17 @@ new Vue({
 }).$mount('#app', true)
 
 
-// if(process.env.NODE_ENV === 'development') {
-// 	const easyMonitor = require('easy-monitor');
-// 	easyMonitor('kungfu renderer')
-// }
+ipcRenderer.send("checkForUpdate");
+ipcRenderer.on("message", (event, text) => {
+    this.tips = text;
+    console.log('ipcRenderer:message', text)
+});
+
+//注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
+ipcRenderer.on("downloadProgress", (event, progressObj) => {
+    this.downloadPercent = progressObj.percent || 0;
+    console.log('downloadPercent', progressObj.percent || 0)
+});
+ipcRenderer.on("isUpdateNow", () => {
+    ipcRenderer.send("isUpdateNow");
+});

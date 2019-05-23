@@ -41,7 +41,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://**.**.**.**:3002/download/"
+        "url": "http://144.48.142.102:8080"
       }
     ],
     "files": [

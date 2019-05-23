@@ -8,7 +8,7 @@ const path = require('path');
 const { app, BrowserWindow, Menu, dialog } = require('electron');
 const electron = require('electron');
 //base setting, init db
-const { initDB } = require('./base');
+const { initDB, updateHandle } = require('./base');
 const { killGodDaemon,  killExtra, KillKfc } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
@@ -93,6 +93,7 @@ function createWindow () {
 
 	//create db
 	initDB()
+	updateHandle()
 }
 
 
@@ -121,13 +122,13 @@ app.on('ready', () => {
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
-console.time('finish kill extra ------ ')
+console.time('finish kill extra')
 killExtra()
 .catch(err => console.error(err))
 .finally(() => {
 	killExtraFinished = true;
 	if(appReady && killExtraFinished) createWindow()
-	console.timeEnd('finish kill extra ------ ')
+	console.timeEnd('finish kill extra')
 	
 })
 
