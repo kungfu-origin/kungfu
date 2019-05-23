@@ -313,7 +313,7 @@ export default {
             }
 
             if(!iconName) return;
-            return `resources/icons/${iconName}.svg`
+            return `resources/file-icons/${iconName}.svg`
         }
     }
 }

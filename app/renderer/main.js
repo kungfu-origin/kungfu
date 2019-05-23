@@ -9,7 +9,8 @@ import moment from 'moment';
 import App from './App.vue';
 import {listProcessStatus} from '__gUtils/processUtils';
 
-import './assets/iconfont/iconfont.css';
+import '@/assets/iconfont/iconfont.js';
+import '@/assets/iconfont/iconfont.css';
 
 //element
 Vue.use(Tag)

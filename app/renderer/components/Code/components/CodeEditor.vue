@@ -1,7 +1,10 @@
 <template>
   <div class="code-editor">
     <div id="editor-content" v-if="currentFile !== null && !currentFile.isDir"></div>
-    <i class="iconfont tr-LOGO-1" v-else></i>
+    <!-- <i class="iconfont tr-LOGO-1" v-else></i> -->
+    <svg class="icon tr-LOGO-1" :aria-hidden="true">
+        <use xlink:href="#tr-LOGO-1"></use>
+    </svg>
   </div>
 </template>
 <script>
@@ -76,6 +79,7 @@ export default {
                 },
                 scrollTimer: null,
                 smartIndent: true,
+                
             }
         };
 
@@ -247,6 +251,11 @@ export default {
     top: 45%;
     transform: translateY(-50%);
   }
+
+}
+
+#tr-LOGO-1 path{
+    fill: $bg !important;
 }
 
 .CodeMirror.CodeMirror-wrap{
