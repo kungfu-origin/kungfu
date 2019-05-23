@@ -68,7 +68,6 @@
 import {mapGetters, mapState} from 'vuex';
 import {accountSource, sourceType} from '@/assets/config/accountConfig'
 import {statusConfig} from '@/assets/config/statusConfig'
-// import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 export default {
     data(){
         let statusLevel = {};
@@ -139,16 +138,6 @@ export default {
 
         }
     },
-
-    // mounted() {
-    //     const t = this;
-    //     onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
-    // },
-    
-    // destroyed() {
-    //     const t = this;
-    //     offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
-    // },
 
     methods: {
         buildMdState(accountItem){

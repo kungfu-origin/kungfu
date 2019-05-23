@@ -183,7 +183,6 @@ import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accoun
 import SetAccountDialog from './SetAccountDialog'
 import SetFeeDialog from './SetFeeDialog'
 import {deleteProcess} from '__gUtils/processUtils'
-// import {onUpdateProcessStatusListener, offUpdateProcessStatusListener} from '@/io/event-bus';
 import {ACCOUNTS_DIR, LOG_DIR, buildGatewayPath} from '__gConfig/pathConfig'
 import {removeFileFolder, openReadFile} from "__gUtils/fileUtils.js"
 
@@ -255,12 +254,6 @@ export default {
     mounted() {
         const t = this;
         t.renderTable = true
-        // onUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
-    },
-    
-    destroyed() {
-        const t = this;
-        // offUpdateProcessStatusListener(t.updateProcessStatus.bind(t))
     },
 
     methods:{
