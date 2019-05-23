@@ -17,13 +17,3 @@ def health_check(ctx):
             stale_pids.append(pid)
     for pid in stale_pids:
         del ctx._client_processes[pid]
-
-@kfs.task
-def switch_trading_day(ctx):
-    current_day = ctx._calendar.current_day()
-    if ctx._current_day < current_day:
-        ctx._current_day = current_day
-        ctx._notice_socket.send(json.dumps({
-            'type':'calendar',
-            'data':{'trading_day':current_day}
-        }))
