@@ -37,6 +37,12 @@
     "directories": {
       "output": "build"
     },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://**.**.**.**:3002/download/"
+      }
+    ],
     "files": [
       "dist/**/*",
       {
@@ -111,6 +117,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "codemirror": "^5.44.0",
+    "electron-updater": "^4.0.6",
     "element-ui": "^2.8.2",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
@@ -144,7 +151,6 @@
     "chai": "^4.0.0",
     "chalk": "^2.1.0",
     "cmake-js": "^5.1.0",
-    "easy-monitor": "^2.2.7",
     "compression-webpack-plugin": "^2.0.0",
     "copy-webpack-plugin": "^4.0.1",
     "copyfiles": "^2.1.0",

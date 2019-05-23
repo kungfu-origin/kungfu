@@ -250,6 +250,7 @@ export default {
     position: relative;
     top: 45%;
     transform: translateY(-50%);
+    filter: drop-shadow($bg_light 1px -1px)
   }
 
 }
