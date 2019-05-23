@@ -4,7 +4,7 @@ project(uid_generator)
 
 set(SOURCE_FILES uid_generator.h uid_generator.cpp)
 add_library(uid_generator SHARED ${SOURCE_FILES})
-target_link_libraries(uid_generator SQLiteCpp sqlite3)
+target_link_libraries(uid_generator SQLiteCpp)
 
 #if (test)
 #    add_executable(test_uid_generator test/test_uid_generator.cpp)

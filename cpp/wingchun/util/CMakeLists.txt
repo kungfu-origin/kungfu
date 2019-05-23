@@ -4,7 +4,7 @@ project(util)
 
 ADD_LIBRARY(journal_printer SHARED journal_printer/journal_printer.cpp journal_printer/journal_printer.h)
 ADD_LIBRARY(instrument SHARED instrument/instrument.h instrument/instrument.cpp)
-TARGET_LINK_LIBRARIES(instrument SQLiteCpp sqlite3 fmt)
+TARGET_LINK_LIBRARIES(instrument SQLiteCpp fmt)
 target_link_libraries(journal_printer journal)
 #add_subdirectory(journal_printer/pybind)
 

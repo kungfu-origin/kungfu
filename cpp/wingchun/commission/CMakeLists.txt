@@ -5,13 +5,13 @@ SET(COMMISSION_SOURCE_FILES commission_manager.h commission_manager.cpp commissi
 ADD_LIBRARY(commission SHARED ${COMMISSION_SOURCE_FILES})
 
 if(WIN32)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp sqlite3 fmt ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(commission SQLiteCpp fmt ${Boost_LIBRARIES})
 endif()
 if(UNIX AND NOT APPLE)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp sqlite3 pthread dl fmt ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(commission SQLiteCpp pthread dl fmt ${Boost_LIBRARIES})
 endif()
 if(APPLE)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp sqlite3 pthread dl fmt ${Boost_LIBRARIES} iconv)
+    TARGET_LINK_LIBRARIES(commission SQLiteCpp pthread dl fmt ${Boost_LIBRARIES} iconv)
 endif()
 
 #if (test)

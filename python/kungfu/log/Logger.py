@@ -1,5 +1,5 @@
 import logging
-import os
+import os, sys, platform
 import nnpy, pyyjj
 
 LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [pid/tid %(process)6d/%(tid)-6d] [%(filename)s:%(lineno)d#%(funcName)s] %(message)s'
@@ -68,7 +68,38 @@ class KungfuFormatter(logging.Formatter):
 
 class ColorFormatter(KungfuFormatter):
     def format_level(self, levelname):
-        return '{}{:^8}{}'.format(COLORS[levelname], levelname, ansicolor.reset)
+        levelname_f = KungfuFormatter.format_level(self, levelname)
+        if pyyjj.in_color_terminal():
+            return '{}{}{}'.format(COLORS[levelname], levelname_f, ansicolor.reset)
+        else:
+            return levelname_f
+
+class UnixConsoleHandler(logging.StreamHandler):
+    def __init__(self):
+        logging.StreamHandler.__init__(self, sys.stdout)
+        self.setFormatter(ColorFormatter(LOG_MSG_FORMAT))
+
+class WinConsoleHandler(logging.StreamHandler):
+    def __init__(self):
+        logging.StreamHandler.__init__(self, sys.stdout)
+        self.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            stream = self.stream
+            if pyyjj.in_color_terminal():
+                stream.write(msg[:33])
+                self.flush()
+                pyyjj.color_print(record.levelname.lower(), '{:^8}'.format(record.levelname.lower()))
+                stream.write(msg[41:])
+                stream.write(self.terminator)
+                self.flush()
+            else:
+                stream.write(msg + self.terminator)
+                self.flush()
+        except Exception:
+            self.handleError(record)
 
 def create_logger(name, level):
     base_dir = os.getenv('KF_HOME')
@@ -82,8 +113,7 @@ def create_logger(name, level):
     file_handler = logging.FileHandler(log_path)
     file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(ColorFormatter(LOG_MSG_FORMAT))
+    console_handler = WinConsoleHandler() if platform.system() == 'Windows' else UnixConsoleHandler()
 
     logger = logging.getLogger(name)
     logger.setLevel(LOG_LEVELS[level])

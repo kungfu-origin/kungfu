@@ -470,7 +470,7 @@ namespace kungfu
             strcpy(des.account_id, ori.AccountID);
             strcpy(des.broker_id, ori.BrokerID);
             strcpy(des.trading_day, ori.TradingDay);
-            des.type = AccountTypeFuture;
+            des.account_type = AccountTypeFuture;
 
             des.avail = ori.Available;
 
