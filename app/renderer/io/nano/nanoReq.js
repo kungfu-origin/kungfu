@@ -8,13 +8,15 @@ import * as msgType from '@/io/nano/msgType'
 export const nanoGetCalendar = () => {
     return new Promise(resolve => {
         const reqMsg = JSON.stringify({
-            req: "current"
+            request: "calendar/current"
         });
         const req = reqCalendarNanomsg();
         req.send(reqMsg + '\0')
+        console.log('get calendar ---')
         req.on('data', buf => {
             req.close();
-            const data = JSON.parse(String(buf).replace(/\0/g,''))
+            const data = JSON.parse(String(buf).replace(/\0/g,''));
+            console.log(data,' ---')
             if(msgType.reqCalendar === data.msg_type) {
                 resolve(data.data)
             }
@@ -33,6 +35,7 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
         req.send(reqMsg + '\0')
         req.on('data', buf => {
             req.close()
+            console.log()
             const data = JSON.parse(String(buf).replace(/\0/g,''))
             if(msgType.cancelOrder === data.msg_type){
                 console.log('nano-Cancel-Order', data)

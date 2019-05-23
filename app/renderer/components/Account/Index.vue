@@ -79,7 +79,6 @@ import {sourceType} from '@/assets/config/accountConfig';
 import {refreshGatewayNanomsg} from '@/io/nano/buildNmsg';
 import * as msgType from '@/io/nano/msgType';
 import * as ACCOUNT_API from '@/io/account';
-import {EVENT_BUS} from '@/io/event-bus';
 import {debounce} from '@/assets/js/utils';
 
 

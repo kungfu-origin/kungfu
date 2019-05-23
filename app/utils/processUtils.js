@@ -176,26 +176,14 @@ export const startProcess = async (options) => {
 
 //启动pageEngine
 export const startMaster = async(force) => {
-    const processName = 'page_engine'
+    const processName = 'master'
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
     if(!force && master.length) throw new Error('master正在运行！')
     return startProcess({
         "name": processName,
-        "args": "master",
+        "args": "master -l debug",
     }).catch(err => logger.error(err))
-}
-
-//启动交易日服务
-export const startCalendarEngine = async(force) => {
-    const processName = 'calendar_engine'
-    const calendarEngines = await describeProcess(processName);
-    if(calendarEngines instanceof Error) throw calendarEngines
-    if(!force && calendarEngines.length) throw new Error('calendar_engine正在运行！')
-    return startProcess({
-        "name": "calendar_engine",
-        "args": "calendar --name calendar",
-    }).catch(err => logger.error(err))    
 }
 
 //启动md
@@ -213,7 +201,6 @@ export const startTd = (resource, processName) => {
         "args": `td_${resource} --name ${processName}`,
     })   
 }
-
 
 //启动strategy
 export const startStrategy = (strategyId, strategyPath) => {
@@ -249,6 +236,7 @@ export const deleteProcess = (processName) => {
         }catch(err){
             console.error(err)
         }
+
         //如果進程不存在，會跳過刪除步驟
         if(!processes || !processes.length) {
             resolve(true)

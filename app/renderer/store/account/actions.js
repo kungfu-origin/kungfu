@@ -3,10 +3,7 @@ import Vue from 'vue';
 import {closeGlobalGatewayNanomsg, refreshGlobalGatewayNanomsg} from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType'
 import * as ACCOUNT_API from '@/io/account';
-import {EVENT_BUS} from '@/io/event-bus';
 import {startTd, startMd, deleteProcess} from '__gUtils/processUtils'
-import {removeFileFolder} from '__gUtils/fileUtils'
-import {buildGateWayStateDBPath} from '__gConfig/pathConfig'
 import {debounce} from '@/assets/js/utils'
 
 

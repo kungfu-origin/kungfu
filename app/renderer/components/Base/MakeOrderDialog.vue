@@ -195,16 +195,6 @@ export default {
             t.clearData();
         },
 
-        // handleChangeVolumeRate(rate){
-        //     const t = this;
-        //     if(rate === 0) return;
-        //     if(t.makeOrderForm.limit_price === 0) return;
-        //     if(!t.makeOrderForm.account_id) return;
-        //     const avail = t.getAvailCash(t.makeOrderForm.account_id)
-        //     const volume = Math.floor((avail / t.makeOrderForm.limit_price) * rate || 0) 
-        //     if(!!volume) t.makeOrderForm.volume =  volume;
-        // },
-
         handleBuy(){
             const t = this;
             //买：0
@@ -228,10 +218,9 @@ export default {
                     const sourceAccountId = makeOrderForm.account_id;
                     const gatewayName = `td_${sourceAccountId}`
                     makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
-                    //下面这些需要传string
-                    makeOrderForm.price_type = `${t.makeOrderForm.price_type}`
-                    makeOrderForm.side = `${t.makeOrderForm.side}`
-                    makeOrderForm.offset = `${t.makeOrderForm.offset}`
+                    makeOrderForm.price_type = makeOrderForm.price_type.toString()
+                    makeOrderForm.side = makeOrderForm.side.toString()
+                    makeOrderForm.offset = makeOrderForm.offset.toString()
                     if((t.processStatus || {})[gatewayName] !== 'online'){
                         t.$message.warning(`需要先启动 ${sourceAccountId} 交易进程！`)
                         return;

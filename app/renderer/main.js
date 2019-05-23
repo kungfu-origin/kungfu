@@ -7,7 +7,6 @@ import * as utils from './assets/js/utils'
 import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip} from 'element-ui';
 import moment from 'moment';
 import App from './App.vue';
-import {EVENT_BUS} from './io/event-bus'
 import {listProcessStatus} from '__gUtils/processUtils';
 
 import './assets/iconfont/iconfont.css';

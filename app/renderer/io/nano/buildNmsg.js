@@ -1,5 +1,5 @@
 const nano = require('nanomsg');
-const { BASE_DIR, GATEWAY_DIR, STRATEGY_DIR } = require('__gConfig/pathConfig');
+const { BASE_DIR, GATEWAY_DIR, STRATEGY_DIR, SOCKET_DIR } = require('__gConfig/pathConfig');
 const fse = require('fs-extra');
 const path = require('path');
 window.nanomsgController = {}
@@ -80,14 +80,14 @@ export const connectCalendarNanomsg = () => {
     return sub
 }
 
-//主动获取交易日
+//请求获取交易日
 export const reqCalendarNanomsg = () => {
     const req = nano.socket('req', {
         rcvtimeo: 1000
     })
-    const ipcDir = path.join(BASE_DIR, 'calendar');
+    const ipcDir = SOCKET_DIR //KF_HOME/socket
     fse.ensureDirSync(ipcDir)
-    const ipcPath = path.join(ipcDir, 'rep.ipc')
+    const ipcPath = path.join(ipcDir, 'service.sock')
     const addr = `ipc://${ipcPath}`
     req.connect(addr)
     return req

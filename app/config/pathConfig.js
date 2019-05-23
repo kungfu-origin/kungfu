@@ -36,6 +36,11 @@ export const LOG_DIR = path.join(BASE_DIR, 'log');
 addFile(BASE_DIR, 'strategy', 'folder')
 export const STRATEGY_DIR = path.join(BASE_DIR, 'strategy');
 
+//socket
+addFile(BASE_DIR, 'socket', 'folder')
+export const SOCKET_DIR = path.join(BASE_DIR, 'socket');
+
+
 //strategy
 export const STRATEGYS_DB = path.join(GLOBAL_DIR, 'strategys.db')
 
