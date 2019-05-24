@@ -292,7 +292,7 @@ export default {
                 }
             })
             .then(() => deleteProcess('td_' + row.account_id))
-            .then(() => deleteProcess('md_' + row.source_name))
+            .then(() => (row.receive_md) && deleteProcess('md_' + row.source_name))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return

@@ -43,10 +43,10 @@ const { ipcMain } = require('electron')
 // 检测更新，在你想要检查更新的时候执行，renderer事件触发后的操作自行编写
 export const updateHandler = (mainWindow) => {
     let message = {
-        error: '检查更新出错',
+        error: '检查更新出错！',
         checking: '正在检查更新...',
         updateAva: '检测到新版本，正在下载...',
-        updateNotAva: '现在使用的就是最新版本，不用更新',
+        updateNotAva: '当前为最新版本！',
     };
 
     autoUpdater.setFeedURL(uploadUrl);
