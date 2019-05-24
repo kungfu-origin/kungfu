@@ -1,5 +1,5 @@
 block_cipher = None
-a = Analysis(['kungfu\\command.py'],
+a = Analysis(['kungfu\\__main__.py'],
      pathex=['python'],
      binaries=[('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
                ('..\\build\\cpp\\yijinjing\\pybind\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.pyd', '.'),

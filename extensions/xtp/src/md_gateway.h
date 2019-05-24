@@ -8,8 +8,10 @@
 #endif //PROJECT_MD_GATEWAY_H
 
 #include <string>
+#include <map>
+#include <gateway_impl.h>
+
 #include "xtp_quote_api.h"
-#include "gateway/impl/gateway_impl.h"
 
 namespace kungfu
 {
@@ -18,9 +20,7 @@ namespace kungfu
         class MdGateway: public XTP::API::QuoteSpi, public kungfu::MdGatewayImpl
         {
         public:
-            MdGateway(int client_id, const std::string& save_file_path, const std::string& ip, const int port, const std::string& user, const std::string& password, int log_level):
-                    kungfu::MdGatewayImpl(SOURCE_XTP, log_level), client_id_(client_id), save_file_path_(save_file_path), ip_(ip), port_(port), user_(user), password_(password), api_(
-                    nullptr) {}
+            MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             virtual ~MdGateway();
 
             virtual void init();

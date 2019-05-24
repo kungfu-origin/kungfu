@@ -332,10 +332,10 @@ namespace kungfu
             int rc = socket->recv(&buf, NN_MSG, NN_DONTWAIT); // non-blocking
             if (rc > 0)
             {
-                SPDLOG_TRACE("recv: data[{}]\n", buf);
+                SPDLOG_TRACE("recv: data[{}]\n", std::string(buf, rc));
                 try
                 {
-                    nlohmann::json content = nlohmann::json::parse(std::string(buf));
+                    nlohmann::json content = nlohmann::json::parse(std::string(buf, rc));
                     // 兼容req
                     if (content.find("req") != content.end() && content.find("msg_type") == content.end())
                     {

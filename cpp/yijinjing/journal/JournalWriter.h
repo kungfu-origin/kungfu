@@ -27,6 +27,7 @@
 
 #include "JournalHandler.h"
 #include "FrameHeader.h"
+#include "passive.h"
 
 YJJ_NAMESPACE_START
 
@@ -36,6 +37,9 @@ FORWARD_DECLARE_PTR(JournalWriter)
  */
 class JournalWriter : public JournalHandler
 {
+private:
+    passive::emitter emitter_;
+
 protected:
     /** the journal will write in */
     JournalPtr journal;

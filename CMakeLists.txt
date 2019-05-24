@@ -16,9 +16,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(kungfu)
 
 ############################################################
-
-ADD_COMPILE_DEFINITIONS(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
-
 SET(CMAKE_CXX_STANDARD 14)
 
 if(UNIX AND NOT APPLE)
@@ -59,5 +56,14 @@ REQUIRE_BOOST_LIBS("1.64.0" "locale;date_time;filesystem;system;thread;serializa
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 ############################################################
+
+ADD_COMPILE_DEFINITIONS(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+
+############################################################
+
 ADD_SUBDIRECTORY(cpp)
 
+############################################################
+
+SET(KF_EXTENSIONS_BUILD_DIR ${CMAKE_BINARY_DIR}/build_extensions)
+ADD_SUBDIRECTORY(extensions)

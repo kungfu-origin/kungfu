@@ -7,7 +7,7 @@ TARGET_LINK_LIBRARIES(strategy_util journal uid_generator nanomsg nn_publisher f
 
 SET(STRATEGY_FILES include/strategy.h src/strategy.cpp)
 ADD_LIBRARY(strategy SHARED ${STRATEGY_FILES})
-TARGET_LINK_LIBRARIES(strategy strategy_util event_loop ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(strategy PRIVATE strategy_util event_loop ${Boost_LIBRARIES})
 
 add_subdirectory(demo)
 

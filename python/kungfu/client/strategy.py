@@ -6,6 +6,13 @@ import pywingchun
 import nnpy, pyyjj
 import kungfu.wingchun.constants
 
+from kungfu.command import command, arg
+
+@arg('-p', '--path', type=str, help='path of strategy py file')
+@command(help='run trading strategy')
+def strategy(args, logger):
+    Strategy(logger, args.name, args.path).run()
+
 class Strategy(pywingchun.Strategy):
     def __init__(self, logger, name, path):
         pywingchun.Strategy.__init__(self, name)

@@ -1,17 +1,16 @@
-
-project(commission)
+PROJECT(commission)
 
 SET(COMMISSION_SOURCE_FILES commission_manager.h commission_manager.cpp commission_storage.h commission_storage.cpp log.cpp log.h)
 ADD_LIBRARY(commission SHARED ${COMMISSION_SOURCE_FILES})
 
 if(WIN32)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp fmt ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(commission PRIVATE SQLiteCpp fmt ${Boost_LIBRARIES})
 endif()
 if(UNIX AND NOT APPLE)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp pthread dl fmt ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(commission PRIVATE SQLiteCpp pthread dl fmt ${Boost_LIBRARIES})
 endif()
 if(APPLE)
-    TARGET_LINK_LIBRARIES(commission SQLiteCpp pthread dl fmt ${Boost_LIBRARIES} iconv)
+    TARGET_LINK_LIBRARIES(commission PRIVATE SQLiteCpp pthread dl fmt ${Boost_LIBRARIES} iconv)
 endif()
 
 #if (test)

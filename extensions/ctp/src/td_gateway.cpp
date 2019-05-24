@@ -19,8 +19,8 @@
 #include "include/serialize.h"
 #include "include/config.h"
 
-#include "../type_convert.h"
-#include "../serialize.h"
+#include "type_convert.h"
+#include "serialize.h"
 
 namespace kungfu
 {

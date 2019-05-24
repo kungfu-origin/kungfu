@@ -27,3 +27,7 @@ def task(func):
 def run_tasks(*args, **kwargs):
     for task_name in TASKS:
         TASKS[task_name](*args, **kwargs)
+
+from . import system
+from . import paged
+from . import calendar

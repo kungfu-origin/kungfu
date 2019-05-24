@@ -2,17 +2,31 @@
 // Created by qlu on 2019/2/11.
 //
 
+#include <fmt/format.h>
+#include <code_convert.h>
+#include <macro.h>
+#include <Log.h>
+
 #include "md_gateway.h"
-#include "fmt/format.h"
-#include "util/include/code_convert.h"
-#include "gateway/include/macro.h"
-#include "../serialize.h"
-#include "../type_convert.h"
+
+#include "serialize_xtp.h"
+#include "type_convert_xtp.h"
 
 namespace kungfu
 {
     namespace xtp
     {
+        MdGateway::MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double): kungfu::MdGatewayImpl(SOURCE_XTP)
+        {
+            client_id_ = config_int["client_id"];
+            user_ = config_str["user_id"];
+            password_ = config_int["password"];
+            ip_ = config_str["md_ip"];
+            port_ = config_int["md_port"];
+            save_file_path_ = config_str["save_file_path"];
+            api_ = nullptr;
+            SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
+        }
         MdGateway::~MdGateway()
         {
             if(api_ != nullptr)

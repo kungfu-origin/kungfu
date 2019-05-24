@@ -1,14 +1,13 @@
-
-cmake_minimum_required(VERSION 3.7)
-project(event_loop)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.7)
+PROJECT(event_loop)
 
 SET(EVENT_LOOP_SOURCE_FILES event_loop.h event_loop.cpp)
 
-add_library(event_loop SHARED ${EVENT_LOOP_SOURCE_FILES})
-target_link_libraries(event_loop task_scheduler nanomsg journal fmt)
+ADD_LIBRARY(event_loop SHARED ${EVENT_LOOP_SOURCE_FILES})
+TARGET_LINK_LIBRARIES(event_loop PRIVATE task_scheduler nanomsg journal fmt)
 
 if (test)
     add_executable(test_loop  test/test.cpp)
-    target_link_libraries(test_loop event_loop)
+    target_link_libraries(test_loop PRIVATE event_loop nanomsg journal fmt task_scheduler)
     add_test(NAME test-event-loop COMMAND test_loop)
 endif()

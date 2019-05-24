@@ -35,12 +35,12 @@ namespace kungfu
 #define DUMP_1M_SNAPSHOT(account_id, account_info) kungfu::storage::SnapshotStorage(\
     ACCOUNT_SNAPSHOT_DB_FILE(account_id), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true).insert(account_info)
 
-    GatewayImpl::GatewayImpl(const std::string &source, const std::string &name, int log_level) 
+    GatewayImpl::GatewayImpl(const std::string &source, const std::string &name) 
             : source_(source), name_(name), state_(GatewayState::Idle)
     {
         kungfu::yijinjing::KungfuLog::setup_log(name);
-        kungfu::yijinjing::KungfuLog::set_log_level(log_level);
         logger_ = spdlog::default_logger();
+        SPDLOG_INFO("created gateway {} with source {}", name, source);
     }
 
     GatewayImpl::~GatewayImpl()
@@ -73,6 +73,7 @@ namespace kungfu
             SPDLOG_ERROR("failed to bind to rep_url {}, exception: {}", rep_url.c_str(), e.what());
             abort();
         }
+        SPDLOG_INFO("gateway bind to rep url {}", rep_url);
         loop_->add_socket(rsp_socket_);
 
         std::string state_db_file = GATEWAY_STATE_DB_FILE(get_name());
@@ -85,6 +86,7 @@ namespace kungfu
         std::string url = GATEWAY_PUB_URL(name_);
         nn_publisher_ = std::unique_ptr<NNPublisher>(new NNPublisher(url));
         nn_publisher_->set_logger(get_logger());
+        SPDLOG_INFO("gateway bind to pub url {}", url);
     }
 
     void GatewayImpl::start()

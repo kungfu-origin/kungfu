@@ -1,11 +1,15 @@
 block_cipher = None
-a = Analysis(['kungfu/command.py'],
+a = Analysis(['kungfu/__main__.py'],
      pathex=["python"],
      binaries=[('../build/' + os.environ['CMAKEBUILDTYPE'] + '/*', '.'),
                ('../build/cpp/deps/nnpy-1.4.2/build/lib*/*.so', '.')
-              ],
-     datas=None,
+               ],
+     datas=[
+          ('../build/build_extensions', 'extensions'),
+          ('extensions/*', 'extensions')
+     ],
      hiddenimports=[
+          'kungfu.client.ping',
           'cffi',
           'numpy',
           'pandas'

@@ -5,8 +5,9 @@
 #ifndef KUNGFU_MDGATEWAY_H
 #define KUNGFU_MDGATEWAY_H
 
+#include <gateway_impl.h>
+
 #include "ThostFtdcMdApi.h"
-#include "../../impl/gateway_impl.h"
 
 namespace kungfu
 {
@@ -15,8 +16,8 @@ namespace kungfu
         class MdGateway: public CThostFtdcMdSpi, public kungfu::MdGatewayImpl
         {
         public:
-            MdGateway(const std::string& front_uri, const std::string& broker_id, const std::string& account_id, const std::string& password, int log_level):
-                    kungfu::MdGatewayImpl(SOURCE_CTP, log_level),front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password) {}
+            MdGateway(const std::string& front_uri, const std::string& broker_id, const std::string& account_id, const std::string& password):
+                    kungfu::MdGatewayImpl(SOURCE_CTP),front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password) {}
             virtual ~MdGateway() {};
 
             virtual void init();

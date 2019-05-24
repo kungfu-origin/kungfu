@@ -6,9 +6,10 @@
 #define PROJECT_TD_GATEWAY_H
 
 #include <memory>
+#include <gateway_impl.h>
+
 #include "xtp_trader_api.h"
 #include "order_mapper.h"
-#include "gateway/impl/gateway_impl.h"
 
 namespace kungfu
 {
@@ -17,9 +18,7 @@ namespace kungfu
         class TdGateway: public XTP::API::TraderSpi, public kungfu::TdGatewayImpl
         {
         public:
-            TdGateway(int client_id, const std::string software_key, const std::string& save_file_path, const std::string& ip, const int port, const std::string& user, const std::string& password, int log_level):
-                    kungfu::TdGatewayImpl(SOURCE_XTP, TD_GATEWAY_NAME(SOURCE_XTP, user), log_level), client_id_(client_id), software_key_(software_key), save_file_path_(save_file_path), ip_(ip), port_(port), user_(user), password_(password), api_(
-                    nullptr), session_id_(0), request_id_(0) {}
+            TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             virtual ~TdGateway();
 
             virtual void init();

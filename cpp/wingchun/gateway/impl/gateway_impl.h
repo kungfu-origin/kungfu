@@ -74,7 +74,7 @@ namespace kungfu
     class GatewayImpl: virtual public Gateway
     {
     public:
-        GatewayImpl(const std::string& source, const std::string& name, int log_level = DEFAULT_LOG_LEVEL);
+        GatewayImpl(const std::string& source, const std::string& name);
         virtual ~GatewayImpl();
 
         virtual const std::string& get_name() const { return name_; }
@@ -111,7 +111,7 @@ namespace kungfu
     class MdGatewayImpl: virtual public MdGateway, public GatewayImpl
     {
     public:
-        MdGatewayImpl(const std::string& source, int log_level = SPDLOG_LEVEL_INFO): GatewayImpl(source, MD_GATEWAY_NAME(source), log_level) {}
+        MdGatewayImpl(const std::string& source): GatewayImpl(source, MD_GATEWAY_NAME(source)) {}
         virtual ~MdGatewayImpl() {}
 
         virtual void init() override;
@@ -139,7 +139,7 @@ namespace kungfu
     class TdGatewayImpl: virtual public TdGateway, public GatewayImpl
     {
     public:
-        TdGatewayImpl(const std::string& source, const std::string& name, int log_level = SPDLOG_LEVEL_INFO): GatewayImpl(source, name, log_level) {}
+        TdGatewayImpl(const std::string& source, const std::string& name): GatewayImpl(source, name) {}
         virtual ~TdGatewayImpl();
 
         virtual void init() override;

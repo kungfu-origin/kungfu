@@ -26,8 +26,9 @@ namespace kungfu
         j["msg_type"] = int(msg_type);
         j["data"] = data;
         std::string js = j.dump();
-        SPDLOG_TRACE(js);
-        pub_socket_->send(js.c_str(), js.length() + 1, 0);
+        SPDLOG_TRACE("nn publishing {}", js);
+        pub_socket_->send(js.c_str(), js.length(), 0);
+        SPDLOG_TRACE("nn published {}", js);
     }
 
     void NNPublisher::publish_order(const kungfu::journal::Order &order) const

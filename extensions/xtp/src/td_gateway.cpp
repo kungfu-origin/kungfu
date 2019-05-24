@@ -2,20 +2,36 @@
 // Created by qlu on 2019/2/11.
 //
 
-#include "td_gateway.h"
 #include <algorithm>
-#include "include/serialize.h"
-#include "include/config.h"
-#include "gateway/include/macro.h"
-#include "util/include/business_helper.h"
-#include "fmt/format.h"
-#include "gateway/xtp/type_convert.h"
-#include "gateway/xtp/serialize.h"
+#include <serialize.h>
+#include <config.h>
+#include <macro.h>
+#include <business_helper.h>
+#include <fmt/format.h>
+
+#include "td_gateway.h"
+#include "type_convert_xtp.h"
+#include "serialize_xtp.h"
 
 namespace kungfu
 {
     namespace xtp
     {
+        TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
+            kungfu::TdGatewayImpl(SOURCE_XTP, TD_GATEWAY_NAME(SOURCE_XTP, config_str["user_id"]))
+        {
+            client_id_ = config_int["client_id"];
+            software_key_ = config_str["software_key"];
+            user_ = config_str["user_id"];
+            password_ = config_int["password"];
+            ip_ = config_str["td_ip"];
+            port_ = config_int["td_port"];
+            save_file_path_ = config_str["save_file_path"];
+            session_id_ = 0;
+            request_id_ = 0;
+            api_ = nullptr;
+            SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
+        }
         TdGateway::~TdGateway()
         {
             if(api_ != nullptr)
