@@ -101,24 +101,11 @@ startAutoUpdate()
 
 function startAutoUpdate(){
     if(window.location.href.split('#')[1].indexOf('code') !== -1) return;
-
     //remove只能移除单个事件，单独封装removeAll移除所有事件
     ipcRenderer.removeAllListeners('message')
     ipcRenderer.removeAllListeners('downloadProgress')
-    ipcRenderer.removeAllListeners('askIfUpdateNow')
-
-    ipcRenderer.send("checkForUpdate");
-    ipcRenderer.on("message", (event, text) => {
-        this.tips = text;
-        console.log(text)
-    });
-
+    ipcRenderer.send('checkForUpdate')
+    ipcRenderer.on("message", (event, text) => console.log(text));
     //注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
-    ipcRenderer.on("downloadProgress", (event, progressObj) => {
-        this.downloadPercent = progressObj.percent || 0;
-        console.log(progressObj.percent || 0)
-    });
-    ipcRenderer.on("askIfUpdateNow", () => {
-        ipcRenderer.send("isUpdateNow");
-    });
+    ipcRenderer.on("downloadProgress", (event, progressObj) => console.log(progressObj.percent || 0));
 }

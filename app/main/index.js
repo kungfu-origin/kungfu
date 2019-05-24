@@ -5,10 +5,10 @@ if (process.env.NODE_ENV !== 'development') {
 
 // Modules to control application life and create native browser window
 const path = require('path');
-const { app, BrowserWindow, Menu, dialog } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const electron = require('electron');
 //base setting, init db
-const { initDB, updateHandler } = require('./base');
+const { initDB } = require('./base');
 const { killGodDaemon,  killExtra, KillKfc } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
@@ -154,6 +154,11 @@ app.on('will-quit', (e) => {
 	e.preventDefault()
 })
 
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+
+//退出提示
 function showQuitMessageBox(){
 	dialog.showMessageBox({
 		type: 'question',
@@ -165,28 +170,7 @@ function showQuitMessageBox(){
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
-			allowQuit = true;
-			if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
-			console.log('----- starting quit process -----');
-			console.time('kill kfcs');
-			KillKfc()
-			.catch(err => console.error(err)) 
-			.finally(() => {
-				console.timeEnd('kill kfcs');
-				console.time('kill daemon');
-				killGodDaemon()
-				.catch(err => console.error(err)) 				
-				.finally(() => {
-					console.timeEnd('kill daemon');
-					console.time('kill extra');
-					killExtra()
-					.catch(err => console.error(err)) 								
-					.finally(() => {
-						console.timeEnd('kill extra');	
-						app.quit();
-					})
-				})
-			})
+			KillAll().then(() => app.quit())
 		}else{
 			if((mainWindow !== null) && !mainWindow.isDestroyed()){
 				if(platform === 'win') mainWindow.minimize();
@@ -196,7 +180,94 @@ function showQuitMessageBox(){
 	})
 }
 
+//结束所有进程
+function KillAll(){
+	return new Promise(resolve => {
+		if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
+		allowQuit = true;
+		console.time('kill kfcs');
+		KillKfc()
+		.catch(err => console.error(err)) 
+		.finally(() => {
+			console.timeEnd('kill kfcs');
+			console.time('kill daemon');
+			killGodDaemon()
+			.catch(err => console.error(err)) 				
+			.finally(() => {
+				console.timeEnd('kill daemon');
+				console.time('kill extra');
+				killExtra()
+				.catch(err => console.error(err)) 								
+				.finally(() => {
+					console.timeEnd('kill extra');	
+					resolve(true)
+				})
+			})
+		})
+	})
+}
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
 
+
+
+// 注意这个autoUpdater不是electron中的autoUpdater
+const { autoUpdater } = require("electron-updater");
+const { uploadUrl } = require('__gConfig/updateConfig');
+
+// 检测更新，在你想要检查更新的时候执行，renderer事件触发后的操作自行编写
+function updateHandler(mainWindow){
+    let message = {
+        error: '检查更新出错！',
+        checking: '正在检查更新...',
+        updateAva: '检测到新版本，正在下载...',
+        updateNotAva: '当前为最新版本！',
+    };
+	autoUpdater.autoDownload = false
+	autoUpdater.autoInstallOnAppQuit = false
+    autoUpdater.setFeedURL(uploadUrl);
+    autoUpdater.on('error', (error) => {
+		sendUpdateMessage(mainWindow, message.error)
+		return new Error(error)		
+	});
+    autoUpdater.on('checking-for-update', () => {
+        sendUpdateMessage(mainWindow, message.checking)
+    });
+    autoUpdater.on('update-available', (info) => {
+        sendUpdateMessage(mainWindow, message.updateAva)
+    });
+    autoUpdater.on('update-not-available', (info) => {
+        sendUpdateMessage(mainWindow, message.updateNotAva)
+    });
+
+    // 更新下载进度事件
+    autoUpdater.on('download-progress', (progressObj) => {
+        mainWindow.webContents.send('downloadProgress', progressObj)
+    })
+    autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) => {
+        dialog.showMessageBox({
+            type: 'question',
+            title: '提示',
+            defaultId: 0,
+            cancelId: 1,
+            message: "检测到新版本，更新会退出应用，是否立即更新？",
+            buttons: ['立即更新', '否'],
+            icon: path.join(__resources, 'icon', 'icon.png')
+        }, (index) => {
+            if(index === 0){
+				KillAll().then(() => {
+					setImmediate(() => {
+						autoUpdater.quitAndInstall(); 
+						app.quit()
+					})
+				})
+            }
+        })
+	});
+	
+	ipcMain.on('checkForUpdate', () => autoUpdater.checkForUpdates().catch(err => console.error(err)))
+}
+
+// 通过main进程发送事件给renderer进程，提示更新信息
+function sendUpdateMessage(mainWindow, text) {
+    mainWindow.webContents.send('message', text)
+}
