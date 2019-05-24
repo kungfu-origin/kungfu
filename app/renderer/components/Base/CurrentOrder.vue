@@ -17,7 +17,7 @@
             <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <el-button size="mini" type="danger" :disabled="todayFinish" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
+            <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -28,6 +28,7 @@
     >
         <template v-slot:oper="{ oper }">
             <i 
+            v-if="[3,4,5,6].indexOf(+oper.status) === -1"
             class="el-icon-close mouse-over" 
             title="撤单" 
             @click="handleCancelOrder(oper)"/>
@@ -135,7 +136,7 @@ export default {
             },{
                 type: "text",
                 label: "订单状态",
-                prop: "status",
+                prop: "statusName",
             },{
                 type: "text",
                 label: this.moduleType == 'account' ? '策略' : '账户',
@@ -338,7 +339,8 @@ export default {
                 offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
                 limitPrice: item.limit_price,
                 volumeTraded: item.volume_traded + "/" + (item.volume),
-                status: orderStatus[item.status],
+                statusName: orderStatus[item.status],
+                status: item.status,
                 clientId: item.client_id,
                 accountId: item.account_id,
                 orderId: item.order_id,
@@ -395,9 +397,9 @@ export default {
                 if(item.offset === '开仓') return 'red'
                 else if(item.offset === '平仓') return 'green'
             }
-            if(prop === 'status'){
-                if(item.status === '错误') return 'red'
-                else if(['已成交', '部分撤单', '已撤单'].indexOf(item.status) != -1) return 'green'
+            if(prop === 'statusName'){
+                if(item.statusName === '错误') return 'red'
+                else if(['已成交', '部分撤单', '已撤单'].indexOf(item.statusName) != -1) return 'green'
                 else return 'gray'
             }
         },

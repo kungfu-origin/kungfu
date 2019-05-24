@@ -44,8 +44,6 @@
 <script>
 import {deepClone} from '@/assets/js/utils';
 import {mapState, mapGetters} from 'vuex';
-
-// import InfoList from './components/InfoList';
 import EngineStatus from './components/EngineStatus';
 import MainHeader from './components/MainHeader';
 

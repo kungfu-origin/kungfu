@@ -69,13 +69,13 @@ export const updateHandler = (mainWindow) => {
         mainWindow.webContents.send('downloadProgress', progressObj)
     })
     autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) => {
-        ipcMain.on('isUpdateNow', (e, arg) => {
-            console.log(arguments);
-            console.log("开始更新");
-            //some code here to handle event
-            autoUpdater.quitAndInstall();
-        });
-        mainWindow.webContents.send('isUpdateNow')
+        mainWindow.webContents.send('askIfUpdateNow')
+    });
+
+    ipcMain.on('isUpdateNow', (e, arg) => {
+        console.log("开始更新");
+        //some code here to handle event
+        autoUpdater.quitAndInstall();
     });
 
     ipcMain.on("checkForUpdate",() => {
