@@ -93,7 +93,7 @@ function createWindow () {
 
 	//create db
 	initDB()
-	updateHandler(mainWindow)
+	if(platform === 'win') updateHandler(mainWindow)
 }
 
 
