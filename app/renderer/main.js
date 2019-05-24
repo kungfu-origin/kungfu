@@ -71,7 +71,7 @@ export const startGetProcessStatus = () => {
     listProcessStatus()
     .then(res => {
         const processStatus = Object.freeze(res);
-        console.log(processStatus)
+        // console.log(processStatus)
         processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
     })
     .catch(err => console.error(err))
@@ -102,13 +102,13 @@ ipcRenderer.removeAllListeners('isUpdateNow')
 ipcRenderer.send("checkForUpdate");
 ipcRenderer.on("message", (event, text) => {
     this.tips = text;
-    console.log('ipcRenderer:message', text)
+    console.log(text)
 });
 
 //注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
 ipcRenderer.on("downloadProgress", (event, progressObj) => {
     this.downloadPercent = progressObj.percent || 0;
-    console.log('downloadPercent', progressObj.percent || 0)
+    console.log(progressObj.percent || 0)
 });
 ipcRenderer.on("isUpdateNow", () => {
     ipcRenderer.send("isUpdateNow");
