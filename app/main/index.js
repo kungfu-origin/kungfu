@@ -246,7 +246,6 @@ function updateHandler(mainWindow){
         mainWindow.webContents.send('downloadProgress', progressObj)
     })
     autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) => {
-		console.log('update-downloaded ', message.downloaded)
         dialog.showMessageBox({
             type: 'question',
             title: '提示',
