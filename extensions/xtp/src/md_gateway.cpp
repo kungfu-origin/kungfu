@@ -3,8 +3,8 @@
 //
 
 #include <fmt/format.h>
-#include <code_convert.h>
-#include <macro.h>
+#include <kungfu/wingchun/util/code_convert.h>
+#include <kungfu/wingchun/gateway/macro.h>
 
 #include <kungfu/log/log.h>
 

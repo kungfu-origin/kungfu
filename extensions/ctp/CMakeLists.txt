@@ -22,13 +22,13 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${KF_E
 ENDIF()
 
 IF(UNIX AND NOT APPLE)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ctpthostmduserapi ctpthosttraderapi gateway_impl fmt)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ctpthostmduserapi ctpthosttraderapi wingchun)
     FILE(COPY api/${CTP_API_VERSION}/lib/libctpthostmduserapi.so DESTINATION ${KF_EXTENSION_BUILD_DIR})
     FILE(COPY api/${CTP_API_VERSION}/lib/libctpthosttraderapi.so DESTINATION ${KF_EXTENSION_BUILD_DIR})
 ENDIF()
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE thostmduserapi thosttraderapi gateway_impl fmt)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE thostmduserapi thosttraderapi wingchun)
     FILE(COPY api/${CTP_API_VERSION}/thosttraderapi.dll DESTINATION ${KF_EXTENSION_BUILD_DIR})
     FILE(COPY api/${CTP_API_VERSION}/thostmduserapi.dll DESTINATION ${KF_EXTENSION_BUILD_DIR})
 ENDIF()

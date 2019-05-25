@@ -2,7 +2,7 @@ PROJECT(kungfu-extensions)
 
 ############################################################
 
-INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/cpp/deps/nanomsg-1.1.5/include")
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/cpp/deps/nanomsg-1.1.5/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/spdlog-1.3.1/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/json-3.5.0/single_include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/SQLiteCpp-2.3.0/include)
@@ -13,12 +13,8 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/cxxopts-2.2/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/googletest-1.9.0/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/cppnanomsg)
 
-INCLUDE_DIRECTORIES(../cpp/yijinjing/include)
-INCLUDE_DIRECTORIES(../cpp/wingchun/)
-INCLUDE_DIRECTORIES(../cpp/wingchun/include)
-INCLUDE_DIRECTORIES(../cpp/wingchun/util/include)
-INCLUDE_DIRECTORIES(../cpp/wingchun/gateway/include)
-INCLUDE_DIRECTORIES(../cpp/wingchun/gateway/impl)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/yijinjing/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/wingchun/include)
 
 ############################################################
 

@@ -13,7 +13,7 @@
 #include "xtp_api_struct.h"
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
-#include "util/include/business_helper.h"
+#include <kungfu/wingchun/util/business_helper.h>
 
 namespace kungfu
 {

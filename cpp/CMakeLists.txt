@@ -2,7 +2,7 @@ PROJECT(kungfu-cpp)
 
 ############################################################
 
-INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/cpp/deps/nanomsg-1.1.5/include")
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/cpp/deps/nanomsg-1.1.5/include)
 INCLUDE_DIRECTORIES(deps/spdlog-1.3.1/include)
 INCLUDE_DIRECTORIES(deps/json-3.5.0/single_include)
 INCLUDE_DIRECTORIES(deps/SQLiteCpp-2.3.0/include)

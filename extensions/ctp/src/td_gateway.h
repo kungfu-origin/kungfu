@@ -5,7 +5,7 @@
 #ifndef WC_2_TD_GATEWAY_H
 #define WC_2_TD_GATEWAY_H
 
-#include <gateway_impl.h>
+#include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include "ThostFtdcTraderApi.h"
 #include "order_mapper.h"

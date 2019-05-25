@@ -14,7 +14,7 @@
 #include <kungfu/wingchun/oms_struct.h>
 #include <kungfu/wingchun/reqrsp.h>
 
-#include "util/include/business_helper.h"
+#include <kungfu/wingchun/util/business_helper.h>
 
 #define FORMAT_DOUBLE(x) rounded(x, 4)
 

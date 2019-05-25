@@ -7,8 +7,8 @@
 
 #include <kungfu/wingchun/serialize.h>
 #include <kungfu/wingchun/config.h>
-#include <macro.h>
-#include <business_helper.h>
+#include <kungfu/wingchun/gateway/macro.h>
+#include <kungfu/wingchun/util/business_helper.h>
 
 #include "td_gateway.h"
 #include "type_convert_xtp.h"

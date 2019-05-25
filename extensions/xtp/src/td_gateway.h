@@ -6,7 +6,7 @@
 #define PROJECT_TD_GATEWAY_H
 
 #include <memory>
-#include <gateway_impl.h>
+#include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include "xtp_trader_api.h"
 #include "order_mapper.h"

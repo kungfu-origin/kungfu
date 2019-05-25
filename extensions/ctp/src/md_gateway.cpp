@@ -10,7 +10,7 @@
 #include <kungfu/time/timer.h>
 
 #include "md_gateway.h"
-#include "macro.h"
+#include <kungfu/wingchun/gateway/macro.h>
 #include "util/include/code_convert.h"
 #include "fmt/format.h"
 #include "../type_convert.h"

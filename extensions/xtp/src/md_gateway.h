@@ -9,7 +9,7 @@
 
 #include <string>
 #include <map>
-#include <gateway_impl.h>
+#include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include "xtp_quote_api.h"
 

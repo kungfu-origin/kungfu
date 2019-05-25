@@ -5,7 +5,7 @@
 #ifndef KUNGFU_MDGATEWAY_H
 #define KUNGFU_MDGATEWAY_H
 
-#include <gateway_impl.h>
+#include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include "ThostFtdcMdApi.h"
 

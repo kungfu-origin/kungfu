@@ -1,22 +1,11 @@
 PROJECT(wingchun)
 
-INCLUDE_DIRECTORIES(../yijinjing/include)
+############################################################
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR}/include)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/yijinjing/include)
+INCLUDE_DIRECTORIES(include)
 
-ADD_SUBDIRECTORY(task_scheduler)
-ADD_SUBDIRECTORY(event_loop)
-ADD_SUBDIRECTORY(uid_generator)
-ADD_SUBDIRECTORY(util)
-ADD_SUBDIRECTORY(calendar)
-ADD_SUBDIRECTORY(oms)
-ADD_SUBDIRECTORY(commission)
-ADD_SUBDIRECTORY(portfolio)
-ADD_SUBDIRECTORY(strategy)
-ADD_SUBDIRECTORY(gateway)
-ADD_SUBDIRECTORY(nn_publisher)
-ADD_SUBDIRECTORY(storage)
+ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(pybind)
 
 

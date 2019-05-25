@@ -19,9 +19,9 @@
 
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
-#include "strategy/include/strategy.h"
-#include "strategy/src/strategy_util.h"
-#include "calendar/include/calendar_service.h"
+#include <kungfu/wingchun/strategy/strategy.h>
+#include <kungfu/wingchun/strategy/strategy_util.h>
+#include <kungfu/wingchun/calendar/calendar_service.h>
 
 namespace py = pybind11;
 namespace kf = kungfu;

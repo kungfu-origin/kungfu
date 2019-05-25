@@ -16,9 +16,9 @@
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
 
-#include "util/include/business_helper.h"
+#include <kungfu/wingchun/util/business_helper.h>
 #include "util/include/code_convert.h"
-#include "util/instrument/instrument.h"
+#include <kungfu/wingchun/util/instrument.h>
 
 
 namespace kungfu

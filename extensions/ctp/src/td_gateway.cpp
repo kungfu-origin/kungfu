@@ -12,10 +12,10 @@
 #include <thread>
 #include <algorithm>
 #include "util/include/code_convert.h"
-#include "util/include/nanomsg_util.h"
-#include "util/instrument/instrument.h"
-#include "util/include/business_helper.h"
-#include "gateway/include/macro.h"
+#include <kungfu/wingchun/util/nanomsg_util.h>
+#include <kungfu/wingchun/util/instrument.h>
+#include <kungfu/wingchun/util/business_helper.h>
+#include <kungfu/wingchun/gateway/macro.h>
 #include <kungfu/wingchun/serialize.h>
 #include "include/config.h"
 
