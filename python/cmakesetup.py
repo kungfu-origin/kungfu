@@ -12,3 +12,4 @@ if platform.system() == 'Windows':
             npm_path = path
 
 subprocess.Popen([npm_path, "config", "set", "cmake_PYTHON_EXECUTABLE", python_path])
+subprocess.Popen([npm_path, "config", "set", "cmake_SQLITECPP_INTERNAL_SQLITE", "off"])
