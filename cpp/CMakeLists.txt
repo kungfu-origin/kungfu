@@ -11,7 +11,6 @@ INCLUDE_DIRECTORIES(deps/fast-cpp-csv-parser)
 INCLUDE_DIRECTORIES(deps/getopt-1.0.0)
 INCLUDE_DIRECTORIES(deps/cxxopts-2.2/include)
 INCLUDE_DIRECTORIES(deps/googletest-1.9.0/include)
-INCLUDE_DIRECTORIES(deps/cppnanomsg)
 
 ############################################################
 

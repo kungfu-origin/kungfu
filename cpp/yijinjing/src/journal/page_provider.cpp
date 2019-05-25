@@ -16,9 +16,8 @@
 #include <spdlog/spdlog.h>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <nanomsg/nn.h>
+
 #include <nanomsg/reqrep.h>
-#include <nanomsg/bus.h>
 
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page.h>
@@ -53,7 +52,7 @@ json ClientPageProvider::request(const string &path)
     request_["writer"] = is_writer_;
     request_["hash_code"] = hash_code_;
     string request_str = request_.dump();
-    int sent_bytes = client_request_socket_.send(request_str.c_str(), request_str.length(), 0);
+    int sent_bytes = client_request_socket_.send(request_str, 0);
     SPDLOG_TRACE("sent request [{}]: {}", sent_bytes, request_str);
     emitter_.poke();
     int recv_bytes = client_request_socket_.recv(response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);

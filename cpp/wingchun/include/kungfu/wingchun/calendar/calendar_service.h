@@ -5,12 +5,12 @@
 #ifndef KUNGFU_CALENDAR_SERVICE_H
 #define KUNGFU_CALENDAR_SERVICE_H
 
-#include <kungfu/wingchun/util/business_helper.h>
-#include <kungfu/wingchun/util/env.h>
 #include <atomic>
-#include <nanomsg/nn.h>
 #include <thread>
 #include <vector>
+
+#include <kungfu/wingchun/util/business_helper.h>
+#include <kungfu/wingchun/util/env.h>
 #include <kungfu/wingchun/msg.h>
 
 namespace kungfu

@@ -13,7 +13,7 @@ USING_YJJ_NAMESPACE
 
 passive::nn_socket_holder::nn_socket_holder(int protocol, std::string url): socket_(AF_SP, protocol)
 {
-    socket_.connect(url.c_str());
+    socket_.connect(url);
 }
 
 void passive::emitter::poke()
@@ -23,7 +23,7 @@ void passive::emitter::poke()
 
 void passive::emitter::emit(const std::string& msg)
 {
-    socket_.send(msg.c_str(), msg.length(), 0);
+    socket_.send(msg, 0);
 }
 
 passive::notice::notice(int timeout): nn_socket_holder(NN_SUB, KFS_NOTICE_URL), timeout_(timeout)
@@ -40,7 +40,7 @@ bool passive::notice::wait()
         message_.assign(buf_, len);
         return true;
     }
-    catch(const nn::exception& e)
+    catch(const nanomsg::exception& e)
     {
         if (e.num() != ETIMEDOUT)
         {

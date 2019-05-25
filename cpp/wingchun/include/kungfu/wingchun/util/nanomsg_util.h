@@ -5,11 +5,11 @@
 #ifndef KUNGFU_NANOMSG_UTIL_H
 #define KUNGFU_NANOMSG_UTIL_H
 
-#include <nn.hpp>
-#include <nanomsg/reqrep.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <nanomsg/reqrep.h>
 
+#include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/wingchun/msg.h>
 
 namespace kungfu
@@ -44,19 +44,19 @@ namespace kungfu
     // >0: 毫秒数
     inline NNMsg get_rsp(const std::string &url, const NNMsg& req, int timeout = -1)
     {
-        int socket = nn_socket(AF_SP, NN_REQ);
-        nn_connect(socket, url.c_str());
-        nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
+        yijinjing::nanomsg::socket socket(AF_SP, NN_REQ);
+        socket.connect(url);
+        socket.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
 
         nlohmann::json j_req = req;
         std::string j_str = j_req.dump();
         SPDLOG_TRACE("send {} to {}", j_str, url);
-        nn_send(socket, j_str.c_str(), j_str.size() + 1, 0);
+        socket.send(j_str, 0);
 
         char* buffer = nullptr;
         NNMsg rsp = {};
         rsp.data["error_msg"] = "no response";
-        int rc = nn_recv(socket, &buffer, NN_MSG, 0);
+        int rc = socket.recv(&buffer, NN_MSG, 0);
         if (rc > 0)
         {
             SPDLOG_TRACE("rcv {} from {}", buffer, url);
@@ -75,8 +75,7 @@ namespace kungfu
         {
             SPDLOG_ERROR("no response from {}", url);
         }
-        nn_shutdown(socket, 0);
-        nn_close(socket);
+        socket.shutdown(0);
         return rsp;
     }
 }

@@ -2,17 +2,17 @@
 // Created by qlu on 2019/3/14.
 //
 
+#include <spdlog/spdlog.h>
+#include <nanomsg/pubsub.h>
+
 #include <kungfu/wingchun/util/nn_publisher.h>
 #include <kungfu/wingchun/serialize.h>
-#include <nanomsg/pubsub.h>
-#include "spdlog/spdlog.h"
 
 namespace kungfu
 {
-    NNPublisher::NNPublisher(const std::string& url)
+    NNPublisher::NNPublisher(const std::string& url): socket_(AF_SP, NN_PUB)
     {
-        pub_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_PUB));
-        pub_socket_->bind(url.c_str());
+        socket_.bind(url);
     }
 
     void NNPublisher::set_logger(std::shared_ptr<spdlog::logger> logger) const
@@ -27,7 +27,7 @@ namespace kungfu
         j["data"] = data;
         std::string js = j.dump();
         SPDLOG_TRACE("nn publishing {}", js);
-        pub_socket_->send(js.c_str(), js.length(), 0);
+        socket_.send(js, 0);
         SPDLOG_TRACE("nn published {}", js);
     }
 

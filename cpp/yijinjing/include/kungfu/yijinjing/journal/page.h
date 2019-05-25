@@ -27,6 +27,7 @@
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
+#include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/nanomsg/passive.h>
 
 YJJ_NAMESPACE_START
@@ -298,7 +299,7 @@ public:
 
 private:
     string  client_name_;
-    nn::socket     client_request_socket_;
+    nanomsg::socket     client_request_socket_;
     passive::emitter emitter_;
     nlohmann::json request_;
     char response_buf[SOCKET_MESSAGE_MAX_LENGTH];

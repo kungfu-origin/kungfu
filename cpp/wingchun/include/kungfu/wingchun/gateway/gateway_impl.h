@@ -90,7 +90,7 @@ namespace kungfu
         kungfu::CalendarPtr get_calendar() const { return calendar_; }
         const NNPublisher* get_publisher() const { return nn_publisher_.get(); }
         std::shared_ptr<GatewayStateStorage> get_state_storage() const { return state_storage_; }
-        std::shared_ptr<nn::socket> get_rsp_socket() const { return rsp_socket_; }
+        std::shared_ptr<yijinjing::nanomsg::socket> get_rsp_socket() const { return rsp_socket_; }
         std::shared_ptr<spdlog::logger> get_logger() const { return logger_; }
 
     protected:
@@ -101,7 +101,7 @@ namespace kungfu
         std::shared_ptr<spdlog::logger> logger_;
 
         std::shared_ptr<EventLoop> loop_;
-        std::shared_ptr<nn::socket> rsp_socket_;
+        std::shared_ptr<yijinjing::nanomsg::socket> rsp_socket_;
 
         kungfu::CalendarPtr calendar_;
         std::shared_ptr<GatewayStateStorage> state_storage_;

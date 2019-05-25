@@ -2,6 +2,13 @@
 // Created by qlu on 2019/2/21.
 //
 
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+
+#include <nanomsg/pubsub.h>
+#include <kungfu/yijinjing/nanomsg/socket.h>
+
 #include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include <kungfu/wingchun/config.h>
@@ -12,13 +19,6 @@
 #include <kungfu/wingchun/util/timer_util.h>
 #include <kungfu/wingchun/gateway/util.hpp>
 
-#include <cstring>
-#include <cstdio>
-#include <algorithm>
-
-#include <nanomsg/nn.h>
-#include <nanomsg/pubsub.h>
-#include <nn.hpp>
 #include <kungfu/wingchun/storage/log.h>
 #include <kungfu/wingchun/storage/snapshot_storage.h>
 #include <kungfu/wingchun/calendar/calendar.h>
@@ -63,7 +63,7 @@ namespace kungfu
         }
 
         std::string rep_url = GATEWAY_REP_URL(get_name());
-        rsp_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
+        rsp_socket_ = std::shared_ptr<yijinjing::nanomsg::socket>(new yijinjing::nanomsg::socket(AF_SP, NN_REP));
         try
         {
             rsp_socket_->bind(rep_url.c_str());
@@ -153,7 +153,7 @@ namespace kungfu
             msg.data = rsp;
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
-            get_rsp_socket()->send(js.c_str(), js.length() + 1, 0);
+            get_rsp_socket()->send(js, 0);
         }
     }
 
@@ -187,7 +187,7 @@ namespace kungfu
             msg.data = rsp;
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
-            get_rsp_socket()->send(js.c_str(), js.length() + 1, 0);
+            get_rsp_socket()->send(js, 0);
         }
     }
 
@@ -354,7 +354,7 @@ namespace kungfu
             msg.data = rsp;
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
-            rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+            rsp_socket_->send(js, 0);
         }
     }
 
@@ -432,7 +432,7 @@ namespace kungfu
         msg.data["error_text"] = error_text;
         msg.data["order_id"] = std::to_string(order_id);
         std::string js = to_string(msg);
-        rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+        rsp_socket_->send(js, 0);
     }
 
     void TdGatewayImpl::on_manual_order_action(const std::string &account_id, const std::string &client_id, const std::vector<uint64_t> &order_ids)
@@ -465,7 +465,7 @@ namespace kungfu
         msg.data["error_text"] = error_text;
         msg.data["cancel_count"] = cancel_count;
         std::string js = to_string(msg);
-        rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+        rsp_socket_->send(js, 0);
     }
 
     void TdGatewayImpl::on_order(Order &order)

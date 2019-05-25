@@ -9,6 +9,16 @@
 
 using namespace kungfu::yijinjing::nanomsg;
 
+static const char *symbol (int i, int *value)
+{
+    return nn_symbol (i, value);
+}
+
+static void term ()
+{
+    nn_term ();
+}
+
 const char *exception::what () const throw ()
 {
     return nn_strerror (errno_);
@@ -17,32 +27,6 @@ const char *exception::what () const throw ()
 int exception::num () const
 {
     return errno_;
-}
-
-const char *symbol (int i, int *value)
-{
-    return nn_symbol (i, value);
-}
-
-void *allocmsg (size_t size, int type)
-{
-    void *msg = nn_allocmsg (size, type);
-    if (!msg)
-        throw exception ();
-    return msg;
-}
-
-int freemsg (void *msg)
-{
-    int rc = nn_freemsg (msg);
-    if (rc != 0)
-        throw exception ();
-    return rc;
-}
-
-void term ()
-{
-    nn_term ();
 }
 
 socket::socket (int domain, int protocol)
@@ -74,17 +58,17 @@ void socket::getsockopt (int level, int option, void *optval,
         throw exception ();
 }
 
-int socket::bind (const char *addr)
+int socket::bind (const std::string &url)
 {
-    int rc = nn_bind (sock_, addr);
+    int rc = nn_bind (sock_, url.c_str());
     if (rc < 0)
         throw exception ();
     return rc;
 }
 
-int socket::connect (const char *addr)
+int socket::connect (const std::string &url)
 {
-    int rc = nn_connect (sock_, addr);
+    int rc = nn_connect (sock_, url.c_str());
     if (rc < 0)
         throw exception ();
     return rc;
@@ -97,9 +81,9 @@ void socket::shutdown (int how)
         throw exception ();
 }
 
-int socket::send (const void *buf, size_t len, int flags)
+int socket::send (const std::string& msg, int flags) const
 {
-    int rc = nn_send (sock_, buf, len, flags);
+    int rc = nn_send (sock_, msg.c_str(), msg.length(), flags);
     if (rc < 0) {
         if (nn_errno () != EAGAIN)
             throw exception ();
@@ -119,7 +103,7 @@ int socket::recv (void *buf, size_t len, int flags)
     return rc;
 }
 
-int socket::sendmsg (const struct nn_msghdr *msghdr, int flags)
+int socket::sendmsg (const struct nn_msghdr *msghdr, int flags) const
 {
     int rc = nn_sendmsg (sock_, msghdr, flags);
     if (rc < 0) {
@@ -138,5 +122,21 @@ int socket::recvmsg (struct nn_msghdr *msghdr, int flags)
             throw exception ();
         return -1;
     }
+    return rc;
+}
+
+void *socket::allocmsg (size_t size, int type)
+{
+    void *msg = nn_allocmsg (size, type);
+    if (!msg)
+        throw exception ();
+    return msg;
+}
+
+int socket::freemsg (void *msg)
+{
+    int rc = nn_freemsg (msg);
+    if (rc != 0)
+        throw exception ();
     return rc;
 }

@@ -28,7 +28,7 @@ namespace kungfu
         impl(Strategy* strategy, const std::string& name) : strategy_(strategy), name_(name), event_loop_(new EventLoop(name)), util_(new StrategyUtil(name))
         {
             std::string rep_url = STRATEGY_REP_URL(name_);
-            rsp_socket_ = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
+            rsp_socket_ = std::shared_ptr<yijinjing::nanomsg::socket>(new yijinjing::nanomsg::socket(AF_SP, NN_REP));
             try
             {
                 rsp_socket_->bind(rep_url.c_str());
@@ -164,7 +164,7 @@ namespace kungfu
             msg.data["error_text"] = error_text;
             msg.data["cancel_count"] = cancel_count;
             std::string js = to_string(msg);
-            rsp_socket_->send(js.c_str(), js.length() + 1, 0);
+            rsp_socket_->send(js, 0);
         }
 
         void on_1min_timer(int64_t nano)
@@ -186,7 +186,7 @@ namespace kungfu
         std::string name_;
         EventLoopPtr event_loop_;
         StrategyUtilPtr util_;
-        std::shared_ptr<nn::socket> rsp_socket_;
+        std::shared_ptr<yijinjing::nanomsg::socket> rsp_socket_;
     };
 
     Strategy::Strategy(const std::string& name) : name_(name), impl_(new impl(this, name)) {}

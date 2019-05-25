@@ -5,9 +5,11 @@
 #ifndef KUNGFU_SOCKET_H
 #define KUNGFU_SOCKET_H
 
+#include <string>
 #include <cstring>
 #include <algorithm>
 #include <exception>
+#include <nanomsg/nn.h>
 
 #include <kungfu/yijinjing/common.h>
 
@@ -15,6 +17,8 @@ YJJ_NAMESPACE_START
 
 namespace nanomsg
 {
+    static const char *symbol (int i, int *value);
+    static void term ();
 
     class exception : public std::exception
     {
@@ -27,11 +31,6 @@ namespace nanomsg
         int errno_;
     };
 
-    const char *symbol (int i, int *value);
-    void *allocmsg (size_t size, int type);
-    int freemsg (void *msg);
-    void term ();
-
     class socket
     {
     public:
@@ -39,13 +38,15 @@ namespace nanomsg
         ~socket ();
         void setsockopt (int level, int option, const void *optval, size_t optvallen);
         void getsockopt (int level, int option, void *optval, size_t *optvallen);
-        int bind (const char *addr);
-        int connect (const char *addr);
+        int bind (const std::string &url);
+        int connect (const std::string &url);
         void shutdown (int how);
-        int send (const void *buf, size_t len, int flags);
+        int send (const std::string &msg, int flags) const;
         int recv (void *buf, size_t len, int flags);
-        int sendmsg (const struct nn_msghdr *msghdr, int flags);
+        int sendmsg (const struct nn_msghdr *msghdr, int flags) const;
         int recvmsg (struct nn_msghdr *msghdr, int flags);
+        void *allocmsg (size_t size, int type);
+        int freemsg (void *msg);
 
     private:
         int sock_;

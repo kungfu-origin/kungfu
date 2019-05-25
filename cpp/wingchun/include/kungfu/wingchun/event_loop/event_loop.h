@@ -8,8 +8,8 @@
 #include <memory>
 #include <csignal>
 #include <spdlog/spdlog.h>
-#include <nn.hpp>
 
+#include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/nanomsg/passive.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -49,7 +49,7 @@ namespace kungfu
         void subscribe_nanomsg(const std::string& url);
         void bind_nanomsg(const std::string& url);
 
-        void add_socket(std::shared_ptr<nn::socket> socket) {  socket_vec_.push_back(socket); };
+        void add_socket(std::shared_ptr<yijinjing::nanomsg::socket> socket) {  socket_vec_.push_back(socket); };
         void subscribe_yjj_journal(const std::string& journal_folder, const std::string& journal_name, int64_t offset_nano);
 
         void register_nanotime_callback(int64_t nano, TSCallback callback); // if nano == 0, trigger at next update
@@ -93,7 +93,7 @@ namespace kungfu
         bool low_latency_;
         yijinjing::passive::notice notice_;
         yijinjing::JournalReaderPtr reader_;
-        std::vector<std::shared_ptr<nn::socket>> socket_vec_;
+        std::vector<std::shared_ptr<yijinjing::nanomsg::socket>> socket_vec_;
 
         std::unique_ptr<TaskScheduler> scheduler_;
 

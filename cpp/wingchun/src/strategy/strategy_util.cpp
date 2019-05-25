@@ -3,8 +3,6 @@
 //
 
 #include <fmt/format.h>
-#include <nanomsg/nn.h>
-#include <nanomsg/pubsub.h>
 
 #include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>

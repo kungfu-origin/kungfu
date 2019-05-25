@@ -6,7 +6,6 @@
 #define KUNGFU_PASSIVE_H
 
 #include <spdlog/spdlog.h>
-#include <nn.hpp>
 #include <nanomsg/pipeline.h>
 #include <nanomsg/pubsub.h>
 

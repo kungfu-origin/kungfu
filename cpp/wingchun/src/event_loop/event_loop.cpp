@@ -5,7 +5,6 @@
 #include <kungfu/wingchun/event_loop/event_loop.h>
 #include <kungfu/wingchun/reqrsp.h>
 #include <kungfu/wingchun/serialize.h>
-#include <nanomsg/nn.h>
 #include <nanomsg/pubsub.h>
 #include <nanomsg/reqrep.h>
 #include <nlohmann/json.hpp>
@@ -27,7 +26,7 @@ namespace kungfu
 
     void EventLoop::subscribe_nanomsg(const std::string& url)
     {
-        std::shared_ptr<nn::socket> socket = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_SUB));
+        std::shared_ptr<yijinjing::nanomsg::socket> socket = std::shared_ptr<yijinjing::nanomsg::socket>(new yijinjing::nanomsg::socket(AF_SP, NN_SUB));
         socket->connect(url.c_str());
         socket->setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
         socket_vec_.emplace_back(socket);
@@ -35,7 +34,7 @@ namespace kungfu
 
     void EventLoop::bind_nanomsg(const std::string &url)
     {
-        std::shared_ptr<nn::socket> socket = std::shared_ptr<nn::socket>(new nn::socket(AF_SP, NN_REP));
+        std::shared_ptr<yijinjing::nanomsg::socket> socket = std::shared_ptr<yijinjing::nanomsg::socket>(new yijinjing::nanomsg::socket(AF_SP, NN_REP));
         socket->bind(url.c_str());
         socket_vec_.emplace_back(socket);
     }
@@ -449,7 +448,7 @@ namespace kungfu
             }
             if (buf != nullptr)
             {
-                nn::freemsg(buf);
+                socket->freemsg(buf);
             }
         }
     }
