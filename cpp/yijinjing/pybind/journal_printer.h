@@ -12,12 +12,9 @@
 #include <kungfu/time/timer.h>
 #include <kungfu/yijinjing/comman.h>
 
-#include <kungfu/yijinjing/journal/hash.hpp>
-#include <kungfu/yijinjing/journal/journal_reader.h>
-#include <kungfu/yijinjing/journal/frame.hpp>
+#include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/page.h>
-#include <kungfu/yijinjing/journal/page_util.h>
-#include <kungfu/yijinjing/journal/page_header.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/serialize.h>

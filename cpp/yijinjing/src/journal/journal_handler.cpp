@@ -24,8 +24,7 @@
 #include <boost/filesystem.hpp>
 #include <kungfu/time/timer.h>
 
-#include <kungfu/yijinjing/journal/journal_handler.h>
-#include <kungfu/yijinjing/journal/page_provider.h>
+#include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
 USING_YJJ_NAMESPACE

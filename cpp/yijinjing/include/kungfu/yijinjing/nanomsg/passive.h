@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2019-05-16.
 //
 
-#ifndef KUNGFU_BUS_H
-#define KUNGFU_BUS_H
+#ifndef KUNGFU_PASSIVE_H
+#define KUNGFU_PASSIVE_H
 
 #include <spdlog/spdlog.h>
 #include <nn.hpp>
@@ -11,6 +11,7 @@
 #include <nanomsg/pubsub.h>
 
 #include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/nanomsg/socket.h>
 
 YJJ_NAMESPACE_START
 
@@ -22,7 +23,7 @@ namespace passive
     class nn_socket_holder {
     protected:
         nn_socket_holder(int protocol, std::string url);
-        nn::socket socket_;
+        nanomsg::socket socket_;
     };
 
     class emitter: nn_socket_holder {
@@ -49,4 +50,4 @@ namespace passive
 
 YJJ_NAMESPACE_END
 
-#endif //KUNGFU_BUS_H
+#endif //KUNGFU_PASSIVE_H

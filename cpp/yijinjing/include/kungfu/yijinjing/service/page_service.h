@@ -22,15 +22,74 @@
 #ifndef YIJINJING_PAGEENGINE_H
 #define YIJINJING_PAGEENGINE_H
 
-#include <kungfu/yijinjing/service/page_service_message.h>
-#include <kungfu/yijinjing/journal/journal_writer.h>
-
 #include <utility>
+
+#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/service/page_service.h>
 
 YJJ_NAMESPACE_START
 
 #define TEMP_PAGE KUNGFU_JOURNAL_FOLDER + "TEMP_PAGE"
 #define MEMORY_MSG_FILE KUNGFU_JOURNAL_FOLDER + "PAGE_SERVICE_MSG"
+
+/*
+ * PROCESS:
+ *
+ *      * default:                          -- PAGE_COMM_RAW
+ *
+ *      user:   socket request
+ *      server: allocate idx                -> PAGE_COMM_ALLOCATED
+ *      user:   setup folder / shortName    -> PAGE_HOLDING
+ *
+ *      user:   fill in page_num            -> PAGE_REQUESTING
+ *      server: find requesting, allocate
+ *              finish allocating           -> PAGE_ALLOCATED (success)
+ *                                          -> PAGE_NON_EXIST (reader wants a not existing page)
+ *                                          -> PAGE_MEM_OVERFLOW (current locking memory overflows)
+ *
+ */
+struct PageServiceMessage
+{
+    /** PagedCommTypeConstants (by both server and client) */
+    volatile int8_t    status;
+    /** journal folder (by client) */
+    char    folder[JOURNAL_FOLDER_MAX_LENGTH];
+    /** journal name (by client) */
+    char    name[JOURNAL_SHORT_NAME_MAX_LENGTH];
+    /** return true if the client is writer (by client) */
+    bool    is_writer;
+    /** page number to request (by client) */
+    int16_t   page_num;
+    /** page number requested (by server) */
+    int16_t   last_page_num;
+
+    // operators for map key
+    bool const operator == (const PageServiceMessage &p) const
+    {
+        return page_num == p.page_num && strcmp(folder, p.folder) == 0 && strcmp(name, p.name) == 0;
+    }
+
+    bool const operator < (const PageServiceMessage &p) const
+    {
+        return (strcmp(folder, p.folder) != 0) ? strcmp(folder, p.folder) < 0
+                                               : (strcmp(name, p.name) != 0) ? strcmp(name, p.name) < 0
+                                                                             : page_num < p.page_num;
+    }
+#ifndef _WIN32
+} __attribute__((packed));
+#else
+};
+#pragma pack(pop)
+#endif
+
+/** max number of communication users in the same time */
+#define MAX_MEMORY_MSG_NUMBER 1000
+/** REQUEST_ID_RANGE * MAX_MEMORY_MSG_NUMBER < 2147483647(max num of int) */
+#define REQUEST_ID_RANGE 1000000
+/** based on the max number, the memory message file size is determined */
+const int MEMORY_MSG_FILE_SIZE = MAX_MEMORY_MSG_NUMBER * sizeof(PageServiceMessage) + 1024;
+/** fast type convert */
+#define GET_MEMORY_MSG(buffer, idx) ((PageServiceMessage*)(ADDRESS_ADD(buffer, idx * sizeof(PageServiceMessage))))
 
 class PageService
 {

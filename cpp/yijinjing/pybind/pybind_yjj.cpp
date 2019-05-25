@@ -27,12 +27,10 @@
 
 #include <kungfu/time/timer.h>
 
-#include <kungfu/yijinjing/service/page_service.h>
-#include <kungfu/yijinjing/journal/journal_reader.h>
-#include <kungfu/yijinjing/journal/journal_writer.h>
-#include <kungfu/yijinjing/journal/journal_finder.h>
-#include <kungfu/yijinjing/journal/frame.hpp>
+#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/passive.h>
+#include <kungfu/yijinjing/service/page_service.h>
 
 #ifdef _WINDOWS
 #include <string>

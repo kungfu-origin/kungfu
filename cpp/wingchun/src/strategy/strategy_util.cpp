@@ -8,7 +8,7 @@
 
 #include <kungfu/log/log.h>
 #include <kungfu/time/timer.h>
-#include <kungfu/yijinjing/journal/journal_reader.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 #include <kungfu/wingchun/strategy/strategy_util.h>
 #include <kungfu/wingchun/portfolio/portfolio_manager.h>

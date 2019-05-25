@@ -28,10 +28,8 @@
 #include <kungfu/time/timer.h>
 
 #include <kungfu/yijinjing/comman.h>
-#include <kungfu/yijinjing/journal/journal_writer.h>
+#include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/journal/page_provider.h>
-
 
 USING_YJJ_NAMESPACE
 

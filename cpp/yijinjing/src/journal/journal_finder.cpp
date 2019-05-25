@@ -20,12 +20,13 @@
  * Find journal names and folders from longfist meta data.
  */
 
-#include <kungfu/yijinjing/journal/journal_finder.h>
-
-#include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/journal/page_util.h>
-
 #include <boost/unordered_set.hpp>
+#include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
+
+
+#include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 USING_YJJ_NAMESPACE
 

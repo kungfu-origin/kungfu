@@ -22,8 +22,7 @@
  */
 
 #include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/journal/page_util.h>
-#include <kungfu/yijinjing/journal/IPageProvider.h>
+#include <kungfu/yijinjing/journal/page.h>
 
 USING_YJJ_NAMESPACE
 

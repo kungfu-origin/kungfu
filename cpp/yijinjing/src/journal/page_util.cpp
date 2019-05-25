@@ -38,8 +38,7 @@
 #include <boost/filesystem.hpp>
 
 #include <kungfu/log/log.h>
-#include <kungfu/yijinjing/journal/page_util.h>
-#include <kungfu/yijinjing/journal/page_header.h>
+#include <kungfu/yijinjing/journal/page.h>
 
 USING_YJJ_NAMESPACE
 

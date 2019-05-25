@@ -22,8 +22,6 @@
 #include <kungfu/time/timer.h>
 
 #include <kungfu/yijinjing/journal/page.h>
-#include <kungfu/yijinjing/journal/page_header.h>
-#include <kungfu/yijinjing/journal/page_util.h>
 
 USING_YJJ_NAMESPACE
 

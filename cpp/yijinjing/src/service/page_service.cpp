@@ -20,11 +20,10 @@
 #include <kungfu/log/log.h>
 #include <kungfu/time/timer.h>
 
-#include <kungfu/yijinjing/service/page_service.h>
-#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/comman.h>
 #include <kungfu/yijinjing/journal/page.h>
-#include <kungfu/yijinjing/journal/hash.hpp>
-#include <kungfu/yijinjing/journal/page_util.h>
+#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/service/page_service.h>
 
 USING_YJJ_NAMESPACE
 

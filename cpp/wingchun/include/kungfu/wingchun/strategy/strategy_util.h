@@ -11,11 +11,10 @@
 #include <memory>
 #include <set>
 
+#include <kungfu/yijinjing/journal/journal.h>
+
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/msg.h>
-
-#include <kungfu/yijinjing/journal/journal_writer.h>
-
 #include <kungfu/wingchun/util/uid_generator.h>
 #include <kungfu/wingchun/storage/source_list_storage.h>
 #include <kungfu/wingchun/storage/account_list_storage.h>

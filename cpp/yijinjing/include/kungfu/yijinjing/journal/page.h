@@ -23,17 +23,115 @@
 #ifndef YIJINJING_PAGE_H
 #define YIJINJING_PAGE_H
 
+#include <nlohmann/json.hpp>
+
 #include <kungfu/yijinjing/comman.h>
-#include <kungfu/yijinjing/journal/frame_header.h>
-#include <kungfu/yijinjing/journal/frame.hpp>
+#include <kungfu/yijinjing/journal/frame.h>
+#include <kungfu/yijinjing/nanomsg/passive.h>
 
 YJJ_NAMESPACE_START
 
-FORWARD_DECLARE_PTR(Page);
+/** reserve space for page header (long) */
+#define PAGE_HEADER_RESERVE 10
+//////////////////////////////////////////
+/// (byte) JournalPageStatus
+//////////////////////////////////////////
+#define JOURNAL_PAGE_STATUS_RAW     0
+#define JOURNAL_PAGE_STATUS_INITED  1
+
+#define SOCKET_MESSAGE_MAX_LENGTH       1024 /**< max length of a socket buffer */
+
+struct PageHeader
+{
+    /** JournalPageStatus */
+    int8_t  status;
+    /** journal name */
+    char    journal_name[JOURNAL_SHORT_NAME_MAX_LENGTH];
+    /** number of this page in journal */
+    int16_t page_num;
+    /** nano time of when the page started */
+    int64_t start_nano;
+    /** nano time of when the page closed */
+    int64_t close_nano;
+    /** how many frame in this page (only filled when closed) */
+    int32_t frame_num;
+    /** pos of last frame */
+    int32_t last_pos;
+    /** version of frame header (using reserve)*/
+    int16_t frame_version;
+    /** reserve space */
+    int16_t reserve_short[3];
+    int64_t reserve_long[PAGE_HEADER_RESERVE - 1];
+#ifndef _WIN32
+} __attribute__((packed));
+#else
+};
+#pragma pack(pop)
+#endif
+
+enum PageStatus : int8_t
+{
+    // status in process 0 ~ 9
+    PAGE_RAW = 0,                       /**< this msg block is not allocated (default) */
+    PAGE_OCCUPIED = 1,                  /**< comm msg idx occupied (by server) */
+    PAGE_HOLDING = 2,                   /**< folder / name ready (by client) */
+    PAGE_REQUESTING = 3,                /**< page number specified (by client) */
+    PAGE_ALLOCATED = 4,                 /**< finish allocated, user may getPage (by server) */
+    // failures 10 ~ 19
+    PAGE_NON_EXIST = 11,                /**< default position */
+    PAGE_MEM_OVERFLOW = 12,             /**< default position */
+    PAGE_MORE_THAN_ONE_WRITE = 13,      /**< default position */
+    PAGE_CANNOT_RENAME_FROM_TEMP = 14   /**< default position */
+};
+
+/**
+ * PageUtil is more likely a namespace for utility functions
+ * more details are provided for each function
+ * all functions are open for usage
+ */
+class PageUtil
+{
+public:
+    // memory access
+    /** direct memory manipulation without service
+     * load page buffer, return address of the file-mapped memory
+     *  whether to write has to be specified in "isWriting"
+     *  if quickMode==True, no locking; if quickMode==False, mlock the memory for performance
+     * the address of memory is returned */
+    static void*  LoadPageBuffer(const string& path, int size, bool isWriting, bool quickMode);
+    /** direct memory manipulation without service
+     * release page buffer, buffer and size needs to be specified.
+     *  if quickMode==True, no unlocking; if quickMode==False, munlock the memory */
+    static void   ReleasePageBuffer(void* buffer, int size, bool quickMode);
+
+    // name / pattern
+    /** generate proper yjj file name by necessary information */
+    static string GenPageFileName(const string& jname, short pageNum);
+    /** generate proper yjj page full path by necessary information */
+    static string GenPageFullPath(const string& dir, const string& jname, short pageNum);
+    /** get the proper yjj file name pattern */
+    static string GetPageFileNamePattern(const string& jname);
+
+    // page number
+    /** extract page number from file name */
+    static short  ExtractPageNum(const string& filename, const string& jname);
+    /** select page number from existing pages in directory which contains the nano time */
+    static short  GetPageNumWithTime(const string& dir, const string& jname, int64_t time);
+    /** get existing page numbers in directory with jname */
+    static vector<short> GetPageNums(const string& dir, const string& jname);
+
+    // header
+    /** get header from necessary information */
+    static PageHeader GetPageHeader(const string& dir, const string& jname, short pageNum);
+
+    // file
+    static bool FileExists(const string& filename);
+};
 
 /**
  * Page class
  */
+FORWARD_DECLARE_PTR(Page);
 class Page
 {
 private:
@@ -82,7 +180,7 @@ public:
 
 public:
     /** load page, should be called by PageProvider
-     * will not lock memory if in quickMode (locked by page engine service)*/
+      * will not lock memory if in quickMode (locked by page engine service) */
     static  PagePtr load(const string& dir, const string& jname, short pageNum, bool isWriting, bool quickMode);
 };
 
@@ -124,6 +222,92 @@ inline void* Page::locateReadableFrame()
            ? frame.get_address(): nullptr;
 }
 
+
+/** abstract interface class */
+class IPageProvider
+{
+public:
+    /** return wrapped Page via directory / journal short name / serviceIdx assigned / page number */
+    virtual PagePtr getPage(const string &dir, const string &jname, int serviceIdx, short pageNum) = 0;
+    /** release page after using */
+    virtual void releasePage(void* buffer, int size, int serviceIdx) = 0;
+    /** return true if this is for writing */
+    virtual bool isWriter() const = 0;
+    /** destructor */
+    virtual ~IPageProvider() {};
+};
+DECLARE_PTR(IPageProvider);
+
+/**
+ * PageProvider,
+ * abstract class with virtual interfaces,
+ * utilized by JournalHandler
+ */
+class PageProvider: public IPageProvider
+{
+protected:
+    /** true if provider is used by a JournalWriter */
+    bool    is_writer_;
+    /** true if it is allowed to revise */
+    bool    revise_allowed_;
+public:
+    /** register journal when added into JournalHandler */
+    virtual int  register_journal(const string& dir, const string& jname) { return -1; };
+    /** exit client after JournalHandler is released */
+    virtual void exit_client() {};
+    /** override IPageProvider */
+    virtual bool isWriter() const {return is_writer_; };
+};
+
+DECLARE_PTR(PageProvider);
+
+/**
+ * LocalPageProvider,
+ * provide local page, no need to connect with service.
+ */
+class LocalPageProvider: public PageProvider
+{
+public:
+    /** constructor */
+    LocalPageProvider(bool is_writer, bool revise_allowed=false);
+    /** override IPageProvider */
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short page_num);
+    /** override IPageProvider */
+    virtual void releasePage(void* buffer, int size, int service_id);
+};
+
+/**
+ * ClientPageProvider,
+ * provide page via memory service, socket & comm
+ */
+class ClientPageProvider: public PageProvider
+{
+public:
+    /** default constructor with client name and writing flag */
+    ClientPageProvider(const string& client_name, bool is_writer, bool revise_allowed=false);
+    /** register to service as a client */
+    void register_client();
+    /** override PageProvider */
+    virtual int  register_journal(const string& dir, const string& jname);
+    /** override PageProvider */
+    virtual void exit_client();
+    /** override IPageProvider */
+    virtual PagePtr getPage(const string &dir, const string &jname, int service_id, short page_num);
+    /** override IPageProvider */
+    virtual void releasePage(void* buffer, int size, int service_id);
+
+private:
+    string  client_name_;
+    nn::socket     client_request_socket_;
+    passive::emitter emitter_;
+    nlohmann::json request_;
+    char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
+    string  response_str_;
+    void*   memory_msg_buffer_;
+    int     hash_code_;
+
+    nlohmann::json request(const string &path);
+};
 YJJ_NAMESPACE_END
 
 #endif //YIJINJING_PAGE_H

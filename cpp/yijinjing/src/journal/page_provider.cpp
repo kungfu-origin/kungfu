@@ -13,25 +13,16 @@
  *  limitations under the License.
  *****************************************************************************/
 
-/**
- * Page Provider.
- * @Author cjiang (changhao.jiang@taurus.ai)
- * @since   March, 2017
- * implements IPageProvider, diverge to different usage
- */
-
-#include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/journal/page.h>
-#include <kungfu/yijinjing/journal/page_util.h>
-#include <kungfu/yijinjing/journal/page_provider.h>
-#include <kungfu/yijinjing/service/page_service_message.h>
-
 #include <spdlog/spdlog.h>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
 #include <nanomsg/bus.h>
+
+#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/service/page_service.h>
 
 USING_YJJ_NAMESPACE
 

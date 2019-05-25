@@ -11,7 +11,7 @@
 #include <nn.hpp>
 
 #include <kungfu/yijinjing/nanomsg/passive.h>
-#include <kungfu/yijinjing/journal/journal_reader.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
