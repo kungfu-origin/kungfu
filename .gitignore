@@ -20,6 +20,7 @@ Debug/
 cmake-build-debug/
 build/
 build-*/
+*.pyc
 
 # NPM related
 node_modules/
