@@ -2,8 +2,6 @@
 // Created by qlu on 2019/1/14.
 //
 
-#include "td_gateway.h"
-#include "assert.h"
 #include <iostream>
 #include <stdio.h>
 #include <cstring>
@@ -11,16 +9,17 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
-#include "util/include/code_convert.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/serialize.h>
+#include <kungfu/wingchun/util/code_convert.h>
 #include <kungfu/wingchun/util/nanomsg_util.h>
 #include <kungfu/wingchun/util/instrument.h>
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/gateway/macro.h>
-#include <kungfu/wingchun/serialize.h>
-#include "include/config.h"
 
-#include "type_convert.h"
-#include <kungfu/wingchun/serialize.h>
+#include "serialize_ctp.h"
+#include "type_convert_ctp.h"
+#include "td_gateway.h"
 
 namespace kungfu
 {
@@ -33,6 +32,14 @@ namespace kungfu
                 {0x2002, "发送心跳失败"},
                 {0x2003, "收到错误报文"}
         };
+
+
+        TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
+                TdGatewayImpl(SOURCE_CTP, TD_GATEWAY_NAME(SOURCE_CTP, config_str["account_id"]))
+        {
+            //front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password), front_id_(-1), session_id_(-1), order_ref_(-1), request_id_(0)
+
+        }
 
         void TdGateway::init()
         {

@@ -2,12 +2,15 @@
 // Created by qlu on 2019/1/14.
 //
 
-#ifndef WC_2_TD_GATEWAY_H
-#define WC_2_TD_GATEWAY_H
+#ifndef TD_GATEWAY_CTP_H
+#define TD_GATEWAY_CTP_H
 
-#include <kungfu/wingchun/gateway/gateway_impl.h>
+#include <string>
+#include <map>
 
 #include "ThostFtdcTraderApi.h"
+
+#include <kungfu/wingchun/gateway/gateway_impl.h>
 #include "order_mapper.h"
 
 namespace kungfu
@@ -17,8 +20,7 @@ namespace kungfu
         class TdGateway: public CThostFtdcTraderSpi, public TdGatewayImpl
         {
         public:
-            TdGateway(const std::string& front_uri, const std::string& broker_id, const std::string& account_id, const std::string& password):
-                    TdGatewayImpl(SOURCE_CTP, TD_GATEWAY_NAME(SOURCE_CTP, account_id)), front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password), front_id_(-1), session_id_(-1), order_ref_(-1), request_id_(0) {}
+            TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             ~TdGateway() {};
 
             virtual void init();
@@ -75,4 +77,4 @@ namespace kungfu
         };
     }
 }
-#endif //WC_2_TD_GATEWAY_H
+#endif //TD_GATEWAY_CTP_H

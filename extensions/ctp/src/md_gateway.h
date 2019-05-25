@@ -2,8 +2,11 @@
 // Created by qlu on 2019/1/10.
 //
 
-#ifndef KUNGFU_MDGATEWAY_H
-#define KUNGFU_MDGATEWAY_H
+#ifndef MD_GATEWAY_CTP_H
+#define MD_GATEWAY_CTP_H
+
+#include <string>
+#include <map>
 
 #include <kungfu/wingchun/gateway/gateway_impl.h>
 
@@ -16,8 +19,7 @@ namespace kungfu
         class MdGateway: public CThostFtdcMdSpi, public kungfu::MdGatewayImpl
         {
         public:
-            MdGateway(const std::string& front_uri, const std::string& broker_id, const std::string& account_id, const std::string& password):
-                    kungfu::MdGatewayImpl(SOURCE_CTP),front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password) {}
+            MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             virtual ~MdGateway() {};
 
             virtual void init();
@@ -73,4 +75,4 @@ namespace kungfu
         };
     }
 }
-#endif //KUNGFU_MDGATEWAY_H
+#endif //MD_GATEWAY_CTP_H

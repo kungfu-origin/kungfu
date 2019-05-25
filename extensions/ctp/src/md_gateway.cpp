@@ -6,15 +6,15 @@
 #include <iostream>
 #include <stdio.h>
 #include <cstring>
+#include <fmt/format.h>
 
 #include <kungfu/time/timer.h>
+#include <kungfu/wingchun/gateway/macro.h>
+#include <kungfu/wingchun/util/code_convert.h>
 
 #include "md_gateway.h"
-#include <kungfu/wingchun/gateway/macro.h>
-#include "util/include/code_convert.h"
-#include "fmt/format.h"
-#include "../type_convert.h"
-#include "../serialize.h"
+#include "type_convert_ctp.h"
+#include "serialize_ctp.h"
 
 namespace kungfu
 {
@@ -27,6 +27,12 @@ namespace kungfu
                 {0x2002, "发送心跳失败"},
                 {0x2003, "收到错误报文"}
         };
+
+        MdGateway::MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
+                kungfu::MdGatewayImpl(SOURCE_CTP)
+        {
+            // ,front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password)
+        }
 
         void MdGateway::init()
         {

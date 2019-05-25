@@ -8,18 +8,19 @@
 #include <stdio.h>
 #include <cstring>
 
-#include <kungfu/time/timer.h>
-
 #include "ThostFtdcUserApiStruct.h"
 
+#include <kungfu/time/timer.h>
 #include <kungfu/wingchun/config.h>
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
 
 #include <kungfu/wingchun/util/business_helper.h>
-#include "util/include/code_convert.h"
+#include <kungfu/wingchun/util/code_convert.h>
 #include <kungfu/wingchun/util/instrument.h>
 
+using namespace kungfu::journal;
+using namespace kungfu::flying;
 
 namespace kungfu
 {

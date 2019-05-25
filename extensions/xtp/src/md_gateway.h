@@ -2,10 +2,8 @@
 // Created by qlu on 2019/2/11.
 //
 
-#ifndef PROJECT_MD_GATEWAY_H
-#define PROJECT_MD_GATEWAY_H
-
-#endif //PROJECT_MD_GATEWAY_H
+#ifndef MD_GATEWAY_XTP_H
+#define MD_GATEWAY_XTP_H
 
 #include <string>
 #include <map>
@@ -201,3 +199,5 @@ namespace kungfu
         };
     }
 }
+
+#endif //MD_GATEWAY_XTP_H

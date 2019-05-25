@@ -9,7 +9,6 @@ a = Analysis(['kungfu/__main__.py'],
           ('extensions/*', 'extensions')
      ],
      hiddenimports=[
-          'kungfu.client.ping',
           'cffi',
           'numpy',
           'pandas'

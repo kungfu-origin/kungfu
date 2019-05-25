@@ -2,10 +2,13 @@
 // Created by qlu on 2019/2/11.
 //
 
-#ifndef PROJECT_TD_GATEWAY_H
-#define PROJECT_TD_GATEWAY_H
+#ifndef TD_GATEWAY_XTP_H
+#define TD_GATEWAY_XTP_H
 
 #include <memory>
+#include <string>
+#include <map>
+
 #include <kungfu/wingchun/gateway/gateway_impl.h>
 
 #include "xtp_trader_api.h"
@@ -166,4 +169,4 @@ namespace kungfu
         };
     }
 }
-#endif //PROJECT_TD_GATEWAY_H
+#endif //TD_GATEWAY_XTP_H

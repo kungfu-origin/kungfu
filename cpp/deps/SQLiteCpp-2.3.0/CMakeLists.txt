@@ -176,7 +176,7 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 
 # add sources of the wrapper as a "SQLiteCpp" static library
 if(UNIX)
-    add_library(SQLiteCpp ${SQLITECPP_SRC} ${SQLITECPP_INC} ${SQLITECPP_DOC} ${SQLITECPP_SCRIPT})
+    add_library(SQLiteCpp SHARED ${SQLITECPP_SRC} ${SQLITECPP_INC} ${SQLITECPP_DOC} ${SQLITECPP_SCRIPT})
 endif()
 if(WIN32)
     add_library(SQLiteCpp ${SQLITECPP_SRC} ${SQLITECPP_INC} ${SQLITECPP_DOC} ${SQLITECPP_SCRIPT})

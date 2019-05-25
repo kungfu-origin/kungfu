@@ -7,7 +7,7 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-#include "util/include/code_convert.h"
+#include <kungfu/wingchun/util/code_convert.h>
 #include "ThostFtdcUserApiStruct.h"
 
 namespace kungfu

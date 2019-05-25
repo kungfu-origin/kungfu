@@ -8,9 +8,9 @@
 #include <cstdio>
 #include <cstring>
 
-#include <kungfu/time/timer.h>
-
 #include "xtp_api_struct.h"
+
+#include <kungfu/time/timer.h>
 #include <kungfu/wingchun/md_struct.h>
 #include <kungfu/wingchun/oms_struct.h>
 #include <kungfu/wingchun/util/business_helper.h>

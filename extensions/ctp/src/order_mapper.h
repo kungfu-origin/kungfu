@@ -6,9 +6,9 @@
 #define WC_2_ORDER_MAPPER_H
 
 #include <string>
-#include <SQLiteCpp/SQLiteCpp.h>
 #include <iostream>
 #include <spdlog/spdlog.h>
+#include <SQLiteCpp/SQLiteCpp.h>
 
 namespace kungfu
 {
