@@ -13,9 +13,9 @@
 #include <kungfu/yijinjing/nanomsg/passive.h>
 #include <kungfu/yijinjing/journal/journal_reader.h>
 
-#include "md_struct.h"
-#include "oms_struct.h"
-#include "msg.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/oms_struct.h>
+#include <kungfu/wingchun/msg.h>
 #include "task_scheduler/task_scheduler.h"
 
 namespace kfj = kungfu::journal;

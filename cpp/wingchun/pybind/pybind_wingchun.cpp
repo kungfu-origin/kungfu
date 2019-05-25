@@ -17,8 +17,8 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
-#include "md_struct.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/oms_struct.h>
 #include "strategy/include/strategy.h"
 #include "strategy/src/strategy_util.h"
 #include "calendar/include/calendar_service.h"

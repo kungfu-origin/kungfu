@@ -3,7 +3,7 @@
 //
 
 #include "calendar/include/calendar.h"
-#include "msg.h"
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {

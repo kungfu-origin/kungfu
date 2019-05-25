@@ -4,7 +4,7 @@
 
 #include "commission_manager.h"
 #include "commission_storage.h"
-#include "config.h"
+#include <kungfu/wingchun/config.h>
 #include "util/include/business_helper.h"
 
 using namespace kungfu::journal;

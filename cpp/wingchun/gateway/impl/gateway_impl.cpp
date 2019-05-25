@@ -4,8 +4,8 @@
 
 #include "gateway_impl.h"
 
-#include "config.h"
-#include "serialize.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/serialize.h>
 
 #include "util/include/env.h"
 #include "util/include/filesystem_util.h"

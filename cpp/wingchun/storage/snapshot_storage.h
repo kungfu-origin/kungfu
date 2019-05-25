@@ -6,7 +6,7 @@
 #define KUNGFU_SNAPSHOT_STORAGE_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
-#include "oms_struct.h"
+#include <kungfu/wingchun/oms_struct.h>
 
 using namespace kungfu::flying;
 

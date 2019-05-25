@@ -3,7 +3,7 @@
 //
 
 #include "commission_storage.h"
-#include "config.h"
+#include <kungfu/wingchun/config.h>
 #include "util/include/env.h"
 #include <fmt/format.h>
 #include <boost/filesystem.hpp>

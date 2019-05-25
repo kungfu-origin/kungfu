@@ -10,8 +10,8 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-#include "msg.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/msg.h>
+#include <kungfu/wingchun/oms_struct.h>
 
 namespace kungfu
 {

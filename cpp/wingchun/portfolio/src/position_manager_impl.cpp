@@ -5,7 +5,7 @@
 #include "position_manager_impl.h"
 #include "util/include/business_helper.h"
 #include "util/instrument/instrument.h"
-#include "serialize.h"
+#include <kungfu/wingchun/serialize.h>
 #include <spdlog/spdlog.h>
 #include <map>
 #include <boost/core/ignore_unused.hpp>

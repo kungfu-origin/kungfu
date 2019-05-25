@@ -12,8 +12,8 @@
 #include "subscription_storage.hpp"
 #include "state_storage.hpp"
 
-#include "feed_handler.h"
-#include "msg.h"
+#include <kungfu/wingchun/feed_handler.h>
+#include <kungfu/wingchun/msg.h>
 
 #include "calendar/include/calendar.h"
 #include "uid_generator/uid_generator.h"

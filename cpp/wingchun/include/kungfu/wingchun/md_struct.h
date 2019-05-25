@@ -5,7 +5,7 @@
 #ifndef PROJECT_MD_STRUCT_H
 #define PROJECT_MD_STRUCT_H
 
-#include "constant.h"
+#include <kungfu/wingchun/constant.h>
 #include <string>
 #include <vector>
 

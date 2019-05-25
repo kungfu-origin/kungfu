@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
-#include "oms_struct.h"
+#include <kungfu/wingchun/oms_struct.h>
 
 namespace kungfu
 {

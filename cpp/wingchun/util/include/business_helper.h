@@ -13,8 +13,8 @@
 
 #include <kungfu/time/timer.h>
 
-#include "constant.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/constant.h>
+#include <kungfu/wingchun/oms_struct.h>
 #include "calendar/include/calendar.h"
 
 namespace kungfu

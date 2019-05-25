@@ -6,7 +6,7 @@
 #define KUNGFU_DATA_TYPE_H
 
 #include <cstdint>
-#include "config.h"
+#include <kungfu/wingchun/config.h>
 
 namespace kungfu
 {

@@ -19,12 +19,12 @@
 #include <kungfu/yijinjing/journal/page_util.h>
 #include <kungfu/yijinjing/journal/page_header.h>
 
-#include "include/md_struct.h"
-#include "include/serialize.h"
-#include "include/msg.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/serialize.h>
+#include <kungfu/wingchun/msg.h>
 #include "gateway/include/macro.h"
 
-#define  TIME_FORMAT "%Y%m%d-%H:%M:%S"
+#define TIME_FORMAT "%Y%m%d-%H:%M:%S"
 #define PRINTER_NAME "JournalPrinter"
 
 namespace kungfu

@@ -5,9 +5,9 @@
 #ifndef KUNGFU_CALENDAR_H
 #define KUNGFU_CALENDAR_H
 
-#include "config.h"
-#include "constant.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/constant.h>
+#include <kungfu/wingchun/oms_struct.h>
 #include "util/include/env.h"
 #include "util/include/timer_util.h"
 #include <nanomsg/nn.h>

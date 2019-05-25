@@ -3,7 +3,7 @@
 //
 
 #include "nn_publisher.h"
-#include "../include/serialize.h"
+#include <kungfu/wingchun/serialize.h>
 #include <nanomsg/pubsub.h>
 #include "spdlog/spdlog.h"
 

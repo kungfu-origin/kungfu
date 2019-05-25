@@ -12,9 +12,9 @@
 
 #include "ThostFtdcUserApiStruct.h"
 
-#include "config.h"
-#include "md_struct.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/oms_struct.h>
 
 #include "util/include/business_helper.h"
 #include "util/include/code_convert.h"

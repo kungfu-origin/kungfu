@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#include "md_struct.h"
+#include <kungfu/wingchun/md_struct.h>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <spdlog/spdlog.h>

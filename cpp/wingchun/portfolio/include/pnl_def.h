@@ -5,8 +5,8 @@
 #ifndef KUNGFU_PNL_DEF_H
 #define KUNGFU_PNL_DEF_H
 
-#include "md_struct.h"
-#include "oms_struct.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/oms_struct.h>
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <functional>
 #include <memory>

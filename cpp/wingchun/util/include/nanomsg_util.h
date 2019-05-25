@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-#include "msg.h"
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {

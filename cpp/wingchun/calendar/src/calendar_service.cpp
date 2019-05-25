@@ -14,8 +14,8 @@
 #include <kungfu/time/timer.h>
 
 #include "calendar/include/calendar_service.h"
-#include "config.h"
-#include "constant.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/constant.h>
 #include "calendar_storage.hpp"
 
 /*

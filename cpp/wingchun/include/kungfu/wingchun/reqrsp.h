@@ -5,7 +5,7 @@
 #ifndef KUNGFU_REQRSP_H
 #define KUNGFU_REQRSP_H
 
-#include "md_struct.h"
+#include <kungfu/wingchun/md_struct.h>
 
 namespace kungfu
 {

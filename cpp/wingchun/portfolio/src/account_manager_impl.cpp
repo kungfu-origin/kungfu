@@ -3,7 +3,7 @@
 //
 
 #include "account_manager_impl.h"
-#include "serialize.h"
+#include <kungfu/wingchun/serialize.h>
 #include "util/include/business_helper.h"
 #include "util/instrument/instrument.h"
 #include <fmt/format.h>

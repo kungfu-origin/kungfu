@@ -14,8 +14,8 @@
 #include "portfolio/include/portfolio_manager.h"
 #include "nn_publisher/nn_publisher.h"
 
-#include "serialize.h"
-#include "config.h"
+#include <kungfu/wingchun/serialize.h>
+#include <kungfu/wingchun/config.h>
 #include "oms/include/def.h"
 
 #include "util/include/env.h"

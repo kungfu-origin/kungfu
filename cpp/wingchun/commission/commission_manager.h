@@ -5,7 +5,7 @@
 #ifndef KUNGFU_COMMISSION_MANAGER_H
 #define KUNGFU_COMMISSION_MANAGER_H
 
-#include "oms_struct.h"
+#include <kungfu/wingchun/oms_struct.h>
 #include <memory>
 
 namespace kfj = kungfu::journal;

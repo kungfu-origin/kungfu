@@ -1,6 +1,6 @@
 
 #include "../instrument/instrument.h"
-#include "constant.h"
+#include <kungfu/wingchun/constant.h>
 #include <cassert>
 #include <fmt/format.h>
 

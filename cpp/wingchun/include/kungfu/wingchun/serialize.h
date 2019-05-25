@@ -10,9 +10,9 @@
 #include <cinttypes>
 #include <nlohmann/json.hpp>
 
-#include "md_struct.h"
-#include "oms_struct.h"
-#include "reqrsp.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/oms_struct.h>
+#include <kungfu/wingchun/reqrsp.h>
 
 #include "util/include/business_helper.h"
 

@@ -3,8 +3,8 @@
 //
 
 #include "event_loop.h"
-#include "reqrsp.h"
-#include "serialize.h"
+#include <kungfu/wingchun/reqrsp.h>
+#include <kungfu/wingchun/serialize.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/pubsub.h>
 #include <nanomsg/reqrep.h>

@@ -5,7 +5,7 @@
 #ifndef KUNGFU_COMMISSION_STORAGE_H
 #define KUNGFU_COMMISSION_STORAGE_H
 
-#include "oms_struct.h"
+#include <kungfu/wingchun/oms_struct.h>
 #include <map>
 #include <functional>
 #include <SQLiteCpp/Database.h>

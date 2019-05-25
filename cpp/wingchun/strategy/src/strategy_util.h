@@ -11,8 +11,8 @@
 #include <memory>
 #include <set>
 
-#include "md_struct.h"
-#include "msg.h"
+#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/msg.h>
 
 #include <kungfu/yijinjing/journal/journal_writer.h>
 

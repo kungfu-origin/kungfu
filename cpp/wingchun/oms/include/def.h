@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <string>
 
-#include "oms_struct.h"
-#include "md_struct.h"
+#include <kungfu/wingchun/oms_struct.h>
+#include <kungfu/wingchun/md_struct.h>
 
 namespace kungfu
 {

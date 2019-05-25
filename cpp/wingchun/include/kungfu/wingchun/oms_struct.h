@@ -5,7 +5,7 @@
 #ifndef PROJECT_OMS_STRUCT_H
 #define PROJECT_OMS_STRUCT_H
 
-#include "constant.h"
+#include <kungfu/wingchun/constant.h>
 #include <ctime>
 #include <vector>
 #include <string>

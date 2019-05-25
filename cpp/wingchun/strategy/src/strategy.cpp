@@ -11,9 +11,9 @@
 #include "strategy/include/strategy.h"
 #include "strategy_util.h"
 #include "event_loop/event_loop.h"
-#include "msg.h"
+#include <kungfu/wingchun/msg.h>
 
-#include "config.h"
+#include <kungfu/wingchun/config.h>
 #include "util/include/env.h"
 #include "util/include/timer_util.h"
 

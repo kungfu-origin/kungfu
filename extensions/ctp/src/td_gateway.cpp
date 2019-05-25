@@ -16,11 +16,11 @@
 #include "util/instrument/instrument.h"
 #include "util/include/business_helper.h"
 #include "gateway/include/macro.h"
-#include "include/serialize.h"
+#include <kungfu/wingchun/serialize.h>
 #include "include/config.h"
 
 #include "type_convert.h"
-#include "serialize.h"
+#include <kungfu/wingchun/serialize.h>
 
 namespace kungfu
 {

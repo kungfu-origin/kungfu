@@ -3,7 +3,7 @@
 //
 
 #include "order_storage.h"
-#include "serialize.h"
+#include <kungfu/wingchun/serialize.h>
 #include <spdlog/spdlog.h>
 
 namespace kungfu

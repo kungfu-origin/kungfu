@@ -14,9 +14,9 @@
 #include "util/include/nanomsg_util.h"
 #include "util/include/env.h"
 #include "fmt/format.h"
-#include "config.h"
-#include "serialize.h"
-#include "msg.h"
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/serialize.h>
+#include <kungfu/wingchun/msg.h>
 #include "macro.h"
 
 namespace kungfu

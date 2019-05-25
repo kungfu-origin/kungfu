@@ -11,7 +11,7 @@
 #include <nanomsg/nn.h>
 #include <thread>
 #include <vector>
-#include "msg.h"
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {
