@@ -5,10 +5,11 @@
 #ifndef KUNGFU_NANOMSG_UTIL_H
 #define KUNGFU_NANOMSG_UTIL_H
 
-#include "nn.hpp"
+#include <nn.hpp>
 #include <nanomsg/reqrep.h>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+
 #include "msg.h"
 
 namespace kungfu

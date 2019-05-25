@@ -7,6 +7,9 @@
 
 #include <stdio.h>
 #include <cstring>
+
+#include <kungfu/time/timer.h>
+
 #include "ThostFtdcUserApiStruct.h"
 
 #include "config.h"
@@ -17,7 +20,6 @@
 #include "util/include/code_convert.h"
 #include "util/instrument/instrument.h"
 
-#include "Timer.h"
 
 namespace kungfu
 {

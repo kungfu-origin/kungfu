@@ -21,9 +21,9 @@
  * may write / read through page.
  */
 
-#include "Journal.h"
-#include "PageUtil.h"
-#include "IPageProvider.h"
+#include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/journal/page_util.h>
+#include <kungfu/yijinjing/journal/IPageProvider.h>
 
 USING_YJJ_NAMESPACE
 

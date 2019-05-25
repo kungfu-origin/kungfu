@@ -5,12 +5,13 @@
 #ifndef KUNGFU_NN_PUBLISHER_H
 #define KUNGFU_NN_PUBLISHER_H
 
-#include "msg.h"
-#include "oms_struct.h"
 #include <string>
 #include <nn.hpp>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+
+#include "msg.h"
+#include "oms_struct.h"
 
 namespace kungfu
 {

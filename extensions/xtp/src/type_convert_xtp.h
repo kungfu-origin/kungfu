@@ -7,10 +7,12 @@
 
 #include <cstdio>
 #include <cstring>
+
+#include <kungfu/time/timer.h>
+
 #include "xtp_api_struct.h"
 #include "md_struct.h"
 #include "oms_struct.h"
-#include "Timer.h"
 #include "util/include/business_helper.h"
 
 namespace kungfu

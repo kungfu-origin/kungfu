@@ -17,11 +17,13 @@
 // Created by cjiang on 17/3/14.
 //
 
-#include "Page.h"
-#include "PageHeader.h"
-#include "PageUtil.h"
-#include "Timer.h"
 #include <sstream>
+
+#include <kungfu/time/timer.h>
+
+#include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/journal/page_header.h>
+#include <kungfu/yijinjing/journal/page_util.h>
 
 USING_YJJ_NAMESPACE
 

@@ -2,12 +2,17 @@
 // Created by qlu on 2019/1/29.
 //
 
+#include "fmt/format.h"
+#include <nanomsg/nn.h>
+#include <nanomsg/pubsub.h>
+
+#include <kungfu/log/log.h>
+#include <kungfu/time/timer.h>
+#include <kungfu/yijinjing/journal/journal_reader.h>
+
 #include "strategy_util.h"
 #include "portfolio/include/portfolio_manager.h"
 #include "nn_publisher/nn_publisher.h"
-
-#include <nanomsg/nn.h>
-#include <nanomsg/pubsub.h>
 
 #include "serialize.h"
 #include "config.h"
@@ -20,11 +25,6 @@
 #include "storage/account_list_storage.h"
 #include "storage/snapshot_storage.h"
 
-#include "Timer.h"
-#include "JournalReader.h"
-
-#include "fmt/format.h"
-#include "Log.h"
 
 using namespace kungfu::journal;
 using namespace kungfu::flying;

@@ -5,13 +5,13 @@
 #ifndef KUNGFU_DEF_H
 #define KUNGFU_DEF_H
 
-#include "oms_struct.h"
-#include "md_struct.h"
-
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <cstring>
 #include <unordered_map>
 #include <string>
+
+#include "oms_struct.h"
+#include "md_struct.h"
 
 namespace kungfu
 {

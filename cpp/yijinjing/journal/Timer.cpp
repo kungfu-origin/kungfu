@@ -20,14 +20,15 @@
  * Provide basic nano time and time transformation
  */
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
-#include "Log.h"
-#include "Timer.h"
-#include "Journal.h"
 #include <chrono>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+
+#include <kungfu/log/log.h>
+#include <kungfu/time/timer.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 USING_YJJ_NAMESPACE
 

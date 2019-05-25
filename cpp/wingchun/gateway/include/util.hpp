@@ -5,19 +5,19 @@
 #ifndef KUNGFU_UTIL_H
 #define KUNGFU_UTIL_H
 
+#include <utility>
+#include <nlohmann/json.hpp>
+
+#include <kungfu/time/timer.h>
+
 #include "state.h"
 #include "util/include/nanomsg_util.h"
 #include "util/include/env.h"
-#include "nlohmann/json.hpp"
 #include "fmt/format.h"
 #include "config.h"
 #include "serialize.h"
 #include "msg.h"
 #include "macro.h"
-
-#include <utility>
-
-#include "Timer.h"
 
 namespace kungfu
 {

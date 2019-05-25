@@ -5,7 +5,7 @@
 #ifndef KUNGFU_SERIALIZE_H
 #define KUNGFU_SERIALIZE_H
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "xtp_api_struct.h"
 
 namespace kungfu

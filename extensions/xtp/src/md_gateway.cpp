@@ -5,7 +5,8 @@
 #include <fmt/format.h>
 #include <code_convert.h>
 #include <macro.h>
-#include <Log.h>
+
+#include <kungfu/log/log.h>
 
 #include "md_gateway.h"
 

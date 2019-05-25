@@ -4,7 +4,7 @@
 
 #include <spdlog/spdlog.h>
 #include <iostream>
-#include "Log.h"
+#include <kungfu/log/log.h>
 
 int main() {
     kungfu::yijinjing::KungfuLog::setup_log("test_logger");

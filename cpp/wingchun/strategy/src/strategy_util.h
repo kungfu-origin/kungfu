@@ -5,24 +5,22 @@
 #ifndef PROJECT_STRATEGY_UTIL_H
 #define PROJECT_STRATEGY_UTIL_H
 
+#include <nlohmann/json.hpp>
+#include <vector>
+#include <iostream>
+#include <memory>
+#include <set>
 
 #include "md_struct.h"
 #include "msg.h"
 
-#include "JournalWriter.h"
+#include <kungfu/yijinjing/journal/journal_writer.h>
 
 #include "uid_generator/uid_generator.h"
 #include "storage/source_list_storage.h"
 #include "storage/account_list_storage.h"
 #include "gateway/include/util.hpp"
 #include "calendar/include/calendar.h"
-
-#include "nlohmann/json.hpp"
-
-#include <vector>
-#include <iostream>
-#include <memory>
-#include <set>
 
 namespace kungfu
 {

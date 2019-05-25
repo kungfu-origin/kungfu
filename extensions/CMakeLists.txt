@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/cxxopts-2.2/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/googletest-1.9.0/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/deps/cppnanomsg)
 
-INCLUDE_DIRECTORIES(../cpp/yijinjing/journal)
+INCLUDE_DIRECTORIES(../cpp/yijinjing/include)
 INCLUDE_DIRECTORIES(../cpp/wingchun/)
 INCLUDE_DIRECTORIES(../cpp/wingchun/include)
 INCLUDE_DIRECTORIES(../cpp/wingchun/util/include)

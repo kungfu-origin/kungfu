@@ -7,14 +7,15 @@
 #ifndef KUNGFU_BUSINESS_HELPER_H
 #define KUNGFU_BUSINESS_HELPER_H
 
-#include "constant.h"
-#include "oms_struct.h"
-#include "calendar/include/calendar.h"
-#include "Timer.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
+
+#include <kungfu/time/timer.h>
+
+#include "constant.h"
+#include "oms_struct.h"
+#include "calendar/include/calendar.h"
 
 namespace kungfu
 {

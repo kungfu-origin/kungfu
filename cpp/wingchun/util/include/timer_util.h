@@ -5,7 +5,7 @@
 #ifndef KUNGFU_TIMER_UTIL_H
 #define KUNGFU_TIMER_UTIL_H
 
-#include "Timer.h"
+#include <kungfu/time/timer.h>
 
 namespace kungfu
 {

@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 #include <cstring>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace kungfu
 {

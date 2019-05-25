@@ -5,6 +5,9 @@
 #ifndef KUNGFU_GATEWAY_IMP_H
 #define KUNGFU_GATEWAY_IMP_H
 
+#include <kungfu/log/log.h>
+#include <kungfu/yijinjing/journal/journal_writer.h>
+
 #include "gateway.h"
 #include "subscription_storage.hpp"
 #include "state_storage.hpp"
@@ -19,9 +22,6 @@
 #include "portfolio/include/account_manager.h"
 #include "nn_publisher/nn_publisher.h"
 #include "event_loop/event_loop.h"
-
-#include "JournalWriter.h"
-#include "Log.h"
 
 namespace kungfu
 {

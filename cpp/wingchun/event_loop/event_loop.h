@@ -10,8 +10,8 @@
 #include <spdlog/spdlog.h>
 #include <nn.hpp>
 
-#include "passive.h"
-#include "JournalReader.h"
+#include <kungfu/yijinjing/nanomsg/passive.h>
+#include <kungfu/yijinjing/journal/journal_reader.h>
 
 #include "md_struct.h"
 #include "oms_struct.h"

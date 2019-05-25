@@ -3,7 +3,7 @@
 //
 
 #include "simple_strategy.h"
-#include "constants.h"
+#include <kungfu/yijinjing/comman.h>
 
 SimpleStrategy::SimpleStrategy(const std::string &name): Strategy(name), order_id_(0) {}
 

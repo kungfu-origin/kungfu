@@ -5,23 +5,24 @@
 #ifndef KUNGFU_JOURNAL_PRINTER_H
 #define KUNGFU_JOURNAL_PRINTER_H
 
-#include "YJJ_DECLARE.h"
-#include "Timer.h"
-#include "Hash.hpp"
-#include "JournalReader.h"
-#include "Frame.hpp"
-#include "Page.h"
-#include "PageUtil.h"
-#include "PageHeader.h"
 #include <iostream>
 #include <algorithm>
+#include <nlohmann/json.hpp>
+
+#include <kungfu/time/timer.h>
+#include <kungfu/yijinjing/comman.h>
+
+#include <kungfu/yijinjing/journal/hash.hpp>
+#include <kungfu/yijinjing/journal/journal_reader.h>
+#include <kungfu/yijinjing/journal/frame.hpp>
+#include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/journal/page_util.h>
+#include <kungfu/yijinjing/journal/page_header.h>
 
 #include "include/md_struct.h"
 #include "include/serialize.h"
 #include "include/msg.h"
 #include "gateway/include/macro.h"
-
-#include "nlohmann/json.hpp"
 
 #define  TIME_FORMAT "%Y%m%d-%H:%M:%S"
 #define PRINTER_NAME "JournalPrinter"

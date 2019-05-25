@@ -5,15 +5,16 @@
 #ifndef KUNGFU_CAST_H
 #define KUNGFU_CAST_H
 
+#include <string>
+#include <cmath>
+#include <cinttypes>
+#include <nlohmann/json.hpp>
+
 #include "md_struct.h"
 #include "oms_struct.h"
 #include "reqrsp.h"
 
 #include "util/include/business_helper.h"
-#include "nlohmann/json.hpp"
-#include <string>
-#include <cmath>
-#include <cinttypes>
 
 #define FORMAT_DOUBLE(x) rounded(x, 4)
 

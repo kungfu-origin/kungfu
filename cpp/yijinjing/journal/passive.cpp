@@ -5,9 +5,9 @@
  * @since   May, 2019
  */
 
-#include "passive.h"
-
 #include <spdlog/spdlog.h>
+
+#include <kungfu/yijinjing/nanomsg/passive.h>
 
 USING_YJJ_NAMESPACE
 

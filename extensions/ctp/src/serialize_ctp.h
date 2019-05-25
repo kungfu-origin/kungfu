@@ -6,7 +6,7 @@
 #define KUNGFU_SERIALIZE_H
 
 #include <string>
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "util/include/code_convert.h"
 #include "ThostFtdcUserApiStruct.h"
 

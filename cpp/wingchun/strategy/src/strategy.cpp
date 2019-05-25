@@ -3,20 +3,19 @@
 //
 
 #include <functional>
+#include "fmt/format.h"
+
+#include <kungfu/log/log.h>
+#include <kungfu/time/timer.h>
 
 #include "strategy/include/strategy.h"
 #include "strategy_util.h"
 #include "event_loop/event_loop.h"
 #include "msg.h"
 
-#include "fmt/format.h"
-
 #include "config.h"
 #include "util/include/env.h"
 #include "util/include/timer_util.h"
-#include "Timer.h"
-
-#include "Log.h"
 
 using namespace kungfu::journal;
 using namespace kungfu::flying;

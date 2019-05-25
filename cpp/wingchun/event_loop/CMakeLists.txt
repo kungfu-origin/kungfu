@@ -1,4 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.7)
 PROJECT(event_loop)
 
 SET(EVENT_LOOP_SOURCE_FILES event_loop.h event_loop.cpp)
