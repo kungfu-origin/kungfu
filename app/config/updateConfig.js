@@ -1,1 +1,1 @@
-export const uploadUrl = "http://144.48.142.102:8080"
+export const uploadUrl = "http://kungfu-trader.oss-cn-beijing.aliyuncs.com"

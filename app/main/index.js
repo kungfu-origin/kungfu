@@ -220,11 +220,13 @@ function updateHandler(mainWindow){
         error: '检查更新出错！',
         checking: '正在检查更新...',
         updateAva: '检测到新版本，正在下载...',
-        updateNotAva: '当前为最新版本！',
-    };
-	autoUpdater.autoDownload = false
-	autoUpdater.autoInstallOnAppQuit = false
-    autoUpdater.setFeedURL(uploadUrl);
+		updateNotAva: '当前为最新版本！',
+		downloaded: '下载已完成！'
+	};
+	autoUpdater.autoDownload = false;
+	autoUpdater.autoInstallOnAppQuit = false;
+	autoUpdater.setFeedURL(uploadUrl);
+	autoUpdater.logger = require("electron-log");
     autoUpdater.on('error', (error) => {
 		sendUpdateMessage(mainWindow, message.error)
 		return new Error(error)		
@@ -244,6 +246,7 @@ function updateHandler(mainWindow){
         mainWindow.webContents.send('downloadProgress', progressObj)
     })
     autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) => {
+		console.log('update-downloaded ', message.downloaded)
         dialog.showMessageBox({
             type: 'question',
             title: '提示',
