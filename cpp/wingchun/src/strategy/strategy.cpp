@@ -5,7 +5,7 @@
 #include <functional>
 #include <fmt/format.h>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 
 #include <kungfu/wingchun/strategy/strategy.h>

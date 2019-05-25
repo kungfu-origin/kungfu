@@ -26,7 +26,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -42,7 +42,7 @@ NanoTimer* NanoTimer::getInstance()
     {
         if(spdlog::default_logger()->name().empty())
         {
-            KungfuLog::setup_log("timer");
+            kungfu::log::LogConfig::setup_log("timer");
         }
         m_ptr = boost::shared_ptr<NanoTimer>(new NanoTimer());
     }

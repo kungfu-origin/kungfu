@@ -10,7 +10,7 @@
 #include <nanomsg/pipeline.h>
 #include <nanomsg/pubsub.h>
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
 YJJ_NAMESPACE_START

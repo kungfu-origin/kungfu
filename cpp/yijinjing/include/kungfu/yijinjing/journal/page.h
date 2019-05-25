@@ -25,7 +25,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/passive.h>
 

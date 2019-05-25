@@ -2,29 +2,26 @@
 // Created by Keren Dong on 2019-03-29.
 //
 
-#ifndef KUNGFU_LOG_H
-#define KUNGFU_LOG_H
+#ifndef KUNGFU_SPDLOG_CONFIG_H
+#define KUNGFU_SPDLOG_CONFIG_H
 
-#include <stdlib.h>
+#include <boost/filesystem.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
-#include <string>
-#include <boost/filesystem.hpp>
+#include <kungfu/common.h>
 
-#include <kungfu/yijinjing/comman.h>
-
-YJJ_NAMESPACE_START
+namespace kungfu{namespace log{
 
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"
 #define DEFAULT_LOG_LEVEL_NAME "info"
 #define DEFAULT_LOG_LEVEL spdlog::level::info
 #define DEFAULT_LOG_PATTERN "[%Y-%m-%d %T.%F] [%^%=8l%$] [pid/tid %6P/%-6t] [%@#%!] %v"
 
-class KungfuLog {
+class LogConfig {
 public:
     static inline spdlog::level::level_enum get_env_log_level()
     {
@@ -37,7 +34,7 @@ public:
         }
         return spdlog::level::from_str(level_name);
     }
-    static inline void setup_log(const string & name)
+    static inline void setup_log(const std::string & name)
     {
         boost::filesystem::path log_path = get_kungfu_home();
         log_path /= "log";
@@ -85,6 +82,6 @@ public:
     }
 };
 
-YJJ_NAMESPACE_END
+}}
 
-#endif //KUNGFU_LOG_H
+#endif //KUNGFU_SPDLOG_CONFIG_H

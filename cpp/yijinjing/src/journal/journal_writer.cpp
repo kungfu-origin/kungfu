@@ -24,10 +24,10 @@
 
 #include <mutex> // used by JournalSafeWriter
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -80,7 +80,7 @@ int64_t JournalWriter::write_frame_full(const void* data, FH_TYPE_LENGTH length,
 JournalWriterPtr JournalWriter::create(const string& dir, const string& jname, const string& writerName)
 {
 #ifdef _WINDOWS
-    KungfuLog::setup_log(writerName);
+    kungfu::log::LogConfig::setup_log(writerName);
 #endif
     return JournalWriter::create(dir, jname, writerName, true);
 }

@@ -23,11 +23,11 @@
 #ifndef YIJINJING_DECLARE_H
 #define YIJINJING_DECLARE_H
 
-#include <stdlib.h>
-#include <string>
 #include <vector>
 #include <map>
 #include <unordered_map>
+
+#include <kungfu/common.h>
 
 /** we use boost shared_ptr as our smart pointer */
 #include <boost/shared_ptr.hpp>
@@ -65,14 +65,8 @@ const int KB = 1024;
 const int MB = KB * KB;
 const int JOURNAL_PAGE_SIZE = 128 * MB;
 const int PAGE_MIN_HEADROOM = 2 * MB;
-inline string get_kungfu_home()
-{
-    const char *name = "KF_HOME";
-    std::string value(getenv(name));
-    return value;
-}
 
-#define KUNGFU_FOLDER get_kungfu_home() /** base folder of kungfu system */
+#define KUNGFU_FOLDER kungfu::get_kungfu_home() /** base folder of kungfu system */
 #define KUNGFU_JOURNAL_FOLDER KUNGFU_FOLDER + "/journal/"  /** where we put journal files */
 #define KUNGFU_SOCKET_FOLDER KUNGFU_FOLDER + "/socket/"    /** where we put socket files */
 #define KUNGFU_LOG_FOLDER KUNGFU_FOLDER + "/log/"          /** where we put log files */

@@ -37,7 +37,7 @@
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/yijinjing/journal/page.h>
 
 USING_YJJ_NAMESPACE

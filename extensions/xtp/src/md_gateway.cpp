@@ -6,7 +6,7 @@
 #include <kungfu/wingchun/util/code_convert.h>
 #include <kungfu/wingchun/gateway/macro.h>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 
 #include "md_gateway.h"
 

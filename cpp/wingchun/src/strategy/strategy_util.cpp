@@ -6,7 +6,7 @@
 #include <nanomsg/nn.h>
 #include <nanomsg/pubsub.h>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -39,8 +39,8 @@ namespace kungfu
 
     StrategyUtil::StrategyUtil(const std::string& name): name_(name), calendar_(new Calendar()), has_stock_account_(false), has_future_account_(false)
     {
-        kungfu::yijinjing::KungfuLog::setup_log(name);
-        kungfu::yijinjing::KungfuLog::set_log_level(spdlog::level::info);
+        kungfu::log::LogConfig::setup_log(name);
+        kungfu::log::LogConfig::set_log_level(spdlog::level::info);
         auto logger = spdlog::default_logger();
         kungfu::calendar_util::set_logger(logger);
 

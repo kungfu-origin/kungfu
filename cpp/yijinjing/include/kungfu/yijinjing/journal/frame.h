@@ -25,7 +25,7 @@
 
 #include <string.h> // memcpy
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
 
 YJJ_NAMESPACE_START

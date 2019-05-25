@@ -10,7 +10,7 @@
 #include <chrono>
 #include <signal.h>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 
 #include <kungfu/wingchun/calendar/calendar_service.h>
@@ -32,7 +32,7 @@ namespace kungfu
 
     CalendarService::CalendarService(): rsp_socket_(-1), pub_socket_(-1), current_(0)
     {
-        yijinjing::KungfuLog::setup_log("calendar");
+        kungfu::log::LogConfig::setup_log("calendar");
         SPDLOG_INFO("CalendarService initializing with base dir: {}", get_base_dir());
         std::string calendar_db_file = fmt::format(CALENDAR_HOLIDAY_DB_FILE_FORMAT, get_base_dir());
         SPDLOG_INFO("CalendarService storage at {}", calendar_db_file);

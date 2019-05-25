@@ -38,7 +38,7 @@ namespace kungfu
     GatewayImpl::GatewayImpl(const std::string &source, const std::string &name) 
             : source_(source), name_(name), state_(GatewayState::Idle)
     {
-        kungfu::yijinjing::KungfuLog::setup_log(name);
+        kungfu::log::LogConfig::setup_log(name);
         logger_ = spdlog::default_logger();
         SPDLOG_INFO("created gateway {} with source {}", name, source);
     }

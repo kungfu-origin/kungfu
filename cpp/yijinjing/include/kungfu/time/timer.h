@@ -384,7 +384,7 @@ inline char * strptime(const char *buf, const char *fmt, struct tm *tm)
 //////////////////////////////////////////////////////////////////////////
 #endif // _WINDOWS
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 
 YJJ_NAMESPACE_START
 

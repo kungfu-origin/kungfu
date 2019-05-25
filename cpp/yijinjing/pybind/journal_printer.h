@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 
 #include <kungfu/time/timer.h>
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/page.h>

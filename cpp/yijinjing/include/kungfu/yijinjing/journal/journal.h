@@ -24,7 +24,7 @@
 #ifndef YIJINJING_JOURNAL_H
 #define YIJINJING_JOURNAL_H
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/frame.h> // for inline function
 #include <kungfu/yijinjing/nanomsg/passive.h>

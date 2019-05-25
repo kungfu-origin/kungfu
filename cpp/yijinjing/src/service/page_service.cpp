@@ -17,10 +17,10 @@
 #include <signal.h>
 #include <nlohmann/json.hpp>
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/time/timer.h>
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/service/page_service.h>
@@ -119,7 +119,7 @@ bool PageService::write(string content, byte msg_type, bool is_last, short sourc
 }
 
 PageService::PageService(const string& _base_dir) : base_dir(_base_dir), memory_message_buffer(nullptr), memory_message_limit(0), memory_msg_file(MEMORY_MSG_FILE) {
-    KungfuLog::setup_log("paged");
+    kungfu::log::LogConfig::setup_log("paged");
 
     SPDLOG_INFO("Page engine base dir {}", get_kungfu_home());
 

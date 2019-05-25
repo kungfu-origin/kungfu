@@ -5,7 +5,7 @@
 #ifndef KUNGFU_GATEWAY_IMP_H
 #define KUNGFU_GATEWAY_IMP_H
 
-#include <kungfu/log/log.h>
+#include <kungfu/log/spdlog_config.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
 #include <kungfu/wingchun/gateway/gateway.h>

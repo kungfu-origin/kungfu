@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <exception>
 
-#include <kungfu/yijinjing/comman.h>
+#include <kungfu/yijinjing/common.h>
 
 YJJ_NAMESPACE_START
 
