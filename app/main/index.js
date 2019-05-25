@@ -223,7 +223,7 @@ function updateHandler(mainWindow){
 		updateNotAva: '当前为最新版本！',
 		downloaded: '下载已完成！'
 	};
-	autoUpdater.autoDownload = false;
+
 	autoUpdater.autoInstallOnAppQuit = false;
 	autoUpdater.setFeedURL(uploadUrl);
 	autoUpdater.logger = require("electron-log");

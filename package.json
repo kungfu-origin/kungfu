@@ -42,7 +42,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://kungfu-trader.oss-cn-beijing.aliyuncs.com"
+        "url": "http://taurusai.com/kungfu"
       }
     ],
     "files": [
@@ -165,7 +165,6 @@
     "electron-builder": "^20.38.5",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
-    "electron-log": "^3.0.5",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "html-webpack-plugin": "^2.30.1",
