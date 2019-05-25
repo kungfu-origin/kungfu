@@ -422,7 +422,7 @@ public:
 private:
     NanoTimer();
     /** singleton */
-    static boost::shared_ptr<NanoTimer> m_ptr;
+    static std::shared_ptr<NanoTimer> m_ptr;
     int64_t basetime_in_nano;
 };
 

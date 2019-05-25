@@ -34,7 +34,7 @@ USING_YJJ_NAMESPACE
 
 using json = nlohmann::json;
 
-boost::shared_ptr<NanoTimer> NanoTimer::m_ptr = boost::shared_ptr<NanoTimer>(nullptr);
+std::shared_ptr<NanoTimer> NanoTimer::m_ptr = std::shared_ptr<NanoTimer>(nullptr);
 
 NanoTimer* NanoTimer::getInstance()
 {
@@ -44,7 +44,7 @@ NanoTimer* NanoTimer::getInstance()
         {
             kungfu::log::LogConfig::setup_log("timer");
         }
-        m_ptr = boost::shared_ptr<NanoTimer>(new NanoTimer());
+        m_ptr = std::shared_ptr<NanoTimer>(new NanoTimer());
     }
     return m_ptr.get();
 }

@@ -29,10 +29,6 @@
 
 #include <kungfu/common.h>
 
-/** we use boost shared_ptr as our smart pointer */
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
-
 using std::string; /** default using string */
 using std::vector; /** default using vector */
 using std::map;    /** default using map */
@@ -78,7 +74,7 @@ const int PAGE_MIN_HEADROOM = 2 * MB;
 #define KFS_EMITTER_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "emitter.sock"
 #define KFS_NOTICE_URL "ipc://" + KUNGFU_SOCKET_FOLDER + "notice.sock"
 
-#define DECLARE_PTR(X) typedef boost::shared_ptr<X> X##Ptr; /** define smart ptr */
+#define DECLARE_PTR(X) typedef std::shared_ptr<X> X##Ptr;   /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
 #define JOURNAL_PREFIX string("yjj")        /** journal file prefix */
