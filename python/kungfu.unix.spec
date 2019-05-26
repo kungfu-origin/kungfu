@@ -5,8 +5,15 @@ a = Analysis(['kungfu/__main__.py'],
                ('../build/cpp/deps/nnpy-1.4.2/build/lib*/*.so', '.')
                ],
      datas=[
+          ('extensions', 'extensions'),
           ('../build/build_extensions', 'extensions'),
-          ('extensions/*', 'extensions')
+          ('../cpp/yijinjing/include', 'include'),
+          ('../cpp/wingchun/include', 'include'),
+          ('../cpp/deps/spdlog-1.3.1/include', 'include'),
+          ('../cpp/deps/json-3.5.0/single_include', 'include'),
+          ('../cpp/deps/fmt-5.3.0/include', 'include'),
+          ('../build/cpp/deps/nanomsg-1.1.5/include', 'include'),
+          ('../cpp/deps/SQLiteCpp-2.3.0/include', 'include')
      ],
      hiddenimports=[
           'cffi',

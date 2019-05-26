@@ -1,0 +1,35 @@
+### CMake template
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# IDE related
+*.VC.*
+*.sln
+*.vcxproj*
+Debug/
+.vs/
+.vscode/
+.idea/
+.arcconfig
+
+# Build related
+cmake-build-debug/
+build/
+build-*/
+*.pyc
+
+# NPM related
+node_modules/
+dist/
+.clang-format
+.project
+package-lock.json
+*.lock
+
+# OS files
+.DS_Store
+*.log

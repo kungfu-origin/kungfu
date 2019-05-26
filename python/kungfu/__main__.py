@@ -3,9 +3,9 @@
 #   KF_LOG_LEVEL - logging level
 #   KF_NO_EXT - disable extensions if set
 
-import os
 import kungfu.command as kfc
 import kungfu.service
 import kungfu.client
+import kungfu.extension
 import extensions
 kfc.execute()

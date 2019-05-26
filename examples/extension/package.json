@@ -1,0 +1,24 @@
+{
+  "name": "kfextdemo",
+  "author": "taurus.ai",
+  "version": "1.0.0",
+  "description": "KungFu Extension Demo",
+  "scripts": {
+    "postinstall": "git submodule update --init",
+    "config": "cmake-js configure",
+    "clean": "cmake-js clean",
+    "build": "cmake-js build",
+    "postbuild": "copyfiles -f package.json build/dist && cd build/dist && yarn pack"
+  },
+  "dependencies": {
+    "log4js": "^4.0.2",
+    "nan": "2"
+  },
+  "devDependencies": {
+    "boost-lib": "^0.11.3",
+    "cmake-js": "^5.1.0",
+    "copyfiles": "^2.1.0",
+    "cross-env": "^5.0.5",
+    "cross-var": "^1.1.0"
+  }
+}
