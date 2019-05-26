@@ -68,7 +68,7 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
     //如果新的message，则报警
     messageInfo[gatewayName] = ''
     sub.on('data', buf => {
-        const data = JSON.parse(String(buf).replace(/\0/g,''))  
+        const data = JSON.parse(String(buf))
         const dataMsgType = data.msg_type;
         switch(dataMsgType){
             case msgType.gatewayState: //监听td、md状态

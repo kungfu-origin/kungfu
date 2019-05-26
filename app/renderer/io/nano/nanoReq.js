@@ -14,7 +14,7 @@ export const nanoGetCalendar = () => {
         req.send(reqMsg)
         req.on('data', buf => {
             req.close();
-            const data = JSON.parse(String(buf).replace(/\0/g,''));
+            const data = JSON.parse(String(buf));
             if(msgType.reqCalendar === data.msg_type) resolve(data.data)
         })
     })
@@ -28,10 +28,10 @@ export const nanoCancelOrder = ({gatewayName, orderId}) => {
             data: {order_id: [orderId]}
         })
         const req = reqGatewayNanomsg(gatewayName)
-        req.send(reqMsg + '\0')
+        req.send(reqMsg)
         req.on('data', buf => {
             req.close()
-            const data = JSON.parse(String(buf).replace(/\0/g,''))
+            const data = JSON.parse(String(buf))
             if(msgType.cancelOrder === data.msg_type) resolve(true)
         })
     })
@@ -50,10 +50,10 @@ export const nanoCancelAllOrder = ({targetId, cancelType, id}) => {
             data: postData
         })
         const req = cancelType ==='account' ? reqGatewayNanomsg(targetId) : reqStrategyNanomsg(targetId)
-        req.send(reqMsg + '\0')
+        req.send(reqMsg)
         req.on('data', buf => {
             req.close()
-            const data = JSON.parse(String(buf).replace(/\0/g,''))
+            const data = JSON.parse(String(buf))
             if(msgType.cancelOrder === data.msg_type) resolve(true)
         })
     })
@@ -67,10 +67,10 @@ export const nanoMakeOrder = (gatewayName, makeOrderData) => {
             data: makeOrderData
         })
         const req = reqGatewayNanomsg(gatewayName)
-        req.send(reqMsg + '\0')
+        req.send(reqMsg)
         req.on('data', buf => {
             req.close()
-            const data = JSON.parse(String(buf).replace(/\0/g,''))
+            const data = JSON.parse(String(buf))
             if(msgType.makeOrder === data.msg_type){
                 console.log('nano-Make-Order', data)
                 resolve(true)

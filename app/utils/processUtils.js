@@ -133,7 +133,7 @@ export const describeProcess = (name) => {
     })
 }
 
-export const startProcess = async (options) => {
+export const startProcess = async (options, no_ext) => {
     const extensionName = platform === 'win' ? '.exe' : ''
     options = {
         ...options,
@@ -153,6 +153,9 @@ export const startProcess = async (options) => {
         "env": {
             "KF_HOME": dealSpaceInPath(BASE_DIR),
         }
+    };
+    if(no_ext) {
+        options['env']['KF_NO_EXT'] = 'on';
     }
 
     return new Promise((resolve, reject) => {
@@ -183,23 +186,23 @@ export const startMaster = async(force) => {
     return startProcess({
         "name": processName,
         "args": "master",
-    }).catch(err => logger.error(err))
+    }, true).catch(err => logger.error(err))
 }
 
 //启动md
 export const startMd = (resource, processName) => {
     return startProcess({
         "name": processName,
-        "args": `md_${resource}`,
-    }).catch(err => logger.error(err))      
+        "args": `md -s ${resource}`,
+    }, false).catch(err => logger.error(err))
 }
 
 //启动td
 export const startTd = (resource, processName) => {
     return startProcess({
         "name": processName,
-        "args": `td_${resource} --name ${processName}`,
-    })   
+        "args": `td -d ${resource} --name ${processName}`,
+    }, false)
 }
 
 //启动strategy
@@ -208,9 +211,9 @@ export const startStrategy = (strategyId, strategyPath) => {
     return startProcess({
         "name": strategyId,
         "args": `strategy --name ${strategyId} --path ${strategyPath}`,
-    }).catch(err => {
+    }, false).catch(err => {
         logger.error('startStrategy-err', err)
-    })   
+    })
 }
 
 

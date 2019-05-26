@@ -107,8 +107,7 @@ int socket::recv (int flags)
 
 int socket::send_json (const nlohmann::json &msg, int flags) const
 {
-    std::string msg_str = msg;
-    return send(msg_str, flags);
+    return send(msg.dump(), flags);
 }
 
 nlohmann::json socket::recv_json (int flags)

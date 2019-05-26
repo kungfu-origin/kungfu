@@ -25,10 +25,8 @@ namespace kungfu
         nlohmann::json j;
         j["msg_type"] = int(msg_type);
         j["data"] = data;
-        std::string js = j.dump();
-        SPDLOG_TRACE("nn publishing {}", js);
-        socket_.send(js, 0);
-        SPDLOG_TRACE("nn published {}", js);
+        socket_.send_json(j);
+        SPDLOG_TRACE("nn published {}", j.dump());
     }
 
     void NNPublisher::publish_order(const kungfu::journal::Order &order) const
