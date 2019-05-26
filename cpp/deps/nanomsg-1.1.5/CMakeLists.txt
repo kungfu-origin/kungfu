@@ -23,9 +23,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 #   IN THE SOFTWARE.
 #
-
-cmake_minimum_required (VERSION 2.8.12)
-
 project (nanomsg C)
 include (CheckFunctionExists)
 include (CheckSymbolExists)
@@ -33,11 +30,6 @@ include (CheckStructHasMember)
 include (CheckLibraryExists)
 include (CheckCSourceCompiles)
 include (GNUInstallDirs)
-
-if (POLICY CMP0042)
-    # Newer cmake on MacOS should use @rpath
-    cmake_policy (SET CMP0042 NEW)
-endif ()
 
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
