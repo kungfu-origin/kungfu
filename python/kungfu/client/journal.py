@@ -1,5 +1,4 @@
-
-import nnpy, pyyjj
+import nnpy, pyyjj, pywingchun
 from kungfu.command import command, arg
 
 @arg("-k", "--keep", dest="keep", action = "store_true", help = "Keep listening")
@@ -10,7 +9,7 @@ from kungfu.command import command, arg
 @arg("-f", "--folder", dest = "folder", help = "Journal Folder")
 @command(help='journal tools')
 def journal(args, logger):
-    printer = pyyjj.JournalPrinter(args.folder, args.name, 20, False, False, True, args.need_detail)
+    printer = pywingchun.JournalPrinter(args.folder, args.name, 20, False, False, True, args.need_detail)
     start_time = "20000101-13:30:00" if args.start_time is None else args.start_time
     end_time = "20200101-00:00:00" if args.end_time is None else args.end_time
     printer.run(start_time, end_time, args.keep)

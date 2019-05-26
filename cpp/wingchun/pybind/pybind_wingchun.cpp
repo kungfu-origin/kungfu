@@ -22,6 +22,7 @@
 #include <kungfu/wingchun/strategy/strategy.h>
 #include <kungfu/wingchun/strategy/strategy_util.h>
 #include <kungfu/wingchun/calendar/calendar_service.h>
+#include <kungfu/wingchun/util/journal_printer.h>
 
 namespace py = pybind11;
 namespace kf = kungfu;
@@ -350,5 +351,10 @@ PYBIND11_MODULE(pywingchun, m)
     .def(py::init())
     .def("current_day", &kf::CalendarService::get_current_day)
     .def("calculate_trading_day", &kf::CalendarService::calculate_trading_day)
+    ;
+
+    py::class_<kungfu::JournalPrinter>(m, "JournalPrinter")
+    .def(py::init<const std::string&, const std::string&, int, bool, bool, bool, bool>())
+    .def("run", &kungfu::JournalPrinter::run, py::arg("start_time"), py::arg("end_time"), py::arg("keep"))
     ;
 }

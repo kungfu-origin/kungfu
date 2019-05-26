@@ -2,8 +2,9 @@
 // Created by qlu on 2019/3/18.
 //
 
-#include "journal_printer.h"
 #include <spdlog/spdlog.h>
+
+#include <kungfu/wingchun/util/journal_printer.h>
 
 namespace kungfu
 {
