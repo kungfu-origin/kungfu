@@ -31,7 +31,10 @@ namespace kungfu
         MdGateway::MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
                 kungfu::MdGatewayImpl(SOURCE_CTP)
         {
-            // ,front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password)
+            front_uri_ = config_str["md_uri"];
+            broker_id_ = config_str["broker_id"];
+            account_id_ = config_str["account_id"];
+            password_ = config_str["password"];
         }
 
         void MdGateway::init()

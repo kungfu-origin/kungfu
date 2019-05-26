@@ -37,8 +37,14 @@ namespace kungfu
         TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
                 TdGatewayImpl(SOURCE_CTP, TD_GATEWAY_NAME(SOURCE_CTP, config_str["account_id"]))
         {
-            //front_uri_(front_uri), broker_id_(broker_id), account_id_(account_id), password_(password), front_id_(-1), session_id_(-1), order_ref_(-1), request_id_(0)
-
+            front_uri_ = config_str["td_uri"];
+            broker_id_ = config_str["broker_id"];
+            account_id_ = config_str["account_id"];
+            password_ = config_str["password"];
+            front_id_ = -1;
+            session_id_ = -1;
+            order_ref_ = -1;
+            request_id_ = 0;
         }
 
         void TdGateway::init()
