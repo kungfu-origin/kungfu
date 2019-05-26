@@ -1,15 +1,15 @@
 //
 // Created by qlu on 2019/1/16.
 //
+#include <nlohmann/json.hpp>
+#include <nanomsg/pubsub.h>
+#include <nanomsg/reqrep.h>
 
+#include <kungfu/time/timer.h>
+#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/event_loop/event_loop.h>
 #include <kungfu/wingchun/reqrsp.h>
 #include <kungfu/wingchun/serialize.h>
-#include <nanomsg/pubsub.h>
-#include <nanomsg/reqrep.h>
-#include <nlohmann/json.hpp>
-#include <kungfu/time/timer.h>
-#include <kungfu/wingchun/util/nanomsg_util.h>
 #include <kungfu/wingchun/oms/def.h>
 
 using namespace kungfu::journal;
@@ -327,14 +327,13 @@ namespace kungfu
 
         for (const auto& socket: socket_vec_)
         {
-            char* buf = nullptr;
-            int rc = socket->recv(&buf, NN_MSG, NN_DONTWAIT); // non-blocking
+            int rc = socket->recv(NN_DONTWAIT);
             if (rc > 0)
             {
-                SPDLOG_TRACE("recv: data[{}]\n", std::string(buf, rc));
+                SPDLOG_TRACE("recv: data[{}]\n", socket->last_message());
                 try
                 {
-                    nlohmann::json content = nlohmann::json::parse(std::string(buf, rc));
+                    nlohmann::json content = nlohmann::json::parse(socket->last_message());
                     // 兼容req
                     if (content.find("req") != content.end() && content.find("msg_type") == content.end())
                     {
@@ -442,13 +441,9 @@ namespace kungfu
                 }
                 catch(std::exception &e)
                 {
-                    SPDLOG_ERROR("failed to parse data[{}], exception: {}", (char*)buf, e.what());
+                    SPDLOG_ERROR("failed to parse data[{}], exception: {}", socket->last_message(), e.what());
                     continue;
                 }
-            }
-            if (buf != nullptr)
-            {
-                socket->freemsg(buf);
             }
         }
     }

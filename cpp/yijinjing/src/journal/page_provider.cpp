@@ -55,16 +55,15 @@ json ClientPageProvider::request(const string &path)
     int sent_bytes = client_request_socket_.send(request_str, 0);
     SPDLOG_TRACE("sent request [{}]: {}", sent_bytes, request_str);
     emitter_.poke();
-    int recv_bytes = client_request_socket_.recv(response_buf, SOCKET_MESSAGE_MAX_LENGTH, 0);
-    response_str_.assign(response_buf, recv_bytes);
-    SPDLOG_TRACE("got response [{}]: {}", recv_bytes, response_str_);
-    return json::parse(response_str_);
+    int rc = client_request_socket_.recv();
+    string response_str = client_request_socket_.last_message();
+    SPDLOG_TRACE("got response [{}]: {}", rc, response_str);
+    return json::parse(response_str);
 }
 
 void ClientPageProvider::register_client()
 {
-    request(is_writer_ ? "client/register/writer" : "client/register/reader");
-    json response = json::parse(response_str_);
+    json response = request(is_writer_ ? "client/register/writer" : "client/register/reader");
     hash_code_ = response["hash_code"];
     if (response["success"])
     {
@@ -87,8 +86,7 @@ void ClientPageProvider::exit_client()
 
 int ClientPageProvider::register_journal(const string& dir, const string& jname)
 {
-    request("journal/register");
-    json response = json::parse(response_str_);
+    json response = request("journal/register");
     int memory_msg_idx = -1;
     if (response["success"])
         memory_msg_idx = response["memory_msg_idx"];

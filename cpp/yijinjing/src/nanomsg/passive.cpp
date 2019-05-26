@@ -36,8 +36,7 @@ bool passive::notice::wait()
 {
     try
     {
-        int len = socket_.recv(buf_, MAC_MSG_LENGTH, 0);
-        message_.assign(buf_, len);
+        socket_.recv();
         return true;
     }
     catch(const nanomsg::exception& e)
@@ -52,5 +51,5 @@ bool passive::notice::wait()
 
 const std::string& passive::notice::last_message()
 {
-    return message_;
+    return socket_.last_message();
 }

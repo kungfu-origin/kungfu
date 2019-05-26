@@ -10,9 +10,9 @@
 #include <nlohmann/json.hpp>
 
 #include <kungfu/time/timer.h>
+#include <kungfu/yijinjing/nanomsg/socket.h>
 
 #include <kungfu/wingchun/gateway/state.h>
-#include <kungfu/wingchun/util/nanomsg_util.h>
 #include <kungfu/wingchun/util/env.h>
 #include <kungfu/wingchun/config.h>
 #include <kungfu/wingchun/serialize.h>
@@ -74,7 +74,7 @@ namespace kungfu
             req_msg.msg_type = kungfu::MsgType::ReqLogin;
             req_msg.data = js_req;
             std::string url = GATEWAY_REP_URL(gateway);
-            NNMsg rsp_msg = get_rsp(url, req_msg, kungfu::yijinjing::MILLISECONDS_PER_SECOND * 5);
+            NNMsg rsp_msg = yijinjing::nanomsg::request(url, req_msg, kungfu::yijinjing::MILLISECONDS_PER_SECOND * 5);
 
             GatewayLoginRsp rsp = {};
             from_json(rsp_msg.data, rsp);
@@ -109,7 +109,7 @@ namespace kungfu
             req_msg.msg_type = MsgType::Subscribe;
             req_msg.data = j;
 
-            get_rsp(url, req_msg);
+            yijinjing::nanomsg::request(url, req_msg);
         }
     }
 }

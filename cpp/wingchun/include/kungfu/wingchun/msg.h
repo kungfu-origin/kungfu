@@ -6,6 +6,7 @@
 #define PROJECT_MSG_H
 
 #include <cstdint>
+#include <nlohmann/json.hpp>
 
 namespace kungfu
 {
@@ -51,6 +52,30 @@ namespace kungfu
 
         ReloadFutureInstrument = 701
     };
+
+    struct NNMsg
+    {
+        kungfu::MsgType msg_type;
+        nlohmann::json data;
+    };
+
+    inline void to_json(nlohmann::json& j, const NNMsg& msg)
+    {
+        j["msg_type"] = msg.msg_type;
+        j["data"] = msg.data;
+    }
+
+    inline void from_json(const nlohmann::json& j, NNMsg& msg)
+    {
+        msg.msg_type = j["msg_type"];
+        msg.data = j["data"];
+    }
+
+    inline std::string to_string(const NNMsg& msg)
+    {
+        nlohmann::json j = msg;
+        return j.dump();
+    }
 }
 
 #endif //PROJECT_MSG_H

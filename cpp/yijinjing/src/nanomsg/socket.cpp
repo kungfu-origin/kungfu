@@ -4,6 +4,8 @@
 
 #include <spdlog/spdlog.h>
 #include <nanomsg/nn.h>
+#include <nanomsg/reqrep.h>
+#include <nanomsg/pubsub.h>
 
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
@@ -29,7 +31,7 @@ int exception::num () const
     return errno_;
 }
 
-socket::socket (int domain, int protocol)
+socket::socket (int domain, int protocol, int buffer_size): buf_(buffer_size)
 {
     sock_ = nn_socket (domain, protocol);
     if (sock_ < 0)
@@ -39,7 +41,6 @@ socket::socket (int domain, int protocol)
 socket::~socket ()
 {
     nn_close (sock_);
-    //assert (rc == 0);
 }
 
 void socket::setsockopt (int level, int option, const void *optval,
@@ -92,51 +93,61 @@ int socket::send (const std::string& msg, int flags) const
     return rc;
 }
 
-int socket::recv (void *buf, size_t len, int flags)
+int socket::recv (int flags)
 {
-    int rc = nn_recv (sock_, buf, len, flags);
+    int rc = nn_recv (sock_, buf_.data(), buf_.size(), flags);
     if (rc < 0) {
         if (nn_errno () != EAGAIN)
             throw exception ();
-        return -1;
+        return rc;
     }
+    message_.assign(buf_.data(), rc);
     return rc;
 }
 
-int socket::sendmsg (const struct nn_msghdr *msghdr, int flags) const
+int socket::send_json (const nlohmann::json &msg, int flags) const
 {
-    int rc = nn_sendmsg (sock_, msghdr, flags);
-    if (rc < 0) {
-        if (nn_errno () != EAGAIN)
-            throw exception ();
-        return -1;
+    std::string msg_str = msg;
+    return send(msg_str, flags);
+}
+
+nlohmann::json socket::recv_json (int flags)
+{
+    if (recv(flags))
+    {
+        return nlohmann::json::parse(message_);
     }
-    return rc;
-}
-
-int socket::recvmsg (struct nn_msghdr *msghdr, int flags)
-{
-    int rc = nn_recvmsg (sock_, msghdr, flags);
-    if (rc < 0) {
-        if (nn_errno () != EAGAIN)
-            throw exception ();
-        return -1;
+    else
+    {
+        return nlohmann::json();
     }
-    return rc;
 }
 
-void *socket::allocmsg (size_t size, int type)
+const std::string& socket::last_message() const
 {
-    void *msg = nn_allocmsg (size, type);
-    if (!msg)
-        throw exception ();
-    return msg;
+    return message_;
 }
 
-int socket::freemsg (void *msg)
+nlohmann::json kungfu::yijinjing::nanomsg::request(const std::string &url, const nlohmann::json& msg, int timeout)
 {
-    int rc = nn_freemsg (msg);
-    if (rc != 0)
-        throw exception ();
-    return rc;
+    socket socket(AF_SP, NN_REQ);
+    socket.connect(url);
+    socket.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
+
+    try
+    {
+        std::string req = msg;
+        SPDLOG_DEBUG("request {}", req);
+        socket.send_json(msg);
+        return socket.recv_json(0);
+    }
+    catch (std::exception& e)
+    {
+        SPDLOG_DEBUG("no response");
+        nlohmann::json response = {};
+        response["msg_type"] = msg["msg_type"];
+        response["data"] = {};
+        response["data"]["error_msg"] = "no response";
+        return response;
+    }
 }

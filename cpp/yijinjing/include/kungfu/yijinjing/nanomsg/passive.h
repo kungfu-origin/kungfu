@@ -16,7 +16,6 @@ YJJ_NAMESPACE_START
 
 namespace passive
 {
-    #define MAC_MSG_LENGTH 256 * 1024
     #define DEFAULT_NOTICE_TIMEOUT 1000
 
     class nn_socket_holder {
@@ -42,8 +41,6 @@ namespace passive
         const std::string& last_message();
     private:
         int timeout_;
-        char buf_[MAC_MSG_LENGTH];
-        std::string message_;
     };
 }
 

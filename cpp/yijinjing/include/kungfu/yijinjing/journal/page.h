@@ -302,8 +302,6 @@ private:
     nanomsg::socket     client_request_socket_;
     passive::emitter emitter_;
     nlohmann::json request_;
-    char response_buf[SOCKET_MESSAGE_MAX_LENGTH];
-    string  response_str_;
     void*   memory_msg_buffer_;
     int     hash_code_;
 
