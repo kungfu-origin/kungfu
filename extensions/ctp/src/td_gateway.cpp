@@ -9,10 +9,11 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+
 #include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/serialize.h>
 #include <kungfu/wingchun/util/code_convert.h>
-#include <kungfu/wingchun/util/nanomsg_util.h>
 #include <kungfu/wingchun/util/instrument.h>
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/gateway/macro.h>
