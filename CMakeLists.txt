@@ -18,14 +18,12 @@ PROJECT(kungfu)
 ############################################################
 SET(CMAKE_CXX_STANDARD 14)
 
-if(UNIX AND NOT APPLE)
+if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
     SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-    OPTION(BUILD_SHARED_LIBS "turn OFF for .a libs" ON)
 endif()
 if(APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+    SET(CMAKE_MACOSX_RPATH ON)
 endif()
 if(WIN32)
     # install boost using binaries from https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/
