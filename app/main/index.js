@@ -226,7 +226,6 @@ function updateHandler(mainWindow){
 
 	autoUpdater.autoInstallOnAppQuit = false;
 	autoUpdater.setFeedURL(uploadUrl);
-	autoUpdater.logger = require("electron-log");
     autoUpdater.on('error', (error) => {
 		sendUpdateMessage(mainWindow, message.error)
 		return new Error(error)		
