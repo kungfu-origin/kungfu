@@ -27,9 +27,11 @@ if(APPLE)
 endif(APPLE)
 if(WIN32)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w")
-    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
+    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+    # install boost using binaries from https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/
+    SET(BOOST_ROOT "C:\\local\\boost_1_64_0")
 endif(WIN32)
 
 ############################################################
@@ -45,26 +47,29 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 ############################################################
 
-if (KF_SDK_HOME)
+# Setup KungFu sdk
+if(KF_SDK_HOME)
     MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
-else()
-    SET(KF_SDK_HOME "../../build/kfc")
+else(KF_SDK_HOME)
+    SET(KFC_DEV_DIR "../../build/kfc")
+    GET_FILENAME_COMPONENT(KF_SDK_HOME ${KFC_DEV_DIR} ABSOLUTE)
     MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
 endif (KF_SDK_HOME)
 
 INCLUDE_DIRECTORIES(${KF_SDK_HOME}/include)
 LINK_DIRECTORIES(${KF_SDK_HOME})
 
-ADD_SUBDIRECTORY(../../cpp/deps/pybind11-2.2.4 build/pybind11)
+############################################################
+
+# Use pybind11
+ADD_SUBDIRECTORY(../../cpp/deps/pybind11-2.2.4 ${PROJECT_BINARY_DIR}/pybind11)
 
 ############################################################
 
-SET(KF_EXTENSION_BUILD_DIR ${CMAKE_BINARY_DIR}/dist)
-
 AUX_SOURCE_DIRECTORY(src SOURCE_FILES)
 PYBIND11_ADD_MODULE(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+if(WIN32)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE yijinjing wingchun)
+endif(WIN32)
 
-#TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE yijinjing wingchun)
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${KF_EXTENSION_BUILD_DIR})
-
-CONFIGURE_FILE(__init__.py "${KF_EXTENSION_BUILD_DIR}/__init__.py")
+CONFIGURE_FILE(__init__.py "${PROJECT_BINARY_DIR}/dist/__init__.py")

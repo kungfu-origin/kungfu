@@ -4,11 +4,10 @@
   "version": "1.0.0",
   "description": "KungFu Extension Demo",
   "scripts": {
-    "postinstall": "git submodule update --init",
     "config": "cmake-js configure",
     "clean": "cmake-js clean",
     "build": "cmake-js build",
-    "postbuild": "copyfiles -f package.json build/dist && cd build/dist && yarn pack"
+    "postbuild": "copyfiles -f package.json build/dist && copyfiles -f build/Release/* build/dist && copyfiles -f build/Debug/* build/dist && cd build/dist && yarn pack"
   },
   "dependencies": {
     "log4js": "^4.0.2",

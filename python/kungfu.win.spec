@@ -3,8 +3,9 @@ a = Analysis(['kungfu\\__main__.py'],
      pathex=['python'],
      binaries=[('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.dll', '.'),
                ('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\py*.pyd', '.'),
-               ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.'),
-               ('C:\\local\\boost_1_64_0\\lib64-msvc-14.1\\*.dll', '.')
+               ('..\\build\\cpp\\yijinjing\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
+               ('..\\build\\cpp\\wingchun\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
+               ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.')
                ],
      datas=[
         ('extensions', 'extensions'),
@@ -18,7 +19,8 @@ a = Analysis(['kungfu\\__main__.py'],
         ('..\\cpp\\deps\\json-3.5.0\\single_include', 'include'),
         ('..\\cpp\\deps\\fmt-5.3.0\\include', 'include'),
         ('..\\build\\cpp\\deps\\nanomsg-1.1.5\\include', 'include'),
-        ('..\\cpp\\deps\\SQLiteCpp-2.3.0\\include', 'include')
+        ('..\\cpp\\deps\\SQLiteCpp-2.3.0\\include', 'include'),
+        ('C:\\local\\boost_1_64_0\\lib64-msvc-14.1\\*', '.')
      ],
      hiddenimports=[
           'cffi',
