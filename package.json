@@ -31,6 +31,7 @@
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
+    "dist:cli": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.cli.config.js",
     "copy": "copyfiles -f cpp/wingchun/resources/commission.db resources/default && copyfiles -f cpp/wingchun/resources/holidays.db resources/default"
   },
   "build": {
@@ -149,6 +150,8 @@
     "babel-preset-stage-0": "^6.24.1",
     "babili-webpack-plugin": "^0.1.2",
     "bindings": "^1.5.0",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.16",
     "boost-lib": "^0.11.3",
     "cfonts": "^1.1.3",
     "chai": "^4.0.0",
