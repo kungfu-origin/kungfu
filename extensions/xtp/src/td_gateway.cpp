@@ -24,7 +24,7 @@ namespace kungfu
             client_id_ = config_int["client_id"];
             software_key_ = config_str["software_key"];
             user_ = config_str["user_id"];
-            password_ = config_int["password"];
+            password_ = config_str["password"];
             ip_ = config_str["td_ip"];
             port_ = config_int["td_port"];
             save_file_path_ = config_str["save_file_path"];
