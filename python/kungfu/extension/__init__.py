@@ -5,7 +5,10 @@ import kungfu.command as kfc
 @kfc.command(help='extension management', sensitive=False)
 def extension(args, logger):
     if not os.getenv('KF_NO_EXT'):
-        COMMANDS[args.ext_command](args, logger)
+        if 'ext_command' in args:
+            COMMANDS[args.ext_command](args, logger)
+        else:
+            kfc.SUBARGPARSERS['extension'].print_help()
     else:
         print('Extension disabled by KF_NO_EXT')
         logger.warning('Trying to manage extension while disallowed by KF_NO_EXT')
