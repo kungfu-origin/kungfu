@@ -1,8 +1,7 @@
 <template>
   <div class="code-editor">
     <div id="editor-content" v-if="currentFile !== null && !currentFile.isDir"></div>
-    <!-- <i class="iconfont tr-LOGO-1" v-else></i> -->
-    <svg class="icon tr-LOGO-1" :aria-hidden="true">
+    <svg v-else class="icon tr-LOGO-1" :aria-hidden="true">
         <use xlink:href="#tr-LOGO-1"></use>
     </svg>
   </div>
@@ -252,7 +251,6 @@ export default {
     transform: translateY(-50%);
     filter: drop-shadow($bg_light 1px -1px)
   }
-
 }
 
 #tr-LOGO-1 path{
