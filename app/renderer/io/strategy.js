@@ -11,7 +11,6 @@ import {
     buildAccountTradesDBPath
 } from '__gConfig/pathConfig';
 import moment from "moment"
-import Vue from 'vue'
 
 /**
  * 获取策略列表
@@ -65,13 +64,12 @@ export const getStrategyAccounts = (strategyId) => {
 /**
  * 获取某策略下委托
  */
-export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
+export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) => {
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
     const strategyAddTime = strategys[0].add_time;
     //tradeing day
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
     const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
@@ -109,13 +107,12 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}) => {
 /**
  * 获取某策略下成交
  */
-export const getStrategyTrade = async(strategyId, {id, dateRange}) => {
+export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) => {
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策咯！')
     const strategyAddTime = strategys[0].add_time;
     //tradeing day
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
     const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
@@ -185,9 +182,7 @@ export const getStrategyPos = (strategyId, {instrumentId, type}) => {
 /**
  * 获取某策略下收益曲线分钟线
  */
-export const getStrategyPnlMin = (strategyId) => {
-    // 在vuex中获得交易日
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day
+export const getStrategyPnlMin = (strategyId, tradingDay) => {
     if(!tradingDay) throw new Error('无交易日！')
     return runSelectDB(buildStrategySnapshortsDBPath(strategyId), `SELECT * FROM portfolio_1m_snapshots WHERE trading_day = '${tradingDay}'`)
 }

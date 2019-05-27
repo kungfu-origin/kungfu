@@ -165,7 +165,7 @@ export default {
                 if(t.calendar.trading_day) return new Promise(resolve => resolve())
                 else return t.$store.dispatch('getCalendar')
             })()
-            .then(() => t.minMethod(t.currentId))
+            .then(() => t.minMethod(t.currentId, t.calendar.trading_day))
             .then(data => {
                 //当调用的传值和当前的传值不同的是，则返回
                 if(id != t.currentId) {

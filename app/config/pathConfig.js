@@ -4,16 +4,15 @@ const renderProcess = require('electron').remote;
 const {addFile} = require('__gUtils/fileUtils');
 
 //ELEC_BASE
-var ELEC_BASE_DIR;
+var ELEC_BASE_DIR_RESOLVE;
 if(process.env.NODE_ENV === 'cli'){
-    ELEC_BASE_DIR = '/Users/zhangyizhi/Library/Application Support/kungfu';
-    exports.ELEC_BASE_DIR = ELEC_BASE_DIR
-    addFile('', ELEC_BASE_DIR, 'folder')
+    ELEC_BASE_DIR_RESOLVE = '/Users/zhangyizhi/Library/Application Support/kungfu';
+    addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
 } else {
-    ELEC_BASE_DIR = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
-    exports.ELEC_BASE_DIR = ELEC_BASE_DIR
-    addFile('', ELEC_BASE_DIR, 'folder')
+    ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
+    addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
 }
+export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
 
 //BASE
 addFile(ELEC_BASE_DIR, 'app', 'folder')

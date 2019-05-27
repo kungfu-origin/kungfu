@@ -201,7 +201,7 @@ export default {
             t.getDataMethod(t.currentId, {
                 id: t.filter.id,
                 dateRange
-            }).then(res => {
+            }, t.calendar.trading_day).then(res => {
                 if(!res.data) return;
                 t.$saveFile({
                     title: '委托记录',
@@ -299,7 +299,7 @@ export default {
             //clear Data
             t.orderDataByKey = {};
             t.tableData = []
-            return t.getDataMethod(t.currentId, t.filter)
+            return t.getDataMethod(t.currentId, t.filter, t.calendar.trading_day)
             .then(res => {
                 if(!res.data) {
                     t.tableData = Object.freeze([]);                    

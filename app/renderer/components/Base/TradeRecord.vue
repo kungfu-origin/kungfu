@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
 import { offsetName } from '@/assets/config/tradingConfig'
 import { debounce, throttleInsert, throttle } from "@/assets/js/utils"
@@ -75,6 +75,10 @@ export default {
     },
 
     computed:{
+        ...mapState({
+            calendar: state => state.BASE.calendar, //日期信息，包含交易日
+        }),
+
         schema(){
             return [{
                 type: 'text',
@@ -164,7 +168,7 @@ export default {
             t.getDataMethod(t.currentId, {
                 id: t.filter.id,
                 dateRange
-            }).then(res => {
+            }, t.calendar.trading_day).then(res => {
                 if(!res.data) return;
                 t.$saveFile({
                     title: '成交记录',
@@ -202,7 +206,7 @@ export default {
             t.getDataLock = true
             t.tableData = Object.freeze([])
             //id:用户或者交易id，filter：需要筛选的数据
-            return t.getDataMethod(t.currentId, t.filter).then(res => {
+            return t.getDataMethod(t.currentId, t.filter, t.calendar.trading_day).then(res => {
                 if(!res || !res.data.length) {
                     t.tableData = Object.freeze([])
                     return;

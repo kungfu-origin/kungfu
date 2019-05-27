@@ -13,7 +13,7 @@
 <script>
 import lineConfig from './config/lineEchart'
 import moment from 'moment'
-import {mapGetters} from 'vuex'
+import {mapGetters, mapState} from 'vuex'
 const {echarts} = require('@/assets/js/static/echarts.min.js')
 
 export default {
@@ -79,6 +79,10 @@ export default {
     },
 
     computed: {
+        ...mapState({
+            calendar: state => state.BASE.calendar, //日期信息，包含交易日
+        }),
+
         accumulatedPnlRatio(){
             const t = this;
             if(!t.dayPnlData.length) return '--'
@@ -167,7 +171,7 @@ export default {
                 t.dayData = [xAxisData, serirsData]
                 t.dayPnlData = data || []
             })
-            .then(() => t.minMethod(t.currentId)) //查找分钟线的数据库中的数据，拿到最后一条数据放入日线最后
+            .then(() => t.minMethod(t.currentId, t.calendar.trading_day)) //查找分钟线的数据库中的数据，拿到最后一条数据放入日线最后
             .then(minData => {
                 const {length} = minData
                 length && t.dealMinData(minData[length-1])

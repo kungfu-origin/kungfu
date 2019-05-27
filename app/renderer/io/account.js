@@ -2,7 +2,6 @@ import {runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB} from
 import {ACCOUNTS_DB, buildGloablCommissionDBPath, buildAccountCommissionDBPath, buildGateWayStateDBPath, buildAccountAssetsDBPath,buildAccountTradesDBPath, buildAccountOrdersDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
-import Vue from 'vue'
 
 /**
  * 获取账户列表
@@ -74,8 +73,7 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
  * 获取账户成交情况
  * 
  */
-export const getAccountTrade = (accountId, {id, dateRange}) => {
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+export const getAccountTrade = (accountId, {id, dateRange}, tradingDay) => {
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000
@@ -99,8 +97,7 @@ export const getAccountTrade = (accountId, {id, dateRange}) => {
  * @param {String} id  模糊查询的id部分数据
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
-export const getAccountOrder = (accountId, {id, dateRange}) => {
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day;
+export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
     const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000
@@ -132,9 +129,7 @@ export const getOrderCount = (accountId, sql) => {
  * 获取账户收益曲线分钟线
  * 
  */
-export const getAccountPnlMin = (accountId) => {
-    // 在vuex中获得交易日
-    const tradingDay = (Vue.store.state.BASE.calendar || {}).trading_day
+export const getAccountPnlMin = (accountId, tradingDay) => {
     if(!tradingDay) return new Promise((resolve, reject) => {reject(new Error('无交易日！'))})
     return runSelectDB(buildAccountSnapshortsDBPath(accountId), 
     `SELECT * FROM trading_account_1m_snapshots WHERE trading_day = '${tradingDay}'`)

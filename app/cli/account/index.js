@@ -2,6 +2,7 @@ const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const screen = blessed.screen()
 const utils = require('../public/utils');
+const { getAccountList, getAccountOrder, getAccountTrade } = require('../../renderer/io/account');
 
 var globalData = {
     account: {
@@ -14,37 +15,54 @@ var globalData = {
 const grid = new contrib.grid({rows: 12, cols: 12, screen: screen})
 
 const accountTable = grid.set(0, 0, 4, 6, contrib.table,      {
-    keys: true,
-    fg: 'white',
-    selectedFg: 'white',
-    selectedBg: 'blue',
-    interactive: true,
-    label: 'Trading Account Processes',
-    width: '30%',
-    height: '30%',
-    border: {type: "line", fg: "cyan"},
-    columnSpacing: 10, //in chars
-    columnWidth: [16, 12, 12] /*in chars*/ })
+        keys: true
+        , fg: 'white'
+        , selectedFg: 'white'
+        , selectedBg: 'blue'
+        , interactive: true
+        , label: 'Active Processes'
+        , width: '30%'
+        , height: '30%'
+        , border: {type: "line", fg: "cyan"}
+        , columnSpacing: 10 //in chars
+        , columnWidth: [16, 12, 12] /*in chars*/ })
 
-const buildAccountList = (table) => {
-    const { getAccountList } = require('../../renderer/io/account');
+const buildTdAccountList = (table) => {
     getAccountList().then(list => {
         const tableData = list.map(l => [l.account_id.toAccountId(), l.source_name, !!l.receive_md ? '✔' : ''])
-        table.setData({headers: ['Account', 'Source', 'Md',], data: tableData})
-        screen.render()
+        table.setData({headers: ['Account', 'Source', 'Md'], data: tableData})
         table.focus()
+        screen.render()
     })
 }
 
-buildAccountList(accountTable)
+buildTdAccountList(accountTable)
 
-const mdList = grid.set(4, 0, 4, 3, contrib.table, {
-    key: true,
-    fg: 'green',
-    label: 'Marketing Processes',
-    columnSpacing: 1,
-    columnWidth: [24, 10, 10] 
-})
+
+const mdTable = grid.set(4, 0, 4, 3, contrib.table, {
+    keys: true
+    , fg: 'white'
+    , selectedFg: 'white'
+    , selectedBg: 'blue'
+    , label: 'Active Processes'
+    , width: '30%'
+    , height: '30%'
+    , border: {type: "line", fg: "cyan"}
+    , columnSpacing: 10 //in chars
+    , columnWidth: [8, 20] /*in chars*/ })
+
+const buildMdAccountList = (table) => {
+    getAccountList().then(list => {
+        const tableData = list.filter(l => !!l.receive_md).map(l => [l.source_name, l.account_id.toAccountId()])
+        table.setData({headers: ['Source', 'Account'], data: tableData})
+        screen.render()
+    })
+}
+
+buildMdAccountList(mdTable)
+
+
+
 
 const pnl = grid.set(4, 3, 4, 3, contrib.sparkline, {
     label: 'pnl (daily)', 
@@ -52,13 +70,47 @@ const pnl = grid.set(4, 3, 4, 3, contrib.sparkline, {
     style: { fg: 'blue', titleFg: 'white' }
 })
 
-const orderList = grid.set(8, 0, 4, 6, contrib.table, {
+const orderTable = grid.set(8, 0, 4, 6, contrib.table, {
     key: true,
     fg: 'green',
     label: 'orders unfinished',
     columnSpacing: 1,
     columnWidth: [24, 10, 10]
 })
+
+// const dataOrder = (item) => {
+//     return Object.freeze({
+//         id: item.order_id.toString() + '_' + item.account_id.toString(),
+//         insertTime: item.insert_time && moment(item.insert_time/1000000).format("YYYY-MM-DD HH:mm:ss"),
+//         instrumentId: item.instrument_id,
+//         side: sideName[item.side] ? sideName[item.side] : '--',
+//         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+//         limitPrice: item.limit_price,
+//         volumeTraded: item.volume_traded + "/" + (item.volume),
+//         statusName: orderStatus[item.status],
+//         status: item.status,
+//         clientId: item.client_id,
+//         accountId: item.account_id,
+//         orderId: item.order_id,
+//         exchangeId: item.exchange_id
+//     })
+// };
+
+
+const buildOrderTable = (table, accountId) => {
+    getAccountOrder(accountId, {}, '20190527').then(list => {
+        console.log(list)
+        if(!list.length) return;
+        const tableData = list.slice(0, 10).map(l => Object.values(dataOrder(l)))
+        table.setData({headers: ['id', 'insertTime', 'instrumentId', 'side', 'offset', 'limitPrice', 'volumeTraded', 'statusName', 'clientId', 'orderId', 'exchangeId'], data: tableData})
+        screen.render()
+    })
+}
+
+buildOrderTable(orderTable, '15040900')
+
+
+
 
 const posList = grid.set(0, 6, 8, 6, contrib.table, {
     key: true,
@@ -67,6 +119,8 @@ const posList = grid.set(0, 6, 8, 6, contrib.table, {
     columnSpacing: 1,
     columnWidth: [24, 10, 10]
 })
+
+
 
 const tradeList = grid.set(8, 6, 4, 6, contrib.table, {
     key: true,
