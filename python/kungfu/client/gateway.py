@@ -19,7 +19,7 @@ def run_extension(registry, args, logger, extension_name, extension_type):
             else:
                 logger.error('unknown config %s, %s', type(config[pname]), config[pname])
         if not 'client_id' in config_int:
-            config_str['client_id'] = 1
+            config_int['client_id'] = 1
         config_str['save_file_path'] = '{}/runtime'.format(args.home)
         plugin = registry.get_extension(extension_name)(config_str, config_int, config_double)
         plugin.init()

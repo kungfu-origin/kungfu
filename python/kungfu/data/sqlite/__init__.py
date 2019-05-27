@@ -61,7 +61,10 @@ def session_scope():
 def get_task_config(task_name):
     with session_scope() as session:
         task = session.query(Task).get(task_name)
-        return task.config
+        if task:
+            return task.config
+        else:
+            return {}
 
 def set_task_config(task_name, config):
     with session_scope() as session:
