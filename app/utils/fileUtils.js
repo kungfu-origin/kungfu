@@ -1,6 +1,5 @@
 import Vue from 'vue';
 const path = require("path");
-// const fs = require('fs');
 const fse = require('fs-extra');
 const csv = require("fast-csv");
 
@@ -258,3 +257,12 @@ export const openReadFile = (logPath) => {
     const shell = require('electron').shell;
     shell.openItem(logPath)
 };
+
+export const existsSync = (filePath) => {
+    return fse.existsSync(filePath)
+}
+
+export const copySync = (fromPath, toPath) => {
+    return fse.copySync(fromPath, toPath)
+
+}

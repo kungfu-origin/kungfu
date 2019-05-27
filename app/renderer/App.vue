@@ -10,11 +10,11 @@ import * as ACCOUNT_API from '@/io/account'
 import * as BASE_API from '@/io/base'
 
 import {BASE_DIR} from '__gConfig/pathConfig.js'
-const path = require('path');
-const fs = require('fs');
-
 import {connectCalendarNanomsg} from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType'
+import { existsSync } from '__gUtils/fileUtils'
+import path from 'path';
+
 
 
 export default {
@@ -47,7 +47,7 @@ export default {
                     //type 是md,td
                     if(!(task_type === 'md' || task_type === 'td')) return
                     //查看是否存在该姓名的文件
-                    if(fs.existsSync(path.join(BASE_DIR, 'gateway', name))) {
+                    if(existsSync(path.join(BASE_DIR, 'gateway', name))) {
                         t.$store.dispatch('buildGatewayNmsgListener', name)//监听账户信息，td、md状态，资金情况
                         ACCOUNT_API.getMdTdState(name).then(state => {
                             const len = (state || []).length;
@@ -72,7 +72,7 @@ export default {
                 const promises = res.map(item => {
                     const {account_id} = item
                     const accountId = account_id.toAccountId();
-                    if(!fs.existsSync(path.join(BASE_DIR,'accounts', accountId))) return false;
+                    if(!existsSync(path.join(BASE_DIR,'accounts', accountId))) return false;
                     return ACCOUNT_API.getAccountAsset(accountId).then(cash => {
                         if(!cash || !cash.length) return false;
                         const cashData = cash[0];

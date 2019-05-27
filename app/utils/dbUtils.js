@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
+const { existsSync } = require('__gUtils/fileUtils'); 
 
 
 /**
@@ -9,7 +9,7 @@ const fs = require('fs');
  */
 export const runInsertUpdateDeleteDB = (dbPath, sql, args) => {
         return new Promise((resolve, reject) => {
-            if(!fs.existsSync(dbPath)){
+            if(!existsSync(dbPath)){
                 throw new Error(`${dbPath} 不存在！`)
             }
             const db = new sqlite3.Database(dbPath)
@@ -25,7 +25,7 @@ export const runInsertUpdateDeleteDB = (dbPath, sql, args) => {
 
 export const runBatchInsertDB = (dbPath, sql, batchList) => {
     return new Promise((resolve, reject) => {
-        if(!fs.existsSync(dbPath)){
+        if(!existsSync(dbPath)){
             throw new Error(`${dbPath} 不存在！`)
         }
         const db = new sqlite3.Database(dbPath)
@@ -47,7 +47,7 @@ export const runBatchInsertDB = (dbPath, sql, batchList) => {
  */
 export const runClearDB = (dbPath, tableName) => {
     return new Promise((resolve, reject) => {
-        if(!fs.existsSync(dbPath)){
+        if(!existsSync(dbPath)){
             throw new Error(`${dbPath} 不存在！`)
         }
         const db = new sqlite3.Database(dbPath)
@@ -70,7 +70,7 @@ export const runClearDB = (dbPath, tableName) => {
  */
 export const runSelectDB = (dbPath, sql, args) =>{
     return new Promise((resolve, reject) => {
-        if(!fs.existsSync(dbPath)){
+        if(!existsSync(dbPath)){
             resolve([]);
             return;
         }

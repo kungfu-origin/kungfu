@@ -1,6 +1,6 @@
-import fse from 'fs-extra';
 import {runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB} from '__gUtils/dbUtils';
 import {ACCOUNTS_DB, buildGloablCommissionDBPath, buildAccountCommissionDBPath, buildGateWayStateDBPath, buildAccountAssetsDBPath,buildAccountTradesDBPath, buildAccountOrdersDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
+import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 import Vue from 'vue'
 
@@ -152,7 +152,7 @@ export const getAccountPnlDay = (accountId) => {
 export const setFeeSettingData = (accountId, feeSettingData) => {
     if(feeSettingData.length < 1) throw new Error('fees length is 0')
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
-    if(!fse.existsSync(COMMISSION_DB)) throw new Error('commission.db is not exist!')
+    if(!existsSync(COMMISSION_DB)) throw new Error('commission.db is not exist!')
     return new Promise((resolve, reject) => {
         const keys = Object.keys(feeSettingData[0], {})
         const q = [...keys].fill("?")
@@ -169,9 +169,9 @@ export const setFeeSettingData = (accountId, feeSettingData) => {
 export const getFeeSettingData = (accountId) => {
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
     const GLOBAL_COMMISSIO_DB = buildGloablCommissionDBPath()
-    if(!fse.existsSync(COMMISSION_DB)) {
+    if(!existsSync(COMMISSION_DB)) {
         try{
-            fse.copySync(GLOBAL_COMMISSIO_DB, COMMISSION_DB)
+            copySync(GLOBAL_COMMISSIO_DB, COMMISSION_DB)
         }catch(err){
             throw err
         }

@@ -1,6 +1,6 @@
 const path = require('path')
-const sqlite3 = require('sqlite3').verbose();
 const fse = require('fs-extra');
+const sqlite3 = require('sqlite3').verbose();
 const initGobalDB = require('__gConfig/initGlobalDB.json');
 const { GLOBAL_DIR } = require('__gConfig/pathConfig');
 const { logger } = require('__gUtils/logUtils');

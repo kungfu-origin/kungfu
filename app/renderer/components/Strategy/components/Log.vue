@@ -37,8 +37,7 @@ import {debounce, throttle, throttleInsert} from '@/assets/js/utils'
 import {buildProcessLogPath} from '__gConfig/pathConfig.js';
 import {Tail} from 'tail';
 import readline from 'readline';
-import fs from 'fs';
-import {clearFileContent, addFile, openReadFile} from '__gUtils/fileUtils.js';
+import {clearFileContent, addFile, openReadFile, existsSync} from '__gUtils/fileUtils.js';
 import { ipcRenderer } from 'electron';
 export default {
     name: 'log',
@@ -145,7 +144,7 @@ export default {
         init: debounce(function(processId, logPath, searchKeyword){
             const t = this;
             //文件不存在则创建
-            if(!fs.existsSync(logPath)){
+            if(!existsSync(logPath)){
                 t.tableData = Object.freeze([])
                 addFile('', logPath, 'file')
             }
