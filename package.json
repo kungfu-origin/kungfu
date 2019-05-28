@@ -121,6 +121,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "blessed": "^0.1.81",
     "codemirror": "^5.44.0",
     "colors": "^1.3.3",
     "electron-updater": "^4.0.6",
@@ -152,7 +153,6 @@
     "babel-preset-stage-0": "^6.24.1",
     "babili-webpack-plugin": "^0.1.2",
     "bindings": "^1.5.0",
-    "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
     "boost-lib": "^0.11.3",
     "cfonts": "^1.1.3",

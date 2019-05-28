@@ -53,6 +53,17 @@ Dashboard.prototype.init = function(){
 	t.initTradeList();
 	t.initPosList();
 	t.initBoxInfo();
+
+	t.screen.append(t.accountList);
+	t.screen.append(t.mdList);
+	t.screen.append(t.posList);
+	t.screen.append(t.pnl);
+	t.screen.append(t.orderList);
+	t.screen.append(t.tradeList);
+	t.screen.append(t.boxInfo);
+	t.screen.render()
+	t.accountList.focus();
+
 }
 
 Dashboard.prototype.initAccountList = function(){
@@ -99,11 +110,6 @@ Dashboard.prototype.initAccountList = function(){
 			data:[]
 		}
 	});
-
-
-
-	t.screen.append(t.accountList);
-	t.accountList.focus();
 }
 
 Dashboard.prototype.initMdList = function(){
@@ -145,8 +151,6 @@ Dashboard.prototype.initMdList = function(){
 			data:[]
 		}
 	});
-
-	t.screen.append(t.mdList);
 }
 
 Dashboard.prototype.initPosList = function(){
@@ -188,7 +192,6 @@ Dashboard.prototype.initPosList = function(){
 			data:[]
 		}
 	});
-	t.screen.append(t.posList);
 }
 
 Dashboard.prototype.initPnlList = function(){
@@ -221,7 +224,6 @@ Dashboard.prototype.initPnlList = function(){
 			}
 		}
 	});
-	t.screen.append(t.pnl);
 }
 
 Dashboard.prototype.initOrderList = function(){
@@ -261,8 +263,6 @@ Dashboard.prototype.initOrderList = function(){
 			data:[]
 		}
 	});
-	t.screen.append(t.orderList);
-
 }
 
 Dashboard.prototype.initTradeList = function(){
@@ -300,8 +300,6 @@ Dashboard.prototype.initTradeList = function(){
 			data:[]
 		}
 	});
-
-	t.screen.append(t.tradeList);
 }
 
 Dashboard.prototype.initBoxInfo = function() {
@@ -317,9 +315,7 @@ Dashboard.prototype.initBoxInfo = function() {
 		style: {
 			fg: 'white'
 		}
-	});
-	
-	t.screen.append(t.boxInfo);
+	});	
 }
 
 Dashboard.prototype.bindEvent = function(){
@@ -330,7 +326,8 @@ Dashboard.prototype.bindEvent = function(){
 		(key.name === 'left') ? i-- : i++;
 		if (i === 6) i = 0;
 		if (i === -1) i = 5;
-		t[boards[i]].focus();
+
+		this[boards[i]].focus();
 		t[boards[i]].style.border.fg = 'blue';
 		if (key.name === 'left') {
 			if (i == 5) t[boards[0]].style.border.fg = 'white';
@@ -353,7 +350,7 @@ Dashboard.prototype.render = function(){
 	// async refresh of the ui
 	setInterval(function () {
 		t.screen.render();
-	}, 300);
+	}, 1000);
 }
 
 Dashboard.prototype.fresh = function(){
@@ -473,6 +470,6 @@ Dashboard.prototype.calcuHeaderWidth = (target, wish) => {
 
 const accountDashboard = new Dashboard();
 accountDashboard.init();
-accountDashboard.bindEvent();
 accountDashboard.render();
+accountDashboard.bindEvent();
 accountDashboard.getData();
