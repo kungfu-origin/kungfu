@@ -23,8 +23,15 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 endif(UNIX)
 if(APPLE)
+    SET(KFC_INSTALL_RPATH
+            "@executable_path/../Resources/kfc"
+            "@loader_path"
+            "@loader_path/../../kfc"
+            )
     SET(CMAKE_MACOSX_RPATH ON)
-endif(APPLE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
+endif()
 if(WIN32)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
