@@ -1,139 +1,421 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
-const screen = blessed.screen()
-const utils = require('../public/utils');
-const { getAccountList, getAccountOrder, getAccountTrade } = require('../../renderer/io/account');
+import { getAccountList, getAccountPos } from '@/io/account.js';
+import * as utils from '../public/utils';
 
-var globalData = {
-    account: {
-        currentAccount: {}
-    }
+// 定义全局变量
+const WIDTH_LEFT_PANEL = 60;
+
+//定义Dashboard
+function Dashboard(){
+	const t = this;
+	t.screen = blessed.screen({
+		smartCSR: true,
+		fullUnicode: true
+	});
+
+	t.screen.title = 'Account Dashboard';
+	t.accountList = null;
+	t.posList = null;
+	t.mdList = null;
+	t.pnl = null;
+	t.tradeList = null;
+	t.orderList = null;
+	t.boxInfo = null;
+
+	t.accountListHeaders = [' Account', ' Source', ' Status', ' Accum',' AccumRt',' Total', ' Avail'];
+	t.mdListHeaders = [' Source', ' Account', ' Status'];
+	t.posListHeaders = [' Ticker', ' D', ' Yest', ' Total', ' UnRealPnl']
+	t.orderListHeaders = [' UpdateTime', ' Ticker', ' Side', ' Offset', 'Price', ' Done/Not', ' Status', ' Strat']
+
+	t.globalData = {
+		accountData: {},
+		posData: [],
+		mdData: {},
+		pnlData: [],
+		tradeData: [],
+		orderData: []
+	};
+
+	t.currentAccount = '15040900'
+
+}
+
+Dashboard.prototype.init = function(){
+	const t = this;
+	t.initAccountList();
+	t.initMdList();
+	t.initOrderList();
+	t.initPnlList();
+	t.initTradeList();
+	t.initPosList();
+	t.initBoxInfo();
+}
+
+Dashboard.prototype.initAccountList = function(){
+	const t = this;
+	t.accountList = contrib.table({
+		label: ' Trading Engines ',
+		top: '0',
+		left: '0',
+		width: WIDTH_LEFT_PANEL + '%',
+		height: '33.33%',
+		padding: 0,
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		border: {
+			type: 'line'
+		},
+		keys: true,
+		autoCommandKeys: true,
+		tags: true,
+		fg: 'white',
+		style: {
+			selected: {
+				bg: 'blue',
+				fg: 'white'
+			},
+			scrollbar: {
+				bg: 'blue',
+				fg: 'black'
+			},
+			fg: 'white',
+			border: {
+				fg: 'blue'
+			},
+			header: {
+				fg: 'blue'
+			}
+		},
+		columnSpacing: 5, //in chars
+		columnWidth: t.calcuHeaderWidth(t.accountListHeaders, [8]),
+		data: {
+			headers: t.accountListHeaders, 
+			data:[]
+		}
+	});
+
+
+
+	t.screen.append(t.accountList);
+	t.accountList.focus();
+}
+
+Dashboard.prototype.initMdList = function(){
+	const t = this;
+	t.mdList = contrib.table({
+		label: ' Market Engines ',
+		top: '33.33%',
+		left: '0',
+		width: WIDTH_LEFT_PANEL / 2 + '%',
+		height: '23.66%',
+		padding: 0,
+		align: 'left',
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		border: {
+			type: 'line'
+		},
+		keys: true,
+		autoCommandKeys: true,
+		tags: true,
+		fg: 'white',
+		interactive: false,
+		style: {
+			fg: 'white',
+			border: {
+			fg: 'white'
+			},
+			scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+			}
+		},
+		columnSpacing: 5, //in chars
+		columnWidth: t.calcuHeaderWidth(t.mdListHeaders, [0, 10]),
+		data: {
+			headers: t.mdListHeaders, 
+			data:[]
+		}
+	});
+
+	t.screen.append(t.mdList);
+}
+
+Dashboard.prototype.initPosList = function(){
+	const t = this;
+	t.posList = contrib.table({
+		label: ' Positions ',
+		top: '0',
+		left: WIDTH_LEFT_PANEL + '%',
+		width: 100 - WIDTH_LEFT_PANEL + '%',
+		height: '56%',
+		padding: 0,
+		scrollable: true,
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		keys: true,
+		fg: 'white',
+		interactive: false,
+		autoCommandKeys: true,
+		tags: true,
+		border: {
+			type: 'line'
+		},
+		style: {
+			fg: 'white',
+			border: {
+				fg: 'white'
+			},
+			scrollbar: {
+				bg: 'blue',
+				fg: 'black'
+			}
+		},
+		columnSpacing: 4, //in chars
+		columnWidth: t.calcuHeaderWidth(t.posListHeaders, [0, 2, 6, 6, 10]),
+		data: {
+			headers: t.posListHeaders, 
+			data:[]
+		}
+	});
+	t.screen.append(t.posList);
+}
+
+Dashboard.prototype.initPnlList = function(){
+	const t = this;
+	t.pnl = blessed.list({
+		label: ' Pnl ',
+		top: '33.33%',
+		left: WIDTH_LEFT_PANEL / 2 + '%',
+		width: WIDTH_LEFT_PANEL / 2 + '%',
+		height: '23.66%',
+		padding: 0,
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		border: {
+			type: 'line'
+		},
+		keys: true,
+		autoCommandKeys: true,
+		tags: true,
+		style: {
+			fg: 'white',
+			border: {
+			fg: 'white'
+			},
+			scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+			}
+		}
+	});
+	t.screen.append(t.pnl);
+}
+
+Dashboard.prototype.initOrderList = function(){
+	const t = this;
+	t.orderList = contrib.table({
+		label: ' Current Orders ',
+		top: '56%',
+		width: WIDTH_LEFT_PANEL + '%',
+		height: '40%',
+		scrollable: true,
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		keys: true,
+		autoCommandKeys: true,
+		tags: true,
+		border: {
+			type: 'line'
+		},
+		style: {
+			fg: 'white',
+			border: {
+			fg: 'white'
+			},
+			scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+			}
+		},
+		columnSpacing: 3, //in chars
+		columnWidth: t.calcuHeaderWidth(t.orderListHeaders, []),
+		data: {
+			headers: t.orderListHeaders, 
+			data:[]
+		}
+	});
+	t.screen.append(t.orderList);
+
+}
+
+Dashboard.prototype.initTradeList = function(){
+	const t = this;
+	t.tradeList = blessed.list({
+		label: ' Today Trades ',
+		top: '56%',
+		left: WIDTH_LEFT_PANEL + '%',
+		width: 100 - WIDTH_LEFT_PANEL + '%',
+		height: '40%',
+		scrollbar: {
+			ch: ' ',
+			inverse: false
+		},
+		keys: true,
+		autoCommandKeys: true,
+		tags: true,
+		border: {
+			type: 'line'
+		},
+		style: {
+			fg: 'white',
+			border: {
+			fg: 'white'
+			},
+			scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+			}
+		}
+	});
+
+	t.screen.append(t.tradeList);
+}
+
+Dashboard.prototype.initBoxInfo = function() {
+	const t = this;
+	t.boxInfo = blessed.text({
+		content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit{|} {cyan-fg}{bold}',
+		left: '0%',
+		top: '95%',
+		width: '100%',
+		height: '6%',
+		valign: 'middle',
+		tags: true,
+		style: {
+			fg: 'white'
+		}
+	});
+	
+	t.screen.append(t.boxInfo);
 }
 
 
-//create layout and widgets
-const grid = new contrib.grid({rows: 12, cols: 12, screen: screen})
+Dashboard.prototype.bindEvent = function(){
+	const t = this;
+	let i = 0;
+	let boards = ['accountList', 'posList', 'mdList', 'pnl', 'tradeList', 'orderList'];
+	t.screen.key(['left', 'right'], (ch, key) => {
+		(key.name === 'left') ? i-- : i++;
+		if (i === 6) i = 0;
+		if (i === -1) i = 5;
+		t[boards[i]].focus();
+		t[boards[i]].style.border.fg = 'blue';
+		if (key.name === 'left') {
+			if (i == 5) t[boards[0]].style.border.fg = 'white';
+			else t[boards[i + 1]].style.border.fg = 'white';
+		} else {
+			if (i == 0) t[boards[5]].style.border.fg = 'white';
+			else t[boards[i - 1]].style.border.fg = 'white';
+		}
+	});
 
-const accountTable = grid.set(0, 0, 4, 6, contrib.table,      {
-        keys: true
-        , fg: 'white'
-        , selectedFg: 'white'
-        , selectedBg: 'blue'
-        , interactive: true
-        , label: 'Active Processes'
-        , width: '30%'
-        , height: '30%'
-        , border: {type: "line", fg: "cyan"}
-        , columnSpacing: 10 //in chars
-        , columnWidth: [16, 12, 12] /*in chars*/ })
-
-const buildTdAccountList = (table) => {
-    getAccountList().then(list => {
-        const tableData = list.map(l => [l.account_id.toAccountId(), l.source_name, !!l.receive_md ? '✔' : ''])
-        table.setData({headers: ['Account', 'Source', 'Md'], data: tableData})
-        table.focus()
-        screen.render()
-    })
+	t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+		t.screen.destroy();
+		process.exit(0);
+	});	
 }
 
-buildTdAccountList(accountTable)
-
-
-const mdTable = grid.set(4, 0, 4, 3, contrib.table, {
-    keys: true
-    , fg: 'white'
-    , selectedFg: 'white'
-    , selectedBg: 'blue'
-    , label: 'Active Processes'
-    , width: '30%'
-    , height: '30%'
-    , border: {type: "line", fg: "cyan"}
-    , columnSpacing: 10 //in chars
-    , columnWidth: [8, 20] /*in chars*/ })
-
-const buildMdAccountList = (table) => {
-    getAccountList().then(list => {
-        const tableData = list.filter(l => !!l.receive_md).map(l => [l.source_name, l.account_id.toAccountId()])
-        table.setData({headers: ['Source', 'Account'], data: tableData})
-        screen.render()
-    })
+Dashboard.prototype.render = function(){
+	const t = this;
+	t.screen.render();
+	// async refresh of the ui
+	setInterval(function () {
+		t.screen.render();
+	}, 300);
 }
 
-buildMdAccountList(mdTable)
+Dashboard.prototype.fresh = function(){
+	const t = this;
 
+	const accountData = Object.values(t.globalData.accountData || {});
+	t.accountList.setData({
+		headers: t.accountListHeaders, 
+		data: accountData.map(a => [a.account_id.toAccountId(), a.source_name, a.status, a.accumulated_pnl, a.accumulated_pnl_ratio, a.total, a.avail])
+	});
 
+	const mdData = Object.values(t.globalData.mdData || {})
+	t.mdList.setData({
+		headers: t.mdListHeaders,
+		data: mdData.map(m => [m.source_name, m.account_id.toAccountId(), m.status])
+	});
 
+	const posData = Object.values(t.globalData.posData || {})
+	t.posList.setData({
+		headers: t.posListHeaders, 
+		data: posData.map(p => [p.instrument_id, p.direction === '0' ? 'L' : 'S', p.yesterday_volume, p.volume, new Number(p.unrealized_pnl).toFixed(2)])
+	});
 
-const pnl = grid.set(4, 3, 4, 3, contrib.sparkline, {
-    label: 'pnl (daily)', 
-    tags: true, 
-    style: { fg: 'blue', titleFg: 'white' }
-})
+	// t.orderList.setData({
+	// 	// headers: ['Account', 'Source', 'status'], 
+	// 	data: t.globalData.orderData
+	// });
 
-const orderTable = grid.set(8, 0, 4, 6, contrib.table, {
-    key: true,
-    fg: 'green',
-    label: 'orders unfinished',
-    columnSpacing: 1,
-    columnWidth: [24, 10, 10]
-})
-
-// const dataOrder = (item) => {
-//     return Object.freeze({
-//         id: item.order_id.toString() + '_' + item.account_id.toString(),
-//         insertTime: item.insert_time && moment(item.insert_time/1000000).format("YYYY-MM-DD HH:mm:ss"),
-//         instrumentId: item.instrument_id,
-//         side: sideName[item.side] ? sideName[item.side] : '--',
-//         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-//         limitPrice: item.limit_price,
-//         volumeTraded: item.volume_traded + "/" + (item.volume),
-//         statusName: orderStatus[item.status],
-//         status: item.status,
-//         clientId: item.client_id,
-//         accountId: item.account_id,
-//         orderId: item.order_id,
-//         exchangeId: item.exchange_id
-//     })
-// };
-
-
-const buildOrderTable = (table, accountId) => {
-    getAccountOrder(accountId, {}, '20190527').then(list => {
-        console.log(list)
-        if(!list.length) return;
-        const tableData = list.slice(0, 10).map(l => Object.values(dataOrder(l)))
-        table.setData({headers: ['id', 'insertTime', 'instrumentId', 'side', 'offset', 'limitPrice', 'volumeTraded', 'statusName', 'clientId', 'orderId', 'exchangeId'], data: tableData})
-        screen.render()
-    })
+	// t.tradeList.setData({
+	// 	// headers: ['Account', 'Source', 'status'], 
+	// 	data: t.globalData.tradeData
+	// });
 }
 
-buildOrderTable(orderTable, '15040900')
+Dashboard.prototype.getData = function(){
+	const  t = this;
+	const getAccountListPromise = getAccountList().then(list => {
+		//td
+		list.forEach(l => {
+			const accountId = l.account_id.toAccountId();
+			if(t.globalData.accountData[accountId]) t.globalData.accountData[accountId] = {...t.globalData.ccountData[accountId], ...l}
+			else t.globalData.accountData[accountId] = {...l, status: '--', accumulated_pnl : '--', accumulated_pnl_ratio: '--', 'total': '--', 'avail': '--'}
+		});
+
+		//md
+		list.filter(l => !!l.receive_md).forEach(l => {
+			const source = l.source_name;
+			if(t.globalData.mdData[source]) t.globalData.mdData[source] = {...t.globalData.mdData[source], ...l}
+			else t.globalData.mdData[source] = {...l, status: '--'}
+		})
+	})
+
+	//pos
+	const getPosPromise = getAccountPos(t.currentAccount, {}).then(pos => {
+		t.globalData.posData = pos || {}
+	})
+
+	Promise.all([getAccountListPromise, getPosPromise]).then(() => {
+		t.fresh()
+	})
+}
+
+Dashboard.prototype.calcuHeaderWidth = (target, wish) => {
+	return target.map((t, i) => {
+		if(t.length < (wish[i] || 0)) return wish[i]
+		else return t.length
+	})
+}
 
 
-
-
-const posList = grid.set(0, 6, 8, 6, contrib.table, {
-    key: true,
-    fg: 'green',
-    label: 'position',
-    columnSpacing: 1,
-    columnWidth: [24, 10, 10]
-})
-
-
-
-const tradeList = grid.set(8, 6, 4, 6, contrib.table, {
-    key: true,
-    fg: 'green',
-    label: 'trades today',
-    columnSpacing: 1,
-    columnWidth: [24, 10, 10]
-})
-
-screen.render()
-
-
-screen.key(['escape', 'q', 'C-c'], function(ch, key) {
-    return process.exit(0);
-  });
-  
+const accountDashboard = new Dashboard();
+accountDashboard.init();
+accountDashboard.bindEvent();
+accountDashboard.render();
+accountDashboard.getData();

@@ -67,7 +67,7 @@ export const getAccountAsset = (accountId) => {
  * 
  */
 export const getAccountPos = (accountId, {instrumentId, type}) => {
-    return runSelectDB(buildAccountAssetsDBPath(accountId), (`SELECT * FROM position where instrument_id LIKE '%${instrumentId}%'` + (type ? ` AND instrument_type = ${type}` : ``) + ' ORDER BY instrument_id'))
+    return runSelectDB(buildAccountAssetsDBPath(accountId), (`SELECT * FROM position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type || ''}` : ``) + ' ORDER BY instrument_id'))
 }
 /**
  * 获取账户成交情况

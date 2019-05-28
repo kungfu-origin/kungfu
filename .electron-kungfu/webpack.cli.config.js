@@ -56,6 +56,12 @@ let mainConfig = {
   }
 }
 
+mainConfig.plugins.push(
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': '"cli"',
+  })
+)
+
 /**
  * Adjust mainConfig for development settings
  */

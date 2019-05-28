@@ -28,6 +28,7 @@
     "build:engine": "yarn run build:cpp && yarn run build:kfc",
     "dev:kfc": "pipenv run python python/devrun.py",
     "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
+    "dev:cli": "yarn run copy && node .electron-kungfu/dev-cli.js",
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
