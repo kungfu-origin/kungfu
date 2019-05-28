@@ -106,11 +106,11 @@ export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
     const filterDate = dateRange ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
-        const sql = `WHERE (order_id LIKE '%${id}%' OR instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+        const sql = `WHERE (order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
         ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` + 
         (dateRange ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
         runSelectDB(buildAccountOrdersDBPath(accountId), `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
-            resolve({data: orders})
+            resolve(orders)
         }).catch(err => {
             reject(err)
         })

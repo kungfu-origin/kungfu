@@ -81,7 +81,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
     return new Promise((resolve, reject) => {
         let tableData = []
         getStrategyAccounts(strategyId).then(accounts => {
-            if(accounts.length == 0) resolve({count: 0, data: []});
+            if(accounts.length == 0) resolve([]);
             const promises = accounts.map(item => 
                     (runSelectDB(buildAccountOrdersDBPath(
                         item.account_id), 
@@ -95,7 +95,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
             Promise.all(promises).then(() => {
                 //对整体排序，默认的只是账户1排序后面跟着账户2的排序，需要的是整体的排序
                 tableData.sort((a, b) => b.insert_time - a.insert_time)
-                resolve({count: 0, data: tableData})
+                resolve(tableData)
             })
         }).catch(err => {
             reject(err)
@@ -126,7 +126,7 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) =
         getStrategyAccounts(strategyId).then(accounts => {
             let {length} = accounts
             let flag = 0
-            if(length == 0) resolve({count: 0, data: []})
+            if(length == 0) resolve([])
             accounts.map(item => {
                 runSelectDB(buildAccountTradesDBPath(item.account_id), 
                 `SELECT rowId, * FROM trade WHERE client_id = '${strategyId}'` + 
@@ -143,7 +143,7 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) =
                     if(length != flag) return
                     //按时间排序
                     tableData.sort((a, b) => b.trade_time - a.trade_time)
-                    resolve({count: 0, data: tableData})
+                    resolve(tableData)
                 })
             })
         }).catch(err => {

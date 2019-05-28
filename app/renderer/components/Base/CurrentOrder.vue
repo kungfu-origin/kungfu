@@ -202,12 +202,12 @@ export default {
                 id: t.filter.id,
                 dateRange
             }, t.calendar.trading_day).then(res => {
-                if(!res.data) return;
+                if(!res) return;
                 t.$saveFile({
                     title: '委托记录',
                 }).then(filename => {
                     if(!filename) return;
-                    writeCSV(filename, res.data)
+                    writeCSV(filename, res)
                 })
             })
         },
@@ -301,11 +301,11 @@ export default {
             t.tableData = []
             return t.getDataMethod(t.currentId, t.filter, t.calendar.trading_day)
             .then(res => {
-                if(!res.data) {
+                if(!res) {
                     t.tableData = Object.freeze([]);                    
                     return;
                 }
-                const {tableData, orderDataByKey}  = t.dealData(res.data);
+                const {tableData, orderDataByKey}  = t.dealData(res);
                 t.tableData = Object.freeze(tableData);
                 t.orderDataByKey = orderDataByKey;  
             }).catch(err => {

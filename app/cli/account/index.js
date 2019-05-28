@@ -1,7 +1,9 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
-import { getAccountList, getAccountPos } from '@/io/account.js';
-import * as utils from '../public/utils';
+const moment = require('moment');
+import { offsetName, orderStatus, sideName, posDirection } from "../public/utils";
+import { getAccountList, getAccountPos, getAccountOrder } from '@/io/account.js';
+const colors = require('colors')
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
@@ -23,10 +25,11 @@ function Dashboard(){
 	t.orderList = null;
 	t.boxInfo = null;
 
-	t.accountListHeaders = [' Account', ' Source', ' Status', ' Accum',' AccumRt',' Total', ' Avail'];
-	t.mdListHeaders = [' Source', ' Account', ' Status'];
-	t.posListHeaders = [' Ticker', ' D', ' Yest', ' Total', ' UnRealPnl']
-	t.orderListHeaders = [' UpdateTime', ' Ticker', ' Side', ' Offset', 'Price', ' Done/Not', ' Status', ' Strat']
+	t.accountListHeaders = [' Account', ' Source', ' State', ' Accum',' AccumRt',' Total', ' Avail'];
+	t.mdListHeaders = [' Source', ' Account', ' State'];
+	t.posListHeaders = [' Ticker', ' Dir', ' Yest', ' Total', ' UnRealPnl']
+	t.orderListHeaders = [' OrderTime', ' Ticker', ' Side', ' Offset', ' Price', ' Filled/Not', ' State', ' Str']
+	t.tradeListHeaders = [' UpdateTime', ' Ticker', ' Side', ' Offset', ' Price', ' Vol', ' Strat']
 
 	t.globalData = {
 		accountData: {},
@@ -179,7 +182,7 @@ Dashboard.prototype.initPosList = function(){
 			}
 		},
 		columnSpacing: 4, //in chars
-		columnWidth: t.calcuHeaderWidth(t.posListHeaders, [0, 2, 6, 6, 10]),
+		columnWidth: t.calcuHeaderWidth(t.posListHeaders, [0, 4, 6, 6, 10]),
 		data: {
 			headers: t.posListHeaders, 
 			data:[]
@@ -226,7 +229,7 @@ Dashboard.prototype.initOrderList = function(){
 	t.orderList = contrib.table({
 		label: ' Current Orders ',
 		top: '56%',
-		width: WIDTH_LEFT_PANEL + '%',
+		width: WIDTH_LEFT_PANEL - 5 + '%',
 		height: '40%',
 		scrollable: true,
 		scrollbar: {
@@ -236,6 +239,8 @@ Dashboard.prototype.initOrderList = function(){
 		keys: true,
 		autoCommandKeys: true,
 		tags: true,
+		interactive: false,
+		fg: 'white',
 		border: {
 			type: 'line'
 		},
@@ -249,8 +254,8 @@ Dashboard.prototype.initOrderList = function(){
 			fg: 'black'
 			}
 		},
-		columnSpacing: 3, //in chars
-		columnWidth: t.calcuHeaderWidth(t.orderListHeaders, []),
+		columnSpacing: 2, //in chars
+		columnWidth: t.calcuHeaderWidth(t.orderListHeaders, [0,0,0,0,0,0,8]),
 		data: {
 			headers: t.orderListHeaders, 
 			data:[]
@@ -262,11 +267,11 @@ Dashboard.prototype.initOrderList = function(){
 
 Dashboard.prototype.initTradeList = function(){
 	const t = this;
-	t.tradeList = blessed.list({
+	t.tradeList = contrib.table({
 		label: ' Today Trades ',
 		top: '56%',
-		left: WIDTH_LEFT_PANEL + '%',
-		width: 100 - WIDTH_LEFT_PANEL + '%',
+		left: WIDTH_LEFT_PANEL - 5 + '%',
+		width: 100 - WIDTH_LEFT_PANEL + 5 + '%',
 		height: '40%',
 		scrollbar: {
 			ch: ' ',
@@ -287,6 +292,12 @@ Dashboard.prototype.initTradeList = function(){
 			bg: 'blue',
 			fg: 'black'
 			}
+		},
+		columnSpacing: 2, //in chars
+		columnWidth: t.calcuHeaderWidth(t.tradeListHeaders, []),
+		data: {
+			headers: t.tradeListHeaders, 
+			data:[]
 		}
 	});
 
@@ -310,7 +321,6 @@ Dashboard.prototype.initBoxInfo = function() {
 	
 	t.screen.append(t.boxInfo);
 }
-
 
 Dashboard.prototype.bindEvent = function(){
 	const t = this;
@@ -364,13 +374,54 @@ Dashboard.prototype.fresh = function(){
 	const posData = Object.values(t.globalData.posData || {})
 	t.posList.setData({
 		headers: t.posListHeaders, 
-		data: posData.map(p => [p.instrument_id, p.direction === '0' ? 'L' : 'S', p.yesterday_volume, p.volume, new Number(p.unrealized_pnl).toFixed(2)])
-	});
+		data: posData.map(p => {
+			let direction = posDirection[p.direction]
+			if(direction === 'L') direction = colors.red(direction);
+			else direction = colors.green(direction);
 
-	// t.orderList.setData({
-	// 	// headers: ['Account', 'Source', 'status'], 
-	// 	data: t.globalData.orderData
-	// });
+			let unRealizedPnl = new Number(p.unrealized_pnl).toFixed(2);
+			if(unRealizedPnl > 0) unRealizedPnl = colors.red(unRealizedPnl)
+			else if(unRealizedPnl < 0) unRealizedPnl = colors.green(unRealizedPnl)
+			else unRealizedPnl = colors.grey(unRealizedPnl)
+			return [
+				p.instrument_id, 
+				direction,
+				p.yesterday_volume, 
+				p.volume, 
+				unRealizedPnl
+			]
+		})
+	});
+	
+	const orderData = t.globalData.orderData
+	t.orderList.setData({
+		headers: t.orderListHeaders,
+		data: orderData.map(o => {
+			let side = sideName[o.side] ? sideName[o.side] : '--';
+			if(side === 'buy') side = colors.red(side);
+			else if(side === 'sell') side = colors.green(side);
+
+			let offset = offsetName[o.offset] ? offsetName[o.offset] : '--';
+			if(offset === 'open') offset = colors.red(offset);
+			else if(offset.indexOf('close') !== -1) offset = colors.green(offset);
+
+			let status = orderStatus[o.status]
+			if([3, 5, 6].indexOf(o.status) !== -1) status = colors.green(status);
+			else if(+o.status === 4) status = colors.red(status);
+			else status = colors.grey(status);
+
+			return [
+				o.insert_time && moment(o.insert_time/1000000).format("HH:mm:ss"),
+				o.instrument_id,
+				side,
+				offset,
+				o.limit_price,
+				o.volume_traded + '/' + o.volume_left,
+				status,
+				o.client_id
+			]
+		}),
+	});
 
 	// t.tradeList.setData({
 	// 	// headers: ['Account', 'Source', 'status'], 
@@ -401,7 +452,13 @@ Dashboard.prototype.getData = function(){
 		t.globalData.posData = pos || {}
 	})
 
-	Promise.all([getAccountListPromise, getPosPromise]).then(() => {
+	//order
+	const getOrderPromise = getAccountOrder(t.currentAccount, {}).then(orders => {
+		t.globalData.orderData = orders || {}
+
+	})
+
+	Promise.all([getAccountListPromise, getPosPromise, getOrderPromise]).then(() => {
 		t.fresh()
 	})
 }

@@ -169,12 +169,12 @@ export default {
                 id: t.filter.id,
                 dateRange
             }, t.calendar.trading_day).then(res => {
-                if(!res.data) return;
+                if(!res) return;
                 t.$saveFile({
                     title: '成交记录',
                 }).then(filename => {
                     if(!filename) return;
-                    writeCSV(filename, res.data)
+                    writeCSV(filename, res)
                 })
             })
         },
@@ -207,11 +207,11 @@ export default {
             t.tableData = Object.freeze([])
             //id:用户或者交易id，filter：需要筛选的数据
             return t.getDataMethod(t.currentId, t.filter, t.calendar.trading_day).then(res => {
-                if(!res || !res.data.length) {
+                if(!res || !res.length) {
                     t.tableData = Object.freeze([])
                     return;
                 }
-                t.tableData = Object.freeze(t.dealData(res.data))
+                t.tableData = Object.freeze(t.dealData(res))
             }).finally(() => t.getDataLock = false)
         },
 
