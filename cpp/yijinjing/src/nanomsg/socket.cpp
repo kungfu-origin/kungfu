@@ -135,14 +135,13 @@ nlohmann::json kungfu::yijinjing::nanomsg::request(const std::string &url, const
 
     try
     {
-        std::string req = msg;
-        SPDLOG_DEBUG("request {}", req);
+        SPDLOG_DEBUG("request url {} msg {}", url, msg.dump());
         socket.send_json(msg);
         return socket.recv_json(0);
     }
     catch (std::exception& e)
     {
-        SPDLOG_DEBUG("no response");
+        SPDLOG_ERROR("request error: {} to {} for message {}", e.what(), url, msg.dump());
         nlohmann::json response = {};
         response["msg_type"] = msg["msg_type"];
         response["data"] = {};

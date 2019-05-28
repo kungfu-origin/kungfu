@@ -152,8 +152,8 @@ namespace kungfu
             msg.msg_type = kungfu::MsgType::RspLogin;
             msg.data = rsp;
             std::string js = to_string(msg);
-            SPDLOG_TRACE("sending {} ", js);
             get_rsp_socket()->send(js, 0);
+            SPDLOG_TRACE("login sent {} ", js);
         }
     }
 
