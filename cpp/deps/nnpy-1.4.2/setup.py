@@ -29,4 +29,7 @@ setup(
     setup_requires=["cffi>=1.0.0"],
     cffi_modules=["generate.py:ffi"],
     install_requires=['cffi'],
+    dependency_links=[
+        "https://pypi.tuna.tsinghua.edu.cn/simple"
+    ]
 )

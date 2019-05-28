@@ -7,7 +7,7 @@ a = Analysis(['kungfu\\__main__.py'],
         ('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\py*.pyd', '.'),
         ('..\\build\\cpp\\yijinjing\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.lib', '.'),
         ('..\\build\\cpp\\wingchun\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.lib', '.'),
-        ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.')
+        ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.'),
         ('extensions', 'extensions'),
         ('..\\build\\build_extensions', 'extensions'),
         ('..\\build\\build_extensions', 'extensions'),
