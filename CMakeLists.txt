@@ -23,7 +23,14 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 endif()
 if(APPLE)
+    SET(KFC_INSTALL_RPATH
+        "@executable_path/../Resources/kfc"
+        "@loader_path"
+        "@loader_path/../../kfc"
+    )
     SET(CMAKE_MACOSX_RPATH ON)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
 endif()
 if(WIN32)
     # install boost using binaries from https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/

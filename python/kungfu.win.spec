@@ -1,13 +1,13 @@
 block_cipher = None
 a = Analysis(['kungfu\\__main__.py'],
      pathex=['python'],
-     binaries=[('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.dll', '.'),
-               ('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\py*.pyd', '.'),
-               ('..\\build\\cpp\\yijinjing\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
-               ('..\\build\\cpp\\wingchun\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*', '.'),
-               ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.')
-               ],
+     binaries=[],
      datas=[
+        ('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.dll', '.'),
+        ('..\\build\\' + os.environ['CMAKEBUILDTYPE'] + '\\py*.pyd', '.'),
+        ('..\\build\\cpp\\yijinjing\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.lib', '.'),
+        ('..\\build\\cpp\\wingchun\\src\\' + os.environ['CMAKEBUILDTYPE'] + '\\*.lib', '.'),
+        ('..\\build\\cpp\\deps\\nnpy-1.4.2\\build\\lib*\\*.pyd', '.')
         ('extensions', 'extensions'),
         ('..\\build\\build_extensions', 'extensions'),
         ('..\\build\\build_extensions', 'extensions'),

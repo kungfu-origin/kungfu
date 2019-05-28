@@ -1,6 +1,6 @@
 block_cipher = None
 a = Analysis(['kungfu/__main__.py'],
-     pathex=["python"],
+     pathex=['python'],
      binaries=[],
      datas=[
         ('../build/' + os.environ['CMAKEBUILDTYPE'] + '/*', '.'),
