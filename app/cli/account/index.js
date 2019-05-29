@@ -1,5 +1,4 @@
 const blessed = require('blessed');
-const contrib = require('blessed-contrib');
 const moment = require('moment');
 import { offsetName, orderStatus, sideName, posDirection } from "../public/utils";
 import { getAccountList, getAccountPos, getAccountOrder } from '@/io/account.js';
@@ -10,6 +9,7 @@ const WIDTH_LEFT_PANEL = 60;
 const TABLE_BASE_OPTIONS = {
 	content: '',
 	padding: 0,
+	scrollable: true,
 	scrollbar: {
 		ch: ' ',
 		inverse: false
@@ -22,9 +22,33 @@ const TABLE_BASE_OPTIONS = {
 	autoCommandKeys: true,
 	tags: true,
 	noCellBorders: true,
-	fg: 'white',
+	mouse: true,
 	rows: [],
-	columnSpacing: 5, //in chars
+	items: [],
+	style: {
+		fg: 'white',
+		focus: {
+			border: {
+				fg: 'blue',
+			}
+		},
+		scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+		},
+		// border: {
+		// 	fg: 'white'
+		// },
+		cell: {
+			selected: {
+				bg: 'blue',
+				fg: 'white'
+			}
+		},
+		header: {
+			fg: 'grey'
+		}	
+	}
 }
 
 
@@ -46,10 +70,10 @@ function Dashboard(){
 	t.boxInfo = null;
 
 	t.accountListHeaders = ['Account', 'Source', 'State', 'Accum',' AcumRt','Total', 'Avail'];
-	t.mdListHeaders = [' Source', ' Account', ' State'];
-	t.posListHeaders = [' Ticker', ' Dir', ' Yest', ' Total', ' UnRealPnl']
-	t.orderListHeaders = [' OrderTime', ' Ticker', ' Side', ' Offset', ' Price', ' Filled/Not', ' State', ' Str']
-	t.tradeListHeaders = [' UpdateTime', ' Ticker', ' Side', ' Offset', ' Price', ' Vol', ' Strat']
+	t.mdListHeaders = ['Source', 'Account', 'State'];
+	t.posListHeaders = ['Ticker', 'Dir', 'Yest', 'Total', ' UnRealPnl']
+	t.orderListHeaders = ['OrderTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'State', 'Str']
+	t.tradeListHeaders = ['TradeTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol', 'Strat']
 
 	t.globalData = {
 		accountData: {},
@@ -88,6 +112,7 @@ Dashboard.prototype.init = function(){
 Dashboard.prototype.initAccountList = function(){
 	const t = this;
 	t.accountList = blessed.listtable({
+		...TABLE_BASE_OPTIONS,
 		parent: t.screen,
 		label: ' Trading Engines ',
 		top: '0',
@@ -95,30 +120,16 @@ Dashboard.prototype.initAccountList = function(){
 		width: WIDTH_LEFT_PANEL + '%',
 		height: '33.33%',
 		style: {
-			selected: {
-				bg: 'blue',
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-			fg: 'white',
-			border: {
-				fg: 'blue'
-			},
-			header: {
-				fg: 'grey',
-			}
-		},
-		// columnWidth: t.calcuHeaderWidth(t.accountListHeaders, [8]),
-		...TABLE_BASE_OPTIONS
+			...TABLE_BASE_OPTIONS['style'],
+		}
 	});
+
 }
 
 Dashboard.prototype.initMdList = function(){
 	const t = this;
 	t.mdList = blessed.listtable({
+		...TABLE_BASE_OPTIONS,
 		label: ' Market Engines ',
 		parent: t.screen,
 		top: '33.33%',
@@ -126,26 +137,15 @@ Dashboard.prototype.initMdList = function(){
 		width: WIDTH_LEFT_PANEL / 2 + '%',
 		height: '23.66%',
 		style: {
-			fg: 'white',
-			border: {
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-			header: {
-				fg: 'grey',
-			}
-		},
-		// columnWidth: t.calcuHeaderWidth(t.mdListHeaders, [0, 10]),
-		...TABLE_BASE_OPTIONS
+			...TABLE_BASE_OPTIONS['style'],
+		}
 	});
 }
 
 Dashboard.prototype.initPosList = function(){
 	const t = this;
 	t.posList = blessed.listtable({
+		...TABLE_BASE_OPTIONS,
 		label: ' Positions ',
 		parent: t.screen,
 		content: '',
@@ -154,20 +154,8 @@ Dashboard.prototype.initPosList = function(){
 		width: 100 - WIDTH_LEFT_PANEL + '%',
 		height: '56%',
 		style: {
-			fg: 'white',
-			border: {
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-			header: {
-				fg: 'grey',
-			}
-		},
-		// columnWidth: t.calcuHeaderWidth(t.posListHeaders, [0, 4, 6, 6, 10])
-		...TABLE_BASE_OPTIONS
+			...TABLE_BASE_OPTIONS['style'],
+		}
 	});
 }
 
@@ -193,15 +181,7 @@ Dashboard.prototype.initPnlList = function(){
 		autoCommandKeys: true,
 		tags: true,
 		style: {
-			fg: 'white',
-			border: {
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-
+			...TABLE_BASE_OPTIONS['style'],			
 		}
 	});
 }
@@ -209,33 +189,22 @@ Dashboard.prototype.initPnlList = function(){
 Dashboard.prototype.initOrderList = function(){
 	const t = this;
 	t.orderList = blessed.listtable({
+		...TABLE_BASE_OPTIONS,
 		label: ' Current Orders ',
 		parent: t.screen,
 		top: '56%',
 		width: WIDTH_LEFT_PANEL - 5 + '%',
 		height: '40%',
 		style: {
-			fg: 'white',
-			border: {
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-			header: {
-				fg: 'grey',
-			}
-		},
-		// columnSpacing: 2, //in chars
-		// columnWidth: t.calcuHeaderWidth(t.orderListHeaders, [0,0,0,0,0,0,8]),
-		...TABLE_BASE_OPTIONS
+			...TABLE_BASE_OPTIONS['style'],
+		}
 	});
 }
 
 Dashboard.prototype.initTradeList = function(){
 	const t = this;
 	t.tradeList = blessed.listtable({
+		...TABLE_BASE_OPTIONS,
 		label: ' Today Trades ',
 		parent: t.screen,
 		top: '56%',
@@ -243,22 +212,8 @@ Dashboard.prototype.initTradeList = function(){
 		width: 100 - WIDTH_LEFT_PANEL + 5 + '%',
 		height: '40%',
 		style: {
-			fg: 'white',
-			border: {
-				fg: 'white'
-			},
-			scrollbar: {
-				bg: 'blue',
-				fg: 'black'
-			},
-			header: {
-				fg: 'grey',
-			}
-		},
-		rows: [],
-		// columnSpacing: 2, //in chars
-		// columnWidth: t.calcuHeaderWidth(t.tradeListHeaders, []),
-		...TABLE_BASE_OPTIONS
+			...TABLE_BASE_OPTIONS['style'],
+		}
 	});
 }
 
@@ -274,7 +229,7 @@ Dashboard.prototype.initBoxInfo = function() {
 		valign: 'middle',
 		tags: true,
 		style: {
-			fg: 'white'
+			...TABLE_BASE_OPTIONS['style'],			
 		}
 	});	
 }
@@ -288,14 +243,6 @@ Dashboard.prototype.bindEvent = function(){
 		if (i === 6) i = 0;
 		if (i === -1) i = 5;
 		t[boards[i]].focus();
-		t[boards[i]].style.border.fg = 'blue';
-		if (key.name === 'left') {
-			if (i == 5) t[boards[0]].style.border.fg = 'white';
-			else t[boards[i + 1]].style.border.fg = 'white';
-		} else {
-			if (i == 0) t[boards[5]].style.border.fg = 'white';
-			else t[boards[i - 1]].style.border.fg = 'white';
-		}
 	});
 
 	t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
@@ -339,13 +286,13 @@ Dashboard.prototype.fresh = function(){
 	const posData = Object.values(t.globalData.posData || {})
 	const posListData = posData.map(p => {
 		let direction = posDirection[p.direction]
-		// if(direction === 'L') direction = colors.red(direction);
-		// else direction = colors.green(direction);
+		if(direction === 'L') direction = colors.red(direction);
+		else direction = colors.green(direction);
 
 		let unRealizedPnl = new Number(p.unrealized_pnl).toFixed(2);
-		// if(unRealizedPnl > 0) unRealizedPnl = colors.red(unRealizedPnl)
-		// else if(unRealizedPnl < 0) unRealizedPnl = colors.green(unRealizedPnl)
-		// else unRealizedPnl = colors.grey(unRealizedPnl)
+		if(unRealizedPnl > 0) unRealizedPnl = colors.red(unRealizedPnl)
+		else if(unRealizedPnl < 0) unRealizedPnl = colors.green(unRealizedPnl)
+		else unRealizedPnl = colors.grey(unRealizedPnl)
 		return [
 			p.instrument_id.toString(),
 			direction.toString(),
@@ -357,37 +304,38 @@ Dashboard.prototype.fresh = function(){
 	posListData.unshift(t.posListHeaders)
 	t.posList.setData(posListData);
 	
-	// const orderData = t.globalData.orderData;
-	// const orderListData = orderData.map(o => {
-	// 	let side = sideName[o.side] ? sideName[o.side] : '--';
-	// 	if(side === 'buy') side = colors.red(side);
-	// 	else if(side === 'sell') side = colors.green(side);
+	const orderData = t.globalData.orderData;
+	const orderListData = orderData.map(o => {
+		let side = sideName[o.side] ? sideName[o.side] : '--';
+		if(side === 'buy') side = colors.red(side);
+		else if(side === 'sell') side = colors.green(side);
 
-	// 	let offset = offsetName[o.offset] ? offsetName[o.offset] : '--';
-	// 	if(offset === 'open') offset = colors.red(offset);
-	// 	else if(offset.indexOf('close') !== -1) offset = colors.green(offset);
+		let offset = offsetName[o.offset] ? offsetName[o.offset] : '--';
+		if(offset === 'open') offset = colors.red(offset);
+		else if(offset.indexOf('close') !== -1) offset = colors.green(offset);
 
-	// 	let status = orderStatus[o.status]
-	// 	if([3, 5, 6].indexOf(o.status) !== -1) status = colors.green(status);
-	// 	else if(+o.status === 4) status = colors.red(status);
-	// 	else status = colors.grey(status);
+		let status = orderStatus[o.status]
+		if([3, 5, 6].indexOf(o.status) !== -1) status = colors.green(status);
+		else if(+o.status === 4) status = colors.red(status);
+		else status = colors.grey(status);
 
-	// 	return [
-	// 		o.insert_time && moment(o.insert_time/1000000).format("HH:mm:ss"),
-	// 		o.instrument_id,
-	// 		side,
-	// 		offset,
-	// 		o.limit_price,
-	// 		o.volume_traded + '/' + o.volume_left,
-	// 		status,
-	// 		o.client_id
-	// 	]
-	// })
-	// orderListData.unshift(t.orderListHeaders);
-	// t.orderList.setData(orderListData);
+		return [
+			o.insert_time && moment(o.insert_time/1000000).format("HH:mm:ss"),
+			o.instrument_id,
+			side,
+			offset,
+			o.limit_price,
+			o.volume_traded + '/' + o.volume_left,
+			status,
+			o.client_id
+		]
+	})
+	orderListData.unshift(t.orderListHeaders);
+	t.orderList.setData(orderListData);
 
-	// const tradeListData = [['Account', 'Source', 'status']]
-	// t.tradeList.setData(tradeListData);
+	const tradeListData = []
+	tradeListData.unshift(t.tradeListHeaders)
+	t.tradeList.setData(tradeListData);
 }
 
 Dashboard.prototype.getData = function(){
