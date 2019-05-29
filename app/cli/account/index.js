@@ -1,5 +1,5 @@
 const blessed = require('blessed');
-const contrib = require('blessed-contrib');
+// const contrib = require('blessed-contrib');
 const moment = require('moment');
 import { offsetName, orderStatus, sideName, posDirection } from "../public/utils";
 import { getAccountList, getAccountPos, getAccountOrder } from '@/io/account.js';
@@ -48,19 +48,19 @@ Dashboard.prototype.init = function(){
 	const t = this;
 	t.initAccountList();
 	t.initMdList();
-	t.initOrderList();
-	t.initPnlList();
-	t.initTradeList();
 	t.initPosList();
-	t.initBoxInfo();
+	t.initPnlList();
+	// t.initOrderList();
+	// t.initTradeList();
+	// t.initBoxInfo();
 
 	t.screen.append(t.accountList);
 	t.screen.append(t.mdList);
 	t.screen.append(t.posList);
 	t.screen.append(t.pnl);
-	t.screen.append(t.orderList);
-	t.screen.append(t.tradeList);
-	t.screen.append(t.boxInfo);
+	// t.screen.append(t.orderList);
+	// t.screen.append(t.tradeList);
+	// t.screen.append(t.boxInfo);
 	t.screen.render()
 	t.accountList.focus();
 
@@ -68,7 +68,7 @@ Dashboard.prototype.init = function(){
 
 Dashboard.prototype.initAccountList = function(){
 	const t = this;
-	t.accountList = contrib.table({
+	t.accountList = blessed.list({
 		label: ' Trading Engines ',
 		top: '0',
 		left: '0',
@@ -114,7 +114,7 @@ Dashboard.prototype.initAccountList = function(){
 
 Dashboard.prototype.initMdList = function(){
 	const t = this;
-	t.mdList = contrib.table({
+	t.mdList = blessed.list({
 		label: ' Market Engines ',
 		top: '33.33%',
 		left: '0',
@@ -155,7 +155,7 @@ Dashboard.prototype.initMdList = function(){
 
 Dashboard.prototype.initPosList = function(){
 	const t = this;
-	t.posList = contrib.table({
+	t.posList = blessed.list({
 		label: ' Positions ',
 		top: '0',
 		left: WIDTH_LEFT_PANEL + '%',
@@ -168,10 +168,10 @@ Dashboard.prototype.initPosList = function(){
 			inverse: false
 		},
 		keys: true,
-		fg: 'white',
-		interactive: false,
 		autoCommandKeys: true,
 		tags: true,
+		interactive: false,
+		fg: 'white',
 		border: {
 			type: 'line'
 		},
@@ -472,4 +472,4 @@ const accountDashboard = new Dashboard();
 accountDashboard.init();
 accountDashboard.render();
 accountDashboard.bindEvent();
-accountDashboard.getData();
+// accountDashboard.getData();
