@@ -41,9 +41,15 @@ bool passive::notice::wait()
     }
     catch(const nanomsg::exception& e)
     {
-        if (e.num() != ETIMEDOUT)
+        switch(e.num())
         {
-            SPDLOG_ERROR("Unexpected nanomsg error: {}", e.what());
+            case EINTR:
+                SPDLOG_DEBUG("Passive notice interrupted");
+                break;
+            case ETIMEDOUT:
+                break;
+            default:
+                SPDLOG_ERROR("Unexpected nanomsg error: [{}] {}", e.num(), e.what());
         }
         return false;
     }
