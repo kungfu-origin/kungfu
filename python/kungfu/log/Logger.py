@@ -2,7 +2,7 @@ import logging
 import os, sys, platform
 import nnpy, pyyjj
 
-LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [pid/tid %(process)6d/%(tid)-6d] [%(filename)s:%(lineno)d#%(funcName)s] %(message)s'
+LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [pid/tid %(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_FILE_DATEEXT_FORMAT = '%Y-%m-%d'
 
