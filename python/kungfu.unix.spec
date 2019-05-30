@@ -4,7 +4,6 @@ a = Analysis(['kungfu/__main__.py'],
      binaries=[],
      datas=[
         ('../build/' + os.environ['CMAKEBUILDTYPE'] + '/*', '.'),
-        ('../build/cpp/deps/nnpy-1.4.2/build/lib*/*.so', '.'),
         ('extensions', 'extensions'),
         ('../build/build_extensions', 'extensions'),
         ('../cpp/yijinjing/include', 'include'),

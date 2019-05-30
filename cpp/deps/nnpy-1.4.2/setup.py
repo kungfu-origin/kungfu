@@ -1,7 +1,7 @@
 from setuptools import setup
-import os
+import os, platform, glob, subprocess, shutil
 
-os.chdir('build/cpp/deps/nnpy-1.4.2')
+os.chdir(os.path.join('build', 'cpp', 'deps', 'nnpy-1.4.2'))
 
 setup(
     name='nnpy',
@@ -33,3 +33,13 @@ setup(
         "https://pypi.tuna.tsinghua.edu.cn/simple"
     ]
 )
+
+nnpy_lib = glob.glob("build/lib*/_nnpy*")[0]
+if platform.system() == 'Darwin':
+    install_name_tool = subprocess.Popen(["install_name_tool", "-add_rpath", "@loader_path", nnpy_lib])
+    install_name_tool.wait()
+    if install_name_tool.returncode != 0:
+        raise Exception("failed to augment rpath for nnpy abi3 lib")
+    else:
+        print("Augmented rpath for nnpy abi3 lib")
+shutil.copy(nnpy_lib, os.path.join('..', '..', '..', os.environ['CMAKEBUILDTYPE']))
