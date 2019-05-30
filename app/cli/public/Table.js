@@ -12,7 +12,7 @@ function Table(){
 Table.prototype.build = function(options) {
 	if(!options.getDataMethod) throw new Error(`${options.label} getDataMethod is required!`)
 	this.getDataMethod = options.getDataMethod;
-	this.afterSelectMethod = options.afterSelectMethod || null;
+	this.afterSelectMethod = options.afterSelectMethod || (() => {});
     this.table = this.init({
         ...options,
 		headers: this.headers,      
@@ -73,6 +73,7 @@ Table.prototype.init = function(options){
 	list.on('focus', (e) => {
 		process.nextTick(() => {
 			const selected = e.selected;
+			if(selected === undefined) return;
 			t.table.selectedIndex = selected;
 			t.afterSelectMethod();
 		})
@@ -83,7 +84,6 @@ Table.prototype.init = function(options){
 	})
 
 	list.on('keypress', (e, key) => {
-		t.table.selectedIndex = t.table.selectedIndex || 0;
 		if(key.name === 'up' && t.table.selectedIndex > 0) {
 			process.nextTick(() => {
 				t.table.selectedIndex = t.table.selectedIndex - 1;
