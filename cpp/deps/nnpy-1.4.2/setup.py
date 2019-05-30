@@ -3,6 +3,9 @@ import os, platform, glob, subprocess, shutil
 
 os.chdir(os.path.join('build', 'cpp', 'deps', 'nnpy-1.4.2'))
 
+for _nnpy in glob.glob("build/lib*/_nnpy*"):
+    os.remove(_nnpy)
+
 setup(
     name='nnpy',
     version='1.4.2',
