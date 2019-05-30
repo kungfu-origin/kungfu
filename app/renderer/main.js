@@ -7,7 +7,7 @@ import * as utils from './assets/js/utils'
 import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip} from 'element-ui';
 import moment from 'moment';
 import App from './App.vue';
-import {listProcessStatus} from '__gUtils/processUtils';
+import {listProcessStatus, startMaster} from '__gUtils/processUtils';
 import {ipcRenderer} from 'electron'
 
 import '@/assets/iconfont/iconfont.js';
@@ -79,7 +79,6 @@ export const startGetProcessStatus = () => {
 
 //start pm2 kungfu master
 process.env.ELECTRON_RUN_AS_NODE = true;
-const {startMaster} = require('__gUtils/processUtils');
 startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {

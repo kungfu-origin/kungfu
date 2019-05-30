@@ -47,3 +47,68 @@ export const posDirection = {
     0: 'L',
     1: 'S' 
 }
+
+/**
+ * @param  {Array} targetList
+ * @param  {} columnWidth
+ * @param  {} pad=2
+ */
+export const parseToString = (targetList, columnWidth, pad=2) => {
+	return targetList.map((l, i) => {
+		l = l + '';
+		const len = l.length;
+		const colWidth = columnWidth[i] || 0
+		const spaceLength = colWidth - len;
+		if(spaceLength <= 0) return l.slice(0, colWidth)
+		else return (l + new Array(spaceLength + 1).join(" "))
+	}).join(new Array(pad + 2).join(" "))
+}
+
+
+export const calcuHeaderWidth = (target, wish=[]) => {
+	return target.map((t, i) => {
+		if(t.length < (wish[i] || 0)) return wish[i]
+		else return t.length
+	})
+}
+
+export const TABLE_BASE_OPTIONS = {
+	content: '',
+	padding: 0,
+	scrollable: true,
+	scrollbar: {
+		ch: ' ',
+		inverse: true
+	},
+	border: {
+		type: 'line'
+	},
+	interactive: true,
+	keys: true,
+	align: 'left',
+	autoCommandKeys: true,
+	tags: true,
+	mouse: true,
+	rows: [],
+	items: [],
+	style: {
+		fg: 'white',
+		focus: {
+			border: {
+				fg: 'blue',
+			}
+		},
+		item: {
+			border: {
+				fg: 'white',
+			}
+		},
+		scrollbar: {
+			bg: 'blue',
+			fg: 'black'
+		},
+		selected: {
+			bold: true,
+		},
+	}
+}

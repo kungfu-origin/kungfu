@@ -29,7 +29,7 @@ const winKill = (tasks) => {
 const unixKill = (tasks) => {
     return fkill(tasks, {
         force: true,
-        tree: platform === 'win'      
+        silent: true     
     })
 }
 
@@ -183,10 +183,11 @@ export const startMaster = async(force) => {
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
     if(!force && master.length) throw new Error('master正在运行！')
-    return startProcess({
+    
+    return KillKfc().finally(() => startProcess({
         "name": processName,
         "args": "master",
-    }, true).catch(err => logger.error(err))
+    }, true).catch(err => logger.error(err)))
 }
 
 //启动md
