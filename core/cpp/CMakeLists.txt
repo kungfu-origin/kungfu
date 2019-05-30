@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY(yijinjing)
+ADD_SUBDIRECTORY(wingchun)

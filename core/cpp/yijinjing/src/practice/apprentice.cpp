@@ -1,0 +1,205 @@
+/*****************************************************************************
+ * Copyright [taurus.ai]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *****************************************************************************/
+
+//
+// Created by Keren Dong on 2019-06-01.
+//
+
+#include <iostream>
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <nlohmann/json.hpp>
+#include <nanomsg/pubsub.h>
+#include <hffix.hpp>
+
+#include <spdlog/spdlog.h>
+#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/time.h>
+
+#include <kungfu/practice/apprentice.h>
+#include <kungfu/practice/os_signal.h>
+
+using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::journal;
+using namespace kungfu::yijinjing::nanomsg;
+using namespace kungfu::practice;
+
+apprentice::apprentice(const std::string &name, bool low_latency) : io_device_(log::setup_log(name), low_latency)
+{
+    handle_os_signals();
+}
+
+void apprentice::setup_output(data::mode m, data::category c, const std::string &group, const std::string &name)
+{
+    if (writer_.get() == nullptr and socket_reply_.get() == nullptr)
+    {
+        SPDLOG_INFO("apprentice output setup to {} {} {} {}", data::get_mode_name(m), data::get_category_name(c), group, name);
+        writer_ = io_device_.open_writer(m, c, group, name);
+        writer_->open_frame(0, MsgType::SessionStart, 0);
+        writer_->close_frame(1);
+        socket_reply_ = io_device_.bind_socket(m, c, group, name, protocol::REPLY, 0);
+        socket_publish_ = io_device_.bind_socket(m, c, group, name, protocol::PUBLISH, 0);
+    } else
+    {
+        SPDLOG_ERROR("apprentice output has already been setup");
+    }
+}
+
+void apprentice::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name)
+{
+    if (reader_.get() == nullptr)
+    {
+        reader_ = io_device_.open_reader(m, c, group, name);
+        reader_->seek_to_time(time::now_in_nano());
+    } else
+    {
+        reader_->subscribe(m, c, group, name, time::now_in_nano());
+    }
+
+    auto url = io_device_.get_url_factory()->make_url_connect(m, c, group, name, protocol::SUBSCRIBE);
+    if (sub_sockets_.find(url) == sub_sockets_.end())
+    {
+        auto socket = io_device_.connect_socket(m, c, group, name, protocol::SUBSCRIBE);
+        sub_sockets_[socket->get_url()] = socket;
+    } else
+    {
+        SPDLOG_WARN("{} has already been subscribed", url);
+    }
+}
+
+void apprentice::add_event_handler(event_handler_ptr handler)
+{
+    SPDLOG_TRACE("apprentice::add_event_handler init {}", handler->get_name());
+    event_handlers_.push_back(handler);
+}
+
+void apprentice::go()
+{
+    try
+    {
+        for (auto handler: event_handlers_)
+        {
+            handler->configure_event_source(shared_from_this());
+        }
+        while (live_)
+        {
+            try_once();
+        }
+        for (auto handler: event_handlers_)
+        {
+            handler->finish();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        SPDLOG_WARN("Unexpected apprentice error: {}", e.what());
+    }
+    writer_->open_frame(0, MsgType::SessionEnd, 0);
+    writer_->close_frame(1);
+    SPDLOG_INFO("apprentice {} finished", io_device_.get_name());
+}
+
+void apprentice::try_once()
+{
+    if (io_device_.get_messenger()->get_observer()->wait_for_notice())
+    {
+        std::string notice = io_device_.get_messenger()->get_observer()->get_notice();
+        nanomsg_json event(notice);
+        for (auto handler : event_handlers_)
+        {
+            handler->handle(event);
+        }
+    }
+
+    if (reader_.get() != nullptr && reader_->current_frame().has_data())
+    {
+        for (auto handler : event_handlers_)
+        {
+            handler->handle(reader_->current_frame());
+        }
+        reader_->seek_next();
+    }
+
+    for (auto element : sub_sockets_)
+    {
+        std::string msg = element.second->recv_msg();
+        nanomsg_json event(msg);
+        for (auto handler : event_handlers_)
+        {
+            handler->handle(event);
+        }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    int64_t n = time::now_in_nano();
+    std::string s = time::strftime(n);
+    int64_t p = time::strptime(s);
+    std::string c = time::strftime(n);
+    std::cout << n << std::endl;
+    std::cout << s << std::endl;
+    std::cout << p << std::endl;
+    std::cout << c << std::endl;
+    std::cout << time::strfnow() << std::endl;
+    log::setup_log("test");
+    SPDLOG_WARN("test");
+    std::string name = "test";
+//    apprentice app(name);
+//
+//    writer_ptr w = app.get_io_device().open_writer(data::mode::LIVE, data::category::MD, "xtp", "xtp");
+//    char *buffer = reinterpret_cast<char *>(w->open_frame(0, 0, 0).address());
+//    int seq_send(1); // Sending sequence number
+//    hffix::message_writer new_order(buffer, buffer + 1024);
+//
+//    new_order.push_back_header("FIX.4.2");
+//
+//    // New Order - Single
+//    new_order.push_back_string(hffix::tag::MsgType, "D");
+//    // Required Standard Header field.
+//    new_order.push_back_string(hffix::tag::SenderCompID, "AAAA");
+//    new_order.push_back_string(hffix::tag::TargetCompID, "BBBB");
+//    new_order.push_back_int(hffix::tag::MsgSeqNum, seq_send++);
+////    new_order.push_back_timestamp (hffix::tag::SendingTime, tsend);
+//    new_order.push_back_string(hffix::tag::ClOrdID, "A1");
+//    // Automated execution.
+//    new_order.push_back_char(hffix::tag::HandlInst, '1');
+//    // Ticker symbol OIH.
+//    new_order.push_back_string(hffix::tag::Symbol, "OIH");
+//    // Buy side.
+//    new_order.push_back_char(hffix::tag::Side, '1');
+////    new_order.push_back_timestamp (hffix::tag::TransactTime, tsend);
+//    // 100 shares.
+//    new_order.push_back_int(hffix::tag::OrderQty, 100);
+//    // Limit order.
+//    new_order.push_back_char(hffix::tag::OrdType, '2');
+//    // Limit price $500.01 = 50001*(10^-2). The push_back_decimal() method
+//    // takes a decimal floating point number of the form mantissa*(10^exponent).
+//    new_order.push_back_decimal(hffix::tag::Price, 50001, -2);
+//    // Good Till Cancel.
+//    new_order.push_back_char(hffix::tag::TimeInForce, '1');
+//
+//    new_order.push_back_trailer(); // write CheckSum.
+//
+//    w->close_frame(new_order.message_end() - buffer);
+//
+//    std::cout << "journal written" << std::endl;
+////    app.subscribe_journal(type::MD, "xtp", "xtp", kungfu::yijinjing::TIME_FROM_FIRST);
+////    app.add_frame_handler(&go_and_die);
+//    std::cout << "apprentice start" << std::endl;
+//    app.go();
+//    std::cout << "done" << std::endl;
+}
