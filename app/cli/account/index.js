@@ -37,7 +37,7 @@ function Dashboard(){
 		cashData: {}
 	};
 
-	t.currentAccount = '15040900'
+	t.currentId = null;
 
 }
 
@@ -63,12 +63,8 @@ Dashboard.prototype.initAccountTable = function(){
 		width: WIDTH_LEFT_PANEL + '%',
 		height: '33.33%',
 		getDataMethod: getAccountList,
+		afterSelectMethod: t.clearTraderData.bind(t),
 		style: {
-			selected: {
-				border: {
-
-				}
-			},
 			cell: {
 				selected: {
 					bold: true,
@@ -91,7 +87,16 @@ Dashboard.prototype.initMdTable = function(){
 		left: '0',
 		width: WIDTH_LEFT_PANEL / 2 + '%',
 		height: '23.66%',
-		getDataMethod: getAccountList
+		getDataMethod: getAccountList,
+		style: {
+			cell: {
+				selected: {
+					bold: true,
+					bg: 'blue',
+					fg: 'white'
+				},
+			},
+		}
 	});
 }
 
@@ -119,6 +124,7 @@ Dashboard.prototype.initPnlList = function(){
 		width: WIDTH_LEFT_PANEL / 2 + '%',
 		height: '23.66%',
 		padding: 0,
+		mouse: true,
 		scrollbar: {
 			ch: ' ',
 			inverse: false
@@ -163,18 +169,14 @@ Dashboard.prototype.initTradeList = function(){
 Dashboard.prototype.initBoxInfo = function() {
 	const t = this;
 	t.boxInfo = blessed.text({
-		content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit{|} {cyan-fg}{bold}',
+		content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | a: process-start | x: process-stop ',
 		parent: t.screen,		
 		left: '0%',
 		top: '95%',
 		width: '100%',
 		height: '6%',
 		valign: 'middle',
-		tags: true,
-		style: {
-			...TABLE_BASE_OPTIONS['style'],	
-
-		}
+		tags: true
 	});	
 }
 
@@ -190,21 +192,37 @@ Dashboard.prototype.refresh = function(){
 
 Dashboard.prototype.getData = function(){
 	const  t = this;
+	const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
+	
 	//md + td
 	const getAccountListPromise = t.accountTable.getData(t.globalData).then(({accountData, mdData}) => {
 		t.globalData[mdData] = mdData;
 		t.globalData[accountData] = accountData;
 	})
+
 	//account assets
 	const getAccountAssetPromise = Object.keys(t.globalData.accountData || {}).map(accountId => getAccountAsset(accountId).then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {})))
+	
+
 	//pos
-	const getPosPromise = t.posTable.getData(t.currentAccount).then(pos => t.globalData.posData = pos || {})
+	const getPosPromise = t.posTable.getData(currentId).then(pos => t.globalData.posData = pos || {})
 	//order
-	const getOrderPromise = t.orderTable.getData(t.currentAccount).then(orders => t.globalData.orderData = orders || [])
+	const getOrderPromise = t.orderTable.getData(currentId).then(orders => t.globalData.orderData = orders || [])
 	//all
 	Promise.all([getAccountListPromise, getPosPromise, getOrderPromise, getAccountAssetPromise]).then(() => {
 		t.refresh()
 	})
+}
+
+Dashboard.prototype.clearTraderData = function(){
+	this.globalData = {
+		...this.globalData,
+		posData: {},
+		pnlData: [],
+		tradeData: [],
+		orderData: []
+	};
+	this.refresh();
 }
 
 Dashboard.prototype.render = function(){
@@ -225,15 +243,6 @@ Dashboard.prototype.bindEvent = function(){
 		if (i === 6) i = 0;
 		if (i === -1) i = 5;
 		t[boards[i]].focus();
-		t[boards[i]].style.border.fg = 'blue';
-		if (key.name === 'left') {
-			if (i === 5) t[boards[0]].style.border.fg = 'white';
-			else t[boards[i + 1]].style.border.fg = 'white';
-		}
-		else {
-			if (i === 0) t[boards[5]].style.border.fg = 'white';
-			else t[boards[i - 1]].style.border.fg = 'white';
-		}
 	});
 
 	t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {

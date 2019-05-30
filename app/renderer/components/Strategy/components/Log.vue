@@ -39,6 +39,8 @@ import {Tail} from 'tail';
 import readline from 'readline';
 import {clearFileContent, addFile, openReadFile, existsSync} from '__gUtils/fileUtils.js';
 import { ipcRenderer } from 'electron';
+const BrowserWindow = require('electron').remote.BrowserWindow
+
 export default {
     name: 'log',
     data() {
@@ -162,7 +164,7 @@ export default {
         getLogByTask(logPath, searchKeyword){
             const t = this;
             return new Promise((resolve, reject) => {
-                t.$utils.buildTask('getStrategyLog').then(({win, curWinId}) => {
+                t.$utils.buildTask('getStrategyLog', BrowserWindow.getFocusedWindow(), BrowserWindow).then(({win, curWinId}) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,
                         logPath,

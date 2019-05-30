@@ -1,6 +1,6 @@
 import Table from '../public/Table';
 import { calcuHeaderWidth, parseToString, posDirection } from './utils';
-
+import { toDecimal } from '@/assets/js/utils';
 
 function PosTable(){
     if (!(this instanceof PosTable)) {
@@ -12,8 +12,9 @@ function PosTable(){
 }
 
 PosTable.prototype = new Table();
-PosTable.prototype.getData = function(accountId){
-	return this.getDataMethod(accountId, {}).then(pos => {
+PosTable.prototype.getData = function(currentId){
+	if(!currentId) return new Promise(resolve => resolve({}))
+	return this.getDataMethod(currentId, {}).then(pos => {
         return pos
 	})
 }
@@ -28,7 +29,7 @@ PosTable.prototype.refresh = function(posData){
 		// if(direction === 'L') direction = colors.red(direction);
 		// else direction = colors.green(direction);
 
-		let unRealizedPnl = new Number(p.unrealized_pnl).toFixed(2);
+		let unRealizedPnl = toDecimal(p.unrealized_pnl);
 		return parseToString([
 			p.instrument_id,
 			p.direction,

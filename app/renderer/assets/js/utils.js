@@ -1,4 +1,3 @@
-const BrowserWindow = require('electron').remote.BrowserWindow
 const path = require("path");
 
 
@@ -92,7 +91,7 @@ export const throttle = (fn, interval=300) => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openWin = (htmlPath) => {
+export const openWin = (htmlPath, BrowserWindow) => {
     const modalPath = process.env.NODE_ENV === 'development'
     ? `http://localhost:9090/#/${htmlPath}`
     : `file://${__dirname}/index.html#${htmlPath}`
@@ -116,8 +115,7 @@ export const openWin = (htmlPath) => {
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (taskPath, preCurWin = BrowserWindow.getFocusedWindow()) => {
-    const curWin = preCurWin || BrowserWindow.getFocusedWindow()
+export const buildTask = (taskPath, curWin, BrowserWindow) => {
     const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
     return new Promise((resolve, reject) => {
         //debug

@@ -10,7 +10,7 @@ function AccountTable(){
     }
     Table.call(this)
 	this.headers = ['Account', 'Source', 'Status', 'Pnl', 'PnlRt','Total', 'Avail'];
-	this.columnWidth = [10]
+	this.columnWidth = [10, 0, 0, 8, 6, 8, 8]
 }
 
 AccountTable.prototype = new Table();
@@ -46,16 +46,16 @@ AccountTable.prototype.refresh = function(accountData, processStatus, cashData){
 		const tdProcess = processStatus[`td_${a.account_id}`] || '--';
 		const cash = cashData[accountId] || {};
 		const typeName = (sourceType[a.source_name] || {}).typeName
-		const total = type === 'future' ? toDecimal(cash.margin) : toDecimal(cash.market_value)
-
+		const total = typeName === 'future' ? cash.margin : cash.market_value
+		const accumulatedPnlRatio = toDecimal(cash.accumulated_pnl_ratio) + ''
 		return parseToString([
 			accountId,
 			a.source_name,
 			tdProcess,
-			cash.accumulated_pnl || '--',
-			cash.accumulated_pnl_ratio || '--',
-			cash.total || '--',
-			cash.avail || '--',
+			toDecimal(cash.accumulated_pnl) + '' || '--',
+			accumulatedPnlRatio ? accumulatedPnlRatio + '%' : '--',
+			toDecimal(total) + '' || '--',
+			toDecimal(cash.avail) + '' || '--',
         ], calcuHeaderWidth(this.headers, this.columnWidth))
     })
 	this.table.setItems(accountListData)

@@ -55,12 +55,11 @@ export const posDirection = {
  */
 export const parseToString = (targetList, columnWidth, pad=2) => {
 	return targetList.map((l, i) => {
-		l = (l + '').trim();
+		l = l + '';
 		const len = l.length;
 		const colWidth = columnWidth[i] || 0
-        const spaceLength = colWidth - len;
-        if(spaceLength === 0) return l;
-		else if(spaceLength < 0) return l.slice(0, colWidth)
+		const spaceLength = colWidth - len;
+		if(spaceLength <= 0) return l.slice(0, colWidth)
 		else return (l + new Array(spaceLength + 1).join(" "))
 	}).join(new Array(pad + 2).join(" "))
 }
@@ -68,7 +67,7 @@ export const parseToString = (targetList, columnWidth, pad=2) => {
 
 export const calcuHeaderWidth = (target, wish=[]) => {
 	return target.map((t, i) => {
-        if(t.length < (wish[i] || 0)) return wish[i] || 0
+		if(t.length < (wish[i] || 0)) return wish[i]
 		else return t.length
 	})
 }
@@ -94,12 +93,22 @@ export const TABLE_BASE_OPTIONS = {
 	items: [],
 	style: {
 		fg: 'white',
+		focus: {
+			border: {
+				fg: 'blue',
+			}
+		},
+		item: {
+			border: {
+				fg: 'white',
+			}
+		},
 		scrollbar: {
 			bg: 'blue',
 			fg: 'black'
 		},
 		selected: {
 			bold: true,
-        },
+		},
 	}
 }

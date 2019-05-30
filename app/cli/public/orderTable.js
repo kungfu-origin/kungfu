@@ -12,8 +12,9 @@ function OrderTable(){
 
 OrderTable.prototype = new Table();
 
-OrderTable.prototype.getData = function(accountId){
-	return this.getDataMethod(accountId, {}).then(orders => {
+OrderTable.prototype.getData = function(currentId){
+	if(!currentId) return new Promise(resolve => resolve([]))
+	return this.getDataMethod(currentId, {}).then(orders => {
         return orders
 	})
 }

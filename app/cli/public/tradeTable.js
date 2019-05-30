@@ -12,8 +12,9 @@ function TradeTable(){
 
 TradeTable.prototype = new Table();
 
-TradeTable.prototype.getData = function(accountId){
-	return this.getDataMethod(accountId, {}).then(orders => {
+TradeTable.prototype.getData = function(currentId){
+	if(!currentId) return new Promise(resolve => resolve([]))
+	return this.getDataMethod(currentId, {}).then(orders => {
         return orders
 	})
 }

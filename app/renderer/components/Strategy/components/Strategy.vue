@@ -122,6 +122,8 @@ import {debounce} from '@/assets/js/utils';
 import {chineseValidator, specialStrValidator, noZeroAtFirstValidator} from '@/assets/js/validator';
 import path from 'path';
 import {remote} from 'electron'
+const BrowserWindow = require('electron').remote.BrowserWindow
+
 
 export default {
     data(){
@@ -236,7 +238,7 @@ export default {
         //编辑策略
         handleEditStrategy(row){
             const t = this;
-            t.$utils.openWin(`code/${row.strategy_id}`)
+            t.$utils.openWin(`code/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略
