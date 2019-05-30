@@ -12,7 +12,6 @@ function PosTable(){
 }
 
 PosTable.prototype = new Table();
-
 PosTable.prototype.getData = function(accountId){
 	return this.getDataMethod(accountId, {}).then(pos => {
         return pos
@@ -36,8 +35,8 @@ PosTable.prototype.refresh = function(posData){
 			p.yesterday_volume,
 			p.volume,
 			unRealizedPnl
-		], calcuHeaderWidth(this.headers))
-	})
+		], calcuHeaderWidth(this.headers, this.columnWidth))
+    })
 	this.table.setItems(posListData)
 }
 

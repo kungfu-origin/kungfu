@@ -13,8 +13,8 @@ function OrderTable(){
 OrderTable.prototype = new Table();
 
 OrderTable.prototype.getData = function(accountId){
-	return this.getDataMethod(accountId, {}).then(pos => {
-        return pos
+	return this.getDataMethod(accountId, {}).then(orders => {
+        return orders
 	})
 }
 /**
@@ -46,7 +46,7 @@ OrderTable.prototype.refresh = function(orderData){
 			o.volume_traded + '/' + o.volume_left,
 			status,
 			o.client_id
-		], calcuHeaderWidth(this.headers))
+		], calcuHeaderWidth(this.headers, this.columnWidth))
 	})
 	this.table.setItems(orderListData)
 }

@@ -2,7 +2,8 @@ import blessed from 'blessed';
 import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from './utils';
 
 function Table(){
-    this.headers = []
+	this.headers = [];
+	this.columnWidth = [];
     this.table = null;
 	this.getDataMethod = null;
 }
@@ -12,16 +13,8 @@ Table.prototype.build = function(options) {
     this.getDataMethod = options.getDataMethod;
     this.table = this.init({
         ...options,
-        headers: this.headers,      
-        style: {
-			cell: {
-				selected: {
-					bold: true,
-					bg: 'blue',
-					fg: 'white'
-				},
-			},
-		}
+		headers: this.headers,      
+		columnWidth: this.columnWidth
     })
     this.table.getData = this.getData.bind(this);
     this.table.refresh = this.refresh.bind(this);
@@ -35,14 +28,16 @@ Table.prototype.refresh = function(){}
 Table.prototype.init = (options) => {
     if(!options.headers) throw new Error('options must include attribute: headers')
 	const headers = options.headers || [];
-	const content = ' ' + parseToString(headers, calcuHeaderWidth(headers))
+	const columnWidth = options.columnWidth || [];
+	const content = ' ' + parseToString(headers, calcuHeaderWidth(headers, columnWidth))
 	const box = blessed.box({
 		...options,
 		content: content,
+		
 		border: {
 			type: 'line'
 		},
-		mouse: true,
+		interactive: false,
 		style: {
 			fg: 'grey'
 		},
@@ -66,16 +61,9 @@ Table.prototype.init = (options) => {
 
 	box.setItems = list.setItems.bind(list);
 	box.headers = headers;
-
 	box.on('focus', () => {
+		box.style.border.fg = 'blue'
 		if(!list.focused) list.focus()
-		box.style.border.fg = TABLE_BASE_OPTIONS.style.focus.border.fg
-	})
-	list.on('blur', () => {
-		box.style.border.fg = TABLE_BASE_OPTIONS.style.item.border.fg
-	})
-	list.on('focus', () => {
-		box.style.border.fg = TABLE_BASE_OPTIONS.style.focus.border.fg
 	})
 
 	return box

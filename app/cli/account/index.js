@@ -1,12 +1,13 @@
 import blessed  from 'blessed';
-import accountTable from '../public/accountTable';
-import posTable from '../public/posTable';
-import mdTable from '../public/mdTable';
-import orderTable from '../public/orderTable';
+import accountTable from '../public/AccountTable';
+import posTable from '../public/PosTable';
+import mdTable from '../public/MdTable';
+import orderTable from '../public/OrderTable';
+import tradeTable from '../public/TradeTable';
 
 import { offsetName, orderStatus, sideName, posDirection, parseToString, TABLE_BASE_OPTIONS } from "../public/utils";
-import { getAccountList, getAccountPos, getAccountOrder } from '@/io/account.js';
-import { listProcessStatus, startMaster } from '__gUtils/processUtils';
+import { getAccountList, getAccountPos, getAccountOrder, getMdTdState, getAccountAsset } from '@/io/account.js';
+import { listProcessStatus } from '__gUtils/processUtils';
 
 
 // 定义全局变量
@@ -24,10 +25,7 @@ function Dashboard(){
 	});
 
 	t.screen.title = 'Account Dashboard';
-
-	t.orderTableHeaders = ['OrderTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 'Strat']
-	t.tradeTableHeaders = ['TradeTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol', 'Strat']
-
+	
 	t.globalData = {
 		accountData: {},
 		posData: {},
@@ -36,6 +34,7 @@ function Dashboard(){
 		tradeData: [],
 		orderData: [],
 		processStatus: {},
+		cashData: {}
 	};
 
 	t.currentAccount = '15040900'
@@ -63,7 +62,21 @@ Dashboard.prototype.initAccountTable = function(){
 		left: '0%',
 		width: WIDTH_LEFT_PANEL + '%',
 		height: '33.33%',
-		getDataMethod: getAccountList
+		getDataMethod: getAccountList,
+		style: {
+			selected: {
+				border: {
+
+				}
+			},
+			cell: {
+				selected: {
+					bold: true,
+					bg: 'blue',
+					fg: 'white'
+				},
+			},
+		}
 
 	})
 	t.accountTable.focus();
@@ -85,6 +98,7 @@ Dashboard.prototype.initMdTable = function(){
 Dashboard.prototype.initPosTable = function(){
 	const t = this;
 	t.posTable = posTable.build({
+		label: ' Positions ',
 		parent: t.screen,
 		top: '0',
 		left: WIDTH_LEFT_PANEL + '%',
@@ -129,26 +143,20 @@ Dashboard.prototype.initOrderList = function(){
 		top: '56%',
 		width: WIDTH_LEFT_PANEL - 5 + '%',
 		height: '39%',
-		style: {
-			...TABLE_BASE_OPTIONS['style'],
-		},
-		headers: [...t.orderTableHeaders]
+		getDataMethod: getAccountOrder
 	});
 }
 
 Dashboard.prototype.initTradeList = function(){
 	const t = this;
-	t.tradeTable = table({
+	t.tradeTable = tradeTable.build({
 		label: ' Today Trades ',
 		parent: t.screen,
 		top: '56%',
 		left: WIDTH_LEFT_PANEL - 5 + '%',
 		width: 100 - WIDTH_LEFT_PANEL + 5 + '%',
 		height: '39%',
-		style: {
-			...TABLE_BASE_OPTIONS['style'],
-		},
-		headers: [...t.tradeTableHeaders]
+		getDataMethod: getAccountOrder
 	});
 }
 
@@ -170,34 +178,33 @@ Dashboard.prototype.initBoxInfo = function() {
 	});	
 }
 
-Dashboard.prototype.bindEvent = function(){
+Dashboard.prototype.refresh = function(){
 	const t = this;
-	let i = 0;
-	let boards = ['accountTable', 'mdTable', 'pnl','posTable', 'orderTable', 'tradeTable'];
-	t.screen.key(['left', 'right'], (ch, key) => {
-		(key.name === 'left') ? i-- : i++;
-		if (i === 6) i = 0;
-		if (i === -1) i = 5;
-		t[boards[i]].focus();
-		t[boards[i]].style.border.fg = 'blue';
-		if (key.name === 'left') {
-		  if (i == 3)
-			t[boards[0]].style.border.fg = 'white';
-		  else
-			t[boards[i + 1]].style.border.fg = 'white';
-		}
-		else {
-		   if (i == 0)
-			t[boards[3]].style.border.fg = 'white';
-		  else
-			t[boards[i - 1]].style.border.fg = 'white';
-		}
-	});
+	const { processStatus, accountData, mdData, posData, orderData, tradeData, cashData } = t.globalData;
+	t.accountTable.refresh(accountData, processStatus, cashData)
+	t.mdTable.refresh(mdData)
+	t.posTable.refresh(posData)
+	t.orderTable.refresh(orderData)
+	t.tradeTable.refresh(tradeData);
+}
 
-	t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
-		t.screen.destroy();
-		process.exit(0);
-	});	
+Dashboard.prototype.getData = function(){
+	const  t = this;
+	//md + td
+	const getAccountListPromise = t.accountTable.getData(t.globalData).then(({accountData, mdData}) => {
+		t.globalData[mdData] = mdData;
+		t.globalData[accountData] = accountData;
+	})
+	//account assets
+	const getAccountAssetPromise = Object.keys(t.globalData.accountData || {}).map(accountId => getAccountAsset(accountId).then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {})))
+	//pos
+	const getPosPromise = t.posTable.getData(t.currentAccount).then(pos => t.globalData.posData = pos || {})
+	//order
+	const getOrderPromise = t.orderTable.getData(t.currentAccount).then(orders => t.globalData.orderData = orders || [])
+	//all
+	Promise.all([getAccountListPromise, getPosPromise, getOrderPromise, getAccountAssetPromise]).then(() => {
+		t.refresh()
+	})
 }
 
 Dashboard.prototype.render = function(){
@@ -209,43 +216,33 @@ Dashboard.prototype.render = function(){
 	}, 300);
 }
 
-Dashboard.prototype.refresh = function(){
+Dashboard.prototype.bindEvent = function(){
 	const t = this;
-	const { processStatus, accountData, mdData, posData, orderData } = t.globalData;
-	t.accountTable.refresh(accountData, processStatus)
-	t.mdTable.refresh(mdData)
-	t.posTable.refresh(posData)
-	t.posTable.refresh(orderData)
-	// const tradeListData = []
-	// tradeListData.unshift(t.tradeTableHeaders)
-	// t.tradeList.setData(tradeListData);
+	let i = 0;
+	let boards = ['accountTable', 'mdTable', 'pnl','posTable', 'orderTable', 'tradeTable'];
+	t.screen.key(['left', 'right'], (ch, key) => {
+		(key.name === 'left') ? i-- : i++;
+		if (i === 6) i = 0;
+		if (i === -1) i = 5;
+		t[boards[i]].focus();
+		t[boards[i]].style.border.fg = 'blue';
+		if (key.name === 'left') {
+			if (i === 5) t[boards[0]].style.border.fg = 'white';
+			else t[boards[i + 1]].style.border.fg = 'white';
+		}
+		else {
+			if (i === 0) t[boards[5]].style.border.fg = 'white';
+			else t[boards[i - 1]].style.border.fg = 'white';
+		}
+	});
+
+	t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+		t.screen.destroy();
+		process.exit(0);
+	});	
 }
 
-Dashboard.prototype.getData = function(){
-	const  t = this;
-
-	const getAccountListPromise = t.accountTable.getData(t.globalData).then(({accountData, mdData}) => {
-		t.globalData[mdData] = mdData;
-		t.globalData[accountData] = accountData;
-	})
-
-	//pos
-	const getPosPromise = t.posTable.getData(t.currentAccount).then(pos => {
-		t.globalData.posData = pos || {}
-	})
-
-	//order
-	// const getOrderPromise = getAccountOrder(t.currentAccount, {}).then(orders => {
-	// 	t.globalData.orderData = orders || []
-
-	// })
-
-	Promise.all([getAccountListPromise, getPosPromise]).then(() => {
-		t.refresh()
-	})
-}
-
-Dashboard.prototype.startMaster = function(){
+Dashboard.prototype.getProcessStatus = function(){
 	const t = this;
 	//循环获取processStatus
 	var listProcessTimer;
@@ -258,17 +255,8 @@ Dashboard.prototype.startMaster = function(){
 		.catch(err => console.error(err))
 		.finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 	}
-
-	//start pm2 kungfu master
-	startMaster(false)
-	.catch(() => {})
-	.finally(() => {
-		startGetProcessStatus()
-	})
+	startGetProcessStatus()
 }
-
-
-
 
 
 const accountDashboard = new Dashboard();
@@ -276,14 +264,15 @@ accountDashboard.init();
 accountDashboard.render();
 accountDashboard.bindEvent();
 accountDashboard.getData();
+accountDashboard.getProcessStatus();
 
 setInterval(() => {
-	// accountDashboard.getData();
+	accountDashboard.getData();
 }, 3000)
 setInterval(() => {
-	// accountDashboard.fresh();
+	accountDashboard.refresh();
 }, 1000)
-// accountDashboard.startMaster();
+
 
 
 

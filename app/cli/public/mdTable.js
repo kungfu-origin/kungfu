@@ -8,6 +8,7 @@ function MdTable(){
     }
     Table.call(this);
     this.headers = ['Source', 'Account', 'Status']
+	this.columnWidth = [0, 10]
 }
 
 MdTable.prototype = new Table();
@@ -24,7 +25,7 @@ MdTable.prototype.refresh = function(mdData){
         m.source_name,
         m.account_id.toAccountId(),
         m.status
-    ], calcuHeaderWidth(this.headers)))
+    ], calcuHeaderWidth(this.headers, this.columnWidth)))
 	this.table.setItems(mdListData)
 }
 

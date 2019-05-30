@@ -1,5 +1,7 @@
 import Table from '../public/Table';
 import { calcuHeaderWidth, parseToString } from './utils';
+import { sourceType } from '@/assets/config/accountConfig';
+import { toDecimal } from '@/assets/js/utils';
 
 
 function AccountTable(){
@@ -7,7 +9,8 @@ function AccountTable(){
         return new AccountTable();
     }
     Table.call(this)
-    this.headers = ['Account', 'Source', 'Status', 'Accum',' AcumRt','Total', 'Avail'];
+	this.headers = ['Account', 'Source', 'Status', 'Pnl', 'PnlRt','Total', 'Avail'];
+	this.columnWidth = [10]
 }
 
 AccountTable.prototype = new Table();
@@ -34,23 +37,26 @@ AccountTable.prototype.getData = function(globalData={}){
  * @param  {Object} accountData
  * @param  {Object} processStatus
  */
-AccountTable.prototype.refresh = function(accountData, processStatus){
+AccountTable.prototype.refresh = function(accountData, processStatus, cashData){
 
 	//accont (td + md)
 	accountData = Object.values(accountData || {});
 	const accountListData = accountData.map(a => {
-		let tdProcess = processStatus[`td_${a.account_id}`] || '--'
-		// if(tdProcess === 'online') tdProcess = colors.green(tdProcess);
-		// else if(tdProcess === 'error') tdProcess = colors.red(tdProcess)
-        // else tdProcess = colors.grey(tdProcess)
+		const accountId = a.account_id.toAccountId();
+		const tdProcess = processStatus[`td_${a.account_id}`] || '--';
+		const cash = cashData[accountId] || {};
+		const typeName = (sourceType[a.source_name] || {}).typeName
+		const total = type === 'future' ? toDecimal(cash.margin) : toDecimal(cash.market_value)
+
 		return parseToString([
-			a.account_id.toAccountId(),
+			accountId,
 			a.source_name,
 			tdProcess,
-			a.accumulated_pnl,
-			a.accumulated_pnl_ratio,
-			a.total, a.avail
-        ], calcuHeaderWidth(this.headers))
+			cash.accumulated_pnl || '--',
+			cash.accumulated_pnl_ratio || '--',
+			cash.total || '--',
+			cash.avail || '--',
+        ], calcuHeaderWidth(this.headers, this.columnWidth))
     })
 	this.table.setItems(accountListData)
 }
