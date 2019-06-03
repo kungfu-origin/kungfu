@@ -18,7 +18,8 @@ fs.readdirSync('node_modules')
 
 let mainConfig = {
   entry: {
-    account: path.join(__dirname, '../app/cli/account/index.js')
+    account: path.join(__dirname, '../app/cli/account/index.js'),
+    monitor: path.join(__dirname, '../app/cli/monitor/index.js')
   },
   externals: nodeModules,
   module: {

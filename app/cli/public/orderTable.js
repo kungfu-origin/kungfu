@@ -1,6 +1,5 @@
 import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, posDirection } from './utils';
-
+import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, posDirection, } from "../public/utils";
 
 function OrderTable(){
     if (!(this instanceof OrderTable)) {

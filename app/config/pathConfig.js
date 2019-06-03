@@ -39,6 +39,10 @@ export const JOURNAL_DIR = path.join(BASE_DIR, 'journal');
 addFile(BASE_DIR, 'log', 'folder')
 export const LOG_DIR = path.join(BASE_DIR, 'log');
 
+//log archive
+addFile(LOG_DIR, 'archive', 'folder')
+export const ARCHIVE_DIR = path.join(LOG_DIR, 'archive');
+
 //strategy
 addFile(BASE_DIR, 'strategy', 'folder')
 export const STRATEGY_DIR = path.join(BASE_DIR, 'strategy');

@@ -118,6 +118,7 @@ import {mapState, mapGetters} from 'vuex';
 import {openWin} from '@/assets/js/utils';
 import {startStrategy, deleteProcess} from '__gUtils/processUtils.js';
 import * as STRATEGY_API from '@/io/strategy';
+import { setTasksDB } from '@/io/base';
 import {debounce} from '@/assets/js/utils';
 import {chineseValidator, specialStrValidator, noZeroAtFirstValidator} from '@/assets/js/validator';
 import path from 'path';
@@ -315,7 +316,7 @@ export default {
                     type: 'strategy',
                     config
                 }
-                t.$store.dispatch('setTasksDB', postData) //设置taskDB
+                setTasksDB(postData) //设置taskDB
                 .then(() => t.$store.dispatch('getTasks'))// 重新获取数据
                 .then(() => t.getStrategyList())
                 .then(() => startStrategy(strategyId, strategyPath))// 启动策略

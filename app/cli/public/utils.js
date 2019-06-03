@@ -1,9 +1,10 @@
+import colors from 'colors';
+import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
+import { setTasksDB } from '@/io/base';
+
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
 }
-
-
-
 
 // open = '0',
 // close = '1',
@@ -53,13 +54,16 @@ export const posDirection = {
  * @param  {} columnWidth
  * @param  {} pad=2
  */
-export const parseToString = (targetList, columnWidth, pad=2) => {
+export const parseToString = (targetList, columnWidth=[], pad=2) => {
 	return targetList.map((l, i) => {
 		l = l + '';
-		const len = l.length;
+		const r = /m([^%]+)\u001b/
+		const lw = l.match(r) === null ? l : l.match(r)[1];
+		const len = lw.length;
 		const colWidth = columnWidth[i] || 0
 		const spaceLength = colWidth - len;
-		if(spaceLength <= 0) return l.slice(0, colWidth)
+		if(spaceLength < 0) return lw.slice(0, colWidth)
+		else if(spaceLength === 0) return l
 		else return (l + new Array(spaceLength + 1).join(" "))
 	}).join(new Array(pad + 2).join(" "))
 }
@@ -111,4 +115,68 @@ export const TABLE_BASE_OPTIONS = {
 			bold: true,
 		},
 	}
+}
+
+export const parseAccountList = (target={}, accountList) => {
+	//td
+	accountList.forEach(l => {
+		const accountId = l.account_id.toAccountId();
+		if(target.accountData[accountId]) target.accountData[accountId] = {...target.accountData[accountId], ...l}
+		else target.accountData[accountId] = {...l, status: '--', accumulated_pnl : '--', accumulated_pnl_ratio: '--', 'total': '--', 'avail': '--'}
+	});
+
+	//md
+	accountList.filter(l => !!l.receive_md).forEach(l => {
+		const source = l.source_name;
+		if(target.mdData[source]) target.mdData[source] = {...target.mdData[source], ...l}
+		else target.mdData[source] = {...l, status: '--'}
+	})
+
+	return target
+}
+
+
+export const dealStatus = (status) => {
+	status = status || '--'
+	if(status === 'online') return colors.green(status);
+	else if(status === 'error') return colors.red(status);
+	else return colors.grey(status)
+}
+
+export const switchMaster = (globalStatus) => {
+	if(globalStatus['master'] !== 'online') return deleteProcess('master').catch(err => {})
+	else return startMaster(false).catch(err => {})
+}
+
+export const switchTd = (processData, globalStatus) => {
+	const {account_id, source_name, config} = processData;
+	const processId = `td_${account_id}`;
+	if(globalStatus[processId] === 'online') return deleteProcess(processId);
+	return setTasksDB({name: processId, type: 'md', config})
+    .then(() => startTd(source_name, processId)) //开启td,pm2
+}
+
+export const switchMd = (processData, globalStatus) => {
+	const {source_name, config} = processData;
+	const processId = `md_${source_name}`;
+	if(globalStatus[processId] === 'online') return deleteProcess(processId);
+	return setTasksDB({name: processId, type: 'td', config})
+	.then(() => startMd(source_name, processId)) //开启td,pm2
+}
+
+export const switchStrategy = (processData, globalStatus) => {
+	const processId = processData.strategy_id;
+	if(globalStatus[processId] === 'online') return deleteProcess(processId);
+	const strategyPath = processData.strategyPath || '';
+	const config = JSON.stringify({
+		strategy_id: processId,
+		strategy_path: strategyPath
+	})
+	const postData = {
+		name: processId, 
+		type: 'strategy',
+		config
+	}
+	return setTasksDB(postData)
+	.then(() => startStrategy(processId, strategyPath))// 启动策略
 }

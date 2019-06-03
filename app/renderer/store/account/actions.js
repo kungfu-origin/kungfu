@@ -1,11 +1,11 @@
 
 import Vue from 'vue';
-import {closeGlobalGatewayNanomsg, refreshGlobalGatewayNanomsg} from '@/io/nano/buildNmsg'
-import * as msgType from '@/io/nano/msgType'
+import { closeGlobalGatewayNanomsg, refreshGlobalGatewayNanomsg } from '@/io/nano/buildNmsg'
+import * as msgType from '@/io/nano/msgType';
 import * as ACCOUNT_API from '@/io/account';
-import {startTd, startMd, deleteProcess} from '__gUtils/processUtils'
-import {debounce} from '@/assets/js/utils'
-
+import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
+import { debounce } from '@/assets/js/utils';
+import { setTasksDB } from '@/io/base';
 
 
 //保存选中的账户信息
@@ -89,6 +89,7 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
 }
 
 
+
 //起停td
 export const switchTd = ({dispatch}, {account, value}) => {
     const {account_id, source_name, config} = account
@@ -102,7 +103,7 @@ export const switchTd = ({dispatch}, {account, value}) => {
     }
 
     //改变数据库表内容，添加或修改
-    return dispatch('setTasksDB', {name: tdProcessId, type: 'td', config})
+    return setTasksDB({name: tdProcessId, type: 'td', config})
     .then(() => dispatch('getTasks'))//重新获取数据
     .then(() => dispatch('setOneMdTdState', {name: tdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', tdProcessId))    
@@ -124,7 +125,7 @@ export const switchMd = ({dispatch}, {account, value}) => {
     }
 
     //改变数据库表内容，添加或修改
-    return dispatch('setTasksDB', {name: mdProcessId, type: 'md', config})
+    return setTasksDB({name: mdProcessId, type: 'md', config})
     .then(() => dispatch('getTasks'))//重新获取数据
     .then(() => dispatch('setOneMdTdState', {name: mdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', mdProcessId))    

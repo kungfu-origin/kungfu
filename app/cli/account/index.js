@@ -5,28 +5,20 @@ import mdTable from '../public/MdTable';
 import orderTable from '../public/OrderTable';
 import tradeTable from '../public/TradeTable';
 
-import { offsetName, orderStatus, sideName, posDirection, parseToString, TABLE_BASE_OPTIONS } from "../public/utils";
-import { getAccountList, getAccountPos, getAccountOrder, getMdTdState, getAccountAsset } from '@/io/account.js';
+import { getAccountList, getAccountPos, getAccountOrder, getAccountAsset } from '@/io/account.js';
 import { listProcessStatus } from '__gUtils/processUtils';
-
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
 
-
-
-//定义Dashboard
-function Dashboard(){
-	const t = this;
-	t.screen = blessed.screen({
+function AccountDashboard(){
+	this.screen = blessed.screen({
 		smartCSR: true,
 		fullUnicode: true,
 		autoPadding: true,
 	});
-
-	t.screen.title = 'Account Dashboard';
-	
-	t.globalData = {
+	this.screen.title = 'Account Dashboard';
+	this.globalData = {
 		accountData: {},
 		posData: {},
 		mdData: {},
@@ -36,24 +28,22 @@ function Dashboard(){
 		processStatus: {},
 		cashData: {}
 	};
-
-	t.currentId = null;
-
 }
 
-Dashboard.prototype.init = function(){
+AccountDashboard.prototype.init = function(){
 	const t = this;
 	t.initAccountTable();
 	t.initMdTable();
 	t.initPosTable();
-	t.initPnlList();
+	t.initLogo();
 	t.initOrderList();
 	t.initTradeList();
 	t.initBoxInfo();
-	t.screen.render()
+	t.screen.render();
+	t.bindEvent();
 }
 
-Dashboard.prototype.initAccountTable = function(){
+AccountDashboard.prototype.initAccountTable = function(){
 	const t = this;
 	t.accountTable = accountTable.build({
 		label: ' Trader Engines ',
@@ -78,7 +68,7 @@ Dashboard.prototype.initAccountTable = function(){
 	t.accountTable.focus();
 }
 
-Dashboard.prototype.initMdTable = function(){
+AccountDashboard.prototype.initMdTable = function(){
 	const t = this;
 	t.mdTable = mdTable.build({
 		label: ' Market Engines ',
@@ -100,7 +90,7 @@ Dashboard.prototype.initMdTable = function(){
 	});
 }
 
-Dashboard.prototype.initPosTable = function(){
+AccountDashboard.prototype.initPosTable = function(){
 	const t = this;
 	t.posTable = posTable.build({
 		label: ' Positions ',
@@ -113,35 +103,21 @@ Dashboard.prototype.initPosTable = function(){
 	})
 }
 
-Dashboard.prototype.initPnlList = function(){
+AccountDashboard.prototype.initLogo = function(){
 	const t = this;
-	t.pnl = blessed.list({
-		label: ' Pnl ',
+	t.logo = blessed.text({
 		parent: t.screen,
-		content: '',
-		top: '33.33%',
+		content: ' \n kungfu trader \n version: 2.0.0',
+		top: '34.33%',
 		left: WIDTH_LEFT_PANEL / 2 + '%',
 		width: WIDTH_LEFT_PANEL / 2 + '%',
-		height: '23.66%',
-		padding: 0,
-		mouse: true,
-		scrollbar: {
-			ch: ' ',
-			inverse: false
-		},
-		border: {
-			type: 'line'
-		},
-		keys: true,
-		autoCommandKeys: true,
-		tags: true,
-		style: {
-			...TABLE_BASE_OPTIONS['style'],			
-		}
-	});
+		height: '18.66%',
+		align: 'center'
+
+	})
 }
 
-Dashboard.prototype.initOrderList = function(){
+AccountDashboard.prototype.initOrderList = function(){
 	const t = this;
 	t.orderTable = orderTable.build({
 		label: ' Current Orders ',
@@ -153,7 +129,7 @@ Dashboard.prototype.initOrderList = function(){
 	});
 }
 
-Dashboard.prototype.initTradeList = function(){
+AccountDashboard.prototype.initTradeList = function(){
 	const t = this;
 	t.tradeTable = tradeTable.build({
 		label: ' Today Trades ',
@@ -166,10 +142,10 @@ Dashboard.prototype.initTradeList = function(){
 	});
 }
 
-Dashboard.prototype.initBoxInfo = function() {
+AccountDashboard.prototype.initBoxInfo = function() {
 	const t = this;
 	t.boxInfo = blessed.text({
-		content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | a: process-start | x: process-stop ',
+		content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | s: process-start | x: process-stop ',
 		parent: t.screen,		
 		left: '0%',
 		top: '95%',
@@ -180,7 +156,7 @@ Dashboard.prototype.initBoxInfo = function() {
 	});	
 }
 
-Dashboard.prototype.refresh = function(){
+AccountDashboard.prototype.refresh = function(){
 	const t = this;
 	const { processStatus, accountData, mdData, posData, orderData, tradeData, cashData } = t.globalData;
 	t.accountTable.refresh(accountData, processStatus, cashData)
@@ -190,7 +166,7 @@ Dashboard.prototype.refresh = function(){
 	t.tradeTable.refresh(tradeData);
 }
 
-Dashboard.prototype.getData = function(){
+AccountDashboard.prototype.getData = function(){
 	const  t = this;
 	const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
 	
@@ -203,7 +179,6 @@ Dashboard.prototype.getData = function(){
 	//account assets
 	const getAccountAssetPromise = Object.keys(t.globalData.accountData || {}).map(accountId => getAccountAsset(accountId).then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {})))
 	
-
 	//pos
 	const getPosPromise = t.posTable.getData(currentId).then(pos => t.globalData.posData = pos || {})
 	//order
@@ -214,7 +189,7 @@ Dashboard.prototype.getData = function(){
 	})
 }
 
-Dashboard.prototype.clearTraderData = function(){
+AccountDashboard.prototype.clearTraderData = function(){
 	this.globalData = {
 		...this.globalData,
 		posData: {},
@@ -225,7 +200,7 @@ Dashboard.prototype.clearTraderData = function(){
 	this.refresh();
 }
 
-Dashboard.prototype.render = function(){
+AccountDashboard.prototype.render = function(){
 	const t = this;
 	t.screen.render();
 	// async refresh of the ui
@@ -234,10 +209,10 @@ Dashboard.prototype.render = function(){
 	}, 300);
 }
 
-Dashboard.prototype.bindEvent = function(){
+AccountDashboard.prototype.bindEvent = function(){
 	const t = this;
 	let i = 0;
-	let boards = ['accountTable', 'mdTable', 'pnl','posTable', 'orderTable', 'tradeTable'];
+	let boards = ['accountTable', 'mdTable', 'logo','posTable', 'orderTable', 'tradeTable'];
 	t.screen.key(['left', 'right'], (ch, key) => {
 		(key.name === 'left') ? i-- : i++;
 		if (i === 6) i = 0;
@@ -251,7 +226,7 @@ Dashboard.prototype.bindEvent = function(){
 	});	
 }
 
-Dashboard.prototype.getProcessStatus = function(){
+AccountDashboard.prototype.getProcessStatus = function(){
 	const t = this;
 	//循环获取processStatus
 	var listProcessTimer;
@@ -267,14 +242,11 @@ Dashboard.prototype.getProcessStatus = function(){
 	startGetProcessStatus()
 }
 
-
-const accountDashboard = new Dashboard();
+const accountDashboard = new AccountDashboard();
 accountDashboard.init();
 accountDashboard.render();
-accountDashboard.bindEvent();
 accountDashboard.getData();
 accountDashboard.getProcessStatus();
-
 setInterval(() => {
 	accountDashboard.getData();
 }, 3000)
