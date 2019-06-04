@@ -1,14 +1,15 @@
 import blessed  from 'blessed';
 import colors from 'colors';
-import fs from 'fs-extra';
 import path from 'path';
 import moment from 'moment';
+import { Tail } from 'tail';
 
-import { ARCHIVE_DIR } from '__gConfig/pathConfig';
+import { ARCHIVE_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '../public/Dashboard';
 import { TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString } from '../public/utils';
 import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
+import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 
@@ -31,18 +32,25 @@ class MonitorDashboard extends Dashboard {
             mdData: {},
             strategyList: [],
             processStatus: {},
+            logList: [],
         }
+
+        this.logWatchers = [];
     }
 
     init(){
-        this.initMasterProcess();
-        this.initProcessList();
-        this.initLog();
-        this.initMetaData();
-        this.initBoxInfo();
-        this.initLoader();
-        this.screen.render();
-        this.bindEvent();
+        const t = this;
+        t.initMasterProcess();
+        t.initProcessList();
+        t.initLog();
+        t.initMetaData();
+        t.initBoxInfo();
+        t.initLoader();
+        t.screen.render();
+        t.bindEvent();
+        t.getProcessStatus().then(() => {
+            t.getLogs();
+        });
     }
 
 
@@ -92,14 +100,15 @@ class MonitorDashboard extends Dashboard {
     }
 
     initLog(){
-        this.mergedLogs = blessed.list({
+        this.mergedLogs = blessed.log({
             ...TABLE_BASE_OPTIONS,
             label: ' Merged Logs ',
             parent: this.screen,
             top: '0',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '70%',
+            height: '80%',
+            padding: DEFAULT_PADDING,
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -114,10 +123,10 @@ class MonitorDashboard extends Dashboard {
             ...TABLE_BASE_OPTIONS,
             label: ' MetaData ',
             parent: this.screen,
-            top: '70%',
+            top: '80%',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '24%',
+            height: '14%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -204,11 +213,89 @@ class MonitorDashboard extends Dashboard {
         const { processStatus } = this.globalData;
         //master
         this.masterProcess.setItems([parseToString(['Master', dealStatus(processStatus.master)], [23, 8])])
-
+        //processes
         const processes = this._dealProcessList();
         this.processList.setItems(processes);
 
+        // this.mergedLogs.setItems(this.globalData.logList);
         this.screen.render();
+    }
+
+    getData(){
+        const t = this;
+        const getAccountDataPromise = getAccountList().then(accountList => {
+            const { mdData, accountData } = parseAccountList(t.globalData, accountList)
+            t.globalData = {
+                ...t.globalData,
+                mdData,
+                accountData
+            }
+        })
+
+        const getStrategyPromise = getStrategyList().then(strategyList => {
+            t.globalData.strategyList = strategyList
+        })
+
+        var timer = null
+        const promiseAll = () => {
+            clearTimeout(timer)
+            Promise.all([getAccountDataPromise, getStrategyPromise]).finally(() => {
+                t.refresh();
+                timer = setTimeout(promiseAll, 3000)
+            })
+        }
+        promiseAll();
+    }
+
+    getProcessStatus(){
+        const t = this;
+        //循环获取processStatus
+        var listProcessTimer;
+        const startGetProcessStatus = () => {
+            clearTimeout(listProcessTimer)
+            return listProcessStatus()
+            .then(res => {
+                t._diffOnlineProcess(res);
+                t.globalData.processStatus = Object.freeze(res);
+                monitorDashboard.refresh();
+                return res;
+            })
+            .catch(err => console.error(err))
+            .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
+        }
+        return startGetProcessStatus()
+    }
+
+    getLogs(){
+        const t = this;
+        const processStatus = t.globalData.processStatus;
+        const aliveProcesses = Object.keys(processStatus || {}).filter(k => processStatus[k] === 'online' && k !== 'master');
+        const logPromises = aliveProcesses.map(p => {
+            const logPath = path.join(LOG_DIR, `${p}.log`);
+            return getLog(logPath)
+        })
+
+        Promise.all(logPromises).then(logList => {
+            let mergedLogs = [];
+            logList.map(({list}) => {
+                mergedLogs = [...mergedLogs, ...list]
+            })
+            
+            //sort
+            mergedLogs.sort((a, b) => {
+                if(a.updateTime > b.updateTime) return 1
+                else if(a.updateTime < b.updateTime) return -1
+                else return 0
+            })
+            mergedLogs.forEach(l => {
+                let type = l.type;
+                if(type === 'error') type = colors.red(l.type);
+                else if(type === 'info') type = colors.grey(l.type);
+                t.mergedLogs.add(
+                    parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 5], 0)
+                )
+            })
+        })
     }
 
     _dealProcessList(){
@@ -257,59 +344,57 @@ class MonitorDashboard extends Dashboard {
         return [...mdList, ...tdList, ...stratList]
     }
 
-    getData(){
+    _diffOnlineProcess(processStatus){
         const t = this;
-        const getAccountDataPromise = getAccountList().then(accountList => {
-            const { mdData, accountData } = parseAccountList(t.globalData, accountList)
-            t.globalData = {
-                ...t.globalData,
-                mdData,
-                accountData
-            }
+        const aliveProcesses = Object.keys(processStatus)
+        .filter(p => processStatus[p] === 'online')
+        .sort((a, b) => {
+           if(a > b) return 1;
+           else if(a < b) return -1;
+           else return 0
         })
 
-        const getStrategyPromise = getStrategyList().then(strategyList => {
-            t.globalData.strategyList = strategyList
+        const oldAliveProcesses = Object.keys(t.globalData.processStatus)
+        .filter(p => processStatus[p] === 'online')
+        .sort((a, b) => {
+           if(a > b) return 1;
+           else if(a < b) return -1;
+           else return 0
         })
 
-        var timer = null
-        const promiseAll = () => {
-            clearTimeout(timer)
-            Promise.all([getAccountDataPromise, getStrategyPromise]).finally(() => {
-                t.refresh();
-                timer = setTimeout(promiseAll, 3000)
-            })
-        }
-        promiseAll();
+        if(aliveProcesses.join('') !== oldAliveProcesses.join('')) t._triggerWatchLogFiles(aliveProcesses)
     }
 
-    getProcessStatus(){
+    _triggerWatchLogFiles(processes){
         const t = this;
-        //循环获取processStatus
-        var listProcessTimer;
-        const startGetProcessStatus = () => {
-            clearTimeout(listProcessTimer)
-            listProcessStatus()
-            .then(res => {
-                t.globalData.processStatus = Object.freeze(res);
-                monitorDashboard.refresh();
-            })
-            .catch(err => console.error(err))
-            .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
-        }
-        startGetProcessStatus()
-    }
+        t.logWatchers.forEach(w => {
+            w.unwatch()
+            w = null;
+        })
+        t.logWatchers = [];
 
-    getLogs(){
-        const t = this;
-        const processStatus = t.globalData.processStatus;
-        const aliveProcesses = Object.keys(processStatus || {}).filter(k => processStatus[k] === 'online' && k !== 'master');
-        const logPromises = aliveProcesses.map(p => fs.readFile(path.join(ARCHIVE_DIR, `${p}_${TODAY}.log`), 'UTF-8', (err, logs) => {
-                if(err) throw err;
-                logger.info(logs)
+        processes.forEach(p => {
+            const logPath = path.join(LOG_DIR, `${p}.log`);
+            const watcher = new Tail(logPath);
+            watcher.watch();
+            watcher.on('line', line => {
+                const logData = dealLogMessage(line);
+                logData.forEach(l => {
+                    let type = l.type;
+                    if(type === 'error') type = colors.red(l.type);
+                    else if(type === 'warning') type = colors.yellow(l.type);
+                    else type = colors.grey(l.type);
+                    t.mergedLogs.add(
+                        parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 7], 0)
+                    )
+                })
             })
-        )
-
+            watcher.on('error', err => {
+                watcher.unwatch();
+                watcher = null;
+            })
+            t.logWatchers.push(watcher);
+        })
     }
 }
 
@@ -317,7 +402,3 @@ const monitorDashboard = new MonitorDashboard()
 monitorDashboard.init();
 monitorDashboard.render();
 monitorDashboard.getData();
-monitorDashboard.getProcessStatus();
-setTimeout(() => {
-    monitorDashboard.getLogs();
-}, 3000)

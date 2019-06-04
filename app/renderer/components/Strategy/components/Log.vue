@@ -31,15 +31,17 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
 import moment from 'moment'
-import {debounce, throttle, throttleInsert} from '@/assets/js/utils'
-import {buildProcessLogPath} from '__gConfig/pathConfig.js';
-import {Tail} from 'tail';
+import { debounce, throttle, throttleInsert, dealLogMessage } from '@/assets/js/utils'
+import { buildProcessLogPath } from '__gConfig/pathConfig.js';
+import { Tail } from 'tail';
 import readline from 'readline';
-import {clearFileContent, addFile, openReadFile, existsSync} from '__gUtils/fileUtils.js';
+import { clearFileContent, addFile, openReadFile, existsSync } from '__gUtils/fileUtils.js';
 import { ipcRenderer } from 'electron';
-const BrowserWindow = require('electron').remote.BrowserWindow
+import { platform } from '__gConfig/platformConfig';
+const BrowserWindow = require('electron').remote.BrowserWindow;
+
 
 export default {
     name: 'log',
@@ -192,14 +194,14 @@ export default {
                 
             t.tailObserver = new Tail(logPath, {
                 flushAtEOF: true,
-                useWatchFile: true,
+                useWatchFile: platform === 'mac',
                 follow: true,
             });   
             t.tailObserver.watch();    
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
                 if(curProcId !== processId) return;
-                const logData = t.dealLogMessage(line, t.searchKeyword);
+                const logData = dealLogMessage(line, t.searchKeyword);
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
                     t.tableData = t.pushTableData(logList);
@@ -212,63 +214,6 @@ export default {
                 if(t.tailObserver !== null) t.clearTailWatcher();
                 t.tailObserver = null;
             }) 
-        },
-
-        //处理日志
-        dealLogMessage(line, searchKeyword){
-            let lineData;
-            try{
-                lineData = JSON.parse(line);
-            }catch(err){
-                console.error(err)
-                return false;
-            }
-            const message = lineData.message;
-            //message 提取 ‘\n’ 再循环
-            return message.split('\n[').map((m,i) => {
-                if(!m.length) return false;
-                if(i > 0) m = '[' + m;
-                const messageList = m.split(']')
-                const len = messageList.length;
-                let messageData = {}
-                switch(len){
-                    case 5:
-                        messageData = {
-                            updateTime: messageList[0].trim().slice(1).trim(),
-                            type: messageList[1].trim().slice(1).trim(),
-                            pid: messageList[2].slice(messageList[2].indexOf('pid/tid') + 7).trim(),
-                            action: messageList[3].trim().slice(1).trim(),
-                            message: messageList[4].trim()
-                        }
-                        break;
-                    default:
-                        if(len < 5){
-                            const type = lineData.type === 'err' ? 'error' 
-                                : lineData.type === 'out' ? 'info' : lineData.type;
-                            messageData = {
-                                updateTime: lineData.timestamp,
-                                type,
-                                pid: '',
-                                action: '',
-                                message
-                            }
-                        }else{
-                            messageData = {
-                                updateTime: messageList[0].trim().slice(1).trim(),
-                                type: messageList[1].trim().slice(1).trim(),
-                                pid: messageList[2].slice(messageList[2].indexOf('pid/tid') + 7).trim(),
-                                action: messageList[3].trim().slice(1).trim(),
-                                message: messageList.slice(4).join(']').trim()
-                            }
-                        }
-                }
-                if(searchKeyword && messageData.message.indexOf(searchKeyword) === -1 ){
-                    if(messageData.type.indexOf(searchKeyword) === -1){
-                        return false;
-                    }
-                }
-                return messageData
-            })
         },
         
         //往日志列表里推送数据

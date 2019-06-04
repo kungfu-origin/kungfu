@@ -60,7 +60,8 @@ export const parseToString = (targetList, columnWidth=[], pad=2) => {
 		const r = /m([^%]+)\u001b/
 		const lw = l.match(r) === null ? l : l.match(r)[1];
 		const len = lw.length;
-		const colWidth = columnWidth[i] || 0
+		const colWidth = columnWidth[i];
+		if(colWidth === undefined) return l;
 		const spaceLength = colWidth - len;
 		if(spaceLength < 0) return lw.slice(0, colWidth)
 		else if(spaceLength === 0) return l
@@ -144,8 +145,8 @@ export const dealStatus = (status) => {
 }
 
 export const switchMaster = (globalStatus) => {
-	if(globalStatus['master'] !== 'online') return deleteProcess('master').catch(err => {})
-	else return startMaster(false).catch(err => {})
+	if(globalStatus['master'] !== 'online') return startMaster().catch(err => {})
+	else return deleteProcess('master').catch(err => {})
 }
 
 export const switchTd = (processData, globalStatus) => {
