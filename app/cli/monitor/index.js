@@ -107,7 +107,7 @@ class MonitorDashboard extends Dashboard {
             top: '0',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '80%',
+            height: '75%',
             padding: DEFAULT_PADDING,
             style: {
                 ...TABLE_BASE_OPTIONS.style,
@@ -123,10 +123,10 @@ class MonitorDashboard extends Dashboard {
             ...TABLE_BASE_OPTIONS,
             label: ' MetaData ',
             parent: this.screen,
-            top: '80%',
+            top: '75%',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '14%',
+            height: '19%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -290,7 +290,8 @@ class MonitorDashboard extends Dashboard {
             mergedLogs.forEach(l => {
                 let type = l.type;
                 if(type === 'error') type = colors.red(l.type);
-                else if(type === 'info') type = colors.grey(l.type);
+                else if(type === 'warning') type = colors.yellow('warn');
+                else type = colors.grey(l.type);
                 t.mergedLogs.add(
                     parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 5], 0)
                 )
@@ -382,10 +383,10 @@ class MonitorDashboard extends Dashboard {
                 logData.forEach(l => {
                     let type = l.type;
                     if(type === 'error') type = colors.red(l.type);
-                    else if(type === 'warning') type = colors.yellow(l.type);
+                    else if(type === 'warning') type = colors.yellow('warn');
                     else type = colors.grey(l.type);
                     t.mergedLogs.add(
-                        parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 7], 0)
+                        parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 5], 0)
                     )
                 })
             })
