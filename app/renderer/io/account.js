@@ -144,6 +144,7 @@ export const getAccountPnlMin = (accountId, tradingDay) => {
  * 
  */
 export const getAccountPnlDay = (accountId) => {
+    if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(buildAccountSnapshortsDBPath(accountId), 'SELECT * FROM trading_account_1d_snapshots')
 }
 

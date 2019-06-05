@@ -1,4 +1,5 @@
 import blessed  from 'blessed';
+import contrib from 'blessed-contrib'
 import accountTable from '../public/AccountTable';
 import posTable from '../public/PosTable';
 import mdTable from '../public/MdTable';
@@ -6,9 +7,10 @@ import orderTable from '../public/OrderTable';
 import tradeTable from '../public/TradeTable';
 import Dashboard from '../public/Dashboard';
 
-import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset } from '@/io/account.js';
-import { switchMd, switchTd } from '../public/utils';
+import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
+import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
+import { toDecimal } from '@/assets/js/utils';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
@@ -25,7 +27,11 @@ class AccountDashboard extends Dashboard {
 			tradeData: [],
 			orderData: [],
 			processStatus: {},
-			cashData: {}
+			cashData: {},
+			pnl: {
+				x: [],
+				y: [],
+			}
 		};
 	}
 
@@ -34,7 +40,7 @@ class AccountDashboard extends Dashboard {
 		t.initAccountTable();
 		t.initMdTable();
 		t.initPosTable();
-		t.initLogo();
+		t.initPnl();
 		t.initOrderList();
 		t.initTradeList();
 		t.initBoxInfo();
@@ -77,16 +83,13 @@ class AccountDashboard extends Dashboard {
 			left: '0',
 			width: WIDTH_LEFT_PANEL / 2 + '%',
 			height: '23.66%',
-			cell: {
-				interactive: false,
-			},
 			getDataMethod: getAccountList,
 			afterSwitchMethod: t._afterSwitchMdProcess.bind(t),
 			style: {
 				cell: {
 					selected: {
 						bold: true,
-						bg: 'blue'
+						bg: 'grey'
 					},
 				},
 			}
@@ -106,18 +109,29 @@ class AccountDashboard extends Dashboard {
 		})
 	}
 	
-	initLogo(){
+	initPnl(){
 		const t = this;
-		t.logo = blessed.text({
-			parent: t.screen,
-			content: ' \n kungfu trader \n version: 2.0.0',
-			top: '34.33%',
+		this.pnl = contrib.line({ 
+			style:{ 
+				line: "yellow", 
+				text: "white", 
+				baseline: "white",
+			},
+			xPadding: 5,
+			border: {
+				type: 'line',
+			},
+			padding: DEFAULT_PADDING,
+			showLegend: false,
+			wholeNumbersOnly: false, //true=do not show fraction in y axis
+			label: 'Pnl',
+			top: '33.33%',
 			left: WIDTH_LEFT_PANEL / 2 + '%',
 			width: WIDTH_LEFT_PANEL / 2 + '%',
-			height: '18.66%',
+			height: '23.66%',
 			align: 'center'
-	
 		})
+	  	this.screen.append(this.pnl) //must append before setting data		
 	}
 	
 	initOrderList(){
@@ -167,35 +181,63 @@ class AccountDashboard extends Dashboard {
 		t.posTable.refresh(posData)
 		t.orderTable.refresh(orderData)
 		t.tradeTable.refresh(tradeData);
+		t.pnl.setData({
+			title: '',
+			x: t.globalData.pnl.x || [],
+			y: t.globalData.pnl.y || [],
+		})
 	}
 	
 	getData(){
 		const  t = this;
-		const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
-		//md + td
-		t.accountTable.getData(t.globalData)
-		.then(({accountData, mdData}) => {
-			t.globalData[mdData] = mdData;
-			t.globalData[accountData] = accountData;
-		})
-		.then(() => t.refresh())
-		//account assets
-		Object.keys(t.globalData.accountData || {})
-		.map(accountId => getAccountAsset(accountId)
-		.then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {}))
-		.then(() => t.refresh()))
-		//pos
-		t.posTable.getData(currentId)
-		.then(pos => t.globalData.posData = pos || {})
-		.then(() => t.refresh())
-		//order
-		t.orderTable.getData(currentId)
-		.then(orders => t.globalData.orderData = orders || [])
-		.then(() => t.refresh())
-		//trades
-		t.tradeTable.getData(currentId)
-		.then(trades => t.globalData.tradeData = trades || [])
-		.then(() => t.refresh())
+		let timer = null;
+		const runPromises = () => {
+			clearTimeout(timer)
+			const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
+			//md + td
+			const mdTdPromise = t.accountTable.getData(t.globalData)
+			.then(({accountData, mdData}) => {
+				t.globalData[mdData] = mdData;
+				t.globalData[accountData] = accountData;
+			})
+			.then(() => t.refresh())
+			//account assets
+			const accountAssetsPromises = Object.keys(t.globalData.accountData || {})
+			.map(accountId => getAccountAsset(accountId)
+			.then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {}))
+			.then(() => t.refresh()))
+			//pos
+			const postDataPromise = t.posTable.getData(currentId)
+			.then(pos => t.globalData.posData = pos || {})
+			.then(() => t.refresh())
+			//order
+			const orderDataPromise = t.orderTable.getData(currentId)
+			.then(orders => t.globalData.orderData = orders || [])
+			.then(() => t.refresh())
+			//trades
+			const tradeDataPromise = t.tradeTable.getData(currentId)
+			.then(trades => t.globalData.tradeData = trades || [])
+			.then(() => t.refresh())
+			//pnl
+			const pnlPromise = getAccountPnlDay(currentId)
+			.then(data => {
+				t.globalData.pnl = dealPnlData(data)
+				t.refresh()
+			})
+			.catch(err => {})
+
+			Promise.all([
+				mdTdPromise, 
+				...accountAssetsPromises, 
+				postDataPromise,
+				orderDataPromise,
+				tradeDataPromise,
+				pnlPromise
+			]).finally(() => {
+				timer = setTimeout(() => runPromises(), 3000)
+			})
+		}
+		runPromises()
 	}
 	
 	render(){
@@ -210,11 +252,11 @@ class AccountDashboard extends Dashboard {
 	bindEvent(){
 		const t = this;
 		let i = 0;
-		let boards = ['accountTable', 'mdTable', 'logo','posTable', 'orderTable', 'tradeTable'];
+		let boards = ['accountTable', 'mdTable', 'posTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch, key) => {
 			(key.name === 'left') ? i-- : i++;
-			if (i === 6) i = 0;
-			if (i === -1) i = 5;
+			if (i === 5) i = 0;
+			if (i === -1) i = 4;
 			t[boards[i]].focus();
 		});
 	
@@ -270,12 +312,9 @@ class AccountDashboard extends Dashboard {
 const accountDashboard = new AccountDashboard();
 accountDashboard.init();
 accountDashboard.render();
-accountDashboard.getData();
+accountDashboard.getData()
 accountDashboard.refresh();
 accountDashboard.getProcessStatus();
-setInterval(() => {
-	accountDashboard.getData();
-}, 3000)
 setInterval(() => {
 	accountDashboard.refresh();
 }, 1000)

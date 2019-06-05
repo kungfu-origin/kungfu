@@ -181,7 +181,7 @@ class MonitorDashboard extends Dashboard {
         })
         t.processList.on('focus', () => t.processList.interactive = true)
         t.processList.on('blur', () => t.processList.interactive = false)
-        t.processList.key(['enter'], () => {
+        t.processList.key(['s'], () => {
             const selectedIndex = t.processList.selected;
             const currentProcess = t.globalData.processes[selectedIndex];
             switch(currentProcess.type) {

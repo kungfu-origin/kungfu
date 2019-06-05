@@ -79,11 +79,9 @@ Table.prototype.bindEvent = function(box, list){
 	})
 	list.on('focus', (e) => {
 		box.style.border.fg = 'blue'
-		list.interactive = true;
 	})
 	list.on('blur', () => {
 		box.style.border.fg = 'white'
-		list.interactive = false;
 	})
 	list.on('select', () => {
 		const newIndex = list.selected;

@@ -196,3 +196,14 @@ export const switchStrategy = (processData, globalStatus) => {
 	return setTasksDB(postData)
 	.then(() => startStrategy(processId, strategyPath))// 启动策略
 }
+
+export const dealPnlData = (data) => {
+	let xAxisData = []
+	let serirsData = []
+	data && data.map(item => {
+		const time = item.trading_day
+		xAxisData.push(time.slice(4))
+		serirsData.push(toDecimal(item.accumulated_pnl_ratio, 4, 2))
+	})
+	return {x: xAxisData, y:serirsData}
+}
