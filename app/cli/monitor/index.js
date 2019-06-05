@@ -181,7 +181,7 @@ class MonitorDashboard extends Dashboard {
         })
         t.processList.on('focus', () => t.processList.interactive = true)
         t.processList.on('blur', () => t.processList.interactive = false)
-        t.processList.key(['s'], () => {
+        t.processList.key(['enter'], () => {
             const selectedIndex = t.processList.selected;
             const currentProcess = t.globalData.processes[selectedIndex];
             switch(currentProcess.type) {
@@ -274,7 +274,9 @@ class MonitorDashboard extends Dashboard {
                 else if(a.updateTime < b.updateTime) return -1
                 else return 0
             })
-            mergedLogs.forEach(l => t.mergedLogs.add(t._dealLog(l)))
+            mergedLogs.forEach(l => {
+                t.mergedLogs.add(t._dealLog(l))
+            })
         })
     }
 
@@ -373,7 +375,7 @@ class MonitorDashboard extends Dashboard {
         let type = l.type;
         if(type === 'error') type = colors.red(l.type);
         else if(type === 'warning') type = colors.yellow('warn');
-        return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5], 0)
+        return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5, 'auto'], 0)
     }
 }
 

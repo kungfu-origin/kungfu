@@ -104,7 +104,7 @@ class AccountDashboard extends Dashboard {
 			top: '0',
 			left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
-			height: '56%',
+			height: '55%',
 			getDataMethod: getAccountPos
 		})
 	}
@@ -153,7 +153,7 @@ class AccountDashboard extends Dashboard {
 			parent: t.screen,
 			top: '56%',
 			left: WIDTH_LEFT_PANEL - 5 + '%',
-			width: 100 - WIDTH_LEFT_PANEL + 6 + '%',
+			width: 100 - WIDTH_LEFT_PANEL + 5.5 + '%',
 			height: '39%',
 			getDataMethod: getAccountTrade
 		});
