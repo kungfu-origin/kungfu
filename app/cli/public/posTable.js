@@ -1,3 +1,4 @@
+import colors from 'colors';
 import Table from '../public/Table';
 import { calcuHeaderWidth, parseToString, posDirection } from './utils';
 import { toDecimal } from '@/assets/js/utils';
@@ -8,7 +9,8 @@ function PosTable(){
     }
     
     Table.call(this)
-	this.headers = ['Ticker', 'Dir', 'Yest', 'Total', ' UnRealPnl']
+	this.headers = ['Ticker', 'Dir', 'Yest', 'Total', 'UnRealPnl']
+	this.columnWidth = [0, 5]
 }
 
 PosTable.prototype = new Table();
@@ -26,13 +28,15 @@ PosTable.prototype.refresh = function(posData){
 	posData = Object.values(posData || {})
 	const posListData = posData.map(p => {
 		let direction = posDirection[p.direction]
-		// if(direction === 'L') direction = colors.red(direction);
-		// else direction = colors.green(direction);
-
+		if(direction === 'Long') direction = colors.red(direction);
+		else direction = colors.green(direction);
 		let unRealizedPnl = toDecimal(p.unrealized_pnl);
+		if(unRealizedPnl > 0) unRealizedPnl = colors.red(unRealizedPnl)
+		else if(unRealizedPnl < 0) unRealizedPnl = colors.green(unRealizedPnl)
+
 		return parseToString([
 			p.instrument_id,
-			p.direction,
+			direction,
 			p.yesterday_volume,
 			p.volume,
 			unRealizedPnl

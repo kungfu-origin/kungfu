@@ -1,5 +1,6 @@
 import blessed from 'blessed';
 import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from './utils';
+import { logger } from '__gUtils/logUtils';
 
 function Table(){
 	this.headers = [];
@@ -12,7 +13,8 @@ function Table(){
 Table.prototype.build = function(options) {
 	if(!options.getDataMethod) throw new Error(`${options.label} getDataMethod is required!`)
 	this.getDataMethod = options.getDataMethod;
-	this.afterSelectMethod = options.afterSelectMethod || (() => {});
+	this.afterSelectMethod = options.afterSelectMethod || function(){};
+	this.afterSwitchMethod = options.afterSwitchMethod || function(){};
     this.table = this.init({
         ...options,
 		headers: this.headers,      
@@ -47,6 +49,7 @@ Table.prototype.init = function(options){
 	});
 	const list = blessed.list({
 		...TABLE_BASE_OPTIONS,
+		...options.cell,
 		label: '',
 		content: '',
 		parent: box,
@@ -64,45 +67,40 @@ Table.prototype.init = function(options){
 
 	box.setItems = list.setItems.bind(list);
 	box.headers = headers;
+	this.bindEvent(box, list)
+	return box
+} 
 
+Table.prototype.bindEvent = function(box, list){
 	//bind event
 	const t = this;
 	box.on('focus', () => {
 		if(!list.focused) list.focus()
 	})
 	list.on('focus', (e) => {
-		process.nextTick(() => {
-			const selected = e.selected;
-			if(selected === undefined) return;
-			t.table.selectedIndex = selected;
-			t.afterSelectMethod();
-		})
 		box.style.border.fg = 'blue'
+		list.interactive = true;
 	})
 	list.on('blur', () => {
 		box.style.border.fg = 'white'
+		list.interactive = false;
 	})
-
-	list.on('keypress', (e, key) => {
-		if(key.name === 'up' && t.table.selectedIndex > 0) {
-			process.nextTick(() => {
-				t.table.selectedIndex = t.table.selectedIndex - 1;
-				t.afterSelectMethod();
-			})
-		} 
-		else if(key.name === 'down' ){
-			const itemLen = t.table.children[1].ritems.length || 0;
-			if(t.table.selectedIndex < itemLen - 1) {
-				process.nextTick(() => {
-					t.table.selectedIndex = t.table.selectedIndex + 1;
-					t.afterSelectMethod();
-				})
-			}
+	list.on('select', () => {
+		const newIndex = list.selected;
+		if(newIndex !== t.table.selectedIndex) {
+			t.table.selectedIndex = newIndex;
+			t.afterSelectMethod(t.table.selectedIndex);
 		}
 	})
-
-	return box
-} 
+	list.key(['enter'], () => {
+		const newIndex = list.selected;
+		t.afterSwitchMethod(t.table.selectedIndex);
+		if(newIndex !== t.table.selectedIndex) {
+			t.table.selectedIndex = newIndex;
+			t.afterSelectMethod(t.table.selectedIndex);
+		}
+	})
+}
 
 
 export default Table

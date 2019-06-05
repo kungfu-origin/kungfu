@@ -1,6 +1,7 @@
 import colors from 'colors';
 import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
 import { setTasksDB } from '@/io/base';
+import { toDecimal } from '@/assets/js/utils';
 
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
@@ -45,8 +46,8 @@ export const orderStatus = {
 //     DirectionLong = '0'
 //    DirectionShort = '1'
 export const posDirection = {
-    0: 'L',
-    1: 'S' 
+    0: 'Long',
+    1: 'Short' 
 }
 
 /**
@@ -56,12 +57,12 @@ export const posDirection = {
  */
 export const parseToString = (targetList, columnWidth=[], pad=2) => {
 	return targetList.map((l, i) => {
-		l = l + '';
+		l = l.toString();
 		const r = /m([^%]+)\u001b/
 		const lw = l.match(r) === null ? l : l.match(r)[1];
 		const len = lw.length;
-		const colWidth = columnWidth[i];
-		if(colWidth === undefined) return l;
+		const colWidth = columnWidth[i] || 0;
+		if(colWidth === 'auto') return l;
 		const spaceLength = colWidth - len;
 		if(spaceLength < 0) return lw.slice(0, colWidth)
 		else if(spaceLength === 0) return l
@@ -77,6 +78,12 @@ export const calcuHeaderWidth = (target, wish=[]) => {
 	})
 }
 
+export const DEFAULT_PADDING = {
+    top : 1,
+    left : 1,
+    right : 1
+};
+
 export const TABLE_BASE_OPTIONS = {
 	content: '',
 	padding: 0,
@@ -88,16 +95,16 @@ export const TABLE_BASE_OPTIONS = {
 	border: {
 		type: 'line'
 	},
-	interactive: true,
 	keys: true,
 	align: 'left',
 	autoCommandKeys: true,
 	tags: true,
 	mouse: true,
+	clickable: true,
+	interactive: true,
 	rows: [],
 	items: [],
 	style: {
-		fg: 'white',
 		focus: {
 			border: {
 				fg: 'blue',
@@ -125,23 +132,31 @@ export const parseAccountList = (target={}, accountList) => {
 		if(target.accountData[accountId]) target.accountData[accountId] = {...target.accountData[accountId], ...l}
 		else target.accountData[accountId] = {...l, status: '--', accumulated_pnl : '--', accumulated_pnl_ratio: '--', 'total': '--', 'avail': '--'}
 	});
-
 	//md
 	accountList.filter(l => !!l.receive_md).forEach(l => {
 		const source = l.source_name;
 		if(target.mdData[source]) target.mdData[source] = {...target.mdData[source], ...l}
 		else target.mdData[source] = {...l, status: '--'}
 	})
-
 	return target
 }
-
 
 export const dealStatus = (status) => {
 	status = status || '--'
 	if(status === 'online') return colors.green(status);
 	else if(status === 'error') return colors.red(status);
 	else return colors.grey(status)
+}
+
+export const dealNum = (num, percentage) => {
+	percentage = percentage ? '%' : ''
+	num = toDecimal(num) + '' || '--'
+	if(num === '--') return '--'
+	if(+num > 0) {
+		return colors.red(num + percentage).toString()
+	}
+	else if(+num < 0) return colors.green(num + percentage)
+	else return num + percentage
 }
 
 export const switchMaster = (globalStatus) => {

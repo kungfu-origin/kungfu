@@ -1,12 +1,11 @@
 import blessed  from 'blessed';
 import colors from 'colors';
 import path from 'path';
-import moment from 'moment';
 import { Tail } from 'tail';
 
-import { ARCHIVE_DIR, LOG_DIR } from '__gConfig/pathConfig';
+import { LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '../public/Dashboard';
-import { TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString } from '../public/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString } from '../public/utils';
 import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
@@ -14,13 +13,6 @@ import { listProcessStatus } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 
 const WIDTH_LEFT_PANEL = 30;
-const DEFAULT_PADDING = {
-    top : 1,
-    left : 1,
-    right : 1
-};
-
-const TODAY = moment().format('YYYY-MM-DD')
 
 class MonitorDashboard extends Dashboard {
     constructor(...args){
@@ -43,7 +35,7 @@ class MonitorDashboard extends Dashboard {
         t.initMasterProcess();
         t.initProcessList();
         t.initLog();
-        t.initMetaData();
+        // t.initMetaData();
         t.initBoxInfo();
         t.initLoader();
         t.screen.render();
@@ -107,7 +99,7 @@ class MonitorDashboard extends Dashboard {
             top: '0',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '75%',
+            height: '95%-1',
             padding: DEFAULT_PADDING,
             style: {
                 ...TABLE_BASE_OPTIONS.style,
@@ -118,24 +110,24 @@ class MonitorDashboard extends Dashboard {
         })
     }
 
-    initMetaData(){
-        this.metaData = blessed.list({
-            ...TABLE_BASE_OPTIONS,
-            label: ' MetaData ',
-            parent: this.screen,
-            top: '75%',
-            left: WIDTH_LEFT_PANEL + '%',
-            width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '19%',
-            style: {
-                ...TABLE_BASE_OPTIONS.style,
-                selected: {
-					bold: true,
-                }
-            }
+    // initMetaData(){
+    //     this.metaData = blessed.list({
+    //         ...TABLE_BASE_OPTIONS,
+    //         label: ' MetaData ',
+    //         parent: this.screen,
+    //         top: '75%',
+    //         left: WIDTH_LEFT_PANEL + '%',
+    //         width: 100 - WIDTH_LEFT_PANEL + '%',
+    //         height: '19%',
+    //         style: {
+    //             ...TABLE_BASE_OPTIONS.style,
+    //             selected: {
+	// 				bold: true,
+    //             }
+    //         }
             
-        })
-    }
+    //     })
+    // }
 
     initBoxInfo() {
         this.boxInfo = blessed.text({
@@ -184,14 +176,11 @@ class MonitorDashboard extends Dashboard {
 
         t.masterProcess.on('focus', () => t.masterProcess.interactive = true)
         t.masterProcess.on('blur', () => t.masterProcess.interactive = false)
-
         t.masterProcess.key(['enter'], (ch, key) => {
             switchMaster(t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
         })
-
         t.processList.on('focus', () => t.processList.interactive = true)
         t.processList.on('blur', () => t.processList.interactive = false)
-
         t.processList.key(['enter'], () => {
             const selectedIndex = t.processList.selected;
             const currentProcess = t.globalData.processes[selectedIndex];
@@ -212,12 +201,10 @@ class MonitorDashboard extends Dashboard {
     refresh(){
         const { processStatus } = this.globalData;
         //master
-        this.masterProcess.setItems([parseToString(['Master', dealStatus(processStatus.master)], [23, 8])])
+        this.masterProcess.setItems([parseToString(['Master', dealStatus(processStatus.master)], [23, 8, 'auto'])])
         //processes
         const processes = this._dealProcessList();
-        this.processList.setItems(processes);
-
-        // this.mergedLogs.setItems(this.globalData.logList);
+        this.processList.setItems(processes);;
         this.screen.render();
     }
 
@@ -287,15 +274,7 @@ class MonitorDashboard extends Dashboard {
                 else if(a.updateTime < b.updateTime) return -1
                 else return 0
             })
-            mergedLogs.forEach(l => {
-                let type = l.type;
-                if(type === 'error') type = colors.red(l.type);
-                else if(type === 'warning') type = colors.yellow('warn');
-                else type = colors.grey(l.type);
-                t.mergedLogs.add(
-                    parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 5], 0)
-                )
-            })
+            mergedLogs.forEach(l => t.mergedLogs.add(t._dealLog(l)))
         })
     }
 
@@ -380,15 +359,7 @@ class MonitorDashboard extends Dashboard {
             watcher.watch();
             watcher.on('line', line => {
                 const logData = dealLogMessage(line);
-                logData.forEach(l => {
-                    let type = l.type;
-                    if(type === 'error') type = colors.red(l.type);
-                    else if(type === 'warning') type = colors.yellow('warn');
-                    else type = colors.grey(l.type);
-                    t.mergedLogs.add(
-                        parseToString([`[${l.updateTime}]`, `[${type}]`, l.message], [31, 5], 0)
-                    )
-                })
+                logData.forEach(l => t.mergedLogs.add(t._dealLog(l)))
             })
             watcher.on('error', err => {
                 watcher.unwatch();
@@ -396,6 +367,13 @@ class MonitorDashboard extends Dashboard {
             })
             t.logWatchers.push(watcher);
         })
+    }
+
+    _dealLog(l){
+        let type = l.type;
+        if(type === 'error') type = colors.red(l.type);
+        else if(type === 'warning') type = colors.yellow('warn');
+        return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5], 0)
     }
 }
 

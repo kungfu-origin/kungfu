@@ -1,5 +1,5 @@
 import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString } from './utils';
+import { calcuHeaderWidth, parseToString, dealStatus } from './utils';
 
 
 function MdTable(){
@@ -8,7 +8,7 @@ function MdTable(){
     }
     Table.call(this);
     this.headers = ['Source', 'Account', 'Status']
-	this.columnWidth = [0, 10]
+	this.columnWidth = [0, 10, 8]
 }
 
 MdTable.prototype = new Table();
@@ -19,12 +19,12 @@ MdTable.prototype = new Table();
  * @param  {Object} accountData
  * @param  {Object} processStatus
  */
-MdTable.prototype.refresh = function(mdData){
+MdTable.prototype.refresh = function(mdData, processStatus){
     mdData = Object.values(mdData || {})
 	const mdListData = mdData.map(m => parseToString([
         m.source_name,
         m.account_id.toAccountId(),
-        m.status
+        dealStatus(processStatus[`md_${m.source_name}`])
     ], calcuHeaderWidth(this.headers, this.columnWidth)))
 	this.table.setItems(mdListData)
 }

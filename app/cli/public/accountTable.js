@@ -1,5 +1,6 @@
+import colors from 'colors';
 import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, parseAccountList } from './utils';
+import { calcuHeaderWidth, parseToString, parseAccountList, dealNum } from './utils';
 import { sourceType } from '@/assets/config/accountConfig';
 import { toDecimal } from '@/assets/js/utils';
 
@@ -10,7 +11,7 @@ function AccountTable(){
     }
     Table.call(this)
 	this.headers = ['Account', 'Source', 'Status', 'Pnl', 'PnlRt','Total', 'Avail'];
-	this.columnWidth = [10, 0, 0, 8, 6, 8, 8]
+	this.columnWidth = [10, 0, 8, 10, 6, 10, 10]
 }
 
 AccountTable.prototype = new Table();
@@ -28,17 +29,19 @@ AccountTable.prototype.refresh = function(accountData, processStatus, cashData){
 	accountData = Object.values(accountData || {});
 	const accountListData = accountData.map(a => {
 		const accountId = a.account_id.toAccountId();
-		const tdProcess = processStatus[`td_${a.account_id}`] || '--';
+		let tdProcess = processStatus[`td_${a.account_id}`] || '--';
+		if(tdProcess === 'online') tdProcess = colors.green(tdProcess);
+		else if(tdProcess === 'error') tdProcess = colors.red(tdProcess);
 		const cash = cashData[accountId] || {};
 		const typeName = (sourceType[a.source_name] || {}).typeName
 		const total = typeName === 'future' ? cash.margin : cash.market_value
-		const accumulatedPnlRatio = toDecimal(cash.accumulated_pnl_ratio) + ''
+		const accumulatedPnlRatio = toDecimal(cash.accumulated_pnl_ratio) + '';
 		return parseToString([
 			accountId,
 			a.source_name,
 			tdProcess,
-			toDecimal(cash.accumulated_pnl) + '' || '--',
-			accumulatedPnlRatio ? accumulatedPnlRatio + '%' : '--',
+			dealNum(cash.accumulated_pnl),
+			dealNum(accumulatedPnlRatio, true),
 			toDecimal(total) + '' || '--',
 			toDecimal(cash.avail) + '' || '--',
         ], calcuHeaderWidth(this.headers, this.columnWidth))
