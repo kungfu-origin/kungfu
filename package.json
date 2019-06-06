@@ -7,7 +7,7 @@
     "pyver": "three",
     "cmakejsopt": ""
   },
-  "main": "./dist/main.js",
+  "main": "./dist/app/main.js",
   "engines": {
     "node": ">=8.0.0 <11.0.0"
   },
@@ -49,17 +49,17 @@
       }
     ],
     "files": [
-      "dist/**/*",
+      "dist/app/**/*",
       {
         "from": ".",
-        "to": "dist",
+        "to": "dist/app",
         "filter": [
           "resources"
         ]
       },
       {
         "from": "wingchun/resources",
-        "to": "dist/resources/default",
+        "to": "dist/app/resources/default",
         "filter": [
           "commission.db"
         ]

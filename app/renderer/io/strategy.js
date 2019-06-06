@@ -65,6 +65,7 @@ export const getStrategyAccounts = (strategyId) => {
  * 获取某策略下委托
  */
 export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) => {
+    dateRange = dateRange || []
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
@@ -77,7 +78,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
     const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
-    const filterDate = dateRange ? [dateRange0, dateRange1] : [startDate, endDate];
+    const filterDate = dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
     return new Promise((resolve, reject) => {
         let tableData = []
         getStrategyAccounts(strategyId).then(accounts => {
@@ -86,7 +87,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
                     (runSelectDB(buildAccountOrdersDBPath(
                         item.account_id), 
                         `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
-                        ` AND (order_id LIKE '%${id}%' OR instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+                        ` AND (order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
                         ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
                         (dateRange ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
                     ).then(orders => tableData = tableData.concat(orders)))
@@ -108,6 +109,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
  * 获取某策略下成交
  */
 export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) => {
+    dateRange = dateRange || [];
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策咯！')
@@ -120,7 +122,7 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) =
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
     const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
-    const filterDate = dateRange ? [dateRange0, dateRange1] : [startDate, endDate];
+    const filterDate = dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
     let tableData = []
     return new Promise((resolve, reject) => {
         getStrategyAccounts(strategyId).then(accounts => {
@@ -130,7 +132,7 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) =
             accounts.map(item => {
                 runSelectDB(buildAccountTradesDBPath(item.account_id), 
                 `SELECT rowId, * FROM trade WHERE client_id = '${strategyId}'` + 
-                ` AND (instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+                ` AND (instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
                 ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}`
                 ).then(trade => {
                     tableData = tableData.concat(trade)
@@ -157,7 +159,7 @@ export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) =
  */
 export const getStrategyPos = (strategyId, {instrumentId, type}) => {
     return new Promise((resolve, reject) => {
-        runSelectDB(buildStrategyPosDBPath(strategyId), `SELECT * FROM position where instrument_id LIKE '%${instrumentId}%'` + (type ? ` AND instrument_type = ${type}` : ``) + ' ORDER BY instrument_id')
+        runSelectDB(buildStrategyPosDBPath(strategyId), `SELECT * FROM position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type}` : ``) + ' ORDER BY instrument_id')
         .then(pos => {
             let posList = {}
             //策略的pos是一条一条成交记录？

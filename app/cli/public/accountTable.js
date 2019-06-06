@@ -1,6 +1,6 @@
 import colors from 'colors';
 import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, parseAccountList, dealNum } from './utils';
+import { calcuHeaderWidth, parseToString, parseAccountList, dealNum, dealStatus } from './utils';
 import { sourceType } from '@/assets/config/accountConfig';
 import { toDecimal } from '@/assets/js/utils';
 
@@ -29,9 +29,7 @@ AccountTable.prototype.refresh = function(accountData, processStatus, cashData){
 	accountData = Object.values(accountData || {});
 	const accountListData = accountData.map(a => {
 		const accountId = a.account_id.toAccountId();
-		let tdProcess = processStatus[`td_${a.account_id}`] || '--';
-		if(tdProcess === 'online') tdProcess = colors.green(tdProcess);
-		else if(tdProcess === 'error') tdProcess = colors.red(tdProcess);
+		const tdProcess = dealStatus(processStatus[`td_${a.account_id}`]) 
 		const cash = cashData[accountId] || {};
 		const typeName = (sourceType[a.source_name] || {}).typeName
 		const total = typeName === 'future' ? cash.margin : cash.market_value

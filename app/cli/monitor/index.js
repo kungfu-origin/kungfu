@@ -110,25 +110,6 @@ class MonitorDashboard extends Dashboard {
         })
     }
 
-    // initMetaData(){
-    //     this.metaData = blessed.list({
-    //         ...TABLE_BASE_OPTIONS,
-    //         label: ' MetaData ',
-    //         parent: this.screen,
-    //         top: '75%',
-    //         left: WIDTH_LEFT_PANEL + '%',
-    //         width: 100 - WIDTH_LEFT_PANEL + '%',
-    //         height: '19%',
-    //         style: {
-    //             ...TABLE_BASE_OPTIONS.style,
-    //             selected: {
-	// 				bold: true,
-    //             }
-    //         }
-            
-    //     })
-    // }
-
     initBoxInfo() {
         this.boxInfo = blessed.text({
             content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | enter: process-switch',

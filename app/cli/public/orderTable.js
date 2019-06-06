@@ -15,7 +15,7 @@ OrderTable.prototype = new Table();
 
 OrderTable.prototype.getData = function(currentId){
 	if(!currentId) return new Promise(resolve => resolve([]))
-	return this.getDataMethod(currentId, {}).then(orders => {
+	return this.getDataMethod(currentId, {dateRange: []}).then(orders => {
         return orders
 	})
 }

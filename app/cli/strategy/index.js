@@ -1,26 +1,25 @@
 import blessed  from 'blessed';
 import contrib from 'blessed-contrib'
-import accountTable from '../public/AccountTable';
+import strategyTable from '../public/StrategyTable';
 import posTable from '../public/PosTable';
-import mdTable from '../public/MdTable';
 import orderTable from '../public/OrderTable';
 import tradeTable from '../public/TradeTable';
 import Dashboard from '../public/Dashboard';
 
-import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
-import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
+import { getStrategyList, getAccountPos, getStrategyPos, getStrategyTrade, getStrategyOrder } from '@/io/strategy.js';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { toDecimal } from '@/assets/js/utils';
 
 // 定义全局变量
-const WIDTH_LEFT_PANEL = 60;
+const WIDTH_LEFT_PANEL = 40;
 
-class AccountDashboard extends Dashboard {
+class StrategyDashboard extends Dashboard {
 	constructor(){
 		super()
 		this.screen.title = 'Account Dashboard';
 		this.globalData = {
-			accountData: {},
+			strategyData: {},
 			posData: {},
 			mdData: {},
 			pnlData: [],
@@ -37,10 +36,9 @@ class AccountDashboard extends Dashboard {
 
 	init(){
 		const t = this;
-		t.initAccountTable();
-		t.initMdTable();
-		t.initPosTable();
-		t.initPnl();
+		t.initStrategyTable();
+        t.initLogTable();
+        t.initPostList();
 		t.initOrderList();
 		t.initTradeList();
 		t.initBoxInfo();
@@ -49,16 +47,16 @@ class AccountDashboard extends Dashboard {
 		t.bindEvent();
 	}
 	
-	initAccountTable(){
+	initStrategyTable(){
 		const t = this;
-		t.accountTable = accountTable.build({
-			label: ' Trader Engines ',
+		t.strategyTable = strategyTable.build({
+			label: ' Strategies ',
 			top: '0',
 			parent: t.screen,
 			left: '0%',
 			width: WIDTH_LEFT_PANEL + '%',
 			height: '33.33%',
-			getDataMethod: getAccountList,
+			getDataMethod: getStrategyList,
 			afterSelectMethod: t._afterSelected.bind(t),
 			afterSwitchMethod: t._afterSwitchAccountProcess.bind(t),
 			style: {
@@ -71,78 +69,48 @@ class AccountDashboard extends Dashboard {
 			}
 	
 		})
-		t.accountTable.focus();
+		t.strategyTable.focus();
 	}
-	
-	initMdTable(){
+
+	initLogTable(){
 		const t = this;
-		t.mdTable = mdTable.build({
-			label: ' Market Engines ',
+		t.logTable = blessed.log({
+            ...TABLE_BASE_OPTIONS,
+			label: ' Logs ',
 			parent: t.screen,
-			top: '33.33%',
+			top: '33.33',
 			left: '0',
-			width: WIDTH_LEFT_PANEL / 2 + '%',
-			height: '23.66%',
-			getDataMethod: getAccountList,
-			afterSwitchMethod: t._afterSwitchMdProcess.bind(t),
-			style: {
-				cell: {
-					selected: {
-						bold: true,
-						bg: 'grey'
-					},
-				},
-			}
-		});
+			width: WIDTH_LEFT_PANEL + '%',
+			height: '62.66%',
+			getDataMethod: getAccountPos
+		})
 	}
-	
-	initPosTable(){
+    
+    	
+	initPostList(){
 		const t = this;
 		t.posTable = posTable.build({
 			label: ' Positions ',
 			parent: t.screen,
-			top: '0',
-			left: WIDTH_LEFT_PANEL + '%',
+            top: '0%',
+            left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
-			height: '55%',
-			getDataMethod: getAccountPos
-		})
+			height: '33.33%',
+			getDataMethod: getStrategyPos
+		});
 	}
 	
-	initPnl(){
-		const t = this;
-		this.pnl = contrib.line({ 
-			style:{ 
-				line: "yellow", 
-				text: "white", 
-				baseline: "white",
-			},
-			xPadding: 5,
-			border: {
-				type: 'line',
-			},
-			padding: DEFAULT_PADDING,
-			showLegend: false,
-			wholeNumbersOnly: false, //true=do not show fraction in y axis
-			label: 'Pnl',
-			top: '33.33%',
-			left: WIDTH_LEFT_PANEL / 2 + '%',
-			width: WIDTH_LEFT_PANEL / 2 + '%',
-			height: '23.66%',
-			align: 'center'
-		})
-	  	this.screen.append(this.pnl) //must append before setting data		
-	}
 	
 	initOrderList(){
 		const t = this;
 		t.orderTable = orderTable.build({
 			label: ' Today Orders ',
 			parent: t.screen,
-			top: '56%',
-			width: WIDTH_LEFT_PANEL - 5 + '%',
-			height: '39%',
-			getDataMethod: getAccountOrder
+			top: '33.33%',
+            left: WIDTH_LEFT_PANEL + '%',
+			width: 100 - WIDTH_LEFT_PANEL + '%',
+			height: '33.33%',
+			getDataMethod: getStrategyOrder
 		});
 	}
 	
@@ -151,11 +119,11 @@ class AccountDashboard extends Dashboard {
 		t.tradeTable = tradeTable.build({
 			label: ' Today Trades ',
 			parent: t.screen,
-			top: '56%',
-			left: WIDTH_LEFT_PANEL - 5 + '%',
-			width: 100 - WIDTH_LEFT_PANEL + 5.5 + '%',
-			height: '39%',
-			getDataMethod: getAccountTrade
+			top: '60.66%',
+            left: WIDTH_LEFT_PANEL + '%',
+			width: 100 - WIDTH_LEFT_PANEL + '%',
+			height: '33.33%',
+			getDataMethod: getStrategyTrade
 		});
 	}
 	
@@ -175,17 +143,11 @@ class AccountDashboard extends Dashboard {
 	
 	refresh(){
 		const t = this;
-		const { processStatus, accountData, mdData, posData, orderData, tradeData, cashData } = t.globalData;
-		t.accountTable.refresh(accountData, processStatus, cashData)
-		t.mdTable.refresh(mdData, processStatus)
+		const { processStatus, strategyData, mdData, posData, orderData, tradeData, cashData } = t.globalData;
+		t.strategyTable.refresh(strategyData, processStatus)
 		t.posTable.refresh(posData)
 		t.orderTable.refresh(orderData)
 		t.tradeTable.refresh(tradeData);
-		t.pnl.setData({
-			title: '',
-			x: t.globalData.pnl.x || [],
-			y: t.globalData.pnl.y || [],
-		})
 	}
 	
 	getData(){
@@ -193,19 +155,11 @@ class AccountDashboard extends Dashboard {
 		let timer = null;
 		const runPromises = () => {
 			clearTimeout(timer)
-			const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
+			const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];
 			//md + td
-			const mdTdPromise = t.accountTable.getData(t.globalData)
-			.then(({accountData, mdData}) => {
-				t.globalData[mdData] = mdData;
-				t.globalData[accountData] = accountData;
-			})
+            const strategyListPromise = t.strategyTable.getData(t.globalData)
+			.then(strategyData => t.globalData.strategyData = strategyData)
 			.then(() => t.refresh())
-			//account assets
-			const accountAssetsPromises = Object.keys(t.globalData.accountData || {})
-			.map(accountId => getAccountAsset(accountId)
-			.then(cash => t.globalData.cashData[accountId] = ((cash || [])[0] || {}))
-			.then(() => t.refresh()))
 			//pos
 			const posDataPromise = t.posTable.getData(currentId)
 			.then(pos => t.globalData.posData = pos || {})
@@ -218,21 +172,12 @@ class AccountDashboard extends Dashboard {
 			const tradeDataPromise = t.tradeTable.getData(currentId)
 			.then(trades => t.globalData.tradeData = trades || [])
 			.then(() => t.refresh())
-			//pnl
-			const pnlPromise = getAccountPnlDay(currentId)
-			.then(data => {
-				t.globalData.pnl = dealPnlData(data)
-				t.refresh()
-			})
-			.catch(err => {})
 
 			Promise.all([
-				mdTdPromise, 
-				...accountAssetsPromises, 
+				strategyListPromise, 
 				posDataPromise,
 				orderDataPromise,
-				tradeDataPromise,
-				pnlPromise
+				tradeDataPromise
 			]).finally(() => {
 				timer = setTimeout(() => runPromises(), 3000)
 			})
@@ -252,7 +197,7 @@ class AccountDashboard extends Dashboard {
 	bindEvent(){
 		const t = this;
 		let i = 0;
-		let boards = ['accountTable', 'mdTable', 'posTable', 'orderTable', 'tradeTable'];
+		let boards = ['strategyTable', 'logTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch, key) => {
 			(key.name === 'left') ? i-- : i++;
 			if (i === 5) i = 0;
@@ -268,7 +213,7 @@ class AccountDashboard extends Dashboard {
 
 	_afterSwitchAccountProcess(index){
 		const t = this;
-		const tdProcess = Object.values(t.globalData.accountData || {})[index];
+		const tdProcess = Object.values(t.globalData.strategyData || {})[index];
 		switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
 	}
 
@@ -309,14 +254,14 @@ class AccountDashboard extends Dashboard {
 	
 
 
-const accountDashboard = new AccountDashboard();
-accountDashboard.init();
-accountDashboard.render();
-accountDashboard.getData()
-accountDashboard.refresh();
-accountDashboard.getProcessStatus();
+const strategyDashboard = new StrategyDashboard();
+strategyDashboard.init();
+strategyDashboard.render();
+strategyDashboard.getData()
+strategyDashboard.refresh();
+strategyDashboard.getProcessStatus();
 setInterval(() => {
-	accountDashboard.refresh();
+	strategyDashboard.refresh();
 }, 1000)
 
 
