@@ -10,7 +10,6 @@ import Dashboard from '../public/Dashboard';
 import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
 import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
-import { toDecimal } from '@/assets/js/utils';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;

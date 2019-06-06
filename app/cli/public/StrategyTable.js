@@ -11,7 +11,7 @@ function StrategyTable(){
     }
     Table.call(this)
 	this.headers = ['Strategy', 'Status', 'Pnl', 'PnlRt', 'dbPath'];
-	this.columnWidth = [10, 8, 10, 6, 'auto']
+	this.columnWidth = [10, 8, 8, 6, 'auto']
 }
 
 StrategyTable.prototype = new Table();
@@ -34,15 +34,14 @@ StrategyTable.prototype.refresh = function(strategyData, processStatus){
 		const strategyId = s.strategy_id;
         const strategyProcess = dealStatus(processStatus[strategyId]);
         const pathLen = s.strategy_path.length;
-        const strategyPath = pathLen < 30 ? s.strategy_path :  `...${s.strategy_path.slice(pathLen - 30)}`
-
+        const strategyPath = pathLen < 15 ? s.strategy_path :  `...${s.strategy_path.slice(pathLen - 15)}`
 		return parseToString([
             strategyId,
             strategyProcess,
             '--',
             '--',
             strategyPath
-        ], this.columnWidth)
+        ].slice(0, this.headers.length), this.columnWidth)
     })
 	this.table.setItems(strategyListData)
 }

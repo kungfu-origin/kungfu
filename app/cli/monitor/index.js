@@ -5,7 +5,7 @@ import { Tail } from 'tail';
 
 import { LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '../public/Dashboard';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString } from '../public/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString, dealLog } from '../public/utils';
 import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
@@ -40,9 +40,7 @@ class MonitorDashboard extends Dashboard {
         t.initLoader();
         t.screen.render();
         t.bindEvent();
-        t.getProcessStatus().then(() => {
-            t.getLogs();
-        });
+        t.getProcessStatus().then(() => t.getLogs());
     }
 
 
@@ -256,7 +254,7 @@ class MonitorDashboard extends Dashboard {
                 else return 0
             })
             mergedLogs.forEach(l => {
-                t.mergedLogs.add(t._dealLog(l))
+                t.mergedLogs.add(dealLog(l))
             })
         })
     }
@@ -342,7 +340,7 @@ class MonitorDashboard extends Dashboard {
             watcher.watch();
             watcher.on('line', line => {
                 const logData = dealLogMessage(line);
-                logData.forEach(l => t.mergedLogs.add(t._dealLog(l)))
+                logData.forEach(l => t.mergedLogs.add(dealLog(l)))
             })
             watcher.on('error', err => {
                 watcher.unwatch();
@@ -350,13 +348,6 @@ class MonitorDashboard extends Dashboard {
             })
             t.logWatchers.push(watcher);
         })
-    }
-
-    _dealLog(l){
-        let type = l.type;
-        if(type === 'error') type = colors.red(l.type);
-        else if(type === 'warning') type = colors.yellow('warn');
-        return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5, 'auto'], 0)
     }
 }
 

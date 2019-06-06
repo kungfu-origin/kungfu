@@ -42,7 +42,7 @@ AccountTable.prototype.refresh = function(accountData, processStatus, cashData){
 			dealNum(accumulatedPnlRatio, true),
 			toDecimal(total) + '' || '--',
 			toDecimal(cash.avail) + '' || '--',
-        ], calcuHeaderWidth(this.headers, this.columnWidth))
+        ].slice(0, this.headers.length), calcuHeaderWidth(this.headers, this.columnWidth))
     })
 	this.table.setItems(accountListData)
 }

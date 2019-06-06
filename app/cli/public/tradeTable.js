@@ -41,10 +41,10 @@ TradeTable.prototype.refresh = function(tradesData){
 			trade.price,
 			trade.volume,
 			trade.client_id
-		], calcuHeaderWidth(this.headers, this.columnWidth))
+		].slice(0, this.headers.length), calcuHeaderWidth(this.headers, this.columnWidth))
 	})
-	this.table.setItems(tradeListData)
-
+	this.table.setItems(tradeListData);
+	if(!this.table.childList.focused) this.table.childList.setScrollPerc(0);
 }
 
 export default TradeTable()

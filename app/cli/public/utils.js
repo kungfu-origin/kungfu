@@ -207,3 +207,10 @@ export const dealPnlData = (data) => {
 	})
 	return {x: xAxisData, y:serirsData}
 }
+
+export const dealLog = (l) => {
+	let type = l.type;
+	if(type === 'error') type = colors.red(l.type);
+	else if(type === 'warning') type = colors.yellow('warn');
+	return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5, 'auto'], 0)
+}

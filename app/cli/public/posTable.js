@@ -43,6 +43,7 @@ PosTable.prototype.refresh = function(posData){
 		], calcuHeaderWidth(this.headers, this.columnWidth))
     })
 	this.table.setItems(posListData)
+	if(!this.table.childList.focused) this.table.childList.setScrollPerc(0)
 }
 
 export default PosTable()

@@ -17,9 +17,10 @@ Table.prototype.build = function(options) {
 	this.afterSwitchMethod = options.afterSwitchMethod || function(){};
     this.table = this.init({
         ...options,
-		headers: this.headers,      
-		columnWidth: this.columnWidth
-    })
+		headers: options.headers || this.headers,      
+		columnWidth: options.columnWidth || this.columnWidth
+	})
+	if(options.headers) this.headers = options.headers
     this.table.getData = this.getData.bind(this);
 	this.table.refresh = this.refresh.bind(this);
 	this.table.selectedIndex = 0;
@@ -31,10 +32,11 @@ Table.prototype.getData = function(){}
 Table.prototype.refresh = function(){}
 
 Table.prototype.init = function(options){
-    if(!options.headers) throw new Error('options must include attribute: headers')
-	const headers = options.headers || [];
-	const columnWidth = options.columnWidth || [];
-	const content = ' ' + parseToString(headers, calcuHeaderWidth(headers, columnWidth))
+	if(!options.headers) throw new Error('options must include attribute: headers')
+	const headers = options.headers || this.headers;
+	const columnWidth = options.columnWidth || this.columnWidth;
+	const pad = options.pad || 2;
+	const content = ' ' + parseToString(headers, calcuHeaderWidth(headers, columnWidth), pad)
 	const box = blessed.box({
 		...options,
 		content: content,
@@ -67,6 +69,7 @@ Table.prototype.init = function(options){
 
 	box.setItems = list.setItems.bind(list);
 	box.headers = headers;
+	box.childList = list;
 	this.bindEvent(box, list)
 	return box
 } 

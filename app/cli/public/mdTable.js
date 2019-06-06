@@ -25,7 +25,7 @@ MdTable.prototype.refresh = function(mdData, processStatus){
         m.source_name,
         m.account_id.toAccountId(),
         dealStatus(processStatus[`md_${m.source_name}`])
-    ], calcuHeaderWidth(this.headers, this.columnWidth)))
+    ].slice(0, this.headers.length), calcuHeaderWidth(this.headers, this.columnWidth)))
 	this.table.setItems(mdListData)
 }
 

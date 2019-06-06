@@ -1,18 +1,19 @@
 import blessed  from 'blessed';
-import contrib from 'blessed-contrib'
+import path from 'path';
 import strategyTable from '../public/StrategyTable';
 import posTable from '../public/PosTable';
 import orderTable from '../public/OrderTable';
 import tradeTable from '../public/TradeTable';
 import Dashboard from '../public/Dashboard';
 
-import { getStrategyList, getAccountPos, getStrategyPos, getStrategyTrade, getStrategyOrder } from '@/io/strategy.js';
-import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
+import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder } from '@/io/strategy.js';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchMd, switchTd, dealLog } from '../public/utils';
+import { dealLogMessage, getLog } from '@/assets/js/utils';
+import { LOG_DIR } from '__gConfig/pathConfig';
 import { listProcessStatus } from '__gUtils/processUtils';
-import { toDecimal } from '@/assets/js/utils';
 
 // 定义全局变量
-const WIDTH_LEFT_PANEL = 40;
+const WIDTH_LEFT_PANEL = 50;
 
 class StrategyDashboard extends Dashboard {
 	constructor(){
@@ -44,7 +45,6 @@ class StrategyDashboard extends Dashboard {
 		t.initBoxInfo();
 		t.initMessage();
 		t.screen.render();
-		t.bindEvent();
 	}
 	
 	initStrategyTable(){
@@ -78,12 +78,12 @@ class StrategyDashboard extends Dashboard {
             ...TABLE_BASE_OPTIONS,
 			label: ' Logs ',
 			parent: t.screen,
-			top: '33.33',
-			left: '0',
+			top: '33.33%',
+            left: '0',
+            padding: DEFAULT_PADDING,
 			width: WIDTH_LEFT_PANEL + '%',
 			height: '62.66%',
-			getDataMethod: getAccountPos
-		})
+        })
 	}
     
     	
@@ -110,7 +110,9 @@ class StrategyDashboard extends Dashboard {
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
 			height: '33.33%',
-			getDataMethod: getStrategyOrder
+            getDataMethod: getStrategyOrder,
+            pad: 1,
+            headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status']
 		});
 	}
 	
@@ -119,11 +121,12 @@ class StrategyDashboard extends Dashboard {
 		t.tradeTable = tradeTable.build({
 			label: ' Today Trades ',
 			parent: t.screen,
-			top: '60.66%',
+			top: '66.66%',
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
-			height: '33.33%',
-			getDataMethod: getStrategyTrade
+			height: '31.33%',
+            getDataMethod: getStrategyTrade,
+	        headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol']            
 		});
 	}
 	
@@ -173,7 +176,7 @@ class StrategyDashboard extends Dashboard {
 			.then(trades => t.globalData.tradeData = trades || [])
 			.then(() => t.refresh())
 
-			Promise.all([
+			return Promise.all([
 				strategyListPromise, 
 				posDataPromise,
 				orderDataPromise,
@@ -182,7 +185,7 @@ class StrategyDashboard extends Dashboard {
 				timer = setTimeout(() => runPromises(), 3000)
 			})
 		}
-		runPromises()
+		return runPromises()
 	}
 	
 	render(){
@@ -233,7 +236,17 @@ class StrategyDashboard extends Dashboard {
 		};
 		this.refresh();
 	}
-	
+    
+    getLogs(){
+        const t = this;
+		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];        
+        const logPath = path.join(LOG_DIR, `${currentId}.log`);  
+        return getLog(logPath).then(({list}) => {
+            list.forEach(l => {
+                t.logTable.add(dealLog(l))
+            })
+        })
+    }
 	
 	getProcessStatus(){
 		const t = this;
@@ -241,14 +254,12 @@ class StrategyDashboard extends Dashboard {
 		var listProcessTimer;
 		const startGetProcessStatus = () => {
 			clearTimeout(listProcessTimer)
-			listProcessStatus()
-			.then(res => {
-				t.globalData.processStatus = Object.freeze(res);
-			})
+			return listProcessStatus()
+			.then(res => t.globalData.processStatus = Object.freeze(res))
 			.catch(err => console.error(err))
 			.finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 		}
-		startGetProcessStatus()
+		return startGetProcessStatus()
 	}
 }
 	
@@ -256,10 +267,11 @@ class StrategyDashboard extends Dashboard {
 
 const strategyDashboard = new StrategyDashboard();
 strategyDashboard.init();
+strategyDashboard.bindEvent();
 strategyDashboard.render();
-strategyDashboard.getData()
+strategyDashboard.getData().then(() => strategyDashboard.getLogs())
 strategyDashboard.refresh();
-strategyDashboard.getProcessStatus();
+strategyDashboard.getProcessStatus();   
 setInterval(() => {
 	strategyDashboard.refresh();
 }, 1000)
