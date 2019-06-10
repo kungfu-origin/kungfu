@@ -18,7 +18,9 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/util/util.h>
 
+using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 
 void journal::seek_next_frame()
@@ -41,7 +43,7 @@ void journal::seek_next_frame()
 
 void journal::seek_to_time(int64_t nanotime)
 {
-    int page_id = util::find_page_id(page_provider_->get_fileinfo(), nanotime);
+    int page_id = page::find_page_id(page_provider_->get_location(), nanotime);
     current_page_ = page_provider_->get_page(page_id, -1);
     current_page_->seek_to_time(nanotime);
 }
@@ -51,11 +53,11 @@ void journal::load_next_page()
     current_page_ = page_provider_->get_page(current_page_->get_id() + 1, current_page_->get_id());
 }
 
-const std::vector<session_ptr> &journal::get_sessions()
+const std::vector<session_ptr> journal::get_sessions()
 {
-    sessions_.clear();
-    const page_fileinfo & fileinfo = page_provider_->get_fileinfo();
-    auto page_ids = util::list_page_ids(fileinfo);
+    std::vector<data::session_ptr> sessions;
+    const data::location & location = page_provider_->get_location();
+    auto page_ids = page::list_page_ids(location);
     for (auto page_id : page_ids)
     {
         auto page = page_provider_->get_page(page_id, -1);
@@ -74,7 +76,7 @@ const std::vector<session_ptr> &journal::get_sessions()
                     SPDLOG_TRACE("found session start {}, {}, page {}, frame {}", ts_frame, ts_start, page_id, frame.address());
                     if (session_start_time > 0)
                     {
-                        sessions_.push_back(std::make_shared<session>(fileinfo, session_start_time, session_start_page_id, frame.gen_time() -1, page_id, false));
+                        sessions.push_back(std::make_shared<session>(location, session_start_time, session_start_page_id, frame.gen_time() -1, page_id, false));
                         SPDLOG_DEBUG("found session [{},{})", ts_start, ts_frame);
                         session_start_time = -1;
                     }
@@ -90,7 +92,7 @@ const std::vector<session_ptr> &journal::get_sessions()
                     SPDLOG_TRACE("found session end {}, page {}, frame {}", ts_frame, page_id, frame.address());
                     if (session_start_time > 0)
                     {
-                        sessions_.push_back(std::make_shared<session>(fileinfo, session_start_time, session_start_page_id, frame.gen_time(), page_id, true));
+                        sessions.push_back(std::make_shared<session>(location, session_start_time, session_start_page_id, frame.gen_time(), page_id, true));
                         SPDLOG_DEBUG("found session [{},{}]", ts_start, ts_frame);
                         session_start_time = -1;
                     }
@@ -111,9 +113,9 @@ const std::vector<session_ptr> &journal::get_sessions()
         }
         if (session_start_time > 0)
         {
-            sessions_.push_back(std::make_shared<session>(fileinfo, session_start_time, session_start_page_id, last_frame_time, page_ids.back(), true));
+            sessions.push_back(std::make_shared<session>(location, session_start_time, session_start_page_id, last_frame_time, page_ids.back(), true));
             session_start_time = -1;
         }
     }
-    return sessions_;
+    return sessions;
 }

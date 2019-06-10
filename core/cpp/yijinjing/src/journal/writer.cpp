@@ -19,37 +19,47 @@
 #include <kungfu/yijinjing/time.h>
 
 #include <kungfu/yijinjing/common.h>
-#include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/io.h>
 
-using namespace kungfu::yijinjing::journal;
-
-writer::writer(page_provider_factory_ptr factory, data::mode m, data::category c, const std::string &group, const std::string& name, nanomsg::master_messenger_ptr messenger):
-        messenger_(messenger)
+namespace kungfu
 {
-    page_provider_ptr page_provider = factory->make_page_provider(m, c, group, name, true);
-    journal_ = std::make_shared<journal>(page_provider);
-    journal_->seek_to_time(time::now_in_nano());
-}
 
-frame& writer::open_frame(int16_t source, int16_t msg_type, int64_t trigger_time)
-{
-    writer_mtx_.lock();
-    frame &frame = journal_->current_frame();
-    frame.set_source(source);
-    frame.set_msg_type(msg_type);
-    frame.set_trigger_time(trigger_time);
-    return frame;
-}
+    namespace yijinjing
+    {
 
-void writer::close_frame(int32_t length)
-{
-    frame &frame = journal_->current_frame();
-    frame.set_gen_time(time::now_in_nano());
-    frame.set_hashcode(MurmurHash2(reinterpret_cast<void *>(frame.address()), frame.frame_length(), HASH_SEED));
-    frame.set_data_length(length);
-    writer_mtx_.unlock();
-    messenger_->poke();
-    journal_->seek_next_frame();
+        namespace journal
+        {
+            writer::writer(page_provider_factory_ptr factory, data::mode m, data::category c, const std::string &group, const std::string &name,
+                           publisher_ptr publisher) :
+                    publisher_(publisher)
+            {
+                page_provider_ptr page_provider = factory->make_page_provider(m, c, group, name, true);
+                journal_ = std::make_shared<journal>(page_provider);
+                journal_->seek_to_time(time::now_in_nano());
+            }
+
+            frame &writer::open_frame(int16_t source, int16_t msg_type, int64_t trigger_time)
+            {
+                writer_mtx_.lock();
+                frame &frame = journal_->current_frame();
+                frame.set_source(source);
+                frame.set_msg_type(msg_type);
+                frame.set_trigger_time(trigger_time);
+                return frame;
+            }
+
+            void writer::close_frame(int32_t length)
+            {
+                frame &frame = journal_->current_frame();
+                frame.set_gen_time(time::now_in_nano());
+                frame.set_hashcode(util::hash(reinterpret_cast<void *>(frame.address()), frame.frame_length(), KUNGFU_HASH_SEED));
+                frame.set_data_length(length);
+                journal_->current_page_->on_frame_added();
+                journal_->seek_next_frame();
+                writer_mtx_.unlock();
+                publisher_->notify();
+            }
+        }
+    }
 }

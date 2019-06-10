@@ -24,6 +24,11 @@
 
 #include <kungfu/yijinjing/io.h>
 
+#define PAGE_SERVICE_MSG_FILE "PAGE_SERVICE_MSG"
+
+/** max number of communication users in the same time */
+#define MAX_MEMORY_MSG_NUMBER 1000
+
 namespace kungfu {
 
     namespace yijinjing {
@@ -69,9 +74,9 @@ namespace kungfu {
                 class page_service {
                 public:
                     /** default constructor */
-                    page_service(bool low_latency);
+                    page_service(io_device_ptr io_device);
 
-                    io_device &get_io_device() { return io_device_; };
+                    io_device_ptr get_io_device() { return io_device_; };
 
                     std::string get_memory_msg_file();
 
@@ -86,7 +91,7 @@ namespace kungfu {
                 private:
                     std::map<int, page_provider_ptr> page_providers_;
                     std::map<std::string, bool> writers_;
-                    io_device io_device_;
+                    io_device_ptr io_device_;
 
                     uintptr_t memory_message_buffer_; /**< message buffer */
                     const size_t memory_msg_file_size_ = MAX_MEMORY_MSG_NUMBER * sizeof(page_request) + 1024;

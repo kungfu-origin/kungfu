@@ -16,62 +16,20 @@
 #ifndef KUNGFU_YIJINJING_COMMON_H
 #define KUNGFU_YIJINJING_COMMON_H
 
-#include <typeinfo>
-#include <nlohmann/json.hpp>
-
 #include <kungfu/common.h>
 
 #define KF_DIR_SOCKET "socket"
 #define KF_DIR_JOURNAL "journal"
 #define KF_DIR_LOG "log"
 
-#define __FRAME_HEADER_VERSION__ 3
-
-//////////////////////////////////////////
-/// (byte) JournalFrameStatus
-//////////////////////////////////////////
-#define JOURNAL_FRAME_STATUS_RAW        0
-#define JOURNAL_FRAME_STATUS_WRITTEN    1
-#define JOURNAL_FRAME_STATUS_PAGE_END   2
-
-//////////////////////////////////////////
-/// (byte) JournalFrameLastFlag
-//////////////////////////////////////////
-#define JOURNAL_FRAME_NOT_LAST          0 /**< false */
-#define JOURNAL_FRAME_IS_LAST           1 /**< true */
-
-/** reserve space for page header (long) */
-#define PAGE_HEADER_RESERVE 10
-//////////////////////////////////////////
-/// (byte) JournalPageStatus
-//////////////////////////////////////////
-#define JOURNAL_PAGE_STATUS_RAW     0
-#define JOURNAL_PAGE_STATUS_INITED  1
-
-#define PAGE_PATH_MAX_LENGTH       1024
-
-#define PAGE_SERVICE_MSG_FILE "PAGE_SERVICE_MSG"
-
-/** max number of communication users in the same time */
-#define MAX_MEMORY_MSG_NUMBER 1000
-/** REQUEST_ID_RANGE * MAX_MEMORY_MSG_NUMBER < 2147483647(max num of int) */
-#define REQUEST_ID_RANGE 1000000
-
 #define DECLARE_PTR_UNI(X) typedef std::unique_ptr<X> X##_ptr;   /** define smart ptr */
 #define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
-#define JOURNAL_PREFIX std::string("yjj")        /** journal file prefix */
-#define JOURNAL_SUFFIX std::string("journal")    /** journal file suffix */
-
-/** fast type convert for moving address forward */
-#define ADDRESS_ADD(x, delta) (void*)((uintptr_t)x + delta)
-
-namespace kungfu {
-    namespace yijinjing {
-
-        /** seed of hash function */
-        const uint32_t HASH_SEED = 97;
+namespace kungfu
+{
+    namespace yijinjing
+    {
 
         /** size related */
         const int KB = 1024;
@@ -79,22 +37,66 @@ namespace kungfu {
         const int JOURNAL_PAGE_SIZE = 128 * MB;
         const int PAGE_MIN_HEADROOM = 1 * MB;
 
-        enum MsgType {
+        enum MsgType
+        {
             SessionStart = 10001,
             SessionEnd = 10002
         };
 
-        namespace data {
+        class event
+        {
+        public:
+            virtual int64_t gen_time() const = 0;
 
-            enum class mode : int8_t {
+            virtual int64_t trigger_time() const = 0;
+
+            virtual int16_t msg_type() const = 0;
+
+            virtual int16_t source() const = 0;
+
+            template<typename T>
+            inline const T &data() const
+            {
+                return *(reinterpret_cast<const T *>(data_address()));
+            }
+
+        protected:
+            virtual const void *data_address() const = 0;
+        };
+
+        class publisher
+        {
+        public:
+            virtual int notify() = 0;
+
+            virtual int publish(const std::string &json_message) = 0;
+        };
+        DECLARE_PTR(publisher)
+
+        class observer
+        {
+        public:
+            virtual bool wait() = 0;
+
+            virtual const std::string &get_notice() = 0;
+        };
+        DECLARE_PTR(observer)
+
+        namespace data
+        {
+
+            enum class mode : int8_t
+            {
                 LIVE,
                 DATA,
                 REPLAY,
                 BACKTEST
             };
 
-            inline std::string get_mode_name(mode m) {
-                switch (m) {
+            inline std::string get_mode_name(mode m)
+            {
+                switch (m)
+                {
                     case mode::LIVE:
                         return "live";
                     case mode::DATA:
@@ -106,15 +108,18 @@ namespace kungfu {
                 }
             }
 
-            enum class category : int8_t {
+            enum class category : int8_t
+            {
                 MD,
                 TD,
                 STRATEGY,
                 SYSTEM
             };
 
-            inline std::string get_category_name(category c) {
-                switch (c) {
+            inline std::string get_category_name(category c)
+            {
+                switch (c)
+                {
                     case category::MD:
                         return "md";
                     case category::TD:
@@ -125,80 +130,45 @@ namespace kungfu {
                         return "system";
                 }
             }
-        }
 
-        class event {
-        public:
-            virtual int64_t gen_time() const = 0;
-            virtual int64_t trigger_time() const = 0;
-            virtual int16_t msg_type() const = 0;
-            virtual int16_t source() const = 0;
+            class location
+            {
+            public:
+                location(data::mode m, data::category c, const std::string &group, const std::string &name) :
+                        mode(m), category(c), group(group), name(name),
+                        keyname_(get_mode_name(mode) + "::" + get_category_name(category) + "::" + group + "::" + name)
+                {};
 
-            template <typename T>
-            inline const T& data() const {
-                return *(reinterpret_cast<const T *>(data_address()));
-            }
+                const mode mode;
+                const category category;
+                const std::string group;
+                const std::string name;
 
-        protected:
-            virtual const void * data_address() const = 0;
-        };
+                inline const std::string &keyname() const
+                {
+                    return keyname_;
+                }
 
-        /**
-         * Murmur Hash 2
-         * @param key content to be hashed
-         * @param len length of key
-         * @param seed
-         * @return hash result
-         */
-        inline uint32_t MurmurHash2(const void *key, int32_t len, uint32_t seed) {
-            // 'm' and 'r' are mixing constants generated offline.
-            // They're not really 'magic', they just happen to work well.
-
-            const uint32_t m = 0x5bd1e995;
-            const int32_t r = 24;
-
-            // Initialize the hash to a 'random' value
-
-            uint32_t h = seed ^len;
-
-            // Mix 4 bytes at a time into the hash
-
-            const unsigned char *data = (const unsigned char *) key;
-
-            while (len >= 4) {
-                uint32_t k = *(uint32_t *) data;
-
-                k *= m;
-                k ^= k >> r;
-                k *= m;
-
-                h *= m;
-                h ^= k;
-
-                data += 4;
-                len -= 4;
-            }
-
-            // Handle the last few bytes of the input array
-
-            switch (len) {
-                case 3:
-                    h ^= data[2] << 16;
-                case 2:
-                    h ^= data[1] << 8;
-                case 1:
-                    h ^= data[0];
-                    h *= m;
+            private:
+                const std::string keyname_;
             };
 
-            // Do a few final mixes of the hash to ensure the last few
-            // bytes are well-incorporated.
+            class session
+            {
+            public:
+                session(const data::location &loc, int64_t start, int sid, int64_t end, int eid, bool c) :
+                        location(&loc), start_time(start), start_page_id(sid), end_time(end), end_page_id(eid), closed(c)
+                {}
 
-            h ^= h >> 13;
-            h *= m;
-            h ^= h >> 15;
+                const data::location *location;
+                const int64_t start_time;
+                const int start_page_id;
+                const int64_t end_time;
+                const int end_page_id;
+                const bool closed;
+            };
 
-            return h;
+            DECLARE_PTR(session)
         }
     }
 }

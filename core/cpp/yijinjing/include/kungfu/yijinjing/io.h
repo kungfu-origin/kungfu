@@ -22,15 +22,19 @@
 
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
-#include <kungfu/yijinjing/nanomsg/master.h>
 
-namespace kungfu {
+namespace kungfu
+{
 
-    namespace yijinjing {
+    namespace yijinjing
+    {
 
         FORWARD_DECLARE_PTR(io_device)
 
-        class event_source {
+        FORWARD_DECLARE_PTR(io_device_client)
+
+        class event_source
+        {
         public:
             virtual ~event_source() = default;
 
@@ -41,54 +45,100 @@ namespace kungfu {
             virtual journal::writer_ptr get_writer() = 0;
 
             virtual nanomsg::socket_ptr get_socket_reply() = 0;
+
             virtual nanomsg::socket_ptr get_socket_publish() = 0;
 
-            virtual io_device &get_io_device() = 0;
+            virtual io_device_client_ptr get_io_device() = 0;
         };
 
         DECLARE_PTR(event_source)
 
-        class event_handler {
+        class event_handler
+        {
         public:
             virtual ~event_handler() = default;
 
-            virtual const std::string& get_name() const = 0;
+            virtual const std::string &get_name() const = 0;
 
             virtual void configure_event_source(event_source_ptr event_source) = 0;
 
             virtual void handle(const event &e) = 0;
 
-            virtual void finish() {}
+            virtual void finish()
+            {}
         };
 
         DECLARE_PTR(event_handler)
 
-        class io_device {
+        class io_device
+        {
         public:
-            io_device(const std::string &name, bool low_latency = false, bool master = false);
 
-            const std::string& get_name() {return name_;};
+            const std::string &get_name()
+            { return name_; };
+
+            bool is_low_latency()
+            { return low_latency_; }
 
             journal::reader_ptr open_reader_to_subscribe();
+
             journal::reader_ptr open_reader(data::mode m, data::category c, const std::string &group, const std::string &name);
+
             journal::writer_ptr open_writer(data::mode m, data::category c, const std::string &group, const std::string &name);
 
-            nanomsg::socket_ptr connect_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p, int timeout = 0);
-            nanomsg::socket_ptr bind_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p, int timeout = 0);
+            nanomsg::socket_ptr
+            connect_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p,
+                           int timeout = 0);
 
-            nanomsg::master_messenger_ptr get_messenger() {return messenger_;};
+            nanomsg::socket_ptr
+            bind_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p,
+                        int timeout = 0);
 
-            journal::locator_ptr get_journal_locator() {return journal_locator_;};
-            journal::page_provider_factory_ptr get_page_provider_factory() {return page_provider_factory_;};
-            nanomsg::url_factory_ptr get_url_factory() {return url_factory_;};
+            journal::page_provider_factory_ptr get_page_provider_factory()
+            { return page_provider_factory_; }
 
-        private:
+            nanomsg::url_factory_ptr get_url_factory()
+            { return url_factory_; }
+
+            publisher_ptr get_publisher()
+            { return publisher_; }
+
+            static io_device_ptr create_io_device(std::string name, bool low_latency);
+
+        protected:
             const std::string name_;
             const bool low_latency_;
-            nanomsg::master_messenger_ptr messenger_;
-            journal::locator_ptr journal_locator_;
             journal::page_provider_factory_ptr page_provider_factory_;
             nanomsg::url_factory_ptr url_factory_;
+            publisher_ptr publisher_;
+
+            io_device(std::string name, bool low_latency);
+        };
+
+        class master_service
+        {
+        public:
+            virtual const std::string &request(const std::string &json_message) = 0;
+        };
+
+        DECLARE_PTR(master_service)
+
+        class io_device_client : public io_device
+        {
+        public:
+            observer_ptr get_observer()
+            { return observer_; }
+
+            master_service_ptr get_service()
+            { return service_; }
+
+            static io_device_client_ptr create_io_device(std::string name, bool low_latency);
+
+        private:
+            observer_ptr observer_;
+            master_service_ptr service_;
+
+            io_device_client(std::string name, bool low_latency);
         };
     }
 }

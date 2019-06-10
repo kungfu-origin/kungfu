@@ -7,11 +7,20 @@
 
 #include <kungfu/yijinjing/common.h>
 
+#define JOURNAL_PREFIX std::string("yjj")        /** journal file prefix */
+#define JOURNAL_SUFFIX std::string("journal")    /** journal file suffix */
+
+#define __JOURNAL_VERSION__ 3
+
 namespace kungfu {
 
     namespace yijinjing {
 
         namespace journal {
+
+            FORWARD_DECLARE_PTR(frame)
+            FORWARD_DECLARE_PTR(page)
+            FORWARD_DECLARE_PTR(journal)
 
             class exception : public std::exception {
             public:
@@ -22,16 +31,6 @@ namespace kungfu {
             private:
                 const std::string message_;
             };
-
-            class locator {
-            public:
-                virtual const std::string get_journal_dir(data::mode m, data::category c, const std::string &group) const = 0;
-            };
-            DECLARE_PTR(locator)
-
-            FORWARD_DECLARE_PTR(frame)
-            FORWARD_DECLARE_PTR(page)
-            FORWARD_DECLARE_PTR(journal)
         }
     }
 }

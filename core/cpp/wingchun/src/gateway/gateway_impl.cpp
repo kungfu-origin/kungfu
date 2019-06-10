@@ -234,7 +234,7 @@ namespace kungfu
             names.emplace_back(TD_JOURNAL_NAME(get_source(), get_account_id()));
             folders.push_back(MD_JOURNAL_FOLDER(get_source()));
             names.emplace_back(MD_JOURNAL_NAME(get_source()));
-            auto reader = event_source_->get_io_device().open_reader(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_name());
+            auto reader = event_source_->get_io_device()->open_reader(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_name());
             reader->seek_to_time(last_update);
             auto frame = reader->current_frame();
             while (frame.has_data())

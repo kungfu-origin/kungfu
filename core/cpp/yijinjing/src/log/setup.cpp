@@ -2,12 +2,12 @@
 // Created by Keren Dong on 2019-06-06.
 //
 
-#include <boost/filesystem.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
 #include <kungfu/common.h>
+#include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/log/setup.h>
 
 namespace kungfu {
@@ -32,16 +32,10 @@ namespace kungfu {
 
             const std::string& setup_log(const std::string &name) {
                 if (spdlog::default_logger()->name().empty()) {
-                    boost::filesystem::path log_path = get_kungfu_home();
-                    log_path /= "log";
-                    log_path /= "archive";
-                    if (!boost::filesystem::exists(log_path)) {
-                        boost::filesystem::create_directories(log_path);
-                    }
-                    log_path /= name + ".log";
+                    std::string log_file = os::make_path({"log", "archive", name + ".log"}, true);
 
                     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-                    auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_path.string(), 0, 0);
+                    auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_file, 0, 0);
                     spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
                     auto logger = std::make_shared<spdlog::logger>(name, log_sinks);
                     logger->set_pattern(DEFAULT_LOG_PATTERN);

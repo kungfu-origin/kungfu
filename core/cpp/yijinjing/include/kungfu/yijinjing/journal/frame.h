@@ -16,7 +16,7 @@
 #ifndef YIJINJING_FRAME_HPP
 #define YIJINJING_FRAME_HPP
 
-#include <kungfu/yijinjing/common.h>
+#include <kungfu/yijinjing/journal/common.h>
 
 namespace kungfu {
 

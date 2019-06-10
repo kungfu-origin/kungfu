@@ -21,11 +21,10 @@ def get_socket_fd(socket):
 class Master:
     def __init__(self, args, logger):
         pyyjj.setup_log(args.name)
-        self._process = psutil.Process()
         self._logger = logger
 
-        self._page_service = pyyjj.page_service(args.low_latency)
-        self._io_device = self._page_service._io_device
+        self._io_device = pyyjj.create_io_device(args.name, args.low_latency)
+        self._page_service = pyyjj.page_service(self._io_device)
 
         self._pull_timeout = 0 if args.low_latency else 1
         self._socket_pull = self._io_device.bind_socket(pyyjj.mode.LIVE, category=pyyjj.category.SYSTEM, group=args.name, name=args.name, protocol=pyyjj.protocol.PULL)

@@ -17,11 +17,11 @@
 #include <signal.h>
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <boost/filesystem.hpp>
 
 #include <kungfu/yijinjing/time.h>
 
 #include <kungfu/yijinjing/common.h>
+#include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page_service.h>
@@ -30,18 +30,10 @@ using namespace kungfu::yijinjing::journal::paged;
 
 using json = nlohmann::json;
 
-page_service::page_service(const bool low_latency) : io_device_("master", low_latency, true), memory_message_limit_(0)
+page_service::page_service(io_device_ptr io_device) : io_device_(io_device), memory_message_limit_(0)
 {
-    boost::filesystem::path target_path = get_kungfu_home();
-    target_path /= KF_DIR_JOURNAL;
-    if (!boost::filesystem::exists(target_path))
-    {
-        boost::filesystem::create_directories(target_path);
-    }
-    target_path /= PAGE_SERVICE_MSG_FILE;
-
-    memory_msg_file_ = target_path.string();
-    memory_message_buffer_ = util::load_mmap_buffer(memory_msg_file_, memory_msg_file_size_, true, true);
+    memory_msg_file_ = os::make_path({KF_DIR_JOURNAL, PAGE_SERVICE_MSG_FILE}, true);
+    memory_message_buffer_ = os::load_mmap_buffer(memory_msg_file_, memory_msg_file_size_, true, true);
     memset(reinterpret_cast<void *>(memory_message_buffer_), 0, memory_msg_file_size_);
     SPDLOG_INFO("Loaded page service memory msg buffer: {}", memory_msg_file_);
 }
@@ -74,12 +66,12 @@ int page_service::get_mm_block(int8_t mode, int8_t category, const std::string &
         return -1;
     }
 
-    auto factory = io_device_.get_page_provider_factory();
+    auto factory = io_device_->get_page_provider_factory();
     // master always use writer mode for page manipulation
     auto page_provider = factory->make_page_provider(static_cast<data::mode>(mode), static_cast<data::category>(category), group, name, true);
     if (is_writing)
     {
-        auto key = page_provider->get_fileinfo().to_string();
+        auto key = page_provider->get_location().keyname();
         bool has_writer = writers_.find(key) != writers_.end() && writers_[key];
         if (has_writer)
         {
@@ -98,7 +90,7 @@ int page_service::get_mm_block(int8_t mode, int8_t category, const std::string &
     page_providers_[idx] = page_provider;
     page_request *msg = get_page_request(memory_message_buffer_, idx);
     msg->status = state::WAITING;
-    SPDLOG_INFO("Register journal for {}/{} with id {}", page_provider->get_fileinfo().dir, name, idx);
+    SPDLOG_INFO("Register journal for {}/{} with id {}", page_provider->get_location().group, name, idx);
     return idx;
 }
 
@@ -108,7 +100,7 @@ void page_service::release_mm_block(int id)
     page_provider->release_all();
     if (page_provider->is_writing())
     {
-        auto key = page_provider->get_fileinfo().to_string();
+        auto key = page_provider->get_location().keyname();
         writers_[key] = false;
     }
     page_providers_.erase(id);
@@ -124,7 +116,7 @@ void page_service::process_memory_message()
             case state::REQUESTING:
             {
                 auto page_provider = page_providers_[msg_id];
-                SPDLOG_INFO("Request page for {} {} [{}/{}]", page_provider->get_fileinfo().dir, page_provider->get_fileinfo().name, msg->new_page_id, msg->old_page_id);
+                SPDLOG_INFO("Request page for {} {} [{}/{}]", page_provider->get_location().group, page_provider->get_location().name, msg->new_page_id, msg->old_page_id);
                 page_provider->get_page(msg->new_page_id, -1);
                 msg->status = state::WAITING;
                 if (msg->old_page_id >= 0)
@@ -136,7 +128,7 @@ void page_service::process_memory_message()
             case state::RELEASING:
             {
                 auto page_provider = page_providers_[msg_id];
-                page_provider->release_all();
+                page_provider->release_page(msg->old_page_id);
                 break;
             }
             default:

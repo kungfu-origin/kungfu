@@ -493,7 +493,7 @@ namespace kungfu
         SPDLOG_TRACE("{} last update {}", name_, last_update);
         if (last_update > 0)
         {
-            auto reader = event_source_->get_io_device().open_reader_to_subscribe();
+            auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
             for (const auto& source: get_md_sources())
             {
                 reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source, last_update);

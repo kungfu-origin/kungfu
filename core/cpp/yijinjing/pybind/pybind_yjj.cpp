@@ -17,9 +17,6 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
-#include <spdlog/details/os.h>
-#include <spdlog/details/console_globals.h>
-
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
@@ -27,78 +24,39 @@
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/journal/page_service.h>
+#include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/practice/os_signal.h>
-
-#ifdef _WINDOWS
-#include <string>
-#include <unordered_map>
-#include <wincon.h>
-class WinColor
-{
-public:
-    const WORD BOLD = FOREGROUND_INTENSITY;
-    const WORD RED = FOREGROUND_RED;
-    const WORD GREEN = FOREGROUND_GREEN;
-    const WORD CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE;
-    const WORD WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-    const WORD YELLOW = FOREGROUND_RED | FOREGROUND_GREEN;
-    WinColor()
-    {
-        colors_["trace"] = WHITE;
-        colors_["debug"] = CYAN;
-        colors_["info"] = GREEN;
-        colors_["warn"] = YELLOW | BOLD;
-        colors_["warning"] = YELLOW | BOLD;
-        colors_["error"] = RED | BOLD;
-        colors_["critical"] = BACKGROUND_RED | WHITE | BOLD;
-        colors_["off"] = 0;
-    }
-    void print(std::string level, std::string log)
-    {
-        HANDLE out_handle_ = spdlog::details::console_stdout::handle();
-        WORD color_attribs = colors_[level];
-        CONSOLE_SCREEN_BUFFER_INFO orig_buffer_info;
-        ::GetConsoleScreenBufferInfo(out_handle_, &orig_buffer_info);
-        WORD back_color = orig_buffer_info.wAttributes;
-        // retrieve the current background color
-        back_color &= static_cast<WORD>(~(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY));
-        // keep the background color unchanged
-        ::SetConsoleTextAttribute(out_handle_, color_attribs | back_color);
-        auto start = log.c_str();
-        auto end = log.c_str() + log.length();
-        auto size = static_cast<DWORD>(end - start);
-        ::WriteFile(out_handle_, start, size, nullptr, nullptr);
-        ::SetConsoleTextAttribute(out_handle_, orig_buffer_info.wAttributes); // reset to orig colors
-    }
-private:
-    std::unordered_map<std::string, WORD> colors_;
-};
-WinColor color_printer;
-void color_print(std::string level, std::string log)
-{
-    color_printer.print(level, log);
-}
-#else
-
-void color_print(std::string level, std::string log)
-{}
-
-#endif
-
-bool in_color_terminal()
-{
-    return spdlog::details::os::in_terminal(spdlog::details::console_stdout::stream()) && spdlog::details::os::is_color_terminal();
-}
 
 namespace py = pybind11;
 
-using namespace kungfu::practice;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::journal::paged;
 using namespace kungfu::yijinjing::nanomsg;
+using namespace kungfu::yijinjing::util;
+using namespace kungfu::practice;
 
+class PyEvent : public event
+{
+public:
+    int64_t gen_time() const override
+    {
+        PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time, )
+    }
+    int64_t trigger_time() const override
+    {
+        PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time, )
+    }
+    int16_t msg_type() const override
+    {
+        PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type, )
+    }
+    int16_t source() const override
+    {
+        PYBIND11_OVERLOAD_PURE(int64_t, event, source, )
+    }
+};
 
 class PyEventHandler : public event_handler
 {
@@ -142,19 +100,28 @@ public:
     }
 };
 
+class PyMasterService : public master_service
+{
+public:
+    const std::string &request(const std::string &json_message) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string &, master_service, request, json_message)
+    }
+};
+
 PYBIND11_MODULE(pyyjj, m)
 {
     m.def("thread_id", &spdlog::details::os::thread_id);
     m.def("in_color_terminal", &in_color_terminal);
     m.def("color_print", &color_print);
 
-    m.def("handle_os_signals", &handle_os_signals);
+    m.def("handle_os_signals", &os::handle_os_signals);
 
     // nanosecond-time related
     m.def("now_in_nano", &time::now_in_nano);
-    m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format")=KUNGFU_DATETIME_FORMAT_DEFAULT);
-    m.def("strptime", &time::strptime, py::arg("timestr"), py::arg("format")=KUNGFU_DATETIME_FORMAT_DEFAULT);
-    m.def("strfnow", &time::strfnow, py::arg("format")=KUNGFU_DATETIME_FORMAT_DEFAULT);
+    m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+    m.def("strptime", &time::strptime, py::arg("timestr"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+    m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
     m.def("setup_log", &kungfu::yijinjing::log::setup_log);
 
@@ -172,27 +139,31 @@ PYBIND11_MODULE(pyyjj, m)
             .value("SYSTEM", data::category::SYSTEM)
             .export_values();
 
+    py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
+            .def_property_readonly("gen_time", &event::gen_time)
+            .def_property_readonly("trigger_time", &event::trigger_time)
+            .def_property_readonly("source", &event::source)
+            .def_property_readonly("msg_type", &event::msg_type);
+
     py::class_<frame, std::shared_ptr<frame>>(m, "frame")
             .def_property_readonly("gen_time", &frame::gen_time)
             .def_property_readonly("trigger_time", &frame::trigger_time)
             .def_property_readonly("source", &frame::source)
             .def_property_readonly("msg_type", &frame::msg_type);
 
-    py::class_<page_fileinfo, std::shared_ptr<page_fileinfo>>(m, "page_fileinfo")
-            .def_readonly("mode", &page_fileinfo::mode)
-            .def_readonly("category", &page_fileinfo::category)
-            .def_readonly("group", &page_fileinfo::group)
-            .def_readonly("name", &page_fileinfo::name)
-            .def_readonly("dir", &page_fileinfo::dir);
+    py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
+            .def_readonly("mode", &data::location::mode)
+            .def_readonly("category", &data::location::category)
+            .def_readonly("group", &data::location::group)
+            .def_readonly("name", &data::location::name);
 
-    py::class_<session, std::shared_ptr<session>>(m, "session")
-            .def_readonly("fileinfo", &session::fileinfo)
-            .def_readonly("start_time", &session::start_time)
-            .def_readonly("start_page_id", &session::start_page_id)
-            .def_readonly("end_time", &session::end_time)
-            .def_readonly("end_page_id", &session::end_page_id)
-            .def_readonly("closed", &session::closed)
-            ;
+    py::class_<data::session, std::shared_ptr<data::session>>(m, "session")
+            .def_readonly("location", &data::session::location)
+            .def_readonly("start_time", &data::session::start_time)
+            .def_readonly("start_page_id", &data::session::start_page_id)
+            .def_readonly("end_time", &data::session::end_time)
+            .def_readonly("end_page_id", &data::session::end_page_id)
+            .def_readonly("closed", &data::session::closed);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)
@@ -216,34 +187,39 @@ PYBIND11_MODULE(pyyjj, m)
             .def("recv", &socket::recv_msg, py::arg("flags") = 0)
             .def("last_messsage", &socket::last_message);
 
-    py::class_<master_service, std::shared_ptr<master_service>>(m, "master_service")
+    py::class_<publisher, std::shared_ptr<publisher>>(m, "publisher")
+            .def("notify", &publisher::notify)
+            .def("publish", &publisher::publish);
+
+    py::class_<master_service, PyMasterService, std::shared_ptr<master_service>>(m, "master_service")
             .def("request", &master_service::request);
 
-    py::class_<master_publisher, std::shared_ptr<master_publisher>>(m, "master_publisher")
-            .def("publish", &master_publisher::publish)
-            .def("poke", &master_publisher::poke);
-
-    py::class_<master_observer, std::shared_ptr<master_observer>>(m, "master_observer")
-            .def("wait_for_notice", &master_observer::wait_for_notice)
-            .def("get_notice", &master_observer::get_notice);
-
-    py::class_<master_messenger, std::shared_ptr<master_messenger>>(m, "master_messenger")
-            .def_property_readonly("_service", &master_messenger::get_service)
-            .def_property_readonly("_publisher", &master_messenger::get_publisher)
-            .def_property_readonly("_observer", &master_messenger::get_observer);
+//    py::class_<publisher, std::shared_ptr<publisher>>(m, "publisher")
+//            .def("publish", &publisher::publish)
+//            .def("notify", &publisher::notify);
+//
+//    py::class_<observer, std::shared_ptr<observer>>(m, "observer")
+//            .def("wait", &observer::wait)
+//            .def("get_notice", &observer::get_notice);
 
     py::class_<aggregate_reader, std::shared_ptr<aggregate_reader>>(m, "reader")
             .def("subscribe", &aggregate_reader::subscribe)
             .def("get_sessions", &aggregate_reader::get_sessions);
 
-    py::class_<io_device, std::shared_ptr<io_device>>(m, "io_device")
-            .def(py::init<std::string, bool, bool>(), py::arg("name"), py::arg("low_latency"), py::arg("master"))
-            .def_property_readonly("_messenger", &io_device::get_messenger)
-            .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
+    py::class_<io_device, std::shared_ptr<io_device>> io_device(m, "io_device");
+    io_device.def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
             .def("connect_socket", &io_device::connect_socket, py::arg("mode"), py::arg("category"), py::arg("group"), py::arg("name"),
                  py::arg("protocol"), py::arg("timeout") = 0)
             .def("bind_socket", &io_device::bind_socket, py::arg("mode"), py::arg("category"), py::arg("group"), py::arg("name"), py::arg("protocol"),
                  py::arg("timeout") = 0);
+
+    m.def("create_io_device", &io_device::create_io_device, py::arg("name"), py::arg("low_latency"));
+
+    py::class_<io_device_client, std::shared_ptr<io_device_client>>(m, "io_device_client", io_device)
+            .def_property_readonly("_service", &io_device_client::get_service)
+            .def_property_readonly("_publisher", &io_device_client::get_publisher);
+
+    m.def("create_io_device_client", &io_device_client::create_io_device, py::arg("name"), py::arg("low_latency"));
 
     py::class_<event_handler, PyEventHandler, std::shared_ptr<event_handler>>(m, "event_handler")
             .def(py::init())
@@ -265,7 +241,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("stop", &apprentice::stop);
 
     py::class_<page_service>(m, "page_service")
-            .def(py::init<bool>())
+            .def(py::init<io_device_ptr>())
             .def_property_readonly("_io_device", &page_service::get_io_device)
             .def_property_readonly("_memory_msg_file", &page_service::get_memory_msg_file)
             .def_property_readonly("_memory_msg_file_size", &page_service::get_memory_msg_file_size)

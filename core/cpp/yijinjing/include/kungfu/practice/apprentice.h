@@ -46,10 +46,10 @@ namespace kungfu {
 
             void stop() { live_ = false; };
 
-            yijinjing::io_device& get_io_device() override { return io_device_; };
+            yijinjing::io_device_client_ptr get_io_device() override { return io_device_; };
 
         private:
-            yijinjing::io_device io_device_;
+            yijinjing::io_device_client_ptr io_device_;
             std::vector<kungfu::yijinjing::event_handler_ptr> event_handlers_;
             yijinjing::journal::reader_ptr reader_;
             yijinjing::journal::writer_ptr writer_;

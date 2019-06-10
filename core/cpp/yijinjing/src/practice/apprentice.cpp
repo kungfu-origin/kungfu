@@ -28,18 +28,19 @@
 #include <spdlog/spdlog.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/util/os.h>
 
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/practice/os_signal.h>
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::practice;
 
-apprentice::apprentice(const std::string &name, bool low_latency) : io_device_(log::setup_log(name), low_latency)
+apprentice::apprentice(const std::string &name, bool low_latency)
 {
-    handle_os_signals();
+    io_device_ = io_device_client::create_io_device(log::setup_log(name), low_latency);
+    os::handle_os_signals();
 }
 
 void apprentice::setup_output(data::mode m, data::category c, const std::string &group, const std::string &name)
@@ -47,11 +48,11 @@ void apprentice::setup_output(data::mode m, data::category c, const std::string 
     if (writer_.get() == nullptr and socket_reply_.get() == nullptr)
     {
         SPDLOG_INFO("apprentice output setup to {} {} {} {}", data::get_mode_name(m), data::get_category_name(c), group, name);
-        writer_ = io_device_.open_writer(m, c, group, name);
+        writer_ = io_device_->open_writer(m, c, group, name);
         writer_->open_frame(0, MsgType::SessionStart, 0);
         writer_->close_frame(1);
-        socket_reply_ = io_device_.bind_socket(m, c, group, name, protocol::REPLY, 0);
-        socket_publish_ = io_device_.bind_socket(m, c, group, name, protocol::PUBLISH, 0);
+        socket_reply_ = io_device_->bind_socket(m, c, group, name, protocol::REPLY, 0);
+        socket_publish_ = io_device_->bind_socket(m, c, group, name, protocol::PUBLISH, 0);
     } else
     {
         SPDLOG_ERROR("apprentice output has already been setup");
@@ -62,17 +63,17 @@ void apprentice::subscribe(data::mode m, data::category c, const std::string &gr
 {
     if (reader_.get() == nullptr)
     {
-        reader_ = io_device_.open_reader(m, c, group, name);
+        reader_ = io_device_->open_reader(m, c, group, name);
         reader_->seek_to_time(time::now_in_nano());
     } else
     {
         reader_->subscribe(m, c, group, name, time::now_in_nano());
     }
 
-    auto url = io_device_.get_url_factory()->make_url_connect(m, c, group, name, protocol::SUBSCRIBE);
+    auto url = io_device_->get_url_factory()->make_url_connect(m, c, group, name, protocol::SUBSCRIBE);
     if (sub_sockets_.find(url) == sub_sockets_.end())
     {
-        auto socket = io_device_.connect_socket(m, c, group, name, protocol::SUBSCRIBE);
+        auto socket = io_device_->connect_socket(m, c, group, name, protocol::SUBSCRIBE);
         sub_sockets_[socket->get_url()] = socket;
     } else
     {
@@ -109,14 +110,14 @@ void apprentice::go()
     }
     writer_->open_frame(0, MsgType::SessionEnd, 0);
     writer_->close_frame(1);
-    SPDLOG_INFO("apprentice {} finished", io_device_.get_name());
+    SPDLOG_INFO("apprentice {} finished", io_device_->get_name());
 }
 
 void apprentice::try_once()
 {
-    if (io_device_.get_messenger()->get_observer()->wait_for_notice())
+    if (io_device_->get_observer()->wait())
     {
-        std::string notice = io_device_.get_messenger()->get_observer()->get_notice();
+        std::string notice = io_device_->get_observer()->get_notice();
         nanomsg_json event(notice);
         for (auto handler : event_handlers_)
         {
