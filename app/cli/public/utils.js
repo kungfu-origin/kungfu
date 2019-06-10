@@ -56,10 +56,10 @@ export const posDirection = {
  * @param  {} columnWidth
  * @param  {} pad=2
  */
-export const parseToString = (targetList, columnWidth=[], pad=2) => {
+export const parseToString = (targetList, columnWidth=[], pad=2, debug) => {
 	return targetList.map((l, i) => {
 		l = l.toString();
-		const r = /m([^%]+)\u001b/
+		const r = /m([^]+)\u001b/
 		const lw = l.match(r) === null ? l : l.match(r)[1];
 		const len = lw.length;
 		const colWidth = columnWidth[i] || 0;
@@ -74,6 +74,7 @@ export const parseToString = (targetList, columnWidth=[], pad=2) => {
 
 export const calcuHeaderWidth = (target, wish=[]) => {
 	return target.map((t, i) => {
+		if(wish[i] === 'auto') return wish[i];
 		if(t.length < (wish[i] || 0)) return wish[i]
 		else return t.length
 	})
@@ -150,8 +151,8 @@ export const dealStatus = (status) => {
 }
 
 export const dealNum = (num, percentage) => {
-	percentage = percentage ? '%' : ''
-	num = toDecimal(num) + '' || '--'
+	percentage = percentage ? '%' : '';
+	num = (percentage ? toDecimal(num, 4, 2) : toDecimal(num)) + '' || '--'
 	if(num === '--') return '--'
 	if(+num > 0) {
 		return colors.red(num + percentage).toString()
@@ -221,4 +222,8 @@ export const buildDateRange = () => {
 	const startDate =momentDay.format('YYYY-MM-DD')
 	const endDate = momentDay.add(1,'d').format('YYYY-MM-DD')
 	return [startDate, endDate]
+}
+
+export const buildTradingDay = () => {
+	return moment().format('YYYYMMDD')
 }

@@ -188,6 +188,20 @@ export const getStrategyPnlMin = (strategyId, tradingDay) => {
     if(!tradingDay) throw new Error('无交易日！')
     return runSelectDB(buildStrategySnapshortsDBPath(strategyId), `SELECT * FROM portfolio_1m_snapshots WHERE trading_day = '${tradingDay}'`)
 }
+
+
+export const getStrategysPnl = (ids, tradingDay) => {
+    if(!tradingDay) throw new Error('无交易日！')
+    const promises = ids.map(id => getStrategyPnlMin(id, tradingDay).then(res => {
+        const resLen = Object.keys(res || {}).length;
+        let lastIndex = 0;
+        if(resLen > 0) lastIndex = resLen - 1;
+        return {lastPnl: res[lastIndex], strategyId: id}
+    }))
+    return Promise.all(promises)
+}
+
+
 /**
  * 获取某策略下收益曲线日线
  */

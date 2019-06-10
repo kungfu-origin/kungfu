@@ -46,7 +46,7 @@ OrderTable.prototype.refresh = function(orderData){
 			o.volume_traded + '/' + o.volume_left,
 			status,
 			o.client_id
-		].slice(0, this.headers.length), calcuHeaderWidth(this.headers, this.columnWidth), 1)
+		], calcuHeaderWidth(this.headers, this.columnWidth), this.pad)
 	})
 	this.table.setItems(orderListData)
 	if(!this.table.childList.focused) this.table.childList.setScrollPerc(0)

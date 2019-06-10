@@ -1,6 +1,7 @@
 import blessed  from 'blessed';
 import path from 'path';
 import { Tail } from 'tail';
+import moment from 'moment';
 
 import strategyTable from '../public/StrategyTable';
 import posTable from '../public/PosTable';
@@ -8,8 +9,8 @@ import orderTable from '../public/OrderTable';
 import tradeTable from '../public/TradeTable';
 import Dashboard from '../public/Dashboard';
 
-import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder } from '@/io/strategy.js';
-import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchMd, switchTd, dealLog } from '../public/utils';
+import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '@/io/strategy.js';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchTd, dealLog, buildTradingDay } from '../public/utils';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { listProcessStatus } from '__gUtils/processUtils';
@@ -24,12 +25,11 @@ class StrategyDashboard extends Dashboard {
 		this.globalData = {
 			strategyData: {},
 			posData: {},
-			mdData: {},
-			pnlData: [],
+			pnlData: {},
 			tradeData: [],
 			orderData: [],
 			processStatus: {},
-			cashData: {},
+
 		};
 		this.logWatcher = null;
 	}
@@ -127,8 +127,9 @@ class StrategyDashboard extends Dashboard {
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
 			height: '31.33%',
+            pad: 1,
             getDataMethod: getStrategyTrade,
-	        headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol']            
+	        headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol', 'AccountId']            
 		});
 	}
 	
@@ -148,11 +149,11 @@ class StrategyDashboard extends Dashboard {
 	
 	refresh(){
 		const t = this;
-		const { processStatus, strategyData, mdData, posData, orderData, tradeData, cashData } = t.globalData;
-		t.strategyTable.refresh(strategyData, processStatus)
+		const { processStatus, strategyData, posData, orderData, tradeData, pnlData } = t.globalData;
+		t.strategyTable.refresh(strategyData, processStatus, pnlData)
 		t.posTable.refresh(posData)
 		t.orderTable.refresh(orderData)
-		t.tradeTable.refresh(tradeData);
+		t.tradeTable.refresh(tradeData, 'strategy');
 	}
 	
 	getData(){
@@ -177,12 +178,20 @@ class StrategyDashboard extends Dashboard {
 			const tradeDataPromise = t.tradeTable.getData(currentId)
 			.then(trades => t.globalData.tradeData = trades || [])
 			.then(() => t.refresh())
+			//pnl
+			const tradingDay = buildTradingDay();
+			const pnlDataPromise = getStrategysPnl(Object.keys(t.globalData.strategyData || {}), tradingDay).then(res => {
+				let pnlData = {}
+				res.forEach(p => pnlData[p.strategyId] = p.lastPnl)
+				t.globalData.pnlData = pnlData;
+			})
 
 			return Promise.all([
 				strategyListPromise, 
 				posDataPromise,
 				orderDataPromise,
-				tradeDataPromise
+				tradeDataPromise,
+				pnlDataPromise
 			]).finally(() => {
 				timer = setTimeout(() => runPromises(), 3000)
 			})
@@ -261,15 +270,14 @@ class StrategyDashboard extends Dashboard {
 
 	_afterSwitchStrategyProcess(index){
 		const t = this;
-		const tdProcess = Object.values(t.globalData.strategyData || {})[index];
-		switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+		// const tdProcess = Object.values(t.globalData.strategyData || {})[index];
+		// switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
 	}
 
 	_afterSelected(){
 		this.globalData = {
 			...this.globalData,
 			posData: {},
-			pnlData: [],
 			tradeData: [],
 			orderData: []
 		};
