@@ -1,5 +1,7 @@
 import blessed  from 'blessed';
 import path from 'path';
+import { Tail } from 'tail';
+
 import strategyTable from '../public/StrategyTable';
 import posTable from '../public/PosTable';
 import orderTable from '../public/OrderTable';
@@ -28,11 +30,8 @@ class StrategyDashboard extends Dashboard {
 			orderData: [],
 			processStatus: {},
 			cashData: {},
-			pnl: {
-				x: [],
-				y: [],
-			}
 		};
+		this.logWatcher = null;
 	}
 
 	init(){
@@ -58,7 +57,7 @@ class StrategyDashboard extends Dashboard {
 			height: '33.33%',
 			getDataMethod: getStrategyList,
 			afterSelectMethod: t._afterSelected.bind(t),
-			afterSwitchMethod: t._afterSwitchAccountProcess.bind(t),
+			afterSwitchMethod: t._afterSwitchStrategyProcess.bind(t),
 			style: {
 				cell: {
 					selected: {
@@ -83,6 +82,9 @@ class StrategyDashboard extends Dashboard {
             padding: DEFAULT_PADDING,
 			width: WIDTH_LEFT_PANEL + '%',
 			height: '62.66%',
+			style: {
+				...TABLE_BASE_OPTIONS.style,
+			}
         })
 	}
     
@@ -121,7 +123,7 @@ class StrategyDashboard extends Dashboard {
 		t.tradeTable = tradeTable.build({
 			label: ' Today Trades ',
 			parent: t.screen,
-			top: '66.66%',
+			top: '66.66%-1',
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
 			height: '31.33%',
@@ -200,7 +202,7 @@ class StrategyDashboard extends Dashboard {
 	bindEvent(){
 		const t = this;
 		let i = 0;
-		let boards = ['strategyTable', 'logTable', 'orderTable', 'tradeTable'];
+		let boards = ['strategyTable', 'posTable', 'logTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch, key) => {
 			(key.name === 'left') ? i-- : i++;
 			if (i === 5) i = 0;
@@ -213,40 +215,6 @@ class StrategyDashboard extends Dashboard {
 			process.exit(0);
 		});	
 	}
-
-	_afterSwitchAccountProcess(index){
-		const t = this;
-		const tdProcess = Object.values(t.globalData.strategyData || {})[index];
-		switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
-	}
-
-	_afterSwitchMdProcess(index){
-		const t = this;
-		const mdProcess = Object.values(t.globalData.mdData || {})[index];
-		switchMd(mdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
-	}
-
-	_afterSelected(){
-		this.globalData = {
-			...this.globalData,
-			posData: {},
-			pnlData: [],
-			tradeData: [],
-			orderData: []
-		};
-		this.refresh();
-	}
-    
-    getLogs(){
-        const t = this;
-		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];        
-        const logPath = path.join(LOG_DIR, `${currentId}.log`);  
-        return getLog(logPath).then(({list}) => {
-            list.forEach(l => {
-                t.logTable.add(dealLog(l))
-            })
-        })
-    }
 	
 	getProcessStatus(){
 		const t = this;
@@ -260,6 +228,56 @@ class StrategyDashboard extends Dashboard {
 			.finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
 		}
 		return startGetProcessStatus()
+	}
+
+	getLogs(){
+        const t = this;
+		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];        
+        const logPath = path.join(LOG_DIR, `${currentId}.log`);  
+        return getLog(logPath).then(({list}) => {
+            list.forEach(l => {
+				t.logTable.add(dealLog(l))
+			})
+		}).finally(() => t._watchCurrentProcessLog(currentId))
+    }
+
+	_watchCurrentProcessLog(processId){
+		const t = this;
+		if(t.logWatcher) t.logWatcher.unwatch();
+		t.logWatcher = null;
+		const logPath = path.join(LOG_DIR, `${processId}.log`);
+		const watcher = new Tail(logPath);
+		watcher.watch();
+		watcher.on('line', line => {
+			const logData = dealLogMessage(line);
+			logData.forEach(l => t.logTable.add(dealLog(l)))
+		})
+		watcher.on('error', err => {
+			watcher.unwatch();
+			watcher = null;
+		})
+		t.logWatcher = watcher;
+	}
+
+	_afterSwitchStrategyProcess(index){
+		const t = this;
+		const tdProcess = Object.values(t.globalData.strategyData || {})[index];
+		switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+	}
+
+	_afterSelected(){
+		this.globalData = {
+			...this.globalData,
+			posData: {},
+			pnlData: [],
+			tradeData: [],
+			orderData: []
+		};
+		this.logTable.content = '';
+		this.logTable.setScrollPerc(0)
+
+		this.refresh();
+		this.getLogs();
 	}
 }
 	

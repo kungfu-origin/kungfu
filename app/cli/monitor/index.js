@@ -10,7 +10,6 @@ import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
-import { logger } from '__gUtils/logUtils';
 
 const WIDTH_LEFT_PANEL = 30;
 
@@ -221,7 +220,7 @@ class MonitorDashboard extends Dashboard {
             clearTimeout(listProcessTimer)
             return listProcessStatus()
             .then(res => {
-                t._diffOnlineProcess(res);
+                t._diffOnlineProcess(res, t.globalData.processStatus);
                 t.globalData.processStatus = Object.freeze(res);
                 monitorDashboard.refresh();
                 return res;
@@ -305,7 +304,7 @@ class MonitorDashboard extends Dashboard {
         return [...mdList, ...tdList, ...stratList]
     }
 
-    _diffOnlineProcess(processStatus){
+    _diffOnlineProcess(processStatus, oldProcessStatus){
         const t = this;
         const aliveProcesses = Object.keys(processStatus)
         .filter(p => processStatus[p] === 'online')
@@ -315,8 +314,8 @@ class MonitorDashboard extends Dashboard {
            else return 0
         })
 
-        const oldAliveProcesses = Object.keys(t.globalData.processStatus)
-        .filter(p => processStatus[p] === 'online')
+        const oldAliveProcesses = Object.keys(oldProcessStatus)
+        .filter(p => oldProcessStatus[p] === 'online')
         .sort((a, b) => {
            if(a > b) return 1;
            else if(a < b) return -1;

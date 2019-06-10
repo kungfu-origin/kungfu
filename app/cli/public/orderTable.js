@@ -1,7 +1,7 @@
 import colors from 'colors';
 import moment from 'moment';
 import Table from '../public/Table';
-import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, posDirection, } from "../public/utils";
+import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, buildDateRange } from "../public/utils";
 
 function OrderTable(){
     if (!(this instanceof OrderTable)) {
@@ -15,7 +15,7 @@ OrderTable.prototype = new Table();
 
 OrderTable.prototype.getData = function(currentId){
 	if(!currentId) return new Promise(resolve => resolve([]))
-	return this.getDataMethod(currentId, {dateRange: []}).then(orders => {
+	return this.getDataMethod(currentId, {dateRange: buildDateRange()}).then(orders => {
         return orders
 	})
 }

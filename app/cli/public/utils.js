@@ -1,4 +1,5 @@
 import colors from 'colors';
+import moment from 'moment';
 import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
 import { setTasksDB } from '@/io/base';
 import { toDecimal } from '@/assets/js/utils';
@@ -213,4 +214,11 @@ export const dealLog = (l) => {
 	if(type === 'error') type = colors.red(l.type);
 	else if(type === 'warning') type = colors.yellow('warn');
 	return parseToString([`[${l.updateTime}]`, `${type}`, l.message], [31, 5, 'auto'], 0)
+}
+
+export const buildDateRange = () => {
+	const momentDay = moment();
+	const startDate =momentDay.format('YYYY-MM-DD')
+	const endDate = momentDay.add(1,'d').format('YYYY-MM-DD')
+	return [startDate, endDate]
 }
