@@ -7,7 +7,7 @@ function StrategyTable(){
     }
     Table.call(this)
 	this.headers = ['Strategy', 'Status', 'Pnl', 'PnlRt', 'dbPath'];
-	this.columnWidth = [10, 6, 8, 8, 'auto']
+	this.columnWidth = [10, 8, 8, 8, 'auto']
 }
 
 StrategyTable.prototype = new Table();

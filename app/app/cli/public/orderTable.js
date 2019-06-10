@@ -23,8 +23,7 @@ OrderTable.prototype.getData = function(currentId){
  * @param  {Object} accountData
  * @param  {Object} processStatus
  */
-OrderTable.prototype.refresh = function(orderData){
-
+OrderTable.prototype.refresh = function(orderData, type){
 	const orderListData = orderData.map(o => {
 		let side = sideName[o.side] ? sideName[o.side] : '--';
 		if(side === 'buy') side = colors.red(side);
@@ -37,6 +36,8 @@ OrderTable.prototype.refresh = function(orderData){
 		else if(+o.status === 4) status = colors.red(status);
 		else status = colors.grey(status);
 
+		let last = o.client_id;
+		if(type === 'strategy') last = o.account_id;
 		return parseToString([
 			o.insert_time && moment(o.insert_time/1000000).format("HH:mm:ss"),
 			o.instrument_id,
@@ -45,7 +46,7 @@ OrderTable.prototype.refresh = function(orderData){
 			o.limit_price,
 			o.volume_traded + '/' + o.volume_left,
 			status,
-			o.client_id
+			last
 		], calcuHeaderWidth(this.headers, this.columnWidth), this.pad)
 	})
 	this.table.setItems(orderListData)

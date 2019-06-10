@@ -10,7 +10,7 @@ import tradeTable from '../public/TradeTable';
 import Dashboard from '../public/Dashboard';
 
 import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '@/io/strategy.js';
-import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchTd, dealLog, buildTradingDay } from '../public/utils';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchStrategy, dealLog, buildTradingDay } from '../public/utils';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { listProcessStatus } from '__gUtils/processUtils';
@@ -114,7 +114,7 @@ class StrategyDashboard extends Dashboard {
 			height: '33.33%',
             getDataMethod: getStrategyOrder,
             pad: 1,
-            headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status']
+            headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 'AccountId']
 		});
 	}
 	
@@ -126,7 +126,7 @@ class StrategyDashboard extends Dashboard {
 			top: '66.66%-1',
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
-			height: '31.33%',
+			height: '33.33%',
             pad: 1,
             getDataMethod: getStrategyTrade,
 	        headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol', 'AccountId']            
@@ -152,7 +152,7 @@ class StrategyDashboard extends Dashboard {
 		const { processStatus, strategyData, posData, orderData, tradeData, pnlData } = t.globalData;
 		t.strategyTable.refresh(strategyData, processStatus, pnlData)
 		t.posTable.refresh(posData)
-		t.orderTable.refresh(orderData)
+		t.orderTable.refresh(orderData, 'strategy');
 		t.tradeTable.refresh(tradeData, 'strategy');
 	}
 	
@@ -270,8 +270,8 @@ class StrategyDashboard extends Dashboard {
 
 	_afterSwitchStrategyProcess(index){
 		const t = this;
-		// const tdProcess = Object.values(t.globalData.strategyData || {})[index];
-		// switchTd(tdProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+		const strategyProcess = Object.values(t.globalData.strategyData || {})[index];
+		switchStrategy(strategyProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
 	}
 
 	_afterSelected(){

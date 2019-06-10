@@ -9,7 +9,7 @@ function PosTable(){
     }
     
     Table.call(this)
-	this.headers = ['Ticker', 'Dir', 'Yest', 'Total', 'UnRealPnl']
+	this.headers = ['Ticker', 'Dir', 'Yest', 'Total', 'AverCost', 'LastPrice', 'UnRealPnl']
 	this.columnWidth = [0, 5]
 }
 
@@ -39,8 +39,10 @@ PosTable.prototype.refresh = function(posData){
 			direction,
 			p.yesterday_volume,
 			p.volume,
+			toDecimal(p.cost_price) || '--',
+			toDecimal(p.last_price) || '--',
 			unRealizedPnl
-		], calcuHeaderWidth(this.headers, this.columnWidth))
+		], calcuHeaderWidth(this.headers, this.columnWidth), this.pad)
     })
 	this.table.setItems(posListData)
 	if(!this.table.childList.focused) this.table.childList.setScrollPerc(0)
