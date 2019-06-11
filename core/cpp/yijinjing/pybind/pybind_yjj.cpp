@@ -159,11 +159,12 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<data::session, std::shared_ptr<data::session>>(m, "session")
             .def_readonly("location", &data::session::location)
-            .def_readonly("start_time", &data::session::start_time)
-            .def_readonly("start_page_id", &data::session::start_page_id)
+            .def_readonly("begin_time", &data::session::begin_time)
+            .def_readonly("begin_page_id", &data::session::begin_page_id)
             .def_readonly("end_time", &data::session::end_time)
             .def_readonly("end_page_id", &data::session::end_page_id)
-            .def_readonly("closed", &data::session::closed);
+            .def_readonly("closed", &data::session::closed)
+            .def_readonly("frame_count", &data::session::frame_count);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)
@@ -204,7 +205,7 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<aggregate_reader, std::shared_ptr<aggregate_reader>>(m, "reader")
             .def("subscribe", &aggregate_reader::subscribe)
-            .def("get_sessions", &aggregate_reader::get_sessions);
+            .def("find_sessions_from_current_frame", &aggregate_reader::find_sessions_from_current_frame);
 
     py::class_<io_device, std::shared_ptr<io_device>> io_device(m, "io_device");
     io_device.def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)

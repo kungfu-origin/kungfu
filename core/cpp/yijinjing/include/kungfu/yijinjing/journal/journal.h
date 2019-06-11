@@ -58,7 +58,7 @@ namespace kungfu
                 /** load next page, current page will be released if not empty */
                 void load_next_page();
 
-                const std::vector<data::session_ptr> get_sessions();
+                const std::vector<data::session_ptr> find_sessions_from_current_frame();
 
             private:
                 page_provider_ptr page_provider_;
@@ -73,7 +73,14 @@ namespace kungfu
                 explicit reader(page_provider_factory_ptr factory) : factory_(factory)
                 {};
 
-                /** subscribe to a given journal  */
+                /**
+                 * subscribe to specified data location
+                 * @param m mode
+                 * @param c category
+                 * @param group group
+                 * @param name name
+                 * @param from_time subscribe events after this time, 0 means from start
+                 */
                 virtual void
                 subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time) = 0;
 
@@ -85,7 +92,7 @@ namespace kungfu
                 /** seek next frame */
                 virtual void seek_next() = 0;
 
-                virtual const std::vector<data::session_ptr> get_sessions() = 0;
+                virtual const std::vector<data::session_ptr> find_sessions_from_current_frame() = 0;
 
             protected:
                 page_provider_factory_ptr factory_;
@@ -110,6 +117,10 @@ namespace kungfu
                     close_frame(frame.copy_data<T>(data));
                 }
 
+                void open_session();
+
+                void close_session();
+
             private:
                 std::mutex writer_mtx_;
                 journal_ptr journal_;
@@ -133,8 +144,8 @@ namespace kungfu
 
                 void seek_next() override;
 
-                const std::vector<data::session_ptr> get_sessions() override
-                { return journal_->get_sessions(); };
+                const std::vector<data::session_ptr> find_sessions_from_current_frame() override
+                { return journal_->find_sessions_from_current_frame(); };
 
             private:
                 journal_ptr journal_;
@@ -158,7 +169,7 @@ namespace kungfu
 
                 void seek_next() override;
 
-                const std::vector<data::session_ptr> get_sessions() override;
+                const std::vector<data::session_ptr> find_sessions_from_current_frame() override;
 
             private:
                 single_reader_ptr current_;

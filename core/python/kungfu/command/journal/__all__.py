@@ -1,4 +1,4 @@
 # pyinstaller matters
 # must explicitly import all commands
 
-from . import session
+from . import sessions

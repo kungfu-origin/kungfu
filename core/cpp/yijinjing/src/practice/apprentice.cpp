@@ -49,8 +49,7 @@ void apprentice::setup_output(data::mode m, data::category c, const std::string 
     {
         SPDLOG_INFO("apprentice output setup to {} {} {} {}", data::get_mode_name(m), data::get_category_name(c), group, name);
         writer_ = io_device_->open_writer(m, c, group, name);
-        writer_->open_frame(0, MsgType::SessionStart, 0);
-        writer_->close_frame(1);
+        writer_->open_session();
         socket_reply_ = io_device_->bind_socket(m, c, group, name, protocol::REPLY, 0);
         socket_publish_ = io_device_->bind_socket(m, c, group, name, protocol::PUBLISH, 0);
     } else
@@ -104,12 +103,15 @@ void apprentice::go()
             handler->finish();
         }
     }
+    catch (const std::runtime_error &e)
+    {
+        SPDLOG_ERROR("Unexpected runtime error: {}", e.what());
+    }
     catch (const std::exception &e)
     {
-        SPDLOG_ERROR("Unexpected apprentice error: {}", e.what());
+        SPDLOG_ERROR("Unexpected exception: {}", e.what());
     }
-    writer_->open_frame(0, MsgType::SessionEnd, 0);
-    writer_->close_frame(1);
+    writer_->close_session();
     SPDLOG_INFO("apprentice {} finished", io_device_->get_name());
 }
 

@@ -102,9 +102,14 @@ namespace kungfu {
                  * will keep moving forward until change page */
                 frame_header *header_;
 
-                inline void move_to_next() {
-                    header_ = reinterpret_cast<frame_header *>(address() + frame_length());
+                inline void move_to(uintptr_t last_frame_address) {
+                    header_ = reinterpret_cast<frame_header *>(last_frame_address);
                 }
+
+                inline void move_to_next() {
+                    move_to(address() + frame_length());
+                }
+
                 friend class page;
             };
         }

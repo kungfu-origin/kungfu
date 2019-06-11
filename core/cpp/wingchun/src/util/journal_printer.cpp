@@ -57,7 +57,7 @@ namespace kungfu
 
     void JournalPrinter::run(std::string start_time, std::string end_time, bool keep)
     {
-//        long start_nano  = kungfu::yijinjing::time::strptime(start_time.c_str(), TIME_FORMAT);
+//        long start_nano  = kungfu::yijinjing::time::strptime(begin_time.c_str(), TIME_FORMAT);
 //        long end_nano = kungfu::yijinjing::time::strptime(end_time.c_str(), TIME_FORMAT);
 //        auto reader = desk.open_reader(kungfu::yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, "xtp", name_);
 //        reader->seek_to_time(start_nano);

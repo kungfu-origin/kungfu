@@ -86,12 +86,12 @@ namespace kungfu
                 seek_current_reader();
             }
 
-            const std::vector<data::session_ptr> aggregate_reader::get_sessions()
+            const std::vector<data::session_ptr> aggregate_reader::find_sessions_from_current_frame()
             {
                 std::vector<data::session_ptr> sessions;
                 for (std::pair<std::string, single_reader_ptr> element: readers_)
                 {
-                    auto s = element.second->get_sessions();
+                    auto s = element.second->find_sessions_from_current_frame();
                     sessions.insert(sessions.end(), s.begin(), s.end());
                 }
                 return sessions;

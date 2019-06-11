@@ -59,6 +59,19 @@ namespace kungfu
                 journal_->seek_next_frame();
                 writer_mtx_.unlock();
                 publisher_->notify();
+                SPDLOG_DEBUG("write frame length {}", length);
+            }
+
+            void writer::open_session()
+            {
+                open_frame(0, MsgType::SessionStart, 0);
+                close_frame(1);
+            }
+
+            void writer::close_session()
+            {
+                open_frame(0, MsgType::SessionEnd, 0);
+                close_frame(1);
             }
         }
     }

@@ -70,6 +70,9 @@ namespace kungfu
         class publisher
         {
         public:
+
+            virtual ~publisher() = default;
+
             virtual int notify() = 0;
 
             virtual int publish(const std::string &json_message) = 0;
@@ -79,6 +82,9 @@ namespace kungfu
         class observer
         {
         public:
+
+            virtual ~observer() = default;
+
             virtual bool wait() = 0;
 
             virtual const std::string &get_notice() = 0;
@@ -159,16 +165,17 @@ namespace kungfu
             class session
             {
             public:
-                session(const data::location &loc, int64_t start, int sid, int64_t end, int eid, bool c) :
-                        location(&loc), start_time(start), start_page_id(sid), end_time(end), end_page_id(eid), closed(c)
+                session(const data::location &loc, int64_t start, int sid, int64_t end, int eid, bool c, int fc) :
+                        location(&loc), begin_time(start), begin_page_id(sid), end_time(end), end_page_id(eid), closed(c), frame_count(fc)
                 {}
 
                 const data::location *location;
-                const int64_t start_time;
-                const int start_page_id;
+                const int64_t begin_time;
+                const int begin_page_id;
                 const int64_t end_time;
                 const int end_page_id;
                 const bool closed;
+                const int frame_count;
             };
 
             DECLARE_PTR(session)

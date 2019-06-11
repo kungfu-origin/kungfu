@@ -1,13 +1,3 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -34,8 +24,6 @@
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/io.h>
-#include <random>
-#include <queue>
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -151,13 +139,13 @@ namespace kungfu
                     {
                         std::string error_msg = response["error_msg"];
                         SPDLOG_ERROR("failed to register client {}, error: {}", client_name_, error_msg);
-                        throw std::runtime_error("cannot register client: " + client_name_);
+                        throw exception("cannot register client: " + client_name_);
                     }
 
                     paged::page_request *server_msg = paged::get_page_request(memory_msg_buffer_, memory_msg_id_);
                     if (server_msg->status != paged::state::WAITING)
                     {
-                        throw std::runtime_error("server buffer is not allocated: " + client_name_);
+                        throw exception("server buffer is not allocated: " + client_name_);
                     }
                 }
 
@@ -178,10 +166,14 @@ namespace kungfu
                         if (server_msg->status != paged::state::WAITING)
                         {
                             std::string path = page::get_page_path(get_location(), new_page_id);
-                            throw std::runtime_error("failed to request page " + path);
+                            throw exception("failed to request page " + path);
                         }
+
+                        return local_page_provider::get_page(new_page_id, old_page_id);
+                    } else
+                    {
+                        throw exception("client_page_provider does not support concurrent page request " + page::get_page_path(get_location(), new_page_id));
                     }
-                    return local_page_provider::get_page(new_page_id, old_page_id);
                 }
 
                 void release_page(int page_id) override
@@ -202,8 +194,11 @@ namespace kungfu
 
                         if (server_msg->status != paged::state::WAITING)
                         {
-                            throw std::runtime_error("failed to release page " + path);
+                            throw exception("failed to release page " + path);
                         }
+                    } else
+                    {
+                        throw exception("client_page_provider does not support concurrent page request " + page::get_page_path(get_location(), page_id));
                     }
                 }
 
@@ -319,7 +314,7 @@ namespace kungfu
                 SPDLOG_DEBUG("ready to publish and notify to master [{}]", url);
             }
 
-            ~nanomsg_publisher()
+            ~nanomsg_publisher() override
             {
                 SPDLOG_DEBUG("master publisher closing");
                 socket_.close();
@@ -354,7 +349,7 @@ namespace kungfu
                 SPDLOG_DEBUG("observing master chanel with timeout {}ms [{}]", timeout, url);
             }
 
-            ~nanomsg_observer()
+            ~nanomsg_observer() override
             {
                 SPDLOG_DEBUG("master observer closing");
                 socket_.close();

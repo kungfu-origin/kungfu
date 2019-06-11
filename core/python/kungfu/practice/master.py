@@ -1,7 +1,7 @@
-import sys, traceback
+import sys
+import traceback
 import select
 import json
-import psutil
 import time
 import functools
 

@@ -43,6 +43,16 @@ namespace kungfu
                 frame_.move_to_next();
             }
 
+            void page::seek_begin()
+            {
+                frame_.move_to(address() + sizeof(page_header));
+            }
+
+            void page::seek_end()
+            {
+                frame_.move_to(address() + header_->last_frame_position);
+            }
+
             bool page::seek_to_writable()
             {
                 while (frame_.has_data())
@@ -54,18 +64,20 @@ namespace kungfu
 
             bool page::seek_to_time(int64_t nanotime)
             {
-                SPDLOG_DEBUG("seek to time {}", time::strftime(nanotime));
-                SPDLOG_DEBUG("page end time {}, last frame {}", time::strftime(end_time()), header_->last_frame_position);
+                SPDLOG_DEBUG("seek to time {}, frame at {}", time::strftime(nanotime), frame_.address());
+                SPDLOG_DEBUG("page begin time {}, frame_count   {}", time::strftime(begin_time()), header_->frame_count);
+                SPDLOG_DEBUG("page end time   {}, last frame    {}", time::strftime(end_time()), header_->last_frame_position);
                 if (end_time() < nanotime)
                 {
-                    return false;
+                    seek_end();
                 }
                 while (frame_.has_data() && frame_.gen_time() < nanotime)
                 {
                     SPDLOG_DEBUG("frame {}", time::strftime(frame_.gen_time()));
                     frame_.move_to_next();
                 }
-                return reached_end();
+                SPDLOG_DEBUG("seeked frame {}, address  {}", time::strftime(frame_.gen_time()), frame_.address());
+                return !reached_end();
             }
 
             void page::on_frame_added()

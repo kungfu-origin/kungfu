@@ -47,48 +47,19 @@ namespace kungfu
             public:
 
                 inline const int get_id() const
-                { return id_; };
+                { return id_; }
 
                 inline const data::location &get_location() const
-                { return location_; };
-
-                inline frame &current_frame()
-                { return frame_; };
-
-                inline uintptr_t address() const
-                { return reinterpret_cast<uintptr_t>(header_); }
-
-                inline uintptr_t address_border() const
-                { return address() + JOURNAL_PAGE_SIZE - PAGE_MIN_HEADROOM; };
+                { return location_; }
 
                 inline int64_t begin_time() const
-                { return first_frame_header()->gen_time; };
+                { return first_frame_header()->gen_time; }
 
                 inline int64_t end_time() const
-                { return last_frame_header()->gen_time; };
+                { return last_frame_header()->gen_time; }
 
-                inline bool reached_end() const
-                {
-                    return frame_.address() > address_border();
-                }
-
-                /**
-                 * seek next frame, user is responsible to check reached_end
-                 */
-                void seek_next();
-
-                /**
-                 * seek to the first writable frame
-                 * @return true if found a writable frame, false if the page is full
-                 */
-                bool seek_to_writable();
-
-                /**
-                 * seek to the next frame that passed given time
-                 * @param nanotime time in nanoseconds
-                 * @return true if found a frame, false if no frame found
-                 */
-                bool seek_to_time(int64_t nanotime);
+                inline bool has_data() const
+                { return header_->frame_count > 0; }
 
                 void release();
 
@@ -99,6 +70,20 @@ namespace kungfu
                 static std::vector<int> list_page_ids(const data::location &location);
 
                 static int find_page_id(const data::location &location, int64_t time);
+
+            protected:
+
+                inline frame &current_frame()
+                { return frame_; };
+
+                inline uintptr_t address() const
+                { return reinterpret_cast<uintptr_t>(header_); }
+
+                inline uintptr_t address_border() const
+                { return address() + JOURNAL_PAGE_SIZE - PAGE_MIN_HEADROOM; }
+
+                inline bool reached_end() const
+                { return frame_.address() > address_border(); }
 
             private:
                 const data::location &location_;
@@ -117,7 +102,40 @@ namespace kungfu
                 inline frame_header *last_frame_header() const
                 { return reinterpret_cast<frame_header *>(address() + header_->last_frame_position); };
 
+                /**
+                 * seek next frame, user is responsible to check reached_end
+                 */
+                void seek_next();
+
+                /**
+                 * seek to the first frame
+                 */
+                void seek_begin();
+
+                /**
+                 * seek to the last frame
+                 */
+                void seek_end();
+
+                /**
+                 * seek to the first writable frame
+                 * @return true if found a writable frame, false if the page is full
+                 */
+                bool seek_to_writable();
+
+                /**
+                 * seek to the next readable/writable frame that passed given time
+                 * @param nanotime time in nanoseconds
+                 * @return true if found a frame, false if no available frame found when reached page end
+                 */
+                bool seek_to_time(int64_t nanotime);
+
+                /**
+                 * update page header when new frame added
+                 */
                 void on_frame_added();
+
+                friend class journal;
                 friend class writer;
             };
         }

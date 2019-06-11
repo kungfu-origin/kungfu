@@ -361,5 +361,5 @@ PYBIND11_MODULE(pywingchun, m) {
 
     py::class_<kungfu::JournalPrinter>(m, "JournalPrinter")
             .def(py::init<const std::string &, const std::string &, int, bool, bool, bool, bool>())
-            .def("run", &kungfu::JournalPrinter::run, py::arg("start_time"), py::arg("end_time"), py::arg("keep"));
+            .def("run", &kungfu::JournalPrinter::run, py::arg("begin_time"), py::arg("end_time"), py::arg("keep"));
 }
