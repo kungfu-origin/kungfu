@@ -402,7 +402,7 @@ namespace kungfu
                 socket_.connect(url);
             }
 
-            ~nanomsg_master_service()
+            ~nanomsg_master_service() override
             {
                 socket_.close();
             }

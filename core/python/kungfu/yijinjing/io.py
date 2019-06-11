@@ -18,6 +18,7 @@ def checkin(args, logger, io_device):
         sys.exit(-1)
     else:
         logger.info('%s checked in with master', args.name)
+    io_device._publisher.publish('{"test":1}')
 
 
 def checkout(args, logger, io_device):

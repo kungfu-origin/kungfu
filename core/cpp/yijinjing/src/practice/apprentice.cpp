@@ -106,7 +106,7 @@ void apprentice::go()
     }
     catch (const std::exception &e)
     {
-        SPDLOG_WARN("Unexpected apprentice error: {}", e.what());
+        SPDLOG_ERROR("Unexpected apprentice error: {}", e.what());
     }
     writer_->open_frame(0, MsgType::SessionEnd, 0);
     writer_->close_frame(1);
@@ -121,7 +121,7 @@ void apprentice::try_once()
         nanomsg_json event(notice);
         for (auto handler : event_handlers_)
         {
-            handler->handle(event);
+            handler->handle(&event);
         }
     }
 
@@ -129,7 +129,7 @@ void apprentice::try_once()
     {
         for (auto handler : event_handlers_)
         {
-            handler->handle(reader_->current_frame());
+            handler->handle(&reader_->current_frame());
         }
         reader_->seek_next();
     }
@@ -140,7 +140,7 @@ void apprentice::try_once()
         nanomsg_json event(msg);
         for (auto handler : event_handlers_)
         {
-            handler->handle(event);
+            handler->handle(&event);
         }
     }
 }

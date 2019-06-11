@@ -69,7 +69,7 @@ public:
     void configure_event_source(event_source_ptr event_source) override
     {PYBIND11_OVERLOAD_PURE(void, event_handler, configure_event_source, event_source) }
 
-    void handle(const event &e) override
+    void handle(const event *e) override
     {PYBIND11_OVERLOAD_PURE(void, event_handler, handle, e) }
 
     void finish() override

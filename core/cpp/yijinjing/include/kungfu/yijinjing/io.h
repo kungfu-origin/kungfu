@@ -62,7 +62,7 @@ namespace kungfu
 
             virtual void configure_event_source(event_source_ptr event_source) = 0;
 
-            virtual void handle(const event &e) = 0;
+            virtual void handle(const event *e) = 0;
 
             virtual void finish()
             {}
@@ -118,6 +118,8 @@ namespace kungfu
         class master_service
         {
         public:
+            virtual ~master_service() = default;
+
             virtual const std::string &request(const std::string &json_message) = 0;
         };
 

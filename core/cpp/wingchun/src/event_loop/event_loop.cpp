@@ -108,17 +108,17 @@ namespace kungfu
         return nano > 0 ? nano : kungfu::yijinjing::time::now_in_nano();
     }
 
-    void EventLoop::handle(const yijinjing::event &event)
+    void EventLoop::handle(const yijinjing::event *event)
     {
-        scheduler_->update_nano(event.gen_time());
-        auto msg_type = static_cast<MsgType>(event.msg_type());
+        scheduler_->update_nano(event->gen_time());
+        auto msg_type = static_cast<MsgType>(event->msg_type());
         switch (msg_type)
         {
             case MsgType::Quote:
             {
                 if (quote_callback_)
                 {
-                    quote_callback_(event.data<Quote>());
+                    quote_callback_(event->data<Quote>());
                 }
                 break;
             }
@@ -126,7 +126,7 @@ namespace kungfu
             {
                 if (entrust_callback_)
                 {
-                    entrust_callback_(event.data<Entrust>());
+                    entrust_callback_(event->data<Entrust>());
                 }
                 break;
             }
@@ -134,7 +134,7 @@ namespace kungfu
             {
                 if (transaction_callback_)
                 {
-                    transaction_callback_(event.data<Transaction>());
+                    transaction_callback_(event->data<Transaction>());
                 }
                 break;
             }
@@ -142,7 +142,7 @@ namespace kungfu
             {
                 if (order_input_callback_)
                 {
-                    order_input_callback_(event.data<OrderInput>());
+                    order_input_callback_(event->data<OrderInput>());
                 }
                 break;
             }
@@ -150,7 +150,7 @@ namespace kungfu
             {
                 if (order_action_callback_)
                 {
-                    order_action_callback_(event.data<OrderAction>());
+                    order_action_callback_(event->data<OrderAction>());
                 }
                 break;
             }
@@ -158,7 +158,7 @@ namespace kungfu
             {
                 if (order_callback_)
                 {
-                    order_callback_(event.data<Order>());
+                    order_callback_(event->data<Order>());
                 }
                 break;
             }
@@ -166,13 +166,13 @@ namespace kungfu
             {
                 if (trade_callback_)
                 {
-                    trade_callback_(event.data<Trade>());
+                    trade_callback_(event->data<Trade>());
                 }
                 break;
             }
             case MsgType::AlgoOrderInput:
             {
-                std::string js((char *) event.data<char>());
+                std::string js((char *) event->data<char>());
                 try
                 {
                     nlohmann::json j = nlohmann::json::parse(js);
@@ -184,13 +184,13 @@ namespace kungfu
                 }
                 catch (std::exception& e)
                 {
-                    SPDLOG_ERROR("failed to parse algo order input msg, data[{}], exception: {}", (char*) event.data<char>(), e.what());
+                    SPDLOG_ERROR("failed to parse algo order input msg, data[{}], exception: {}", (char*) event->data<char>(), e.what());
                 }
                 break;
             }
             case MsgType::AlgoOrderStatus:
             {
-                std::string js((char*) event.data<char>());
+                std::string js((char*) event->data<char>());
                 try
                 {
                     nlohmann::json j = nlohmann::json::parse(js);
@@ -202,13 +202,13 @@ namespace kungfu
                 }
                 catch (std::exception& e)
                 {
-                    SPDLOG_ERROR("failed to parse algo order action msg, data[{}], exception: {}", (char*) event.data<char>(), e.what());
+                    SPDLOG_ERROR("failed to parse algo order action msg, data[{}], exception: {}", (char*) event->data<char>(), e.what());
                 }
                 break;
             }
             case MsgType::AlgoOrderAction:
             {
-                std::string js((char*) event.data<char>());
+                std::string js((char*) event->data<char>());
                 try
                 {
                     nlohmann::json j = nlohmann::json::parse(js);
@@ -220,7 +220,7 @@ namespace kungfu
                 }
                 catch (std::exception& e)
                 {
-                    SPDLOG_ERROR("failed to parse algo order action msg, data[{}], exception: {}", (char*) event.data<char>(), e.what());
+                    SPDLOG_ERROR("failed to parse algo order action msg, data[{}], exception: {}", (char*) event->data<char>(), e.what());
                 }
                 break;
             }
@@ -228,7 +228,7 @@ namespace kungfu
             {
                 if (login_callback_)
                 {
-                    LoginRequest req = event.data<nlohmann::json>();
+                    LoginRequest req = event->data<nlohmann::json>();
                     login_callback_(req.recipient, req.sender);
                 }
                 break;
@@ -237,7 +237,7 @@ namespace kungfu
             {
                 if (sub_callback_)
                 {
-                    SubscribeRequest req = event.data<nlohmann::json>();
+                    SubscribeRequest req = event->data<nlohmann::json>();
                     sub_callback_(req.recipient, req.instruments, req.is_level2);
                 }
                 break;
@@ -255,7 +255,7 @@ namespace kungfu
                 if (manual_order_input_callback_)
                 {
                     OrderInput order_input = {};
-                    auto data = event.data<nlohmann::json>();
+                    auto data = event->data<nlohmann::json>();
                     strcpy(order_input.instrument_id, data["instrument_id"].get<std::string>().c_str());
                     strcpy(order_input.account_id, data["account_id"].get<std::string>().c_str());
                     strcpy(order_input.client_id, data["client_id"].get<std::string>().c_str());
@@ -272,7 +272,7 @@ namespace kungfu
             {
                 if (manual_order_action_callback_)
                 {
-                    auto data = event.data<nlohmann::json>();
+                    auto data = event->data<nlohmann::json>();
                     std::string account_id = "";
                     if (data.find("account_id") != data.end())
                     {

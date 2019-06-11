@@ -68,7 +68,7 @@ namespace kungfu
 
         int64_t get_nano() const;
 
-        void handle(const yijinjing::event &e) override ;
+        void handle(const yijinjing::event *e) override ;
 
     private:
 

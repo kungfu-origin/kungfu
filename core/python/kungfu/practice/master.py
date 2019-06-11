@@ -47,15 +47,20 @@ class Master:
     def process_passive_notice(self):
         readable, writable, exceptional = select.select([self._fd_pull], [], [], self._pull_timeout)
         if readable:
-            event_msg_data = self._socket_pull.recv()
+            raw = self._socket_pull.recv()
             try:
-                event_msg_str = event_msg_data
-                event_msg = json.loads(event_msg_str)
-                rc = self._socket_publish.send(event_msg_str)
+                event_msg = json.dumps({
+                    'gen_time': pyyjj.now_in_nano(),
+                    'trigger_time': 0,
+                    'msg_type': 999,
+                    'source': 0,
+                    'data': json.loads(raw)
+                }) if len(raw) > 2 else raw
+                rc = self._socket_publish.send(event_msg)
                 self._logger.debug('Published passive notice: %d, %s', rc, event_msg)
             except Exception as err:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
-                self._logger.error('Invalid passive notice %s, [%s] %s', event_msg_data, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+                self._logger.error('Invalid passive notice %s, [%s] %s', raw, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
                 self._socket_publish.send('{}')
 
     def process_service_message(self):

@@ -46,6 +46,9 @@ namespace kungfu
         class event
         {
         public:
+
+            virtual ~event() = default;
+
             virtual int64_t gen_time() const = 0;
 
             virtual int64_t trigger_time() const = 0;
