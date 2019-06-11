@@ -10,7 +10,7 @@ dependencies['kungfu-core'] = 'commonjs kungfu-core';
 
 let mainConfig = {
   entry: {
-    main: path.join(__dirname, '../app/main/index.js')
+    main: path.join(__dirname, '../src/main/index.js')
   },
   externals: [
     ...Object.keys(dependencies || {})
@@ -42,9 +42,9 @@ let mainConfig = {
   ],
   resolve: {
     alias: {
-      '@': path.join(__dirname, '../app/renderer'),
-      '__gUtils': path.join(__dirname, '../app/utils'),
-      '__gConfig': path.join(__dirname, '../app/config')
+      '@': path.join(__dirname, '../src/renderer'),
+      '__gUtils': path.join(__dirname, '../src/utils'),
+      '__gConfig': path.join(__dirname, '../src/config')
     },
     extensions: ['.js', '.json', '.node']
   },

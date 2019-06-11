@@ -17,9 +17,9 @@ fs.readdirSync('../node_modules')
 
 let mainConfig = {
   entry: {
-    account: path.join(__dirname, '../app/cli/account/index.js'),
-    monitor: path.join(__dirname, '../app/cli/monitor/index.js'),
-    strategy: path.join(__dirname, '../app/cli/strategy/index.js')
+    account: path.join(__dirname, '../src/cli/account/index.js'),
+    monitor: path.join(__dirname, '../src/cli/monitor/index.js'),
+    strategy: path.join(__dirname, '../src/cli/strategy/index.js')
   },
   externals: nodeModules,
   module: {
@@ -49,9 +49,9 @@ let mainConfig = {
   ],
   resolve: {
     alias: {
-      '@': path.join(__dirname, '../app/renderer'),
-      '__gUtils': path.join(__dirname, '../app/utils'),
-      '__gConfig': path.join(__dirname, '../app/config')
+      '@': path.join(__dirname, '../src/renderer'),
+      '__gUtils': path.join(__dirname, '../src/utils'),
+      '__gConfig': path.join(__dirname, '../src/config')
     },
     extensions: ['.js', '.json', '.node']
   }

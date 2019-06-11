@@ -19,13 +19,14 @@ let whiteListedModules = [
   'vuex', 
   'vue-router', 
   'vue-virtual-scroller', 
-  ];
+];
 
+dependencies['kungfu-core'] = 'commonjs kungfu-core';
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
   entry: {
-    renderer: path.join(__dirname, '../app/renderer/main.js')
+    renderer: path.join(__dirname, '../src/renderer/main.js')
   },
   externals: [
     ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
@@ -116,7 +117,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: path.resolve(__dirname, '../app/index.ejs'),
+      template: path.resolve(__dirname, '../src/index.ejs'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
@@ -142,9 +143,9 @@ let rendererConfig = {
   },
   resolve: {
     alias: {
-      '@': path.join(__dirname, '../app/renderer'),
-      '__gUtils': path.join(__dirname, '../app/utils'),
-      '__gConfig': path.join(__dirname, '../app/config'),
+      '@': path.join(__dirname, '../src/renderer'),
+      '__gUtils': path.join(__dirname, '../src/utils'),
+      '__gConfig': path.join(__dirname, '../src/config'),
       'vue$': 'vue/dist/vue.esm.js'
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']
