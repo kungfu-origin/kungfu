@@ -15,10 +15,8 @@
 
 #include <mutex>
 
-#include <kungfu/yijinjing/log/setup.h>
-#include <kungfu/yijinjing/time.h>
-
 #include <kungfu/yijinjing/common.h>
+#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -39,38 +37,45 @@ namespace kungfu
                 journal_->seek_to_time(time::now_in_nano());
             }
 
-            frame &writer::open_frame(int16_t source, int16_t msg_type, int64_t trigger_time)
+            frame &writer::open_frame(int64_t trigger_time, int16_t msg_type, int16_t source)
             {
                 writer_mtx_.lock();
                 frame &frame = journal_->current_frame();
-                frame.set_source(source);
-                frame.set_msg_type(msg_type);
+                frame.set_header_length();
                 frame.set_trigger_time(trigger_time);
+                frame.set_msg_type(msg_type);
+                frame.set_source(source);
                 return frame;
             }
 
-            void writer::close_frame(int32_t length)
+            void writer::close_frame(size_t data_length)
             {
                 frame &frame = journal_->current_frame();
-                frame.set_gen_time(time::now_in_nano());
                 frame.set_hashcode(util::hash(reinterpret_cast<void *>(frame.address()), frame.frame_length(), KUNGFU_HASH_SEED));
-                frame.set_data_length(length);
-                journal_->current_page_->on_frame_added();
-                journal_->seek_next_frame();
+                frame.set_gen_time(time::now_in_nano());
+                frame.set_data_length(data_length);
+                journal_->current_page_->set_last_frame_position(frame.address() - journal_->current_page_->address());
+                journal_->next();
                 writer_mtx_.unlock();
                 publisher_->notify();
-                SPDLOG_DEBUG("write frame length {}", length);
+            }
+
+            void writer::write_raw(int64_t trigger_time, int16_t msg_type, int16_t source, char *data, int32_t length)
+            {
+                frame &frame = open_frame(trigger_time, msg_type, source);
+                memcpy(const_cast<void*>(frame.data_address()), data, length);
+                close_frame(length);
             }
 
             void writer::open_session()
             {
-                open_frame(0, MsgType::SessionStart, 0);
+                open_frame(time::now_in_nano(), MsgType::SessionStart, 0);
                 close_frame(1);
             }
 
             void writer::close_session()
             {
-                open_frame(0, MsgType::SessionEnd, 0);
+                open_frame(time::now_in_nano(), MsgType::SessionEnd, 0);
                 close_frame(1);
             }
         }

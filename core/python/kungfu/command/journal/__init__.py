@@ -1,12 +1,13 @@
-import psutil
 import functools
 import kungfu.command as kfc
+
+
+LOG_NAME = 'journal_tools'
 
 
 @kfc.command(help='journal tools', sensitive=False)
 def journal(args, logger):
     if 'journal_command' in args:
-        args.name = 'kfc::journal::{}::{}'.format(args.journal_command, psutil.Process().pid)
         COMMANDS[args.journal_command](args, logger)
     else:
         kfc.SUBARGPARSERS['journal'].print_help()

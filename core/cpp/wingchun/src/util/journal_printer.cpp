@@ -102,7 +102,7 @@ namespace kungfu
 //                    }
 //                    std::cout << std::endl;
 //                }
-//                reader->seek_next();
+//                reader->next();
 //            }
 //        }
 //        while (keep);

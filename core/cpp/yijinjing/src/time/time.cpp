@@ -85,9 +85,13 @@ const std::string time::strftime(const int64_t nanotime, const std::string &form
     {
         return oss.str();
     }
+    else if (nanotime == 0)
+    {
+        return std::regex_replace(oss.str(), std::regex("\\d"), "0");
+    }
     else
     {
-        return std::regex_replace(oss.str(), std::regex("\\w"), "#");
+        return std::regex_replace(oss.str(), std::regex("\\d"), "#");
     }
 }
 

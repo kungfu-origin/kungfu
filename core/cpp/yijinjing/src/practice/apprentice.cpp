@@ -127,13 +127,13 @@ void apprentice::try_once()
         }
     }
 
-    if (reader_.get() != nullptr && reader_->current_frame().has_data())
+    if (reader_.get() != nullptr && reader_->data_available())
     {
         for (auto handler : event_handlers_)
         {
             handler->handle(&reader_->current_frame());
         }
-        reader_->seek_next();
+        reader_->next();
     }
 
     for (auto element : sub_sockets_)

@@ -26,120 +26,53 @@ namespace kungfu
     {
         namespace journal
         {
-            void journal::seek_next_frame()
+
+            journal::~journal()
             {
-                if (page_provider_->is_writing())
+                if (current_page_.get() != nullptr)
                 {
-                    while (!current_page_->seek_to_writable())
-                    {
-                        load_next_page();
-                    }
-                } else
+                    page_provider_->release_page(current_page_->get_id());
+                }
+            }
+
+            void journal::next()
+            {
+                assert(current_page_.get() != nullptr);
+
+                frame_.move_to_next();
+                if (frame_.address() > current_page_->address_border())
                 {
-                    current_page_->seek_next();
-                    if (current_page_->reached_end())
-                    {
-                        load_next_page();
-                    }
+                    load_next_page();
                 }
             }
 
             void journal::seek_to_time(int64_t nanotime)
             {
-                int page_id = page::find_page_id(page_provider_->get_location(), nanotime);
-                current_page_ = page_provider_->get_page(page_id, current_page_.get() == nullptr ? -1 : current_page_->get_id());
-                if (!current_page_->seek_to_time(nanotime))
+                int old_page_id = current_page_id_;
+                current_page_id_ = page::find_page_id(page_provider_->get_location(), nanotime);
+                current_page_ = page_provider_->get_page(current_page_id_, old_page_id);
+                frame_.set_address(current_page_->first_frame_address());
+                SPDLOG_TRACE("seek time {} in current page [{} - {}]",
+                        nanotime > 0 ? time::strftime(nanotime) : "",
+                        time::strftime(current_page_->begin_time()),
+                        time::strftime(current_page_->end_time())
+                        );
+                while (current_page_->is_full() && current_page_->end_time() <= nanotime)
                 {
-                    // has seeked to end but not found available frame, load a new page
                     load_next_page();
+                }
+                while (frame_.has_data() && frame_.gen_time() <= nanotime)
+                {
+                    next();
                 }
             }
 
             void journal::load_next_page()
             {
-                current_page_ = page_provider_->get_page(current_page_->get_id() + 1, current_page_->get_id());
+                current_page_id_++;
+                current_page_ = page_provider_->get_page(current_page_id_, current_page_id_ - 1);
+                frame_.set_address(current_page_->first_frame_address());
             }
-
-            const std::vector<data::session_ptr> journal::find_sessions_from_current_frame()
-            {
-                std::vector<data::session_ptr> sessions;
-                int64_t session_start_time = -1;
-                int64_t last_frame_time = -1;
-                int session_start_page_id = -1;
-                int session_frame_count = 0;
-
-                while (!current_page_->reached_end() && current_frame().has_data())
-                {
-                    while (current_frame().has_data())
-                    {
-                        auto frame = current_frame();
-                        session_frame_count++;
-
-                        auto ts_frame = time::strftime(frame.gen_time());
-                        auto ts_start = time::strftime(session_start_time);
-
-                        switch (frame.msg_type())
-                        {
-                            case MsgType::SessionStart:
-                            {
-                                SPDLOG_TRACE("found session start {}, {}, page {}, frame {}", ts_frame, ts_start, current_page_->get_id(), frame.address());
-                                if (session_start_time > 0)
-                                {
-                                    sessions.push_back(
-                                            std::make_shared<data::session>(current_page_->get_location(), session_start_time, session_start_page_id,
-                                                                            frame.gen_time() - 1, current_page_->get_id(), false,
-                                                                            session_frame_count - 1));
-                                    SPDLOG_DEBUG("found session [{},{})", ts_start, ts_frame);
-                                    session_start_time = -1;
-                                    session_frame_count = 0;
-                                } else
-                                {
-                                    session_start_time = frame.gen_time();
-                                    session_start_page_id = current_page_->get_id();
-                                }
-                                break;
-                            }
-                            case MsgType::SessionEnd:
-                            {
-                                SPDLOG_TRACE("found session end {}, page {}, frame {}", ts_frame, current_page_->get_id(), frame.address());
-                                if (session_start_time > 0)
-                                {
-                                    sessions.push_back(
-                                            std::make_shared<data::session>(current_page_->get_location(), session_start_time, session_start_page_id,
-                                                                            frame.gen_time(), current_page_->get_id(), true,
-                                                                            session_frame_count));
-                                    SPDLOG_DEBUG("found session [{},{}]", ts_start, ts_frame);
-                                    session_start_time = -1;
-                                    session_frame_count = 0;
-                                } else
-                                {
-                                    SPDLOG_WARN("Unexpected session end {}, page {}", ts_frame, current_page_->get_id());
-                                }
-                                break;
-                            }
-                            default:
-                            {
-                                break;
-                            }
-                        }
-                        last_frame_time = frame.gen_time();
-                        current_page_->seek_next();
-                    }
-                    if (current_page_->reached_end())
-                    {
-                        load_next_page();
-                    }
-                }
-                if (session_start_time > 0)
-                {
-                    sessions.push_back(std::make_shared<data::session>(current_page_->get_location(),
-                                                                       session_start_time, session_start_page_id, last_frame_time,
-                                                                       current_page_->get_id(), false,
-                                                                       session_frame_count));
-                }
-                return sessions;
-            }
-
         }
     }
 }

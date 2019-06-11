@@ -43,6 +43,27 @@ namespace kungfu {
                 return target_path.string();
             }
 
+            std::vector<int> list_journal_page_id(const std::string &path, const std::string &name)
+            {
+                std::string page_filename_regex = JOURNAL_PREFIX + "\\." + name + "\\.[0-9]+\\." + JOURNAL_SUFFIX;
+                std::regex pattern(page_filename_regex);
+                boost::filesystem::path journal_folder_path(path);
+                std::vector<int> res;
+                for (auto &file : boost::filesystem::directory_iterator(journal_folder_path))
+                {
+                    std::string filename = file.path().filename().string();
+                    if (std::regex_match(filename.begin(), filename.end(), pattern))
+                    {
+                        int begin = JOURNAL_PREFIX.length() + name.length() + 2;
+                        int end = filename.length() - JOURNAL_SUFFIX.length();
+                        std::string page_id_str = filename.substr(begin, end);
+                        res.push_back(atoi(page_id_str.c_str()));
+                    }
+                }
+                std::sort(res.begin(), res.end());
+                return res;
+            }
+
             uintptr_t load_mmap_buffer(const std::string &path, size_t size, bool is_writing, bool lazy)
             {
 #ifdef _WINDOWS

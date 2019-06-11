@@ -28,12 +28,9 @@ namespace kungfu
 
             struct page_header
             {
-                /** version of frame header */
-                int16_t version;
-                int16_t header_length;
-                /** how many frame in this page (only filled when closed) */
-                int32_t frame_count;
-                /** pos of last frame */
+                int32_t version;
+                int32_t page_header_length;
+                int32_t frame_header_length;
                 int32_t last_frame_position;
 #ifndef _WIN32
             } __attribute__((packed));
@@ -53,28 +50,10 @@ namespace kungfu
                 { return location_; }
 
                 inline int64_t begin_time() const
-                { return first_frame_header()->gen_time; }
+                { return reinterpret_cast<frame_header *>(first_frame_address())->gen_time; }
 
                 inline int64_t end_time() const
-                { return last_frame_header()->gen_time; }
-
-                inline bool has_data() const
-                { return header_->frame_count > 0; }
-
-                void release();
-
-                static page_ptr load(const data::location &location, int page_id, bool is_writing = false, bool lazy = true);
-
-                static std::string get_page_path(const data::location &location, int id);
-
-                static std::vector<int> list_page_ids(const data::location &location);
-
-                static int find_page_id(const data::location &location, int64_t time);
-
-            protected:
-
-                inline frame &current_frame()
-                { return frame_; };
+                { return reinterpret_cast<frame_header *>(last_frame_address())->gen_time; }
 
                 inline uintptr_t address() const
                 { return reinterpret_cast<uintptr_t>(header_); }
@@ -82,58 +61,37 @@ namespace kungfu
                 inline uintptr_t address_border() const
                 { return address() + JOURNAL_PAGE_SIZE - PAGE_MIN_HEADROOM; }
 
-                inline bool reached_end() const
-                { return frame_.address() > address_border(); }
+                inline uintptr_t first_frame_address() const
+                { return address() + header_->page_header_length; };
+
+                inline uintptr_t last_frame_address() const
+                { return address() + header_->last_frame_position; };
+
+                inline bool is_full() const
+                { return last_frame_address() + reinterpret_cast<frame_header *>(last_frame_address())->length > address_border(); }
+
+                void release();
+
+                static page_ptr load(const data::location &location, int page_id, bool is_writing = false, bool lazy = true);
+
+                static std::string get_page_path(const data::location &location, int id);
+
+                static int find_page_id(const data::location &location, int64_t time);
 
             private:
+
                 const data::location &location_;
                 const int id_;
                 const bool lazy_;
                 const size_t size_;
-                page_header *header_;
-                frame frame_;
-                int frame_count_;
+                const page_header *header_;
 
-                page(const data::location &location, int id, size_t size, bool lazy, page_header *header);
-
-                inline frame_header *first_frame_header() const
-                { return reinterpret_cast<frame_header *>(address() + header_->header_length); };
-
-                inline frame_header *last_frame_header() const
-                { return reinterpret_cast<frame_header *>(address() + header_->last_frame_position); };
-
-                /**
-                 * seek next frame, user is responsible to check reached_end
-                 */
-                void seek_next();
-
-                /**
-                 * seek to the first frame
-                 */
-                void seek_begin();
-
-                /**
-                 * seek to the last frame
-                 */
-                void seek_end();
-
-                /**
-                 * seek to the first writable frame
-                 * @return true if found a writable frame, false if the page is full
-                 */
-                bool seek_to_writable();
-
-                /**
-                 * seek to the next readable/writable frame that passed given time
-                 * @param nanotime time in nanoseconds
-                 * @return true if found a frame, false if no available frame found when reached page end
-                 */
-                bool seek_to_time(int64_t nanotime);
+                page(const data::location &location, int id, size_t size, bool lazy, uintptr_t address);
 
                 /**
                  * update page header when new frame added
                  */
-                void on_frame_added();
+                void set_last_frame_position(int32_t position);
 
                 friend class journal;
                 friend class writer;

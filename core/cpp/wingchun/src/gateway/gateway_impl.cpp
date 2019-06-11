@@ -166,8 +166,6 @@ namespace kungfu
     void TdGatewayImpl::configure_event_source(kungfu::yijinjing::event_source_ptr event_source)
     {
         GatewayImpl::configure_event_source(event_source);
-        event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, get_source(), get_account_id());
-        nn_publisher_ = std::make_unique<NNPublisher>(event_source_);
 
         order_manager_ = oms::create_order_manager();
 
@@ -207,6 +205,9 @@ namespace kungfu
         register_manual_order_action_callback(std::bind(&TdGatewayImpl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
         calendar_->register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
+
+        event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, get_source(), get_account_id());
+        nn_publisher_ = std::make_unique<NNPublisher>(event_source_);
 
         init();
     }
@@ -283,7 +284,7 @@ namespace kungfu
                         break;
                     }
                 }
-                reader->seek_next();
+                reader->next();
                 frame = reader->current_frame();
             }
             SPDLOG_INFO("forward account manager from {}|{} to {}|{}", last_update,

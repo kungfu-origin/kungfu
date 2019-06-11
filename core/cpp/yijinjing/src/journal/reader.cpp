@@ -15,15 +15,11 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <sstream>
-#include <assert.h>
+#include <spdlog/spdlog.h>
 
-#include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
-
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/io.h>
 
 namespace kungfu
 {
@@ -33,79 +29,58 @@ namespace kungfu
 
         namespace journal
         {
+            reader::reader(page_provider_factory_ptr factory) : factory_(factory)
+            {}
 
-            void single_reader::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time)
+            reader::~reader()
             {
-                if (journal_.get() == nullptr)
-                {
-                    page_provider_ = factory_->make_page_provider(m, c, group, name, false);
-                    journal_ = std::make_shared<journal>(page_provider_);
-                    journal_->seek_to_time(from_time);
-                    SPDLOG_DEBUG("subscribed {} from time {}", name, journal_->current_frame().gen_time());
-                } else
-                {
-                    throw exception("single_reader can only subscribe one journal");
-                }
-            }
-
-            void single_reader::seek_to_time(int64_t time)
-            {
-                journal_->seek_to_time(time);
-            }
-
-            void single_reader::seek_next()
-            {
-                journal_->seek_next_frame();
+                journals_.clear();
             }
 
             void
-            aggregate_reader::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time)
+            reader::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time)
             {
-                std::string journal_name = data::get_mode_name(m) + data::get_category_name(c) + group + name;
-                if (readers_.find(journal_name) == readers_.end())
+                auto provider = factory_->make_page_provider(m, c, group, name, false);
+                auto key = provider->get_location().keyname();
+                if (journals_.find(key) == journals_.end())
                 {
-                    auto reader = std::make_shared<single_reader>(factory_);
-                    reader->subscribe(m, c, group, name, from_time);
-                    readers_[journal_name] = reader;
-                    seek_current_reader();
+                    current_ = std::make_shared<journal>(provider);
+                    current_->seek_to_time(from_time);
+                    journals_[key] = current_;
+                    seek_current_journal();
                 }
             }
 
-            void aggregate_reader::seek_to_time(int64_t time)
+            void reader::seek_to_time(int64_t nanotime)
             {
-                for (std::pair<std::string, single_reader_ptr> element: readers_)
+                for (std::pair<std::string, journal_ptr> element: journals_)
                 {
-                    element.second->seek_to_time(time);
+                    element.second->seek_to_time(nanotime);
                 }
-                seek_current_reader();
+                seek_current_journal();
             }
 
-            void aggregate_reader::seek_next()
+            void reader::next()
             {
-                current_->seek_next();
-                seek_current_reader();
+                assert(current_.get() != nullptr);
+                current_->next();
+                seek_current_journal();
             }
 
-            const std::vector<data::session_ptr> aggregate_reader::find_sessions_from_current_frame()
+            void reader::seek_current_journal()
             {
-                std::vector<data::session_ptr> sessions;
-                for (std::pair<std::string, single_reader_ptr> element: readers_)
+                if (journals_.size() == 1)
                 {
-                    auto s = element.second->find_sessions_from_current_frame();
-                    sessions.insert(sessions.end(), s.begin(), s.end());
+                    return;
                 }
-                return sessions;
-            }
 
-            void aggregate_reader::seek_current_reader()
-            {
                 int64_t min_time = time::now_in_nano();
-                for (std::pair<std::string, single_reader_ptr> element: readers_)
+                for (std::pair<std::string, journal_ptr> element: journals_)
                 {
-                    int64_t frame_time = element.second->current_frame().gen_time();
-                    if (frame_time <= min_time)
+                    auto frame = element.second->current_frame();
+                    if (frame.has_data() && frame.gen_time() <= min_time)
                     {
-                        min_time = frame_time;
+                        min_time = frame.gen_time();
                         current_ = element.second;
                     }
                 }

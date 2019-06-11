@@ -23,7 +23,7 @@ class Master:
         pyyjj.setup_log(args.name)
         self._logger = logger
 
-        self._io_device = pyyjj.create_io_device(args.name, args.low_latency)
+        self._io_device = pyyjj.create_io_device(args.low_latency)
         self._page_service = pyyjj.page_service(self._io_device)
 
         self._pull_timeout = 0 if args.low_latency else 1

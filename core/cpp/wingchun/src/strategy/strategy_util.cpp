@@ -540,7 +540,7 @@ namespace kungfu
                         break;
                     }
                 }
-                reader->seek_next();
+                reader->next();
                 frame = reader->current_frame();
             }
             SPDLOG_INFO("forward portfolio manager from {}|{} to {}|{}", last_update,

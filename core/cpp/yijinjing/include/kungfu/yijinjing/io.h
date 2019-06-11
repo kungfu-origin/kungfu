@@ -74,9 +74,6 @@ namespace kungfu
         {
         public:
 
-            const std::string &get_name()
-            { return name_; };
-
             bool is_low_latency()
             { return low_latency_; }
 
@@ -103,16 +100,15 @@ namespace kungfu
             publisher_ptr get_publisher()
             { return publisher_; }
 
-            static io_device_ptr create_io_device(std::string name, bool low_latency);
+            static io_device_ptr create_io_device(bool low_latency);
 
         protected:
-            const std::string name_;
             const bool low_latency_;
             journal::page_provider_factory_ptr page_provider_factory_;
             nanomsg::url_factory_ptr url_factory_;
             publisher_ptr publisher_;
 
-            io_device(std::string name, bool low_latency);
+            io_device(bool low_latency);
         };
 
         class master_service
@@ -128,6 +124,9 @@ namespace kungfu
         class io_device_client : public io_device
         {
         public:
+            const std::string &get_name()
+            { return name_; };
+
             observer_ptr get_observer()
             { return observer_; }
 
@@ -137,6 +136,7 @@ namespace kungfu
             static io_device_client_ptr create_io_device(std::string name, bool low_latency);
 
         private:
+            const std::string name_;
             observer_ptr observer_;
             master_service_ptr service_;
 

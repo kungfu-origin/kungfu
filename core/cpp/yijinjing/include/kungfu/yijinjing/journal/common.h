@@ -12,21 +12,33 @@
 
 #define __JOURNAL_VERSION__ 3
 
-namespace kungfu {
+namespace kungfu
+{
 
-    namespace yijinjing {
+    namespace yijinjing
+    {
 
-        namespace journal {
+        namespace journal
+        {
 
             FORWARD_DECLARE_PTR(frame)
+
             FORWARD_DECLARE_PTR(page)
+
             FORWARD_DECLARE_PTR(journal)
 
-            class exception : public std::exception {
-            public:
-                exception(const std::string &message): message_(message) {}
+            FORWARD_DECLARE_PTR(reader)
 
-                virtual const char *what() const throw () { return message_.c_str(); };
+            FORWARD_DECLARE_PTR(writer)
+
+            class exception : public std::exception
+            {
+            public:
+                exception(const std::string &message) : message_(message)
+                {}
+
+                virtual const char *what() const throw()
+                { return message_.c_str(); };
 
             private:
                 const std::string message_;

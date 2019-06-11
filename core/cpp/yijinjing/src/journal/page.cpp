@@ -15,10 +15,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <sstream>
-#include <regex>
+#include <fmt/format.h>
 #include <spdlog/spdlog.h>
-#include <boost/filesystem.hpp>
 
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
@@ -32,59 +30,15 @@ namespace kungfu
         namespace journal
         {
 
-            page::page(const data::location &location, const int id, const size_t size, const bool lazy, page_header *header) :
-                    location_(location), id_(id), size_(size), lazy_(lazy), header_(header),
-                    frame_count_(header->frame_count),
-                    frame_(address() + sizeof(page_header))
-            {}
-
-            void page::seek_next()
+            page::page(const data::location &location, const int id, const size_t size, const bool lazy, uintptr_t address) :
+                    location_(location), id_(id), size_(size), lazy_(lazy), header_(reinterpret_cast<page_header *>(address))
             {
-                frame_.move_to_next();
+                assert(address > 0);
             }
 
-            void page::seek_begin()
+            void page::set_last_frame_position(int32_t position)
             {
-                frame_.move_to(address() + sizeof(page_header));
-            }
-
-            void page::seek_end()
-            {
-                frame_.move_to(address() + header_->last_frame_position);
-            }
-
-            bool page::seek_to_writable()
-            {
-                while (frame_.has_data())
-                {
-                    frame_.move_to_next();
-                }
-                return frame_.address() + frame_.frame_length() < address_border();
-            }
-
-            bool page::seek_to_time(int64_t nanotime)
-            {
-                SPDLOG_DEBUG("seek to time {}, frame at {}", time::strftime(nanotime), frame_.address());
-                SPDLOG_DEBUG("page begin time {}, frame_count   {}", time::strftime(begin_time()), header_->frame_count);
-                SPDLOG_DEBUG("page end time   {}, last frame    {}", time::strftime(end_time()), header_->last_frame_position);
-                if (end_time() < nanotime)
-                {
-                    seek_end();
-                }
-                while (frame_.has_data() && frame_.gen_time() < nanotime)
-                {
-                    SPDLOG_DEBUG("frame {}", time::strftime(frame_.gen_time()));
-                    frame_.move_to_next();
-                }
-                SPDLOG_DEBUG("seeked frame {}, address  {}", time::strftime(frame_.gen_time()), frame_.address());
-                return !reached_end();
-            }
-
-            void page::on_frame_added()
-            {
-                frame_count_++;
-                header_->frame_count = frame_count_;
-                header_->last_frame_position = frame_.address() - address();
+                const_cast<page_header*>(header_)->last_frame_position = position;
             }
 
             void page::release()
@@ -104,24 +58,32 @@ namespace kungfu
                     throw exception("unable to load page for " + path);
                 }
 
-                page_header *header = reinterpret_cast<page_header *>(address);
+                auto header = reinterpret_cast<page_header *>(address);
 
                 if (header->last_frame_position == 0)
                 {
                     header->version = __JOURNAL_VERSION__;
-                    header->header_length = sizeof(page_header);
-                    header->frame_count = 0;
-                    header->last_frame_position = header->header_length;
+                    header->page_header_length = sizeof(page_header);
+                    header->frame_header_length = sizeof(frame_header);
+                    header->last_frame_position = header->page_header_length;
                 }
 
-                if (header->version != __JOURNAL_VERSION__ or header->header_length != sizeof(page_header))
+                if (header->version != __JOURNAL_VERSION__)
                 {
-                    std::stringstream ss;
-                    ss << "version mismatch for page " << path << ", required " << __JOURNAL_VERSION__ << ", found" << header->version;
-                    throw exception(ss.str().c_str());
+                    throw exception(fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
+                }
+                if (header->page_header_length != sizeof(page_header))
+                {
+                    throw exception(fmt::format("header length mismatch for page {}, required {}, found {}",
+                            path, sizeof(page_header), header->page_header_length));
+                }
+                if (header->frame_header_length != sizeof(frame_header))
+                {
+                    throw exception(fmt::format("frame header length mismatch for page {}, required {}, found {}",
+                            path, sizeof(frame_header), header->frame_header_length));
                 }
 
-                return std::shared_ptr<page>(new page(location, page_id, JOURNAL_PAGE_SIZE, lazy, header));
+                return std::shared_ptr<page>(new page(location, page_id, JOURNAL_PAGE_SIZE, lazy, address));
             }
 
             std::string page::get_page_path(const data::location &location, int id)
@@ -130,31 +92,10 @@ namespace kungfu
                 return os::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group, page_filename}, true);
             }
 
-            std::vector<int> page::list_page_ids(const data::location &location)
-            {
-                std::string page_filename_regex = JOURNAL_PREFIX + "\\." + location.name + "\\.[0-9]+\\." + JOURNAL_SUFFIX;
-                std::regex pattern(page_filename_regex);
-                std::string dir = os::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group}, false);
-                boost::filesystem::path journal_folder_path(dir);
-                std::vector<int> res;
-                for (auto &file : boost::filesystem::directory_iterator(journal_folder_path))
-                {
-                    std::string filename = file.path().filename().string();
-                    if (std::regex_match(filename.begin(), filename.end(), pattern))
-                    {
-                        int begin = JOURNAL_PREFIX.length() + location.name.length() + 2;
-                        int end = filename.length() - JOURNAL_SUFFIX.length();
-                        std::string page_id_str = filename.substr(begin, end);
-                        res.push_back(atoi(page_id_str.c_str()));
-                    }
-                }
-                std::sort(res.begin(), res.end());
-                return res;
-            }
-
             int page::find_page_id(const data::location &location, int64_t time)
             {
-                std::vector<int> page_ids = list_page_ids(location);
+                std::string path = os::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group}, false);
+                std::vector<int> page_ids = os::list_journal_page_id(path, location.name);
                 if (page_ids.empty())
                 {
                     return 1;

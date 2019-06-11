@@ -13,6 +13,7 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <typeinfo>
 #include <spdlog/spdlog.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
@@ -413,16 +414,16 @@ namespace kungfu
         };
 
 
-        io_device::io_device(std::string name, const bool low_latency) : name_(std::move(name)), low_latency_(low_latency)
+        io_device::io_device(const bool low_latency) : low_latency_(low_latency)
         {
-            SPDLOG_DEBUG("creating io_device {}", name_);
+            SPDLOG_DEBUG("creating io_device {}", low_latency);
 
             url_factory_ = std::make_shared<ipc_url_factory>();
         }
 
-        io_device_ptr io_device::create_io_device(std::string name, bool low_latency)
+        io_device_ptr io_device::create_io_device(bool low_latency = false)
         {
-            auto r = std::shared_ptr<io_device>(new io_device(name, low_latency));
+            auto r = std::shared_ptr<io_device>(new io_device(low_latency));
             r->page_provider_factory_ = std::make_shared<page_provider_factory_local>();
             r->publisher_ = std::make_shared<noop_publisher>();
             return r;
@@ -430,14 +431,14 @@ namespace kungfu
 
         reader_ptr io_device::open_reader_to_subscribe()
         {
-            return std::make_shared<aggregate_reader>(page_provider_factory_);
+            return std::make_shared<reader>(page_provider_factory_);
         }
 
         reader_ptr io_device::open_reader(mode m, category c, const std::string &group, const std::string &name)
         {
-            auto reader = std::make_shared<aggregate_reader>(page_provider_factory_);
-            reader->subscribe(m, c, group, name, 0);
-            return reader;
+            auto r = std::make_shared<reader>(page_provider_factory_);
+            r->subscribe(m, c, group, name, 0);
+            return r;
         }
 
         writer_ptr io_device::open_writer(mode m, category c, const std::string &group, const std::string &name)
@@ -465,8 +466,8 @@ namespace kungfu
             return s;
         }
 
-        io_device_client::io_device_client(std::string name, bool low_latency) : io_device(std::move(name), low_latency)
-        {
+        io_device_client::io_device_client(std::string name, bool low_latency) : io_device(low_latency), name_(std::move(name))
+    {
             SPDLOG_DEBUG("creating io_device_client {}", name);
 
             observer_ = std::make_shared<nanomsg_observer>(get_url_factory(), is_low_latency());
@@ -474,7 +475,7 @@ namespace kungfu
             service_ = std::make_shared<nanomsg_master_service>(get_url_factory());
         }
 
-        io_device_client_ptr io_device_client::create_io_device(std::string name, bool low_latency)
+        io_device_client_ptr io_device_client::create_io_device(std::string name, bool low_latency = false)
         {
             auto r = std::shared_ptr<io_device_client>(new io_device_client(name, low_latency));
             r->page_provider_factory_ = std::make_shared<page_provider_factory_client>(r);

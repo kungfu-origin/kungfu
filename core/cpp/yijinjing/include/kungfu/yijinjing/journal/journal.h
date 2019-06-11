@@ -19,7 +19,6 @@
 #define YIJINJING_JOURNAL_H
 
 #include <mutex>
-#include <vector>
 
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
@@ -44,34 +43,45 @@ namespace kungfu
             class journal
             {
             public:
-                journal(page_provider_ptr provider) : page_provider_(provider)
+                journal(page_provider_ptr provider) : page_provider_(provider), current_page_id_(-1)
                 {}
 
-                inline frame &current_frame()
-                { return current_page_->current_frame(); }
+                ~journal();
 
-                void seek_next_frame();
+                frame &current_frame()
+                { return frame_; }
 
-                /** seek to time in nanoseconds-timestamp */
+                /**
+                 * move current frame to the next available one
+                 */
+                void next();
+
+                /**
+                 * makes sure after this call, next time user calls current_frame() gets the right available frame
+                 * (gen_time() > nanotime or writable)
+                 * @param nanotime
+                 */
                 void seek_to_time(int64_t nanotime);
+
+            private:
+                page_provider_ptr page_provider_;
+                int current_page_id_;
+                page_ptr current_page_;
+                frame frame_;
 
                 /** load next page, current page will be released if not empty */
                 void load_next_page();
 
-                const std::vector<data::session_ptr> find_sessions_from_current_frame();
-
-            private:
-                page_provider_ptr page_provider_;
-                page_ptr current_page_;
-
+                /** writer needs access to current_page_ to update page header */
                 friend class writer;
             };
 
             class reader
             {
             public:
-                explicit reader(page_provider_factory_ptr factory) : factory_(factory)
-                {};
+                reader(page_provider_factory_ptr factory);
+
+                ~reader();
 
                 /**
                  * subscribe to specified data location
@@ -81,24 +91,27 @@ namespace kungfu
                  * @param name name
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                virtual void
-                subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time) = 0;
+                void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time);
 
-                virtual frame &current_frame() = 0;
+                inline frame &current_frame()
+                { return current_->current_frame(); }
+
+                inline bool data_available()
+                { return current_frame().has_data(); }
 
                 /** seek journal to time */
-                virtual void seek_to_time(int64_t time) = 0;
+                void seek_to_time(int64_t nanotime);
 
                 /** seek next frame */
-                virtual void seek_next() = 0;
+                void next();
 
-                virtual const std::vector<data::session_ptr> find_sessions_from_current_frame() = 0;
-
-            protected:
+            private:
                 page_provider_factory_ptr factory_;
-            };
+                journal_ptr current_;
+                std::unordered_map<std::string, journal_ptr> journals_;
 
-            DECLARE_PTR(reader)
+                void seek_current_journal();
+            };
 
             class writer
             {
@@ -106,16 +119,18 @@ namespace kungfu
                 explicit writer(page_provider_factory_ptr factory,
                                 data::mode m, data::category c, const std::string &group, const std::string &name, publisher_ptr messenger);
 
-                frame &open_frame(int16_t source, int16_t msg_type, int64_t trigger_time);
+                frame &open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
 
-                void close_frame(int32_t length);
+                void close_frame(size_t data_length);
 
                 template<typename T>
-                inline void write(int16_t source, int16_t msg_type, int64_t trigger_time, const T *data)
+                inline void write(int64_t trigger_time, int16_t msg_type, int16_t source, const T *data)
                 {
-                    frame &frame = open_frame(source, msg_type, trigger_time);
+                    frame &frame = open_frame(trigger_time, msg_type, source);
                     close_frame(frame.copy_data<T>(data));
                 }
+
+                void write_raw(int64_t trigger_time, int16_t msg_type, int16_t source, char *data, int32_t length);
 
                 void open_session();
 
@@ -125,57 +140,6 @@ namespace kungfu
                 std::mutex writer_mtx_;
                 journal_ptr journal_;
                 publisher_ptr publisher_;
-            };
-
-            DECLARE_PTR(writer)
-
-            class single_reader : public reader
-            {
-            public:
-                explicit single_reader(page_provider_factory_ptr factory) : reader(factory)
-                {};
-
-                void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time) override;
-
-                inline frame &current_frame() override
-                { return journal_->current_frame(); }
-
-                void seek_to_time(int64_t time) override;
-
-                void seek_next() override;
-
-                const std::vector<data::session_ptr> find_sessions_from_current_frame() override
-                { return journal_->find_sessions_from_current_frame(); };
-
-            private:
-                journal_ptr journal_;
-                page_provider_ptr page_provider_;
-            };
-
-            DECLARE_PTR(single_reader)
-
-            class aggregate_reader : public reader
-            {
-            public:
-                explicit aggregate_reader(page_provider_factory_ptr factory) : reader(factory)
-                {};
-
-                void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time) override;
-
-                frame &current_frame() override
-                { return current_->current_frame(); }
-
-                void seek_to_time(int64_t time) override;
-
-                void seek_next() override;
-
-                const std::vector<data::session_ptr> find_sessions_from_current_frame() override;
-
-            private:
-                single_reader_ptr current_;
-                std::unordered_map<std::string, single_reader_ptr> readers_;
-
-                void seek_current_reader();
             };
 
             /** abstract interface class */
