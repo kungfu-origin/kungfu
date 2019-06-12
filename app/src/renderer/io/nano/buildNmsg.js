@@ -10,6 +10,7 @@ window.nanomsgController = {}
  * 对于pos/order/trades的nanomsg 监听要跟gloabel gateway划分开，防止污染
  * **/
 
+
 //接收账户的相关推送
 export const connectGatewayNanomsg = (gatewayName) => {
     if(!gatewayName) return false;

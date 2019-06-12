@@ -5,8 +5,9 @@ const {addFile} = require('__gUtils/fileUtils');
 
 //ELEC_BASE
 var ELEC_BASE_DIR_RESOLVE;
-if(process.env.NODE_ENV === 'cli'){
-    ELEC_BASE_DIR_RESOLVE = '/Users/dkr/Library/Application Support/kungfu';
+if(process.env.APP_TYPE === 'cli'){
+    console.log(require('os').homedir())
+    ELEC_BASE_DIR_RESOLVE = '/Users/zhangyizhi/Library/Application Support/kungfu';
     addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
 } else {
     ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
