@@ -62,10 +62,12 @@ void apprentice::subscribe(data::mode m, data::category c, const std::string &gr
 {
     if (reader_.get() == nullptr)
     {
+        SPDLOG_TRACE("apprentice open reader for {}", name);
         reader_ = io_device_->open_reader(m, c, group, name);
         reader_->seek_to_time(time::now_in_nano());
     } else
     {
+        SPDLOG_TRACE("apprentice subscribe for {}", name);
         reader_->subscribe(m, c, group, name, time::now_in_nano());
     }
 
@@ -88,19 +90,32 @@ void apprentice::add_event_handler(event_handler_ptr handler)
 
 void apprentice::go()
 {
+    for (auto handler: event_handlers_)
+    {
+        handler->configure_event_source(shared_from_this());
+    }
     try
     {
-        for (auto handler: event_handlers_)
-        {
-            handler->configure_event_source(shared_from_this());
-        }
         while (live_)
         {
             try_once();
         }
-        for (auto handler: event_handlers_)
+    }
+    catch (const nanomsg::nn_exception &e)
+    {
+        switch (e.num())
         {
-            handler->finish();
+            case EINTR:
+            case EAGAIN:
+            case ETIMEDOUT:
+            {
+                SPDLOG_INFO("apprentice quit because {}", e.what());
+                break;
+            }
+            default:
+            {
+                SPDLOG_ERROR("Unexpected nanomsg error: {}", e.what());
+            }
         }
     }
     catch (const std::runtime_error &e)
@@ -110,6 +125,10 @@ void apprentice::go()
     catch (const std::exception &e)
     {
         SPDLOG_ERROR("Unexpected exception: {}", e.what());
+    }
+    for (auto handler: event_handlers_)
+    {
+        handler->finish();
     }
     writer_->close_session();
     SPDLOG_INFO("apprentice {} finished", io_device_->get_name());
@@ -136,13 +155,24 @@ void apprentice::try_once()
         reader_->next();
     }
 
-    for (auto element : sub_sockets_)
+    if (socket_reply_.get() != nullptr && socket_reply_->recv() > 0)
     {
-        std::string msg = element.second->recv_msg();
-        nanomsg_json event(msg);
+        nanomsg_json event(socket_reply_->last_message());
         for (auto handler : event_handlers_)
         {
             handler->handle(&event);
+        }
+    }
+
+    for (auto element : sub_sockets_)
+    {
+        if (element.second->recv() > 0)
+        {
+            nanomsg_json event(element.second->last_message());
+            for (auto handler : event_handlers_)
+            {
+                handler->handle(&event);
+            }
         }
     }
 }

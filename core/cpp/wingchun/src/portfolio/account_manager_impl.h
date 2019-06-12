@@ -5,6 +5,8 @@
 #ifndef PROJECT_ACCOUNT_MANAGER_IMPL_H
 #define PROJECT_ACCOUNT_MANAGER_IMPL_H
 
+#include <kungfu/yijinjing/io.h>
+
 #include <kungfu/wingchun/portfolio/account_manager.h>
 #include <kungfu/wingchun/portfolio/position_manager.h>
 #include <kungfu/wingchun/commission/commission_manager.h>
@@ -19,7 +21,7 @@ namespace kungfu
         friend bool save(SQLite::Database& db, const AccountManagerImpl* account_manager);
         friend bool load(SQLite::Database& db, AccountManagerImpl* account_manager);
 
-        AccountManagerImpl(const char* account_id, AccountType type);
+        AccountManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char* account_id, AccountType type);
 
         AccountInfo get_account_info() const { return account_; };
 
@@ -67,6 +69,7 @@ namespace kungfu
         void on_pos_callback(const Position& pos) const;
 
     private:
+        kungfu::yijinjing::event_source_ptr             event_source_;
         int64_t                                         last_update_;
         std::string                                     trading_day_;
         CommissionManager                               commission_;

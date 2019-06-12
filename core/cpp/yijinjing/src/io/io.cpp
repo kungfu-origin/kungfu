@@ -127,7 +127,6 @@ namespace kungfu
                     request["is_writing"] = is_writing;
                     std::string request_str = request.dump();
                     std::string response_str = service_->request(request_str);
-                    SPDLOG_TRACE("got response: {}", response_str);
                     nlohmann::json response = nlohmann::json::parse(response_str);
 
                     if (response["success"])
@@ -280,13 +279,13 @@ namespace kungfu
 
             const std::string make_url_bind(mode m, category c, const std::string &group, const std::string &name, protocol p) const override
             {
-                std::string socket_dir = os::make_path({KF_DIR_SOCKET, get_category_name(c), group});
+                std::string socket_dir = util::make_path({KF_DIR_SOCKET, get_category_name(c), group});
                 return "ipc://" + socket_dir + "/" + name + "." + get_protocol_name(p);
             }
 
             const std::string make_url_connect(mode m, category c, const std::string &group, const std::string &name, protocol p) const override
             {
-                std::string socket_dir = os::make_path({KF_DIR_SOCKET, get_category_name(c), group});
+                std::string socket_dir = util::make_path({KF_DIR_SOCKET, get_category_name(c), group});
                 return "ipc://" + socket_dir + "/" + name + "." + get_protocol_name(get_opposite_protol(p));
             }
         };
@@ -359,23 +358,7 @@ namespace kungfu
 
             bool wait() override
             {
-                try
-                {
-                    int rc = socket_.recv();
-                    SPDLOG_TRACE("master_observer received {}", rc);
-                    return rc > 2;
-                }
-                catch (const nn_exception &e)
-                {
-                    switch (e.num())
-                    {
-                        case ETIMEDOUT:
-                            break;
-                        default:
-                            throw e;
-                    }
-                    return false;
-                }
+                return socket_.recv() > 2;
             }
 
             const std::string &get_notice() override

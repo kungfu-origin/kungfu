@@ -21,6 +21,7 @@
 #include <kungfu/wingchun/storage/account_list_storage.h>
 #include <kungfu/wingchun/gateway/util.hpp>
 #include <kungfu/wingchun/calendar/calendar.h>
+#include <kungfu/wingchun/event_loop/event_loop.h>
 
 namespace kungfu
 {
@@ -34,7 +35,7 @@ namespace kungfu
     class StrategyUtil
     {
     public:
-        explicit StrategyUtil(const std::string& name);
+        explicit StrategyUtil(EventLoop* strategy, const std::string& name);
         ~StrategyUtil();
 
         void init(kungfu::yijinjing::event_source_ptr event_source);
@@ -92,7 +93,7 @@ namespace kungfu
     private:
         std::string name_;
         kungfu::yijinjing::event_source_ptr event_source_;
-        CalendarPtr calendar_;
+        Calendar_ptr calendar_;
         std::shared_ptr<NNPublisher> publisher_;
         std::shared_ptr<PortfolioManager> portfolio_manager_;
         std::shared_ptr<oms::OrderManager> order_manager_;

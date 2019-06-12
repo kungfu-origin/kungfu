@@ -358,8 +358,4 @@ PYBIND11_MODULE(pywingchun, m) {
             .def(py::init())
             .def("current_day", &kf::CalendarService::get_current_day)
             .def("calculate_trading_day", &kf::CalendarService::calculate_trading_day);
-
-    py::class_<kungfu::JournalPrinter>(m, "JournalPrinter")
-            .def(py::init<const std::string &, const std::string &, int, bool, bool, bool, bool>())
-            .def("run", &kungfu::JournalPrinter::run, py::arg("begin_time"), py::arg("end_time"), py::arg("keep"));
 }

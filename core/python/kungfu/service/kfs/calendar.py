@@ -7,7 +7,7 @@ from kungfu.wingchun.constants import *
 def current(ctx, request):
     return {
         'msg_type': MsgType.RspTradingDay,
-        'data': {'trading_day':str(ctx._calendar.current_day())}
+        'data': {'trading_day': str(ctx._calendar.current_day())}
     }
 
 
@@ -17,7 +17,7 @@ def calculate(ctx, request):
     delta = request['delta']
     return {
         'msg_type': MsgType.RspTradingDay,
-        'data': {'trading_day':str(ctx._calendar.calculate_trading_day(start_date, delta))}
+        'data': {'trading_day': str(ctx._calendar.calculate_trading_day(start_date, delta))}
     }
 
 

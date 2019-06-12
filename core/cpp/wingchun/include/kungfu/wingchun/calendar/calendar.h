@@ -13,8 +13,8 @@
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include <nanomsg/pubsub.h>
-#include <nanomsg/reqrep.h>
+
+#include <kungfu/yijinjing/io.h>
 
 #include <kungfu/wingchun/config.h>
 #include <kungfu/wingchun/constant.h>
@@ -34,12 +34,10 @@ namespace kungfu
     #define EVENING 2
     #define DEFAULT_SLOT -1
 
-    typedef std::function<void (const std::string&)> SwitchDayCallback;
-
     class Calendar
     {
     public:
-        Calendar();
+        Calendar(kungfu::yijinjing::master_service_ptr service);
         virtual ~Calendar();
 
         //判断是否是交易时间
@@ -84,9 +82,8 @@ namespace kungfu
         std::vector<flying::TradingSession> get_trading_sessions(int64_t start_nano, int64_t end_nano, const std::string& exchange_id);
 
         //获取当前交易日
-        //@param via_net 是否通过网络获取，如果为 true，发送请求到 calendar service 获取当前交易日
         //@return 当前交易日
-        std::string get_current_trading_day(bool via_net = false);
+        std::string get_current_trading_day();
 
         //获取下一个交易日
         //@return 下一个交易日
@@ -98,7 +95,6 @@ namespace kungfu
 
         //注册交易日切换回调函数
         //@param cb 交易日切换回调函数
-        void register_switch_day_callback(SwitchDayCallback cb);
 
     private:
         void loop();
@@ -122,14 +118,11 @@ namespace kungfu
             {"SSE", false},
             {"SZE", false}
         };
-        int                             req_socket_;
-        int                             sub_socket_;
-        std::shared_ptr<std::thread>    thread_;
-        std::atomic<bool>               started_;
-        std::atomic<int>                current_;
-        std::vector<SwitchDayCallback>  cbs_;
+
+        kungfu::yijinjing::master_service_ptr service_;
+        std::string current_trading_day_;
     };
-    typedef std::shared_ptr<Calendar> CalendarPtr;
+    DECLARE_PTR(Calendar)
 }
 
 #endif //KUNGFU_CALENDAR_H

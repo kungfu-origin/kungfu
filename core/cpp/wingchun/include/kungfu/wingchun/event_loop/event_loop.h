@@ -35,6 +35,7 @@ namespace kungfu
     typedef std::function<void (kfj::OrderInput& input)> ManualOrderInputCallback;
     typedef std::function<void (const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids)> ManualOrderActionCallback;
     typedef std::function<void ()> ReloadInstrumentsCallback;
+    typedef std::function<void (const std::string&)> SwitchDayCallback;
 
     class EventLoop: public kungfu::yijinjing::event_handler
     {
@@ -66,6 +67,8 @@ namespace kungfu
 
         void register_reload_instruments_callback(ReloadInstrumentsCallback callback);
 
+        void register_switch_day_callback(SwitchDayCallback cb);
+
         int64_t get_nano() const;
 
         void handle(const yijinjing::event *e) override ;
@@ -93,6 +96,7 @@ namespace kungfu
         ManualOrderActionCallback manual_order_action_callback_;
 
         ReloadInstrumentsCallback reload_instruments_callback_;
+        SwitchDayCallback switch_day_callback_;
     };
     DECLARE_PTR(EventLoop)
 }

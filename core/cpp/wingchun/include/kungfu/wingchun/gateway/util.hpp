@@ -63,18 +63,19 @@ namespace kungfu
             }
         }
 
-        inline GatewayLoginRsp login(const std::string& gateway, const std::string& sender)
+        inline GatewayLoginRsp login(yijinjing::io_device_client_ptr io_device, yijinjing::data::category c, const std::string& group, const std::string& name, const std::string& sender)
         {
             LoginRequest request;
             request.sender = sender;
-            request.recipient = gateway;
+            request.recipient = group;
             nlohmann::json js_req = request;
 
             NNMsg req_msg;
             req_msg.msg_type = kungfu::MsgType::ReqLogin;
             req_msg.data = js_req;
-            std::string url = GATEWAY_REP_URL(gateway);
-            NNMsg rsp_msg = yijinjing::nanomsg::request(url, req_msg, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
+            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, c, group, name, yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
+            socket->send_json(req_msg);
+            NNMsg rsp_msg = socket->recv_json();
 
             GatewayLoginRsp rsp = {};
             from_json(rsp_msg.data, rsp);
@@ -82,19 +83,17 @@ namespace kungfu
             return rsp;
         }
 
-        inline GatewayLoginRsp add_market_feed(const std::string& source, const std::string& sender)
+        inline GatewayLoginRsp add_market_feed(yijinjing::io_device_client_ptr io_device, const std::string& source, const std::string& sender)
         {
-            std::string gateway = fmt::format(MD_GATEWAY_NAME_FORMAT, source);
-            return login(gateway, sender);
+            return login(io_device, yijinjing::data::category::MD, source, source, sender);
         }
 
-        inline GatewayLoginRsp register_trade_account(const std::string& source, const std::string& account_id, const std::string& sender)
+        inline GatewayLoginRsp register_trade_account(yijinjing::io_device_client_ptr io_device, const std::string& source, const std::string& account_id, const std::string& sender)
         {
-            std::string gateway = fmt::format(TD_GATEWAY_NAME_FORMAT, source, account_id);
-            return login(gateway, sender);
+            return login(io_device, yijinjing::data::category::TD, source, account_id, sender);
         }
 
-        inline void subscribe(const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
+        inline void subscribe(kungfu::yijinjing::io_device_client_ptr io_device, const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
         {
             std::string gateway = fmt::format(MD_GATEWAY_NAME_FORMAT, source);
             std::string url = GATEWAY_REP_URL(gateway);
@@ -109,7 +108,10 @@ namespace kungfu
             req_msg.msg_type = MsgType::Subscribe;
             req_msg.data = j;
 
-            yijinjing::nanomsg::request(url, req_msg);
+            j = req_msg;
+            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source,
+                    yijinjing::nanomsg::protocol::REQUEST);
+            socket->send_json(j);
         }
     }
 }

@@ -45,7 +45,7 @@ namespace kungfu
         SPDLOG_DEBUG("created gateway {} with source {}", get_name(), get_source());
         event_source_ = event_source;
 
-        calendar_ = CalendarPtr(new Calendar());
+        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()->get_service()));
 
         if (!create_folder_if_not_exists(GATEWAY_FOLDER(this->get_name())))
         {
@@ -173,6 +173,7 @@ namespace kungfu
         {
             SPDLOG_ERROR("failed to create account folder {}", ACCOUNT_FOLDER(this->get_account_id()));
         }
+        init_account_manager();
 
         int worker_id = UidWorkerStorage::get_instance(UID_WORKER_DB_FILE)->get_uid_worker_id(get_name());
         if (worker_id <= 0)
@@ -182,9 +183,9 @@ namespace kungfu
         }
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
-        init_account_manager();
-
-        event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_name());
+        SPDLOG_WARN("subscribing md");
+        event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source());
+        SPDLOG_WARN("subscribed md");
 
         std::shared_ptr<kungfu::TraderDataFeedHandler> feed_handler = std::shared_ptr<kungfu::TraderDataFeedHandler>(new kungfu::TraderDataStreamingWriter(event_source_->get_writer()));
         register_feed_handler(feed_handler);
@@ -203,11 +204,13 @@ namespace kungfu
         register_quote_callback(std::bind(&TdGatewayImpl::on_quote, this, std::placeholders::_1));
         register_manual_order_input_callback(std::bind(&TdGatewayImpl::on_manual_order_input, this, std::placeholders::_1));
         register_manual_order_action_callback(std::bind(&TdGatewayImpl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-        calendar_->register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
+        register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
 
         event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, get_source(), get_account_id());
         nn_publisher_ = std::make_unique<NNPublisher>(event_source_);
+
+        account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
+        account_manager_->register_acc_callback(std::bind(&NNPublisher::publish_account_info, (NNPublisher*)get_publisher(), std::placeholders::_1, MsgType::AccountInfo));
 
         init();
     }
@@ -224,22 +227,17 @@ namespace kungfu
         AccountType account_type = get_account_type();
         std::string asset_db_file = ACCOUNT_ASSET_DB_FILE(this->get_account_id());
 
-        account_manager_ = create_account_manager(this->get_account_id().c_str(), account_type, asset_db_file.c_str());
+        account_manager_ = create_account_manager(event_source_, this->get_account_id().c_str(), account_type, asset_db_file.c_str());
 
         int64_t last_update = account_manager_->get_last_update();
         if (last_update > 0)
         {
-            std::vector<std::string> folders;
-            std::vector<std::string> names;
-            folders.push_back(TD_JOURNAL_FOLDER(get_source(), get_account_id()));
-            names.emplace_back(TD_JOURNAL_NAME(get_source(), get_account_id()));
-            folders.push_back(MD_JOURNAL_FOLDER(get_source()));
-            names.emplace_back(MD_JOURNAL_NAME(get_source()));
-            auto reader = event_source_->get_io_device()->open_reader(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_name());
-            reader->seek_to_time(last_update);
-            auto frame = reader->current_frame();
-            while (frame.has_data())
+            auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
+            reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source(), last_update);
+            reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id(), last_update);
+            while (reader->data_available())
             {
+                auto frame = reader->current_frame();
                 MsgType msg_type = static_cast<MsgType>(frame.msg_type());
                 switch (msg_type)
                 {
@@ -285,19 +283,14 @@ namespace kungfu
                     }
                 }
                 reader->next();
-                frame = reader->current_frame();
             }
-            SPDLOG_INFO("forward account manager from {}|{} to {}|{}", last_update,
-                        kungfu::yijinjing::time::strftime(last_update, "%Y%m%d-%H:%M:%S"), account_manager_->get_last_update(),
+            SPDLOG_INFO("forwarded account manager from {} to {}", kungfu::yijinjing::time::strftime(last_update, "%Y%m%d-%H:%M:%S"),
                         kungfu::yijinjing::time::strftime(account_manager_->get_last_update(), "%Y%m%d-%H:%M:%S"));
         }
 
         account_manager_->set_current_trading_day(get_calendar()->get_current_trading_day());
         account_manager_->dump_to_db(asset_db_file.c_str(), true);
         SPDLOG_INFO("account_manager inited and set to {}", account_manager_->get_current_trading_day());
-
-        account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
-        account_manager_->register_acc_callback(std::bind(&NNPublisher::publish_account_info, (NNPublisher*)get_publisher(), std::placeholders::_1, MsgType::AccountInfo));
 
     }
 
@@ -311,7 +304,7 @@ namespace kungfu
     {
         std::vector<Instrument> instruments = account_manager_->get_all_pos_instruments();
         SPDLOG_TRACE(fmt::format("holding {} insts, sending subscribe request", instruments.size()));
-        gateway::subscribe(get_source(), instruments, false, this->get_name());
+        gateway::subscribe(event_source_->get_io_device(), get_source(), instruments, false, this->get_name());
     }
 
     void TdGatewayImpl::on_login(const std::string &recipient, const std::string &client_id)
@@ -359,7 +352,7 @@ namespace kungfu
 
     bool TdGatewayImpl::add_market_feed(const std::string &source_name)
     {
-        gateway::add_market_feed(source_name, this->get_name());
+        gateway::add_market_feed(event_source_->get_io_device(), source_name, this->get_name());
         return true;
     }
 

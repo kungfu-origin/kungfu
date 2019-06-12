@@ -102,6 +102,11 @@ namespace kungfu
         reload_instruments_callback_ = callback;
     }
 
+    void EventLoop::register_switch_day_callback(SwitchDayCallback callback)
+    {
+        switch_day_callback_ = callback;
+    }
+
     int64_t EventLoop::get_nano() const
     {
         int64_t nano = scheduler_->get_nano();
@@ -169,6 +174,13 @@ namespace kungfu
                     trade_callback_(event->data<Trade>());
                 }
                 break;
+            }
+            case MsgType::SwitchDay:
+            {
+                if (switch_day_callback_)
+                {
+                    switch_day_callback_(event->data<nlohmann::json>());
+                }
             }
             case MsgType::AlgoOrderInput:
             {

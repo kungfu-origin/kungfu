@@ -153,8 +153,6 @@ namespace kungfu {
             };
             DECLARE_PTR(socket)
 
-            nlohmann::json request(const std::string &url, const nlohmann::json &msg, int timeout = -1);
-
             class nanomsg_json : public event {
             public:
                 nanomsg_json(const std::string &msg): binding_(nlohmann::json::parse(msg)) {};

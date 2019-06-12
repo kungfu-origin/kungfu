@@ -14,10 +14,6 @@ namespace kungfu
     {
         namespace os
         {
-            std::string make_path(std::initializer_list<std::string> list, bool is_file=false);
-
-            std::vector<int> list_journal_page_id(const std::string &path, const std::string &name);
-
             /**
              * load mmap buffer, return address of the file-mapped memory
              * whether to write has to be specified in "is_writing"

@@ -3,7 +3,7 @@
 #include "spdlog/details/fmt_helper.h"
 #include "spdlog/details/log_msg.h"
 #include "spdlog/details/mpmc_blocking_q.h"
-#include "spdlog/details/os.h"
+#include "spdlog/details/util.h"
 
 #include <chrono>
 #include <memory>

@@ -6,7 +6,7 @@ from kungfu.practice.apprentice import Apprentice, EventHandler
 @arg('-p', '--path', type=str, help='path of strategy py file')
 @command(help='run trading strategy')
 def strategy(args, logger):
-    handler = EventHandler(logger, Strategy(logger, args.name, args.path))
+    handler = EventHandler(args, logger, Strategy(logger, args.name, args.path))
     apprentice = Apprentice(args, logger)
     apprentice.add_event_handler(handler)
     apprentice.go()

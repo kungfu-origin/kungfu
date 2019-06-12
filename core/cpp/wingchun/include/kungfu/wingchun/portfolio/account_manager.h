@@ -58,7 +58,7 @@ namespace kungfu
 
     };
     typedef std::shared_ptr<AccountManager> AccountManagerPtr;
-    AccountManagerPtr create_account_manager(const char* name, AccountType type, const char *db = nullptr);
+    AccountManagerPtr create_account_manager(kungfu::yijinjing::event_source_ptr event_source, const char* name, AccountType type, const char *db = nullptr);
 }
 
 #endif //KUNGFU_ACCOUNT_MANAGER_H

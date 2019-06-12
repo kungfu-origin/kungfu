@@ -25,7 +25,7 @@ namespace kungfu
     class Strategy::impl
     {
     public:
-        impl(Strategy* strategy, const std::string& name) : strategy_(strategy), name_(name), util_(new StrategyUtil(name)) {}
+        impl(Strategy* strategy, const std::string& name) : strategy_(strategy), name_(name), util_(new StrategyUtil(strategy, name)) {}
 
         StrategyUtil_ptr get_util() const { return util_; }
 

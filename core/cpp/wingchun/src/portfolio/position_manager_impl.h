@@ -5,6 +5,8 @@
 #ifndef PROJECT_POSITION_MANAGER_IMPL_H
 #define PROJECT_POSITION_MANAGER_IMPL_H
 
+#include <kungfu/yijinjing/io.h>
+
 #include <kungfu/wingchun/portfolio/position_manager.h>
 
 namespace kungfu
@@ -12,7 +14,7 @@ namespace kungfu
     class PositionManagerImpl: public PositionManager
     {
     public:
-        PositionManagerImpl(const char* account_id);
+        PositionManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char* account_id);
 
         Position get_long_pos(const char* instrument_id, const char* exchange_id) const ;
         Position get_short_pos(const char* instrument_id, const char* exchange_id) const ;
@@ -60,6 +62,7 @@ namespace kungfu
         void on_trade_future(const Trade* trade);
 
     private:
+        kungfu::yijinjing::event_source_ptr event_source_;
         std::string                                     account_id_;
         int64_t                                         last_update_;
         std::string                                     trading_day_;

@@ -67,7 +67,7 @@ namespace kungfu
             api_->SetSoftwareVersion("1.1.0");
             api_->SetSoftwareKey(software_key_.c_str());
 
-            int retry = 10;
+            int retry = 2;
             while (retry > 0)
             {
                 session_id_ = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);

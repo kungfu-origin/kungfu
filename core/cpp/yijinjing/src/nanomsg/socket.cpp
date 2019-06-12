@@ -4,6 +4,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
 using namespace kungfu::yijinjing::nanomsg;
@@ -88,7 +89,7 @@ int socket::bind (const std::string &url)
     int rc = nn_bind (sock_, url.c_str());
     if (rc < 0)
     {
-        SPDLOG_DEBUG("can not bind");
+        SPDLOG_ERROR("can not bind to {}", url);
         throw nn_exception ();
     }
     url_ = url;
@@ -100,7 +101,7 @@ int socket::connect (const std::string &url)
     int rc = nn_connect (sock_, url.c_str());
     if (rc < 0)
     {
-        SPDLOG_DEBUG("can not connect");
+        SPDLOG_ERROR("can not connect to {}", url);
         throw nn_exception ();
     }
     url_ = url;
@@ -133,6 +134,7 @@ int socket::send (const std::string& msg, int flags) const
     if (rc < 0) {
         if (nn_errno () != EAGAIN)
         {
+            SPDLOG_ERROR("can not send to {} errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
             throw nn_exception ();
         }
         return -1;
@@ -144,14 +146,29 @@ int socket::recv (int flags)
 {
     int rc = nn_recv (sock_, buf_.data(), buf_.size(), flags);
     if (rc < 0) {
-        if (nn_errno () != EAGAIN)
+        switch (nn_errno())
         {
-            throw nn_exception ();
+            case ETIMEDOUT:
+            case EAGAIN:
+                break;
+            case EINTR:
+            {
+                SPDLOG_WARN("interrupted when receiving from {}", url_);
+                throw nn_exception ();
+            }
+            default:
+            {
+                SPDLOG_ERROR("can not recv from {} errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
+                throw nn_exception ();
+            }
         }
+        message_.assign(buf_.data(), 0);
+        return rc;
+    } else
+    {
+        message_.assign(buf_.data(), rc);
         return rc;
     }
-    message_.assign(buf_.data(), rc);
-    return rc;
 }
 
 const std::string& socket::recv_msg(int flags)
@@ -174,28 +191,5 @@ nlohmann::json socket::recv_json (int flags)
     else
     {
         return nlohmann::json();
-    }
-}
-
-nlohmann::json kungfu::yijinjing::nanomsg::request(const std::string &url, const nlohmann::json& msg, int timeout)
-{
-    socket socket(AF_SP, protocol::REQUEST);
-    socket.connect(url);
-    socket.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
-
-    try
-    {
-        SPDLOG_DEBUG("request url {} msg {}", url, msg.dump());
-        socket.send_json(msg);
-        return socket.recv_json(0);
-    }
-    catch (std::exception& e)
-    {
-        SPDLOG_ERROR("request error: {} to {} for message {}", e.what(), url, msg.dump());
-        nlohmann::json response = {};
-        response["msg_type"] = msg["msg_type"];
-        response["data"] = {};
-        response["data"]["error_msg"] = "no response";
-        return response;
     }
 }

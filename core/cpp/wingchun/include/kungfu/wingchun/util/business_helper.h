@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/io.h>
 
 #include <kungfu/wingchun/constant.h>
 #include <kungfu/wingchun/oms_struct.h>
@@ -263,10 +264,10 @@ namespace kungfu
         return std::string(instrument_id, pos);
     }
 
-    inline std::string get_reverse_repurchase_expire_date(const char* instrument_id, const char* open_date)
+    inline std::string get_reverse_repurchase_expire_date(kungfu::yijinjing::event_source_ptr event_source, const char* instrument_id, const char* open_date)
     {
-        static Calendar s_calendar;
-        return s_calendar.get_next_trading_day(open_date, get_reverse_repurchase_expire_days(instrument_id));
+        Calendar calendar(event_source->get_io_device()->get_service());
+        return calendar.get_next_trading_day(open_date, get_reverse_repurchase_expire_days(instrument_id));
     }
 
     inline bool is_open(InstrumentType instrument_type, Side side, Offset offset)

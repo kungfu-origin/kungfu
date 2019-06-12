@@ -84,7 +84,7 @@ namespace kungfu
         GatewayState get_state() const override { return state_; };
         void set_state(const GatewayState& state, const std::string& message = "") override ;
 
-        kungfu::CalendarPtr get_calendar() const { return calendar_; }
+        kungfu::Calendar_ptr get_calendar() const { return calendar_; }
         const NNPublisher* get_publisher() const { return nn_publisher_.get(); }
         std::shared_ptr<GatewayStateStorage> get_state_storage() const { return state_storage_; }
 
@@ -96,7 +96,7 @@ namespace kungfu
         kungfu::yijinjing::event_source_ptr event_source_;
         GatewayState state_;
 
-        kungfu::CalendarPtr calendar_;
+        kungfu::Calendar_ptr calendar_;
         std::shared_ptr<GatewayStateStorage> state_storage_;
         std::unique_ptr<NNPublisher> nn_publisher_;
     };

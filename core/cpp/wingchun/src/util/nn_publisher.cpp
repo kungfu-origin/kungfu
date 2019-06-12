@@ -10,12 +10,12 @@
 
 namespace kungfu
 {
-    void NNPublisher::publish(kungfu::MsgType msg_type, nlohmann::json& data) const
+    void NNPublisher::publish(kungfu::MsgType msg_type, nlohmann::json &data) const
     {
         nlohmann::json j;
         j["msg_type"] = int(msg_type);
         j["data"] = data;
-        socket_->send_json(j);
+        event_source_->get_socket_publish()->send_json(j);
         SPDLOG_TRACE("nn published {}", j.dump());
     }
 
@@ -31,7 +31,7 @@ namespace kungfu
         publish(kungfu::MsgType::Trade, j);
     }
 
-    void NNPublisher::publish_pos(const kungfu::flying::Position& pos) const
+    void NNPublisher::publish_pos(const kungfu::flying::Position &pos) const
     {
         nlohmann::json j = pos;
         publish(kungfu::MsgType::Position, j);

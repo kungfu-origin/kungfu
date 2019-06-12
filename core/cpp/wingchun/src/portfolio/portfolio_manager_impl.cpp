@@ -12,7 +12,7 @@
 
 namespace kungfu
 {
-    PortfolioManagerImpl::PortfolioManagerImpl(const char* name): name_(name), last_update_(0), trading_day_(""), pnl_({}) {}
+    PortfolioManagerImpl::PortfolioManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char* name): event_source_(event_source), name_(name), last_update_(0), trading_day_(""), pnl_({}) {}
 
     Position PortfolioManagerImpl::get_long_pos(const char *account_id, const char *instrument_id, const char *exchange_id) const
     {
@@ -223,7 +223,7 @@ namespace kungfu
         if (accounts_.find(account.account_id) == accounts_.end())
         {
             SPDLOG_INFO("portfolio {} add account{}", name_, account.account_id);
-            auto account_manager = create_account_manager(account.account_id, account.account_type);
+            auto account_manager = create_account_manager(event_source_, account.account_id, account.account_type);
             account_manager->set_current_trading_day(trading_day_);
             accounts_[account.account_id] = account_manager;
             account_manager->register_pos_callback(std::bind(&PortfolioManagerImpl::on_pos_callback, this, std::placeholders::_1));
@@ -387,7 +387,7 @@ namespace kungfu
         {
             std::string account_id = query_account.getColumn(0).getString();
             AccountType type = query_account.getColumn(1).getString()[0];
-            auto acc_manager = create_account_manager(account_id.c_str(), type, db.getFilename().c_str());
+            auto acc_manager = create_account_manager(event_source_, account_id.c_str(), type, db.getFilename().c_str());
             accounts_[account_id] = acc_manager;
             acc_manager->register_pos_callback(std::bind(&PortfolioManagerImpl::on_pos_callback, this, std::placeholders::_1));
             acc_manager->register_acc_callback(std::bind(&PortfolioManagerImpl::on_acc_callback, this, std::placeholders::_1));
@@ -437,9 +437,9 @@ namespace kungfu
         dump_to_db(db);
     }
 
-    PortfolioManagerPtr create_portfolio_manager(const char* name, const char *db)
+    PortfolioManagerPtr create_portfolio_manager(kungfu::yijinjing::event_source_ptr event_source, const char* name, const char *db)
     {
-        auto portfolio_manager = PortfolioManagerPtr(new PortfolioManagerImpl(name));
+        auto portfolio_manager = PortfolioManagerPtr(new PortfolioManagerImpl(event_source, name));
         if (db != nullptr)
         {
             portfolio_manager->load_from_db(db);

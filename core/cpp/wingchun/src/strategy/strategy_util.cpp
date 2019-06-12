@@ -35,15 +35,15 @@ namespace kungfu
 #define DUMP_1M_SNAPSHOT(name, pnl) storage::SnapshotStorage(\
     STRATEGY_SNAPSHOT_DB_FILE(name), PORTFOLIO_ONE_MIN_SNAPSHOT_TABLE_NAME, false, false).insert(pnl)
 
-    StrategyUtil::StrategyUtil(const std::string& name):
-        name_(name), calendar_(new Calendar()), has_stock_account_(false), has_future_account_(false)
+    StrategyUtil::StrategyUtil(EventLoop* strategy, const std::string& name):
+        name_(name), has_stock_account_(false), has_future_account_(false)
     {
         auto logger = spdlog::default_logger();
         kungfu::calendar_util::set_logger(logger);
 
         create_folder_if_not_exists(STRATEGY_FOLDER(name));
 
-        calendar_->register_switch_day_callback(std::bind(&StrategyUtil::on_switch_day, this, std::placeholders::_1));
+        strategy->register_switch_day_callback(std::bind(&StrategyUtil::on_switch_day, this, std::placeholders::_1));
 
         int worker_id = UidWorkerStorage::get_instance(fmt::format(UID_WORKER_DB_FILE_FORMAT, get_base_dir()))->get_uid_worker_id(name);
         if (worker_id <= 0)
@@ -69,13 +69,15 @@ namespace kungfu
         event_source_ = event_source;
         publisher_ = std::make_shared<NNPublisher>(event_source_);
 
+        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()->get_service()));
+
         init_portfolio_manager();
     }
 
     bool StrategyUtil::add_md(const std::string &source_id)
     {
         storage::SourceListStorage(STRATEGY_MD_FEED_DB_FILE(name_)).add_source(source_id);
-        auto rsp = gateway::add_market_feed(source_id, name_);
+        auto rsp = gateway::add_market_feed(event_source_->get_io_device(), source_id, name_);
         if (rsp.state != GatewayState::Ready)
         {
             SPDLOG_WARN("market feed {} is not ready yet, current state: {}.", source_id, (int)rsp.state);
@@ -96,7 +98,7 @@ namespace kungfu
         storage::AccountListStorage(STRATEGY_ACCOUNT_LIST_DB_FILE(name_)).add_account(this->name_, account_id, source_id);
         publisher_->publish_sub_portfolio_info(info);
 
-        auto rsp = gateway::register_trade_account(source_id, account_id, this->name_);
+        auto rsp = gateway::register_trade_account(event_source_->get_io_device(), source_id, account_id, this->name_);
 		if (rsp.error_msg != "")
 		{
 			return false;
@@ -196,7 +198,7 @@ namespace kungfu
             inst_vec.emplace_back(inst);
             subscribed_[source].insert(get_symbol(inst.instrument_id, inst.exchange_id));
         }
-        kungfu::gateway::subscribe(source, inst_vec, is_level2, this->name_);
+        kungfu::gateway::subscribe(event_source_->get_io_device(), source, inst_vec, is_level2, this->name_);
     }
 
     bool StrategyUtil::is_subscribed(const std::string &source, const std::string &instrument,
@@ -485,7 +487,7 @@ namespace kungfu
     void StrategyUtil::init_portfolio_manager()
     {
         std::string asset_db_file = STRATEGY_ASSET_DB_FILE(name_);
-        portfolio_manager_ = create_portfolio_manager(this->name_.c_str(), asset_db_file.c_str());
+        portfolio_manager_ = create_portfolio_manager(event_source_, this->name_.c_str(), asset_db_file.c_str());
         portfolio_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, publisher_.get(), std::placeholders::_1));
         portfolio_manager_->register_pnl_callback(std::bind(&NNPublisher::publish_portfolio_info, publisher_.get(), std::placeholders::_1,MsgType::Portfolio));
 
@@ -502,9 +504,9 @@ namespace kungfu
             {
                 reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id, last_update);
             }
-            yijinjing::journal::frame &frame = reader->current_frame();
-            while (frame.has_data())
+            while (reader->data_available())
             {
+                auto frame = reader->current_frame();
                 MsgType msg_type = static_cast<MsgType>(frame.msg_type());
                 switch (msg_type)
                 {
@@ -541,7 +543,6 @@ namespace kungfu
                     }
                 }
                 reader->next();
-                frame = reader->current_frame();
             }
             SPDLOG_INFO("forward portfolio manager from {}|{} to {}|{}", last_update,
                         kungfu::yijinjing::time::strftime(last_update, "%Y%m%d-%H:%M:%S"), portfolio_manager_->get_last_update(),

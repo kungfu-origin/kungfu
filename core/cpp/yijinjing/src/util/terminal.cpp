@@ -3,7 +3,7 @@
 //
 
 #include <spdlog/spdlog.h>
-#include <spdlog/details/os.h>
+#include <spdlog/details/util.h>
 #include <spdlog/details/console_globals.h>
 
 #include <kungfu/yijinjing/util/util.h>

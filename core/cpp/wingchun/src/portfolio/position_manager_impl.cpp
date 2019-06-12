@@ -86,7 +86,7 @@ namespace kungfu
         insert.exec();
     }
 
-    PositionManagerImpl::PositionManagerImpl(const char* account_id): account_id_(account_id) {}
+    PositionManagerImpl::PositionManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char* account_id): event_source_(event_source), account_id_(account_id) {}
 
     Position PositionManagerImpl::get_long_pos(const char *instrument_id, const char *exchange_id) const 
     {
@@ -632,7 +632,8 @@ namespace kungfu
         pos.volume = trade->volume;
         pos.open_price = trade->price;
         strcpy(pos.open_date, trading_day_.c_str());
-        strcpy(pos.expire_date, get_reverse_repurchase_expire_date(trade->instrument_id, pos.open_date).c_str());
+        auto expire_date = get_reverse_repurchase_expire_date(event_source_, trade->instrument_id, pos.open_date);
+        strcpy(pos.expire_date, expire_date.c_str());
 
         bond_map_[pos.expire_date].emplace_back(pos);
     }
@@ -983,9 +984,9 @@ namespace kungfu
         dump_to_db(db);
     }
 
-    PositionManagerPtr create_position_manager(const char* account_id, const char* db)
+    PositionManagerPtr create_position_manager(kungfu::yijinjing::event_source_ptr event_source, const char* account_id, const char* db)
     {
-        auto position_manager = PositionManagerPtr(new PositionManagerImpl(account_id));
+        auto position_manager = PositionManagerPtr(new PositionManagerImpl(event_source, account_id));
         if (db != nullptr)
         {
             position_manager->load_from_db(db);

@@ -41,78 +41,12 @@ namespace kungfu
         SPDLOG_INFO("CalendarService initialized");
     }
 
-    CalendarService::~CalendarService()
-    {
-        stop();
-    }
-
     void CalendarService::signal_handler(int signal)
     {
         SPDLOG_TRACE("signal received {}", signal);
         started_ = false;
     }
 
-    void CalendarService::run()
-    {
-        for (int s = 1; s < 32; s++)
-        {
-            signal(s, CalendarService::signal_handler);
-        }
-        if (started_)
-        {
-            return;
-        }
-
-        std::string rep_url = fmt::format(CALENDAR_REP_URL, get_base_dir());
-        rsp_socket_ = nn_socket(AF_SP, NN_REP);
-        int timeout = 1000;
-        nn_setsockopt(rsp_socket_, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout, sizeof(int));
-        if (auto ret = nn_bind(rsp_socket_, rep_url.c_str()) < 0)
-        {
-            SPDLOG_ERROR("[CalendarService] exception: rep socket create failed, ret = {}", ret);
-            return;
-        }
-
-        std::string pub_url = fmt::format(CALENDAR_PUB_URL, get_base_dir());
-        pub_socket_ = nn_socket(AF_SP, NN_PUB);
-        if (auto ret = nn_bind(pub_socket_, pub_url.c_str()) < 0)
-        {
-            SPDLOG_ERROR("[CalendarService] exception: pub socket create failed, ret = {}", ret);
-            return;
-        }
-
-        SPDLOG_INFO("[CalendarService] started with pub: {}, rep: {}", pub_url, rep_url);
-        started_ = true;
-        threads_.emplace_back(std::shared_ptr<std::thread>(new std::thread(&CalendarService::loop_new_date, this)));
-        threads_.emplace_back(std::shared_ptr<std::thread>(new std::thread(&CalendarService::loop_reqs, this)));
-    }
-
-    void CalendarService::join()
-    {
-        if (!started_)
-        {
-            return;
-        }
-
-        for (const auto& thread : threads_)
-        {
-            thread->join();
-        }
-    }
-
-    void CalendarService::stop()
-    {
-        if (!started_)
-        {
-            return;
-        }
-
-        started_ = false;
-        for (const auto& thread : threads_)
-        {
-            thread->join();
-        }
-    }
 
     void CalendarService::loop_new_date()
     {

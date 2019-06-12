@@ -19,7 +19,7 @@ namespace kungfu
     class NNPublisher
     {
     public:
-        NNPublisher(yijinjing::event_source_ptr event_source): socket_(event_source->get_socket_publish()) {};
+        NNPublisher(yijinjing::event_source_ptr event_source): event_source_(event_source) {};
         void publish_order(const kungfu::journal::Order& order) const;
         void publish_trade(const kungfu::journal::Trade& trade) const;
         void publish_pos(const kungfu::flying::Position& pos) const;
@@ -29,7 +29,7 @@ namespace kungfu
         void publish(kungfu::MsgType msg_type, nlohmann::json& data) const;
 
     private:
-        yijinjing::nanomsg::socket_ptr socket_;
+        yijinjing::event_source_ptr event_source_;
     };
 }
 

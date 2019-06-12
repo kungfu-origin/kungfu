@@ -19,10 +19,7 @@ namespace kungfu
     {
     public:
         CalendarService();
-        virtual ~CalendarService();
-        void run();
-        void join();
-        void stop();
+        virtual ~CalendarService() = default;
         int get_current_day() const;
         int calculate_trading_day(int date, int delta) const;
 

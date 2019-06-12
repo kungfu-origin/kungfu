@@ -5,6 +5,7 @@
 #ifndef PROJECT_PORTFOLIO_MANAGER_IMPL_H
 #define PROJECT_PORTFOLIO_MANAGER_IMPL_H
 
+#include <kungfu/yijinjing/io.h>
 #include <kungfu/wingchun/portfolio/portfolio_manager.h>
 
 namespace kungfu
@@ -12,7 +13,7 @@ namespace kungfu
     class PortfolioManagerImpl: public PortfolioManager
     {
     public:
-        PortfolioManagerImpl(const char* name);
+        PortfolioManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char* name);
 
         Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const override ;
         Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const override;
@@ -54,6 +55,7 @@ namespace kungfu
         void on_pos_callback(const Position& pos) const;
 
     private:
+        kungfu::yijinjing::event_source_ptr             event_source_;
         std::string                                     name_;
         int64_t                                         last_update_;
         std::string                                     trading_day_;

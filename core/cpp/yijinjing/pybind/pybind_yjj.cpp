@@ -268,6 +268,7 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<event_source, PyEventlet, event_source_ptr> py_event_source(m, "event_source");
     py_event_source.def("setup_output", &event_source::setup_output)
             .def("subscribe", &event_source::subscribe)
+            .def_property_readonly("_io_device", &event_source::get_io_device)
             .def_property_readonly("_writer", &event_source::get_writer)
             .def_property_readonly("_socket_reply", &event_source::get_socket_reply);
 

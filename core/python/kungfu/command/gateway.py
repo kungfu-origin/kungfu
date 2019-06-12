@@ -22,7 +22,7 @@ def run_extension(registry, args, logger, extension_name, extension_type):
             config_int['client_id'] = 1
         config_str['save_file_path'] = '{}/runtime'.format(args.home)
         gateway = registry.get_extension(extension_name)(config_str, config_int, config_double)
-        handler = EventHandler(logger, gateway)
+        handler = EventHandler(args, logger, gateway)
         apprentice = Apprentice(args, logger)
         apprentice.add_event_handler(handler)
         apprentice.go()

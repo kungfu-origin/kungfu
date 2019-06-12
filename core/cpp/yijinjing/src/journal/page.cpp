@@ -77,11 +77,6 @@ namespace kungfu
                     throw exception(fmt::format("header length mismatch for page {}, required {}, found {}",
                             path, sizeof(page_header), header->page_header_length));
                 }
-                if (header->frame_header_length != sizeof(frame_header))
-                {
-                    throw exception(fmt::format("frame header length mismatch for page {}, required {}, found {}",
-                            path, sizeof(frame_header), header->frame_header_length));
-                }
 
                 return std::shared_ptr<page>(new page(location, page_id, JOURNAL_PAGE_SIZE, lazy, address));
             }
@@ -89,13 +84,13 @@ namespace kungfu
             std::string page::get_page_path(const data::location &location, int id)
             {
                 std::string page_filename = JOURNAL_PREFIX + "." + location.name + "." + std::to_string(id) + "." + JOURNAL_SUFFIX;
-                return os::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group, page_filename}, true);
+                return util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group, page_filename}, true);
             }
 
             int page::find_page_id(const data::location &location, int64_t time)
             {
-                std::string path = os::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group}, false);
-                std::vector<int> page_ids = os::list_journal_page_id(path, location.name);
+                std::string path = util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group}, false);
+                std::vector<int> page_ids = util::list_journal_page_id(path, location.name);
                 if (page_ids.empty())
                 {
                     return 1;

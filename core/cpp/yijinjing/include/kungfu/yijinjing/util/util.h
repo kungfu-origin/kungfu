@@ -24,9 +24,11 @@ namespace kungfu
              */
             uint32_t hash(const void *key, int32_t len, uint32_t seed);
 
-            const std::string get_page_path(const data::location &location, int id);
-            std::vector<int> list_page_ids(const data::location &location);
-            int find_page_id(const data::location &location, int64_t time);
+            std::string make_path(std::initializer_list<std::string> list, bool is_file=false);
+
+            std::vector<int> list_journal_page_id(const std::string &path, const std::string &name);
+
+            void print_backtrace();
 
             void color_print(std::string level, std::string log);
 

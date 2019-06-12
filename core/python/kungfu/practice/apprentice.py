@@ -13,20 +13,22 @@ class Apprentice(pyyjj.apprentice):
         self._process = psutil.Process()
 
         os_signal.handle_os_signals(self.exit_gracefully)
-        kfio.checkin(args, logger, self._io_device)
+
+    def go(self):
+        kfio.checkin(self._args, self._logger, self._io_device)
+        pyyjj.apprentice.go(self)
+        # kfio.checkout(self._args, self._logger, self._io_device)
 
     def exit_gracefully(self, signum, frame):
         self.stop()
-        if signum != signal.SIGTERM:
-            self._logger.info('%s checking out', self._args.name)
-            kfio.checkout(self._args, self._logger, self._io_device)
-        else:
+        if signum == signal.SIGTERM:
             self._logger.info('%s terminated', self._args.name)
 
 
 class EventHandler(pyyjj.event_handler):
-    def __init__(self, logger, handler):
+    def __init__(self, args, logger, handler):
         pyyjj.event_handler.__init__(self)
+        self._args = args
         self._logger = logger
         self._handler = handler
 

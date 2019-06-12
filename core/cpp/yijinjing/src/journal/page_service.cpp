@@ -22,6 +22,7 @@
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page_service.h>
@@ -32,7 +33,7 @@ using json = nlohmann::json;
 
 page_service::page_service(io_device_ptr io_device) : io_device_(io_device), memory_message_limit_(0)
 {
-    memory_msg_file_ = os::make_path({KF_DIR_JOURNAL, PAGE_SERVICE_MSG_FILE}, true);
+    memory_msg_file_ = util::make_path({KF_DIR_JOURNAL, PAGE_SERVICE_MSG_FILE}, true);
     memory_message_buffer_ = os::load_mmap_buffer(memory_msg_file_, memory_msg_file_size_, true, true);
     memset(reinterpret_cast<void *>(memory_message_buffer_), 0, memory_msg_file_size_);
     SPDLOG_INFO("Loaded page service memory msg buffer: {}", memory_msg_file_);
@@ -111,12 +112,19 @@ void page_service::process_memory_message()
     for (int32_t msg_id = 0; msg_id < memory_message_limit_; msg_id++)
     {
         page_request *msg = get_page_request(memory_message_buffer_, msg_id);
+        if (msg->status != state::IDLE && page_providers_.find(msg_id) == page_providers_.end())
+        {
+            SPDLOG_WARN("abandon ghost page service message");
+            msg->status = state::IDLE;
+            continue;
+        }
         switch (msg->status)
         {
             case state::REQUESTING:
             {
                 auto page_provider = page_providers_[msg_id];
-                SPDLOG_INFO("Request page for {} {} [{}/{}]", page_provider->get_location().group, page_provider->get_location().name, msg->new_page_id, msg->old_page_id);
+                SPDLOG_INFO("Request page for {} {} [{}/{}]", page_provider->get_location().group, page_provider->get_location().name,
+                            msg->new_page_id, msg->old_page_id);
                 page_provider->get_page(msg->new_page_id, -1);
                 msg->status = state::WAITING;
                 if (msg->old_page_id >= 0)
@@ -129,6 +137,7 @@ void page_service::process_memory_message()
             {
                 auto page_provider = page_providers_[msg_id];
                 page_provider->release_page(msg->old_page_id);
+                msg->status = state::WAITING;
                 break;
             }
             default:

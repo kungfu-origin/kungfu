@@ -14,11 +14,12 @@
 
 namespace kungfu
 {
-    AccountManagerImpl::AccountManagerImpl(const char *account_id, AccountType type): last_update_(0), trading_day_(""), commission_(account_id)
+    AccountManagerImpl::AccountManagerImpl(kungfu::yijinjing::event_source_ptr event_source, const char *account_id, AccountType type):
+        event_source_(event_source), last_update_(0), trading_day_(""), commission_(account_id)
     {
         strcpy(account_.account_id, account_id);
         account_.account_type = type;
-        pos_manager_ = create_position_manager(account_id);
+        pos_manager_ = create_position_manager(event_source_, account_id);
         pos_manager_->register_pos_callback(std::bind(&AccountManagerImpl::on_pos_callback, this, std::placeholders::_1));
     }
 
@@ -177,7 +178,7 @@ namespace kungfu
             if (is_reverse_repurchase(trade->instrument_id, trade->exchange_id))
             {
                 auto days = get_reverse_repurchase_expire_days(trade->instrument_id);
-                auto expire_date = get_reverse_repurchase_expire_date(trade->instrument_id,
+                auto expire_date = get_reverse_repurchase_expire_date(event_source_, trade->instrument_id,
                                                                       yijinjing::time::strftime(trade->trade_time, "%Y%m%d").c_str());
                 bond_map_[expire_date] += trade->volume * trade->price / 100.0 * days / 360 + trade->volume;
             }
@@ -530,9 +531,9 @@ namespace kungfu
         }
     }
 
-    AccountManagerPtr create_account_manager(const char* name, AccountType type, const char *db)
+    AccountManagerPtr create_account_manager(kungfu::yijinjing::event_source_ptr event_source, const char* name, AccountType type, const char *db)
     {
-        auto account_manager = AccountManagerPtr(new AccountManagerImpl(name, type));
+        auto account_manager = AccountManagerPtr(new AccountManagerImpl(event_source, name, type));
         if (db != nullptr)
         {
             account_manager->load_from_db(db);

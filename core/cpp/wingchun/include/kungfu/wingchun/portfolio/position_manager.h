@@ -7,6 +7,8 @@
 
 #include "pnl_def.h"
 
+#include <kungfu/yijinjing/io.h>
+
 using namespace kungfu::journal;
 using namespace kungfu::flying;
 
@@ -48,7 +50,7 @@ namespace kungfu
     };
 
     typedef std::shared_ptr<PositionManager> PositionManagerPtr;
-    PositionManagerPtr create_position_manager(const char* account_id, const char* db = nullptr);
+    PositionManagerPtr create_position_manager(kungfu::yijinjing::event_source_ptr event_source, const char* account_id, const char* db = nullptr);
 }
 
 #endif //KUNGFU_POSITION_MANAGER_H

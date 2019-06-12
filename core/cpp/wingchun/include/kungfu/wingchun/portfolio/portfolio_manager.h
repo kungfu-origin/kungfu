@@ -54,7 +54,7 @@ namespace kungfu
     };
 
     typedef std::shared_ptr<PortfolioManager> PortfolioManagerPtr;
-    PortfolioManagerPtr create_portfolio_manager(const char* name, const char *db = nullptr);
+    PortfolioManagerPtr create_portfolio_manager(kungfu::yijinjing::event_source_ptr event_source, const char* name, const char *db = nullptr);
 }
 
 #endif //KUNGFU_PORTFOLIO_MANAGER_H
