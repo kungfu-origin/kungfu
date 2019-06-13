@@ -1,10 +1,12 @@
 import os
 import glob
 import re
+import pandas as pd
 import kungfu.yijinjing.time as kft
 import kungfu.command.journal as kfj
 import pyyjj
 from datetime import datetime, timedelta
+from tabulate import tabulate
 
 
 SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -39,7 +41,8 @@ CATEGORIES = {
 }
 
 
-@kfj.arg('-r', '--reverse', dest='reverse', action='store_true', help='reverse sorting')
+@kfj.arg('-f', '--format', dest='format', default='simple', choices=['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile'], help='output format')
+@kfj.arg('-a', '--ascending', dest='ascending', action='store_true', help='sorted as ascending')
 @kfj.arg('-s', '--sortby', dest='sortby', type=str, default='begin_time',
          choices=['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name', 'frame_count'],
          help='sorting method')
@@ -49,20 +52,13 @@ CATEGORIES = {
 @kfj.arg('-m', '--mode', dest='mode', type=str, default='*', choices=MODES.keys(), help='mode')
 @kfj.command(help='list sessions, use * as wildcard')
 def sessions(args, logger):
-    all_sessions = find_sessions(args, logger)
 
-    if not all_sessions:
-        print('no sessions found')
+    all_sessions = find_sessions(args, logger).sort_values(by=args.sortby, ascending=args.ascending)
+    all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
+    all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
+    all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - DURATION_TZ_ADJUST, DURATION_FORMAT))
 
-    all_sessions = sorted(all_sessions, key=lambda s: s[args.sortby], reverse=args.reverse)
-    for i in range(len(all_sessions)):
-        session = all_sessions[i]
-        session_meta = '[{:3d}] [{:^8}] [{:^8}] [{:^10}]'.format(i + 1, session['mode'], session['category'], session['group'])
-        begin = kft.strftime(session['begin_time'], format=SESSION_DATETIME_FORMAT)
-        end = kft.strftime(session['end_time'], format=SESSION_DATETIME_FORMAT)
-        duration = kft.strftime(session['duration'] - DURATION_TZ_ADJUST, format=DURATION_FORMAT)
-        session_info = '[ {} - {}{} [{}] [{:6d} frames]'.format(begin, end, ' ]' if session['closed'] else ' >', duration, session['frame_count'])
-        print('{} {}'.format(session_meta, session_info))
+    print(tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=args.format))
 
 
 def find_sessions(args, logger):
@@ -72,7 +68,9 @@ def find_sessions(args, logger):
 
     io_device = pyyjj.create_io_device()
 
-    all_sessions = []
+    sessions_df = pd.DataFrame(columns=[
+        'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration', 'frame_count'
+    ])
     for journal in glob.glob(search_path):
         if os.path.getsize(journal) != JOURNAL_FILE_SIZE:
             logger.error('bad journal file %s', journal)
@@ -86,14 +84,13 @@ def find_sessions(args, logger):
             name = match.group(5)
             logger.debug('subscribe to %s %s %s %s', MODES[mode], CATEGORIES[category], group, name)
             reader = io_device.open_reader(MODES[mode], CATEGORIES[category], group, name)
-            all_sessions.extend(find_sessions_from_reader(reader, mode, category, group, name))
+            find_sessions_from_reader(sessions_df, reader, mode, category, group, name)
         else:
             logger.warn('unable to match journal file %s to pattern %s', journal_location, JOURNAL_LOCATION_REGEX)
-    return all_sessions
+    return sessions_df
 
 
-def find_sessions_from_reader(reader, mode, category, group, name):
-    result = []
+def find_sessions_from_reader(sessions_df, reader, mode, category, group, name):
     session_start_time = -1
     last_frame_time = 0
     session_frame_count = 0
@@ -103,17 +100,11 @@ def find_sessions_from_reader(reader, mode, category, group, name):
         session_frame_count = session_frame_count + 1
         if frame.msg_type == 10001:
             if session_start_time > 0:
-                result.append({
-                    'mode': mode,
-                    'category': category,
-                    'group': group,
-                    'name': name,
-                    'begin_time': session_start_time,
-                    'end_time': last_frame_time,
-                    'duration': last_frame_time - session_start_time,
-                    'closed': False,
-                    'frame_count': session_frame_count
-                })
+                sessions_df.loc[len(sessions_df)] = [
+                    mode, category, group, name,
+                    session_start_time, last_frame_time, False,
+                    last_frame_time - session_start_time, session_frame_count
+                ]
                 session_start_time = frame.gen_time
                 session_frame_count = 1
             else:
@@ -121,32 +112,19 @@ def find_sessions_from_reader(reader, mode, category, group, name):
                 session_frame_count = 1
         elif frame.msg_type == 10002:
             if session_start_time > 0:
-                result.append({
-                    'mode': mode,
-                    'category': category,
-                    'group': group,
-                    'name': name,
-                    'begin_time': session_start_time,
-                    'end_time': frame.gen_time,
-                    'duration': frame.gen_time - session_start_time,
-                    'closed': True,
-                    'frame_count': session_frame_count
-                })
+                sessions_df.loc[len(sessions_df)] = [
+                    mode, category, group, name,
+                    session_start_time, frame.gen_time, True,
+                    frame.gen_time - session_start_time, session_frame_count
+                ]
                 session_start_time = -1
                 session_frame_count = 0
         last_frame_time = frame.gen_time
         reader.next()
 
     if session_start_time > 0:
-        result.append({
-            'mode': mode,
-            'category': category,
-            'group': group,
-            'name': name,
-            'begin_time': session_start_time,
-            'end_time': last_frame_time,
-            'duration': last_frame_time - session_start_time,
-            'closed': False,
-            'frame_count': session_frame_count
-        })
-    return result
+        sessions_df.loc[len(sessions_df)] = [
+            mode, category, group, name,
+            session_start_time, last_frame_time, False,
+            last_frame_time - session_start_time, session_frame_count
+        ]
