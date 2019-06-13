@@ -1,9 +1,10 @@
+import { BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath } from '__gConfig/pathConfig';
+import { logger } from '__gUtils/logUtils';
+import { platform } from '__gConfig/platformConfig';
+import { getProcesses } from 'getprocesses';
+
 const path = require('path');
-const {BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath} = require('__gConfig/pathConfig');
-const {logger} = require('__gUtils/logUtils');
-const {platform} = require('__gConfig/platformConfig');
 const fkill = require('fkill');
-const {getProcesses} = require('getprocesses');
 const taskkill = require('taskkill');
 export const pm2 = require('pm2');
 

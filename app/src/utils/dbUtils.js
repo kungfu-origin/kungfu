@@ -1,5 +1,6 @@
+import { existsSync } from '__gUtils/fileUtils'; 
+
 const sqlite3 = require('sqlite3').verbose();
-const { existsSync } = require('__gUtils/fileUtils'); 
 
 /**
  * @param  {String} dbPath

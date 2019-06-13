@@ -1,10 +1,13 @@
+import initGlobalDB from '__gConfig/initGlobalDB.json'
+import { GLOBAL_DIR } from '__gConfig/pathConfig';
+import { logger } from '__gUtils/logUtils'
 const path = require('path')
 const fse = require('fs-extra');
 const sqlite3 = require('sqlite3').verbose();
-const initGobalDB = require('__gConfig/initGlobalDB.json');
-const { GLOBAL_DIR } = require('__gConfig/pathConfig');
-const { logger } = require('__gUtils/logUtils');
-const { platform } = require('__gConfig/platformConfig');
+
+;if (process.env.NODE_ENV !== 'development') {
+	global.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
+}
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
@@ -13,9 +16,9 @@ export const initDB = () => {
     }
 
     //循环建立表
-    Object.keys(initGobalDB).forEach((dbName) => {
+    Object.keys(initGlobalDB).forEach((dbName) => {
         const db = new sqlite3.Database(path.join(GLOBAL_DIR, `${dbName}.db`));
-        const tables = initGobalDB[dbName];
+        const tables = initGlobalDB[dbName];
         db.serialize(() => {
             tables.forEach((table) => {
                 db.run(table.sql)

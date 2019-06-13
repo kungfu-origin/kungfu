@@ -1,8 +1,3 @@
-
-if (process.env.NODE_ENV !== 'development') {
-	global.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
-}
-
 // Modules to control application life and create native browser window
 const path = require('path');
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');

@@ -98,7 +98,7 @@ export default {
             const t =  this;
             const target = t.fileTree[t.currentFile.id];
             if(target.isDir){
-                CODE_UTILS.openFolder(target, t.fileTree, true).then(() => {
+                CODE_UTILS.openFolder(t.$store, target, t.fileTree, true).then(() => {
                     t.$store.dispatch('addFileFolderPending', {id: target.id, type: 'folder'})
                 });
             }else{
@@ -115,7 +115,7 @@ export default {
             const t =  this;
             const target = t.fileTree[t.currentFile.id];
             if(target.isDir){
-                CODE_UTILS.openFolder(target, t.fileTree, true).then(() => {
+                CODE_UTILS.openFolder(t.$store, target, t.fileTree, true).then(() => {
                     t.$store.dispatch('addFileFolderPending', {id: target.id})
                 });
             }else{

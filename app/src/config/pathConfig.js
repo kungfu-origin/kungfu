@@ -1,24 +1,19 @@
+import { addFile } from '__gUtils/fileUtils';
 const path = require('path');
 const mainProcess = require('electron').app;
 const renderProcess = require('electron').remote;
-const {addFile} = require('__gUtils/fileUtils');
 
 //ELEC_BASE
 var ELEC_BASE_DIR_RESOLVE;
-if(process.env.APP_TYPE === 'cli'){
-    console.log(require('os').homedir())
-    ELEC_BASE_DIR_RESOLVE = '/Users/zhangyizhi/Library/Application Support/kungfu';
-    addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
-} else {
-    ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
-    addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
-}
+if(process.env.APP_TYPE === 'cli') ELEC_BASE_DIR_RESOLVE = process.env.APPDATA || (process.platform == 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support', 'kungfu') : path.join('var', 'local', 'kungfu'))
+else ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
+addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
+
 export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
 
 //BASE
 addFile(ELEC_BASE_DIR, 'app', 'folder')
 export const BASE_DIR = path.join(ELEC_BASE_DIR, 'app')
-console.log(BASE_DIR)
 
 //GLOBAL_DIR strategys, accounts, tasks
 addFile(BASE_DIR, 'global', 'folder')
@@ -64,7 +59,7 @@ export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 
 //kungfu-engine
 export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
-? path.join(process.resourcesPath)
+? process.env.APP_TYPE === 'cli' ? path.join(__dirname) : process.resourcesPath
 : path.join(__dirname, '..', '..', '..', 'core', 'build')
 
 //gateway

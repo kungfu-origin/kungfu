@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { deepClone } from '@/assets/js/utils';
 const path = require("path");
 const fse = require('fs-extra');
 const csv = require("fast-csv");
@@ -123,8 +123,8 @@ export const buildFileObj = ({
  * @param  {boolean} openStatus
  * @param  {boolean} force 强制清空
  */
-export const openFolder = (folder, oldFileTree, openStatus, force) => {
-    oldFileTree = Vue.utils.deepClone(oldFileTree);
+export const openFolder = (store, folder, oldFileTree, openStatus, force) => {
+    oldFileTree = deepClone(oldFileTree);
     //清空
     if(force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
     return new Promise(async (resolve) => {
@@ -136,15 +136,15 @@ export const openFolder = (folder, oldFileTree, openStatus, force) => {
                 strategy: folder,
                 fileTree: oldFileTree
             })    
-            Vue.store.dispatch('setFileTree', fileTree)
-            Vue.store.dispatch('setFileNode', {id: folder.id, attr: 'children', val: ids})
+            store.dispatch('setFileTree', fileTree)
+            store.dispatch('setFileNode', {id: folder.id, attr: 'children', val: ids})
             resolve(fileTree)
         }else{
             resolve({})
         }
 
         //打开
-        Vue.store.dispatch('setFileNode', {id: folder.id, attr: 'open', val: openStatus})
+        store.dispatch('setFileNode', {id: folder.id, attr: 'open', val: openStatus})
 
     })
     

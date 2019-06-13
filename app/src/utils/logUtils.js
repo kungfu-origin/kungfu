@@ -1,5 +1,5 @@
+import  { LOG_DIR } from '__gConfig/pathConfig';
 const path = require('path')
-const {LOG_DIR} = require('__gConfig/pathConfig');
 const log4js = require('log4js');
 log4js.configure({
     appenders: {

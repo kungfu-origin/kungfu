@@ -231,7 +231,7 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => CODE_UTILS.removeFileFolder(t.fileNode.filePath))
-            .then(() => CODE_UTILS.openFolder(t.fileTree[parentId], t.fileTree, true, true))
+            .then(() => CODE_UTILS.openFolder(t.$store, t.fileTree[parentId], t.fileTree, true, true))
             .then(() => t.$store.dispatch('setCurrentFile', t.fileTree[parentId]))
             .then(() => t.$message.success(`${typeName}删除成功！`)) 
             .catch((err) => {
@@ -252,7 +252,7 @@ export default {
         //重新加载folder
         reloadFolder(parentId, filename){
             const t = this;
-            CODE_UTILS.openFolder(t.fileTree[parentId], t.fileTree, true, true).then((fileTree) => {
+            CODE_UTILS.openFolder(t.$store, t.fileTree[parentId], t.fileTree, true, true).then((fileTree) => {
                 const currentFile = t.getCurrentFileByName(parentId, fileTree, filename)
                 if(currentFile.id){
                     t.$store.dispatch('setCurrentFile', currentFile)
