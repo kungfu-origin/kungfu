@@ -7,6 +7,7 @@ import kungfu.command.journal as kfj
 import pyyjj
 from datetime import datetime, timedelta
 from tabulate import tabulate
+import click
 
 
 SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -41,6 +42,7 @@ CATEGORIES = {
 }
 
 
+@kfj.arg('-p', '--pager', dest='pager', action='store_true', help='show in a pager')
 @kfj.arg('-f', '--format', dest='format', default='simple', choices=['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile'], help='output format')
 @kfj.arg('-a', '--ascending', dest='ascending', action='store_true', help='sorted as ascending')
 @kfj.arg('-s', '--sortby', dest='sortby', type=str, default='begin_time',
@@ -58,7 +60,11 @@ def sessions(args, logger):
     all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
     all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - DURATION_TZ_ADJUST, DURATION_FORMAT))
 
-    print(tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=args.format))
+    table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=args.format)
+    if args.pager:
+        click.echo_via_pager(table)
+    else:
+        print(table)
 
 
 def find_sessions(args, logger):

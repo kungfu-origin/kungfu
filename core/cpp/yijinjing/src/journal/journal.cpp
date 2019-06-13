@@ -68,7 +68,6 @@ namespace kungfu
                 {
                     next();
                 }
-                SPDLOG_TRACE("seeked time");
             }
 
             void journal::load_next_page()
