@@ -193,6 +193,7 @@ class AccountDashboard extends Dashboard {
 		const runPromises = () => {
 			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
+			if(!currentId) return;      
 			//md + td
 			const mdTdPromise = t.accountTable.getData(t.globalData)
 			.then(({accountData, mdData}) => {

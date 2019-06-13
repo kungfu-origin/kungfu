@@ -162,6 +162,7 @@ class StrategyDashboard extends Dashboard {
 		const runPromises = () => {
 			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];
+			if(!currentId) return;      
 			//md + td
             const strategyListPromise = t.strategyTable.getData(t.globalData)
 			.then(strategyData => t.globalData.strategyData = strategyData)
@@ -241,7 +242,8 @@ class StrategyDashboard extends Dashboard {
 
 	getLogs(){
         const t = this;
-		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];        
+		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];  
+		if(!currentId) return;      
         const logPath = path.join(LOG_DIR, `${currentId}.log`);  
         return getLog(logPath).then(({list}) => {
             list.forEach(l => {
@@ -251,6 +253,7 @@ class StrategyDashboard extends Dashboard {
     }
 
 	_watchCurrentProcessLog(processId){
+		if(!processId) return;
 		const t = this;
 		if(t.logWatcher) t.logWatcher.unwatch();
 		t.logWatcher = null;

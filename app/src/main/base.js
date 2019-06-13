@@ -5,8 +5,9 @@ const path = require('path')
 const fse = require('fs-extra');
 const sqlite3 = require('sqlite3').verbose();
 
-;if (process.env.NODE_ENV !== 'development') {
-	global.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
+;if (process.env.NODE_ENV === 'production') {
+    if(process.env.APP_TYPE === 'cli') global.__resources = path.join('.', 'resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
+    else global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
 }
 
 export const initDB = () => {
@@ -26,6 +27,8 @@ export const initDB = () => {
         })	
         db.close();
     })
+
+    console.log(__resources)
 
     //commission.db
     fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(GLOBAL_DIR, 'commission.db'), err => {

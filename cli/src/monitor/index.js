@@ -162,6 +162,7 @@ class MonitorDashboard extends Dashboard {
         t.processList.key(['enter'], () => {
             const selectedIndex = t.processList.selected;
             const currentProcess = t.globalData.processes[selectedIndex];
+            if(!currentProcess) return;
             switch(currentProcess.type) {
                 case 'md':
                     switchMd(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
