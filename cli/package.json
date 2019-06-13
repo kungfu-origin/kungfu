@@ -14,13 +14,10 @@
   },
   "scripts": {
     "dev": "yarn run copy && node config/dev-cli.js",
-    "build": "yarn run copy && yarn run buildcopy && cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config config/webpack.cli.config.js && yarn run pkg",
+    "webpack": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config config/webpack.cli.config.js",
+    "build": "yarn run copy && yarn run webpack && yarn run pkg",
     "pkg": "pkg -t node10-macos-x64 . --out-path=build/",
-    "copy": "copyfiles -f ../core/cpp/wingchun/resources/commission.db resources/default && copyfiles -f ../core/cpp/wingchun/resources/holidays.db resources/default && copyfiles -f ./src/index.js ./dist",
-    "buildcopy": " yarn run copykfc && yarn run copyresources && yarn run copysqlite3 ",
-    "copykfc": "copyfiles -f ../core/build/kfc/* ../core/build/kfc/**/* ./build/kfc",
-    "copyresources": "copyfiles -f ./resources/**/* ./build/resources/default",
-    "copysqlite3": "copyfiles -f ../node_modules/sqlite3/lib/binding/node-v64-darwin-x64/node_sqlite3.node ./build"
+    "copy": "sh ./scripts/copy.sh"
   },
   "cmake-js": {
     "runtime": "electron",

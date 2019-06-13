@@ -1,7 +1,6 @@
 import blessed  from 'blessed';
 import path from 'path';
 import { Tail } from 'tail';
-import moment from 'moment';
 
 import strategyTable from '../public/StrategyTable';
 import posTable from '../public/PosTable';
@@ -162,7 +161,7 @@ class StrategyDashboard extends Dashboard {
 		const runPromises = () => {
 			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];
-			if(!currentId) return;      
+			if(!currentId) return new Promise((resolve) => resolve());      
 			//md + td
             const strategyListPromise = t.strategyTable.getData(t.globalData)
 			.then(strategyData => t.globalData.strategyData = strategyData)
@@ -298,11 +297,11 @@ export default () => {
 	strategyDashboard.bindEvent();
 	strategyDashboard.render();
 	strategyDashboard.getData().then(() => strategyDashboard.getLogs())
-	strategyDashboard.refresh();
-	strategyDashboard.getProcessStatus();   
-	setInterval(() => {
-		strategyDashboard.refresh();
-	}, 1000)	
+	// strategyDashboard.refresh();
+	// strategyDashboard.getProcessStatus();   
+	// setInterval(() => {
+	// 	strategyDashboard.refresh();
+	// }, 1000)	
 }
 
 

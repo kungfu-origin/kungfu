@@ -4,6 +4,8 @@ import monitor from './monitor/index'
 import { initDB } from '../../app/src/main/base';
 
 initDB()
+
+strategy()
 export default {
     strategy,
     account,
