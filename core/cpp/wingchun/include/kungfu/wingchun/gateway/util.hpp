@@ -67,18 +67,31 @@ namespace kungfu
         {
             LoginRequest request;
             request.sender = sender;
-            request.recipient = group;
+            request.source = group;
+            request.name = name;
             nlohmann::json js_req = request;
 
             NNMsg req_msg;
             req_msg.msg_type = kungfu::MsgType::ReqLogin;
             req_msg.data = js_req;
-            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, c, group, name, yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
-            socket->send_json(req_msg);
-            NNMsg rsp_msg = socket->recv_json();
 
+            nlohmann::json j = req_msg;
+            j["gen_time"] = yijinjing::time::now_in_nano();
+            j["trigger_time"] = yijinjing::time::now_in_nano();
+            j["source"] = 0;
+
+            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, c, group, name, yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
+            socket->send_json(j);
+
+            SPDLOG_TRACE("gateway login sent {}", j.dump());
             GatewayLoginRsp rsp = {};
-            from_json(rsp_msg.data, rsp);
+
+            int rc = socket->recv();
+            if (rc > 0)
+            {
+                NNMsg rsp_msg = nlohmann::json::parse(socket->last_message());
+                from_json(rsp_msg.data, rsp);
+            }
 
             return rsp;
         }
@@ -95,11 +108,10 @@ namespace kungfu
 
         inline void subscribe(kungfu::yijinjing::io_device_client_ptr io_device, const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
         {
-            std::string gateway = fmt::format(MD_GATEWAY_NAME_FORMAT, source);
 
             SubscribeRequest request = {};
             request.sender = sender;
-            request.recipient = gateway;
+            request.source = source;
             request.instruments = instruments;
             nlohmann::json j = request;
 
@@ -108,9 +120,15 @@ namespace kungfu
             req_msg.data = j;
 
             j = req_msg;
+            j["gen_time"] = yijinjing::time::now_in_nano();
+            j["trigger_time"] = yijinjing::time::now_in_nano();
+            j["source"] = 0;
+
             auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source,
                     yijinjing::nanomsg::protocol::REQUEST);
+            SPDLOG_DEBUG("subscribe sending {}", j.dump());
             socket->send_json(j);
+            SPDLOG_DEBUG("subscribe send {}", j.dump());
         }
     }
 }

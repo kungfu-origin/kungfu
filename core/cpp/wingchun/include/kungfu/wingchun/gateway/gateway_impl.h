@@ -108,7 +108,7 @@ namespace kungfu
         virtual ~MdGatewayImpl() {}
 
         virtual void on_started() override {};
-        virtual void on_login(const std::string& recipient, const std::string& client_id) override ;
+        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) override ;
 
         void register_subscription_storage(std::shared_ptr<SubscriptionStorage> subscription_storage) { subscription_storage_ = subscription_storage; }
         std::shared_ptr<SubscriptionStorage> get_subscription_storage() {return subscription_storage_;}
@@ -137,7 +137,7 @@ namespace kungfu
         virtual ~TdGatewayImpl() {};
 
         virtual void on_started() override;
-        virtual void on_login(const std::string& recipient, const std::string& client_id) override;
+        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) override;
 
         virtual bool req_position_detail() override { return false;}
         virtual bool req_position() override = 0;

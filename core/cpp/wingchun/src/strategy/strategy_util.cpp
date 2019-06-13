@@ -198,7 +198,9 @@ namespace kungfu
             inst_vec.emplace_back(inst);
             subscribed_[source].insert(get_symbol(inst.instrument_id, inst.exchange_id));
         }
+        SPDLOG_DEBUG("strategy subscribing {}", source);
         kungfu::gateway::subscribe(event_source_->get_io_device(), source, inst_vec, is_level2, this->name_);
+        SPDLOG_DEBUG("strategy subscribed {}", source);
     }
 
     bool StrategyUtil::is_subscribed(const std::string &source, const std::string &instrument,

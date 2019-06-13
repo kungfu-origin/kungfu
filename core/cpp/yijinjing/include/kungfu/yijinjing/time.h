@@ -74,6 +74,22 @@ namespace kungfu {
                 return strftime(now_in_nano(), format);
             }
 
+            static inline int64_t next_minute_nano(int64_t nanotime)
+            {
+                return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
+            }
+
+            static inline int64_t next_day_nano(int64_t nanotime)
+            {
+                int64_t day = nanotime - nanotime % time_unit::NANOSECONDS_PER_DAY
+                        + 7 * time_unit::NANOSECONDS_PER_HOUR + 30 * time_unit::NANOSECONDS_PER_MINUTE;
+                if (day < now_in_nano())
+                {
+                    day += time_unit::NANOSECONDS_PER_DAY;
+                }
+                return day;
+            }
+
         private:
             time();
             static const time& get_instance();

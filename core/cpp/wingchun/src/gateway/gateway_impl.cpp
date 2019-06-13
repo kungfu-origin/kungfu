@@ -104,16 +104,16 @@ namespace kungfu
         std::shared_ptr<kungfu::SubscriptionStorage> subscription_storage = std::shared_ptr<kungfu::SubscriptionStorage>(new kungfu::SubscriptionStorage(subscription_db_file));
         register_subscription_storage(subscription_storage);
 
-        register_req_login_callback(std::bind(&MdGatewayImpl::on_login, this, std::placeholders::_1, std::placeholders::_2));
+        register_req_login_callback(std::bind(&MdGatewayImpl::on_login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         register_subscribe_callback(std::bind(&MdGatewayImpl::on_subscribe, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
         init();
     }
 
-    void MdGatewayImpl::on_login(const std::string &recipient, const std::string &client_id)
+    void MdGatewayImpl::on_login(const std::string &source, const std::string& name, const std::string &client_id)
     {
-        SPDLOG_TRACE("(recipient) {} (client) {}", recipient, client_id);
-        if (recipient == this->get_name())
+        SPDLOG_TRACE("login from client {} source {}, this source {}", client_id, source, get_source());
+        if (source == this->get_source())
         {
             gateway::GatewayLoginRsp rsp = {};
             rsp.state = this->get_state();
@@ -122,8 +122,11 @@ namespace kungfu
             msg.msg_type = kungfu::MsgType::RspLogin;
             msg.data = rsp;
             std::string js = to_string(msg);
-            event_source_->get_socket_reply()->send(js, 0);
+            event_source_->get_socket_reply()->send(js);
             SPDLOG_TRACE("login sent {} ", js);
+        } else
+        {
+            SPDLOG_TRACE("wrong login from client {} source {}, this source {}", client_id, source, get_source());
         }
     }
 
@@ -145,10 +148,10 @@ namespace kungfu
         feed_handler_->on_transaction(&transaction);
     }
 
-    void MdGatewayImpl::on_subscribe(const std::string &recipient, const std::vector<Instrument> &instruments, bool is_level2 = false)
+    void MdGatewayImpl::on_subscribe(const std::string &source, const std::vector<Instrument> &instruments, bool is_level2 = false)
     {
-        SPDLOG_TRACE("(recipient) {} (size) {} (is_level2) {}", recipient, instruments.size(), is_level2);
-        if (recipient == this->get_name())
+        SPDLOG_TRACE("source {} size {} is_level2 {}", source, instruments.size(), is_level2);
+        if (source == this->get_source())
         {
             this->subscribe(instruments, is_level2);
             SubscribeRsp rsp = {};
@@ -183,9 +186,7 @@ namespace kungfu
         }
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
-        SPDLOG_WARN("subscribing md");
         event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source());
-        SPDLOG_WARN("subscribed md");
 
         std::shared_ptr<kungfu::TraderDataFeedHandler> feed_handler = std::shared_ptr<kungfu::TraderDataFeedHandler>(new kungfu::TraderDataStreamingWriter(event_source_->get_writer()));
         register_feed_handler(feed_handler);
@@ -196,9 +197,9 @@ namespace kungfu
         std::shared_ptr<kungfu::storage::TradeStorage> trade_storage = std::shared_ptr<kungfu::storage::TradeStorage>(new kungfu::storage::TradeStorage(TRADE_DB_FILE(get_account_id())));
         register_trade_storage(trade_storage);
 
-        register_nanotime_callback(nseconds_next_min(yijinjing::time::now_in_nano()), std::bind(&TdGatewayImpl::on_1min_timer, this, std::placeholders::_1));
-        register_nanotime_callback(nseconds_next_day(yijinjing::time::now_in_nano()), std::bind(&TdGatewayImpl::on_daily_timer, this, std::placeholders::_1));
-        register_req_login_callback(std::bind(&TdGatewayImpl::on_login, this, std::placeholders::_1, std::placeholders::_2));
+        register_nanotime_callback(yijinjing::time::next_minute_nano(yijinjing::time::now_in_nano()), std::bind(&TdGatewayImpl::on_1min_timer, this, std::placeholders::_1));
+        register_nanotime_callback(yijinjing::time::next_day_nano(yijinjing::time::now_in_nano()), std::bind(&TdGatewayImpl::on_daily_timer, this, std::placeholders::_1));
+        register_req_login_callback(std::bind(&TdGatewayImpl::on_login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         register_order_input_callback(std::bind(&TdGatewayImpl::on_order_input, this, std::placeholders::_1));
         register_order_action_callback(std::bind(&TdGatewayImpl::on_order_action, this, std::placeholders::_1));
         register_quote_callback(std::bind(&TdGatewayImpl::on_quote, this, std::placeholders::_1));
@@ -307,10 +308,10 @@ namespace kungfu
         gateway::subscribe(event_source_->get_io_device(), get_source(), instruments, false, this->get_name());
     }
 
-    void TdGatewayImpl::on_login(const std::string &recipient, const std::string &client_id)
+    void TdGatewayImpl::on_login(const std::string &source, const std::string& name, const std::string &client_id)
     {
-        SPDLOG_TRACE("(recipient) {} (client) {}", recipient, client_id);
-        if (recipient == get_name())
+        SPDLOG_TRACE("login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
+        if (source == get_source() && name == get_account_id())
         {
             event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id);
 
@@ -323,6 +324,9 @@ namespace kungfu
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
             event_source_->get_socket_reply()->send(js, 0);
+        } else
+        {
+            SPDLOG_TRACE("wrong login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
         }
     }
 

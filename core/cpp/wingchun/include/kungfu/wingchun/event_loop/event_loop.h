@@ -23,8 +23,8 @@ namespace kungfu
     typedef std::function<void (const kfj::Quote& quote)> QuoteCallback;
     typedef std::function<void (const kfj::Entrust& entrust)> EntrustCallback;
     typedef std::function<void (const kfj::Transaction& transaction)> TransactionCallback;
-    typedef std::function<void (const std::string& recipient, std::vector<kfj::Instrument>&, bool is_level2)> SubscribeCallback;
-    typedef std::function<void (const std::string& recipient, const std::string& client_id)> ReqLoginCallback;
+    typedef std::function<void (const std::string& source, std::vector<kfj::Instrument>&, bool is_level2)> SubscribeCallback;
+    typedef std::function<void (const std::string& source, const std::string& name, const std::string& client_id)> ReqLoginCallback;
     typedef std::function<void (const kfj::OrderInput& input)> OrderInputCallback;
     typedef std::function<void (const kfj::OrderAction& action)> OrderActionCallback;
     typedef std::function<void (const kfj::Order& order)> OrderCallback;
@@ -42,8 +42,8 @@ namespace kungfu
     public:
         EventLoop(): scheduler_(new TaskScheduler()) {};
 
-        void register_nanotime_callback(int64_t nano, TSCallback callback); // if nano == 0, trigger at next update
-        void register_nanotime_callback_at_next(const char* time_str, TSCallback callback);
+        virtual void register_nanotime_callback(int64_t nano, TSCallback callback); // if nano == 0, trigger at next update
+        virtual void register_nanotime_callback_at_next(const char* time_str, TSCallback callback);
 
         void register_quote_callback(QuoteCallback callback);
         void register_entrust_callback(EntrustCallback callback);

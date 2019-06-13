@@ -12,7 +12,7 @@ def checkin(ctx, io_device):
     }
     request_str = json.dumps(request)
     ctx.logger.info('checking int: %s', request_str)
-    response_str = io_device._service.request(request_str)
+    response_str = io_device.service.request(request_str)
     response = json.loads(response_str)
     if 'success' not in response or not response['success']:
         ctx.logger.critical('Unable to checkin with master')
@@ -29,7 +29,7 @@ def checkout(ctx, io_device):
     }
     request_str = json.dumps(request)
     ctx.logger.info('checking out: %s', request_str)
-    response_str = io_device._service.request(request_str)
+    response_str = io_device.service.request(request_str)
     response = json.loads(response_str)
     if 'success' not in response or not response['success']:
         ctx.logger.critical('Unable to checkout with master')

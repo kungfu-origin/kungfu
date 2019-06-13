@@ -29,35 +29,53 @@ namespace kf = kungfu;
 namespace kfj = kungfu::journal;
 namespace kff = kungfu::flying;
 
-class PyStrategy : public kf::Strategy {
+class PyStrategy : public kf::Strategy
+{
 public:
     using kf::Strategy::Strategy; // Inherit constructors
-    void pre_run() override {PYBIND11_OVERLOAD(void, kf::Strategy, pre_run,); }
 
-    void on_switch_day(const std::string &next_trading_day) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_switch_day, next_trading_day); }
+    void pre_run() override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, pre_run,); }
 
-    void on_quote(const kfj::Quote &quote) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_quote, quote); }
+    void pre_quit() override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, pre_quit,); }
 
-    void on_entrust(const kfj::Entrust &entrust) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_entrust, entrust); }
+    void register_nanotime_callback(int64_t nano, kungfu::TSCallback callback) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, register_nanotime_callback, nano, callback); }
 
-    void on_transaction(const kfj::Transaction &transaction) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_transaction, transaction); }
+    void on_switch_day(const std::string &next_trading_day) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_switch_day, next_trading_day); }
 
-    void on_order(const kfj::Order &order) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_order, order); }
+    void on_quote(const kfj::Quote &quote) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_quote, quote); }
 
-    void on_trade(const kfj::Trade &trade) override {PYBIND11_OVERLOAD(void, kf::Strategy, on_trade, trade); }
+    void on_entrust(const kfj::Entrust &entrust) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_entrust, entrust); }
 
-    void on_algo_order_status(uint64_t order_id, const std::string &algo_type, const std::string &event_msg) override {
+    void on_transaction(const kfj::Transaction &transaction) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_transaction, transaction); }
+
+    void on_order(const kfj::Order &order) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_order, order); }
+
+    void on_trade(const kfj::Trade &trade) override
+    {PYBIND11_OVERLOAD(void, kf::Strategy, on_trade, trade); }
+
+    void on_algo_order_status(uint64_t order_id, const std::string &algo_type, const std::string &event_msg) override
+    {
         PYBIND11_OVERLOAD(void, kf::Strategy, on_algo_order_status, order_id, algo_type, event_msg);
     }
 };
 
-PYBIND11_MODULE(pywingchun, m) {
+PYBIND11_MODULE(pywingchun, m)
+{
     py::class_<kfj::Instrument>(m, "Instrument")
             .def_readonly("instrument_type", &kfj::Instrument::instrument_type)
             .def_property_readonly("instrument_id", &kfj::Instrument::get_instrument_id)
             .def_property_readonly("exchange_id", &kfj::Instrument::get_exchange_id)
             .def("__repr__",
-                 [](const kfj::Instrument &a) {
+                 [](const kfj::Instrument &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -74,7 +92,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("create_date", &kfj::FutureInstrument::get_create_date)
             .def_property_readonly("expire_date", &kfj::FutureInstrument::get_expire_date)
             .def("__repr__",
-                 [](const kfj::FutureInstrument &a) {
+                 [](const kfj::FutureInstrument &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -105,7 +124,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("bid_volume", &kfj::Quote::get_bid_volume)
             .def_property_readonly("ask_volume", &kfj::Quote::get_ask_volume)
             .def("__repr__",
-                 [](const kfj::Quote &a) {
+                 [](const kfj::Quote &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -124,7 +144,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_readonly("main_seq", &kfj::Entrust::main_seq)
             .def_readonly("seq", &kfj::Entrust::seq)
             .def("__repr__",
-                 [](const kfj::Entrust &a) {
+                 [](const kfj::Entrust &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -145,7 +166,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_readonly("main_seq", &kfj::Transaction::main_seq)
             .def_readonly("seq", &kfj::Transaction::seq)
             .def("__repr__",
-                 [](const kfj::Transaction &a) {
+                 [](const kfj::Transaction &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -166,7 +188,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("account_id", &kfj::OrderInput::get_account_id)
             .def_property_readonly("client_id", &kfj::OrderInput::get_client_id)
             .def("__repr__",
-                 [](const kfj::OrderInput &a) {
+                 [](const kfj::OrderInput &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -197,7 +220,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("client_id", &kfj::Order::get_client_id)
             .def_property_readonly("error_msg", &kfj::Order::get_error_msg)
             .def("__repr__",
-                 [](const kfj::Order &a) {
+                 [](const kfj::Order &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -208,7 +232,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_readonly("price", &kfj::OrderAction::price)
             .def_readonly("volume", &kfj::OrderAction::volume)
             .def("__repr__",
-                 [](const kfj::OrderAction &a) {
+                 [](const kfj::OrderAction &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -230,7 +255,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("account_id", &kfj::Trade::get_account_id)
             .def_property_readonly("client_id", &kfj::Trade::get_client_id)
             .def("__repr__",
-                 [](const kfj::Trade &a) {
+                 [](const kfj::Trade &a)
+                 {
                      return kfj::to_string(a);
                  }
             );
@@ -260,7 +286,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("broker_id", &kff::AccountInfo::get_broker_id)
             .def_property_readonly("source_id", &kff::AccountInfo::get_source_id)
             .def("__repr__",
-                 [](const kff::AccountInfo &a) {
+                 [](const kff::AccountInfo &a)
+                 {
                      return kff::to_string(a);
                  }
             );
@@ -293,7 +320,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("open_date", &kff::Position::get_open_date)
             .def_property_readonly("expire_date", &kff::Position::get_expire_date)
             .def("__repr__",
-                 [](const kff::Position &a) {
+                 [](const kff::Position &a)
+                 {
                      return kff::to_string(a);
                  }
             );
@@ -309,7 +337,8 @@ PYBIND11_MODULE(pywingchun, m) {
             .def_property_readonly("trading_day", &kff::PortfolioInfo::get_trading_day)
             .def_property_readonly("client_id", &kff::PortfolioInfo::get_client_id)
             .def("__repr__",
-                 [](const kff::PortfolioInfo &a) {
+                 [](const kff::PortfolioInfo &a)
+                 {
                      return kff::to_string(a);
                  }
             );
@@ -335,7 +364,7 @@ PYBIND11_MODULE(pywingchun, m) {
             .def("insert_fak_order", &kf::Strategy::insert_fak_order)
             .def("insert_market_order", &kf::Strategy::insert_market_order)
             .def("cancel_order", &kf::Strategy::cancel_order)
-            .def("_register_nanotime_callback", &kf::Strategy::register_nanotime_callback)
+            .def("register_nanotime_callback", &kf::Strategy::register_nanotime_callback)
             .def("insert_algo_order", &kf::Strategy::insert_algo_order)
             .def("modify_algo_order", &kf::Strategy::modify_algo_order)
                     // .def("try_frozen", &kf::Strategy::try_frozen)

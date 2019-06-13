@@ -157,6 +157,7 @@ void apprentice::try_once()
 
     if (socket_reply_.get() != nullptr && socket_reply_->recv() > 0)
     {
+        SPDLOG_INFO("handle reply nn event {}", socket_reply_->last_message());
         nanomsg_json event(socket_reply_->last_message());
         for (auto handler : event_handlers_)
         {
@@ -168,6 +169,7 @@ void apprentice::try_once()
     {
         if (element.second->recv() > 0)
         {
+            SPDLOG_INFO("handle sub socket nn event {}", element.second->last_message());
             nanomsg_json event(element.second->last_message());
             for (auto handler : event_handlers_)
             {

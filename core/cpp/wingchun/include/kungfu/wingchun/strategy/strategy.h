@@ -120,11 +120,6 @@ namespace kungfu
         //@return              撤单操作ID
         uint64_t cancel_order(uint64_t order_id);
 
-        //注册时间回调函数
-        //@param nano          纳秒时间
-        //@param callback      回调函数
-        void register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback);
-
         //算法订单报单
         //@param algo_type     算法订单类型
         //@param input         算法订单输入信息

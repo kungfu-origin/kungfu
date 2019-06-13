@@ -50,11 +50,6 @@ namespace kungfu
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 
-        void register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback)
-        {
-            strategy_->register_nanotime_callback(nano, callback);
-        }
-
         void init()
         {
             QuoteCallback quote_callback = std::bind(&Strategy::impl::process_quote, this, std::placeholders::_1);
@@ -65,8 +60,9 @@ namespace kungfu
             TradeCallback trade_callback = std::bind(&Strategy::impl::process_trade, this, std::placeholders::_1);
             AlgoOrderStatusCallback algo_order_status_callback = std::bind(&Strategy::impl::process_algo_order_status, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
-            strategy_->register_nanotime_callback(nseconds_next_min(yijinjing::time::now_in_nano()), std::bind(&Strategy::impl::on_1min_timer, this, std::placeholders::_1));
-            strategy_->register_nanotime_callback(nseconds_next_day(yijinjing::time::now_in_nano()), std::bind(&Strategy::impl::on_daily_timer, this, std::placeholders::_1));
+            int64_t now = yijinjing::time::now_in_nano();
+            strategy_->register_nanotime_callback(yijinjing::time::next_minute_nano(now), std::bind(&Strategy::impl::on_1min_timer, this, std::placeholders::_1));
+            strategy_->register_nanotime_callback(yijinjing::time::next_day_nano(now), std::bind(&Strategy::impl::on_daily_timer, this, std::placeholders::_1));
 
             strategy_->register_quote_callback(quote_callback);
             strategy_->register_entrust_callback(entrust_callback);
@@ -137,8 +133,12 @@ namespace kungfu
             msg.data["error_id"] = error_id;
             msg.data["error_text"] = error_text;
             msg.data["cancel_count"] = cancel_count;
-            std::string js = to_string(msg);
-            strategy_->event_source_->get_socket_reply()->send(js, 0);
+
+            nlohmann::json j = msg;
+            j["gen_time"] = yijinjing::time::now_in_nano();
+            j["trigger_time"] = yijinjing::time::now_in_nano();
+            j["source"] = 0;
+            strategy_->event_source_->get_socket_reply()->send_json(j);
         }
 
         void on_1min_timer(int64_t nano)
@@ -179,11 +179,13 @@ namespace kungfu
         event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, get_name(), get_name());
         impl_->get_util()->init(event_source);
         impl_->init();
+        SPDLOG_INFO("Strategy pre run");
         pre_run();
     }
 
     void Strategy::finish()
     {
+        SPDLOG_INFO("Strategy pre quit");
         pre_quit();
     }
 
@@ -255,11 +257,6 @@ namespace kungfu
     uint64_t Strategy::cancel_order(uint64_t order_id)
     {
         return impl_->get_util()->cancel_order(order_id);
-    }
-
-    void Strategy::register_nanotime_callback(int64_t nano, std::function<void (int64_t)> callback)
-    {
-        return impl_->register_nanotime_callback(nano, callback);
     }
 
     uint64_t Strategy::insert_algo_order(const std::string &algo_type, const std::string &algo_order_input)

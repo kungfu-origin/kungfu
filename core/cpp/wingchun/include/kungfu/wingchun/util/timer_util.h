@@ -11,23 +11,6 @@ namespace kungfu
 {
     #define SWITCH_HOUR 17
 
-    inline int64_t nseconds_next_min(int64_t cur_nano)
-    {
-        std::string cur_time = yijinjing::time::strftime(cur_nano, "%Y%m%d %H:%M:%S");
-        return yijinjing::time::strptime((cur_time.substr(0, cur_time.size() - 2) + "00").c_str(), "%Y%m%d %H:%M:%S") + yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
-    }
-
-    inline int64_t nseconds_next_day(int64_t cur_nano)
-    {
-        std::string cur_time = yijinjing::time::strftime(cur_nano, "%Y%m%d %H:%M:%S");
-        int64_t next_day = yijinjing::time::strptime((cur_time.substr(0, 9) + DAILY_STORAGE_TIME).c_str(), "%Y%m%d %H:%M:%S");
-        if (next_day < yijinjing::time::now_in_nano())
-        {
-            next_day += yijinjing::time_unit::NANOSECONDS_PER_DAY;
-        }
-        return next_day;
-    }
-
     inline std::string get_trading_day_from_nano(int64_t nano)
     {
         return yijinjing::time::strftime(nano + (yijinjing::time_unit::NANOSECONDS_PER_DAY - SWITCH_HOUR * yijinjing::time_unit::NANOSECONDS_PER_HOUR),

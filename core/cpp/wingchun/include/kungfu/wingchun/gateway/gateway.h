@@ -27,7 +27,7 @@ namespace kungfu
 
         virtual void init() = 0;
 
-        virtual void on_login(const std::string& recipient, const std::string& client_id) = 0;
+        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) = 0;
         virtual void on_started() = 0;
     };
 
@@ -37,7 +37,7 @@ namespace kungfu
         virtual bool subscribe(const std::vector<journal::Instrument>& instruments, bool is_level2) = 0;
         virtual bool unsubscribe(const std::vector<journal::Instrument>& instruments) = 0;
 
-        virtual void on_login(const std::string& recipient, const std::string& client_id) = 0;
+        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) = 0;
         virtual void on_started() = 0;
     };
 
@@ -54,7 +54,7 @@ namespace kungfu
         virtual bool req_position() = 0;
         virtual bool req_account() = 0;
 
-        virtual void on_login(const std::string& recipient, const std::string& client_id) = 0;
+        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) = 0;
         virtual void on_started() = 0;
 
     };

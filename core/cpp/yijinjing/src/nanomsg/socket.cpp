@@ -184,8 +184,10 @@ int socket::send_json (const nlohmann::json &msg, int flags) const
 
 nlohmann::json socket::recv_json (int flags)
 {
-    if (recv(flags))
+    int rc = 0;
+    if ((rc = recv(flags)) > 0)
     {
+        SPDLOG_INFO("parsing json {} {}", rc, message_);
         return nlohmann::json::parse(message_);
     }
     else

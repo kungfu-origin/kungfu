@@ -476,19 +476,21 @@ namespace kungfu
     inline void to_json(nlohmann::json& j, const LoginRequest& login_req)
     {
         j["sender"] = login_req.sender;
-        j["recipient"] = login_req.recipient;
+        j["source"] = login_req.source;
+        j["name"] = login_req.name;
     }
 
     inline void from_json(const nlohmann::json& j, LoginRequest& login_req)
     {
         login_req.sender = j["sender"];
-        login_req.recipient = j["recipient"];
+        login_req.source = j["source"];
+        login_req.name = j["name"];
     }
 
     inline void to_json(nlohmann::json& j, const SubscribeRequest& sub_req)
     {
         j["sender"] = sub_req.sender;
-        j["recipient"] = sub_req.recipient;
+        j["source"] = sub_req.source;
         j["is_level2"] = sub_req.is_level2;
         j["instruments"] = nlohmann::json::array();
         for (const auto& instrument : sub_req.instruments)
@@ -500,7 +502,7 @@ namespace kungfu
     inline void from_json(const nlohmann::json& j, SubscribeRequest& sub_req)
     {
         sub_req.sender = j["sender"];
-        sub_req.recipient = j["recipient"];
+        sub_req.source = j["source"];
         sub_req.is_level2 = j["is_level2"].get<bool>();
         sub_req.instruments.clear();
         for (const auto& instrument : j["instruments"])

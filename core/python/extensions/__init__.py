@@ -2,29 +2,38 @@ import os, sys, traceback
 import pkgutil
 from kungfu.log import create_logger
 
+
 kfext_log_level = os.getenv('KF_LOG_LEVEL')
+
 if not kfext_log_level:
     kfext_log_level = 'error'
 kfext_logger = create_logger('extensions', kfext_log_level)
 
+
 class ExtensionRegistry:
     def __init__(self, ext_type):
         self._registry = {}
-        self._ext_type = ext_type
+        self.ext_type = ext_type
+
     def register_extension(self, name, extension):
-        kfext_logger.debug('Registering %s extension %s', self._ext_type, name)
+        kfext_logger.debug('Registering %s extension %s', self.ext_type, name)
         self._registry[name] = extension
+
     def has_extension(self, name):
         return name in self._registry
+
     def get_extension(self, name):
         return self._registry[name]
+
     def names(self):
         return self._registry.keys()
+
 
 EXTENSION_REGISTRY_MD=ExtensionRegistry('MD')
 EXTENSION_REGISTRY_TD=ExtensionRegistry('TD')
 EXTENSION_REGISTRY_LOG=ExtensionRegistry('LOG')
 EXTENSIONS={}
+
 
 extension_path = __path__
 __path__ = pkgutil.extend_path(__path__, __name__)

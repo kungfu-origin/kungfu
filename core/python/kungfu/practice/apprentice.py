@@ -8,20 +8,20 @@ from . import os_signal
 class Apprentice(pyyjj.apprentice):
     def __init__(self, ctx):
         pyyjj.apprentice.__init__(self, name=ctx.name, low_latency=ctx.low_latency)
-        self._ctx = ctx
+        self.ctx = ctx
         self._process = psutil.Process()
 
         os_signal.handle_os_signals(self.exit_gracefully)
 
     def go(self):
-        kfio.checkin(self._ctx, self._io_device)
+        kfio.checkin(self.ctx, self.io_device)
         pyyjj.apprentice.go(self)
         # kfio.checkout(self._ctx, self.logger, self._io_device)
 
     def exit_gracefully(self, signum, frame):
         self.stop()
         if signum == signal.SIGTERM:
-            self.logger.info('%s terminated', self._ctx.name)
+            self.logger.info('%s terminated', self.ctx.name)
 
 
 class EventHandler(pyyjj.event_handler):

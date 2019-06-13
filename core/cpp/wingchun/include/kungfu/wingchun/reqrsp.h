@@ -12,13 +12,14 @@ namespace kungfu
     struct LoginRequest
     {
         std::string sender;
-        std::string recipient;
+        std::string source;
+        std::string name;
     };
 
     struct SubscribeRequest
     {
         std::string sender;
-        std::string recipient;
+        std::string source;
         bool is_level2;
         std::vector<journal::Instrument> instruments;
     };

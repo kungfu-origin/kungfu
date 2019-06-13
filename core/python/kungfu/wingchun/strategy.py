@@ -31,11 +31,12 @@ class Strategy(pywingchun.Strategy):
         self._init = getattr(impl, 'init', lambda ctx: None)
 
     def register_nanotime_callback(self, nano, callback):
-        self._register_nanotime_callback(int(nano), partial(callback, self))
+        pywingchun.Strategy.register_nanotime_callback(self, int(nano), partial(callback, self))
 
     def pre_run(self):
         self._init(self)
         self._pre_run(self)
+        self.log.info('strategy ready to run')
 
     def pre_quit(self):
         self._pre_quit(self)

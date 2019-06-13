@@ -13,7 +13,10 @@ namespace kungfu
     void NNPublisher::publish(kungfu::MsgType msg_type, nlohmann::json &data) const
     {
         nlohmann::json j;
+        j["gen_time"] = yijinjing::time::now_in_nano();
+        j["trigger_time"] = yijinjing::time::now_in_nano();
         j["msg_type"] = int(msg_type);
+        j["source"] = 0;
         j["data"] = data;
         event_source_->get_socket_publish()->send_json(j);
         SPDLOG_TRACE("nn published {}", j.dump());

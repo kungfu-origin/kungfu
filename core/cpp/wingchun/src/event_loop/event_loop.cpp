@@ -241,7 +241,7 @@ namespace kungfu
                 if (login_callback_)
                 {
                     LoginRequest req = event->data<nlohmann::json>();
-                    login_callback_(req.recipient, req.sender);
+                    login_callback_(req.source, req.name, req.sender);
                 }
                 break;
             }
@@ -250,7 +250,7 @@ namespace kungfu
                 if (sub_callback_)
                 {
                     SubscribeRequest req = event->data<nlohmann::json>();
-                    sub_callback_(req.recipient, req.instruments, req.is_level2);
+                    sub_callback_(req.source, req.instruments, req.is_level2);
                 }
                 break;
             }

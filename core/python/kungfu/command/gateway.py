@@ -2,11 +2,11 @@ import click
 from kungfu.command import kfc
 from kungfu.practice.apprentice import Apprentice, EventHandler
 from kungfu.data.sqlite import get_task_config
-from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, EXTENSION_REGISTRY_LOG
+from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
 
 
-def run_extension(ctx, registry, extension_type):
-    if registry.has_extension(ctx.name):
+def run_extension(ctx, registry):
+    if registry.has_extension(ctx.source):
         config = get_task_config(ctx.name)
         config_str = {}
         config_int = {}
@@ -20,27 +20,34 @@ def run_extension(ctx, registry, extension_type):
                 config_double[pname] = config[pname]
             else:
                 ctx.logger.error('unknown config %s, %s', type(config[pname]), config[pname])
-        if not 'client_id' in config_int:
+        if 'client_id' not in config_int:
             config_int['client_id'] = 1
         config_str['save_file_path'] = '{}/runtime'.format(ctx.home)
-        gateway = registry.get_extension(ctx.name)(config_str, config_int, config_double)
+        gateway = registry.get_extension(ctx.source)(config_str, config_int, config_double)
         handler = EventHandler(ctx, gateway)
         apprentice = Apprentice(ctx)
         apprentice.add_event_handler(handler)
         apprentice.go()
     else:
-        ctx.logger.error('Unrecognized %s arg %s', extension_type, ctx.name)
+        ctx.logger.error('Unrecognized %s arg %s', registry.ext_type.lower(), ctx.name)
 
 
 @kfc.command()
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_MD.names()), help='data source')
+@click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
 @click.pass_context
-def md(ctx, source):
-    ctx.name = 'md_' + source
-    run_extension(ctx.parent, EXTENSION_REGISTRY_MD, source, 'md')
+def md(ctx, source, low_latency):
+    ctx.parent.name = 'md_' + source
+    ctx.parent.source = source
+    ctx.parent.low_latency = low_latency
+    run_extension(ctx.parent, EXTENSION_REGISTRY_MD)
+
 
 @kfc.command()
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_TD.names()), help='destination to send order')
+@click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
 @click.pass_context
-def td(ctx, source):
-    run_extension(ctx.parent, EXTENSION_REGISTRY_TD, source, 'td')
+def td(ctx, source, low_latency):
+    ctx.parent.source = source
+    ctx.parent.low_latency = low_latency
+    run_extension(ctx.parent, EXTENSION_REGISTRY_TD)
