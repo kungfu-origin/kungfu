@@ -1,15 +1,13 @@
-from kungfu.command import command, arg
+import click
+from kungfu.command import kfc
 from kungfu.practice.master import Master
-from kungfu.practice.apprentice import Apprentice
 
 
-@command(help='kungfu master', enable_daemonize=True)
-def master(args, logger):
-    server = Master(args, logger)
+@kfc.command()
+@click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
+@click.pass_context
+def master(ctx, low_latency):
+    ctx.parent.low_latency = low_latency
+    server = Master(ctx.parent)
     server.go()
 
-
-@command(help='kungfu apprentice test', enable_daemonize=True)
-def app(args, logger):
-    apprentice = Apprentice(args, logger)
-    apprentice.go()

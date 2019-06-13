@@ -3,37 +3,37 @@ import psutil
 import json
 
 
-def checkin(args, logger, io_device):
+def checkin(ctx, io_device):
     pid = psutil.Process().pid
     request = {
         "request": "checkin",
-        "name": args.name,
+        "name": ctx.name,
         "pid": pid
     }
     request_str = json.dumps(request)
-    logger.info('checking int: %s', request_str)
+    ctx.logger.info('checking int: %s', request_str)
     response_str = io_device._service.request(request_str)
     response = json.loads(response_str)
     if 'success' not in response or not response['success']:
-        logger.critical('Unable to checkin with master')
+        ctx.logger.critical('Unable to checkin with master')
         sys.exit(-1)
     else:
-        logger.info('%s checked in with master', args.name)
+        ctx.logger.info('%s checked in with master', ctx.name)
 
 
-def checkout(args, logger, io_device):
+def checkout(ctx, io_device):
     request = {
         "request": "checkout",
-        "name": args.name,
+        "name": ctx.name,
         "pid": psutil.Process().pid
     }
     request_str = json.dumps(request)
-    logger.info('checking out: %s', request_str)
+    ctx.logger.info('checking out: %s', request_str)
     response_str = io_device._service.request(request_str)
     response = json.loads(response_str)
     if 'success' not in response or not response['success']:
-        logger.critical('Unable to checkout with master')
+        ctx.logger.critical('Unable to checkout with master')
         sys.exit(-1)
     else:
-        logger.info('%s checked out with master', args.name)
+        ctx.logger.info('%s checked out with master', ctx.name)
 

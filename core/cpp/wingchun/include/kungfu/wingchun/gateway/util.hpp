@@ -96,7 +96,6 @@ namespace kungfu
         inline void subscribe(kungfu::yijinjing::io_device_client_ptr io_device, const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
         {
             std::string gateway = fmt::format(MD_GATEWAY_NAME_FORMAT, source);
-            std::string url = GATEWAY_REP_URL(gateway);
 
             SubscribeRequest request = {};
             request.sender = sender;

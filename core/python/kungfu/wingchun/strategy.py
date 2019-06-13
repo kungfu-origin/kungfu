@@ -7,11 +7,9 @@ import kungfu.yijinjing.time as kft
 
 
 class Strategy(pywingchun.Strategy):
-    def __init__(self, logger, name, path):
-        logger.info('strategy __init__ begin')
-        pywingchun.Strategy.__init__(self, name)
-        logger.info('strategy __init__ done')
-        self.log = logger
+    def __init__(self, ctx, path):
+        pywingchun.Strategy.__init__(self, ctx.name)
+        self.log = ctx.logger
         self.strftime = kft.strftime
         self.strptime = kft.strptime
         # context.is_subscribed = self._util.is_subscribed

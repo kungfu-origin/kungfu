@@ -1,14 +1,17 @@
 import os, shutil
 import extensions
-import kungfu.command.extension as kfext
+import click
+from kungfu.command.extension import extension as kfext
 
-@kfext.arg("-n", "--name", dest="name", required=True, help="KungFu extension name")
+
 @kfext.command(help='uninstall extension')
-def uninstall(args, logger):
-    install_path = os.path.join(extensions.extension_path, args.name)
+@click.option("-n", "--name", required=True, help="KungFu extension name")
+@click.pass_context
+def uninstall(ctx, name):
+    install_path = os.path.join(extensions.extension_path, name)
     if os.path.exists(install_path):
         shutil.rmtree(install_path)
-        logger.info('Uninstalled extension %s', args.name)
-        print('Uninstalled extension', args.name)
+        ctx.parent.logger.info('Uninstalled extension %s', name)
+        click.echo('Uninstalled extension', name)
     else:
-        print('Extension', args.name, 'not found')
+        click.echo('Extension', name, 'not found')

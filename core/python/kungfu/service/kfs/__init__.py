@@ -14,7 +14,7 @@ def on(request_path):
 
 def handle(request_path, *args, **kwargs):
     if request_path not in HANDLERS:
-        args[0]._logger.error("invalid request path %s", request_path)
+        args[0].logger.error("invalid request path %s", request_path)
     return HANDLERS[request_path](*args, **kwargs)
 
 def task(func):

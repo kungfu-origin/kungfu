@@ -2,9 +2,10 @@ import os
 import glob
 import re
 import pandas as pd
-import kungfu.yijinjing.time as kft
-import kungfu.command.journal as kfj
 import pyyjj
+import click
+from kungfu.command.journal import journal as kfj
+import kungfu.yijinjing.time as kft
 from datetime import datetime, timedelta
 from tabulate import tabulate
 import click
@@ -42,35 +43,35 @@ CATEGORIES = {
 }
 
 
-@kfj.arg('-p', '--pager', dest='pager', action='store_true', help='show in a pager')
-@kfj.arg('-f', '--format', dest='format', default='simple', choices=['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile'], help='output format')
-@kfj.arg('-a', '--ascending', dest='ascending', action='store_true', help='sorted as ascending')
-@kfj.arg('-s', '--sortby', dest='sortby', type=str, default='begin_time',
-         choices=['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name', 'frame_count'],
-         help='sorting method')
-@kfj.arg('-n', '--name', dest='name', type=str, default='*', help='name')
-@kfj.arg('-g', '--group', dest='group', type=str, default='*', help='group')
-@kfj.arg('-c', '--category', dest='category', type=str, default='*', choices=CATEGORIES.keys(), help='category')
-@kfj.arg('-m', '--mode', dest='mode', type=str, default='*', choices=MODES.keys(), help='mode')
 @kfj.command(help='list sessions, use * as wildcard')
-def sessions(args, logger):
+@click.option('-m', '--mode', default='*', type=click.Choice(MODES.keys()), help='mode')
+@click.option('-c', '--category', default='*', type=click.Choice(CATEGORIES.keys()), help='category')
+@click.option('-g', '--group', type=str, default='*', help='group')
+@click.option('-n', '--name', type=str, default='*', help='name')
+@click.option('-s', '--sortby', default='begin_time',
+         type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name', 'frame_count']),
+         help='sorting method')
+@click.option('-a', '--ascending', is_flag=True, help='sorted as ascending')
+@click.option('-f', '--format', default='simple', type=click.Choice(['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile']), help='output format')
+@click.option('-p', '--pager', is_flag=True, help='show in a pager')
+@click.pass_context
+def sessions(ctx, mode, category, group, name, sortby, ascending, format, pager):
 
-    all_sessions = find_sessions(args, logger).sort_values(by=args.sortby, ascending=args.ascending)
+    all_sessions = find_sessions(ctx, mode, category, group, name).sort_values(by=sortby, ascending=ascending)
     all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
     all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
     all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - DURATION_TZ_ADJUST, DURATION_FORMAT))
 
-    table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=args.format)
-    if args.pager:
+    table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=format)
+    if pager:
         click.echo_via_pager(table)
     else:
         print(table)
 
 
-def find_sessions(args, logger):
-    pyyjj.setup_log(kfj.LOG_NAME)
+def find_sessions(ctx, mode, category, group, name):
     kf_home = os.environ['KF_HOME']
-    search_path = os.path.join(kf_home, 'journal', args.mode, args.category, args.group, 'yjj.' + args.name + '.*.journal')
+    search_path = os.path.join(kf_home, 'journal', mode, category, group, 'yjj.' + name + '.*.journal')
 
     io_device = pyyjj.create_io_device()
 
@@ -88,7 +89,7 @@ def find_sessions(args, logger):
             category = match.group(3)
             group = match.group(4)
             name = match.group(5)
-            logger.debug('subscribe to %s %s %s %s', MODES[mode], CATEGORIES[category], group, name)
+            ctx.parent.parent.logger.debug('subscribe to %s %s %s %s', MODES[mode], CATEGORIES[category], group, name)
             reader = io_device.open_reader(MODES[mode], CATEGORIES[category], group, name)
             find_sessions_from_reader(sessions_df, reader, mode, category, group, name)
         else:

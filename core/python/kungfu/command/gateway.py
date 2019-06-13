@@ -1,11 +1,13 @@
+import click
+from kungfu.command import kfc
 from kungfu.practice.apprentice import Apprentice, EventHandler
 from kungfu.data.sqlite import get_task_config
-from kungfu.command import command, arg
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, EXTENSION_REGISTRY_LOG
 
-def run_extension(registry, args, logger, extension_name, extension_type):
-    if registry.has_extension(extension_name):
-        config = get_task_config(args.name)
+
+def run_extension(ctx, registry, extension_type):
+    if registry.has_extension(ctx.name):
+        config = get_task_config(ctx.name)
         config_str = {}
         config_int = {}
         config_double = {}
@@ -17,25 +19,28 @@ def run_extension(registry, args, logger, extension_name, extension_type):
             elif type(config[pname]) == float:
                 config_double[pname] = config[pname]
             else:
-                logger.error('unknown config %s, %s', type(config[pname]), config[pname])
+                ctx.logger.error('unknown config %s, %s', type(config[pname]), config[pname])
         if not 'client_id' in config_int:
             config_int['client_id'] = 1
-        config_str['save_file_path'] = '{}/runtime'.format(args.home)
-        gateway = registry.get_extension(extension_name)(config_str, config_int, config_double)
-        handler = EventHandler(args, logger, gateway)
-        apprentice = Apprentice(args, logger)
+        config_str['save_file_path'] = '{}/runtime'.format(ctx.home)
+        gateway = registry.get_extension(ctx.name)(config_str, config_int, config_double)
+        handler = EventHandler(ctx, gateway)
+        apprentice = Apprentice(ctx)
         apprentice.add_event_handler(handler)
         apprentice.go()
     else:
-        logger.error('Unrecognized %s arg %s', extension_type, extension_name)
+        ctx.logger.error('Unrecognized %s arg %s', extension_type, ctx.name)
 
-@arg('-s', '--source', dest='source', type=str, required=True, choices=EXTENSION_REGISTRY_MD.names(), help='data source')
-@command(help='market data gateway')
-def md(args, logger):
-    args.name = 'md_' + args.source
-    run_extension(EXTENSION_REGISTRY_MD, args, logger, args.source, 'md')
 
-@arg('-d', '--dest', dest='dest', type=str, required=True, choices=EXTENSION_REGISTRY_TD.names(), help='destination to send order')
-@command(help='trade gateway')
-def td(args, logger):
-    run_extension(EXTENSION_REGISTRY_TD, args, logger, args.dest, 'td')
+@kfc.command()
+@click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_MD.names()), help='data source')
+@click.pass_context
+def md(ctx, source):
+    ctx.name = 'md_' + source
+    run_extension(ctx.parent, EXTENSION_REGISTRY_MD, source, 'md')
+
+@kfc.command()
+@click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_TD.names()), help='destination to send order')
+@click.pass_context
+def td(ctx, source):
+    run_extension(ctx.parent, EXTENSION_REGISTRY_TD, source, 'td')

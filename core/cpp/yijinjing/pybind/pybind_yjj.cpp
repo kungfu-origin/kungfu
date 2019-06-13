@@ -224,9 +224,9 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<page_service>(m, "page_service")
             .def(py::init<io_device_ptr>())
-            .def_property_readonly("_io_device", &page_service::get_io_device)
-            .def_property_readonly("_memory_msg_file", &page_service::get_memory_msg_file)
-            .def_property_readonly("_memory_msg_file_size", &page_service::get_memory_msg_file_size)
+            .def_property_readonly("io_device", &page_service::get_io_device)
+            .def_property_readonly("memory_msg_file", &page_service::get_memory_msg_file)
+            .def_property_readonly("memory_msg_file_size", &page_service::get_memory_msg_file_size)
             .def("process_memory_message", &page_service::process_memory_message)
             .def("get_mm_block", &page_service::get_mm_block)
             .def("release_mm_block", &page_service::release_mm_block);
@@ -254,8 +254,9 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("create_io_device", &io_device::create_io_device, py::arg("low_latency")=false);
 
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
-            .def_property_readonly("_service", &io_device_client::get_service)
-            .def_property_readonly("_publisher", &io_device_client::get_publisher);
+            .def_property_readonly("service", &io_device_client::get_service)
+            .def_property_readonly("publisher", &io_device_client::get_publisher)
+            .def_property_readonly("observer", &io_device_client::get_observer);
 
     m.def("create_io_device_client", &io_device_client::create_io_device, py::arg("name"), py::arg("low_latency")=false);
 
@@ -268,13 +269,13 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<event_source, PyEventlet, event_source_ptr> py_event_source(m, "event_source");
     py_event_source.def("setup_output", &event_source::setup_output)
             .def("subscribe", &event_source::subscribe)
-            .def_property_readonly("_io_device", &event_source::get_io_device)
-            .def_property_readonly("_writer", &event_source::get_writer)
-            .def_property_readonly("_socket_reply", &event_source::get_socket_reply);
+            .def_property_readonly("io_device", &event_source::get_io_device)
+            .def_property_readonly("writer", &event_source::get_writer)
+            .def_property_readonly("socket_reply", &event_source::get_socket_reply);
 
     py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice", py_event_source)
             .def(py::init<std::string, bool>(), py::arg("name"), py::arg("low_latency") = false)
-            .def_property_readonly("_io_device", &apprentice::get_io_device)
+            .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("add_event_handler", &apprentice::add_event_handler)
             .def("go", &apprentice::go)
             .def("stop", &apprentice::stop);

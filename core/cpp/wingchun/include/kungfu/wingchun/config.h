@@ -48,18 +48,6 @@ namespace kungfu
 #define GATEWAY_PUB_URL(name) fmt::format(GATEWAY_PUB_URL_FORMAT, get_base_dir(), name)
 #define GATEWAY_REP_URL(name) fmt::format(GATEWAY_REP_URL_FORMAT, get_base_dir(), name)
 
-// journal related configuration
-#define STRATEGY_JOURNAL_FOLDER_FORMAT "{}/journal/strategy/"
-#define MD_JOURNAL_FOLDER_FORMAT "{}/journal/md/{}"
-#define TD_JOURNAL_FOLDER_FORMAT "{}/journal/td/{}/{}"
-
-#define MD_JOURNAL_NAME(source_id) MD_GATEWAY_NAME(source_id)
-#define TD_JOURNAL_NAME(source_id, account_id) TD_GATEWAY_NAME(source_id, account_id)
-
-#define STRATEGY_JOURNAL_FOLDER fmt::format(STRATEGY_JOURNAL_FOLDER_FORMAT, get_base_dir())
-#define MD_JOURNAL_FOLDER(source) fmt::format(MD_JOURNAL_FOLDER_FORMAT, get_base_dir(), source)
-#define TD_JOURNAL_FOLDER(source, account_id) fmt::format(TD_JOURNAL_FOLDER_FORMAT, get_base_dir(), source, account_id)
-
 // commission configuration
 #define COMMISSION_DEFAULT_DB_FILE fmt::format("{}/global/commission.db", get_base_dir())
 #define COMMISSION_DB_FILE_FORMAT "{}/accounts/{}/commission.db"
