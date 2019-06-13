@@ -222,7 +222,7 @@ class MonitorDashboard extends Dashboard {
             .then(res => {
                 t._diffOnlineProcess(res, t.globalData.processStatus);
                 t.globalData.processStatus = Object.freeze(res);
-                monitorDashboard.refresh();
+                t.refresh();
                 return res;
             })
             .catch(err => console.error(err))
@@ -350,7 +350,10 @@ class MonitorDashboard extends Dashboard {
     }
 }
 
-const monitorDashboard = new MonitorDashboard()
-monitorDashboard.init();
-monitorDashboard.render();
-monitorDashboard.getData();
+export default () => {
+    const monitorDashboard = new MonitorDashboard()
+    monitorDashboard.init();
+    monitorDashboard.render();
+    monitorDashboard.getData();
+}
+

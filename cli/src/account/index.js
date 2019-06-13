@@ -308,15 +308,17 @@ class AccountDashboard extends Dashboard {
 	
 
 
-const accountDashboard = new AccountDashboard();
-accountDashboard.init();
-accountDashboard.render();
-accountDashboard.getData()
-accountDashboard.refresh();
-accountDashboard.getProcessStatus();
-setInterval(() => {
+export default () => {
+	const accountDashboard = new AccountDashboard();
+	accountDashboard.init();
+	accountDashboard.render();
+	accountDashboard.getData()
 	accountDashboard.refresh();
-}, 1000)
+	accountDashboard.getProcessStatus();
+	setInterval(() => {
+		accountDashboard.refresh();
+	}, 1000)	
+}
 
 
 

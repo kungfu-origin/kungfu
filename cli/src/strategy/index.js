@@ -289,18 +289,19 @@ class StrategyDashboard extends Dashboard {
 	}
 }
 	
-
-
-const strategyDashboard = new StrategyDashboard();
-strategyDashboard.init();
-strategyDashboard.bindEvent();
-strategyDashboard.render();
-strategyDashboard.getData().then(() => strategyDashboard.getLogs())
-strategyDashboard.refresh();
-strategyDashboard.getProcessStatus();   
-setInterval(() => {
+export default () => {
+	const strategyDashboard = new StrategyDashboard();
+	strategyDashboard.init();
+	strategyDashboard.bindEvent();
+	strategyDashboard.render();
+	strategyDashboard.getData().then(() => strategyDashboard.getLogs())
 	strategyDashboard.refresh();
-}, 1000)
+	strategyDashboard.getProcessStatus();   
+	setInterval(() => {
+		strategyDashboard.refresh();
+	}, 1000)	
+}
+
 
 
 

@@ -5,12 +5,14 @@ process.env.BABEL_ENV = 'main'
 const path = require('path')
 const webpack = require('webpack')
 const fs = require('fs');
-const packageJSON = require('../package.json');
+const OptimizeJsPlugin = require("optimize-js-plugin");
+const { dependencies } = require('../package.json');
+
 
 const nodeModules = {};
-fs.readdirSync('../node_modules')
+Object.keys(dependencies || {})
   .filter(function(x) {
-    return ['.bin'].indexOf(x) === -1;
+    return ['.bin'].indexOf(x) === -1 
   })
   .forEach(function(mod) {
     nodeModules[mod] = 'commonjs ' + mod;
@@ -18,9 +20,7 @@ fs.readdirSync('../node_modules')
 
 let cliConfig = {
   entry: {
-    account: path.join(__dirname, '../src/account/index.js'),
-    monitor: path.join(__dirname, '../src/monitor/index.js'),
-    strategy: path.join(__dirname, '../src/strategy/index.js')
+    index: path.join(__dirname, '../src/index.js'),
   },
   externals: {
     ...nodeModules,
@@ -57,13 +57,14 @@ let cliConfig = {
       '__gConfig': path.join(__dirname, '../../app/src/config')
     },
     extensions: ['.js', '.json', '.node']
-  }
+  },
+  target: 'node'
 }
 
 cliConfig.plugins.push(
   new webpack.DefinePlugin({
-    'process.env.APP_TYPE': '"cli"',
-    '_version_': packageJSON.version
+    'process.platform': `"${process.platform}"`,
+    'process.env.APP_TYPE': '"cli"'
   })
 )
 
@@ -85,6 +86,9 @@ if (process.env.NODE_ENV === 'production') {
   cliConfig.plugins.push(
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
+    }),
+    new OptimizeJsPlugin({
+      sourceMap: false
     })
   )
 }

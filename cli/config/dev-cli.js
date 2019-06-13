@@ -36,7 +36,7 @@ function logStats (proc, data) {
 
 function startCli () {
   return new Promise((resolve, reject) => {
-    cliConfig.entry.account = [].concat(cliConfig.entry.account)
+    // cliConfig.entry.index = [].concat(cliConfig.entry.index)
 
     const compiler = webpack(cliConfig)
     hotMiddleware = webpackHotMiddleware(compiler, { 
