@@ -155,6 +155,7 @@ export const startProcess = async (options, no_ext) => {
             "KF_HOME": dealSpaceInPath(BASE_DIR),
         }
     };
+
     if(no_ext) {
         options['env']['KF_NO_EXT'] = 'on';
     }
@@ -183,8 +184,8 @@ export const startMaster = async(force) => {
     const processName = 'master'
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
-    if(!force && master.length) throw new Error('master正在运行！')
-    
+    const masterStatus = master.filter(m => m.pm2_env.status === 'online')
+    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
     return KillKfc().finally(() => startProcess({
         "name": processName,
         "args": "master",

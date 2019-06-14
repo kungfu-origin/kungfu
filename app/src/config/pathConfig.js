@@ -59,7 +59,7 @@ export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 
 //kungfu-engine
 export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
-? process.env.APP_TYPE === 'cli' ? path.join(__dirname) : process.resourcesPath
+? process.env.APP_TYPE === 'cli' ? path.join('.') : process.resourcesPath
 : path.join(__dirname, '..', '..', '..', 'core', 'build')
 
 //gateway
