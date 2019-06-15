@@ -13,8 +13,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef YIJINJING_FRAME_HPP
-#define YIJINJING_FRAME_HPP
+#ifndef KUNGFU_YIJINJING_FRAME_H
+#define KUNGFU_YIJINJING_FRAME_H
 
 #include <kungfu/yijinjing/journal/common.h>
 
@@ -150,4 +150,4 @@ namespace kungfu
     }
 }
 
-#endif //YIJINJING_FRAME_HPP
+#endif //KUNGFU_YIJINJING_FRAME_H

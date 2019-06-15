@@ -35,12 +35,12 @@ namespace kungfu
             }
 
             void
-            reader::subscribe(const data::location &location, const int64_t from_time)
+            reader::subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
             {
-                auto key = location.keyname();
+                auto key = location->keyname();
                 if (journals_.find(key) == journals_.end())
                 {
-                    current_ = std::make_shared<journal>(location, false, lazy_);
+                    current_ = std::make_shared<journal>(location, dest_id, false, lazy_);
                     current_->seek_to_time(from_time);
                     journals_[key] = current_;
                     seek_current_journal();

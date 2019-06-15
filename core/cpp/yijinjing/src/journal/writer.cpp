@@ -28,10 +28,10 @@ namespace kungfu
 
         namespace journal
         {
-            writer::writer(const data::location &location, bool lazy, publisher_ptr publisher) :
+            writer::writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr publisher) :
                     publisher_(publisher)
             {
-                journal_ = std::make_shared<journal>(location, true, lazy);
+                journal_ = std::make_shared<journal>(location, dest_id, true, lazy);
                 journal_->seek_to_time(time::now_in_nano());
             }
 

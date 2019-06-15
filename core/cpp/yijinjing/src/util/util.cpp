@@ -12,6 +12,7 @@
 
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/util/os.h>
+#include <sstream>
 
 using namespace kungfu::yijinjing::journal;
 
@@ -36,10 +37,11 @@ namespace kungfu {
                 return target_path.string();
             }
 
-            std::vector<int> list_journal_page_id(const std::string &path, const std::string &name)
+            std::vector<int> list_journal_page_id(const std::string &path, const uint32_t dest_id)
             {
-                std::string page_filename_regex = JOURNAL_PREFIX + "\\." + name + "\\.[0-9]+\\." + JOURNAL_SUFFIX;
-                std::regex pattern(page_filename_regex);
+                std::ostringstream page_filename_regex;
+                page_filename_regex << std::hex << dest_id << "\\.[0-9]+\\." << JOURNAL_SUFFIX;
+                std::regex pattern(page_filename_regex.str());
                 boost::filesystem::path journal_folder_path(path);
                 std::vector<int> res;
                 for (auto &file : boost::filesystem::directory_iterator(journal_folder_path))
@@ -47,7 +49,7 @@ namespace kungfu {
                     std::string filename = file.path().filename().string();
                     if (std::regex_match(filename.begin(), filename.end(), pattern))
                     {
-                        int begin = JOURNAL_PREFIX.length() + name.length() + 2;
+                        int begin = 9;
                         int end = filename.length() - JOURNAL_SUFFIX.length();
                         std::string page_id_str = filename.substr(begin, end);
                         res.push_back(atoi(page_id_str.c_str()));

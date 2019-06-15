@@ -13,18 +13,19 @@ GB = 2 ** 30
 
 # mode/category/group/id/*.page
 
-# live/system/master/ctrl/in.1.page
+# live/system/master/publish/[live/strategy/hft/test].1.page
 # live/system/master/ctrl/out.1.page
 
-# live/md/xtp/level1/in.1.page
-# live/md/xtp/level2/in.1.page
+# live/md/xtp/level1/[0].1.page
 # live/md/xtp/level2/out.2.page
-# live/md/xtp/level2/out.3.page
 
-# live/td/xtp/15040900.1.journal
-# live/td/xtp/15011218.1.journal
+# live/td/xtp/15040900/.1.journal
+# live/td/xtp/15011218/.1.journal
 
-# live/strategy/hft/test.1.journal
+# live/strategy/hft/test/[live/md/xtp/level1].1.journal
+# live/strategy/hft/test/[live/md/xtp/level2].1.journal
+# live/strategy/hft/test/[live/td/xtp/15011218].1.journal
+# live/strategy/hft/test/[live/td/xtp/15040900].1.journal
 # live/strategy/alpha/test.1.journal
 
 
@@ -34,7 +35,11 @@ def test(ctx):
     click.echo(2 ** 16)
     click.echo(2 ** 32)
     click.echo(hex(pyyjj.hash_str_32('helloworld'))[2:])
-    click.echo(hex(pyyjj.hash_str_16_low('helloworld'))[2:])
-    click.echo(hex(pyyjj.hash_str_16_high('helloworld'))[2:])
     click.echo(hex(pyyjj.hash_str_32('test'))[2:])
     click.echo(kft.strftime(pyyjj.now_in_nano()))
+    loc = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, "xtp", "15040900")
+    click.echo(loc.keyname)
+    click.echo(hex(loc.hash))
+    click.echo(hex(pyyjj.hash_str_32(loc.keyname)))
+    click.echo(pyyjj.get_page_path(loc, 0, 1))
+    click.echo(pyyjj.get_page_path(loc, loc.hash, 1))

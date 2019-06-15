@@ -2,10 +2,10 @@
 // Created by Keren Dong on 2019-06-10.
 //
 
+#include <string>
+
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/util/MurmurHash3.h>
-
-using namespace kungfu::yijinjing::journal;
 
 namespace kungfu
 {

@@ -43,7 +43,8 @@ namespace kungfu
             class journal
             {
             public:
-                journal(const data::location &location, bool is_writing, bool lazy) : location_(location), is_writing_(is_writing), lazy_(lazy)
+                journal(const data::location_ptr location, uint32_t dest_id, bool is_writing, bool lazy) :
+                    location_(location), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy)
                 {}
 
                 ~journal();
@@ -64,7 +65,8 @@ namespace kungfu
                 void seek_to_time(int64_t nanotime);
 
             private:
-                const data::location &location_;
+                const data::location_ptr location_;
+                const uint32_t dest_id_;
                 const bool is_writing_;
                 const bool lazy_;
                 page_ptr current_page_;
@@ -94,7 +96,7 @@ namespace kungfu
                  * @param name name
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                void subscribe(const data::location &location, const int64_t from_time);
+                void subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time);
 
                 inline frame &current_frame()
                 { return current_->current_frame(); }
@@ -119,7 +121,7 @@ namespace kungfu
             class writer
             {
             public:
-                explicit writer(const data::location &location, bool lazy, publisher_ptr messenger);
+                explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
 
                 frame &open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
 

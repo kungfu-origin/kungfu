@@ -17,6 +17,7 @@
 #define KUNGFU_YIJINJING_COMMON_H
 
 #include <kungfu/common.h>
+#include <kungfu/yijinjing/util/util.h>
 
 #define KF_DIR_SOCKET "socket"
 #define KF_DIR_JOURNAL "journal"
@@ -42,7 +43,9 @@ namespace kungfu
         enum MsgType
         {
             SessionStart = 10001,
-            SessionEnd = 10002
+            SessionEnd = 10002,
+            Subscribe = 10003,
+            Unsubscribe = 10004
         };
 
         class event
@@ -149,7 +152,8 @@ namespace kungfu
             public:
                 location(data::mode m, data::category c, const std::string &group, const std::string &name) :
                         mode(m), category(c), group(group), name(name),
-                        keyname_(get_mode_name(mode) + get_category_name(category) + group + name)
+                        keyname_(get_mode_name(mode) + get_category_name(category) + group + name),
+                        hash_(util::hash_str_32(keyname_))
                 {};
 
                 location(const location& copy) : location(copy.mode, copy.category, copy.group, copy.name)
@@ -165,8 +169,24 @@ namespace kungfu
                     return keyname_;
                 }
 
+                inline uint32_t hash() const
+                {
+                    return hash_;
+                }
+
             private:
                 const std::string keyname_;
+                const uint32_t hash_;
+            };
+            DECLARE_PTR(location)
+        }
+
+        namespace action
+        {
+            struct Subscribe
+            {
+                uint32_t source_id;
+                int64_t from_time;
             };
         }
     }

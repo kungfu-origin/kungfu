@@ -5,8 +5,6 @@
 #ifndef KUNGFU_YIJINJING_UTIL_H
 #define KUNGFU_YIJINJING_UTIL_H
 
-#include <kungfu/yijinjing/journal/page.h>
-
 #define KUNGFU_HASH_SEED 42
 
 namespace kungfu
@@ -30,7 +28,7 @@ namespace kungfu
 
             std::string make_path(std::initializer_list<std::string> list, bool is_file=false);
 
-            std::vector<int> list_journal_page_id(const std::string &path, const std::string &name);
+            std::vector<int> list_journal_page_id(const std::string &path, uint32_t dest_id);
 
             void print_backtrace();
 

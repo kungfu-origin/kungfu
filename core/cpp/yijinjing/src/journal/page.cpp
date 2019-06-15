@@ -15,6 +15,7 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <sstream>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -30,8 +31,8 @@ namespace kungfu
         namespace journal
         {
 
-            page::page(const data::location &location, const int id, const size_t size, const bool lazy, uintptr_t address) :
-                    location_(location), id_(id), size_(size), lazy_(lazy), header_(reinterpret_cast<page_header *>(address))
+            page::page(const data::location_ptr location, uint32_t dest_id, const int id, const size_t size, const bool lazy, uintptr_t address) :
+                    location_(location), dest_id_(dest_id), page_id_(id), size_(size), lazy_(lazy), header_(reinterpret_cast<page_header *>(address))
             {
                 assert(address > 0);
             }
@@ -45,13 +46,13 @@ namespace kungfu
             {
                 if (!os::release_mmap_buffer(address(), size_, lazy_))
                 {
-                    throw journal_error("failed to release memory for page " + get_page_path(location_, id_));
+                    throw journal_error("failed to release memory for page " + get_page_path(location_, dest_id_, page_id_));
                 }
             }
 
-            page_ptr page::load(const data::location &location, int page_id, bool is_writing, bool lazy)
+            page_ptr page::load(const data::location_ptr location, uint32_t dest_id, int page_id, bool is_writing, bool lazy)
             {
-                std::string path = get_page_path(location, page_id);
+                std::string path = get_page_path(location, dest_id, page_id);
                 uintptr_t address = os::load_mmap_buffer(path, JOURNAL_PAGE_SIZE, is_writing, lazy);
                 if (address < 0)
                 {
@@ -78,19 +79,22 @@ namespace kungfu
                             path, sizeof(page_header), header->page_header_length));
                 }
 
-                return std::shared_ptr<page>(new page(location, page_id, JOURNAL_PAGE_SIZE, lazy, address));
+                return std::shared_ptr<page>(new page(location, dest_id, page_id, JOURNAL_PAGE_SIZE, lazy, address));
             }
 
-            std::string page::get_page_path(const data::location &location, int id)
+            std::string page::get_page_path(const data::location_ptr location, uint32_t dest_id, int id)
             {
-                std::string page_filename = JOURNAL_PREFIX + "." + location.name + "." + std::to_string(id) + "." + JOURNAL_SUFFIX;
-                return util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group, page_filename}, true);
+                std::string page_file_name = fmt::format("{:08x}.{}.{}", dest_id, id, JOURNAL_SUFFIX);
+                return util::make_path({
+                    KF_DIR_JOURNAL, data::get_mode_name(location->mode), data::get_category_name(location->category), location->group, location->name,
+                    page_file_name
+                    }, true);
             }
 
-            int page::find_page_id(const data::location &location, int64_t time)
+            int page::find_page_id(const data::location_ptr location, uint32_t dest_id, int64_t time)
             {
-                std::string path = util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location.mode), data::get_category_name(location.category), location.group}, false);
-                std::vector<int> page_ids = util::list_journal_page_id(path, location.name);
+                std::string path = util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location->mode), data::get_category_name(location->category), location->group, location->name}, false);
+                std::vector<int> page_ids = util::list_journal_page_id(path, dest_id);
                 if (page_ids.empty())
                 {
                     return 1;

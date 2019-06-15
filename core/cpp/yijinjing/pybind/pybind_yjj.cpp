@@ -40,19 +40,22 @@ class PyEvent : public event
 public:
     int64_t gen_time() const override
     {
-        PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time, )
+        PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time,)
     }
+
     int64_t trigger_time() const override
     {
-        PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time, )
+        PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time,)
     }
+
     int16_t msg_type() const override
     {
-        PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type, )
+        PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type,)
     }
+
     int16_t source() const override
     {
-        PYBIND11_OVERLOAD_PURE(int64_t, event, source, )
+        PYBIND11_OVERLOAD_PURE(int64_t, event, source,)
     }
 };
 
@@ -74,22 +77,18 @@ public:
     {PYBIND11_OVERLOAD(void, event_handler, finish,); }
 };
 
-class PyEventlet : public event_source
+class PyEventSource : public event_source
 {
 public:
-    void setup_output(const data::location &location) override
-    {
-        PYBIND11_OVERLOAD_PURE(void, event_source, setup_output, location)
-    }
 
-    void subscribe(const data::location &location) override
+    void subscribe(const data::location_ptr location) override
     {
         PYBIND11_OVERLOAD_PURE(void, event_source, subscribe, location)
     }
 
-    writer_ptr get_writer() override
+    writer_ptr get_writer(uint32_t dest_id) override
     {
-        PYBIND11_OVERLOAD_PURE(writer_ptr, event_source, get_writer,)
+        PYBIND11_OVERLOAD_PURE(writer_ptr, event_source, get_writer, dest_id)
     }
 
     socket_ptr get_socket_reply() override
@@ -112,8 +111,9 @@ class PyPublisher : public publisher
 public:
     int notify() override
     {
-        PYBIND11_OVERLOAD_PURE(int, publisher, notify, )
+        PYBIND11_OVERLOAD_PURE(int, publisher, notify,)
     }
+
     int publish(const std::string &json_message) override
     {
         PYBIND11_OVERLOAD_PURE(int, publisher, publish, json_message)
@@ -125,11 +125,12 @@ class PyObserver : public observer
 public:
     bool wait() override
     {
-        PYBIND11_OVERLOAD_PURE(bool, observer, wait, )
+        PYBIND11_OVERLOAD_PURE(bool, observer, wait,)
     }
+
     const std::string &get_notice() override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string &, observer, get_notice, )
+        PYBIND11_OVERLOAD_PURE(const std::string &, observer, get_notice,)
     }
 };
 
@@ -149,10 +150,9 @@ PYBIND11_MODULE(pyyjj, m)
 
     m.def("setup_log", &kungfu::yijinjing::log::setup_log);
 
-    m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed")=KUNGFU_HASH_SEED);
-    m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
-    m.def("hash_str_16_low", &hash_str_16_low, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
-    m.def("hash_str_16_high", &hash_str_16_high, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
+    m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
+    m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
+    m.def("get_page_path", &page::get_page_path);
 
     py::enum_<data::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
             .value("LIVE", data::mode::LIVE)
@@ -187,10 +187,13 @@ PYBIND11_MODULE(pyyjj, m)
             .def("has_data", &frame::has_data);
 
     py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
+            .def(py::init<data::mode, data::category, const std::string&, const std::string&>())
             .def_readonly("mode", &data::location::mode)
             .def_readonly("category", &data::location::category)
             .def_readonly("group", &data::location::group)
-            .def_readonly("name", &data::location::name);
+            .def_readonly("name", &data::location::name)
+            .def_property_readonly("keyname", &data::location::keyname)
+            .def_property_readonly("hash", &data::location::hash);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)
@@ -243,14 +246,14 @@ PYBIND11_MODULE(pyyjj, m)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
             .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
-    m.def("create_io_device", &io_device::create_io_device, py::arg("low_latency")=false);
+    m.def("create_io_device", &io_device::create_io_device, py::arg("location"), py::arg("low_latency") = false);
 
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
             .def_property_readonly("service", &io_device_client::get_service)
             .def_property_readonly("publisher", &io_device_client::get_publisher)
             .def_property_readonly("observer", &io_device_client::get_observer);
 
-    m.def("create_io_device_client", &io_device_client::create_io_device, py::arg("name"), py::arg("low_latency")=false);
+    m.def("create_io_device_client", &io_device_client::create_io_device, py::arg("location"), py::arg("low_latency") = false);
 
     py::class_<event_handler, PyEventHandler, event_handler_ptr>(m, "event_handler")
             .def(py::init())
@@ -258,15 +261,14 @@ PYBIND11_MODULE(pyyjj, m)
             .def("configure_event_source", &event_handler::configure_event_source)
             .def("handle", &event_handler::handle);
 
-    py::class_<event_source, PyEventlet, event_source_ptr> py_event_source(m, "event_source");
-    py_event_source.def("setup_output", &event_source::setup_output)
-            .def("subscribe", &event_source::subscribe)
+    py::class_<event_source, PyEventSource, event_source_ptr> py_event_source(m, "event_source");
+    py_event_source.def("subscribe", &event_source::subscribe)
             .def_property_readonly("io_device", &event_source::get_io_device)
             .def_property_readonly("writer", &event_source::get_writer)
             .def_property_readonly("socket_reply", &event_source::get_socket_reply);
 
     py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice", py_event_source)
-            .def(py::init<std::string, bool>(), py::arg("name"), py::arg("low_latency") = false)
+            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("add_event_handler", &apprentice::add_event_handler)
             .def("go", &apprentice::go)

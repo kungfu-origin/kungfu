@@ -8,8 +8,6 @@
 
 #include <kungfu/yijinjing/util/util.h>
 
-using namespace kungfu::yijinjing::journal;
-
 namespace kungfu {
 
     namespace yijinjing {

@@ -37,38 +37,27 @@ using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::practice;
 
-apprentice::apprentice(const std::string &name, bool low_latency)
+apprentice::apprentice(yijinjing::data::location_ptr home, bool low_latency) : home_(home)
 {
-    io_device_ = io_device_client::create_io_device(log::setup_log(name), low_latency);
+    log::setup_log(home_->keyname());
+    io_device_ = io_device_client::create_io_device(home_, low_latency);
     os::handle_os_signals();
 }
 
-void apprentice::setup_output(const data::location &location)
+void apprentice::subscribe(const data::location_ptr location)
 {
-    if (writer_.get() == nullptr and socket_reply_.get() == nullptr)
-    {
-        SPDLOG_INFO("apprentice output setup to {}", location.keyname());
-        writer_ = io_device_->open_writer(location);
-        writer_->open_session();
-        socket_reply_ = io_device_->bind_socket(location, protocol::REPLY, 0);
-        socket_publish_ = io_device_->bind_socket(location, protocol::PUBLISH, 0);
-    } else
-    {
-        SPDLOG_ERROR("apprentice output has already been setup");
-    }
-}
-
-void apprentice::subscribe(const data::location &location)
-{
+    int64_t now = time::now_in_nano();
     if (reader_.get() == nullptr)
     {
-        SPDLOG_TRACE("apprentice open reader for {}", location.name);
-        reader_ = io_device_->open_reader(location);
-        reader_->seek_to_time(time::now_in_nano());
+        SPDLOG_TRACE("apprentice open reader for {}", location->name);
+        reader_ = io_device_->open_reader(location, 0);
+        reader_->subscribe(location, home_->hash(), 0);
+        reader_->seek_to_time(now);
     } else
     {
-        SPDLOG_TRACE("apprentice subscribe for {}", location.name);
-        reader_->subscribe(location, time::now_in_nano());
+        SPDLOG_TRACE("apprentice subscribe for {}", location->name);
+        reader_->subscribe(location, 0, now);
+        reader_->subscribe(location, home_->hash(), now);
     }
 
     auto url = io_device_->get_url_factory()->make_url_connect(location, protocol::SUBSCRIBE);
@@ -130,8 +119,7 @@ void apprentice::go()
     {
         handler->finish();
     }
-    writer_->close_session();
-    SPDLOG_INFO("apprentice {} finished", io_device_->get_name());
+    SPDLOG_INFO("apprentice {} finished", home_->keyname());
 }
 
 void apprentice::try_once()

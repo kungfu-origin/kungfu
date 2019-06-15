@@ -43,11 +43,14 @@ namespace kungfu
             {
             public:
 
-                inline const int get_id() const
-                { return id_; }
-
-                inline const data::location &get_location() const
+                inline const data::location_ptr get_location() const
                 { return location_; }
+
+                inline const uint32_t get_dest_id() const
+                { return dest_id_; }
+
+                inline const int get_page_id() const
+                { return page_id_; }
 
                 inline int64_t begin_time() const
                 { return reinterpret_cast<frame_header *>(first_frame_address())->gen_time; }
@@ -72,21 +75,22 @@ namespace kungfu
 
                 void release();
 
-                static page_ptr load(const data::location &location, int page_id, bool is_writing = false, bool lazy = true);
+                static page_ptr load(const data::location_ptr location, uint32_t dest_id, int page_id, bool is_writing = false, bool lazy = true);
 
-                static std::string get_page_path(const data::location &location, int id);
+                static std::string get_page_path(const data::location_ptr location, uint32_t dest_id, int id);
 
-                static int find_page_id(const data::location &location, int64_t time);
+                static int find_page_id(const data::location_ptr location, uint32_t dest_id, int64_t time);
 
             private:
 
-                const data::location &location_;
-                const int id_;
+                const data::location_ptr location_;
+                const uint32_t dest_id_;
+                const int page_id_;
                 const bool lazy_;
                 const size_t size_;
                 const page_header *header_;
 
-                page(const data::location &location, int id, size_t size, bool lazy, uintptr_t address);
+                page(const data::location_ptr location, uint32_t dest_id, int page_id, size_t size, bool lazy, uintptr_t address);
 
                 /**
                  * update page header when new frame added

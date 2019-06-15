@@ -38,11 +38,9 @@ namespace kungfu
         public:
             virtual ~event_source() = default;
 
-            virtual void setup_output(const data::location &location) = 0;
+            virtual void subscribe(const data::location_ptr location) = 0;
 
-            virtual void subscribe(const data::location &location) = 0;
-
-            virtual journal::writer_ptr get_writer() = 0;
+            virtual journal::writer_ptr get_writer(uint32_t dest_id) = 0;
 
             virtual nanomsg::socket_ptr get_socket_reply() = 0;
 
@@ -74,22 +72,22 @@ namespace kungfu
         {
         public:
 
+            data::location_ptr get_home() { return home_; }
+
             bool is_low_latency()
             { return low_latency_; }
 
             journal::reader_ptr open_reader_to_subscribe();
 
-            journal::reader_ptr open_reader(const data::location &location);
+            journal::reader_ptr open_reader(const data::location_ptr location, uint32_t dest_id);
 
-            journal::writer_ptr open_writer(const data::location &location);
-
-            nanomsg::socket_ptr
-            connect_socket(const data::location &location, const nanomsg::protocol &p,
-                           int timeout = 0);
+            journal::writer_ptr open_writer(uint32_t dest_id);
 
             nanomsg::socket_ptr
-            bind_socket(const data::location &location, const nanomsg::protocol &p,
-                        int timeout = 0);
+            connect_socket(const data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);
+
+            nanomsg::socket_ptr
+            bind_socket(const data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);
 
             nanomsg::url_factory_ptr get_url_factory()
             { return url_factory_; }
@@ -97,15 +95,16 @@ namespace kungfu
             publisher_ptr get_publisher()
             { return publisher_; }
 
-            static io_device_ptr create_io_device(bool low_latency);
+            static io_device_ptr create_io_device(data::location_ptr home, bool low_latency);
 
         protected:
+            data::location_ptr home_;
             const bool low_latency_;
             const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;
             publisher_ptr publisher_;
 
-            io_device(bool low_latency, bool lazy = false);
+            io_device(data::location_ptr home, bool low_latency, bool lazy = false);
         };
 
         class master_service
@@ -121,8 +120,6 @@ namespace kungfu
         class io_device_client : public io_device
         {
         public:
-            const std::string &get_name()
-            { return name_; };
 
             observer_ptr get_observer()
             { return observer_; }
@@ -130,14 +127,13 @@ namespace kungfu
             master_service_ptr get_service()
             { return service_; }
 
-            static io_device_client_ptr create_io_device(std::string name, bool low_latency);
+            static io_device_client_ptr create_io_device(data::location_ptr home, bool low_latency);
 
         private:
-            const std::string name_;
             observer_ptr observer_;
             master_service_ptr service_;
 
-            io_device_client(std::string name, bool low_latency);
+            io_device_client(data::location_ptr home, bool low_latency);
         };
     }
 }
