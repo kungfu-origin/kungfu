@@ -29,22 +29,18 @@ namespace kungfu
 
         namespace journal
         {
-            reader::reader(page_provider_factory_ptr factory) : factory_(factory)
-            {}
-
             reader::~reader()
             {
                 journals_.clear();
             }
 
             void
-            reader::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time)
+            reader::subscribe(const data::location &location, const int64_t from_time)
             {
-                auto provider = factory_->make_page_provider(m, c, group, name, false);
-                auto key = provider->get_location().keyname();
+                auto key = location.keyname();
                 if (journals_.find(key) == journals_.end())
                 {
-                    current_ = std::make_shared<journal>(provider);
+                    current_ = std::make_shared<journal>(location, false, lazy_);
                     current_->seek_to_time(from_time);
                     journals_[key] = current_;
                     seek_current_journal();

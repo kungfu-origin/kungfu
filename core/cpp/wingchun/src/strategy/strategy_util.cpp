@@ -500,11 +500,11 @@ namespace kungfu
             auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
             for (const auto& source: get_md_sources())
             {
-                reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source, last_update);
+                reader->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source), last_update);
             }
             for (const auto& account: get_accounts())
             {
-                reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id, last_update);
+                reader->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id), last_update);
             }
             while (reader->data_available())
             {

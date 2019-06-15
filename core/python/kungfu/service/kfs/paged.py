@@ -1,8 +1,5 @@
-import os
-import psutil
-import pyyjj
-
 import kungfu.service.kfs as kfs
+
 
 @kfs.on('journal/register')
 def journal_register(ctx, request):
@@ -31,6 +28,7 @@ def journal_register(ctx, request):
             'memory_msg_id': mm_id,
             'success': True
         }
+
 
 @kfs.on('journal/deregister')
 def journal_deregister(ctx, request):

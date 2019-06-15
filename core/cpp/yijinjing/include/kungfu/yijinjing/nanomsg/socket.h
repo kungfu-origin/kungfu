@@ -76,8 +76,8 @@ namespace kungfu {
 
             class url_factory {
             public:
-                virtual const std::string make_url_bind(data::mode m, data::category c, const std::string &group, const std::string &name, protocol p) const = 0;
-                virtual const std::string make_url_connect(data::mode m, data::category c, const std::string &group, const std::string &name, protocol p) const = 0;
+                virtual const std::string make_url_bind(const data::location &location, protocol p) const = 0;
+                virtual const std::string make_url_connect(const data::location &location, protocol p) const = 0;
             };
             DECLARE_PTR(url_factory)
 

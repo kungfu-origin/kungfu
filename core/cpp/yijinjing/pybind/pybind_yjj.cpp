@@ -23,7 +23,6 @@
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
-#include <kungfu/yijinjing/journal/page_service.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/practice/apprentice.h>
@@ -32,7 +31,6 @@ namespace py = pybind11;
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::journal;
-using namespace kungfu::yijinjing::journal::paged;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::yijinjing::util;
 using namespace kungfu::practice;
@@ -79,14 +77,14 @@ public:
 class PyEventlet : public event_source
 {
 public:
-    void setup_output(data::mode m, data::category c, const std::string &group, const std::string &name) override
+    void setup_output(const data::location &location) override
     {
-        PYBIND11_OVERLOAD_PURE(void, event_source, setup_output, m, c, group, name)
+        PYBIND11_OVERLOAD_PURE(void, event_source, setup_output, location)
     }
 
-    void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name) override
+    void subscribe(const data::location &location) override
     {
-        PYBIND11_OVERLOAD_PURE(void, event_source, subscribe, m, c, group, name)
+        PYBIND11_OVERLOAD_PURE(void, event_source, subscribe, location)
     }
 
     writer_ptr get_writer() override
@@ -150,6 +148,11 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
     m.def("setup_log", &kungfu::yijinjing::log::setup_log);
+
+    m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed")=KUNGFU_HASH_SEED);
+    m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
+    m.def("hash_str_16_low", &hash_str_16_low, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
+    m.def("hash_str_16_high", &hash_str_16_high, py::arg("key"), py::arg("seed")=KUNGFU_HASH_SEED);
 
     py::enum_<data::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
             .value("LIVE", data::mode::LIVE)
@@ -222,15 +225,6 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<master_service, PyMasterService, master_service_ptr>(m, "master_service")
             .def("request", &master_service::request);
 
-    py::class_<page_service>(m, "page_service")
-            .def(py::init<io_device_ptr>())
-            .def_property_readonly("io_device", &page_service::get_io_device)
-            .def_property_readonly("memory_msg_file", &page_service::get_memory_msg_file)
-            .def_property_readonly("memory_msg_file_size", &page_service::get_memory_msg_file_size)
-            .def("process_memory_message", &page_service::process_memory_message)
-            .def("get_mm_block", &page_service::get_mm_block)
-            .def("release_mm_block", &page_service::release_mm_block);
-
     py::class_<reader, reader_ptr>(m, "reader")
             .def("subscribe", &reader::subscribe)
             .def("current_frame", &reader::current_frame)
@@ -246,10 +240,8 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
     io_device.def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
-            .def("connect_socket", &io_device::connect_socket, py::arg("mode"), py::arg("category"), py::arg("group"), py::arg("name"),
-                 py::arg("protocol"), py::arg("timeout") = 0)
-            .def("bind_socket", &io_device::bind_socket, py::arg("mode"), py::arg("category"), py::arg("group"), py::arg("name"), py::arg("protocol"),
-                 py::arg("timeout") = 0);
+            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
+            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
     m.def("create_io_device", &io_device::create_io_device, py::arg("low_latency")=false);
 

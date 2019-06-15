@@ -31,9 +31,9 @@ namespace kungfu {
         public:
             explicit apprentice(const std::string &name, bool low_latency = false);
 
-            void setup_output(yijinjing::data::mode m, yijinjing::data::category c, const std::string &group, const std::string &name) override;
+            void setup_output(const yijinjing::data::location &location) override;
 
-            void subscribe(yijinjing::data::mode m, yijinjing::data::category c, const std::string &group, const std::string &name) override;
+            void subscribe(const yijinjing::data::location &location) override;
 
             yijinjing::journal::writer_ptr get_writer() override { return writer_; };
 

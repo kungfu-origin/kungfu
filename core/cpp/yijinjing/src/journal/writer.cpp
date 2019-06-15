@@ -28,12 +28,10 @@ namespace kungfu
 
         namespace journal
         {
-            writer::writer(page_provider_factory_ptr factory, data::mode m, data::category c, const std::string &group, const std::string &name,
-                           publisher_ptr publisher) :
+            writer::writer(const data::location &location, bool lazy, publisher_ptr publisher) :
                     publisher_(publisher)
             {
-                page_provider_ptr page_provider = factory->make_page_provider(m, c, group, name, true);
-                journal_ = std::make_shared<journal>(page_provider);
+                journal_ = std::make_shared<journal>(location, true, lazy);
                 journal_->seek_to_time(time::now_in_nano());
             }
 
@@ -51,7 +49,7 @@ namespace kungfu
             void writer::close_frame(size_t data_length)
             {
                 frame &frame = journal_->current_frame();
-                frame.set_hashcode(util::hash(reinterpret_cast<void *>(frame.address()), frame.frame_length(), KUNGFU_HASH_SEED));
+                frame.set_hashcode(util::hash_32(reinterpret_cast<unsigned char *>(frame.address()), frame.frame_length()));
                 frame.set_gen_time(time::now_in_nano());
                 frame.set_data_length(data_length);
                 journal_->current_page_->set_last_frame_position(frame.address() - journal_->current_page_->address());

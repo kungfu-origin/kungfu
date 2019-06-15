@@ -91,7 +91,7 @@ namespace kungfu
     void MdGatewayImpl::configure_event_source(kungfu::yijinjing::event_source_ptr event_source)
     {
         GatewayImpl::configure_event_source(event_source);
-        event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source());
+        event_source_->setup_output(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source()));
         nn_publisher_ = std::make_unique<NNPublisher>(event_source_);
 
         std::shared_ptr<kungfu::MarketDataStreamingWriter> feed_handler = std::shared_ptr<kungfu::MarketDataStreamingWriter>(new kungfu::MarketDataStreamingWriter(event_source_->get_writer()));
@@ -186,7 +186,7 @@ namespace kungfu
         }
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
-        event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source());
+        event_source_->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source()));
 
         std::shared_ptr<kungfu::TraderDataFeedHandler> feed_handler = std::shared_ptr<kungfu::TraderDataFeedHandler>(new kungfu::TraderDataStreamingWriter(event_source_->get_writer()));
         register_feed_handler(feed_handler);
@@ -207,7 +207,7 @@ namespace kungfu
         register_manual_order_action_callback(std::bind(&TdGatewayImpl::on_manual_order_action, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         register_switch_day_callback(std::bind(&TdGatewayImpl::on_switch_day, this, std::placeholders::_1));
 
-        event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, get_source(), get_account_id());
+        event_source_->setup_output(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, get_source(), get_account_id()));
         nn_publisher_ = std::make_unique<NNPublisher>(event_source_);
 
         account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
@@ -234,8 +234,8 @@ namespace kungfu
         if (last_update > 0)
         {
             auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
-            reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source(), last_update);
-            reader->subscribe(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id(), last_update);
+            reader->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source()), last_update);
+            reader->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id()), last_update);
             while (reader->data_available())
             {
                 auto frame = reader->current_frame();
@@ -313,7 +313,7 @@ namespace kungfu
         SPDLOG_TRACE("login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
         if (source == get_source() && name == get_account_id())
         {
-            event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id);
+            event_source_->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id));
 
             gateway::GatewayLoginRsp rsp = {};
             rsp.state = this->get_state();

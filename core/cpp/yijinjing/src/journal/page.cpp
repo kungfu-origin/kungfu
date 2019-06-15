@@ -45,7 +45,7 @@ namespace kungfu
             {
                 if (!os::release_mmap_buffer(address(), size_, lazy_))
                 {
-                    throw exception("failed to release memory for page " + get_page_path(location_, id_));
+                    throw journal_error("failed to release memory for page " + get_page_path(location_, id_));
                 }
             }
 
@@ -55,7 +55,7 @@ namespace kungfu
                 uintptr_t address = os::load_mmap_buffer(path, JOURNAL_PAGE_SIZE, is_writing, lazy);
                 if (address < 0)
                 {
-                    throw exception("unable to load page for " + path);
+                    throw journal_error("unable to load page for " + path);
                 }
 
                 auto header = reinterpret_cast<page_header *>(address);
@@ -70,11 +70,11 @@ namespace kungfu
 
                 if (header->version != __JOURNAL_VERSION__)
                 {
-                    throw exception(fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
+                    throw journal_error(fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
                 }
                 if (header->page_header_length != sizeof(page_header))
                 {
-                    throw exception(fmt::format("header length mismatch for page {}, required {}, found {}",
+                    throw journal_error(fmt::format("header length mismatch for page {}, required {}, found {}",
                             path, sizeof(page_header), header->page_header_length));
                 }
 

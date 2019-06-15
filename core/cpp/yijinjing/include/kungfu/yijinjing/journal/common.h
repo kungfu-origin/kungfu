@@ -31,10 +31,10 @@ namespace kungfu
 
             FORWARD_DECLARE_PTR(writer)
 
-            class exception : public std::exception
+            class journal_error : public std::exception
             {
             public:
-                exception(const std::string &message) : message_(message)
+                journal_error(const std::string &message) : message_(message)
                 {}
 
                 virtual const char *what() const throw()

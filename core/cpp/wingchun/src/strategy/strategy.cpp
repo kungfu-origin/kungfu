@@ -38,7 +38,7 @@ namespace kungfu
         bool add_md(const std::string& source_id)
         {
             SPDLOG_INFO("add md {}", source_id);
-            strategy_->event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id);
+            strategy_->event_source_->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id));
             return get_util()->add_md(source_id);
         }
 
@@ -46,7 +46,7 @@ namespace kungfu
         {
             SPDLOG_INFO("add account {}/{}", source_id, account_id);
             strategy_->register_reload_instruments_callback(std::bind(&StrategyUtil::reload_instruments, util_));
-            strategy_->event_source_->subscribe(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id);
+            strategy_->event_source_->subscribe(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id));
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 
@@ -176,7 +176,7 @@ namespace kungfu
     void Strategy::configure_event_source(kungfu::yijinjing::event_source_ptr event_source)
     {
         event_source_ = event_source;
-        event_source_->setup_output(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, get_name(), get_name());
+        event_source_->setup_output(yijinjing::data::location(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, get_name(), get_name())));
         impl_->get_util()->init(event_source);
         impl_->init();
         SPDLOG_INFO("Strategy pre run");

@@ -2,8 +2,8 @@
 // Created by qlu on 2019/3/8.
 //
 
-#ifndef KUNGFU_UTIL_H
-#define KUNGFU_UTIL_H
+#ifndef KUNGFU_WINGCHUN_UTIL_HPP
+#define KUNGFU_WINGCHUN_UTIL_HPP
 
 #include <utility>
 #include <fmt/format.h>
@@ -80,7 +80,7 @@ namespace kungfu
             j["trigger_time"] = yijinjing::time::now_in_nano();
             j["source"] = 0;
 
-            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, c, group, name, yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
+            auto socket = io_device->connect_socket(yijinjing::data::location(yijinjing::data::mode::LIVE, c, group, name), yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
             socket->send_json(j);
 
             SPDLOG_TRACE("gateway login sent {}", j.dump());
@@ -124,7 +124,7 @@ namespace kungfu
             j["trigger_time"] = yijinjing::time::now_in_nano();
             j["source"] = 0;
 
-            auto socket = io_device->connect_socket(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source,
+            auto socket = io_device->connect_socket(yijinjing::data::location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source),
                     yijinjing::nanomsg::protocol::REQUEST);
             SPDLOG_DEBUG("subscribe sending {}", j.dump());
             socket->send_json(j);
@@ -133,4 +133,4 @@ namespace kungfu
     }
 }
 
-#endif //KUNGFU_UTIL_H
+#endif //KUNGFU_WINGCHUN_UTIL_HPP

@@ -38,9 +38,9 @@ namespace kungfu
         public:
             virtual ~event_source() = default;
 
-            virtual void setup_output(data::mode m, data::category c, const std::string &group, const std::string &name) = 0;
+            virtual void setup_output(const data::location &location) = 0;
 
-            virtual void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name) = 0;
+            virtual void subscribe(const data::location &location) = 0;
 
             virtual journal::writer_ptr get_writer() = 0;
 
@@ -79,20 +79,17 @@ namespace kungfu
 
             journal::reader_ptr open_reader_to_subscribe();
 
-            journal::reader_ptr open_reader(data::mode m, data::category c, const std::string &group, const std::string &name);
+            journal::reader_ptr open_reader(const data::location &location);
 
-            journal::writer_ptr open_writer(data::mode m, data::category c, const std::string &group, const std::string &name);
+            journal::writer_ptr open_writer(const data::location &location);
 
             nanomsg::socket_ptr
-            connect_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p,
+            connect_socket(const data::location &location, const nanomsg::protocol &p,
                            int timeout = 0);
 
             nanomsg::socket_ptr
-            bind_socket(data::mode m, data::category c, const std::string &group, const std::string &name, const nanomsg::protocol &p,
+            bind_socket(const data::location &location, const nanomsg::protocol &p,
                         int timeout = 0);
-
-            journal::page_provider_factory_ptr get_page_provider_factory()
-            { return page_provider_factory_; }
 
             nanomsg::url_factory_ptr get_url_factory()
             { return url_factory_; }
@@ -104,11 +101,11 @@ namespace kungfu
 
         protected:
             const bool low_latency_;
-            journal::page_provider_factory_ptr page_provider_factory_;
+            const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;
             publisher_ptr publisher_;
 
-            io_device(bool low_latency);
+            io_device(bool low_latency, bool lazy = false);
         };
 
         class master_service

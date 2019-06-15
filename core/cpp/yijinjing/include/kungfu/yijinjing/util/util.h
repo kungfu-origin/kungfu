@@ -7,7 +7,7 @@
 
 #include <kungfu/yijinjing/journal/page.h>
 
-#define KUNGFU_HASH_SEED 97
+#define KUNGFU_HASH_SEED 42
 
 namespace kungfu
 {
@@ -22,7 +22,11 @@ namespace kungfu
              * @param seed
              * @return hash result
              */
-            uint32_t hash(const void *key, int32_t len, uint32_t seed);
+            uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed=KUNGFU_HASH_SEED);
+
+            uint32_t hash_str_32(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
+            uint16_t hash_str_16_low(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
+            uint16_t hash_str_16_high(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
 
             std::string make_path(std::initializer_list<std::string> list, bool is_file=false);
 

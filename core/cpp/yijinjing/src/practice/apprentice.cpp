@@ -43,38 +43,38 @@ apprentice::apprentice(const std::string &name, bool low_latency)
     os::handle_os_signals();
 }
 
-void apprentice::setup_output(data::mode m, data::category c, const std::string &group, const std::string &name)
+void apprentice::setup_output(const data::location &location)
 {
     if (writer_.get() == nullptr and socket_reply_.get() == nullptr)
     {
-        SPDLOG_INFO("apprentice output setup to {} {} {} {}", data::get_mode_name(m), data::get_category_name(c), group, name);
-        writer_ = io_device_->open_writer(m, c, group, name);
+        SPDLOG_INFO("apprentice output setup to {}", location.keyname());
+        writer_ = io_device_->open_writer(location);
         writer_->open_session();
-        socket_reply_ = io_device_->bind_socket(m, c, group, name, protocol::REPLY, 0);
-        socket_publish_ = io_device_->bind_socket(m, c, group, name, protocol::PUBLISH, 0);
+        socket_reply_ = io_device_->bind_socket(location, protocol::REPLY, 0);
+        socket_publish_ = io_device_->bind_socket(location, protocol::PUBLISH, 0);
     } else
     {
         SPDLOG_ERROR("apprentice output has already been setup");
     }
 }
 
-void apprentice::subscribe(data::mode m, data::category c, const std::string &group, const std::string &name)
+void apprentice::subscribe(const data::location &location)
 {
     if (reader_.get() == nullptr)
     {
-        SPDLOG_TRACE("apprentice open reader for {}", name);
-        reader_ = io_device_->open_reader(m, c, group, name);
+        SPDLOG_TRACE("apprentice open reader for {}", location.name);
+        reader_ = io_device_->open_reader(location);
         reader_->seek_to_time(time::now_in_nano());
     } else
     {
-        SPDLOG_TRACE("apprentice subscribe for {}", name);
-        reader_->subscribe(m, c, group, name, time::now_in_nano());
+        SPDLOG_TRACE("apprentice subscribe for {}", location.name);
+        reader_->subscribe(location, time::now_in_nano());
     }
 
-    auto url = io_device_->get_url_factory()->make_url_connect(m, c, group, name, protocol::SUBSCRIBE);
+    auto url = io_device_->get_url_factory()->make_url_connect(location, protocol::SUBSCRIBE);
     if (sub_sockets_.find(url) == sub_sockets_.end())
     {
-        auto socket = io_device_->connect_socket(m, c, group, name, protocol::SUBSCRIBE);
+        auto socket = io_device_->connect_socket(location, protocol::SUBSCRIBE);
         sub_sockets_[socket->get_url()] = socket;
     } else
     {

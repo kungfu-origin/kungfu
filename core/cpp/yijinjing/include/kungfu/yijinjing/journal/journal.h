@@ -43,7 +43,7 @@ namespace kungfu
             class journal
             {
             public:
-                journal(page_provider_ptr provider) : page_provider_(provider), current_page_id_(-1)
+                journal(const data::location &location, bool is_writing, bool lazy) : location_(location), is_writing_(is_writing), lazy_(lazy)
                 {}
 
                 ~journal();
@@ -64,10 +64,13 @@ namespace kungfu
                 void seek_to_time(int64_t nanotime);
 
             private:
-                page_provider_ptr page_provider_;
-                int current_page_id_;
+                const data::location &location_;
+                const bool is_writing_;
+                const bool lazy_;
                 page_ptr current_page_;
                 frame frame_;
+
+                void load_page(int page_id);
 
                 /** load next page, current page will be released if not empty */
                 void load_next_page();
@@ -79,7 +82,7 @@ namespace kungfu
             class reader
             {
             public:
-                reader(page_provider_factory_ptr factory);
+                reader(bool lazy) : lazy_(lazy) {};
 
                 ~reader();
 
@@ -91,7 +94,7 @@ namespace kungfu
                  * @param name name
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                void subscribe(data::mode m, data::category c, const std::string &group, const std::string &name, const int64_t from_time);
+                void subscribe(const data::location &location, const int64_t from_time);
 
                 inline frame &current_frame()
                 { return current_->current_frame(); }
@@ -106,7 +109,7 @@ namespace kungfu
                 void next();
 
             private:
-                page_provider_factory_ptr factory_;
+                const bool lazy_;
                 journal_ptr current_;
                 std::unordered_map<std::string, journal_ptr> journals_;
 
@@ -116,8 +119,7 @@ namespace kungfu
             class writer
             {
             public:
-                explicit writer(page_provider_factory_ptr factory,
-                                data::mode m, data::category c, const std::string &group, const std::string &name, publisher_ptr messenger);
+                explicit writer(const data::location &location, bool lazy, publisher_ptr messenger);
 
                 frame &open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
 
@@ -140,40 +142,6 @@ namespace kungfu
                 std::mutex writer_mtx_;
                 journal_ptr journal_;
                 publisher_ptr publisher_;
-            };
-
-            /** abstract interface class */
-            class page_provider
-            {
-            protected:
-                const data::location location_;
-                const bool is_writing_;
-            public:
-                page_provider(data::location &location, const bool is_writing) : location_(std::move(location)), is_writing_(is_writing)
-                {};
-
-                /** destructor */
-                virtual ~page_provider()
-                {};
-
-                const data::location &get_location() const
-                { return location_; };
-
-                const bool &is_writing() const
-                { return is_writing_; };
-
-                virtual page_ptr get_page(int new_page_id, int old_page_id) = 0;
-
-                virtual void release_page(int page_id) = 0;
-
-                virtual void release_all() = 0;
-            };
-
-            class page_provider_factory
-            {
-            public:
-                virtual page_provider_ptr
-                make_page_provider(data::mode m, data::category c, const std::string &group, const std::string &name, const bool is_writing) = 0;
             };
         }
     }

@@ -149,8 +149,11 @@ namespace kungfu
             public:
                 location(data::mode m, data::category c, const std::string &group, const std::string &name) :
                         mode(m), category(c), group(group), name(name),
-                        keyname_(get_mode_name(mode) + "::" + get_category_name(category) + "::" + group + "::" + name)
+                        keyname_(get_mode_name(mode) + get_category_name(category) + group + name)
                 {};
+
+                location(const location& copy) : location(copy.mode, copy.category, copy.group, copy.name)
+                {}
 
                 const mode mode;
                 const category category;

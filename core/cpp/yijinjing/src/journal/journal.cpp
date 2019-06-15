@@ -31,7 +31,7 @@ namespace kungfu
             {
                 if (current_page_.get() != nullptr)
                 {
-                    page_provider_->release_page(current_page_->get_id());
+                    current_page_->release();
                 }
             }
 
@@ -48,13 +48,7 @@ namespace kungfu
 
             void journal::seek_to_time(int64_t nanotime)
             {
-                int possible_id = page::find_page_id(page_provider_->get_location(), nanotime);
-                if (current_page_id_ != possible_id)
-                {
-                    current_page_ = page_provider_->get_page(possible_id, current_page_id_);
-                    current_page_id_ = current_page_->get_id();
-                    frame_.set_address(current_page_->first_frame_address());
-                }
+                load_page(page::find_page_id(location_, nanotime));
                 SPDLOG_TRACE("seek time {} in current page [{} - {}]",
                         nanotime > 0 ? time::strftime(nanotime) : "",
                         time::strftime(current_page_->begin_time()),
@@ -70,12 +64,22 @@ namespace kungfu
                 }
             }
 
+            void journal::load_page(int page_id)
+            {
+                if (current_page_.get() != nullptr)
+                {
+                    current_page_->release();
+                }
+                if (current_page_->get_id() != page_id)
+                {
+                    current_page_ = page::load(location_, page_id, is_writing_, lazy_);
+                    frame_.set_address(current_page_->first_frame_address());
+                }
+            }
+
             void journal::load_next_page()
             {
-                SPDLOG_TRACE("loading page id {}", current_page_id_);
-                current_page_ = page_provider_->get_page(current_page_id_ + 1, current_page_id_);
-                current_page_id_ = current_page_->get_id();
-                frame_.set_address(current_page_->first_frame_address());
+                load_page(current_page_->get_id() + 1);
             }
         }
     }

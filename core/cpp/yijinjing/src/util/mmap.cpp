@@ -82,7 +82,7 @@ namespace kungfu {
                 int fd = open(path.c_str(), (is_writing ? O_RDWR : O_RDONLY) | O_CREAT, (mode_t) 0600);
                 if (fd < 0)
                 {
-                    throw exception("failed to open file for page " + path);
+                    throw journal_error("failed to open file for page " + path);
                 }
 
                 if (/*!lazy &&*/ is_writing)
@@ -90,28 +90,34 @@ namespace kungfu {
                     if (lseek(fd, size - 1, SEEK_SET) == -1)
                     {
                         close(fd);
-                        throw exception("failed to stretch for page " + path);
+                        throw journal_error("failed to stretch for page " + path);
                     }
                     if (write(fd, "", 1) == -1)
                     {
                         close(fd);
-                        throw exception("unable to write for page " + path);
+                        throw journal_error("unable to write for page " + path);
                     }
                 }
 
+                /**
+                 * MAP_FIXED is dup2 for memory mappings, and it's useful in exactly the same situations where dup2 is useful for file descriptors:
+                 * when you want to perform a replace operation that atomically reassigns a resource identifier (memory range in the case of MAP_FIXED,
+                 * or fd in the case of dup2) to refer to a new resource without the possibility of races where it might get reassigned to something
+                 * else if you first released the old resource then attempted to regain it for the new resource.
+                 */
                 void *buffer = mmap(0, size, (is_writing) ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
 
                 if (buffer == MAP_FAILED)
                 {
                     close(fd);
-                    throw exception("Error mapping file to buffer");
+                    throw journal_error("Error mapping file to buffer");
                 }
 
                 if (!lazy && madvise(buffer, size, MADV_RANDOM) != 0 && mlock(buffer, size) != 0)
                 {
                     munmap(buffer, size);
                     close(fd);
-                    throw exception("failed to lock memory for page " + path);
+                    throw journal_error("failed to lock memory for page " + path);
                 }
 
                 close(fd);
