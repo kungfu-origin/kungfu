@@ -37,7 +37,7 @@ namespace kungfu
     class Calendar
     {
     public:
-        Calendar(kungfu::yijinjing::master_service_ptr service);
+        Calendar(kungfu::yijinjing::io_device_client_ptr io_device);
         virtual ~Calendar();
 
         //判断是否是交易时间
@@ -119,7 +119,7 @@ namespace kungfu
             {"SZE", false}
         };
 
-        kungfu::yijinjing::master_service_ptr service_;
+        kungfu::yijinjing::io_device_client_ptr io_device_;
         std::string current_trading_day_;
     };
     DECLARE_PTR(Calendar)

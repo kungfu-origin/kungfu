@@ -14,7 +14,7 @@ namespace kungfu {
 
         void hero::register_location(const yijinjing::data::location_ptr location)
         {
-            locations_[location->hash()] = location;
+            locations_[location->uid] = location;
         }
 
         const yijinjing::data::location_ptr hero::get_location(uint32_t hash)
@@ -56,7 +56,7 @@ namespace kungfu {
             {
                 SPDLOG_ERROR("Unexpected exception: {}", e.what());
             }
-            SPDLOG_INFO("apprentice {} finished", io_device_->get_home()->journal_path());
+            SPDLOG_INFO("apprentice {} finished", get_home()->uname);
         }
     }
 }

@@ -135,6 +135,8 @@ namespace kungfu {
 
                 nlohmann::json recv_json(int flags = 0);
 
+                const std::string &request(const std::string &json_message);
+
                 const protocol get_protocol() const {return protocol_;};
                 const std::string &get_url() const {return url_;};
                 const std::string &last_message() const {return message_;};

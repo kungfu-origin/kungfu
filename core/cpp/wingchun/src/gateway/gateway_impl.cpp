@@ -45,7 +45,7 @@ namespace kungfu
         SPDLOG_DEBUG("created gateway {} with source {}", get_name(), get_source());
         event_source_ = event_source;
 
-        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()->get_service()));
+        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()));
 
         if (!create_folder_if_not_exists(GATEWAY_FOLDER(this->get_name())))
         {
@@ -185,7 +185,7 @@ namespace kungfu
         }
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
-        event_source_->subscribe(event_source_->get_io_device()->get_home()->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source()));
+        event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source(), event_source_->get_io_device()->get_home()->locator));
 
         std::shared_ptr<kungfu::TraderDataFeedHandler> feed_handler = std::shared_ptr<kungfu::TraderDataFeedHandler>(new kungfu::TraderDataStreamingWriter(event_source_->get_writer(0)));
         register_feed_handler(feed_handler);
@@ -233,8 +233,8 @@ namespace kungfu
         {
             auto io = event_source_->get_io_device();
             auto reader = io->open_reader_to_subscribe();
-            reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source()), 0, last_update);
-            reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id()), 0, last_update);
+            reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source(), io->get_home()->locator), 0, last_update);
+            reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id(), io->get_home()->locator), 0, last_update);
             while (reader->data_available())
             {
                 auto frame = reader->current_frame();
@@ -312,7 +312,8 @@ namespace kungfu
         SPDLOG_TRACE("login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
         if (source == get_source() && name == get_account_id())
         {
-            event_source_->subscribe(event_source_->get_io_device()->get_home()->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id));
+            auto locator = event_source_->get_io_device()->get_home()->locator;
+            event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id, locator));
 
             gateway::GatewayLoginRsp rsp = {};
             rsp.state = this->get_state();

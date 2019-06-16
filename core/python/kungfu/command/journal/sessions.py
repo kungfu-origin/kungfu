@@ -4,17 +4,18 @@ from datetime import datetime, timedelta
 from tabulate import tabulate
 
 import click
-from kungfu.command.journal import journal as kfj
+from kungfu.command import pass_ctx_from_parent
+from kungfu.command.journal import journal
 
 import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.journal as journal
+import kungfu.yijinjing.journal as kfj
 
 SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 DURATION_FORMAT = '%H:%M:%S.%N'
 DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
 
 
-@kfj.command()
+@journal.command()
 @click.option('-s', '--sortby', default='begin_time',
               type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name', 'frame_count']),
               help='sorting method')
@@ -25,7 +26,8 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 @click.option('-p', '--pager', is_flag=True, help='show in a pager')
 @click.pass_context
 def sessions(ctx, sortby, ascending, tablefmt, pager):
-    all_sessions = find_sessions(ctx.parent).sort_values(by=sortby, ascending=ascending)
+    pass_ctx_from_parent(ctx)
+    all_sessions = find_sessions(ctx).sort_values(by=sortby, ascending=ascending)
     all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
     all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
     all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - DURATION_TZ_ADJUST, DURATION_FORMAT))
@@ -43,10 +45,10 @@ def find_sessions(ctx):
     sessions_df = pd.DataFrame(columns=[
         'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration', 'frame_count'
     ])
-    locations = journal.collect_journal_locations(ctx)
+    locations = kfj.collect_journal_locations(ctx)
     for key in locations:
         location = locations[key]
-        reader = io_device.open_reader(journal.MODES[location['mode']], journal.CATEGORIES[location['category']], location['group'], location['name'])
+        reader = io_device.open_reader(kfj.MODES[location['mode']], kfj.CATEGORIES[location['category']], location['group'], location['name'])
         find_sessions_from_reader(sessions_df, reader, location['mode'], location['category'], location['group'], location['name'])
 
     return sessions_df

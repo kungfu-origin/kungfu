@@ -1,7 +1,7 @@
 import pyyjj
 import kungfu.yijinjing.journal as kfj
 import click
-from kungfu.command import kfc
+from kungfu.command import kfc, pass_ctx_from_parent
 
 
 @kfc.group()
@@ -11,11 +11,10 @@ from kungfu.command import kfc
 @click.option('-n', '--name', type=str, default='*', help='name')
 @click.pass_context
 def journal(ctx, mode, category, group, name):
-    ctx.home = ctx.parent.home
-    ctx.logger = ctx.parent.logger
+    pass_ctx_from_parent(ctx)
     ctx.mode = mode
     ctx.category = category
     ctx.group = group
     ctx.name = name
-    ctx.location = kfj.Location(ctx, mode, category, group, name)
+    ctx.location = pyyjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.locator)
     pyyjj.setup_log(ctx.location, 'journal_tools')

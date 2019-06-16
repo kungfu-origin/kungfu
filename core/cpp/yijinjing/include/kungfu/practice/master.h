@@ -19,13 +19,16 @@ namespace kungfu {
 
             void register_event_source(uint32_t source_id);
 
+            yijinjing::io_device_master_ptr get_io_device() { return io_device_; };
+
         protected:
             void try_once() override ;
 
         private:
-            yijinjing::data::location_ptr home_;
-            yijinjing::io_device_ptr io_device_;
+            yijinjing::io_device_master_ptr io_device_;
             yijinjing::journal::reader_ptr reader_;
+            yijinjing::nanomsg::socket_ptr service_socket_;
+            yijinjing::nanomsg::socket_ptr pull_socket_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
         };
     }

@@ -8,6 +8,7 @@ import functools
 import pyyjj
 import pywingchun
 import kungfu.service.kfs as kfs
+import kungfu.yijinjing.journal as kfj
 from kungfu import nanomsg
 from . import os_signal
 
@@ -18,21 +19,10 @@ def get_socket_fd(socket):
     return socket.getsockopt(level=nanomsg.SOL_SOCKET, option=nanomsg.RCVFD)
 
 
-class Master:
+class Master(pyyjj.master):
     def __init__(self, ctx):
-        pyyjj.setup_log(ctx.name)
+        pyyjj.master.__init__(self, pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
         self.logger = ctx.logger
-
-        self._io_device = pyyjj.create_io_device(ctx.low_latency)
-        self.page_service = pyyjj.page_service(self._io_device)
-
-        self._pull_timeout = 0 if ctx.low_latency else 1
-        self._socket_pull = self._io_device.bind_socket(pyyjj.mode.LIVE, category=pyyjj.category.SYSTEM, group=ctx.name, name=ctx.name, protocol=pyyjj.protocol.PULL)
-        self._socket_reply = self._io_device.bind_socket(pyyjj.mode.LIVE, category=pyyjj.category.SYSTEM, group=ctx.name, name=ctx.name, protocol=pyyjj.protocol.REPLY)
-        self._socket_publish = self._io_device.bind_socket(pyyjj.mode.LIVE, category=pyyjj.category.SYSTEM, group=ctx.name, name=ctx.name, protocol=pyyjj.protocol.PUBLISH)
-
-        self._fd_pull = get_socket_fd(self._socket_pull)
-        self._fd_reply = get_socket_fd(self._socket_reply)
 
         self.apprentices = {}
         self._check_interval = 5 * SECOND_IN_NANO
@@ -80,7 +70,7 @@ class Master:
             kfs.run_tasks(self)
             self._last_check = pyyjj.now_in_nano()
 
-    def go(self):
+    def go1(self):
         self._running = True
         self._last_check = pyyjj.now_in_nano()
         while self._running:
@@ -123,8 +113,5 @@ class Master:
                 apprentice.kill()
 
         self._running = False
-        self._socket_reply.close()
-        self._socket_pull.close()
-        self._socket_publish.close()
 
         self.logger.info('kungfu master stopped')

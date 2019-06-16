@@ -39,7 +39,7 @@ namespace kungfu
         {
             SPDLOG_INFO("add md {}", source_id);
             auto home = strategy_->event_source_->get_io_device()->get_home();
-            strategy_->event_source_->subscribe(home->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id));
+            strategy_->event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id, home->locator));
             return get_util()->add_md(source_id);
         }
 
@@ -48,7 +48,7 @@ namespace kungfu
             SPDLOG_INFO("add account {}/{}", source_id, account_id);
             auto home = strategy_->event_source_->get_io_device()->get_home();
             strategy_->register_reload_instruments_callback(std::bind(&StrategyUtil::reload_instruments, util_));
-            strategy_->event_source_->subscribe(home->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id));
+            strategy_->event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id, home->locator));
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 

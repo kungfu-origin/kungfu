@@ -15,7 +15,7 @@ namespace kungfu
         }
     }
 
-    Calendar::Calendar(kungfu::yijinjing::master_service_ptr service) : service_(service)
+    Calendar::Calendar(kungfu::yijinjing::io_device_client_ptr io_device) : io_device_(io_device)
     {}
 
     Calendar::~Calendar()
@@ -160,7 +160,7 @@ namespace kungfu
         j["start_date"] = start_date;
         j["delta"] = delta;
 
-        std::string response = service_->request(j.dump());
+        std::string response = io_device_->get_request_socket()->request(j.dump());
         j = nlohmann::json::parse(response);
         return j["data"]["trading_day"];
     }
@@ -172,7 +172,7 @@ namespace kungfu
         j["request"] = "calendar/current";
         j["region"] = REGION_CN;
 
-        std::string response = service_->request(j.dump());
+        std::string response = io_device_->get_request_socket()->request(j.dump());
         j = nlohmann::json::parse(response);
         current_trading_day_ = j["data"]["trading_day"];
     }

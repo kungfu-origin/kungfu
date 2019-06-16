@@ -31,6 +31,8 @@ namespace kungfu
 
         FORWARD_DECLARE_PTR(io_device)
 
+        FORWARD_DECLARE_PTR(io_device_master)
+
         FORWARD_DECLARE_PTR(io_device_client)
 
         class event_source
@@ -95,7 +97,8 @@ namespace kungfu
             publisher_ptr get_publisher()
             { return publisher_; }
 
-            static io_device_ptr create_io_device(data::location_ptr home, bool low_latency);
+            observer_ptr get_observer()
+            { return observer_; }
 
         protected:
             data::location_ptr home_;
@@ -103,37 +106,35 @@ namespace kungfu
             const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;
             publisher_ptr publisher_;
+            observer_ptr observer_;
 
-            io_device(data::location_ptr home, bool low_latency, bool lazy = false);
+            io_device(data::location_ptr home, bool low_latency, bool lazy);
         };
 
-        class master_service
+        class io_device_master : public io_device
         {
         public:
-            virtual ~master_service() = default;
 
-            virtual const std::string &request(const std::string &json_message) = 0;
+            io_device_master(data::location_ptr home, bool low_latency);
+
+            nanomsg::socket_ptr get_service_socket()
+            { return service_socket_; }
+
+        private:
+            nanomsg::socket_ptr service_socket_;
         };
-
-        DECLARE_PTR(master_service)
 
         class io_device_client : public io_device
         {
         public:
 
-            observer_ptr get_observer()
-            { return observer_; }
+            io_device_client(data::location_ptr home, bool low_latency);
 
-            master_service_ptr get_service()
-            { return service_; }
-
-            static io_device_client_ptr create_io_device(data::location_ptr home, bool low_latency);
+            nanomsg::socket_ptr get_request_socket()
+            { return request_socket_; }
 
         private:
-            observer_ptr observer_;
-            master_service_ptr service_;
-
-            io_device_client(data::location_ptr home, bool low_latency);
+            nanomsg::socket_ptr request_socket_;
         };
     }
 }

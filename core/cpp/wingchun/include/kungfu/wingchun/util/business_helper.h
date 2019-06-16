@@ -271,7 +271,7 @@ namespace kungfu
 
     inline std::string get_reverse_repurchase_expire_date(kungfu::yijinjing::event_source_ptr event_source, const char* instrument_id, const char* open_date)
     {
-        Calendar calendar(event_source->get_io_device()->get_service());
+        Calendar calendar(event_source->get_io_device());
         return calendar.get_next_trading_day(open_date, get_reverse_repurchase_expire_days(instrument_id));
     }
 

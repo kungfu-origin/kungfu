@@ -151,16 +151,30 @@ namespace kungfu
                 }
             }
 
-            typedef std::function<void (const uint32_t, const int)> get_page_path;
-
-
             FORWARD_DECLARE_PTR(location)
-            class location
+            FORWARD_DECLARE_PTR(locator)
+
+            class locator
             {
             public:
-                location(data::mode m, data::category c, std::string group, std::string name) :
-                        mode(m), category(c), group(std::move(group)), name(std::move(name))
-                {};
+                locator() = default;
+                virtual ~locator() = default;
+
+                virtual const std::string make_path(const std::string& parent, const std::string& filename) const = 0;
+                virtual const std::string journal_path(location_ptr location) const = 0;
+                virtual const std::string socket_path(location_ptr location) const = 0;
+                virtual const std::string log_path(location_ptr location) const = 0;
+                virtual const std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
+            };
+
+            class location : public std::enable_shared_from_this<location>
+            {
+            public:
+                location(data::mode m, data::category c, std::string g, std::string n, locator_ptr l) :
+                        mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(l),
+                        uname(data::get_mode_name(mode) + "/" + data::get_category_name(category) + "/" + group + "/" + name),
+                        uid(util::hash_str_32(uname))
+                {}
 
                 virtual ~location() = default;
 
@@ -168,20 +182,11 @@ namespace kungfu
                 const category category;
                 const std::string group;
                 const std::string name;
-
-                inline uint32_t hash() const
-                {
-                    return util::hash_str_32(journal_path());
-                }
-
-                virtual const std::string journal_path() const = 0;
-                virtual const std::string socket_path() const = 0;
-                virtual const std::string log_path() const = 0;
-                virtual const std::string make_path(const std::string& parent, const std::string& filename) const = 0;
-                virtual const std::vector<int> list_page_id(uint32_t dest_id) const = 0;
-
-                virtual const location_ptr make_location(data::mode m, data::category c, const std::string &group, const std::string &name) const = 0;
+                const std::string uname;
+                const uint32_t uid;
+                const locator_ptr locator;
             };
+
         }
 
         namespace action

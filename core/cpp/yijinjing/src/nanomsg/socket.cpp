@@ -163,7 +163,7 @@ int socket::recv (int flags)
             }
         }
         message_.assign(buf_.data(), 0);
-        return rc;
+        return 0;
     } else
     {
         message_.assign(buf_.data(), rc);
@@ -194,4 +194,10 @@ nlohmann::json socket::recv_json (int flags)
     {
         return nlohmann::json();
     }
+}
+
+const std::string& socket::request(const std::string &json_message)
+{
+    send(json_message);
+    return recv_msg();
 }

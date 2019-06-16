@@ -35,43 +35,24 @@ using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::practice;
 
-apprentice::apprentice(yijinjing::data::location_ptr home, bool low_latency) : home_(home)
+apprentice::apprentice(yijinjing::data::location_ptr home, bool low_latency) : hero(home, low_latency)
 {
-    log::setup_log(home_, home->name);
-    io_device_ = io_device_client::create_io_device(home_, low_latency);
+    log::setup_log(home, home->name);
+    io_device_ = std::make_shared<io_device_client>(get_home(), low_latency);
+    reader_ = io_device_->open_reader_to_subscribe();
     os::handle_os_signals();
 }
 
 void apprentice::subscribe(const data::location_ptr location)
 {
     int64_t now = time::now_in_nano();
-    if (reader_.get() == nullptr)
-    {
-        SPDLOG_TRACE("apprentice open reader for {}", location->name);
-        reader_ = io_device_->open_reader(location, 0);
-        reader_->subscribe(location, home_->hash(), 0);
-        reader_->seek_to_time(now);
-    } else
-    {
-        SPDLOG_TRACE("apprentice subscribe for {}", location->name);
-        reader_->subscribe(location, 0, now);
-        reader_->subscribe(location, home_->hash(), now);
-    }
-
-    auto url = io_device_->get_url_factory()->make_url_connect(location, protocol::SUBSCRIBE);
-    if (sub_sockets_.find(url) == sub_sockets_.end())
-    {
-        auto socket = io_device_->connect_socket(location, protocol::SUBSCRIBE);
-        sub_sockets_[socket->get_url()] = socket;
-    } else
-    {
-        SPDLOG_WARN("{} has already been subscribed", url);
-    }
+    reader_->subscribe(location, 0, now);
+    reader_->subscribe(location, get_home()->uid, now);
+    SPDLOG_INFO("apprentice subscribed for {}", location->uname);
 }
 
 void apprentice::add_event_handler(event_handler_ptr handler)
 {
-    SPDLOG_TRACE("apprentice::add_event_handler init {}", handler->get_name());
     event_handlers_.push_back(handler);
 }
 
@@ -81,43 +62,14 @@ void apprentice::go()
     {
         handler->configure_event_source(shared_from_this());
     }
-    try
-    {
-        while (live_)
-        {
-            try_once();
-        }
-    }
-    catch (const nanomsg::nn_exception &e)
-    {
-        switch (e.num())
-        {
-            case EINTR:
-            case EAGAIN:
-            case ETIMEDOUT:
-            {
-                SPDLOG_INFO("apprentice quit because {}", e.what());
-                break;
-            }
-            default:
-            {
-                SPDLOG_ERROR("Unexpected nanomsg error: {}", e.what());
-            }
-        }
-    }
-    catch (const std::runtime_error &e)
-    {
-        SPDLOG_ERROR("Unexpected runtime error: {}", e.what());
-    }
-    catch (const std::exception &e)
-    {
-        SPDLOG_ERROR("Unexpected exception: {}", e.what());
-    }
+
+    hero::go();
+
     for (auto handler: event_handlers_)
     {
         handler->finish();
     }
-    SPDLOG_INFO("apprentice {} finished", home_->journal_path());
+    SPDLOG_INFO("apprentice {} finished", get_home()->uname);
 }
 
 void apprentice::try_once()

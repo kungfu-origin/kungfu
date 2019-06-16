@@ -69,7 +69,7 @@ namespace kungfu
         event_source_ = event_source;
         publisher_ = std::make_shared<NNPublisher>(event_source_);
 
-        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()->get_service()));
+        calendar_ = Calendar_ptr(new Calendar(event_source_->get_io_device()));
 
         init_portfolio_manager();
     }
@@ -501,11 +501,11 @@ namespace kungfu
             auto reader = io->open_reader_to_subscribe();
             for (const auto& source: get_md_sources())
             {
-                reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source), 0, last_update);
+                reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source, io->get_home()->locator), 0, last_update);
             }
             for (const auto& account: get_accounts())
             {
-                reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id), 0, last_update);
+                reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id, io->get_home()->locator), 0, last_update);
             }
             while (reader->data_available())
             {

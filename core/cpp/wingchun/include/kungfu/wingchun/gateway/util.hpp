@@ -80,7 +80,9 @@ namespace kungfu
             j["trigger_time"] = yijinjing::time::now_in_nano();
             j["source"] = 0;
 
-            auto socket = io_device->connect_socket(io_device->get_home()->make_location(yijinjing::data::mode::LIVE, c, group, name), yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
+            auto socket = io_device->connect_socket(
+                    std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, c, group, name, io_device->get_home()->locator),
+                    yijinjing::nanomsg::protocol::REQUEST, kungfu::yijinjing::time_unit::MILLISECONDS_PER_SECOND * 5);
             socket->send_json(j);
 
             SPDLOG_TRACE("gateway login sent {}", j.dump());
@@ -124,7 +126,10 @@ namespace kungfu
             j["trigger_time"] = yijinjing::time::now_in_nano();
             j["source"] = 0;
 
-            auto socket = io_device->connect_socket(io_device->get_home()->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source),
+            auto socket = io_device->connect_socket(
+                    std::make_shared<yijinjing::data::location>(
+                            yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source, source, io_device->get_home()->locator
+                            ),
                     yijinjing::nanomsg::protocol::REQUEST);
             SPDLOG_DEBUG("subscribe sending {}", j.dump());
             socket->send_json(j);

@@ -28,7 +28,7 @@
 namespace kungfu {
     namespace practice {
 
-        class apprentice : public yijinjing::event_source, public std::enable_shared_from_this<apprentice> {
+        class apprentice : public hero, public yijinjing::event_source, public std::enable_shared_from_this<apprentice> {
         public:
             explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
@@ -41,14 +41,14 @@ namespace kungfu {
 
             void add_event_handler(yijinjing::event_handler_ptr handler);
 
-            void go();
-
-            void stop() { live_ = false; };
+            void go() override ;
 
             yijinjing::io_device_client_ptr get_io_device() override { return io_device_; };
 
+        protected:
+            void try_once() override ;
+
         private:
-            yijinjing::data::location_ptr home_;
             yijinjing::io_device_client_ptr io_device_;
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
@@ -57,8 +57,6 @@ namespace kungfu {
             std::unordered_map<std::string, yijinjing::nanomsg::socket_ptr> sub_sockets_;
             std::vector<kungfu::yijinjing::event_handler_ptr> event_handlers_;
             bool live_ = true;
-
-            void try_once();
         };
     }
 }

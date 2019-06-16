@@ -3,7 +3,6 @@ import signal
 
 
 def handle_os_signals(handler):
-    pyyjj.handle_os_signals()
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGHUP, handler)

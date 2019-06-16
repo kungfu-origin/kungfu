@@ -1,8 +1,8 @@
 import pyyjj
 import click
-from kungfu.command.journal import journal as kfj
-import kungfu.yijinjing.journal as journal
+from kungfu.command.journal import journal
 import kungfu.yijinjing.time as kft
+import kungfu.yijinjing.journal as kfj
 
 KB = 2 ** 10
 MB = 2 ** 20
@@ -29,7 +29,7 @@ GB = 2 ** 30
 # live/strategy/alpha/test.1.journal
 
 
-@kfj.command()
+@journal.command()
 @click.pass_context
 def test(ctx):
     click.echo(2 ** 16)
@@ -37,11 +37,12 @@ def test(ctx):
     click.echo(hex(pyyjj.hash_str_32('helloworld'))[2:])
     click.echo(hex(pyyjj.hash_str_32('test'))[2:])
     click.echo(kft.strftime(pyyjj.now_in_nano()))
-    loc = journal.Location(ctx.parent, 'live', 'td', "xtp", "15040900")
-    click.echo(loc.journal_path())
-    click.echo(hex(loc.hash))
-    click.echo(hex(pyyjj.hash_str_32(loc.journal_path())))
+    loc = pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['td'], "xtp", "15040900", ctx.parent.locator)
+    click.echo(loc.uname)
+    click.echo(hex(loc.uid))
+    click.echo(hex(pyyjj.hash_str_32(loc.uname)))
     click.echo(pyyjj.get_page_path(loc, 0, 1))
-    click.echo(pyyjj.get_page_path(loc, loc.hash, 1))
-    click.echo(loc.list_page_id(pyyjj.hash_str_32('helloworld')))
+    click.echo(pyyjj.get_page_path(loc, loc.uid, 1))
+    click.echo(ctx.parent.locator.list_page_id(loc, pyyjj.hash_str_32('helloworld')))
+    io = pyyjj.io_device_client(loc, False)
     click.echo('done')

@@ -26,6 +26,7 @@
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/practice/apprentice.h>
+#include <kungfu/practice/master.h>
 
 namespace py = pybind11;
 
@@ -35,38 +36,33 @@ using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::yijinjing::util;
 using namespace kungfu::practice;
 
-class PyLocation : public data::location
+class PyLocator : public data::locator
 {
-    using data::location::location;
+    using data::locator::locator;
 
-    const std::string journal_path() const override
+    const std::string journal_path(data::location_ptr location) const override
     {
-        PYBIND11_OVERLOAD_PURE(std::string, data::location, journal_path,)
+        PYBIND11_OVERLOAD_PURE(std::string, data::locator, journal_path, location)
     }
 
-    const std::string socket_path() const override
+    const std::string socket_path(data::location_ptr location) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::location, socket_path,)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, socket_path, location)
     }
 
-    const std::string log_path() const override
+    const std::string log_path(data::location_ptr location) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::location, log_path,)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, log_path, location)
     }
 
-    const std::string make_path(const std::string& parent, const std::string& filename) const override
+    const std::string make_path(const std::string &parent, const std::string &filename) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::location, make_path, parent, filename)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, make_path, parent, filename)
     }
 
-    const std::vector<int> list_page_id(uint32_t dest_id) const override
+    const std::vector<int> list_page_id(data::location_ptr location, uint32_t dest_id) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::vector<int>, data::location, list_page_id, dest_id)
-    }
-
-    const data::location_ptr make_location(data::mode m, data::category c, const std::string &group, const std::string &name) const override
-    {
-        PYBIND11_OVERLOAD_PURE(const data::location_ptr, data::location, make_location, m, c, group, name)
+        PYBIND11_OVERLOAD_PURE(const std::vector<int>, data::locator, list_page_id, location, dest_id)
     }
 };
 
@@ -132,15 +128,6 @@ public:
     }
 };
 
-class PyMasterService : public master_service
-{
-public:
-    const std::string &request(const std::string &json_message) override
-    {
-        PYBIND11_OVERLOAD_PURE(const std::string &, master_service, request, json_message)
-    }
-};
-
 class PyPublisher : public publisher
 {
 public:
@@ -195,6 +182,7 @@ PYBIND11_MODULE(pyyjj, m)
             .value("REPLAY", data::mode::REPLAY)
             .value("BACKTEST", data::mode::BACKTEST)
             .export_values();
+    m.def("get_mode_name", &data::get_mode_name);
 
     py::enum_<data::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
             .value("MD", data::category::MD)
@@ -202,6 +190,7 @@ PYBIND11_MODULE(pyyjj, m)
             .value("STRATEGY", data::category::STRATEGY)
             .value("SYSTEM", data::category::SYSTEM)
             .export_values();
+    m.def("get_category_name", &data::get_category_name);
 
     py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
             .def_property_readonly("gen_time", &event::gen_time)
@@ -221,20 +210,22 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("address", &frame::address)
             .def("has_data", &frame::has_data);
 
-    py::class_<data::location, PyLocation, std::shared_ptr<data::location>>(m, "location")
-            .def(py::init<data::mode, data::category, const std::string&, const std::string&>())
+    py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
+            .def(py::init<data::mode, data::category, const std::string &, const std::string &, data::locator_ptr>())
             .def_readonly("mode", &data::location::mode)
             .def_readonly("category", &data::location::category)
             .def_readonly("group", &data::location::group)
             .def_readonly("name", &data::location::name)
-            .def_property_readonly("hash", &data::location::hash)
-            .def_property_readonly("journal_path", &data::location::journal_path)
-            .def_property_readonly("socket_path", &data::location::socket_path)
-            .def_property_readonly("log_path", &data::location::log_path)
-            .def("make_path", &data::location::make_path)
-            .def("list_page_id", &data::location::list_page_id)
-            .def("make_location", &data::location::make_location)
-            ;
+            .def_readonly("uname", &data::location::uname)
+            .def_readonly("uid", &data::location::uid);
+
+    py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
+            .def(py::init())
+            .def("journal_path", &data::locator::journal_path)
+            .def("socket_path", &data::locator::socket_path)
+            .def("log_path", &data::locator::log_path)
+            .def("make_path", &data::locator::make_path)
+            .def("list_page_id", &data::locator::list_page_id);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)
@@ -266,9 +257,6 @@ PYBIND11_MODULE(pyyjj, m)
             .def("wait", &observer::wait)
             .def("get_notice", &observer::get_notice);
 
-    py::class_<master_service, PyMasterService, master_service_ptr>(m, "master_service")
-            .def("request", &master_service::request);
-
     py::class_<reader, reader_ptr>(m, "reader")
             .def("subscribe", &reader::subscribe)
             .def("current_frame", &reader::current_frame)
@@ -282,19 +270,20 @@ PYBIND11_MODULE(pyyjj, m)
             .def("write_raw", &writer::write_raw);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-    io_device.def("open_reader", &io_device::open_reader)
+    io_device.def_property_readonly("publisher", &io_device::get_publisher)
+            .def_property_readonly("observer", &io_device::get_observer)
+            .def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
             .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
-    m.def("create_io_device", &io_device::create_io_device, py::arg("location"), py::arg("low_latency") = false);
+    py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
+            .def(py::init<data::location_ptr, bool>())
+            .def_property_readonly("service_socket", &io_device_master::get_service_socket);
 
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
-            .def_property_readonly("service", &io_device_client::get_service)
-            .def_property_readonly("publisher", &io_device_client::get_publisher)
-            .def_property_readonly("observer", &io_device_client::get_observer);
-
-    m.def("create_io_device_client", &io_device_client::create_io_device, py::arg("location"), py::arg("low_latency") = false);
+            .def(py::init<data::location_ptr, bool>())
+            .def_property_readonly("request_socket", &io_device_client::get_request_socket);
 
     py::class_<event_handler, PyEventHandler, event_handler_ptr>(m, "event_handler")
             .def(py::init())
@@ -308,7 +297,14 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("writer", &event_source::get_writer)
             .def_property_readonly("socket_reply", &event_source::get_socket_reply);
 
-    py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice", py_event_source)
+    py::class_<hero, std::shared_ptr<hero>> py_hero(m, "hero", py_event_source);
+    py_hero.def("go", &hero::go);
+
+    py::class_<master, std::shared_ptr<master>>(m, "master", py_hero)
+            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+            .def_property_readonly("io_device", &master::get_io_device);
+
+    py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice", py_hero)
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("add_event_handler", &apprentice::add_event_handler)

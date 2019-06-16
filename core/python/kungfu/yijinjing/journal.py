@@ -31,30 +31,39 @@ CATEGORIES = {
 }
 
 
-class Location(pyyjj.location):
-    def __init__(self, ctx, mode, category, group, name):
-        pyyjj.location.__init__(self, MODES[mode], CATEGORIES[category], group, name)
+class Locator(pyyjj.locator):
+    def __init__(self, ctx):
+        pyyjj.locator.__init__(self)
         self._home = ctx.home
-        self._journal_path = os.path.join(self._home, 'journal', mode, category, group, name)
-        self._socket_path = os.path.join(self._home, 'socket', mode, category, group, name)
-        self._log_path = os.path.join(self._home, 'log', 'archive')
-
-    def journal_path(self):
-        return self._journal_path
-
-    def socket_path(self):
-        return self._socket_path
-
-    def log_path(self):
-        return self._log_path
 
     def make_path(self, parent, filename):
+        if not os.path.exists(parent):
+            os.makedirs(parent)
         return os.path.join(parent, filename)
 
-    def list_page_id(self, dest_id):
-        print(hex(dest_id))
+    def journal_path(self, location):
+        path = os.path.join(self._home, 'journal',
+                            pyyjj.get_mode_name(location.mode), pyyjj.get_category_name(location.category), location.group, location.name)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
+    def socket_path(self, location):
+        path = os.path.join(self._home, 'socket',
+                            pyyjj.get_mode_name(location.mode), pyyjj.get_category_name(location.category), location.group, location.name)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
+    def log_path(self, location):
+        path = os.path.join(self._home, 'log', 'archive')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
+    def list_page_id(self, location, dest_id):
         page_ids = []
-        for journal in glob.glob(os.path.join(self.journal_path(), hex(dest_id)[2:] + '.*.journal')):
+        for journal in glob.glob(os.path.join(self.journal_path(location), hex(dest_id)[2:] + '.*.journal')):
             match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(7)

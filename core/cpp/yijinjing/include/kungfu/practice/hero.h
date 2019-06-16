@@ -12,18 +12,21 @@
 namespace kungfu {
     namespace practice {
 
-        class hero : public yijinjing::event_source {
+        class hero {
         public:
-            explicit hero() = default;
+            explicit hero(yijinjing::data::location_ptr home, bool low_latency = false) : home_(home), low_latency_(low_latency) {}
             virtual ~hero() {}
 
-            virtual yijinjing::journal::reader_ptr get_reader() = 0;
-            virtual yijinjing::journal::writer_ptr get_writer() = 0;
+            yijinjing::data::location_ptr get_home() const { return home_; }
+            bool is_low_latency() const { return low_latency_; }
+
+//            virtual yijinjing::journal::reader_ptr get_reader() = 0;
+//            virtual yijinjing::journal::writer_ptr get_writer() = 0;
 
             void register_location(const yijinjing::data::location_ptr location);
             const yijinjing::data::location_ptr get_location(uint32_t hash);
 
-            void go();
+            virtual void go();
 
             void stop() { live_ = false; };
 
@@ -31,7 +34,8 @@ namespace kungfu {
             virtual void try_once() = 0;
 
         private:
-            yijinjing::io_device_ptr io_device_;
+            yijinjing::data::location_ptr home_;
+            const bool low_latency_;
             bool live_ = true;
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
         };
