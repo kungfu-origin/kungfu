@@ -17,9 +17,8 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu {
     namespace practice {
 
-            master::master(bool low_latency)
+            master::master(location_ptr home, bool low_latency) : home_(home)
             {
-                home_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master");
                 io_device_ = io_device::create_io_device(home_, low_latency);
                 reader_ = io_device_->open_reader_to_subscribe();
             }

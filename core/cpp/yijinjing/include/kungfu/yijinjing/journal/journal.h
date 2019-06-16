@@ -113,7 +113,7 @@ namespace kungfu
             private:
                 const bool lazy_;
                 journal_ptr current_;
-                std::unordered_map<std::string, journal_ptr> journals_;
+                std::unordered_map<uint32_t, journal_ptr> journals_;
 
                 void seek_current_journal();
             };

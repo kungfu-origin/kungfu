@@ -25,7 +25,7 @@ namespace kungfu
         virtual GatewayState get_state() const = 0;
         virtual void set_state(const GatewayState& state, const std::string& message = "") = 0;
 
-        virtual void init() = 0;
+        virtual void init(yijinjing::event_source_ptr event_source) = 0;
 
         virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) = 0;
         virtual void on_started() = 0;

@@ -38,15 +38,17 @@ namespace kungfu
         bool add_md(const std::string& source_id)
         {
             SPDLOG_INFO("add md {}", source_id);
-            strategy_->event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id));
+            auto home = strategy_->event_source_->get_io_device()->get_home();
+            strategy_->event_source_->subscribe(home->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, source_id, source_id));
             return get_util()->add_md(source_id);
         }
 
         bool add_account(const std::string& source_id, const std::string& account_id, const double cash_limit)
         {
             SPDLOG_INFO("add account {}/{}", source_id, account_id);
+            auto home = strategy_->event_source_->get_io_device()->get_home();
             strategy_->register_reload_instruments_callback(std::bind(&StrategyUtil::reload_instruments, util_));
-            strategy_->event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id));
+            strategy_->event_source_->subscribe(home->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::TD, source_id, account_id));
             return get_util()->add_account(source_id, account_id, cash_limit);
         }
 
@@ -162,7 +164,6 @@ namespace kungfu
     };
 
     Strategy::Strategy(const std::string& name) : name_(name) {
-        kungfu::yijinjing::log::copy_log_settings(name);
         impl_ = std::make_unique<impl>(this, name);
     }
 
@@ -175,6 +176,7 @@ namespace kungfu
 
     void Strategy::configure_event_source(kungfu::yijinjing::event_source_ptr event_source)
     {
+        kungfu::yijinjing::log::copy_log_settings(event_source->get_io_device()->get_home(), get_name());
         event_source_ = event_source;
         impl_->get_util()->init(event_source);
         impl_->init();

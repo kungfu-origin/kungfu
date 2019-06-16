@@ -497,14 +497,15 @@ namespace kungfu
         SPDLOG_TRACE("{} last update {}", name_, last_update);
         if (last_update > 0)
         {
-            auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
+            auto io = event_source_->get_io_device();
+            auto reader = io->open_reader_to_subscribe();
             for (const auto& source: get_md_sources())
             {
-                reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source), 0, last_update);
+                reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, source, source), 0, last_update);
             }
             for (const auto& account: get_accounts())
             {
-                reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id), 0, last_update);
+                reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, account.source_id, account.account_id), 0, last_update);
             }
             while (reader->data_available())
             {

@@ -15,7 +15,7 @@ namespace kungfu {
 
         class master : public hero {
         public:
-            master(bool low_latency = false);
+            master(yijinjing::data::location_ptr home, bool low_latency = false);
 
             void register_event_source(uint32_t source_id);
 

@@ -40,14 +40,12 @@ namespace kungfu
 
             const std::string make_url_bind(const data::location_ptr location, protocol p) const override
             {
-                std::string socket_dir = util::make_path({KF_DIR_SOCKET, get_category_name(location->category), location->group});
-                return "ipc://" + socket_dir + "/" + location->name + "." + get_protocol_name(p);
+                return "ipc://" + location->make_path(location->socket_path(), location->name + "." + get_protocol_name(p));
             }
 
             const std::string make_url_connect(const data::location_ptr location, protocol p) const override
             {
-                std::string socket_dir = util::make_path({KF_DIR_SOCKET, get_category_name(location->category), location->group});
-                return "ipc://" + socket_dir + "/" + location->name + "." + get_protocol_name(get_opposite_protol(p));
+                return "ipc://" + location->make_path(location->socket_path(), location->name + "." + get_protocol_name(get_opposite_protol(p)));
             }
         };
 
@@ -68,9 +66,9 @@ namespace kungfu
         class nanomsg_publisher : public publisher
         {
         public:
-            nanomsg_publisher(url_factory_ptr factory, bool low_latency) : socket_(protocol::PUSH), low_latency_(low_latency)
+            nanomsg_publisher(const io_device &io, bool low_latency) : socket_(protocol::PUSH), low_latency_(low_latency)
             {
-                auto url = factory->make_url_connect(std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
+                auto url = io.get_url_factory()->make_url_connect(io.get_home()->make_location(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
                 socket_.connect(url);
                 SPDLOG_DEBUG("ready to publish and notify to master [{}]", url);
             }
@@ -100,10 +98,10 @@ namespace kungfu
         class nanomsg_observer : public observer
         {
         public:
-            nanomsg_observer(url_factory_ptr factory, bool low_latency) : socket_(protocol::SUBSCRIBE)
+            nanomsg_observer(const io_device &io, bool low_latency) : socket_(protocol::SUBSCRIBE)
             {
                 int timeout = low_latency ? 0 : DEFAULT_NOTICE_TIMEOUT;
-                auto url = factory->make_url_connect(std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
+                auto url = io.get_url_factory()->make_url_connect(io.get_home()->make_location(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
                 socket_.connect(url);
                 socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
                 socket_.setsockopt_str(NN_SUB, NN_SUB_SUBSCRIBE, "");
@@ -135,9 +133,9 @@ namespace kungfu
         class nanomsg_master_service : public master_service
         {
         public:
-            nanomsg_master_service(url_factory_ptr factory) : socket_(protocol::REQUEST)
+            nanomsg_master_service(const io_device &io) : socket_(protocol::REQUEST)
             {
-                auto url = factory->make_url_connect(std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
+                auto url = io.get_url_factory()->make_url_connect(io.get_home()->make_location(data::mode::LIVE, data::category::SYSTEM, "master", "master"), socket_.get_protocol());
                 SPDLOG_INFO("ready to use master service [{}]", url);
                 socket_.connect(url);
             }
@@ -211,17 +209,17 @@ namespace kungfu
 
         io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device(home, low_latency, true)
         {
-            SPDLOG_DEBUG("creating io_device_client {}", home->keyname());
+            SPDLOG_DEBUG("creating io_device_client {}", home->journal_path());
 
-            observer_ = std::make_shared<nanomsg_observer>(get_url_factory(), is_low_latency());
+            observer_ = std::make_shared<nanomsg_observer>(*this, is_low_latency());
 
-            service_ = std::make_shared<nanomsg_master_service>(get_url_factory());
+            service_ = std::make_shared<nanomsg_master_service>(*this);
         }
 
         io_device_client_ptr io_device_client::create_io_device(data::location_ptr home, bool low_latency = false)
         {
             auto r = std::shared_ptr<io_device_client>(new io_device_client(home, low_latency));
-            r->publisher_ = std::make_shared<nanomsg_publisher>(r->get_url_factory(), low_latency);
+            r->publisher_ = std::make_shared<nanomsg_publisher>(*r, low_latency);
             return r;
         }
     }

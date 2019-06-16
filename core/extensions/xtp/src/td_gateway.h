@@ -24,7 +24,7 @@ namespace kungfu
             TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             ~TdGateway() override ;
 
-            void init() override ;
+            void init(yijinjing::event_source_ptr event_source) override ;
 
             const std::string& get_account_id() const override { return user_; }
             const AccountType get_account_type() const override { return AccountTypeStock; }

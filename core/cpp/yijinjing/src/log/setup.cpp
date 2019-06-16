@@ -6,7 +6,6 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
-#include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/log/setup.h>
 
@@ -30,9 +29,9 @@ namespace kungfu {
                 return spdlog::default_logger();
             }
 
-            const std::string& setup_log(const std::string &name) {
+            const std::string& setup_log(data::location_ptr location, const std::string &name) {
                 if (spdlog::default_logger()->name().empty()) {
-                    std::string log_file = util::make_path({"log", "archive", name + ".log"}, true);
+                    std::string log_file = location->make_path(location->log_path(), name + ".log");
 
                     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
                     auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_file, 0, 0);

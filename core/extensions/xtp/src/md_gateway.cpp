@@ -19,7 +19,6 @@ namespace kungfu
     {
         MdGateway::MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double): kungfu::MdGatewayImpl(SOURCE_XTP)
         {
-            kungfu::yijinjing::log::copy_log_settings(get_name());
 
             client_id_ = config_int["client_id"];
             user_ = config_str["user_id"];
@@ -28,7 +27,6 @@ namespace kungfu
             port_ = config_int["md_port"];
             save_file_path_ = config_str["save_file_path"];
             api_ = nullptr;
-            SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
         }
 
         MdGateway::~MdGateway()
@@ -40,8 +38,10 @@ namespace kungfu
             }
         }
 
-        void MdGateway::init()
+        void MdGateway::init(yijinjing::event_source_ptr event_source)
         {
+            kungfu::yijinjing::log::copy_log_settings(event_source->get_io_device()->get_home(), get_name());
+            SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
             login();
         }
 

@@ -85,16 +85,12 @@ namespace kungfu
             std::string page::get_page_path(const data::location_ptr location, uint32_t dest_id, int id)
             {
                 std::string page_file_name = fmt::format("{:08x}.{}.{}", dest_id, id, JOURNAL_SUFFIX);
-                return util::make_path({
-                    KF_DIR_JOURNAL, data::get_mode_name(location->mode), data::get_category_name(location->category), location->group, location->name,
-                    page_file_name
-                    }, true);
+                return location->make_path(location->journal_path(), page_file_name);
             }
 
             int page::find_page_id(const data::location_ptr location, uint32_t dest_id, int64_t time)
             {
-                std::string path = util::make_path({KF_DIR_JOURNAL, data::get_mode_name(location->mode), data::get_category_name(location->category), location->group, location->name}, false);
-                std::vector<int> page_ids = util::list_journal_page_id(path, dest_id);
+                std::vector<int> page_ids = location->list_page_id(dest_id);
                 if (page_ids.empty())
                 {
                     return 1;

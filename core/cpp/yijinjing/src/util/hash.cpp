@@ -29,20 +29,9 @@ namespace kungfu
                 return h;
             }
 
-
             uint32_t hash_str_32(const std::string &key, uint32_t seed)
             {
                 return hash_32(reinterpret_cast<const unsigned char *>(key.c_str()), key.length(), seed);
-            }
-
-            uint16_t hash_str_16_low(const std::string &key, uint32_t seed)
-            {
-                return hash_32(reinterpret_cast<const unsigned char *>(key.c_str()), key.length(), seed) ;
-            }
-
-            uint16_t hash_str_16_high(const std::string &key, uint32_t seed)
-            {
-                return hash_32(reinterpret_cast<const unsigned char *>(key.c_str()), key.length(), seed) >> 16;
             }
         }
     }

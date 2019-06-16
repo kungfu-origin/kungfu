@@ -21,7 +21,7 @@ namespace kungfu
             MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
             ~MdGateway() override ;
 
-            void init() override ;
+            void init(yijinjing::event_source_ptr event_source) override ;
 
             bool subscribe(const std::vector<Instrument>& instruments, bool is_level2 = false) override ;
             bool unsubscribe(const std::vector<Instrument>& instruments) override { return false; };

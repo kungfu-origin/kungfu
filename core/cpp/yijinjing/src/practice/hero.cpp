@@ -56,7 +56,7 @@ namespace kungfu {
             {
                 SPDLOG_ERROR("Unexpected exception: {}", e.what());
             }
-            SPDLOG_INFO("apprentice {} finished", io_device_->get_home()->keyname());
+            SPDLOG_INFO("apprentice {} finished", io_device_->get_home()->journal_path());
         }
     }
 }

@@ -19,8 +19,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <nlohmann/json.hpp>
 #include <nanomsg/pubsub.h>
 #include <hffix.hpp>
@@ -39,7 +37,7 @@ using namespace kungfu::practice;
 
 apprentice::apprentice(yijinjing::data::location_ptr home, bool low_latency) : home_(home)
 {
-    log::setup_log(home_->keyname());
+    log::setup_log(home_, home->name);
     io_device_ = io_device_client::create_io_device(home_, low_latency);
     os::handle_os_signals();
 }
@@ -119,7 +117,7 @@ void apprentice::go()
     {
         handler->finish();
     }
-    SPDLOG_INFO("apprentice {} finished", home_->keyname());
+    SPDLOG_INFO("apprentice {} finished", home_->journal_path());
 }
 
 void apprentice::try_once()
@@ -178,9 +176,9 @@ int main(int argc, char **argv)
     std::cout << p << std::endl;
     std::cout << c << std::endl;
     std::cout << time::strfnow() << std::endl;
-    log::setup_log("test");
-    SPDLOG_WARN("test");
-    std::string name = "test";
+//    log::setup_log("test");
+//    SPDLOG_WARN("test");
+//    std::string name = "test";
 //    apprentice app(name);
 //
 //    writer_ptr w = app.get_io_device().open_writer(data::mode::LIVE, data::category::MD, "xtp", "xtp");

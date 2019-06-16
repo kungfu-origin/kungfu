@@ -72,7 +72,7 @@ namespace kungfu
         {
         public:
 
-            data::location_ptr get_home() { return home_; }
+            const data::location_ptr get_home() const { return home_; }
 
             bool is_low_latency()
             { return low_latency_; }
@@ -89,7 +89,7 @@ namespace kungfu
             nanomsg::socket_ptr
             bind_socket(const data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);
 
-            nanomsg::url_factory_ptr get_url_factory()
+            nanomsg::url_factory_ptr get_url_factory() const
             { return url_factory_; }
 
             publisher_ptr get_publisher()

@@ -6,6 +6,7 @@
 #define KUNGFU_LOG_H
 
 #include <spdlog/spdlog.h>
+#include <kungfu/yijinjing/common.h>
 
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"
 #define DEFAULT_LOG_LEVEL_NAME "info"
@@ -18,14 +19,14 @@ namespace kungfu {
         namespace log {
             spdlog::level::level_enum get_env_log_level();
 
-            const std::string& setup_log(const std::string &name);
+            const std::string& setup_log(data::location_ptr location, const std::string &name);
 
             std::shared_ptr<spdlog::logger> get_main_logger();
 
-            inline void copy_log_settings(const std::string &name) {
+            inline void copy_log_settings(data::location_ptr location, const std::string &name) {
                 if(get_main_logger()->name().empty())
                 {
-                    setup_log(name);
+                    setup_log(location, name);
                 }
                 auto logger_cloned = get_main_logger()->clone(name);
                 spdlog::set_default_logger(logger_cloned);

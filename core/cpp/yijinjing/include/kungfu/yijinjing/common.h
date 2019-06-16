@@ -1,3 +1,7 @@
+#include <utility>
+
+#include <utility>
+
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -147,38 +151,37 @@ namespace kungfu
                 }
             }
 
+            typedef std::function<void (const uint32_t, const int)> get_page_path;
+
+
+            FORWARD_DECLARE_PTR(location)
             class location
             {
             public:
-                location(data::mode m, data::category c, const std::string &group, const std::string &name) :
-                        mode(m), category(c), group(group), name(name),
-                        keyname_(get_mode_name(mode) + get_category_name(category) + group + name),
-                        hash_(util::hash_str_32(keyname_))
+                location(data::mode m, data::category c, std::string group, std::string name) :
+                        mode(m), category(c), group(std::move(group)), name(std::move(name))
                 {};
 
-                location(const location& copy) : location(copy.mode, copy.category, copy.group, copy.name)
-                {}
+                virtual ~location() = default;
 
                 const mode mode;
                 const category category;
                 const std::string group;
                 const std::string name;
 
-                inline const std::string &keyname() const
-                {
-                    return keyname_;
-                }
-
                 inline uint32_t hash() const
                 {
-                    return hash_;
+                    return util::hash_str_32(journal_path());
                 }
 
-            private:
-                const std::string keyname_;
-                const uint32_t hash_;
+                virtual const std::string journal_path() const = 0;
+                virtual const std::string socket_path() const = 0;
+                virtual const std::string log_path() const = 0;
+                virtual const std::string make_path(const std::string& parent, const std::string& filename) const = 0;
+                virtual const std::vector<int> list_page_id(uint32_t dest_id) const = 0;
+
+                virtual const location_ptr make_location(data::mode m, data::category c, const std::string &group, const std::string &name) const = 0;
             };
-            DECLARE_PTR(location)
         }
 
         namespace action

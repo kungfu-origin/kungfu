@@ -21,7 +21,6 @@ namespace kungfu
         TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
             kungfu::TdGatewayImpl(SOURCE_XTP, TD_GATEWAY_NAME(SOURCE_XTP, config_str["user_id"]))
         {
-            kungfu::yijinjing::log::copy_log_settings(get_name());
             client_id_ = config_int["client_id"];
             software_key_ = config_str["software_key"];
             user_ = config_str["user_id"];
@@ -32,7 +31,6 @@ namespace kungfu
             session_id_ = 0;
             request_id_ = 0;
             api_ = nullptr;
-            SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
             std::string order_mapper_db_file = fmt::format(ORDER_MAPPER_DB_FILE_FORMAT, get_base_dir(), get_name());
 #ifdef _WINDOWS
             std::replace(order_mapper_db_file.begin(), order_mapper_db_file.end(), '/', '\\');
@@ -49,8 +47,10 @@ namespace kungfu
             }
         }
 
-        void TdGateway::init()
+        void TdGateway::init(yijinjing::event_source_ptr event_source)
         {
+            kungfu::yijinjing::log::copy_log_settings(event_source->get_io_device()->get_home(), get_name());
+            SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
             login();
         }
 

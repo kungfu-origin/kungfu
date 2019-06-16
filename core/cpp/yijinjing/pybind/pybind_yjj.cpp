@@ -35,6 +35,41 @@ using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::yijinjing::util;
 using namespace kungfu::practice;
 
+class PyLocation : public data::location
+{
+    using data::location::location;
+
+    const std::string journal_path() const override
+    {
+        PYBIND11_OVERLOAD_PURE(std::string, data::location, journal_path,)
+    }
+
+    const std::string socket_path() const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, data::location, socket_path,)
+    }
+
+    const std::string log_path() const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, data::location, log_path,)
+    }
+
+    const std::string make_path(const std::string& parent, const std::string& filename) const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, data::location, make_path, parent, filename)
+    }
+
+    const std::vector<int> list_page_id(uint32_t dest_id) const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::vector<int>, data::location, list_page_id, dest_id)
+    }
+
+    const data::location_ptr make_location(data::mode m, data::category c, const std::string &group, const std::string &name) const override
+    {
+        PYBIND11_OVERLOAD_PURE(const data::location_ptr, data::location, make_location, m, c, group, name)
+    }
+};
+
 class PyEvent : public event
 {
 public:
@@ -186,14 +221,20 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("address", &frame::address)
             .def("has_data", &frame::has_data);
 
-    py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
+    py::class_<data::location, PyLocation, std::shared_ptr<data::location>>(m, "location")
             .def(py::init<data::mode, data::category, const std::string&, const std::string&>())
             .def_readonly("mode", &data::location::mode)
             .def_readonly("category", &data::location::category)
             .def_readonly("group", &data::location::group)
             .def_readonly("name", &data::location::name)
-            .def_property_readonly("keyname", &data::location::keyname)
-            .def_property_readonly("hash", &data::location::hash);
+            .def_property_readonly("hash", &data::location::hash)
+            .def_property_readonly("journal_path", &data::location::journal_path)
+            .def_property_readonly("socket_path", &data::location::socket_path)
+            .def_property_readonly("log_path", &data::location::log_path)
+            .def("make_path", &data::location::make_path)
+            .def("list_page_id", &data::location::list_page_id)
+            .def("make_location", &data::location::make_location)
+            ;
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)

@@ -36,12 +36,12 @@ namespace kungfu
 #define DUMP_1M_SNAPSHOT(account_id, account_info) kungfu::storage::SnapshotStorage(\
     ACCOUNT_SNAPSHOT_DB_FILE(account_id), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true).insert(account_info)
 
-    GatewayImpl::GatewayImpl(const std::string &source, const std::string &name) : source_(source), name_(name), state_(GatewayState::Idle) {
-        kungfu::yijinjing::log::copy_log_settings(name);
-    }
+    GatewayImpl::GatewayImpl(const std::string &source, const std::string &name) : source_(source), name_(name), state_(GatewayState::Idle)
+    {}
 
     void GatewayImpl::configure_event_source(kungfu::yijinjing::event_source_ptr event_source)
     {
+        kungfu::yijinjing::log::copy_log_settings(event_source->get_io_device()->get_home(), get_name());
         SPDLOG_DEBUG("created gateway {} with source {}", get_name(), get_source());
         event_source_ = event_source;
 
@@ -106,7 +106,7 @@ namespace kungfu
         register_req_login_callback(std::bind(&MdGatewayImpl::on_login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         register_subscribe_callback(std::bind(&MdGatewayImpl::on_subscribe, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-        init();
+        init(event_source);
     }
 
     void MdGatewayImpl::on_login(const std::string &source, const std::string& name, const std::string &client_id)
@@ -185,7 +185,7 @@ namespace kungfu
         }
         uid_generator_ = std::unique_ptr<UidGenerator>(new UidGenerator(worker_id, UID_EPOCH_SECONDS));
 
-        event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source()));
+        event_source_->subscribe(event_source_->get_io_device()->get_home()->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::MD, get_source(), get_source()));
 
         std::shared_ptr<kungfu::TraderDataFeedHandler> feed_handler = std::shared_ptr<kungfu::TraderDataFeedHandler>(new kungfu::TraderDataStreamingWriter(event_source_->get_writer(0)));
         register_feed_handler(feed_handler);
@@ -211,7 +211,7 @@ namespace kungfu
         account_manager_->register_pos_callback(std::bind(&NNPublisher::publish_pos, (NNPublisher*)get_publisher(), std::placeholders::_1));
         account_manager_->register_acc_callback(std::bind(&NNPublisher::publish_account_info, (NNPublisher*)get_publisher(), std::placeholders::_1, MsgType::AccountInfo));
 
-        init();
+        init(event_source);
     }
 
     void TdGatewayImpl::on_started()
@@ -231,9 +231,10 @@ namespace kungfu
         int64_t last_update = account_manager_->get_last_update();
         if (last_update > 0)
         {
-            auto reader = event_source_->get_io_device()->open_reader_to_subscribe();
-            reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source()), 0, last_update);
-            reader->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id()), 0, last_update);
+            auto io = event_source_->get_io_device();
+            auto reader = io->open_reader_to_subscribe();
+            reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::MD, get_source(), get_source()), 0, last_update);
+            reader->subscribe(io->get_home()->make_location(yijinjing::data::mode::LIVE, kungfu::yijinjing::data::category::TD, get_source(), get_account_id()), 0, last_update);
             while (reader->data_available())
             {
                 auto frame = reader->current_frame();
@@ -311,7 +312,7 @@ namespace kungfu
         SPDLOG_TRACE("login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
         if (source == get_source() && name == get_account_id())
         {
-            event_source_->subscribe(std::make_shared<yijinjing::data::location>(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id));
+            event_source_->subscribe(event_source_->get_io_device()->get_home()->make_location(yijinjing::data::mode::LIVE, yijinjing::data::category::STRATEGY, client_id, client_id));
 
             gateway::GatewayLoginRsp rsp = {};
             rsp.state = this->get_state();

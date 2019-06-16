@@ -37,7 +37,7 @@ namespace kungfu
             void
             reader::subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
             {
-                auto key = location->keyname();
+                auto key = location->hash();
                 if (journals_.find(key) == journals_.end())
                 {
                     current_ = std::make_shared<journal>(location, dest_id, false, lazy_);
@@ -49,7 +49,7 @@ namespace kungfu
 
             void reader::seek_to_time(int64_t nanotime)
             {
-                for (std::pair<std::string, journal_ptr> element: journals_)
+                for (std::pair<uint32_t, journal_ptr> element: journals_)
                 {
                     element.second->seek_to_time(nanotime);
                 }
@@ -71,7 +71,7 @@ namespace kungfu
                 }
 
                 int64_t min_time = time::now_in_nano();
-                for (std::pair<std::string, journal_ptr> element: journals_)
+                for (std::pair<uint32_t, journal_ptr> element: journals_)
                 {
                     auto frame = element.second->current_frame();
                     if (frame.has_data() && frame.gen_time() <= min_time)

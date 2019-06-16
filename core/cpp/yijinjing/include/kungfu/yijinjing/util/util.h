@@ -23,12 +23,6 @@ namespace kungfu
             uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed=KUNGFU_HASH_SEED);
 
             uint32_t hash_str_32(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
-            uint16_t hash_str_16_low(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
-            uint16_t hash_str_16_high(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
-
-            std::string make_path(std::initializer_list<std::string> list, bool is_file=false);
-
-            std::vector<int> list_journal_page_id(const std::string &path, uint32_t dest_id);
 
             void print_backtrace();
 
