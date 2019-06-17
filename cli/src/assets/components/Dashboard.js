@@ -1,5 +1,5 @@
 import blessed  from 'blessed';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '../public/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '../utils';
 
 class Dashboard {
     constructor(){

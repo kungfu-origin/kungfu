@@ -1,5 +1,5 @@
-import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, dealStatus } from './utils';
+import Table from './Table';
+import { calcuHeaderWidth, parseToString, dealStatus } from '../utils';
 
 
 function MdTable(){

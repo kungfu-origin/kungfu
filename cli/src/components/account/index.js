@@ -1,14 +1,14 @@
 import blessed  from 'blessed';
 import { line } from 'blessed-contrib'
-import accountTable from '../public/AccountTable';
-import posTable from '../public/PosTable';
-import mdTable from '../public/MdTable';
-import orderTable from '../public/OrderTable';
-import tradeTable from '../public/TradeTable';
-import Dashboard from '../public/Dashboard';
+import accountTable from '__@/assets/components/AccountTable';
+import posTable from '__@/assets/components/PosTable';
+import mdTable from '__@/assets/components/MdTable';
+import orderTable from '__@/assets/components/OrderTable';
+import tradeTable from '__@/assets/components/TradeTable';
+import Dashboard from '__@/assets/components/Dashboard';
 
 import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
-import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '../public/utils';
+import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '__@/assets/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
 
 // 定义全局变量
@@ -46,6 +46,21 @@ class AccountDashboard extends Dashboard {
 		t.initMessage();
 		t.screen.render();
 		t.bindEvent();
+
+		t.addAccountBtn = blessed.Input({
+			parent: t.accountTable,
+			content: 'Add',
+			top: 1,
+			left: '96%-6',
+			width: 6,
+			height: 1,
+			align: 'center',
+			keys: true,
+			autoCommandKeys: true,
+			style: {
+				bg: 'blue'
+			}
+		})
 	}
 	
 	initAccountTable(){
@@ -71,6 +86,10 @@ class AccountDashboard extends Dashboard {
 	
 		})
 		t.accountTable.focus();
+
+		
+
+	
 	}
 	
 	initMdTable(){

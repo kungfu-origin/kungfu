@@ -1,6 +1,6 @@
 import colors from 'colors';
-import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, posDirection } from './utils';
+import Table from './Table';
+import { calcuHeaderWidth, parseToString, posDirection } from '../utils';
 import { toDecimal } from '@/assets/js/utils';
 
 function PosTable(){

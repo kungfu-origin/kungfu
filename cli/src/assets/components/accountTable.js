@@ -1,6 +1,6 @@
 import colors from 'colors';
-import Table from '../public/Table';
-import { calcuHeaderWidth, parseToString, parseAccountList, dealNum, dealStatus } from './utils';
+import Table from './Table';
+import { calcuHeaderWidth, parseToString, parseAccountList, dealNum, dealStatus } from '../utils';
 import { sourceType } from '@/assets/config/accountConfig';
 import { toDecimal } from '@/assets/js/utils';
 
