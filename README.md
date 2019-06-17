@@ -98,6 +98,8 @@ Compile 编译
 $ git clone https://github.com/taurusai/kungfu
 $ cd kungfu
 $ yarn install
+$ cd core && yarn run build
+$ cd ../app && yarn run build
 $ yarn run build
 ```
 
