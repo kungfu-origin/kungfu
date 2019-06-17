@@ -3,9 +3,6 @@ import moment from 'moment';
 import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
 import { setTasksDB } from '@/io/base';
 import { toDecimal } from '@/assets/js/utils';
-import { getAccountBySource, addAccount } from '@/io/account';
-
-const ora = require('ora');
 
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
@@ -229,19 +226,4 @@ export const buildDateRange = () => {
 
 export const buildTradingDay = () => {
 	return moment().format('YYYYMMDD')
-}
-
-export const addAccountByPrompt = async (source, key, config) => {
-    if(!key) throw new Error('something wrong with the key!')
-    const accountId = `${source}_${config[key]}`
-    const accountsBySource = await getAccountBySource(source)
-    const spinner = ora('Adding account').start();
-    try {
-        await addAccount(accountId, source, !accountsBySource.length, config)
-        spinner.stop();            
-    }catch(err){
-        spinner.stop();
-        throw err
-    }
-    console.log(`Add account ${JSON.stringify(config, null , '')} sucess!`)
 }
