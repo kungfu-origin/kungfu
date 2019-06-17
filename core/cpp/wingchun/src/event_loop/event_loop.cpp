@@ -113,7 +113,7 @@ namespace kungfu
         return nano > 0 ? nano : kungfu::yijinjing::time::now_in_nano();
     }
 
-    void EventLoop::handle(const yijinjing::event *event)
+    void EventLoop::handle(const yijinjing::event_ptr event)
     {
         scheduler_->update_nano(event->gen_time());
         auto msg_type = static_cast<MsgType>(event->msg_type());

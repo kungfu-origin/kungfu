@@ -43,6 +43,9 @@ namespace kungfu
                     current_->seek_to_time(from_time);
                     journals_[location->uid] = current_;
                     seek_current_journal();
+                } else
+                {
+                    SPDLOG_ERROR("Subscribed {} more than once", location->uname);
                 }
             }
 
@@ -73,9 +76,9 @@ namespace kungfu
                 for (std::pair<uint32_t, journal_ptr> element: journals_)
                 {
                     auto frame = element.second->current_frame();
-                    if (frame.has_data() && frame.gen_time() <= min_time)
+                    if (frame->has_data() && frame->gen_time() <= min_time)
                     {
-                        min_time = frame.gen_time();
+                        min_time = frame->gen_time();
                         current_ = element.second;
                     }
                 }

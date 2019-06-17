@@ -3,6 +3,7 @@
 //
 
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/time.h>
@@ -18,73 +19,59 @@ namespace kungfu
 {
     namespace practice
     {
-
-        master::master(location_ptr home, bool low_latency) : hero(home, low_latency)
+        master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency))
         {
-            log::setup_log(home, home->name);
-            io_device_ = std::make_shared<io_device_master>(get_home(), low_latency);
-            reader_ = io_device_->open_reader_to_subscribe();
-            os::handle_os_signals();
+            add_event_handler(shared_from_this());
         }
 
-        void master::register_event_source(uint32_t source_id)
+        void master::handle(const event_ptr e)
         {
-            reader_->subscribe(get_location(source_id), 0, 0);
-        }
-
-        void master::try_once()
-        {
-            if (io_device_->get_observer()->wait())
+            switch (e->msg_type())
             {
-                std::string notice = io_device_->get_observer()->get_notice();
-                if (notice.length() > 2)
+                case MsgType::Register:
                 {
-                    io_device_->get_publisher()->publish(notice);
-                }
-            }
-            if (reader_->data_available())
-            {
-                auto frame = reader_->current_frame();
-                switch (frame.msg_type())
-                {
-                    case MsgType::Subscribe:
+                    auto app_location = get_location(e->source());
+                    if (writers_.find(app_location->uid) == writers_.end())
                     {
-                        auto msg = frame.data<action::Subscribe>();
-//                            reader_->subscribe(*get_location(msg.source_id), msg.from_time);
-                        writers_[frame.source()]->write(frame.gen_time(), frame.msg_type(), 0, &msg);
+                        auto now = time::now_in_nano();
+                        auto uid_str = fmt::format("{:08x}", app_location->uid);
+                        auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "app", uid_str, get_io_device()->get_home()->locator);
+                        reader_->subscribe(app_location, 0, now);
+                        reader_->subscribe(app_location, master_location->uid, now);
+
+                        auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
+                        writers_[app_location->uid] = writer;
+
+                        action::RequestPublish msg;
+                        msg.dest_id = 0;
+                        writer->write(e->gen_time(), MsgType::RequestPublish, master_location->uid, &msg);
+                        msg.dest_id = master_location->uid;
+                        writer->write(e->gen_time(), MsgType::RequestPublish, master_location->uid, &msg);
+                    }
+                    break;
+                }
+                case MsgType::RequestSubscribe:
+                {
+                    auto subscribe = e->data<action::RequestSubscribe>();
+                    action::RequestPublish publish{};
+                    publish.dest_id = e->source();
+                    if (writers_.find(subscribe.source_id) == writers_.end())
+                    {
+                        SPDLOG_ERROR("Subscribe to unknown location");
                         break;
                     }
-                    default:
+                    if (writers_.find(e->source()) == writers_.end())
+                    {
+                        SPDLOG_ERROR("Unregistered request");
                         break;
+                    }
+                    writers_[subscribe.source_id]->write(e->gen_time(), MsgType::RequestPublish, get_home_uid(), &publish);
+                    writers_[e->source()]->write(e->gen_time(), MsgType::RequestSubscribe, get_home_uid(), &subscribe);
+                    break;
                 }
-                reader_->next();
-            }
-            if (io_device_->get_service_socket()->recv() > 0)
-            {
-                auto msg = io_device_->get_service_socket()->last_message();
-                nlohmann::json request = nlohmann::json::parse(msg);
-                int pid = request["pid"];
-                data::mode mode = request["mode"];
-                data::category category = request["category"];
-                std::string group = request["group"];
-                std::string name = request["name"];
-                auto location = std::make_shared<data::location>(mode, category, group, name, get_home()->locator);
-                if (writers_.find(location->uid) == writers_.end())
+                default:
                 {
-                    auto now = time::now_in_nano();
-                    writers_[location->uid] = io_device_->open_writer(location->uid);
-                    reader_->subscribe(location, 0, now);
-                    reader_->subscribe(location, get_home()->uid, now);
-
-                    nlohmann::json response;
-                    response["success"] = true;
-                    response["uid"] = location->uid;
-                    io_device_->get_service_socket()->send_json(response);
-                } else
-                {
-                    nlohmann::json response;
-                    response["success"] = false;
-                    io_device_->get_service_socket()->send_json(response);
+                    break;
                 }
             }
         }

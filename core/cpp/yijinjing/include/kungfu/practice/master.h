@@ -10,26 +10,27 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/hero.h>
 
-namespace kungfu {
-    namespace practice {
-
-        class master : public hero {
+namespace kungfu
+{
+    namespace practice
+    {
+        class master : public hero, public yijinjing::event_handler, public std::enable_shared_from_this<master>
+        {
         public:
             master(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void register_event_source(uint32_t source_id);
+            void subscribe(const yijinjing::data::location_ptr location) override {}
 
-            yijinjing::io_device_master_ptr get_io_device() { return io_device_; };
+            const std::string &get_name() const override
+            { return get_io_device()->get_home()->name; }
 
-        protected:
-            void try_once() override ;
+            void configure_event_source(yijinjing::event_source_ptr event_source) override
+            {}
 
-        private:
-            yijinjing::io_device_master_ptr io_device_;
-            yijinjing::journal::reader_ptr reader_;
-            yijinjing::nanomsg::socket_ptr service_socket_;
-            yijinjing::nanomsg::socket_ptr pull_socket_;
-            std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
+            void handle(const yijinjing::event_ptr e) override;
+
+            void finish() override
+            {}
         };
     }
 }

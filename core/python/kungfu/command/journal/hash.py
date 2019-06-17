@@ -1,8 +1,9 @@
 import pyyjj
 import click
-from kungfu.command.journal import journal
+from kungfu.command.journal import journal, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
+from kungfu.practice.apprentice import Apprentice, EventHandler
 
 KB = 2 ** 10
 MB = 2 ** 20
@@ -32,6 +33,8 @@ GB = 2 ** 30
 @journal.command()
 @click.pass_context
 def test(ctx):
+    pass_ctx_from_parent(ctx)
+    ctx.low_latency = False
     click.echo(2 ** 16)
     click.echo(2 ** 32)
     click.echo(hex(pyyjj.hash_str_32('helloworld'))[2:])
@@ -44,5 +47,6 @@ def test(ctx):
     click.echo(pyyjj.get_page_path(loc, 0, 1))
     click.echo(pyyjj.get_page_path(loc, loc.uid, 1))
     click.echo(ctx.parent.locator.list_page_id(loc, pyyjj.hash_str_32('helloworld')))
-    io = pyyjj.io_device_client(loc, False)
+    app = Apprentice(ctx)
+    app.go()
     click.echo('done')

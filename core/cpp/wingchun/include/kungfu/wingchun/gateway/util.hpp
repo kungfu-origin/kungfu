@@ -63,7 +63,7 @@ namespace kungfu
             }
         }
 
-        inline GatewayLoginRsp login(yijinjing::io_device_client_ptr io_device, yijinjing::data::category c, const std::string& group, const std::string& name, const std::string& sender)
+        inline GatewayLoginRsp login(yijinjing::io_device_ptr io_device, yijinjing::data::category c, const std::string& group, const std::string& name, const std::string& sender)
         {
             LoginRequest request;
             request.sender = sender;
@@ -98,17 +98,17 @@ namespace kungfu
             return rsp;
         }
 
-        inline GatewayLoginRsp add_market_feed(yijinjing::io_device_client_ptr io_device, const std::string& source, const std::string& sender)
+        inline GatewayLoginRsp add_market_feed(yijinjing::io_device_ptr io_device, const std::string& source, const std::string& sender)
         {
             return login(io_device, yijinjing::data::category::MD, source, source, sender);
         }
 
-        inline GatewayLoginRsp register_trade_account(yijinjing::io_device_client_ptr io_device, const std::string& source, const std::string& account_id, const std::string& sender)
+        inline GatewayLoginRsp register_trade_account(yijinjing::io_device_ptr io_device, const std::string& source, const std::string& account_id, const std::string& sender)
         {
             return login(io_device, yijinjing::data::category::TD, source, account_id, sender);
         }
 
-        inline void subscribe(kungfu::yijinjing::io_device_client_ptr io_device, const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
+        inline void subscribe(kungfu::yijinjing::io_device_ptr io_device, const std::string& source, const std::vector<journal::Instrument>& instruments, bool is_level2, const std::string& sender)
         {
 
             SubscribeRequest request = {};

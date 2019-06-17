@@ -510,12 +510,12 @@ namespace kungfu
             while (reader->data_available())
             {
                 auto frame = reader->current_frame();
-                MsgType msg_type = static_cast<MsgType>(frame.msg_type());
+                MsgType msg_type = static_cast<MsgType>(frame->msg_type());
                 switch (msg_type)
                 {
                     case MsgType::Quote:
                     {
-                        auto quote = frame.data<Quote>();
+                        auto quote = frame->data<Quote>();
                         if (quote.rcv_time > last_update)
                         {
                             portfolio_manager_->on_quote(&quote);
@@ -524,7 +524,7 @@ namespace kungfu
                     }
                     case MsgType::Order:
                     {
-                        auto order = frame.data<Order>();
+                        auto order = frame->data<Order>();
                         if (strcmp(order.client_id, this->name_.c_str()) == 0 && order.rcv_time > last_update)
                         {
                             portfolio_manager_->on_order(&order);
@@ -533,7 +533,7 @@ namespace kungfu
                     }
                     case MsgType::Trade:
                     {
-                        auto trade = frame.data<Trade>();
+                        auto trade = frame->data<Trade>();
                         if (strcmp(trade.client_id, this->name_.c_str()) == 0 && trade.rcv_time > last_update)
                         {
                             portfolio_manager_->on_trade(&trade);

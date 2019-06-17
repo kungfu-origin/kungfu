@@ -25,38 +25,19 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/hero.h>
 
-namespace kungfu {
-    namespace practice {
-
-        class apprentice : public hero, public yijinjing::event_source, public std::enable_shared_from_this<apprentice> {
+namespace kungfu
+{
+    namespace practice
+    {
+        class apprentice : public hero
+        {
         public:
             explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
             void subscribe(const yijinjing::data::location_ptr location) override;
 
-            yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) override { return writers_[dest_id]; };
-
-            yijinjing::nanomsg::socket_ptr get_socket_reply() override { return socket_reply_; };
-            yijinjing::nanomsg::socket_ptr get_socket_publish() override { return socket_publish_; };
-
-            void add_event_handler(yijinjing::event_handler_ptr handler);
-
-            void go() override ;
-
-            yijinjing::io_device_client_ptr get_io_device() override { return io_device_; };
-
-        protected:
-            void try_once() override ;
-
         private:
-            yijinjing::io_device_client_ptr io_device_;
-            yijinjing::journal::reader_ptr reader_;
-            std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
-            yijinjing::nanomsg::socket_ptr socket_reply_;
-            yijinjing::nanomsg::socket_ptr socket_publish_;
-            std::unordered_map<std::string, yijinjing::nanomsg::socket_ptr> sub_sockets_;
-            std::vector<kungfu::yijinjing::event_handler_ptr> event_handlers_;
-            bool live_ = true;
+            yijinjing::data::location_ptr master_location_;
         };
     }
 }

@@ -18,7 +18,7 @@ namespace kungfu
         j["msg_type"] = int(msg_type);
         j["source"] = 0;
         j["data"] = data;
-        event_source_->get_socket_publish()->send_json(j);
+//        event_source_->get_socket_publish()->send_json(j);
         SPDLOG_TRACE("nn published {}", j.dump());
     }
 

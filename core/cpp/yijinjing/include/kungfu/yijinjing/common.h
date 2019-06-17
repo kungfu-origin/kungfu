@@ -48,8 +48,12 @@ namespace kungfu
         {
             SessionStart = 10001,
             SessionEnd = 10002,
-            Subscribe = 10003,
-            Unsubscribe = 10004
+            Register = 10011,
+            Deregister = 10012,
+            RequestSubscribe = 10021,
+            RequestUnsubscribe = 10022,
+            RequestPublish = 10023,
+            RequestUnpublish = 10024
         };
 
         class event
@@ -62,9 +66,9 @@ namespace kungfu
 
             virtual int64_t trigger_time() const = 0;
 
-            virtual int16_t msg_type() const = 0;
+            virtual int32_t msg_type() const = 0;
 
-            virtual int16_t source() const = 0;
+            virtual uint32_t source() const = 0;
 
             template<typename T>
             inline const T &data() const
@@ -75,6 +79,7 @@ namespace kungfu
         protected:
             virtual const void *data_address() const = 0;
         };
+        DECLARE_PTR(event)
 
         class publisher
         {
@@ -191,10 +196,14 @@ namespace kungfu
 
         namespace action
         {
-            struct Subscribe
+            struct RequestSubscribe
             {
                 uint32_t source_id;
                 int64_t from_time;
+            };
+            struct RequestPublish
+            {
+                uint32_t dest_id;
             };
         }
     }

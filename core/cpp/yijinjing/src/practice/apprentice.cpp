@@ -17,13 +17,11 @@
 // Created by Keren Dong on 2019-06-01.
 //
 
-#include <iostream>
-
+#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <nanomsg/pubsub.h>
+#include <fmt/format.h>
 #include <hffix.hpp>
 
-#include <spdlog/spdlog.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/os.h>
@@ -31,88 +29,42 @@
 #include <kungfu/practice/apprentice.h>
 
 using namespace kungfu::yijinjing;
-using namespace kungfu::yijinjing::journal;
-using namespace kungfu::yijinjing::nanomsg;
-using namespace kungfu::practice;
+using namespace kungfu::yijinjing::data;
 
-apprentice::apprentice(yijinjing::data::location_ptr home, bool low_latency) : hero(home, low_latency)
+namespace kungfu
 {
-    log::setup_log(home, home->name);
-    io_device_ = std::make_shared<io_device_client>(get_home(), low_latency);
-    reader_ = io_device_->open_reader_to_subscribe();
-    os::handle_os_signals();
-}
-
-void apprentice::subscribe(const data::location_ptr location)
-{
-    int64_t now = time::now_in_nano();
-    reader_->subscribe(location, 0, now);
-    reader_->subscribe(location, get_home()->uid, now);
-    SPDLOG_INFO("apprentice subscribed for {}", location->uname);
-}
-
-void apprentice::add_event_handler(event_handler_ptr handler)
-{
-    event_handlers_.push_back(handler);
-}
-
-void apprentice::go()
-{
-    for (auto handler: event_handlers_)
+    namespace practice
     {
-        handler->configure_event_source(shared_from_this());
-    }
-
-    hero::go();
-
-    for (auto handler: event_handlers_)
-    {
-        handler->finish();
-    }
-    SPDLOG_INFO("apprentice {} finished", get_home()->uname);
-}
-
-void apprentice::try_once()
-{
-    if (io_device_->get_observer()->wait())
-    {
-        std::string notice = io_device_->get_observer()->get_notice();
-        nanomsg_json event(notice);
-        for (auto handler : event_handlers_)
+        apprentice::apprentice(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_client>(home, low_latency))
         {
-            handler->handle(&event);
+            auto now = time::now_in_nano();
+            auto uid_str = fmt::format("{:08x}", get_home_uid());
+            master_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "app", uid_str, home->locator);
+            reader_->subscribe(master_location_, get_home_uid(), now);
+            nlohmann::json request;
+            request["msg_type"] = MsgType::Register;
+#ifdef _WINDOWS
+            request["pid"] = _getpid();
+#else
+            request["pid"] = getpid();
+#endif
+            request["gen_time"] = now;
+            request["trigger_time"] = now;
+            request["source"] = get_home_uid();
+            request["mode"] = home->mode;
+            request["category"] = home->category;
+            request["group"] = home->group;
+            request["name"] = home->name;
+            get_io_device()->get_publisher()->publish(request.dump());
         }
-    }
 
-    if (reader_.get() != nullptr && reader_->data_available())
-    {
-        for (auto handler : event_handlers_)
+        void apprentice::subscribe(const location_ptr location)
         {
-            handler->handle(&reader_->current_frame());
-        }
-        reader_->next();
-    }
-
-    if (socket_reply_.get() != nullptr && socket_reply_->recv() > 0)
-    {
-        SPDLOG_INFO("handle reply nn event {}", socket_reply_->last_message());
-        nanomsg_json event(socket_reply_->last_message());
-        for (auto handler : event_handlers_)
-        {
-            handler->handle(&event);
-        }
-    }
-
-    for (auto element : sub_sockets_)
-    {
-        if (element.second->recv() > 0)
-        {
-            SPDLOG_INFO("handle sub socket nn event {}", element.second->last_message());
-            nanomsg_json event(element.second->last_message());
-            for (auto handler : event_handlers_)
-            {
-                handler->handle(&event);
-            }
+            auto now = time::now_in_nano();
+            action::RequestSubscribe request;
+            request.source_id = location->uid;
+            request.from_time = now;
+            get_writer(master_location_->uid)->write(now, MsgType::RequestSubscribe, get_home_uid(), &request);
         }
     }
 }

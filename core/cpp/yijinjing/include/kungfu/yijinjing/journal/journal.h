@@ -44,12 +44,12 @@ namespace kungfu
             {
             public:
                 journal(const data::location_ptr location, uint32_t dest_id, bool is_writing, bool lazy) :
-                    location_(location), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy)
+                    location_(location), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy), frame_(std::shared_ptr<frame>(new frame()))
                 {}
 
                 ~journal();
 
-                frame &current_frame()
+                frame_ptr current_frame()
                 { return frame_; }
 
                 /**
@@ -70,7 +70,7 @@ namespace kungfu
                 const bool is_writing_;
                 const bool lazy_;
                 page_ptr current_page_;
-                frame frame_;
+                frame_ptr frame_;
 
                 void load_page(int page_id);
 
@@ -98,11 +98,11 @@ namespace kungfu
                  */
                 void subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time);
 
-                inline frame &current_frame()
+                inline frame_ptr current_frame()
                 { return current_->current_frame(); }
 
                 inline bool data_available()
-                { return current_frame().has_data(); }
+                { return current_frame()->has_data(); }
 
                 /** seek journal to time */
                 void seek_to_time(int64_t nanotime);
@@ -123,15 +123,15 @@ namespace kungfu
             public:
                 explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
 
-                frame &open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
+                frame_ptr open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
 
                 void close_frame(size_t data_length);
 
                 template<typename T>
                 inline void write(int64_t trigger_time, int16_t msg_type, int16_t source, const T *data)
                 {
-                    frame &frame = open_frame(trigger_time, msg_type, source);
-                    close_frame(frame.copy_data<T>(data));
+                    auto frame = open_frame(trigger_time, msg_type, source);
+                    close_frame(frame->copy_data<T>(data));
                 }
 
                 void write_raw(int64_t trigger_time, int16_t msg_type, int16_t source, char *data, int32_t length);

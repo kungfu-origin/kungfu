@@ -79,12 +79,12 @@ public:
         PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time,)
     }
 
-    int16_t msg_type() const override
+    int32_t msg_type() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type,)
     }
 
-    int16_t source() const override
+    uint32_t source() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, source,)
     }
@@ -101,7 +101,7 @@ public:
     void configure_event_source(event_source_ptr event_source) override
     {PYBIND11_OVERLOAD_PURE(void, event_handler, configure_event_source, event_source) }
 
-    void handle(const event *e) override
+    void handle(const event_ptr e) override
     {PYBIND11_OVERLOAD_PURE(void, event_handler, handle, e) }
 
     void finish() override
@@ -120,11 +120,6 @@ public:
     writer_ptr get_writer(uint32_t dest_id) override
     {
         PYBIND11_OVERLOAD_PURE(writer_ptr, event_source, get_writer, dest_id)
-    }
-
-    socket_ptr get_socket_reply() override
-    {
-        PYBIND11_OVERLOAD_PURE(socket_ptr, event_source, get_socket_reply,)
     }
 };
 
@@ -203,7 +198,6 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("trigger_time", &frame::trigger_time)
             .def_property_readonly("source", &frame::source)
             .def_property_readonly("msg_type", &frame::msg_type)
-            .def_property_readonly("hashcode", &frame::hashcode)
             .def_property_readonly("frame_length", &frame::frame_length)
             .def_property_readonly("header_length", &frame::header_length)
             .def_property_readonly("data_length", &frame::data_length)
@@ -275,7 +269,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
-            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
+            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
+            ;
 
     py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
             .def(py::init<data::location_ptr, bool>())
@@ -294,20 +289,17 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<event_source, PyEventSource, event_source_ptr> py_event_source(m, "event_source");
     py_event_source.def("subscribe", &event_source::subscribe)
             .def_property_readonly("io_device", &event_source::get_io_device)
-            .def_property_readonly("writer", &event_source::get_writer)
-            .def_property_readonly("socket_reply", &event_source::get_socket_reply);
+            .def_property_readonly("writer", &event_source::get_writer);
 
-    py::class_<hero, std::shared_ptr<hero>> py_hero(m, "hero", py_event_source);
-    py_hero.def("go", &hero::go);
-
-    py::class_<master, std::shared_ptr<master>>(m, "master", py_hero)
+    py::class_<master, std::shared_ptr<master>>(m, "master")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-            .def_property_readonly("io_device", &master::get_io_device);
+            .def_property_readonly("io_device", &master::get_io_device)
+            .def("run", &master::run);
 
-    py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice", py_hero)
+    py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("add_event_handler", &apprentice::add_event_handler)
-            .def("go", &apprentice::go)
+            .def("run", &apprentice::run)
             .def("stop", &apprentice::stop);
 }

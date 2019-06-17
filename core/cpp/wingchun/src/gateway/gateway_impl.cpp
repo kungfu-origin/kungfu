@@ -121,7 +121,7 @@ namespace kungfu
             msg.msg_type = kungfu::MsgType::RspLogin;
             msg.data = rsp;
             std::string js = to_string(msg);
-            event_source_->get_socket_reply()->send(js);
+//            event_source_->get_socket_reply()->send(js);
             SPDLOG_TRACE("login sent {} ", js);
         } else
         {
@@ -159,7 +159,7 @@ namespace kungfu
             msg.data = rsp;
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
-            event_source_->get_socket_reply()->send(js, 0);
+//            event_source_->get_socket_reply()->send(js, 0);
         }
     }
 
@@ -238,12 +238,12 @@ namespace kungfu
             while (reader->data_available())
             {
                 auto frame = reader->current_frame();
-                MsgType msg_type = static_cast<MsgType>(frame.msg_type());
+                MsgType msg_type = static_cast<MsgType>(frame->msg_type());
                 switch (msg_type)
                 {
                     case MsgType::Quote:
                     {
-                        auto quote = frame.data<Quote>();
+                        auto quote = frame->data<Quote>();
                         if (quote.rcv_time > last_update)
                         {
                             account_manager_->on_quote(&quote);
@@ -252,7 +252,7 @@ namespace kungfu
                     }
                     case MsgType::Order:
                     {
-                        auto order = frame.data<Order>();
+                        auto order = frame->data<Order>();
                         if (order.rcv_time > last_update)
                         {
                             account_manager_->on_order(&order);
@@ -261,7 +261,7 @@ namespace kungfu
                     }
                     case MsgType::Trade:
                     {
-                        auto trade = frame.data<Trade>();
+                        auto trade = frame->data<Trade>();
                         if (trade.rcv_time > last_update)
                         {
                             account_manager_->on_trade(&trade);
@@ -270,7 +270,7 @@ namespace kungfu
                     }
                     case MsgType::AccountInfo:
                     {
-                        auto account = frame.data<AccountInfo>();
+                        auto account = frame->data<AccountInfo>();
                         if (account.rcv_time > last_update)
                         {
                             account_manager_->on_account(account);
@@ -323,7 +323,7 @@ namespace kungfu
             msg.data = rsp;
             std::string js = to_string(msg);
             SPDLOG_TRACE("sending {} ", js);
-            event_source_->get_socket_reply()->send(js, 0);
+//            event_source_->get_socket_reply()->send(js, 0);
         } else
         {
             SPDLOG_TRACE("wrong login from client {} source {} name {}, this source {} account_id {}", client_id, source, name, get_source(), get_account_id());
@@ -404,7 +404,7 @@ namespace kungfu
         msg.data["error_text"] = error_text;
         msg.data["order_id"] = std::to_string(order_id);
         std::string js = to_string(msg);
-        event_source_->get_socket_reply()->send(js, 0);
+//        event_source_->get_socket_reply()->send(js, 0);
     }
 
     void TdGatewayImpl::on_manual_order_action(const std::string &account_id, const std::string &client_id, const std::vector<uint64_t> &order_ids)
@@ -437,7 +437,7 @@ namespace kungfu
         msg.data["error_text"] = error_text;
         msg.data["cancel_count"] = cancel_count;
         std::string js = to_string(msg);
-        event_source_->get_socket_reply()->send(js, 0);
+//        event_source_->get_socket_reply()->send(js, 0);
     }
 
     void TdGatewayImpl::on_order(Order &order)

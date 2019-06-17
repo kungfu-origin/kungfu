@@ -44,11 +44,9 @@ namespace kungfu
 
             virtual journal::writer_ptr get_writer(uint32_t dest_id) = 0;
 
-            virtual nanomsg::socket_ptr get_socket_reply() = 0;
+//            virtual nanomsg::socket_ptr get_socket_reply() = 0;
 
-            virtual nanomsg::socket_ptr get_socket_publish() = 0;
-
-            virtual io_device_client_ptr get_io_device() = 0;
+            virtual io_device_ptr get_io_device() const = 0;
         };
 
         DECLARE_PTR(event_source)
@@ -62,7 +60,7 @@ namespace kungfu
 
             virtual void configure_event_source(event_source_ptr event_source) = 0;
 
-            virtual void handle(const event *e) = 0;
+            virtual void handle(const event_ptr e) = 0;
 
             virtual void finish()
             {}
@@ -84,6 +82,8 @@ namespace kungfu
             journal::reader_ptr open_reader(const data::location_ptr location, uint32_t dest_id);
 
             journal::writer_ptr open_writer(uint32_t dest_id);
+
+            journal::writer_ptr open_writer_at(const data::location_ptr location, uint32_t dest_id);
 
             nanomsg::socket_ptr
             connect_socket(const data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);

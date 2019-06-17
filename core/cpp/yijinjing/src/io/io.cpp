@@ -200,6 +200,11 @@ namespace kungfu
             return std::make_shared<writer>(home_, dest_id, lazy_, publisher_);
         }
 
+        writer_ptr io_device::open_writer_at(const data::location_ptr location, uint32_t dest_id)
+        {
+            return std::make_shared<writer>(location, dest_id, lazy_, publisher_);
+        }
+
         socket_ptr io_device::connect_socket(const data::location_ptr location, const protocol &p, int timeout)
         {
             socket_ptr s = std::make_shared<socket>(p);

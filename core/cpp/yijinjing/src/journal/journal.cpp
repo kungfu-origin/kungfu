@@ -39,8 +39,8 @@ namespace kungfu
             {
                 assert(current_page_.get() != nullptr);
 
-                frame_.move_to_next();
-                if (frame_.address() > current_page_->address_border())
+                frame_->move_to_next();
+                if (frame_->address() > current_page_->address_border())
                 {
                     load_next_page();
                 }
@@ -58,7 +58,7 @@ namespace kungfu
                 {
                     load_next_page();
                 }
-                while (frame_.has_data() && frame_.gen_time() <= nanotime)
+                while (frame_->has_data() && frame_->gen_time() <= nanotime)
                 {
                     next();
                 }
@@ -73,7 +73,7 @@ namespace kungfu
                 if (current_page_->get_page_id() != page_id)
                 {
                     current_page_ = page::load(location_, dest_id_, page_id, is_writing_, lazy_);
-                    frame_.set_address(current_page_->first_frame_address());
+                    frame_->set_address(current_page_->first_frame_address());
                 }
             }
 

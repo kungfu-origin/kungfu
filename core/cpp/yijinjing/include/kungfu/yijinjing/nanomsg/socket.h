@@ -96,6 +96,7 @@ namespace kungfu {
             private:
                 int errno_;
             };
+            DECLARE_PTR(nn_exception)
 
             class socket {
             public:
@@ -163,9 +164,9 @@ namespace kungfu {
 
                 inline int64_t trigger_time() const override {return binding_["trigger_time"];}
 
-                inline int16_t msg_type() const override {return binding_["msg_type"];}
+                inline int32_t msg_type() const override {return binding_["msg_type"];}
 
-                inline int16_t source() const override {return binding_["source"];}
+                inline uint32_t source() const override {return binding_["source"];}
 
             protected:
                 const void* data_address() const override { return &binding_["data"];}
@@ -173,6 +174,7 @@ namespace kungfu {
             private:
                 const nlohmann::json binding_;
             };
+            DECLARE_PTR(nanomsg_json)
         }
     }
 }

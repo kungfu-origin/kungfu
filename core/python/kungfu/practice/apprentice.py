@@ -2,12 +2,13 @@ import psutil
 import signal
 import pyyjj
 import kungfu.yijinjing.io as kfio
+import kungfu.yijinjing.journal as kfj
 from . import os_signal
 
 
 class Apprentice(pyyjj.apprentice):
     def __init__(self, ctx):
-        pyyjj.apprentice.__init__(self, name=ctx.name, low_latency=ctx.low_latency)
+        pyyjj.apprentice.__init__(self, pyyjj.location(kfj.MODES[ctx.mode], kfj.CATEGORIES[ctx.category], ctx.group, ctx.name, ctx.locator), low_latency=ctx.low_latency)
         self.ctx = ctx
         self._process = psutil.Process()
 

@@ -140,7 +140,7 @@ namespace kungfu
             j["gen_time"] = yijinjing::time::now_in_nano();
             j["trigger_time"] = yijinjing::time::now_in_nano();
             j["source"] = 0;
-            strategy_->event_source_->get_socket_reply()->send_json(j);
+//            strategy_->event_source_->get_socket_reply()->send_json(j);
         }
 
         void on_1min_timer(int64_t nano)

@@ -12,32 +12,49 @@
 namespace kungfu {
     namespace practice {
 
-        class hero {
+        class hero : public yijinjing::event_source {
         public:
-            explicit hero(yijinjing::data::location_ptr home, bool low_latency = false) : home_(home), low_latency_(low_latency) {}
+            explicit hero(yijinjing::io_device_ptr io_device);
+
             virtual ~hero() {}
 
-            yijinjing::data::location_ptr get_home() const { return home_; }
-            bool is_low_latency() const { return low_latency_; }
+            yijinjing::io_device_ptr get_io_device() const override
+            { return io_device_; }
 
-//            virtual yijinjing::journal::reader_ptr get_reader() = 0;
-//            virtual yijinjing::journal::writer_ptr get_writer() = 0;
+            yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) override
+            { return writers_[dest_id]; }
+
+            inline uint32_t get_home_uid() const
+            { return get_io_device()->get_home()->uid; }
 
             void register_location(const yijinjing::data::location_ptr location);
+
             const yijinjing::data::location_ptr get_location(uint32_t hash);
 
-            virtual void go();
+            inline void add_event_handler(yijinjing::event_handler_ptr handler)
+            {
+                event_handlers_.push_back(handler);
+            }
+
+            void pre_run();
+
+            void run();
+
+            void post_run();
 
             void stop() { live_ = false; };
 
         protected:
-            virtual void try_once() = 0;
+            void try_once();
+
+            yijinjing::journal::reader_ptr reader_;
+            std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
 
         private:
-            yijinjing::data::location_ptr home_;
-            const bool low_latency_;
+            yijinjing::io_device_ptr io_device_;
             bool live_ = true;
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
+            std::vector<kungfu::yijinjing::event_handler_ptr> event_handlers_;
         };
     }
 }

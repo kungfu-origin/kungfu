@@ -38,11 +38,9 @@ namespace kungfu
                 /** trigger time for this frame, use for latency stats */
                 int64_t trigger_time;
                 /** msg type of the data in frame */
-                int16_t msg_type;
+                int32_t msg_type;
                 /** source (system id) of this frame */
-                int16_t source;
-                /** hash code of whole frame */
-                uint32_t hash;
+                uint32_t source;
 #ifndef _WIN32
             } __attribute__((packed));
 #else
@@ -81,14 +79,11 @@ namespace kungfu
                 inline int64_t trigger_time() const override
                 { return header_->trigger_time; }
 
-                inline int16_t msg_type() const override
+                inline int32_t msg_type() const override
                 { return header_->msg_type; }
 
-                inline int16_t source() const override
+                inline uint32_t source() const override
                 { return header_->source; }
-
-                inline uint32_t hashcode() const
-                { return header_->hash; }
 
                 template<typename T>
                 inline size_t copy_data(const T *data)
@@ -135,9 +130,6 @@ namespace kungfu
 
                 inline void set_trigger_time(int64_t trigger_time)
                 { header_->trigger_time = trigger_time; }
-
-                inline void set_hashcode(int32_t hashcode)
-                { header_->hash = hashcode; }
 
                 inline void set_msg_type(int16_t msg_type)
                 { header_->msg_type = msg_type; }

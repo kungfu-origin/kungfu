@@ -18,6 +18,7 @@ a = Analysis(['kungfu/__main__.py'],
         ('../deps/spdlog-1.3.1/include', 'include'),
         ('../deps/json-3.5.0/single_include', 'include'),
         ('../deps/fmt-5.3.0/include', 'include'),
+        ('../deps/rxcpp-4.1.0/include', 'include'),
         ('../deps/hffix-b67d404f/include', 'include'),
         ('../deps/SQLiteCpp-2.3.0/include', 'include')
      ],
