@@ -2,14 +2,14 @@ import blessed  from 'blessed';
 import path from 'path';
 import { Tail } from 'tail';
 
-import strategyTable from '../public/StrategyTable';
-import posTable from '../public/PosTable';
-import orderTable from '../public/OrderTable';
-import tradeTable from '../public/TradeTable';
-import Dashboard from '../public/Dashboard';
+import strategyTable from '__@/assets/components/StrategyTable';
+import posTable from '__@/assets/components/PosTable';
+import orderTable from '__@/assets/components/OrderTable';
+import tradeTable from '__@/assets/components/TradeTable';
+import Dashboard from '__@/assets/components/Dashboard';
 
 import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '@/io/strategy.js';
-import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchStrategy, dealLog, buildTradingDay } from '../public/utils';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchStrategy, dealLog, buildTradingDay } from '__@/assets/utils';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { listProcessStatus } from '__gUtils/processUtils';
@@ -122,10 +122,10 @@ class StrategyDashboard extends Dashboard {
 		t.tradeTable = tradeTable.build({
 			label: ' Today Trades ',
 			parent: t.screen,
-			top: '66.66%-1',
+			top: '66.66%',
             left: WIDTH_LEFT_PANEL + '%',
 			width: 100 - WIDTH_LEFT_PANEL + '%',
-			height: '33.33%',
+			height: '33.33%-1',
             pad: 1,
             getDataMethod: getStrategyTrade,
 	        headers: ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Vol', 'AccountId']            

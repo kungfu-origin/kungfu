@@ -1,7 +1,7 @@
 import colors from 'colors';
 import moment from 'moment';
-import Table from '../public/Table';
-import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, buildDateRange } from "../public/utils";
+import Table from './Table';
+import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, buildDateRange } from "../utils";
 
 function OrderTable(){
     if (!(this instanceof OrderTable)) {

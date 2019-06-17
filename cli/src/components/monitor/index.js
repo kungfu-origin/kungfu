@@ -4,8 +4,8 @@ import path from 'path';
 import { Tail } from 'tail';
 
 import { LOG_DIR } from '__gConfig/pathConfig';
-import Dashboard from '../public/Dashboard';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString, dealLog } from '../public/utils';
+import Dashboard from '__@/assets/components/Dashboard';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString, dealLog } from '__@/assets/utils';
 import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
 import { dealLogMessage, getLog } from '@/assets/js/utils';

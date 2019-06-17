@@ -1,5 +1,5 @@
-import Table from '../public/Table';
-import { parseToString, dealNum, dealStatus, calcuHeaderWidth } from './utils';
+import Table from './Table';
+import { parseToString, dealNum, dealStatus, calcuHeaderWidth } from '../utils';
 
 function StrategyTable(){
     if (!(this instanceof StrategyTable)) {

@@ -53,6 +53,7 @@ let cliConfig = {
   resolve: {
     alias: {
       '@': path.join(__dirname, '../../app/src/renderer'),
+      '__@': path.join(__dirname, '../src'),
       '__gUtils': path.join(__dirname, '../../app/src/utils'),
       '__gConfig': path.join(__dirname, '../../app/src/config')
     },

@@ -1,5 +1,5 @@
 import blessed from 'blessed';
-import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from './utils';
+import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from '../utils';
 import { logger } from '__gUtils/logUtils';
 
 function Table(){
