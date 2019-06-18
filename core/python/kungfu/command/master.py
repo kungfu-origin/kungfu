@@ -10,5 +10,5 @@ def master(ctx, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
     server = Master(ctx)
-    server.go()
+    server.run()
 

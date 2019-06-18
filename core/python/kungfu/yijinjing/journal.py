@@ -67,7 +67,7 @@ class Locator(pyyjj.locator):
             match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(7)
-                page_ids.append(page_id)
+                page_ids.append(int(page_id))
         return page_ids
 
 

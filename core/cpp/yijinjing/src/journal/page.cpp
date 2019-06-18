@@ -100,12 +100,12 @@ namespace kungfu
                 {
                     return page_ids.front();
                 }
-                for (int idx = page_ids.size() - 1; idx >= 0; idx--)
+                for (int i = page_ids.size() - 1; i >= 0; i--)
                 {
-                    page_ptr page = page::load(location, page_ids[idx], false, true);
+                    page_ptr page = page::load(location, dest_id, page_ids[i], false, true);
                     if (page->begin_time() < time)
                     {
-                        return page_ids[idx];
+                        return page_ids[i];
                     }
                 }
                 return page_ids.front();

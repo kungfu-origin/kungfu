@@ -37,23 +37,24 @@ namespace kungfu
             void
             reader::subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
             {
-                if (journals_.find(location->uid) == journals_.end())
+                for (auto journal : journals_)
                 {
-                    current_ = std::make_shared<journal>(location, dest_id, false, lazy_);
-                    current_->seek_to_time(from_time);
-                    journals_[location->uid] = current_;
-                    seek_current_journal();
-                } else
-                {
-                    SPDLOG_ERROR("Subscribed {} more than once", location->uname);
+                    if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
+                    {
+                        throw journal_error(fmt::format("Can not subscribe journal {}/{} more than once", location->uname, dest_id));
+                    }
                 }
+                current_ = std::make_shared<journal>(location, dest_id, false, lazy_);
+                current_->seek_to_time(from_time);
+                journals_.push_back(current_);
+                seek_current_journal();
             }
 
             void reader::seek_to_time(int64_t nanotime)
             {
-                for (std::pair<uint32_t, journal_ptr> element: journals_)
+                for (auto journal : journals_)
                 {
-                    element.second->seek_to_time(nanotime);
+                    journal->seek_to_time(nanotime);
                 }
                 seek_current_journal();
             }
@@ -73,13 +74,13 @@ namespace kungfu
                 }
 
                 int64_t min_time = time::now_in_nano();
-                for (std::pair<uint32_t, journal_ptr> element: journals_)
+                for (auto journal : journals_)
                 {
-                    auto frame = element.second->current_frame();
+                    auto frame = journal->current_frame();
                     if (frame->has_data() && frame->gen_time() <= min_time)
                     {
                         min_time = frame->gen_time();
-                        current_ = element.second;
+                        current_ = journal;
                     }
                 }
             }

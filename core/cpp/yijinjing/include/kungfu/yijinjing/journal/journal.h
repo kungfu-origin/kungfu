@@ -78,6 +78,7 @@ namespace kungfu
                 void load_next_page();
 
                 /** writer needs access to current_page_ to update page header */
+                friend class reader;
                 friend class writer;
             };
 
@@ -102,7 +103,7 @@ namespace kungfu
                 { return current_->current_frame(); }
 
                 inline bool data_available()
-                { return current_frame()->has_data(); }
+                { return current_.get() != nullptr && current_frame()->has_data(); }
 
                 /** seek journal to time */
                 void seek_to_time(int64_t nanotime);
@@ -113,7 +114,7 @@ namespace kungfu
             private:
                 const bool lazy_;
                 journal_ptr current_;
-                std::unordered_map<uint32_t, journal_ptr> journals_;
+                std::vector<journal_ptr> journals_;
 
                 void seek_current_journal();
             };

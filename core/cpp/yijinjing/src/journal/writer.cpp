@@ -14,6 +14,7 @@
  *****************************************************************************/
 
 #include <mutex>
+#include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/time.h>

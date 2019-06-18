@@ -158,7 +158,7 @@ namespace kungfu {
 
             class nanomsg_json : public event {
             public:
-                nanomsg_json(const std::string &msg): binding_(nlohmann::json::parse(msg)) {};
+                nanomsg_json(const std::string &msg): binding_(nlohmann::json::parse(msg)), msg_(msg) {};
 
                 inline int64_t gen_time() const override {return binding_["gen_time"];}
 
@@ -173,6 +173,7 @@ namespace kungfu {
 
             private:
                 const nlohmann::json binding_;
+                const std::string msg_;
             };
             DECLARE_PTR(nanomsg_json)
         }

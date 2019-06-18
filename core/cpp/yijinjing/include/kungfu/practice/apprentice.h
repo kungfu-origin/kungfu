@@ -34,7 +34,10 @@ namespace kungfu
         public:
             explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void subscribe(const yijinjing::data::location_ptr location) override;
+            void subscribe(yijinjing::data::location_ptr location) override;
+
+        protected:
+            void rx_subscribe(rx::observable<yijinjing::event_ptr> events) override ;
 
         private:
             yijinjing::data::location_ptr master_location_;

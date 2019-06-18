@@ -20,15 +20,12 @@
 #ifndef KUNGFU_YIJINJING_COMMON_H
 #define KUNGFU_YIJINJING_COMMON_H
 
+#include <rxcpp/rx.hpp>
+
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#define KF_DIR_SOCKET "socket"
-#define KF_DIR_JOURNAL "journal"
-#define KF_DIR_LOG "log"
-
 #define DECLARE_PTR_UNI(X) typedef std::unique_ptr<X> X##_ptr;   /** define smart ptr */
-#define FORWARD_DECLARE_PTR_UNI(X) class X; DECLARE_PTR_UNI(X)      /** forward defile smart ptr */
 
 #define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
@@ -37,7 +34,6 @@ namespace kungfu
 {
     namespace yijinjing
     {
-
         /** size related */
         const int KB = 1024;
         const int MB = KB * KB;
@@ -79,6 +75,7 @@ namespace kungfu
         protected:
             virtual const void *data_address() const = 0;
         };
+
         DECLARE_PTR(event)
 
         class publisher
@@ -157,18 +154,24 @@ namespace kungfu
             }
 
             FORWARD_DECLARE_PTR(location)
+
             FORWARD_DECLARE_PTR(locator)
 
             class locator
             {
             public:
                 locator() = default;
+
                 virtual ~locator() = default;
 
-                virtual const std::string make_path(const std::string& parent, const std::string& filename) const = 0;
+                virtual const std::string make_path(const std::string &parent, const std::string &filename) const = 0;
+
                 virtual const std::string journal_path(location_ptr location) const = 0;
+
                 virtual const std::string socket_path(location_ptr location) const = 0;
+
                 virtual const std::string log_path(location_ptr location) const = 0;
+
                 virtual const std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
             };
 
@@ -205,6 +208,44 @@ namespace kungfu
             {
                 uint32_t dest_id;
             };
+        }
+    }
+
+    namespace rx
+    {
+        using namespace rxcpp;
+        using namespace rxcpp::operators;
+        using namespace rxcpp::util;
+
+        auto is = [](int32_t msg_type)
+        {
+            return filter([=](yijinjing::event_ptr e)
+                          {
+                              return e->msg_type() == msg_type;
+                          });
+        };
+
+        auto from = [](uint32_t source)
+        {
+            return filter([=](yijinjing::event_ptr e)
+                          {
+                              return e->source() == source;
+                          });
+        };
+
+        auto trace = []()
+        {
+            return map([=](yijinjing::event_ptr e)
+                       {
+                           printf("coming event %d\n", e->msg_type());
+                           return e;
+                       });
+        };
+
+        template<class... ArgN>
+        auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
+        {
+            return subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...);
         }
     }
 }

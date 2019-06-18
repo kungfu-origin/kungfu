@@ -13,4 +13,4 @@ def strategy(ctx, path, low_latency):
     handler = EventHandler(ctx.parent, Strategy(ctx.parent, path))
     apprentice = Apprentice(ctx.parent)
     apprentice.add_event_handler(handler)
-    apprentice.go()
+    apprentice.run()

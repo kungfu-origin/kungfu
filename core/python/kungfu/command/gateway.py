@@ -27,7 +27,7 @@ def run_extension(ctx, registry):
         handler = EventHandler(ctx, gateway)
         apprentice = Apprentice(ctx)
         apprentice.add_event_handler(handler)
-        apprentice.go()
+        apprentice.run()
     else:
         ctx.logger.error('Unrecognized %s arg %s', registry.ext_type.lower(), ctx.name)
 

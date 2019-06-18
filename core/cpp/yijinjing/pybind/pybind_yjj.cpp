@@ -157,8 +157,6 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("in_color_terminal", &in_color_terminal);
     m.def("color_print", &color_print);
 
-    m.def("handle_os_signals", &os::handle_os_signals);
-
     // nanosecond-time related
     m.def("now_in_nano", &time::now_in_nano);
     m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
@@ -299,7 +297,6 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
-            .def("add_event_handler", &apprentice::add_event_handler)
             .def("run", &apprentice::run)
             .def("stop", &apprentice::stop);
 }

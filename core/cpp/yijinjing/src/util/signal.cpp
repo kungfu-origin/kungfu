@@ -7,33 +7,34 @@
 
 #include <kungfu/yijinjing/util/os.h>
 
-namespace kungfu {
-
-    namespace yijinjing {
-
-        namespace os {
-
+namespace kungfu
+{
+    namespace yijinjing
+    {
+        namespace os
+        {
             void kf_os_signal_handler(int signum)
             {
-                switch(signum){
+                switch (signum)
+                {
 #ifdef _WINDOWS
-                    case  SIGINT:          // interrupt
-        case  SIGBREAK:        // Ctrl-Break sequence
-            SPDLOG_INFO("kungfu app interrupted");
-            exit(signum);
-            break;
-        case  SIGTERM:         // Software termination signal from kill
-            SPDLOG_INFO("kungfu app killed");
-            exit(signum);
-            break;
-        case  SIGILL:          // illegal instruction - invalid function image
-        case  SIGFPE:          // floating point exception
-        case  SIGSEGV:         // segment violation
-        case  SIGABRT:         // abnormal termination triggered by abort call
-        case  SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
-            SPDLOG_CRITICAL("kungfu app stopped by signal {}", signum);
-            exit(signum);
-            break;
+                    case SIGINT:          // interrupt
+                    case SIGBREAK:        // Ctrl-Break sequence
+                        SPDLOG_INFO("kungfu app interrupted");
+                        exit(signum);
+                        break;
+                    case SIGTERM:         // Software termination signal from kill
+                        SPDLOG_INFO("kungfu app killed");
+                        exit(signum);
+                        break;
+                    case SIGILL:          // illegal instruction - invalid function image
+                    case SIGFPE:          // floating point exception
+                    case SIGSEGV:         // segment violation
+                    case SIGABRT:         // abnormal termination triggered by abort call
+                    case SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
+                        SPDLOG_CRITICAL("kungfu app stopped by signal {}", signum);
+                        exit(signum);
+                        break;
 #else
                     case SIGURG:       // discard signal       urgent condition present on socket
                     case SIGCONT:      // discard signal       continue after stop

@@ -23,6 +23,7 @@
 
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 
 using namespace kungfu::yijinjing;
@@ -136,7 +137,7 @@ namespace kungfu
 
             bool wait() override
             {
-                return socket_.recv() > 0;
+                return socket_.recv() > 2;
             }
 
             const std::string &get_notice() override
@@ -180,6 +181,7 @@ namespace kungfu
 
         io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy) : home_(home), low_latency_(low_latency), lazy_(lazy)
         {
+            log::setup_log(home_, home_->name);
             url_factory_ = std::make_shared<ipc_url_factory>();
         }
 

@@ -75,7 +75,7 @@ namespace kungfu
 
                 void release();
 
-                static page_ptr load(const data::location_ptr location, uint32_t dest_id, int page_id, bool is_writing = false, bool lazy = true);
+                static page_ptr load(const data::location_ptr location, uint32_t dest_id, int page_id, bool is_writing, bool lazy);
 
                 static std::string get_page_path(const data::location_ptr location, uint32_t dest_id, int id);
 

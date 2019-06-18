@@ -48,5 +48,5 @@ def test(ctx):
     click.echo(pyyjj.get_page_path(loc, loc.uid, 1))
     click.echo(ctx.parent.locator.list_page_id(loc, pyyjj.hash_str_32('helloworld')))
     app = Apprentice(ctx)
-    app.go()
+    app.run()
     click.echo('done')

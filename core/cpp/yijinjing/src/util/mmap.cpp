@@ -31,26 +31,24 @@ namespace kungfu {
             uintptr_t load_mmap_buffer(const std::string &path, size_t size, bool is_writing, bool lazy)
             {
 #ifdef _WINDOWS
+                bool master = is_writing || !lazy;
                 HANDLE dumpFileDescriptor = CreateFileA(path.c_str(),
-                    (is_writing) ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
+                    (master) ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
                     FILE_SHARE_READ | FILE_SHARE_WRITE,
                     NULL,
-                    (is_writing) ? OPEN_ALWAYS : OPEN_EXISTING,
+                    (master) ? OPEN_ALWAYS : OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL,
                     NULL);
 
                 if (dumpFileDescriptor == INVALID_HANDLE_VALUE)
                 {
-                    if (!is_writing) return nullptr;
-
-                    printf("Cannot create/write the file");
-                    exit(EXIT_FAILURE);
+                    throw journal_error("unable to mmap for page " + path);
                 }
 
 
                 HANDLE fileMappingObject = CreateFileMapping(dumpFileDescriptor,
                     NULL,
-                    (is_writing) ? PAGE_READWRITE:PAGE_READONLY,
+                    (master) ? PAGE_READWRITE:PAGE_READONLY,
                     0,
                     size,
                     NULL);
@@ -58,14 +56,13 @@ namespace kungfu {
                 if (fileMappingObject == NULL)
                 {
                     int nRet = GetLastError();
-                    printf("LoadPageBuffer fail(%s): CreateFileMapping Error = %d, %s\n", is_writing ? "writer" : "reader", nRet, path.c_str());
-                    return nullptr;
-                    //exit(EXIT_FAILURE);
+                    SPDLOG_ERROR("{} CreateFileMapping Error = {}, {}\n", master ? "writer" : "reader", nRet, path);
+                    throw journal_error("unable to mmap for page " + path);
                 }
 
 
                 void* buffer = MapViewOfFile(fileMappingObject,
-                    (is_writing) ? FILE_MAP_ALL_ACCESS:FILE_MAP_READ,
+                    (master) ? FILE_MAP_ALL_ACCESS:FILE_MAP_READ,
                     0,
                     0,
                     size);
@@ -73,19 +70,17 @@ namespace kungfu {
                 if (buffer == nullptr)
                 {
                     int nRet = GetLastError();
-                    throw exception("failed to load page " + path + ", MapViewOfFile Error " + std::to_string(nRet));
+                    throw journal_error("failed to load page " + path + ", MapViewOfFile Error " + std::to_string(nRet));
                 }
-
-                SPDLOG_DEBUG("loaded buffer for page {}", path);
-                return reinterpret_cast<uintptr_t>(buffer);
 #else
-                int fd = open(path.c_str(), (is_writing ? O_RDWR : O_RDONLY) | O_CREAT, (mode_t) 0600);
+                bool master = is_writing || !lazy;
+                int fd = open(path.c_str(), (master ? O_RDWR : O_RDONLY) | O_CREAT, (mode_t) 0600);
                 if (fd < 0)
                 {
                     throw journal_error("failed to open file for page " + path);
                 }
 
-                if (/*!lazy &&*/ is_writing)
+                if (master)
                 {
                     if (lseek(fd, size - 1, SEEK_SET) == -1)
                     {
@@ -105,7 +100,7 @@ namespace kungfu {
                  * or fd in the case of dup2) to refer to a new resource without the possibility of races where it might get reassigned to something
                  * else if you first released the old resource then attempted to regain it for the new resource.
                  */
-                void *buffer = mmap(0, size, (is_writing) ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
+                void *buffer = mmap(0, size, master ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
 
                 if (buffer == MAP_FAILED)
                 {
@@ -121,9 +116,10 @@ namespace kungfu {
                 }
 
                 close(fd);
+#endif // _WINDOWS
+
                 SPDLOG_DEBUG("loaded buffer for page {}, writing {}, lazy {}", path, is_writing, lazy);
                 return reinterpret_cast<uintptr_t>(buffer);
-#endif // _WINDOWS
             }
 
             bool release_mmap_buffer(uintptr_t address, size_t size, bool lazy)

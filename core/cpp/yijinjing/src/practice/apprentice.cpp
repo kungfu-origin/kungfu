@@ -17,6 +17,7 @@
 // Created by Keren Dong on 2019-06-01.
 //
 
+#include <signal.h>
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <fmt/format.h>
@@ -28,8 +29,10 @@
 
 #include <kungfu/practice/apprentice.h>
 
+using namespace kungfu::rx;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace std::chrono;
 
 namespace kungfu
 {
@@ -38,33 +41,84 @@ namespace kungfu
         apprentice::apprentice(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_client>(home, low_latency))
         {
             auto now = time::now_in_nano();
-            auto uid_str = fmt::format("{:08x}", get_home_uid());
-            master_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "app", uid_str, home->locator);
-            reader_->subscribe(master_location_, get_home_uid(), now);
             nlohmann::json request;
             request["msg_type"] = MsgType::Register;
-#ifdef _WINDOWS
-            request["pid"] = _getpid();
-#else
-            request["pid"] = getpid();
-#endif
             request["gen_time"] = now;
             request["trigger_time"] = now;
             request["source"] = get_home_uid();
-            request["mode"] = home->mode;
-            request["category"] = home->category;
-            request["group"] = home->group;
-            request["name"] = home->name;
+
+            nlohmann::json data;
+            data["mode"] = home->mode;
+            data["category"] = home->category;
+            data["group"] = home->group;
+            data["name"] = home->name;
+            data["uid"] = home->uid;
+#ifdef _WINDOWS
+            data["pid"] = _getpid();
+#else
+            data["pid"] = getpid();
+#endif
+
+            request["data"] = data;
+
+            auto uid_str = fmt::format("{:08x}", get_home_uid());
+            auto locator = get_io_device()->get_home()->locator;
+            master_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
+            register_location(master_location_);
+
+            SPDLOG_INFO("request {}", request.dump());
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
         void apprentice::subscribe(const location_ptr location)
         {
             auto now = time::now_in_nano();
-            action::RequestSubscribe request;
+            action::RequestSubscribe request{};
             request.source_id = location->uid;
             request.from_time = now;
             get_writer(master_location_->uid)->write(now, MsgType::RequestSubscribe, get_home_uid(), &request);
+        }
+
+        void apprentice::rx_subscribe(observable<yijinjing::event_ptr> events)
+        {
+            events | skip_until(events | is(MsgType::Register) | from(get_home_uid())) | first() | timeout(seconds(1), observe_on_new_thread()) |
+            $([&](event_ptr e)
+              {
+                  // timeout happens on new thread, can not subscribe journal reader here
+              },
+              [&](std::exception_ptr e)
+              {
+                  try
+                  { std::rethrow_exception(e); }
+                  catch (const timeout_error &ex)
+                  {
+                      SPDLOG_ERROR("app register timeout");
+                      hero::stop();
+                  }
+              },
+              [&]()
+              {
+                  // once registered this subscriber finished, no worry for performance.
+              });
+
+            events | skip_until(events | is(MsgType::Register) | from(get_home_uid())) | first() |
+            $([&](event_ptr e)
+              {
+                  reader_->subscribe(master_location_, get_home_uid(), e->gen_time());
+              });
+
+            events | is(MsgType::Register) |
+            $([&](event_ptr e)
+              {
+                  auto request_loc = e->data<nlohmann::json>();
+                  auto app_location = std::make_shared<location>(
+                          static_cast<mode>(request_loc["mode"]),
+                          static_cast<category>(request_loc["category"]),
+                          request_loc["group"], request_loc["name"],
+                          get_io_device()->get_home()->locator
+                  );
+                  register_location(app_location);
+              });
         }
     }
 }

@@ -2,9 +2,8 @@
 // Created by Keren Dong on 2019-06-15.
 //
 
+#include <utility>
 #include <spdlog/spdlog.h>
-
-#include <rxcpp/rx.hpp>
 
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
@@ -13,15 +12,7 @@
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/practice/hero.h>
 
-namespace rx
-{
-    using namespace rxcpp;
-    using namespace rxcpp::sources;
-    using namespace rxcpp::operators;
-    using namespace rxcpp::util;
-}
-using namespace rx;
-
+using namespace kungfu::rx;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
@@ -32,16 +23,20 @@ namespace kungfu
     namespace practice
     {
 
-        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(io_device)
+        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device))
         {
             os::handle_os_signals();
-            log::setup_log(io_device_->get_home(), io_device_->get_home()->name);
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
-        void hero::register_location(const yijinjing::data::location_ptr location)
+        void hero::register_location(const yijinjing::data::location_ptr &location)
         {
             locations_[location->uid] = location;
+        }
+
+        bool hero::has_location(uint32_t hash)
+        {
+            return locations_.find(hash) != locations_.end();
         }
 
         const yijinjing::data::location_ptr hero::get_location(uint32_t hash)
@@ -49,71 +44,42 @@ namespace kungfu
             return locations_[hash];
         }
 
-        void hero::pre_run()
-        {
-            for (auto handler : event_handlers_)
-            {
-//                handler->configure_event_source(shared_from_this());
-            }
-        }
-
-        void test(event &e)
-        {}
-
         void hero::run()
         {
-            SPDLOG_INFO("{} started", io_device_->get_home()->uname);
-            writers_[io_device_->get_home()->uid]->open_session();
-            pre_run();
+            SPDLOG_INFO("{} started", get_home_uname());
 
-            auto events = rx::observable<>::create<event_ptr>(
-                    [&](rx::subscriber<event_ptr> dest)
+            auto events = observable<>::create<event_ptr>(
+                    [&](subscriber<event_ptr> sb)
                     {
-                        while (live_)
+                        try
                         {
-                            if (io_device_->get_observer()->wait())
+                            SPDLOG_INFO("{} generating events with source id {}/{:08x}", get_home_uname(), get_home_uid(), get_home_uid());
+
+                            while (live_)
                             {
-                                std::string notice = io_device_->get_observer()->get_notice();
-                                auto event = std::make_shared<nanomsg_json>(notice);
-                                dest.on_next(event);
+                                if (io_device_->get_observer()->wait())
+                                {
+                                    std::string notice = io_device_->get_observer()->get_notice();
+                                    SPDLOG_INFO("got notice {}", notice);
+                                    auto event = std::make_shared<nanomsg_json>(notice);
+                                    sb.on_next(event);
+                                }
+                                if (reader_->data_available())
+                                {
+                                    sb.on_next(reader_->current_frame());
+                                    reader_->next();
+                                }
                             }
-                            if (reader_->data_available())
-                            {
-                                dest.on_next(reader_->current_frame());
-                                reader_->next();
-                            }
+
+                        } catch (...)
+                        {
+                            sb.on_error(std::current_exception());
                         }
-                        dest.on_completed();
-                    }).
-                    publish();
 
-            events.filter([](event_ptr e)
-                          { return e->msg_type() == MsgType::Register; })
-                    .subscribe([&](event_ptr e)
-                               {
-                                   auto data = e->data<action::RequestSubscribe>();
-                                   auto location = get_location(e->source());
-                                   reader_->subscribe(location, 0, data.from_time);
-                                   reader_->subscribe(location, get_home_uid(), data.from_time);
-                               });
+                        sb.on_completed();
 
-            events.filter([](event_ptr e)
-                          { return e->msg_type() == MsgType::RequestPublish; })
-                    .subscribe([&](event_ptr e)
-                               {
-                                   auto data = e->data<action::RequestPublish>();
-                                   if (writers_.find(data.dest_id) != writers_.end())
-                                   {
-                                       writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
-                                       writers_[data.dest_id]->open_session();
-                                   } else
-                                   {
-                                       SPDLOG_ERROR("Ask publish for more than once");
-                                   }
-                               });
-
-            events.on_error_resume_next(
-                    [&](std::exception_ptr e) -> rx::observable<event_ptr>
+                    }) | on_error_resume_next(
+                    [&](std::exception_ptr e) -> observable<event_ptr>
                     {
                         try
                         { std::rethrow_exception(e); }
@@ -126,88 +92,59 @@ namespace kungfu
                                 case ETIMEDOUT:
                                 {
                                     SPDLOG_INFO("apprentice quit because {}", ex.what());
-                                    return rx::observable<>::empty<event_ptr>();
+                                    return observable<>::empty<event_ptr>();
                                 }
                                 default:
                                 {
                                     SPDLOG_ERROR("Unexpected nanomsg error: {}", ex.what());
-                                    return rx::observable<>::error<event_ptr>(ex);
+                                    return observable<>::error<event_ptr>(ex);
                                 }
                             }
                         }
                         catch (const std::exception &ex)
                         {
                             SPDLOG_ERROR("Unexpected exception: {}", ex.what());
-                            return rx::observable<>::error<event_ptr>(ex);
+                            return observable<>::error<event_ptr>(ex);
                         }
-                    });
+                    }) | finally(
+                    [&]()
+                    {
+                        for (const auto &element : writers_)
+                        {
+                            element.second->close_session();
+                        }
 
-            events.finally([&](){
-                writers_[io_device_->get_home()->uid]->close_session();
-            });
+                    }) | publish();
+
+            events | is(MsgType::RequestPublish) |
+            $([&](event_ptr e)
+              {
+                  auto data = e->data<action::RequestPublish>();
+                  if (writers_.find(data.dest_id) == writers_.end())
+                  {
+                      writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
+                      writers_[data.dest_id]->open_session();
+                  } else
+                  {
+                      SPDLOG_ERROR("Ask publish for more than once");
+                  }
+              });
+
+            events | is(MsgType::RequestSubscribe) |
+            $([&](event_ptr e)
+              {
+                  SPDLOG_INFO("RequestSubscribe event");
+                  auto data = e->data<action::RequestSubscribe>();
+                  SPDLOG_INFO("RequestSubscribe {}", data.source_id);
+                  auto location = get_location(e->source());
+                  reader_->subscribe(location, 0, data.from_time);
+                  reader_->subscribe(location, get_home_uid(), data.from_time);
+              });
+
+            rx_subscribe(events);
 
             events.connect();
-            post_run();
-            SPDLOG_INFO("{} finished", io_device_->get_home()->uname);
-        }
-
-        void hero::post_run()
-        {
-            for (auto handler : event_handlers_)
-            {
-                handler->finish();
-            }
-        }
-
-        void hero::try_once()
-        {
-            if (io_device_->get_observer()->wait())
-            {
-                std::string notice = io_device_->get_observer()->get_notice();
-                nanomsg_json_ptr event = std::make_shared<nanomsg_json>(notice);
-                for (auto handler : event_handlers_)
-                {
-                    handler->handle(event);
-                }
-            }
-
-            if (reader_->data_available())
-            {
-                auto frame = reader_->current_frame();
-                switch (frame->msg_type())
-                {
-                    case MsgType::RequestSubscribe:
-                    {
-                        auto data = frame->data<action::RequestSubscribe>();
-                        auto location = get_location(data.source_id);
-                        reader_->subscribe(location, 0, data.from_time);
-                        reader_->subscribe(location, get_home_uid(), data.from_time);
-                        break;
-                    }
-                    case MsgType::RequestPublish:
-                    {
-                        auto data = frame->data<action::RequestPublish>();
-                        if (writers_.find(data.dest_id) != writers_.end())
-                        {
-                            writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
-                            writers_[data.dest_id]->open_session();
-                        } else
-                        {
-                            SPDLOG_ERROR("Ask publish for more than once");
-                        }
-                        break;
-                    }
-                    default:
-                    {
-                        for (auto handler : event_handlers_)
-                        {
-                            handler->handle(reader_->current_frame());
-                        }
-                        break;
-                    }
-                }
-                reader_->next();
-            }
+            SPDLOG_INFO("{} finished", get_home_uname());
         }
     }
 }
