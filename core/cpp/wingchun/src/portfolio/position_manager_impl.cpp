@@ -734,7 +734,11 @@ namespace kungfu
     {
         auto key = get_symbol(trade->instrument_id, trade->exchange_id);
         if (frozen_map_.find(trade->order_id) != frozen_map_.end())
+        {
+            frozen_map_[trade->order_id] -= trade->volume;
+            long_pos_map_[key].frozen_total -= trade->volume;
             long_pos_map_[key].frozen_yesterday -= trade->volume;
+        }
 
         if (long_pos_map_.find(key) == long_pos_map_.end())
         {
