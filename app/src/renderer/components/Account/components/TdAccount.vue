@@ -175,16 +175,17 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from 'vuex'
-import {debounce} from '@/assets/js/utils'
+import { mapState, mapGetters } from 'vuex'
+import { debounce } from '@/assets/js/utils'
 import * as ACCOUNT_API from '@/io/account'
 import * as BASE_API from '@/io/base'
 import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accountConfig'
 import SetAccountDialog from './SetAccountDialog'
 import SetFeeDialog from './SetFeeDialog'
-import {deleteProcess} from '__gUtils/processUtils'
-import {ACCOUNTS_DIR, LOG_DIR, buildGatewayPath} from '__gConfig/pathConfig'
-import {removeFileFolder, openReadFile} from "__gUtils/fileUtils.js"
+import { deleteProcess } from '__gUtils/processUtils'
+import { ACCOUNTS_DIR, LOG_DIR, buildGatewayPath } from '__gConfig/pathConfig'
+import { removeFileFolder, openReadFile } from "__gUtils/fileUtils.js";
+import { deleteAccount } from '@/io/actions/account';
 
 import path from 'path'
 export default {
@@ -274,13 +275,18 @@ export default {
         //删除账户信息
         handleDeleteAccount(row) {
             const t = this
-            if(!t.judgeCondition(row)) return
-            const accountId = row.account_id.toAccountId()
+            if(!t.judgeCondition(row)) return;
+            const { account_id, source_name, receive_md } = row
+            //查看该账户下是否存在task中的td任务
+            const tdProcessId = `td_${account_id}`
+            const mdProcessId = `md_${source_name}`
+            const accountId = account_id.toAccountId()
             t.$confirm(`删除账户${accountId}会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => t.deleteAccount(row))
+            .then(() => deleteAccount(row, t.accountList))
+            .then(() => t.$store.dispatch('getTasks'))
             .then(() => t.getAccountList())
             .then(() => {
                 //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
@@ -291,8 +297,6 @@ export default {
                     t.$store.dispatch('setCurrentAccount', {})
                 }
             })
-            .then(() => deleteProcess('td_' + row.account_id))
-            .then(() => (row.receive_md) && deleteProcess('md_' + row.source_name))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
@@ -354,7 +358,7 @@ export default {
             t.$store.dispatch('switchTd', {
                 account,
                 value
-            })
+            }).then(({ type, message }) => t.$message[type](message))
         },
 
         //打开日志
@@ -362,11 +366,6 @@ export default {
             const logPath = path.join(LOG_DIR, `td_${row.account_id}.log`);
             openReadFile(logPath)
         },
-
-        // updateProcessStatus(res){
-        //     const t = this;
-        //     t.processStatus = res
-        // },
 
         //获取账户列表
         getAccountList() {
@@ -379,37 +378,6 @@ export default {
                     }
                 })
             })   
-        },
-
-        //删除账户需要将所关联的数据库以及进程都关掉
-        //判断task表和进程中是否存在，有则删除
-        //TODO
-        deleteAccount(row) {
-            const t = this
-            const {account_id, source_name, receive_md} = row
-            //查看该账户下是否存在task中的td任务
-            const tdProcessId = `td_${account_id}`
-            const mdProcessId = `md_${source_name}`
-
-            //删除td
-            return removeFileFolder(path.join(ACCOUNTS_DIR, account_id.toAccountId()))
-            .then(() => t.$store.dispatch('deleteTask', tdProcessId))                      
-            .then(() => ACCOUNT_API.deleteAccount(account_id))//删除账户表中的数据
-            .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
-            .then(() => t.getAccountList())
-            .then(accountList => t.removeMdGatewayFolder(accountList, mdProcessId, source_name, receive_md))
-        },
-
-        //删除md的gateway folder
-        removeMdGatewayFolder(accountList, mdProcessId, source_name, receive_md){
-            const t = this;
-            const accountNotMdBySource = accountList.filter(a => (a.source_name == source_name && a.receive_md === 0))            
-            const accountBySource = accountList.filter(a => (a.source_name == source_name)) 
-            if(!accountBySource.length) {
-                removeFileFolder(buildGatewayPath(mdProcessId))
-                t.$store.dispatch('deleteTask', mdProcessId)
-            }
-            if(accountNotMdBySource.length && receive_md) return ACCOUNT_API.changeAccountMd(accountNotMdBySource[0].account_id, true)
         },
 
         //删除前进行一些判断

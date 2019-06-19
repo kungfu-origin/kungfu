@@ -10,6 +10,10 @@ export const getAccountList = () => {
     return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config ORDER BY account_id')
 }
 
+export const getAccountBySource = (sourceName) => {
+    return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config WHERE source_name = ?', sourceName)
+}
+
 /**
  * 新建账户
  * @param {String} account_id 账户id
@@ -178,3 +182,4 @@ export const getFeeSettingData = (accountId) => {
     }
     return runSelectDB(COMMISSION_DB,`SELECT * FROM commission`)
 }
+

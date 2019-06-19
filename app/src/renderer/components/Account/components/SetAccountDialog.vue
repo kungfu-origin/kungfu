@@ -102,7 +102,6 @@ export default {
             t.$refs.accountForm.validate(valid => {
                 if(valid) {
                     let account_id = `${t.source}_${t.value[t.sourceType[t.source].key]}`
-                    const gatewayName = 'td_' + account_id
                     const formValue = t.value
                     let changeAccount 
                     if(t.method == 'add') { //添加账户

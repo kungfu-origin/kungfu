@@ -1,7 +1,5 @@
 import * as STRATEGY_API from '@/io/strategy';
-import {removeFileFolder} from '__gUtils/fileUtils.js'
-import {STRATEGY_DIR, LOG_DIR} from '__gConfig/pathConfig'
-import path from 'path'
+import { deleteStrat } from '@/io/actions/strategy';
 
 //设置当前策略
 export const setCurrentStrategy = ({commit}, strategy) => {
@@ -56,9 +54,5 @@ export const setEntryFile = ({commit}, entryFile) => {
 
 //删除策略
 export const deleteStrategy = ({dispatch}, strategyId) => {
-    return STRATEGY_API.deleteStrategy(strategyId) //删除策略数据库
-    .then(() => dispatch('deleteTask', strategyId))
-    .then(() => removeFileFolder(path.join(STRATEGY_DIR, strategyId))) //策略相关数据
-    .then(() => removeFileFolder(path.join(LOG_DIR, strategyId + '.log')))//策略log
-    .then(() => dispatch('getStrategyList'))
+    return deleteStrat(strategyId).then(() => dispatch('getStrategyList'))
 }

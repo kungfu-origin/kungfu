@@ -161,7 +161,7 @@ export default {
             t.$store.dispatch('switchTd', {
                 account,
                 value
-            })
+            }).then(({ type, message }) => t.$message[type](message))
         },
 
         //行情开关
@@ -170,7 +170,7 @@ export default {
             t.$store.dispatch('switchMd', {
                 account,
                 value
-            })    
+            }).then(({ type, message }) => t.$message[type](message))  
         },
     }
 }

@@ -88,3 +88,9 @@ export const validateInt = (rule, value, callback) => {
         callback()
     }
 }
+
+//必填
+export const validateRequired = (rule, value, callback) => {
+    if(!!(value + '')) return callback()
+    else callback(new Error('不能为空！'))
+}

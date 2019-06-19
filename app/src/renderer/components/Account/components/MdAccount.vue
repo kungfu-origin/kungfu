@@ -132,7 +132,7 @@ export default {
             t.$store.dispatch('switchMd', {
                 account,
                 value
-            })    
+            }).then(({ type, message }) => t.$message[type](message))  
         },
 
         handleOpenLogFile(row){

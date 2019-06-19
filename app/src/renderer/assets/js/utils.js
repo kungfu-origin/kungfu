@@ -290,3 +290,6 @@ export const getLog = (logPath, searchKeyword) => {
         })
     })
 }
+
+
+

@@ -24,19 +24,6 @@ export const getTasks = ({commit}) => {
     })
 }
 
-//删除任务
-export const deleteTask = ({dispatch, state}, taskName) => {
-    return new Promise (resolve => {
-        if(!state.tasks[taskName]) {
-            resolve()
-            return
-        }  
-        BASE_API.deleteTask(taskName).then(() => {
-            dispatch('getTasks')
-            resolve()
-        })
-    })
-}
 
 //主动获得交易日
 export const getCalendar = ({dispatch}) => {

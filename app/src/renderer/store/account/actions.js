@@ -42,12 +42,10 @@ export const setAccountList = ({commit}, accountList) => {
 
 //获取 accountList
 export const getAccountList = ({dispatch}) => {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
         ACCOUNT_API.getAccountList().then(res => {
             dispatch('setAccountList', res);
             resolve(res)
-        }).catch(err => {
-            Vue.message.error(err.message || '操作失败！')
         })
     })
 }
@@ -98,8 +96,8 @@ export const switchTd = ({dispatch}, {account, value}) => {
         return deleteProcess(tdProcessId)
         .then(() => dispatch('deleteOneMdTdState', tdProcessId))
         .then(() => closeGlobalGatewayNanomsg(tdProcessId))
-        .then(() => Vue.message.success('操作成功！'))        
-        .catch(err => Vue.message.error(err.message || '操作失败！'))
+        .then(() => ({ type: 'success', message: '操作成功！' }))       
+        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
     }
 
     //改变数据库表内容，添加或修改
@@ -108,8 +106,8 @@ export const switchTd = ({dispatch}, {account, value}) => {
     .then(() => dispatch('setOneMdTdState', {name: tdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', tdProcessId))    
     .then(() => startTd(source_name, tdProcessId)) //开启td,pm2
-    .then(() => Vue.message.start('正在启动...'))       
-    .catch(err => Vue.message.error(err.message || '操作失败！'))
+    .then(() => ({ type: 'start', message: '正在启动...' }))       
+    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))
 }
 
 //起停md
@@ -120,8 +118,8 @@ export const switchMd = ({dispatch}, {account, value}) => {
         return deleteProcess(mdProcessId)
         .then(() => dispatch('deleteOneMdTdState', mdProcessId))
         .then(() => closeGlobalGatewayNanomsg(mdProcessId))
-        .then(() => Vue.message.success('操作成功！'))        
-        .catch(err => Vue.message.error(err.message || '操作失败！'))
+        .then(() => ({ type: 'success', message: '操作成功！' }))       
+        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
     }
 
     //改变数据库表内容，添加或修改
@@ -130,6 +128,6 @@ export const switchMd = ({dispatch}, {account, value}) => {
     .then(() => dispatch('setOneMdTdState', {name: mdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', mdProcessId))    
     .then(() => startMd(source_name, mdProcessId)) //开启td,pm2
-    .then(() => Vue.message.start('正在启动...'))       
-    .catch(err => Vue.message.error(err.message || '操作失败！'))          
+    .then(() => ({ type: 'start', message: '正在启动...' }))       
+    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))     
 }
