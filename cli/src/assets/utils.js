@@ -58,7 +58,7 @@ export const posDirection = {
  */
 export const parseToString = (targetList, columnWidth=[], pad=2, debug) => {
 	return targetList.map((l, i) => {
-		l = l.toString();
+		l = (l || '').toString();
 		const r = /m([^]+)\u001b/
 		const lw = l.match(r) === null ? l : l.match(r)[1];
 		const len = lw.length;
@@ -226,4 +226,8 @@ export const buildDateRange = () => {
 
 export const buildTradingDay = () => {
 	return moment().format('YYYYMMDD')
+}
+
+export const parseSources = (sourcesData) => {
+    return Object.values(sourcesData).map(s => `${s.source} (${s.typeName})`)
 }

@@ -1,9 +1,9 @@
 import { sourceType, accountSource } from '@/assets/config/accountConfig';
 import { validateRequired, specialStrValidator, blankValidator, noZeroAtFirstValidator, chineseValidator } from '@/assets/js/validator';
-import { getAccountList, getAccountBySource, addAccount } from '@/io/account';
-import { getStrategyList, addStrategy } from '@/io/strategy';
+import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '@/io/account';
+import { getStrategyList, addStrategy, updateStrategyPath } from '@/io/strategy';
+import { parseSources } from '__@/assets/utils';
 
-const ora = require('ora');
 var inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
@@ -13,8 +13,7 @@ const selectSourcePrompt = () => inquirer.prompt([
     {
         type: 'autocomplete',
         name: 'source',
-        message: 'Select one type of source',
-        // choices: parseSources(sourceType),
+        message: 'Select one type of source    ',
         source: (answersSoFar, input) => {
             input = input || ''
             const selected = parseSources(sourceType).filter(s => s.indexOf(input) !== -1)
@@ -23,11 +22,30 @@ const selectSourcePrompt = () => inquirer.prompt([
     }
 ])
 
-const accountConfigPrompt = (source) => {
-    source = source.source.split(' ')[0] // e.g. source = 'xtp (stock)'
+export const addAccountByPrompt = async (source, key, config, updateModule = false) => {
+    if(!key) throw new Error('something wrong with the key!')
+    const accountId = `${source}_${config[key]}`
+    const accountsBySource = await getAccountBySource(source)
+    try {
+        if(updateModule) {
+            await updateAccountConfig(accountId, JSON.stringify(config))
+            console.log(`Update account ${JSON.stringify(config, null , '')} sucess!`)   
+        }else{
+            await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
+            console.log(`Add account ${JSON.stringify(config, null , '')} sucess!`)   
+        }
+    }catch(err){
+        throw err
+    }
+    return
+}
+
+export const accountConfigPrompt = (source, updateModule = false, accountData = {}) => {
+    source = source.split(' ')[0] // e.g. source = 'xtp (stock)'
     const accountOptions = accountSource[source];
+    const idKey = sourceType[source].key
     if(!accountOptions) throw new Error `No ${source} config information!`
-    const questions = accountOptions.map(a => paresAccountQuestion(a, source))
+    const questions = accountOptions.filter(a => !(updateModule && a.key === idKey)).map(a => paresAccountQuestion(a, source, updateModule, accountData))
     return inquirer.prompt(questions).then(answers => ({
         source,
         key: sourceType[source].key || '',
@@ -37,17 +55,17 @@ const accountConfigPrompt = (source) => {
 
 const addAccountPrompt = () => {
     return selectSourcePrompt()
-    .then(source => accountConfigPrompt(source))
-    .then(({source, key, config}) => addAccountByPrompt(source, key, config))
+    .then(({ source }) => accountConfigPrompt(source))
+    .then(({ source, key, config }) => addAccountByPrompt(source, key, config))
 }
 
 
 // ======================= add account end ============================
 
 // ======================= add strategy start ============================
-const addStrategyPrompt =() => {
-    return inquirer.prompt([
-        {
+export const addStrategyPrompt = async (strategyData, updateModule) => {
+    const {strategy_id, strategy_path} = await inquirer.prompt([
+        !updateModule ? {
             type: 'input',
             name: 'strategy_id',
             message: 'Enter strategy_id',
@@ -65,35 +83,43 @@ const addStrategyPrompt =() => {
                 if(hasError) return hasError
                 else return true;
             }
-        }, {
+        } : null , {
             type: 'input',
             name: 'strategy_path',
-            message: 'Enter a strategy_path',
+            message: `${updateModule ? 'Update' : 'Enter'} strategy_path ${ updateModule ? `(${strategyData.strategy_path})` : '' }`,
             validate: value => {
                 let hasError = null;
-                validateRequired(null, value, (err) => hasError = err)
+                !updateModule && validateRequired(null, value, (err) => hasError = err)
                 if(hasError) return hasError
                 else return true;
             }
         }
-    ]).then(async ({strategy_id, strategy_path}) => {
-        try {
+    ].filter(q => !!q))
+    try {
+        if(updateModule) {
+            const strategyId = strategyData.strategy_id;
+            await updateStrategyPath(strategyId, strategy_path)
+            console.log(`Update strategy ${strategyId} ${strategy_path} sucess!`)
+
+        } else {
             await addStrategy(strategy_id, strategy_path)
             console.log(`Add strategy ${strategy_id} ${strategy_path} sucess!`)
-        }catch(err) {
-            throw err;
         }
-    })
+       
+    }catch(err) {
+        throw err;
+    }
+    return
 }
 
 // ======================= add strategy end ============================
 
 
-export const addStrategyOrAccount = () => inquirer.prompt([
+export const addAccountStrategy = () => inquirer.prompt([
     {
         type: 'list',
         name: 'add',
-        message: 'Add a account or strategy',
+        message: 'Add a account or strategy    ',
         choices: ['account', 'strategy']
     }
 ]).then(answers => {
@@ -106,23 +132,20 @@ export const addStrategyOrAccount = () => inquirer.prompt([
 
 
 
-function parseSources(sourcesData){
-    return Object.values(sourcesData).map(s => `${s.source} (${s.typeName})`)
-}
-
-function paresAccountQuestion(accountData, source){
-    const key = accountData.key;
+function paresAccountQuestion(accountConfig, source, updateModule = false, accountData = {}){
+    const key = accountConfig.key;
     const idKey = sourceType[source].key
-    const validators = accountData.validator;
-    const required = accountData.required;
+    const validators = accountConfig.validator;
+    const required = accountConfig.required;
+    const existedValue = accountData[key];
     return {
         type: 'input',
         name: key,
-        message: `Enter ${key}`,
+        message: `${updateModule ? 'Update' : 'Enter'} ${key} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
         validate: async value => {
             let hasError = null;
             let validatorList = [];
-            if(required) validatorList.push(validateRequired);
+            if(required && !updateModule) validatorList.push(validateRequired);
             [...(validators || []), ...validatorList].forEach(validator => {
                 if(hasError) return;
                 validator(null, value, (err) => err && (hasError = err))
@@ -137,17 +160,5 @@ function paresAccountQuestion(accountData, source){
             if(hasError) return hasError
             else return true;
         }
-    }
-}
-
-async function addAccountByPrompt(source, key, config){
-    if(!key) throw new Error('something wrong with the key!')
-    const accountId = `${source}_${config[key]}`
-    const accountsBySource = await getAccountBySource(source)
-    try {
-        await addAccount(accountId, source, !accountsBySource.length, config)
-        console.log(`Add account ${JSON.stringify(config, null , '')} sucess!`)   
-    }catch(err){
-        throw err
     }
 }

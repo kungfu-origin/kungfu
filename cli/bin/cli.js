@@ -46,7 +46,6 @@ program
                     choices: ['all', 'account', 'strategy']
                 }
             ]).then(answers => {
-                console.log(answers)
                 const type = answers.monit
                 if(type === 'strategy') strategy();
                 if(type === 'account') account();

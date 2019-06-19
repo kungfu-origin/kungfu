@@ -46,21 +46,6 @@ class AccountDashboard extends Dashboard {
 		t.initMessage();
 		t.screen.render();
 		t.bindEvent();
-
-		t.addAccountBtn = blessed.Input({
-			parent: t.accountTable,
-			content: 'Add',
-			top: 1,
-			left: '96%-6',
-			width: 6,
-			height: 1,
-			align: 'center',
-			keys: true,
-			autoCommandKeys: true,
-			style: {
-				bg: 'blue'
-			}
-		})
 	}
 	
 	initAccountTable(){
@@ -86,10 +71,6 @@ class AccountDashboard extends Dashboard {
 	
 		})
 		t.accountTable.focus();
-
-		
-
-	
 	}
 	
 	initMdTable(){
@@ -210,9 +191,12 @@ class AccountDashboard extends Dashboard {
 		const  t = this;
 		let timer = null;
 		const runPromises = () => {
-			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
-			if(!currentId) return;      
+			if(!currentId) {
+				clearTimeout(timer)
+				timer = setTimeout(() => runPromises(), 3000)
+			};  
+
 			//md + td
 			const mdTdPromise = t.accountTable.getData(t.globalData)
 			.then(({accountData, mdData}) => {
@@ -253,6 +237,7 @@ class AccountDashboard extends Dashboard {
 				tradeDataPromise,
 				pnlPromise
 			]).finally(() => {
+				clearTimeout(timer)
 				timer = setTimeout(() => runPromises(), 3000)
 			})
 		}
@@ -332,9 +317,9 @@ export default () => {
 	const accountDashboard = new AccountDashboard();
 	accountDashboard.init();
 	accountDashboard.render();
-	accountDashboard.getData()
 	accountDashboard.refresh();
 	accountDashboard.getProcessStatus();
+	accountDashboard.getData();
 	setInterval(() => {
 		accountDashboard.refresh();
 	}, 1000)	
