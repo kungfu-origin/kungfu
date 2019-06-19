@@ -34,9 +34,11 @@ namespace kungfu
 #define DISCONNECTED_ERROR(content) SPDLOG_ERROR("[DisConnected] {}", content)
 
 #define ACCOUNT_TRACE(content) SPDLOG_TRACE("[Account] {}", content)
+#define ACCOUNT_INFO(content) SPDLOG_INFO("[Account] {}", content)
 #define ACCOUNT_ERROR(content)  SPDLOG_ERROR("[Account] {}", content)
 
 #define POSITION_TRACE(content) SPDLOG_TRACE("[Position] {}", content)
+#define POSITION_INFO(content) SPDLOG_INFO("[Position] {}", content)
 #define POSITION_ERROR(content)  SPDLOG_ERROR("[Position] {}", content)
 
 #define POSITION_DETAIL_TRACE(content) SPDLOG_TRACE("[PositionDetail] {}", content)

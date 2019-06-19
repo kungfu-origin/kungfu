@@ -72,11 +72,11 @@ namespace kungfu
                             "margin double, "
                             "accumulated_fee double, "
                             "intraday_fee double, "
-                            "frozen_cash char(50), "
-                            "frozen_margin char(50), "
-                            "frozen_fee char(50), "
-                            "position_pnl char(50), "
-                            "close_pnl char(50)"
+                            "frozen_cash double, "
+                            "frozen_margin double, "
+                            "frozen_fee double, "
+                            "position_pnl double, "
+                            "close_pnl double"
                             ")");
             db.exec("CREATE UNIQUE INDEX IF NOT EXISTS account_uid ON account(account_id, source_id)");
             db.exec("CREATE TABLE IF NOT EXISTS bond_expire(date char(50), account_id char(50), amount double)");

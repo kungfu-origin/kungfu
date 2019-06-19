@@ -230,7 +230,7 @@ namespace kungfu {namespace flying
         char trading_day[DATE_LEN];        //交易日
 
         char account_id[ACCOUNT_ID_LEN];   //账号ID
-        AccountType account_type;                  //账号类型
+        AccountType account_type;          //账号类型
         char broker_id[BROKER_ID_LEN];     //Broker ID
         char source_id[SOURCE_ID_LEN];     //柜台ID
 
