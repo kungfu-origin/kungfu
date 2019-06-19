@@ -49,10 +49,6 @@ namespace kungfu
 #define SUBSCRIBE_INFO(content) SPDLOG_INFO("[Subscribe] {}", content)
 #define SUBSCRIBE_ERROR(content) SPDLOG_ERROR("[Subscribe] {}", content)
 
-#define SUBSCRIBE_TRACE(content) SPDLOG_TRACE("[Subscribe] {}" , content)
-#define SUBSCRIBE_INFO(content) SPDLOG_INFO("[Subscribe] {}", content)
-#define SUBSCRIBE_ERROR(content) SPDLOG_ERROR("[Subscribe] {}", content)
-
 #define UNSUBSCRIBE_TRACE(content) SPDLOG_TRACE("[Unsubscribe] {}" , content)
 #define UNSUBSCRIBE_INFO(content) SPDLOG_INFO("[Unsubscribe] {}", content)
 #define UNSUBSCRIBE_ERROR(content) SPDLOG_ERROR("[Unsubscribe] {}", content)
