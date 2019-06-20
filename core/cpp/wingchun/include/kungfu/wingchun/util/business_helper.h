@@ -256,12 +256,17 @@ namespace kungfu
 
     inline std::string get_instrument_product(const char *instrument_id)
     {
-        int pos = 0;
-        while((instrument_id[pos]>'a'&&instrument_id[pos]<'z')||(instrument_id[pos]>'A'&&instrument_id[pos]<'Z'))
+        std::string product = "";
+        int i = 0;
+        while (instrument_id[i] != 0)
         {
-            pos++;
+            if (instrument_id[i] < '0' || instrument_id[i] > '9')
+            {
+                product.push_back(instrument_id[i]);
+            }
+            ++i;
         }
-        return std::string(instrument_id, pos);
+        return product;
     }
 
     inline std::string get_reverse_repurchase_expire_date(kungfu::yijinjing::event_source_ptr event_source, const char* instrument_id, const char* open_date)
@@ -288,17 +293,19 @@ namespace kungfu
 
     inline std::string get_exchange_id_from_future_instrument_id(const char* instrument_id)
     {
-        std::string product = std::string(instrument_id).substr(0, strlen(instrument_id) - 4);
+        std::string product = get_instrument_product(instrument_id);
         std::transform(product.begin(), product.end(), product.begin(), ::tolower);
         if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
             product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
-            product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg")
+            product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg" ||
+            product.substr(0, 2) == "sp" || product.substr(0, 3) == "spc")
         {
             return EXCHANGE_DCE;
         }
         else if (product == "sr" || product == "cf" || product == "pm" || product == "wh" || product == "ri" || product == "lr" ||
                 product == "jr" || product == "rm" || product == "rs" || product == "rs" || product == "rm" || product == "oi" ||
-                product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm")
+                product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm" ||
+                product.substr(0, 3) == "spd" || product.substr(0, 3) == "ips")
         {
             return EXCHANGE_CZCE;
         }
