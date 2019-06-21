@@ -36,14 +36,14 @@ namespace kungfu
                 journal_->seek_to_time(time::now_in_nano());
             }
 
-            frame_ptr writer::open_frame(int64_t trigger_time, int16_t msg_type, int16_t source)
+            frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type)
             {
                 writer_mtx_.lock();
                 auto frame = journal_->current_frame();
                 frame->set_header_length();
                 frame->set_trigger_time(trigger_time);
                 frame->set_msg_type(msg_type);
-                frame->set_source(source);
+                frame->set_source(journal_->location_->uid);
                 return frame;
             }
 
@@ -58,22 +58,22 @@ namespace kungfu
                 publisher_->notify();
             }
 
-            void writer::write_raw(int64_t trigger_time, int16_t msg_type, int16_t source, char *data, int32_t length)
+            void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length)
             {
-                auto frame = open_frame(trigger_time, msg_type, source);
+                auto frame = open_frame(trigger_time, msg_type);
                 memcpy(const_cast<void*>(frame->data_address()), data, length);
                 close_frame(length);
             }
 
             void writer::open_session()
             {
-                open_frame(time::now_in_nano(), MsgType::SessionStart, 0);
+                open_frame(time::now_in_nano(), msg::type::SessionStart, 0);
                 close_frame(1);
             }
 
             void writer::close_session()
             {
-                open_frame(time::now_in_nano(), MsgType::SessionEnd, 0);
+                open_frame(time::now_in_nano(), msg::type::SessionEnd, 0);
                 close_frame(1);
             }
         }

@@ -90,14 +90,12 @@ namespace kungfu
                 ~reader();
 
                 /**
-                 * subscribe to specified data location
-                 * @param m mode
-                 * @param c category
-                 * @param group group
-                 * @param name name
+                 * join journal at given data location
+                 * @param location where the journal locates
+                 * @param dest_id journal dest id
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                void subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time);
+                void join(const data::location_ptr location, uint32_t dest_id, const int64_t from_time);
 
                 inline frame_ptr current_frame()
                 { return current_->current_frame(); }
@@ -124,27 +122,42 @@ namespace kungfu
             public:
                 explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
 
-                frame_ptr open_frame(int64_t trigger_time, int16_t msg_type, int16_t source);
+                frame_ptr open_frame(int64_t trigger_time, int32_t msg_type);
 
                 void close_frame(size_t data_length);
 
                 template<typename T>
-                inline void write(int64_t trigger_time, int16_t msg_type, int16_t source, const T *data)
+                inline T &open_data(int64_t trigger_time, int32_t msg_type)
                 {
-                    auto frame = open_frame(trigger_time, msg_type, source);
+                    auto frame = open_frame(trigger_time, msg_type);
+                    size_to_write_ = sizeof(T);
+                    return const_cast<T&>(frame->data<T>());
+                }
+
+                inline void close_data()
+                {
+                    size_t length = size_to_write_;
+                    size_to_write_ = 0;
+                    close_frame(length);
+                }
+
+                template<typename T>
+                inline void write(int64_t trigger_time, int32_t msg_type, const T& data)
+                {
+                    auto frame = open_frame(trigger_time, msg_type);
                     close_frame(frame->copy_data<T>(data));
                 }
 
-                void write_raw(int64_t trigger_time, int16_t msg_type, int16_t source, char *data, int32_t length);
+                void write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length);
 
                 void open_session();
 
                 void close_session();
-
             private:
                 std::mutex writer_mtx_;
                 journal_ptr journal_;
                 publisher_ptr publisher_;
+                size_t size_to_write_;
             };
         }
     }

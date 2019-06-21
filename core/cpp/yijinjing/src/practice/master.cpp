@@ -6,6 +6,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
+#include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
@@ -27,9 +28,9 @@ namespace kungfu
             writers_[0]->open_session();
         }
 
-        void master::rx_subscribe(observable<yijinjing::event_ptr> events)
+        void master::react(observable<event_ptr> events)
         {
-            events | is(MsgType::Register) |
+            events | is(msg::type::Register) |
             $([&](event_ptr e)
               {
                   auto request_loc = e->data<nlohmann::json>();
@@ -46,25 +47,25 @@ namespace kungfu
                       auto uid_str = fmt::format("{:08x}", app_location->uid);
                       auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str,
                                                                         get_io_device()->get_home()->locator);
-                      reader_->subscribe(app_location, 0, now);
-                      reader_->subscribe(app_location, master_location->uid, now);
+                      reader_->join(app_location, 0, now);
+                      reader_->join(app_location, master_location->uid, now);
 
                       auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
                       writers_[app_location->uid] = writer;
 
                       nlohmann::json register_msg;
-                      register_msg["msg_type"] = MsgType::Register;
+                      register_msg["msg_type"] = msg::type::Register;
                       register_msg["gen_time"] = now;
                       register_msg["trigger_time"] = e->gen_time();
                       register_msg["source"] = app_location->uid;
                       register_msg["data"] = request_loc;
                       get_io_device()->get_publisher()->publish(register_msg.dump());
 
-                      action::RequestPublish msg;
+                      msg::data::RequestPublish msg;
                       msg.dest_id = 0;
-                      writer->write(e->gen_time(), MsgType::RequestPublish, master_location->uid, &msg);
+                      writer->write(e->gen_time(), msg::type::RequestPublish, &msg);
                       msg.dest_id = master_location->uid;
-                      writer->write(e->gen_time(), MsgType::RequestPublish, master_location->uid, &msg);
+                      writer->write(e->gen_time(), msg::type::RequestPublish, &msg);
                       SPDLOG_INFO("request publish {}", app_location->uname);
                   } else
                   {
@@ -72,11 +73,11 @@ namespace kungfu
                   }
               });
 
-            events | is(MsgType::RequestSubscribe) |
+            events | is(msg::type::RequestSubscribe) |
             $([&](event_ptr e)
               {
-                  auto subscribe = e->data<action::RequestSubscribe>();
-                  action::RequestPublish publish{};
+                  auto subscribe = e->data<msg::data::RequestSubscribe>();
+                  msg::data::RequestPublish publish{};
                   publish.dest_id = e->source();
                   if (writers_.find(subscribe.source_id) == writers_.end())
                   {
@@ -88,8 +89,8 @@ namespace kungfu
                       SPDLOG_ERROR("Unregistered request");
                       return;
                   }
-                  writers_[subscribe.source_id]->write(e->gen_time(), MsgType::RequestPublish, get_home_uid(), &publish);
-                  writers_[e->source()]->write(e->gen_time(), MsgType::RequestSubscribe, get_home_uid(), &subscribe);
+                  writers_[subscribe.source_id]->write(e->gen_time(), msg::type::RequestPublish, &publish);
+                  writers_[e->source()]->write(e->gen_time(), msg::type::RequestSubscribe, &subscribe);
               });
         }
     }

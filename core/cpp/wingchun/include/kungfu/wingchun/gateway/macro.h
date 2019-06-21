@@ -7,9 +7,6 @@
 
 #include <spdlog/spdlog.h>
 
-namespace kungfu
-{
-
 #define INSERT_ORDER_TRACE(content) SPDLOG_TRACE("[InsertOrder] {}", content)
 #define INSERT_ORDER_ERROR(content) SPDLOG_ERROR("[InsertOrder] {}", content)
 #define INSERT_ORDER_INFO(content)  SPDLOG_INFO("[InsertOrder] {}", content)
@@ -60,7 +57,5 @@ namespace kungfu
 #define TRANSACTION_TRACE(content) SPDLOG_TRACE("[Transaction] {}", content)
 
 #define TIMER_TRACE(content) SPDLOG_TRACE("[Timer] {}", content)
-
-}
 
 #endif //KUNGFU_MACRO_H

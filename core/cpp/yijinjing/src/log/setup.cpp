@@ -32,7 +32,7 @@ namespace kungfu {
             const std::string& setup_log(data::location_ptr location, const std::string &name) {
                 if (spdlog::default_logger()->name().empty()) {
                     auto locator = location->locator;
-                    std::string log_file = locator->make_path(locator->log_path(location), name + ".log");
+                    std::string log_file = locator->layout_file(location, data::layout::LOG, name);
 
                     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
                     auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_file, 0, 0);

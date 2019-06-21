@@ -1,4 +1,5 @@
 import os
+import shutil
 import glob
 import re
 import pyyjj
@@ -36,30 +37,27 @@ class Locator(pyyjj.locator):
         pyyjj.locator.__init__(self)
         self._home = ctx.home
 
-    def make_path(self, parent, filename):
-        if not os.path.exists(parent):
-            os.makedirs(parent)
-        return os.path.join(parent, filename)
+    def layout_dir(self, location, layout):
+        mode = pyyjj.get_mode_name(location.mode)
+        category = pyyjj.get_category_name(location.category)
+        p = os.path.join(self._home, category, location.group, location.name, layout, mode)
+        if not os.path.exists(p):
+            os.makedirs(p)
+        return p
 
-    def journal_path(self, location):
-        path = os.path.join(self._home, 'journal',
-                            pyyjj.get_mode_name(location.mode), pyyjj.get_category_name(location.category), location.group, location.name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        return path
+    def layout_file(self, location, layout, name):
+        return os.path.join(self.layout_dir(location, layout), "{}.{}".format(name, pyyjj.get_layout_name(layout)))
 
-    def socket_path(self, location):
-        path = os.path.join(self._home, 'socket',
-                            pyyjj.get_mode_name(location.mode), pyyjj.get_category_name(location.category), location.group, location.name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        return path
-
-    def log_path(self, location):
-        path = os.path.join(self._home, 'log', 'archive')
-        if not os.path.exists(path):
-            os.makedirs(path)
-        return path
+    def default_to_system_db(self, location, name):
+        file = os.path.join(self.layout_dir(location, pyyjj.layout.SQLITE), "{}.{}".format(name, pyyjj.get_layout_name(pyyjj.layout.SQLITE)))
+        if os.path.exists(file):
+            return file
+        else:
+            system_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "etc", "kungfu", self)
+            system_file = os.path.join(self.layout_dir(system_location, pyyjj.layout.SQLITE),
+                                       "{}.{}".format(name, pyyjj.get_layout_name(pyyjj.layout.SQLITE)))
+            shutil.copy(system_file, file)
+            return file
 
     def list_page_id(self, location, dest_id):
         page_ids = []

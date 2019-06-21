@@ -7,9 +7,6 @@
 
 #include <kungfu/yijinjing/common.h>
 
-#define JOURNAL_PREFIX std::string("yjj")        /** journal file prefix */
-#define JOURNAL_SUFFIX std::string("journal")    /** journal file suffix */
-
 #define __JOURNAL_VERSION__ 3
 
 namespace kungfu

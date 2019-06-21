@@ -5,31 +5,38 @@
 #ifndef KUNGFU_COMMISSION_MANAGER_H
 #define KUNGFU_COMMISSION_MANAGER_H
 
-#include <kungfu/wingchun/oms_struct.h>
-#include <memory>
-
-namespace kfj = kungfu::journal;
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {
-    class CommissionManager
+    namespace wingchun
     {
-    public:
-        explicit CommissionManager(const char* account_id);
-        ~CommissionManager();
+        class CommissionManager
+        {
+        public:
+            explicit CommissionManager(const std::string& account_id, const std::string& db_file);
 
-        const kfj::InstrumentCommissionRate* get_commission_rate(const char* instrument_id, const char* exchange_id) const;
+            ~CommissionManager();
 
-        double calc_commission(const kfj::OrderInput* input) const;
+            const msg::data::InstrumentCommissionRate& get_commission_rate(const std::string& instrument_id, const std::string& exchange_id) const;
 
-        void update_commission(const kfj::InstrumentCommissionRate& commission);
-        void update_commissions(const std::vector<kfj::InstrumentCommissionRate>& commissions);
+            double calc_commission(const msg::data::OrderInput *input) const;
 
-    private:
-        class impl;
-        impl* impl_;
-    };
-    typedef std::shared_ptr<CommissionManager> CommissionManagerPtr;
+            void update_commission(const msg::data::InstrumentCommissionRate &commission);
+
+            void update_commissions(const std::vector<msg::data::InstrumentCommissionRate> &commissions);
+
+            void on_commission(const msg::data::InstrumentCommissionRate &commission);
+
+        private:
+
+        private:
+            msg::data::InstrumentCommissionRate simple_default_;
+            msg::data::InstrumentCommissionRate stock_rate_;
+            std::map<std::string, msg::data::InstrumentCommissionRate> future_rates_;
+            storage::CommissionStorage storage_;
+        };
+    }
 }
 
 #endif //KUNGFU_COMMISSION_MANAGER_H

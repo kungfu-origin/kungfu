@@ -14,7 +14,6 @@
 #endif // _WINDOWS
 
 #include <regex>
-#include <boost/filesystem.hpp>
 #include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/journal/common.h>

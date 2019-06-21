@@ -11,17 +11,24 @@
 
 namespace kungfu
 {
-    namespace portfolio_util
+    namespace wingchun
     {
-        void init_db(const char* db_file);
+        namespace portfolio_util
+        {
+            void init_db(const std::string& db_file);
 
-        void save_meta_inner(SQLite::Database& db, int64_t last_update, const std::string& trading_day);
-        void load_meta_inner(SQLite::Database& db, int64_t& last_update, std::string& trading_day);
+            void save_meta_inner(SQLite::Database &db, int64_t last_update, const std::string &trading_day);
 
-        void create_pos_tables(SQLite::Database& db);
-        void create_acc_tables(SQLite::Database& db);
-        void create_pnl_tables(SQLite::Database& db);
-        void create_meta_table(SQLite::Database& db);
+            void load_meta_inner(SQLite::Database &db, int64_t &last_update, std::string &trading_day);
+
+            void create_pos_tables(SQLite::Database &db);
+
+            void create_acc_tables(SQLite::Database &db);
+
+            void create_pnl_tables(SQLite::Database &db);
+
+            void create_meta_table(SQLite::Database &db);
+        }
     }
 }
 

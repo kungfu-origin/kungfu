@@ -13,6 +13,11 @@
 #define KF_ENV_LOG_LEVEL        kungfu::get_env("KF_LOG_LEVEL")
 #define KF_ENV_NO_EXT           kungfu::get_env("KF_NO_EXT")
 
+#define DECLARE_PTR_UNI(X) typedef std::unique_ptr<X> X##_ptr;   /** define smart ptr */
+
+#define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
+#define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
+
 namespace kungfu
 {
     inline std::string get_env(std::string name)

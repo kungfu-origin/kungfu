@@ -2,59 +2,65 @@
 // Created by PolarAir on 2019-04-18.
 //
 
-#ifndef KUNGFU_PORTFOLIO_MANAGER_H
-#define KUNGFU_PORTFOLIO_MANAGER_H
+#ifndef WINGCHUN_PORTFOLIO_MANAGER_H
+#define WINGCHUN_PORTFOLIO_MANAGER_H
+
+#include <kungfu/wingchun/msg.h>
 
 #include "pnl_def.h"
 #include "account_manager.h"
 
-using namespace kungfu::journal;
-using namespace kungfu::flying;
-
 namespace kungfu
 {
-    class PortfolioManager: public IPnLDataHandler
+    namespace wingchun
     {
-    public:
-        virtual void on_order_input(const OrderInput* input) = 0;
-        virtual void on_quote(const Quote* quote) = 0;
-        virtual void on_order(const Order* order) = 0;
-        virtual void on_trade(const Trade* trade) = 0;
+        class PortfolioManager : public IPnLDataHandler
+        {
+        public:
+            PortfolioManager(const std::string& name);
 
-        virtual void on_positions(const std::vector<Position>& positions) = 0;
-        virtual void on_position_details(const std::vector<Position>& details) = 0;
-        virtual void on_account(const AccountInfo& account) = 0;
+            virtual msg::data::Position get_long_pos(const std::string& account_id, const std::string& instrument_id, const std::string& exchange_id);
 
-        virtual void on_switch_day(const std::string& trading_day) = 0;
+            virtual msg::data::Position get_short_pos(const std::string& account_id, const std::string& instrument_id, const std::string& exchange_id);
 
-        virtual int64_t get_last_update() const = 0;
+            virtual double get_last_price(const std::string& instrument_id, const std::string& exchange_id);
 
-        virtual std::string get_current_trading_day() const = 0;
-        virtual void set_current_trading_day(const std::string& trading_day) = 0;
+            virtual std::vector<msg::data::Instrument> get_all_pos_instruments(const std::string& account_id);
 
-        virtual void register_pos_callback(PositionCallback cb) = 0;
-        virtual void register_acc_callback(AccountCallback cb) = 0;
-        virtual void register_pnl_callback(PnLCallback cb) = 0;
+            virtual msg::data::SubPortfolioInfo get_sub_portfolio(const std::string& account_id);
 
-        virtual Position get_long_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const = 0;
-        virtual Position get_short_pos(const char* account_id, const char* instrument_id, const char* exchange_id) const = 0;
-        virtual double get_last_price(const char* instrument_id, const char* exchange_id) const = 0;
-        virtual std::vector<Instrument> get_all_pos_instruments(const char* account_id) const = 0;
+            virtual msg::data::PortfolioInfo get_portfolio();
 
-        virtual SubPortfolioInfo get_sub_portfolio(const char* account_id) const = 0;
-        virtual PortfolioInfo get_portfolio() const = 0;
+            virtual const AccountManager& get_account(const std::string& account_id);
 
-        virtual const AccountManagerPtr get_account(const char* account_id) const = 0;
+            virtual void dump_to_db(SQLite::Database &db) = 0;
 
-        virtual void dump_to_db(SQLite::Database& db) = 0;
-        virtual void dump_to_db(const char* db_file) = 0;
+            virtual void dump_to_db(const std::string& db_file) = 0;
 
-        virtual void load_from_db(const char* db_file) = 0;
-        virtual void load_from_db(SQLite::Database& db) = 0;
-    };
+            virtual void load_from_db(const std::string& db_file) = 0;
 
-    typedef std::shared_ptr<PortfolioManager> PortfolioManagerPtr;
-    PortfolioManagerPtr create_portfolio_manager(kungfu::yijinjing::event_source_ptr event_source, const char* name, const char *db = nullptr);
+            virtual void load_from_db(SQLite::Database &db) = 0;
+
+        private:
+            bool recalc_pnl();
+
+            void callback() const;
+
+            void on_acc_callback(const msg::data::AccountInfo &acc) const;
+
+            void on_pos_callback(const msg::data::Position &pos) const;
+
+        private:
+            std::string name_;
+            int64_t last_update_;
+            std::string trading_day_;
+            std::map<std::string, AccountManager&> accounts_;
+            msg::data::PortfolioInfo pnl_;
+            std::vector<PnLCallback> cbs_;
+            std::vector<AccountCallback> acc_cbs_;
+            std::vector<PositionCallback> pos_cbs_;
+        };
+    }
 }
 
-#endif //KUNGFU_PORTFOLIO_MANAGER_H
+#endif //WINGCHUN_PORTFOLIO_MANAGER_H

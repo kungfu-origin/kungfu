@@ -9,16 +9,18 @@
 
 namespace kungfu
 {
-    inline bool create_folder_if_not_exists(const std::string& path)
+    namespace wingchun
     {
-        boost::filesystem::path _path(path);
-        if (!boost::filesystem::exists(_path))
+        inline bool create_folder_if_not_exists(const std::string &path)
         {
-            return boost::filesystem::create_directories(_path);
-        }
-        else
-        {
-            return boost::filesystem::is_directory(_path);
+            boost::filesystem::path _path(path);
+            if (!boost::filesystem::exists(_path))
+            {
+                return boost::filesystem::create_directories(_path);
+            } else
+            {
+                return boost::filesystem::is_directory(_path);
+            }
         }
     }
 }

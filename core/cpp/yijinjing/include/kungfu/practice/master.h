@@ -19,8 +19,11 @@ namespace kungfu
         public:
             master(yijinjing::data::location_ptr home, bool low_latency = false);
 
+            void observe(const yijinjing::data::location_ptr location) override
+            {}
+
         protected:
-            void rx_subscribe(rx::observable<yijinjing::event_ptr> events) override ;
+            void react(rx::observable<yijinjing::event_ptr> events) override;
         };
     }
 }

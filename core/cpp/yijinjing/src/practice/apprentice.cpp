@@ -23,8 +23,9 @@
 #include <fmt/format.h>
 #include <hffix.hpp>
 
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
 
 #include <kungfu/practice/apprentice.h>
@@ -42,7 +43,7 @@ namespace kungfu
         {
             auto now = time::now_in_nano();
             nlohmann::json request;
-            request["msg_type"] = MsgType::Register;
+            request["msg_type"] = msg::type::Register;
             request["gen_time"] = now;
             request["trigger_time"] = now;
             request["source"] = get_home_uid();
@@ -63,28 +64,31 @@ namespace kungfu
 
             auto uid_str = fmt::format("{:08x}", get_home_uid());
             auto locator = get_io_device()->get_home()->locator;
-            master_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
-            register_location(master_location_);
+            master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
+            register_location(master_commands_location_);
+
+            config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
 
             SPDLOG_INFO("request {}", request.dump());
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::subscribe(const location_ptr location)
+        void apprentice::observe(const location_ptr location)
         {
             auto now = time::now_in_nano();
-            action::RequestSubscribe request{};
+            msg::data::RequestSubscribe request{};
             request.source_id = location->uid;
             request.from_time = now;
-            get_writer(master_location_->uid)->write(now, MsgType::RequestSubscribe, get_home_uid(), &request);
+            get_writer(master_commands_location_->uid)->write(now, msg::type::RequestSubscribe, &request);
         }
 
-        void apprentice::rx_subscribe(observable<yijinjing::event_ptr> events)
+        void apprentice::react(observable<event_ptr> events)
         {
-            events | skip_until(events | is(MsgType::Register) | from(get_home_uid())) | first() | timeout(seconds(1), observe_on_new_thread()) |
+            events | skip_until(events | is(msg::type::Register) | from(get_home_uid())) | first() | timeout(seconds(1), observe_on_new_thread()) |
             $([&](event_ptr e)
               {
                   // timeout happens on new thread, can not subscribe journal reader here
+                  // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
               },
               [&](std::exception_ptr e)
               {
@@ -93,7 +97,7 @@ namespace kungfu
                   catch (const timeout_error &ex)
                   {
                       SPDLOG_ERROR("app register timeout");
-                      hero::stop();
+                      hero::signal_stop();
                   }
               },
               [&]()
@@ -101,13 +105,13 @@ namespace kungfu
                   // once registered this subscriber finished, no worry for performance.
               });
 
-            events | skip_until(events | is(MsgType::Register) | from(get_home_uid())) | first() |
+            events | skip_until(events | is(msg::type::Register) | from(get_home_uid())) | first() |
             $([&](event_ptr e)
               {
-                  reader_->subscribe(master_location_, get_home_uid(), e->gen_time());
+                  reader_->join(master_commands_location_, get_home_uid(), e->gen_time());
               });
 
-            events | is(MsgType::Register) |
+            events | is(msg::type::Register) |
             $([&](event_ptr e)
               {
                   auto request_loc = e->data<nlohmann::json>();
@@ -118,6 +122,12 @@ namespace kungfu
                           get_io_device()->get_home()->locator
                   );
                   register_location(app_location);
+              });
+
+            events | is(msg::type::RequestStart) | first() |
+            $([&](event_ptr e)
+              {
+                  start();
               });
         }
     }

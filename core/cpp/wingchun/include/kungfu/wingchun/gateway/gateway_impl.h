@@ -7,12 +7,10 @@
 
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/practice/apprentice.h>
 
-#include <kungfu/wingchun/gateway/gateway.h>
-
-#include <kungfu/wingchun/feed_handler.h>
 #include <kungfu/wingchun/msg.h>
-
+#include <kungfu/wingchun/gateway/gateway.h>
 #include <kungfu/wingchun/calendar/calendar.h>
 #include <kungfu/wingchun/util/uid_generator.h>
 #include <kungfu/wingchun/storage/order_storage.h>
@@ -26,169 +24,175 @@
 
 namespace kungfu
 {
-    namespace oms
+    namespace wingchun
     {
-        class OrderManager;
+        namespace oms
+        {
+            class OrderManager;
+        }
+
+        class GatewayImpl : virtual public Gateway, public practice::apprentice
+        {
+        public:
+            GatewayImpl(bool low_latency, yijinjing::data::category c, const std::string &source, const std::string &name);
+
+            virtual ~GatewayImpl();
+
+            inline std::string get_app_db_file(const std::string &name)
+            {
+                auto home = get_io_device()->get_home();
+                return home->locator->layout_file(home, yijinjing::data::layout::SQLITE, name);
+            }
+
+            const std::string &get_name() const override
+            { return name_; }
+
+            const std::string &get_source() const override
+            { return source_; }
+
+            enum GatewayState get_state() const override
+            { return state_; };
+
+            void set_state(const enum GatewayState &state, const std::string &message = "") override;
+
+            Calendar_ptr get_calendar() const
+            { return calendar_; }
+
+            const NNPublisher *get_publisher() const
+            { return nn_publisher_.get(); }
+
+            std::shared_ptr<GatewayStateStorage> get_state_storage() const
+            { return state_storage_; }
+
+            virtual void configure_event_source(kungfu::yijinjing::event_source_ptr event_source);
+
+            void react(rx::observable <yijinjing::event_ptr> events) override;
+
+        protected:
+            std::string source_;
+            std::string name_;
+            yijinjing::event_source_ptr event_source_;
+            enum GatewayState state_;
+
+            Calendar_ptr calendar_;
+            std::shared_ptr<GatewayStateStorage> state_storage_;
+            std::unique_ptr<NNPublisher> nn_publisher_;
+        };
+
+        class MdGatewayImpl : virtual public MdGateway, public GatewayImpl
+        {
+        public:
+            MdGatewayImpl(bool low_latency, const std::string &source);
+
+            virtual ~MdGatewayImpl()
+            {}
+
+            virtual void on_started() override
+            {};
+
+            virtual void on_login(const std::string &source, const std::string &name, const std::string &client_id) override;
+
+            void register_subscription_storage(std::shared_ptr<SubscriptionStorage> subscription_storage)
+            { subscription_storage_ = subscription_storage; }
+
+            std::shared_ptr<SubscriptionStorage> get_subscription_storage()
+            { return subscription_storage_; }
+
+            std::vector<msg::data::Instrument> get_subscriptions()
+            { return subscription_storage_->get_subscriptions(); }
+
+            void react(rx::observable <yijinjing::event_ptr> events) override;
+
+        private:
+            std::shared_ptr<SubscriptionStorage> subscription_storage_;
+        };
+
+        class TdGatewayImpl : virtual public TdGateway, public GatewayImpl
+        {
+        public:
+            TdGatewayImpl(bool low_latency, const std::string &source, const std::string &name);
+
+            virtual ~TdGatewayImpl()
+            {};
+
+            virtual void on_started() override;
+
+            virtual void on_login(const std::string &source, const std::string &name, const std::string &client_id) override;
+
+            virtual bool req_position_detail() override
+            { return false; }
+
+            virtual bool req_position() override = 0;
+
+            virtual bool req_account() override = 0;
+
+            void init_account_manager();
+
+            void register_order_storage(std::shared_ptr<storage::OrderStorage> order_storage)
+            { order_storage_ = order_storage; }
+
+            void register_trade_storage(std::shared_ptr<storage::TradeStorage> trade_storage)
+            { trade_storage_ = trade_storage; }
+
+            std::shared_ptr<storage::OrderStorage> get_order_storage()
+            { return order_storage_; };
+
+            std::shared_ptr<storage::TradeStorage> get_trade_storage()
+            { return trade_storage_; };
+
+            std::shared_ptr<AccountManager> get_account_manager()
+            { return account_manager_; }
+
+            std::vector<uint64_t> get_pending_orders(const std::string &client_id = "") const;
+
+            uint64_t next_id();
+
+            bool add_market_feed(const std::string &source_name);
+
+            void subscribe_holdings() const;
+
+            void on_order_input(const msg::data::OrderInput &order_input);
+
+            void on_order_action(const msg::data::OrderAction &order_action);
+
+            void on_manual_order_input(msg::data::OrderInput &order_input);
+
+            void on_manual_order_action(const std::string &account_id, const std::string &client_id, const std::vector<uint64_t> &order_ids);
+
+            void on_order(msg::data::Order &order);
+
+            void on_trade(msg::data::Trade &trade);
+
+            void on_position(const msg::data::Position &pos, bool is_last);
+
+            void on_position_detail(const msg::data::Position &pos_detail, bool is_last);
+
+            void on_account(msg::data::AccountInfo &account);
+
+            void on_quote(const msg::data::Quote &quote);
+
+            void on_1min_timer(int64_t nano);
+
+            void on_daily_timer(int64_t nano);
+
+            void on_switch_day(const std::string &trading_day);
+
+            void configure_event_source(kungfu::yijinjing::event_source_ptr event_source) override;
+
+            void react(rx::observable <yijinjing::event_ptr> events) override;
+
+        private:
+            std::shared_ptr<storage::OrderStorage> order_storage_;
+            std::shared_ptr<storage::TradeStorage> trade_storage_;
+            std::shared_ptr<AccountManager> account_manager_;
+            std::shared_ptr<oms::OrderManager> order_manager_;
+
+            std::unique_ptr<UidGenerator> uid_generator_;
+
+            std::vector<msg::data::Position> rsp_pos_;
+            std::vector<msg::data::Position> rsp_pos_detail_;
+        };
     }
-
-
-    class MarketDataStreamingWriter: public MarketDataFeedHandler
-    {
-    public:
-        MarketDataStreamingWriter(kungfu::yijinjing::journal::writer_ptr writer): writer_(writer) {};
-        virtual ~MarketDataStreamingWriter() {}
-        void on_quote(const Quote* quote) override
-        {
-            writer_->write(0, (int16_t)MsgType::Quote, 0, quote);
-        }
-        void on_entrust(const Entrust* entrust) override
-        {
-            writer_->write(0, (int16_t)MsgType::Entrust, 0, entrust);
-        }
-        void on_transaction(const Transaction* transaction) override
-        {
-            writer_->write(0, (int16_t)MsgType::Transaction, 0, transaction);
-        }
-
-    private:
-        kungfu::yijinjing::journal::writer_ptr writer_;
-    };
-
-    class TraderDataStreamingWriter: public TraderDataFeedHandler
-    {
-    public:
-        TraderDataStreamingWriter(kungfu::yijinjing::journal::writer_ptr writer): writer_(writer) {};
-        virtual ~TraderDataStreamingWriter() {}
-        virtual void on_order(const Order* order)
-        {
-            writer_->write(0, (int16_t)MsgType::Order, 0, order);
-        }
-        virtual void on_trade(const Trade* trade)
-        {
-            writer_->write(0, (int16_t)MsgType::Trade, 0, trade);
-        }
-
-    private:
-        kungfu::yijinjing::journal::writer_ptr writer_;
-    };
-
-    class GatewayImpl: virtual public Gateway, public EventLoop
-    {
-    public:
-        GatewayImpl(const std::string& source, const std::string& name);
-        virtual ~GatewayImpl();
-
-        const std::string& get_name() const override { return name_; }
-        const std::string& get_source() const override { return source_; }
-
-        GatewayState get_state() const override { return state_; };
-        void set_state(const GatewayState& state, const std::string& message = "") override ;
-
-        kungfu::Calendar_ptr get_calendar() const { return calendar_; }
-        const NNPublisher* get_publisher() const { return nn_publisher_.get(); }
-        std::shared_ptr<GatewayStateStorage> get_state_storage() const { return state_storage_; }
-
-        void configure_event_source(kungfu::yijinjing::event_source_ptr event_source) override ;
-
-    protected:
-        std::string source_;
-        std::string name_;
-        kungfu::yijinjing::event_source_ptr event_source_;
-        GatewayState state_;
-
-        kungfu::Calendar_ptr calendar_;
-        std::shared_ptr<GatewayStateStorage> state_storage_;
-        std::unique_ptr<NNPublisher> nn_publisher_;
-    };
-
-    class MdGatewayImpl: virtual public MdGateway, public GatewayImpl
-    {
-    public:
-        MdGatewayImpl(const std::string& source);
-        virtual ~MdGatewayImpl() {}
-
-        virtual void on_started() override {};
-        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) override ;
-
-        void register_subscription_storage(std::shared_ptr<SubscriptionStorage> subscription_storage) { subscription_storage_ = subscription_storage; }
-        std::shared_ptr<SubscriptionStorage> get_subscription_storage() {return subscription_storage_;}
-
-        void register_feed_handler(std::shared_ptr<MarketDataFeedHandler> feed_handler) { feed_handler_ = feed_handler; };
-        std::shared_ptr<MarketDataFeedHandler> get_feed_handler() {return feed_handler_;};
-
-        std::vector<Instrument> get_subscriptions() { return subscription_storage_->get_subscriptions(); }
-
-        void on_quote(const Quote& quote);
-        void on_entrust(const Entrust& entrust);
-        void on_transaction(const Transaction& transaction);
-        void on_subscribe(const std::string &recipient, const std::vector<Instrument> &instruments, bool is_level2);
-
-        void configure_event_source(kungfu::yijinjing::event_source_ptr event_source) override ;
-
-    private:
-        std::shared_ptr<SubscriptionStorage> subscription_storage_;
-        std::shared_ptr<MarketDataFeedHandler> feed_handler_;
-    };
-
-    class TdGatewayImpl: virtual public TdGateway, public GatewayImpl
-    {
-    public:
-        TdGatewayImpl(const std::string& source, const std::string& name);
-        virtual ~TdGatewayImpl() {};
-
-        virtual void on_started() override;
-        virtual void on_login(const std::string &source, const std::string& name, const std::string& client_id) override;
-
-        virtual bool req_position_detail() override { return false;}
-        virtual bool req_position() override = 0;
-        virtual bool req_account() override = 0;
-
-        void init_account_manager();
-        void register_order_storage(std::shared_ptr<kungfu::storage::OrderStorage> order_storage) { order_storage_ = order_storage; }
-        void register_trade_storage(std::shared_ptr<kungfu::storage::TradeStorage> trade_storage) { trade_storage_ = trade_storage; }
-        void register_feed_handler(std::shared_ptr<TraderDataFeedHandler> feed_handler) { feed_handler_ = feed_handler; };
-
-        std::shared_ptr<kungfu::storage::OrderStorage> get_order_storage(){return order_storage_;};
-        std::shared_ptr<kungfu::storage::TradeStorage> get_trade_storage(){return trade_storage_;};
-        std::shared_ptr<kungfu::AccountManager> get_account_manager() {return account_manager_; }
-
-        std::vector<uint64_t> get_pending_orders(const std::string& client_id = "") const;
-
-        uint64_t next_id();
-
-        bool add_market_feed(const std::string& source_name);
-        void subscribe_holdings() const;
-
-        void on_order_input(const OrderInput& order_input);
-        void on_order_action(const OrderAction& order_action);
-
-        void on_manual_order_input(OrderInput& order_input);
-        void on_manual_order_action(const std::string& account_id, const std::string& client_id, const std::vector<uint64_t>& order_ids);
-
-        void on_order(Order& order);
-        void on_trade(Trade& trade);
-        void on_position(const Position& pos, bool is_last);
-        void on_position_detail(const Position& pos_detail, bool is_last);
-        void on_account(AccountInfo& account);
-        void on_quote(const Quote& quote);
-        void on_1min_timer(int64_t nano);
-        void on_daily_timer(int64_t nano);
-        void on_switch_day(const std::string& trading_day);
-
-        void configure_event_source(kungfu::yijinjing::event_source_ptr event_source) override ;
-
-    private:
-        std::shared_ptr<TraderDataFeedHandler> feed_handler_;
-        std::shared_ptr<kungfu::storage::OrderStorage> order_storage_;
-        std::shared_ptr<kungfu::storage::TradeStorage> trade_storage_;
-        std::shared_ptr<kungfu::AccountManager> account_manager_;
-        std::shared_ptr<oms::OrderManager> order_manager_;
-
-        std::unique_ptr<UidGenerator> uid_generator_;
-
-        std::vector<Position> rsp_pos_;
-        std::vector<Position> rsp_pos_detail_;
-    };
 }
 
 #endif //KUNGFU_GATEWAY_IMP_H

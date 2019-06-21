@@ -13,18 +13,12 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(kfext_xtp, m) {
-    py::class_<kungfu::xtp::MdGateway, std::shared_ptr<kungfu::xtp::MdGateway>>(m, "MD")
-            .def(py::init<std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-            .def("get_name", &kungfu::xtp::MdGateway::get_name)
-            .def("configure_event_source", &kungfu::xtp::MdGateway::configure_event_source)
-            .def("handle", &kungfu::xtp::MdGateway::handle)
-            .def("finish", &kungfu::xtp::MdGateway::finish);
+using namespace kungfu::wingchun::xtp;
 
-    py::class_<kungfu::xtp::TdGateway, std::shared_ptr<kungfu::xtp::TdGateway>>(m, "TD")
-            .def(py::init<std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-            .def("get_name", &kungfu::xtp::TdGateway::get_name)
-            .def("configure_event_source", &kungfu::xtp::TdGateway::configure_event_source)
-            .def("handle", &kungfu::xtp::TdGateway::handle)
-            .def("finish", &kungfu::xtp::TdGateway::finish);
+PYBIND11_MODULE(kfext_xtp, m) {
+    py::class_<MdGateway, std::shared_ptr<MdGateway>>(m, "MD")
+            .def(py::init<std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>());
+
+    py::class_<TdGateway, std::shared_ptr<TdGateway>>(m, "TD")
+            .def(py::init<std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>());
 }

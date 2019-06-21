@@ -13,8 +13,7 @@ namespace kungfu
 {
     namespace practice
     {
-
-        class hero : public yijinjing::event_source
+        class hero
         {
         public:
             explicit hero(yijinjing::io_device_ptr io_device);
@@ -22,37 +21,42 @@ namespace kungfu
             virtual ~hero()
             {}
 
-            void subscribe(const yijinjing::data::location_ptr location) override
-            {};
+            void run();
 
-            inline yijinjing::io_device_ptr get_io_device() const override
+            void signal_stop()
+            { live_ = false; };
+
+            virtual void observe(const yijinjing::data::location_ptr location) = 0;
+
+            inline yijinjing::io_device_ptr get_io_device() const
             { return io_device_; }
 
-            inline yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) override
+            inline yijinjing::journal::writer_ptr get_writer(uint32_t dest_id)
             { return writers_[dest_id]; }
 
             inline uint32_t get_home_uid() const
             { return get_io_device()->get_home()->uid; }
 
-            inline const std::string& get_home_uname() const
+            inline const std::string &get_home_uname() const
             { return get_io_device()->get_home()->uname; }
 
-            void register_location(const yijinjing::data::location_ptr& location);
+            void register_location(const yijinjing::data::location_ptr &location);
 
             bool has_location(uint32_t hash);
 
             const yijinjing::data::location_ptr get_location(uint32_t hash);
 
-            void run();
-
-            void stop()
-            { live_ = false; };
+            template<typename T>
+            inline void write_to(int64_t trigger_time, int32_t msg_type, T &data, uint32_t dest_id = 0)
+            {
+                writers_[dest_id]->write(trigger_time, msg_type, get_home_uid(), data);
+            }
 
         protected:
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
 
-            virtual void rx_subscribe(rx::observable<yijinjing::event_ptr> events) = 0;
+            virtual void react(rx::observable <yijinjing::event_ptr> events) = 0;
 
         private:
             yijinjing::io_device_ptr io_device_;

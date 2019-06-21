@@ -32,15 +32,31 @@ namespace kungfu
         class apprentice : public hero
         {
         public:
-            explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
+            apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void subscribe(yijinjing::data::location_ptr location) override;
+            void observe(const yijinjing::data::location_ptr location) override;
+
+            inline std::string get_config_db_file(const std::string &name)
+            {
+                return config_location_->locator->layout_file(config_location_, yijinjing::data::layout::SQLITE, name);
+            }
+
+            inline std::string get_app_db_file(const std::string &name)
+            {
+                auto home = get_io_device()->get_home();
+                return home->locator->layout_file(home, yijinjing::data::layout::SQLITE, name);
+            }
 
         protected:
-            void rx_subscribe(rx::observable<yijinjing::event_ptr> events) override ;
+            yijinjing::data::location_ptr config_location_;
+
+            void react(rx::observable<yijinjing::event_ptr> events) override;
+
+            virtual void start()
+            {}
 
         private:
-            yijinjing::data::location_ptr master_location_;
+            yijinjing::data::location_ptr master_commands_location_;
         };
     }
 }

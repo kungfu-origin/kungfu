@@ -1,7 +1,3 @@
-#include <utility>
-
-#include <utility>
-
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -20,15 +16,11 @@
 #ifndef KUNGFU_YIJINJING_COMMON_H
 #define KUNGFU_YIJINJING_COMMON_H
 
+#include <utility>
 #include <rxcpp/rx.hpp>
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
-
-#define DECLARE_PTR_UNI(X) typedef std::unique_ptr<X> X##_ptr;   /** define smart ptr */
-
-#define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
-#define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
 namespace kungfu
 {
@@ -39,18 +31,6 @@ namespace kungfu
         const int MB = KB * KB;
         const int JOURNAL_PAGE_SIZE = 128 * MB;
         const int PAGE_MIN_HEADROOM = 1 * MB;
-
-        enum MsgType
-        {
-            SessionStart = 10001,
-            SessionEnd = 10002,
-            Register = 10011,
-            Deregister = 10012,
-            RequestSubscribe = 10021,
-            RequestUnsubscribe = 10022,
-            RequestPublish = 10023,
-            RequestUnpublish = 10024
-        };
 
         class event
         {
@@ -65,6 +45,8 @@ namespace kungfu
             virtual int32_t msg_type() const = 0;
 
             virtual uint32_t source() const = 0;
+
+            virtual int32_t data_length() const = 0;
 
             template<typename T>
             inline const T &data() const
@@ -106,7 +88,6 @@ namespace kungfu
 
         namespace data
         {
-
             enum class mode : int8_t
             {
                 LIVE,
@@ -153,6 +134,29 @@ namespace kungfu
                 }
             }
 
+            enum class layout : int8_t
+            {
+                JOURNAL,
+                SQLITE,
+                SOCKET,
+                LOG
+            };
+
+            inline std::string get_layout_name(layout l)
+            {
+                switch(l)
+                {
+                    case layout::JOURNAL:
+                        return "journal";
+                    case layout::SQLITE:
+                        return "db";
+                    case layout::SOCKET:
+                        return "socket";
+                    case layout::LOG:
+                        return "log";
+                }
+            }
+
             FORWARD_DECLARE_PTR(location)
 
             FORWARD_DECLARE_PTR(locator)
@@ -164,13 +168,11 @@ namespace kungfu
 
                 virtual ~locator() = default;
 
-                virtual const std::string make_path(const std::string &parent, const std::string &filename) const = 0;
+                virtual const std::string layout_dir(location_ptr location, layout l) const = 0;
 
-                virtual const std::string journal_path(location_ptr location) const = 0;
+                virtual const std::string layout_file(location_ptr location, layout l, const std::string &name) const = 0;
 
-                virtual const std::string socket_path(location_ptr location) const = 0;
-
-                virtual const std::string log_path(location_ptr location) const = 0;
+                virtual const std::string default_to_system_db(location_ptr location, const std::string &name) const = 0;
 
                 virtual const std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
             };
@@ -193,20 +195,11 @@ namespace kungfu
                 const std::string uname;
                 const uint32_t uid;
                 const locator_ptr locator;
-            };
 
-        }
-
-        namespace action
-        {
-            struct RequestSubscribe
-            {
-                uint32_t source_id;
-                int64_t from_time;
-            };
-            struct RequestPublish
-            {
-                uint32_t dest_id;
+                static inline location_ptr make(data::mode m, data::category c, std::string g, std::string n, locator_ptr l)
+                {
+                    return std::make_shared<location>(m, c, g, n, l);
+                }
             };
         }
     }

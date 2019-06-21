@@ -35,7 +35,7 @@ namespace kungfu
             }
 
             void
-            reader::subscribe(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
+            reader::join(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
             {
                 for (auto journal : journals_)
                 {

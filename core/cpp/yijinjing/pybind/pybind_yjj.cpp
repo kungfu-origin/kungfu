@@ -40,24 +40,19 @@ class PyLocator : public data::locator
 {
     using data::locator::locator;
 
-    const std::string journal_path(data::location_ptr location) const override
+    const std::string layout_dir(data::location_ptr location, data::layout l) const override
     {
-        PYBIND11_OVERLOAD_PURE(std::string, data::locator, journal_path, location)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, layout_dir, location, l)
     }
 
-    const std::string socket_path(data::location_ptr location) const override
+    const std::string layout_file(data::location_ptr location, data::layout l, const std::string &name) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, socket_path, location)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, layout_file, location, l, name)
     }
 
-    const std::string log_path(data::location_ptr location) const override
+    const std::string default_to_system_db(data::location_ptr location, const std::string &name) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, log_path, location)
-    }
-
-    const std::string make_path(const std::string &parent, const std::string &filename) const override
-    {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, make_path, parent, filename)
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, default_to_system_db, location, name)
     }
 
     const std::vector<int> list_page_id(data::location_ptr location, uint32_t dest_id) const override
@@ -90,36 +85,18 @@ public:
     }
 };
 
-class PyEventHandler : public event_handler
-{
-public:
-    using event_handler::event_handler; // Inherit constructors
-
-    const std::string &get_name() const override
-    {PYBIND11_OVERLOAD_PURE(const std::string&, event_handler, get_name,) }
-
-    void configure_event_source(event_source_ptr event_source) override
-    {PYBIND11_OVERLOAD_PURE(void, event_handler, configure_event_source, event_source) }
-
-    void handle(const event_ptr e) override
-    {PYBIND11_OVERLOAD_PURE(void, event_handler, handle, e) }
-
-    void finish() override
-    {PYBIND11_OVERLOAD(void, event_handler, finish,); }
-};
-
-class PyEventSource : public event_source
+class PyEventSource : public event_device
 {
 public:
 
-    void subscribe(const data::location_ptr location) override
+    void observe(const data::location_ptr location) override
     {
-        PYBIND11_OVERLOAD_PURE(void, event_source, subscribe, location)
+        PYBIND11_OVERLOAD_PURE(void, event_device, observe, location)
     }
 
     writer_ptr get_writer(uint32_t dest_id) override
     {
-        PYBIND11_OVERLOAD_PURE(writer_ptr, event_source, get_writer, dest_id)
+        PYBIND11_OVERLOAD_PURE(writer_ptr, event_device, get_writer, dest_id)
     }
 };
 
@@ -185,6 +162,14 @@ PYBIND11_MODULE(pyyjj, m)
             .export_values();
     m.def("get_category_name", &data::get_category_name);
 
+    py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
+            .value("JOURNAL", data::layout::JOURNAL)
+            .value("SQLITE", data::layout::SQLITE)
+            .value("SOCKET", data::layout::SOCKET)
+            .value("LOG", data::layout::LOG)
+            .export_values();
+    m.def("get_layout_name", &data::get_layout_name);
+
     py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
             .def_property_readonly("gen_time", &event::gen_time)
             .def_property_readonly("trigger_time", &event::trigger_time)
@@ -213,10 +198,8 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
             .def(py::init())
-            .def("journal_path", &data::locator::journal_path)
-            .def("socket_path", &data::locator::socket_path)
-            .def("log_path", &data::locator::log_path)
-            .def("make_path", &data::locator::make_path)
+            .def("layout_dir", &data::locator::layout_dir)
+            .def("layout_file", &data::locator::layout_file)
             .def("list_page_id", &data::locator::list_page_id);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
@@ -250,7 +233,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("get_notice", &observer::get_notice);
 
     py::class_<reader, reader_ptr>(m, "reader")
-            .def("subscribe", &reader::subscribe)
+            .def("subscribe", &reader::join)
             .def("current_frame", &reader::current_frame)
             .def("seek_to_time", &reader::seek_to_time)
             .def("data_available", &reader::data_available)
@@ -271,23 +254,15 @@ PYBIND11_MODULE(pyyjj, m)
             ;
 
     py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
-            .def(py::init<data::location_ptr, bool>())
-            .def_property_readonly("service_socket", &io_device_master::get_service_socket);
+            .def(py::init<data::location_ptr, bool>());
 
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
-            .def(py::init<data::location_ptr, bool>())
-            .def_property_readonly("request_socket", &io_device_client::get_request_socket);
+            .def(py::init<data::location_ptr, bool>());
 
-    py::class_<event_handler, PyEventHandler, event_handler_ptr>(m, "event_handler")
-            .def(py::init())
-            .def("get_name", &event_handler::get_name)
-            .def("configure_event_source", &event_handler::configure_event_source)
-            .def("handle", &event_handler::handle);
-
-    py::class_<event_source, PyEventSource, event_source_ptr> py_event_source(m, "event_source");
-    py_event_source.def("subscribe", &event_source::subscribe)
-            .def_property_readonly("io_device", &event_source::get_io_device)
-            .def_property_readonly("writer", &event_source::get_writer);
+    py::class_<event_device, PyEventSource, event_source_ptr> py_event_source(m, "event_device");
+    py_event_source.def("subscribe", &event_device::observe)
+            .def_property_readonly("io_device", &event_device::get_io_device)
+            .def_property_readonly("writer", &event_device::get_writer);
 
     py::class_<master, std::shared_ptr<master>>(m, "master")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)

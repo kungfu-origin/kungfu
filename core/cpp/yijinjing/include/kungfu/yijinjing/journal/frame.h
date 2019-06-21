@@ -70,7 +70,7 @@ namespace kungfu
                 inline int32_t header_length() const
                 { return header_->header_length; }
 
-                inline int32_t data_length() const
+                inline int32_t data_length() const override
                 { return frame_length() - header_length(); }
 
                 inline int64_t gen_time() const override
@@ -86,10 +86,10 @@ namespace kungfu
                 { return header_->source; }
 
                 template<typename T>
-                inline size_t copy_data(const T *data)
+                inline size_t copy_data(const T& data)
                 {
                     size_t length = sizeof(T);
-                    memcpy(const_cast<void *>(data_address()), data, length);
+                    memcpy(const_cast<void *>(data_address()), &data, length);
                     return length;
                 }
 

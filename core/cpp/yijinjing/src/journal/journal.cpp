@@ -48,7 +48,6 @@ namespace kungfu
 
             void journal::seek_to_time(int64_t nanotime)
             {
-                SPDLOG_TRACE("seek_to_timetime {}", nanotime);
                 load_page(page::find_page_id(location_, dest_id_, nanotime));
                 SPDLOG_TRACE("seek time {} in current page [{} - {}]",
                         nanotime > 0 ? time::strftime(nanotime) : "",

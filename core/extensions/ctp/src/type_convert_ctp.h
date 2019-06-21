@@ -11,10 +11,9 @@
 #include "ThostFtdcUserApiStruct.h"
 
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/wingchun/config.h>
-#include <kungfu/wingchun/md_struct.h>
-#include <kungfu/wingchun/oms_struct.h>
 
+#include <kungfu/wingchun/config.h>
+#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/util/code_convert.h>
 #include <kungfu/wingchun/util/instrument.h>

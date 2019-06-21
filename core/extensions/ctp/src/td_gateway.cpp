@@ -36,7 +36,7 @@ namespace kungfu
 
 
         TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
-                TdGatewayImpl(SOURCE_CTP, TD_GATEWAY_NAME(SOURCE_CTP, config_str["account_id"]))
+                TdGatewayImpl(SOURCE_CTP, config_str["account_id"])
         {
             front_uri_ = config_str["td_uri"];
             broker_id_ = config_str["broker_id"];
@@ -496,7 +496,7 @@ namespace kungfu
 
                     FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).set_future_instruments(future_instruments_);
                     nlohmann::json j;
-                    get_publisher()->publish(MsgType::ReloadFutureInstrument, j);
+                    get_publisher()->publish(msg::type::ReloadFutureInstrument, j);
 
                     std::this_thread::sleep_for(std::chrono::seconds(1));
 

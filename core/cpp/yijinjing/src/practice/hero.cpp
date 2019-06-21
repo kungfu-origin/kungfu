@@ -5,6 +5,7 @@
 #include <utility>
 #include <spdlog/spdlog.h>
 
+#include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
@@ -116,10 +117,10 @@ namespace kungfu
 
                     }) | publish();
 
-            events | is(MsgType::RequestPublish) |
+            events | is(msg::type::RequestPublish) |
             $([&](event_ptr e)
               {
-                  auto data = e->data<action::RequestPublish>();
+                  auto data = e->data<msg::data::RequestPublish>();
                   if (writers_.find(data.dest_id) == writers_.end())
                   {
                       writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
@@ -130,18 +131,18 @@ namespace kungfu
                   }
               });
 
-            events | is(MsgType::RequestSubscribe) |
+            events | is(msg::type::RequestSubscribe) |
             $([&](event_ptr e)
               {
                   SPDLOG_INFO("RequestSubscribe event");
-                  auto data = e->data<action::RequestSubscribe>();
+                  auto data = e->data<msg::data::RequestSubscribe>();
                   SPDLOG_INFO("RequestSubscribe {}", data.source_id);
                   auto location = get_location(e->source());
-                  reader_->subscribe(location, 0, data.from_time);
-                  reader_->subscribe(location, get_home_uid(), data.from_time);
+                  reader_->join(location, 0, data.from_time);
+                  reader_->join(location, get_home_uid(), data.from_time);
               });
 
-            rx_subscribe(events);
+            react(events);
 
             events.connect();
             SPDLOG_INFO("{} finished", get_home_uname());
