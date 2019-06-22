@@ -3,7 +3,6 @@
 //
 
 #include <fmt/format.h>
-#include <kungfu/wingchun/util/code_convert.h>
 #include <kungfu/wingchun/gateway/macro.h>
 
 #include <kungfu/yijinjing/log/setup.h>
@@ -61,8 +60,8 @@ namespace kungfu
 //                    set_state(GatewayState::LoggedInFailed, error_info->error_msg);
 
                     client_id_++;
-                    std::this_thread::sleep_for(std::chrono::seconds(2));
-                    login();
+//                    std::this_thread::sleep_for(std::chrono::seconds(2));
+//                    start();
                 } else
                 {
                     LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
@@ -72,10 +71,6 @@ namespace kungfu
             bool MdGateway::subscribe(const std::vector<Instrument> &instruments, bool is_level2)
             {
                 SUBSCRIBE_TRACE(fmt::format("(size) {}", instruments.size()));
-                for (const auto &inst: instruments)
-                {
-                    get_subscription_storage().add_subscription(inst);
-                }
 
                 std::vector<std::string> sse_tickers;
                 std::vector<std::string> sze_tickers;

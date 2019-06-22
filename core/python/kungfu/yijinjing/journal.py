@@ -40,7 +40,7 @@ class Locator(pyyjj.locator):
     def layout_dir(self, location, layout):
         mode = pyyjj.get_mode_name(location.mode)
         category = pyyjj.get_category_name(location.category)
-        p = os.path.join(self._home, category, location.group, location.name, layout, mode)
+        p = os.path.join(self._home, category, location.group, location.name, pyyjj.get_layout_name(layout), mode)
         if not os.path.exists(p):
             os.makedirs(p)
         return p
@@ -61,7 +61,7 @@ class Locator(pyyjj.locator):
 
     def list_page_id(self, location, dest_id):
         page_ids = []
-        for journal in glob.glob(os.path.join(self.journal_path(location), hex(dest_id)[2:] + '.*.journal')):
+        for journal in glob.glob(os.path.join(self.layout_dir(location, pyyjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
             match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(7)

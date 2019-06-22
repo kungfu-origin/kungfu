@@ -15,13 +15,6 @@ namespace kungfu
 
         namespace util
         {
-            /**
-             * Murmur Hash 2
-             * @param key content to be hashed
-             * @param len length of key
-             * @param seed
-             * @return hash result
-             */
             uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed)
             {
                 uint32_t h;

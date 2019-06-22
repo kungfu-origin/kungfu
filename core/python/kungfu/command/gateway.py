@@ -1,6 +1,5 @@
 import click
 from kungfu.command import kfc
-from kungfu.practice.apprentice import Apprentice, EventHandler
 from kungfu.data.sqlite import get_task_config
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
 
@@ -24,10 +23,7 @@ def run_extension(ctx, registry):
             config_int['client_id'] = 1
         config_str['save_file_path'] = '{}/runtime'.format(ctx.home)
         gateway = registry.get_extension(ctx.source)(config_str, config_int, config_double)
-        handler = EventHandler(ctx, gateway)
-        apprentice = Apprentice(ctx)
-        apprentice.add_event_handler(handler)
-        apprentice.run()
+        gateway.run()
     else:
         ctx.logger.error('Unrecognized %s arg %s', registry.ext_type.lower(), ctx.name)
 

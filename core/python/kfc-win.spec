@@ -25,8 +25,7 @@ a = Analysis(['kungfu\\__main__.py'],
         ('..\\deps\\fmt-5.3.0\\include', 'include'),
         ('..\\deps\\rxcpp-4.1.0\\include', 'include'),
         ('..\\deps\\hffix-b67d404f\\include', 'include'),
-        ('..\\deps\\SQLiteCpp-2.3.0\\include', 'include'),
-        ('C:\\local\\boost_1_64_0\\lib64-msvc-14.1\\*', '.')
+        ('..\\deps\\SQLiteCpp-2.3.0\\include', 'include')
      ],
      hiddenimports=[
           'numpy',

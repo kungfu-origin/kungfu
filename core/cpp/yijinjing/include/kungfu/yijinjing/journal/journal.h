@@ -71,6 +71,7 @@ namespace kungfu
                 const bool lazy_;
                 page_ptr current_page_;
                 frame_ptr frame_;
+                int page_frame_nb_;
 
                 void load_page(int page_id);
 
@@ -122,6 +123,8 @@ namespace kungfu
             public:
                 explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
 
+                uint64_t current_frame_id();
+
                 frame_ptr open_frame(int64_t trigger_time, int32_t msg_type);
 
                 void close_frame(size_t data_length);
@@ -156,6 +159,7 @@ namespace kungfu
             private:
                 std::mutex writer_mtx_;
                 journal_ptr journal_;
+                uint64_t frame_id_base_;
                 publisher_ptr publisher_;
                 size_t size_to_write_;
             };

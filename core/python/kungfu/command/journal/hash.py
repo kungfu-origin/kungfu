@@ -3,7 +3,7 @@ import click
 from kungfu.command.journal import journal, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
-from kungfu.practice.apprentice import Apprentice, EventHandler
+from kungfu.practice.apprentice import Apprentice
 
 KB = 2 ** 10
 MB = 2 ** 20
@@ -30,23 +30,27 @@ GB = 2 ** 30
 # live/strategy/alpha/test.1.journal
 
 
+def dump(t):
+    click.echo('{} {:016x}'.format(kft.strftime(t), t))
+
+
 @journal.command()
 @click.pass_context
 def test(ctx):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = False
-    click.echo(2 ** 16)
-    click.echo(2 ** 32)
-    click.echo(hex(pyyjj.hash_str_32('helloworld'))[2:])
-    click.echo(hex(pyyjj.hash_str_32('test'))[2:])
-    click.echo(kft.strftime(pyyjj.now_in_nano()))
+    dump(pyyjj.now_in_nano())
+    dump(19980621)
+    dump(20190621)
+    dump(20220621)
+    dump(kft.strptime("2019-06-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
+    dump(kft.strptime("2019-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
+    dump(kft.strptime("2019-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
+    dump(kft.strptime("2018-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
+    dump(kft.strptime("2008-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
+    dump(kft.strptime("1998-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
     loc = pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['td'], "xtp", "15040900", ctx.parent.locator)
     click.echo(loc.uname)
-    click.echo(hex(loc.uid))
-    click.echo(hex(pyyjj.hash_str_32(loc.uname)))
-    click.echo(pyyjj.get_page_path(loc, 0, 1))
-    click.echo(pyyjj.get_page_path(loc, loc.uid, 1))
-    click.echo(ctx.parent.locator.list_page_id(loc, pyyjj.hash_str_32('helloworld')))
-    app = Apprentice(ctx)
-    app.run()
+    # app = Apprentice(ctx)
+    # app.run()
     click.echo('done')

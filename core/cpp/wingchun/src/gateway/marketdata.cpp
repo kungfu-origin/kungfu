@@ -21,8 +21,7 @@ namespace kungfu
         namespace gateway
         {
             MarketData::MarketData(bool low_latency, locator_ptr locator, const std::string &source) :
-                apprentice(location::make(mode::LIVE, category::MD, source, source, locator), low_latency),
-                subscription_storage_(get_app_db_file("subscription"))
+                apprentice(location::make(mode::LIVE, category::MD, source, source, locator), low_latency)
             {
                 log::copy_log_settings(get_io_device()->get_home(), source);
             }
@@ -34,7 +33,7 @@ namespace kungfu
                 events | is(msg::type::Subscribe) |
                 $([&](event_ptr event)
                   {
-                      std::vector<std::string &> symbols{};
+                      std::vector<Instrument> symbols;
                       auto buffer = event->data<char *>();
                       hffix::message_reader reader(buffer, buffer + event->data_length());
                       for (; reader.is_complete(); reader = reader.next_message_reader())
@@ -44,11 +43,14 @@ namespace kungfu
                               hffix::message_reader::const_iterator i = reader.begin();
                               if (reader.find_with_hint(hffix::tag::Symbol, i))
                               {
-                                  symbols.push_back(i++->value());
+                                  auto symbol = i++->value();
+                                  Instrument instrument{};
+                                  strcpy(instrument.instrument_id, symbol.as_string().c_str());
+                                  symbols.push_back(instrument);
                               }
                           }
                       }
-                      subscribe(symbols);
+//                      MarketData::subscribe(symbols);
                   });
             }
 

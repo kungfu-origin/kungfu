@@ -23,22 +23,3 @@ class Apprentice(pyyjj.apprentice):
         self.stop()
         if signum == signal.SIGTERM:
             self.logger.info('%s terminated', self.ctx.name)
-
-
-class EventHandler(pyyjj.event_handler):
-    def __init__(self, ctx, handler):
-        pyyjj.event_handler.__init__(self)
-        self._ctx = ctx
-        self._handler = handler
-
-    def configure_event_source(self, event_source):
-        self._handler.configure_event_source(event_source)
-
-    def get_name(self):
-        return self._handler.get_name()
-
-    def handle(self, event):
-        self._handler.handle(event)
-
-    def finish(self):
-        self._handler.finish()

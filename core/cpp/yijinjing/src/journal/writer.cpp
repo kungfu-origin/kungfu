@@ -18,6 +18,7 @@
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -29,11 +30,23 @@ namespace kungfu
 
         namespace journal
         {
+            const uint32_t PAGE_ID_TRANC    = 0xFFFF0000;
+            const uint32_t FRAME_ID_TRANC   = 0x0000FFFF;
+
             writer::writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr publisher) :
                     publisher_(publisher)
             {
+                frame_id_base_ = location->uid;
+                frame_id_base_ = frame_id_base_ << 32;
                 journal_ = std::make_shared<journal>(location, dest_id, true, lazy);
                 journal_->seek_to_time(time::now_in_nano());
+            }
+
+            uint64_t writer::current_frame_id()
+            {
+                uint32_t page_part = (journal_->current_page_->page_id_ << 16) & PAGE_ID_TRANC;
+                uint32_t frame_part = journal_->page_frame_nb_ & FRAME_ID_TRANC;
+                return frame_id_base_ | (page_part | frame_part);
             }
 
             frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type)
@@ -67,13 +80,13 @@ namespace kungfu
 
             void writer::open_session()
             {
-                open_frame(time::now_in_nano(), msg::type::SessionStart, 0);
+                open_frame(time::now_in_nano(), msg::type::SessionStart);
                 close_frame(1);
             }
 
             void writer::close_session()
             {
-                open_frame(time::now_in_nano(), msg::type::SessionEnd, 0);
+                open_frame(time::now_in_nano(), msg::type::SessionEnd);
                 close_frame(1);
             }
         }

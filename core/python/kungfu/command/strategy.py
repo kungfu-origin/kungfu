@@ -1,7 +1,6 @@
 import click
 from kungfu.command import kfc
 from kungfu.wingchun.strategy import Strategy
-from kungfu.practice.apprentice import Apprentice, EventHandler
 
 
 @kfc.command()
@@ -10,7 +9,4 @@ from kungfu.practice.apprentice import Apprentice, EventHandler
 @click.pass_context
 def strategy(ctx, path, low_latency):
     ctx.parent.low_latency = low_latency
-    handler = EventHandler(ctx.parent, Strategy(ctx.parent, path))
-    apprentice = Apprentice(ctx.parent)
-    apprentice.add_event_handler(handler)
-    apprentice.run()
+    strategy = Strategy(ctx.parent, path)

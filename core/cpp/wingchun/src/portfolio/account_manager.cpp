@@ -7,7 +7,6 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include <kungfu/wingchun/serialize.h>
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/util/instrument.h>
 #include <kungfu/wingchun/portfolio/account_manager.h>
@@ -146,8 +145,8 @@ namespace kungfu
 
         void AccountManager::on_trade(const Trade *trade)
         {
-            SPDLOG_TRACE("trade: {}", journal::to_string(*trade));
-            SPDLOG_TRACE("acc before: {}", flying::to_string(account_));
+            SPDLOG_TRACE("trade: {}", msg::data::to_string(*trade));
+            SPDLOG_TRACE("acc before: {}", msg::data::to_string(account_));
 
             if (strcmp(trade->account_id, account_.account_id) != 0)
             {
@@ -198,7 +197,7 @@ namespace kungfu
             recalc_acc();
             callback();
 
-            SPDLOG_TRACE("acc after: {}", flying::to_string(account_));
+            SPDLOG_TRACE("acc after: {}", msg::data::to_string(account_));
         }
 
         void AccountManager::on_switch_day(const std::string &trading_day)
@@ -271,7 +270,6 @@ namespace kungfu
             account_.rcv_time = account.rcv_time;
             account_.update_time = account.update_time;
             strcpy(account_.trading_day, account.trading_day);
-            account_.account_type = account.account_type;
             strcpy(account_.broker_id, account.broker_id);
             strcpy(account_.source_id, account.source_id);
             if (is_zero(account_.initial_equity))
@@ -295,9 +293,9 @@ namespace kungfu
                 return get_reverse_repurchase_expire_days(trade->instrument_id) * trade->volume;
             } else
             {
-                auto *rate = commission_manager_.get_commission_rate(trade->instrument_id, trade->exchange_id);
-                double base = rate->mode == CommissionRateModeByVolume ? trade->volume : trade->price * trade->volume;
-                return std::max((trade->side == SideBuy ? rate->open_ratio : rate->close_ratio) * base, rate->min_commission);
+                auto rate = commission_manager_.get_commission_rate(trade->instrument_id, trade->exchange_id);
+                double base = rate.mode == CommissionRateModeByVolume ? trade->volume : trade->price * trade->volume;
+                return std::max((trade->side == SideBuy ? rate.open_ratio : rate.close_ratio) * base, rate.min_commission);
             }
         }
 
@@ -403,7 +401,7 @@ namespace kungfu
             delete_acc_frozen.bind(1, account_.account_id);
 
             SQLite::Statement save_account_info(db, "INSERT INTO account("
-                                                    "rcv_time, update_time, trading_day, account_id, type, broker_id, source_id, "
+                                                    "rcv_time, update_time, trading_day, account_id, broker_id, source_id, "
                                                     "initial_equity, static_equity, dynamic_equity, accumulated_pnl, accumulated_pnl_ratio, "
                                                     "intraday_pnl, intraday_pnl_ratio, avail, market_value, margin, accumulated_fee, "
                                                     "intraday_fee, frozen_cash, frozen_margin, frozen_fee, position_pnl, close_pnl"
@@ -413,26 +411,25 @@ namespace kungfu
             save_account_info.bind(2, account_.update_time);
             save_account_info.bind(3, account_.trading_day);
             save_account_info.bind(4, account_.account_id);
-            save_account_info.bind(5, std::string(1, account_.account_type));
-            save_account_info.bind(6, account_.broker_id);
-            save_account_info.bind(7, account_.source_id);
-            save_account_info.bind(8, account_.initial_equity);
-            save_account_info.bind(9, account_.static_equity);
-            save_account_info.bind(10, account_.dynamic_equity);
-            save_account_info.bind(11, account_.accumulated_pnl);
-            save_account_info.bind(12, account_.accumulated_pnl_ratio);
-            save_account_info.bind(13, account_.intraday_pnl);
-            save_account_info.bind(14, account_.intraday_pnl_ratio);
-            save_account_info.bind(15, account_.avail);
-            save_account_info.bind(16, account_.market_value);
-            save_account_info.bind(17, account_.margin);
-            save_account_info.bind(18, account_.accumulated_fee);
-            save_account_info.bind(19, account_.intraday_fee);
-            save_account_info.bind(20, account_.frozen_cash);
-            save_account_info.bind(21, account_.frozen_margin);
-            save_account_info.bind(22, account_.frozen_fee);
-            save_account_info.bind(23, account_.position_pnl);
-            save_account_info.bind(24, account_.close_pnl);
+            save_account_info.bind(5, account_.broker_id);
+            save_account_info.bind(6, account_.source_id);
+            save_account_info.bind(7, account_.initial_equity);
+            save_account_info.bind(8, account_.static_equity);
+            save_account_info.bind(9, account_.dynamic_equity);
+            save_account_info.bind(10, account_.accumulated_pnl);
+            save_account_info.bind(11, account_.accumulated_pnl_ratio);
+            save_account_info.bind(12, account_.intraday_pnl);
+            save_account_info.bind(13, account_.intraday_pnl_ratio);
+            save_account_info.bind(14, account_.avail);
+            save_account_info.bind(15, account_.market_value);
+            save_account_info.bind(16, account_.margin);
+            save_account_info.bind(17, account_.accumulated_fee);
+            save_account_info.bind(18, account_.intraday_fee);
+            save_account_info.bind(19, account_.frozen_cash);
+            save_account_info.bind(20, account_.frozen_margin);
+            save_account_info.bind(21, account_.frozen_fee);
+            save_account_info.bind(22, account_.position_pnl);
+            save_account_info.bind(23, account_.close_pnl);
             save_account_info.exec();
 
             for (const auto &iter : bond_map_)
@@ -486,26 +483,25 @@ namespace kungfu
                 account_.update_time = query_account.getColumn(1);
                 strcpy(account_.trading_day, query_account.getColumn(2));
                 strcpy(account_.account_id, query_account.getColumn(3));
-                account_.account_type = query_account.getColumn(4)[0];
-                strcpy(account_.broker_id, query_account.getColumn(5));
-                strcpy(account_.source_id, query_account.getColumn(6));
-                account_.initial_equity = query_account.getColumn(7);
-                account_.static_equity = query_account.getColumn(8);
-                account_.dynamic_equity = query_account.getColumn(9);
-                account_.accumulated_pnl = query_account.getColumn(10);
-                account_.accumulated_pnl_ratio = query_account.getColumn(11);
-                account_.intraday_pnl = query_account.getColumn(12);
-                account_.intraday_pnl_ratio = query_account.getColumn(13);
-                account_.avail = query_account.getColumn(14);
-                account_.market_value = query_account.getColumn(15);
-                account_.margin = query_account.getColumn(16);
-                account_.accumulated_fee = query_account.getColumn(17);
-                account_.intraday_fee = query_account.getColumn(18);
-                account_.frozen_cash = query_account.getColumn(19);
-                account_.frozen_margin = query_account.getColumn(20);
-                account_.frozen_fee = query_account.getColumn(21);
-                account_.position_pnl = query_account.getColumn(22);
-                account_.close_pnl = query_account.getColumn(23);
+                strcpy(account_.broker_id, query_account.getColumn(4));
+                strcpy(account_.source_id, query_account.getColumn(5));
+                account_.initial_equity = query_account.getColumn(6);
+                account_.static_equity = query_account.getColumn(7);
+                account_.dynamic_equity = query_account.getColumn(8);
+                account_.accumulated_pnl = query_account.getColumn(9);
+                account_.accumulated_pnl_ratio = query_account.getColumn(10);
+                account_.intraday_pnl = query_account.getColumn(11);
+                account_.intraday_pnl_ratio = query_account.getColumn(12);
+                account_.avail = query_account.getColumn(13);
+                account_.market_value = query_account.getColumn(14);
+                account_.margin = query_account.getColumn(15);
+                account_.accumulated_fee = query_account.getColumn(16);
+                account_.intraday_fee = query_account.getColumn(17);
+                account_.frozen_cash = query_account.getColumn(18);
+                account_.frozen_margin = query_account.getColumn(19);
+                account_.frozen_fee = query_account.getColumn(20);
+                account_.position_pnl = query_account.getColumn(21);
+                account_.close_pnl = query_account.getColumn(22);
             }
 
             bond_map_.clear();

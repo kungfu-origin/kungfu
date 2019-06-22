@@ -19,8 +19,7 @@
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/strategy/strategy.h>
-#include <kungfu/wingchun/strategy/strategy_util.h>
-#include <kungfu/wingchun/calendar/calendar_service.h>
+#include <kungfu/wingchun/calendar/calendar.h>
 
 namespace py = pybind11;
 namespace wc = kungfu::wingchun;
@@ -35,9 +34,6 @@ public:
 
     void pre_quit() override
     {PYBIND11_OVERLOAD(void, wc::Strategy, pre_quit,); }
-
-    void register_nanotime_callback(int64_t nano, wc::TSCallback callback) override
-    {PYBIND11_OVERLOAD(void, wc::Strategy, register_nanotime_callback, nano, callback); }
 
     void on_switch_day(const std::string &next_trading_day) override
     {PYBIND11_OVERLOAD(void, wc::Strategy, on_switch_day, next_trading_day); }
@@ -258,7 +254,6 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<wc::msg::data::AccountInfo>(m, "AccountInfo")
             .def_readonly("rcv_time", &wc::msg::data::AccountInfo::rcv_time)
             .def_readonly("update_time", &wc::msg::data::AccountInfo::update_time)
-            .def_readonly("account_type", &wc::msg::data::AccountInfo::account_type)
             .def_readonly("initial_equity", &wc::msg::data::AccountInfo::initial_equity)
             .def_readonly("static_equity", &wc::msg::data::AccountInfo::static_equity)
             .def_readonly("dynamic_equity", &wc::msg::data::AccountInfo::dynamic_equity)
@@ -339,35 +334,6 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<wc::Strategy, PyStrategy>(m, "Strategy")
-            .def(py::init<const std::string &>())
-            .def_property_readonly("name", &wc::Strategy::get_name)
-            .def("get_name", &wc::Strategy::get_name)
-            .def("configure_event_source", &wc::Strategy::configure_event_source)
-            .def("handle", &wc::Strategy::handle)
-            .def("finish", &wc::Strategy::finish)
-            .def("add_md", &wc::Strategy::add_md)
-            .def("add_account", &wc::Strategy::add_account)
-            .def("register_algo_service", &wc::Strategy::register_algo_service)
-            .def("get_nano", &wc::Strategy::get_nano)
-                    // .def("get_last_md", &wc::Strategy::get_last_md)
-            .def("get_position", &wc::Strategy::get_position)
-            .def("get_portfolio_info", &wc::Strategy::get_portfolio_info)
-            .def("get_sub_portfolio_info", &wc::Strategy::get_sub_portfolio_info)
-            .def("subscribe", &wc::Strategy::subscribe)
-            .def("insert_limit_order", &wc::Strategy::insert_limit_order)
-            .def("insert_fok_order", &wc::Strategy::insert_fok_order)
-            .def("insert_fak_order", &wc::Strategy::insert_fak_order)
-            .def("insert_market_order", &wc::Strategy::insert_market_order)
-            .def("cancel_order", &wc::Strategy::cancel_order)
-            .def("register_nanotime_callback", &wc::Strategy::register_nanotime_callback)
-            .def("insert_algo_order", &wc::Strategy::insert_algo_order)
-            .def("modify_algo_order", &wc::Strategy::modify_algo_order)
-                    // .def("try_frozen", &wc::Strategy::try_frozen)
-            .def("cancel_frozen", &wc::Strategy::cancel_frozen)
-            .def("commit_frozen", &wc::Strategy::commit_frozen)
-            .def("try_modify_position", &wc::Strategy::try_modify_position)
-            .def("cancel_modify_position", &wc::Strategy::cancel_modify_position)
-            .def("commit_modify_position", &wc::Strategy::commit_modify_position)
             .def("pre_run", &wc::Strategy::pre_run)
             .def("pre_quit", &wc::Strategy::pre_quit)
             .def("on_switch_day", &wc::Strategy::on_switch_day)
@@ -378,8 +344,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_trade", &wc::Strategy::on_trade)
             .def("on_algo_order_status", &wc::Strategy::on_algo_order_status);
 
-    py::class_<wc::CalendarService>(m, "CalendarService")
-            .def(py::init())
-            .def("current_day", &wc::CalendarService::get_current_day)
-            .def("calculate_trading_day", &wc::CalendarService::calculate_trading_day);
+    py::class_<wc::Calendar>(m, "Calendar")
+            .def(py::init<const std::string &>())
+            .def("current_day", &wc::Calendar::get_current_trading_day)
+            .def("calculate_trading_day", &wc::Calendar::calculate_trading_day);
 }

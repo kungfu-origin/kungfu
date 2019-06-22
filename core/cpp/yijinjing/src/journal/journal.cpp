@@ -40,6 +40,8 @@ namespace kungfu
                 assert(current_page_.get() != nullptr);
 
                 frame_->move_to_next();
+                page_frame_nb_++;
+
                 if (frame_->address() > current_page_->address_border())
                 {
                     load_next_page();
@@ -74,6 +76,7 @@ namespace kungfu
                 {
                     current_page_ = page::load(location_, dest_id_, page_id, is_writing_, lazy_);
                     frame_->set_address(current_page_->first_frame_address());
+                    page_frame_nb_ = 0;
                 }
             }
 

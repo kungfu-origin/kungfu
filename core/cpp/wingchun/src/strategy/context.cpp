@@ -25,21 +25,30 @@ namespace kungfu
     {
         namespace strategy
         {
+            inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
+            {
+                return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
+            }
+
             Context::Context(practice::apprentice &app) :
                     app_(app),
-                    uid_worker_storage_(app_.get_config_db_file("uid_worker")),
-                    order_storage_(app_.get_app_db_file("orders")),
-                    trade_storage_(app_.get_app_db_file("trades")),
-                    calendar_(app_.get_config_db_file("holidays")),
-                    uid_generator_(uid_worker_storage_.get_uid_worker_id(app_.get_io_device()->get_home()->name), UID_EPOCH_SECONDS)
+                    calendar_(app_.get_config_db_file("holidays"))
             {}
 
             void Context::react(rx::observable<yijinjing::event_ptr> events)
             {
+                events |
+                $([&](event_ptr event)
+                  {
+                      now_ = event->gen_time();
+                  });
+
                 events | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
                       auto quote = event->data<Quote>();
+                      auto id = get_symbol_id(quote.get_instrument_id(), quote.get_exchange_id());
+                      quotes_[id].last_price = quote.last_price;
                   });
 
                 events | is(msg::type::Order) |
@@ -69,135 +78,140 @@ namespace kungfu
 
             int64_t Context::now() const
             {
-                return 0;
+                return now_;
             }
 
-            bool Context::add_md(const std::string &source_id)
+            void Context::add_md(const std::string &source)
             {
                 auto home = app_.get_io_device()->get_home();
-                app_.observe(location::make(home->mode, category::MD, source_id, source_id, home->locator));
-                return true;
+                app_.observe(location::make(home->mode, category::MD, source, source, home->locator));
             }
 
-            bool Context::add_account(const std::string &source_id, const std::string &account_id, double cash_limit)
+            void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
             {
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
                 if (accounts_.find(account_id) != accounts_.end())
                 {
-                    throw wingchun_error("duplicated account " + account_id);
+                    throw wingchun_error("duplicated account " + account);
                 }
 
                 auto home = app_.get_io_device()->get_home();
-                auto account_location = location::make(mode::LIVE, category::TD, source_id, account_id, home->locator);
+                auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
                 auto commission_db_file = home->locator->layout_file(account_location, yijinjing::data::layout::SQLITE, "commission");
-                account_managers_[account_id] = std::make_shared<AccountManager>(account_id, calendar_, commission_db_file);
+                account_managers_[account_id] = std::make_shared<AccountManager>(account, calendar_, commission_db_file);
                 accounts_[account_id] = msg::data::AccountInfo{};
 
-                auto account = accounts_[account_id];
-                strcpy(account.account_id, account_id.c_str());
-                strcpy(account.source_id, source_id.c_str());
-                strcpy(account.trading_day, std::to_string(calendar_.get_current_trading_day()).c_str());
-                account.initial_equity = cash_limit;
-                account.static_equity = cash_limit;
-                account.dynamic_equity = cash_limit;
-                account.avail = cash_limit;
+                auto info = accounts_[account_id];
+                strcpy(info.account_id, account.c_str());
+                strcpy(info.source_id, source.c_str());
+                strcpy(info.trading_day, std::to_string(calendar_.get_current_trading_day()).c_str());
+                info.initial_equity = cash_limit;
+                info.static_equity = cash_limit;
+                info.dynamic_equity = cash_limit;
+                info.avail = cash_limit;
             }
 
-            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange_id,
-                                    bool is_level2)
+            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange, bool is_level2)
             {
                 location md_loc(mode::LIVE, category::MD, source, source, app_.get_io_device()->get_home()->locator);
                 auto writer = app_.get_writer(md_loc.uid);
                 char *buffer = reinterpret_cast<char *>(writer->open_frame(0, msg::type::Subscribe)->address());
                 hffix::message_writer sub_msg(buffer, buffer + 1024);
-                sub_msg.push_back_string(hffix::tag::ExDestination, exchange_id);
+                sub_msg.push_back_string(hffix::tag::ExDestination, exchange);
                 for (const auto &symbol : symbols)
                 {
                     sub_msg.push_back_string(hffix::tag::Symbol, symbol);
+                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote {};
                 }
 
                 writer->close_frame(sub_msg.message_end() - buffer);
             }
 
-            uint64_t Context::insert_limit_order(const std::string &instrument_id, const std::string &exchange_id,
-                                                 const std::string &account_id, double limit_price, int64_t volume,
-                                                 Side side, Offset offset)
+            uint64_t Context::insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+                                                 double limit_price, int64_t volume, Side side, Offset offset)
             {
-                auto input = app_.get_writer(0)->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                auto writer = app_.get_writer(account_id);
+                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                input.order_id = next_id();
-                strcpy(input.instrument_id, instrument_id.c_str());
-                strcpy(input.exchange_id, exchange_id.c_str());
-                strcpy(input.account_id, account_id.c_str());
+                input.order_id = writer->current_frame_id();
+                strcpy(input.instrument_id, symbol.c_str());
+                strcpy(input.exchange_id, exchange.c_str());
+                strcpy(input.account_id, account.c_str());
                 input.limit_price = limit_price;
                 input.frozen_price = limit_price;
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-
                 input.price_type = PriceTypeLimit;
                 input.time_condition = TimeConditionGFD;
                 input.volume_condition = VolumeConditionAny;
 
-                app_.get_writer(0)->close_data();
+                writer->close_data();
                 return input.order_id;
             }
 
-            uint64_t Context::insert_fak_order(const std::string &instrument_id, const std::string &exchange_id,
-                                               const std::string &account_id, double limit_price, int64_t volume,
-                                               Side side, Offset offset)
+            uint64_t Context::insert_fak_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+                                               double limit_price, int64_t volume, Side side, Offset offset)
             {
-                auto input = app_.get_writer(0)->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                auto writer = app_.get_writer(account_id);
+                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                strcpy(input.instrument_id, instrument_id.c_str());
-                strcpy(input.exchange_id, exchange_id.c_str());
-                strcpy(input.account_id, account_id.c_str());
+                input.order_id = writer->current_frame_id();
+                strcpy(input.instrument_id, symbol.c_str());
+                strcpy(input.exchange_id, exchange.c_str());
+                strcpy(input.account_id, account.c_str());
                 input.limit_price = limit_price;
                 input.frozen_price = limit_price;
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-
                 input.price_type = PriceTypeLimit;
                 input.time_condition = TimeConditionIOC;
                 input.volume_condition = VolumeConditionAny;
 
-                app_.get_writer(0)->close_data();
+                writer->close_data();
                 return input.order_id;
             }
 
-            uint64_t Context::insert_fok_order(const std::string &instrument_id, const std::string &exchange_id,
-                                               const std::string &account_id, double limit_price, int64_t volume,
-                                               Side side, Offset offset)
+            uint64_t Context::insert_fok_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+                                               double limit_price, int64_t volume, Side side, Offset offset)
             {
-                auto input = app_.get_writer(0)->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                auto writer = app_.get_writer(account_id);
+                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                strcpy(input.instrument_id, instrument_id.c_str());
-                strcpy(input.exchange_id, exchange_id.c_str());
-                strcpy(input.account_id, account_id.c_str());
+                input.order_id = writer->current_frame_id();
+                strcpy(input.instrument_id, symbol.c_str());
+                strcpy(input.exchange_id, exchange.c_str());
+                strcpy(input.account_id, account.c_str());
                 input.limit_price = limit_price;
                 input.frozen_price = limit_price;
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-
                 input.price_type = PriceTypeLimit;
                 input.time_condition = TimeConditionIOC;
                 input.volume_condition = VolumeConditionAll;
 
-                app_.get_writer(0)->close_data();
+                writer->close_data();
                 return input.order_id;
             }
 
-            uint64_t Context::insert_market_order(const std::string &instrument_id, const std::string &exchange_id,
-                                                  const std::string &account_id, int64_t volume, Side side, Offset offset)
+            uint64_t Context::insert_market_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+                                                  int64_t volume, Side side, Offset offset)
             {
-                auto input = app_.get_writer(0)->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                auto writer = app_.get_writer(account_id);
+                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                strcpy(input.instrument_id, instrument_id.c_str());
-                strcpy(input.exchange_id, exchange_id.c_str());
-                strcpy(input.account_id, account_id.c_str());
-                auto iter = quote_map_.find(get_symbol(instrument_id, exchange_id));
-                if (iter != quote_map_.end())
+                input.order_id = writer->current_frame_id();
+                strcpy(input.instrument_id, symbol.c_str());
+                strcpy(input.exchange_id, exchange.c_str());
+                strcpy(input.account_id, account.c_str());
+                auto iter = quotes_.find(get_symbol_id(symbol, exchange));
+                if (iter != quotes_.end())
                 {
                     input.frozen_price = iter->second.last_price;
                 }
@@ -217,27 +231,22 @@ namespace kungfu
                     input.volume_condition = VolumeConditionAny;
                 }
 
-                app_.get_writer(0)->close_data();
+                writer->close_data();
                 return input.order_id;
             }
 
             uint64_t Context::cancel_order(uint64_t order_id)
             {
-                auto action = app_.get_writer(0)->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
+                uint32_t account_id = order_id >> 32;
+                auto writer = app_.get_writer(account_id);
+                auto action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
 
-                uint64_t uid = next_id();
-                action.order_action_id = uid;
+                action.order_action_id = writer->current_frame_id();
                 action.order_id = order_id;
                 action.action_flag = OrderActionFlagCancel;
 
-                app_.get_writer(0)->close_data();
-                return uid;
-            }
-
-            uint64_t Context::next_id()
-            {
-                int64_t seconds = yijinjing::time::now_in_nano() / yijinjing::time_unit::NANOSECONDS_PER_SECOND;
-                return uid_generator_.next_id(seconds);
+                writer->close_data();
+                return action.order_action_id;
             }
         }
     }

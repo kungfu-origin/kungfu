@@ -43,17 +43,17 @@ namespace kungfu
                 switch (p)
                 {
                     case protocol::REPLY:
-                        return "reply";
+                        return "rep";
                     case protocol::REQUEST:
-                        return "request";
+                        return "req";
                     case protocol::PUSH:
                         return "push";
                     case protocol::PULL:
                         return "pull";
                     case protocol::PUBLISH:
-                        return "publish";
+                        return "pub";
                     case protocol::SUBSCRIBE:
-                        return "subscribe";
+                        return "sub";
                     default:
                         return "unknown";
                 }

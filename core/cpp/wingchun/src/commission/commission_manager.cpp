@@ -22,6 +22,9 @@ namespace kungfu
             storage_.register_callback(std::bind(&CommissionManager::on_commission, this, std::placeholders::_1));
         }
 
+        CommissionManager::~CommissionManager()
+        {}
+
         const InstrumentCommissionRate &CommissionManager::get_commission_rate(const std::string &instrument_id,
                                                                                const std::string &exchange_id) const
         {

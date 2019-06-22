@@ -42,13 +42,13 @@ namespace kungfu
             const std::string make_url_bind(const data::location_ptr location, protocol p) const override
             {
                 auto locator = location->locator;
-                return "ipc://" + locator->layout_file(location, layout::SOCKET, location->name + "." + get_protocol_name(p));
+                return "ipc://" + locator->layout_file(location, layout::IPC, get_protocol_name(p));
             }
 
             const std::string make_url_connect(const data::location_ptr location, protocol p) const override
             {
                 auto locator = location->locator;
-                return "ipc://" + locator->layout_file(location, layout::SOCKET, location->name + "." + get_protocol_name(get_opposite_protol(p)));
+                return "ipc://" + locator->layout_file(location, layout::IPC, get_protocol_name(get_opposite_protol(p)));
             }
         };
 
@@ -225,6 +225,17 @@ namespace kungfu
             s->setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
             SPDLOG_INFO("bind to socket [{}] {} at {} with timeout {}", nanomsg::get_protocol_name(p), location->name, url, timeout);
             return s;
+        }
+
+        io_device_master::io_device_master(data::location_ptr home, bool low_latency) : io_device(home, low_latency, false)
+        {
+            SPDLOG_DEBUG("creating io_device_master {}", home->uname);
+            auto publisher = std::make_shared<nanomsg_publisher_master>(low_latency);
+            publisher->init(*this);
+            publisher_ = publisher;
+            auto observer = std::make_shared<nanomsg_observer_master>(low_latency);
+            observer->init(*this);
+            observer_ = observer;
         }
 
         io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device(home, low_latency, true)

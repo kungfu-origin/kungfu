@@ -4,7 +4,6 @@
 #include <map>
 #include <spdlog/spdlog.h>
 
-#include <kungfu/wingchun/serialize.h>
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/util/instrument.h>
 #include <kungfu/wingchun/portfolio/position_manager.h>
@@ -578,7 +577,6 @@ namespace kungfu
             pos.instrument_type = input->instrument_type;
             strcpy(pos.exchange_id, input->exchange_id);
             strcpy(pos.account_id, input->account_id);
-            strcpy(pos.client_id, input->client_id);
             pos.direction = pos.instrument_type == InstrumentTypeFuture ? get_future_direction(input->side, input->offset) : DirectionLong;
 
             auto &pos_map = pos.direction == DirectionLong ? long_pos_map_ : short_pos_map_;

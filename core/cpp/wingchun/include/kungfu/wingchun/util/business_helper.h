@@ -30,6 +30,7 @@ namespace kungfu
             return std::strncmp(s1.c_str(), s2.c_str(), l) == 0;
         }
 
+
         inline bool is_final_status(const OrderStatus &status)
         {
             switch (status)
@@ -58,7 +59,7 @@ namespace kungfu
             strcpy(order.instrument_id, input.instrument_id);
             strcpy(order.exchange_id, input.exchange_id);
             strcpy(order.account_id, input.account_id);
-            strcpy(order.client_id, input.client_id);
+//            strcpy(order.client_id, input.client_id);
 
             order.limit_price = input.limit_price;
             order.frozen_price = input.frozen_price;

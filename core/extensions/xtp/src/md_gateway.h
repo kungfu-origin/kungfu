@@ -223,8 +223,6 @@ namespace kungfu
 
                 XTP::API::QuoteApi *api_;
 
-                bool login();
-
                 bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id, bool is_level2);
             };
         }

@@ -151,27 +151,27 @@ namespace kungfu
                       account_manager_.dump_to_db(get_app_db_file("asset"), true);
                   });
 
-                events | time_interval(std::chrono::minutes(1), observe_on_new_thread()) |
-                $([&](duration_type v)
-                  {
-                      auto account_info = account_manager_.get_account_info();
-                      bool is_open = calendar_.is_open(time::now_in_nano(), EXCHANGE_SSE);
-                      if (is_open)
-                      {
-                          account_info.update_time = (int64_t) std::round((double) yijinjing::time::now_in_nano() / 1000000000) * 1000000000;
-
-                          storage::SnapshotStorage(get_app_db_file("snapshots"), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true).insert(
-                                  account_info);
-                      }
-                  });
-
-                events | time_interval(std::chrono::hours(24), observe_on_new_thread()) |
-                $([&](duration_type v)
-                  {
-                      auto account_info = account_manager_.get_account_info();
-                      account_info.update_time = (int64_t) std::round((double) yijinjing::time::now_in_nano() / 1000000000) * 1000000000;
-                      storage::SnapshotStorage(get_app_db_file("snapshots"), ACCOUNT_ONE_DAY_SNAPSHOT_TABLE_NAME, true, true).insert(account_info);
-                  });
+//                events | time_interval(std::chrono::minutes(1), observe_on_new_thread()) |
+//                $([&](duration_type v)
+//                  {
+//                      auto account_info = account_manager_.get_account_info();
+//                      bool is_open = calendar_.is_open(time::now_in_nano(), EXCHANGE_SSE);
+//                      if (is_open)
+//                      {
+//                          account_info.update_time = (int64_t) std::round((double) yijinjing::time::now_in_nano() / 1000000000) * 1000000000;
+//
+//                          storage::SnapshotStorage(get_app_db_file("snapshots"), ACCOUNT_ONE_MIN_SNAPSHOT_TABLE_NAME, false, true).insert(
+//                                  account_info);
+//                      }
+//                  });
+//
+//                events | time_interval(std::chrono::hours(24), observe_on_new_thread()) |
+//                $([&](duration_type v)
+//                  {
+//                      auto account_info = account_manager_.get_account_info();
+//                      account_info.update_time = (int64_t) std::round((double) yijinjing::time::now_in_nano() / 1000000000) * 1000000000;
+//                      storage::SnapshotStorage(get_app_db_file("snapshots"), ACCOUNT_ONE_DAY_SNAPSHOT_TABLE_NAME, true, true).insert(account_info);
+//                  });
             }
 
             void Trader::start()

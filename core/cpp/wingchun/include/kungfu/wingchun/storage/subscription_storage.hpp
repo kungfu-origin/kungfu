@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#include <kungfu/wingchun/md_struct.h>
+#include <kungfu/wingchun/msg.h>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <spdlog/spdlog.h>
@@ -69,15 +69,15 @@ namespace kungfu
                 }
             }
 
-            std::vector<journal::Instrument> get_subscriptions()
+            std::vector<msg::data::Instrument> get_subscriptions()
             {
-                std::vector<journal::Instrument> result;
+                std::vector<msg::data::Instrument> result;
                 try
                 {
                     SQLite::Database db(file_name_.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
                     create_table_if_not_exist(db);
                     SQLite::Statement query(db, "SELECT * FROM subscription");
-                    journal::Instrument inst = {};
+                    msg::data::Instrument inst = {};
                     while (query.executeStep())
                     {
                         strcpy(inst.instrument_id, query.getColumn(0));

@@ -27,8 +27,8 @@ class Master(pyyjj.master):
         self.apprentices = {}
         self._check_interval = 5 * SECOND_IN_NANO
 
-        self._calendar = pywingchun.CalendarService()
-        self._current_day = self._calendar.current_day()
+        # self._calendar = pywingchun.Calendar()
+        # self._current_day = self._calendar.current_day()
         self._running = False
         self._last_check = 0
 

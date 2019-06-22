@@ -85,21 +85,6 @@ public:
     }
 };
 
-class PyEventSource : public event_device
-{
-public:
-
-    void observe(const data::location_ptr location) override
-    {
-        PYBIND11_OVERLOAD_PURE(void, event_device, observe, location)
-    }
-
-    writer_ptr get_writer(uint32_t dest_id) override
-    {
-        PYBIND11_OVERLOAD_PURE(writer_ptr, event_device, get_writer, dest_id)
-    }
-};
-
 class PyPublisher : public publisher
 {
 public:
@@ -165,7 +150,7 @@ PYBIND11_MODULE(pyyjj, m)
     py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
             .value("JOURNAL", data::layout::JOURNAL)
             .value("SQLITE", data::layout::SQLITE)
-            .value("SOCKET", data::layout::SOCKET)
+            .value("IPC", data::layout::IPC)
             .value("LOG", data::layout::LOG)
             .export_values();
     m.def("get_layout_name", &data::get_layout_name);
@@ -259,11 +244,6 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
             .def(py::init<data::location_ptr, bool>());
 
-    py::class_<event_device, PyEventSource, event_source_ptr> py_event_source(m, "event_device");
-    py_event_source.def("subscribe", &event_device::observe)
-            .def_property_readonly("io_device", &event_device::get_io_device)
-            .def_property_readonly("writer", &event_device::get_writer);
-
     py::class_<master, std::shared_ptr<master>>(m, "master")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &master::get_io_device)
@@ -272,6 +252,5 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
-            .def("run", &apprentice::run)
-            .def("stop", &apprentice::stop);
+            .def("run", &apprentice::run);
 }

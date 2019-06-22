@@ -2,9 +2,9 @@
 // Created by Keren Dong on 2019-06-20.
 //
 
+#include <set>
 #include <spdlog/spdlog.h>
 
-#include <kungfu/wingchun/serialize.h>
 #include <kungfu/wingchun/storage/storage.h>
 
 namespace kungfu
@@ -15,37 +15,21 @@ namespace kungfu
         {
             UidWorkerStorage::UidWorkerStorage(const std::string &file_path) : DatabaseHolder(file_path)
             {
-                try
-                {
                     std::string sql = "CREATE TABLE IF NOT EXISTS uid_worker("
                                       "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
                                       "name        CHAR(50) UNIQUE);";
                     db_.exec(sql);
-                }
-                catch (std::exception &e)
-                {
-                    std::cout << "exception: " << e.what() << std::endl;
-                }
             }
 
             void UidWorkerStorage::add_uid_worker(const std::string &name)
             {
-                try
-                {
                     SQLite::Statement insert(db_, "INSERT OR IGNORE INTO uid_worker VALUES (NULL, ?)");
                     insert.bind(1, name);
                     insert.exec();
-                }
-                catch (std::exception &e)
-                {
-                    std::cout << "exception: " << e.what() << std::endl;
-                }
             }
 
             int UidWorkerStorage::get_uid_worker_id(const std::string &name)
             {
-                try
-                {
                     SQLite::Statement query(db_, "SELECT id FROM uid_worker WHERE name == ?");
                     query.bind(1, name);
                     if (query.executeStep())
@@ -56,12 +40,6 @@ namespace kungfu
                     {
                         return -1;
                     }
-                }
-                catch (std::exception &e)
-                {
-                    std::cout << "exception: " << e.what() << std::endl;
-                    return -1;
-                }
             }
 
             CalendarStorage::CalendarStorage(const std::string &file_path) : DatabaseHolder(file_path)
@@ -451,7 +429,7 @@ namespace kungfu
 
             void SnapshotStorage::insert(const msg::data::AccountInfo &account_info)
             {
-                SQLite::Statement insert(db_, "REPLACE INTO " + table_ + "(update_time, trading_day, account_id, type, "
+                SQLite::Statement insert(db_, "REPLACE INTO " + table_ + "(update_time, trading_day, account_id, "
                                                                          "broker_id, source_id, initial_equity, static_equity, dynamic_equity, "
                                                                          "accumulated_pnl, accumulated_pnl_ratio, intraday_pnl, intraday_pnl_ratio, "
                                                                          "avail, market_value, margin, accumulated_fee, intraday_fee, "
@@ -460,26 +438,25 @@ namespace kungfu
                 insert.bind(1, account_info.update_time);
                 insert.bind(2, account_info.trading_day);
                 insert.bind(3, account_info.account_id);
-                insert.bind(4, std::string(1, account_info.account_type));
-                insert.bind(5, account_info.broker_id);
-                insert.bind(6, account_info.source_id);
-                insert.bind(7, account_info.initial_equity);
-                insert.bind(8, account_info.static_equity);
-                insert.bind(9, account_info.dynamic_equity);
-                insert.bind(10, account_info.accumulated_pnl);
-                insert.bind(11, account_info.accumulated_pnl_ratio);
-                insert.bind(12, account_info.intraday_pnl);
-                insert.bind(13, account_info.intraday_pnl_ratio);
-                insert.bind(14, account_info.avail);
-                insert.bind(15, account_info.market_value);
-                insert.bind(16, account_info.margin);
-                insert.bind(17, account_info.accumulated_fee);
-                insert.bind(18, account_info.intraday_fee);
-                insert.bind(19, account_info.frozen_cash);
-                insert.bind(20, account_info.frozen_margin);
-                insert.bind(21, account_info.frozen_fee);
-                insert.bind(22, account_info.position_pnl);
-                insert.bind(23, account_info.close_pnl);
+                insert.bind(4, account_info.broker_id);
+                insert.bind(5, account_info.source_id);
+                insert.bind(6, account_info.initial_equity);
+                insert.bind(7, account_info.static_equity);
+                insert.bind(8, account_info.dynamic_equity);
+                insert.bind(9, account_info.accumulated_pnl);
+                insert.bind(10, account_info.accumulated_pnl_ratio);
+                insert.bind(11, account_info.intraday_pnl);
+                insert.bind(12, account_info.intraday_pnl_ratio);
+                insert.bind(13, account_info.avail);
+                insert.bind(14, account_info.market_value);
+                insert.bind(15, account_info.margin);
+                insert.bind(16, account_info.accumulated_fee);
+                insert.bind(17, account_info.intraday_fee);
+                insert.bind(18, account_info.frozen_cash);
+                insert.bind(19, account_info.frozen_margin);
+                insert.bind(20, account_info.frozen_fee);
+                insert.bind(21, account_info.position_pnl);
+                insert.bind(22, account_info.close_pnl);
 
                 try
                 {

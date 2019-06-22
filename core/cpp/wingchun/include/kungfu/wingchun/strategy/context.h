@@ -33,21 +33,21 @@ namespace kungfu
                 //添加策略使用的行情柜台
                 //@param source_id   柜台ID
                 //@return            成功或者失败
-                bool add_md(const std::string &source_id);
+                void add_md(const std::string &source);
 
                 //添加策略使用的交易账户
                 //@param source_id   柜台ID
                 //@param account_id  账户ID
                 //@param cash_limit  可用资金限制
                 //@return            成功或者失败
-                bool add_account(const std::string &source_id, const std::string &account_id, double cash_limit);
+                void add_account(const std::string &source, const std::string &account, double cash_limit);
 
                 //订阅行情
                 //@param source_id   柜台ID
                 //@param instruments 合约列表
                 //@param exchange_id 交易所ID
                 //@param is_level2   是否订阅Level2数据
-                void subscribe(const std::string &source_id, const std::vector<std::string> &instruments, const std::string &exchange_id = "",
+                void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "",
                                bool is_level2 = false);
 
                 //限价单报单
@@ -59,7 +59,7 @@ namespace kungfu
                 //@param side          买卖方向
                 //@param offset        开平方向
                 //@return              订单ID
-                uint64_t insert_limit_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account_id,
+                uint64_t insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                             double limit_price, int64_t volume, Side side, Offset offset);
 
                 //fok单报单
@@ -71,7 +71,7 @@ namespace kungfu
                 //@param side          买卖方向
                 //@param offset        开平方向
                 //@return              订单ID
-                uint64_t insert_fok_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account_id,
+                uint64_t insert_fok_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                           double limit_price, int64_t volume, Side side, Offset offset);
 
                 //fak单报单
@@ -83,7 +83,7 @@ namespace kungfu
                 //@param side          买卖方向
                 //@param offset        开平方向
                 //@return              订单ID
-                uint64_t insert_fak_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account_id,
+                uint64_t insert_fak_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                           double limit_price, int64_t volume, Side side, Offset offset);
 
                 //市价单报单
@@ -94,7 +94,7 @@ namespace kungfu
                 //@param side          买卖方向
                 //@param offset        开平方向
                 //@return              订单ID
-                uint64_t insert_market_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account_id,
+                uint64_t insert_market_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                              int64_t volume, Side side, Offset offset);
 
                 //撤单
@@ -106,24 +106,14 @@ namespace kungfu
                 void react(rx::observable<yijinjing::event_ptr> events);
 
             private:
-                uint64_t next_id();
-
-            private:
                 practice::apprentice& app_;
-
-                storage::UidWorkerStorage uid_worker_storage_;
-                storage::OrderStorage order_storage_;
-                storage::TradeStorage trade_storage_;
+                int64_t now_;
 
                 Calendar calendar_;
-                UidGenerator uid_generator_;
 
-                std::map<std::string, AccountManager_ptr> account_managers_;
-                std::map<std::string, msg::data::AccountInfo> accounts_;
-
-                bool has_stock_account_;
-                bool has_future_account_;
-                std::map<std::string, std::set<std::string>> subscribed_;
+                std::unordered_map<uint32_t, AccountManager_ptr> account_managers_;
+                std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
+                std::unordered_map<uint32_t, msg::data::Quote> quotes_;
 
                 friend class Runner;
             };

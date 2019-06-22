@@ -45,16 +45,8 @@ if(WIN32)
     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
 endif()
 
-OPTION(test "Build all tests." ON) # Makes boolean 'test' available.
-ENABLE_TESTING()
-
-############################################################
-
-SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/../node_modules/boost-lib/cmake")
-INCLUDE(BoostLib)
-
-REQUIRE_BOOST_LIBS("1.64.0" "locale;date_time;filesystem;system;thread;serialization;math_tr1;chrono;regex;program_options")
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+#OPTION(test "Build all tests." ON) # Makes boolean 'test' available.
+#ENABLE_TESTING()
 
 ############################################################
 
@@ -77,9 +69,6 @@ INCLUDE_DIRECTORIES(deps/SQLiteCpp-2.3.0/include)
 INCLUDE_DIRECTORIES(deps/fmt-5.3.0/include)
 INCLUDE_DIRECTORIES(deps/rxcpp-4.1.0/include)
 INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
-INCLUDE_DIRECTORIES(deps/fast-cpp-csv-parser)
-INCLUDE_DIRECTORIES(deps/getopt-1.0.0)
-INCLUDE_DIRECTORIES(deps/cxxopts-2.2/include)
 INCLUDE_DIRECTORIES(deps/googletest-1.9.0/include)
 
 ############################################################

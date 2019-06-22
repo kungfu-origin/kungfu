@@ -138,7 +138,7 @@ namespace kungfu
             {
                 JOURNAL,
                 SQLITE,
-                SOCKET,
+                IPC,
                 LOG
             };
 
@@ -150,8 +150,8 @@ namespace kungfu
                         return "journal";
                     case layout::SQLITE:
                         return "db";
-                    case layout::SOCKET:
-                        return "socket";
+                    case layout::IPC:
+                        return "ipc";
                     case layout::LOG:
                         return "log";
                 }

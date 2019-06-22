@@ -23,7 +23,7 @@ namespace kungfu
             class Trader : public practice::apprentice
             {
             public:
-                Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source, const std::string &account_id);
+                explicit Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source, const std::string &account_id);
 
                 virtual ~Trader() = default;
 

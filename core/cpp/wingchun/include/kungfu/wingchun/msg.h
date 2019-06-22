@@ -9,6 +9,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 #include <kungfu/wingchun/common.h>
 
@@ -492,7 +493,6 @@ namespace kungfu
                     j["instrument_id"] = std::string(input.instrument_id);
                     j["exchange_id"] = std::string(input.exchange_id);
                     j["account_id"] = std::string(input.account_id);
-                    j["client_id"] = std::string(input.client_id);
                     if (input.instrument_type != char(0))
                     {
                         j["instrument_type"] = std::string(1, input.instrument_type);
@@ -534,7 +534,6 @@ namespace kungfu
                     strncpy(input.instrument_id, j["instrument_id"].get<std::string>().c_str(), INSTRUMENT_ID_LEN);
                     strncpy(input.exchange_id, j["exchange_id"].get<std::string>().c_str(), EXCHANGE_ID_LEN);
                     strncpy(input.account_id, j["account_id"].get<std::string>().c_str(), ACCOUNT_ID_LEN);
-                    strncpy(input.client_id, j["client_id"].get<std::string>().c_str(), CLIENT_ID_LEN);
 
                     if (j.find("instrument_type") != j.end())
                     {
