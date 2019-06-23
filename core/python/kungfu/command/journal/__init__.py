@@ -28,4 +28,4 @@ def pass_ctx_from_parent(ctx):
     ctx.category = ctx.parent.category
     ctx.group = ctx.parent.group
     ctx.name = ctx.parent.name
-    ctx.location = ctx.parent.locator
+    ctx.locator = ctx.parent.locator

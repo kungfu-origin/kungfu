@@ -121,6 +121,7 @@ namespace kungfu
 
                 friend class Runner;
             };
+            DECLARE_PTR(Context)
         }
     }
 }

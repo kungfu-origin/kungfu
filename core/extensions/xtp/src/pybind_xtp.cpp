@@ -17,8 +17,10 @@ using namespace kungfu::wingchun::xtp;
 
 PYBIND11_MODULE(kfext_xtp, m) {
     py::class_<MdGateway, std::shared_ptr<MdGateway>>(m, "MD")
-            .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>());
+            .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
+            .def("run", &MdGateway::run);
 
     py::class_<TdGateway, std::shared_ptr<TdGateway>>(m, "TD")
-            .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>());
+            .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
+            .def("run", &TdGateway::run);
 }

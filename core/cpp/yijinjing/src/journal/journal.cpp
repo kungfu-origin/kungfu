@@ -52,7 +52,7 @@ namespace kungfu
             {
                 load_page(page::find_page_id(location_, dest_id_, nanotime));
                 SPDLOG_TRACE("{} in page [{} - {}]",
-                        nanotime > 0 ? time::strftime(nanotime) : "",
+                        nanotime > 0 ? time::strftime(nanotime) : "beginning",
                         time::strftime(current_page_->begin_time(), "%F %T"),
                         time::strftime(current_page_->end_time(), "%F %T")
                         );

@@ -31,7 +31,7 @@ namespace kungfu
         return std::string(getenv(name));
     }
 
-    inline const std::string relative_to_kf_home(const std::string &path)
+    inline const std::string strip_kf_home(const std::string &path)
     {
         std::string home = get_kungfu_home();
         return path.substr(home.length() + 1, path.length() - home.length() - 1);

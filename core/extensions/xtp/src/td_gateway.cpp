@@ -90,7 +90,7 @@ namespace kungfu
 
             bool TdGateway::insert_order(const yijinjing::event_ptr& event)
             {
-                auto input = event->data<OrderInput>();
+                const OrderInput &input = event->data<OrderInput>();
                 XTPOrderInsertInfo xtp_input = {};
                 to_xtp(xtp_input, input);
 
@@ -102,7 +102,7 @@ namespace kungfu
                 uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
                 int64_t nano = kungfu::yijinjing::time::now_in_nano();
                 auto writer = get_writer(event->source());
-                auto order = writer->open_data<msg::data::Order>(event->gen_time(), msg::type::Order);
+                msg::data::Order &order = writer->open_data<msg::data::Order>(event->gen_time(), msg::type::Order);
                 get_order(input, order, xtp_order_id);
 
                 if (xtp_order_id == 0)
@@ -142,7 +142,7 @@ namespace kungfu
 
             bool TdGateway::cancel_order(const yijinjing::event_ptr& event)
             {
-                auto action = event->data<OrderAction>();
+                const OrderAction &action = event->data<OrderAction>();
                 uint64_t xtp_order_id = order_mapper_->get_xtp_order_id(action.order_id);
                 if (xtp_order_id != 0)
                 {
@@ -223,7 +223,7 @@ namespace kungfu
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
-                    auto order = writer->open_data<msg::data::Order>(0, msg::type::Order);
+                    msg::data::Order &order = writer->open_data<msg::data::Order>(0, msg::type::Order);
 
                     from_xtp(*order_info, order);
                     order.order_id = xtp_order.internal_order_id;
@@ -257,7 +257,7 @@ namespace kungfu
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
-                    auto trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
+                    msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
                     from_xtp(*trade_info, trade);
                     trade.rcv_time = kungfu::yijinjing::time::now_in_nano();
                     trade.order_id = xtp_order.internal_order_id;
@@ -285,7 +285,7 @@ namespace kungfu
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    auto stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
+                    msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
                     strcpy(stock_pos.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
@@ -320,7 +320,7 @@ namespace kungfu
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    auto account = writer->open_data<msg::data::AccountInfo>(0, msg::type::AccountInfo);
+                    msg::data::AccountInfo &account = writer->open_data<msg::data::AccountInfo>(0, msg::type::AccountInfo);
                     strcpy(account.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {

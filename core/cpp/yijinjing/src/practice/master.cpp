@@ -26,7 +26,7 @@ namespace kungfu
             msg::data::RequestPublish &msg_master = writer->open_data<msg::data::RequestPublish>(trigger_time, msg::type::RequestPublish);
             msg_master.dest_id = dest_id;
             writer->close_data();
-            SPDLOG_INFO("request {} publish to {:08x}", uname, dest_id);
+            SPDLOG_DEBUG("request {} publish to {:08x}", uname, dest_id);
         }
 
         master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency))
@@ -70,6 +70,9 @@ namespace kungfu
 
                       request_publish(writer, e->gen_time(), app_location->uname, master_location->uid);
                       request_publish(writer, e->gen_time(), app_location->uname, 0);
+
+                      writer->open_frame(e->gen_time(), msg::type::RequestStart);
+                      writer->close_frame(1);
                   } else
                   {
                       SPDLOG_ERROR("location {} has already been registered", app_location->uname);
@@ -80,8 +83,6 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   auto subscribe = e->data<msg::data::RequestSubscribe>();
-                  msg::data::RequestPublish publish{};
-                  publish.dest_id = e->source();
                   if (writers_.find(subscribe.source_id) == writers_.end())
                   {
                       SPDLOG_ERROR("Subscribe to unknown location {:08x}", subscribe.source_id);
@@ -92,7 +93,7 @@ namespace kungfu
                       SPDLOG_ERROR("Unregistered request from {:08x}", e->source());
                       return;
                   }
-                  writers_[subscribe.source_id]->write(e->gen_time(), msg::type::RequestPublish, &publish);
+                  request_publish(writers_[subscribe.source_id], e->gen_time(), get_location(subscribe.source_id)->uname, e->source());
                   writers_[e->source()]->write(e->gen_time(), msg::type::RequestSubscribe, &subscribe);
               });
         }

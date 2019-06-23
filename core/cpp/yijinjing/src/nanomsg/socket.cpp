@@ -87,7 +87,7 @@ int socket::getsockopt_int (int level, int option)
 int socket::bind (const std::string &path)
 {
     url_ = "ipc://" + path;
-    relative_path_ = relative_to_kf_home(path);
+    relative_path_ = strip_kf_home(path);
     int rc = nn_bind (sock_, url_.c_str());
     if (rc < 0)
     {
@@ -100,7 +100,7 @@ int socket::bind (const std::string &path)
 int socket::connect (const std::string &path)
 {
     url_ = "ipc://" + path;
-    relative_path_ = relative_to_kf_home(path);
+    relative_path_ = strip_kf_home(path);
     int rc = nn_connect (sock_, url_.c_str());
     if (rc < 0)
     {

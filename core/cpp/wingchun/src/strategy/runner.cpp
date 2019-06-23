@@ -26,6 +26,11 @@ namespace kungfu
                     : apprentice(location::make(mode::LIVE, category::STRATEGY, group, name, locator), low_latency), context_(*this)
             {}
 
+            void Runner::add_strategy(Strategy_ptr strategy)
+            {
+                strategies_.push_back(strategy);
+            }
+
             void Runner::react(rx::observable<yijinjing::event_ptr> events)
             {
                 apprentice::react(events);
@@ -34,36 +39,61 @@ namespace kungfu
                 events | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
-                      strategy_->on_quote(event->data<Quote>());
+                      for (auto strategy : strategies_)
+                      {
+                          strategy->on_quote(event->data<Quote>());
+                      }
                   });
 
                 events | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {
-                      strategy_->on_order(event->data<Order>());
+                      for (auto strategy : strategies_)
+                      {
+                          strategy->on_order(event->data<Order>());
+                      }
                   });
 
                 events | is(msg::type::Trade) |
                 $([&](event_ptr event)
                   {
-                      strategy_->on_trade(event->data<Trade>());
+                      for (auto strategy : strategies_)
+                      {
+                          strategy->on_trade(event->data<Trade>());
+                      }
                   });
 
                 events | is(msg::type::Entrust) |
                 $([&](event_ptr event)
                   {
-                      strategy_->on_entrust(event->data<Entrust>());
+                      for (auto strategy : strategies_)
+                      {
+                          strategy->on_entrust(event->data<Entrust>());
+                      }
                   });
 
                 events | is(msg::type::Transaction) |
                 $([&](event_ptr event)
                   {
-                      strategy_->on_transaction(event->data<Transaction>());
+                      for (auto strategy : strategies_)
+                      {
+                          strategy->on_transaction(event->data<Transaction>());
+                      }
                   });
+                
+                for (auto strategy : strategies_)
+                {
+                    strategy->pre_start(context_);
+                }
             }
 
             void Runner::start()
-            {}
+            {
+                for (auto strategy : strategies_)
+                {
+                    strategy->post_start(context_);
+                }
+            }
 
         }
     }

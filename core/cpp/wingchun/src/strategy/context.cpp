@@ -83,6 +83,7 @@ namespace kungfu
 
             void Context::add_md(const std::string &source)
             {
+                SPDLOG_INFO("add md {}", source);
                 auto home = app_.get_io_device()->get_home();
                 app_.observe(location::make(home->mode, category::MD, source, source, home->locator));
             }
@@ -90,6 +91,7 @@ namespace kungfu
             void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
             {
                 uint32_t account_id = yijinjing::util::hash_str_32(account);
+                SPDLOG_INFO("add account {} {:08x}", account, account_id);
                 if (accounts_.find(account_id) != accounts_.end())
                 {
                     throw wingchun_error("duplicated account " + account);
@@ -135,7 +137,7 @@ namespace kungfu
                                                  double limit_price, int64_t volume, Side side, Offset offset)
             {
                 auto writer = app_.get_writer(lookup_account_location_id(account));
-                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
                 input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
@@ -158,7 +160,7 @@ namespace kungfu
                                                double limit_price, int64_t volume, Side side, Offset offset)
             {
                 auto writer = app_.get_writer(lookup_account_location_id(account));
-                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
                 input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
@@ -181,7 +183,7 @@ namespace kungfu
                                                double limit_price, int64_t volume, Side side, Offset offset)
             {
                 auto writer = app_.get_writer(lookup_account_location_id(account));
-                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
                 input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
@@ -204,7 +206,7 @@ namespace kungfu
                                                   int64_t volume, Side side, Offset offset)
             {
                 auto writer = app_.get_writer(lookup_account_location_id(account));
-                auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
                 input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
@@ -244,7 +246,7 @@ namespace kungfu
                 }
 
                 auto writer = app_.get_writer(account_location_ids_[account_id]);
-                auto action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
+                msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
 
                 action.order_action_id = writer->current_frame_uid();
                 action.order_id = order_id;

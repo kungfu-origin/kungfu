@@ -178,7 +178,7 @@ namespace kungfu
             {
                 QUOTE_TRACE(to_string(*market_data));
 
-                auto quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
+                msg::data::Quote &quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
                 from_xtp(*market_data, quote);
                 get_writer(0)->close_data();
             }
@@ -189,14 +189,14 @@ namespace kungfu
                 {
                     ENTRUST_TRACE(to_string(*tbt_data));
 
-                    auto entrust = get_writer(0)->open_data<msg::data::Entrust>(0, msg::type::Entrust);
+                    msg::data::Entrust &entrust = get_writer(0)->open_data<msg::data::Entrust>(0, msg::type::Entrust);
                     from_xtp(*tbt_data, entrust);
                     get_writer(0)->close_data();
                 } else if (tbt_data->type == XTP_TBT_TRADE)
                 {
                     TRANSACTION_TRACE(to_string(*tbt_data));
 
-                    auto transaction = get_writer(0)->open_data<msg::data::Transaction>(0, msg::type::Transaction);
+                    msg::data::Transaction &transaction = get_writer(0)->open_data<msg::data::Transaction>(0, msg::type::Transaction);
                     from_xtp(*tbt_data, transaction);
                     get_writer(0)->close_data();
                 }

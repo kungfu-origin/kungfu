@@ -129,6 +129,13 @@ namespace kungfu
 
                 void close_frame(size_t data_length);
 
+                /**
+                 * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
+                 * @tparam T
+                 * @param trigger_time
+                 * @param msg_type
+                 * @return a casted reference to the underlying memory address in mmap file
+                 */
                 template<typename T>
                 inline T &open_data(int64_t trigger_time, int32_t msg_type)
                 {

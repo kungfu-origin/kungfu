@@ -22,6 +22,8 @@ namespace kungfu
 
                 virtual ~Runner() = default;
 
+                void add_strategy(Strategy_ptr strategy);
+
             protected:
                 void react(rx::observable<yijinjing::event_ptr> events) override ;
 
@@ -29,7 +31,7 @@ namespace kungfu
 
             private:
                 Context context_;
-                Strategy_ptr strategy_;
+                std::vector<Strategy_ptr> strategies_;
             };
         }
     }

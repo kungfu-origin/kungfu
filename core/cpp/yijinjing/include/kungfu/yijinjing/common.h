@@ -56,6 +56,11 @@ namespace kungfu
 
             virtual int32_t data_length() const = 0;
 
+            /**
+             * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
+             * @tparam T
+             * @return a casted reference to the underlying memory address
+             */
             template<typename T>
             inline const T &data() const
             {

@@ -117,7 +117,7 @@ namespace kungfu {
                 close(fd);
 #endif // _WINDOWS
 
-                SPDLOG_DEBUG("mapped {} - {} - {}", relative_to_kf_home(path), is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
+                SPDLOG_DEBUG("mapped {} - {} - {}", strip_kf_home(path), is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
                 return reinterpret_cast<uintptr_t>(buffer);
             }
 

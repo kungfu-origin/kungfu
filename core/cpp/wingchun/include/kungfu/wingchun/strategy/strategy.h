@@ -17,57 +17,67 @@ namespace kungfu
 {
     namespace wingchun
     {
-        class Strategy : public practice::apprentice
+        namespace strategy
         {
-        public:
-            virtual ~Strategy() = default;
+            class Strategy
+            {
+            public:
+                virtual ~Strategy() = default;
 
-            //运行前
-            virtual void pre_run()
-            {};
+                //运行前
+                virtual void pre_start(Context &context)
+                {};
 
-            //退出前
-            virtual void pre_quit()
-            {};
+                virtual void post_start(Context &context)
+                {};
 
-            //交易日切换回调
-            //@param next_trading_day  下一个交易日
-            virtual void on_switch_day(const std::string &next_trading_day)
-            {};
+                //退出前
+                virtual void pre_stop(Context &context)
+                {};
 
-            //行情数据更新回调
-            //@param quote             行情数据
-            virtual void on_quote(const msg::data::Quote &quote)
-            {};
+                virtual void post_stop(Context &context)
+                {};
 
-            //逐笔委托更新回调
-            //@param entrust           逐笔委托数据
-            virtual void on_entrust(const msg::data::Entrust &entrust)
-            {};
+                //交易日切换回调
+                //@param next_trading_day  下一个交易日
+                virtual void on_switch_day(const std::string &next_trading_day)
+                {};
 
-            //逐笔成交更新回调
-            //@param transaction       逐笔成交数据
-            virtual void on_transaction(const msg::data::Transaction &transaction)
-            {};
+                //行情数据更新回调
+                //@param quote             行情数据
+                virtual void on_quote(const msg::data::Quote &quote)
+                {};
 
-            //订单信息更新回调
-            //@param order             订单信息数据
-            virtual void on_order(const msg::data::Order &order)
-            {};
+                //逐笔委托更新回调
+                //@param entrust           逐笔委托数据
+                virtual void on_entrust(const msg::data::Entrust &entrust)
+                {};
 
-            //订单成交回报回调
-            //@param trade             订单成交数据
-            virtual void on_trade(const msg::data::Trade &trade)
-            {};
+                //逐笔成交更新回调
+                //@param transaction       逐笔成交数据
+                virtual void on_transaction(const msg::data::Transaction &transaction)
+                {};
 
-            //算法订单状态更新回调
-            //@param order_id          订单ID
-            //@param algo_type         订单类型
-            //@param event_msg         订单更新事件
-            virtual void on_algo_order_status(uint64_t order_id, const std::string &algo_type, const std::string &event_msg)
-            {};
-        };
-        DECLARE_PTR(Strategy)
+                //订单信息更新回调
+                //@param order             订单信息数据
+                virtual void on_order(const msg::data::Order &order)
+                {};
+
+                //订单成交回报回调
+                //@param trade             订单成交数据
+                virtual void on_trade(const msg::data::Trade &trade)
+                {};
+
+                //算法订单状态更新回调
+                //@param order_id          订单ID
+                //@param algo_type         订单类型
+                //@param event_msg         订单更新事件
+                virtual void on_algo_order_status(uint64_t order_id, const std::string &algo_type, const std::string &event_msg)
+                {};
+            };
+
+            DECLARE_PTR(Strategy)
+        }
     }
 }
 #endif //WINGCHUN_STRATEGY_H

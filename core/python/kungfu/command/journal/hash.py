@@ -1,9 +1,11 @@
 import pyyjj
+import pywingchun
 import click
 from kungfu.command.journal import journal, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 from kungfu.practice.apprentice import Apprentice
+from kungfu.wingchun.strategy import Strategy
 
 KB = 2 ** 10
 MB = 2 ** 20
@@ -37,6 +39,11 @@ def test(ctx):
     ctx.low_latency = False
     loc = pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['td'], "xtp", "15040900", ctx.parent.locator)
     click.echo(loc.uname)
-    app = Apprentice(ctx)
-    app.run()
+    # app = Apprentice(ctx)
+    # app.run()
+    ctx.path = "../examples/strategy/py/strategy_demo.py"
+    strategy = Strategy(ctx)
+    runner = pywingchun.Runner(ctx.low_latency, ctx.parent.locator, "alpha", "101")
+    runner.add_strategy(strategy)
+    runner.run()
     click.echo('done')

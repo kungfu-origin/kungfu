@@ -3,21 +3,17 @@ from kungfu.wingchun.constants import *
 source = Source.XTP
 exchange = Exchange.SSE
 
-def init(context):
+def pre_start(context):
+    print("pre run strategy")
     context.add_md(source)
     context.add_account(source, "15011218", 100000000.0)
     context.add_account(source, "15040900", 100000000.0)
     context.subscribe(source, ["601988", "600000"], exchange, True)
-    context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
-    sub_portfolio = context.get_sub_portfolio_info("15040900")
-    print(sub_portfolio)
-    portfolio = context.get_portfolio_info()
-    print(portfolio)
-
-def pre_run(context):
-    context.log.info("pre run strategy")
-    pass
-
+    # context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
+    # sub_portfolio = context.get_sub_portfolio_info("15040900")
+    # print(sub_portfolio)
+    # portfolio = context.get_portfolio_info()
+    # print(portfolio)
 
 def insert_order(context, nano):
 
