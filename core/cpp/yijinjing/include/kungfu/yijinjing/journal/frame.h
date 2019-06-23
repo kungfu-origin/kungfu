@@ -122,7 +122,7 @@ namespace kungfu
                     header_->length = header_length() + length;
                 }
 
-                inline void set_source(int16_t source)
+                inline void set_source(uint32_t source)
                 { header_->source = source; }
 
                 inline void set_gen_time(int64_t gen_time)
@@ -131,7 +131,7 @@ namespace kungfu
                 inline void set_trigger_time(int64_t trigger_time)
                 { header_->trigger_time = trigger_time; }
 
-                inline void set_msg_type(int16_t msg_type)
+                inline void set_msg_type(int32_t msg_type)
                 { header_->msg_type = msg_type; }
 
                 friend class journal;

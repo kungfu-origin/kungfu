@@ -86,11 +86,11 @@ namespace kungfu
                     }
                 }
                 bool res = true;
-                if (sse_tickers.size() > 0)
+                if (!sse_tickers.empty())
                 {
                     res = res && subscribe(sse_tickers, EXCHANGE_SSE, is_level2);
                 }
-                if (sze_tickers.size() > 0)
+                if (!sze_tickers.empty())
                 {
                     res = res && subscribe(sze_tickers, EXCHANGE_SZE, is_level2);
                 }

@@ -30,27 +30,13 @@ GB = 2 ** 30
 # live/strategy/alpha/test.1.journal
 
 
-def dump(t):
-    click.echo('{} {:016x}'.format(kft.strftime(t), t))
-
-
 @journal.command()
 @click.pass_context
 def test(ctx):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = False
-    dump(pyyjj.now_in_nano())
-    dump(19980621)
-    dump(20190621)
-    dump(20220621)
-    dump(kft.strptime("2019-06-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
-    dump(kft.strptime("2019-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
-    dump(kft.strptime("2019-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
-    dump(kft.strptime("2018-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
-    dump(kft.strptime("2008-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
-    dump(kft.strptime("1998-05-21 00:00:00", "%Y-%m-%d %H:%M:%S"))
     loc = pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['td'], "xtp", "15040900", ctx.parent.locator)
     click.echo(loc.uname)
-    # app = Apprentice(ctx)
-    # app.run()
+    app = Apprentice(ctx)
+    app.run()
     click.echo('done')

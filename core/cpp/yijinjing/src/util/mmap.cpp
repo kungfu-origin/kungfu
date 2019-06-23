@@ -117,7 +117,7 @@ namespace kungfu {
                 close(fd);
 #endif // _WINDOWS
 
-                SPDLOG_DEBUG("loaded buffer for page {}, writing {}, lazy {}", path, is_writing, lazy);
+                SPDLOG_DEBUG("mapped {} - {} - {}", relative_to_kf_home(path), is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
                 return reinterpret_cast<uintptr_t>(buffer);
             }
 

@@ -51,10 +51,10 @@ namespace kungfu
             void journal::seek_to_time(int64_t nanotime)
             {
                 load_page(page::find_page_id(location_, dest_id_, nanotime));
-                SPDLOG_TRACE("seek time {} in current page [{} - {}]",
+                SPDLOG_TRACE("{} in page [{} - {}]",
                         nanotime > 0 ? time::strftime(nanotime) : "",
-                        time::strftime(current_page_->begin_time()),
-                        time::strftime(current_page_->end_time())
+                        time::strftime(current_page_->begin_time(), "%F %T"),
+                        time::strftime(current_page_->end_time(), "%F %T")
                         );
                 while (current_page_->is_full() && current_page_->end_time() <= nanotime)
                 {

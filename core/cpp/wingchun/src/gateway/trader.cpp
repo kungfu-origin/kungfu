@@ -26,20 +26,12 @@ namespace kungfu
                     :
                     apprentice(location::make(mode::LIVE, category::TD, source, account_id, locator), low_latency),
                     source_(source), account_id_(account_id),
-                    uid_worker_storage_(get_config_db_file("uid_worker")),
                     order_storage_(get_app_db_file("orders")),
                     trade_storage_(get_app_db_file("trades")),
                     calendar_(get_config_db_file("holidays")),
-                    uid_generator_(uid_worker_storage_.get_uid_worker_id(account_id), UID_EPOCH_SECONDS),
                     account_manager_(account_id, calendar_, get_app_db_file("commission"))
             {
                 log::copy_log_settings(get_io_device()->get_home(), account_id);
-            }
-
-            uint64_t Trader::next_id()
-            {
-                int64_t seconds = yijinjing::time::now_in_nano() / yijinjing::time_unit::NANOSECONDS_PER_SECOND;
-                return uid_generator_.next_id(seconds);
             }
 
             std::vector<uint64_t> Trader::get_pending_orders(const std::string &client_id) const

@@ -83,9 +83,9 @@ namespace kungfu
             class url_factory
             {
             public:
-                virtual const std::string make_url_bind(const data::location_ptr location, protocol p) const = 0;
+                virtual const std::string make_path_bind(const data::location_ptr location, protocol p) const = 0;
 
-                virtual const std::string make_url_connect(const data::location_ptr location, protocol p) const = 0;
+                virtual const std::string make_path_connect(const data::location_ptr location, protocol p) const = 0;
             };
 
             DECLARE_PTR(url_factory)
@@ -133,9 +133,9 @@ namespace kungfu
 
                 int getsockopt_int(int level, int option);
 
-                int bind(const std::string &url);
+                int bind(const std::string &path);
 
-                int connect(const std::string &url);
+                int connect(const std::string &path);
 
                 void shutdown(int how = 0);
 
@@ -166,6 +166,7 @@ namespace kungfu
                 int sock_;
                 protocol protocol_;
                 std::string url_;
+                std::string relative_path_;
                 std::vector<char> buf_;
                 std::string message_;
 

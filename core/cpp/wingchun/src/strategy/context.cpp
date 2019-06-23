@@ -31,11 +31,11 @@ namespace kungfu
             }
 
             Context::Context(practice::apprentice &app) :
-                    app_(app),
+                    app_(app), now_(0),
                     calendar_(app_.get_config_db_file("holidays"))
             {}
 
-            void Context::react(rx::observable<yijinjing::event_ptr> events)
+            void Context::react(const rx::observable<yijinjing::event_ptr> &events)
             {
                 events |
                 $([&](event_ptr event)
@@ -97,6 +97,8 @@ namespace kungfu
 
                 auto home = app_.get_io_device()->get_home();
                 auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
+                account_location_ids_[account_id] = account_location->uid;
+
                 auto commission_db_file = home->locator->layout_file(account_location, yijinjing::data::layout::SQLITE, "commission");
                 account_managers_[account_id] = std::make_shared<AccountManager>(account, calendar_, commission_db_file);
                 accounts_[account_id] = msg::data::AccountInfo{};
@@ -109,6 +111,8 @@ namespace kungfu
                 info.static_equity = cash_limit;
                 info.dynamic_equity = cash_limit;
                 info.avail = cash_limit;
+
+                app_.observe(account_location);
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange, bool is_level2)
@@ -121,7 +125,7 @@ namespace kungfu
                 for (const auto &symbol : symbols)
                 {
                     sub_msg.push_back_string(hffix::tag::Symbol, symbol);
-                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote {};
+                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
                 }
 
                 writer->close_frame(sub_msg.message_end() - buffer);
@@ -130,11 +134,10 @@ namespace kungfu
             uint64_t Context::insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                  double limit_price, int64_t volume, Side side, Offset offset)
             {
-                uint32_t account_id = yijinjing::util::hash_str_32(account);
-                auto writer = app_.get_writer(account_id);
+                auto writer = app_.get_writer(lookup_account_location_id(account));
                 auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                input.order_id = writer->current_frame_id();
+                input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
                 strcpy(input.exchange_id, exchange.c_str());
                 strcpy(input.account_id, account.c_str());
@@ -154,11 +157,10 @@ namespace kungfu
             uint64_t Context::insert_fak_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                double limit_price, int64_t volume, Side side, Offset offset)
             {
-                uint32_t account_id = yijinjing::util::hash_str_32(account);
-                auto writer = app_.get_writer(account_id);
+                auto writer = app_.get_writer(lookup_account_location_id(account));
                 auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                input.order_id = writer->current_frame_id();
+                input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
                 strcpy(input.exchange_id, exchange.c_str());
                 strcpy(input.account_id, account.c_str());
@@ -178,11 +180,10 @@ namespace kungfu
             uint64_t Context::insert_fok_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                double limit_price, int64_t volume, Side side, Offset offset)
             {
-                uint32_t account_id = yijinjing::util::hash_str_32(account);
-                auto writer = app_.get_writer(account_id);
+                auto writer = app_.get_writer(lookup_account_location_id(account));
                 auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                input.order_id = writer->current_frame_id();
+                input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
                 strcpy(input.exchange_id, exchange.c_str());
                 strcpy(input.account_id, account.c_str());
@@ -202,11 +203,10 @@ namespace kungfu
             uint64_t Context::insert_market_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                   int64_t volume, Side side, Offset offset)
             {
-                uint32_t account_id = yijinjing::util::hash_str_32(account);
-                auto writer = app_.get_writer(account_id);
+                auto writer = app_.get_writer(lookup_account_location_id(account));
                 auto input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
 
-                input.order_id = writer->current_frame_id();
+                input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
                 strcpy(input.exchange_id, exchange.c_str());
                 strcpy(input.account_id, account.c_str());
@@ -238,15 +238,31 @@ namespace kungfu
             uint64_t Context::cancel_order(uint64_t order_id)
             {
                 uint32_t account_id = order_id >> 32;
-                auto writer = app_.get_writer(account_id);
+                if (account_location_ids_.find(account_id) == account_location_ids_.end())
+                {
+                    throw wingchun_error(fmt::format("invalid order id {}", order_id));
+                }
+
+                auto writer = app_.get_writer(account_location_ids_[account_id]);
                 auto action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
 
-                action.order_action_id = writer->current_frame_id();
+                action.order_action_id = writer->current_frame_uid();
                 action.order_id = order_id;
                 action.action_flag = OrderActionFlagCancel;
 
                 writer->close_data();
                 return action.order_action_id;
+            }
+
+            uint32_t Context::lookup_account_location_id(const std::string &account)
+            {
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                if (account_location_ids_.find(account_id) == account_location_ids_.end())
+                {
+                    throw wingchun_error("invalid account " + account);
+                }
+
+                return account_location_ids_[account_id];
             }
         }
     }

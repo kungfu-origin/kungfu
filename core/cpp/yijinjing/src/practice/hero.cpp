@@ -30,6 +30,15 @@ namespace kungfu
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
+        yijinjing::journal::writer_ptr hero::get_writer(uint32_t dest_id)
+        {
+            if (writers_.find(dest_id) == writers_.end())
+            {
+                throw yijinjing_error(fmt::format("writer {:x} not exists", dest_id));
+            }
+            return writers_[dest_id];
+        }
+
         void hero::register_location(const yijinjing::data::location_ptr &location)
         {
             locations_[location->uid] = location;
@@ -54,7 +63,7 @@ namespace kungfu
                     {
                         try
                         {
-                            SPDLOG_INFO("{} generating events with source id {}/{:08x}", get_home_uname(), get_home_uid(), get_home_uid());
+                            SPDLOG_INFO("{} generating events with source id {:08x}", get_home_uname(), get_home_uid());
 
                             while (live_)
                             {
@@ -120,14 +129,14 @@ namespace kungfu
             events | is(msg::type::RequestPublish) |
             $([&](event_ptr e)
               {
-                  auto data = e->data<msg::data::RequestPublish>();
+                  const msg::data::RequestPublish &data = e->data<msg::data::RequestPublish>();
                   if (writers_.find(data.dest_id) == writers_.end())
                   {
                       writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
                       writers_[data.dest_id]->open_session();
                   } else
                   {
-                      SPDLOG_ERROR("Ask publish for more than once");
+                      SPDLOG_ERROR("Ask publish to {:08x} for more than once", data.dest_id);
                   }
               });
 
@@ -136,7 +145,7 @@ namespace kungfu
               {
                   SPDLOG_INFO("RequestSubscribe event");
                   auto data = e->data<msg::data::RequestSubscribe>();
-                  SPDLOG_INFO("RequestSubscribe {}", data.source_id);
+                  SPDLOG_INFO("RequestSubscribe {:08x}", data.source_id);
                   auto location = get_location(e->source());
                   reader_->join(location, 0, data.from_time);
                   reader_->join(location, get_home_uid(), data.from_time);

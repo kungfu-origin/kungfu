@@ -66,20 +66,22 @@ namespace kungfu
             auto locator = get_io_device()->get_home()->locator;
             master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
             register_location(master_commands_location_);
+            SPDLOG_DEBUG("register master location {} {:08x}", master_commands_location_->uname, master_commands_location_->uid);
 
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
 
-            SPDLOG_INFO("request {}", request.dump());
+            SPDLOG_DEBUG("request {}", request.dump());
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
         void apprentice::observe(const location_ptr location)
         {
             auto now = time::now_in_nano();
-            msg::data::RequestSubscribe request{};
+            auto writer = get_writer(master_commands_location_->uid);
+            auto request = writer->open_data<msg::data::RequestSubscribe>(now, msg::type::RequestSubscribe);
             request.source_id = location->uid;
             request.from_time = now;
-            get_writer(master_commands_location_->uid)->write(now, msg::type::RequestSubscribe, &request);
+            writer->close_data();
         }
 
         void apprentice::react(observable<event_ptr> events)

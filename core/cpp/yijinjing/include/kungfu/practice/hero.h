@@ -31,8 +31,7 @@ namespace kungfu
             inline yijinjing::io_device_ptr get_io_device() const
             { return io_device_; }
 
-            inline yijinjing::journal::writer_ptr get_writer(uint32_t dest_id)
-            { return writers_[dest_id]; }
+            yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
             inline uint32_t get_home_uid() const
             { return get_io_device()->get_home()->uid; }

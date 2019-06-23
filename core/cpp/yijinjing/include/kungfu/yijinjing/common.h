@@ -17,6 +17,7 @@
 #define KUNGFU_YIJINJING_COMMON_H
 
 #include <utility>
+#include <fmt/format.h>
 #include <rxcpp/rx.hpp>
 
 #include <kungfu/common.h>
@@ -31,6 +32,13 @@ namespace kungfu
         const int MB = KB * KB;
         const int JOURNAL_PAGE_SIZE = 128 * MB;
         const int PAGE_MIN_HEADROOM = 1 * MB;
+
+        class yijinjing_error : public std::runtime_error
+        {
+        public:
+            yijinjing_error(const std::string &message) : runtime_error(message)
+            {}
+        };
 
         class event
         {
@@ -138,7 +146,7 @@ namespace kungfu
             {
                 JOURNAL,
                 SQLITE,
-                IPC,
+                NANOMSG,
                 LOG
             };
 
@@ -150,8 +158,8 @@ namespace kungfu
                         return "journal";
                     case layout::SQLITE:
                         return "db";
-                    case layout::IPC:
-                        return "ipc";
+                    case layout::NANOMSG:
+                        return "nn";
                     case layout::LOG:
                         return "log";
                 }
@@ -182,7 +190,7 @@ namespace kungfu
             public:
                 location(data::mode m, data::category c, std::string g, std::string n, locator_ptr l) :
                         mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(l),
-                        uname(data::get_mode_name(mode) + "/" + data::get_category_name(category) + "/" + group + "/" + name),
+                        uname(fmt::format("{}/{}/{}/{}", data::get_category_name(category), group, name, data::get_mode_name(mode))),
                         uid(util::hash_str_32(uname))
                 {}
 

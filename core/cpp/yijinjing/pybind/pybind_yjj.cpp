@@ -150,7 +150,7 @@ PYBIND11_MODULE(pyyjj, m)
     py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
             .value("JOURNAL", data::layout::JOURNAL)
             .value("SQLITE", data::layout::SQLITE)
-            .value("IPC", data::layout::IPC)
+            .value("NANOMSG", data::layout::NANOMSG)
             .value("LOG", data::layout::LOG)
             .export_values();
     m.def("get_layout_name", &data::get_layout_name);

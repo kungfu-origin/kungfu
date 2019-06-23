@@ -6,10 +6,10 @@
 #define WINGCHUN_CONTEXT_H
 
 #include <kungfu/practice/apprentice.h>
+
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/calendar/calendar.h>
-#include <kungfu/wingchun/util/uid_generator.h>
-#include <kungfu/wingchun/portfolio/portfolio_manager.h>
+#include <kungfu/wingchun/portfolio/account_manager.h>
 
 namespace kungfu
 {
@@ -103,7 +103,10 @@ namespace kungfu
                 uint64_t cancel_order(uint64_t order_id);
 
             protected:
-                void react(rx::observable<yijinjing::event_ptr> events);
+                void react(const rx::observable<yijinjing::event_ptr>& events);
+
+            private:
+                uint32_t lookup_account_location_id(const std::string &account);
 
             private:
                 practice::apprentice& app_;
@@ -111,6 +114,7 @@ namespace kungfu
 
                 Calendar calendar_;
 
+                std::unordered_map<uint32_t, uint32_t> account_location_ids_;
                 std::unordered_map<uint32_t, AccountManager_ptr> account_managers_;
                 std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
                 std::unordered_map<uint32_t, msg::data::Quote> quotes_;

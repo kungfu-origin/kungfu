@@ -40,6 +40,10 @@ namespace kungfu
                 struct RequestPublish
                 {
                     uint32_t dest_id;
+                    inline void set_dest_id(uint32_t id)
+                    {
+                        dest_id = id;
+                    }
                 };
             }
         }

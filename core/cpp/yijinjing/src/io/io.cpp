@@ -39,16 +39,14 @@ namespace kungfu
         {
         public:
 
-            const std::string make_url_bind(const data::location_ptr location, protocol p) const override
+            const std::string make_path_bind(const data::location_ptr location, protocol p) const override
             {
-                auto locator = location->locator;
-                return "ipc://" + locator->layout_file(location, layout::IPC, get_protocol_name(p));
+                return location->locator->layout_file(location, layout::NANOMSG, get_protocol_name(p));
             }
 
-            const std::string make_url_connect(const data::location_ptr location, protocol p) const override
+            const std::string make_path_connect(const data::location_ptr location, protocol p) const override
             {
-                auto locator = location->locator;
-                return "ipc://" + locator->layout_file(location, layout::IPC, get_protocol_name(get_opposite_protol(p)));
+                return location->locator->layout_file(location, layout::NANOMSG, get_protocol_name(get_opposite_protol(p)));
             }
         };
 
@@ -97,7 +95,7 @@ namespace kungfu
         protected:
             void init_socket(socket & s, location_ptr location, url_factory_ptr url_factory) override
             {
-                s.bind(url_factory->make_url_bind(location, s.get_protocol()));
+                s.bind(url_factory->make_path_bind(location, s.get_protocol()));
             }
         };
 
@@ -109,7 +107,7 @@ namespace kungfu
         protected:
             void init_socket(socket & s, location_ptr location, url_factory_ptr url_factory) override
             {
-                s.connect(url_factory->make_url_connect(location, s.get_protocol()));
+                s.connect(url_factory->make_path_connect(location, s.get_protocol()));
             }
         };
 
@@ -162,7 +160,7 @@ namespace kungfu
         protected:
             void init_socket(socket & s, location_ptr location, url_factory_ptr url_factory) override 
             {
-                s.bind(url_factory->make_url_bind(location, s.get_protocol()));
+                s.bind(url_factory->make_path_bind(location, s.get_protocol()));
             }
         };
 
@@ -174,7 +172,7 @@ namespace kungfu
         protected:
             void init_socket(socket & s, location_ptr location, url_factory_ptr url_factory) override
             {
-                s.connect(url_factory->make_url_connect(location, s.get_protocol()));
+                s.connect(url_factory->make_path_connect(location, s.get_protocol()));
                 s.setsockopt_str(NN_SUB, NN_SUB_SUBSCRIBE, "");
             }
         };
@@ -210,7 +208,7 @@ namespace kungfu
         socket_ptr io_device::connect_socket(const data::location_ptr location, const protocol &p, int timeout)
         {
             socket_ptr s = std::make_shared<socket>(p);
-            auto url = url_factory_->make_url_connect(location, p);
+            auto url = url_factory_->make_path_connect(location, p);
             s->connect(url);
             s->setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
             SPDLOG_INFO("connected socket [{}] {} at {} with timeout {}", nanomsg::get_protocol_name(p), location->name, url, timeout);
@@ -220,7 +218,7 @@ namespace kungfu
         socket_ptr io_device::bind_socket(const data::location_ptr location, const protocol &p, int timeout)
         {
             socket_ptr s = std::make_shared<socket>(p);
-            auto url = url_factory_->make_url_bind(location, p);
+            auto url = url_factory_->make_path_bind(location, p);
             s->bind(url);
             s->setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
             SPDLOG_INFO("bind to socket [{}] {} at {} with timeout {}", nanomsg::get_protocol_name(p), location->name, url, timeout);

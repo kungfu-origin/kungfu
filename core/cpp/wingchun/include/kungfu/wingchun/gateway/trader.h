@@ -10,7 +10,6 @@
 #include <kungfu/practice/apprentice.h>
 #include <kungfu/wingchun/storage/storage.h>
 #include <kungfu/wingchun/calendar/calendar.h>
-#include <kungfu/wingchun/util/uid_generator.h>
 #include <kungfu/wingchun/portfolio/account_manager.h>
 #include <kungfu/wingchun/oms/def.h>
 
@@ -48,8 +47,6 @@ namespace kungfu
 
                 std::vector<uint64_t> get_pending_orders(const std::string &client_id = "") const;
 
-                uint64_t next_id();
-
             protected:
                 void react(rx::observable<yijinjing::event_ptr> events) override ;
 
@@ -62,12 +59,10 @@ namespace kungfu
                 std::string source_;
                 std::string account_id_;
 
-                storage::UidWorkerStorage uid_worker_storage_;
                 storage::OrderStorage order_storage_;
                 storage::TradeStorage trade_storage_;
 
                 Calendar calendar_;
-                UidGenerator uid_generator_;
 
                 AccountManager account_manager_;
 //                oms::OrderManager order_manager_;

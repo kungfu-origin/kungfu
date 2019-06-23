@@ -50,7 +50,7 @@ namespace kungfu
                               }
                           }
                       }
-//                      MarketData::subscribe(symbols);
+                      subscribe(symbols, false);
                   });
             }
 

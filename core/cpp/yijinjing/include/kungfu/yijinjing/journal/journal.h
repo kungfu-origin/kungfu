@@ -123,7 +123,7 @@ namespace kungfu
             public:
                 explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
 
-                uint64_t current_frame_id();
+                uint64_t current_frame_uid();
 
                 frame_ptr open_frame(int64_t trigger_time, int32_t msg_type);
 

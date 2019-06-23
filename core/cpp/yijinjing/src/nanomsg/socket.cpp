@@ -84,27 +84,29 @@ int socket::getsockopt_int (int level, int option)
     return rc;
 }
 
-int socket::bind (const std::string &url)
+int socket::bind (const std::string &path)
 {
-    int rc = nn_bind (sock_, url.c_str());
+    url_ = "ipc://" + path;
+    relative_path_ = relative_to_kf_home(path);
+    int rc = nn_bind (sock_, url_.c_str());
     if (rc < 0)
     {
-        SPDLOG_ERROR("can not bind to {}", url);
+        SPDLOG_ERROR("can not bind to {}", url_);
         throw nn_exception ();
     }
-    url_ = url;
     return rc;
 }
 
-int socket::connect (const std::string &url)
+int socket::connect (const std::string &path)
 {
-    int rc = nn_connect (sock_, url.c_str());
+    url_ = "ipc://" + path;
+    relative_path_ = relative_to_kf_home(path);
+    int rc = nn_connect (sock_, url_.c_str());
     if (rc < 0)
     {
-        SPDLOG_ERROR("can not connect to {}", url);
+        SPDLOG_ERROR("can not connect to {}", url_);
         throw nn_exception ();
     }
-    url_ = url;
     return rc;
 }
 
@@ -153,12 +155,12 @@ int socket::recv (int flags)
                 break;
             case EINTR:
             {
-                SPDLOG_WARN("interrupted when receiving from {}", url_);
+                SPDLOG_WARN("interrupted when receiving from {}", relative_path_);
                 throw nn_exception ();
             }
             default:
             {
-                SPDLOG_ERROR("can not recv from {} errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
+                SPDLOG_ERROR("can not recv from {} errno [{}] {}", relative_path_, nn_errno(), nn_strerror(nn_errno()));
                 throw nn_exception ();
             }
         }

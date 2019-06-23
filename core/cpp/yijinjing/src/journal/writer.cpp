@@ -14,7 +14,6 @@
  *****************************************************************************/
 
 #include <mutex>
-#include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/time.h>
@@ -42,7 +41,7 @@ namespace kungfu
                 journal_->seek_to_time(time::now_in_nano());
             }
 
-            uint64_t writer::current_frame_id()
+            uint64_t writer::current_frame_uid()
             {
                 uint32_t page_part = (journal_->current_page_->page_id_ << 16) & PAGE_ID_TRANC;
                 uint32_t frame_part = journal_->page_frame_nb_ & FRAME_ID_TRANC;

@@ -13,35 +13,6 @@ namespace kungfu
     {
         namespace storage
         {
-            UidWorkerStorage::UidWorkerStorage(const std::string &file_path) : DatabaseHolder(file_path)
-            {
-                    std::string sql = "CREATE TABLE IF NOT EXISTS uid_worker("
-                                      "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-                                      "name        CHAR(50) UNIQUE);";
-                    db_.exec(sql);
-            }
-
-            void UidWorkerStorage::add_uid_worker(const std::string &name)
-            {
-                    SQLite::Statement insert(db_, "INSERT OR IGNORE INTO uid_worker VALUES (NULL, ?)");
-                    insert.bind(1, name);
-                    insert.exec();
-            }
-
-            int UidWorkerStorage::get_uid_worker_id(const std::string &name)
-            {
-                    SQLite::Statement query(db_, "SELECT id FROM uid_worker WHERE name == ?");
-                    query.bind(1, name);
-                    if (query.executeStep())
-                    {
-                        int id = query.getColumn(0);
-                        return id;
-                    } else
-                    {
-                        return -1;
-                    }
-            }
-
             CalendarStorage::CalendarStorage(const std::string &file_path) : DatabaseHolder(file_path)
             {
                 try

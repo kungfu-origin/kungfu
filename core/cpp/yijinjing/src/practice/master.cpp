@@ -21,9 +21,16 @@ namespace kungfu
 {
     namespace practice
     {
+        inline void request_publish(journal::writer_ptr &writer, int64_t trigger_time, const std::string &uname, uint32_t dest_id)
+        {
+            msg::data::RequestPublish &msg_master = writer->open_data<msg::data::RequestPublish>(trigger_time, msg::type::RequestPublish);
+            msg_master.dest_id = dest_id;
+            writer->close_data();
+            SPDLOG_INFO("request {} publish to {:08x}", uname, dest_id);
+        }
+
         master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency))
         {
-            SPDLOG_INFO("{} call master", get_io_device()->get_home()->uname);
             writers_[0] = get_io_device()->open_writer(0);
             writers_[0]->open_session();
         }
@@ -61,12 +68,8 @@ namespace kungfu
                       register_msg["data"] = request_loc;
                       get_io_device()->get_publisher()->publish(register_msg.dump());
 
-                      msg::data::RequestPublish msg;
-                      msg.dest_id = 0;
-                      writer->write(e->gen_time(), msg::type::RequestPublish, &msg);
-                      msg.dest_id = master_location->uid;
-                      writer->write(e->gen_time(), msg::type::RequestPublish, &msg);
-                      SPDLOG_INFO("request publish {}", app_location->uname);
+                      request_publish(writer, e->gen_time(), app_location->uname, master_location->uid);
+                      request_publish(writer, e->gen_time(), app_location->uname, 0);
                   } else
                   {
                       SPDLOG_ERROR("location {} has already been registered", app_location->uname);
@@ -81,12 +84,12 @@ namespace kungfu
                   publish.dest_id = e->source();
                   if (writers_.find(subscribe.source_id) == writers_.end())
                   {
-                      SPDLOG_ERROR("Subscribe to unknown location");
+                      SPDLOG_ERROR("Subscribe to unknown location {:08x}", subscribe.source_id);
                       return;
                   }
                   if (writers_.find(e->source()) == writers_.end())
                   {
-                      SPDLOG_ERROR("Unregistered request");
+                      SPDLOG_ERROR("Unregistered request from {:08x}", e->source());
                       return;
                   }
                   writers_[subscribe.source_id]->write(e->gen_time(), msg::type::RequestPublish, &publish);
