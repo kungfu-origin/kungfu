@@ -26,7 +26,7 @@ namespace kungfu
                 log::copy_log_settings(get_io_device()->get_home(), source);
             }
 
-            void MarketData::react(rx::observable<yijinjing::event_ptr> events)
+            void MarketData::react(const rx::observable<yijinjing::event_ptr> &events)
             {
                 apprentice::react(events);
 

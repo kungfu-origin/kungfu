@@ -1,6 +1,5 @@
-
+import pyyjj
 import os
-import sys
 from contextlib import contextmanager
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -11,6 +10,7 @@ from sqlalchemy import TypeDecorator, types
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
+
 
 class Json(TypeDecorator):
     @property
@@ -40,9 +40,11 @@ class Task(Base):
 
 
 @contextmanager
-def session_scope():
+def session_scope(ctx):
     # Create an engine that stores data in the local directory's
-    engine = create_engine('sqlite:///{}/global/task.db'.format(os.environ['KF_HOME']))
+    kf_etc_locaiton = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+    task_db_file = ctx.locator.layout_file(kf_etc_locaiton, pyyjj.layout.SQLITE, 'task')
+    engine = create_engine('sqlite:///{}'.format(task_db_file))
 
     # Create all tables in the engine. This is equivalent to "Create Table"
     # statements in raw SQL.
@@ -60,8 +62,8 @@ def session_scope():
         session.close()
 
 
-def get_task_config(task_name):
-    with session_scope() as session:
+def get_task_config(ctx, task_name):
+    with session_scope(ctx) as session:
         task = session.query(Task).get(task_name)
         if task:
             return task.config
@@ -69,8 +71,8 @@ def get_task_config(task_name):
             return {}
 
 
-def set_task_config(task_name, config):
-    with session_scope() as session:
+def set_task_config(ctx, task_name, config):
+    with session_scope(ctx) as session:
         task = session.query(Task).get(task_name)
         if task is None:
             task = Task(name=task_name, config=config)

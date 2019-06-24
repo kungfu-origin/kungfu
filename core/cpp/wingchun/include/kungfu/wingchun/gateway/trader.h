@@ -48,7 +48,7 @@ namespace kungfu
                 std::vector<uint64_t> get_pending_orders(const std::string &client_id = "") const;
 
             protected:
-                void react(rx::observable<yijinjing::event_ptr> events) override ;
+                void react(const rx::observable<yijinjing::event_ptr> &events) override ;
 
                 void start() override ;
 

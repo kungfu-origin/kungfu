@@ -50,6 +50,12 @@ namespace kungfu
                 seek_current_journal();
             }
 
+            bool reader::data_available()
+            {
+                seek_current_journal();
+                return current_.get() != nullptr && current_frame()->has_data();
+            }
+
             void reader::seek_to_time(int64_t nanotime)
             {
                 for (auto journal : journals_)
@@ -74,7 +80,7 @@ namespace kungfu
                 }
 
                 int64_t min_time = time::now_in_nano();
-                for (auto journal : journals_)
+                for (const auto &journal : journals_)
                 {
                     auto frame = journal->current_frame();
                     if (frame->has_data() && frame->gen_time() <= min_time)

@@ -25,12 +25,12 @@ namespace kungfu
                 void add_strategy(Strategy_ptr strategy);
 
             protected:
-                void react(rx::observable<yijinjing::event_ptr> events) override ;
+                void react(const rx::observable<yijinjing::event_ptr> &events) override ;
 
                 void start() override ;
 
             private:
-                Context context_;
+                Context_ptr context_;
                 std::vector<Strategy_ptr> strategies_;
             };
         }

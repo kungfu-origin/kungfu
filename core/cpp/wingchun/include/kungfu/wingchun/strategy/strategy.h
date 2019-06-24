@@ -25,17 +25,17 @@ namespace kungfu
                 virtual ~Strategy() = default;
 
                 //运行前
-                virtual void pre_start(Context &context)
+                virtual void pre_start(Context_ptr context)
                 {};
 
-                virtual void post_start(Context &context)
+                virtual void post_start(Context_ptr context)
                 {};
 
                 //退出前
-                virtual void pre_stop(Context &context)
+                virtual void pre_stop(Context_ptr context)
                 {};
 
-                virtual void post_stop(Context &context)
+                virtual void post_stop(Context_ptr context)
                 {};
 
                 //交易日切换回调

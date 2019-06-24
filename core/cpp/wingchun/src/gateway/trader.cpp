@@ -52,7 +52,7 @@ namespace kungfu
                 return order_ids;
             }
 
-            void Trader::react(rx::observable<yijinjing::event_ptr> events)
+            void Trader::react(const rx::observable<yijinjing::event_ptr> &events)
             {
                 apprentice::react(events);
 
@@ -170,7 +170,7 @@ namespace kungfu
             {
                 apprentice::start();
                 auto home = get_io_device()->get_home();
-                observe(location::make(home->mode, category::MD, source_, source_, home->locator));
+                observe(location::make(home->mode, category::MD, source_, source_, home->locator), time::now_in_nano());
             }
 
             void Trader::init_account_manager()

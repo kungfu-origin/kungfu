@@ -22,18 +22,13 @@ namespace kungfu
             class Context
             {
             public:
-                explicit Context(practice::apprentice &app);
+                explicit Context(practice::apprentice &app, const rx::observable<yijinjing::event_ptr> &events);
 
                 ~Context() = default;
 
                 //获取当前纳秒时间
                 //@return            当前纳秒时间
                 int64_t now() const;
-
-                //添加策略使用的行情柜台
-                //@param source_id   柜台ID
-                //@return            成功或者失败
-                void add_md(const std::string &source);
 
                 //添加策略使用的交易账户
                 //@param source_id   柜台ID
@@ -110,6 +105,7 @@ namespace kungfu
 
             private:
                 practice::apprentice& app_;
+                const rx::observable<yijinjing::event_ptr> &events_;
                 int64_t now_;
 
                 Calendar calendar_;
@@ -118,6 +114,8 @@ namespace kungfu
                 std::unordered_map<uint32_t, AccountManager_ptr> account_managers_;
                 std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
                 std::unordered_map<uint32_t, msg::data::Quote> quotes_;
+
+                std::unordered_map<std::string, bool> market_data_;
 
                 friend class Runner;
             };

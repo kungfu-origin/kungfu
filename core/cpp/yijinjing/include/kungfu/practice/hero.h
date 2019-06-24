@@ -8,11 +8,15 @@
 #include <unordered_map>
 
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/msg.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu
 {
     namespace practice
     {
+        namespace msg = yijinjing::msg;
+
         class hero
         {
         public:
@@ -25,8 +29,6 @@ namespace kungfu
 
             void signal_stop()
             { live_ = false; };
-
-            virtual void observe(const yijinjing::data::location_ptr location) = 0;
 
             inline yijinjing::io_device_ptr get_io_device() const
             { return io_device_; }
@@ -55,7 +57,10 @@ namespace kungfu
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
 
-            virtual void react(rx::observable <yijinjing::event_ptr> events) = 0;
+            virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
+
+            void request_publish(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
+            void request_subscribe(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
 
         private:
             yijinjing::io_device_ptr io_device_;

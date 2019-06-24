@@ -56,7 +56,7 @@ namespace kungfu
 
         void hero::run()
         {
-            SPDLOG_INFO("{} started", get_home_uname());
+            SPDLOG_INFO("{} observing", get_home_uname());
 
             auto events = observable<>::create<event_ptr>(
                     [&](subscriber<event_ptr> sb)
@@ -119,9 +119,9 @@ namespace kungfu
                     }) | finally(
                     [&]()
                     {
-                        for (const auto &element : writers_)
+                        if (writers_.find(0) != writers_.end())
                         {
-                            element.second->close_session();
+                            writers_[0]->close_session();
                         }
 
                     }) | publish();
@@ -133,28 +133,48 @@ namespace kungfu
                   if (writers_.find(data.dest_id) == writers_.end())
                   {
                       writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
-                      writers_[data.dest_id]->open_session();
+                      if (data.dest_id == 0)
+                      {
+                          writers_[data.dest_id]->open_session();
+                      }
                   } else
                   {
-                      SPDLOG_ERROR("Ask publish to {:08x} for more than once", data.dest_id);
+                      SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once", get_location(e->source())->uname, e->source(),
+                              get_location(data.dest_id)->uname, data.dest_id);
                   }
               });
 
             events | is(msg::type::RequestSubscribe) |
             $([&](event_ptr e)
               {
-                  SPDLOG_INFO("RequestSubscribe event");
-                  auto data = e->data<msg::data::RequestSubscribe>();
-                  SPDLOG_INFO("RequestSubscribe {:08x}", data.source_id);
-                  auto location = get_location(e->source());
-                  reader_->join(location, 0, data.from_time);
-                  reader_->join(location, get_home_uid(), data.from_time);
+                  const msg::data::RequestSubscribe &data = e->data<msg::data::RequestSubscribe>();
+                  reader_->join(get_location(data.source_id), get_home_uid(), data.from_time);
               });
 
             react(events);
 
             events.connect();
             SPDLOG_INFO("{} finished", get_home_uname());
+        }
+
+        void hero::request_publish(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
+        {
+            auto writer = get_writer(source_id);
+            msg::data::RequestPublish &msg = writer->open_data<msg::data::RequestPublish>(trigger_time, msg::type::RequestPublish);
+            msg.dest_id = dest_id;
+            writer->close_data();
+            SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
+                    dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
+        }
+
+        void hero::request_subscribe(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
+        {
+            auto writer = get_writer(dest_id);
+            msg::data::RequestSubscribe &msg = writer->open_data<msg::data::RequestSubscribe>(trigger_time, msg::type::RequestSubscribe);
+            msg.source_id = source_id;
+            writer->close_data();
+            SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
+                    get_location(source_id)->uname, source_id);
         }
     }
 }

@@ -74,17 +74,22 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::observe(const location_ptr location)
+        void apprentice::observe(const location_ptr &location, int64_t from_time)
         {
-            auto now = time::now_in_nano();
-            auto writer = get_writer(master_commands_location_->uid);
-            auto request = writer->open_data<msg::data::RequestSubscribe>(now, msg::type::RequestSubscribe);
-            request.source_id = location->uid;
-            request.from_time = now;
-            writer->close_data();
+            reader_->join(location, 0, from_time);
         }
 
-        void apprentice::react(observable<event_ptr> events)
+        void apprentice::request_publish(int64_t trigger_time, uint32_t dest_id)
+        {
+            hero::request_publish(master_commands_location_->uid, trigger_time, dest_id);
+        }
+
+        void apprentice::request_subscribe(int64_t trigger_time, uint32_t source_id)
+        {
+            hero::request_subscribe(master_commands_location_->uid, trigger_time, source_id);
+        }
+
+        void apprentice::react(const observable<event_ptr> &events)
         {
             events | skip_until(events | is(msg::type::Register) | from(get_home_uid())) | first() | timeout(seconds(1), observe_on_new_thread()) |
             $([&](event_ptr e)
@@ -124,6 +129,7 @@ namespace kungfu
                           get_io_device()->get_home()->locator
                   );
                   register_location(app_location);
+                  SPDLOG_INFO("registered location {}", app_location->uname);
               });
 
             events | is(msg::type::RequestStart) | first() |

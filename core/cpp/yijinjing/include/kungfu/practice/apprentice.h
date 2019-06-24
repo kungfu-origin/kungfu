@@ -34,7 +34,14 @@ namespace kungfu
         public:
             apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void observe(const yijinjing::data::location_ptr location) override;
+            void observe(const yijinjing::data::location_ptr &location, int64_t from_time);
+            void request_publish(int64_t trigger_time, uint32_t dest_id);
+            void request_subscribe(int64_t trigger_time, uint32_t source_id);
+
+            inline uint32_t get_master_commands_uid()
+            {
+                return master_commands_location_->uid;
+            }
 
             inline std::string get_config_db_file(const std::string &name)
             {
@@ -50,7 +57,7 @@ namespace kungfu
         protected:
             yijinjing::data::location_ptr config_location_;
 
-            void react(rx::observable<yijinjing::event_ptr> events) override;
+            void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
             virtual void start()
             {}

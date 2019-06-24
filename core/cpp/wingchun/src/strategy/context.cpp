@@ -7,6 +7,7 @@
 
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/msg.h>
 
 #include <kungfu/wingchun/util/business_helper.h>
 #include <kungfu/wingchun/storage/storage.h>
@@ -30,8 +31,8 @@ namespace kungfu
                 return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
             }
 
-            Context::Context(practice::apprentice &app) :
-                    app_(app), now_(0),
+            Context::Context(practice::apprentice &app, const rx::observable<yijinjing::event_ptr> &events) :
+                    app_(app), events_(events), now_(0),
                     calendar_(app_.get_config_db_file("holidays"))
             {}
 
@@ -81,13 +82,6 @@ namespace kungfu
                 return now_;
             }
 
-            void Context::add_md(const std::string &source)
-            {
-                SPDLOG_INFO("add md {}", source);
-                auto home = app_.get_io_device()->get_home();
-                app_.observe(location::make(home->mode, category::MD, source, source, home->locator));
-            }
-
             void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
             {
                 uint32_t account_id = yijinjing::util::hash_str_32(account);
@@ -113,24 +107,38 @@ namespace kungfu
                 info.static_equity = cash_limit;
                 info.dynamic_equity = cash_limit;
                 info.avail = cash_limit;
-
-                app_.observe(account_location);
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange, bool is_level2)
             {
-                location md_loc(mode::LIVE, category::MD, source, source, app_.get_io_device()->get_home()->locator);
-                auto writer = app_.get_writer(md_loc.uid);
-                char *buffer = reinterpret_cast<char *>(writer->open_frame(0, msg::type::Subscribe)->address());
-                hffix::message_writer sub_msg(buffer, buffer + 1024);
-                sub_msg.push_back_string(hffix::tag::ExDestination, exchange);
-                for (const auto &symbol : symbols)
+                if (market_data_.find(source) == market_data_.end())
                 {
-                    sub_msg.push_back_string(hffix::tag::Symbol, symbol);
-                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
-                }
+                    SPDLOG_INFO("add md {}", source);
+                    auto home = app_.get_io_device()->get_home();
+                    auto md_location = location::make(home->mode, category::MD, source, source, home->locator);
+                    app_.register_location(md_location); // TODO ask master to check if this MD service is available
+                    app_.observe(md_location, now_);
+                    app_.request_publish(now_, md_location->uid);
 
-                writer->close_frame(sub_msg.message_end() - buffer);
+                    events_ | is(yijinjing::msg::type::RequestPublish) |
+                    $([&](event_ptr e)
+                      {
+                          auto data = e->data<yijinjing::msg::data::RequestPublish>();
+                          if (data.dest_id == md_location->uid)
+                          {
+                              auto writer = app_.get_writer(md_location->uid);
+                              char *buffer = reinterpret_cast<char *>(writer->open_frame(0, msg::type::Subscribe)->address());
+                              hffix::message_writer sub_msg(buffer, buffer + 1024);
+                              sub_msg.push_back_string(hffix::tag::ExDestination, exchange);
+                              for (const auto &symbol : symbols)
+                              {
+                                  sub_msg.push_back_string(hffix::tag::Symbol, symbol);
+                                  quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
+                              }
+                              writer->close_frame(sub_msg.message_end() - buffer);
+                          }
+                      });
+                }
             }
 
             uint64_t Context::insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,

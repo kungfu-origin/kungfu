@@ -21,13 +21,6 @@ namespace kungfu
 {
     namespace practice
     {
-        inline void request_publish(journal::writer_ptr &writer, int64_t trigger_time, const std::string &uname, uint32_t dest_id)
-        {
-            msg::data::RequestPublish &msg_master = writer->open_data<msg::data::RequestPublish>(trigger_time, msg::type::RequestPublish);
-            msg_master.dest_id = dest_id;
-            writer->close_data();
-            SPDLOG_DEBUG("request {} publish to {:08x}", uname, dest_id);
-        }
 
         master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency))
         {
@@ -35,7 +28,7 @@ namespace kungfu
             writers_[0]->open_session();
         }
 
-        void master::react(observable<event_ptr> events)
+        void master::react(const observable<event_ptr> &events)
         {
             events | is(msg::type::Register) |
             $([&](event_ptr e)
@@ -47,18 +40,27 @@ namespace kungfu
                           request_loc["group"], request_loc["name"],
                           get_io_device()->get_home()->locator
                   );
-                  if (writers_.find(app_location->uid) == writers_.end())
+                  if (has_location(app_location->uid))
                   {
-                      register_location(app_location);
+                      SPDLOG_ERROR("location {} has already been registered", app_location->uname);
+                  } else
+                  {
                       auto now = time::now_in_nano();
                       auto uid_str = fmt::format("{:08x}", app_location->uid);
-                      auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str,
-                                                                        get_io_device()->get_home()->locator);
-                      reader_->join(app_location, 0, now);
-                      reader_->join(app_location, master_location->uid, now);
+                      auto home = get_io_device()->get_home();
+                      auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+
+                      register_location(app_location);
+                      register_location(master_location);
 
                       auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
                       writers_[app_location->uid] = writer;
+
+                      reader_->join(app_location, 0, now);
+                      request_publish(app_location->uid, e->gen_time(), 0);
+
+                      reader_->join(app_location, master_location->uid, now);
+                      request_publish(app_location->uid, e->gen_time(), master_location->uid);
 
                       nlohmann::json register_msg;
                       register_msg["msg_type"] = msg::type::Register;
@@ -68,33 +70,37 @@ namespace kungfu
                       register_msg["data"] = request_loc;
                       get_io_device()->get_publisher()->publish(register_msg.dump());
 
-                      request_publish(writer, e->gen_time(), app_location->uname, master_location->uid);
-                      request_publish(writer, e->gen_time(), app_location->uname, 0);
-
                       writer->open_frame(e->gen_time(), msg::type::RequestStart);
                       writer->close_frame(1);
-                  } else
-                  {
-                      SPDLOG_ERROR("location {} has already been registered", app_location->uname);
                   }
+              });
+
+            events | is(msg::type::RequestPublish) |
+            $([&](event_ptr e)
+              {
+                  auto request = e->data<msg::data::RequestPublish>();
+                  if (not has_location(request.dest_id))
+                  {
+                      SPDLOG_ERROR("Request publish to unknown location {:08x}", request.dest_id);
+                      return;
+                  }
+                  reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
+                  request_publish(e->source(), e->gen_time(), request.dest_id);
+                  request_subscribe(request.dest_id, e->gen_time(), e->source());
               });
 
             events | is(msg::type::RequestSubscribe) |
             $([&](event_ptr e)
               {
-                  auto subscribe = e->data<msg::data::RequestSubscribe>();
-                  if (writers_.find(subscribe.source_id) == writers_.end())
+                  auto request = e->data<msg::data::RequestSubscribe>();
+                  if (not has_location(request.source_id))
                   {
-                      SPDLOG_ERROR("Subscribe to unknown location {:08x}", subscribe.source_id);
+                      SPDLOG_ERROR("Request subscribe to unknown location {:08x}", request.source_id);
                       return;
                   }
-                  if (writers_.find(e->source()) == writers_.end())
-                  {
-                      SPDLOG_ERROR("Unregistered request from {:08x}", e->source());
-                      return;
-                  }
-                  request_publish(writers_[subscribe.source_id], e->gen_time(), get_location(subscribe.source_id)->uname, e->source());
-                  writers_[e->source()]->write(e->gen_time(), msg::type::RequestSubscribe, &subscribe);
+                  reader_->join(get_location(request.source_id), e->source(), e->gen_time());
+                  request_publish(request.source_id, e->gen_time(), e->source());
+                  request_subscribe(e->source(), e->gen_time(), request.source_id);
               });
         }
     }

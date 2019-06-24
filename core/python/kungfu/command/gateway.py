@@ -8,7 +8,7 @@ from kungfu.log import create_logger
 
 def run_extension(ctx, registry):
     if registry.has_extension(ctx.source):
-        config = get_task_config(ctx.name)
+        config = get_task_config(ctx, ctx.name)
         config_str = {}
         config_int = {}
         config_double = {}
@@ -36,6 +36,7 @@ def run_extension(ctx, registry):
 @click.pass_context
 def md(ctx, source, low_latency):
     pass_ctx_from_parent(ctx)
+    ctx.name = 'md_' + source
     ctx.source = source
     ctx.low_latency = low_latency
     ctx.logger = create_logger(source, ctx.log_level, pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.MD, source, source, ctx.locator))
@@ -49,6 +50,7 @@ def md(ctx, source, low_latency):
 @click.pass_context
 def td(ctx, source, account, low_latency):
     pass_ctx_from_parent(ctx)
+    ctx.name = 'td_' + source + '_' + account
     ctx.source = source
     ctx.account = account
     ctx.low_latency = low_latency

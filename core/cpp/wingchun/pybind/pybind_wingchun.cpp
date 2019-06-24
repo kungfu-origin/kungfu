@@ -23,7 +23,6 @@
 
 namespace py = pybind11;
 
-using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
 
 class PyStrategy : public strategy::Strategy
@@ -31,16 +30,16 @@ class PyStrategy : public strategy::Strategy
 public:
     using strategy::Strategy::Strategy; // Inherit constructors
 
-    void pre_start(strategy::Context &context) override
+    void pre_start(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, pre_start, context); }
 
-    void post_start(strategy::Context &context) override
+    void post_start(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, post_start, context); }
 
-    void pre_stop(strategy::Context &context) override
+    void pre_stop(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, pre_stop, context); }
 
-    void post_stop(strategy::Context &context) override
+    void post_stop(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, post_stop, context); }
 
     void on_switch_day(const std::string &next_trading_day) override
@@ -342,15 +341,15 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<strategy::Runner>(m, "Runner")
-            .def(py::init<bool, data::locator_ptr, const std::string &, const std::string &>())
+            .def(py::init<bool, kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &>())
             .def("run", &strategy::Runner::run)
             .def("add_strategy", &strategy::Runner::add_strategy)
             ;
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
             .def("now", &strategy::Context::now)
-            .def("add_md", &strategy::Context::add_md)
             .def("add_account", &strategy::Context::add_account)
+            .def("subscribe", &strategy::Context::subscribe)
             .def("insert_market_order", &strategy::Context::insert_market_order)
             .def("insert_limit_order", &strategy::Context::insert_limit_order)
             .def("insert_fak_order", &strategy::Context::insert_fak_order)

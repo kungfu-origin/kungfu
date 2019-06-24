@@ -101,8 +101,7 @@ namespace kungfu
                 inline frame_ptr current_frame()
                 { return current_->current_frame(); }
 
-                inline bool data_available()
-                { return current_.get() != nullptr && current_frame()->has_data(); }
+                bool data_available();
 
                 /** seek journal to time */
                 void seek_to_time(int64_t nanotime);
@@ -122,6 +121,9 @@ namespace kungfu
             {
             public:
                 explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
+
+                inline const data::location_ptr &get_location()
+                { return journal_->location_; }
 
                 uint64_t current_frame_uid();
 
