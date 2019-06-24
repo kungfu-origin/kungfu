@@ -159,6 +159,9 @@ namespace kungfu
                 const std::string &get_url() const
                 { return url_; };
 
+                const std::string &get_relative_path() const
+                { return relative_path_; };
+
                 const std::string &last_message() const
                 { return message_; };
 

@@ -2,7 +2,7 @@ import pyyjj
 import json
 import numpy
 import click
-from kungfu.command import kfc
+from kungfu.command import kfc, pass_ctx_from_parent
 
 
 @kfc.command()
@@ -10,7 +10,8 @@ from kungfu.command import kfc
 @click.option('-m', '--message', type=str, help='message')
 @click.pass_context
 def ping(ctx, times, message):
-    pyyjj.setup_log(ctx.parent.name)
+    pass_ctx_from_parent(ctx)
+    pyyjj.setup_log(ctx.name)
     io_device = pyyjj.create_io_device_client(ctx.parent.name)
     latency = []
     for t in range(times):
@@ -23,9 +24,7 @@ def ping(ctx, times, message):
         end = pyyjj.now_in_nano()
         latency.append(end - start)
         recv_bytes = len(rsp_data)
-        pong_messsage = rsp_data
         print('[{}] {}/{} bytes time={} ns'.format(t + 1, sent_bytes, recv_bytes, latency[-1]))
-        ctx.parent.logger.debug('ping: %s, pong: %s', message, pong_messsage)
     click.echo('round-trip min/avg/max/stddev = {:.0f}/{:.0f}/{:.0f}/{:.0f} ns'.format(
         numpy.min(latency),numpy.mean(latency),numpy.max(latency),numpy.std(latency)
     ))

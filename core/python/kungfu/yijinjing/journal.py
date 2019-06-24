@@ -33,9 +33,9 @@ CATEGORIES = {
 
 
 class Locator(pyyjj.locator):
-    def __init__(self, ctx):
+    def __init__(self, home):
         pyyjj.locator.__init__(self)
-        self._home = ctx.home
+        self._home = home
 
     def layout_dir(self, location, layout):
         mode = pyyjj.get_mode_name(location.mode)

@@ -179,7 +179,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def_readonly("group", &data::location::group)
             .def_readonly("name", &data::location::name)
             .def_readonly("uname", &data::location::uname)
-            .def_readonly("uid", &data::location::uid);
+            .def_readonly("uid", &data::location::uid)
+            .def_readonly("locator", &data::location::locator);
 
     py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
             .def(py::init())

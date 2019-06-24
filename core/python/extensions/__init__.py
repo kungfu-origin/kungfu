@@ -1,5 +1,9 @@
-import os, sys, traceback
+import os
+import sys
+import traceback
 import pkgutil
+import pyyjj
+import kungfu.yijinjing.journal as kfj
 from kungfu.log import create_logger
 
 
@@ -7,7 +11,9 @@ kfext_log_level = os.getenv('KF_LOG_LEVEL')
 
 if not kfext_log_level:
     kfext_log_level = 'error'
-kfext_logger = create_logger('extensions', kfext_log_level)
+kfext_log_locator = kfj.Locator(os.environ['KF_HOME'])
+kfext_log_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'extensions', 'extensions', kfext_log_locator)
+kfext_logger = create_logger('extensions', kfext_log_level, kfext_log_location)
 
 
 class ExtensionRegistry:
@@ -29,10 +35,9 @@ class ExtensionRegistry:
         return self._registry.keys()
 
 
-EXTENSION_REGISTRY_MD=ExtensionRegistry('MD')
-EXTENSION_REGISTRY_TD=ExtensionRegistry('TD')
-EXTENSION_REGISTRY_LOG=ExtensionRegistry('LOG')
-EXTENSIONS={}
+EXTENSION_REGISTRY_MD = ExtensionRegistry('MD')
+EXTENSION_REGISTRY_TD = ExtensionRegistry('TD')
+EXTENSIONS = {}
 
 
 extension_path = __path__

@@ -39,17 +39,15 @@ class Task(Base):
     config = Column(Json, nullable=False)
 
 
-# Create an engine that stores data in the local directory's
-engine = create_engine('sqlite:///{}/global/task.db'.format(os.environ['KF_HOME']))
-
-# Create all tables in the engine. This is equivalent to "Create Table"
-# statements in raw SQL.
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-
-
 @contextmanager
 def session_scope():
+    # Create an engine that stores data in the local directory's
+    engine = create_engine('sqlite:///{}/global/task.db'.format(os.environ['KF_HOME']))
+
+    # Create all tables in the engine. This is equivalent to "Create Table"
+    # statements in raw SQL.
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
     """Provide a transactional scope around a series of operations."""
     session = Session()
     try:

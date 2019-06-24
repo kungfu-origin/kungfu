@@ -123,7 +123,7 @@ namespace kungfu
                 auto location = std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master", io.get_home()->locator);
                 init_socket(socket_, location, io.get_url_factory());
                 socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
-                SPDLOG_DEBUG("observing master chanel with timeout {}ms [{}]", timeout, socket_.get_url());
+                SPDLOG_DEBUG("observing master chanel with timeout {}ms [{}]", timeout, socket_.get_relative_path());
             }
 
             virtual ~nanomsg_observer()

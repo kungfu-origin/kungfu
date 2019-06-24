@@ -3,6 +3,7 @@ import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.data.sqlite import get_task_config
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
+from kungfu.log import create_logger
 
 
 def run_extension(ctx, registry):
@@ -37,6 +38,7 @@ def md(ctx, source, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.source = source
     ctx.low_latency = low_latency
+    ctx.logger = create_logger(source, ctx.log_level, pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.MD, source, source, ctx.locator))
     run_extension(ctx, EXTENSION_REGISTRY_MD)
 
 
@@ -50,4 +52,5 @@ def td(ctx, source, account, low_latency):
     ctx.source = source
     ctx.account = account
     ctx.low_latency = low_latency
+    ctx.logger = create_logger(source, ctx.log_level, pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, ctx.locator))
     run_extension(ctx, EXTENSION_REGISTRY_TD)

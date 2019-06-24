@@ -1,7 +1,6 @@
 import os
 import click
 import kungfu.yijinjing.journal as kfj
-from kungfu.log import create_logger
 
 
 @click.group(invoke_without_command=True)
@@ -12,13 +11,11 @@ from kungfu.log import create_logger
 @click.pass_context
 def kfc(ctx, home, log_level, name):
     os.environ['KF_HOME'] = ctx.home = home
-    os.environ['KF_LOG_LEVEL'] = log_level
-
-    ctx.logger = create_logger(name, log_level)
+    os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
 
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
-    ctx.locator = kfj.Locator(ctx)
+    ctx.locator = kfj.Locator(home)
 
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
@@ -29,7 +26,7 @@ def kfc(ctx, home, log_level, name):
 
 def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
-    ctx.logger = ctx.parent.logger
+    ctx.log_level = ctx.parent.log_level
     ctx.locator = ctx.parent.locator
     ctx.name = ctx.parent.name
 

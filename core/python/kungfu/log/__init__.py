@@ -106,13 +106,10 @@ class WinConsoleHandler(logging.StreamHandler):
             self.handleError(record)
 
 
-def create_logger(name, level):
-    base_dir = os.getenv('KF_HOME')
-    log_archive_folder = os.path.join(base_dir, 'log', 'archive')
-    if not os.path.exists(log_archive_folder):
-        os.makedirs(log_archive_folder)
+def create_logger(name, level, location):
     log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
-    log_path = os.path.join(log_archive_folder, '{}_py_{}.log'.format(name, log_dateext))
+    log_name = '{}_py_{}'.format(name, log_dateext)
+    log_path = location.locator.layout_file(location, pyyjj.layout.LOG, log_name)
 
     file_handler = logging.FileHandler(log_path)
     file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
