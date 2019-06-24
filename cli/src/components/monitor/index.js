@@ -8,12 +8,15 @@ import Dashboard from '__@/assets/components/Dashboard';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString, dealLog } from '__@/assets/utils';
 import { getAccountList } from '@/io/account.js';
 import { getStrategyList } from '@/io/strategy.js';
-import { dealLogMessage, getLog } from '@/assets/js/utils';
+import { dealLogMessage, getLog, debounce } from '@/assets/js/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
+import { addFile } from '__gUtils/fileUtils';
+import { logger } from '__gUtils/logUtils';
+
 
 const WIDTH_LEFT_PANEL = 30;
 
-class MonitorDashboard extends Dashboard {
+export class MonitorDashboard extends Dashboard {
     constructor(...args){
         super(args)
         this.screen.title = 'Account Dashboard';
@@ -34,12 +37,11 @@ class MonitorDashboard extends Dashboard {
         t.initMasterProcess();
         t.initProcessList();
         t.initLog();
-        // t.initMetaData();
         t.initBoxInfo();
         t.initLoader();
         t.screen.render();
-        t.bindEvent();
         t.getProcessStatus().then(() => t.getLogs());
+        t.bindEvent();
     }
 
 
@@ -98,6 +100,7 @@ class MonitorDashboard extends Dashboard {
             width: 100 - WIDTH_LEFT_PANEL + '%',
             height: '95%-1',
             padding: DEFAULT_PADDING,
+			mouse: true,
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -139,11 +142,11 @@ class MonitorDashboard extends Dashboard {
     bindEvent(){
         const t = this;
         let i = 0;
-        let boards = ['masterProcess', 'processList', 'mergedLogs','metaData'];
+        let boards = ['masterProcess', 'processList', 'mergedLogs'];
         t.screen.key(['left', 'right'], (ch, key) => {
             (key.name === 'left') ? i-- : i++;
-            if (i === 4) i = 0;
-            if (i === -1) i = 3;
+            if (i === 3) i = 0;
+            if (i === -1) i = 2;
             t[boards[i]].focus();
         });
     
@@ -157,24 +160,31 @@ class MonitorDashboard extends Dashboard {
         t.masterProcess.key(['enter'], (ch, key) => {
             switchMaster(t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
         })
+
         t.processList.on('focus', () => t.processList.interactive = true)
         t.processList.on('blur', () => t.processList.interactive = false)
         t.processList.key(['enter'], () => {
             const selectedIndex = t.processList.selected;
-            const currentProcess = t.globalData.processes[selectedIndex];
-            if(!currentProcess) return;
-            switch(currentProcess.type) {
-                case 'md':
-                    switchMd(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
-                    break;
-                case 'td':
-                    switchTd(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
-                    break;
-                case 'strategy':
-                    switchStrategy(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
-                    break;
-            }
+            t._switchProcess(selectedIndex)
+           
         })
+    }
+
+    _switchProcess(selectedIndex){
+        const t = this;
+        const currentProcess = t.globalData.processes[selectedIndex];
+        if(!currentProcess) return;
+        switch(currentProcess.type) {
+            case 'md':
+                switchMd(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+                break;
+            case 'td':
+                switchTd(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+                break;
+            case 'strategy':
+                switchStrategy(currentProcess, t.globalData.processStatus).then(() => {t.message.log(' operation sucess!', 2)})
+                break;
+        }
     }
 
     refresh(){
@@ -238,6 +248,7 @@ class MonitorDashboard extends Dashboard {
         const aliveProcesses = Object.keys(processStatus || {}).filter(k => processStatus[k] === 'online' && k !== 'master');
         const logPromises = aliveProcesses.map(p => {
             const logPath = path.join(LOG_DIR, `${p}.log`);
+            addFile('', logPath, 'file')		
             return getLog(logPath)
         })
 
@@ -336,6 +347,7 @@ class MonitorDashboard extends Dashboard {
 
         processes.forEach(p => {
             const logPath = path.join(LOG_DIR, `${p}.log`);
+		    addFile('', logPath, 'file')		
             const watcher = new Tail(logPath);
             watcher.watch();
             watcher.on('line', line => {
@@ -353,8 +365,8 @@ class MonitorDashboard extends Dashboard {
 
 export default () => {
     const monitorDashboard = new MonitorDashboard()
-    monitorDashboard.init();
     monitorDashboard.render();
+    monitorDashboard.init();
     monitorDashboard.getData();
 }
 

@@ -84,27 +84,35 @@ Table.prototype.bindEvent = function(box, list){
 	box.on('focus', () => {
 		if(!list.focused) list.focus()
 	})
+
 	list.on('focus', (e) => {
 		box.style.border.fg = 'blue'
+		process.nextTick(() => {
+			t.afterSelected(list)
+		})
 	})
+
 	list.on('blur', () => {
 		box.style.border.fg = 'white'
 	})
-	list.on('select', () => {
-		const newIndex = list.selected;
-		if(newIndex !== t.table.selectedIndex) {
-			t.table.selectedIndex = newIndex;
-			t.afterSelectMethod(t.table.selectedIndex);
-		}
-	})
+
 	list.key(['enter'], () => {
-		const newIndex = list.selected;
-		t.afterSwitchMethod(t.table.selectedIndex);
-		if(newIndex !== t.table.selectedIndex) {
-			t.table.selectedIndex = newIndex;
-			t.afterSelectMethod(t.table.selectedIndex);
-		}
+		t.afterSwitchMethod(list.selected);
+		t.afterSelected(list)		
 	})
+
+	list.key(['down', 'up'], () => {
+		t.afterSelected(list)
+	})
+}
+
+Table.prototype.afterSelected = function(target){
+	const t = this;
+	const newIndex = target.selected;
+	if(newIndex !== t.table.selectedIndex) {
+		t.table.selectedIndex = newIndex;
+		t.afterSelectMethod(t.table.selectedIndex);
+	}
 }
 
 

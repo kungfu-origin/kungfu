@@ -10,6 +10,7 @@ import Dashboard from '__@/assets/components/Dashboard';
 import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
 import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '__@/assets/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
+import { logger } from '__gUtils/logUtils';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
@@ -161,7 +162,7 @@ class AccountDashboard extends Dashboard {
 	initBoxInfo() {
 		const t = this;
 		t.boxInfo = blessed.text({
-			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch | Double-Click/Enter: select ',
+			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch',
 			parent: t.screen,		
 			left: '0%',
 			top: '95%',

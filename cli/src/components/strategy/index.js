@@ -83,6 +83,7 @@ class StrategyDashboard extends Dashboard {
             padding: DEFAULT_PADDING,
 			width: WIDTH_LEFT_PANEL + '%',
 			height: '62.66%',
+			mouse: true,
 			style: {
 				...TABLE_BASE_OPTIONS.style,
 			}
@@ -137,7 +138,7 @@ class StrategyDashboard extends Dashboard {
 	initBoxInfo() {
 		const t = this;
 		t.boxInfo = blessed.text({
-			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch | Double-Click/Enter: select ',
+			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch',
 			parent: t.screen,		
 			left: '0%',
 			top: '95%',

@@ -21,6 +21,7 @@ Object.keys(dependencies || {})
 let cliConfig = {
   entry: {
     index: path.join(__dirname, '../src/index.js'),
+    monitor: path.join(__dirname, '../src/components/monitor/index.js')
   },
   externals: {
     ...nodeModules,
