@@ -88,8 +88,7 @@ export default {
             config: sourceType,
             setMdSourceDialogVisiblity: false,
             currentMdSourceAccount: null,
-            renderTable: false,
-            // processStatus: Object.freeze({})
+            renderTable: false
         }
     },
 
@@ -139,11 +138,6 @@ export default {
             const logPath = path.join(LOG_DIR, `md_${row.source_name}.log`);
             openReadFile(logPath);
         },
-
-        // updateProcessStatus(res){
-        //     const t = this;
-        //     t.processStatus = res
-        // },
 
         //获取账户列表
         getAccountList() {

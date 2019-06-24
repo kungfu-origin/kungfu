@@ -7,7 +7,6 @@ import { parseSources } from '__@/assets/utils';
 var inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
-
 // ======================= add account start ============================
 const selectSourcePrompt = () => inquirer.prompt([
     {

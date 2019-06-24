@@ -4,9 +4,9 @@ process.env.BABEL_ENV = 'main'
 
 const path = require('path')
 const webpack = require('webpack')
-const fs = require('fs');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const { dependencies } = require('../package.json');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 
 const nodeModules = {};

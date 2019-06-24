@@ -1,6 +1,7 @@
 import { getAccountList } from '@/io/account';
 import { getStrategyList } from '@/io/strategy';
 import { parseToString } from '__@/assets/utils';
+
 const colors = require('colors');
 
 export const listAccountsStrategys = async (asUtil) => {
@@ -11,7 +12,6 @@ export const listAccountsStrategys = async (asUtil) => {
     const strategys = await getStrategys;
 
     if(asUtil) return { accounts, strategys };
-
     const accountsList = accounts.map(a => {
         const asMd = !!a.receive_md ? colors.green('md ✓') : ''
         return parseToString(
@@ -20,7 +20,6 @@ export const listAccountsStrategys = async (asUtil) => {
             1
         )
     })
-    
     const strategyList = strategys.map(s => {
         return parseToString(
             [colors.yellow('strategy'), colors.bold(s.strategy_id), s.strategy_path],
@@ -28,7 +27,5 @@ export const listAccountsStrategys = async (asUtil) => {
             1
         )
     })
-
     console.log([...accountsList, ...strategyList].join('\n'))
-
 }

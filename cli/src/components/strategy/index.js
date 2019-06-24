@@ -13,6 +13,8 @@ import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchStrategy, dealLog, buildTrad
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { listProcessStatus } from '__gUtils/processUtils';
+import { addFile } from '__gUtils/fileUtils';
+
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 50;
@@ -161,21 +163,22 @@ class StrategyDashboard extends Dashboard {
 		const runPromises = () => {
 			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];
-			if(!currentId) return new Promise((resolve) => resolve());      
-			//md + td
-            const strategyListPromise = t.strategyTable.getData(t.globalData)
+			
+			//strategy list
+			const strategyListPromise = t.strategyTable.getData(t.globalData)
 			.then(strategyData => t.globalData.strategyData = strategyData)
 			.then(() => t.refresh())
+			
 			//pos
-			const posDataPromise = t.posTable.getData(currentId)
+			const posDataPromise = t.posTable.getData(currentId || '')
 			.then(pos => t.globalData.posData = pos || {})
 			.then(() => t.refresh())
 			//order
-			const orderDataPromise = t.orderTable.getData(currentId)
+			const orderDataPromise = t.orderTable.getData(currentId || '')
 			.then(orders => t.globalData.orderData = orders || [])
 			.then(() => t.refresh())
 			//trades
-			const tradeDataPromise = t.tradeTable.getData(currentId)
+			const tradeDataPromise = t.tradeTable.getData(currentId || '')
 			.then(trades => t.globalData.tradeData = trades || [])
 			.then(() => t.refresh())
 			//pnl
@@ -243,7 +246,8 @@ class StrategyDashboard extends Dashboard {
         const t = this;
 		const currentId = Object.keys(t.globalData.strategyData)[t.strategyTable.selectedIndex || 0];  
 		if(!currentId) return;      
-        const logPath = path.join(LOG_DIR, `${currentId}.log`);  
+		const logPath = path.join(LOG_DIR, `${currentId}.log`);  
+		addFile('', logPath, 'file')		
         return getLog(logPath).then(({list}) => {
             list.forEach(l => {
 				t.logTable.add(dealLog(l))
@@ -257,6 +261,7 @@ class StrategyDashboard extends Dashboard {
 		if(t.logWatcher) t.logWatcher.unwatch();
 		t.logWatcher = null;
 		const logPath = path.join(LOG_DIR, `${processId}.log`);
+		addFile('', logPath, 'file')
 		const watcher = new Tail(logPath);
 		watcher.watch();
 		watcher.on('line', line => {
@@ -297,11 +302,11 @@ export default () => {
 	strategyDashboard.bindEvent();
 	strategyDashboard.render();
 	strategyDashboard.getData().then(() => strategyDashboard.getLogs())
-	// strategyDashboard.refresh();
-	// strategyDashboard.getProcessStatus();   
-	// setInterval(() => {
-	// 	strategyDashboard.refresh();
-	// }, 1000)	
+	strategyDashboard.refresh();
+	strategyDashboard.getProcessStatus();   
+	setInterval(() => {
+		strategyDashboard.refresh();
+	}, 1000)	
 }
 
 

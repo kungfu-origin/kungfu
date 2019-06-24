@@ -191,11 +191,9 @@ class AccountDashboard extends Dashboard {
 		const  t = this;
 		let timer = null;
 		const runPromises = () => {
+			clearTimeout(timer)
 			const currentId = Object.keys(t.globalData.accountData)[t.accountTable.selectedIndex || 0];
-			if(!currentId) {
-				clearTimeout(timer)
-				timer = setTimeout(() => runPromises(), 3000)
-			};  
+			if(!currentId) timer = setTimeout(() => runPromises(), 3000)
 
 			//md + td
 			const mdTdPromise = t.accountTable.getData(t.globalData)
@@ -237,7 +235,6 @@ class AccountDashboard extends Dashboard {
 				tradeDataPromise,
 				pnlPromise
 			]).finally(() => {
-				clearTimeout(timer)
 				timer = setTimeout(() => runPromises(), 3000)
 			})
 		}
