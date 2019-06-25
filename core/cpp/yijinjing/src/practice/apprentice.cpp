@@ -184,6 +184,17 @@ int main(int argc, char **argv)
     std::cout << fmt::format("+int32_t = {}", addr + len) << std::endl;
     std::cout << fmt::format("+uint32_t= {}", addr + ul) << std::endl;
 
+    event_ptr e = std::make_shared<nanomsg::nanomsg_json>("{\"data\":{\"value\":1}}");
+    std::cout << typeid(event_ptr).name() << std::endl;
+    std::cout << typeid(e.get()).name() << std::endl;
+    std::cout << typeid(nanomsg::nanomsg_json).name() << std::endl;
+    std::cout << typeid(nanomsg::nanomsg_json_ptr).name() << std::endl;
+    std::cout << (typeid(e) == typeid(nanomsg::nanomsg_json_ptr)) << std::endl;
+    std::cout << (dynamic_cast<nanomsg::nanomsg_json*>(e.get()) == nullptr) << std::endl;
+    std::cout << (dynamic_cast<journal::frame*>(e.get()) == nullptr) << std::endl;
+    std::cout << e->to_string() << std::endl;
+    std::cout << e->data<nlohmann::json>().dump() << std::endl;
+
     //    char buffer[1024];
 //    hffix::message_writer sub_msg(buffer, buffer + 1024);
 //    sub_msg.push_back_header("FIX.4.2");

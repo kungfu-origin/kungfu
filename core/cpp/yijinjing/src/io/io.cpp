@@ -135,7 +135,7 @@ namespace kungfu
 
             bool wait() override
             {
-                return socket_.recv() > 2;
+                return socket_.recv() > 0;
             }
 
             const std::string &get_notice() override

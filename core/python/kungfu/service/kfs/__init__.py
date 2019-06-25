@@ -3,19 +3,19 @@ import functools
 HANDLERS = dict()
 TASKS = dict()
 
-def on(request_path):
+def on(msg_type):
     def register_handler(func):
         @functools.wraps(func)
         def handler_wrapper(*args, **kwargs):
             return func(*args, **kwargs)
-        HANDLERS[request_path] = handler_wrapper
+        HANDLERS[msg_type] = handler_wrapper
         return on
     return register_handler
 
-def handle(request_path, *args, **kwargs):
-    if request_path not in HANDLERS:
-        args[0].logger.error("invalid request path %s", request_path)
-    return HANDLERS[request_path](*args, **kwargs)
+def handle(msg_type, *args, **kwargs):
+    if msg_type not in HANDLERS:
+        args[0].logger.error("invalid request path %s", msg_type)
+    return HANDLERS[msg_type](*args, **kwargs)
 
 def task(func):
     @functools.wraps(func)
@@ -29,5 +29,4 @@ def run_tasks(*args, **kwargs):
         TASKS[task_name](*args, **kwargs)
 
 from . import system
-from . import paged
 from . import calendar

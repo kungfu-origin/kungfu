@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/practice/hero.h>
 
 namespace kungfu
 {
@@ -13,6 +14,16 @@ namespace kungfu
     {
         namespace os
         {
+            static practice::hero * hero_instance;
+
+            void stop_hero()
+            {
+                if (hero_instance != nullptr)
+                {
+                    hero_instance->signal_stop();
+                }
+            }
+
             void kf_os_signal_handler(int signum)
             {
                 switch (signum)
@@ -52,9 +63,13 @@ namespace kungfu
                         exit(signum);
                     case SIGINT:       // terminate process    interrupt program
                         SPDLOG_INFO("kungfu app interrupted");
-                        exit(signum);
-                    case SIGKILL:      // terminate process    kill program
+                        stop_hero();
+                        break;
                     case SIGTERM:      // terminate process    software termination signal
+                        SPDLOG_INFO("kungfu app interrupted");
+                        stop_hero();
+                        break;
+                    case SIGKILL:      // terminate process    kill program
                         SPDLOG_INFO("kungfu app killed");
                         exit(signum);
                     case SIGHUP:       // terminate process    terminal line hangup
@@ -91,8 +106,15 @@ namespace kungfu
                 }
             }
 
-            void handle_os_signals()
+            void handle_os_signals(void *hero)
             {
+                if (hero_instance != nullptr)
+                {
+                    throw yijinjing_error("kungfu can only have one hero instance per process");
+                }
+
+                hero_instance = static_cast<practice::hero *>(hero);
+
                 for (int s = 1; s < NSIG; s++)
                 {
                     signal(s, kf_os_signal_handler);

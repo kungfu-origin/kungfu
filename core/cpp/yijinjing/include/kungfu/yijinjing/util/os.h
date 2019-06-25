@@ -24,7 +24,7 @@ namespace kungfu
 
             bool release_mmap_buffer(uintptr_t address, size_t size, bool lazy);
 
-            void handle_os_signals();
+            void handle_os_signals(void *hero);
         }
     }
 }

@@ -1,46 +1,38 @@
+import pyyjj
 import psutil
 import kungfu.service.kfs as kfs
+import kungfu.yijinjing.msg as msg
+import kungfu.yijinjing.journal as kfj
 
 
-@kfs.on('checkin')
-def checkin(ctx, request):
-    name = request['name']
-    pid = request['pid']
-    ctx.logger.info('apprentice %s checking in', pid)
-    if pid in ctx.apprentices:
-        return {
-            'success': False
+@kfs.on(msg.Register)
+def register(ctx, event):
+    data = event['data']
+    mode = kfj.find_mode(data['mode'])
+    category = kfj.find_category(data['category'])
+    group = data['group']
+    name = data['name']
+    location = pyyjj.location(mode, category, group, name, ctx.locator)
+    pid = data['pid']
+    ctx.logger.info('apprentice %s %d checking in', location.uname, pid)
+    if pid not in ctx.apprentices:
+        ctx.apprentices[pid] = {
+            'process': psutil.Process(pid),
+            'location': location
         }
-        # reject
-    ctx.apprentices[pid] = {
-        'process': psutil.Process(pid),
-        'name': name,
-        'mm_ids': []
-    }
-    return {
-        'success': True
-    }
 
 
-@kfs.on('checkout')
-def checkout(ctx, request):
-    pid = request['pid']
+@kfs.on(msg.Deregister)
+def deregister(ctx, event):
+    pid = event['pid']
     ctx.logger.info('apprentice %s checking out', pid)
-    cleanup(ctx, pid)
-    return {
-        'success': True
-    }
+    ctx.master.deregister_app(ctx.apprentices[pid]['location'].uid)
 
 
 @kfs.task
 def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
-            ctx.logger.warn('cleaning up stale process pid %s clients %s', pid, ctx.apprentices[pid]['mm_ids'])
-            cleanup(ctx, pid)
-
-
-def cleanup(ctx, pid):
-    for mm_id in ctx.apprentices[pid]['mm_ids']:
-        ctx.page_service.release_mm_block(mm_id)
-    del ctx.apprentices[pid]
+            ctx.logger.warn('cleaning up stale process pid %s clients %s', pid, ctx.apprentices[pid]['location'].uname)
+            ctx.master.deregister_app(ctx.apprentices[pid]['location'].uid)
+            del ctx.apprentices[pid]

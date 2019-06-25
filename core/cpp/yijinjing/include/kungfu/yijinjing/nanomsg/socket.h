@@ -202,6 +202,15 @@ namespace kungfu
                 inline int32_t data_length() const override
                 { return binding_.size(); }
 
+                inline const char *data_as_bytes() const override
+                { return msg_.c_str(); }
+
+                inline const std::string data_as_string() const override
+                { return binding_["data"].dump(); }
+
+                inline const std::string to_string() const override
+                { return msg_; }
+
             protected:
                 const void *data_address() const override
                 { return &binding_["data"]; }

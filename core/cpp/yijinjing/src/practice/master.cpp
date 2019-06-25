@@ -2,6 +2,7 @@
 // Created by Keren Dong on 2019-06-15.
 //
 
+#include <typeinfo>
 #include <nlohmann/json.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -22,10 +23,70 @@ namespace kungfu
     namespace practice
     {
 
-        master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency))
+        master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency)), last_check_(0)
         {
             writers_[0] = get_io_device()->open_writer(0);
             writers_[0]->open_session();
+        }
+
+        void master::on_notify()
+        {
+            get_io_device()->get_publisher()->notify();
+        }
+
+        void master::register_app(event_ptr e)
+        {
+            auto request_loc = e->data<nlohmann::json>();
+            auto app_location = std::make_shared<location>(
+                    static_cast<mode>(request_loc["mode"]),
+                    static_cast<category>(request_loc["category"]),
+                    request_loc["group"], request_loc["name"],
+                    get_io_device()->get_home()->locator
+            );
+            if (has_location(app_location->uid))
+            {
+                SPDLOG_ERROR("location {} has already been registered", app_location->uname);
+            } else
+            {
+                auto now = time::now_in_nano();
+                auto uid_str = fmt::format("{:08x}", app_location->uid);
+                auto home = get_io_device()->get_home();
+                if (app_locations_.find(app_location->uid) == app_locations_.end())
+                {
+                    auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+                    register_location(master_location);
+                    app_locations_[app_location->uid] = master_location->uid;
+                }
+
+                register_location(app_location);
+
+                auto master_location = get_location(app_locations_[app_location->uid]);
+                auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
+                writers_[app_location->uid] = writer;
+
+                reader_->join(app_location, 0, now);
+                require_write_to(app_location->uid, e->gen_time(), 0);
+
+                reader_->join(app_location, master_location->uid, now);
+                require_write_to(app_location->uid, e->gen_time(), master_location->uid);
+
+                nlohmann::json register_msg;
+                register_msg["msg_type"] = msg::type::Register;
+                register_msg["gen_time"] = now;
+                register_msg["trigger_time"] = e->gen_time();
+                register_msg["source"] = app_location->uid;
+                register_msg["data"] = request_loc;
+                get_io_device()->get_publisher()->publish(register_msg.dump());
+
+                writer->open_frame(e->gen_time(), msg::type::RequestStart);
+                writer->close_frame(1);
+            }
+        }
+
+        void master::deregister_app(uint32_t app_location_uid)
+        {
+            deregister_location(app_location_uid);
+            reader_->disjoin(app_location_uid);
         }
 
         void master::react(const observable<event_ptr> &events)
@@ -33,46 +94,7 @@ namespace kungfu
             events | is(msg::type::Register) |
             $([&](event_ptr e)
               {
-                  auto request_loc = e->data<nlohmann::json>();
-                  auto app_location = std::make_shared<location>(
-                          static_cast<mode>(request_loc["mode"]),
-                          static_cast<category>(request_loc["category"]),
-                          request_loc["group"], request_loc["name"],
-                          get_io_device()->get_home()->locator
-                  );
-                  if (has_location(app_location->uid))
-                  {
-                      SPDLOG_ERROR("location {} has already been registered", app_location->uname);
-                  } else
-                  {
-                      auto now = time::now_in_nano();
-                      auto uid_str = fmt::format("{:08x}", app_location->uid);
-                      auto home = get_io_device()->get_home();
-                      auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-
-                      register_location(app_location);
-                      register_location(master_location);
-
-                      auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
-                      writers_[app_location->uid] = writer;
-
-                      reader_->join(app_location, 0, now);
-                      require_write_to(app_location->uid, e->gen_time(), 0);
-
-                      reader_->join(app_location, master_location->uid, now);
-                      require_write_to(app_location->uid, e->gen_time(), master_location->uid);
-
-                      nlohmann::json register_msg;
-                      register_msg["msg_type"] = msg::type::Register;
-                      register_msg["gen_time"] = now;
-                      register_msg["trigger_time"] = e->gen_time();
-                      register_msg["source"] = app_location->uid;
-                      register_msg["data"] = request_loc;
-                      get_io_device()->get_publisher()->publish(register_msg.dump());
-
-                      writer->open_frame(e->gen_time(), msg::type::RequestStart);
-                      writer->close_frame(1);
-                  }
+                  register_app(e);
               });
 
             events | is(msg::type::RequestWriteTo) |
@@ -101,6 +123,16 @@ namespace kungfu
                   reader_->join(get_location(request.source_id), e->source(), e->gen_time());
                   require_write_to(request.source_id, e->gen_time(), e->source());
                   require_read_from(e->source(), e->gen_time(), request.source_id);
+              });
+
+            events |
+            filter([=](yijinjing::event_ptr e)
+                   {
+                       return dynamic_cast<nanomsg::nanomsg_json *>(e.get()) != nullptr;
+                   }) |
+            $([&](event_ptr e)
+              {
+                  on_notice(e);
               });
         }
     }

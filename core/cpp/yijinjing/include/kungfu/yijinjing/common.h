@@ -56,6 +56,12 @@ namespace kungfu
 
             virtual int32_t data_length() const = 0;
 
+            virtual const char *data_as_bytes() const = 0;
+
+            virtual const std::string data_as_string() const = 0;
+
+            virtual const std::string to_string() const = 0;
+
             /**
              * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
              * @tparam T

@@ -98,6 +98,8 @@ namespace kungfu
                  */
                 void join(const data::location_ptr& location, uint32_t dest_id, int64_t from_time);
 
+                void disjoin(uint32_t location_uid);
+
                 inline frame_ptr current_frame()
                 { return current_->current_frame(); }
 
@@ -109,7 +111,7 @@ namespace kungfu
                 /** seek next frame */
                 void next();
 
-                void reorder();
+                void sort();
 
             private:
                 const bool lazy_;

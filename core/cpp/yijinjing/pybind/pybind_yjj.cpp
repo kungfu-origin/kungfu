@@ -113,6 +113,22 @@ public:
     }
 };
 
+class PyMaster : public master
+{
+public:
+    using master::master;
+
+    void on_notice(kungfu::yijinjing::event_ptr event) override
+    {
+        PYBIND11_OVERLOAD(void, master, on_notice, event);
+    }
+
+    void on_timer(int64_t nanotime) override
+    {
+        PYBIND11_OVERLOAD(void, master, on_timer, nanotime);
+    }
+};
+
 PYBIND11_MODULE(pyyjj, m)
 {
     m.def("thread_id", &spdlog::details::os::thread_id);
@@ -159,7 +175,12 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("gen_time", &event::gen_time)
             .def_property_readonly("trigger_time", &event::trigger_time)
             .def_property_readonly("source", &event::source)
-            .def_property_readonly("msg_type", &event::msg_type);
+            .def_property_readonly("msg_type", &event::msg_type)
+            .def_property_readonly("data_length", &event::data_length)
+            .def_property_readonly("data_as_bytes", &event::data_as_bytes)
+            .def_property_readonly("data_as_string", &event::data_as_string)
+            .def("to_string", &event::to_string)
+            ;
 
     py::class_<frame, frame_ptr>(m, "frame")
             .def_property_readonly("gen_time", &frame::gen_time)
@@ -170,7 +191,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("header_length", &frame::header_length)
             .def_property_readonly("data_length", &frame::data_length)
             .def_property_readonly("address", &frame::address)
-            .def("data_as_string", &frame::data_as_string)
+            .def("data_as_bytes", &frame::data_as_bytes)
             .def("has_data", &frame::has_data);
 
     py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
@@ -237,8 +258,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
-            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
-            ;
+            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
     py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
             .def(py::init<data::location_ptr, bool>());
@@ -246,12 +266,16 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
             .def(py::init<data::location_ptr, bool>());
 
-    py::class_<master, std::shared_ptr<master>>(m, "master")
+    py::class_<master, PyMaster>(m, "master")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &master::get_io_device)
-            .def("run", &master::run);
+            .def("run", &master::run)
+            .def("on_notice", &master::on_notice)
+            .def("on_timer", &master::on_timer)
+            .def("deregister_app", &master::deregister_app)
+            ;
 
-    py::class_<apprentice, std::shared_ptr<apprentice>>(m, "apprentice")
+    py::class_<apprentice>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("run", &apprentice::run);

@@ -1,10 +1,8 @@
 import sys
 import traceback
-import select
 import json
 import time
 import functools
-
 import pyyjj
 import pywingchun
 import kungfu.service.kfs as kfs
@@ -22,96 +20,53 @@ def get_socket_fd(socket):
 class Master(pyyjj.master):
     def __init__(self, ctx):
         pyyjj.master.__init__(self, pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
-        self.logger = ctx.logger
+        self.ctx = ctx
+        self.ctx.master = self
+        self.ctx.apprentices = {}
 
-        self.apprentices = {}
-        self._check_interval = 5 * SECOND_IN_NANO
-
-        # self._calendar = pywingchun.Calendar()
-        # self._current_day = self._calendar.current_day()
-        self._running = False
-        self._last_check = 0
+        calendar_db_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+        ctx.calendar = pywingchun.Calendar(ctx.locator.layout_file(calendar_db_location, pyyjj.layout.SQLITE, 'holidays'))
+        ctx.current_trading_day = ctx.calendar.current_trading_day()
 
         os_signal.handle_os_signals(self.exit_gracefully)
 
-    def process_passive_notice(self):
-        readable, writable, exceptional = select.select([self._fd_pull], [], [], self._pull_timeout)
-        if readable:
-            raw = self._socket_pull.recv()
-            try:
-                event_msg = json.dumps({
-                    'gen_time': pyyjj.now_in_nano(),
-                    'trigger_time': 0,
-                    'msg_type': 999,
-                    'source': 0,
-                    'data': json.loads(raw)
-                }) if len(raw) > 2 else raw
-                rc = self._socket_publish.send(event_msg)
-                self.logger.debug('Published passive notice: %d, %s', rc, event_msg)
-            except Exception as err:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                self.logger.error('Invalid passive notice %s, [%s] %s', raw, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-                self._socket_publish.send('{}')
+    def on_notice(self, event):
+        try:
+            kfs.handle(event.msg_type, self.ctx, json.loads(event.to_string()))
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self.ctx.logger.error('Invalid passive notice %s, [%s] %s', event.to_string(), exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
-    def process_service_message(self):
-        readable, writable, exceptional = select.select([self._fd_reply], [], [], 0)
-        if readable:
-            request_data = self._socket_reply.recv()
-            self.logger.debug('received %s', request_data)
-            request_json = json.loads(request_data)
-            request_path = request_json['request']
-            response = kfs.handle(request_path, self, request_json)
-            self._socket_reply.send(json.dumps(response))
-            self.logger.debug('processed request %s, response %s', request_json, response)
-
-    def run_tasks(self):
-        time_passed = pyyjj.now_in_nano() - self._last_check
-        if time_passed > self._check_interval:
-            kfs.run_tasks(self)
-            self._last_check = pyyjj.now_in_nano()
-
-    def go1(self):
-        self._running = True
-        self._last_check = pyyjj.now_in_nano()
-        while self._running:
-            try:
-                self.page_service.process_memory_message()
-                self.process_passive_notice()
-                self.process_service_message()
-                self.run_tasks()
-            except:
-                if self._running:
-                    exc_type, exc_obj, exc_tb = sys.exc_info()
-                    self.logger.error('Server suffers: %s %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-        self.logger.info('kungfu master finished')
+    def on_timer(self, nanotime):
+        kfs.run_tasks(self.ctx)
 
     def exit_gracefully(self, signum, frame):
-        self.logger.info('kungfu master stopping')
+        self.ctx.logger.info('kungfu master stopping')
 
-        for pid in self.apprentices:
-            apprentice = self.apprentices[pid]['process']
+        for pid in self.ctx.apprentices:
+            apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
-                self.logger.info('terminating apprentice %s pid %d', self.apprentices[pid]['name'], pid)
+                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
                 apprentice.terminate()
 
         count = 0
         time_to_wait = 10
         while count < time_to_wait:
-            remaining = list(map(lambda pid: [self.apprentices[pid]['name']] if self.apprentices[pid]['process'].is_running() else [], self.apprentices))
+            remaining = list(
+                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.ctx.apprentices[pid]['process'].is_running() else [],
+                    self.ctx.apprentices))
             remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
             if remaining:
-                self.logger.info('terminating apprentices, remaining %s, count down %ds', remaining, time_to_wait - count)
+                self.ctx.logger.info('terminating apprentices, remaining %s, count down %ds', remaining, time_to_wait - count)
                 time.sleep(1)
                 count = count + 1
             else:
                 break
 
-        for pid in self.apprentices:
-            apprentice = self.apprentices[pid]['process']
+        for pid in self.ctx.apprentices:
+            apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
-                self.logger.warn('killing apprentice %s pid %d', self.apprentices[pid]['name'], pid)
+                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
                 apprentice.kill()
 
-        self._running = False
-
-        self.logger.info('kungfu master stopped')
+        self.ctx.logger.info('kungfu master stopped')

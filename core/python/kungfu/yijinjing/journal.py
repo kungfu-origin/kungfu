@@ -31,6 +31,20 @@ CATEGORIES = {
 }
 
 
+def find_mode(m):
+    for k in MODES:
+        if int(MODES[k]) == m:
+            return MODES[k]
+    return pyyjj.mode.LIVE
+
+
+def find_category(c):
+    for k in CATEGORIES:
+        if int(CATEGORIES[k]) == c:
+            return CATEGORIES[k]
+    return pyyjj.category.SYSTEM
+
+
 class Locator(pyyjj.locator):
     def __init__(self, home):
         pyyjj.locator.__init__(self)

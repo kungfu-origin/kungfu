@@ -24,9 +24,9 @@ namespace kungfu
     namespace practice
     {
 
-        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device))
+        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device)), last_check_(0)
         {
-            os::handle_os_signals();
+            os::handle_os_signals(this);
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
@@ -42,6 +42,11 @@ namespace kungfu
         void hero::register_location(const yijinjing::data::location_ptr &location)
         {
             locations_[location->uid] = location;
+        }
+
+        void hero::deregister_location(const uint32_t location_uid)
+        {
+            locations_.erase(location_uid);
         }
 
         bool hero::has_location(uint32_t hash)
@@ -69,15 +74,26 @@ namespace kungfu
                             {
                                 if (io_device_->get_observer()->wait())
                                 {
-                                    std::string notice = io_device_->get_observer()->get_notice();
+                                    const std::string &notice = io_device_->get_observer()->get_notice();
                                     SPDLOG_INFO("got notice {}", notice);
-                                    auto event = std::make_shared<nanomsg_json>(notice);
-                                    sb.on_next(event);
+                                    if (notice.length() > 2)
+                                    {
+                                        sb.on_next(std::make_shared<nanomsg_json>(notice));
+                                    } else
+                                    {
+                                        on_notify();
+                                    }
                                 }
                                 if (reader_->data_available())
                                 {
                                     sb.on_next(reader_->current_frame());
                                     reader_->next();
+                                }
+                                auto now = time::now_in_nano();
+                                if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
+                                {
+                                    on_timer(now);
+                                    last_check_ = now;
                                 }
                             }
 
@@ -139,7 +155,7 @@ namespace kungfu
             msg.dest_id = dest_id;
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
-                    dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
+                        dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
         }
 
         void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
@@ -150,7 +166,7 @@ namespace kungfu
             msg.from_time = trigger_time;
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
-                    get_location(source_id)->uname, source_id);
+                        get_location(source_id)->uname, source_id);
         }
     }
 }

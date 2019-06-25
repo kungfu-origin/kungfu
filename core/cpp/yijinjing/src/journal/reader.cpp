@@ -52,9 +52,16 @@ namespace kungfu
                 }
             }
 
+            void reader::disjoin(const uint32_t location_uid)
+            {
+                journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
+                                      [&](journal_ptr j) { return j->location_->uid == location_uid; }), journals_.end());
+                sort();
+            }
+
             bool reader::data_available()
             {
-                reorder();
+                sort();
                 return current_.get() != nullptr && current_frame()->has_data();
             }
 
@@ -64,17 +71,17 @@ namespace kungfu
                 {
                     journal->seek_to_time(nanotime);
                 }
-                reorder();
+                sort();
             }
 
             void reader::next()
             {
                 assert(current_.get() != nullptr);
                 current_->next();
-                reorder();
+                sort();
             }
 
-            void reader::reorder()
+            void reader::sort()
             {
                 if (journals_.size() == 1)
                 {

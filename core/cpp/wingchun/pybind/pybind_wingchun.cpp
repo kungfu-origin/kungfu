@@ -372,6 +372,6 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<Calendar>(m, "Calendar")
             .def(py::init<const std::string &>())
-            .def("current_day", &Calendar::get_current_trading_day)
+            .def("current_trading_day", &Calendar::get_current_trading_day)
             .def("calculate_trading_day", &Calendar::calculate_trading_day);
 }

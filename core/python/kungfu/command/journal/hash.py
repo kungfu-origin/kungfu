@@ -44,7 +44,7 @@ def test(ctx):
     # reader = io_device.open_reader(location, md.uid)
     # while reader.data_available():
     #     frame = reader.current_frame()
-    #     click.echo('length={}, {}'.format(frame.frame_length, frame.data_as_string()))
+    #     click.echo('length={}, {}'.format(frame.frame_length, frame.data_as_bytes()))
     #     reader.next()
 
     # app = Apprentice(ctx)

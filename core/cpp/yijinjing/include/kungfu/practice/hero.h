@@ -25,6 +25,12 @@ namespace kungfu
             virtual ~hero()
             {}
 
+            virtual void on_notify()
+            {}
+
+            virtual void on_timer(int64_t nanotime)
+            {}
+
             void run();
 
             void signal_stop()
@@ -43,6 +49,8 @@ namespace kungfu
 
             void register_location(const yijinjing::data::location_ptr &location);
 
+            void deregister_location(uint32_t location_uid);
+
             bool has_location(uint32_t hash);
 
             const yijinjing::data::location_ptr get_location(uint32_t hash);
@@ -60,11 +68,13 @@ namespace kungfu
             virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
 
             void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
+
             void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
 
         private:
             yijinjing::io_device_ptr io_device_;
             bool live_ = true;
+            int64_t last_check_;
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
         };
     }
