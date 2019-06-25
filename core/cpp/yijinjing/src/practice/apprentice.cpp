@@ -132,6 +132,15 @@ namespace kungfu
                   SPDLOG_INFO("registered location {}", app_location->uname);
               });
 
+            events | is(msg::type::Deregister) |
+            $([&](event_ptr e)
+              {
+                  auto app_location = get_location(e->source());
+                  deregister_location(e->source());
+                  reader_->disjoin(e->source());
+                  SPDLOG_INFO("deregistered location {}", app_location->uname);
+              });
+
             events | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {

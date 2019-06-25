@@ -37,7 +37,7 @@ class Master(pyyjj.master):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             self.ctx.logger.error('Invalid passive notice %s, [%s] %s', event.to_string(), exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
-    def on_timer(self, nanotime):
+    def on_interval_check(self, nanotime):
         kfs.run_tasks(self.ctx)
 
     def exit_gracefully(self, signum, frame):

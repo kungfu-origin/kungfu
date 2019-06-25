@@ -123,9 +123,9 @@ public:
         PYBIND11_OVERLOAD(void, master, on_notice, event);
     }
 
-    void on_timer(int64_t nanotime) override
+    void on_interval_check(int64_t nanotime) override
     {
-        PYBIND11_OVERLOAD(void, master, on_timer, nanotime);
+        PYBIND11_OVERLOAD(void, master, on_interval_check, nanotime);
     }
 };
 
@@ -271,7 +271,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("io_device", &master::get_io_device)
             .def("run", &master::run)
             .def("on_notice", &master::on_notice)
-            .def("on_timer", &master::on_timer)
+            .def("on_interval_check", &master::on_interval_check)
             .def("deregister_app", &master::deregister_app)
             ;
 

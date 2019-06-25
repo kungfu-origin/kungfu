@@ -92,7 +92,7 @@ namespace kungfu
                                 auto now = time::now_in_nano();
                                 if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
                                 {
-                                    on_timer(now);
+                                    on_interval_check(now);
                                     last_check_ = now;
                                 }
                             }

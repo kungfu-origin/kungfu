@@ -28,7 +28,7 @@ namespace kungfu
             virtual void on_notify()
             {}
 
-            virtual void on_timer(int64_t nanotime)
+            virtual void on_interval_check(int64_t nanotime)
             {}
 
             void run();

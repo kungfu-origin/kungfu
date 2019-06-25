@@ -87,6 +87,13 @@ namespace kungfu
         {
             deregister_location(app_location_uid);
             reader_->disjoin(app_location_uid);
+            nlohmann::json msg{};
+            auto now = time::now_in_nano();
+            msg["gen_time"] = now;
+            msg["trigger_time"] = now;
+            msg["msg_type"] = msg::type::Deregister;
+            msg["source"] = app_location_uid;
+            get_io_device()->get_publisher()->publish(msg.dump());
         }
 
         void master::react(const observable<event_ptr> &events)
