@@ -79,14 +79,14 @@ namespace kungfu
             reader_->join(location, 0, from_time);
         }
 
-        void apprentice::request_publish(int64_t trigger_time, uint32_t dest_id)
+        void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
         {
-            hero::request_publish(master_commands_location_->uid, trigger_time, dest_id);
+            require_write_to(master_commands_location_->uid, trigger_time, dest_id);
         }
 
-        void apprentice::request_subscribe(int64_t trigger_time, uint32_t source_id)
+        void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
         {
-            hero::request_subscribe(master_commands_location_->uid, trigger_time, source_id);
+            require_read_from(master_commands_location_->uid, trigger_time, source_id);
         }
 
         void apprentice::react(const observable<event_ptr> &events)
@@ -132,6 +132,34 @@ namespace kungfu
                   SPDLOG_INFO("registered location {}", app_location->uname);
               });
 
+            events | is(msg::type::RequestWriteTo) |
+            $([&](event_ptr e)
+              {
+                  const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
+                  if (writers_.find(request.dest_id) == writers_.end())
+                  {
+                      writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
+                      if (request.dest_id == 0)
+                      {
+                          writers_[request.dest_id]->open_session();
+                      }
+                  } else
+                  {
+                      SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once", get_location(e->source())->uname, e->source(),
+                                   get_location(request.dest_id)->uname, request.dest_id);
+                  }
+              });
+
+            events | is(msg::type::RequestReadFrom) |
+            $([&](event_ptr e)
+              {
+                  const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
+                  SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(e->source())->uname, e->source(),
+                              get_location(request.source_id)->uname, request.source_id, time::strftime(e->gen_time()),
+                              time::strftime(request.from_time));
+                  reader_->join(get_location(request.source_id), get_home_uid(), request.from_time);
+              });
+
             events | is(msg::type::RequestStart) | first() |
             $([&](event_ptr e)
               {
@@ -147,12 +175,58 @@ int main(int argc, char **argv)
     std::string s = time::strftime(n);
     int64_t p = time::strptime(s);
     std::string c = time::strftime(n);
-    std::cout << n << std::endl;
-    std::cout << s << std::endl;
-    std::cout << p << std::endl;
-    std::cout << c << std::endl;
-    std::cout << time::strfnow() << std::endl;
-//    log::setup_log("test");
+    int32_t len = 28;
+    uint32_t ul = len;
+    uintptr_t addr = reinterpret_cast<uintptr_t>(&len);
+    std::cout << fmt::format("int32_t  = {}", len) << std::endl;
+    std::cout << fmt::format("uint32_t = {}", ul) << std::endl;
+    std::cout << fmt::format("addr     = {}", addr) << std::endl;
+    std::cout << fmt::format("+int32_t = {}", addr + len) << std::endl;
+    std::cout << fmt::format("+uint32_t= {}", addr + ul) << std::endl;
+
+    //    char buffer[1024];
+//    hffix::message_writer sub_msg(buffer, buffer + 1024);
+//    sub_msg.push_back_header("FIX.4.2");
+//    sub_msg.push_back_string    (hffix::tag::MsgType, "V"); // Market Data Request
+//
+//    sub_msg.push_back_int(hffix::tag::MDReqID, 1);
+//    sub_msg.push_back_int(hffix::tag::SubscriptionRequestType, 1); // Snapshot + Updates (Subscribe)
+//    sub_msg.push_back_int(hffix::tag::MarketDepth, 1);
+//
+//    sub_msg.push_back_int(hffix::tag::NoMDEntryTypes, 1);
+//    sub_msg.push_back_int(hffix::tag::MDEntryType, 2);
+//    sub_msg.push_back_int(hffix::tag::NoRelatedSym, 2);
+//    sub_msg.push_back_string(hffix::tag::Symbol, "1234");
+//    sub_msg.push_back_string(hffix::tag::SecurityExchange, "SSE");
+//    sub_msg.push_back_string(hffix::tag::Symbol, "5678");
+//    sub_msg.push_back_string(hffix::tag::SecurityExchange, "SSE");
+//    sub_msg.push_back_trailer();
+//    printf("%s\n", buffer);
+//
+//    hffix::message_reader reader(buffer, buffer + 1024);
+//    for (; reader.is_complete(); reader = reader.next_message_reader())
+//    {
+//        if (reader.is_valid())
+//        {
+//            auto group_mdentry_begin = std::find_if(reader.begin(), reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+//            hffix::message_reader::const_iterator group_mdentry_end;
+//            for (; group_mdentry_begin != reader.end(); group_mdentry_begin = group_mdentry_end) {
+//                group_mdentry_end = std::find_if(group_mdentry_begin + 1, reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+//
+//                auto group_instrument_begin = std::find_if(group_mdentry_begin, group_mdentry_end, hffix::tag_equal(hffix::tag::Symbol));
+//                hffix::message_reader::const_iterator group_instrument_end;
+//
+//                for (; group_instrument_begin != group_mdentry_end; group_instrument_begin = group_instrument_end) {
+//                    group_instrument_end = std::find_if(group_instrument_begin + 1, group_mdentry_end, hffix::tag_equal(hffix::tag::Symbol));
+//                    hffix::message_reader::const_iterator symbol = group_instrument_begin;
+//                    hffix::message_reader::const_iterator exchange = group_instrument_begin;
+//                    reader.find_with_hint(hffix::tag::SecurityExchange, exchange);
+//                    SPDLOG_INFO("{} - {}", symbol->value().as_string(), exchange->value().as_string());
+//                }
+//            }
+//        }
+//    }
+    //    log::setup_log("test");
 //    SPDLOG_WARN("test");
 //    std::string name = "test";
 //    apprentice app(name);

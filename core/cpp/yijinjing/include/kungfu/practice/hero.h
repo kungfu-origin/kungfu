@@ -59,8 +59,8 @@ namespace kungfu
 
             virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
 
-            void request_publish(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
-            void request_subscribe(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
+            void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
+            void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
 
         private:
             yijinjing::io_device_ptr io_device_;

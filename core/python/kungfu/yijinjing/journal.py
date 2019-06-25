@@ -4,16 +4,15 @@ import glob
 import re
 import pyyjj
 
-
-JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(r'(.*)', os.sep,  # literal 'journal'
-                                                     r'(.*)', os.sep,  # mode
-                                                     r'(.*)', os.sep,  # category
-                                                     r'(.*)', os.sep,  # group
-                                                     r'(.*)', os.sep,  # name
-                                                     r'(\w+).(\d+).journal',  # hash + page_id
-                                                     )
+JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
+    r'(.*)', os.sep,  # category
+    r'(.*)', os.sep,  # group
+    r'(.*)', os.sep,  # name
+    r'journal', os.sep,  # mode
+    r'(.*)', os.sep,  # mode
+    r'(\w+).(\d+).journal',  # hash + page_id
+)
 JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
-
 
 MODES = {
     'live': pyyjj.mode.LIVE,
@@ -64,34 +63,42 @@ class Locator(pyyjj.locator):
         for journal in glob.glob(os.path.join(self.layout_dir(location, pyyjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
             match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
             if match:
-                page_id = match.group(7)
+                page_id = match.group(6)
                 page_ids.append(int(page_id))
         return page_ids
 
 
 def collect_journal_locations(ctx):
     kf_home = ctx.home
-    search_path = os.path.join(kf_home, 'journal', ctx.mode, ctx.category, ctx.group, 'yjj.' + ctx.name + '.*.journal')
+    search_path = os.path.join(kf_home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
 
     locations = {}
     for journal in glob.glob(search_path):
         match = JOURNAL_LOCATION_PATTERN.match(journal[len(kf_home) + 1:])
         if match:
-            mode = match.group(2)
-            category = match.group(3)
-            group = match.group(4)
-            name = match.group(5)
+            category = match.group(1)
+            group = match.group(2)
+            name = match.group(3)
+            mode = match.group(4)
+            dest = match.group(5)
             page_id = match.group(6)
-            key = mode + category + group + name
-            if key in locations:
-                locations[key]['page_id'].append(page_id)
+            uname = '{}/{}/{}/{}'.format(category, group, name, mode)
+            if uname in locations:
+                if dest in locations[uname]['readers']:
+                    locations[uname]['readers'][dest].append(page_id)
+                else:
+                    locations[uname]['readers'][dest] = [page_id]
             else:
-                locations[key] = {
-                    'mode': mode,
+                locations[uname] = {
                     'category': category,
                     'group': group,
                     'name': name,
-                    'page_id': [page_id]
+                    'mode': mode,
+                    'uname': uname,
+                    'uid': pyyjj.hash_str_32(uname),
+                    'readers': {
+                        dest: [page_id]
+                    }
                 }
             ctx.logger.debug('found journal %s %s %s %s', MODES[mode], CATEGORIES[category], group, name)
         else:

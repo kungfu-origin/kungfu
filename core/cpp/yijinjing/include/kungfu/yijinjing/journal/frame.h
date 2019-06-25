@@ -85,6 +85,9 @@ namespace kungfu
                 inline uint32_t source() const override
                 { return header_->source; }
 
+                const char *data_as_string() const
+                { return reinterpret_cast<char *>(address() + header_length()); }
+
                 template<typename T>
                 inline size_t copy_data(const T& data)
                 {

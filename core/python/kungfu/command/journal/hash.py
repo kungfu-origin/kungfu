@@ -37,13 +37,21 @@ GB = 2 ** 30
 def test(ctx):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = False
-    loc = pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['td'], "xtp", "15040900", ctx.parent.locator)
-    click.echo(loc.uname)
+
+    # location = pyyjj.location(kfj.MODES[ctx.mode], kfj.CATEGORIES[ctx.category], ctx.group, ctx.name, ctx.locator)
+    # md = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.MD, 'xtp', 'xtp', ctx.locator)
+    # io_device = pyyjj.io_device_master(location, False)
+    # reader = io_device.open_reader(location, md.uid)
+    # while reader.data_available():
+    #     frame = reader.current_frame()
+    #     click.echo('length={}, {}'.format(frame.frame_length, frame.data_as_string()))
+    #     reader.next()
+
     # app = Apprentice(ctx)
     # app.run()
+
     ctx.path = "../examples/strategy/py/strategy_demo.py"
     strategy = Strategy(ctx)
-    runner = pywingchun.Runner(ctx.low_latency, ctx.parent.locator, "alpha", "101")
+    runner = pywingchun.Runner(ctx.low_latency, ctx.locator, ctx.group, ctx.name)
     runner.add_strategy(strategy)
     runner.run()
-    click.echo('done')

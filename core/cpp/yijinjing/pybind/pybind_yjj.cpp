@@ -170,6 +170,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("header_length", &frame::header_length)
             .def_property_readonly("data_length", &frame::data_length)
             .def_property_readonly("address", &frame::address)
+            .def("data_as_string", &frame::data_as_string)
             .def("has_data", &frame::has_data);
 
     py::class_<data::location, std::shared_ptr<data::location>>(m, "location")

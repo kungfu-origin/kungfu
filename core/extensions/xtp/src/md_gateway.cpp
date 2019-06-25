@@ -68,7 +68,7 @@ namespace kungfu
                 }
             }
 
-            bool MdGateway::subscribe(const std::vector<Instrument> &instruments, bool is_level2)
+            bool MdGateway::subscribe(const std::vector<Instrument> &instruments)
             {
                 SUBSCRIBE_TRACE(fmt::format("(size) {}", instruments.size()));
 
@@ -88,16 +88,16 @@ namespace kungfu
                 bool res = true;
                 if (!sse_tickers.empty())
                 {
-                    res = res && subscribe(sse_tickers, EXCHANGE_SSE, is_level2);
+                    res = res && subscribe(sse_tickers, EXCHANGE_SSE);
                 }
                 if (!sze_tickers.empty())
                 {
-                    res = res && subscribe(sze_tickers, EXCHANGE_SZE, is_level2);
+                    res = res && subscribe(sze_tickers, EXCHANGE_SZE);
                 }
                 return res;
             }
 
-            bool MdGateway::subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id, bool is_level2)
+            bool MdGateway::subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id)
             {
                 int size = instruments.size();
                 char **insts = new char *[size];

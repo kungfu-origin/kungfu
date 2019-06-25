@@ -109,7 +109,7 @@ namespace kungfu
                 info.avail = cash_limit;
             }
 
-            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange, bool is_level2)
+            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
             {
                 if (market_data_.find(source) == market_data_.end())
                 {
@@ -118,27 +118,50 @@ namespace kungfu
                     auto md_location = location::make(home->mode, category::MD, source, source, home->locator);
                     app_.register_location(md_location); // TODO ask master to check if this MD service is available
                     app_.observe(md_location, now_);
-                    app_.request_publish(now_, md_location->uid);
-
-                    events_ | is(yijinjing::msg::type::RequestPublish) |
-                    $([&](event_ptr e)
+                    app_.request_write_to(now_, md_location->uid);
+                    market_data_[source] = md_location->uid;
+                }
+                uint32_t md_source = market_data_[source];
+                if (app_.get_writer(market_data_[source]).get() == nullptr)
+                {
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    $([=](event_ptr e)
                       {
-                          auto data = e->data<yijinjing::msg::data::RequestPublish>();
-                          if (data.dest_id == md_location->uid)
+                          const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                          if (data.dest_id == md_source)
                           {
-                              auto writer = app_.get_writer(md_location->uid);
-                              char *buffer = reinterpret_cast<char *>(writer->open_frame(0, msg::type::Subscribe)->address());
-                              hffix::message_writer sub_msg(buffer, buffer + 1024);
-                              sub_msg.push_back_string(hffix::tag::ExDestination, exchange);
-                              for (const auto &symbol : symbols)
-                              {
-                                  sub_msg.push_back_string(hffix::tag::Symbol, symbol);
-                                  quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
-                              }
-                              writer->close_frame(sub_msg.message_end() - buffer);
+                              request_subscribe(md_source, symbols, exchange);
                           }
                       });
                 }
+                else
+                {
+                    request_subscribe(md_source, symbols, exchange);
+                }
+            }
+
+            void Context::request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange)
+            {
+                auto writer = app_.get_writer(source);
+                char *buffer = const_cast<char *>(&(writer->open_frame(now_, msg::type::Subscribe)->data<char>()));
+                hffix::message_writer sub_msg(buffer, buffer + 1024);
+                sub_msg.push_back_header("FIX.4.2");
+                sub_msg.push_back_string(hffix::tag::MsgType, "V");
+                sub_msg.push_back_int(hffix::tag::MDReqID, 1);
+                sub_msg.push_back_int(hffix::tag::SubscriptionRequestType, 1); // Snapshot + Updates (Subscribe)
+                sub_msg.push_back_int(hffix::tag::MarketDepth, 1);
+
+                sub_msg.push_back_int(hffix::tag::NoMDEntryTypes, 1);
+                sub_msg.push_back_int(hffix::tag::MDEntryType, 2);
+                sub_msg.push_back_int(hffix::tag::NoRelatedSym, symbols.size());
+                for (const auto &symbol : symbols)
+                {
+                    sub_msg.push_back_string(hffix::tag::Symbol, symbol);
+                    sub_msg.push_back_string(hffix::tag::SecurityExchange, exchange);
+                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
+                }
+                sub_msg.push_back_trailer();
+                writer->close_frame(sub_msg.message_end() - buffer);
             }
 
             uint64_t Context::insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
@@ -271,7 +294,6 @@ namespace kungfu
                 {
                     throw wingchun_error("invalid account " + account);
                 }
-
                 return account_location_ids_[account_id];
             }
         }

@@ -103,6 +103,7 @@ namespace kungfu
                     page_ptr page = page::load(location, dest_id, page_ids[i], false, true);
                     if (page->begin_time() < time)
                     {
+                        SPDLOG_INFO("found page [{}] begin time {}", page_ids[i], time::strftime(page->begin_time()));
                         return page_ids[i];
                     }
                 }

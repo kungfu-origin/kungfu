@@ -24,7 +24,7 @@ namespace kungfu
 
                 virtual ~MarketData() = default;
 
-                virtual bool subscribe(const std::vector<msg::data::Instrument> &instruments, bool is_level2) = 0;
+                virtual bool subscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
                 virtual bool unsubscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 

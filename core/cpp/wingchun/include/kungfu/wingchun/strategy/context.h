@@ -42,8 +42,7 @@ namespace kungfu
                 //@param instruments 合约列表
                 //@param exchange_id 交易所ID
                 //@param is_level2   是否订阅Level2数据
-                void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "",
-                               bool is_level2 = false);
+                void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "");
 
                 //限价单报单
                 //@param instrument_id 合约ID
@@ -103,6 +102,8 @@ namespace kungfu
             private:
                 uint32_t lookup_account_location_id(const std::string &account);
 
+                void request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange);
+
             private:
                 practice::apprentice& app_;
                 const rx::observable<yijinjing::event_ptr> &events_;
@@ -115,7 +116,7 @@ namespace kungfu
                 std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
                 std::unordered_map<uint32_t, msg::data::Quote> quotes_;
 
-                std::unordered_map<std::string, bool> market_data_;
+                std::unordered_map<std::string, uint32_t> market_data_;
 
                 friend class Runner;
             };

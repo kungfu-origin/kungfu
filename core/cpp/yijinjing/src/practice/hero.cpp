@@ -30,11 +30,11 @@ namespace kungfu
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
-        yijinjing::journal::writer_ptr hero::get_writer(uint32_t dest_id)
+        writer_ptr hero::get_writer(uint32_t dest_id)
         {
             if (writers_.find(dest_id) == writers_.end())
             {
-                throw yijinjing_error(fmt::format("writer {:x} not exists", dest_id));
+                return writer_ptr();
             }
             return writers_[dest_id];
         }
@@ -126,52 +126,28 @@ namespace kungfu
 
                     }) | publish();
 
-            events | is(msg::type::RequestPublish) |
-            $([&](event_ptr e)
-              {
-                  const msg::data::RequestPublish &data = e->data<msg::data::RequestPublish>();
-                  if (writers_.find(data.dest_id) == writers_.end())
-                  {
-                      writers_[data.dest_id] = get_io_device()->open_writer(data.dest_id);
-                      if (data.dest_id == 0)
-                      {
-                          writers_[data.dest_id]->open_session();
-                      }
-                  } else
-                  {
-                      SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once", get_location(e->source())->uname, e->source(),
-                              get_location(data.dest_id)->uname, data.dest_id);
-                  }
-              });
-
-            events | is(msg::type::RequestSubscribe) |
-            $([&](event_ptr e)
-              {
-                  const msg::data::RequestSubscribe &data = e->data<msg::data::RequestSubscribe>();
-                  reader_->join(get_location(data.source_id), get_home_uid(), data.from_time);
-              });
-
             react(events);
 
             events.connect();
             SPDLOG_INFO("{} finished", get_home_uname());
         }
 
-        void hero::request_publish(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
+        void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
         {
             auto writer = get_writer(source_id);
-            msg::data::RequestPublish &msg = writer->open_data<msg::data::RequestPublish>(trigger_time, msg::type::RequestPublish);
+            msg::data::RequestWriteTo &msg = writer->open_data<msg::data::RequestWriteTo>(trigger_time, msg::type::RequestWriteTo);
             msg.dest_id = dest_id;
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
                     dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
         }
 
-        void hero::request_subscribe(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
+        void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
         {
             auto writer = get_writer(dest_id);
-            msg::data::RequestSubscribe &msg = writer->open_data<msg::data::RequestSubscribe>(trigger_time, msg::type::RequestSubscribe);
+            msg::data::RequestReadFrom &msg = writer->open_data<msg::data::RequestReadFrom>(trigger_time, msg::type::RequestReadFrom);
             msg.source_id = source_id;
+            msg.from_time = trigger_time;
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
                     get_location(source_id)->uname, source_id);

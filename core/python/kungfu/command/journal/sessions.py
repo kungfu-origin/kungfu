@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 from tabulate import tabulate
 
 import click
-from kungfu.command import pass_ctx_from_parent
-from kungfu.command.journal import journal
+from kungfu.command.journal import journal, pass_ctx_from_parent
 
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
@@ -40,16 +39,20 @@ def sessions(ctx, sortby, ascending, tablefmt, pager):
 
 
 def find_sessions(ctx):
-    io_device = pyyjj.create_io_device()
+    home = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "master", "master", ctx.locator)
+    io_device = pyyjj.io_device_client(home, False)
 
     sessions_df = pd.DataFrame(columns=[
         'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration', 'frame_count'
     ])
     locations = kfj.collect_journal_locations(ctx)
+    dest_pub = '{:08x}'.format(0)
     for key in locations:
-        location = locations[key]
-        reader = io_device.open_reader(kfj.MODES[location['mode']], kfj.CATEGORIES[location['category']], location['group'], location['name'])
-        find_sessions_from_reader(sessions_df, reader, location['mode'], location['category'], location['group'], location['name'])
+        record = locations[key]
+        location = pyyjj.location(kfj.MODES[record['mode']], kfj.CATEGORIES[record['category']], record['group'], record['name'], ctx.locator)
+        if dest_pub in record['readers']:
+            reader = io_device.open_reader(location, 0)
+            find_sessions_from_reader(sessions_df, reader, record['mode'], record['category'], record['group'], record['name'])
 
     return sessions_df
 

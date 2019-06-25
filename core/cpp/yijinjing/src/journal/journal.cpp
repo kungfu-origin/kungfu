@@ -50,14 +50,23 @@ namespace kungfu
 
             void journal::seek_to_time(int64_t nanotime)
             {
-                load_page(page::find_page_id(location_, dest_id_, nanotime));
-                SPDLOG_TRACE("{} in page [{} - {}]",
-                        nanotime > 0 ? time::strftime(nanotime) : "beginning",
-                        time::strftime(current_page_->begin_time(), "%F %T"),
-                        time::strftime(current_page_->end_time(), "%F %T")
-                        );
+                int page_id = page::find_page_id(location_, dest_id_, nanotime);
+                load_page(page_id);
+                SPDLOG_TRACE("{} in page [{}] [{} - {}]",
+                             nanotime > 0 ? time::strftime(nanotime) : "beginning", page_id,
+                             time::strftime(current_page_->begin_time(), "%F %T"), time::strftime(current_page_->end_time(), "%F %T"));
                 while (current_page_->is_full() && current_page_->end_time() <= nanotime)
                 {
+                    SPDLOG_CRITICAL("{} [{}] is full, {}", location_->uname, current_page_->page_id_, current_page_->header_->last_frame_position);
+                    int i = 1;
+                    while (frame_->has_data())
+                    {
+                        SPDLOG_INFO("[{:04d}] {} {} pp{} fp{}, [{}] {} - {} = {}", i, time::strftime(frame_->gen_time()), frame_->frame_length(), current_page_->header_->frame_header_length, frame_->header_->length,
+                                    frame_->address() + frame_->frame_length(), frame_->address(), current_page_->address(),
+                                    frame_->address() - current_page_->address());
+                        frame_->move_to_next();
+                        i++;
+                    }
                     load_next_page();
                 }
                 while (frame_->has_data() && frame_->gen_time() <= nanotime)

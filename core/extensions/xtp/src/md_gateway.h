@@ -30,7 +30,7 @@ namespace kungfu
 
                 void start() override;
 
-                bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments, bool is_level2 = false) override;
+                bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
 
                 bool unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override
                 { return false; };
@@ -223,7 +223,7 @@ namespace kungfu
 
                 XTP::API::QuoteApi *api_;
 
-                bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id, bool is_level2);
+                bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
             };
         }
     }

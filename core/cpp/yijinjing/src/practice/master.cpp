@@ -57,10 +57,10 @@ namespace kungfu
                       writers_[app_location->uid] = writer;
 
                       reader_->join(app_location, 0, now);
-                      request_publish(app_location->uid, e->gen_time(), 0);
+                      require_write_to(app_location->uid, e->gen_time(), 0);
 
                       reader_->join(app_location, master_location->uid, now);
-                      request_publish(app_location->uid, e->gen_time(), master_location->uid);
+                      require_write_to(app_location->uid, e->gen_time(), master_location->uid);
 
                       nlohmann::json register_msg;
                       register_msg["msg_type"] = msg::type::Register;
@@ -75,32 +75,32 @@ namespace kungfu
                   }
               });
 
-            events | is(msg::type::RequestPublish) |
+            events | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
-                  auto request = e->data<msg::data::RequestPublish>();
+                  auto request = e->data<msg::data::RequestWriteTo>();
                   if (not has_location(request.dest_id))
                   {
                       SPDLOG_ERROR("Request publish to unknown location {:08x}", request.dest_id);
                       return;
                   }
                   reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-                  request_publish(e->source(), e->gen_time(), request.dest_id);
-                  request_subscribe(request.dest_id, e->gen_time(), e->source());
+                  require_write_to(e->source(), e->gen_time(), request.dest_id);
+                  require_read_from(request.dest_id, e->gen_time(), e->source());
               });
 
-            events | is(msg::type::RequestSubscribe) |
+            events | is(msg::type::RequestReadFrom) |
             $([&](event_ptr e)
               {
-                  auto request = e->data<msg::data::RequestSubscribe>();
+                  auto request = e->data<msg::data::RequestReadFrom>();
                   if (not has_location(request.source_id))
                   {
                       SPDLOG_ERROR("Request subscribe to unknown location {:08x}", request.source_id);
                       return;
                   }
                   reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-                  request_publish(request.source_id, e->gen_time(), e->source());
-                  request_subscribe(e->source(), e->gen_time(), request.source_id);
+                  require_write_to(request.source_id, e->gen_time(), e->source());
+                  require_read_from(e->source(), e->gen_time(), request.source_id);
               });
         }
     }

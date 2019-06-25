@@ -96,7 +96,7 @@ namespace kungfu
                  * @param dest_id journal dest id
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                void join(const data::location_ptr location, uint32_t dest_id, const int64_t from_time);
+                void join(const data::location_ptr& location, uint32_t dest_id, int64_t from_time);
 
                 inline frame_ptr current_frame()
                 { return current_->current_frame(); }
@@ -109,12 +109,12 @@ namespace kungfu
                 /** seek next frame */
                 void next();
 
+                void reorder();
+
             private:
                 const bool lazy_;
                 journal_ptr current_;
                 std::vector<journal_ptr> journals_;
-
-                void seek_current_journal();
             };
 
             class writer

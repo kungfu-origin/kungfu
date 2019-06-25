@@ -35,44 +35,46 @@ namespace kungfu
             }
 
             void
-            reader::join(const data::location_ptr location, uint32_t dest_id, const int64_t from_time)
+            reader::join(const data::location_ptr &location, uint32_t dest_id, const int64_t from_time)
             {
-                for (auto journal : journals_)
+                for (const auto &journal : journals_)
                 {
                     if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
                     {
-                        throw journal_error(fmt::format("Can not subscribe journal {}/{} more than once", location->uname, dest_id));
+                        throw journal_error(fmt::format("reader can not join journal {}/{} more than once", location->uname, dest_id));
                     }
                 }
-                current_ = std::make_shared<journal>(location, dest_id, false, lazy_);
-                current_->seek_to_time(from_time);
-                journals_.push_back(current_);
-                seek_current_journal();
+                journals_.push_back(std::make_shared<journal>(location, dest_id, false, lazy_));
+                journals_.back()->seek_to_time(from_time);
+                if (current_.get() == nullptr)
+                {
+                    current_ = journals_.back();
+                }
             }
 
             bool reader::data_available()
             {
-                seek_current_journal();
+                reorder();
                 return current_.get() != nullptr && current_frame()->has_data();
             }
 
             void reader::seek_to_time(int64_t nanotime)
             {
-                for (auto journal : journals_)
+                for (const auto &journal : journals_)
                 {
                     journal->seek_to_time(nanotime);
                 }
-                seek_current_journal();
+                reorder();
             }
 
             void reader::next()
             {
                 assert(current_.get() != nullptr);
                 current_->next();
-                seek_current_journal();
+                reorder();
             }
 
-            void reader::seek_current_journal()
+            void reader::reorder()
             {
                 if (journals_.size() == 1)
                 {

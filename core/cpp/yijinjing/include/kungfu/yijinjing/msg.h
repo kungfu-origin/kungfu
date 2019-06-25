@@ -21,9 +21,9 @@ namespace kungfu
                     SessionEnd = 10002,
                     Register = 10011,
                     Deregister = 10012,
-                    RequestSubscribe = 10021,
+                    RequestReadFrom = 10021,
                     RequestUnsubscribe = 10022,
-                    RequestPublish = 10023,
+                    RequestWriteTo = 10023,
                     RequestUnpublish = 10024,
                     RequestStart = 10025
                 };
@@ -31,13 +31,13 @@ namespace kungfu
 
             namespace data
             {
-                struct RequestSubscribe
+                struct RequestReadFrom
                 {
                     uint32_t source_id;
                     int64_t from_time;
                 };
 
-                struct RequestPublish
+                struct RequestWriteTo
                 {
                     uint32_t dest_id;
                     inline void set_dest_id(uint32_t id)
