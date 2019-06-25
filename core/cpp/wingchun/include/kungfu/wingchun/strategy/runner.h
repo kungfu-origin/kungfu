@@ -22,7 +22,7 @@ namespace kungfu
 
                 virtual ~Runner() = default;
 
-                void add_strategy(Strategy_ptr strategy);
+                void add_strategy(const Strategy_ptr& strategy);
 
             protected:
                 void react(const rx::observable<yijinjing::event_ptr> &events) override ;

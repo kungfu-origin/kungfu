@@ -23,6 +23,8 @@ def insert_order(context, nano):
 
 def on_quote(context, quote):
     context.log.info("{} {}".format(quote.instrument_id, quote.trading_day))
+    order_id = context.insert_market_order("601988", exchange, "15040900", 200, Side.Buy, Offset.Open)
+    context.log.info("insert market order: [order_id] %d [account] %s", order_id, "15040900")
     pass
 
 def on_transaction(context, transaction):

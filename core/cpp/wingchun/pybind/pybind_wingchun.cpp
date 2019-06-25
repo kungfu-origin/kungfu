@@ -42,27 +42,27 @@ public:
     void post_stop(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, post_stop, context); }
 
-    void on_switch_day(const std::string &next_trading_day) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_switch_day, next_trading_day); }
+    void on_switch_day(strategy::Context_ptr context, const std::string &next_trading_day) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_switch_day, context, next_trading_day); }
 
-    void on_quote(const msg::data::Quote &quote) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, quote); }
+    void on_quote(strategy::Context_ptr context, const msg::data::Quote &quote) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote); }
 
-    void on_entrust(const msg::data::Entrust &entrust) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, entrust); }
+    void on_entrust(strategy::Context_ptr context, const msg::data::Entrust &entrust) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust); }
 
-    void on_transaction(const msg::data::Transaction &transaction) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, transaction); }
+    void on_transaction(strategy::Context_ptr context, const msg::data::Transaction &transaction) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, context, transaction); }
 
-    void on_order(const msg::data::Order &order) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, order); }
+    void on_order(strategy::Context_ptr context, const msg::data::Order &order) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order); }
 
-    void on_trade(const msg::data::Trade &trade) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, trade); }
+    void on_trade(strategy::Context_ptr context, const msg::data::Trade &trade) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade); }
 
-    void on_algo_order_status(uint64_t order_id, const std::string &algo_type, const std::string &event_msg) override
+    void on_algo_order_status(strategy::Context_ptr context, uint64_t order_id, const std::string &algo_type, const std::string &event_msg) override
     {
-        PYBIND11_OVERLOAD(void, strategy::Strategy, on_algo_order_status, order_id, algo_type, event_msg);
+        PYBIND11_OVERLOAD(void, strategy::Strategy, on_algo_order_status, context, order_id, algo_type, event_msg);
     }
 };
 
@@ -354,6 +354,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("insert_limit_order", &strategy::Context::insert_limit_order)
             .def("insert_fak_order", &strategy::Context::insert_fak_order)
             .def("insert_fok_order", &strategy::Context::insert_fok_order)
+            .def("cancel_order", &strategy::Context::cancel_order)
             ;
 
     py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")

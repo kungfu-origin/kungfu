@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Keren Dong on 2019-06-20.
 //
@@ -23,10 +25,10 @@ namespace kungfu
         namespace strategy
         {
             Runner::Runner(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name)
-                    : apprentice(location::make(mode::LIVE, category::STRATEGY, group, name, locator), low_latency)
+                    : apprentice(location::make(mode::LIVE, category::STRATEGY, group, name, std::move(locator)), low_latency)
             {}
 
-            void Runner::add_strategy(Strategy_ptr strategy)
+            void Runner::add_strategy(const Strategy_ptr& strategy)
             {
                 strategies_.push_back(strategy);
             }
@@ -41,52 +43,52 @@ namespace kungfu
                 events | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
-                      for (auto strategy : strategies_)
+                      for (const auto& strategy : strategies_)
                       {
-                          strategy->on_quote(event->data<Quote>());
+                          strategy->on_quote(context_, event->data<Quote>());
                       }
                   });
 
                 events | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {
-                      for (auto strategy : strategies_)
+                      for (const auto& strategy : strategies_)
                       {
-                          strategy->on_order(event->data<Order>());
+                          strategy->on_order(context_, event->data<Order>());
                       }
                   });
 
                 events | is(msg::type::Trade) |
                 $([&](event_ptr event)
                   {
-                      for (auto strategy : strategies_)
+                      for (const auto& strategy : strategies_)
                       {
-                          strategy->on_trade(event->data<Trade>());
+                          strategy->on_trade(context_, event->data<Trade>());
                       }
                   });
 
                 events | is(msg::type::Entrust) |
                 $([&](event_ptr event)
                   {
-                      for (auto strategy : strategies_)
+                      for (const auto& strategy : strategies_)
                       {
-                          strategy->on_entrust(event->data<Entrust>());
+                          strategy->on_entrust(context_, event->data<Entrust>());
                       }
                   });
 
                 events | is(msg::type::Transaction) |
                 $([&](event_ptr event)
                   {
-                      for (auto strategy : strategies_)
+                      for (const auto& strategy : strategies_)
                       {
-                          strategy->on_transaction(event->data<Transaction>());
+                          strategy->on_transaction(context_, event->data<Transaction>());
                       }
                   });
             }
 
             void Runner::start()
             {
-                for (auto strategy : strategies_)
+                for (const auto& strategy : strategies_)
                 {
                     strategy->pre_start(context_);
                 }

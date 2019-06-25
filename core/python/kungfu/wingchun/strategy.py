@@ -9,7 +9,8 @@ import kungfu.yijinjing.time as kft
 class Strategy(pywingchun.Strategy):
     def __init__(self, ctx):
         pywingchun.Strategy.__init__(self)
-        self.log = ctx.logger
+        ctx.log = ctx.logger
+        self.ctx = ctx
         self.strftime = kft.strftime
         self.strptime = kft.strptime
         # context.is_subscribed = self._util.is_subscribed
@@ -31,35 +32,43 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
 
-    def pre_start(self, ctx):
-        self._pre_start(ctx)
-        self.log.info('strategy prepare to run')
+    def pre_start(self, wc_context):
+        self.ctx.now = wc_context.now
+        self.ctx.subscribe = wc_context.subscribe
+        self.ctx.add_account = wc_context.add_account
+        self.ctx.insert_limit_order = wc_context.insert_limit_order
+        self.ctx.insert_fok_order = wc_context.insert_fok_order
+        self.ctx.insert_fak_order = wc_context.insert_fak_order
+        self.ctx.insert_market_order = wc_context.insert_market_order
+        self.ctx.cancel_order = wc_context.cancel_order
+        self._pre_start(self.ctx)
+        self.ctx.log.info('strategy prepare to run')
 
-    def post_start(self, ctx):
-        self._post_start(ctx)
-        self.log.info('strategy ready to run')
+    def post_start(self, wc_context):
+        self._post_start(self.ctx)
+        self.ctx.log.info('strategy ready to run')
 
-    def pre_quit(self, ctx):
-        self._pre_stop(ctx)
+    def pre_quit(self, wc_context):
+        self._pre_stop(self.ctx)
 
-    def post_quit(self, ctx):
-        self._post_stop(self, ctx)
+    def post_quit(self, wc_context):
+        self._post_stop(self, self.ctx)
 
-    def on_switch_day(self, trading_day):
-        self._on_switch_day(self, trading_day)
+    def on_switch_day(self, wc_context, trading_day):
+        self._on_switch_day(self.ctx, trading_day)
 
-    def on_quote(self, quote):
-        self._on_quote(self, quote)
+    def on_quote(self, wc_context, quote):
+        self._on_quote(self.ctx, quote)
 
-    def on_entrust(self, entrust):
-        self._on_entrust(self, entrust)
+    def on_entrust(self, wc_context, entrust):
+        self._on_entrust(self.ctx, entrust)
 
-    def on_transaction(self, transaction):
-        self._on_transaction(self, transaction)
+    def on_transaction(self, wc_context, transaction):
+        self._on_transaction(self.ctx, transaction)
 
-    def on_order(self, order):
-        self._on_order(self, order)
+    def on_order(self, wc_context, order):
+        self._on_order(self.ctx, order)
 
-    def on_trade(self, trade):
-        self._on_trade(self, trade)
+    def on_trade(self, wc_context, trade):
+        self._on_trade(self.ctx, trade)
 

@@ -138,6 +138,7 @@ namespace kungfu
                   auto app_location = get_location(e->source());
                   deregister_location(e->source());
                   reader_->disjoin(e->source());
+                  writers_.erase(e->source());
                   SPDLOG_INFO("deregistered location {}", app_location->uname);
               });
 

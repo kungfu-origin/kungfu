@@ -93,6 +93,7 @@ namespace kungfu
 
                 auto home = app_.get_io_device()->get_home();
                 auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
+                app_.register_location(account_location);
                 account_location_ids_[account_id] = account_location->uid;
 
                 auto commission_db_file = home->locator->layout_file(account_location, yijinjing::data::layout::SQLITE, "commission");
@@ -107,6 +108,10 @@ namespace kungfu
                 info.static_equity = cash_limit;
                 info.dynamic_equity = cash_limit;
                 info.avail = cash_limit;
+
+                app_.observe(account_location, now_);
+                app_.request_write_to(now_, account_location->uid);
+                app_.request_read_from(now_, account_location->uid);
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
