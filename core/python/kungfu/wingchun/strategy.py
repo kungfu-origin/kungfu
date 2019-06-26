@@ -1,7 +1,6 @@
-import os, sys
+import os
+import sys
 import importlib
-from functools import partial
-
 import pywingchun
 import kungfu.yijinjing.time as kft
 
@@ -10,10 +9,9 @@ class Strategy(pywingchun.Strategy):
     def __init__(self, ctx):
         pywingchun.Strategy.__init__(self)
         ctx.log = ctx.logger
+        ctx.strftime = kft.strftime
+        ctx.strptime = kft.strptime
         self.ctx = ctx
-        self.strftime = kft.strftime
-        self.strptime = kft.strptime
-        # context.is_subscribed = self._util.is_subscribed
         self.__init_strategy(ctx.path)
 
     def __init_strategy(self, path):
