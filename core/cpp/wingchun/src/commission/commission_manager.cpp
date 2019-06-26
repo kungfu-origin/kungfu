@@ -39,7 +39,7 @@ namespace kungfu
                     return future_rates_.at(instrument_id);
                 } else
                 {
-                    auto product = get_instrument_product(instrument_id);
+                    auto product = get_instrument_product(instrument_id.c_str());
                     if (future_rates_.find(product) != future_rates_.end())
                     {
                         return future_rates_.at(product);

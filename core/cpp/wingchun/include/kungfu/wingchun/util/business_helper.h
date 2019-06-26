@@ -20,12 +20,12 @@ namespace kungfu
     namespace wingchun
     {
 
-        inline bool string_equals(const std::string& s1, const std::string& s2)
+        inline bool string_equals(const std::string &s1, const std::string &s2)
         {
             return std::strcmp(s1.c_str(), s2.c_str()) == 0;
         }
 
-        inline bool string_equals_n(const std::string& s1, const std::string& s2, size_t l)
+        inline bool string_equals_n(const std::string &s1, const std::string &s2, size_t l)
         {
             return std::strncmp(s1.c_str(), s2.c_str(), l) == 0;
         }
@@ -45,12 +45,12 @@ namespace kungfu
             }
         }
 
-        inline std::string get_symbol(const std::string& instrument_id, const std::string& exchange_id)
+        inline std::string get_symbol(const std::string &instrument_id, const std::string &exchange_id)
         {
             return instrument_id + "." + exchange_id;
         }
 
-        inline msg::data::Order get_order(const msg::data::OrderInput &input, msg::data::Order& order, uint64_t external_id)
+        inline msg::data::Order get_order(const msg::data::OrderInput &input, msg::data::Order &order, uint64_t external_id)
         {
             order.parent_id = input.parent_id;
             order.order_id = input.order_id;
@@ -79,13 +79,13 @@ namespace kungfu
             return order;
         }
 
-        inline bool is_reverse_repurchase(const std::string& instrument_id, const std::string& exchange_id)
+        inline bool is_reverse_repurchase(const std::string &instrument_id, const std::string &exchange_id)
         {
             return (string_equals_n(instrument_id, "204", 3) == 0 && string_equals(exchange_id, EXCHANGE_SSE) == 0) ||
                    (string_equals_n(instrument_id, "1318", 4) == 0 && string_equals(exchange_id, EXCHANGE_SZE) == 0);
         }
 
-        inline double get_reverse_repurchase_commission_rate(const std::string& instrument_id)
+        inline double get_reverse_repurchase_commission_rate(const std::string &instrument_id)
         {
             if (string_equals(instrument_id, "204001") == 0 || string_equals(instrument_id, "131810") == 0)
             {
@@ -120,7 +120,7 @@ namespace kungfu
             }
         }
 
-        inline int get_reverse_repurchase_expire_days(const std::string& instrument_id)
+        inline int get_reverse_repurchase_expire_days(const std::string &instrument_id)
         {
             if (string_equals(instrument_id, "204001") == 0 || string_equals(instrument_id, "131810") == 0)
             {
@@ -155,20 +155,39 @@ namespace kungfu
             }
         }
 
-    inline std::string get_instrument_product(const char *instrument_id)
-    {
-        std::string product = "";
-        int i = 0;
-        while (instrument_id[i] != 0)
+        inline InstrumentType get_instrument_type(const std::string &instrument_id, const std::string &exchange_id)
         {
-            if (instrument_id[i] < '0' || instrument_id[i] > '9')
+            if (string_equals(exchange_id, EXCHANGE_SSE) || string_equals(exchange_id, EXCHANGE_SZE))
             {
-                product.push_back(instrument_id[i]);
+                if (is_reverse_repurchase(instrument_id, exchange_id))
+                {
+                    return InstrumentTypeBond;
+                }
+                else
+                {
+                    return InstrumentTypeStock;
+                }
             }
-            ++i;
+            else
+            {
+                return InstrumentTypeFuture;
+            }
         }
-        return product;
-    }
+
+        inline std::string get_instrument_product(const char *instrument_id)
+        {
+            std::string product = "";
+            int i = 0;
+            while (instrument_id[i] != 0)
+            {
+                if (instrument_id[i] < '0' || instrument_id[i] > '9')
+                {
+                    product.push_back(instrument_id[i]);
+                }
+                ++i;
+            }
+            return product;
+        }
 
         inline Direction get_future_direction(Side side, Offset offset)
         {
@@ -181,28 +200,29 @@ namespace kungfu
             }
         }
 
-    inline std::string get_exchange_id_from_future_instrument_id(const char* instrument_id)
-    {
-        std::string product = get_instrument_product(instrument_id);
-        std::transform(product.begin(), product.end(), product.begin(), ::tolower);
-        if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
-            product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
-            product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg" ||
-            product.substr(0, 2) == "sp" || product.substr(0, 3) == "spc")
+        inline std::string get_exchange_id_from_future_instrument_id(const char *instrument_id)
         {
-            return EXCHANGE_DCE;
-        }
-        else if (product == "sr" || product == "cf" || product == "pm" || product == "wh" || product == "ri" || product == "lr" ||
-                product == "jr" || product == "rm" || product == "rs" || product == "rs" || product == "rm" || product == "oi" ||
-                product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm" ||
-                product.substr(0, 3) == "spd" || product.substr(0, 3) == "ips")
-        {
-            int pos = 0;
-            while ((instrument_id[pos] > 'a' && instrument_id[pos] < 'z') || (instrument_id[pos] > 'A' && instrument_id[pos] < 'Z'))
+            std::string product = get_instrument_product(instrument_id);
+            std::transform(product.begin(), product.end(), product.begin(), ::tolower);
+            if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
+                product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
+                product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg" ||
+                product.substr(0, 2) == "sp" || product.substr(0, 3) == "spc")
             {
-                pos++;
+                return EXCHANGE_DCE;
+            } else if (product == "sr" || product == "cf" || product == "pm" || product == "wh" || product == "ri" || product == "lr" ||
+                       product == "jr" || product == "rm" || product == "rs" || product == "rs" || product == "rm" || product == "oi" ||
+                       product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm" ||
+                       product.substr(0, 3) == "spd" || product.substr(0, 3) == "ips")
+            {
+                int pos = 0;
+                while ((instrument_id[pos] > 'a' && instrument_id[pos] < 'z') || (instrument_id[pos] > 'A' && instrument_id[pos] < 'Z'))
+                {
+                    pos++;
+                }
+                return std::string(instrument_id, pos);
             }
-            return std::string(instrument_id, pos);
+            throw wingchun_error("unknown instrument");
         }
 
         inline bool is_open(InstrumentType instrument_type, Side side, Offset offset)
@@ -219,7 +239,7 @@ namespace kungfu
             }
         }
 
-        inline std::string get_exchange_id_from_future_instrument_id(const std::string& instrument_id)
+        inline std::string get_exchange_id_from_future_instrument_id(const std::string &instrument_id)
         {
             std::string product = std::string(instrument_id).substr(0, instrument_id.length() - 4);
             std::transform(product.begin(), product.end(), product.begin(), ::tolower);
@@ -250,7 +270,7 @@ namespace kungfu
             }
         }
 
-        inline std::string get_exchange_id_from_stock_instrument_id(const std::string& instrument_id)
+        inline std::string get_exchange_id_from_stock_instrument_id(const std::string &instrument_id)
         {
             int code = atoi(instrument_id.c_str());
             int head3 = code / 1000;
@@ -281,5 +301,4 @@ namespace kungfu
         }
     }
 }
-
 #endif //KUNGFU_BUSINESS_HELPER_H
