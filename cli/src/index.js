@@ -17,7 +17,7 @@ program
     .option('-r --remove', 'remove a account|strategy ')
     .option('-u --update', 'update accounts|strategys config')
     .option('-s --switch-md-source', 'switch md source')
-    .option('-m --monit [type]', 'monit processes of (account|strategy|all)', 'all')
+    .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
     .action(async options => {
         const add = options.add;
         if(add) return addAccountStrategy();

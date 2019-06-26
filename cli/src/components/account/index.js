@@ -61,6 +61,7 @@ class AccountDashboard extends Dashboard {
 			getDataMethod: getAccountList,
 			afterSelectMethod: t._afterSelected.bind(t),
 			afterSwitchMethod: t._afterSwitchAccountProcess.bind(t),
+			mouse: false,						
 			style: {
 				cell: {
 					selected: {

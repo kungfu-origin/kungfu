@@ -101,7 +101,7 @@ export const TABLE_BASE_OPTIONS = {
 	align: 'left',
 	autoCommandKeys: true,
 	tags: true,
-	mouse: false,
+	mouse: true,
 	clickable: true,
 	interactive: true,
 	rows: [],

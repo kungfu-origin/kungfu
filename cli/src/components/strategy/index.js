@@ -59,6 +59,7 @@ class StrategyDashboard extends Dashboard {
 			getDataMethod: getStrategyList,
 			afterSelectMethod: t._afterSelected.bind(t),
 			afterSwitchMethod: t._afterSwitchStrategyProcess.bind(t),
+			mouse: false,			
 			style: {
 				cell: {
 					selected: {
@@ -83,7 +84,6 @@ class StrategyDashboard extends Dashboard {
             padding: DEFAULT_PADDING,
 			width: WIDTH_LEFT_PANEL + '%',
 			height: '62.66%',
-			mouse: true,
 			style: {
 				...TABLE_BASE_OPTIONS.style,
 			}

@@ -78,6 +78,7 @@ export class MonitorDashboard extends Dashboard {
             top: 5,
             left: '0',
             interactive: false,
+			mouse: false,			
             width: WIDTH_LEFT_PANEL + '%',
             height: '95%-6',
             style: {
