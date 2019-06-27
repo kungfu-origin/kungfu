@@ -60,11 +60,13 @@ namespace kungfu
                 stock_rate = {};
                 future_rates.clear();
                 future_rates[""] = {};
+
+                std::string statement("SELECT instrument_id, exchange_id, instrument_type, account_id, broker_id, mode, open_ratio,"
+                                      " close_ratio, close_today_ratio, min_commission FROM commission;");
                 try
                 {
                     SQLite::Database db(db_.c_str(), SQLite::OPEN_READONLY);
-
-                    SQLite::Statement query(db, "SELECT * FROM commission;");
+                    SQLite::Statement query(db, statement);
                     while (query.executeStep())
                     {
                         msg::data::InstrumentCommissionRate rate = {};

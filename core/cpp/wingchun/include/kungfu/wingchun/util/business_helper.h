@@ -222,7 +222,7 @@ namespace kungfu
                 }
                 return std::string(instrument_id, pos);
             }
-            throw wingchun_error("unknown instrument");
+            throw wingchun_error(fmt::format("unknown instrument [{}]", instrument_id));
         }
 
         inline bool is_open(InstrumentType instrument_type, Side side, Offset offset)

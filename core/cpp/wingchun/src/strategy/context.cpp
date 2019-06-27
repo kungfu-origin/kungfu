@@ -129,7 +129,7 @@ namespace kungfu
                 uint32_t md_source = market_data_[source];
                 if (app_.get_writer(market_data_[source]).get() == nullptr)
                 {
-                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) | first() |
                     $([=](event_ptr e)
                       {
                           const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();

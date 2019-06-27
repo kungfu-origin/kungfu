@@ -29,7 +29,7 @@ namespace kungfu
                     order_storage_(get_app_db_file("orders")),
                     trade_storage_(get_app_db_file("trades")),
                     calendar_(get_config_db_file("holidays")),
-                    account_manager_(account_id, calendar_, get_app_db_file("commission"))
+                    account_manager_(account_id, calendar_, get_app_db_file("commission", true))
             {
                 log::copy_log_settings(get_io_device()->get_home(), account_id);
             }

@@ -75,9 +75,9 @@ namespace kungfu
                                 if (io_device_->get_observer()->wait())
                                 {
                                     const std::string &notice = io_device_->get_observer()->get_notice();
-                                    SPDLOG_INFO("got notice {}", notice);
                                     if (notice.length() > 2)
                                     {
+                                        SPDLOG_DEBUG("got notice {}", notice);
                                         sb.on_next(std::make_shared<nanomsg_json>(notice));
                                     } else
                                     {
