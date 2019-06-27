@@ -137,7 +137,7 @@ namespace kungfu
                     {
                         if (writers_.find(0) != writers_.end())
                         {
-                            writers_[0]->close_session();
+                            writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
                         }
 
                     }) | publish();

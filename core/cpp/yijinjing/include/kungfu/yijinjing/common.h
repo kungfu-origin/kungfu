@@ -54,7 +54,7 @@ namespace kungfu
 
             virtual uint32_t source() const = 0;
 
-            virtual int32_t data_length() const = 0;
+            virtual uint32_t data_length() const = 0;
 
             virtual const char *data_as_bytes() const = 0;
 

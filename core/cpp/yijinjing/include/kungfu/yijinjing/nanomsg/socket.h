@@ -199,7 +199,7 @@ namespace kungfu
                 inline uint32_t source() const override
                 { return binding_["source"]; }
 
-                inline int32_t data_length() const override
+                inline uint32_t data_length() const override
                 { return binding_.size(); }
 
                 inline const char *data_as_bytes() const override

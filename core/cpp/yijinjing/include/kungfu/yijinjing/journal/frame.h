@@ -30,9 +30,9 @@ namespace kungfu
             struct frame_header
             {
                 /** total frame length (including header and data body) */
-                volatile int32_t length;
+                volatile uint32_t length;
                 /** header length */
-                int32_t header_length;
+                uint32_t header_length;
                 /** generate time of the frame data */
                 int64_t gen_time;
                 /** trigger time for this frame, use for latency stats */
@@ -64,13 +64,13 @@ namespace kungfu
                 inline uintptr_t address() const
                 { return reinterpret_cast<uintptr_t>(header_); }
 
-                inline int32_t frame_length() const
+                inline uint32_t frame_length() const
                 { return header_->length; }
 
-                inline int32_t header_length() const
+                inline uint32_t header_length() const
                 { return header_->header_length; }
 
-                inline int32_t data_length() const override
+                inline uint32_t data_length() const override
                 { return frame_length() - header_length(); }
 
                 inline int64_t gen_time() const override
@@ -125,9 +125,8 @@ namespace kungfu
                     header_->header_length = sizeof(frame_header);
                 }
 
-                inline void set_data_length(int32_t length)
+                inline void set_data_length(uint32_t length)
                 {
-                    assert(length > 0);
                     header_->length = header_length() + length;
                 }
 

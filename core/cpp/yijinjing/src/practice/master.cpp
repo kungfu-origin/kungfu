@@ -26,7 +26,7 @@ namespace kungfu
         master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency)), last_check_(0)
         {
             writers_[0] = get_io_device()->open_writer(0);
-            writers_[0]->open_session();
+            writers_[0]->mark(time::now_in_nano(), msg::type::SessionStart);
         }
 
         void master::on_notify()
@@ -78,8 +78,7 @@ namespace kungfu
                 register_msg["data"] = request_loc;
                 get_io_device()->get_publisher()->publish(register_msg.dump());
 
-                writer->open_frame(e->gen_time(), msg::type::RequestStart);
-                writer->close_frame(1);
+                writer->mark(e->gen_time(), msg::type::RequestStart);
             }
         }
 

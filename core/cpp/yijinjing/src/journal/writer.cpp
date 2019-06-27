@@ -70,23 +70,17 @@ namespace kungfu
                 publisher_->notify();
             }
 
+            void writer::mark(int64_t trigger_time, int32_t msg_type)
+            {
+                open_frame(trigger_time, msg_type);
+                close_frame(0);
+            }
+
             void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length)
             {
                 auto frame = open_frame(trigger_time, msg_type);
                 memcpy(const_cast<void*>(frame->data_address()), data, length);
                 close_frame(length);
-            }
-
-            void writer::open_session()
-            {
-                open_frame(time::now_in_nano(), msg::type::SessionStart);
-                close_frame(1);
-            }
-
-            void writer::close_session()
-            {
-                open_frame(time::now_in_nano(), msg::type::SessionEnd);
-                close_frame(1);
             }
         }
     }

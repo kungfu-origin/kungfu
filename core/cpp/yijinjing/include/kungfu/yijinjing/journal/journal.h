@@ -133,6 +133,8 @@ namespace kungfu
 
                 void close_frame(size_t data_length);
 
+                void mark(int64_t trigger_time, int32_t msg_type);
+
                 /**
                  * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
                  * @tparam T
@@ -164,9 +166,6 @@ namespace kungfu
 
                 void write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length);
 
-                void open_session();
-
-                void close_session();
             private:
                 std::mutex writer_mtx_;
                 journal_ptr journal_;

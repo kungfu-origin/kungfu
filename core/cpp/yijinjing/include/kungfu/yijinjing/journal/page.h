@@ -29,9 +29,9 @@ namespace kungfu
             struct page_header
             {
                 int32_t version;
-                int32_t page_header_length;
-                int32_t frame_header_length;
-                int32_t last_frame_position;
+                uint32_t page_header_length;
+                uint32_t frame_header_length;
+                uint32_t last_frame_position;
 #ifndef _WIN32
             } __attribute__((packed));
 #else

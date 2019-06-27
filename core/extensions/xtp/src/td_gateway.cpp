@@ -301,8 +301,7 @@ namespace kungfu
                     if (is_last)
                     {
 //                        set_state(GatewayState::Ready);
-                        auto frame = writer->open_frame(0, msg::type::PositionEnd);
-                        writer->close_frame(1);
+                        writer->mark(0, msg::type::PositionEnd);
                     }
                 } else
                 {

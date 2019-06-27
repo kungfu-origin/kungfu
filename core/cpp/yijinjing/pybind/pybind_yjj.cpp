@@ -248,8 +248,6 @@ PYBIND11_MODULE(pyyjj, m)
             .def("next", &reader::next);
 
     py::class_<writer, writer_ptr>(m, "writer")
-            .def("open_session", &writer::open_session)
-            .def("close_session", &writer::close_session)
             .def("write_raw", &writer::write_raw);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");

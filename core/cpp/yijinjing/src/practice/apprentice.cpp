@@ -151,7 +151,7 @@ namespace kungfu
                       writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
                       if (request.dest_id == 0)
                       {
-                          writers_[request.dest_id]->open_session();
+                          writers_[request.dest_id]->mark(time::now_in_nano(), msg::type::SessionStart);
                       }
                   } else
                   {
