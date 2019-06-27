@@ -25,7 +25,8 @@ namespace kungfu
                     RequestUnsubscribe = 10022,
                     RequestWriteTo = 10023,
                     RequestUnpublish = 10024,
-                    RequestStart = 10025
+                    RequestStart = 10025,
+                    Location = 10026
                 };
             }
 

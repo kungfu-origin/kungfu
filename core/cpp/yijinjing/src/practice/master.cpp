@@ -78,6 +78,20 @@ namespace kungfu
                 register_msg["data"] = request_loc;
                 get_io_device()->get_publisher()->publish(register_msg.dump());
 
+                for (const auto& item : locations_)
+                {
+                    auto frame = writer->open_frame(e->gen_time(), msg::type::Location);
+                    nlohmann::json location;
+                    location["mode"] = item.second->mode;
+                    location["category"] = item.second->category;
+                    location["group"] = item.second->group;
+                    location["name"] = item.second->name;
+                    auto msg = location.dump();
+                    SPDLOG_DEBUG("adding location {}", msg);
+                    memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
+                    writer->close_frame(msg.length());
+                }
+
                 writer->mark(e->gen_time(), msg::type::RequestStart);
             }
         }

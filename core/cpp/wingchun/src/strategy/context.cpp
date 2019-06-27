@@ -85,15 +85,17 @@ namespace kungfu
             void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
             {
                 uint32_t account_id = yijinjing::util::hash_str_32(account);
-                SPDLOG_INFO("add account {} {:08x}", account, account_id);
                 if (accounts_.find(account_id) != accounts_.end())
                 {
-                    throw wingchun_error("duplicated account " + account);
+                    throw wingchun_error(fmt::format("duplicated account {}@{}", account, source));
                 }
 
                 auto home = app_.get_io_device()->get_home();
                 auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
-                app_.register_location(account_location);
+                if (not app_.has_location(account_location->uid))
+                {
+                    throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
+                }
                 account_location_ids_[account_id] = account_location->uid;
 
                 auto commission_db_file = home->locator->layout_file(account_location, yijinjing::data::layout::SQLITE, "commission");
@@ -112,34 +114,39 @@ namespace kungfu
                 app_.observe(account_location, now_);
                 app_.request_write_to(now_, account_location->uid);
                 app_.request_read_from(now_, account_location->uid);
+                SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
             {
                 if (market_data_.find(source) == market_data_.end())
                 {
-                    SPDLOG_INFO("add md {}", source);
                     auto home = app_.get_io_device()->get_home();
                     auto md_location = location::make(home->mode, category::MD, source, source, home->locator);
-                    app_.register_location(md_location); // TODO ask master to check if this MD service is available
+                    if (not app_.has_location(md_location->uid))
+                    {
+                        throw wingchun_error(fmt::format("invalid md {}", source));
+                    }
                     app_.observe(md_location, now_);
                     app_.request_write_to(now_, md_location->uid);
                     market_data_[source] = md_location->uid;
+                    SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);
                 }
                 uint32_t md_source = market_data_[source];
+                SPDLOG_INFO("strategy subscribe from {} [{:08x}]", source, md_source);
                 if (app_.get_writer(market_data_[source]).get() == nullptr)
                 {
-                    events_ | is(yijinjing::msg::type::RequestWriteTo) | first() |
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    filter([=](yijinjing::event_ptr e)
+                           {
+                               const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                               return data.dest_id == md_source;
+                           }) | first() |
                     $([=](event_ptr e)
                       {
-                          const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
-                          if (data.dest_id == md_source)
-                          {
-                              request_subscribe(md_source, symbols, exchange);
-                          }
+                          request_subscribe(md_source, symbols, exchange);
                       });
-                }
-                else
+                } else
                 {
                     request_subscribe(md_source, symbols, exchange);
                 }
@@ -164,6 +171,7 @@ namespace kungfu
                     sub_msg.push_back_string(hffix::tag::Symbol, symbol);
                     sub_msg.push_back_string(hffix::tag::SecurityExchange, exchange);
                     quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
+                    SPDLOG_INFO("request subscribe {}", symbol);
                 }
                 sub_msg.push_back_trailer();
                 writer->close_frame(sub_msg.message_end() - buffer);

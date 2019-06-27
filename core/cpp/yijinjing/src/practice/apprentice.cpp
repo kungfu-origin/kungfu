@@ -65,9 +65,6 @@ namespace kungfu
             auto uid_str = fmt::format("{:08x}", get_home_uid());
             auto locator = get_io_device()->get_home()->locator;
             master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
-            register_location(master_commands_location_);
-            SPDLOG_DEBUG("register master location {} {:08x}", master_commands_location_->uname, master_commands_location_->uid);
-
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
 
             SPDLOG_DEBUG("request {}", request.dump());
@@ -118,18 +115,20 @@ namespace kungfu
                   reader_->join(master_commands_location_, get_home_uid(), e->gen_time());
               });
 
+            events | is(msg::type::Location) |
+            $([&](event_ptr e)
+              {
+                  const char *buffer = &(e->data<char>());
+                  std::string json_str{};
+                  json_str.assign(buffer, e->data_length());
+                  nlohmann::json request_loc = nlohmann::json::parse(json_str);
+                  register_location(request_loc);
+              });
+
             events | is(msg::type::Register) |
             $([&](event_ptr e)
               {
-                  auto request_loc = e->data<nlohmann::json>();
-                  auto app_location = std::make_shared<location>(
-                          static_cast<mode>(request_loc["mode"]),
-                          static_cast<category>(request_loc["category"]),
-                          request_loc["group"], request_loc["name"],
-                          get_io_device()->get_home()->locator
-                  );
-                  register_location(app_location);
-                  SPDLOG_INFO("registered location {}", app_location->uname);
+                  register_location(e->data<nlohmann::json>());
               });
 
             events | is(msg::type::Deregister) |
@@ -175,6 +174,18 @@ namespace kungfu
               {
                   start();
               });
+        }
+
+        void apprentice::register_location(const nlohmann::json &location_json)
+        {
+            auto app_location = std::make_shared<location>(
+                    static_cast<mode>(location_json["mode"]),
+                    static_cast<category>(location_json["category"]),
+                    location_json["group"], location_json["name"],
+                    get_io_device()->get_home()->locator
+            );
+            hero::register_location(app_location);
+            SPDLOG_INFO("registered location {}", app_location->uname);
         }
     }
 }

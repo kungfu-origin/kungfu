@@ -72,6 +72,8 @@ namespace kungfu
 
         private:
             yijinjing::data::location_ptr master_commands_location_;
+
+            void register_location(const nlohmann::json &location_json);
         };
     }
 }

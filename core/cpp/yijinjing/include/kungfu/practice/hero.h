@@ -47,10 +47,6 @@ namespace kungfu
             inline const std::string &get_home_uname() const
             { return get_io_device()->get_home()->uname; }
 
-            void register_location(const yijinjing::data::location_ptr &location);
-
-            void deregister_location(uint32_t location_uid);
-
             bool has_location(uint32_t hash);
 
             const yijinjing::data::location_ptr get_location(uint32_t hash);
@@ -62,10 +58,15 @@ namespace kungfu
             }
 
         protected:
+            std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
 
             virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
+
+            void register_location(const yijinjing::data::location_ptr &location);
+
+            void deregister_location(uint32_t location_uid);
 
             void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
 
@@ -75,7 +76,6 @@ namespace kungfu
             yijinjing::io_device_ptr io_device_;
             bool live_ = true;
             int64_t last_check_;
-            std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
         };
     }
 }
