@@ -220,9 +220,10 @@ export default {
                 t.$message.error(`${props.accountId} 不在系统内！`)
                 return;
             }
-            const gatewayName = `td_${accountIds[0]}`
+            const accountId = accountIds[0]
+            const gatewayName = `td_${accountId}`
             if(t.processStatus[gatewayName] !== 'online') {
-                t.$message.warning(`需要先启动 ${accountIds[0]} 交易进程！`)
+                t.$message.warning(`需要先启动 ${accountId} 交易进程！`)
                 return;
             }
             //撤单
@@ -239,7 +240,7 @@ export default {
             //先判断对应进程是否启动
             if(t.moduleType === 'account'){
                 if(t.processStatus[t.gatewayName] !== 'online') {
-                    t.$message.warning(`需要先启动 ${t.gatewayName} 交易进程！`)
+                    t.$message.warning(`需要先启动 ${t.gatewayName.toAccountId()} 交易进程！`)
                     return;
                 }
             }else if(t.moduleType === 'strategy'){
@@ -308,8 +309,8 @@ export default {
                 const {tableData, orderDataByKey}  = t.dealData(res);
                 t.tableData = Object.freeze(tableData);
                 t.orderDataByKey = orderDataByKey;  
-            }).catch(err => {
-            }).finally(() => {
+            })
+            .finally(() => {
                 t.getDataLock = false
             })
         },

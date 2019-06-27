@@ -71,6 +71,7 @@ export const runClearDB = (dbPath, tableName) => {
 export const runSelectDB = (dbPath, sql, args) =>{
     return new Promise((resolve, reject) => {
         if(!existsSync(dbPath)){
+            if(process.env.NODE_ENV === 'development') throw new Error(`${dbPath} is not exist`)
             resolve([]);
             return;
         }

@@ -7,6 +7,19 @@ String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
 }
 
+String.prototype.parseSourceAccountId = function(){
+    const parseList = this.toString().split('_');
+    //没有 "_"
+    if(parseList.length !== 2) {
+        throw new Error(`${this} accountId format is wrong！`)
+    } else {
+        return {
+            source: parseList[0],
+            id: parseList[1] 
+        }
+    }
+}
+
 
 //深度克隆obj
 export const deepClone = (obj) => {

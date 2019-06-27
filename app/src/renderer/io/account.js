@@ -126,19 +126,12 @@ export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
 }
 
 /**
- * 获取委托总行数
- * 
- */
-export const getOrderCount = (accountId, sql) => {
-    return runSelectDB(buildAccountOrdersDBPath(accountId),`SELECT COUNT(*) FROM orders ${sql}`)
-}
-
-/**
  * 获取账户收益曲线分钟线
  * 
  */
 export const getAccountPnlMin = (accountId, tradingDay) => {
-    if(!tradingDay) return new Promise((resolve, reject) => {reject(new Error('无交易日！'))})
+    if(!tradingDay) throw new Error('无交易日！')
+    if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(buildAccountSnapshortsDBPath(accountId), 
     `SELECT * FROM trading_account_1m_snapshots WHERE trading_day = '${tradingDay}'`)
 }

@@ -4,13 +4,13 @@
     </div>
 </template>
 <script>
-import {deepClone} from '@/assets/js/utils';
-import {mapState} from 'vuex';
+import { deepClone } from '@/assets/js/utils';
+import { mapState } from 'vuex';
 import * as ACCOUNT_API from '@/io/account'
 import * as BASE_API from '@/io/base'
 
-import {BASE_DIR} from '__gConfig/pathConfig.js'
-import {connectCalendarNanomsg} from '@/io/nano/buildNmsg'
+import { BASE_DIR, buildAccountFolderPath } from '__gConfig/pathConfig.js'
+import { connectCalendarNanomsg } from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType'
 import { existsSync } from '__gUtils/fileUtils'
 import path from 'path';
@@ -70,10 +70,9 @@ export default {
             t.$store.dispatch('getAccountList').then(res => {
                 if(!res) return
                 const promises = res.map(item => {
-                    const {account_id} = item
-                    const accountId = account_id.toAccountId();
-                    if(!existsSync(path.join(BASE_DIR,'accounts', accountId))) return false;
-                    return ACCOUNT_API.getAccountAsset(accountId).then(cash => {
+                    const { account_id } = item
+                    if(!existsSync(buildAccountFolderPath(account_id))) return false;
+                    return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
                         if(!cash || !cash.length) return false;
                         const cashData = cash[0];
                         return {

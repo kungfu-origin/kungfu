@@ -193,18 +193,18 @@ export const startMaster = async(force) => {
 }
 
 //启动md
-export const startMd = (resource, processName) => {
+export const startMd = (source, processName) => {
     return startProcess({
         "name": processName,
-        "args": `md -s ${resource}`,
+        "args": `md -s ${source}`,
     }, false).catch(err => logger.error(err))
 }
 
 //启动td
-export const startTd = (resource, processName) => {
+export const startTd = (source, processName) => {
     return startProcess({
         "name": processName,
-        "args": `td -d ${resource} --name ${processName}`,
+        "args": `td -s ${source} -a ${processName}`,
     }, false)
 }
 

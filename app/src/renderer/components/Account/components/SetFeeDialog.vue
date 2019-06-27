@@ -99,7 +99,7 @@ export default {
         //过滤 stock: 股票 债券 etf, 
         //    future: 其他
         const targetTypes = t.accountType === 'stock' ? [0, 1, 3] : [2, 4]
-        t.getFeeSettingData(t.accountId.toAccountId()).then(res => {
+        t.getFeeSettingData(t.accountId).then(res => {
             t.feeSettingForm.fees = res.map(res => {
                 //指定默认
                 if (res.instrument_id === '')  res.default = true
@@ -134,7 +134,7 @@ export default {
             t.$refs['feeSettingForm'].validate(valid => {
                 if(valid){
                     const feeSettingData = t.resolveFeeSettingData(t.feeSettingForm.fees, t.sourceType)
-                    t.setFeeSettingData(t.accountId.toAccountId(), feeSettingData).then(res => {
+                    t.setFeeSettingData(t.accountId, feeSettingData).then(res => {
                         t.$message.success('操作成功！')
                         t.clearData()
                     })

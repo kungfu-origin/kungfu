@@ -117,7 +117,7 @@ export default {
 
         currentId() {
             const t = this;
-            return (t.currentAccount.account_id ? t.currentAccount.account_id.toAccountId() : '')
+            return t.currentAccount.account_id || ''
         }
     },
 

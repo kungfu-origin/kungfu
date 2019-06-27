@@ -4,8 +4,6 @@ import {
     STRATEGYS_DB, 
     buildStrategyAccountsDBPath, 
     buildAccountOrdersDBPath,
-    buildCurrentTdAccountsByStrategyDBPath,
-    buildCurrentMdAccountsByStrategyDBPath,
     buildStrategyPosDBPath,
     buildStrategySnapshortsDBPath,
     buildAccountTradesDBPath
@@ -83,8 +81,10 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
         let tableData = []
         getStrategyAccounts(strategyId).then(accounts => {
             if(accounts.length == 0) resolve([]);
+            //todo: accountid 不清楚
             const promises = accounts.map(item => 
                     (runSelectDB(buildAccountOrdersDBPath(
+                        undefined,
                         item.account_id), 
                         `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
                         ` AND (order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
@@ -209,26 +209,5 @@ export const getStrategyPnlDay = (strategyId) => {
     return runSelectDB(buildStrategySnapshortsDBPath(strategyId), 'SELECT * FROM portfolio_1d_snapshots')
 }
 
-/**
- * 获取md+td正在使用的账户
- * @param  {String} strategyId
- */
-export const getTdMdAccountsByStrategy = async(strategyId) => {
-    const mdAccountsSelect = runSelectDB(buildCurrentMdAccountsByStrategyDBPath(strategyId), 'SELECT * FROM source_list')
-    const tdAccountsSelect = runSelectDB(buildCurrentTdAccountsByStrategyDBPath(strategyId), 'SELECT * FROM account_list')
-    const mdAccounts = await mdAccountsSelect
-    const tdAccounts = await tdAccountsSelect
-
-    return [
-        ...mdAccounts.map(item => {
-            item.type = 'md'; 
-            return item
-        }), 
-        ...tdAccounts.map(item => {
-            item.type = 'td';
-            return item
-        })
-    ]
-}
 
 

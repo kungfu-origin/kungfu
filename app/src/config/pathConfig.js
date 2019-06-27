@@ -15,97 +15,105 @@ export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
 addFile(ELEC_BASE_DIR, 'app', 'folder')
 export const BASE_DIR = path.join(ELEC_BASE_DIR, 'app')
 
+//system
+addFile(BASE_DIR, 'system', 'folder')
+export const SYSTEM_DIR = path.join(BASE_DIR, 'system');
+
 //GLOBAL_DIR strategys, accounts, tasks
-addFile(BASE_DIR, 'global', 'folder')
-export const GLOBAL_DIR = path.join(BASE_DIR, 'global');
+export const GLOBAL_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
 
-//gateway
-export const GATEWAY_DIR = path.join(BASE_DIR, 'gateway');
-addFile(BASE_DIR, 'gateway', 'folder')
+//runtime
+addFile(BASE_DIR, 'runtime', 'folder')
+export const RUNTIME_DIR = path.join(BASE_DIR, 'runtime');
 
-//accounts
-addFile(BASE_DIR, 'accounts', 'folder')
-export const ACCOUNTS_DIR = path.join(BASE_DIR, 'accounts');
-
-//journal
-addFile(BASE_DIR, 'journal', 'folder')
-export const JOURNAL_DIR = path.join(BASE_DIR, 'journal');
-
-//log
-addFile(BASE_DIR, 'log', 'folder')
-export const LOG_DIR = path.join(BASE_DIR, 'log');
-
-//log archive
-addFile(LOG_DIR, 'archive', 'folder')
-export const ARCHIVE_DIR = path.join(LOG_DIR, 'archive');
 
 //strategy
 addFile(BASE_DIR, 'strategy', 'folder')
 export const STRATEGY_DIR = path.join(BASE_DIR, 'strategy');
 
-//socket
-addFile(BASE_DIR, 'socket', 'folder')
-export const SOCKET_DIR = path.join(BASE_DIR, 'socket');
+//accounts(td)
+addFile(BASE_DIR, 'td', 'folder')
+export const ACCOUNTS_DIR = path.join(BASE_DIR, 'td');
+
+//md
+addFile(BASE_DIR, 'md', 'folder')
+export const MD_DIR = path.join(BASE_DIR, 'md');
+
+//log
+addFile(BASE_DIR, 'log', 'folder')
+export const LOG_DIR = path.join(BASE_DIR, 'log');
+
+
+// //socket
+// addFile(BASE_DIR, 'socket', 'folder')
+// export const SOCKET_DIR = path.join(BASE_DIR, 'socket');
+export const SOCKET_DIR = '';
+
+//gateway
+export const GATEWAY_DIR = ''
+
+
+
+
+
 
 
 //strategy
 export const STRATEGYS_DB = path.join(GLOBAL_DIR, 'strategys.db')
 
-//accounts
+//accounts(td)
 export const ACCOUNTS_DB = path.join(GLOBAL_DIR, 'accounts.db')
 
 //tasks
 export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 
-//kungfu-engine
-export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
-? process.env.APP_TYPE === 'cli' ? path.join('.') : process.resourcesPath
-: path.join(__dirname, '..', '..', '..', 'core', 'build')
+
+//================= account related start ==========================
 
 //gateway
 export const buildGatewayPath = (gatewayName) => {
-    return path.join(GATEWAY_DIR, gatewayName)
-}
-
-//account folder
-export const buildAccountFolderPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId)
-}
-
-//account commission 手续费
-export const buildAccountCommissionDBPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId, 'commission.db')    
-}
-
-//global commission 手续费
-export const buildGloablCommissionDBPath = () => {
-    return path.join(GLOBAL_DIR, 'commission.db')    
+    return path.join(BASE_DIR, ...gatewayName.split('_'))
 }
 
 //gateway state
 export const buildGateWayStateDBPath = (gatewayName) => {
-    return path.join(buildGatewayPath(gatewayName), 'state.db')
+    return path.join(buildGatewayPath(gatewayName), 'db', 'live', 'state.db')
+}
+
+//account folder
+export const buildAccountFolderPath = (accountId) => {
+    const {source, id} = accountId.parseSourceAccountId();
+    return path.join(ACCOUNTS_DIR, source, id, 'db', 'live')
+}
+
+//account commission 手续费
+export const buildAccountCommissionDBPath = (accountId) => {
+    return path.join(buildAccountFolderPath(accountId), 'commission.db')    
 }
 
 //assets
 export const buildAccountAssetsDBPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId, 'assets.db')
+    return path.join(buildAccountFolderPath(accountId), 'assets.db')
 }
 
 //orders
 export const buildAccountOrdersDBPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId, 'orders.db')
+    return path.join(buildAccountFolderPath(accountId), 'orders.db')
 }
 
 //trades
 export const buildAccountTradesDBPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId, 'trades.db')
+    return path.join(buildAccountFolderPath(accountId), 'trades.db')
 }
 
 //snapshorts
 export const buildAccountSnapshortsDBPath = (accountId) => {
-    return path.join(ACCOUNTS_DIR, accountId, 'snapshots.db')
+    return path.join(buildAccountFolderPath(accountId), 'snapshots.db')
 }
+
+//================= account related end ==========================
+
+//================= strategy related start =======================
 
 //strategyAccounts 某策略下的账户
 export const buildStrategyAccountsDBPath = (strategyId) => {
@@ -122,17 +130,23 @@ export const buildStrategySnapshortsDBPath = (accountId) => {
     return path.join(STRATEGY_DIR, accountId, 'snapshots.db')
 }
 
-//当策略运行时，其使用的md accounts(sources)
-export const buildCurrentMdAccountsByStrategyDBPath = (strategyId) => {
-    return path.join(STRATEGY_DIR, strategyId, 'current_md_feed.db')
-}
+//================== strategy related end =========================
 
-//当策略运行时，其使用的td accounts 
-export const buildCurrentTdAccountsByStrategyDBPath = (strategyId) => {
-    return path.join(STRATEGY_DIR, strategyId, 'current_account_list.db')    
+//================== others start =================================
+
+//global commission 手续费
+export const buildGloablCommissionDBPath = () => {
+    return path.join(GLOBAL_DIR, 'commission.db')    
 }
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId) => {
     return path.join(LOG_DIR, `${processId}.log`)
 }
+
+//================== others end ===================================
+
+//kungfu-engine
+export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
+? process.env.APP_TYPE === 'cli' ? path.join('.') : process.resourcesPath
+: path.join(__dirname, '..', '..', '..', 'core', 'build')
