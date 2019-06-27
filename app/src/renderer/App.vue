@@ -29,12 +29,19 @@ export default {
         };
     },
     created() {
+        const t = this;
         this.getMdTdState()
-        this.getAccountsCash()
         this.getCalendarNanomsg()
         this.$store.dispatch('getStrategyList')
+        this.$store.dispatch('getAccountList')
+        .then(res => t.getAccountsCash())
     },
     methods: {
+        buildMdTdStateNmsg(){},
+        buildTradingDataNmsg(){},
+        
+
+
         getMdTdState() {
             const t = this
             //先获取task的name,再去找他对应的状态
@@ -63,29 +70,27 @@ export default {
         },
 
         //获取accounts的cash
-        getAccountsCash() {
+        getAccountsCash(accountList) {
             const t = this
             let cashList = {}
             //从数据库中查找
-            t.$store.dispatch('getAccountList').then(res => {
-                if(!res) return
-                const promises = res.map(item => {
-                    const { account_id } = item
-                    if(!existsSync(buildAccountFolderPath(account_id))) return false;
-                    return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
-                        if(!cash || !cash.length) return false;
-                        const cashData = cash[0];
-                        return {
-                            accountId: account_id,
-                            cashData
-                        }
-                    })
+            if(!accountList || !accountList.length) return
+            const promises = accountList.map(item => {
+                const { account_id } = item
+                if(!existsSync(buildAccountFolderPath(account_id))) return false;
+                return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
+                    if(!cash || !cash.length) return false;
+                    const cashData = cash[0];
+                    return {
+                        accountId: account_id,
+                        cashData
+                    }
                 })
+            })
 
-                Promise.all(promises).then(cashList => {
-                    cashList.forEach(cash => cashList[cash.accountId] = cash.cashData)
-                    t.$store.dispatch('setAccountsAsset', cashList)
-                })
+            return Promise.all(promises).then(cashList => {
+                cashList.forEach(cash => cashList[cash.accountId] = cash.cashData)
+                t.$store.dispatch('setAccountsAsset', cashList)
             })
         },
         

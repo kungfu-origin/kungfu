@@ -90,7 +90,7 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
 
 //起停td
 export const switchTd = ({dispatch}, {account, value}) => {
-    const {account_id, source_name, config} = account
+    const {account_id, config} = account
     const tdProcessId = `td_${account_id}`
     if(!value){
         return deleteProcess(tdProcessId)
@@ -105,7 +105,7 @@ export const switchTd = ({dispatch}, {account, value}) => {
     .then(() => dispatch('getTasks'))//重新获取数据
     .then(() => dispatch('setOneMdTdState', {name: tdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', tdProcessId))    
-    .then(() => startTd(source_name, tdProcessId)) //开启td,pm2
+    .then(() => startTd(account_id)) //开启td,pm2
     .then(() => ({ type: 'start', message: '正在启动...' }))       
     .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))
 }
@@ -127,7 +127,7 @@ export const switchMd = ({dispatch}, {account, value}) => {
     .then(() => dispatch('getTasks'))//重新获取数据
     .then(() => dispatch('setOneMdTdState', {name: mdProcessId, oneState: Object.freeze({})}))
     .then(() => dispatch('buildGatewayNmsgListener', mdProcessId))    
-    .then(() => startMd(source_name, mdProcessId)) //开启td,pm2
+    .then(() => startMd(source_name)) //开启td,pm2
     .then(() => ({ type: 'start', message: '正在启动...' }))       
     .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))     
 }

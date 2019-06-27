@@ -193,19 +193,20 @@ export const startMaster = async(force) => {
 }
 
 //启动md
-export const startMd = (source, processName) => {
+export const startMd = (source) => {
     return startProcess({
-        "name": processName,
+        "name": `md_${source}`,
         "args": `md -s ${source}`,
     }, false).catch(err => logger.error(err))
 }
 
 //启动td
-export const startTd = (source, processName) => {
+export const startTd = (accountId) => {
+    const { source, id } = accountId.parseSourceAccountId();
     return startProcess({
-        "name": processName,
-        "args": `td -s ${source} -a ${processName}`,
-    }, false)
+        "name": `td_${accountId}`,
+        "args": `td -s ${source} -a ${id}`,
+    }, false).catch(err => logger.error(err))
 }
 
 //启动strategy

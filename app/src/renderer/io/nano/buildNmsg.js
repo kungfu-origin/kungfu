@@ -74,11 +74,11 @@ export const refreshStrategyNanomsg = (strategyId, oldNanomsg)=> {
 //接收交易日的相关推送
 export const connectCalendarNanomsg = () => {
     const sub = nano.socket('sub');
-    const ipcDir = path.join(BASE_DIR, 'calendar');
-    fse.ensureDirSync(ipcDir)
-    const ipcPath = path.join(ipcDir, 'pub.ipc')
-    const addr = `ipc://${ipcPath}`
-    sub.connect(addr)
+    // const ipcDir = path.join(BASE_DIR, 'calendar');
+    // fse.ensureDirSync(ipcDir)
+    // const ipcPath = path.join(ipcDir, 'pub.ipc')
+    // const addr = `ipc://${ipcPath}`
+    // sub.connect(addr)
     return sub
 }
 
@@ -87,11 +87,11 @@ export const reqCalendarNanomsg = () => {
     const req = nano.socket('req', {
         rcvtimeo: 1000
     })
-    const ipcDir = SOCKET_DIR //KF_HOME/socket
-    fse.ensureDirSync(ipcDir)
-    const ipcPath = path.join(ipcDir, 'service.sock')
-    const addr = `ipc://${ipcPath}`
-    req.connect(addr)
+    // const ipcDir = SOCKET_DIR //KF_HOME/socket
+    // fse.ensureDirSync(ipcDir)
+    // const ipcPath = path.join(ipcDir, 'service.sock')
+    // const addr = `ipc://${ipcPath}`
+    // req.connect(addr)
     return req
 }
 
