@@ -114,17 +114,18 @@
 
 </template>
 <script>
-import {mapState, mapGetters} from 'vuex';
-import {openWin} from '@/assets/js/utils';
-import {startStrategy, deleteProcess} from '__gUtils/processUtils.js';
-import * as STRATEGY_API from '@/io/strategy';
-import { setTasksDB } from '@/io/base';
-import {debounce} from '@/assets/js/utils';
-import {chineseValidator, specialStrValidator, noZeroAtFirstValidator} from '@/assets/js/validator';
 import path from 'path';
-import {remote} from 'electron'
-const BrowserWindow = require('electron').remote.BrowserWindow
+import { remote } from 'electron';
+import { mapState, mapGetters } from 'vuex';
+import { openWin } from '@/assets/js/utils';
+import { deleteProcess } from '__gUtils/processUtils.js';
+import * as STRATEGY_API from '@/io/db/strategy';
+import { setTasksDB } from '@/io/db/base';
+import { switchStrategy } from '@/io/actions/strategy';
+import { debounce } from '@/assets/js/utils';
+import { chineseValidator, specialStrValidator, noZeroAtFirstValidator } from '@/assets/js/validator';
 
+const BrowserWindow = require('electron').remote.BrowserWindow
 
 export default {
     data(){
@@ -291,38 +292,8 @@ export default {
         handleStrategySwitch(value, strategy){
             const t = this;
             const strategyId = strategy.strategy_id;
-            if(!value){
-                deleteProcess(strategyId)
-                .then(() => t.$message.success('操作成功！'))
-                .catch(err => t.$message.error(err.message || '操作失败！'))
-                return
-            }
-
-            // for import file changed in code editor module
-            t.getStrategyList().then((strategyList) => {
-                const curStrategy = strategyList.filter(s => s.strategy_id === strategyId)
-                if(!curStrategy.length) return
-                const strategyPath = curStrategy[0].strategy_path;
-                if(!strategyPath){
-                    t.$message.error('该策略未绑定任何文件！')
-                    return;
-                }
-                const config = JSON.stringify({
-                    strategy_id: strategyId,
-                    strategy_path: strategyPath
-                })
-                const postData = {
-                    name: strategyId, 
-                    type: 'strategy',
-                    config
-                }
-                setTasksDB(postData) //设置taskDB
-                .then(() => t.$store.dispatch('getTasks'))// 重新获取数据
-                .then(() => t.getStrategyList())
-                .then(() => startStrategy(strategyId, strategyPath))// 启动策略
-                .then(() => t.$message.start('正在启动...'))
-                .catch(err => t.$message.error(err.message || '操作失败！'))  
-            })
+            t.getStrategyList();
+            switchStrategy(strategyId, value).then(({ type, message }) => t.$message[type](message))
         },
 
         //关闭添加strategy弹窗, refresh数据
@@ -332,11 +303,6 @@ export default {
             t.setStrategyDialogVisiblity = false;
             t.setStrategyDialogType = ''
         },
-
-        // updateProcessStatus(res){
-        //     const t = this;
-        //     t.processStatus = res
-        // },
 
         //check策略是否重复
         validateDuplicateStrategyId(rule, value, callback){

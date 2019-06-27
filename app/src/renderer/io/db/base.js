@@ -7,7 +7,6 @@ export const getTaskList = () => {
     return runSelectDB(TASKS_DB, 'SELECT * FROM kungfu_task')
 }
 
-
 /**
  * 新建task
  * @param {String} name 
@@ -25,21 +24,21 @@ export const addTask = (name, type, config) => {
 export const updateTask = (name, config) => {
     return runInsertUpdateDeleteDB(TASKS_DB, 'UPDATE kungfu_task SET config = ? WHERE name = ?', [config, name])
 }
+
 /**
  * 删除task
  * @param {String} name 
  */
-
 export const deleteTask = (name) => {
     return runInsertUpdateDeleteDB(TASKS_DB, 'DELETE FROM kungfu_task WHERE name = ?', name)
 }
-
 
 //判断是添加还是修改表内容
 //检查数据库中是否有该条数据，有则只修改config,没有则添加一条数据
 export const setTasksDB = ({ name, type, config }) => {
     return getTaskList().then(list => {
-        if(!list.filter(l => l.name === name).length) return addTask(name, type, config)
+        const existed = list.filter(l => l.name === name).length;
+        if(!existed) return addTask(name, type, config)
         else return updateTask(name, config)
     })
 }

@@ -1,8 +1,8 @@
-import * as ACCOUNT_API from '@/io/account';
-import { deleteTask } from '@/io/base';
+import * as ACCOUNT_API from '@/io/db/account';
 import { ACCOUNTS_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
-import { deleteProcess } from '__gUtils/processUtils';
+import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
+import { setTasksDB, deleteTask } from '@/io/db/base';
 
 const path = require('path')
 
@@ -21,9 +21,9 @@ export const deleteAccount = (row, accountList = []) => {
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
     .then(() => deleteProcess('td_' + row.account_id))
     .then(() => deleteTask(tdProcessId))
-    .then(() => { if(receive_md) return removeFileFolder(buildGatewayPath(mdProcessId)) })
-    .then(() => { if(receive_md) return deleteProcess('md_' + row.source_name) })                     
-    .then(() => { if(receive_md) return deleteTask(mdProcessId) })
+    .then(() => {if(receive_md) return removeFileFolder(buildGatewayPath(mdProcessId))})
+    .then(() => {if(receive_md) return deleteProcess('md_' + row.source_name)})                     
+    .then(() => {if(receive_md) return deleteTask(mdProcessId)})
     .then(() => ACCOUNT_API.deleteAccount(account_id))//删除账户表中的数据    
     .then(() => {
         if(receive_md && leftAccounts.length) {
@@ -31,4 +31,40 @@ export const deleteAccount = (row, accountList = []) => {
         }
         return false;
     })
+}
+
+//起停td
+export const switchTd = (account, value) => {
+    const {account_id, config} = account
+    const tdProcessId = `td_${account_id}`
+    if(!value){
+        return deleteProcess(tdProcessId)
+        .then(() => deleteTask(tdProcessId))
+        .then(() => ({ type: 'success', message: '操作成功！' }))       
+        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
+    }
+
+    //改变数据库表内容，添加或修改
+    return setTasksDB({name: tdProcessId, type: 'td', config})    
+    .then(() => startTd(account_id)) //开启td,pm2
+    .then(() => ({ type: 'start', message: '正在启动...' }))       
+    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))
+}
+
+//起停md
+export const switchMd = (account, value) => {
+    const {source_name, config} = account;
+    const mdProcessId = `md_${source_name}`
+    if(!value){
+        return deleteProcess(mdProcessId)
+        .then(() => deleteTask(mdProcessId))
+        .then(() => ({ type: 'success', message: '操作成功！' }))       
+        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
+    }
+
+    //改变数据库表内容，添加或修改
+    return setTasksDB({name: mdProcessId, type: 'md', config}) 
+    .then(() => startMd(source_name)) //开启td,pm2
+    .then(() => ({ type: 'start', message: '正在启动...' }))       
+    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))     
 }

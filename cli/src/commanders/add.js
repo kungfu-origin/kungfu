@@ -1,7 +1,7 @@
 import { sourceType, accountSource } from '@/assets/config/accountConfig';
 import { validateRequired, specialStrValidator, blankValidator, noZeroAtFirstValidator, chineseValidator } from '@/assets/js/validator';
-import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '@/io/account';
-import { getStrategyList, addStrategy, updateStrategyPath } from '@/io/strategy';
+import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '@/io/db/account';
+import { getStrategyList, addStrategy, updateStrategyPath } from '@/io/db/strategy';
 import { parseSources } from '__@/assets/utils';
 
 var inquirer = require( 'inquirer' );

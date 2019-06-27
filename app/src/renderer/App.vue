@@ -6,8 +6,8 @@
 <script>
 import { deepClone } from '@/assets/js/utils';
 import { mapState } from 'vuex';
-import * as ACCOUNT_API from '@/io/account'
-import * as BASE_API from '@/io/base'
+import * as ACCOUNT_API from '@/io/db/account';
+import * as BASE_API from '@/io/db/base';
 
 import { BASE_DIR, buildAccountFolderPath } from '__gConfig/pathConfig.js'
 import { connectCalendarNanomsg } from '@/io/nano/buildNmsg'
@@ -30,7 +30,6 @@ export default {
     },
     created() {
         const t = this;
-        this.getMdTdState()
         this.getCalendarNanomsg()
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
@@ -39,36 +38,7 @@ export default {
     methods: {
         buildMdTdStateNmsg(){},
         buildTradingDataNmsg(){},
-        
-
-
-        getMdTdState() {
-            const t = this
-            //先获取task的name,再去找他对应的状态
-            t.$store.dispatch('getTasks').then(res => {
-               if(!res) return
-               t.$store.dispatch('setMdTdState', {})
-                //分别获取状态
-               res.forEach(item => {
-                    const {name, task_type} = item
-                    //type 是md,td
-                    if(!(task_type === 'md' || task_type === 'td')) return
-                    //查看是否存在该姓名的文件
-                    if(existsSync(path.join(BASE_DIR, 'gateway', name))) {
-                        t.$store.dispatch('buildGatewayNmsgListener', name)//监听账户信息，td、md状态，资金情况
-                        ACCOUNT_API.getMdTdState(name).then(state => {
-                            const len = (state || []).length;
-                            const stateData = state[0]
-                            if(stateData) t.$store.dispatch('setOneMdTdState', {
-                                name, 
-                                oneState: stateData
-                            })
-                        })
-                    } 
-                })
-            })
-        },
-
+    
         //获取accounts的cash
         getAccountsCash(accountList) {
             const t = this

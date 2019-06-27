@@ -175,17 +175,17 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import { debounce } from '@/assets/js/utils'
-import * as ACCOUNT_API from '@/io/account'
-import * as BASE_API from '@/io/base'
-import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accountConfig'
-import SetAccountDialog from './SetAccountDialog'
-import SetFeeDialog from './SetFeeDialog'
-import { deleteProcess } from '__gUtils/processUtils'
-import { ACCOUNTS_DIR, LOG_DIR, buildGatewayPath } from '__gConfig/pathConfig'
+import { mapState, mapGetters } from 'vuex';
+import { debounce } from '@/assets/js/utils';
+import * as ACCOUNT_API from '@/io/db/account';
+import * as BASE_API from '@/io/db/base';
+import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accountConfig';
+import SetAccountDialog from './SetAccountDialog';
+import SetFeeDialog from './SetFeeDialog';
+import { deleteProcess } from '__gUtils/processUtils';
+import { ACCOUNTS_DIR, LOG_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder, openReadFile } from "__gUtils/fileUtils.js";
-import { deleteAccount } from '@/io/actions/account';
+import { deleteAccount, switchTd } from '@/io/actions/account';
 
 import path from 'path'
 export default {
@@ -249,7 +249,6 @@ export default {
     beforeMount(){
         const t = this;
         t.getAccountList();
-        t.$store.dispatch('getTasks')
     },
 
     mounted() {
@@ -286,7 +285,6 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => deleteAccount(row, t.accountList))
-            .then(() => t.$store.dispatch('getTasks'))
             .then(() => t.getAccountList())
             .then(() => {
                 //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
@@ -355,10 +353,7 @@ export default {
         //Td开关
         handleTdSwitch(value, account) {
             const t = this;
-            t.$store.dispatch('switchTd', {
-                account,
-                value
-            }).then(({ type, message }) => t.$message[type](message))
+            switchTd(account, value).then(({ type, message }) => t.$message[type](message))
         },
 
         //打开日志

@@ -7,7 +7,7 @@ import orderTable from '__@/assets/components/OrderTable';
 import tradeTable from '__@/assets/components/TradeTable';
 import Dashboard from '__@/assets/components/Dashboard';
 
-import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/account.js';
+import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '@/io/db/account';
 import { DEFAULT_PADDING, switchMd, switchTd, dealPnlData } from '__@/assets/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';

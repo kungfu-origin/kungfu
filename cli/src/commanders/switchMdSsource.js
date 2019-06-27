@@ -1,5 +1,5 @@
 import { parseSources } from '__@/assets/utils';
-import { getAccountList, changeAccountMd } from '@/io/account';
+import { getAccountList, changeAccountMd } from '@/io/db/account';
 
 const colors = require('colors');
 const inquirer = require( 'inquirer' );

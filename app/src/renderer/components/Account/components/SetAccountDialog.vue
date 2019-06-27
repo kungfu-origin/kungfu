@@ -45,9 +45,9 @@
 </template>
 
 <script>
-import {accountSource, sourceType} from '@/assets/config/accountConfig'
-import {mapState} from 'vuex'
-import * as ACCOUNT_API from '@/io/account'
+import {accountSource, sourceType} from '@/assets/config/accountConfig';
+import {mapState} from 'vuex';
+import * as ACCOUNT_API from '@/io/db/account';
 export default {
     name: 'set-account-dialog',
     props: {

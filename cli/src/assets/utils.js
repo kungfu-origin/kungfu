@@ -1,7 +1,7 @@
 import colors from 'colors';
 import moment from 'moment';
 import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
-import { setTasksDB } from '@/io/base';
+import { setTasksDB } from '@/io/db/base';
 import { toDecimal } from '@/assets/js/utils';
 
 String.prototype.toAccountId = function(){

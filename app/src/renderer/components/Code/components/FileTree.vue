@@ -24,7 +24,7 @@
     </div>
 </template>
 <script>
-import * as STRATEGY_API from '@/io/strategy';
+import * as STRATEGY_API from '@/io/db/strategy';
 import path from 'path';
 import FileNode from './FileNode';
 import {mapState} from 'vuex';

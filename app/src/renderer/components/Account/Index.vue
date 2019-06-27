@@ -78,7 +78,7 @@ import Pnl from '../Base/pnl/Pnl';
 import {sourceType} from '@/assets/config/accountConfig';
 import {refreshGatewayNanomsg} from '@/io/nano/buildNmsg';
 import * as msgType from '@/io/nano/msgType';
-import * as ACCOUNT_API from '@/io/account';
+import * as ACCOUNT_API from '@/io/db/account';
 import {debounce} from '@/assets/js/utils';
 
 

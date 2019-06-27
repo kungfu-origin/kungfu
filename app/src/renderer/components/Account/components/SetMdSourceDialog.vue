@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import {changeAccountMd} from '@/io/account.js'
+import {changeAccountMd} from '@/io/db/account';
 export default {
     props: {
         currentMdSourceAccount: {

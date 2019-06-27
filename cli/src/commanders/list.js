@@ -1,5 +1,5 @@
-import { getAccountList } from '@/io/account';
-import { getStrategyList } from '@/io/strategy';
+import { getAccountList } from '@/io/db/account';
+import { getStrategyList } from '@/io/db/strategy';
 import { parseToString } from '__@/assets/utils';
 
 const colors = require('colors');

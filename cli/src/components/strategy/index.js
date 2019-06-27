@@ -8,7 +8,7 @@ import orderTable from '__@/assets/components/OrderTable';
 import tradeTable from '__@/assets/components/TradeTable';
 import Dashboard from '__@/assets/components/Dashboard';
 
-import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '@/io/strategy.js';
+import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '@/io/db/strategy';
 import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, switchStrategy, dealLog, buildTradingDay } from '__@/assets/utils';
 import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { LOG_DIR } from '__gConfig/pathConfig';

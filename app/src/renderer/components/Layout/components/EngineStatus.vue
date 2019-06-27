@@ -65,9 +65,11 @@
     </el-popover>
 </template>
 <script>
-import {mapGetters, mapState} from 'vuex';
-import {accountSource, sourceType} from '@/assets/config/accountConfig'
-import {statusConfig} from '@/assets/config/statusConfig'
+import { mapGetters, mapState } from 'vuex';
+import { accountSource, sourceType } from '@/assets/config/accountConfig';
+import { statusConfig } from '@/assets/config/statusConfig';
+import { switchTd, switchMd } from '@/io/actions/account';
+
 export default {
     data(){
         let statusLevel = {};
@@ -150,27 +152,16 @@ export default {
             return (t.mdTdState[`td_${accountItem.account_id}`] || {}).state
         },
 
-        // updateProcessStatus(res){
-        //     const t = this;
-        //     t.processStatus = res
-        // },
-
         //Td开关
         handleTdSwitch(value, account) {
             const t = this;
-            t.$store.dispatch('switchTd', {
-                account,
-                value
-            }).then(({ type, message }) => t.$message[type](message))
+            switchTd(account, value).then(({ type, message }) => t.$message[type](message))
         },
 
         //行情开关
         handleMdSwitch(value, account) {
             const t = this
-            t.$store.dispatch('switchMd', {
-                account,
-                value
-            }).then(({ type, message }) => t.$message[type](message))  
+            switchMd(account, value).then(({ type, message }) => t.$message[type](message))  
         },
     }
 }

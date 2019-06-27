@@ -214,7 +214,7 @@ export const startStrategy = (strategyId, strategyPath) => {
     strategyPath = dealSpaceInPath(strategyPath)
     return startProcess({
         "name": strategyId,
-        "args": `strategy --name ${strategyId} --path ${strategyPath}`,
+        "args": `strategy -n ${strategyId} -p ${strategyPath}`,
     }, false).catch(err => {
         logger.error('startStrategy-err', err)
     })

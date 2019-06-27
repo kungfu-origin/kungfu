@@ -2,11 +2,9 @@
 import Vue from 'vue';
 import { closeGlobalGatewayNanomsg, refreshGlobalGatewayNanomsg } from '@/io/nano/buildNmsg'
 import * as msgType from '@/io/nano/msgType';
-import * as ACCOUNT_API from '@/io/account';
+import * as ACCOUNT_API from '@/io/db/account';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
 import { debounce } from '@/assets/js/utils';
-import { setTasksDB } from '@/io/base';
-
 
 //保存选中的账户信息
 export const setCurrentAccount = ({commit}, account) => {
@@ -84,50 +82,4 @@ export const buildGatewayNmsgListener = ({dispatch}, gatewayName) => {
                 break
         }
     })
-}
-
-
-
-//起停td
-export const switchTd = ({dispatch}, {account, value}) => {
-    const {account_id, config} = account
-    const tdProcessId = `td_${account_id}`
-    if(!value){
-        return deleteProcess(tdProcessId)
-        .then(() => dispatch('deleteOneMdTdState', tdProcessId))
-        .then(() => closeGlobalGatewayNanomsg(tdProcessId))
-        .then(() => ({ type: 'success', message: '操作成功！' }))       
-        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
-    }
-
-    //改变数据库表内容，添加或修改
-    return setTasksDB({name: tdProcessId, type: 'td', config})
-    .then(() => dispatch('getTasks'))//重新获取数据
-    .then(() => dispatch('setOneMdTdState', {name: tdProcessId, oneState: Object.freeze({})}))
-    .then(() => dispatch('buildGatewayNmsgListener', tdProcessId))    
-    .then(() => startTd(account_id)) //开启td,pm2
-    .then(() => ({ type: 'start', message: '正在启动...' }))       
-    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))
-}
-
-//起停md
-export const switchMd = ({dispatch}, {account, value}) => {
-    const {source_name, config} = account;
-    const mdProcessId = `md_${source_name}`
-    if(!value){
-        return deleteProcess(mdProcessId)
-        .then(() => dispatch('deleteOneMdTdState', mdProcessId))
-        .then(() => closeGlobalGatewayNanomsg(mdProcessId))
-        .then(() => ({ type: 'success', message: '操作成功！' }))       
-        .catch(err => ({ type: 'error', message: err || '操作失败！' }))
-    }
-
-    //改变数据库表内容，添加或修改
-    return setTasksDB({name: mdProcessId, type: 'md', config})
-    .then(() => dispatch('getTasks'))//重新获取数据
-    .then(() => dispatch('setOneMdTdState', {name: mdProcessId, oneState: Object.freeze({})}))
-    .then(() => dispatch('buildGatewayNmsgListener', mdProcessId))    
-    .then(() => startMd(source_name)) //开启td,pm2
-    .then(() => ({ type: 'start', message: '正在启动...' }))       
-    .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))     
 }
