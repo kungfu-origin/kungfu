@@ -8,6 +8,7 @@ import pywingchun
 import kungfu.service.kfs as kfs
 import kungfu.yijinjing.journal as kfj
 from kungfu import nanomsg
+from kungfu.log import create_logger
 from . import os_signal
 
 SECOND_IN_NANO = int(1e9)
@@ -22,6 +23,7 @@ class Master(pyyjj.master):
         pyyjj.master.__init__(self, pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
         self.ctx = ctx
         self.ctx.master = self
+        self.ctx.logger = create_logger("watcher", ctx.log_level, self.io_device.home)
         self.ctx.apprentices = {}
 
         calendar_db_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)

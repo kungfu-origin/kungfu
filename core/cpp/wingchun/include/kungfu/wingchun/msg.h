@@ -72,6 +72,26 @@ namespace kungfu
 
             namespace data
             {
+                enum class GatewayState : int
+                {
+                    Unknown = 0,
+                    Idle = 1,
+                    DisConnected = 2,
+                    Connected = 3,
+                    LoggedIn = 4,
+                    LoggedInFailed = 5,
+                    SettlementConfirmed = 6,
+                    SettlementConfirmFailed = 7,
+                    AccountInfoConfirmed = 8,
+                    AccountInfoConfirmFailed = 9,
+                    PositionInfoConfirmed = 10,
+                    PositionInfoConfirmFailed = 11,
+                    InstrumentInfoConfirmed = 12,
+                    InstrumentInfoConfirmFailed = 13,
+                    PositionDetailConfirmed = 14,
+                    PositionDetailConfirmFailed = 15,
+                    Ready = 100
+                };
 
                 //合约信息
                 struct Instrument
@@ -247,6 +267,7 @@ namespace kungfu
                 };
 #pragma pack(pop)
 #endif
+
                 inline void to_json(nlohmann::json &j, const Quote &quote)
                 {
                     j["trading_day"] = std::string(quote.trading_day);
@@ -487,6 +508,7 @@ namespace kungfu
                 };
 #pragma pack(pop)
 #endif
+
                 inline void to_json(nlohmann::json &j, const OrderInput &input)
                 {
                     j["order_id"] = input.order_id;
@@ -850,6 +872,7 @@ namespace kungfu
                     j["commission"] = FORMAT_DOUBLE(trade.commission);
 
                 }
+
                 //账户信息
                 struct AccountInfo
                 {

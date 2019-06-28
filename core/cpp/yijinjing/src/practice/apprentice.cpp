@@ -144,29 +144,13 @@ namespace kungfu
             events | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
-                  const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
-                  if (writers_.find(request.dest_id) == writers_.end())
-                  {
-                      writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
-                      if (request.dest_id == 0)
-                      {
-                          writers_[request.dest_id]->mark(time::now_in_nano(), msg::type::SessionStart);
-                      }
-                  } else
-                  {
-                      SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once", get_location(e->source())->uname, e->source(),
-                                   get_location(request.dest_id)->uname, request.dest_id);
-                  }
+                  on_write_to(e);
               });
 
             events | is(msg::type::RequestReadFrom) |
             $([&](event_ptr e)
               {
-                  const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
-                  SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(e->source())->uname, e->source(),
-                              get_location(request.source_id)->uname, request.source_id, time::strftime(e->gen_time()),
-                              time::strftime(request.from_time));
-                  reader_->join(get_location(request.source_id), get_home_uid(), request.from_time);
+                  on_read_from(e);
               });
 
             events | is(msg::type::RequestStart) | first() |
@@ -174,6 +158,33 @@ namespace kungfu
               {
                   start();
               });
+        }
+
+        void apprentice::on_write_to(const yijinjing::event_ptr &event)
+        {
+            const msg::data::RequestWriteTo &request = event->data<msg::data::RequestWriteTo>();
+            if (writers_.find(request.dest_id) == writers_.end())
+            {
+                writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
+                if (request.dest_id == 0)
+                {
+                    writers_[request.dest_id]->mark(time::now_in_nano(), msg::type::SessionStart);
+                }
+            } else
+            {
+                SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once",
+                             get_location(event->source())->uname, event->source(),
+                             get_location(request.dest_id)->uname, request.dest_id);
+            }
+        }
+
+        void apprentice::on_read_from(const yijinjing::event_ptr &event)
+        {
+            const msg::data::RequestReadFrom &request = event->data<msg::data::RequestReadFrom>();
+            SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
+                        get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
+                        time::strftime(request.from_time));
+            reader_->join(get_location(request.source_id), get_home_uid(), request.from_time);
         }
 
         void apprentice::register_location(const nlohmann::json &location_json)
@@ -211,8 +222,8 @@ int main(int argc, char **argv)
     std::cout << typeid(nanomsg::nanomsg_json).name() << std::endl;
     std::cout << typeid(nanomsg::nanomsg_json_ptr).name() << std::endl;
     std::cout << (typeid(e) == typeid(nanomsg::nanomsg_json_ptr)) << std::endl;
-    std::cout << (dynamic_cast<nanomsg::nanomsg_json*>(e.get()) == nullptr) << std::endl;
-    std::cout << (dynamic_cast<journal::frame*>(e.get()) == nullptr) << std::endl;
+    std::cout << (dynamic_cast<nanomsg::nanomsg_json *>(e.get()) == nullptr) << std::endl;
+    std::cout << (dynamic_cast<journal::frame *>(e.get()) == nullptr) << std::endl;
     std::cout << e->to_string() << std::endl;
     std::cout << e->data<nlohmann::json>().dump() << std::endl;
 

@@ -2,6 +2,7 @@
 # must explicitly import all commands
 
 from . import master
+from . import watcher
 from . import gateway
 from . import strategy
 from . import replay

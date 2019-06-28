@@ -39,7 +39,7 @@ namespace kungfu
             return writers_[dest_id];
         }
 
-        void hero::register_location(const yijinjing::data::location_ptr &location)
+        void hero::register_location(const location_ptr &location)
         {
             locations_[location->uid] = location;
         }
@@ -54,7 +54,13 @@ namespace kungfu
             return locations_.find(hash) != locations_.end();
         }
 
-        const yijinjing::data::location_ptr hero::get_location(uint32_t hash)
+        bool hero::has_location(mode m, category c, const std::string &group, const std::string &name)
+        {
+            location loc(m, c, group, name, get_io_device()->get_home()->locator);
+            return has_location(loc.uid);
+        }
+
+        const location_ptr hero::get_location(uint32_t hash)
         {
             return locations_[hash];
         }
@@ -88,6 +94,11 @@ namespace kungfu
                                 {
                                     sb.on_next(reader_->current_frame());
                                     reader_->next();
+                                }
+                                if (io_device_->get_rep_sock()->recv() > 0)
+                                {
+                                    const std::string &msg = io_device_->get_rep_sock()->last_message();
+                                    sb.on_next(std::make_shared<nanomsg_json>(msg));
                                 }
                                 auto now = time::now_in_nano();
                                 if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)

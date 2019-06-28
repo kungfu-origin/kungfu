@@ -1,3 +1,5 @@
+#include <utility>
+
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -200,7 +202,7 @@ namespace kungfu
             {
             public:
                 location(data::mode m, data::category c, std::string g, std::string n, locator_ptr l) :
-                        mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(l),
+                        mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(std::move(l)),
                         uname(fmt::format("{}/{}/{}/{}", data::get_category_name(category), group, name, data::get_mode_name(mode))),
                         uid(util::hash_str_32(uname))
                 {}

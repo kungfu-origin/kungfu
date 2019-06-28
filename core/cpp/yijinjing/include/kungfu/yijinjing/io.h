@@ -41,20 +41,23 @@ namespace kungfu
 
             journal::reader_ptr open_reader_to_subscribe();
 
-            journal::reader_ptr open_reader(data::location_ptr location, uint32_t dest_id);
+            journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
 
             journal::writer_ptr open_writer(uint32_t dest_id);
 
-            journal::writer_ptr open_writer_at(data::location_ptr location, uint32_t dest_id);
+            journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
 
             nanomsg::socket_ptr
-            connect_socket(data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);
+            connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
 
             nanomsg::socket_ptr
-            bind_socket(data::location_ptr location, const nanomsg::protocol &p, int timeout = 0);
+            bind_socket(const nanomsg::protocol &p, int timeout = 0);
 
             nanomsg::url_factory_ptr get_url_factory() const
             { return url_factory_; }
+
+            nanomsg::socket_ptr get_rep_sock() const
+            { return rep_sock_; }
 
             publisher_ptr get_publisher()
             { return publisher_; }
@@ -67,6 +70,7 @@ namespace kungfu
             const bool low_latency_;
             const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;
+            nanomsg::socket_ptr rep_sock_;
             publisher_ptr publisher_;
             observer_ptr observer_;
 

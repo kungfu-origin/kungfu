@@ -49,6 +49,8 @@ namespace kungfu
 
             bool has_location(uint32_t hash);
 
+            bool has_location(yijinjing::data::mode m, yijinjing::data::category c, const std::string &group, const std::string &name);
+
             const yijinjing::data::location_ptr get_location(uint32_t hash);
 
             template<typename T>

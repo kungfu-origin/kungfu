@@ -143,9 +143,9 @@ namespace kungfu
 
                 int send(const std::string &msg, int flags = 0) const;
 
-                int recv(int flags = 0);
+                int recv(int flags = NN_DONTWAIT);
 
-                const std::string &recv_msg(int flags = 0);
+                const std::string &recv_msg(int flags = NN_DONTWAIT);
 
                 int send_json(const nlohmann::json &msg, int flags = 0) const;
 

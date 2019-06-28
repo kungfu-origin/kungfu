@@ -45,31 +45,15 @@ namespace kungfu
 
                 virtual bool req_account() = 0;
 
-                std::vector<uint64_t> get_pending_orders(const std::string &client_id = "") const;
-
             protected:
                 void react(const rx::observable<yijinjing::event_ptr> &events) override ;
 
                 void start() override ;
 
             private:
-                void init_account_manager();
-
-            private:
                 std::string source_;
                 std::string account_id_;
-
-                storage::OrderStorage order_storage_;
-                storage::TradeStorage trade_storage_;
-
                 Calendar calendar_;
-
-                AccountManager account_manager_;
-//                oms::OrderManager order_manager_;
-
-                std::vector<msg::data::Position> rsp_pos_;
-                std::vector<msg::data::Position> rsp_pos_detail_;
-
             };
         }
     }

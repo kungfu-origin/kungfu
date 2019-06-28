@@ -253,10 +253,10 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
     io_device.def_property_readonly("publisher", &io_device::get_publisher)
             .def_property_readonly("observer", &io_device::get_observer)
+            .def_property_readonly("home", &io_device::get_home)
             .def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
-            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
-            .def("bind_socket", &io_device::bind_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
+            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
     py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
             .def(py::init<data::location_ptr, bool>());
