@@ -76,7 +76,7 @@ namespace kungfu
             {
                 apprentice::start();
                 auto home = get_io_device()->get_home();
-                observe(location::make(home->mode, category::MD, source_, source_, home->locator), time::now_in_nano());
+                observe(time::now_in_nano(), location::make(home->mode, category::MD, source_, source_, home->locator));
             }
         }
     }

@@ -26,7 +26,7 @@ namespace kungfu
 
             void register_app(yijinjing::event_ptr e);
 
-            void deregister_app(uint32_t app_location_uid);
+            void deregister_app(int64_t trigger_time, uint32_t app_location_uid);
 
         protected:
             void react(const rx::observable<yijinjing::event_ptr> &events) override;

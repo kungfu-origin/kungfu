@@ -54,11 +54,11 @@ namespace kungfu
                 if (app_locations_.find(app_location->uid) == app_locations_.end())
                 {
                     auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-                    register_location(master_location);
+                    register_location(e->gen_time(), master_location);
                     app_locations_[app_location->uid] = master_location->uid;
                 }
 
-                register_location(app_location);
+                register_location(e->gen_time(), app_location);
 
                 auto master_location = get_location(app_locations_[app_location->uid]);
                 auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
@@ -96,9 +96,9 @@ namespace kungfu
             }
         }
 
-        void master::deregister_app(uint32_t app_location_uid)
+        void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
         {
-            deregister_location(app_location_uid);
+            deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
             nlohmann::json msg{};
             auto now = time::now_in_nano();

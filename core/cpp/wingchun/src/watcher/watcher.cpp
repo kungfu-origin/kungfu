@@ -34,7 +34,8 @@ namespace kungfu
             SPDLOG_INFO("published {}", msg);
         }
 
-        void Watcher::publish_state(int64_t trigger_time, yijinjing::data::category c, const std::string &group, const std::string &name, GatewayState state)
+        void Watcher::publish_state(int64_t trigger_time, yijinjing::data::category c, const std::string &group, const std::string &name,
+                                    GatewayState state)
         {
             nlohmann::json msg;
             msg["gen_time"] = time::now_in_nano();
@@ -54,68 +55,6 @@ namespace kungfu
         void Watcher::react(const rx::observable<yijinjing::event_ptr> &events)
         {
             apprentice::react(events);
-
-            events | is(yijinjing::msg::type::Register) |
-            $([&](event_ptr e)
-              {
-                  auto app_location = get_location(e->source());
-                  if (app_location->uid != get_home_uid())
-                  {
-                      auto app_uid_str = fmt::format("{:08x}", app_location->uid);
-                      auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
-                      reader_->join(master_cmd_location, app_location->uid, e->gen_time());
-                  }
-
-                  switch (app_location->category)
-                  {
-                      case category::MD:
-                      {
-                          observe(app_location, e->gen_time());
-                          publish_state(e->gen_time(), app_location->category, app_location->group, app_location->name, GatewayState::Connected);
-                          break;
-                      }
-                      case category::TD:
-                      {
-                          publish_state(e->gen_time(), app_location->category, app_location->group, app_location->name, GatewayState::Connected);
-                          break;
-                      }
-                      case category::STRATEGY:
-                      {
-                          break;
-                      }
-                      default:
-                      {
-                          break;
-                      }
-                  }
-              });
-
-            events | is(yijinjing::msg::type::Deregister) |
-            $([&](event_ptr e)
-              {
-                  auto app_location = get_location(e->source());
-                  switch (app_location->category)
-                  {
-                      case category::MD:
-                      {
-                          publish_state(e->gen_time(), app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
-                          break;
-                      }
-                      case category::TD:
-                      {
-                          publish_state(e->gen_time(), app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
-                          break;
-                      }
-                      case category::STRATEGY:
-                      {
-                          break;
-                      }
-                      default:
-                      {
-                          break;
-                      }
-                  }
-              });
 
             /**
              * process active query from clients
@@ -154,6 +93,67 @@ namespace kungfu
               });
         }
 
+        void Watcher::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
+        {
+            if (has_location(app_location->uid))
+            {
+                // bypass location events from others master cmd journal
+                return;
+            }
+            apprentice::register_location(trigger_time, app_location);
+            switch (app_location->category)
+            {
+                case category::MD:
+                {
+                    watch(trigger_time, app_location);
+                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
+                    break;
+                }
+                case category::TD:
+                {
+                    watch(trigger_time, app_location);
+                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
+                    break;
+                }
+                case category::STRATEGY:
+                {
+                    watch(trigger_time, app_location);
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+        }
+
+        void Watcher::deregister_location(int64_t trigger_time, uint32_t location_uid)
+        {
+            auto app_location = get_location(location_uid);
+            switch (app_location->category)
+            {
+                case category::MD:
+                {
+                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
+                    break;
+                }
+                case category::TD:
+                {
+                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
+                    break;
+                }
+                case category::STRATEGY:
+                {
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            apprentice::deregister_location(trigger_time, location_uid);
+        }
+
         void Watcher::on_write_to(const yijinjing::event_ptr &event)
         {
             if (event->source() == get_master_commands_uid())
@@ -181,6 +181,13 @@ namespace kungfu
         void Watcher::start()
         {
             apprentice::start();
+        }
+
+        void Watcher::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
+        {
+            auto app_uid_str = fmt::format("{:08x}", app_location->uid);
+            auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
+            reader_->join(master_cmd_location, app_location->uid, trigger_time);
         }
     }
 }

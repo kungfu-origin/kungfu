@@ -37,6 +37,10 @@ namespace kungfu
         protected:
             void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
+            void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
+
+            void deregister_location(int64_t trigger_time, uint32_t location_uid) override;
+
             void on_write_to(const yijinjing::event_ptr &event) override;
 
             void on_read_from(const yijinjing::event_ptr &event) override;
@@ -48,6 +52,8 @@ namespace kungfu
             Calendar calendar_;
 
             std::unordered_map<std::string, int> accounts_;
+
+            void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
         };
     }
 }

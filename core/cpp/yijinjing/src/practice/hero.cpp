@@ -39,13 +39,15 @@ namespace kungfu
             return writers_[dest_id];
         }
 
-        void hero::register_location(const location_ptr &location)
+        void hero::register_location(int64_t trigger_time, const location_ptr &location)
         {
             locations_[location->uid] = location;
+            SPDLOG_INFO("registered location {} at {}", location->uname, time::strftime(trigger_time));
         }
 
-        void hero::deregister_location(const uint32_t location_uid)
+        void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
         {
+            SPDLOG_INFO("deregistered location {} at {}", get_location(location_uid)->uname, time::strftime(trigger_time));
             locations_.erase(location_uid);
         }
 

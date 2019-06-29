@@ -26,7 +26,7 @@ def register(ctx, event):
 def deregister(ctx, event):
     pid = event['pid']
     ctx.logger.info('apprentice %s checking out', pid)
-    ctx.master.deregister_app(ctx.apprentices[pid]['location'].uid)
+    ctx.master.deregister_app(event['gen_time'], ctx.apprentices[pid]['location'].uid)
 
 
 @kfs.task
@@ -34,5 +34,5 @@ def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
             ctx.logger.warn('cleaning up stale process pid %s clients %s', pid, ctx.apprentices[pid]['location'].uname)
-            ctx.master.deregister_app(ctx.apprentices[pid]['location'].uid)
+            ctx.master.deregister_app(pyyjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
             del ctx.apprentices[pid]

@@ -66,9 +66,9 @@ namespace kungfu
 
             virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
 
-            void register_location(const yijinjing::data::location_ptr &location);
+            virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
-            void deregister_location(uint32_t location_uid);
+            virtual void deregister_location(int64_t trigger_time, uint32_t location_uid);
 
             void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
 

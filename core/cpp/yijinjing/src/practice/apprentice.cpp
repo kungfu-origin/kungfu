@@ -71,7 +71,7 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::observe(const location_ptr &location, int64_t from_time)
+        void apprentice::observe(int64_t from_time, const location_ptr &location)
         {
             reader_->join(location, 0, from_time);
         }
@@ -122,23 +122,21 @@ namespace kungfu
                   std::string json_str{};
                   json_str.assign(buffer, e->data_length());
                   nlohmann::json request_loc = nlohmann::json::parse(json_str);
-                  register_location(request_loc);
+                  register_location_from_json(e->gen_time(), request_loc);
               });
 
             events | is(msg::type::Register) |
             $([&](event_ptr e)
               {
-                  register_location(e->data<nlohmann::json>());
+                  register_location_from_json(e->gen_time(), e->data<nlohmann::json>());
               });
 
             events | is(msg::type::Deregister) |
             $([&](event_ptr e)
               {
-                  auto app_location = get_location(e->source());
-                  deregister_location(e->source());
                   reader_->disjoin(e->source());
                   writers_.erase(e->source());
-                  SPDLOG_INFO("deregistered location {}", app_location->uname);
+                  deregister_location(e->gen_time(), e->source());
               });
 
             events | is(msg::type::RequestWriteTo) |
@@ -187,7 +185,7 @@ namespace kungfu
             reader_->join(get_location(request.source_id), get_home_uid(), request.from_time);
         }
 
-        void apprentice::register_location(const nlohmann::json &location_json)
+        void apprentice::register_location_from_json(int64_t trigger_time, const nlohmann::json &location_json)
         {
             auto app_location = std::make_shared<location>(
                     static_cast<mode>(location_json["mode"]),
@@ -195,8 +193,7 @@ namespace kungfu
                     location_json["group"], location_json["name"],
                     get_io_device()->get_home()->locator
             );
-            hero::register_location(app_location);
-            SPDLOG_INFO("registered location {}", app_location->uname);
+            register_location(trigger_time, app_location);
         }
     }
 }
