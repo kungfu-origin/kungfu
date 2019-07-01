@@ -4,16 +4,17 @@
     </div>
 </template>
 <script>
-import { deepClone } from '@/assets/js/utils';
+import path from 'path';
 import { mapState } from 'vuex';
+
+import { BASE_DIR, buildAccountFolderPath } from '__gConfig/pathConfig.js';
+import { existsSync } from '__gUtils/fileUtils';
+import { deepClone } from '@/assets/js/utils';
 import * as ACCOUNT_API from '@/io/db/account';
 import * as BASE_API from '@/io/db/base';
-
-import { BASE_DIR, buildAccountFolderPath } from '__gConfig/pathConfig.js'
 import { connectCalendarNanomsg } from '@/io/nano/buildNmsg'
-import * as msgType from '@/io/nano/msgType'
-import { existsSync } from '__gUtils/fileUtils'
-import path from 'path';
+import * as MSG_TYPE from '@/io/nano/msgType'
+import { subObservable, filterGatewayState } from '@/io/nano/nanoSub'; 
 
 
 
@@ -30,37 +31,34 @@ export default {
     },
     created() {
         const t = this;
-        this.getCalendarNanomsg()
+        this.subGatewayState();
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
-        .then(res => t.getAccountsCash())
+        .then(accountList => t.getAccountsCash(accountList))
+        this.getCalendarNanomsg();
     },
-    methods: {
-        buildMdTdStateNmsg(){},
-        buildTradingDataNmsg(){},
-    
+    methods: {   
+        subGatewayState() {
+            const t = this;
+            subObservable.subscribe(data => filterGatewayState(data))
+        },
+        
         //获取accounts的cash
         getAccountsCash(accountList) {
             const t = this
-            let cashList = {}
             //从数据库中查找
             if(!accountList || !accountList.length) return
-            const promises = accountList.map(item => {
-                const { account_id } = item
+            const promises = accountList.map(({ account_id }) => {
                 if(!existsSync(buildAccountFolderPath(account_id))) return false;
                 return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
                     if(!cash || !cash.length) return false;
-                    const cashData = cash[0];
-                    return {
-                        accountId: account_id,
-                        cashData
-                    }
+                    return { accountId: account_id, cashData: cash[0] }
                 })
             })
-
             return Promise.all(promises).then(cashList => {
-                cashList.forEach(cash => cashList[cash.accountId] = cash.cashData)
-                t.$store.dispatch('setAccountsAsset', cashList)
+                const cashData = {} 
+                cashList.forEach(cash => cashData[cash.accountId] = cash.cashData)
+                t.$store.dispatch('setAccountsAsset', cashData)
             })
         },
         
@@ -69,15 +67,6 @@ export default {
             const t = this
             //先主动获取
             t.$store.dispatch('getCalendar');
-            const sub = connectCalendarNanomsg()
-            if(!sub) return;
-            sub.on('data', buf => {
-                const data = JSON.parse(String(buf).replace(/\0/g,''))
-                //监听交易日的变化
-                if(msgType.calendar == data.msg_type) {
-                t.$store.dispatch('setCalendar', data.data)
-                }
-            })
         }
     }
 }

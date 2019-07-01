@@ -186,7 +186,6 @@ export default {
                 t.$message.error(err.message || '获取失败')
             }).finally(() => {
                 t.initChart()
-                t.$emit('startNanomsg')
             })
             
         },

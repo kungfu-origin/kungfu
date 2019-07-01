@@ -30,7 +30,7 @@ const winKill = (tasks) => {
 const unixKill = (tasks) => {
     return fkill(tasks, {
         force: true,
-        silent: true     
+        silent: true 
     })
 }
 
@@ -40,7 +40,7 @@ const kfKill = (tasks) => {
 }
 
 
-export const KillKfc = () => kfKill(['kfc'])
+export const killKfc = () => kfKill(['kfc'])
 
 export const killExtra = () => kfKill(['kfc', 'pm2'])
 
@@ -134,7 +134,7 @@ export const describeProcess = (name) => {
     })
 }
 
-export const startProcess = async (options, no_ext) => {
+export const startProcess = async (options, no_ext=false) => {
     const extensionName = platform === 'win' ? '.exe' : ''
     options = {
         ...options,
@@ -156,9 +156,7 @@ export const startProcess = async (options, no_ext) => {
         }
     };
 
-    if(no_ext) {
-        options['env']['KF_NO_EXT'] = 'on';
-    }
+    if(no_ext) options['env']['KF_NO_EXT'] = 'on'
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -181,15 +179,30 @@ export const startProcess = async (options, no_ext) => {
 
 //启动pageEngine
 export const startMaster = async(force) => {
-    const processName = 'master'
+    
+    const processName = 'master';
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
     const masterStatus = master.filter(m => m.pm2_env.status === 'online')
     if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
-    return KillKfc().finally(() => startProcess({
+    try{ await killKfc() } catch (err) {}
+    return startProcess({
         "name": processName,
-        "args": "master",
-    }, true).catch(err => logger.error(err)))
+        "args": "master"
+    }, true).catch(err => logger.error(err))
+}
+
+//启动watcher
+export const startWatcher = async(force) => {
+    const processName = 'watcher';
+    const watcher = await describeProcess(processName);
+    if(watcher instanceof Error) throw watcher
+    const watcherStatus = watcher.filter(m => m.pm2_env.status === 'online')
+    if(!force && watcherStatus.length === watcher.length && watcher.length !== 0) throw new Error('kungfu watcher 正在运行！')
+    return startProcess({
+        'name': processName,
+        'args': 'watcher'
+    }).catch(err => logger.error(err))
 }
 
 //启动md
@@ -197,7 +210,7 @@ export const startMd = (source) => {
     return startProcess({
         "name": `md_${source}`,
         "args": `md -s ${source}`,
-    }, false).catch(err => logger.error(err))
+    }).catch(err => logger.error(err))
 }
 
 //启动td
@@ -206,7 +219,7 @@ export const startTd = (accountId) => {
     return startProcess({
         "name": `td_${accountId}`,
         "args": `td -s ${source} -a ${id}`,
-    }, false).catch(err => logger.error(err))
+    }).catch(err => logger.error(err))
 }
 
 //启动strategy
@@ -215,11 +228,8 @@ export const startStrategy = (strategyId, strategyPath) => {
     return startProcess({
         "name": strategyId,
         "args": `strategy -n ${strategyId} -p ${strategyPath}`,
-    }, false).catch(err => {
-        logger.error('startStrategy-err', err)
-    })
+    }).catch(err => logger.error(err))
 }
-
 
 //列出所有进程
 export const listProcessStatus = () => {

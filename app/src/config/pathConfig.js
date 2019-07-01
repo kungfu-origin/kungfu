@@ -56,7 +56,7 @@ export const GATEWAY_DIR = ''
 
 
 
-
+//================= global db start ==============================
 
 //strategy
 export const STRATEGYS_DB = path.join(GLOBAL_DIR, 'strategys.db')
@@ -67,6 +67,7 @@ export const ACCOUNTS_DB = path.join(GLOBAL_DIR, 'accounts.db')
 //tasks
 export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 
+//================= global db end =================================
 
 //================= account related start ==========================
 
@@ -142,6 +143,16 @@ export const buildGloablCommissionDBPath = () => {
 //获取进程日志地址
 export const buildProcessLogPath = (processId) => {
     return path.join(LOG_DIR, `${processId}.log`)
+}
+
+//获取watcher nano pub 地址
+export const buildNmsgPubFilePath = () => {
+    return path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
+}
+
+//获取watcher nano rep 地址
+export const buildNmsgRepFilePath = () => {
+    return path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
 }
 
 //================== others end ===================================

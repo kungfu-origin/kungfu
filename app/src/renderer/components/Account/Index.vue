@@ -18,7 +18,6 @@
                         moduleType="account"
                         :minMethod="getAccountPnlMin"
                         :dayMethod="getAccountPnlDay"
-                        @startNanomsg="buildMinNanomsgListener"
                         :nanomsgBackData="minNanomsgListener"
                         />
                     </el-col>
@@ -31,7 +30,6 @@
                         moduleType="account" 
                         :gatewayName="`td_${currentAccount.account_id}`"
                         :getDataMethod="getAccountOrder" 
-                        @startNanomsg="buildOrderNanomsgListener"
                         :nanomsgBackData="orderNanomsgListener"
                         />   
                     </el-col>              
@@ -46,7 +44,6 @@
                     moduleType="account"
                     :accountType="accountType"
                     :getDataMethod="getAccountPos"
-                    @startNanomsg="buildPosNanomsgListener"
                     :nanomsgBackData="posNanomsgListener"
                     />
                 </el-row>
@@ -57,7 +54,6 @@
                     :currentId="currentId"
                     moduleType="account" 
                     :getDataMethod="getAccountTrade"
-                    @startNanomsg="buildTradeNanomsgListener"
                     :nanomsgBackData="tradeNanomsgListener"
                     />
                 </el-row>

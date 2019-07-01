@@ -181,7 +181,6 @@ export default {
             })
             .finally(() => {
                 t.initChart()
-                t.$emit('startNanomsg')
             })
         },
 

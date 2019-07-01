@@ -289,7 +289,6 @@ export default {
 
         init: debounce(function() {
             const t = this
-            t.$emit('startNanomsg');
             t.getData();
         }),
 

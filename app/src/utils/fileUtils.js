@@ -142,7 +142,6 @@ export const openFolder = (store, folder, oldFileTree, openStatus, force) => {
         }else{
             resolve({})
         }
-
         //打开
         store.dispatch('setFileNode', {id: folder.id, attr: 'open', val: openStatus})
 

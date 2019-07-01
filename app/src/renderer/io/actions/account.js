@@ -45,7 +45,7 @@ export const switchTd = (account, value) => {
     }
 
     //改变数据库表内容，添加或修改
-    return setTasksDB({name: tdProcessId, type: 'td', config})    
+    return setTasksDB({name: tdProcessId, type: 'td', config})   
     .then(() => startTd(account_id)) //开启td,pm2
     .then(() => ({ type: 'start', message: '正在启动...' }))       
     .catch(err => ({ type: 'error', message: err.message || '操作失败！' }))
