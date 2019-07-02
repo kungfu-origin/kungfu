@@ -72,9 +72,9 @@ namespace kungfu
 //                  });
             }
 
-            void Trader::start()
+            void Trader::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
-                apprentice::start();
+                apprentice::on_start(events);
                 auto home = get_io_device()->get_home();
                 observe(time::now_in_nano(), location::make(home->mode, category::MD, source_, source_, home->locator));
             }

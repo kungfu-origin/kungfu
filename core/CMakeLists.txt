@@ -16,7 +16,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(kungfu)
 
 ############################################################
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 
 if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")

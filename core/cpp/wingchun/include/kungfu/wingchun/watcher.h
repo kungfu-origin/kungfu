@@ -45,7 +45,7 @@ namespace kungfu
 
             void on_read_from(const yijinjing::event_ptr &event) override;
 
-            void start() override;
+            void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;

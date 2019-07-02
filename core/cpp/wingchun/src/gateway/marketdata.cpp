@@ -73,9 +73,9 @@ namespace kungfu
                   });
             }
 
-            void MarketData::start()
+            void MarketData::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
-                apprentice::start();
+                apprentice::on_start(events);
             }
         }
     }

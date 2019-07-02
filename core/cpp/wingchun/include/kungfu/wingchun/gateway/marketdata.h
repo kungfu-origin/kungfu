@@ -31,7 +31,7 @@ namespace kungfu
             protected:
                 void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
-                void start() override ;
+                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
             };
         }
     }

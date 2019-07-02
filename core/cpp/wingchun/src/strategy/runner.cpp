@@ -86,7 +86,7 @@ namespace kungfu
                   });
             }
 
-            void Runner::start()
+            void Runner::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
                 for (const auto& strategy : strategies_)
                 {

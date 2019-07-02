@@ -41,8 +41,9 @@ namespace kungfu
                 }
             }
 
-            void MdGateway::start()
+            void MdGateway::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
+                gateway::MarketData::on_start(events);
                 SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
 
                 if (api_ != nullptr)

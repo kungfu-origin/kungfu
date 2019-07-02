@@ -178,9 +178,9 @@ namespace kungfu
             }
         }
 
-        void Watcher::start()
+        void Watcher::on_start(const rx::observable<yijinjing::event_ptr> &events)
         {
-            apprentice::start();
+            apprentice::on_start(events);
         }
 
         void Watcher::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)

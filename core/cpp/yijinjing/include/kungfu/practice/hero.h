@@ -36,15 +36,13 @@ namespace kungfu
             void signal_stop()
             { live_ = false; };
 
-            inline yijinjing::io_device_ptr get_io_device() const
+            yijinjing::io_device_ptr get_io_device() const
             { return io_device_; }
 
-            yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
-
-            inline uint32_t get_home_uid() const
+            uint32_t get_home_uid() const
             { return get_io_device()->get_home()->uid; }
 
-            inline const std::string &get_home_uname() const
+            const std::string &get_home_uname() const
             { return get_io_device()->get_home()->uname; }
 
             bool has_location(uint32_t hash);
@@ -52,6 +50,8 @@ namespace kungfu
             bool has_location(yijinjing::data::mode m, yijinjing::data::category c, const std::string &group, const std::string &name);
 
             const yijinjing::data::location_ptr get_location(uint32_t hash);
+
+            yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
             template<typename T>
             inline void write_to(int64_t trigger_time, int32_t msg_type, T &data, uint32_t dest_id = 0)
@@ -64,8 +64,6 @@ namespace kungfu
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
 
-            virtual void react(const rx::observable <yijinjing::event_ptr> &events) = 0;
-
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
             virtual void deregister_location(int64_t trigger_time, uint32_t location_uid);
@@ -74,9 +72,14 @@ namespace kungfu
 
             void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
 
+            virtual void react(const rx::observable<yijinjing::event_ptr> &events) = 0;
+
+            rx::observable<yijinjing::event_ptr> stimeout(rx::observable<yijinjing::event_ptr> src);
+
         private:
             yijinjing::io_device_ptr io_device_;
             bool live_ = true;
+            int64_t now_;
             int64_t last_check_;
         };
     }

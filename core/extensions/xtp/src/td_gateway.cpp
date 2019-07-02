@@ -50,9 +50,9 @@ namespace kungfu
                 }
             }
 
-            void TdGateway::start()
+            void TdGateway::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
-                gateway::Trader::start();
+                gateway::Trader::on_start(events);
 
                 SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
                 if (api_ != nullptr)

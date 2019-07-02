@@ -30,7 +30,7 @@ namespace kungfu
 
                 ~TdGateway() override;
 
-                void start() override;
+                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
                 const AccountType get_account_type() const override
                 { return AccountTypeStock; }

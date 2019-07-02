@@ -28,7 +28,7 @@ namespace kungfu
 
                 ~MdGateway() override;
 
-                void start() override;
+                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
                 bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
 

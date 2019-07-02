@@ -67,12 +67,12 @@ namespace kungfu
 
             void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
+            virtual void on_start(const rx::observable<yijinjing::event_ptr> &events)
+            {}
+
             virtual void on_write_to(const yijinjing::event_ptr &event);
 
             virtual void on_read_from(const yijinjing::event_ptr &event);
-
-            virtual void start()
-            {}
 
         private:
             yijinjing::data::location_ptr master_commands_location_;

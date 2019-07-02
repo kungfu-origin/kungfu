@@ -24,31 +24,10 @@ namespace kungfu
     namespace practice
     {
 
-        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device)), last_check_(0)
+        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device)), last_check_(0), now_(0)
         {
             os::handle_os_signals(this);
             reader_ = io_device_->open_reader_to_subscribe();
-        }
-
-        writer_ptr hero::get_writer(uint32_t dest_id)
-        {
-            if (writers_.find(dest_id) == writers_.end())
-            {
-                return writer_ptr();
-            }
-            return writers_[dest_id];
-        }
-
-        void hero::register_location(int64_t trigger_time, const location_ptr &location)
-        {
-            locations_[location->uid] = location;
-            SPDLOG_INFO("registered location {} at {}", location->uname, time::strftime(trigger_time));
-        }
-
-        void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
-        {
-            SPDLOG_INFO("deregistered location {} at {}", get_location(location_uid)->uname, time::strftime(trigger_time));
-            locations_.erase(location_uid);
         }
 
         bool hero::has_location(uint32_t hash)
@@ -65,6 +44,15 @@ namespace kungfu
         const location_ptr hero::get_location(uint32_t hash)
         {
             return locations_[hash];
+        }
+
+        writer_ptr hero::get_writer(uint32_t dest_id)
+        {
+            if (writers_.find(dest_id) == writers_.end())
+            {
+                return writer_ptr();
+            }
+            return writers_[dest_id];
         }
 
         void hero::run()
@@ -161,6 +149,18 @@ namespace kungfu
             SPDLOG_INFO("{} finished", get_home_uname());
         }
 
+        void hero::register_location(int64_t trigger_time, const location_ptr &location)
+        {
+            locations_[location->uid] = location;
+            SPDLOG_INFO("registered location {} at {}", location->uname, time::strftime(trigger_time));
+        }
+
+        void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
+        {
+            SPDLOG_INFO("deregistered location {} at {}", get_location(location_uid)->uname, time::strftime(trigger_time));
+            locations_.erase(location_uid);
+        }
+
         void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
         {
             auto writer = get_writer(source_id);
@@ -180,6 +180,11 @@ namespace kungfu
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
                         get_location(source_id)->uname, source_id);
+        }
+
+        rx::observable<yijinjing::event_ptr> hero::stimeout(rx::observable<yijinjing::event_ptr> src)
+        {
+            return src;
         }
     }
 }
