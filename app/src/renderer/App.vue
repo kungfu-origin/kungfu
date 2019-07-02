@@ -14,7 +14,7 @@ import * as ACCOUNT_API from '@/io/db/account';
 import * as BASE_API from '@/io/db/base';
 import { connectCalendarNanomsg } from '@/io/nano/buildNmsg'
 import * as MSG_TYPE from '@/io/nano/msgType'
-import { subObservable, filterGatewayState } from '@/io/nano/nanoSub'; 
+import { buildGatewayStatePipe } from '@/io/nano/nanoSub'; 
 
 
 
@@ -40,7 +40,12 @@ export default {
     methods: {   
         subGatewayState() {
             const t = this;
-            subObservable.subscribe(data => filterGatewayState(data))
+            buildGatewayStatePipe().subscribe(data => {
+                t.$store.dispatch('setOneMdTdState', {
+                    id: data[0],
+                    stateData: data[1]
+                })
+            })
         },
         
         //获取accounts的cash

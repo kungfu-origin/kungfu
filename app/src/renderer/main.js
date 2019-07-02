@@ -9,8 +9,6 @@ import moment from 'moment';
 import App from './App.vue';
 import { listProcessStatus, startMaster, startWatcher } from '__gUtils/processUtils';
 import { ipcRenderer } from 'electron'
-import * as SUB_PIPE from '@/io/nano/nanoSub';
-
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
@@ -109,3 +107,4 @@ function startAutoUpdate(){
     ipcRenderer.on("message", (event, text) => console.log(text));
     //注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
 }
+

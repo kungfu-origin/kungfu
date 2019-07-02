@@ -17,7 +17,6 @@ export default {
         }
     },
     data() {
-
         let processName = {};
         let processColor = {};
         Object.keys(statusConfig || {}).map(key => {

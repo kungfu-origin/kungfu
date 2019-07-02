@@ -22,10 +22,10 @@ export const switchStrategy = (strategyId, value) => {
     }
 
     // for import file changed in code editor module
-    return getStrategyById(strategyId).then(currentStrategy => {
-        if(!curStrategy.length) return new Promise(resolve => ({ type: 'error', message: `${strategyId} is not existed!` })); 
+    return getStrategyById(strategyId).then(curStrategy => {
+        if(!curStrategy.length) return new Promise(resolve => resolve({ type: 'error', message: `${strategyId} is not existed!` })); 
         const strategyPath = curStrategy[0].strategy_path;
-        if(!strategyPath) return new Promise(resolve => ({ type: 'error', message: `该策略未绑定任何文件！` }))
+        if(!strategyPath) return new Promise(resolve => resolve({ type: 'error', message: `该策略未绑定任何文件！` }))
         const config = JSON.stringify({ strategy_id: strategyId, strategy_path: strategyPath })
         return startStrategy(strategyId, strategyPath)// 启动策略
         .then(() => ({ type: 'start', message: '正在启动...' }))       
