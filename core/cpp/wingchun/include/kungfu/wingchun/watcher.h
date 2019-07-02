@@ -28,11 +28,11 @@ namespace kungfu
 
             virtual std::string handle_request(const std::string &msg) = 0;
 
-            virtual std::string on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
+            virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
 
-            virtual std::string on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
+            virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
 
-            virtual std::string on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
+            virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
 
         protected:
             void react(const rx::observable<yijinjing::event_ptr> &events) override;

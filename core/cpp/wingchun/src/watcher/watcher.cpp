@@ -1,9 +1,9 @@
-#include <utility>
-
 //
 // Created by Keren Dong on 2019-06-28.
 //
 
+#include <utility>
+#include <sstream>
 #include <kungfu/yijinjing/time.h>
 
 #include <kungfu/wingchun/msg.h>
@@ -166,7 +166,14 @@ namespace kungfu
         {
             const yijinjing::msg::data::RequestReadFrom &request = event->data<yijinjing::msg::data::RequestReadFrom>();
             auto source_location = get_location(request.source_id);
-            auto dest_location = get_location(event->source());
+            auto master_cmd_location = get_location(event->source());
+
+            std::stringstream ss;
+            ss << std::hex << master_cmd_location->name;
+            uint32_t dest_id;
+            ss >> dest_id;
+            auto dest_location = get_location(dest_id);
+
             if (source_location->uid == get_master_commands_uid())
             {
                 apprentice::on_read_from(event);
@@ -174,6 +181,7 @@ namespace kungfu
             }
             if (source_location->category == category::TD && dest_location->category == category::STRATEGY)
             {
+                SPDLOG_INFO("watcher read order/trades from {} to {}", source_location->uname, dest_location->uname);
                 reader_->join(source_location, dest_location->uid, event->gen_time());
             }
         }

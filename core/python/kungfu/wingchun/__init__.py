@@ -16,10 +16,13 @@ class Watcher(pywingchun.Watcher):
         return json.dumps(req)
 
     def on_quote(self, event, quote):
-        pass
+        self.ctx.logger.info('on quote')
+        return
 
     def on_order(self, event, order):
-        pass
+        self.ctx.logger.info('on order %s', order)
+        return
 
     def on_trade(self, event, trade):
-        pass
+        self.ctx.logger.info('on trade')
+        return

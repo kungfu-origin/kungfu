@@ -36,14 +36,14 @@ public:
     std::string handle_request(const std::string &msg) override
     {PYBIND11_OVERLOAD_PURE(std::string, Watcher, handle_request, msg) }
 
-    std::string on_quote(event_ptr event, const Quote& quote) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Watcher, on_quote, event, quote) }
+    void on_quote(event_ptr event, const Quote& quote) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_quote, event, quote) }
 
-    std::string on_order(event_ptr event, const Order& order) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Watcher, on_order, event, order) }
+    void on_order(event_ptr event, const Order& order) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_order, event, order) }
 
-    std::string on_trade(event_ptr event, const Trade& trade) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Watcher, on_trade, event, trade) }
+    void on_trade(event_ptr event, const Trade& trade) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
 };
 
 class PyStrategy : public strategy::Strategy
