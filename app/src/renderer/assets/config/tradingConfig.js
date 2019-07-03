@@ -5,15 +5,15 @@
 // close_today = '2',
 // close_yesterday = '3'
 export const offsetName = {
-    '0': '开仓',
-    '1': '平仓',
-    '2': '平今',
-    '3': '平昨'
+    0: '开仓',
+    1: '平仓',
+    2: '平今',
+    3: '平昨'
 }
 
 export const sideName = {
-    '0': '买',
-    '1': '卖'
+    0: '买',
+    1: '卖'
 }
 
 export const statusName = {

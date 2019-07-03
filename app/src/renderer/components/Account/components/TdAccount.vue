@@ -183,7 +183,7 @@ import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accoun
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
-import { ACCOUNTS_DIR, LOG_DIR, buildGatewayPath } from '__gConfig/pathConfig';
+import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder, openReadFile } from "__gUtils/fileUtils.js";
 import { deleteAccount, switchTd } from '@/io/actions/account';
 

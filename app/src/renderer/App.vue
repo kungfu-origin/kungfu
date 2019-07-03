@@ -7,7 +7,7 @@
 import path from 'path';
 import { mapState } from 'vuex';
 
-import { BASE_DIR, buildAccountFolderPath } from '__gConfig/pathConfig.js';
+import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig.js';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone } from '@/assets/js/utils';
 import * as ACCOUNT_API from '@/io/db/account';
@@ -54,7 +54,7 @@ export default {
             //从数据库中查找
             if(!accountList || !accountList.length) return
             const promises = accountList.map(({ account_id }) => {
-                if(!existsSync(buildAccountFolderPath(account_id))) return false;
+                if(!existsSync(LIVE_TRADING_DB_DIR)) return false;
                 return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
                     if(!cash || !cash.length) return false;
                     return { accountId: account_id, cashData: cash[0] }

@@ -28,7 +28,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
-import { offsetName } from '@/assets/config/tradingConfig'
+import { offsetName, sideName } from '@/assets/config/tradingConfig'
 import { debounce, throttleInsert, throttle } from "@/assets/js/utils"
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
@@ -225,10 +225,10 @@ export default {
         //处理需要的数据及顺序
         dealTrade(item) {
             return {
-                id: item.account_id.toString() + '_' + item.id.toString() + '_' + item.trade_time.toString(),
+                id: item.account_id.toString() + '_' + item.trade_id.toString() + '_' + item.trade_time.toString(),
                 tradeTime: item.trade_time && moment(item.trade_time/1000000).format('YYYY-MM-DD HH:mm:ss'),
                 instrumentId: item.instrument_id,
-                side: item.side ? (item.side == '0' ? '买' : '卖') : '',
+                side: sideName[item.side],
                 offset: offsetName[item.offset],
                 price: item.price,
                 volume: item.volume,
@@ -242,8 +242,9 @@ export default {
             //当有日期筛选的时候，不需要推送数据
             if(t.filter.dateRange) return
             //如果存在筛选，则推送的数据也需要满足筛选条件
-            const {id, dateRange} = t.filter
-            const {trade_time} = data
+            const { id, dateRange } = t.filter
+            const { trade_time } = data
+            console.log(id, dateRange)
             if(!((data.instrument_id.includes(id) || data.client_id.includes(id)) )) return
             const tradeData = t.dealTrade(data)
             t.throttleInsertTrade(tradeData).then(tradeList => {

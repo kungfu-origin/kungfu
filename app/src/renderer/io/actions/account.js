@@ -1,5 +1,5 @@
 import * as ACCOUNT_API from '@/io/db/account';
-import { ACCOUNTS_DIR, buildGatewayPath } from '__gConfig/pathConfig';
+import { TD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
 import { setTasksDB, deleteTask } from '@/io/db/base';
@@ -17,7 +17,7 @@ export const deleteAccount = (row, accountList = []) => {
     const leftAccounts = accountList.filter(a => a.source_name === source_name && a.receive_md === 0 && a.account_id !== account_id)
 
     //删除td
-    return removeFileFolder(path.join(ACCOUNTS_DIR, account_id.toAccountId()))
+    return removeFileFolder(path.join(TD_DIR, account_id.toAccountId()))
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
     .then(() => deleteProcess('td_' + row.account_id))
     .then(() => deleteTask(tdProcessId))

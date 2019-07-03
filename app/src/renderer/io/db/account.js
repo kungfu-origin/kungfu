@@ -1,5 +1,5 @@
 import {runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB} from '__gUtils/dbUtils';
-import {ACCOUNTS_DB, buildGloablCommissionDBPath, buildAccountCommissionDBPath, buildGateWayStateDBPath, buildAccountAssetsDBPath,buildAccountTradesDBPath, buildAccountOrdersDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
+import {ACCOUNTS_DB, LIVE_TRADING_ORDER_DB, LIVE_TRADING_TRADE_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath, buildAccountAssetsDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 
@@ -49,15 +49,6 @@ export const changeAccountMd = (account_id, receive_md) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE account_config SET receive_md = ? WHERE account_id = ?', [receive_md, account_id])
 }
 
-
-/**
- * 获取md/td状态列表
- * 
- */
-export const getMdTdState = (gatewayName) => {
-    return runSelectDB(buildGateWayStateDBPath(gatewayName), 'SELECT * FROM gateway_state')
-}
-
 /**
  * 获取账户资金情况
  * 
@@ -87,10 +78,10 @@ export const getAccountTrade = (accountId, {id, dateRange}, tradingDay) => {
     const filterDate = dateRange.length ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
-        const sql = `WHERE (instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+        const sql = `WHERE (account_id="${accountId}" AND instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
         (` AND trade_time > ${filterDate[0]} AND trade_time < ${filterDate[1]}`) //有日期筛选的时候
-        runSelectDB(buildAccountTradesDBPath(accountId), `SELECT rowId, * FROM trade ${sql} ORDER BY id DESC`).then(trade => {
-            resolve(trade)
+        runSelectDB(LIVE_TRADING_TRADE_DB, `SELECT rowId, * FROM trades ${sql} ORDER BY trade_id DESC`).then(trades => {
+            resolve(trades)
         }).catch(err => {
             reject(err)
         })
@@ -114,10 +105,10 @@ export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
     const filterDate = dateRange.length ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
-        const sql = `WHERE (order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
+        const sql = `WHERE (account_id='${accountId}' AND order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
         ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` + 
         (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
-        runSelectDB(buildAccountOrdersDBPath(accountId), `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
+        runSelectDB(LIVE_TRADING_ORDER_DB, `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
             resolve(orders)
         }).catch(err => {
             reject(err)
@@ -165,7 +156,6 @@ export const setFeeSettingData = (accountId, feeSettingData) => {
 
 export const getFeeSettingData = (accountId) => {
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
-    const GLOBAL_COMMISSIO_DB = buildGloablCommissionDBPath()
     if(!existsSync(COMMISSION_DB)) {
         try{
             copySync(GLOBAL_COMMISSIO_DB, COMMISSION_DB)

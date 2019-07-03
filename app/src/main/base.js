@@ -1,5 +1,5 @@
 import initGlobalDB from '__gConfig/initGlobalDB.json'
-import { GLOBAL_DIR } from '__gConfig/pathConfig';
+import { BASE_DB_DIR } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
 const path = require('path')
 const fse = require('fs-extra');
@@ -12,13 +12,13 @@ const sqlite3 = require('sqlite3').verbose();
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
-    if(!fse.existsSync(GLOBAL_DIR)){
-        fse.mkdirSync(GLOBAL_DIR)
+    if(!fse.existsSync(BASE_DB_DIR)){
+        fse.mkdirSync(BASE_DB_DIR)
     }
 
     //循环建立表
     Object.keys(initGlobalDB).forEach((dbName) => {
-        const db = new sqlite3.Database(path.join(GLOBAL_DIR, `${dbName}.db`));
+        const db = new sqlite3.Database(path.join(BASE_DB_DIR, `${dbName}.db`));
         const tables = initGlobalDB[dbName];
         db.serialize(() => {
             tables.forEach((table) => {
@@ -29,12 +29,12 @@ export const initDB = () => {
     })
 
     //commission.db
-    fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(GLOBAL_DIR, 'commission.db'), err => {
+    fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(BASE_DB_DIR, 'commission.db'), err => {
         if(err) logger.error(err);
     })
 
     //holidays.db
-    fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(GLOBAL_DIR, 'holidays.db'), err => {
+    fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(BASE_DB_DIR, 'holidays.db'), err => {
         if(err) logger.error(err);
     })
 }

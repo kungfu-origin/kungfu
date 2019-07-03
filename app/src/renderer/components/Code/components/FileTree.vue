@@ -154,7 +154,14 @@ export default {
                 open: true
             })
             //获取第一级文件树
-            let {ids, fileTree} = await CODE_UTILS.getTreeByFilePath({strategy: rootFile, fileTree: {}})
+            let ids, fileTree;
+            try {
+                const fileTreeData = await CODE_UTILS.getTreeByFilePath({strategy: rootFile, fileTree: {}})
+                ids = fileTreeData.ids;
+                fileTree = fileTreeData.fileTree;
+            } catch (err) {
+                t.$message.error(err)
+            }
             //处理根
             rootFile['children'] = ids;
             fileTree[rootId] = rootFile

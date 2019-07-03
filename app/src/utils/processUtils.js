@@ -1,4 +1,4 @@
-import { BASE_DIR, KUNGFU_ENGINE, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE, buildProcessLogPath } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { getProcesses } from 'getprocesses';
@@ -152,7 +152,7 @@ export const startProcess = async (options, no_ext=false) => {
         "exec_mode" : "fork",
         "interpreterArgs": ["~harmony"],
         "env": {
-            "KF_HOME": dealSpaceInPath(BASE_DIR),
+            "KF_HOME": dealSpaceInPath(KF_HOME),
         }
     };
 
@@ -200,7 +200,7 @@ export const startWatcher = async(force) => {
     if(!force && watcherStatus.length === watcher.length && watcher.length !== 0) throw new Error('kungfu watcher 正在运行！')
     return startProcess({
         'name': processName,
-        'args': 'watcher'
+        'args': '-l trace watcher'
     }).catch(err => logger.error(err))
 }
 
@@ -226,7 +226,7 @@ export const startStrategy = (strategyId, strategyPath) => {
     strategyPath = dealSpaceInPath(strategyPath)
     return startProcess({
         "name": strategyId,
-        "args": `strategy -n ${strategyId} -p ${strategyPath}`,
+        "args": `-l trace strategy -n ${strategyId} -p ${strategyPath}`,
     }).catch(err => logger.error(err))
 }
 

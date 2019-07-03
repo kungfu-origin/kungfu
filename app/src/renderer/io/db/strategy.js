@@ -2,7 +2,6 @@ import {runSelectDB, runInsertUpdateDeleteDB, } from '__gUtils/dbUtils';
 
 import {
     STRATEGYS_DB, 
-    buildStrategyAccountsDBPath, 
     buildAccountOrdersDBPath,
     buildStrategyPosDBPath,
     buildStrategySnapshortsDBPath,
@@ -52,12 +51,6 @@ export const updateStrategyPath = (strategy_id, strategy_path) => {
     return runInsertUpdateDeleteDB(STRATEGYS_DB, 'UPDATE strategys SET strategy_path = ? WHERE strategy_id = ?', [strategy_path, strategy_id])    
 }
 
-/**
- * 获取某策略下的账户
- */
-export const getStrategyAccounts = (strategyId) => {
-    return runSelectDB(buildStrategyAccountsDBPath(strategyId), 'SELECT * FROM account_list')
-}
 
 /**
  * 获取某策略下委托
@@ -79,7 +72,8 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
     const filterDate = dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
     return new Promise((resolve, reject) => {
         let tableData = []
-        getStrategyAccounts(strategyId).then(accounts => {
+            accounts = [];
+            throw new Error('这块要重写!')
             if(accounts.length == 0) resolve([]);
             //todo: accountid 不清楚
             const promises = accounts.map(item => 
@@ -98,9 +92,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
                 tableData.sort((a, b) => b.insert_time - a.insert_time)
                 resolve(tableData)
             })
-        }).catch(err => {
-            reject(err)
-        })
+      
 
     })
 }

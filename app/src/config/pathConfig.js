@@ -12,58 +12,51 @@ addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
 export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
 
 //BASE
-addFile(ELEC_BASE_DIR, 'app', 'folder')
-export const BASE_DIR = path.join(ELEC_BASE_DIR, 'app')
+export const KF_HOME = path.join(ELEC_BASE_DIR, 'app')
+addFile('', KF_HOME, 'folder')
 
 //system
-addFile(BASE_DIR, 'system', 'folder')
-export const SYSTEM_DIR = path.join(BASE_DIR, 'system');
-
-//GLOBAL_DIR strategys, accounts, tasks
-export const GLOBAL_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
+export const SYSTEM_DIR = path.join(KF_HOME, 'system');
+addFile('', SYSTEM_DIR, 'folder')
 
 //runtime
-addFile(BASE_DIR, 'runtime', 'folder')
-export const RUNTIME_DIR = path.join(BASE_DIR, 'runtime');
-
+export const RUNTIME_DIR = path.join(KF_HOME, 'runtime');
+addFile('', RUNTIME_DIR, 'folder')
 
 //strategy
-addFile(BASE_DIR, 'strategy', 'folder')
-export const STRATEGY_DIR = path.join(BASE_DIR, 'strategy');
+export const STRATEGY_DIR = path.join(KF_HOME, 'strategy');
+addFile('', STRATEGY_DIR, 'folder')
 
-//accounts(td)
-addFile(BASE_DIR, 'td', 'folder')
-export const ACCOUNTS_DIR = path.join(BASE_DIR, 'td');
+//td
+export const TD_DIR = path.join(KF_HOME, 'td');
+addFile('', TD_DIR, 'folder')
 
 //md
-addFile(BASE_DIR, 'md', 'folder')
-export const MD_DIR = path.join(BASE_DIR, 'md');
+export const MD_DIR = path.join(KF_HOME, 'md');
+addFile('', MD_DIR, 'folder')
+
+//watcher 
+export const WATCHER_DIR = path.join(SYSTEM_DIR, 'watcher', 'watcher')
+addFile('', WATCHER_DIR, 'folder')
 
 //log
-addFile(BASE_DIR, 'log', 'folder')
-export const LOG_DIR = path.join(BASE_DIR, 'log');
-
-
-// //socket
-// addFile(BASE_DIR, 'socket', 'folder')
-// export const SOCKET_DIR = path.join(BASE_DIR, 'socket');
-export const SOCKET_DIR = '';
-
-//gateway
-export const GATEWAY_DIR = ''
-
+export const LOG_DIR = path.join(KF_HOME, 'log');
+addFile('', LOG_DIR, 'folder')
 
 
 //================= global db start ==============================
 
+//BASE_DB_DIR strategys, accounts, tasks
+export const BASE_DB_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
+
 //strategy
-export const STRATEGYS_DB = path.join(GLOBAL_DIR, 'strategys.db')
+export const STRATEGYS_DB = path.join(BASE_DB_DIR, 'strategys.db')
 
 //accounts(td)
-export const ACCOUNTS_DB = path.join(GLOBAL_DIR, 'accounts.db')
+export const ACCOUNTS_DB = path.join(BASE_DB_DIR, 'accounts.db')
 
 //tasks
-export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
+export const TASKS_DB = path.join(BASE_DB_DIR, 'task.db')
 
 //================= global db end =================================
 
@@ -71,53 +64,45 @@ export const TASKS_DB = path.join(GLOBAL_DIR, 'task.db')
 
 //gateway
 export const buildGatewayPath = (gatewayName) => {
-    return path.join(BASE_DIR, ...gatewayName.split('_'))
+    return path.join(KF_HOME, ...gatewayName.split('_'))
 }
 
-//gateway state
-export const buildGateWayStateDBPath = (gatewayName) => {
-    return path.join(buildGatewayPath(gatewayName), 'db', 'live', 'state.db')
-}
-
-//account folder
-export const buildAccountFolderPath = (accountId) => {
-    const {source, id} = accountId.parseSourceAccountId();
-    return path.join(ACCOUNTS_DIR, source, id, 'db', 'live')
+//gateway data
+export const buildGatewayLiveDBPath = (gatewayName) => {
+    return path.join(buildGatewayPath(gatewayName), 'db', 'live')
 }
 
 //account commission 手续费
 export const buildAccountCommissionDBPath = (accountId) => {
-    return path.join(buildAccountFolderPath(accountId), 'commission.db')    
+    return path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
 }
 
-//assets
-export const buildAccountAssetsDBPath = (accountId) => {
-    return path.join(buildAccountFolderPath(accountId), 'assets.db')
-}
-
-//orders
-export const buildAccountOrdersDBPath = (accountId) => {
-    return path.join(buildAccountFolderPath(accountId), 'orders.db')
-}
-
-//trades
-export const buildAccountTradesDBPath = (accountId) => {
-    return path.join(buildAccountFolderPath(accountId), 'trades.db')
-}
-
-//snapshorts
-export const buildAccountSnapshortsDBPath = (accountId) => {
-    return path.join(buildAccountFolderPath(accountId), 'snapshots.db')
-}
 
 //================= account related end ==========================
 
-//================= strategy related start =======================
+//================= live trading start ===========================
 
-//strategyAccounts 某策略下的账户
-export const buildStrategyAccountsDBPath = (strategyId) => {
-    return path.join(STRATEGY_DIR, strategyId, 'account_list.db')
+export const LIVE_TRADING_DB_DIR = path.join(WATCHER_DIR, 'db', 'live');
+
+//orders
+export const LIVE_TRADING_ORDER_DB = path.join(LIVE_TRADING_DB_DIR, 'orders.db')
+
+//trades
+export const LIVE_TRADING_TRADE_DB = path.join(LIVE_TRADING_DB_DIR, 'trades.db')
+
+//assets
+export const buildAccountAssetsDBPath = () => {
+    return path.join(LIVE_TRADING_DB_DIR, 'assets.db')
 }
+
+//snapshorts
+export const buildAccountSnapshortsDBPath = () => {
+    return path.join(LIVE_TRADING_DB_DIR, 'snapshots.db')
+}
+
+//================= live trading end =============================
+
+//================= strategy related start =======================
 
 //strategyPos 某策略下的持仓
 export const buildStrategyPosDBPath = (strategyId) => {
@@ -134,9 +119,7 @@ export const buildStrategySnapshortsDBPath = (accountId) => {
 //================== others start =================================
 
 //global commission 手续费
-export const buildGloablCommissionDBPath = () => {
-    return path.join(GLOBAL_DIR, 'commission.db')    
-}
+export const GLOBAL_COMMISSION_DB = path.join(BASE_DB_DIR, 'commission.db');
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId) => {
@@ -144,14 +127,11 @@ export const buildProcessLogPath = (processId) => {
 }
 
 //获取watcher nano pub 地址
-export const buildNmsgPubFilePath = () => {
-    return path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
-}
+export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
 
 //获取watcher nano rep 地址
-export const buildNmsgRepFilePath = () => {
-    return path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
-}
+export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
+
 
 //================== others end ===================================
 

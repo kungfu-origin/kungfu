@@ -29,21 +29,11 @@ export const buildGatewayStatePipe = () => {
 }
 
 
-//orders
+//trading data: order trades position pnlmin
 export const buildOrdersPipe = function(){
-    const t = this;
-    t.type = '';
-    t.id = '';
-    t.filter = (type, id) => {
-        t.type = type;
-        t.id = id; 
-    }
+    const tradingDataTypes = [MSG_TYPE.order, MSG_TYPE.trade, MSG_TYPE.position, MSG_TYPE.portfolioByMin]
     return subObservable.pipe(
-        filter(d => d.msg_type === MSG_TYPE.order),
-        filter(d => {
-            if(t.type === 'strategy') return d.strategy_id === t.id;
-            else if(t.type === 'account') return d.account_id === t.id;
-        })
+        filter(d => (tradingDataTypes.indexOf(d.msg_type) !== -1))
     )
 }
 
