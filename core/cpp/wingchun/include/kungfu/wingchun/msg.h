@@ -717,7 +717,7 @@ namespace kungfu
                 //成交信息
                 struct Trade
                 {
-                    uint64_t id;                             //成交ID
+                    uint64_t trade_id;                             //成交ID
 
                     uint64_t order_id;                       //订单ID
                     uint64_t parent_order_id;                //母订单ID
@@ -762,7 +762,7 @@ namespace kungfu
 
                 inline void to_json(nlohmann::json &j, const Trade &trade)
                 {
-                    j["id"] = trade.id;
+                    j["trade_id"] = trade.trade_id;
                     j["order_id"] = std::to_string(trade.order_id);
 
                     j["trade_time"] = trade.trade_time;

@@ -249,7 +249,7 @@ namespace kungfu
                     auto writer = get_writer(xtp_order.source);
                     msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
                     from_xtp(*trade_info, trade);
-                    trade.id = writer->current_frame_uid();
+                    trade.trade_id = writer->current_frame_uid();
                     trade.order_id = xtp_order.internal_order_id;
                     trade.parent_order_id = xtp_order.parent_id;
                     strcpy(trade.client_id, xtp_order.client_id);

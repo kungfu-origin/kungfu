@@ -183,6 +183,30 @@ PYBIND11_MODULE(pywingchun, m)
         .export_values()
         ;
 
+    py::enum_<kungfu::wingchun::PriceType>(m_constants, "PriceType", py::arithmetic())
+        .value("Any", kungfu::wingchun::PriceType::Any)
+        .value("Best", kungfu::wingchun::PriceType::Best)
+        .value("Best5", kungfu::wingchun::PriceType::Best5)
+        .value("Limit", kungfu::wingchun::PriceType::Limit)
+        .value("ForwardBest", kungfu::wingchun::PriceType::ForwardBest)
+        .value("ReverseBest", kungfu::wingchun::PriceType::ReverseBest)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::VolumeCondition>(m_constants, "VolumeCondition", py::arithmetic())
+        .value("Any", kungfu::wingchun::VolumeCondition::Any)
+        .value("Min", kungfu::wingchun::VolumeCondition::Min)
+        .value("All", kungfu::wingchun::VolumeCondition::All)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::TimeCondition>(m_constants, "TimeCondition", py::arithmetic())
+        .value("IOC", kungfu::wingchun::TimeCondition::IOC)
+        .value("GFD", kungfu::wingchun::TimeCondition::GFD)
+        .value("GTC", kungfu::wingchun::TimeCondition::GTC)
+        .export_values()
+        ;
+
     py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
         .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
         .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
@@ -382,7 +406,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<Trade>(m, "Trade")
-            .def_readonly("id", &Trade::id)
+            .def_readonly("trade_id", &Trade::trade_id)
             .def_readonly("order_id", &Trade::order_id)
             .def_readonly("parent_order_id", &Trade::parent_order_id)
             .def_readonly("trade_time", &Trade::trade_time)

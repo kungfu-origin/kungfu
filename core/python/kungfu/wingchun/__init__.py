@@ -23,11 +23,11 @@ class Watcher(pywingchun.Watcher):
     def on_order(self, event, order):
         self.ctx.logger.info('on order %s', order)
         order_dict = to_dict(order)
-        order_dict["order_id"] = str(order_dict["order_id"])
-        self.ctx.data_proxy.on_order(event, order_dict)
-        self.publish(json.dumps({"msg_type": MsgType.Order, "data": order_dict}))
+        self.ctx.data_proxy.add_order(**order_dict)
+        self.publish(json.dumps({"msg_type": int(MsgType.Order), "data": order_dict}))
 
     def on_trade(self, event, trade):
         self.ctx.logger.info('on trade %s', trade)
-        self.ctx.data_proxy.on_trade(event, trade)
-        
+        trade_dict = to_dict(trade)
+        self.ctx.data_proxy.add_trade(**trade_dict)
+        self.publish(json.dumps({"msg_type": int(MsgType.Trade), "data": trade_dict}))

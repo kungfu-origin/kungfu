@@ -49,7 +49,7 @@ class Commission(Base):
 class Order(Base):
     __tablename__ = 'orders'
     order_id = Column(String, primary_key = True)
-    create_time = Column(Integer)
+    insert_time = Column(Integer)
     update_time = Column(Integer)
     trading_day = Column(String)
     instrument_id = Column(String)
@@ -77,8 +77,9 @@ class Order(Base):
 
 class Trade(Base):
     __tablename__ = 'trades'
-    id = Column(Integer, primary_key = True)
+    trade_id = Column(String, primary_key = True)
     order_id = Column(String, nullable = False)
+    parent_order_id = Column(String)
     trade_time = Column(Integer)
     trading_day = Column(String)
     instrument_id = Column(String)

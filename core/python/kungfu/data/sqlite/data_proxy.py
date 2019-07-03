@@ -7,6 +7,7 @@ def make_url(locator, location, filename):
     db_file = locator.layout_file(location, pyyjj.layout.SQLITE, filename)
     return 'sqlite:///{}'.format(db_file)
 
+
 class Storage:
     def __init__(self, url):
         self.engine = create_engine(url)
@@ -16,22 +17,18 @@ class Storage:
 class OrderStorage(Storage):
     def __init__(self, url):
         super(OrderStorage, self).__init__(url)
-        self.session = self.session_factory()
 
-    def on_order(self, event, order):
-        obj = Order(**{k: v for k,v in order.__dict__ })
-        try:
-            self.session.add(obj)
-            self.session.commit()
-        except:
-            self.session.rollback()
+    def add_order(self, **kwargs):
+        with session_scope(self.session_factory) as session:
+            session.merge(Order(**kwargs))
 
 class TradeStorage(Storage):
     def __init__(self, url):
         super(TradeStorage, self).__init__(url)
 
-    def add_trade(self, trade_msg):
-        pass
+    def add_trade(self, **kwargs):
+        with session_scope(self.session_factory) as session:
+            session.add(Trade(**kwargs))
 
 class FutureInstrumentStorage(Storage):
     def __init__(self, url):
@@ -78,11 +75,11 @@ class DataProxy:
         self._task_storage = TaskConfigStorage(make_url(ctx.locator,default_location, "task"))
         self._instrument_storage = FutureInstrumentStorage(make_url(ctx.locator, default_location, "future_instruments"))
 
-    def on_order(self, event, order):
-        pass
+    def add_order(self, **kwargs):
+        self._order_storage.add_order(**kwargs)
 
-    def on_trade(self, event, trade):
-        pass
+    def add_trade(self, **kwargs):
+        self._trade_storage.add_trade(**kwargs)
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass
