@@ -8,10 +8,7 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/wingchun/storage/storage.h>
 #include <kungfu/wingchun/calendar/calendar.h>
-#include <kungfu/wingchun/portfolio/account_manager.h>
-#include <kungfu/wingchun/oms/def.h>
 
 namespace kungfu
 {
@@ -32,8 +29,11 @@ namespace kungfu
                 const std::string &get_source() const
                 { return source_; }
 
-                Calendar& get_calendar()
-                { return calendar_; }
+                const std::string current_trading_day() const
+                {
+                    //TODO
+                    return "20190702";
+                }
 
                 virtual const AccountType get_account_type() const = 0;
 
@@ -53,7 +53,7 @@ namespace kungfu
             private:
                 std::string source_;
                 std::string account_id_;
-                Calendar calendar_;
+                Calendar_ptr calendar_;
             };
         }
     }

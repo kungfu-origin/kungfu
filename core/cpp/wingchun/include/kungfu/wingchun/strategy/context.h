@@ -9,7 +9,6 @@
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/calendar/calendar.h>
-#include <kungfu/wingchun/portfolio/account_manager.h>
 
 namespace kungfu
 {
@@ -18,6 +17,11 @@ namespace kungfu
         namespace strategy
         {
             class Runner;
+
+            inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
+            {
+                return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
+            }
 
             class Context
             {
@@ -109,10 +113,9 @@ namespace kungfu
                 const rx::observable<yijinjing::event_ptr> &events_;
                 int64_t now_;
 
-                Calendar calendar_;
+                Calendar_ptr calendar_;
 
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
-                std::unordered_map<uint32_t, AccountManager_ptr> account_managers_;
                 std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
                 std::unordered_map<uint32_t, msg::data::Quote> quotes_;
 

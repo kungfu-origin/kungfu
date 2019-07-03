@@ -19,6 +19,7 @@
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/watcher.h>
+#include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/wingchun/calendar/calendar.h>
 
@@ -27,6 +28,47 @@ namespace py = pybind11;
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::msg::data;
+
+class PyCalendar: public Calendar
+{
+public:
+    const std::string get_current_trading_day() const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, Calendar, current_trading_day);
+    }
+
+    const std::string get_next_trading_day(const std::string& trading_day, int32_t delta_days) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, Calendar, get_next_trading_day, trading_day, delta_days);
+    }
+
+    bool is_open(const std::chrono::system_clock::time_point tp, const std::string& exchange_id) override
+    {
+        PYBIND11_OVERLOAD_PURE(bool, Calendar, is_open, tp, exchange_id);
+    }
+
+    const std::chrono::system_clock::time_point get_open_time(const std::string& trading_day, const std::string& exchange_id) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::chrono::system_clock::time_point, Calendar, get_open_time, trading_day, exchange_id);
+    }
+
+    const std::chrono::system_clock::time_point get_close_time(const std::string& trading_day, const std::string& exchange_id) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::chrono::system_clock::time_point, Calendar, get_close_time, trading_day, exchange_id);
+    }
+
+    const std::chrono::system_clock::time_point next_open(const std::chrono::system_clock::time_point tp, const std::string& exchange_id) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::chrono::system_clock::time_point, Calendar, next_open, tp, exchange_id);
+    }
+
+    const std::chrono::system_clock::time_point next_close(const std::chrono::system_clock::time_point tp, const std::string& exchange_id) override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::chrono::system_clock::time_point, Calendar, next_close, tp, exchange_id);
+    }
+
+};
+
 
 class PyWatcher : public Watcher
 {
@@ -89,6 +131,91 @@ public:
 
 PYBIND11_MODULE(pywingchun, m)
 {
+    m.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
+
+    auto m_constants = m.def_submodule("constants");
+
+    py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
+        .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
+        .value("Stock", kungfu::wingchun::InstrumentType::Stock)
+        .value("Future", kungfu::wingchun::InstrumentType::Future)
+        .value("Bond", kungfu::wingchun::InstrumentType::Bond)
+        .value("StockOption", kungfu::wingchun::InstrumentType::StockOption)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::ExecType>(m_constants, "ExecType", py::arithmetic())
+        .value("Unknown", kungfu::wingchun::ExecType::Unknown)
+        .value("Cancel", kungfu::wingchun::ExecType::Cancel)
+        .value("Trade", kungfu::wingchun::ExecType::Trade)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::Side>(m_constants, "Side", py::arithmetic())
+        .value("Buy", kungfu::wingchun::Side::Buy)
+        .value("Sell", kungfu::wingchun::Side::Sell)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::Offset>(m_constants, "Offset", py::arithmetic())
+        .value("Open", kungfu::wingchun::Offset::Open)
+        .value("Close", kungfu::wingchun::Offset::Close)
+        .value("CloseToday", kungfu::wingchun::Offset::CloseToday)
+        .value("CloseYesterday", kungfu::wingchun::Offset::CloseYesterday)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::OrderStatus>(m_constants, "OrderStatus", py::arithmetic())
+        .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
+        .value("Submitted", kungfu::wingchun::OrderStatus::Submitted)
+        .value("Pending", kungfu::wingchun::OrderStatus::Pending)
+        .value("Cancelled", kungfu::wingchun::OrderStatus::Cancelled)
+        .value("Error", kungfu::wingchun::OrderStatus::Error)
+        .value("Filled", kungfu::wingchun::OrderStatus::Filled)
+        .value("PartialFilledNotActive", kungfu::wingchun::OrderStatus::PartialFilledNotActive)
+        .value("PartialFilledActive", kungfu::wingchun::OrderStatus::PartialFilledActive)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::Direction>(m_constants, "Direction", py::arithmetic())
+        .value("Long", kungfu::wingchun::Direction::Long)
+        .value("Short", kungfu::wingchun::Direction::Short)
+        .export_values()
+        ;
+
+    py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
+        .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
+        .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
+        .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
+        .value("Transaction", kungfu::wingchun::msg::type::MsgType::Transaction)
+        .value("OrderInput", kungfu::wingchun::msg::type::MsgType::OrderInput)
+        .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
+        .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
+        .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
+        .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
+        .value("AccountInfo", kungfu::wingchun::msg::type::MsgType::AccountInfo)
+        .value("AccountInfoByMin", kungfu::wingchun::msg::type::MsgType::AccountInfoByMin)
+        .value("PortfolioByMin", kungfu::wingchun::msg::type::MsgType::PortfolioByMin)
+        .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
+        .value("SubPortfolioInfo", kungfu::wingchun::msg::type::MsgType::SubPortfolioInfo)
+        .value("ReqLogin", kungfu::wingchun::msg::type::MsgType::ReqLogin)
+        .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
+        .value("ReqOrderInput", kungfu::wingchun::msg::type::MsgType::ReqOrderInput)
+        .value("ReqOrderAction", kungfu::wingchun::msg::type::MsgType::ReqOrderAction)
+        .value("RspLogin", kungfu::wingchun::msg::type::MsgType::RspLogin)
+        .value("RspSubscribe", kungfu::wingchun::msg::type::MsgType::RspSubscribe)
+        .value("RspOrderInput", kungfu::wingchun::msg::type::MsgType::RspOrderInput)
+        .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
+        .value("AlgoOrderInput", kungfu::wingchun::msg::type::MsgType::AlgoOrderInput)
+        .value("AlgoOrderStatus", kungfu::wingchun::msg::type::MsgType::AlgoOrderStatus)
+        .value("AlgoOrderAction", kungfu::wingchun::msg::type::MsgType::AlgoOrderAction)
+        .value("SwitchDay", kungfu::wingchun::msg::type::MsgType::SwitchDay)
+        .value("RspTradingDay", kungfu::wingchun::msg::type::MsgType::RspTradingDay)
+        .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
+        .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
+        .export_values()
+        ;
+
     py::class_<Instrument>(m, "Instrument")
             .def_readonly("instrument_type", &Instrument::instrument_type)
             .def_property_readonly("instrument_id", &Instrument::get_instrument_id)
@@ -120,7 +247,6 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<Quote>(m, "Quote")
             .def_property_readonly("source_id", &Quote::get_source_id)
             .def_property_readonly("trading_day", &Quote::get_trading_day)
-            .def_readonly("rcv_time", &Quote::rcv_time)
             .def_readonly("data_time", &Quote::data_time)
             .def_property_readonly("instrument_id", &Quote::get_instrument_id)
             .def_property_readonly("exchange_id", &Quote::get_exchange_id)
@@ -149,10 +275,10 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
     py::class_<Entrust>(m, "Entrust")
             .def_property_readonly("source_id", &Entrust::get_source_id)
             .def_property_readonly("trading_day", &Entrust::get_trading_day)
-            .def_readonly("rcv_time", &Entrust::rcv_time)
             .def_readonly("data_time", &Entrust::data_time)
             .def_property_readonly("instrument_id", &Entrust::get_instrument_id)
             .def_property_readonly("exchange_id", &Entrust::get_exchange_id)
@@ -172,7 +298,6 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<Transaction>(m, "Transaction")
             .def_property_readonly("source_id", &Transaction::get_source_id)
             .def_property_readonly("trading_day", &Transaction::get_trading_day)
-            .def_readonly("rcv_time", &Transaction::rcv_time)
             .def_readonly("data_time", &Transaction::data_time)
             .def_property_readonly("instrument_id", &Transaction::get_instrument_id)
             .def_property_readonly("exchange_id", &Transaction::get_exchange_id)
@@ -212,8 +337,8 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
     py::class_<Order>(m, "Order")
-            .def_readonly("rcv_time", &Order::rcv_time)
             .def_readonly("order_id", &Order::order_id)
             .def_readonly("insert_time", &Order::insert_time)
             .def_readonly("update_time", &Order::update_time)
@@ -257,7 +382,6 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<Trade>(m, "Trade")
-            .def_readonly("rcv_time", &Trade::rcv_time)
             .def_readonly("id", &Trade::id)
             .def_readonly("order_id", &Trade::order_id)
             .def_readonly("parent_order_id", &Trade::parent_order_id)
@@ -280,7 +404,6 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<AccountInfo>(m, "AccountInfo")
-            .def_readonly("rcv_time", &AccountInfo::rcv_time)
             .def_readonly("update_time", &AccountInfo::update_time)
             .def_readonly("initial_equity", &AccountInfo::initial_equity)
             .def_readonly("static_equity", &AccountInfo::static_equity)
@@ -310,7 +433,6 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<Position>(m, "Position")
-            .def_readonly("rcv_time", &Position::rcv_time)
             .def_readonly("update_time", &Position::update_time)
             .def_readonly("instrument_type", &Position::instrument_type)
             .def_readonly("direction", &Position::direction)
@@ -400,8 +522,14 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_trade", &strategy::Strategy::on_trade)
             .def("on_algo_order_status", &strategy::Strategy::on_algo_order_status);
 
-    py::class_<Calendar>(m, "Calendar")
-            .def(py::init<const std::string &>())
-            .def("current_trading_day", &Calendar::get_current_trading_day)
-            .def("calculate_trading_day", &Calendar::calculate_trading_day);
+    py::class_<Calendar, std::shared_ptr<Calendar>, PyCalendar>(m, "Calendar")
+            .def(py::init())
+            .def("get_current_trading_day", &Calendar::get_current_trading_day)
+            .def("get_next_trading_day", &Calendar::get_next_trading_day)
+            .def("is_open", &Calendar::is_open)
+            .def("get_open_time", &Calendar::get_open_time)
+            .def("get_close_time", &Calendar::get_close_time)
+            .def("next_open", &Calendar::next_open)
+            .def("next_close", &Calendar::next_close)
+            ;
 }

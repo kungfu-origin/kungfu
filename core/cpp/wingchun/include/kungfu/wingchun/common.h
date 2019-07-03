@@ -18,10 +18,11 @@
 #define EXCHANGE_CFFEX "CFFEX"
 #define EXCHANGE_INE "INE"
 
+#define SOURCE_CTP "ctp"
+#define SOURCE_XTP "xtp"
+
 #define EPSILON (1e-6)
 #define DOUBLEMAX (1e16) // 一亿亿, 2018年A股总市值不到50万亿
-
-#define UID_EPOCH_SECONDS 1463673600 // "2016-05-20"
 
 namespace kungfu
 {
@@ -38,76 +39,102 @@ namespace kungfu
         const int BROKER_ID_LEN = 32;
         const int ERROR_MSG_LEN = 32;
 
-        typedef char InstrumentType;
-        const InstrumentType InstrumentTypeUnknown = '0';
-        const InstrumentType InstrumentTypeStock = '1';
-        const InstrumentType InstrumentTypeFuture = '2';
-        const InstrumentType InstrumentTypeBond = '3';
-        const InstrumentType InstrumentTypeStockOption = '4';
+        enum class InstrumentType: int8_t
+        {
+            Unknown,
+            Stock,
+            Future,
+            Bond,
+            StockOption
+        };
 
-        typedef char ExecType;
-        const ExecType ExecTypeUnknown = '0';
-        const ExecType ExecTypeCancel = '1';
-        const ExecType ExecTypeTrade = '2';
+        enum class ExecType: int8_t
+        {
+            Unknown,
+            Cancel,
+            Trade
+        };
 
-        typedef char BsFlag;
-        const BsFlag BsFlagUnknown = '0';
-        const BsFlag BsFlagBuy = '1';
-        const BsFlag BsFlagSell = '2';
+        enum class BsFlag: int8_t
+        {
+            Unknown,
+            Buy,
+            Sell
+        };
 
-        typedef char Side;
-        const Side SideBuy = '0'; // 所有建仓操作(股票买入, 逆回购借出)
-        const Side SideSell = '1';
+        enum class Side: int8_t
+        {
+            Buy,
+            Sell
+        };
 
-        typedef char Offset;
-        const Offset OffsetOpen = '0';
-        const Offset OffsetClose = '1';
-        const Offset OffsetCloseToday = '2';
-        const Offset OffsetCloseYesterday = '3';
+        enum class Offset: int8_t
+        {
+            Open,
+            Close,
+            CloseToday,
+            CloseYesterday
+        };
 
-        typedef char OrderActionFlag;
-        const OrderActionFlag OrderActionFlagCancel = '0';
+        enum class OrderActionFlag: int8_t
+        {
+            Cancel,
+        };
 
-        typedef char PriceType;
-        const PriceType PriceTypeAny = '0';
-        const PriceType PriceTypeBest = '1';
-        const PriceType PriceTypeBest5 = '2';
-        const PriceType PriceTypeLimit = '3';
-        const PriceType PriceTypeForwardBest = '4';
-        const PriceType PriceTypeReverseBest = '5';
+        enum class PriceType: int8_t
+        {
+            Any,
+            Best,
+            Best5,
+            Limit,
+            ForwardBest,
+            ReverseBest
+        };
 
-        typedef char VolumeCondition;
-        const VolumeCondition VolumeConditionAny = '0';
-        const VolumeCondition VolumeConditionMin = '1';
-        const VolumeCondition VolumeConditionAll = '2';
+        enum class VolumeCondition: int8_t
+        {
+            Any,
+            Min,
+            All
+        };
 
-        typedef char TimeCondition;
-        const TimeCondition TimeConditionIOC = '0';
-        const TimeCondition TimeConditionGFD = '1';
-        const TimeCondition TimeConditionGTC = '2';
+        enum class TimeCondition: int8_t
+        {
+            IOC,
+            GFD,
+            GTC
+        };
 
-        typedef char OrderStatus;
-        const OrderStatus OrderStatusUnknown = '0';
-        const OrderStatus OrderStatusSubmitted = '1';
-        const OrderStatus OrderStatusPending = '2';
-        const OrderStatus OrderStatusCancelled = '3';
-        const OrderStatus OrderStatusError = '4';
-        const OrderStatus OrderStatusFilled = '5';
-        const OrderStatus OrderStatusPartialFilledNotActive = '6';
-        const OrderStatus OrderStatusPartialFilledActive = '7';
+        enum class OrderStatus: int8_t
+        {
+            Unknown,
+            Submitted,
+            Pending,
+            Cancelled,
+            Error,
+            Filled,
+            PartialFilledNotActive,
+            PartialFilledActive
+        };
 
-        typedef char Direction;
-        const Direction DirectionLong = '0';
-        const Direction DirectionShort = '1';
+        enum class Direction: int8_t
+        {
+            Long,
+            Short
+        };
 
-        typedef char AccountType;
-        const AccountType AccountTypeStock = '0';
-        const AccountType AccountTypeCredit = '1';
-        const AccountType AccountTypeFuture = '2';
+        enum class AccountType: int8_t
+        {
+            Stock,
+            Credit,
+            Future
+        };
 
-        typedef char CommissionRateMode;
-        const CommissionRateMode CommissionRateModeByAmount = '0';
-        const CommissionRateMode CommissionRateModeByVolume = '1';
+        enum class CommissionRateMode: int8_t
+        {
+            ByAmount,
+            ByVolume
+        };
 
         class wingchun_error : public std::runtime_error
         {

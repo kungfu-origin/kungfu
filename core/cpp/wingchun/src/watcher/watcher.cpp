@@ -21,8 +21,7 @@ namespace kungfu
     namespace wingchun
     {
         Watcher::Watcher(bool low_latency, locator_ptr locator) :
-                apprentice(location::make(mode::LIVE, category::SYSTEM, "watcher", "watcher", std::move(locator)), low_latency),
-                calendar_(get_config_db_file("holidays"))
+                apprentice(location::make(mode::LIVE, category::SYSTEM, "watcher", "watcher", std::move(locator)), low_latency)
         {
             log::copy_log_settings(get_io_device()->get_home(), "watcher");
             pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);

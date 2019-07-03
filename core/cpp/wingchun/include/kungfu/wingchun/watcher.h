@@ -8,7 +8,6 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/wingchun/calendar/calendar.h>
 
 namespace kungfu
 {
@@ -49,7 +48,6 @@ namespace kungfu
 
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;
-            Calendar calendar_;
 
             std::unordered_map<std::string, int> accounts_;
 

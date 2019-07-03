@@ -1,7 +1,7 @@
 import os
 import click
 import kungfu.yijinjing.journal as kfj
-
+from kungfu.data.sqlite.data_proxy import DataProxy
 
 @click.group(invoke_without_command=True)
 @click.option('-f', '--home', type=str, help='kungfu home folder')
@@ -16,7 +16,7 @@ def kfc(ctx, home, log_level, name):
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.locator = kfj.Locator(home)
-
+    ctx.data_proxy = DataProxy(ctx)
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:
@@ -28,6 +28,7 @@ def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
     ctx.log_level = ctx.parent.log_level
     ctx.locator = ctx.parent.locator
+    ctx.data_proxy = ctx.parent.data_proxy
     ctx.name = ctx.parent.name
 
 

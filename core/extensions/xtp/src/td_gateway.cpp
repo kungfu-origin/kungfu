@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <fmt/format.h>
 
-#include <kungfu/wingchun/config.h>
 #include <kungfu/wingchun/gateway/macro.h>
 #include <kungfu/wingchun/util/business_helper.h>
 
@@ -109,13 +108,12 @@ namespace kungfu
                 {
                     order.insert_time = nano;
                     order.update_time = nano;
-                    order.rcv_time = nano;
-                    strcpy(order.trading_day, std::to_string(get_calendar().get_current_trading_day()).c_str());
+                    strcpy(order.trading_day, current_trading_day().c_str());
 
                     XTPRI *error_info = api_->GetApiLastError();
                     order.error_id = error_info->error_id;
                     strcpy(order.error_msg, error_info->error_msg);
-                    order.status = OrderStatusError;
+                    order.status = OrderStatus::Error;
 
                     writer->close_data();
 
@@ -132,7 +130,7 @@ namespace kungfu
                     info.parent_id = input.parent_id;
                     info.source = event->source();
                     info.insert_time = nano;
-                    strcpy(info.trading_day, std::to_string(get_calendar().get_current_trading_day()).c_str());
+                    strcpy(info.trading_day, current_trading_day().c_str());
                     order_mapper_->add_order(info);
 
                     INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id));
@@ -184,7 +182,6 @@ namespace kungfu
                 if (session_id == session_id_)
                 {
                     DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
-//                    set_state(GatewayState::DisConnected, fmt::format("reason {}", reason));
                     int retry = 10;
                     while (retry > 0)
                     {
@@ -192,14 +189,12 @@ namespace kungfu
                         if (session_id_ > 0)
                         {
                             LOGIN_INFO("login success");
-//                            set_state(GatewayState::LoggedIn);
                             req_account();
                             break;
                         } else
                         {
                             XTPRI *error_info = api_->GetApiLastError();
                             LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-//                            set_state(GatewayState::LoggedInFailed, std::string(error_info->error_msg));
                             std::this_thread::sleep_for(std::chrono::seconds(2));
                             retry--;
                         }
@@ -214,12 +209,10 @@ namespace kungfu
                                         error_info == nullptr ? 0 : error_info->error_id,
                                         error_info == nullptr ? "" : error_info->error_msg,
                                         session_id));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(std::to_string(get_calendar().get_current_trading_day()).c_str(),
-                                                                              order_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(current_trading_day().c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id,
-                                            get_calendar().get_current_trading_day()));
+                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, current_trading_day()));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -231,7 +224,6 @@ namespace kungfu
                     order.insert_time = xtp_order.insert_time;
                     int64_t nano = kungfu::yijinjing::time::now_in_nano();
                     order.update_time = nano;
-                    order.rcv_time = nano;
                     strcpy(order.client_id, xtp_order.client_id);
                     strcpy(order.account_id, get_account_id().c_str());
                     strcpy(order.trading_day, xtp_order.trading_day);
@@ -248,18 +240,16 @@ namespace kungfu
             void TdGateway::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
             {
                 TRADE_TRACE(fmt::format("(trade_info) {}", to_string(*trade_info)));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(std::to_string(get_calendar().get_current_trading_day()).c_str(),
-                                                                              trade_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(current_trading_day().c_str(), trade_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id,
-                                            get_calendar().get_current_trading_day()));
+                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, current_trading_day()));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
                     msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
                     from_xtp(*trade_info, trade);
-                    trade.rcv_time = kungfu::yijinjing::time::now_in_nano();
+                    trade.id = writer->current_frame_uid();
                     trade.order_id = xtp_order.internal_order_id;
                     trade.parent_order_id = xtp_order.parent_id;
                     strcpy(trade.client_id, xtp_order.client_id);
@@ -292,9 +282,8 @@ namespace kungfu
                         from_xtp(*position, stock_pos);
                     }
                     stock_pos.instrument_type = get_instrument_type(stock_pos.instrument_id, stock_pos.exchange_id);
-                    stock_pos.direction = DirectionLong;
+                    stock_pos.direction = Direction::Long;
                     int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    stock_pos.rcv_time = nano;
                     stock_pos.update_time = nano;
                     writer->close_data();
 
@@ -326,7 +315,6 @@ namespace kungfu
                         from_xtp(*asset, account);
                     }
                     int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    account.rcv_time = nano;
                     account.update_time = nano;
                     writer->close_data();
 

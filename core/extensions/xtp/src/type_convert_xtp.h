@@ -86,36 +86,36 @@ namespace kungfu
             {
                 if (xtp_price_type == XTP_PRICE_LIMIT)
                 {
-                    price_type = PriceTypeLimit;
-                    time_condition = TimeConditionGFD;
-                    volume_condition = VolumeConditionAny;
+                    price_type = PriceType::Limit;
+                    time_condition = TimeCondition::GFD;
+                    volume_condition = VolumeCondition::Any;
                 } else if (xtp_price_type == XTP_PRICE_BEST5_OR_CANCEL)
                 {
-                    price_type = PriceTypeBest5;
-                    time_condition = TimeConditionIOC;
-                    volume_condition = VolumeConditionAny;
+                    price_type = PriceType::Best5;
+                    time_condition = TimeCondition::IOC;
+                    volume_condition = VolumeCondition::Any;
                 }
             }
 
             inline void to_xtp(XTP_PRICE_TYPE &xtp_price_type, const PriceType &price_type, const TimeCondition &time_condition,
                                const VolumeCondition &volume_condition)
             {
-                if (price_type == PriceTypeLimit && time_condition == TimeConditionGFD) // 限价
+                if (price_type == PriceType::Limit && time_condition == TimeCondition::GFD) // 限价
                 {
                     xtp_price_type = XTP_PRICE_LIMIT;
-                } else if (price_type == PriceTypeBest && time_condition == TimeConditionIOC) //
+                } else if (price_type == PriceType::Best && time_condition == TimeCondition::IOC) //
                 {
                     xtp_price_type = XTP_PRICE_BEST_OR_CANCEL;
-                } else if (price_type == PriceTypeBest5 && time_condition == TimeConditionIOC) // 最优五档成交剩余转撤销
+                } else if (price_type == PriceType::Best5 && time_condition == TimeCondition::IOC) // 最优五档成交剩余转撤销
                 {
                     xtp_price_type = XTP_PRICE_BEST5_OR_CANCEL;
-                } else if (price_type == PriceTypeBest5 && time_condition == TimeConditionGFD) // 最优五档成交剩余转限价
+                } else if (price_type == PriceType::Best5 && time_condition == TimeCondition::GFD) // 最优五档成交剩余转限价
                 {
                     xtp_price_type = XTP_PRICE_BEST5_OR_LIMIT;
-                } else if (price_type == PriceTypeForwardBest) //本方最优价
+                } else if (price_type == PriceType::ForwardBest) //本方最优价
                 {
                     xtp_price_type = XTP_PRICE_FORWARD_BEST;
-                } else if (price_type == PriceTypeReverseBest && time_condition == TimeConditionGFD)
+                } else if (price_type == PriceType::ReverseBest && time_condition == TimeCondition::GFD)
                 {
                     xtp_price_type = XTP_PRICE_REVERSE_BEST_LIMIT;
                 }
@@ -125,25 +125,25 @@ namespace kungfu
             {
                 if (xtp_order_status == XTP_ORDER_STATUS_INIT || xtp_order_status == XTP_ORDER_STATUS_NOTRADEQUEUEING)
                 {
-                    status = OrderStatusPending;
+                    status = OrderStatus::Pending;
                 } else if (xtp_order_status == XTP_ORDER_STATUS_ALLTRADED)
                 {
-                    status = OrderStatusFilled;
+                    status = OrderStatus::Filled;
                 } else if (xtp_order_status == XTP_ORDER_STATUS_CANCELED)
                 {
-                    status = OrderStatusCancelled;
+                    status = OrderStatus::Cancelled;
                 } else if (xtp_order_status == XTP_ORDER_STATUS_PARTTRADEDQUEUEING)
                 {
-                    status = OrderStatusPartialFilledActive;
+                    status = OrderStatus::PartialFilledActive;
                 } else if (xtp_order_status == XTP_ORDER_STATUS_PARTTRADEDNOTQUEUEING)
                 {
-                    status = OrderStatusPartialFilledNotActive;
+                    status = OrderStatus::PartialFilledNotActive;
                 } else if (xtp_order_status == XTP_ORDER_STATUS_REJECTED)
                 {
-                    status = OrderStatusError;
+                    status = OrderStatus::Error;
                 } else
                 {
-                    status = OrderStatusUnknown;
+                    status = OrderStatus::Unknown;
                 }
             }
 
@@ -151,19 +151,19 @@ namespace kungfu
             {
                 if (xtp_side == XTP_SIDE_BUY)
                 {
-                    side = SideBuy;
+                    side = Side::Buy;
                 } else if (xtp_side == XTP_SIDE_SELL)
                 {
-                    side = SideSell;
+                    side = Side::Sell;
                 }
             }
 
             inline void to_xtp(XTP_SIDE_TYPE &xtp_side, const Side &side)
             {
-                if (side == SideBuy)
+                if (side == Side::Buy)
                 {
                     xtp_side = XTP_SIDE_BUY;
-                } else if (side == SideSell)
+                } else if (side == Side::Sell)
                 {
                     xtp_side = XTP_SIDE_SELL;
                 }
@@ -184,16 +184,16 @@ namespace kungfu
 
                 if (ori.data_type == XTP_MARKETDATA_OPTION)
                 {
-                    des.instrument_type = InstrumentTypeStockOption;
+                    des.instrument_type = InstrumentType::StockOption;
                 } else
                 {
                     // 目前除逆回购之外的债券均当做股票
                     if (is_reverse_repurchase(des.instrument_id, des.exchange_id))
                     {
-                        des.instrument_type = InstrumentTypeBond;
+                        des.instrument_type = InstrumentType::Bond;
                     } else
                     {
-                        des.instrument_type = InstrumentTypeStock;
+                        des.instrument_type = InstrumentType::Stock;
                     }
                 }
 
@@ -246,10 +246,10 @@ namespace kungfu
                 des.limit_price = ori.price;
                 from_xtp(ori.order_status, des.status);
                 from_xtp(ori.side, des.side);
-                des.offset = OffsetOpen;
+                des.offset = Offset::Open;
                 if (ori.business_type == XTP_BUSINESS_TYPE_CASH)
                 {
-                    des.instrument_type = InstrumentTypeStock;
+                    des.instrument_type = InstrumentType::Stock;
                 }
                 if (ori.update_time > 0)
                 {
@@ -264,10 +264,10 @@ namespace kungfu
                 des.price = ori.price;
                 from_xtp(ori.market, des.exchange_id);
                 from_xtp(ori.side, des.side);
-                des.offset = OffsetOpen;
+                des.offset = Offset::Open;
                 if (ori.business_type == XTP_BUSINESS_TYPE_CASH)
                 {
-                    des.instrument_type = InstrumentTypeStock;
+                    des.instrument_type = InstrumentType::Stock;
                 }
                 from_xtp_timestamp(ori.trade_time, des.trade_time);
             }
@@ -299,13 +299,13 @@ namespace kungfu
 
                 if (ori.entrust.ord_type == '1')
                 {
-                    des.price_type = PriceTypeAny;
+                    des.price_type = PriceType::Any;
                 } else if (ori.entrust.ord_type == '2')
                 {
-                    des.price_type = PriceTypeLimit;
+                    des.price_type = PriceType::Limit;
                 } else if (ori.entrust.ord_type == 'U')
                 {
-                    des.price_type = PriceTypeBest;
+                    des.price_type = PriceType::Best;
                 }
             }
 
@@ -330,31 +330,32 @@ namespace kungfu
                 {
                     case 'B':
                     {
-                        des.bs_flag = BsFlagBuy;
+                        des.bs_flag = BsFlag::Buy;
                         break;
                     }
                     case 'S':
                     {
-                        des.bs_flag = BsFlagSell;
+                        des.bs_flag = BsFlag::Sell;
                         break;
                     }
                     case 'N':
                     {
-                        des.bs_flag = BsFlagUnknown;
+                        des.bs_flag = BsFlag::Unknown;
                         break;
                     }
                     case '4':
                     {
-                        des.exec_type = ExecTypeCancel;
+                        des.exec_type = ExecType::Cancel;
                         break;
                     }
                     case 'F':
                     {
-                        des.exec_type = ExecTypeTrade;
+                        des.exec_type = ExecType::Trade;
                         break;
                     }
                     default:
-                    { ;
+                    {
+                        break;
                     }
                 }
             }

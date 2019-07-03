@@ -8,9 +8,6 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/msg.h>
-
-#include <kungfu/wingchun/util/business_helper.h>
-#include <kungfu/wingchun/storage/storage.h>
 #include <kungfu/wingchun/strategy/context.h>
 
 using namespace kungfu::practice;
@@ -26,14 +23,8 @@ namespace kungfu
     {
         namespace strategy
         {
-            inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
-            {
-                return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
-            }
-
             Context::Context(practice::apprentice &app, const rx::observable<yijinjing::event_ptr> &events) :
-                    app_(app), events_(events), now_(0),
-                    calendar_(app_.get_config_db_file("holidays"))
+                    app_(app), events_(events), now_(0)
             {}
 
             void Context::react(const rx::observable<yijinjing::event_ptr> &events)
@@ -97,19 +88,6 @@ namespace kungfu
                     throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
                 }
                 account_location_ids_[account_id] = account_location->uid;
-
-                auto commission_db_file = home->locator->layout_file(account_location, yijinjing::data::layout::SQLITE, "commission");
-                account_managers_[account_id] = std::make_shared<AccountManager>(account, calendar_, commission_db_file);
-                accounts_[account_id] = msg::data::AccountInfo{};
-
-                auto info = accounts_[account_id];
-                strcpy(info.account_id, account.c_str());
-                strcpy(info.source_id, source.c_str());
-                strcpy(info.trading_day, std::to_string(calendar_.get_current_trading_day()).c_str());
-                info.initial_equity = cash_limit;
-                info.static_equity = cash_limit;
-                info.dynamic_equity = cash_limit;
-                info.avail = cash_limit;
 
                 app_.observe(now_, account_location);
                 app_.request_write_to(now_, account_location->uid);
@@ -192,9 +170,9 @@ namespace kungfu
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-                input.price_type = PriceTypeLimit;
-                input.time_condition = TimeConditionGFD;
-                input.volume_condition = VolumeConditionAny;
+                input.price_type = PriceType::Limit;
+                input.time_condition = TimeCondition::GFD;
+                input.volume_condition = VolumeCondition::Any;
 
                 writer->close_data();
                 return input.order_id;
@@ -215,9 +193,9 @@ namespace kungfu
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-                input.price_type = PriceTypeLimit;
-                input.time_condition = TimeConditionIOC;
-                input.volume_condition = VolumeConditionAny;
+                input.price_type = PriceType::Limit;
+                input.time_condition = TimeCondition::IOC;
+                input.volume_condition = VolumeCondition::Any;
 
                 writer->close_data();
                 return input.order_id;
@@ -238,9 +216,9 @@ namespace kungfu
                 input.volume = volume;
                 input.side = side;
                 input.offset = offset;
-                input.price_type = PriceTypeLimit;
-                input.time_condition = TimeConditionIOC;
-                input.volume_condition = VolumeConditionAll;
+                input.price_type = PriceType::Limit;
+                input.time_condition = TimeCondition::IOC;
+                input.volume_condition = VolumeCondition::All;
 
                 writer->close_data();
                 return input.order_id;
@@ -267,14 +245,14 @@ namespace kungfu
 
                 if (strcmp(input.exchange_id, EXCHANGE_SSE) == 0 || strcmp(input.exchange_id, EXCHANGE_SZE) == 0) //沪深市，最优五档转撤销
                 {
-                    input.price_type = PriceTypeBest5;
-                    input.time_condition = TimeConditionIOC;
-                    input.volume_condition = VolumeConditionAny;
+                    input.price_type = PriceType::Best5;
+                    input.time_condition = TimeCondition::IOC;
+                    input.volume_condition = VolumeCondition::Any;
                 } else
                 {
-                    input.price_type = PriceTypeAny;
-                    input.time_condition = TimeConditionIOC;
-                    input.volume_condition = VolumeConditionAny;
+                    input.price_type = PriceType::Any;
+                    input.time_condition = TimeCondition::IOC;
+                    input.volume_condition = VolumeCondition::Any;
                 }
 
                 writer->close_data();
@@ -294,7 +272,7 @@ namespace kungfu
 
                 action.order_action_id = writer->current_frame_uid();
                 action.order_id = order_id;
-                action.action_flag = OrderActionFlagCancel;
+                action.action_flag = OrderActionFlag::Cancel;
 
                 writer->close_data();
                 return action.order_action_id;

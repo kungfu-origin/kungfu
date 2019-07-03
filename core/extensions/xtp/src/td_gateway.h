@@ -33,7 +33,7 @@ namespace kungfu
                 void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
                 const AccountType get_account_type() const override
-                { return AccountTypeStock; }
+                { return AccountType::Stock; }
 
                 bool insert_order(const yijinjing::event_ptr& event) override;
 

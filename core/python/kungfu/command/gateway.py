@@ -1,14 +1,14 @@
 import pyyjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.data.sqlite import get_task_config
+# from kungfu.data.sqlite import get_task_config
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
 from kungfu.log import create_logger
 
 
 def run_extension(ctx, registry):
     if registry.has_extension(ctx.source):
-        config = get_task_config(ctx, ctx.name)
+        config = ctx.data_proxy.get_task_config(ctx.name)
         config_str = {}
         config_int = {}
         config_double = {}

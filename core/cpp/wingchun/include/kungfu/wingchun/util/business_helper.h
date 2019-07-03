@@ -35,10 +35,10 @@ namespace kungfu
         {
             switch (status)
             {
-                case OrderStatusSubmitted:
-                case OrderStatusPending:
-                case OrderStatusPartialFilledNotActive:
-                case OrderStatusUnknown:
+                case OrderStatus::Submitted:
+                case OrderStatus::Pending:
+                case OrderStatus::PartialFilledNotActive:
+                case OrderStatus::Unknown:
                     return false;
                 default:
                     return true;
@@ -67,7 +67,7 @@ namespace kungfu
             order.volume = input.volume;
             order.volume_traded = 0;
             order.volume_left = input.volume;
-            order.status = OrderStatusSubmitted;
+            order.status = OrderStatus::Submitted;
 
             order.side = input.side;
             order.offset = input.offset;
@@ -161,16 +161,16 @@ namespace kungfu
             {
                 if (is_reverse_repurchase(instrument_id, exchange_id))
                 {
-                    return InstrumentTypeBond;
+                    return InstrumentType::Bond;
                 }
                 else
                 {
-                    return InstrumentTypeStock;
+                    return InstrumentType::Stock;
                 }
             }
             else
             {
-                return InstrumentTypeFuture;
+                return InstrumentType::Future;
             }
         }
 
@@ -191,12 +191,12 @@ namespace kungfu
 
         inline Direction get_future_direction(Side side, Offset offset)
         {
-            if ((side == SideBuy && offset == OffsetOpen) || (side == SideSell && offset != OffsetOpen))
+            if ((side == Side::Buy && offset == Offset::Open) || (side == Side::Sell && offset != Offset::Open))
             {
-                return DirectionLong;
+                return Direction::Long;
             } else
             {
-                return DirectionShort;
+                return Direction::Short;
             }
         }
 
@@ -227,12 +227,12 @@ namespace kungfu
 
         inline bool is_open(InstrumentType instrument_type, Side side, Offset offset)
         {
-            if (instrument_type == InstrumentTypeStock || instrument_type == InstrumentTypeBond)
+            if (instrument_type == InstrumentType::Stock || instrument_type == InstrumentType::Bond)
             {
-                return side == SideBuy;
-            } else if (instrument_type == InstrumentTypeFuture)
+                return side == Side::Buy;
+            } else if (instrument_type == InstrumentType::Future)
             {
-                return offset == OffsetOpen;
+                return offset == Offset::Open;
             } else
             {
                 return false;

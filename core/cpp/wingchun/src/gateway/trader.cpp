@@ -7,7 +7,6 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/gateway/trader.h>
-#include <kungfu/wingchun/util/business_helper.h>
 
 using namespace kungfu::practice;
 using namespace kungfu::rx;
@@ -28,7 +27,7 @@ namespace kungfu
                     :
                     apprentice(location::make(mode::LIVE, category::TD, source, account_id, std::move(locator)), low_latency),
                     source_(source), account_id_(account_id),
-                    calendar_(get_config_db_file("holidays"))
+                    calendar_(nullptr)
             {
                 log::copy_log_settings(get_io_device()->get_home(), account_id);
             }

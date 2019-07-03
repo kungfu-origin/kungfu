@@ -9,8 +9,6 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
 
-#include <kungfu/wingchun/storage/subscription_storage.hpp>
-
 namespace kungfu
 {
     namespace wingchun
