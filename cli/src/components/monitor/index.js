@@ -8,7 +8,7 @@ import Dashboard from '__@/assets/components/Dashboard';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, switchMd, switchTd, switchStrategy, switchMaster, parseToString, dealLog } from '__@/assets/utils';
 import { getAccountList } from '@/io/db/account';
 import { getStrategyList } from '@/io/db/strategy';
-import { dealLogMessage, getLog, debounce } from '@/assets/js/utils';
+import { dealLogMessage, getLog } from '@/assets/js/utils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { addFile } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';

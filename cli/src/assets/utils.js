@@ -3,6 +3,7 @@ import moment from 'moment';
 import { startTd, startMd, startStrategy, startMaster, deleteProcess } from '__gUtils/processUtils.js';
 import { setTasksDB } from '@/io/db/base';
 import { toDecimal } from '@/assets/js/utils';
+import { logger } from '__gUtils/logUtils';
 
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
@@ -162,24 +163,24 @@ export const dealNum = (num, percentage) => {
 }
 
 export const switchMaster = (globalStatus) => {
-	if(globalStatus['master'] !== 'online') return startMaster().catch(err => {})
+	if(globalStatus['master'] !== 'online') return startMaster(true).catch(err => logger.error(err))
 	else return deleteProcess('master').catch(err => {})
 }
 
 export const switchTd = (processData, globalStatus) => {
-	const {account_id, source_name, config} = processData;
+	const { account_id, source_name, config } = processData;
 	const processId = `td_${account_id}`;
 	if(globalStatus[processId] === 'online') return deleteProcess(processId);
 	return setTasksDB({name: processId, type: 'md', config})
-    .then(() => startTd(source_name, processId)) //开启td,pm2
+    .then(() => startTd(account_id)) //开启td,pm2
 }
 
 export const switchMd = (processData, globalStatus) => {
-	const {source_name, config} = processData;
+	const { source_name, config } = processData;
 	const processId = `md_${source_name}`;
 	if(globalStatus[processId] === 'online') return deleteProcess(processId);
-	return setTasksDB({name: processId, type: 'td', config})
-	.then(() => startMd(source_name, processId)) //开启td,pm2
+	return setTasksDB({ name: processId, type: 'td', config })
+	.then(() => startMd(source_name)) //开启md,pm2
 }
 
 export const switchStrategy = (processData, globalStatus) => {
