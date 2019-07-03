@@ -157,11 +157,11 @@ export const startProcess = async (options, no_ext=false) => {
     };
 
     if(no_ext) options['env']['KF_NO_EXT'] = 'on'
-
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
                 pm2.start(options, (err, apps) => { 
+                    logger.info(err, apps)
                     if(err) {
                         logger.error(err)
                         reject(err);
@@ -179,7 +179,6 @@ export const startProcess = async (options, no_ext=false) => {
 
 //启动pageEngine
 export const startMaster = async(force) => {
-    
     const processName = 'master';
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
@@ -188,7 +187,7 @@ export const startMaster = async(force) => {
     try{ await killKfc() } catch (err) {}
     return startProcess({
         "name": processName,
-        "args": "master"
+        "args": "-l trace master"
     }, true).catch(err => logger.error(err))
 }
 
