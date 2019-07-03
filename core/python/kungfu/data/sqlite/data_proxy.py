@@ -70,8 +70,9 @@ class DataProxy:
         self.ctx = ctx
         ctx.data_proxy = self
         default_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
-        self._order_storage = OrderStorage(make_url(ctx.locator, default_location, "orders"))
-        self._trade_storage = TradeStorage(make_url(ctx.locator, default_location, "trades"))
+        watcher_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'watcher', 'watcher', ctx.locator)
+        self._order_storage = OrderStorage(make_url(ctx.locator, watcher_location, "orders"))
+        self._trade_storage = TradeStorage(make_url(ctx.locator, watcher_location, "trades"))
         self._task_storage = TaskConfigStorage(make_url(ctx.locator,default_location, "task"))
         self._instrument_storage = FutureInstrumentStorage(make_url(ctx.locator, default_location, "future_instruments"))
 
