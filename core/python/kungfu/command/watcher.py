@@ -1,6 +1,6 @@
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.wingchun import Watcher
+from kungfu.wingchun.watcher import Watcher
 
 
 @kfc.command()
