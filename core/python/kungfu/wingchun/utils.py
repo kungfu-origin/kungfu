@@ -1,4 +1,6 @@
 
+import pywingchun
+
 def to_dict(obj):
     d = {}
     for attr in dir(obj):
@@ -10,3 +12,6 @@ def to_dict(obj):
             else:
                 d[attr] = getattr(obj, attr)
     return d
+
+is_valid_price = pywingchun.utils.is_valid_price
+get_symbol_id = pywingchun.utils.get_symbol_id

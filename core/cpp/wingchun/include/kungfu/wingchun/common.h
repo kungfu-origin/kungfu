@@ -183,6 +183,11 @@ namespace kungfu
             return is_greater(x, DOUBLEMAX);
         }
 
+        inline bool is_valid_price(double price)
+        {
+            return !is_less_equal(price, 0.0) && !is_too_large(price);
+        }
+
         inline double rounded(double x, int n)
         {
             if (is_too_large(x) || is_zero(x) || is_too_large(std::abs(x)))

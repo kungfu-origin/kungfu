@@ -91,6 +91,12 @@ namespace kungfu
                   on_trade(event, event->data<Trade>());
               });
 
+            events | is(msg::type::AccountInfo) |
+            $([&](event_ptr event)
+              {
+                  memcpy(&account_info_, & event->data<AccountInfo>(), sizeof(AccountInfo));
+              });
+
             events | is(msg::type::Position) |
             $([&](event_ptr event)
               {
@@ -100,8 +106,9 @@ namespace kungfu
             events | is(msg::type::PositionEnd) |
             $([&](event_ptr event)
               {
-                  on_positions(position_buffer_);
+                  on_assets(account_info_, position_buffer_);
                   position_buffer_.clear();
+                  memset(&account_info_, 0, sizeof(account_info_));
               });
         }
 

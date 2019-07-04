@@ -1,16 +1,41 @@
 
+from kungfu.wingchun.constants import *
+from pyyjj import hash_str_32
+
+def get_symbol_id(instrument_id, exchange_id, direction = DirectionLong):
+    if isinstance(direction, int):
+        direction = Direction(direction)
+    return hash_str_32("{}.{}.{}".format(instrument_id, exchange_id, direction))
 
 class StockPosition:
-    def __init__(self, instrument_id, exchange_id):
-        self._instrument_id = instrument_id
-        self._exchange_id = exchange_id
-        self._volume = 0
-        self._yesterday_volume = 0
-        self._avg_open_price = 0.0
-        self._realized_pnl = 0.0
-        self._last_price = None
-        self._pre_close_price = None
-        self._close_price = None
+    def __init__(self, **kwargs):
+        self._ledger = kwargs.pop("ledger", None)
+        self._instrument_id = kwargs.pop("instrument_id")
+        self._exchange_id = kwargs.pop("exchange_id")
+        self._symbol_id = get_symbol_id(self._instrument_id, self._exchange_id)
+        self._volume = kwargs.pop("volume", 0)
+        self._yesterday_volume = kwargs.pop("yesterday_volume", 0)
+
+        self._avg_open_price = kwargs.pop("open_price", 0.0)
+        if self._avg_open_price <= 0.0:
+            self._avg_open_price = kwargs.pop("cost_price", 0.0) # fill with position cost price
+        self._last_price = kwargs.pop("last_price", 0.0)
+        self._close_price = kwargs.pop("close_price", 0.0)
+        self._pre_close_price = kwargs.pop("pre_close_price", 0.0)
+
+        self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+
+    @property
+    def ledger(self):
+        return self._ledger
+
+    @ledger.setter
+    def ledger(self, value):
+        self._ledger = value
+
+    @property
+    def symbol_id(self):
+        return self._symbol_id
 
     @property
     def instrument_id(self):
@@ -38,7 +63,7 @@ class StockPosition:
 
     @property
     def market_value(self):
-        return self.volume * self.last_price
+        return self.volume * (self.last_price if self.last_price > 0.0 else self.avg_open_price)
 
     @property
     def avg_open_price(self):
@@ -50,28 +75,31 @@ class StockPosition:
 
     @property
     def unrealized_pnl(self):
-        return (self.last_price - self.avg_open_price) * self.volume
+        return (self.last_price - self.avg_open_price) * self.volume if self.last_price > 0.0 else 0.0
 
     def apply_trade(self, trade):
-        if trade.side == pywingchun.Side.Buy:
-            self._apply_buy(trade.price, trade.volume)
+        if trade.side == Side.Buy:
+            return self._apply_buy(trade.price, trade.volume)
         else:
-            self._apply_sell(trade.price, trade.volume)
+            return self._apply_sell(trade.price, trade.volume)
 
     def apply_settlement(self, close_price):
         self.close_price = close_price
 
     def switch_day(self, trading_day):
         self.pre_close_price = self.close_price
-        self.close_price = None
+        self.close_price = 0.0
 
     def _apply_sell(self, price, volume):
         realized_pnl = self._calculate_realized_pnl(price, volume)
-        return realized_pnl
+        self.realized_pnl += realized_pnl
+        self.ledger.realized_pnl += realized_pnl
+        self.ledger.avail += (realized_pnl + price * volume)
 
     def _apply_buy(self, price, volume):
         self.avg_open_price = (self.avg_open_price * self.volume + price * volume) / (self.volume + volume)
         self.volume += volume
+        self.ledger.avail -= price * volume
 
     def _calculate_realized_pnl(self, trade_price, trade_volume):
         return (trade_price - self.avg_open_price) * trade_volume

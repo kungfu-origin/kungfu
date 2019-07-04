@@ -94,12 +94,11 @@ class Trade(Base):
     tax = Column(Float)
     commission = Column(Float)
 
-class AssetMeta(Base):
-    __tablename__ = "asset_meta"
+class LedgerMeta(Base):
+    __tablename__ = "ledger_meta"
     __table_args__ = (PrimaryKeyConstraint('category', 'name'),)
     category = Column(Integer)
-    name = Column(String)
-    update_time = Column(Integer)
+    id = Column()
 
 class Account(Base):
     __tablename__ = "account"
@@ -143,8 +142,6 @@ class PositionMixin(object):
     instrument_id = Column(String)
     instrument_type = Column(String)
     exchange_id = Column(String)
-    account_id = Column(String)
-    client_id  = Column(String)
     direction = Column(String)
     volume = Column(Integer)
     yesterday_volume = Column(Integer)
@@ -165,10 +162,23 @@ class PositionMixin(object):
     open_date = Column(String)
     expire_date = Column(String)
 
+class AccountPosition(PositionMixin, Base):
+    __tablename__ = "account_position"
+    pass
+
+class PortfolioPosition(PositionMixin, Base):
+    __tablename__ = "portfolio_position"
+    pass
+
+class SubPortfolioPosition(PositionMixin, Base):
+    __tablename__ = "subportfolio_position"
+    pass
+
 class Position(PositionMixin, Base):
     __tablename__ = "position"
     __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id', "account_id", "client_id", "direction"),)
 
-class PositionDetail(PositionMixin, Base):
-    __tablename__ = "position_detail"
+
+class FuturePositionDetail(PositionMixin, Base):
+    __tablename__ = "future_position_detail"
     id = Column(Integer, nullable = False, primary_key = True)

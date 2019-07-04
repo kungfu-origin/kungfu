@@ -18,6 +18,7 @@
 #include <pybind11/functional.h>
 
 #include <kungfu/wingchun/msg.h>
+#include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/watcher.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
@@ -87,8 +88,8 @@ public:
     void on_trade(event_ptr event, const Trade& trade) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
 
-    void on_positions(const std::vector<Position>& positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_positions, positions) }
+    void on_assets(const AccountInfo& account_info, const std::vector<Position>& positions) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, account_info, positions) }
 };
 
 class PyStrategy : public strategy::Strategy
@@ -134,7 +135,9 @@ public:
 
 PYBIND11_MODULE(pywingchun, m)
 {
-    m.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
+    auto m_utils =  m.def_submodule("utils");
+    m_utils.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
+    m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
 
     auto m_constants = m.def_submodule("constants");
 
@@ -518,7 +521,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_quote", &Watcher::on_quote)
             .def("on_order", &Watcher::on_order)
             .def("on_trade", &Watcher::on_trade)
-            .def("on_positions", &Watcher::on_positions)
+            .def("on_assets", &Watcher::on_assets)
             .def("run", &Watcher::run);
 
     py::class_<strategy::Runner>(m, "Runner")
