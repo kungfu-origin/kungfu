@@ -90,6 +90,19 @@ namespace kungfu
               {
                   on_trade(event, event->data<Trade>());
               });
+
+            events | is(msg::type::Position) |
+            $([&](event_ptr event)
+              {
+                  position_buffer_.push_back(event->data<Position>());
+              });
+
+            events | is(msg::type::PositionEnd) |
+            $([&](event_ptr event)
+              {
+                  on_positions(position_buffer_);
+                  position_buffer_.clear();
+              });
         }
 
         void Watcher::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
@@ -195,6 +208,7 @@ namespace kungfu
             auto app_uid_str = fmt::format("{:08x}", app_location->uid);
             auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
             reader_->join(master_cmd_location, app_location->uid, trigger_time);
+            reader_->join(app_location, 0, trigger_time);
         }
     }
 }

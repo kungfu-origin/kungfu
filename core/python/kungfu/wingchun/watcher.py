@@ -37,3 +37,7 @@ class Watcher(pywingchun.Watcher):
         trade_dict = to_dict(trade)
         self.data_proxy.add_trade(**trade_dict)
         self.publish(json.dumps({"msg_type": int(MsgType.Trade), "data": trade_dict}))
+
+    def on_positions(self, positions):
+        for pos in positions:
+            self.ctx.logger.info("on pos: %s", pos)

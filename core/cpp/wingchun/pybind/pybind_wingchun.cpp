@@ -86,6 +86,9 @@ public:
 
     void on_trade(event_ptr event, const Trade& trade) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
+
+    void on_positions(const std::vector<Position>& positions) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_positions, positions) }
 };
 
 class PyStrategy : public strategy::Strategy
@@ -515,6 +518,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_quote", &Watcher::on_quote)
             .def("on_order", &Watcher::on_order)
             .def("on_trade", &Watcher::on_trade)
+            .def("on_positions", &Watcher::on_positions)
             .def("run", &Watcher::run);
 
     py::class_<strategy::Runner>(m, "Runner")
