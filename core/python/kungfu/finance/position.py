@@ -8,8 +8,6 @@ class Position:
         self._exchange_id = kwargs.pop("exchange_id")
         self._instrument_type = kwargs.pop("instrument_type", get_instrument_type(instrument_id, exchange_id))
         self._symbol_id = get_symbol_id(self._instrument_id, self._exchange_id)
-        self._volume = kwargs.pop("volume", 0)
-        self._yesterday_volume = kwargs.pop("yesterday_volume", 0)
 
         self._last_price = kwargs.pop("last_price", 0.0)
 
@@ -32,16 +30,12 @@ class Position:
         return self._symbol_id
 
     @property
-    def volume(self):
-        return self._volume
-
-    @property
-    def yesterday_volume(self):
-        return self._yesterday_volume
-
-    @property
     def margin(self):
-        return 0.0
+        raise NotImplementationError
+
+    @property
+    def market_value(self):
+        raise NotImplementationError
 
     @property
     def last_price(self):
@@ -78,6 +72,8 @@ class Position:
 class StockPosition(Position):
     def __init__(self, **kwargs):
         super(StockPosition, self).__init__(**kwargs)
+        self._volume = kwargs.pop("volume", 0)
+        self._yesterday_volume = kwargs.pop("yesterday_volume", 0)
 
         self._avg_open_price = kwargs.pop("open_price", 0.0)
         if self._avg_open_price <= 0.0:
@@ -86,6 +82,14 @@ class StockPosition(Position):
         self._pre_close_price = kwargs.pop("pre_close_price", 0.0)
 
         self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @property
+    def yesterday_volume(self):
+        return self._yesterday_volume
 
     @property
     def close_price(self):
@@ -126,7 +130,7 @@ class StockPosition(Position):
 
     def _apply_sell(self, price, volume):
         realized_pnl = self._calculate_realized_pnl(price, volume)
-        self.realized_pnl += realized_pnl
+        self._realized_pnl += realized_pnl
         self.ledger.realized_pnl += realized_pnl
         self.ledger.avail += (realized_pnl + price * volume)
 
@@ -140,38 +144,34 @@ class StockPosition(Position):
 
 class FuturePositionDetail:
     def __init__(self, **kwargs):
-        self._open_price = kwargs.pop("open_price", 0.0)
-        self._open_date = kwargs.pop("open_date", None)
-        self._direction = kwargs.pop("direction", None)
-        self._volume = kwargs.pop("volume", None)
-        self._trading_day = kwargs.pop("trading_day", None)
-        self._contract_multiplier = kwargs.pop("contract_multiplier", None)
-        self._margin_ratio = kwargs.pop("margin_ratio", None)
-        self._margin = 0.0
-        self._settlement_price = None
-        self._pre_settlement_price = None
+        self._open_price = kwargs.pop("open_price")
+        self._open_date = kwargs.pop("open_date")
+        self._trading_day = kwargs.pop("trading_day")
+        self._direction = kwargs.pop("direction")
+        self._volume = kwargs.pop("volume")
+        self._contract_multiplier = kwargs.pop("contract_multiplier")
+        self._margin_ratio = kwargs.pop("margin_ratio")
+        self._settlement_price = kwargs.pop("settlement_price", 0.0)
+        self._pre_settlement_price = kwargs.pop("pre_settlement_price", 0.0)
 
     @property
     def open_date(self):
         return self._open_date
 
     @property
-    def trading_day(self):
-        return self._trading_day
-
-    @property
     def open_price(self):
         return self._open_price
 
     @property
+    def trading_day(self):
+        return self._trading_day
+
+    @property
     def margin(self):
-        if self.trading_day == self.open_date:
-            if self.settlement_price is not None:
-                return self._calculate_margin(self.settlement_price, self.volume)
-            else:
-                return self._calculate_margin(self.open_price, self.volume)
-        else:
-            return self._calculate_margin(self.pre_settlement_price, self.volume)
+        price = self.settlement_price if self.trading_day == self.open_date else self.pre_settlement_price
+        if price <= 0.0:
+            price = self.open_price
+        return self._calculate_margin(price, self.volume)
 
     @property
     def volume(self):
@@ -192,9 +192,8 @@ class FuturePositionDetail:
     def apply_close(self, price, volume):
         volume_closed = min(self.volume, volume)
         realized_pnl = self._calculate_realized_pnl(price, volume_closed)
-        margin_price = self.open_price if self.open_price == self.trading_day else self.pre_settlement_price
-        margin_release = self._calculate_margin(margin_price, volume_closed)
-        return (realized_pnl, margin_release, volume_closed)
+        margin_delta = self._calculate_margin(price, volume_closed) * -1
+        return (volume_closed, realized_pnl, margin_delta)
 
     def apply_settlement(self, settlement_price):
         pre_margin = self.margin
@@ -202,7 +201,7 @@ class FuturePositionDetail:
         return self.pre_margin - self.margin
 
     def _calculate_realized_pnl(self, trade_price, trade_volume):
-        return (trade_price - self._open_price) * trade_volume * self._contract_multiplier * self._direction
+        return (trade_price - self._open_price) * trade_volume * self._contract_multiplier * (1 if self._direction == DirectionLong else -1)
 
     def _calculate_margin(self, price, volume):
         return self._contract_multiplier * price * volume * self._margin_ratio
@@ -210,6 +209,8 @@ class FuturePositionDetail:
 class FuturePosition(Position):
     def __init__(self, **kwargs):
         super(FuturePosition, self).__init__(**kwargs)
+        self._long_details = []
+        self._short_details = []
 
     @property
     def realized_pnl(self):
@@ -217,38 +218,37 @@ class FuturePosition(Position):
 
     @property
     def margin(self):
-        pass
+        return self.long_margin + self.short_margin
 
+    @property
+    def long_margin(self):
+        return [detail.margin for detail in self._long_details]
 
-    def get_margin(self, direction):
-        pass
+    @property
+    def short_margin(self):
+        return [detail.margin for detail in self._short_details]
 
     def apply_close(self, trade):
-        cash_delta = 0.0
-        if trade.exchange_id == Exchange.SHFE and trade.offset == Offset.CloseToday:
-            #TODO close today
-            pass
-        else:
-            volume_left = trade.volume
-            while volume_left > 0 and not self._details.empty():
-                if self._details.empty():
-                    break
-                else:
-                    detail = self._details[0]
-                    realized_pnl, margin_release, volume_closed = detail.apply_close(trade.price, volume_left)
-                    self.realized_pnl += self.realized_pnl
-                    self.volume -= volume_closed
-                    cash_delta += (realized_pnl + margin_release)
-                    volume_left -= volume_closed
-                    if detail.volume <= 0:
-                        self._details.pop()
-        return cash_delta
+        details = self._long_details #TODO choose long or short
+        volume_left = trade.volume
+        while volume_left > 0 and not details.empty():
+            detail = details[0]
+            volume_closed, realized_pnl, margin_delta = detail.apply_close(trade.price, volume_left)
+            self.realized_pnl += realized_pnl
+            self.ledger.avail += (realized_pnl - margin_delta)
+            if detail.volume <= 0:
+                details.pop(0)
 
     def apply_open(self, trade):
-        self.volume += trade.volume
-        pass
+        details = self._long_details #TODO choose long or short
+        detail = FuturePositionDetail(trading_day="", open_price = trade.price, volume = trade.volume, open_date="")
+        self.ledger.avail -= detail.margin
+        details.append(detail)
 
     def apply_settlement(self, settlement_price):
-        cash_delta = sum([ detail.apply_settlement(settlement_price) for detail in self._details])
-        return cash_delta
+        margin_delta = 0.0
+        for detail in [self._long_details + self._short_details]:
+            margin_delta += detail.apply_settlement(settlement_price)
+        self.ledger.avail -= margin_delta
+
 

@@ -2,7 +2,6 @@
 from kungfu.finance.position import *
 from kungfu.wingchun.utils import *
 from kungfu.wingchun.constants import *
-from kungfu.finance.ledger import *
 
 class Ledger:
     def __init__(self, **kwargs):
@@ -22,6 +21,10 @@ class Ledger:
     @property
     def avail(self):
         return self._avail
+
+    @avail.setter
+    def avail(self, value):
+        self._avail = value
 
     @property
     def margin(self):
