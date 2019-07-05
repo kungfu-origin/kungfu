@@ -1,5 +1,5 @@
 import {runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB} from '__gUtils/dbUtils';
-import {ACCOUNTS_DB, LIVE_TRADING_ORDER_DB, LIVE_TRADING_TRADE_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath, buildAccountAssetsDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
+import {ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath, buildAccountAssetsDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 
@@ -54,7 +54,7 @@ export const changeAccountMd = (account_id, receive_md) => {
  * 
  */
 export const getAccountAsset = (accountId) => {
-    return runSelectDB(buildAccountAssetsDBPath(accountId), 'SELECT * FROM account')
+    return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM account')
 }
 
 /**
@@ -62,7 +62,7 @@ export const getAccountAsset = (accountId) => {
  * 
  */
 export const getAccountPos = (accountId, {instrumentId, type}) => {
-    return runSelectDB(buildAccountAssetsDBPath(accountId), (`SELECT * FROM position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type || ''}` : ``) + ' ORDER BY instrument_id'))
+    return runSelectDB(LIVE_TRADING_DATA_DB, (`SELECT * FROM account_position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type || ''}` : ``) + ' ORDER BY instrument_id'))
 }
 /**
  * 获取账户成交情况
@@ -80,7 +80,7 @@ export const getAccountTrade = (accountId, {id, dateRange}, tradingDay) => {
         //查询总数的时候也需要根据筛选条件来
         const sql = `WHERE (account_id="${accountId}" AND instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
         (` AND trade_time > ${filterDate[0]} AND trade_time < ${filterDate[1]}`) //有日期筛选的时候
-        runSelectDB(LIVE_TRADING_TRADE_DB, `SELECT rowId, * FROM trades ${sql} ORDER BY trade_id DESC`).then(trades => {
+        runSelectDB(LIVE_TRADING_DATA_DB, `SELECT rowId, * FROM trades ${sql} ORDER BY trade_id DESC`).then(trades => {
             resolve(trades)
         }).catch(err => {
             reject(err)
@@ -108,7 +108,7 @@ export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
         const sql = `WHERE (account_id='${accountId}' AND order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
         ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` + 
         (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
-        runSelectDB(LIVE_TRADING_ORDER_DB, `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
+        runSelectDB(LIVE_TRADING_DATA_DB, `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
             resolve(orders)
         }).catch(err => {
             reject(err)

@@ -84,11 +84,8 @@ export const buildAccountCommissionDBPath = (accountId) => {
 
 export const LIVE_TRADING_DB_DIR = path.join(WATCHER_DIR, 'db', 'live');
 
-//orders
-export const LIVE_TRADING_ORDER_DB = path.join(LIVE_TRADING_DB_DIR, 'orders.db')
-
-//trades
-export const LIVE_TRADING_TRADE_DB = path.join(LIVE_TRADING_DB_DIR, 'trades.db')
+//trading data
+export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
 
 //assets
 export const buildAccountAssetsDBPath = () => {

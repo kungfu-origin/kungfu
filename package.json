@@ -5,7 +5,7 @@
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": ["core", "app", "cli"],
+  "workspaces": ["core", "app"],
   "dependencies": {
     "nan": "0.3.0"
   }
