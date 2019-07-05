@@ -1,5 +1,3 @@
-#include <utility>
-
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -18,6 +16,7 @@
 #ifndef YIJINJING_JOURNAL_H
 #define YIJINJING_JOURNAL_H
 
+#include <utility>
 #include <mutex>
 
 #include <kungfu/yijinjing/journal/common.h>
@@ -43,8 +42,9 @@ namespace kungfu
             class journal
             {
             public:
-                journal(const data::location_ptr location, uint32_t dest_id, bool is_writing, bool lazy) :
-                    location_(location), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy), frame_(std::shared_ptr<frame>(new frame()))
+                journal(data::location_ptr location, uint32_t dest_id, bool is_writing, bool lazy) :
+                        location_(std::move(location)), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy),
+                        frame_(std::shared_ptr<frame>(new frame())), page_frame_nb_(0)
                 {}
 
                 ~journal();
@@ -78,15 +78,16 @@ namespace kungfu
                 /** load next page, current page will be released if not empty */
                 void load_next_page();
 
-                /** writer needs access to current_page_ to update page header */
                 friend class reader;
+
                 friend class writer;
             };
 
             class reader
             {
             public:
-                reader(bool lazy) : lazy_(lazy) {};
+                explicit reader(bool lazy) : lazy_(lazy)
+                {};
 
                 ~reader();
 
@@ -96,11 +97,11 @@ namespace kungfu
                  * @param dest_id journal dest id
                  * @param from_time subscribe events after this time, 0 means from start
                  */
-                void join(const data::location_ptr& location, uint32_t dest_id, int64_t from_time);
+                void join(const data::location_ptr &location, uint32_t dest_id, int64_t from_time);
 
                 void disjoin(uint32_t location_uid);
 
-                inline frame_ptr current_frame()
+                frame_ptr current_frame()
                 { return current_->current_frame(); }
 
                 bool data_available();
@@ -122,14 +123,14 @@ namespace kungfu
             class writer
             {
             public:
-                explicit writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr messenger);
+                writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher);
 
-                inline const data::location_ptr &get_location()
+                const data::location_ptr &get_location()
                 { return journal_->location_; }
 
                 uint64_t current_frame_uid();
 
-                frame_ptr open_frame(int64_t trigger_time, int32_t msg_type);
+                frame_ptr open_frame(int64_t trigger_time, int32_t msg_type, uint32_t length);
 
                 void close_frame(size_t data_length);
 
@@ -143,14 +144,14 @@ namespace kungfu
                  * @return a casted reference to the underlying memory address in mmap file
                  */
                 template<typename T>
-                inline T &open_data(int64_t trigger_time, int32_t msg_type)
+                T &open_data(int64_t trigger_time, int32_t msg_type)
                 {
-                    auto frame = open_frame(trigger_time, msg_type);
+                    auto frame = open_frame(trigger_time, msg_type, sizeof(T));
                     size_to_write_ = sizeof(T);
-                    return const_cast<T&>(frame->data<T>());
+                    return const_cast<T &>(frame->data<T>());
                 }
 
-                inline void close_data()
+                void close_data()
                 {
                     size_t length = size_to_write_;
                     size_to_write_ = 0;
@@ -158,13 +159,13 @@ namespace kungfu
                 }
 
                 template<typename T>
-                inline void write(int64_t trigger_time, int32_t msg_type, const T& data)
+                void write(int64_t trigger_time, int32_t msg_type, const T &data)
                 {
-                    auto frame = open_frame(trigger_time, msg_type);
+                    auto frame = open_frame(trigger_time, msg_type, sizeof(T));
                     close_frame(frame->copy_data<T>(data));
                 }
 
-                void write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length);
+                void write_raw(int64_t trigger_time, int32_t msg_type, char *data, uint32_t length);
 
             private:
                 std::mutex writer_mtx_;

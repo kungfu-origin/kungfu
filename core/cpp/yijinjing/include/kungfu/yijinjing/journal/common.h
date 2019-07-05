@@ -7,7 +7,7 @@
 
 #include <kungfu/yijinjing/common.h>
 
-#define __JOURNAL_VERSION__ 3
+#define __JOURNAL_VERSION__ 4
 
 namespace kungfu
 {

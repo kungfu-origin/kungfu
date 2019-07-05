@@ -187,28 +187,31 @@ namespace kungfu
                 nanomsg_json(const std::string &msg) : binding_(nlohmann::json::parse(msg)), msg_(msg)
                 {};
 
-                inline int64_t gen_time() const override
+                int64_t gen_time() const override
                 { return binding_["gen_time"]; }
 
-                inline int64_t trigger_time() const override
+                int64_t trigger_time() const override
                 { return binding_["trigger_time"]; }
 
-                inline int32_t msg_type() const override
+                int32_t msg_type() const override
                 { return binding_["msg_type"]; }
 
-                inline uint32_t source() const override
+                uint32_t source() const override
                 { return binding_["source"]; }
 
-                inline uint32_t data_length() const override
+                uint32_t dest() const override
+                { return binding_["dest"]; }
+
+                uint32_t data_length() const override
                 { return binding_.size(); }
 
-                inline const char *data_as_bytes() const override
+                const char *data_as_bytes() const override
                 { return msg_.c_str(); }
 
-                inline const std::string data_as_string() const override
+                const std::string data_as_string() const override
                 { return binding_["data"].dump(); }
 
-                inline const std::string to_string() const override
+                const std::string to_string() const override
                 { return msg_; }
 
             protected:

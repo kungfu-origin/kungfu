@@ -133,8 +133,8 @@ namespace kungfu
             void Context::request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange)
             {
                 auto writer = app_.get_writer(source);
-                char *buffer = const_cast<char *>(&(writer->open_frame(now_, msg::type::Subscribe)->data<char>()));
-                hffix::message_writer sub_msg(buffer, buffer + 1024);
+                char *buffer = const_cast<char *>(&(writer->open_frame(now_, msg::type::Subscribe, 4096)->data<char>()));
+                hffix::message_writer sub_msg(buffer, buffer + 4096);
                 sub_msg.push_back_header("FIX.4.2");
                 sub_msg.push_back_string(hffix::tag::MsgType, "V");
                 sub_msg.push_back_int(hffix::tag::MDReqID, 1);

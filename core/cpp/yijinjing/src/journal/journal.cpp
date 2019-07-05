@@ -19,6 +19,7 @@
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/util/util.h>
+#include <kungfu/yijinjing/msg.h>
 
 namespace kungfu
 {
@@ -42,7 +43,7 @@ namespace kungfu
                 frame_->move_to_next();
                 page_frame_nb_++;
 
-                if (frame_->address() > current_page_->address_border())
+                if (frame_->msg_type() == msg::type::PageEnd)
                 {
                     load_next_page();
                 }

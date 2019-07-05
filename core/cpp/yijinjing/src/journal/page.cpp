@@ -31,15 +31,15 @@ namespace kungfu
         namespace journal
         {
 
-            page::page(const data::location_ptr location, uint32_t dest_id, const int id, const size_t size, const bool lazy, uintptr_t address) :
+            page::page(const data::location_ptr &location, uint32_t dest_id, const int id, const size_t size, const bool lazy, uintptr_t address) :
                     location_(location), dest_id_(dest_id), page_id_(id), size_(size), lazy_(lazy), header_(reinterpret_cast<page_header *>(address))
             {
                 assert(address > 0);
             }
 
-            void page::set_last_frame_position(int32_t position)
+            void page::set_last_frame_position(uint64_t position)
             {
-                const_cast<page_header*>(header_)->last_frame_position = position;
+                const_cast<page_header *>(header_)->last_frame_position = position;
             }
 
             void page::release()
@@ -50,10 +50,11 @@ namespace kungfu
                 }
             }
 
-            page_ptr page::load(const data::location_ptr location, uint32_t dest_id, int page_id, bool is_writing, bool lazy)
+            page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, int page_id, bool is_writing, bool lazy)
             {
+                uint32_t page_size = find_page_size(location, dest_id);
                 std::string path = get_page_path(location, dest_id, page_id);
-                uintptr_t address = os::load_mmap_buffer(path, JOURNAL_PAGE_SIZE, is_writing, lazy);
+                uintptr_t address = os::load_mmap_buffer(path, page_size, is_writing, lazy);
                 if (address < 0)
                 {
                     throw journal_error("unable to load page for " + path);
@@ -65,29 +66,35 @@ namespace kungfu
                 {
                     header->version = __JOURNAL_VERSION__;
                     header->page_header_length = sizeof(page_header);
+                    header->page_size = page_size;
                     header->frame_header_length = sizeof(frame_header);
                     header->last_frame_position = header->page_header_length;
                 }
 
                 if (header->version != __JOURNAL_VERSION__)
                 {
-                    throw journal_error(fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
+                    throw journal_error(
+                            fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
                 }
                 if (header->page_header_length != sizeof(page_header))
                 {
                     throw journal_error(fmt::format("header length mismatch for page {}, required {}, found {}",
-                            path, sizeof(page_header), header->page_header_length));
+                                                    path, sizeof(page_header), header->page_header_length));
+                }
+                if (header->page_size != page_size)
+                {
+                    throw journal_error(fmt::format("page size mismatch, required {}, found {}", page_size, header->page_size));
                 }
 
-                return std::shared_ptr<page>(new page(location, dest_id, page_id, JOURNAL_PAGE_SIZE, lazy, address));
+                return std::shared_ptr<page>(new page(location, dest_id, page_id, page_size, lazy, address));
             }
 
-            std::string page::get_page_path(const data::location_ptr location, uint32_t dest_id, int id)
+            std::string page::get_page_path(const data::location_ptr &location, uint32_t dest_id, int id)
             {
                 return location->locator->layout_file(location, data::layout::JOURNAL, fmt::format("{:08x}.{}", dest_id, id));
             }
 
-            int page::find_page_id(const data::location_ptr location, uint32_t dest_id, int64_t time)
+            int page::find_page_id(const data::location_ptr &location, uint32_t dest_id, int64_t time)
             {
                 std::vector<int> page_ids = location->locator->list_page_id(location, dest_id);
                 if (page_ids.empty())

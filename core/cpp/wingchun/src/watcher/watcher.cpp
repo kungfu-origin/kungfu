@@ -82,6 +82,7 @@ namespace kungfu
             events | is(msg::type::Order) |
             $([&](event_ptr event)
               {
+                  SPDLOG_INFO("hanlde order from {} {:08x}", get_location(event->source())->uname, get_location(event->source())->uid);
                   on_order(event, event->data<Order>());
               });
 

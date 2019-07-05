@@ -1,3 +1,5 @@
+#include <utility>
+
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -29,11 +31,11 @@ namespace kungfu
 
         namespace journal
         {
-            const uint32_t PAGE_ID_TRANC    = 0xFFFF0000;
-            const uint32_t FRAME_ID_TRANC   = 0x0000FFFF;
+            constexpr uint32_t PAGE_ID_TRANC    = 0xFFFF0000;
+            constexpr uint32_t FRAME_ID_TRANC   = 0x0000FFFF;
 
-            writer::writer(const data::location_ptr location, uint32_t dest_id, bool lazy, publisher_ptr publisher) :
-                    publisher_(publisher)
+            writer::writer(const data::location_ptr& location, uint32_t dest_id, bool lazy, publisher_ptr publisher) :
+                    publisher_(std::move(publisher)), size_to_write_(0)
             {
                 frame_id_base_ = location->uid;
                 frame_id_base_ = frame_id_base_ << 32;
@@ -48,14 +50,21 @@ namespace kungfu
                 return frame_id_base_ | (page_part | frame_part);
             }
 
-            frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type)
+            frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length)
             {
+                assert(sizeof(frame_header) + data_length + sizeof(frame_header) < journal_->current_page_->get_page_size());
                 writer_mtx_.lock();
+                if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->current_page_->address_border())
+                {
+                    mark(trigger_time, msg::type::PageEnd);
+                    journal_->load_next_page();
+                }
                 auto frame = journal_->current_frame();
                 frame->set_header_length();
                 frame->set_trigger_time(trigger_time);
                 frame->set_msg_type(msg_type);
                 frame->set_source(journal_->location_->uid);
+                frame->set_dest(journal_->dest_id_);
                 return frame;
             }
 
@@ -72,13 +81,13 @@ namespace kungfu
 
             void writer::mark(int64_t trigger_time, int32_t msg_type)
             {
-                open_frame(trigger_time, msg_type);
+                open_frame(trigger_time, msg_type, 0);
                 close_frame(0);
             }
 
-            void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, int32_t length)
+            void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, uint32_t length)
             {
-                auto frame = open_frame(trigger_time, msg_type);
+                auto frame = open_frame(trigger_time, msg_type, length);
                 memcpy(const_cast<void*>(frame->data_address()), data, length);
                 close_frame(length);
             }

@@ -30,15 +30,13 @@ namespace kungfu
     namespace yijinjing
     {
         /** size related */
-        const int KB = 1024;
-        const int MB = KB * KB;
-        const int JOURNAL_PAGE_SIZE = 128 * MB;
-        const int PAGE_MIN_HEADROOM = 1 * MB;
+        constexpr int KB = 1024;
+        constexpr int MB = KB * KB;
 
         class yijinjing_error : public std::runtime_error
         {
         public:
-            yijinjing_error(const std::string &message) : runtime_error(message)
+            explicit yijinjing_error(const std::string &message) : runtime_error(message)
             {}
         };
 
@@ -55,6 +53,8 @@ namespace kungfu
             virtual int32_t msg_type() const = 0;
 
             virtual uint32_t source() const = 0;
+
+            virtual uint32_t dest() const = 0;
 
             virtual uint32_t data_length() const = 0;
 

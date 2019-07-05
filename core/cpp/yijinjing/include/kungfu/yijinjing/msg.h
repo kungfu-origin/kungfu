@@ -17,6 +17,7 @@ namespace kungfu
             {
                 enum
                 {
+                    PageEnd = 10000,
                     SessionStart = 10001,
                     SessionEnd = 10002,
                     Register = 10011,
@@ -41,10 +42,6 @@ namespace kungfu
                 struct RequestWriteTo
                 {
                     uint32_t dest_id;
-                    inline void set_dest_id(uint32_t id)
-                    {
-                        dest_id = id;
-                    }
                 };
             }
         }

@@ -39,8 +39,10 @@ namespace kungfu
                 int64_t trigger_time;
                 /** msg type of the data in frame */
                 int32_t msg_type;
-                /** source (system id) of this frame */
+                /** source of this frame */
                 uint32_t source;
+                /** dest of this frame */
+                uint32_t dest;
 #ifndef _WIN32
             } __attribute__((packed));
 #else
@@ -58,44 +60,47 @@ namespace kungfu
 
                 ~frame() override = default;
 
-                inline bool has_data() const
+                bool has_data() const
                 { return header_->length > 0; }
 
-                inline uintptr_t address() const
+                uintptr_t address() const
                 { return reinterpret_cast<uintptr_t>(header_); }
 
-                inline uint32_t frame_length() const
+                uint32_t frame_length() const
                 { return header_->length; }
 
-                inline uint32_t header_length() const
+                uint32_t header_length() const
                 { return header_->header_length; }
 
-                inline uint32_t data_length() const override
+                uint32_t data_length() const override
                 { return frame_length() - header_length(); }
 
-                inline int64_t gen_time() const override
+                int64_t gen_time() const override
                 { return header_->gen_time; }
 
-                inline int64_t trigger_time() const override
+                int64_t trigger_time() const override
                 { return header_->trigger_time; }
 
-                inline int32_t msg_type() const override
+                int32_t msg_type() const override
                 { return header_->msg_type; }
 
-                inline uint32_t source() const override
+                uint32_t source() const override
                 { return header_->source; }
 
-                inline const char *data_as_bytes() const override
+                uint32_t dest() const override
+                { return header_->dest; }
+
+                const char *data_as_bytes() const override
                 { return reinterpret_cast<char *>(address() + header_length()); }
 
-                inline const std::string data_as_string() const override
+                const std::string data_as_string() const override
                 { return std::string(data_as_bytes()); }
 
-                inline const std::string to_string() const override
+                const std::string to_string() const override
                 { return std::string(reinterpret_cast<char *>(address())); }
 
                 template<typename T>
-                inline size_t copy_data(const T& data)
+                size_t copy_data(const T& data)
                 {
                     size_t length = sizeof(T);
                     memcpy(const_cast<void *>(data_address()), &data, length);
@@ -114,33 +119,32 @@ namespace kungfu
 
                 frame() = default;
 
-                inline void set_address(uintptr_t address)
+                void set_address(uintptr_t address)
                 { header_ = reinterpret_cast<frame_header *>(address); }
 
-                inline void move_to_next()
+                void move_to_next()
                 { set_address(address() + frame_length()); }
 
-                inline void set_header_length()
-                {
-                    header_->header_length = sizeof(frame_header);
-                }
+                void set_header_length()
+                { header_->header_length = sizeof(frame_header); }
 
-                inline void set_data_length(uint32_t length)
-                {
-                    header_->length = header_length() + length;
-                }
+                void set_data_length(uint32_t length)
+                { header_->length = header_length() + length; }
 
-                inline void set_source(uint32_t source)
-                { header_->source = source; }
-
-                inline void set_gen_time(int64_t gen_time)
+                void set_gen_time(int64_t gen_time)
                 { header_->gen_time = gen_time; }
 
-                inline void set_trigger_time(int64_t trigger_time)
+                void set_trigger_time(int64_t trigger_time)
                 { header_->trigger_time = trigger_time; }
 
-                inline void set_msg_type(int32_t msg_type)
+                void set_msg_type(int32_t msg_type)
                 { header_->msg_type = msg_type; }
+
+                void set_source(uint32_t source)
+                { header_->source = source; }
+
+                void set_dest(uint32_t dest)
+                { header_->dest = dest; }
 
                 friend class journal;
 
