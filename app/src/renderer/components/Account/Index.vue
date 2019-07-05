@@ -74,7 +74,7 @@ import Pnl from '../Base/pnl/Pnl';
 import { sourceType } from '@/assets/config/accountConfig';
 import * as ACCOUNT_API from '@/io/db/account';
 import { debounce } from '@/assets/js/utils';
-import { buildOrdersPipe } from '@/io/nano/nanoSub';
+import { buildTradingDataPipe, buildCashPipe } from '@/io/nano/nanoSub';
 import * as MSG_TYPE from '@/io/nano/msgType';
 
 
@@ -115,7 +115,7 @@ export default {
 
     mounted(){
         const t = this;
-        buildOrdersPipe().subscribe(d => {
+        buildTradingDataPipe().subscribe(d => {
             const msgType = d.msg_type;
             const tradingData = d.data;
             const accountId = tradingData.account_id || '';
@@ -126,12 +126,14 @@ export default {
                     t.ordersFromNmsg = Object.freeze(tradingData);
                     break
                 case MSG_TYPE.trade:
-                    console.log(tradingData,accountId, currentId, '---')
                     if(accountId !== currentId) return;
                     t.tradesFromNmsg = Object.freeze(tradingData);
                     break
             }
+        })
 
+        buildCashPipe().subscribe(d => {
+            console.log(d,'~~~~~~~')
         })
     },
 

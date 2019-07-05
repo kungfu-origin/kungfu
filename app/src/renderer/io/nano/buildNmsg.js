@@ -8,7 +8,8 @@ const nano = kfcore.nanomsg;
 
 export const buildSubNmsg = () => {
     const sub = nano.socket('sub');
-    const addr = `ipc://${NMSG_REP_FILE}`;
+    console.log(NMSG_PUB_FILE,'---')
+    const addr = `ipc://${NMSG_PUB_FILE}`;
     sub.connect(addr)
     return sub
 }

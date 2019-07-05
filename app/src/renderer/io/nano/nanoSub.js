@@ -30,10 +30,17 @@ export const buildGatewayStatePipe = () => {
 
 
 //trading data: order trades position pnlmin
-export const buildOrdersPipe = function(){
+export const buildTradingDataPipe = () => {
     const tradingDataTypes = [MSG_TYPE.order, MSG_TYPE.trade, MSG_TYPE.position, MSG_TYPE.portfolioByMin]
     return subObservable.pipe(
         filter(d => (tradingDataTypes.indexOf(d.msg_type) !== -1))
+    )
+}
+
+//cash
+export const buildCashPipe = () => {
+    return subObservable.pipe(
+        filter(d => d.msg_type === MSG_TYPE.accountInfo)
     )
 }
 
