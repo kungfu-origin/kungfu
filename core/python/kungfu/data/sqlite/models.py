@@ -96,24 +96,16 @@ class Trade(Base):
 
 class LedgerMeta(Base):
     __tablename__ = "ledger_meta"
-    __table_args__ = (PrimaryKeyConstraint('category', 'name'),)
-    category = Column(Integer)
-    name = Column(String)
+    uname = Column(String,  primary_key = True)
+    update_time = Column(Integer)
 
-class Account(Base):
-    __tablename__ = "account"
-    account_id = Column(String, nullable = False, primary_key = True)
+class BalanceMixin(object):
     trading_day = Column(String)
-    type = Column(Integer)
-    broker_id = Column(String)
-    source_id = Column(String)
     initial_equity = Column(Float)
     static_equity = Column(Float)
     dynamic_equity = Column(Float)
-    accumulated_pnl = Column(Float)
-    accumulated_pnl_ratio = Column(Float)
-    intraday_pnl = Column(Float)
-    intraday_pnl_ratio = Column(Float)
+    realized_pnl = Column(Float)
+    unrealized_pnl = Column(Float)
     avail = Column(Float)
     market_value = Column(Float)
     margin = Column(Float)
@@ -125,24 +117,29 @@ class Account(Base):
     position_pnl = Column(Float)
     close_pnl = Column(Float)
 
-class Portfolio(Base):
+class AccountBalance(BalanceMixin, Base):
+    __tablename__ = "account"
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id'),)
+    account_id = Column(String)
+    source_id = Column(String)
+
+class PortfolioBalance(BalanceMixin, Base):
     __tablename__ = "portfolio"
-    portfolio_id = Column(String, nullable = False, primary_key = True)
-    trading_day = Column(String)
-    initial_equity = Column(Float)
-    static_equity = Column(Float)
-    dynamic_equity = Column(Float)
-    accumulated_pnl = Column(Float)
-    accumulated_pnl_ratio = Column(Float)
-    intraday_pnl = Column(Float)
-    intraday_pnl_ratio = Column(Float)
+    client_id = Column(String, nullable = False, primary_key = True)
+
+class SubPortfolioBalance(BalanceMixin, Base):
+    __tablename__ = "subportfolio"
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'client_id'),)
+    account_id = Column(String)
+    source_id = Column(String)
+    client_id = Column(String)
 
 class PositionMixin(object):
     trading_day = Column(String)
     instrument_id = Column(String)
     instrument_type = Column(String)
     exchange_id = Column(String)
-    direction = Column(String)
+    direction = Column(Integer)
     volume = Column(Integer)
     yesterday_volume = Column(Integer)
     frozen_total = Column(Integer)
@@ -164,27 +161,18 @@ class PositionMixin(object):
 
 class AccountPosition(PositionMixin, Base):
     __tablename__ = "account_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'instrument_id', 'exchange_id', 'direction'),)
     account_id = Column(String)
-    pass
+    source_id = Column(String)
 
 class PortfolioPosition(PositionMixin, Base):
     __tablename__ = "portfolio_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id'),)
-    account_id = Column(String)
-    pass
+    __table_args__ = (PrimaryKeyConstraint('client_id', 'instrument_id', 'exchange_id', 'direction'),)
+    client_id = Column(String)
 
 class SubPortfolioPosition(PositionMixin, Base):
     __tablename__ = "subportfolio_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'client_id','instrument_id', 'exchange_id', 'direction'),)
     account_id = Column(String)
-    pass
-
-class Position(PositionMixin, Base):
-    __tablename__ = "position"
-    __table_args__ = (PrimaryKeyConstraint('instrument_id'),)
-
-
-class FuturePositionDetail(PositionMixin, Base):
-    __tablename__ = "future_position_detail"
-    id = Column(Integer, nullable = False, primary_key = True)
+    source_id = Column(String)
+    client_id = Column(String)

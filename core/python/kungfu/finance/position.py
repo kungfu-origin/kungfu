@@ -6,12 +6,18 @@ class Position:
     def __init__(self, **kwargs):
         self._instrument_id = kwargs.pop("instrument_id")
         self._exchange_id = kwargs.pop("exchange_id")
-        self._instrument_type = kwargs.pop("instrument_type", get_instrument_type(instrument_id, exchange_id))
+        self._instrument_type = kwargs.pop("instrument_type", get_instrument_type(self._instrument_id, self._exchange_id))
+        if isinstance(self._instrument_type, int):
+            self._instrument_type = InstrumentType(self._instrument_type)
         self._symbol_id = get_symbol_id(self._instrument_id, self._exchange_id)
 
         self._last_price = kwargs.pop("last_price", 0.0)
 
         self._ledger = kwargs.pop("ledger", None)
+
+    @property
+    def message(self):
+        raise NotImplementationError
 
     @property
     def instrument_type(self):
@@ -84,6 +90,19 @@ class StockPosition(Position):
         self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
 
     @property
+    def message(self):
+        return {
+                "instrument_id": self.instrument_id,
+                "exchange_id":self.exchange_id,
+                "direction": int(Direction.Long),
+                "volume":self.volume,
+                "yesterday_volume": self.yesterday_volume,
+                "realized_pnl": self.realized_pnl,
+                "unrealized_pnl": self.unrealized_pnl
+             }
+
+
+    @property
     def volume(self):
         return self._volume
 
@@ -98,6 +117,10 @@ class StockPosition(Position):
     @property
     def pre_close_price(self):
         return self._pre_close_price
+
+    @property
+    def margin(self):
+        return 0.0
 
     @property
     def market_value(self):

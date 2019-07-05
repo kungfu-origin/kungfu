@@ -27,6 +27,23 @@ class Ledger:
         self._avail = value
 
     @property
+    def message(self):
+        return {
+            "avail": self.avail,
+            "margin": self.margin,
+            "market_value": self.market_value,
+            "initial_equity": self.initial_equity,
+            "dynamic_equity": self.dynamic_equity,
+            "static_equity": self.static_equity,
+            "realized_pnl": self.realized_pnl,
+            "unrealized_pnl": self.unrealized_pnl
+        }
+
+    @property
+    def positions(self):
+        return self._positions.values()
+
+    @property
     def margin(self):
         return sum([position.margin for position in self._positions.values()])
 
@@ -35,17 +52,21 @@ class Ledger:
         return sum([position.market_value for position in self._positions.values()])
 
     @property
+    def initial_equity(self):
+        return self._initial_equity
+
+    @property
     def static_equity(self):
         return self._static_equity
 
     @property
     def dynamic_equity(self):
         total_value = self.avail
-        for pos in self._positions:
-            if pos.instrument_type == InstrumentType.Stock:
-                total_value += pos.market_value
-            elif pos.instrument_type == InstrumentType.Future:
+        for pos in self._positions.values():
+            if pos.instrument_type == InstrumentType.Future:
                 total_value += (pos.margin + pos.position_pnl)
+            else:
+                total_value += pos.market_value
         return total_value
 
     @property

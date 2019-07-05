@@ -47,3 +47,4 @@ class Watcher(pywingchun.Watcher):
             self.ctx.logger.info("on assets, pos: %s", pos)
         account = Ledger(avail = account_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
         self.accounts[account_info.account_id] = account
+        self.data_proxy.save_account(account_info.account_id, "xtp", account.message, [pos.message for pos in account.positions])

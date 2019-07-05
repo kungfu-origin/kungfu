@@ -21,6 +21,14 @@ class DataProxy:
         with session_scope(self.session_factory) as session:
             session.merge(Order(**kwargs))
 
+    def save_account(self, account_id, source_id, account_info, positions):
+        with session_scope(self.session_factory) as session:
+            session.merge(AccountBalance(account_id = account_id, source_id = source_id, **account_info))
+            session.query(AccountPosition).filter(AccountPosition.account_id == account_id, AccountPosition.source_id == source_id).delete()
+            for pos in positions:
+                pos = AccountPosition(account_id = account_id, source_id = source_id, **pos)
+                session.add(pos)
+
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass
 
