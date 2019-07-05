@@ -153,13 +153,15 @@ class StockPosition(Position):
 
     def _apply_sell(self, price, volume):
         realized_pnl = self._calculate_realized_pnl(price, volume)
+        self._yesterday_volume -= volume
+        self._volume -= volume
         self._realized_pnl += realized_pnl
         self.ledger.realized_pnl += realized_pnl
         self.ledger.avail += (realized_pnl + price * volume)
 
     def _apply_buy(self, price, volume):
-        self.avg_open_price = (self.avg_open_price * self.volume + price * volume) / (self.volume + volume)
-        self.volume += volume
+        self._avg_open_price = (self._avg_open_price * self.volume + price * volume) / (self.volume + volume)
+        self._volume += volume
         self.ledger.avail -= price * volume
 
     def _calculate_realized_pnl(self, trade_price, trade_volume):

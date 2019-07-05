@@ -85,13 +85,13 @@ class Ledger:
         self._get_position(quote.instrument_id, quote.exchange_id).apply_quote(quote)
                 
     def apply_trade(self, trade):
-        self._get_position(trade.instrument_id, trade.exchange_id).apply(trade)
+        self._get_position(trade.instrument_id, trade.exchange_id).apply_trade(trade)
 
     def _get_position(self, instrument_id, exchange_id):
         symbol_id = get_symbol_id(instrument_id, exchange_id)
-        if not self._positions.has_key(symbol_id):
+        if symbol_id not in self._positions:
             instrument_type = get_instrument_type(instrument_id, exchange_id)
             cls = StockPostion if instrument_type == InstrumentType.Stock else FuturePosition
             self._positions[symbol_id] = cls(ledger = self, instrument_id = instrument_id, exchange_id = exchange_id, instrument_type = instrument_type)
-        return self.positions[symbol_id]
+        return self._positions[symbol_id]
 

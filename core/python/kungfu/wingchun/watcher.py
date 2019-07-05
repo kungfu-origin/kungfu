@@ -40,6 +40,9 @@ class Watcher(pywingchun.Watcher):
         trade_dict = to_dict(trade)
         self.data_proxy.add_trade(**trade_dict)
         self.publish(json.dumps({"msg_type": int(MsgType.Trade), "data": trade_dict}))
+        if trade.account_id in self.accounts:
+            self.accounts[trade.account_id].apply_trade(trade)
+            self.publish(json.dumps({"msg_type": int(MsgType.AccountInfo), "data": self.accounts[trade.account_id].message}))
 
     def on_assets(self, account_info, positions):
         self.ctx.logger.info("on assets, acc: %s", account_info.account_id)
