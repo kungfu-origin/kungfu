@@ -45,7 +45,7 @@ class Position:
     def realized_pnl(self):
         raise NotImplementationError
 
-    @@property
+    @property
     def unrealized_pnl(self):
         raise NotImplementationError
 

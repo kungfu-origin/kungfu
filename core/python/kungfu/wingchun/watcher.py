@@ -6,8 +6,8 @@ from kungfu.log import create_logger
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import to_dict
 from kungfu.data.sqlite.data_proxy import make_url, DataProxy
-from kungfu.finance.account import StockAccount
-from kungfu.finance.position import StockPosition
+from kungfu.finance.ledger import *
+from kungfu.finance.position import *
 
 class Watcher(pywingchun.Watcher):
     def __init__(self, ctx):
@@ -17,7 +17,7 @@ class Watcher(pywingchun.Watcher):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'watcher', 'watcher', ctx.locator)
         url = make_url(ctx.locator,location, ctx.name)
         self.data_proxy = DataProxy(url)
-        self.ledgers = {}
+        self.accounts = {}
 
     def handle_request(self, msg):
         req = json.loads(msg)
@@ -45,5 +45,5 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.info("on assets, acc: %s", account_info.account_id)
         for pos in positions:
             self.ctx.logger.info("on assets, pos: %s", pos)
-        account = StockAccount(avail = account_info.avail, positions = { get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
-        self.ledgers[account.uid] = account
+        account = Ledger(avail = account_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
+        self.accounts[account_info.account_id] = account

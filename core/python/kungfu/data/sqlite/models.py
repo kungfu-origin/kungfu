@@ -98,7 +98,7 @@ class LedgerMeta(Base):
     __tablename__ = "ledger_meta"
     __table_args__ = (PrimaryKeyConstraint('category', 'name'),)
     category = Column(Integer)
-    id = Column()
+    name = Column(String)
 
 class Account(Base):
     __tablename__ = "account"
@@ -164,19 +164,25 @@ class PositionMixin(object):
 
 class AccountPosition(PositionMixin, Base):
     __tablename__ = "account_position"
+    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+    account_id = Column(String)
     pass
 
 class PortfolioPosition(PositionMixin, Base):
     __tablename__ = "portfolio_position"
+    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+    account_id = Column(String)
     pass
 
 class SubPortfolioPosition(PositionMixin, Base):
     __tablename__ = "subportfolio_position"
+    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+    account_id = Column(String)
     pass
 
 class Position(PositionMixin, Base):
     __tablename__ = "position"
-    __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id', "account_id", "client_id", "direction"),)
+    __table_args__ = (PrimaryKeyConstraint('instrument_id'),)
 
 
 class FuturePositionDetail(PositionMixin, Base):
