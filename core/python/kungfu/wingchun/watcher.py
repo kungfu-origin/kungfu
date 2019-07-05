@@ -30,7 +30,7 @@ class Watcher(pywingchun.Watcher):
         return
 
     def on_order(self, event, order):
-        self.ctx.logger.info('on order %s', order)
+        self.ctx.logger.info('on order %s from %s', order, self.get_location(event.dest).uname)
         order_dict = to_dict(order)
         self.data_proxy.add_order(**order_dict)
         self.publish(json.dumps({"msg_type": int(MsgType.Order), "data": order_dict}))

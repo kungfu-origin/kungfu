@@ -83,6 +83,11 @@ public:
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, source,)
     }
+
+    uint32_t dest() const override
+    {
+        PYBIND11_OVERLOAD_PURE(int64_t, event, dest,)
+    }
 };
 
 class PyPublisher : public publisher
@@ -175,6 +180,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("gen_time", &event::gen_time)
             .def_property_readonly("trigger_time", &event::trigger_time)
             .def_property_readonly("source", &event::source)
+            .def_property_readonly("dest", &event::dest)
             .def_property_readonly("msg_type", &event::msg_type)
             .def_property_readonly("data_length", &event::data_length)
             .def_property_readonly("data_as_bytes", &event::data_as_bytes)
@@ -186,6 +192,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("gen_time", &frame::gen_time)
             .def_property_readonly("trigger_time", &frame::trigger_time)
             .def_property_readonly("source", &frame::source)
+            .def_property_readonly("dest", &frame::dest)
             .def_property_readonly("msg_type", &frame::msg_type)
             .def_property_readonly("frame_length", &frame::frame_length)
             .def_property_readonly("header_length", &frame::header_length)

@@ -36,10 +36,10 @@ def on_entrust(context, entrust):
     pass
 
 def on_order(context, order):
-    context.log.info('rcv_time {} ticker {} order_id {}, status {}|{}'.format(order.rcv_time, order.instrument_id, order.order_id, order.status, OrderStatus.to_str(order.status)))
+    context.log.info('ticker {} order_id {}, status {}'.format(order.instrument_id, order.order_id, order.status))
 
 def on_trade(context, trade):
-    context.log.info('rcv_time {} order_id {}'.format(trade.rcv_time, trade.order_id))
+    context.log.info('order_id {}'.format(trade.order_id))
 
 def pre_quit(context):
     context.log.info("pre quit")
