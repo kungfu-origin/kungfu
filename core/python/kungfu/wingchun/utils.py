@@ -1,6 +1,6 @@
 
 import pywingchun
-
+from kungfu.wingchun.constants import *
 def to_dict(obj):
     d = {}
     for attr in dir(obj):
@@ -12,6 +12,12 @@ def to_dict(obj):
             else:
                 d[attr] = getattr(obj, attr)
     return d
+
+def get_instrument_type(instrument_id, exchange_id):
+    if exchange_id == Exchange.SSE or exchange_id == Exchange.SZE:
+        return InstrumentType.Stock
+    else:
+        return InstrumentType.Future
 
 is_valid_price = pywingchun.utils.is_valid_price
 get_symbol_id = pywingchun.utils.get_symbol_id

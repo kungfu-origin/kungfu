@@ -1,41 +1,23 @@
 
 from kungfu.wingchun.constants import *
-from pyyjj import hash_str_32
+from kungfu.wingchun.utils import *
 
-def get_symbol_id(instrument_id, exchange_id, direction = DirectionLong):
-    if isinstance(direction, int):
-        direction = Direction(direction)
-    return hash_str_32("{}.{}.{}".format(instrument_id, exchange_id, direction))
-
-class StockPosition:
+class Position:
     def __init__(self, **kwargs):
-        self._ledger = kwargs.pop("ledger", None)
         self._instrument_id = kwargs.pop("instrument_id")
         self._exchange_id = kwargs.pop("exchange_id")
+        self._instrument_type = kwargs.pop("instrument_type", get_instrument_type(instrument_id, exchange_id))
         self._symbol_id = get_symbol_id(self._instrument_id, self._exchange_id)
         self._volume = kwargs.pop("volume", 0)
         self._yesterday_volume = kwargs.pop("yesterday_volume", 0)
 
-        self._avg_open_price = kwargs.pop("open_price", 0.0)
-        if self._avg_open_price <= 0.0:
-            self._avg_open_price = kwargs.pop("cost_price", 0.0) # fill with position cost price
         self._last_price = kwargs.pop("last_price", 0.0)
-        self._close_price = kwargs.pop("close_price", 0.0)
-        self._pre_close_price = kwargs.pop("pre_close_price", 0.0)
 
-        self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+        self._ledger = kwargs.pop("ledger", None)
 
     @property
-    def ledger(self):
-        return self._ledger
-
-    @ledger.setter
-    def ledger(self, value):
-        self._ledger = value
-
-    @property
-    def symbol_id(self):
-        return self._symbol_id
+    def instrument_type(self):
+        return self._instrument_type
 
     @property
     def instrument_id(self):
@@ -46,8 +28,64 @@ class StockPosition:
         return self._exchange_id
 
     @property
+    def symbol_id(self):
+        return self._symbol_id
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @property
+    def yesterday_volume(self):
+        return self._yesterday_volume
+
+    @property
+    def margin(self):
+        return 0.0
+
+    @property
     def last_price(self):
         return self._last_price
+
+    @property
+    def realized_pnl(self):
+        raise NotImplementationError
+
+    @@property
+    def unrealized_pnl(self):
+        raise NotImplementationError
+
+    @property
+    def ledger(self):
+        return self._ledger
+
+    @ledger.setter
+    def ledger(self, value):
+        self._ledger = value
+
+    def apply_trade(self, trade):
+        raise NotImplementationError
+
+    def apply_quote(self, quote):
+        raise NotImplementationError
+
+    def apply_settlement(self, close_price):
+        raise NotImplementationError
+
+    def switch_day(self, trading_day):
+        raise NotImplementationError
+
+class StockPosition(Position):
+    def __init__(self, **kwargs):
+        super(StockPosition, self).__init__(**kwargs)
+
+        self._avg_open_price = kwargs.pop("open_price", 0.0)
+        if self._avg_open_price <= 0.0:
+            self._avg_open_price = kwargs.pop("cost_price", 0.0) # fill with position cost price
+        self._close_price = kwargs.pop("close_price", 0.0)
+        self._pre_close_price = kwargs.pop("pre_close_price", 0.0)
+
+        self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
 
     @property
     def close_price(self):
@@ -56,10 +94,6 @@ class StockPosition:
     @property
     def pre_close_price(self):
         return self._pre_close_price
-
-    @property
-    def volume(self):
-        return self._volume
 
     @property
     def market_value(self):
@@ -173,36 +207,21 @@ class FuturePositionDetail:
     def _calculate_margin(self, price, volume):
         return self._contract_multiplier * price * volume * self._margin_ratio
 
-class FuturePosition:
-    def __init__(self, ctx, instrument_id, exchange_id, direction):
-        self._instrument_id = instrument_id
-        self._exchange_id = exchange_id
-        self._direction = direction
-        self._volume = 0
-        self._yesterday_volume = 0
-        self._pre_settlement_price = 0.0
-        self._last_price = 0.0
-        self._realized_pnl = 0.0
-        self._trading_day = ctx.trading_day #TODO
-        self._contract_multiplier = ctx.data_proxy.get_contract_multiplier(instrument_id, exchange_id)
-        self._margin_ratio = ctx.data_proxy.get_margin_ratio(instrument_id, exchange_id, direction)
-        self._details = []
+class FuturePosition(Position):
+    def __init__(self, **kwargs):
+        super(FuturePosition, self).__init__(**kwargs)
 
     @property
     def realized_pnl(self):
         return self._realized_pnl
 
     @property
-    def last_price(self):
-        return self._last_price
+    def margin(self):
+        pass
 
-    @property
-    def volume(self):
-        return self._volume
 
-    @property
-    def direction(self):
-        return self._direction
+    def get_margin(self, direction):
+        pass
 
     def apply_close(self, trade):
         cash_delta = 0.0
@@ -232,3 +251,4 @@ class FuturePosition:
     def apply_settlement(self, settlement_price):
         cash_delta = sum([ detail.apply_settlement(settlement_price) for detail in self._details])
         return cash_delta
+

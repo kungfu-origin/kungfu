@@ -1,61 +1,73 @@
 
-import enum
-from abc import ABCMeta, abstractmethod
+from kungfu.finance.position import *
+from kungfu.wingchun.utils import *
+from kungfu.wingchun.constants import *
+from kungfu.finance.ledger import *
 
-class LedgerCategory(enum.Enum):
-    StockAccount = 1
-    FutureAccount = 2
-    StockSubPortfolio = 3
-    FutureSubPortfolio = 4
-    Portfolio = 5
+class Ledger:
+    def __init__(self, **kwargs):
+        self._initial_equity = kwargs.pop("initial_equity", 0.0)
+        self._static_equity = kwargs.pop("static_equity", 0.0)
+        self._avail = kwargs.pop("avail", 0.0)
 
-class Ledger(with_metaclass(ABCMeta)):
-    def __init__(self):
-        pass
-
-    @property
-    @abstractmethod
-    def category(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def uid(self):
-        raise NotImplementedError
+        self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+        self._positions = kwargs.pop("positions", {})
+        for pos in self._positions.values():
+            pos.ledger = self
+        if self._initial_equity <= 0.0:
+            self._initial_equity = self.dynamic_equity # fill initial equity
+        if self._static_equity <= 0.0:
+            self._static_equity = self.dynamic_equity
 
     @property
-    @abstractmethod
-    def positions(self):
-        raise  NotImplementedError
-
-    @property
-    @abstractmethod
     def avail(self):
-        raise NotImplementedError
+        return self._avail
 
     @property
-    @abstractmethod
-    def initial_equity(self):
-        raise NotImplementedError
+    def margin(self):
+        return sum([position.margin for position in self._positions.values()])
 
     @property
-    @abstractmethod
+    def market_value(self):
+        return sum([position.market_value for position in self._positions.values()])
+
+    @property
     def static_equity(self):
-        raise NotImplementedError
+        return self._static_equity
 
     @property
-    @abstractmethod
     def dynamic_equity(self):
-        raise NotImplementedError
+        total_value = self.avail
+        for pos in self._positions:
+            if pos.instrument_type == InstrumentType.Stock:
+                total_value += pos.market_value
+            elif pos.instrument_type == InstrumentType.Future:
+                total_value += (pos.margin + pos.position_pnl)
+        return total_value
 
-    @abstractmethod
-    def get_position(self, instrument_id, exchange_id, direction):
-        raise NotImplementedError
+    @property
+    def realized_pnl(self):
+        return self._realized_pnl
 
-    @abstractmethod
-    def apply_trade(self, trade):
-        raise NotImplementedError
+    @realized_pnl.setter
+    def realized_pnl(self, value):
+        self._realized_pnl = value
 
-    @abstractmethod
+    @property
+    def unrealized_pnl(self):
+        return sum([position.unrealized_pnl for position in self._positions.values()])
+    
     def apply_quote(self, quote):
-        raise NotImplementedError
+        self._get_position(quote.instrument_id, quote.exchange_id).apply_quote(quote)
+                
+    def apply_trade(self, trade):
+        self._get_position(trade.instrument_id, trade.exchange_id).apply(trade)
+
+    def _get_position(self, instrument_id, exchange_id):
+        symbol_id = get_symbol_id(instrument_id, exchange_id)
+        if not self._positions.has_key(symbol_id):
+            instrument_type = get_instrument_type(instrument_id, exchange_id)
+            cls = StockPostion if instrument_type == InstrumentType.Stock else FuturePosition
+            self._positions[symbol_id] = cls(ledger = self, instrument_id = instrument_id, exchange_id = exchange_id, instrument_type = instrument_type)
+        return self.positions[symbol_id]
+
