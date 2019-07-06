@@ -523,10 +523,12 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_order", &Watcher::on_order)
             .def("on_trade", &Watcher::on_trade)
             .def("on_assets", &Watcher::on_assets)
+            .def("checkin", &Watcher::checkin)
             .def("run", &Watcher::run);
 
     py::class_<strategy::Runner>(m, "Runner")
             .def(py::init<bool, kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &>())
+            .def("checkin", &strategy::Runner::checkin)
             .def("run", &strategy::Runner::run)
             .def("add_strategy", &strategy::Runner::add_strategy);
 

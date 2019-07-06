@@ -25,8 +25,9 @@
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/util/util.h>
-#include <kungfu/practice/apprentice.h>
 #include <kungfu/practice/master.h>
+#include <kungfu/practice/apprentice.h>
+#include <kungfu/practice/replay.h>
 
 namespace py = pybind11;
 
@@ -280,8 +281,15 @@ PYBIND11_MODULE(pyyjj, m)
             .def("deregister_app", &master::deregister_app)
             ;
 
-    py::class_<apprentice>(m, "apprentice")
+    py::class_<apprentice, apprentice_ptr>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
+            .def("checkin", &apprentice::checkin)
             .def("run", &apprentice::run);
+
+    py::class_<replay>(m, "replay")
+            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+            .def(py::init<apprentice_ptr>(), py::arg("app"))
+            .def_property_readonly("io_device", &replay::get_io_device)
+            .def("run", &replay::run);
 }

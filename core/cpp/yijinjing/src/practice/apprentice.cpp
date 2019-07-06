@@ -41,21 +41,24 @@ namespace kungfu
     {
         apprentice::apprentice(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_client>(home, low_latency))
         {
-
             auto uid_str = fmt::format("{:08x}", get_home_uid());
             auto locator = get_io_device()->get_home()->locator;
-            auto master_home_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
+            master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
             master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
+        }
 
+        void apprentice::checkin()
+        {
             auto now = time::now_in_nano();
             nlohmann::json request;
             request["msg_type"] = msg::type::Register;
             request["gen_time"] = now;
             request["trigger_time"] = now;
             request["source"] = get_home_uid();
-            request["dest"] = master_home_location->uid;
+            request["dest"] = master_home_location_->uid;
 
+            auto home = get_io_device()->get_home();
             nlohmann::json data;
             data["mode"] = home->mode;
             data["category"] = home->category;

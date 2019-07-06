@@ -9,4 +9,6 @@ from kungfu.wingchun.watcher import Watcher
 def watcher(ctx, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
-    Watcher(ctx).run()
+    watcher = Watcher(ctx)
+    watcher.checkin()
+    watcher.run()

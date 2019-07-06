@@ -54,4 +54,6 @@ def test(ctx):
     strategy = Strategy(ctx)
     runner = pywingchun.Runner(ctx.low_latency, ctx.locator, ctx.group, ctx.name)
     runner.add_strategy(strategy)
-    runner.run()
+    ctx.logger.info("replaying")
+    replay = pyyjj.replay(runner)
+    replay.run()

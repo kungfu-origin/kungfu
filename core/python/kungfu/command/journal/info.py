@@ -1,3 +1,4 @@
+import pyyjj
 from datetime import datetime, timedelta
 from tabulate import tabulate
 
@@ -19,10 +20,24 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 def info(ctx, session_id, pager):
     pass_ctx_from_parent(ctx)
     all_sessions = kfj.find_sessions(ctx)
-    session = all_sessions[all_sessions['id'] == session_id]
+    session = all_sessions[all_sessions['id'] == session_id].iloc[0]
+    uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
+    uid = pyyjj.hash_str_32(uname)
+    ctx.category = '*'
+    ctx.group = '*'
+    ctx.name = '*'
+    ctx.mode = '*'
+    locations = kfj.collect_journal_locations(ctx)
+    location = locations[uid]
+    for dest in location['readers']:
+        dest_id = int(dest, 16)
+        if dest_id == 0:
+            click.echo('{} -> public'.format(uname))
+        else:
+            click.echo('{} -> {}'.format(uname, locations[dest_id]['uname']))
 
     if pager:
-        click.echo_via_pager(session)
+        click.echo_via_pager(locations)
     else:
-        click.echo(session)
+        click.echo(locations)
 

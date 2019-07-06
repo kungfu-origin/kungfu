@@ -97,13 +97,14 @@ def collect_journal_locations(ctx):
             dest = match.group(5)
             page_id = match.group(6)
             uname = '{}/{}/{}/{}'.format(category, group, name, mode)
-            if uname in locations:
-                if dest in locations[uname]['readers']:
-                    locations[uname]['readers'][dest].append(page_id)
+            uid = pyyjj.hash_str_32(uname)
+            if uid in locations:
+                if dest in locations[uid]['readers']:
+                    locations[uid]['readers'][dest].append(page_id)
                 else:
-                    locations[uname]['readers'][dest] = [page_id]
+                    locations[uid]['readers'][dest] = [page_id]
             else:
-                locations[uname] = {
+                locations[uid] = {
                     'category': category,
                     'group': group,
                     'name': name,
@@ -119,6 +120,7 @@ def collect_journal_locations(ctx):
             ctx.logger.warn('unable to match journal file %s to pattern %s', journal, JOURNAL_LOCATION_REGEX)
 
     return locations
+
 
 def find_sessions(ctx):
     home = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "master", "master", ctx.locator)

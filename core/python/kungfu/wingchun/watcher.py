@@ -1,4 +1,3 @@
-
 import pywingchun
 import pyyjj
 import json
@@ -8,6 +7,7 @@ from kungfu.wingchun.utils import to_dict
 from kungfu.data.sqlite.data_proxy import make_url, DataProxy
 from kungfu.finance.ledger import *
 from kungfu.finance.position import *
+
 
 class Watcher(pywingchun.Watcher):
     def __init__(self, ctx):

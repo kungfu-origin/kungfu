@@ -22,4 +22,5 @@ def strategy(ctx, group, name, path, low_latency):
     strategy = Strategy(ctx)
     runner = pywingchun.Runner(ctx.low_latency, ctx.locator, ctx.group, ctx.name)
     runner.add_strategy(strategy)
+    runner.checkin()
     runner.run()
