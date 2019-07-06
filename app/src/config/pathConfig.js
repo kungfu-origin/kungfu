@@ -87,13 +87,8 @@ export const LIVE_TRADING_DB_DIR = path.join(WATCHER_DIR, 'db', 'live');
 //trading data
 export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
 
-//assets
-export const buildAccountAssetsDBPath = () => {
-    return path.join(LIVE_TRADING_DB_DIR, 'assets.db')
-}
-
 //snapshorts
-export const buildAccountSnapshortsDBPath = () => {
+export const LIVE_TRADING_DATA_DB = () => {
     return path.join(LIVE_TRADING_DB_DIR, 'snapshots.db')
 }
 

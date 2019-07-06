@@ -1,5 +1,5 @@
-import {runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB} from '__gUtils/dbUtils';
-import {ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath, buildAccountAssetsDBPath, buildAccountSnapshortsDBPath} from '__gConfig/pathConfig';
+import { runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB } from '__gUtils/dbUtils';
+import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, LIVE_TRADING_DATA_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 
@@ -123,7 +123,7 @@ export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
 export const getAccountPnlMin = (accountId, tradingDay) => {
     if(!tradingDay) throw new Error('无交易日！')
     if(!accountId) return new Promise(resolve => resolve([]))
-    return runSelectDB(buildAccountSnapshortsDBPath(accountId), 
+    return runSelectDB(LIVE_TRADING_DATA_DB, 
     `SELECT * FROM trading_account_1m_snapshots WHERE trading_day = '${tradingDay}'`)
 }
 
@@ -133,7 +133,7 @@ export const getAccountPnlMin = (accountId, tradingDay) => {
  */
 export const getAccountPnlDay = (accountId) => {
     if(!accountId) return new Promise(resolve => resolve([]))
-    return runSelectDB(buildAccountSnapshortsDBPath(accountId), 'SELECT * FROM trading_account_1d_snapshots')
+    return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM trading_account_1d_snapshots')
 }
 
 
