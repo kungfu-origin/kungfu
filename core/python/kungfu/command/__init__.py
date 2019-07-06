@@ -1,10 +1,10 @@
 import os
 import click
 import kungfu.yijinjing.journal as kfj
-from kungfu.data.sqlite.data_proxy import DataProxy
+
 
 @click.group(invoke_without_command=True)
-@click.option('-f', '--home', type=str, help='kungfu home folder')
+@click.option('-H', '--home', type=str, required=True, help='kungfu home folder')
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('-n', '--name', type=str, help='name for the process, defaults to command if not set')

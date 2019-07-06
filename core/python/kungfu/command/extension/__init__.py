@@ -1,12 +1,12 @@
 import os
 import click
-from kungfu.command import kfc
+from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 
 
 @kfc.group()
 @click.pass_context
 def extension(ctx):
-    ctx.logger = ctx.parent.logger
+    pass_ctx_from_root(ctx)
     if not os.getenv('KF_NO_EXT'):
         pass
     else:

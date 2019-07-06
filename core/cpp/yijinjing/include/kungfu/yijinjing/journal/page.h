@@ -69,10 +69,10 @@ namespace kungfu
                 { return address() + header_->page_size - sizeof(frame_header); }
 
                 uintptr_t first_frame_address() const
-                { return address() + header_->page_header_length; };
+                { return address() + header_->page_header_length; }
 
                 uintptr_t last_frame_address() const
-                { return address() + header_->last_frame_position; };
+                { return address() + header_->last_frame_position; }
 
                 bool is_full() const
                 { return last_frame_address() + reinterpret_cast<frame_header *>(last_frame_address())->length > address_border(); }

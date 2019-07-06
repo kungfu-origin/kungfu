@@ -107,17 +107,19 @@ class WinConsoleHandler(logging.StreamHandler):
 
 
 def create_logger(name, level, location):
-    log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
-    log_name = '{}_py_{}'.format(name, log_dateext)
-    log_path = location.locator.layout_file(location, pyyjj.layout.LOG, log_name)
+    logger = logging.getLogger(name)
 
-    file_handler = logging.FileHandler(log_path)
-    file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
+    if location is not None:
+        log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
+        log_name = '{}_py_{}'.format(name, log_dateext)
+        log_path = location.locator.layout_file(location, pyyjj.layout.LOG, log_name)
+
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
+        logger.addHandler(file_handler)
 
     console_handler = WinConsoleHandler() if platform.system() == 'Windows' else UnixConsoleHandler()
-
-    logger = logging.getLogger(name)
-    logger.setLevel(LOG_LEVELS[level])
-    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+
+    logger.setLevel(LOG_LEVELS[level])
     return logger
