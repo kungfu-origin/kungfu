@@ -29,6 +29,5 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     runner.add_strategy(ctx.strategy)
     if replay:
         ctx.category = 'strategy'
-        ctx.mode = 'live'
         replay_setup.setup(ctx, session_id, strategy, runner)
     runner.run()

@@ -18,6 +18,5 @@ def watcher(ctx, low_latency, replay, session_id):
         ctx.category = 'system'
         ctx.group = 'watcher'
         ctx.name = 'watcher'
-        ctx.mode = 'live'
         replay_setup.setup(ctx, session_id, watcher, watcher_instance)
     watcher_instance.run()

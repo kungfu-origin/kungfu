@@ -7,6 +7,7 @@ from tabulate import tabulate
 
 
 def setup(ctx, session_id, cmd, instance):
+    ctx.mode = 'live'  # to get live data
     if not session_id:
         all_sessions = kfj.find_sessions(ctx)
         all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))
