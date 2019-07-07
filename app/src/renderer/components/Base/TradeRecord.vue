@@ -244,7 +244,6 @@ export default {
             //如果存在筛选，则推送的数据也需要满足筛选条件
             const { id, dateRange } = t.filter
             const { trade_time } = data
-            console.log(id, dateRange)
             if(!((data.instrument_id.includes(id) || data.client_id.includes(id)) )) return
             const tradeData = t.dealTrade(data)
             t.throttleInsertTrade(tradeData).then(tradeList => {

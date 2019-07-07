@@ -133,7 +133,7 @@ export default {
         })
 
         buildCashPipe().subscribe(d => {
-            console.log(d,'~~~~~~~')
+
         })
     },
 

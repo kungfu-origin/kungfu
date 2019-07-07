@@ -1,5 +1,6 @@
+import { buildDateRange } from '@/assets/js/utils';
 import { runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB } from '__gUtils/dbUtils';
-import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, LIVE_TRADING_DATA_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
+import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 
@@ -39,7 +40,6 @@ export const deleteAccount = (account_id) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM account_config WHERE account_id = ?", account_id)
 }
 
-
 /**
  * 改变账户行情
  * @param  {} account_id 账户id
@@ -68,14 +68,9 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
  * 获取账户成交情况
  * 
  */
-export const getAccountTrade = (accountId, {id, dateRange}, tradingDay) => {
+export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
     id = id || '';
-    dateRange = dateRange || [];
-    const momentDay = tradingDay ? moment(tradingDay) : moment();
-    //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const startDate = (moment(momentDay.format('YYYY-MM-DD').toString()).valueOf()) * 1000000
-    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD').toString()).valueOf()) * 1000000
-    const filterDate = dateRange.length ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
+    const filterDate = buildDateRange(dateRange, tradingDay)
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
         const sql = `WHERE (account_id="${accountId}" AND instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
@@ -94,15 +89,9 @@ export const getAccountTrade = (accountId, {id, dateRange}, tradingDay) => {
  * @param {String} id  模糊查询的id部分数据
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
-export const getAccountOrder = (accountId, {id, dateRange}, tradingDay) => {
+export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
     id = id || '';
-    dateRange = dateRange || [];
-    const momentDay = tradingDay ? moment(tradingDay) : moment();
-    //获取当天是日期范围
-    const startDate = (moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000
-    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
-    //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const filterDate = dateRange.length ? [moment(dateRange[0]).valueOf() * 1000000, (moment(dateRange[1]).add(1,'d').valueOf() * 1000000)] : [startDate, endDate]
+    const filterDate = buildDateRange(dateRange, tradingDay)
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来
         const sql = `WHERE (account_id='${accountId}' AND order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
@@ -145,11 +134,8 @@ export const setFeeSettingData = (accountId, feeSettingData) => {
         const keys = Object.keys(feeSettingData[0], {})
         const q = [...keys].fill("?")
         runClearDB(COMMISSION_DB, 'commission')
-        .then(() => {
-            runBatchInsertDB(COMMISSION_DB, `INSERT INTO commission(${keys.join(", ")}) VALUES (${q.join(", ")})`, feeSettingData.map(f => [...Object.values(f)]))
-            .then(() => resolve(true))
-            .catch(err => reject(err))
-        })
+        .then(() => runBatchInsertDB(COMMISSION_DB, `INSERT INTO commission(${keys.join(", ")}) VALUES (${q.join(", ")})`, feeSettingData.map(f => [...Object.values(f)])))
+        .then(() => resolve(true))
         .catch(err => reject(err))
     })
 }
@@ -158,7 +144,7 @@ export const getFeeSettingData = (accountId) => {
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
     if(!existsSync(COMMISSION_DB)) {
         try{
-            copySync(GLOBAL_COMMISSIO_DB, COMMISSION_DB)
+            copySync(GLOBAL_COMMISSION_DB, COMMISSION_DB)
         }catch(err){
             throw err
         }

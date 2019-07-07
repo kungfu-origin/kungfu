@@ -63,48 +63,32 @@ export const TASKS_DB = path.join(BASE_DB_DIR, 'task.db')
 //================= account related start ==========================
 
 //gateway
-export const buildGatewayPath = (gatewayName) => {
-    return path.join(KF_HOME, ...gatewayName.split('_'))
-}
+export const buildGatewayPath = (gatewayName) => path.join(KF_HOME, ...gatewayName.split('_'))
 
 //gateway data
-export const buildGatewayLiveDBPath = (gatewayName) => {
-    return path.join(buildGatewayPath(gatewayName), 'db', 'live')
-}
+export const buildGatewayLiveDBPath = (gatewayName) => path.join(buildGatewayPath(gatewayName), 'db', 'live')
 
 //account commission 手续费
-export const buildAccountCommissionDBPath = (accountId) => {
-    return path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
-}
-
+export const buildAccountCommissionDBPath = (accountId) => path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
 
 //================= account related end ==========================
 
 //================= live trading start ===========================
 
+//trading data
 export const LIVE_TRADING_DB_DIR = path.join(WATCHER_DIR, 'db', 'live');
 
-//trading data
 export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
-
-//snapshorts
-export const LIVE_TRADING_DATA_DB = () => {
-    return path.join(LIVE_TRADING_DB_DIR, 'snapshots.db')
-}
 
 //================= live trading end =============================
 
 //================= strategy related start =======================
 
 //strategyPos 某策略下的持仓
-export const buildStrategyPosDBPath = (strategyId) => {
-    return path.join(STRATEGY_DIR, strategyId, 'assets.db')
-}
+export const buildStrategyPosDBPath = (strategyId) => path.join(STRATEGY_DIR, strategyId, 'assets.db')
 
 //snapshorts
-export const buildStrategySnapshortsDBPath = (accountId) => {
-    return path.join(STRATEGY_DIR, accountId, 'snapshots.db')
-}
+export const buildStrategySnapshortsDBPath = (accountId) => path.join(STRATEGY_DIR, accountId, 'snapshots.db')
 
 //================== strategy related end =========================
 
@@ -114,9 +98,7 @@ export const buildStrategySnapshortsDBPath = (accountId) => {
 export const GLOBAL_COMMISSION_DB = path.join(BASE_DB_DIR, 'commission.db');
 
 //获取进程日志地址
-export const buildProcessLogPath = (processId) => {
-    return path.join(LOG_DIR, `${processId}.log`)
-}
+export const buildProcessLogPath = (processId) => path.join(LOG_DIR, `${processId}.log`)
 
 //获取watcher nano pub 地址
 export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')

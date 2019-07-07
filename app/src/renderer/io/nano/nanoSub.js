@@ -19,9 +19,7 @@ export const buildGatewayStatePipe = () => {
     return subObservable.pipe(
         filter(d => d.msg_type === MSG_TYPE.gatewayState),
         map(({ data }) => {
-            const category = data.category;
-            const group = data.group;
-            const name = data.name;
+            const { category, group, name } = data;
             if(+category === 0) return [`${MSG_TYPE.category[category]}_${group}`, data];
             else if(+category === 1) return [`${MSG_TYPE.category[category]}_${group}_${name}`, data];
         })
@@ -41,24 +39,6 @@ export const buildTradingDataPipe = () => {
 export const buildCashPipe = () => {
     return subObservable.pipe(
         filter(d => d.msg_type === MSG_TYPE.accountInfo)
-    )
-}
-
-//trades
-export const buildTradesPipe = function(){
-    const t = this;
-    t.type = '';
-    t.id = '';
-    t.filter = (type, id) => {
-        t.type = type;
-        t.id = id; 
-    }
-    return subObservable.pipe(
-        filter(d => d.msg_type === MSG_TYPE.trade),
-        filter(d => {
-            if(t.type === 'strategy') return d.strategy_id === t.id;
-            else if(t.type === 'account') return d.account_id === t.id;
-        })
     )
 }
 

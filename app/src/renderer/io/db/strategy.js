@@ -1,4 +1,5 @@
-import {runSelectDB, runInsertUpdateDeleteDB, } from '__gUtils/dbUtils';
+import { runSelectDB, runInsertUpdateDeleteDB } from '__gUtils/dbUtils';
+import { buildDateRange } from '@/assets/js/utils';
 
 import {
     STRATEGYS_DB, 
@@ -56,20 +57,10 @@ export const updateStrategyPath = (strategy_id, strategy_path) => {
  * 获取某策略下委托
  */
 export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) => {
-    dateRange = dateRange || []
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
-    const strategyAddTime = strategys[0].add_time;
-    //tradeing day
-    const momentDay = tradingDay ? moment(tradingDay) : moment();
-    //获取当天是日期范围
-    const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
-    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
-    //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
-    const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
-    const filterDate = dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
+    const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)    
     return new Promise((resolve, reject) => {
         let tableData = []
             accounts = [];
@@ -100,38 +91,24 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
 /**
  * 获取某策略下成交
  */
-export const getStrategyTrade = async(strategyId, {id, dateRange}, tradingDay) => {
-    dateRange = dateRange || [];
+export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay) => {
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策咯！')
-    const strategyAddTime = strategys[0].add_time;
-    //tradeing day
-    const momentDay = tradingDay ? moment(tradingDay) : moment();
-    //获取当天是日期范围
-    const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6), strategyAddTime)
-    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * Math.pow(10, 6)
-    //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * Math.pow(10, 6), strategyAddTime);
-    const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * Math.pow(10, 6);
-    const filterDate = dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
-    let tableData = []
+    const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
     return new Promise((resolve, reject) => {
         getStrategyAccounts(strategyId).then(accounts => {
-            let {length} = accounts
-            let flag = 0
+            let { length } = accounts;
+            let flag = 0;
+            let tableData = [];
             if(length == 0) resolve([])
             accounts.map(item => {
                 runSelectDB(buildAccountTradesDBPath(item.account_id), 
                 `SELECT rowId, * FROM trade WHERE client_id = '${strategyId}'` + 
                 ` AND (instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
                 ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}`
-                ).then(trade => {
-                    tableData = tableData.concat(trade)
-                })
-                .catch(err => {
-                    reject(err)
-                })
+                ).then(trade => tableData = tableData.concat(trade))
+                .catch(err => reject(err))
                 .finally(() => {
                     flag++
                     if(length != flag) return
