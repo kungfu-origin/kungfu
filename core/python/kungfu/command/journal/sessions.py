@@ -11,7 +11,7 @@ import kungfu.yijinjing.journal as kfj
 
 @journal.command()
 @click.option('-s', '--sortby', default='begin_time',
-              type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name', 'frame_count']),
+              type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name']),
               help='sorting method')
 @click.option('-a', '--ascending', is_flag=True, help='sorted as ascending')
 @click.option('-f', '--tablefmt', default='simple',

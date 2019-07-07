@@ -128,7 +128,7 @@ def find_sessions(ctx):
 
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
-        'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration', 'frame_count'
+        'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
     locations = collect_journal_locations(ctx)
     dest_pub = '{:08x}'.format(0)
@@ -150,33 +150,28 @@ def find_session(ctx, session_id):
 def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, name):
     session_start_time = -1
     last_frame_time = 0
-    session_frame_count = 0
 
     while reader.data_available():
         frame = reader.current_frame()
-        session_frame_count = session_frame_count + 1
         if frame.msg_type == 10001:
             if session_start_time > 0:
                 sessions_df.loc[len(sessions_df)] = [
                     ctx.session_count, mode, category, group, name,
                     session_start_time, last_frame_time, False,
-                    last_frame_time - session_start_time, session_frame_count
+                    last_frame_time - session_start_time
                 ]
                 session_start_time = frame.trigger_time
-                session_frame_count = 1
                 ctx.session_count = ctx.session_count + 1
             else:
                 session_start_time = frame.trigger_time
-                session_frame_count = 1
         elif frame.msg_type == 10002:
             if session_start_time > 0:
                 sessions_df.loc[len(sessions_df)] = [
                     ctx.session_count, mode, category, group, name,
                     session_start_time, frame.gen_time, True,
-                    frame.gen_time - session_start_time, session_frame_count
+                    frame.gen_time - session_start_time
                 ]
                 session_start_time = -1
-                session_frame_count = 0
                 ctx.session_count = ctx.session_count + 1
         last_frame_time = frame.gen_time
         reader.next()
@@ -185,5 +180,62 @@ def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, n
         sessions_df.loc[len(sessions_df)] = [
             ctx.session_count, mode, category, group, name,
             session_start_time, last_frame_time, False,
-            last_frame_time - session_start_time, session_frame_count
+            last_frame_time - session_start_time
         ]
+
+
+def trace_record(ctx, session_id):
+    trace_df = pd.DataFrame(columns=[
+        'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
+    ])
+    session = find_session(ctx, session_id)
+    uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
+    uid = pyyjj.hash_str_32(uname)
+    ctx.category = '*'
+    ctx.group = '*'
+    ctx.name = '*'
+    ctx.mode = '*'
+    locations = collect_journal_locations(ctx)
+    location = locations[uid]
+    home = pyyjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
+    io_device = pyyjj.io_device_client(home, False)
+    reader = io_device.open_reader_to_subscribe()
+    return trace_df, session, locations, location, home, reader
+
+
+def trace_location_out(ctx, session_id):
+    trace_df, session, locations, location, home, reader = trace_record(ctx, session_id)
+    for dest in location['readers']:
+        dest_id = int(dest, 16)
+        reader.join(home, dest_id, session['begin_time'])
+    while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
+        frame = reader.current_frame()
+        trace_df.loc[len(trace_df)] = [
+            frame.gen_time, frame.trigger_time,
+            locations[frame.source]['uname'],
+            'public' if frame.dest == 0 else locations[frame.dest]['uname'],
+            frame.msg_type, frame.frame_length, frame.data_length
+        ]
+        reader.next()
+    return trace_df
+
+
+def trace_location_in(ctx, session_id):
+    trace_df, session, locations, location, home, reader = trace_record(ctx, session_id)
+    master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
+    master_cmd_location = locations[master_cmd_uid]
+    master_cmd_location = pyyjj.location(MODES[master_cmd_location['mode']], CATEGORIES[master_cmd_location['category']],
+                                         master_cmd_location['group'], master_cmd_location['name'], ctx.locator)
+    reader.join(master_cmd_location, location['uid'], session['begin_time'])
+    while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
+        frame = reader.current_frame()
+        trace_df.loc[len(trace_df)] = [
+            frame.gen_time, frame.trigger_time,
+            locations[frame.source]['uname'],
+            'public' if frame.dest == 0 else locations[frame.dest]['uname'],
+            frame.msg_type, frame.frame_length, frame.data_length
+        ]
+        # if frame.msg_type == 10021:
+        #     print(frame.data_as_string())
+        reader.next()
+    return trace_df

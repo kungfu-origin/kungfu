@@ -199,6 +199,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("data_length", &frame::data_length)
             .def_property_readonly("address", &frame::address)
             .def("data_as_bytes", &frame::data_as_bytes)
+            .def("data_as_string", &frame::data_as_string)
             .def("has_data", &frame::has_data);
 
     py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
@@ -252,7 +253,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("current_frame", &reader::current_frame)
             .def("seek_to_time", &reader::seek_to_time)
             .def("data_available", &reader::data_available)
-            .def("next", &reader::next);
+            .def("next", &reader::next)
+            .def("join", &reader::join);
 
     py::class_<writer, writer_ptr>(m, "writer")
             .def("write_raw", &writer::write_raw);
@@ -263,6 +265,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("home", &io_device::get_home)
             .def_property_readonly("live_home", &io_device::get_live_home)
             .def("open_reader", &io_device::open_reader)
+            .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 

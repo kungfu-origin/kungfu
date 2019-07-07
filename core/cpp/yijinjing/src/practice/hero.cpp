@@ -27,7 +27,12 @@ namespace kungfu
         hero::hero(yijinjing::io_device_ptr io_device) :
                 io_device_(std::move(io_device)), last_check_(0), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
         {
+            if (spdlog::default_logger()->name().empty())
+            {
+                log::setup_log(io_device_->get_home(), io_device_->get_home()->name);
+            }
             os::handle_os_signals(this);
+            SPDLOG_DEBUG("creating {} low_latency {}", io_device_->get_home()->uname, io_device_->is_low_latency());
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
@@ -168,12 +173,12 @@ namespace kungfu
         void hero::register_location(int64_t trigger_time, const location_ptr &location)
         {
             locations_[location->uid] = location;
-            SPDLOG_INFO("registered location {} at {}", location->uname, time::strftime(trigger_time));
+            SPDLOG_INFO("registered location {:08x} {} at {}", location->uid, location->uname, time::strftime(trigger_time));
         }
 
         void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
         {
-            SPDLOG_INFO("deregistered location {} at {}", get_location(location_uid)->uname, time::strftime(trigger_time));
+            SPDLOG_INFO("deregistered location {:08x} {} at {}", location_uid, get_location(location_uid)->uname, time::strftime(trigger_time));
             locations_.erase(location_uid);
         }
 

@@ -19,8 +19,7 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 @click.pass_context
 def info(ctx, session_id, pager):
     pass_ctx_from_parent(ctx)
-    all_sessions = kfj.find_sessions(ctx)
-    session = all_sessions[all_sessions['id'] == session_id].iloc[0]
+    session = kfj.find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
     uid = pyyjj.hash_str_32(uname)
     ctx.category = '*'
