@@ -91,6 +91,7 @@ export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
  */
 export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
     id = id || '';
+    dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
     return new Promise((resolve, reject) => {
         //查询总数的时候也需要根据筛选条件来

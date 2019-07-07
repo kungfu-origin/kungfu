@@ -19,6 +19,7 @@ let whiteListedModules = [
   'vuex', 
   'vue-router', 
   'vue-virtual-scroller', 
+  'codemirror'
 ];
 
 dependencies['kungfu-core'] = 'commonjs kungfu-core';

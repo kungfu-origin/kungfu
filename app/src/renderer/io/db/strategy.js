@@ -60,6 +60,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
+    const strategyAddTime = strategys[0].add_time;
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)    
     return new Promise((resolve, reject) => {
         let tableData = []
@@ -94,7 +95,8 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
 export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay) => {
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
-    if(!strategys[0]) throw new Error('找不到该策咯！')
+    if(!strategys[0]) throw new Error('找不到该策咯！');
+    const strategyAddTime = strategys[0].add_time;
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
     return new Promise((resolve, reject) => {
         getStrategyAccounts(strategyId).then(accounts => {
