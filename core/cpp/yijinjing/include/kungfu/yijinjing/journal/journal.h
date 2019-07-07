@@ -125,8 +125,11 @@ namespace kungfu
             public:
                 writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher);
 
-                const data::location_ptr &get_location()
+                const data::location_ptr &get_location() const
                 { return journal_->location_; }
+
+                uint32_t get_dest() const
+                { return journal_->dest_id_; }
 
                 uint64_t current_frame_uid();
 

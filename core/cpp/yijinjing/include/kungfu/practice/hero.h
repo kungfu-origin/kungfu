@@ -31,6 +31,12 @@ namespace kungfu
             virtual void on_interval_check(int64_t nanotime)
             {}
 
+            void set_begin_time(int64_t begin_time)
+            { begin_time_ = begin_time; }
+
+            void set_end_time(int64_t end_time)
+            { end_time_ = end_time; }
+
             void run();
 
             void signal_stop()
@@ -41,6 +47,9 @@ namespace kungfu
 
             uint32_t get_home_uid() const
             { return get_io_device()->get_home()->uid; }
+
+            uint32_t get_live_home_uid() const
+            { return get_io_device()->get_live_home()->uid; }
 
             const std::string &get_home_uname() const
             { return get_io_device()->get_home()->uname; }
@@ -63,6 +72,8 @@ namespace kungfu
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
+            int64_t begin_time_;
+            int64_t end_time_;
 
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 

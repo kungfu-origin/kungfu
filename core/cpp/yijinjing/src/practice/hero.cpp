@@ -24,7 +24,8 @@ namespace kungfu
     namespace practice
     {
 
-        hero::hero(yijinjing::io_device_ptr io_device) : io_device_(std::move(io_device)), last_check_(0), now_(0)
+        hero::hero(yijinjing::io_device_ptr io_device) :
+                io_device_(std::move(io_device)), last_check_(0), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
         {
             os::handle_os_signals(this);
             reader_ = io_device_->open_reader_to_subscribe();
@@ -65,30 +66,45 @@ namespace kungfu
                         try
                         {
                             SPDLOG_INFO("{} generating events with source id {:08x}", get_home_uname(), get_home_uid());
+                            SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), time::strftime(end_time_));
 
                             while (live_)
                             {
-                                if (io_device_->get_observer()->wait())
+                                if (io_device_->get_home()->mode == mode::LIVE)
                                 {
-                                    const std::string &notice = io_device_->get_observer()->get_notice();
-                                    if (notice.length() > 2)
+                                    if (io_device_->get_observer()->wait())
                                     {
-                                        SPDLOG_DEBUG("got notice {}", notice);
-                                        sb.on_next(std::make_shared<nanomsg_json>(notice));
-                                    } else
+                                        const std::string &notice = io_device_->get_observer()->get_notice();
+                                        if (notice.length() > 2)
+                                        {
+                                            SPDLOG_DEBUG("got notice {}", notice);
+                                            sb.on_next(std::make_shared<nanomsg_json>(notice));
+                                        } else
+                                        {
+                                            on_notify();
+                                        }
+                                    }
+                                    if (io_device_->get_rep_sock()->recv() > 0)
                                     {
-                                        on_notify();
+                                        const std::string &msg = io_device_->get_rep_sock()->last_message();
+                                        sb.on_next(std::make_shared<nanomsg_json>(msg));
                                     }
                                 }
                                 if (reader_->data_available())
                                 {
-                                    sb.on_next(reader_->current_frame());
-                                    reader_->next();
-                                }
-                                if (io_device_->get_rep_sock()->recv() > 0)
+                                    if (reader_->current_frame()->gen_time() <= end_time_)
+                                    {
+                                        sb.on_next(reader_->current_frame());
+                                        reader_->next();
+                                    } else
+                                    {
+                                        SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
+                                        break;
+                                    }
+                                } else if (get_io_device()->get_home()->mode != mode::LIVE)
                                 {
-                                    const std::string &msg = io_device_->get_rep_sock()->last_message();
-                                    sb.on_next(std::make_shared<nanomsg_json>(msg));
+                                    SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
+                                    break;
                                 }
                                 auto now = time::now_in_nano();
                                 if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)

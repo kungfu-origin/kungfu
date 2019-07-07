@@ -24,11 +24,12 @@ namespace kungfu
     {
         namespace strategy
         {
-            Runner::Runner(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name)
-                    : apprentice(location::make(mode::LIVE, category::STRATEGY, group, name, std::move(locator)), low_latency)
+            Runner::Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, yijinjing::data::mode m,
+                           bool low_latency)
+                    : apprentice(location::make(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
             {}
 
-            void Runner::add_strategy(const Strategy_ptr& strategy)
+            void Runner::add_strategy(const Strategy_ptr &strategy)
             {
                 strategies_.push_back(strategy);
             }
@@ -43,7 +44,7 @@ namespace kungfu
                 events | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
-                      for (const auto& strategy : strategies_)
+                      for (const auto &strategy : strategies_)
                       {
                           strategy->on_quote(context_, event->data<Quote>());
                       }
@@ -52,7 +53,7 @@ namespace kungfu
                 events | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {
-                      for (const auto& strategy : strategies_)
+                      for (const auto &strategy : strategies_)
                       {
                           strategy->on_order(context_, event->data<Order>());
                       }
@@ -61,7 +62,7 @@ namespace kungfu
                 events | is(msg::type::Trade) |
                 $([&](event_ptr event)
                   {
-                      for (const auto& strategy : strategies_)
+                      for (const auto &strategy : strategies_)
                       {
                           strategy->on_trade(context_, event->data<Trade>());
                       }
@@ -70,7 +71,7 @@ namespace kungfu
                 events | is(msg::type::Entrust) |
                 $([&](event_ptr event)
                   {
-                      for (const auto& strategy : strategies_)
+                      for (const auto &strategy : strategies_)
                       {
                           strategy->on_entrust(context_, event->data<Entrust>());
                       }
@@ -79,7 +80,7 @@ namespace kungfu
                 events | is(msg::type::Transaction) |
                 $([&](event_ptr event)
                   {
-                      for (const auto& strategy : strategies_)
+                      for (const auto &strategy : strategies_)
                       {
                           strategy->on_transaction(context_, event->data<Transaction>());
                       }
@@ -88,7 +89,7 @@ namespace kungfu
 
             void Runner::on_start(const rx::observable<yijinjing::event_ptr> &events)
             {
-                for (const auto& strategy : strategies_)
+                for (const auto &strategy : strategies_)
                 {
                     strategy->pre_start(context_);
                 }

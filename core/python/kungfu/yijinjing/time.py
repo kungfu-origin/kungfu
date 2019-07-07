@@ -8,6 +8,11 @@ NANO_PER_SECOND = 1000000000
 EPOCH = datetime.fromtimestamp(0)
 
 
+SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DURATION_FORMAT = '%H:%M:%S.%N'
+DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
+
+
 def strftime(nanotime, format=DATETIME_FORMAT):
     dt = EPOCH + timedelta(microseconds=nanotime/1000)
     normal_format = format.replace("%N", '{:09d}'.format(nanotime % NANO_PER_SECOND))

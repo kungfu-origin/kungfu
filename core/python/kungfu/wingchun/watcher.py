@@ -11,11 +11,12 @@ from kungfu.finance.position import *
 
 class Watcher(pywingchun.Watcher):
     def __init__(self, ctx):
-        pywingchun.Watcher.__init__(self, ctx.low_latency, ctx.locator)
+        mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
+        pywingchun.Watcher.__init__(self, ctx.locator, mode, ctx.low_latency)
         self.ctx = ctx
         self.ctx.logger = create_logger("watcher", ctx.log_level, self.io_device.home)
-        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'watcher', 'watcher', ctx.locator)
-        url = make_url(ctx.locator,location, ctx.name)
+        location = pyyjj.location(mode, pyyjj.category.SYSTEM, 'watcher', 'watcher', ctx.locator)
+        url = make_url(ctx.locator, location, ctx.name)
         self.data_proxy = DataProxy(url)
         self.accounts = {}
 

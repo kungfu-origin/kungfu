@@ -100,7 +100,7 @@ namespace kungfu
                 if (market_data_.find(source) == market_data_.end())
                 {
                     auto home = app_.get_io_device()->get_home();
-                    auto md_location = location::make(home->mode, category::MD, source, source, home->locator);
+                    auto md_location = location::make(mode::LIVE, category::MD, source, source, home->locator);
                     if (not app_.has_location(md_location->uid))
                     {
                         throw wingchun_error(fmt::format("invalid md {}", source));

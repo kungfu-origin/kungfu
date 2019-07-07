@@ -36,6 +36,9 @@ namespace kungfu
             const data::location_ptr get_home() const
             { return home_; }
 
+            const data::location_ptr get_live_home() const
+            { return live_home_; }
+
             bool is_low_latency()
             { return low_latency_; }
 
@@ -67,6 +70,7 @@ namespace kungfu
 
         protected:
             data::location_ptr home_;
+            data::location_ptr live_home_;
             const bool low_latency_;
             const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;

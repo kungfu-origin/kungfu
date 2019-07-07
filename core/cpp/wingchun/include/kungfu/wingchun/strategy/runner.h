@@ -18,7 +18,7 @@ namespace kungfu
             class Runner : public practice::apprentice
             {
             public:
-                Runner(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name);
+                Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, yijinjing::data::mode m, bool low_latency);
 
                 virtual ~Runner() = default;
 

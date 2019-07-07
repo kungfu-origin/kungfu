@@ -8,10 +8,6 @@ from kungfu.command.journal import journal, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 
-SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-DURATION_FORMAT = '%H:%M:%S.%N'
-DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
-
 
 @journal.command()
 @click.option('-s', '--sortby', default='begin_time',
@@ -26,9 +22,9 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 def sessions(ctx, sortby, ascending, tablefmt, pager):
     pass_ctx_from_parent(ctx)
     all_sessions = kfj.find_sessions(ctx).sort_values(by=sortby, ascending=ascending)
-    all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
-    all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, SESSION_DATETIME_FORMAT))
-    all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - DURATION_TZ_ADJUST, DURATION_FORMAT))
+    all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))
+    all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))
+    all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - kft.DURATION_TZ_ADJUST, kft.DURATION_FORMAT))
 
     table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=tablefmt)
     if pager:

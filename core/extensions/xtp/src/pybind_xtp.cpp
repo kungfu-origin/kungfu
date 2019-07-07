@@ -16,13 +16,11 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::wingchun::xtp;
 
 PYBIND11_MODULE(kfext_xtp, m) {
-    py::class_<MdGateway, std::shared_ptr<MdGateway>>(m, "MD")
+    py::class_<MdGateway, kungfu::practice::apprentice, std::shared_ptr<MdGateway>>(m, "MD")
             .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-            .def("checkin", &MdGateway::checkin)
             .def("run", &MdGateway::run);
 
-    py::class_<TdGateway, std::shared_ptr<TdGateway>>(m, "TD")
+    py::class_<TdGateway, kungfu::practice::apprentice, std::shared_ptr<TdGateway>>(m, "TD")
             .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-            .def("checkin", &TdGateway::checkin)
             .def("run", &TdGateway::run);
 }

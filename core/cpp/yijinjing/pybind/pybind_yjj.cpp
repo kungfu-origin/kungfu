@@ -27,7 +27,6 @@
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/practice/master.h>
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/practice/replay.h>
 
 namespace py = pybind11;
 
@@ -262,6 +261,7 @@ PYBIND11_MODULE(pyyjj, m)
     io_device.def_property_readonly("publisher", &io_device::get_publisher)
             .def_property_readonly("observer", &io_device::get_observer)
             .def_property_readonly("home", &io_device::get_home)
+            .def_property_readonly("live_home", &io_device::get_live_home)
             .def("open_reader", &io_device::open_reader)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
@@ -284,12 +284,7 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<apprentice, apprentice_ptr>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
-            .def("checkin", &apprentice::checkin)
+            .def("set_begin_time", &apprentice::set_begin_time)
+            .def("set_end_time", &apprentice::set_end_time)
             .def("run", &apprentice::run);
-
-    py::class_<replay>(m, "replay")
-            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-            .def(py::init<apprentice_ptr>(), py::arg("app"))
-            .def_property_readonly("io_device", &replay::get_io_device)
-            .def("run", &replay::run);
 }

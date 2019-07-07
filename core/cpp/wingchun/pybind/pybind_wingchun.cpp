@@ -514,7 +514,7 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<Watcher, PyWatcher>(m, "Watcher")
-            .def(py::init<bool, kungfu::yijinjing::data::locator_ptr>())
+            .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Watcher::get_io_device)
             .def("get_location", &Watcher::get_location)
             .def("publish", &Watcher::publish)
@@ -523,12 +523,14 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_order", &Watcher::on_order)
             .def("on_trade", &Watcher::on_trade)
             .def("on_assets", &Watcher::on_assets)
-            .def("checkin", &Watcher::checkin)
+            .def("set_begin_time", &Watcher::set_begin_time)
+            .def("set_end_time", &Watcher::set_end_time)
             .def("run", &Watcher::run);
 
-    py::class_<strategy::Runner>(m, "Runner")
-            .def(py::init<bool, kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &>())
-            .def("checkin", &strategy::Runner::checkin)
+    py::class_<strategy::Runner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
+            .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
+            .def("set_begin_time", &strategy::Runner::set_begin_time)
+            .def("set_end_time", &strategy::Runner::set_end_time)
             .def("run", &strategy::Runner::run)
             .def("add_strategy", &strategy::Runner::add_strategy);
 

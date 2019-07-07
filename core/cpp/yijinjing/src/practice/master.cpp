@@ -64,20 +64,19 @@ namespace kungfu
                 auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
                 writers_[app_location->uid] = writer;
 
+                {
+                    auto msg = request_loc.dump();
+                    auto frame = writers_[0]->open_frame(e->gen_time(), msg::type::Register, msg.length());
+                    SPDLOG_DEBUG("register to {}/{} location {}", writers_[0]->get_location()->uname, writers_[0]->get_dest(), msg);
+                    memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
+                    writers_[0]->close_frame(msg.length());
+                }
+
                 reader_->join(app_location, 0, now);
                 require_write_to(app_location->uid, e->gen_time(), 0);
 
                 reader_->join(app_location, master_location->uid, now);
                 require_write_to(app_location->uid, e->gen_time(), master_location->uid);
-
-                nlohmann::json register_msg;
-                register_msg["msg_type"] = msg::type::Register;
-                register_msg["gen_time"] = now;
-                register_msg["trigger_time"] = e->gen_time();
-                register_msg["source"] = app_location->uid;
-                register_msg["dest"] = get_home_uid();
-                register_msg["data"] = request_loc;
-                get_io_device()->get_publisher()->publish(register_msg.dump());
 
                 for (const auto& item : locations_)
                 {

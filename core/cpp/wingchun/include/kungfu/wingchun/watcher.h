@@ -16,7 +16,7 @@ namespace kungfu
         class Watcher : public practice::apprentice
         {
         public:
-            explicit Watcher(bool low_latency, yijinjing::data::locator_ptr locator);
+            explicit Watcher(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
 
             virtual ~Watcher() = default;
 

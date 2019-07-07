@@ -20,16 +20,22 @@ namespace kungfu
 {
     namespace wingchun
     {
-        Watcher::Watcher(bool low_latency, locator_ptr locator) :
-                apprentice(location::make(mode::LIVE, category::SYSTEM, "watcher", "watcher", std::move(locator)), low_latency)
+        Watcher::Watcher(locator_ptr locator, mode m, bool low_latency) :
+                apprentice(location::make(m, category::SYSTEM, "watcher", "watcher", std::move(locator)), low_latency)
         {
             log::copy_log_settings(get_io_device()->get_home(), "watcher");
-            pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
+            if (m == mode::LIVE)
+            {
+                pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
+            }
         }
 
         void Watcher::publish(const std::string &msg)
         {
-            pub_sock_->send(msg);
+            if (get_io_device()->get_home()->mode == mode::LIVE)
+            {
+                pub_sock_->send(msg);
+            }
             SPDLOG_INFO("published {}", msg);
         }
 
@@ -95,7 +101,7 @@ namespace kungfu
             events | is(msg::type::AccountInfo) |
             $([&](event_ptr event)
               {
-                  memcpy(&account_info_, & event->data<AccountInfo>(), sizeof(AccountInfo));
+                  memcpy(&account_info_, &event->data<AccountInfo>(), sizeof(AccountInfo));
               });
 
             events | is(msg::type::Position) |

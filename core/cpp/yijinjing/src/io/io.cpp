@@ -196,6 +196,7 @@ namespace kungfu
                                                                                                  lazy_(lazy)
         {
             log::setup_log(home_, home_->name);
+            live_home_ = location::make(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
             url_factory_ = std::make_shared<ipc_url_factory>();
 
             rep_sock_ = std::make_shared<socket>(protocol::REPLY);
@@ -244,7 +245,7 @@ namespace kungfu
 
         io_device_master::io_device_master(data::location_ptr home, bool low_latency) : io_device(std::move(home), low_latency, false)
         {
-            SPDLOG_DEBUG("creating io_device_master {}", get_home()->uname);
+            SPDLOG_DEBUG("creating io_device_master {} low_latency {}", get_home()->uname, low_latency);
             auto publisher = std::make_shared<nanomsg_publisher_master>(low_latency);
             publisher->init(*this);
             publisher_ = publisher;
@@ -255,7 +256,7 @@ namespace kungfu
 
         io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device(std::move(home), low_latency, true)
         {
-            SPDLOG_DEBUG("creating io_device_client {}", get_home()->uname);
+            SPDLOG_DEBUG("creating io_device_client {} low_latency {}", get_home()->uname, low_latency);
             auto publisher = std::make_shared<nanomsg_publisher_client>(low_latency);
             publisher->init(*this);
             publisher_ = publisher;

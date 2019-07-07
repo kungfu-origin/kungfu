@@ -5,6 +5,7 @@ from kungfu.data.sqlite.data_proxy import make_url, DataProxy
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
 from kungfu.log import create_logger
 
+
 def run_extension(ctx, registry):
     if registry.has_extension(ctx.source):
         sys_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
@@ -25,7 +26,6 @@ def run_extension(ctx, registry):
             config_int['client_id'] = 1
         config_str['save_file_path'] = '{}/runtime'.format(ctx.home)
         gateway = registry.get_extension(ctx.source)(ctx.low_latency, ctx.locator, config_str, config_int, config_double)
-        gateway.checkin()
         gateway.run()
     else:
         ctx.logger.error('Unrecognized %s arg %s', registry.ext_type.lower(), ctx.name)

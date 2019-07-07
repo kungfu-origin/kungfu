@@ -41,11 +41,134 @@ namespace kungfu
     {
         apprentice::apprentice(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_client>(home, low_latency))
         {
-            auto uid_str = fmt::format("{:08x}", get_home_uid());
+            auto uid_str = fmt::format("{:08x}", get_live_home_uid());
             auto locator = get_io_device()->get_home()->locator;
             master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
             master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
+        }
+
+        void apprentice::observe(int64_t from_time, const location_ptr &location)
+        {
+            reader_->join(location, 0, from_time);
+        }
+
+        void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
+        {
+            require_write_to(master_commands_location_->uid, trigger_time, dest_id);
+        }
+
+        void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
+        {
+            require_read_from(master_commands_location_->uid, trigger_time, source_id);
+        }
+
+        void apprentice::react(const observable<event_ptr> &events)
+        {
+            if (get_io_device()->get_home()->mode == mode::LIVE)
+            {
+                events | skip_until(events | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
+                timeout(seconds(1), observe_on_new_thread()) |
+                $([&](event_ptr e)
+                  {
+                      // timeout happens on new thread, can not subscribe journal reader here
+                      // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
+                  },
+                  [&](std::exception_ptr e)
+                  {
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const timeout_error &ex)
+                      {
+                          SPDLOG_ERROR("app register timeout");
+                          hero::signal_stop();
+                      }
+                  },
+                  [&]()
+                  {
+                      // once registered this subscriber finished, no worry for performance.
+                  });
+
+                events | skip_until(events | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
+                $([&](event_ptr e)
+                  {
+                      reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
+                  });
+            } else
+            {
+                reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
+            }
+
+            events | is(msg::type::Location) |
+            $([&](event_ptr e)
+              {
+                  register_location_from_event(e);
+              });
+
+            events | is(msg::type::Register) |
+            $([&](event_ptr e)
+              {
+                  register_location_from_event(e);
+              });
+
+            events | is(msg::type::Deregister) |
+            $([&](event_ptr e)
+              {
+                  reader_->disjoin(e->source());
+                  writers_.erase(e->source());
+                  deregister_location(e->gen_time(), e->source());
+              });
+
+            events | is(msg::type::RequestWriteTo) |
+            $([&](event_ptr e)
+              {
+                  on_write_to(e);
+              });
+
+            events | is(msg::type::RequestReadFrom) |
+            $([&](event_ptr e)
+              {
+                  on_read_from(e);
+              });
+
+            events | is(msg::type::RequestStart) | first() |
+            $([&](event_ptr e)
+              {
+                  on_start(events);
+              });
+
+            reader_->join(master_home_location_, 0, begin_time_);
+            if (get_io_device()->get_home()->mode == mode::LIVE)
+            {
+                checkin();
+            }
+        }
+
+        void apprentice::on_write_to(const yijinjing::event_ptr &event)
+        {
+            const msg::data::RequestWriteTo &request = event->data<msg::data::RequestWriteTo>();
+            if (writers_.find(request.dest_id) == writers_.end())
+            {
+                writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
+                if (request.dest_id == 0)
+                {
+                    writers_[request.dest_id]->mark(event->trigger_time(), msg::type::SessionStart);
+                }
+            } else
+            {
+                SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once",
+                             get_location(event->source())->uname, event->source(),
+                             get_location(request.dest_id)->uname, request.dest_id);
+            }
+        }
+
+        void apprentice::on_read_from(const yijinjing::event_ptr &event)
+        {
+            const msg::data::RequestReadFrom &request = event->data<msg::data::RequestReadFrom>();
+            SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
+                        get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
+                        time::strftime(request.from_time));
+            reader_->join(get_location(request.source_id), get_live_home_uid(), request.from_time);
         }
 
         void apprentice::checkin()
@@ -77,129 +200,19 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::observe(int64_t from_time, const location_ptr &location)
+        void apprentice::register_location_from_event(const yijinjing::event_ptr& event)
         {
-            reader_->join(location, 0, from_time);
-        }
-
-        void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
-        {
-            require_write_to(master_commands_location_->uid, trigger_time, dest_id);
-        }
-
-        void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
-        {
-            require_read_from(master_commands_location_->uid, trigger_time, source_id);
-        }
-
-        void apprentice::react(const observable<event_ptr> &events)
-        {
-            events | skip_until(events | is(msg::type::Register) | from(get_home_uid())) | first() | timeout(seconds(1), observe_on_new_thread()) |
-            $([&](event_ptr e)
-              {
-                  // timeout happens on new thread, can not subscribe journal reader here
-                  // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
-              },
-              [&](std::exception_ptr e)
-              {
-                  try
-                  { std::rethrow_exception(e); }
-                  catch (const timeout_error &ex)
-                  {
-                      SPDLOG_ERROR("app register timeout");
-                      hero::signal_stop();
-                  }
-              },
-              [&]()
-              {
-                  // once registered this subscriber finished, no worry for performance.
-              });
-
-            events | skip_until(events | is(msg::type::Register) | from(get_home_uid())) | first() |
-            $([&](event_ptr e)
-              {
-                  reader_->join(master_commands_location_, get_home_uid(), e->gen_time());
-              });
-
-            events | is(msg::type::Location) |
-            $([&](event_ptr e)
-              {
-                  const char *buffer = &(e->data<char>());
-                  std::string json_str{};
-                  json_str.assign(buffer, e->data_length());
-                  nlohmann::json request_loc = nlohmann::json::parse(json_str);
-                  register_location_from_json(e->gen_time(), request_loc);
-              });
-
-            events | is(msg::type::Register) |
-            $([&](event_ptr e)
-              {
-                  register_location_from_json(e->gen_time(), e->data<nlohmann::json>());
-              });
-
-            events | is(msg::type::Deregister) |
-            $([&](event_ptr e)
-              {
-                  reader_->disjoin(e->source());
-                  writers_.erase(e->source());
-                  deregister_location(e->gen_time(), e->source());
-              });
-
-            events | is(msg::type::RequestWriteTo) |
-            $([&](event_ptr e)
-              {
-                  on_write_to(e);
-              });
-
-            events | is(msg::type::RequestReadFrom) |
-            $([&](event_ptr e)
-              {
-                  on_read_from(e);
-              });
-
-            events | is(msg::type::RequestStart) | first() |
-            $([&](event_ptr e)
-              {
-                  on_start(events);
-              });
-        }
-
-        void apprentice::on_write_to(const yijinjing::event_ptr &event)
-        {
-            const msg::data::RequestWriteTo &request = event->data<msg::data::RequestWriteTo>();
-            if (writers_.find(request.dest_id) == writers_.end())
-            {
-                writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
-                if (request.dest_id == 0)
-                {
-                    writers_[request.dest_id]->mark(time::now_in_nano(), msg::type::SessionStart);
-                }
-            } else
-            {
-                SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once",
-                             get_location(event->source())->uname, event->source(),
-                             get_location(request.dest_id)->uname, request.dest_id);
-            }
-        }
-
-        void apprentice::on_read_from(const yijinjing::event_ptr &event)
-        {
-            const msg::data::RequestReadFrom &request = event->data<msg::data::RequestReadFrom>();
-            SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
-                        get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
-                        time::strftime(request.from_time));
-            reader_->join(get_location(request.source_id), get_home_uid(), request.from_time);
-        }
-
-        void apprentice::register_location_from_json(int64_t trigger_time, const nlohmann::json &location_json)
-        {
+            const char *buffer = &(event->data<char>());
+            std::string json_str{};
+            json_str.assign(buffer, event->data_length());
+            nlohmann::json location_json = nlohmann::json::parse(json_str);
             auto app_location = std::make_shared<location>(
                     static_cast<mode>(location_json["mode"]),
                     static_cast<category>(location_json["category"]),
                     location_json["group"], location_json["name"],
                     get_io_device()->get_home()->locator
             );
-            register_location(trigger_time, app_location);
+            register_location(event->trigger_time(), app_location);
         }
     }
 }

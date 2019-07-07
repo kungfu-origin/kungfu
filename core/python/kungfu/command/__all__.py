@@ -5,7 +5,6 @@ from . import master
 from . import watcher
 from . import gateway
 from . import strategy
-from . import replay
 from . import ping
 
 from kungfu.command.extension import __all__

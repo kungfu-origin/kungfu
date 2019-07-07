@@ -34,8 +34,6 @@ namespace kungfu
         public:
             apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void checkin();
-
             void observe(int64_t from_time, const yijinjing::data::location_ptr &location);
 
             void request_write_to(int64_t trigger_time, uint32_t dest_id);
@@ -80,7 +78,9 @@ namespace kungfu
             yijinjing::data::location_ptr master_home_location_;
             yijinjing::data::location_ptr master_commands_location_;
 
-            void register_location_from_json(int64_t trigger_time, const nlohmann::json &location_json);
+            void checkin();
+
+            void register_location_from_event(const yijinjing::event_ptr &event);
         };
 
         DECLARE_PTR(apprentice)

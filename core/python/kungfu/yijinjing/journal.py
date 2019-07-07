@@ -142,6 +142,11 @@ def find_sessions(ctx):
     return sessions_df
 
 
+def find_session(ctx, session_id):
+    all_sessions = find_sessions(ctx)
+    return all_sessions[all_sessions['id'] == session_id].iloc[0]
+
+
 def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, name):
     session_start_time = -1
     last_frame_time = 0
@@ -157,11 +162,11 @@ def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, n
                     session_start_time, last_frame_time, False,
                     last_frame_time - session_start_time, session_frame_count
                 ]
-                session_start_time = frame.gen_time
+                session_start_time = frame.trigger_time
                 session_frame_count = 1
                 ctx.session_count = ctx.session_count + 1
             else:
-                session_start_time = frame.gen_time
+                session_start_time = frame.trigger_time
                 session_frame_count = 1
         elif frame.msg_type == 10002:
             if session_start_time > 0:
