@@ -113,20 +113,26 @@ namespace kungfu
         {
             auto now = time::now_in_nano();
 
-            auto it = timer_tasks_.begin();
-            while (it != timer_tasks_.end())
+            for (auto &app : timer_tasks_)
             {
-                if (it->checkpoint >= now)
+                uint32_t app_id = app.first;
+                auto &app_tasks = app.second;
+                auto it = app_tasks.begin();
+                while (it != app_tasks.end())
                 {
-                    writers_[0]->mark(0, msg::type::Time);
-                    it->checkpoint += it->duration;
-                    it->repeat_count++;
-                }
-                if (it->checkpoint >= now && it->repeat_count >= it->repeat_limit)
-                {
-                    it = timer_tasks_.erase(it);
-                } else
-                {
+                    auto &task = it->second;
+                    if (task.checkpoint <= now)
+                    {
+                        writers_[app_id]->mark(0, msg::type::Time);
+                        task.checkpoint += task.duration;
+                        task.repeat_count++;
+                        SPDLOG_TRACE("sent time event to {}", get_location(app_id)->uname);
+                        if (task.repeat_count >= task.repeat_limit)
+                        {
+                            it = app_tasks.erase(it);
+                            continue;
+                        }
+                    }
                     it++;
                 }
             }
@@ -186,12 +192,22 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   const msg::data::TimeRequest &request = e->data<msg::data::TimeRequest>();
-                  TimerTask task{};
+                  if (timer_tasks_.find(e->source()) == timer_tasks_.end())
+                  {
+                      timer_tasks_[e->source()] = std::unordered_map<int32_t, TimerTask>();
+                  }
+                  std::unordered_map<int32_t, TimerTask> &app_tasks = timer_tasks_[e->source()];
+                  if (app_tasks.find(request.id) == app_tasks.end())
+                  {
+                      app_tasks[request.id] = TimerTask();
+                  }
+                  TimerTask &task = app_tasks[request.id];
                   task.checkpoint = time::now_in_nano() + request.duration;
                   task.duration = request.duration;
                   task.repeat_count = 0;
                   task.repeat_limit = request.repeat;
-                  timer_tasks_.emplace_back(task);
+                  SPDLOG_INFO("time request from {} duration {} repeat {}, next checkpoint {}",
+                          get_location(e->source())->uname, request.duration, request.repeat, time::strftime(task.checkpoint));
               });
 
             events |

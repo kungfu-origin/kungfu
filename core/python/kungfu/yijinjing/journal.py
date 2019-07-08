@@ -128,7 +128,7 @@ def find_sessions(ctx):
 
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
-        'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
+        'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration', 'frame_count'
     ])
     locations = collect_journal_locations(ctx)
     dest_pub = '{:08x}'.format(0)
@@ -136,7 +136,9 @@ def find_sessions(ctx):
         record = locations[key]
         location = pyyjj.location(MODES[record['mode']], CATEGORIES[record['category']], record['group'], record['name'], ctx.locator)
         if dest_pub in record['readers']:
-            reader = io_device.open_reader(location, 0)
+            reader = io_device.open_reader_to_subscribe()
+            for dest_id in record['readers']:
+                reader.join(location, int(dest_id, 16), 0)
             find_sessions_from_reader(ctx, sessions_df, reader, record['mode'], record['category'], record['group'], record['name'])
 
     return sessions_df
@@ -150,28 +152,32 @@ def find_session(ctx, session_id):
 def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, name):
     session_start_time = -1
     last_frame_time = 0
+    frame_count = 0
 
     while reader.data_available():
         frame = reader.current_frame()
+        frame_count = frame_count + 1
         if frame.msg_type == 10001:
             if session_start_time > 0:
                 sessions_df.loc[len(sessions_df)] = [
                     ctx.session_count, mode, category, group, name,
                     session_start_time, last_frame_time, False,
-                    last_frame_time - session_start_time
+                    last_frame_time - session_start_time, frame_count - 1
                 ]
                 session_start_time = frame.trigger_time
                 ctx.session_count = ctx.session_count + 1
             else:
                 session_start_time = frame.trigger_time
+            frame_count = 1
         elif frame.msg_type == 10002:
             if session_start_time > 0:
                 sessions_df.loc[len(sessions_df)] = [
                     ctx.session_count, mode, category, group, name,
                     session_start_time, frame.gen_time, True,
-                    frame.gen_time - session_start_time
+                    frame.gen_time - session_start_time, frame_count
                 ]
                 session_start_time = -1
+                frame_count = 0
                 ctx.session_count = ctx.session_count + 1
         last_frame_time = frame.gen_time
         reader.next()
@@ -180,7 +186,7 @@ def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, n
         sessions_df.loc[len(sessions_df)] = [
             ctx.session_count, mode, category, group, name,
             session_start_time, last_frame_time, False,
-            last_frame_time - session_start_time
+            last_frame_time - session_start_time, frame_count
         ]
 
 

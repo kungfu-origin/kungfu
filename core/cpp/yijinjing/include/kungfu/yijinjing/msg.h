@@ -37,6 +37,7 @@ namespace kungfu
             {
                 struct TimeRequest
                 {
+                    int32_t id;
                     int64_t duration;
                     int64_t repeat;
 #ifndef _WIN32

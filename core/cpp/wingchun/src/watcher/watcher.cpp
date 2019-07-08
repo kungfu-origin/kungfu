@@ -212,10 +212,20 @@ namespace kungfu
                   memset(&asset_info_, 0, sizeof(asset_info_));
               });
 
-//            events | timeout(std::chrono::seconds(1)) |
+//            events | timeout(std::chrono::seconds(5)) |
 //            $([&](event_ptr event)
 //              {
 //                  SPDLOG_INFO("wait for time out");
+//              },
+//              [&](std::exception_ptr e)
+//              {
+//                  try
+//                  { std::rethrow_exception(e); }
+//                  catch (const timeout_error &ex)
+//                  {
+//                      SPDLOG_ERROR("watcher timeout");
+//                      hero::signal_stop();
+//                  }
 //              });
         }
 
