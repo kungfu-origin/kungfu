@@ -100,25 +100,18 @@ export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay)
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
     return new Promise((resolve, reject) => {
         getStrategyAccounts(strategyId).then(accounts => {
-            let { length } = accounts;
-            let flag = 0;
             let tableData = [];
-            if(length == 0) resolve([])
-            accounts.map(item => {
-                runSelectDB(buildAccountTradesDBPath(item.account_id), 
+            const promises = accounts.map(item => runSelectDB(
+                buildAccountTradesDBPath(item.account_id), 
                 `SELECT rowId, * FROM trade WHERE client_id = '${strategyId}'` + 
                 ` AND (instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
                 ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}`
-                ).then(trade => tableData = tableData.concat(trade))
-                .catch(err => reject(err))
-                .finally(() => {
-                    flag++
-                    if(length != flag) return
-                    //按时间排序
-                    tableData.sort((a, b) => b.trade_time - a.trade_time)
-                    resolve(tableData)
-                })
-            })
+            ).then(trade => tableData = tableData.concat(trade)))
+            Promise.all(promises)
+            .then(() => {
+                tableData.sort((a, b) => b.trade_time - a.trade_time)
+                resolve(tableData)
+            }).catch(err => reject(err))
         }).catch(err => {
             reject(err)
         })

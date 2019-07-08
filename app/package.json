@@ -14,14 +14,12 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "clean": "rimraf .node-gyp .electron-gyp dist",
+    "clean": "rimraf ./dist/* ./build/*",
     "build": "yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
-    "dev:cli": "yarn run copy && node .electron-kungfu/dev-cli.js",
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
-    "dist:cli": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.cli.config.js",
     "copy": "copyfiles -f ../core/cpp/wingchun/resources/commission.db resources/default && copyfiles -f ../core/cpp/wingchun/resources/holidays.db resources/default"
   },
   "cmake-js": {
@@ -52,17 +50,27 @@
         ]
       },
       {
-        "from": "wingchun/resources",
+        "from": "../core/cpp/wingchun/resources",
         "to": "dist/app/resources/default",
         "filter": [
-          "commission.db"
+          "commission.db",
+          "holidays.db"
         ]
       }
     ],
     "extraResources": [
       {
-        "from": "build/kfc",
+        "from": "../core/build/kfc",
         "to": "kfc"
+      },
+      {
+        "from": "../node_modules/kungfu-core",
+        "to": "app.asar.unpacked/node_modules/kungfu-core",
+        "filter": [
+          "node/*",
+          "build/**/node_nanomsg.node",
+          "package.json"
+        ]
       }
     ],
     "asar": true,
@@ -130,8 +138,7 @@
     "sqlite3": "^4.0.6",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
- 
-    "kungfu-core": "./core"
+    "kungfu-core": ""
   },
   "devDependencies": {
     "codemirror": "^5.44.0",
