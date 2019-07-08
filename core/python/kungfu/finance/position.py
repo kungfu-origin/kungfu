@@ -66,6 +66,7 @@ class Position:
     def apply_trade(self, trade):
         raise NotImplementationError
 
+
     def apply_quote(self, quote):
         raise NotImplementationError
 
@@ -124,7 +125,7 @@ class StockPosition(Position):
 
     @property
     def market_value(self):
-        return self.volume * (self.last_price if self.last_price > 0.0 else self.avg_open_price)
+        return self._volume * (self._last_price if self._last_price > 0.0 else self._avg_open_price)
 
     @property
     def avg_open_price(self):
@@ -136,7 +137,7 @@ class StockPosition(Position):
 
     @property
     def unrealized_pnl(self):
-        return (self.last_price - self.avg_open_price) * self.volume if self.last_price > 0.0 else 0.0
+        return (self._last_price - self._avg_open_price) * self._volume if self._last_price > 0.0 else 0.0
 
     def apply_trade(self, trade):
         if trade.side == Side.Buy:
@@ -145,10 +146,14 @@ class StockPosition(Position):
             return self._apply_sell(trade.price, trade.volume)
 
     def apply_settlement(self, close_price):
-        self.close_price = close_price
+        self._close_price = close_price
+
+    def apply_quote(self, Quote):
+        self._last_price = Quote.last_price
 
     def switch_day(self, trading_day):
-        self.pre_close_price = self.close_price
+        self._pre_close_price = self.close_price
+        self._yesterday_volume = self.volume
         self.close_price = 0.0
 
     def _apply_sell(self, price, volume):
@@ -160,12 +165,12 @@ class StockPosition(Position):
         self.ledger.avail += (realized_pnl + price * volume)
 
     def _apply_buy(self, price, volume):
-        self._avg_open_price = (self._avg_open_price * self.volume + price * volume) / (self.volume + volume)
+        self._avg_open_price = (self._avg_open_price * self._volume + price * volume) / (self._volume + volume)
         self._volume += volume
         self.ledger.avail -= price * volume
 
     def _calculate_realized_pnl(self, trade_price, trade_volume):
-        return (trade_price - self.avg_open_price) * trade_volume
+        return (trade_price - self._avg_open_price) * trade_volume
 
 class FuturePositionDetail:
     def __init__(self, **kwargs):
@@ -193,9 +198,9 @@ class FuturePositionDetail:
 
     @property
     def margin(self):
-        price = self.settlement_price if self.trading_day == self.open_date else self.pre_settlement_price
+        price = self._settlement_price if self._trading_day == self._open_date else self._pre_settlement_price
         if price <= 0.0:
-            price = self.open_price
+            price = self._open_price
         return self._calculate_margin(price, self.volume)
 
     @property
@@ -210,23 +215,30 @@ class FuturePositionDetail:
     def settlement_price(self):
         return self._settlement_price
 
-    @property
-    def open_price(self):
-        return self._open_price
+    def unrealized_pnl(self, trade_price):
+        price = self._pre_settlement_price
+        if price <= 0.0:
+            price = self._open_price
+        return (trade_price - price) * self._volume * self._contract_multiplier * (1 if self._direction == Direction.Long else -1)
 
-    def apply_close(self, price, volume):
-        volume_closed = min(self.volume, volume)
+
+    def apply_close(self, price, volume=None):
+        #平仓
+        volume_closed = min(self._volume, volume) if volume else self._volume
         realized_pnl = self._calculate_realized_pnl(price, volume_closed)
         margin_delta = self._calculate_margin(price, volume_closed) * -1
+        self._volume = self._volume - volume_closed
         return (volume_closed, realized_pnl, margin_delta)
 
     def apply_settlement(self, settlement_price):
+        #结算
         pre_margin = self.margin
-        self.settlement_price = settlement_price
-        return self.pre_margin - self.margin
+        self._pre_settlement_price = self._settlement_price
+        self._settlement_price = settlement_price
+        return pre_margin - self.margin
 
     def _calculate_realized_pnl(self, trade_price, trade_volume):
-        return (trade_price - self._open_price) * trade_volume * self._contract_multiplier * (1 if self._direction == DirectionLong else -1)
+        return (trade_price - self._open_price) * trade_volume * self._contract_multiplier * (1 if self._direction == Direction.Long else -1)
 
     def _calculate_margin(self, price, volume):
         return self._contract_multiplier * price * volume * self._margin_ratio
@@ -234,8 +246,9 @@ class FuturePositionDetail:
 class FuturePosition(Position):
     def __init__(self, **kwargs):
         super(FuturePosition, self).__init__(**kwargs)
-        self._long_details = []
+        self._long_details = kwargs.pop("long_details", [])
         self._short_details = []
+        self._realized_pnl = 0.0
 
     @property
     def realized_pnl(self):
@@ -253,20 +266,43 @@ class FuturePosition(Position):
     def short_margin(self):
         return [detail.margin for detail in self._short_details]
 
+    @property
+    def position_pnl(self):
+        details = self._long_details + self._short_details
+        total_pnl = 0
+        for detail in details:
+            total_pnl += detail.unrealized_pnl(self._last_price)
+            
     def apply_close(self, trade):
-        details = self._long_details #TODO choose long or short
+        if trade.side == Side.Buy:
+            details = self._short_details
+        elif trade.side == Side.Sell:
+            details = self._long_details
+        else:
+            raise Exception("Unrecognized trade direction")
+
         volume_left = trade.volume
         while volume_left > 0 and not details.empty():
             detail = details[0]
             volume_closed, realized_pnl, margin_delta = detail.apply_close(trade.price, volume_left)
-            self.realized_pnl += realized_pnl
+            self._realized_pnl += realized_pnl
             self.ledger.avail += (realized_pnl - margin_delta)
+            volume_left = volume_left - volume_closed
             if detail.volume <= 0:
                 details.pop(0)
 
-    def apply_open(self, trade):
-        details = self._long_details #TODO choose long or short
-        detail = FuturePositionDetail(trading_day="", open_price = trade.price, volume = trade.volume, open_date="")
+    def apply_open(self, trade, margin_ratio=0.1, contract_multiplier=100):
+        if trade.side == Side.Buy:
+            details = self._long_details
+            direction = Direction.Long
+        elif trade.side == Side.Sell:
+            details = self._short_details
+            direction = Direction.Short
+        else:
+            raise Exception("Unrecognized trade direction")
+
+        detail = FuturePositionDetail(trading_day="", open_price=trade.price, contract_multiplier=contract_multiplier,
+                                      volume=trade.volume, direction=direction, margin_ratio=margin_ratio, open_date="")
         self.ledger.avail -= detail.margin
         details.append(detail)
 

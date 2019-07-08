@@ -21,6 +21,7 @@ class Region:
 
 InstrumentType = pywingchun.constants.InstrumentType
 Side = pywingchun.constants.Side
+Quote = pywingchun.Quote
 Offset = pywingchun.constants.Offset
 OrderStatus = pywingchun.constants.OrderStatus
 Direction = pywingchun.constants.Direction
