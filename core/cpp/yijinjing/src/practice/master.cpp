@@ -78,7 +78,7 @@ namespace kungfu
                 reader_->join(app_location, master_location->uid, now);
                 require_write_to(app_location->uid, e->gen_time(), master_location->uid);
 
-                for (const auto& item : locations_)
+                for (const auto &item : locations_)
                 {
                     nlohmann::json location;
                     location["mode"] = item.second->mode;
@@ -109,6 +109,37 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(msg.dump());
         }
 
+        bool master::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
+        {
+            auto now = time::now_in_nano();
+
+            auto it = timer_tasks_.begin();
+            while (it != timer_tasks_.end())
+            {
+                if (it->checkpoint >= now)
+                {
+                    writers_[0]->mark(0, msg::type::Time);
+                    it->checkpoint += it->duration;
+                    it->repeat_count++;
+                }
+                if (it->checkpoint >= now && it->repeat_count >= it->repeat_limit)
+                {
+                    it = timer_tasks_.erase(it);
+                } else
+                {
+                    it++;
+                }
+            }
+
+            if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
+            {
+                on_interval_check(now);
+                last_check_ = now;
+            }
+
+            return hero::produce_one(sb);
+        }
+
         void master::react(const observable<event_ptr> &events)
         {
             events | is(msg::type::Register) |
@@ -120,7 +151,7 @@ namespace kungfu
             events | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
-                  auto request = e->data<msg::data::RequestWriteTo>();
+                  const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
                   if (not has_location(request.dest_id))
                   {
                       SPDLOG_ERROR("Request publish to unknown location {:08x}", request.dest_id);
@@ -131,12 +162,13 @@ namespace kungfu
                   require_read_from(request.dest_id, e->gen_time(), e->source(), false);
               });
 
-            events | filter([&](event_ptr e){
-                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
-            }) |
+            events | filter([&](event_ptr e)
+                            {
+                                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+                            }) |
             $([&](event_ptr e)
               {
-                  auto request = e->data<msg::data::RequestReadFrom>();
+                  const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
                   if (not has_location(request.source_id))
                   {
                       SPDLOG_ERROR("Request subscribe to unknown location {:08x}", request.source_id);
@@ -148,6 +180,18 @@ namespace kungfu
                   }
                   require_write_to(request.source_id, e->gen_time(), e->source());
                   require_read_from(e->source(), e->gen_time(), request.source_id, e->msg_type() == msg::type::RequestReadFromPublic);
+              });
+
+            events | is(msg::type::TimeRequest) |
+            $([&](event_ptr e)
+              {
+                  const msg::data::TimeRequest &request = e->data<msg::data::TimeRequest>();
+                  TimerTask task{};
+                  task.checkpoint = time::now_in_nano() + request.duration;
+                  task.duration = request.duration;
+                  task.repeat_count = 0;
+                  task.repeat_limit = request.repeat;
+                  timer_tasks_.emplace_back(task);
               });
 
             events |

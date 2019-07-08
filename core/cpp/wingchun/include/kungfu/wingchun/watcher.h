@@ -36,7 +36,6 @@ namespace kungfu
             virtual void on_assets(const msg::data::AccountInfo& account_info, const std::vector<msg::data::Position>& positions) = 0;
 
         protected:
-            void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
             void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
 

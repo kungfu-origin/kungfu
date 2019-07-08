@@ -25,7 +25,7 @@ namespace kungfu
     {
 
         hero::hero(yijinjing::io_device_ptr io_device) :
-                io_device_(std::move(io_device)), last_check_(0), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
+                io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
         {
             if (spdlog::default_logger()->name().empty())
             {
@@ -65,67 +65,10 @@ namespace kungfu
         {
             SPDLOG_INFO("{} observing", get_home_uname());
 
-            auto events = observable<>::create<event_ptr>(
+            events_ = observable<>::create<event_ptr>(
                     [&](subscriber<event_ptr> sb)
                     {
-                        try
-                        {
-                            SPDLOG_INFO("{} generating events with source id {:08x}", get_home_uname(), get_home_uid());
-                            SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), time::strftime(end_time_));
-
-                            while (live_)
-                            {
-                                if (io_device_->get_home()->mode == mode::LIVE)
-                                {
-                                    if (io_device_->get_observer()->wait())
-                                    {
-                                        const std::string &notice = io_device_->get_observer()->get_notice();
-                                        if (notice.length() > 2)
-                                        {
-                                            SPDLOG_DEBUG("got notice {}", notice);
-                                            sb.on_next(std::make_shared<nanomsg_json>(notice));
-                                        } else
-                                        {
-                                            on_notify();
-                                        }
-                                    }
-                                    if (io_device_->get_rep_sock()->recv() > 0)
-                                    {
-                                        const std::string &msg = io_device_->get_rep_sock()->last_message();
-                                        sb.on_next(std::make_shared<nanomsg_json>(msg));
-                                    }
-                                }
-                                if (reader_->data_available())
-                                {
-                                    if (reader_->current_frame()->gen_time() <= end_time_)
-                                    {
-                                        sb.on_next(reader_->current_frame());
-                                        reader_->next();
-                                    } else
-                                    {
-                                        SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
-                                        break;
-                                    }
-                                } else if (get_io_device()->get_home()->mode != mode::LIVE)
-                                {
-                                    SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
-                                    break;
-                                }
-                                auto now = time::now_in_nano();
-                                if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
-                                {
-                                    on_interval_check(now);
-                                    last_check_ = now;
-                                }
-                            }
-
-                        } catch (...)
-                        {
-                            sb.on_error(std::current_exception());
-                        }
-
-                        sb.on_completed();
-
+                        produce(sb);
                     }) | on_error_resume_next(
                     [&](std::exception_ptr e) -> observable<event_ptr>
                     {
@@ -164,9 +107,9 @@ namespace kungfu
 
                     }) | publish();
 
-            react(events);
+            react(events_);
 
-            events.connect();
+            events_.connect();
             SPDLOG_INFO("{} finished", get_home_uname());
         }
 
@@ -204,9 +147,68 @@ namespace kungfu
                         get_location(source_id)->uname, source_id);
         }
 
-        rx::observable<yijinjing::event_ptr> hero::stimeout(rx::observable<yijinjing::event_ptr> src)
+        void hero::produce(const rx::subscriber<yijinjing::event_ptr> &sb)
         {
-            return src;
+            try
+            {
+                SPDLOG_INFO("{} generating events with source id {:08x}", get_home_uname(), get_home_uid());
+                SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), time::strftime(end_time_));
+                while (live_)
+                {
+                    if (not produce_one(sb))
+                    {
+                        break;
+                    }
+                }
+            } catch (...)
+            {
+                sb.on_error(std::current_exception());
+            }
+            sb.on_completed();
+        }
+
+        bool hero::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
+        {
+            if (io_device_->get_home()->mode == mode::LIVE)
+            {
+                if (io_device_->get_observer()->wait())
+                {
+                    const std::string &notice = io_device_->get_observer()->get_notice();
+                    now_ = time::now_in_nano();
+                    if (notice.length() > 2)
+                    {
+                        SPDLOG_DEBUG("got notice {}", notice);
+                        sb.on_next(std::make_shared<nanomsg_json>(notice));
+                    } else
+                    {
+                        on_notify();
+                    }
+                }
+                if (io_device_->get_rep_sock()->recv() > 0)
+                {
+                    const std::string &msg = io_device_->get_rep_sock()->last_message();
+                    now_ = time::now_in_nano();
+                    sb.on_next(std::make_shared<nanomsg_json>(msg));
+                }
+            }
+            if (reader_->data_available())
+            {
+                if (reader_->current_frame()->gen_time() <= end_time_)
+                {
+                    now_ = reader_->current_frame()->gen_time();
+                    sb.on_next(reader_->current_frame());
+                    reader_->next();
+                } else
+                {
+                    SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
+                    return false;
+                }
+            } else if (get_io_device()->get_home()->mode != mode::LIVE)
+            {
+                SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -24,7 +24,6 @@
 #include <hffix.hpp>
 
 #include <kungfu/yijinjing/msg.h>
-#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
 
@@ -39,7 +38,8 @@ namespace kungfu
 {
     namespace practice
     {
-        apprentice::apprentice(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_client>(home, low_latency))
+        apprentice::apprentice(location_ptr home, bool low_latency) :
+                hero(std::make_shared<io_device_client>(home, low_latency)), timer_usage_count_(0)
         {
             auto uid_str = fmt::format("{:08x}", get_live_home_uid());
             auto locator = get_io_device()->get_home()->locator;
@@ -63,7 +63,7 @@ namespace kungfu
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {
                 events | skip_until(events | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
-                timeout(seconds(1), observe_on_new_thread()) |
+                rx::timeout(seconds(1), observe_on_new_thread()) |
                 $([&](event_ptr e)
                   {
                       // timeout happens on new thread, can not subscribe journal reader here
@@ -120,9 +120,10 @@ namespace kungfu
                   on_write_to(e);
               });
 
-            events | filter([&](event_ptr e){
-                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
-            }) |
+            events | filter([&](event_ptr e)
+                            {
+                                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+                            }) |
             $([&](event_ptr e)
               {
                   on_read_from(e);
@@ -198,7 +199,7 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::register_location_from_event(const yijinjing::event_ptr& event)
+        void apprentice::register_location_from_event(const yijinjing::event_ptr &event)
         {
             const char *buffer = &(event->data<char>());
             std::string json_str{};
@@ -250,7 +251,7 @@ public:
                                  })).merge(events_ | filter([&, ns](event_ptr e)
                                                             {
                                                                 std::cout << "now_    = " << time::strftime(e->gen_time()) << std::endl;
-                                                                if (e->gen_time() >= start_time_ + ns)
+                                                                if (e->gen_time() > start_time_ + ns)
                                                                 {
                                                                     throw timeout_error("timeout");
                                                                 }

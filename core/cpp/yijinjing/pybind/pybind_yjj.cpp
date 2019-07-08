@@ -134,7 +134,7 @@ public:
     }
 };
 
-msg::data::RequestReadFrom get_RequestReadFrom(frame_ptr f)
+msg::data::RequestReadFrom get_RequestReadFrom(const frame_ptr& f)
 {
     return f->data<msg::data::RequestReadFrom>();
 }

@@ -1,4 +1,3 @@
-import pyyjj
 from datetime import datetime, timedelta
 from tabulate import tabulate
 

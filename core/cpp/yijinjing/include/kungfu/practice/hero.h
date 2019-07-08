@@ -28,9 +28,6 @@ namespace kungfu
             virtual void on_notify()
             {}
 
-            virtual void on_interval_check(int64_t nanotime)
-            {}
-
             void set_begin_time(int64_t begin_time)
             { begin_time_ = begin_time; }
 
@@ -74,6 +71,8 @@ namespace kungfu
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
             int64_t begin_time_;
             int64_t end_time_;
+            int64_t now_;
+            rx::connectable_observable<yijinjing::event_ptr> events_;
 
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
@@ -83,15 +82,15 @@ namespace kungfu
 
             void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub);
 
-            virtual void react(const rx::observable<yijinjing::event_ptr> &events) = 0;
+            virtual void produce(const rx::subscriber<yijinjing::event_ptr> &sb);
 
-            rx::observable<yijinjing::event_ptr> stimeout(rx::observable<yijinjing::event_ptr> src);
+            virtual bool produce_one(const rx::subscriber<yijinjing::event_ptr> &sb);
+
+            virtual void react(const rx::observable<yijinjing::event_ptr> &events) = 0;
 
         private:
             yijinjing::io_device_ptr io_device_;
             bool live_ = true;
-            int64_t now_;
-            int64_t last_check_;
         };
     }
 }

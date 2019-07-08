@@ -20,6 +20,8 @@ namespace kungfu
                     PageEnd = 10000,
                     SessionStart = 10001,
                     SessionEnd = 10002,
+                    Time = 10003,
+                    TimeRequest = 10004,
                     Register = 10011,
                     Deregister = 10012,
                     RequestReadFrom = 10021,
@@ -33,6 +35,18 @@ namespace kungfu
 
             namespace data
             {
+                struct TimeRequest
+                {
+                    int64_t duration;
+                    int64_t repeat;
+#ifndef _WIN32
+                } __attribute__((packed));
+
+#else
+                };
+#pragma pack(pop)
+#endif
+
                 struct RequestReadFrom
                 {
                     uint32_t source_id;
