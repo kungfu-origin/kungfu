@@ -82,6 +82,8 @@ export default {
     name: 'account',
     data() {
         const t = this;
+        this.tradingDataPipe = null;
+        this.cashPipe = null;
         return {
             ordersFromNmsg: null,
             tradesFromNmsg: null,
@@ -115,7 +117,7 @@ export default {
 
     mounted(){
         const t = this;
-        buildTradingDataPipe().subscribe(d => {
+        t.tradingDataPipe = buildTradingDataPipe().subscribe(d => {
             const msgType = d.msg_type;
             const tradingData = d.data;
             const accountId = tradingData.account_id || '';
@@ -136,11 +138,17 @@ export default {
             }
         })
 
-        buildCashPipe().subscribe(({ data }) => {
+        t.cashPipe = buildCashPipe().subscribe(({ data }) => {
             const { account_id, source_id } = data;
             const accountId = `${source_id}_${account_id}`;  
             t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
         })
+    },
+
+    destroyed(){
+        const t = this;
+        t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
+        t.cashPipe && t.cashPipe.unsubscribe();
     },
  
     methods:{

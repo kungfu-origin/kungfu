@@ -4,6 +4,7 @@ import { filter, map } from 'rxjs/operators';
 import * as MSG_TYPE from '@/io/nano/msgType';
 
 export const subGateWayState = () => {
+    console.log('subGateWayState =====')
     return new Observable(subscriber => {
         buildSubNmsg().on('data', buf => {
             const data = JSON.parse(String(buf).replace(/\0/g,'')) 

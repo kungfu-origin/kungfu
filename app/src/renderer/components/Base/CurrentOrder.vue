@@ -43,8 +43,7 @@
 
 <script>
 import moment from "moment"
-import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig";
-import { debounce, throttle } from "@/assets/js/utils";
+import { debounce, throttle, dealOrder } from "@/assets/js/utils";
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
 import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
@@ -321,31 +320,11 @@ export default {
             let orderDataByKey = {};
             let tableData = []
             preDealData.map(item => {
-                const dealItem = t.dataOrder(item)
+                const dealItem = dealOrder(item)
                 tableData.push(dealItem)
                 orderDataByKey[item.order_id] = dealItem
             })
             return {tableData, orderDataByKey}
-        },  
-
-        //处理需要的数据及顺序
-        dataOrder(item) {
-            const t = this;
-            return Object.freeze({
-                id: item.order_id.toString() + '_' + item.account_id.toString(),
-                insertTime: item.insert_time && moment(item.insert_time/1000000).format("YYYY-MM-DD HH:mm:ss"),
-                instrumentId: item.instrument_id,
-                side: sideName[item.side] ? sideName[item.side] : '--',
-                offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-                limitPrice: item.limit_price,
-                volumeTraded: item.volume_traded + "/" + (item.volume),
-                statusName: orderStatus[item.status],
-                status: item.status,
-                clientId: item.client_id,
-                accountId: item.account_id,
-                orderId: item.order_id,
-                exchangeId: item.exchange_id
-            })
         },
 
         resetData() {
@@ -379,7 +358,7 @@ export default {
                 t.orderDataByKey[order_id] = null;
                 delete t.orderDataByKey[order_id]
             }else {
-                t.orderDataByKey[order_id] = t.dataOrder(data)
+                t.orderDataByKey[order_id] = dealOrder(data)
             }
             //更新数据, 根据ID来排序
             const sortOrderList = Object.values(t.orderDataByKey).sort((a, b) =>{

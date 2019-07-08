@@ -1,4 +1,7 @@
 import readline from 'readline';
+import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig";
+import { posDirection } from "@/assets/config/tradingConfig"
+
 const path = require("path");
 const fs = require('fs-extra');
 const moment = require('moment');
@@ -305,14 +308,69 @@ export const getLog = (logPath, searchKeyword) => {
     })
 }
 
+
+
 export const buildDateRange = (dateRange, tradingDay, addTime=0) => {
     dateRange = dateRange || [];
     const momentDay = tradingDay ? moment(tradingDay) : moment();
     //获取当天是日期范围
     const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000, addTime)
-    const endDate = (moment(momentDay.add(1,'d').format('YYYY-MM-DD')).valueOf()) * 1000000
+    const endDate = (moment(momentDay.add(1, 'd').format('YYYY-MM-DD')).valueOf()) * 1000000
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
     const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * 1000000, addTime);
-    const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1,'d').valueOf() * 1000000;
+    const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1, 'd').valueOf() * 1000000;
     return dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
 }
+
+// ========================== 交易数据处理 start ===========================
+export const dealOrder = (item) => {
+    return Object.freeze({
+        id: item.order_id.toString() + '_' + item.account_id.toString(),
+        insertTime: item.insert_time && moment(item.insert_time / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        instrumentId: item.instrument_id,
+        side: sideName[item.side] ? sideName[item.side] : '--',
+        offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        limitPrice: item.limit_price,
+        volumeTraded: item.volume_traded + "/" + (item.volume),
+        statusName: orderStatus[item.status],
+        status: item.status,
+        clientId: item.client_id,
+        accountId: item.account_id,
+        orderId: item.order_id,
+        exchangeId: item.exchange_id
+    })
+}
+
+export const dealPos = (item) => {
+    //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
+    const direction = posDirection[item.direction] || '--';
+    return Object.freeze({
+        id: item.instrument_id + direction,
+        instrumentId: item.instrument_id,
+        direction,
+        yesterdayVolume: toDecimal(item.yesterday_volume),
+        todayVolume: toDecimal(item.volume - item.yesterday_volume),
+        totalVolume: toDecimal(item.volume),
+        costPrice: +toDecimal(item.cost_price) || '--',
+        lastPrice: +toDecimal(item.last_price) || '--',
+        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
+    })
+}
+
+export const dealTrade = (item) => {
+    return {
+        id: item.account_id.toString() + '_' + item.trade_id.toString() + '_' + item.trade_time.toString(),
+        tradeTime: item.trade_time && moment(item.trade_time/1000000).format('YYYY-MM-DD HH:mm:ss'),
+        instrumentId: item.instrument_id,
+        side: sideName[item.side],
+        offset: offsetName[item.offset],
+        price: item.price,
+        volume: item.volume,
+        clientId: item.client_id,
+        accountId: item.account_id
+    }     
+}
+
+
+// ========================== 交易数据处理 end ===========================
+

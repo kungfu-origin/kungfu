@@ -28,8 +28,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
-import { offsetName, sideName } from '@/assets/config/tradingConfig'
-import { debounce, throttleInsert, throttle } from "@/assets/js/utils"
+import { debounce, throttleInsert, dealTrade } from "@/assets/js/utils"
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
 
@@ -218,24 +217,10 @@ export default {
         dealData(data) {
             const t = this
             const historyData = data || []
-            const tableData = historyData.map(item => (t.dealTrade(item)))
+            const tableData = historyData.map(item => dealTrade(item))
             return tableData
         },
 
-        //处理需要的数据及顺序
-        dealTrade(item) {
-            return {
-                id: item.account_id.toString() + '_' + item.trade_id.toString() + '_' + item.trade_time.toString(),
-                tradeTime: item.trade_time && moment(item.trade_time/1000000).format('YYYY-MM-DD HH:mm:ss'),
-                instrumentId: item.instrument_id,
-                side: sideName[item.side],
-                offset: offsetName[item.offset],
-                price: item.price,
-                volume: item.volume,
-                clientId: item.client_id,
-                accountId: item.account_id
-            }     
-        },
 
         dealNanomsg(data) {
             const t = this
@@ -245,7 +230,7 @@ export default {
             const { id, dateRange } = t.filter
             const { trade_time } = data
             if(!((data.instrument_id.includes(id) || data.client_id.includes(id)) )) return
-            const tradeData = t.dealTrade(data)
+            const tradeData = dealTrade(data)
             t.throttleInsertTrade(tradeData).then(tradeList => {
                 if(!tradeList) return;
                 let oldTableData = t.tableData.slice(0, 500);

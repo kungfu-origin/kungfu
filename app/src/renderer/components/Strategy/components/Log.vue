@@ -36,7 +36,6 @@ import moment from 'moment'
 import { debounce, throttle, throttleInsert, dealLogMessage } from '@/assets/js/utils'
 import { buildProcessLogPath } from '__gConfig/pathConfig.js';
 import { Tail } from 'tail';
-import readline from 'readline';
 import { clearFileContent, addFile, openReadFile, existsSync } from '__gUtils/fileUtils.js';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';

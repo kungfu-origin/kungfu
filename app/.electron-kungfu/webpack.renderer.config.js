@@ -8,10 +8,8 @@ const webpack = require('webpack')
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
-
 
 let whiteListedModules = [
   'vue', 
@@ -130,11 +128,11 @@ let rendererConfig = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    // new MonacoWebpackPlugin({
-    //   languages: ['cpp', 'json', 'powershell', 'python', 'shell', 'sql'],
-    // }),
     new PreloadWebpackPlugin({
       rel: 'preload',
+    }),
+    new OptimizeJsPlugin({
+      sourceMap: false
     })
   ],
   output: {
@@ -162,9 +160,6 @@ if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`
-    }),
-    new OptimizeJsPlugin({
-      sourceMap: false
     })
   )
 }
@@ -182,9 +177,6 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
-    }),
-    new OptimizeJsPlugin({
-      sourceMap: false
     })
   )
 }

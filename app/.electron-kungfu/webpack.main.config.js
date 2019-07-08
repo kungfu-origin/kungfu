@@ -5,6 +5,7 @@ process.env.BABEL_ENV = 'main'
 const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
+const OptimizeJsPlugin = require("optimize-js-plugin");
 
 let mainConfig = {
   entry: {
@@ -67,6 +68,14 @@ if (process.env.NODE_ENV === 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      }
+    }),
+    new OptimizeJsPlugin({
+      sourceMap: false
     })
   )
 }
