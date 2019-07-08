@@ -15,7 +15,7 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 
 @journal.command()
 @click.option('-i', '--session_id', type=int, required=True, help='session id')
-@click.option('-t', '--io_type', type=click.Choice(['in', 'out']), default='out', help='input or output during this session')
+@click.option('-t', '--io_type', type=click.Choice(['all', 'in', 'out']), default='all', help='input or output during this session')
 @click.option('-f', '--tablefmt', default='simple',
               type=click.Choice(['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile']),
               help='output format')
@@ -23,7 +23,7 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 @click.pass_context
 def trace(ctx, session_id, io_type, tablefmt, pager):
     pass_ctx_from_parent(ctx)
-    trace_df = kfj.trace_location_out(ctx, session_id) if io_type == 'out' else kfj.trace_location_in(ctx, session_id)
+    trace_df = kfj.trace_journal(ctx, session_id, io_type)
     trace_df['gen_time'] = trace_df['gen_time'].apply(lambda t: kft.strftime(t))
     trace_df['trigger_time'] = trace_df['trigger_time'].apply(lambda t: kft.strftime(t))
 

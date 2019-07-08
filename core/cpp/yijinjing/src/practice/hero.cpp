@@ -192,10 +192,11 @@ namespace kungfu
                         dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
         }
 
-        void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
+        void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub)
         {
             auto writer = get_writer(dest_id);
-            msg::data::RequestReadFrom &msg = writer->open_data<msg::data::RequestReadFrom>(trigger_time, msg::type::RequestReadFrom);
+            auto msg_type = pub ? msg::type::RequestReadFromPublic : msg::type::RequestReadFrom;
+            msg::data::RequestReadFrom &msg = writer->open_data<msg::data::RequestReadFrom>(trigger_time, msg_type);
             msg.source_id = source_id;
             msg.from_time = trigger_time;
             writer->close_data();

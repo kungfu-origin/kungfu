@@ -89,8 +89,8 @@ namespace kungfu
                 }
                 account_location_ids_[account_id] = account_location->uid;
 
-                app_.observe(now_, account_location);
                 app_.request_write_to(now_, account_location->uid);
+                app_.request_read_from(now_, account_location->uid, true);
                 app_.request_read_from(now_, account_location->uid);
                 SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
             }
@@ -105,7 +105,7 @@ namespace kungfu
                     {
                         throw wingchun_error(fmt::format("invalid md {}", source));
                     }
-                    app_.observe(now_, md_location);
+                    app_.request_read_from(now_, md_location->uid, true);
                     app_.request_write_to(now_, md_location->uid);
                     market_data_[source] = md_location->uid;
                     SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);

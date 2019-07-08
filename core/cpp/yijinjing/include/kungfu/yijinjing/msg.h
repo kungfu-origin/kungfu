@@ -23,7 +23,7 @@ namespace kungfu
                     Register = 10011,
                     Deregister = 10012,
                     RequestReadFrom = 10021,
-                    RequestUnsubscribe = 10022,
+                    RequestReadFromPublic = 10022,
                     RequestWriteTo = 10023,
                     RequestUnpublish = 10024,
                     RequestStart = 10025,
@@ -37,12 +37,26 @@ namespace kungfu
                 {
                     uint32_t source_id;
                     int64_t from_time;
+
+#ifndef _WIN32
+                } __attribute__((packed));
+
+#else
                 };
+#pragma pack(pop)
+#endif
 
                 struct RequestWriteTo
                 {
                     uint32_t dest_id;
+
+#ifndef _WIN32
+                } __attribute__((packed));
+
+#else
                 };
+#pragma pack(pop)
+#endif
             }
         }
     }

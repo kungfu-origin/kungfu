@@ -34,11 +34,9 @@ namespace kungfu
         public:
             apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-            void observe(int64_t from_time, const yijinjing::data::location_ptr &location);
-
             void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-            void request_read_from(int64_t trigger_time, uint32_t source_id);
+            void request_read_from(int64_t trigger_time, uint32_t source_id, bool pub = false);
 
             inline uint32_t get_master_commands_uid()
             {

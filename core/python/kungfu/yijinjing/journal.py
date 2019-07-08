@@ -184,7 +184,11 @@ def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, n
         ]
 
 
-def trace_record(ctx, session_id):
+def make_location_from_dict(ctx, location):
+    return pyyjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
+
+
+def trace_journal(ctx, session_id, io_type):
     trace_df = pd.DataFrame(columns=[
         'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
     ])
@@ -197,17 +201,20 @@ def trace_record(ctx, session_id):
     ctx.mode = '*'
     locations = collect_journal_locations(ctx)
     location = locations[uid]
-    home = pyyjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
+    home = make_location_from_dict(ctx, location)
     io_device = pyyjj.io_device_client(home, False)
     reader = io_device.open_reader_to_subscribe()
-    return trace_df, session, locations, location, home, reader
 
+    if io_type == 'out' or io_type == 'all':
+        for dest in location['readers']:
+            dest_id = int(dest, 16)
+            reader.join(home, dest_id, session['begin_time'])
 
-def trace_location_out(ctx, session_id):
-    trace_df, session, locations, location, home, reader = trace_record(ctx, session_id)
-    for dest in location['readers']:
-        dest_id = int(dest, 16)
-        reader.join(home, dest_id, session['begin_time'])
+    if io_type == 'in' or io_type == 'all':
+        master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
+        master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
+        reader.join(master_cmd_location, location['uid'], session['begin_time'])
+
     while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
         frame = reader.current_frame()
         trace_df.loc[len(trace_df)] = [
@@ -216,26 +223,9 @@ def trace_location_out(ctx, session_id):
             'public' if frame.dest == 0 else locations[frame.dest]['uname'],
             frame.msg_type, frame.frame_length, frame.data_length
         ]
-        reader.next()
-    return trace_df
-
-
-def trace_location_in(ctx, session_id):
-    trace_df, session, locations, location, home, reader = trace_record(ctx, session_id)
-    master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
-    master_cmd_location = locations[master_cmd_uid]
-    master_cmd_location = pyyjj.location(MODES[master_cmd_location['mode']], CATEGORIES[master_cmd_location['category']],
-                                         master_cmd_location['group'], master_cmd_location['name'], ctx.locator)
-    reader.join(master_cmd_location, location['uid'], session['begin_time'])
-    while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
-        frame = reader.current_frame()
-        trace_df.loc[len(trace_df)] = [
-            frame.gen_time, frame.trigger_time,
-            locations[frame.source]['uname'],
-            'public' if frame.dest == 0 else locations[frame.dest]['uname'],
-            frame.msg_type, frame.frame_length, frame.data_length
-        ]
-        # if frame.msg_type == 10021:
-        #     print(frame.data_as_string())
+        if frame.dest == home.uid and (frame.msg_type == 10021 or frame.msg_type == 10022):
+            request = pyyjj.get_RequestReadFrom(frame)
+            source_location = make_location_from_dict(ctx, locations[request.source_id])
+            reader.join(source_location, location['uid'] if frame.msg_type == 10021 else 0, request.from_time)
         reader.next()
     return trace_df

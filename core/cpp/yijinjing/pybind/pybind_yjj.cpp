@@ -134,6 +134,11 @@ public:
     }
 };
 
+msg::data::RequestReadFrom get_RequestReadFrom(frame_ptr f)
+{
+    return f->data<msg::data::RequestReadFrom>();
+}
+
 PYBIND11_MODULE(pyyjj, m)
 {
     m.def("thread_id", &spdlog::details::os::thread_id);
@@ -290,4 +295,10 @@ PYBIND11_MODULE(pyyjj, m)
             .def("set_begin_time", &apprentice::set_begin_time)
             .def("set_end_time", &apprentice::set_end_time)
             .def("run", &apprentice::run);
+
+
+    py::class_<msg::data::RequestReadFrom, std::shared_ptr<msg::data::RequestReadFrom>>(m, "RequestReadFrom")
+            .def_readonly("source_id", &msg::data::RequestReadFrom::source_id)
+            .def_readonly("from_time", &msg::data::RequestReadFrom::from_time);
+    m.def("get_RequestReadFrom", &get_RequestReadFrom);
 }

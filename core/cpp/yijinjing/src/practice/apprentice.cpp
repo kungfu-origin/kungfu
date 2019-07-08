@@ -48,19 +48,14 @@ namespace kungfu
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
         }
 
-        void apprentice::observe(int64_t from_time, const location_ptr &location)
-        {
-            reader_->join(location, 0, from_time);
-        }
-
         void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
         {
             require_write_to(master_commands_location_->uid, trigger_time, dest_id);
         }
 
-        void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
+        void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, bool pub)
         {
-            require_read_from(master_commands_location_->uid, trigger_time, source_id);
+            require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
         }
 
         void apprentice::react(const observable<event_ptr> &events)
@@ -125,7 +120,9 @@ namespace kungfu
                   on_write_to(e);
               });
 
-            events | is(msg::type::RequestReadFrom) |
+            events | filter([&](event_ptr e){
+                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+            }) |
             $([&](event_ptr e)
               {
                   on_read_from(e);
@@ -168,7 +165,8 @@ namespace kungfu
             SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
                         get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
                         time::strftime(request.from_time));
-            reader_->join(get_location(request.source_id), get_live_home_uid(), request.from_time);
+            uint32_t dest_id = event->msg_type() == msg::type::RequestReadFromPublic ? 0 : get_live_home_uid();
+            reader_->join(get_location(request.source_id), dest_id, request.from_time);
         }
 
         void apprentice::checkin()
