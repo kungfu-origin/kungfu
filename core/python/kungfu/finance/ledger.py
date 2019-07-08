@@ -18,6 +18,31 @@ class Ledger:
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
 
+        self._account_id = kwargs.pop("account_id", None)
+        self._client_id = kwargs.pop("client_id", None)
+        if self._account_id and not self._client_id:
+            self._msg_type = int(MsgType.AccountInfo)
+        elif not self._account_id and self._client_id:
+            self._msg_type = int(MsgType.PortfolioInfo)
+        else:
+            self._msg_type = int(MsgType.SubPortfolioInfo)
+        self._callbacks = []
+
+    def register_callback(self, callback):
+        self._callbacks.append(callback)
+
+    def dispatch(self, messages):
+        for cb in self._callbacks:
+            cb(messages)
+
+    @property
+    def account_id(self):
+        return self._account_id
+
+    @property
+    def client_id(self):
+        return self._client_id
+
     @property
     def avail(self):
         return self._avail
@@ -27,16 +52,25 @@ class Ledger:
         self._avail = value
 
     @property
+    def msg_type(self):
+       return self._msg_type
+
+    @property
     def message(self):
         return {
-            "avail": self.avail,
-            "margin": self.margin,
-            "market_value": self.market_value,
-            "initial_equity": self.initial_equity,
-            "dynamic_equity": self.dynamic_equity,
-            "static_equity": self.static_equity,
-            "realized_pnl": self.realized_pnl,
-            "unrealized_pnl": self.unrealized_pnl
+            "msg_type": self.msg_type,
+            "data": {
+                "account_id": self.account_id,
+                "client_id": self.client_id,
+                "avail": self.avail,
+                "margin": self.margin,
+                "market_value": self.market_value,
+                "initial_equity": self.initial_equity,
+                "dynamic_equity": self.dynamic_equity,
+                "static_equity": self.static_equity,
+                "realized_pnl": self.realized_pnl,
+                "unrealized_pnl": self.unrealized_pnl
+            }
         }
 
     @property
@@ -91,7 +125,7 @@ class Ledger:
         symbol_id = get_symbol_id(instrument_id, exchange_id)
         if symbol_id not in self._positions:
             instrument_type = get_instrument_type(instrument_id, exchange_id)
-            cls = StockPostion if instrument_type == InstrumentType.Stock else FuturePosition
+            cls = StockPosition if instrument_type == InstrumentType.Stock else FuturePosition
             self._positions[symbol_id] = cls(ledger = self, instrument_id = instrument_id, exchange_id = exchange_id, instrument_type = instrument_type)
         return self._positions[symbol_id]
 

@@ -198,7 +198,7 @@ namespace kungfu
                   memcpy(&account_info_, &event->data<AccountInfo>(), sizeof(AccountInfo));
               });
 
-            events | is(msg::type::Position) |
+            events | is(msg::type::AccountPosition) |
             $([&](event_ptr event)
               {
                   position_buffer_.push_back(event->data<Position>());

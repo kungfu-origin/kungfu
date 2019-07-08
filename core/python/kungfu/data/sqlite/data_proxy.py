@@ -2,6 +2,7 @@
 from . import *
 from kungfu.data.sqlite.models import *
 import pyyjj
+from kungfu.wingchun.constants import *
 
 def make_url(locator, location, filename):
     db_file = locator.layout_file(location, pyyjj.layout.SQLITE, filename)
@@ -54,4 +55,27 @@ class DataProxy:
                 session.add(task)
             else:
                 task.config = config
+
+class LedgerHolder(DataProxy):
+    def __init__(self, url):
+        super(LedgerHolder, self).__init__(url)
+
+    def process_message(self, session, message):
+        if message["msg_type"] == MsgType.AccountInfo:
+            session.merge(AccountBalance(**message["data"]))
+        elif message["msg_type"] == MsgType.PortfolioInfo:
+            session.merge(PortfolioBalance(**message["data"]))
+        elif message["msg_type"] == MsgType.SubPortfolioInfo:
+            session.merge(SubPortfolioBalance(**message["data"]))
+        elif message["msg_type"] in [MsgType.AccountPosition, MsgType.PortfolioPosition, MsgType.SubPortfolioPosition]:
+            cls = AccountPosition if message["msg_type"] == MsgType.AccountPosition else PortfolioPosition if  message["msg_type"] == MsgType.PortfolioPosition else SubPortfolioPosition
+            position = cls(**message["data"])
+            session.merge(position)
+            if position.volume == 0:
+                session.delete(position)
+
+    def on_messages(self, messages):
+        with session_scope(self.session_factory) as session:
+            for message in messages:
+                self.process_message(session, message)
 

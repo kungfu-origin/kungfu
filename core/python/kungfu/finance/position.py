@@ -16,8 +16,13 @@ class Position:
         self._ledger = kwargs.pop("ledger", None)
 
     @property
-    def message(self):
-        raise NotImplementationError
+    def msg_type(self):
+        if self.ledger.msg_type == int(MsgType.AccountInfo):
+            return int(MsgType.AccountPosition)
+        elif self.ledger.msg_type == int(MsgType.PortfolioInfo):
+            return int(MsgType.PortfolioPosition)
+        else:
+            return int(MsgType.SubPortfolioPosition)
 
     @property
     def instrument_type(self):
@@ -93,6 +98,8 @@ class StockPosition(Position):
     @property
     def message(self):
         return {
+            "msg_type": self.msg_type,
+            "data":  {
                 "instrument_id": self.instrument_id,
                 "exchange_id":self.exchange_id,
                 "direction": int(Direction.Long),
@@ -100,8 +107,8 @@ class StockPosition(Position):
                 "yesterday_volume": self.yesterday_volume,
                 "realized_pnl": self.realized_pnl,
                 "unrealized_pnl": self.unrealized_pnl
-             }
-
+            }
+        }
 
     @property
     def volume(self):
@@ -141,9 +148,10 @@ class StockPosition(Position):
 
     def apply_trade(self, trade):
         if trade.side == Side.Buy:
-            return self._apply_buy(trade.price, trade.volume)
+            self._apply_buy(trade.price, trade.volume)
         else:
-            return self._apply_sell(trade.price, trade.volume)
+            self._apply_sell(trade.price, trade.volume)
+        self.ledger.dispatch([self.ledger.message, self.message])
 
     def apply_settlement(self, close_price):
         self._close_price = close_price
@@ -249,6 +257,9 @@ class FuturePosition(Position):
         self._long_details = kwargs.pop("long_details", [])
         self._short_details = []
         self._realized_pnl = 0.0
+
+    def get_message(self, direction):
+        pass
 
     @property
     def realized_pnl(self):

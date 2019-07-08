@@ -117,9 +117,14 @@ class BalanceMixin(object):
     position_pnl = Column(Float)
     close_pnl = Column(Float)
 
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                setattr(self, attr, kwargs[attr])
+
 class AccountBalance(BalanceMixin, Base):
     __tablename__ = "account"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id'),)
     account_id = Column(String)
     source_id = Column(String)
 
@@ -129,7 +134,7 @@ class PortfolioBalance(BalanceMixin, Base):
 
 class SubPortfolioBalance(BalanceMixin, Base):
     __tablename__ = "subportfolio"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'client_id'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id'),)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
@@ -159,9 +164,14 @@ class PositionMixin(object):
     open_date = Column(String)
     expire_date = Column(String)
 
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                setattr(self, attr, kwargs[attr])
+
 class AccountPosition(PositionMixin, Base):
     __tablename__ = "account_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'instrument_id', 'exchange_id', 'direction'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'instrument_id', 'exchange_id', 'direction'),)
     account_id = Column(String)
     source_id = Column(String)
 
@@ -172,7 +182,7 @@ class PortfolioPosition(PositionMixin, Base):
 
 class SubPortfolioPosition(PositionMixin, Base):
     __tablename__ = "subportfolio_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'source_id', 'client_id','instrument_id', 'exchange_id', 'direction'),)
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id','instrument_id', 'exchange_id', 'direction'),)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)

@@ -275,7 +275,7 @@ namespace kungfu
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
+                    msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::AccountPosition);
                     strcpy(stock_pos.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
