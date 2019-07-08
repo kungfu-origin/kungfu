@@ -15,6 +15,7 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
+    "buildInstaller": "electron-builder",
     "build": "yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
     "dist": "yarn run dist:render && yarn run dist:main",
@@ -56,7 +57,15 @@
           "commission.db",
           "holidays.db"
         ]
-      }
+      },
+      "!**/kungfu-core/*",
+      "!**/kungfu-core/**/*",
+      "!**/kungfu-core/**/**/*",
+      "!**/kungfu-core/**/**/*",
+      "**/kungfu-core/package.json",
+      "**/kungfu-core/build/Release/node_nanomsg.node",
+      "**/kungfu-core/build/Debug/node_nanomsg.node",
+      "**/kungfu-core/node/*"
     ],
     "extraResources": [
       {

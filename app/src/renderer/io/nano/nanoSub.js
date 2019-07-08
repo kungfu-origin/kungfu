@@ -26,7 +26,6 @@ export const buildGatewayStatePipe = () => {
     )
 }
 
-
 //trading data: order trades position pnlmin
 export const buildTradingDataPipe = () => {
     const tradingDataTypes = [MSG_TYPE.order, MSG_TYPE.trade, MSG_TYPE.position, MSG_TYPE.portfolioByMin]

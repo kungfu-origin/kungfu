@@ -86,7 +86,6 @@ export default {
         return {
             rendererTable: false,
             filter: {
-                type: '', //类型
                 instrumentId: ''  //代码id
             },
             searchKeyword: '',
@@ -262,7 +261,7 @@ export default {
         dealNanomsg(data) {
             const t = this
             //如果存在筛选，则推送的数据也需要满足筛选条件
-            if(!data.instrument_id.includes(t.filter.instrumentId) || !data.instrument_type.includes(t.filter.type)) return
+            if(!data.instrument_id.includes(t.filter.instrumentId)) return
             const poskey = t.getKey(data)
             t.posDataByKey[poskey] = {
                 ...t.dealPos(data)

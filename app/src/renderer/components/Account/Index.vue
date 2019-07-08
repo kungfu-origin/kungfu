@@ -129,22 +129,19 @@ export default {
                     if(accountId !== currentId) return;
                     t.tradesFromNmsg = Object.freeze(tradingData);
                     break
+                case MSG_TYPE.position:
+                    if(accountId !== currentId) return;
+                    t.posFromNmsg = Object.freeze(tradingData);
+                    break
             }
         })
 
-        buildCashPipe().subscribe(d => {
-
+        buildCashPipe().subscribe(({ data }) => {
+            const { account_id, source_id } = data;
+            const accountId = `${source_id}_${account_id}`;  
+            t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
         })
     },
-
-    destroyed() {
-        const t = this
-        if(t.oldOrderNanomsg) t.oldOrderNanomsg.close()
-        if(t.oldTradeNanomsg) t.oldTradeNanomsg.close()
-        if(t.oldPosNanomsg) t.oldPosNanomsg.close()
-        if(t.oldMinNanomsg) t.oldMinNanomsg.close()
-    },
-
  
     methods:{
         getAccountPos: ACCOUNT_API.getAccountPos,
