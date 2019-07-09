@@ -1,5 +1,5 @@
-import * as STRATEGY_API from '@/io/db/strategy';
-import { deleteStrat } from '@/io/actions/strategy';
+import * as STRATEGY_API from '__io/db/strategy';
+import { deleteStrat } from '__io/actions/strategy';
 
 //设置当前策略
 export const setCurrentStrategy = ({commit}, strategy) => {

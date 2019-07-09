@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import * as BASE_API from '@/io/db/base';
-import { nanoGetCalendar } from '@/io/nano/nanoReq';
+import * as BASE_API from '__io/db/base';
+import { nanoGetCalendar } from '__io/nano/nanoReq';
 
 export const setCalendar = ({commit}, calendar) => {
     commit('SET_CALENDAR', calendar)

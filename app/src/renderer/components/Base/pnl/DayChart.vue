@@ -13,8 +13,8 @@
 <script>
 import lineConfig from './config/lineEchart'
 import moment from 'moment'
-import {mapGetters, mapState} from 'vuex'
-const {echarts} = require('@/assets/js/static/echarts.min.js')
+import { mapGetters, mapState } from 'vuex'
+const { echarts } = require('@/assets/js/static/echarts.min.js')
 
 export default {
     name: 'day-chart',

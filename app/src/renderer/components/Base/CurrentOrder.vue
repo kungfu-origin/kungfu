@@ -43,10 +43,10 @@
 
 <script>
 import moment from "moment"
-import { debounce, throttle, dealOrder } from "@/assets/js/utils";
+import { debounce, throttle, dealOrder } from "__gUtils/busiUtils";
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
-import { nanoCancelOrder, nanoCancelAllOrder } from '@/io/nano/nanoReq';
+import { nanoCancelOrder, nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { mapState } from 'vuex';
 export default {
     name: "current-orders",

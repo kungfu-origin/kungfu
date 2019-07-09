@@ -176,16 +176,16 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { debounce } from '@/assets/js/utils';
-import * as ACCOUNT_API from '@/io/db/account';
-import * as BASE_API from '@/io/db/base';
-import {accountSource, sourceType, ifSourceDisable} from '@/assets/config/accountConfig';
+import { debounce } from '__gUtils/busiUtils';
+import * as ACCOUNT_API from '__io/db/account';
+import * as BASE_API from '__io/db/base';
+import {accountSource, sourceType, ifSourceDisable} from '__gConfig/accountConfig';
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder, openReadFile } from "__gUtils/fileUtils.js";
-import { deleteAccount, switchTd } from '@/io/actions/account';
+import { deleteAccount, switchTd } from '__io/actions/account';
 
 import path from 'path'
 export default {

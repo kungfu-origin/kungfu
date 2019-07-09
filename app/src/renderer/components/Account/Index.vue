@@ -71,11 +71,11 @@ import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Pnl';
-import { sourceType } from '@/assets/config/accountConfig';
-import * as ACCOUNT_API from '@/io/db/account';
-import { debounce } from '@/assets/js/utils';
-import { buildTradingDataPipe, buildCashPipe } from '@/io/nano/nanoSub';
-import * as MSG_TYPE from '@/io/nano/msgType';
+import { sourceType } from '__gConfig/accountConfig';
+import * as ACCOUNT_API from '__io/db/account';
+import { debounce } from '__gUtils/busiUtils';
+import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
+import * as MSG_TYPE from '__io/nano/msgType';
 
 
 export default {

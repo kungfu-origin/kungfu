@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import {deepClone} from '@/assets/js/utils';
+import {deepClone} from '__gUtils/busiUtils';
 import {mapState, mapGetters} from 'vuex';
 import EngineStatus from './components/EngineStatus';
 import MainHeader from './components/MainHeader';

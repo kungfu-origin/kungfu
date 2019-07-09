@@ -14,7 +14,7 @@
 import lineConfig from './config/lineEchart'
 import moment from 'moment'
 import {mapState} from 'vuex'
-const {echarts} = require('@/assets/js/static/echarts.min.js')
+const { echarts } = require('@/assets/js/static/echarts.min.js')
 
 export default {
     name: 'min-chart',

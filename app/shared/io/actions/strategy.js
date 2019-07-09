@@ -1,8 +1,8 @@
-import { deleteStrategy, getStrategyById } from '@/io/db/strategy';
+import { deleteStrategy, getStrategyById } from '__io/db/strategy';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { deleteProcess, startStrategy } from '__gUtils/processUtils';
 import { STRATEGY_DIR, LOG_DIR } from '__gConfig/pathConfig';
-import { deleteTask } from '@/io/db/base';
+import { deleteTask } from '__io/db/base';
 
 const path = require('path');
 

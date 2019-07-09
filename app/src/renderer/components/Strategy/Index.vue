@@ -64,9 +64,9 @@ import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Pnl';
 import {mapState, mapGetters} from 'vuex';
-import * as STRATEGY_API from '@/io/db/strategy'
-import {refreshStrategyNanomsg, refreshGatewayNanomsg} from '@/io/nano/buildNmsg'
-import * as msgType from '@/io/nano/msgType'
+import * as STRATEGY_API from '__io/db/strategy'
+import {refreshStrategyNanomsg, refreshGatewayNanomsg} from '__io/nano/buildNmsg'
+import * as msgType from '__io/nano/msgType'
 
 
 export default {

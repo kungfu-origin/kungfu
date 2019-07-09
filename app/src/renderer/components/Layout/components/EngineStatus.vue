@@ -66,9 +66,9 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { accountSource, sourceType } from '@/assets/config/accountConfig';
-import { statusConfig } from '@/assets/config/statusConfig';
-import { switchTd, switchMd } from '@/io/actions/account';
+import { accountSource, sourceType } from '__gConfig/accountConfig';
+import { statusConfig } from '__gConfig/statusConfig';
+import { switchTd, switchMd } from '__io/actions/account';
 
 export default {
     data(){

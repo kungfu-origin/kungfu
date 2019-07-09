@@ -1,8 +1,8 @@
-import * as ACCOUNT_API from '@/io/db/account';
+import * as ACCOUNT_API from '__io/db/account';
 import { TD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
-import { setTasksDB, deleteTask } from '@/io/db/base';
+import { setTasksDB, deleteTask } from '__io/db/base';
 
 const path = require('path')
 

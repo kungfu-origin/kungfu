@@ -33,7 +33,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import { debounce, dealPos } from '@/assets/js/utils'
+import { debounce, dealPos } from '__gUtils/busiUtils'
 import { ipcRenderer } from 'electron'
 import { writeCSV } from '__gUtils/fileUtils';
 import MakeOrderDialog from './MakeOrderDialog';

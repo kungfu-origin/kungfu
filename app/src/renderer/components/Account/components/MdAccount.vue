@@ -76,11 +76,11 @@
 import path from 'path';
 import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
-import { sourceType } from '@/assets/config/accountConfig'
-import * as ACCOUNT_API from '@/io/db/account';
+import { sourceType } from '__gConfig/accountConfig'
+import * as ACCOUNT_API from '__io/db/account';
 import { openReadFile } from '__gUtils/fileUtils';
 import { LOG_DIR } from '__gConfig/pathConfig';
-import { switchMd } from '@/io/actions/account';
+import { switchMd } from '__io/actions/account';
 import SetMdSourceDialog from './SetMdSourceDialog';
 
 export default {

@@ -1,6 +1,6 @@
 import readline from 'readline';
-import { offsetName, orderStatus, sideName } from "@/assets/config/tradingConfig";
-import { posDirection } from "@/assets/config/tradingConfig"
+import { offsetName, orderStatus, sideName } from "__gConfig/tradingConfig";
+import { posDirection } from "__gConfig/tradingConfig"
 
 const path = require("path");
 const fs = require('fs-extra');

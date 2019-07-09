@@ -33,7 +33,7 @@
 <script>
 import { mapState } from 'vuex'
 import moment from 'moment'
-import { debounce, throttle, throttleInsert, dealLogMessage } from '@/assets/js/utils'
+import { debounce, throttle, throttleInsert, dealLogMessage } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig.js';
 import { Tail } from 'tail';
 import { clearFileContent, addFile, openReadFile, existsSync } from '__gUtils/fileUtils.js';

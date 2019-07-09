@@ -1,10 +1,9 @@
-import { buildSubNmsg } from '@/io/nano/buildNmsg';
+import { buildSubNmsg } from '__io/nano/buildNmsg';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import * as MSG_TYPE from '@/io/nano/msgType';
+import * as MSG_TYPE from '__io/nano/msgType';
 
 export const subGateWayState = () => {
-    console.log('subGateWayState =====')
     return new Observable(subscriber => {
         buildSubNmsg().on('data', buf => {
             const data = JSON.parse(String(buf).replace(/\0/g,'')) 

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import {statusConfig} from '@/assets/config/statusConfig';
+import {statusConfig} from '__gConfig/statusConfig';
 export default {
     name: 'tr-status',
     props: {

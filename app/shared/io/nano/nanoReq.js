@@ -1,6 +1,6 @@
 
-import { buildRepNmsg } from '@/io/nano/buildNmsg'
-import * as msgType from '@/io/nano/msgType'
+import { buildRepNmsg } from '__io/nano/buildNmsg'
+import * as msgType from '__io/nano/msgType'
 
 
 //日历

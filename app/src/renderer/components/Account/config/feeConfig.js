@@ -1,4 +1,4 @@
-import {blankValidator, validateTCPUri, validate099, validateInt} from '@/assets/js/validator'
+import {blankValidator, validateTCPUri, validate099, validateInt} from '__assets/validator'
 /**
  * @param  {String} type stock/future
  */

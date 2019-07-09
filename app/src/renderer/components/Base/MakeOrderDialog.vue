@@ -111,10 +111,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import { sourceType } from '@/assets/config/accountConfig'
-import { biggerThanZeroValidator } from '@/assets/js/validator';
-import { nanoMakeOrder } from '@/io/nano/nanoReq';
-import { deepClone } from '@/assets/js/utils';
+import { sourceType } from '__gConfig/accountConfig'
+import { biggerThanZeroValidator } from '__assets/validator';
+import { nanoMakeOrder } from '__io/nano/nanoReq';
+import { deepClone } from '__gUtils/busiUtils';
 
 export default {
     name: 'make-order-dialog',

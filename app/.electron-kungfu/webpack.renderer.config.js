@@ -17,7 +17,12 @@ let whiteListedModules = [
   'vuex', 
   'vue-router', 
   'vue-virtual-scroller', 
-  'codemirror'
+  'codemirror',
+  "rxjs",
+  "moment",
+  "mime",
+  "readline",
+  "fast-csv"
 ];
 
 dependencies['kungfu-core'] = 'commonjs kungfu-core';
@@ -143,8 +148,10 @@ let rendererConfig = {
   resolve: {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
-      '__gUtils': path.join(__dirname, '../src/utils'),
-      '__gConfig': path.join(__dirname, '../src/config'),
+      '__gUtils': path.join(__dirname, '../shared/utils'),
+      '__gConfig': path.join(__dirname, '../shared/config'),
+      '__io': path.join(__dirname, '../shared/io'),
+      '__assets': path.join(__dirname, '../shared/assets'),
       'vue$': 'vue/dist/vue.esm.js'
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']

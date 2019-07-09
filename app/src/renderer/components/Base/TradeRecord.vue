@@ -28,7 +28,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
-import { debounce, throttleInsert, dealTrade } from "@/assets/js/utils"
+import { debounce, throttleInsert, dealTrade } from "__gUtils/busiUtils"
 import { writeCSV } from '__gUtils/fileUtils';
 import DateRangeDialog from './DateRangeDialog';
 

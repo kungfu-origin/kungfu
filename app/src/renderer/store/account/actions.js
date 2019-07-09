@@ -1,7 +1,7 @@
 
 import Vue from 'vue';
-import * as ACCOUNT_API from '@/io/db/account';
-import { debounce } from '@/assets/js/utils';
+import * as ACCOUNT_API from '__io/db/account';
+import { debounce } from '__gUtils/busiUtils';
 
 //保存选中的账户信息
 export const setCurrentAccount = ({ commit }, account) => {

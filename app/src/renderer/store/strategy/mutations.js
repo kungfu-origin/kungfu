@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import {deepClone} from '@/assets/js/utils'
+import {deepClone} from '__gUtils/busiUtils'
 
 export const SET_CURRENT_STRATEGY = (state, strategy) => {
     state.currentStrategy = strategy;
