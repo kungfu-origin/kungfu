@@ -281,8 +281,9 @@ namespace kungfu
                 des.cost_price = ori.avg_price;
             }
 
-            inline void from_xtp(const XTPQueryAssetRsp &ori, AccountInfo &des)
+            inline void from_xtp(const XTPQueryAssetRsp &ori, AssetInfo &des)
             {
+                des.ledger_category = LedgerCategory::Account;
                 des.avail = ori.buying_power;
             }
 

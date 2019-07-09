@@ -60,19 +60,33 @@ class LedgerHolder(DataProxy):
     def __init__(self, url):
         super(LedgerHolder, self).__init__(url)
 
+    def get_model_cls(self, msg_type, ledger_category):
+        cls = None
+        if msg_type == int(MsgType.AssetInfo):
+            if ledger_category == int(LedgerCategory.Account):
+                cls = AccountAssetInfo
+            elif ledger_category == int(LedgerCategory.Portfolio):
+                cls = PortfolioAssetInfo
+            elif ledger_category == int(LedgerCategory.SubPortfolio):
+                cls = SubPortfolioAssetInfo
+        elif msg_type == int(MsgType.Position):
+            if ledger_category == int(LedgerCategory.Account):
+                cls = AccountPosition
+            elif category == int(LedgerCategory.Portfolio):
+                cls =  PortfolioPosition
+            elif ledger_category == int(LedgerCategory.SubPortfolio):
+                cls = SubPortfolioPosition
+        return cls
+
     def process_message(self, session, message):
-        if message["msg_type"] == MsgType.AccountInfo:
-            session.merge(AccountBalance(**message["data"]))
-        elif message["msg_type"] == MsgType.PortfolioInfo:
-            session.merge(PortfolioBalance(**message["data"]))
-        elif message["msg_type"] == MsgType.SubPortfolioInfo:
-            session.merge(SubPortfolioBalance(**message["data"]))
-        elif message["msg_type"] in [MsgType.AccountPosition, MsgType.PortfolioPosition, MsgType.SubPortfolioPosition]:
-            cls = AccountPosition if message["msg_type"] == MsgType.AccountPosition else PortfolioPosition if  message["msg_type"] == MsgType.PortfolioPosition else SubPortfolioPosition
-            position = cls(**message["data"])
-            session.merge(position)
-            if position.volume == 0:
-                session.delete(position)
+        msg_type = message["msg_type"]
+        category = message["data"].pop("ledger_category")
+        cls = self.get_model_cls(msg_type, category)
+        if cls is not None:
+            obj = cls(**message["data"])
+            session.merge(obj)
+            if isinstance(obj, PositionMixin) and obj.volume == 0:
+                session.delete(obj)
 
     def on_messages(self, messages):
         with session_scope(self.session_factory) as session:

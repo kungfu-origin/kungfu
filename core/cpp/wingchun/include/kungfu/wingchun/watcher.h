@@ -33,7 +33,7 @@ namespace kungfu
 
             virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
 
-            virtual void on_assets(const msg::data::AccountInfo& account_info, const std::vector<msg::data::Position>& positions) = 0;
+            virtual void on_assets(const msg::data::AssetInfo& info, const std::vector<msg::data::Position>& positions) = 0;
 
         protected:
 
@@ -54,7 +54,7 @@ namespace kungfu
 
             void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 
-            msg::data::AccountInfo account_info_;
+            msg::data::AssetInfo asset_info_;
             std::vector<msg::data::Position> position_buffer_;
 
         };

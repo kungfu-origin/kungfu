@@ -17,12 +17,7 @@ class Position:
 
     @property
     def msg_type(self):
-        if self.ledger.msg_type == int(MsgType.AccountInfo):
-            return int(MsgType.AccountPosition)
-        elif self.ledger.msg_type == int(MsgType.PortfolioInfo):
-            return int(MsgType.PortfolioPosition)
-        else:
-            return int(MsgType.SubPortfolioPosition)
+        return int(MsgType.Position)
 
     @property
     def instrument_type(self):
@@ -100,6 +95,9 @@ class StockPosition(Position):
         return {
             "msg_type": self.msg_type,
             "data":  {
+                "ledger_category": int(self.ledger.category),
+                "account_id": self.ledger.account_id,
+                "client_id": self.ledger.client_id,
                 "instrument_id": self.instrument_id,
                 "exchange_id":self.exchange_id,
                 "direction": int(Direction.Long),
@@ -156,8 +154,14 @@ class StockPosition(Position):
     def apply_settlement(self, close_price):
         self._close_price = close_price
 
-    def apply_quote(self, Quote):
-        self._last_price = Quote.last_price
+    def apply_quote(self, quote):
+        pre_market_value = self.market_value
+        if is_valid_price(quote.close_price):
+            self.apply_settlement(quote.close_price)
+        elif is_valid_price(quote.last_price):
+            self._last_price = quote.last_price
+        if  abs(self.market_value - pre_market_value) >= 0.01:
+            self.ledger.dispatch([self.ledger.message, self.message])
 
     def switch_day(self, trading_day):
         self._pre_close_price = self.close_price

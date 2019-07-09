@@ -116,7 +116,7 @@ namespace kungfu
                 Calendar_ptr calendar_;
 
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
-                std::unordered_map<uint32_t, msg::data::AccountInfo> accounts_;
+                std::unordered_map<uint32_t, std::string> accounts_;
                 std::unordered_map<uint32_t, msg::data::Quote> quotes_;
 
                 std::unordered_map<std::string, uint32_t> market_data_;

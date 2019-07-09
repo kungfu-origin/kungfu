@@ -21,7 +21,6 @@ class Region:
 
 InstrumentType = pywingchun.constants.InstrumentType
 Side = pywingchun.constants.Side
-Quote = pywingchun.Quote
 Offset = pywingchun.constants.Offset
 OrderStatus = pywingchun.constants.OrderStatus
 Direction = pywingchun.constants.Direction
@@ -29,7 +28,7 @@ PriceType = pywingchun.constants.PriceType
 VolumeCondition = pywingchun.constants.VolumeCondition
 TimeCondition = pywingchun.constants.TimeCondition
 MsgType = pywingchun.constants.MsgType
-
+LedgerCategory = pywingchun.constants.LedgerCategory
 
 
 

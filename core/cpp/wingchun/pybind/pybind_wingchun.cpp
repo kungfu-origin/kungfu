@@ -88,8 +88,8 @@ public:
     void on_trade(event_ptr event, const Trade& trade) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
 
-    void on_assets(const AccountInfo& account_info, const std::vector<Position>& positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, account_info, positions) }
+    void on_assets(const AssetInfo& asset_info, const std::vector<Position>& positions) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, asset_info, positions) }
 };
 
 class PyStrategy : public strategy::Strategy
@@ -140,6 +140,13 @@ PYBIND11_MODULE(pywingchun, m)
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
 
     auto m_constants = m.def_submodule("constants");
+
+    py::enum_<kungfu::wingchun::LedgerCategory>(m_constants, "LedgerCategory", py::arithmetic())
+        .value("Account", kungfu::wingchun::LedgerCategory::Account)
+        .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
+        .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
+        .export_values()
+        ;
 
     py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
         .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
@@ -222,18 +229,10 @@ PYBIND11_MODULE(pywingchun, m)
         .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
         .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
         .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
-        .value("AccountPosition", kungfu::wingchun::msg::type::MsgType::AccountPosition)
-        .value("AccountInfo", kungfu::wingchun::msg::type::MsgType::AccountInfo)
-        .value("PortfolioInfo", kungfu::wingchun::msg::type::PortfolioInfo)
-        .value("AccountInfoSnapshot", kungfu::wingchun::msg::type::MsgType::AccountInfoSnapshot)
-        .value("PortfolioSnapshot", kungfu::wingchun::msg::type::MsgType::PortfolioSnapshot)
-        .value("AccountPositionDetail", kungfu::wingchun::msg::type::MsgType::AccountPositionDetail)
-        .value("SubPortfolioInfo", kungfu::wingchun::msg::type::MsgType::SubPortfolioInfo)
-        .value("PortfolioPosition", kungfu::wingchun::msg::type::MsgType::PortfolioPosition)
-        .value("PortfolioPositionDetail", kungfu::wingchun::msg::type::MsgType::PortfolioPositionDetail)
-        .value("SubPortfolioPosition", kungfu::wingchun::msg::type::MsgType::SubPortfolioPosition)
-        .value("SubPortfolioPositionDetail", kungfu::wingchun::msg::type::MsgType::SubPortfolioPositionDetail)
-        .value("ReqLogin", kungfu::wingchun::msg::type::MsgType::ReqLogin)
+        .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
+        .value("AssetInfo", kungfu::wingchun::msg::type::MsgType::AssetInfo)
+        .value("AssetInfoSnapshot", kungfu::wingchun::msg::type::AssetInfoSnapshot)
+        .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
         .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
         .value("ReqOrderInput", kungfu::wingchun::msg::type::MsgType::ReqOrderInput)
         .value("ReqOrderAction", kungfu::wingchun::msg::type::MsgType::ReqOrderAction)
@@ -438,31 +437,31 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
-    py::class_<AccountInfo>(m, "AccountInfo")
-            .def_readonly("update_time", &AccountInfo::update_time)
-            .def_readonly("initial_equity", &AccountInfo::initial_equity)
-            .def_readonly("static_equity", &AccountInfo::static_equity)
-            .def_readonly("dynamic_equity", &AccountInfo::dynamic_equity)
-            .def_readonly("accumulated_pnl", &AccountInfo::accumulated_pnl)
-            .def_readonly("accumulated_pnl_ratio", &AccountInfo::accumulated_pnl_ratio)
-            .def_readonly("intraday_pnl", &AccountInfo::intraday_pnl)
-            .def_readonly("intraday_pnl_ratio", &AccountInfo::intraday_pnl_ratio)
-            .def_readonly("avail", &AccountInfo::avail)
-            .def_readonly("market_value", &AccountInfo::market_value)
-            .def_readonly("margin", &AccountInfo::margin)
-            .def_readonly("accumulated_fee", &AccountInfo::accumulated_fee)
-            .def_readonly("intraday_fee", &AccountInfo::intraday_fee)
-            .def_readonly("frozen_cash", &AccountInfo::frozen_cash)
-            .def_readonly("frozen_margin", &AccountInfo::frozen_margin)
-            .def_readonly("frozen_fee", &AccountInfo::frozen_fee)
-            .def_readonly("position_pnl", &AccountInfo::position_pnl)
-            .def_readonly("close_pnl", &AccountInfo::close_pnl)
-            .def_property_readonly("trading_day", &AccountInfo::get_trading_day)
-            .def_property_readonly("account_id", &AccountInfo::get_account_id)
-            .def_property_readonly("broker_id", &AccountInfo::get_broker_id)
-            .def_property_readonly("source_id", &AccountInfo::get_source_id)
+
+    py::class_<AssetInfo>(m, "AssetInfo")
+            .def_readonly("update_time", &AssetInfo::update_time)
+            .def_readonly("ledger_category", &AssetInfo::ledger_category)
+            .def_readonly("initial_equity", &AssetInfo::initial_equity)
+            .def_readonly("static_equity", &AssetInfo::static_equity)
+            .def_readonly("dynamic_equity", &AssetInfo::dynamic_equity)
+            .def_readonly("realized_pnl", &AssetInfo::realized_pnl)
+            .def_readonly("unrealized_pnl", &AssetInfo::unrealized_pnl)
+            .def_readonly("avail", &AssetInfo::avail)
+            .def_readonly("market_value", &AssetInfo::market_value)
+            .def_readonly("margin", &AssetInfo::margin)
+            .def_readonly("accumulated_fee", &AssetInfo::accumulated_fee)
+            .def_readonly("intraday_fee", &AssetInfo::intraday_fee)
+            .def_readonly("frozen_cash", &AssetInfo::frozen_cash)
+            .def_readonly("frozen_margin", &AssetInfo::frozen_margin)
+            .def_readonly("frozen_fee", &AssetInfo::frozen_fee)
+            .def_readonly("position_pnl", &AssetInfo::position_pnl)
+            .def_readonly("close_pnl", &AssetInfo::close_pnl)
+            .def_property_readonly("trading_day", &AssetInfo::get_trading_day)
+            .def_property_readonly("account_id", &AssetInfo::get_account_id)
+            .def_property_readonly("broker_id", &AssetInfo::get_broker_id)
+            .def_property_readonly("source_id", &AssetInfo::get_source_id)
             .def("__repr__",
-                 [](const AccountInfo &a)
+                 [](const AssetInfo &a)
                  {
                      return to_string(a);
                  }
@@ -470,6 +469,7 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<Position>(m, "Position")
             .def_readonly("update_time", &Position::update_time)
             .def_readonly("instrument_type", &Position::instrument_type)
+            .def_readonly("ledger_category", &Position::ledger_category)
             .def_readonly("direction", &Position::direction)
             .def_readonly("volume", &Position::volume)
             .def_readonly("yesterday_volume", &Position::yesterday_volume)
@@ -496,23 +496,6 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("expire_date", &Position::get_expire_date)
             .def("__repr__",
                  [](const Position &a)
-                 {
-                     return to_string(a);
-                 }
-            );
-    py::class_<PortfolioInfo>(m, "PortfolioInfo")
-            .def_readonly("update_time", &PortfolioInfo::update_time)
-            .def_readonly("initial_equity", &PortfolioInfo::initial_equity)
-            .def_readonly("static_equity", &PortfolioInfo::static_equity)
-            .def_readonly("dynamic_equity", &PortfolioInfo::dynamic_equity)
-            .def_readonly("accumulated_pnl", &PortfolioInfo::accumulated_pnl)
-            .def_readonly("accumulated_pnl_ratio", &PortfolioInfo::accumulated_pnl_ratio)
-            .def_readonly("intraday_pnl", &PortfolioInfo::intraday_pnl)
-            .def_readonly("intraday_pnl_ratio", &PortfolioInfo::intraday_pnl_ratio)
-            .def_property_readonly("trading_day", &PortfolioInfo::get_trading_day)
-            .def_property_readonly("client_id", &PortfolioInfo::get_client_id)
-            .def("__repr__",
-                 [](const PortfolioInfo &a)
                  {
                      return to_string(a);
                  }

@@ -18,14 +18,17 @@ class Ledger:
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
 
-        self._account_id = kwargs.pop("account_id", None)
-        self._client_id = kwargs.pop("client_id", None)
-        if self._account_id and not self._client_id:
-            self._msg_type = int(MsgType.AccountInfo)
-        elif not self._account_id and self._client_id:
-            self._msg_type = int(MsgType.PortfolioInfo)
+        self._category = kwargs.pop("ledger_category")
+        if self._category == LedgerCategory.Account:
+            self._account_id = kwargs.pop("account_id")
+            self._client_id = None
+        elif self._category == LedgerCategory.Portfolio:
+            self._account_id = None
+            self._client_id = kwargs.pop("client_id")
         else:
-            self._msg_type = int(MsgType.SubPortfolioInfo)
+            self._account_id = kwargs.pop("account_id")
+            self._client_id = kwargs.pop("client_id")
+
         self._callbacks = []
 
     def register_callback(self, callback):
@@ -34,6 +37,10 @@ class Ledger:
     def dispatch(self, messages):
         for cb in self._callbacks:
             cb(messages)
+
+    @property
+    def category(self):
+        return self._category
 
     @property
     def account_id(self):
@@ -53,13 +60,14 @@ class Ledger:
 
     @property
     def msg_type(self):
-       return self._msg_type
+       return int(MsgType.AssetInfo)
 
     @property
     def message(self):
         return {
             "msg_type": self.msg_type,
             "data": {
+                "ledger_category": int(self.category),
                 "account_id": self.account_id,
                 "client_id": self.client_id,
                 "avail": self.avail,

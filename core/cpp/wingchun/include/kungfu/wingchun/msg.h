@@ -35,17 +35,10 @@ namespace kungfu
                     OrderAction = 202,
                     Order = 203,
                     Trade = 204,
-                    AccountPosition = 205,
-                    AccountInfo = 206,
-                    PortfolioInfo = 207,
-                    AccountInfoSnapshot = 208,
-                    PortfolioSnapshot = 209,
-                    AccountPositionDetail = 210,
-                    SubPortfolioInfo = 211,
-                    PortfolioPosition = 212,
-                    PortfolioPositionDetail = 213,
-                    SubPortfolioPosition = 214,
-                    SubPortfolioPositionDetail = 215,
+                    Position = 205,
+                    AssetInfo = 206,
+                    AssetInfoSnapshot = 207,
+                    PositionDetail = 208,
 
                     ReqLogin = 301,
                     Subscribe = 302,
@@ -788,25 +781,31 @@ namespace kungfu
                 }
 
                 //账户信息
-                struct AccountInfo
+                struct AssetInfo
                 {
                     int64_t update_time;               //更新时间
                     char trading_day[DATE_LEN];        //交易日
+
+                    LedgerCategory ledger_category;
 
                     char account_id[ACCOUNT_ID_LEN];   //账号ID
                     char broker_id[BROKER_ID_LEN];     //Broker ID
                     char source_id[SOURCE_ID_LEN];     //柜台ID
 
+                    char client_id[CLIENT_ID_LEN];     //client ID
+
                     double initial_equity;             //期初权益
                     double static_equity;              //静态权益
                     double dynamic_equity;             //动态权益
-                    double accumulated_pnl;            //累计收益
-                    double accumulated_pnl_ratio;      //累计收益率
-                    double intraday_pnl;               //日内收益
-                    double intraday_pnl_ratio;         //日内收益率
+
+                    double realized_pnl;            //累计收益
+                    double unrealized_pnl;
+
                     double avail;                      //可用资金
                     double market_value;               //市值(股票)
+
                     double margin;                     //保证金(期货)
+
                     double accumulated_fee;            //累计手续费
                     double intraday_fee;               //当日手续费
 
@@ -826,6 +825,9 @@ namespace kungfu
                     std::string get_broker_id()
                     { return std::string(broker_id); }
 
+                    std::string get_client_id()
+                    { return std::string(client_id); }
+
                     std::string get_source_id()
                     { return std::string(source_id); }
 
@@ -837,30 +839,30 @@ namespace kungfu
 #pragma pack(pop)
 #endif
 
-                inline void to_json(nlohmann::json &j, const AccountInfo &account)
+                inline void to_json(nlohmann::json &j, const AssetInfo &asset_info)
                 {
-                    j["update_time"] = account.update_time;
-                    j["trading_day"] = std::string(account.trading_day);
-                    j["account_id"] = std::string(account.account_id);
-                    j["broker_id"] = std::string(account.broker_id);
-                    j["source_id"] = std::string(account.source_id);
-                    j["initial_equity"] = FORMAT_DOUBLE(account.initial_equity);
-                    j["static_equity"] = FORMAT_DOUBLE(account.static_equity);
-                    j["dynamic_equity"] = FORMAT_DOUBLE(account.dynamic_equity);
-                    j["accumulated_pnl"] = FORMAT_DOUBLE(account.accumulated_pnl);
-                    j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(account.accumulated_pnl_ratio);
-                    j["intraday_pnl"] = FORMAT_DOUBLE(account.intraday_pnl);
-                    j["intraday_pnl_ratio"] = FORMAT_DOUBLE(account.intraday_pnl_ratio);
-                    j["avail"] = FORMAT_DOUBLE(account.avail);
-                    j["market_value"] = FORMAT_DOUBLE(account.market_value);
-                    j["margin"] = FORMAT_DOUBLE(account.margin);
-                    j["accumulated_fee"] = FORMAT_DOUBLE(account.accumulated_fee);
-                    j["intraday_fee"] = FORMAT_DOUBLE(account.intraday_fee);
-                    j["frozen_cash"] = FORMAT_DOUBLE(account.frozen_cash);
-                    j["frozen_margin"] = FORMAT_DOUBLE(account.frozen_margin);
-                    j["frozen_fee"] = FORMAT_DOUBLE(account.frozen_fee);
-                    j["position_pnl"] = FORMAT_DOUBLE(account.position_pnl);
-                    j["close_pnl"] = FORMAT_DOUBLE(account.close_pnl);
+                    j["update_time"] = asset_info.update_time;
+                    j["trading_day"] = std::string(asset_info.trading_day);
+                    j["ledger_category"] = asset_info.ledger_category;
+                    j["account_id"] = std::string(asset_info.account_id);
+                    j["broker_id"] = std::string(asset_info.broker_id);
+                    j["source_id"] = std::string(asset_info.source_id);
+                    j["client_id"] = std::string(asset_info.client_id);
+                    j["initial_equity"] = FORMAT_DOUBLE(asset_info.initial_equity);
+                    j["static_equity"] = FORMAT_DOUBLE(asset_info.static_equity);
+                    j["dynamic_equity"] = FORMAT_DOUBLE(asset_info.dynamic_equity);
+                    j["unrealized_pnl"] = FORMAT_DOUBLE(asset_info.unrealized_pnl);
+                    j["realized_pnl"] =  FORMAT_DOUBLE(asset_info.realized_pnl);
+                    j["avail"] = FORMAT_DOUBLE(asset_info.avail);
+                    j["market_value"] = FORMAT_DOUBLE(asset_info.market_value);
+                    j["margin"] = FORMAT_DOUBLE(asset_info.margin);
+                    j["accumulated_fee"] = FORMAT_DOUBLE(asset_info.accumulated_fee);
+                    j["intraday_fee"] = FORMAT_DOUBLE(asset_info.intraday_fee);
+                    j["frozen_cash"] = FORMAT_DOUBLE(asset_info.frozen_cash);
+                    j["frozen_margin"] = FORMAT_DOUBLE(asset_info.frozen_margin);
+                    j["frozen_fee"] = FORMAT_DOUBLE(asset_info.frozen_fee);
+                    j["position_pnl"] = FORMAT_DOUBLE(asset_info.position_pnl);
+                    j["close_pnl"] = FORMAT_DOUBLE(asset_info.close_pnl);
                 }
 
                 //持仓信息
@@ -872,6 +874,8 @@ namespace kungfu
                     char instrument_id[INSTRUMENT_ID_LEN];   //合约ID
                     InstrumentType instrument_type;          //合约类型
                     char exchange_id[EXCHANGE_ID_LEN];       //交易所ID
+
+                    LedgerCategory ledger_category;
 
                     char account_id[ACCOUNT_ID_LEN];         //账号ID
                     char client_id[CLIENT_ID_LEN];           //Client ID
@@ -938,6 +942,7 @@ namespace kungfu
                 inline void to_json(nlohmann::json &j, const Position &position)
                 {
                     j["update_time"] = position.update_time;
+                    j["trading_day"] = std::string(position.trading_day);
                     j["instrument_id"] = std::string(position.instrument_id);
                     j["instrument_type"] = position.instrument_type;
                     j["exchange_id"] = std::string(position.exchange_id);
@@ -963,51 +968,6 @@ namespace kungfu
                     j["open_date"] = std::string(position.open_date);
                     j["expire_date"] = std::string(position.expire_date);
                 }
-
-                //投资组合信息
-                struct PortfolioInfo
-                {
-                    char trading_day[DATE_LEN];    //交易日
-                    int64_t update_time;           //数据更新时间
-
-                    char client_id[CLIENT_ID_LEN]; //Client ID
-
-                    double initial_equity;         //期初权益
-                    double static_equity;          //静态权益
-                    double dynamic_equity;         //动态权益
-                    double accumulated_pnl;        //累计收益
-                    double accumulated_pnl_ratio;  //累计收益率
-                    double intraday_pnl;           //日内收益
-                    double intraday_pnl_ratio;     //日内收益率
-
-                    std::string get_trading_day()
-                    { return std::string(trading_day); }
-
-                    std::string get_client_id()
-                    { return std::string(client_id); }
-
-#ifndef _WIN32
-                } __attribute__((packed));
-
-#else
-                };
-#pragma pack(pop)
-#endif
-
-                inline void to_json(nlohmann::json &j, const PortfolioInfo &pnl)
-                {
-                    j["trading_day"] = std::string(pnl.trading_day);
-                    j["update_time"] = pnl.update_time;
-                    j["initial_equity"] = FORMAT_DOUBLE(pnl.initial_equity);
-                    j["static_equity"] = FORMAT_DOUBLE(pnl.static_equity);
-                    j["dynamic_equity"] = FORMAT_DOUBLE(pnl.dynamic_equity);
-                    j["accumulated_pnl"] = FORMAT_DOUBLE(pnl.accumulated_pnl);
-                    j["accumulated_pnl_ratio"] = FORMAT_DOUBLE(pnl.accumulated_pnl_ratio);
-                    j["intraday_pnl"] = FORMAT_DOUBLE(pnl.intraday_pnl);
-                    j["intraday_pnl_ratio"] = FORMAT_DOUBLE(pnl.intraday_pnl_ratio);
-                }
-
-                typedef AccountInfo SubPortfolioInfo; // 策略中的单个账户数据
 
                 template<typename T>
                 inline std::string to_string(const T &ori)

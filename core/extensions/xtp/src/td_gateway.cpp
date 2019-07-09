@@ -275,7 +275,8 @@ namespace kungfu
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::AccountPosition);
+                    msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
+                    stock_pos.ledger_category = LedgerCategory::Account;
                     strcpy(stock_pos.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
@@ -289,7 +290,6 @@ namespace kungfu
 
                     if (is_last)
                     {
-//                        set_state(GatewayState::Ready);
                         writer->mark(0, msg::type::PositionEnd);
                     }
                 } else
@@ -308,7 +308,7 @@ namespace kungfu
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    msg::data::AccountInfo &account = writer->open_data<msg::data::AccountInfo>(0, msg::type::AccountInfo);
+                    msg::data::AssetInfo &account = writer->open_data<msg::data::AssetInfo>(0, msg::type::AssetInfo);
                     strcpy(account.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {

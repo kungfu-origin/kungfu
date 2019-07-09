@@ -99,7 +99,7 @@ class LedgerMeta(Base):
     uname = Column(String,  primary_key = True)
     update_time = Column(Integer)
 
-class BalanceMixin(object):
+class AssetInfoMixin(object):
     trading_day = Column(String)
     initial_equity = Column(Float)
     static_equity = Column(Float)
@@ -122,17 +122,17 @@ class BalanceMixin(object):
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
 
-class AccountBalance(BalanceMixin, Base):
+class AccountAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "account"
     __table_args__ = (PrimaryKeyConstraint('account_id'),)
     account_id = Column(String)
     source_id = Column(String)
 
-class PortfolioBalance(BalanceMixin, Base):
+class PortfolioAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "portfolio"
     client_id = Column(String, nullable = False, primary_key = True)
 
-class SubPortfolioBalance(BalanceMixin, Base):
+class SubPortfolioAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "subportfolio"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id'),)
     account_id = Column(String)

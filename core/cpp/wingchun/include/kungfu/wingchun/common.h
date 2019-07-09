@@ -136,6 +136,13 @@ namespace kungfu
             ByVolume
         };
 
+        enum class LedgerCategory: int8_t
+        {
+            Account,
+            Portfolio,
+            SubPortfolio
+        };
+
         class wingchun_error : public std::runtime_error
         {
         public:
