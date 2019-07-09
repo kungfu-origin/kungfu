@@ -65,18 +65,12 @@ import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Pnl';
 import {mapState, mapGetters} from 'vuex';
 import * as STRATEGY_API from '__io/db/strategy'
-import {refreshStrategyNanomsg, refreshGatewayNanomsg} from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
 
 
 export default {
     data(){
         const t = this;
-        // t.oldOrderNanomsgListener = {}; //记住nanomsg,以便之后清除
-        // t.oldTradeNanomsgListener = {}; // 监听trade变化 
-        // t.oldPosNanomsgListener = null; //监听pos变化
-        // t.oldMinNanomsgListener = null;  //监听分钟线变化
-        // t.oldStrAccountNanomsgListener = null; //监听策略使用账户变化
         return {
             orderNanomsgBack: null, //传入order组件中的nanomsg推送的数据
             posNanomsgBack: null, //传入pos组件中的nanomsg推送的数据
@@ -101,106 +95,7 @@ export default {
     },
 
     methods:{
-        // //获取委托推送信息
-        // buildOrderNanomsgListener() {
-        //     const t = this
-        //     //获取推送前将之前的订阅关闭
-        //     t.getStrategyAccounts().then((strategyAccounts) => {
-        //         strategyAccounts.forEach(item => {
-        //             const gatewayName = `td_${item.source}_${item.account_id}`
-        //             const gateWayNanomsgListener = refreshGatewayNanomsg(gatewayName, t.oldOrderNanomsgListener[gatewayName] || undefined)
-        //             if(!gateWayNanomsgListener) return;
-        //             t.oldOrderNanomsgListener[gatewayName] = gateWayNanomsgListener
-        //             t.oldOrderNanomsgListener[gatewayName].on('data', buf => {
-        //                 const orderData = JSON.parse(String(buf).replace(/\0/g,''))
-        //                 const {data, msg_type} = orderData
-        //                 if(msgType.order == msg_type && data.client_id === t.strategyId) {
-        //                     t.orderNanomsgBack = Object.freeze(data)
-        //                 }
-        //             })
-        //         })
-        //     })
-        // },
-
-        // //获取成交推送信息
-        // buildTradeNanomsgListener() {
-        //     const t = this
-        //     //获取推送前将之前的订阅关闭
-        //     t.getStrategyAccounts().then((strategyAccounts) => {
-        //         strategyAccounts.forEach(item => {
-        //             const gatewayName = `td_${item.source}_${item.account_id}`
-        //             const gateWayNanomsgListener = refreshGatewayNanomsg(gatewayName, t.oldTradeNanomsgListener[gatewayName] || undefined)
-        //             if(!gateWayNanomsgListener) return;
-        //             t.oldTradeNanomsgListener[gatewayName] = gateWayNanomsgListener                    
-        //             t.oldTradeNanomsgListener[gatewayName].on('data', buf => {
-        //                 const tradeData = JSON.parse(String(buf).replace(/\0/g,''))
-        //                 const {data, msg_type} = tradeData
-        //                 if(msgType.trade == msg_type && data.client_id === t.strategyId) {
-        //                     t.tradeNanomsgBack = Object.freeze(data)
-        //                 }
-        //             })
-        //         })
-        //     })
-        // },
-
-        // //获取持仓
-        // buildPosNanomsgListener() {
-        //     const t = this
-        //     const posNanomsg = refreshStrategyNanomsg(t.strategyId, t.oldPosNanomsgListener)
-        //     if(!posNanomsg) return;
-        //     t.oldPosNanomsgListener = posNanomsg
-        //     posNanomsg.on('data', buf => {
-        //         const posData = JSON.parse(String(buf).replace(/\0/g,''))
-        //         const {data, msg_type} = posData
-        //         if(msgType.position == msg_type && data.client_id === t.strategyId) {
-        //             t.posNanomsgBack = Object.freeze(data)
-        //         }
-        //     })
-        // },
-
-        // //获取pnl min线
-        // buildMinNanomsgListener() {
-        //     const t = this
-        //     const minNanomsg = refreshStrategyNanomsg(t.strategyId, t.oldMinNanomsgListener)
-        //     if(!minNanomsg) return;
-        //     t.oldMinNanomsgListener = minNanomsg
-        //     minNanomsg.on('data', buf => {
-        //         const minData = JSON.parse(String(buf).replace(/\0/g,''))
-        //         const {data, msg_type} = minData
-        //         if(msgType.portfolioByMin == msg_type) {
-        //             t.minNanomsgBack = Object.freeze(data)
-        //         }
-        //     })
-        // },
-
-        // //当策略下的账户有变化的时候会推送数据
-        // buildStrategyAccountsNanomsgListener() {
-        //     const t = this
-        //     const stratAccountNanomsg = refreshStrategyNanomsg(t.strategyId, t.oldStrAccountNanomsgListener)
-        //     if(!stratAccountNanomsg) return;
-        //     t.oldStrAccountNanomsgListener = stratAccountNanomsg
-        //     stratAccountNanomsg.on('data',buf => {
-        //         const accountData = JSON.parse(String(buf).replace(/\0/g,''))
-        //         const {data, msg_type} = accountData
-        //         if(msgType.strategyUsedAccountUpdate == msg_type) {
-        //             t.$refs['current-order'] && t.closeNanomsg(t.oldOrderNanomsgListener) && t.$refs['current-order'].resetData() && t.$refs['current-order'].init();
-        //             t.$refs['trade-record'] && t.closeNanomsg(t.oldTradeNanomsgListener) && t.$refs['trade-record'].resetData() && t.$refs['trade-record'].init();
-        //         }
-        //     })
-        // },
-
-        // //close trade/order nano msg , because they are built by diff accounts
-        // closeNanomsg(nanomsg) {
-        //     const nanomsgKeys = Object.keys(nanomsg || {});
-        //     if(nanomsgKeys.length) {
-        //         nanomsgKeys.map(key => {
-        //             nanomsg[key] && nanomsg[key].close();
-        //         })
-        //     }
-        //     return true;
-        // },
-
-  
+        
         getStrategyPos: STRATEGY_API.getStrategyPos,
         getStrategyOrder: STRATEGY_API.getStrategyOrder,
         getStrategyTrade: STRATEGY_API.getStrategyTrade,

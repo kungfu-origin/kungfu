@@ -3,7 +3,7 @@ import { buildDateRange } from '__gUtils/busiUtils';
 
 import {
     STRATEGYS_DB, 
-    buildAccountOrdersDBPath,
+    LIVE_TRADING_DATA_DB,
     buildStrategyPosDBPath,
     buildStrategySnapshortsDBPath,
     buildAccountTradesDBPath
@@ -52,70 +52,45 @@ export const updateStrategyPath = (strategy_id, strategy_path) => {
     return runInsertUpdateDeleteDB(STRATEGYS_DB, 'UPDATE strategys SET strategy_path = ? WHERE strategy_id = ?', [strategy_path, strategy_id])    
 }
 
-
 /**
  * 获取某策略下委托
  */
 export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) => {
+    dateRange = dateRange || [];
+    id = id || ''
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策略！');
     const strategyAddTime = strategys[0].add_time;
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)    
-    return new Promise((resolve, reject) => {
-        let tableData = []
-            accounts = [];
-            throw new Error('这块要重写!')
-            if(accounts.length == 0) resolve([]);
-            //todo: accountid 不清楚
-            const promises = accounts.map(item => 
-                    (runSelectDB(buildAccountOrdersDBPath(
-                        undefined,
-                        item.account_id), 
-                        `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
-                        ` AND (order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
-                        ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
-                        (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
-                    ).then(orders => tableData = tableData.concat(orders)))
-            )
-            //用这种方式处理map+promise
-            Promise.all(promises).then(() => {
-                //对整体排序，默认的只是账户1排序后面跟着账户2的排序，需要的是整体的排序
-                tableData.sort((a, b) => b.insert_time - a.insert_time)
-                resolve(tableData)
-            })
-      
-
-    })
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
+        ` AND (order_id LIKE '%${id}%' OR instrument_id LIKE '%${id}%')` + //有id筛选的时候
+        ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
+        (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
+        ` ORDER BY insert_time`
+    )
 }
 
 /**
  * 获取某策略下成交
  */
 export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay) => {
+    dateRange = dateRange || [];
+    id = id || ''
     //新建与之前重名策略，防止get之前的数据    
     const strategys = await getStrategyById(strategyId)
     if(!strategys[0]) throw new Error('找不到该策咯！');
     const strategyAddTime = strategys[0].add_time;
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
-    return new Promise((resolve, reject) => {
-        getStrategyAccounts(strategyId).then(accounts => {
-            let tableData = [];
-            const promises = accounts.map(item => runSelectDB(
-                buildAccountTradesDBPath(item.account_id), 
-                `SELECT rowId, * FROM trade WHERE client_id = '${strategyId}'` + 
-                ` AND (instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
-                ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}`
-            ).then(trade => tableData = tableData.concat(trade)))
-            Promise.all(promises)
-            .then(() => {
-                tableData.sort((a, b) => b.trade_time - a.trade_time)
-                resolve(tableData)
-            }).catch(err => reject(err))
-        }).catch(err => {
-            reject(err)
-        })
-    })
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB,
+        `SELECT rowId, * FROM trades WHERE client_id = '${strategyId}'` + 
+        ` AND instrument_id LIKE '%${id}%'` + //有id筛选的时候
+        ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}` +
+        ` ORDER BY trade_time`
+    )
 }
 
 /**

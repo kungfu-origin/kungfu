@@ -308,8 +308,6 @@ export const getLog = (logPath, searchKeyword) => {
     })
 }
 
-
-
 export const buildDateRange = (dateRange, tradingDay, addTime=0) => {
     dateRange = dateRange || [];
     const momentDay = tradingDay ? moment(tradingDay) : moment();
@@ -317,8 +315,8 @@ export const buildDateRange = (dateRange, tradingDay, addTime=0) => {
     const startDate = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000, addTime)
     const endDate = (moment(momentDay.add(1, 'd').format('YYYY-MM-DD')).valueOf()) * 1000000
     //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const dateRange0 = Math.max(moment(dateRange ? dateRange[0] : undefined).valueOf() * 1000000, addTime);
-    const dateRange1 = moment(dateRange ? dateRange[1] : undefined).add(1, 'd').valueOf() * 1000000;
+    const dateRange0 = Math.max(moment(dateRange.length ? dateRange[0] : undefined).valueOf() * 1000000, addTime);
+    const dateRange1 = moment(dateRange.length ? dateRange[1] : undefined).add(1, 'd').valueOf() * 1000000;
     return dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
 }
 

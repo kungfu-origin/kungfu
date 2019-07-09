@@ -62,7 +62,13 @@ export const getAccountAsset = (accountId) => {
  * 
  */
 export const getAccountPos = (accountId, {instrumentId, type}) => {
-    return runSelectDB(LIVE_TRADING_DATA_DB, (`SELECT * FROM account_position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type || ''}` : ``) + ' ORDER BY instrument_id'))
+    instrumentId = instrumentId || '';
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        `SELECT * FROM account_position where account_id = "${accountId}" AND instrument_id LIKE '%${instrumentId}%'` +
+        (type ? ` AND instrument_type = ${type || ''}` : ``) + 
+        ' ORDER BY instrument_id'
+    )
 }
 /**
  * 获取账户成交情况
@@ -71,16 +77,10 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
 export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
     id = id || '';
     const filterDate = buildDateRange(dateRange, tradingDay)
-    return new Promise((resolve, reject) => {
-        //查询总数的时候也需要根据筛选条件来
-        const sql = `WHERE (account_id="${accountId}" AND instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
-        (` AND trade_time > ${filterDate[0]} AND trade_time < ${filterDate[1]}`) //有日期筛选的时候
-        runSelectDB(LIVE_TRADING_DATA_DB, `SELECT rowId, * FROM trades ${sql} ORDER BY trade_id DESC`).then(trades => {
-            resolve(trades)
-        }).catch(err => {
-            reject(err)
-        })
-    })
+    //查询总数的时候也需要根据筛选条件来
+    const sql = `WHERE (account_id="${accountId}" AND instrument_id LIKE '%${id}%' OR client_id LIKE '%${id}%')` + //有id筛选的时候
+    (` AND trade_time > ${filterDate[0]} AND trade_time < ${filterDate[1]}`) //有日期筛选的时候
+    return runSelectDB(LIVE_TRADING_DATA_DB, `SELECT rowId, * FROM trades ${sql} ORDER BY trade_id DESC`)
 }
 
 /**
@@ -93,17 +93,11 @@ export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
     id = id || '';
     dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
-    return new Promise((resolve, reject) => {
-        //查询总数的时候也需要根据筛选条件来
-        const sql = `WHERE (account_id='${accountId}' AND order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
-        ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` + 
-        (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
-        runSelectDB(LIVE_TRADING_DATA_DB, `SELECT * FROM orders ${sql} ORDER BY order_id DESC`).then(orders => {
-            resolve(orders)
-        }).catch(err => {
-            reject(err)
-        })
-    })  
+    //查询总数的时候也需要根据筛选条件来
+    const sql = `WHERE (account_id='${accountId}' AND order_id LIKE '%${id || ''}%' OR instrument_id LIKE '%${id || ''}%' OR client_id LIKE '%${id || ''}%')` + //有id筛选的时候
+    ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` + 
+    (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
+    return runSelectDB(LIVE_TRADING_DATA_DB, `SELECT * FROM orders ${sql} ORDER BY order_id DESC`)
 }
 
 /**
