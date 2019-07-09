@@ -62,6 +62,7 @@ export const getAccountAsset = (accountId) => {
  * 
  */
 export const getAccountPos = (accountId, {instrumentId, type}) => {
+    accountId = accountId.toAccountId();
     instrumentId = instrumentId || '';
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
