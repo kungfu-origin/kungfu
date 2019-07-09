@@ -26,8 +26,7 @@ namespace kungfu
             Trader::Trader(bool low_latency, locator_ptr locator, const std::string &source, const std::string &account_id)
                     :
                     apprentice(location::make(mode::LIVE, category::TD, source, account_id, std::move(locator)), low_latency),
-                    source_(source), account_id_(account_id),
-                    calendar_(nullptr)
+                    source_(source), account_id_(account_id), trading_day_("")
             {
                 log::copy_log_settings(get_io_device()->get_home(), account_id);
             }

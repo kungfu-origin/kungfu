@@ -72,15 +72,12 @@ namespace kungfu
                     if (session_id_ > 0)
                     {
                         LOGIN_INFO("login success");
-//                        set_state(GatewayState::LoggedIn);
-
                         req_account();
                         break;
                     } else
                     {
                         XTPRI *error_info = api_->GetApiLastError();
                         LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-//                        set_state(GatewayState::LoggedInFailed, std::string(error_info->error_msg));
                         std::this_thread::sleep_for(std::chrono::seconds(2));
                         retry--;
                     }
@@ -108,7 +105,7 @@ namespace kungfu
                 {
                     order.insert_time = nano;
                     order.update_time = nano;
-                    strcpy(order.trading_day, current_trading_day().c_str());
+                    strcpy(order.trading_day, trading_day().c_str());
 
                     XTPRI *error_info = api_->GetApiLastError();
                     order.error_id = error_info->error_id;
@@ -130,7 +127,7 @@ namespace kungfu
                     info.parent_id = input.parent_id;
                     info.source = event->source();
                     info.insert_time = nano;
-                    strcpy(info.trading_day, current_trading_day().c_str());
+                    strcpy(info.trading_day, trading_day().c_str());
                     order_mapper_->add_order(info);
 
                     INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id));
@@ -209,10 +206,10 @@ namespace kungfu
                                         error_info == nullptr ? 0 : error_info->error_id,
                                         error_info == nullptr ? "" : error_info->error_msg,
                                         session_id));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(current_trading_day().c_str(), order_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day().c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, current_trading_day()));
+                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, trading_day()));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -240,10 +237,10 @@ namespace kungfu
             void TdGateway::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
             {
                 TRADE_TRACE(fmt::format("(trade_info) {}", to_string(*trade_info)));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(current_trading_day().c_str(), trade_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day().c_str(), trade_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, current_trading_day()));
+                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, trading_day()));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);

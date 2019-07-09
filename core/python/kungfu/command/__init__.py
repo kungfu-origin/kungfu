@@ -1,7 +1,7 @@
 import os
 import click
 import kungfu.yijinjing.journal as kfj
-
+import pyyjj
 
 @click.group(invoke_without_command=True)
 @click.option('-H', '--home', type=str, required=True, help='kungfu home folder')
@@ -16,6 +16,8 @@ def kfc(ctx, home, log_level, name):
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.locator = kfj.Locator(home)
+    ctx.system_config_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:
@@ -27,8 +29,8 @@ def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
     ctx.log_level = ctx.parent.log_level
     ctx.locator = ctx.parent.locator
+    ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name
-
 
 def execute():
     kfc(auto_envvar_prefix='KF')

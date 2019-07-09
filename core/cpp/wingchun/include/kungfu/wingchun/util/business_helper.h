@@ -13,7 +13,6 @@
 #include <kungfu/yijinjing/io.h>
 
 #include <kungfu/wingchun/msg.h>
-#include <kungfu/wingchun/calendar/calendar.h>
 
 namespace kungfu
 {

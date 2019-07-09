@@ -6,9 +6,7 @@
 #define WINGCHUN_CONTEXT_H
 
 #include <kungfu/practice/apprentice.h>
-
 #include <kungfu/wingchun/msg.h>
-#include <kungfu/wingchun/calendar/calendar.h>
 
 namespace kungfu
 {
@@ -112,8 +110,6 @@ namespace kungfu
                 practice::apprentice& app_;
                 const rx::observable<yijinjing::event_ptr> &events_;
                 int64_t now_;
-
-                Calendar_ptr calendar_;
 
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
                 std::unordered_map<uint32_t, std::string> accounts_;

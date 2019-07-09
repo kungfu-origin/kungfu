@@ -12,7 +12,7 @@ class Holiday(Base):
     __tablename__ = "holidays"
     __table_args__ = (PrimaryKeyConstraint('region', 'holiday'),)
     region = Column(String)
-    holiday = Column(Integer)
+    holiday = Column(Date)
 
 class FutureInstrument(Base):
     __tablename__ = 'future_instrument'
