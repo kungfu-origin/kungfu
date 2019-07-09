@@ -65,9 +65,12 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)    
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        `SELECT * FROM orders WHERE client_id = '${strategyId}'` + 
-        ` AND (order_id LIKE '%${id}%' OR instrument_id LIKE '%${id}%')` + //有id筛选的时候
-        ` AND insert_time >= ${filterDate[0]} AND insert_time < ${filterDate[1]}` +
+        `SELECT * FROM orders` +
+        ` WHERE client_id = '${strategyId}'` + 
+        ` AND (order_id LIKE '%${id}%'` + 
+        ` OR instrument_id LIKE '%${id}%')` + //有id筛选的时候
+        ` AND insert_time >= ${filterDate[0]}` + 
+        ` AND insert_time < ${filterDate[1]}` +
         (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
         ` ORDER BY insert_time`
     )
@@ -86,9 +89,11 @@ export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay)
     const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
-        `SELECT rowId, * FROM trades WHERE client_id = '${strategyId}'` + 
+        `SELECT rowId, * FROM trades` +
+        ` WHERE client_id = '${strategyId}'` + 
         ` AND instrument_id LIKE '%${id}%'` + //有id筛选的时候
-        ` AND trade_time >= ${filterDate[0]} AND trade_time < ${filterDate[1]}` +
+        ` AND trade_time >= ${filterDate[0]}` + 
+        ` AND trade_time < ${filterDate[1]}` +
         ` ORDER BY trade_time`
     )
 }
@@ -96,28 +101,31 @@ export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay)
 /**
  * 获取某策略下的持仓
  */
-export const getStrategyPos = (strategyId, {instrumentId, type}) => {
-    return new Promise((resolve, reject) => {
-        runSelectDB(buildStrategyPosDBPath(strategyId), `SELECT * FROM position where instrument_id LIKE '%${instrumentId || ''}%'` + (type ? ` AND instrument_type = ${type}` : ``) + ' ORDER BY instrument_id')
-        .then(pos => {
-            let posList = {}
-            //策略的pos是一条一条成交记录？
-            pos.map(item => {
-                let key = item.instrument_id + item.direction
-                if(posList[key]) {
-                    posList[key].yesterday_volume = posList[key].yesterday_volume + item.yesterday_volume
-                    posList[key].volume = posList[key].volume + item.volume
-                    posList[key].last_price = posList[key].last_price + item.last_price
-                    posList[key].margin = posList[key].margin + item.margin
-                }else{
-                    posList[key] = item
-                }
-            })
-            resolve(Object.values(posList))
-        }).catch(err => {
-            reject(err)
+export const getStrategyPos = (strategyId, { instrumentId }) => {
+    instrumentId = instrumentId || '';
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB,
+        `SELECT * FROM portfolio_position` + 
+        ` WHERE client_id = "${strategyId}"` + 
+        ` AND instrument_id LIKE '%${instrumentId}%'` +
+        ` ORDER BY instrument_id`
+    )
+    .then(pos => {
+        let posList = {}
+        //策略的pos是一条一条成交记录？
+        pos.map(item => {
+            let key = item.instrument_id + item.direction
+            if(posList[key]) {
+                posList[key].yesterday_volume = posList[key].yesterday_volume + item.yesterday_volume
+                posList[key].volume = posList[key].volume + item.volume
+                posList[key].last_price = posList[key].last_price + item.last_price
+                posList[key].margin = posList[key].margin + item.margin
+            }else{
+                posList[key] = item
+            }
         })
-    }) 
+        return Object.values(posList);
+    })
 }
 
 /**
