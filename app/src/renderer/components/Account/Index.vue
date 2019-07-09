@@ -120,6 +120,7 @@ export default {
         t.tradingDataPipe = buildTradingDataPipe().subscribe(d => {
             const msgType = d.msg_type;
             const tradingData = d.data;
+            const ledgerCategory = tradingData.ledger_category
             const accountId = tradingData.account_id || '';
             const currentId = t.currentId.toAccountId();
             switch (msgType) {
@@ -133,13 +134,16 @@ export default {
                     break
                 case MSG_TYPE.position:
                     if(accountId !== currentId) return;
+                    if(ledgerCategory !== 0) return;
                     t.posFromNmsg = Object.freeze(tradingData);
                     break
             }
         })
 
         t.cashPipe = buildCashPipe().subscribe(({ data }) => {
-            const { account_id, source_id } = data;
+            console.log(data, '---')
+            const { account_id, source_id, ledger_category } = data;
+            if(ledger_category !== 0) return;
             const accountId = `${source_id}_${account_id}`;  
             t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
         })
@@ -157,7 +161,6 @@ export default {
         getAccountTrade: ACCOUNT_API.getAccountTrade,
         getAccountPnlMin: ACCOUNT_API.getAccountPnlMin,
         getAccountPnlDay: ACCOUNT_API.getAccountPnlDay,
-
     }
 }
 </script>

@@ -53,16 +53,9 @@ export default {
             const t = this
             //从数据库中查找
             if(!accountList || !accountList.length) return
-            const promises = accountList.map(({ account_id }) => {
-                if(!existsSync(LIVE_TRADING_DB_DIR)) return false;
-                return ACCOUNT_API.getAccountAsset(account_id).then(cash => {
-                    if(!cash || !cash.length) return false;
-                    return { accountId: account_id, cashData: cash[0] }
-                })
-            })
-            return Promise.all(promises).then(cashList => {
+            ACCOUNT_API.getAccountAsset().then(cashList => {
                 const cashData = {} 
-                cashList.forEach(cash => cashData[cash.accountId] = cash.cashData)
+                cashList.forEach(cash => cashData[`${cash.source_id}_${cash.account_id}`] = cash)
                 t.$store.dispatch('setAccountsAsset', cashData)
             })
         },

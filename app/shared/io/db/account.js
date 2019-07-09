@@ -53,7 +53,7 @@ export const changeAccountMd = (account_id, receive_md) => {
  * 获取账户资金情况
  * 
  */
-export const getAccountAsset = (accountId) => {
+export const getAccountAsset = () => {
     return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM account')
 }
 

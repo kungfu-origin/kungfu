@@ -13,7 +13,7 @@
                                 moduleType="strategy"
                                 :minMethod="getStrategyPnlMin"
                                 :dayMethod="getStrategyPnlDay"
-                                :nanomsgBackData="minNanomsgBack"
+                                :nanomsgBackData="minPnlFromNmsg"
                                 ></Pnl>
                         </el-col>
                     </el-row>
@@ -30,7 +30,7 @@
                             :currentId="strategyId"
                             moduleType="strategy"
                             :getDataMethod="getStrategyPos"
-                            :nanomsgBackData="posNanomsgBack"                   
+                            :nanomsgBackData="posFromNmsg"                   
                             ></Pos>
                     </el-row>
                     <el-row  style="height: 33.333%">
@@ -39,7 +39,7 @@
                             :currentId="strategyId"
                             moduleType="strategy"
                             :getDataMethod="getStrategyOrder"
-                            :nanomsgBackData="orderNanomsgBack"
+                            :nanomsgBackData="ordersFromNmsg"
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
@@ -48,7 +48,7 @@
                             :currentId="strategyId"
                             moduleType="strategy"
                             :getDataMethod="getStrategyTrade"
-                            :nanomsgBackData="tradeNanomsgBack"
+                            :nanomsgBackData="tradesFromNmsg"
                             ></TradeRecord>
                     </el-row>
                 </el-col>
@@ -63,22 +63,61 @@ import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Pnl';
-import {mapState, mapGetters} from 'vuex';
-import * as STRATEGY_API from '__io/db/strategy'
-import * as msgType from '__io/nano/msgType'
+import { mapState, mapGetters } from 'vuex';
+import * as STRATEGY_API from '__io/db/strategy';
+import * as msgType from '__io/nano/msgType';
+import { buildCashPipe, buildTradingDataPipe } from '__io/nano/nanoSub';
 
 
 export default {
     data(){
         const t = this;
         return {
-            orderNanomsgBack: null, //传入order组件中的nanomsg推送的数据
-            posNanomsgBack: null, //传入pos组件中的nanomsg推送的数据
-            tradeNanomsgBack: null, //传入trades组件中的nanomsg推送的数据
-            minNanomsgBack: null, //传入min组件中的nanomsg推送的数据
+            ordersFromNmsg: null,
+            tradesFromNmsg: null,
+            posFromNmsg: null,
+            minPnlFromNmsg: null
         }
     },
  
+    mounted(){
+        const t = this;
+        t.tradingDataPipe = buildTradingDataPipe().subscribe(d => {
+            const msgType = d.msg_type;
+            const tradingData = d.data;
+            const ledgerCategory = tradingData.ledger_category;
+            const strategyId = tradingData.client_id || '';
+            const currentId = t.currentId.toAccountId();
+            switch (msgType) {
+                case MSG_TYPE.order:
+                    if(strategyId !== currentId) return;
+                    t.ordersFromNmsg = Object.freeze(tradingData);
+                    break
+                case MSG_TYPE.trade:
+                    if(strategyId !== currentId) return;
+                    t.tradesFromNmsg = Object.freeze(tradingData);
+                    break
+                case MSG_TYPE.position:
+                    if(accountId !== currentId) return;
+                    if(ledgerCategory !== 1) return;
+                    t.posFromNmsg = Object.freeze(tradingData);
+                    break
+            }
+        })
+
+        t.cashPipe = buildCashPipe().subscribe(({ data }) => {
+            const { account_id, source_id, ledger_category } = data;
+            if(ledger_category !== 1) return;
+            const accountId = `${source_id}_${account_id}`;  
+            t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
+        })
+    },
+
+    destroyed(){
+        const t = this;
+        t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
+        t.cashPipe && t.cashPipe.unsubscribe();
+    },
    
     computed: {
         ...mapState({
