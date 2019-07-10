@@ -36,15 +36,15 @@ namespace kungfu
                 //@param source_id   柜台ID
                 //@param account_id  账户ID
                 //@param cash_limit  可用资金限制
-                //@return            成功或者失败
                 void add_account(const std::string &source, const std::string &account, double cash_limit);
 
                 //订阅行情
                 //@param source_id   柜台ID
                 //@param instruments 合约列表
                 //@param exchange_id 交易所ID
-                //@param is_level2   是否订阅Level2数据
                 void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "");
+
+                uint64_t insert_order(const msg::data::OrderInput &input);
 
                 //限价单报单
                 //@param instrument_id 合约ID

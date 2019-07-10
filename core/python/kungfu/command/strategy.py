@@ -4,7 +4,7 @@ import click
 from kungfu.command import kfc, pass_ctx_from_parent, replay_setup
 from kungfu.wingchun.strategy import Strategy
 from kungfu.log import create_logger
-
+from kungfu.oms.order import *
 
 @kfc.command()
 @click.option('-g', '--group', type=str, default='default', help='group')

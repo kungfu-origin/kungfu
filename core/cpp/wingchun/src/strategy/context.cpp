@@ -155,6 +155,16 @@ namespace kungfu
                 writer->close_frame(sub_msg.message_end() - buffer);
             }
 
+            uint64_t Context::insert_order(const OrderInput &input)
+            {
+                auto writer = app_.get_writer(lookup_account_location_id(std::string(input.account_id)));
+                msg::data::OrderInput &data = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                memcpy(&data, &input, sizeof(OrderInput));
+                data.order_id = writer->current_frame_uid();
+                writer->close_data();
+                return data.order_id;
+            }
+
             uint64_t Context::insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                  double limit_price, int64_t volume, Side side, Offset offset)
             {

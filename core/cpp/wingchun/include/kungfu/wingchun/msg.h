@@ -475,12 +475,26 @@ namespace kungfu
                     std::string get_instrument_id()
                     { return std::string(instrument_id); }
 
+                    void set_instrument_id(const std::string &inst)
+                    {
+                        strcpy(instrument_id, inst.c_str());
+                    }
+
                     std::string get_exchange_id()
                     { return std::string(exchange_id); }
+
+                    void set_exchange_id(const std::string &exch)
+                    {
+                        strcpy(exchange_id, exch.c_str());
+                    }
 
                     std::string get_account_id()
                     { return std::string(account_id); }
 
+                    void set_account_id(const std::string &account)
+                    {
+                        strcpy(account_id, account.c_str());
+                    }
 #ifndef _WIN32
                 } __attribute__((packed));
 

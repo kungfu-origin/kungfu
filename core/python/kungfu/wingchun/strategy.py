@@ -34,6 +34,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.now = wc_context.now
         self.ctx.subscribe = wc_context.subscribe
         self.ctx.add_account = wc_context.add_account
+        self.ctx.insert_order = wc_context.insert_order
         self.ctx.insert_limit_order = wc_context.insert_limit_order
         self.ctx.insert_fok_order = wc_context.insert_fok_order
         self.ctx.insert_fak_order = wc_context.insert_fak_order

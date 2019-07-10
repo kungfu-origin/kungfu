@@ -1,4 +1,5 @@
 
+import pywingchun
 
 class OrderBase:
     def __init__(self, ctx, **kwargs):
@@ -16,6 +17,10 @@ class OrderBase:
     @property
     def order_id(self):
         return self._order_id
+
+    @order_id.setter
+    def order_id(self, order_id):
+        self._order_id = order_id
 
     @property
     def triggered(self):
@@ -42,8 +47,8 @@ class SimpleOrder(OrderBase):
 
         self._trading_day = kwargs.pop("trading_day", None)
 
-        self.insert_time = kwargs.pop("insert_time", None)
-        self.update_time = kwargs.pop("update_time", None)
+        self._insert_time = kwargs.pop("insert_time", None)
+        self._update_time = kwargs.pop("update_time", None)
 
         self._instrument_id = kwargs.pop("instrument_id", None)
         self._exchange_id = kwargs.pop("exchange_id", None)
@@ -104,8 +109,17 @@ class SimpleOrder(OrderBase):
 
     def execute(self):
         if not self.triggered:
-            #TODO
-            self.ctx.insert_order()
+            input = pywingchun.OrderInput()
+            if self._instrument_id: input.instrument_id = self._instrument_id
+            if self._exchange_id: input.exchange_id = self._exchange_id
+            if self._account_id: input.account_id = self._account_id
+            if self._limit_price: input.limit_price = self._limit_price
+            if self._volume: input.volume = self._volume
+            if self._side: input.side = self._side
+            if self._offset: input.offset = self._offset
+            if self._price_type: input.price_type = self._price_type
+            if self._parent_id: input.parent_id = self._parent_id
+            self.order_id = self.ctx.insert_order(input)
 
     def cancel(self):
         if self.is_active:
@@ -115,7 +129,12 @@ class SimpleOrder(OrderBase):
         pass
 
     def on_order(self, event, order):
-        pass
+        if order.order_id == self.order_id:
+            self._status = order.status
+            self._update_time = order.update_time
+            self._volume = order.volume
+            self._volume_traded = order.volume_traded
+            self._volume_left = order.volume_left
 
     def on_trade(self, event, trade):
         pass
