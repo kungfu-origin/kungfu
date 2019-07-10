@@ -14,37 +14,56 @@ import * as ACCOUNT_API from '__io/db/account';
 import * as BASE_API from '__io/db/base';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
-import { buildGatewayStatePipe } from '__io/nano/nanoSub'; 
+import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 
 
 
 
 export default {
     name: 'app',
     data() {
-        return {
-        }
+        this.gatewayStatePipe = null;
+        this.cashPipe = null;
+        return {}
     },
+
     mounted(){
-        if(document.getElementById('loading')){
-            document.getElementById('loading').remove()
-        };
+        if(document.getElementById('loading')) document.getElementById('loading').remove();
     },
+
     created() {
         const t = this;
         this.subGatewayState();
+        this.subAccountCash();
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
         .then(accountList => t.getAccountsCash(accountList))
         this.getCalendarNanomsg();
     },
+
+    destroyed() {
+        const t = this;
+        t.gatewayStatePipe.unsubscribe();
+        t.cashPipe.unsubscribe();
+    },
+
     methods: {   
         subGatewayState() {
             const t = this;
-            buildGatewayStatePipe().subscribe(data => {
+            t.gatewayStatePipe = buildGatewayStatePipe().subscribe(data => {
                 t.$store.dispatch('setOneMdTdState', {
                     id: data[0],
                     stateData: data[1]
                 })
+            })
+        },
+
+        subAccountCash() {
+            const t = this;
+            t.cashPipe = buildCashPipe().subscribe(({ data }) => {
+                const { account_id, source_id, ledger_category } = data;
+                const accountId = `${source_id}_${account_id}`;                  
+                if(ledger_category !== 0) return;
+                t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
             })
         },
         

@@ -26,6 +26,7 @@ let whiteListedModules = [
 ];
 
 dependencies['kungfu-core'] = 'commonjs kungfu-core';
+dependencies['pm2'] = 'commonjs pm2';
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',

@@ -63,28 +63,28 @@
                     </template>
                 </el-table-column>
                 <el-table-column
-                    label="累计盈亏"
+                    label="实现盈亏"
                     show-overflow-tooltip
                     >
                     <template slot-scope="props">
                         <span :class="{
-                            'color-red': calcAccumulatedPnl(props.row) > 0,
-                            'color-green': calcAccumulatedPnl(props.row) < 0,
+                            'color-red': calcCash(props.row, 'realized_pnl') > 0,
+                            'color-green': calcCash(props.row, 'realized_pnl') < 0,
                         }">
-                        {{calcAccumulatedPnl(props.row) || '--'}}
+                        {{calcCash(props.row, 'realized_pnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
                 <el-table-column
-                    label="累计盈亏率"
+                    label="浮动盈亏"
                     show-overflow-tooltip
                     >
                     <template slot-scope="props">
                         <span :class="{
-                            'color-red': calcAccumulatedPnlRate(props.row) > 0,
-                            'color-green': calcAccumulatedPnlRate(props.row) < 0,
+                            'color-red': calcCash(props.row, 'unrealized_pnl') > 0,
+                            'color-green': calcCash(props.row, 'unrealized_pnl') < 0,
                         }">
-                        {{calcAccumulatedPnlRate(props.row) + '' ? calcAccumulatedPnlRate(props.row) + '%' : '--'}}
+                        {{calcCash(props.row, 'unrealized_pnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
@@ -408,9 +408,9 @@ export default {
         },
 
         //计算持仓盈亏
-        calcAccumulatedPnl(row){
+        calcCash(row, key){
             const t = this;
-            return t.$utils.toDecimal((t.accountsAsset[row.account_id] || {}).accumulated_pnl) + ''
+            return t.$utils.toDecimal((t.accountsAsset[row.account_id] || {})[key]) + ''
         },
 
         //计算持仓盈亏率

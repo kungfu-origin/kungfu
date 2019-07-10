@@ -71,7 +71,7 @@ import { buildCashPipe, buildTradingDataPipe } from '__io/nano/nanoSub';
 
 export default {
     data(){
-        const t = this;
+        this.tradingDataPipe = null;
         return {
             ordersFromNmsg: null,
             tradesFromNmsg: null,
@@ -87,36 +87,27 @@ export default {
             const tradingData = d.data;
             const ledgerCategory = tradingData.ledger_category;
             const strategyId = tradingData.client_id || '';
-            const currentId = t.currentId.toAccountId();
             switch (msgType) {
                 case MSG_TYPE.order:
-                    if(strategyId !== currentId) return;
+                    if(strategyId !== t.strategyId) return;
                     t.ordersFromNmsg = Object.freeze(tradingData);
                     break
                 case MSG_TYPE.trade:
-                    if(strategyId !== currentId) return;
+                    if(strategyId !== t.strategyId) return;
                     t.tradesFromNmsg = Object.freeze(tradingData);
                     break
                 case MSG_TYPE.position:
-                    if(accountId !== currentId) return;
+                    if(accountId !== t.strategyId) return;
                     if(ledgerCategory !== 1) return;
                     t.posFromNmsg = Object.freeze(tradingData);
                     break
             }
-        })
-
-        t.cashPipe = buildCashPipe().subscribe(({ data }) => {
-            const { account_id, source_id, ledger_category } = data;
-            if(ledger_category !== 1) return;
-            const accountId = `${source_id}_${account_id}`;  
-            t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
         })
     },
 
     destroyed(){
         const t = this;
         t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
-        t.cashPipe && t.cashPipe.unsubscribe();
     },
    
     computed: {

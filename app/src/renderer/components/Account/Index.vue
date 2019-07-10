@@ -83,7 +83,6 @@ export default {
     data() {
         const t = this;
         this.tradingDataPipe = null;
-        this.cashPipe = null;
         return {
             ordersFromNmsg: null,
             tradesFromNmsg: null,
@@ -139,20 +138,11 @@ export default {
                     break
             }
         })
-
-        t.cashPipe = buildCashPipe().subscribe(({ data }) => {
-            console.log(data, '---')
-            const { account_id, source_id, ledger_category } = data;
-            if(ledger_category !== 0) return;
-            const accountId = `${source_id}_${account_id}`;  
-            t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
-        })
     },
 
     destroyed(){
         const t = this;
         t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
-        t.cashPipe && t.cashPipe.unsubscribe();
     },
  
     methods:{
