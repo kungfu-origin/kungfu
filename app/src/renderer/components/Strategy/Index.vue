@@ -65,7 +65,7 @@ import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Pnl';
 import { mapState, mapGetters } from 'vuex';
 import * as STRATEGY_API from '__io/db/strategy';
-import * as msgType from '__io/nano/msgType';
+import * as MSG_TYPE from '__io/nano/msgType';
 import { buildCashPipe, buildTradingDataPipe } from '__io/nano/nanoSub';
 
 
