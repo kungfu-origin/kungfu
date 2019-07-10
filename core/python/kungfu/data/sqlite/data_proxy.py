@@ -3,10 +3,17 @@ from . import *
 from kungfu.data.sqlite.models import *
 import pyyjj
 from kungfu.wingchun.constants import *
+from sqlalchemy import inspect
+from kungfu.finance.position import *
+from kungfu.finance.ledger import *
 
 def make_url(locator, location, filename):
     db_file = locator.layout_file(location, pyyjj.layout.SQLITE, filename)
     return 'sqlite:///{}'.format(db_file)
+
+def object_as_dict(obj):
+    return {c.key: getattr(obj, c.key)
+            for c in inspect(obj).mapper.column_attrs}
 
 class DataProxy:
     def __init__(self, url):
@@ -89,3 +96,17 @@ class LedgerHolder(DataProxy):
             for message in messages:
                 self.process_message(session, message)
 
+    def load(self, ledger_category, account_id = None, client_id = None):
+        asset_info_cls = self.get_model_cls(int(MsgType.AssetInfo), int(ledger_category))
+        position_cls = self.get_model_cls(int(MsgType.Position), int(ledger_category))
+        with session_scope(self.session_factory) as session:
+            asset_info = session.query(asset_info_cls).filter(asset_info_cls.account_id == account_id, asset_info_cls.client_id == client_id).first()
+            if asset_info is None:
+                return None
+            else:
+                asset_info = object_as_dict(asset_info)
+                positions = {}
+                for obj in session.query(position_cls).filter(position_cls.account_id == account_id, position_cls == client_id).all():
+                    cls = StockPosition if obj.instrument_type == int(InstrumentType.Stock) else FuturePosition
+                    positions[get_symbol_id(obj.instrument_id, obj.exchange_id)] = cls(**object_as_dict(obj))
+                return Ledger(**{**asset_info, "positions": positions, "ledger_category": ledger_category})

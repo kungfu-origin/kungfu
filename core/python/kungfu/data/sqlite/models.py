@@ -101,6 +101,9 @@ class LedgerMeta(Base):
 
 class AssetInfoMixin(object):
     trading_day = Column(String)
+    account_id = Column(String)
+    source_id = Column(String)
+    client_id = Column(String)
     initial_equity = Column(Float)
     static_equity = Column(Float)
     dynamic_equity = Column(Float)
@@ -125,22 +128,20 @@ class AssetInfoMixin(object):
 class AccountAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "account"
     __table_args__ = (PrimaryKeyConstraint('account_id'),)
-    account_id = Column(String)
-    source_id = Column(String)
 
 class PortfolioAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "portfolio"
-    client_id = Column(String, nullable = False, primary_key = True)
+    __table_args__ = (PrimaryKeyConstraint('client_id'),)
 
 class SubPortfolioAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "subportfolio"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id'),)
-    account_id = Column(String)
-    source_id = Column(String)
-    client_id = Column(String)
 
 class PositionMixin(object):
     trading_day = Column(String)
+    account_id = Column(String)
+    source_id = Column(String)
+    client_id = Column(String)
     instrument_id = Column(String)
     instrument_type = Column(String)
     exchange_id = Column(String)
@@ -172,17 +173,12 @@ class PositionMixin(object):
 class AccountPosition(PositionMixin, Base):
     __tablename__ = "account_position"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'instrument_id', 'exchange_id', 'direction'),)
-    account_id = Column(String)
-    source_id = Column(String)
 
 class PortfolioPosition(PositionMixin, Base):
     __tablename__ = "portfolio_position"
     __table_args__ = (PrimaryKeyConstraint('client_id', 'instrument_id', 'exchange_id', 'direction'),)
-    client_id = Column(String)
+
 
 class SubPortfolioPosition(PositionMixin, Base):
     __tablename__ = "subportfolio_position"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id','instrument_id', 'exchange_id', 'direction'),)
-    account_id = Column(String)
-    source_id = Column(String)
-    client_id = Column(String)

@@ -68,7 +68,9 @@ class Watcher(pywingchun.Watcher):
 
     def _get_portfolio_ledger(self, client_id):
         if not client_id in self.portfolios:
-            ledger = Ledger(ledger_category = LedgerCategory.Portfolio, client_id = client_id, avail = DEFAULT_INIT_CASH)
+            ledger = self.ledger_holder.load(LedgerCategory.Portfolio, client_id = client_id)
+            if ledger is None:
+                ledger = Ledger(ledger_category = LedgerCategory.Portfolio, client_id = client_id, avail = DEFAULT_INIT_CASH)
             ledger.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
             ledger.register_callback(self.ledger_holder.on_messages)
             self.portfolios[client_id] = ledger
