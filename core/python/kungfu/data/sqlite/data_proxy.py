@@ -68,7 +68,7 @@ class LedgerHolder(DataProxy):
         elif msg_type == int(MsgType.Position):
             if ledger_category == int(LedgerCategory.Account):
                 cls = AccountPosition
-            elif category == int(LedgerCategory.Portfolio):
+            elif ledger_category == int(LedgerCategory.Portfolio):
                 cls =  PortfolioPosition
             elif ledger_category == int(LedgerCategory.SubPortfolio):
                 cls = SubPortfolioPosition

@@ -8,6 +8,7 @@ from kungfu.data.sqlite.data_proxy import make_url, DataProxy, LedgerHolder
 from kungfu.finance.ledger import *
 from kungfu.finance.position import *
 
+DEFAULT_INIT_CASH = 1e7
 
 class Watcher(pywingchun.Watcher):
     def __init__(self, ctx):
@@ -35,6 +36,8 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.info('on quote')
         for acc in self.accounts.values():
             acc.apply_quote(quote)
+        for cli in self.portfolios.values():
+            cli.apply_quote(quote)
 
     def on_order(self, event, order):
         self.ctx.logger.info('on order %s from %s', order, self.get_location(event.dest).uname)
@@ -45,12 +48,14 @@ class Watcher(pywingchun.Watcher):
 
     def on_trade(self, event, trade):
         self.ctx.logger.info('on trade %s from %s', trade, self.get_location(event.dest).uname)
+        client_id = self.get_location(event.dest).name
         trade_dict = to_dict(trade)
-        trade_dict["client_id"] = self.get_location(event.dest).name
+        trade_dict["client_id"] = client_id
         self.data_proxy.add_trade(**trade_dict)
         self.publish(json.dumps({"msg_type": int(MsgType.Trade), "data": trade_dict}))
         if trade.account_id in self.accounts:
             self.accounts[trade.account_id].apply_trade(trade)
+        self._get_portfolio_ledger(client_id).apply_trade(trade)
 
     def on_assets(self, asset_info, positions):
         self.ctx.logger.info("on assets, acc: %s", asset_info.account_id)
@@ -60,3 +65,11 @@ class Watcher(pywingchun.Watcher):
         self.accounts[asset_info.account_id] = account
         account.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
         account.register_callback(self.ledger_holder.on_messages)
+
+    def _get_portfolio_ledger(self, client_id):
+        if not client_id in self.portfolios:
+            ledger = Ledger(ledger_category = LedgerCategory.Portfolio, client_id = client_id, avail = DEFAULT_INIT_CASH)
+            ledger.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
+            ledger.register_callback(self.ledger_holder.on_messages)
+            self.portfolios[client_id] = ledger
+        return self.portfolios[client_id]
