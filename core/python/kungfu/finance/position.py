@@ -98,6 +98,7 @@ class StockPosition(Position):
                 "ledger_category": int(self.ledger.category),
                 "account_id": self.ledger.account_id,
                 "client_id": self.ledger.client_id,
+                "source_id": self.ledger.source_id,
                 "instrument_id": self.instrument_id,
                 "exchange_id":self.exchange_id,
                 "direction": int(Direction.Long),

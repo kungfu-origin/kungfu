@@ -28,6 +28,7 @@ class Ledger:
         else:
             self._account_id = kwargs.pop("account_id")
             self._client_id = kwargs.pop("client_id")
+        self._source_id = kwargs.pop("source_id", None)
 
         self._callbacks = []
 
@@ -51,6 +52,10 @@ class Ledger:
         return self._client_id
 
     @property
+    def source_id(self):
+        return self._source_id
+
+    @property
     def avail(self):
         return self._avail
 
@@ -70,6 +75,7 @@ class Ledger:
                 "ledger_category": int(self.category),
                 "account_id": self.account_id,
                 "client_id": self.client_id,
+                "source_id": self.source_id,
                 "avail": self.avail,
                 "margin": self.margin,
                 "market_value": self.market_value,

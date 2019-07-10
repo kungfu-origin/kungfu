@@ -283,6 +283,7 @@ namespace kungfu
 
             inline void from_xtp(const XTPQueryAssetRsp &ori, AssetInfo &des)
             {
+                strcpy(des.source_id, SOURCE_XTP);
                 des.ledger_category = LedgerCategory::Account;
                 des.avail = ori.buying_power;
             }

@@ -56,7 +56,7 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.info("on assets, acc: %s", asset_info.account_id)
         for pos in positions:
             self.ctx.logger.info("on assets, pos: %s", pos)
-        account = Ledger(ledger_category = asset_info.ledger_category, account_id = asset_info.account_id, avail = asset_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
+        account = Ledger(ledger_category = asset_info.ledger_category, account_id = asset_info.account_id, source_id = asset_info.source_id, avail = asset_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
         self.accounts[asset_info.account_id] = account
         account.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
         account.register_callback(self.ledger_holder.on_messages)
