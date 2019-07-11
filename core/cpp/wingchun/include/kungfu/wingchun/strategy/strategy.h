@@ -67,13 +67,7 @@ namespace kungfu
                 //@param trade             订单成交数据
                 virtual void on_trade(Context_ptr context, const msg::data::Trade &trade)
                 {};
-
-                //算法订单状态更新回调
-                //@param order_id          订单ID
-                //@param algo_type         订单类型
-                //@param event_msg         订单更新事件
-                virtual void on_algo_order_status(Context_ptr context, uint64_t order_id, const std::string &algo_type, const std::string &event_msg)
-                {};
+                
             };
 
             DECLARE_PTR(Strategy)

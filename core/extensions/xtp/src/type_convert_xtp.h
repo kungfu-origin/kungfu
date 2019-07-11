@@ -21,7 +21,6 @@ namespace kungfu
         {
 
             using namespace kungfu::wingchun::msg::data;
-            using namespace kungfu::wingchun::msg::nanomsg;
 
             inline void from_xtp_timestamp(const int64_t &xtp_time, int64_t &nsec)
             {

@@ -85,10 +85,6 @@ public:
     void on_trade(strategy::Context_ptr context, const Trade &trade) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade); }
 
-    void on_algo_order_status(strategy::Context_ptr context, uint64_t order_id, const std::string &algo_type, const std::string &event_msg) override
-    {
-        PYBIND11_OVERLOAD(void, strategy::Strategy, on_algo_order_status, context, order_id, algo_type, event_msg);
-    }
 };
 
 PYBIND11_MODULE(pywingchun, m)
@@ -212,30 +208,24 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readonly("instrument_type", &Instrument::instrument_type)
             .def_property_readonly("instrument_id", &Instrument::get_instrument_id)
             .def_property_readonly("exchange_id", &Instrument::get_exchange_id)
+            .def_readonly("contract_multiplier", &Instrument::contract_multiplier)
+            .def_readonly("price_tick", &Instrument::price_tick)
+            .def_readonly("delivery_year", &Instrument::delivery_year)
+            .def_readonly("delivery_month", &Instrument::delivery_month)
+            .def_readonly("is_trading", &Instrument::is_trading)
+            .def_readonly("long_margin_ratio", &Instrument::long_margin_ratio)
+            .def_readonly("short_margin_ratio", &Instrument::short_margin_ratio)
+            .def_property_readonly("product_id", &Instrument::get_product_id)
+            .def_property_readonly("open_date", &Instrument::get_open_date)
+            .def_property_readonly("create_date", &Instrument::get_create_date)
+            .def_property_readonly("expire_date", &Instrument::get_expire_date)
             .def("__repr__",
                  [](const Instrument &a)
                  {
                      return to_string(a);
                  }
             );
-    py::class_<FutureInstrument>(m, "FutureInstrument")
-            .def_readonly("contract_multiplier", &FutureInstrument::contract_multiplier)
-            .def_readonly("price_tick", &FutureInstrument::price_tick)
-            .def_readonly("delivery_year", &FutureInstrument::delivery_year)
-            .def_readonly("delivery_month", &FutureInstrument::delivery_month)
-            .def_readonly("is_trading", &FutureInstrument::is_trading)
-            .def_readonly("long_margin_ratio", &FutureInstrument::long_margin_ratio)
-            .def_readonly("short_margin_ratio", &FutureInstrument::short_margin_ratio)
-            .def_property_readonly("product_id", &FutureInstrument::get_product_id)
-            .def_property_readonly("open_date", &FutureInstrument::get_open_date)
-            .def_property_readonly("create_date", &FutureInstrument::get_create_date)
-            .def_property_readonly("expire_date", &FutureInstrument::get_expire_date)
-            .def("__repr__",
-                 [](const FutureInstrument &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+
     py::class_<Quote>(m, "Quote")
             .def_property_readonly("source_id", &Quote::get_source_id)
             .def_property_readonly("trading_day", &Quote::get_trading_day)

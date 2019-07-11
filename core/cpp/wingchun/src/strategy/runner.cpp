@@ -16,7 +16,6 @@ using namespace kungfu::rx;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::wingchun::msg::data;
-using namespace kungfu::wingchun::msg::nanomsg;
 
 namespace kungfu
 {

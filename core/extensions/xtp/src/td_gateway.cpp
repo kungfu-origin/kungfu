@@ -12,7 +12,6 @@
 #include "serialize_xtp.h"
 
 using namespace kungfu::wingchun::msg::data;
-using namespace kungfu::wingchun::msg::nanomsg;
 
 namespace kungfu
 {

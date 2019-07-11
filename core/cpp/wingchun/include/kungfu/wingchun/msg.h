@@ -89,46 +89,12 @@ namespace kungfu
                     Ready = 100
                 };
 
-                //合约信息
                 struct Instrument
                 {
                     char instrument_id[INSTRUMENT_ID_LEN];     //合约ID
                     char exchange_id[EXCHANGE_ID_LEN];         //交易所ID
                     InstrumentType instrument_type;            //合约类型
 
-                    std::string get_instrument_id()
-                    { return std::string(instrument_id); }
-
-                    std::string get_exchange_id()
-                    { return std::string(exchange_id); }
-
-#ifndef _WIN32
-                } __attribute__((packed));
-
-#else
-                };
-#pragma pack(pop)
-#endif
-
-                typedef Instrument StockInstrument;
-
-                inline void from_json(const nlohmann::json &j, Instrument &instrument)
-                {
-                    strcpy(instrument.exchange_id, j["exchange_id"].get<std::string>().c_str());
-                    strcpy(instrument.instrument_id, j["instrument_id"].get<std::string>().c_str());
-                    instrument.instrument_type = j["instrument_type"];
-                }
-
-                inline void to_json(nlohmann::json &j, const Instrument &instrument)
-                {
-                    j["exchange_id"] = std::string(instrument.exchange_id);
-                    j["instrument_id"] = std::string(instrument.instrument_id);
-                    j["instrument_type"] = instrument.instrument_type;
-                }
-
-                //期货合约信息
-                struct FutureInstrument : Instrument
-                {
                     char product_id[PRODUCT_ID_LEN];           //产品ID
 
                     int contract_multiplier;                   //合约乘数
@@ -146,16 +112,22 @@ namespace kungfu
                     double long_margin_ratio;                  //多头保证金率
                     double short_margin_ratio;                 //空头保证金率
 
-                    std::string get_product_id()
+                    const std::string get_instrument_id() const
+                    { return std::string(instrument_id); }
+
+                    const std::string get_exchange_id() const
+                    { return std::string(exchange_id); }
+
+                    const std::string get_product_id() const
                     { return std::string(product_id); }
 
-                    std::string get_open_date()
+                    const std::string get_open_date() const
                     { return std::string(open_date); }
 
-                    std::string get_create_date()
+                    const std::string get_create_date() const
                     { return std::string(create_date); }
 
-                    std::string get_expire_date()
+                    const std::string get_expire_date() const
                     { return std::string(expire_date); }
 
 #ifndef _WIN32
@@ -166,7 +138,7 @@ namespace kungfu
 #pragma pack(pop)
 #endif
 
-                inline void to_json(nlohmann::json &j, const FutureInstrument &instrument)
+                inline void to_json(nlohmann::json &j, const Instrument &instrument)
                 {
                     j["exchange_id"] = std::string(instrument.exchange_id);
                     j["instrument_id"] = std::string(instrument.instrument_id);
@@ -966,127 +938,6 @@ namespace kungfu
 
                 template<typename T>
                 inline std::string to_string(const T &ori)
-                {
-                    nlohmann::json j;
-                    to_json(j, ori);
-                    return j.dump();
-                }
-            }
-
-
-            namespace nanomsg
-            {
-
-                //持仓冻结信息
-                struct PositionFrozen
-                {
-                    char instrument_id[INSTRUMENT_ID_LEN];   //合约代码
-                    InstrumentType instrument_type;          //合约类型
-                    char exchange_id[EXCHANGE_ID_LEN];       //交易所代码
-                    Direction direction;                     //持仓方向
-                    int64_t volume;                          //冻结的持仓
-                    int64_t yesterday_volume;                //冻结的昨仓
-                };
-
-                //持仓修改信息
-                typedef PositionFrozen PositionDiff;
-
-                //资产冻结请求
-                struct AssetsFrozen
-                {
-                    char account_id[ACCOUNT_ID_LEN];                //账号ID
-                    char client_id[CLIENT_ID_LEN];                  //Client ID
-                    double frozen_cash;                             //冻结资金
-                    std::vector<PositionFrozen> frozen_positions;   //冻结持仓
-                };
-
-                //持仓修改请求
-                struct PositionModify
-                {
-                    char account_id[ACCOUNT_ID_LEN];                //账户ID
-                    char client_id[CLIENT_ID_LEN];                  //Client ID
-                    std::vector<PositionDiff> position_diffs;       //修改持仓
-                };
-
-                //算法订单输入
-                struct AlgoOrderInput
-                {
-                    uint64_t order_id;                              //订单ID
-                    std::string client_id;                          //Client ID
-                    std::string algo_type;                          //算法订单类型
-                    std::string input;                              //订单输入信息
-                };
-
-                inline void from_json(const nlohmann::json &j, AlgoOrderInput &input)
-                {
-                    input.order_id = j["order_id"];
-                    input.client_id = j["client_id"];
-                    input.algo_type = j["algo_type"];
-                    input.input = j["input"];
-                }
-
-                inline void to_json(nlohmann::json &j, const AlgoOrderInput &input)
-                {
-                    j["order_id"] = input.order_id;
-                    j["client_id"] = input.client_id;
-                    j["algo_type"] = input.algo_type;
-                    j["input"] = input.input;
-                }
-
-                //算法订单操作
-                struct AlgoOrderAction
-                {
-                    uint64_t order_id;                              //订单ID
-                    uint64_t order_action_id;                       //订单操作ID
-                    std::string action;                             //订单操作信息
-                };
-
-                inline void from_json(const nlohmann::json &j, AlgoOrderAction &action)
-                {
-                    action.order_id = j["order_id"];
-                    action.order_action_id = j["order_action_id"];
-                    action.action = j["action"];
-                }
-
-                inline void to_json(nlohmann::json &j, const AlgoOrderAction &action)
-                {
-                    j["order_id"] = action.order_id;
-                    j["order_action_id"] = action.order_action_id;
-                    j["action"] = action.action;
-                }
-
-                struct AlgoOrderStatus
-                {
-                    uint64_t order_id;
-                    std::string algo_type;
-                    std::string status;
-                };
-
-                inline void from_json(const nlohmann::json &j, AlgoOrderStatus &status)
-                {
-                    status.order_id = j["order_id"];
-                    status.algo_type = j["algo_type"];
-                    status.status = j["status"];
-                }
-
-                inline void to_json(nlohmann::json &j, const AlgoOrderStatus &status)
-                {
-                    j["order_id"] = status.order_id;
-                    j["algo_type"] = status.algo_type;
-                    j["status"] = status.status;
-                }
-
-                //交易Session
-                struct TradingSession
-                {
-                    std::string exchange_id;           //交易所ID
-                    std::string trading_day;           //交易日
-                    int64_t start_nano;                //开始时间纳秒时间戳
-                    int64_t end_nano;                  //结束时间纳秒时间戳
-                };
-
-                template<typename T>
-                std::string to_string(const T &ori)
                 {
                     nlohmann::json j;
                     to_json(j, ori);
