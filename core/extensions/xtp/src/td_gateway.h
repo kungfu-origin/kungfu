@@ -30,8 +30,6 @@ namespace kungfu
 
                 ~TdGateway() override;
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
-
                 const AccountType get_account_type() const override
                 { return AccountType::Stock; }
 
@@ -170,6 +168,10 @@ namespace kungfu
                 void
                 OnQueryIPOQuotaInfo(XTPQueryIPOQuotaRsp *quota_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id) override
                 {};
+
+            protected:
+
+                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
             private:
                 int client_id_;

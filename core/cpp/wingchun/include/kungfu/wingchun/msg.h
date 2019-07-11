@@ -48,6 +48,8 @@ namespace kungfu
 
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
+
+                    PassiveCtrl = 10099
                 };
             }
 

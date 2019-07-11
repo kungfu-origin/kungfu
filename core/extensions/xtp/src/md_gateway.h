@@ -28,8 +28,6 @@ namespace kungfu
 
                 ~MdGateway() override;
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
-
                 bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
 
                 bool unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override
@@ -212,6 +210,10 @@ namespace kungfu
                 ///@remark 需要快速返回
                 void OnUnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info) override
                 {};
+
+            protected:
+
+                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
 
             private:
                 int client_id_;
