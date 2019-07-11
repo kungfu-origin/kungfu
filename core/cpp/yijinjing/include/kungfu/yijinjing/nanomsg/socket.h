@@ -141,13 +141,13 @@ namespace kungfu
 
                 void close();
 
-                int send(const std::string &msg, int flags = 0) const;
+                int send(const std::string &msg, int flags = NN_DONTWAIT) const;
 
                 int recv(int flags = NN_DONTWAIT);
 
                 const std::string &recv_msg(int flags = NN_DONTWAIT);
 
-                int send_json(const nlohmann::json &msg, int flags = 0) const;
+                int send_json(const nlohmann::json &msg, int flags = NN_DONTWAIT) const;
 
                 nlohmann::json recv_json(int flags = 0);
 

@@ -221,28 +221,28 @@ namespace kungfu
                     int64_t bid_volume[10];                     //申买量
                     int64_t ask_volume[10];                     //申卖量
 
-                    std::string get_source_id()
+                    std::string get_source_id() const
                     { return std::string(source_id); }
 
-                    std::string get_trading_day()
+                    std::string get_trading_day() const
                     { return std::string(trading_day); }
 
-                    std::string get_instrument_id()
+                    std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    std::string get_exchange_id()
+                    std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
-                    std::vector<double> get_bid_price()
+                    std::vector<double> get_bid_price() const
                     { return std::vector<double>(bid_price, bid_price + 10); }
 
-                    std::vector<double> get_ask_price()
+                    std::vector<double> get_ask_price() const
                     { return std::vector<double>(ask_price, ask_price + 10); }
 
-                    std::vector<int64_t> get_bid_volume()
+                    std::vector<int64_t> get_bid_volume() const
                     { return std::vector<int64_t>(bid_volume, bid_volume + 10); }
 
-                    std::vector<int64_t> get_ask_volume()
+                    std::vector<int64_t> get_ask_volume() const
                     { return std::vector<int64_t>(ask_volume, ask_volume + 10); }
 
 #ifndef _WIN32

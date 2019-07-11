@@ -73,17 +73,16 @@ namespace kungfu
 
             virtual void on_read_from(const yijinjing::event_ptr &event);
 
-            template<typename Duration,
-                    typename Enabled = rx::enable_if_all_true_type_t<rx::is_duration<Duration>>>
+            template<typename Duration, typename Enabled = rx::is_duration<Duration>>
             std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> timeout(Duration &&d)
             {
                 auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                msg::data::TimeRequest &request = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
-                request.id = timer_usage_count;
-                request.duration = duration_ns;
-                request.repeat = 1;
+                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                r.id = timer_usage_count;
+                r.duration = duration_ns;
+                r.repeat = 1;
                 writer->close_data();
                 timer_checkpoints_[timer_usage_count] = now_;
                 timer_usage_count_++;
@@ -94,10 +93,10 @@ namespace kungfu
                                                  if (e->msg_type() != msg::type::Time)
                                                  {
                                                      auto writer = writers_[master_commands_location_->uid];
-                                                     msg::data::TimeRequest &request = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
-                                                     request.id = timer_usage_count;
-                                                     request.duration = duration_ns;
-                                                     request.repeat = 1;
+                                                     msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                                                     r.id = timer_usage_count;
+                                                     r.duration = duration_ns;
+                                                     r.repeat = 1;
                                                      writer->close_data();
                                                      timer_checkpoints_[timer_usage_count] = now_;
                                                      return true;
@@ -114,6 +113,43 @@ namespace kungfu
                                                                                 }
                                                                                 return false;
                                                                             }));
+                };
+            }
+
+            template<typename Duration, typename Enabled = rx::is_duration<Duration>>
+            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> time_interval(Duration &&d)
+            {
+                auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
+                auto writer = writers_[master_commands_location_->uid];
+                int32_t timer_usage_count = timer_usage_count_;
+                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                r.id = timer_usage_count;
+                r.duration = duration_ns;
+                r.repeat = 1;
+                writer->close_data();
+                timer_checkpoints_[timer_usage_count] = now_;
+                timer_usage_count_++;
+                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
+                {
+                    return events_ |
+                           rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                                      {
+                                          if (e->msg_type() == msg::type::Time &&
+                                              e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
+                                          {
+                                              auto writer = writers_[master_commands_location_->uid];
+                                              msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                                              r.id = timer_usage_count;
+                                              r.duration = duration_ns;
+                                              r.repeat = 1;
+                                              writer->close_data();
+                                              timer_checkpoints_[timer_usage_count] = now_;
+                                              return true;
+                                          } else
+                                          {
+                                              return false;
+                                          }
+                                      });
                 };
             }
 
