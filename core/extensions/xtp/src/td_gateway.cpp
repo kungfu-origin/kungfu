@@ -6,7 +6,6 @@
 #include <fmt/format.h>
 
 #include <kungfu/wingchun/gateway/macro.h>
-#include <kungfu/wingchun/util/business_helper.h>
 
 #include "td_gateway.h"
 #include "type_convert_xtp.h"
@@ -99,8 +98,7 @@ namespace kungfu
                 int64_t nano = kungfu::yijinjing::time::now_in_nano();
                 auto writer = get_writer(event->source());
                 msg::data::Order &order = writer->open_data<msg::data::Order>(event->gen_time(), msg::type::Order);
-                get_order(input, order, xtp_order_id);
-
+                order_from_input(input, order);
                 if (xtp_order_id == 0)
                 {
                     order.insert_time = nano;

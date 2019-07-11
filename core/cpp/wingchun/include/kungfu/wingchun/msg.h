@@ -539,27 +539,6 @@ namespace kungfu
                     input.parent_id = j["parent_id"].get<uint64_t>();
                 }
 
-                //订单输入反馈(手动下单)
-                struct OrderInputRsp
-                {
-                    uint64_t order_id;                       //订单ID
-
-                    int error_id;                            //错误ID
-                    char error_msg[ERROR_MSG_LEN];           //错误信息
-#ifndef _WIN32
-                } __attribute__((packed));
-#else
-                };
-#pragma pack(pop)
-#endif
-
-                inline void to_json(nlohmann::json &j, const OrderInputRsp &input_rsp)
-                {
-                    j["order_id"] = input_rsp.order_id;
-                    j["error_id"] = input_rsp.error_id;
-                    j["error_msg"] = input_rsp.error_msg;
-                }
-
                 //订单操作
                 struct OrderAction
                 {
@@ -593,29 +572,6 @@ namespace kungfu
                     action.action_flag = j["action_flag"];
                     action.price = j["price"].get<double>();
                     action.volume = j["volume"].get<int64_t>();
-                }
-
-                //订单操作反馈(手动下单)
-                struct OrderActionRsp
-                {
-                    uint64_t order_id;                       //订单ID
-                    uint64_t order_action_id;                //订单操作ID
-
-                    int error_id;                            //错误ID
-                    char error_msg[ERROR_MSG_LEN];           //错误信息
-#ifndef _WIN32
-                } __attribute__((packed));
-#else
-                };
-#pragma pack(pop)
-#endif
-
-                inline void to_json(nlohmann::json &j, const OrderActionRsp &action_rsp)
-                {
-                    j["order_id"] = action_rsp.order_id;
-                    j["order_action_id"] = action_rsp.order_action_id;
-                    j["error_id"] = action_rsp.error_id;
-                    j["error_msg"] = action_rsp.error_msg;
                 }
 
                 //订单消息
@@ -721,6 +677,31 @@ namespace kungfu
                     j["price_type"] = order.price_type;
                     j["volume_condition"] = order.volume_condition;
                     j["time_condition"] = order.time_condition;
+
+                }
+
+                inline void order_from_input(const msg::data::OrderInput &input, msg::data::Order &order)
+                {
+                    order.parent_id = input.parent_id;
+                    order.order_id = input.order_id;
+                    strcpy(order.instrument_id, input.instrument_id);
+                    strcpy(order.exchange_id, input.exchange_id);
+                    strcpy(order.account_id, input.account_id);
+
+                    order.limit_price = input.limit_price;
+                    order.frozen_price = input.frozen_price;
+
+                    order.volume = input.volume;
+                    order.volume_traded = 0;
+                    order.volume_left = input.volume;
+                    order.status = OrderStatus::Submitted;
+
+                    order.side = input.side;
+                    order.offset = input.offset;
+
+                    order.price_type = input.price_type;
+                    order.volume_condition = input.volume_condition;
+                    order.time_condition = input.time_condition;
 
                 }
 

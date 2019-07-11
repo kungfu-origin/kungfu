@@ -12,7 +12,6 @@
 
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/msg.h>
-#include <kungfu/wingchun/util/business_helper.h>
 
 namespace kungfu
 {
