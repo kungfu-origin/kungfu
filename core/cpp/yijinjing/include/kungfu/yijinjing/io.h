@@ -33,6 +33,8 @@ namespace kungfu
         {
         public:
 
+            io_device(data::location_ptr home, bool low_latency, bool lazy);
+
             const data::location_ptr get_home() const
             { return home_; }
 
@@ -59,9 +61,6 @@ namespace kungfu
             nanomsg::url_factory_ptr get_url_factory() const
             { return url_factory_; }
 
-            nanomsg::socket_ptr get_rep_sock() const
-            { return rep_sock_; }
-
             publisher_ptr get_publisher()
             { return publisher_; }
 
@@ -74,16 +73,28 @@ namespace kungfu
             const bool low_latency_;
             const bool lazy_;
             nanomsg::url_factory_ptr url_factory_;
-            nanomsg::socket_ptr rep_sock_;
             publisher_ptr publisher_;
             observer_ptr observer_;
-
-            io_device(data::location_ptr home, bool low_latency, bool lazy);
         };
 
         DECLARE_PTR(io_device)
 
-        class io_device_master : public io_device
+        class io_device_with_reply : public io_device
+        {
+        public:
+
+            io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
+
+            nanomsg::socket_ptr get_rep_sock() const
+            { return rep_sock_; }
+
+        protected:
+            nanomsg::socket_ptr rep_sock_;
+        };
+
+        DECLARE_PTR(io_device_with_reply)
+
+        class io_device_master : public io_device_with_reply
         {
         public:
             io_device_master(data::location_ptr home, bool low_latency);
@@ -91,7 +102,7 @@ namespace kungfu
 
         DECLARE_PTR(io_device_master)
 
-        class io_device_client : public io_device
+        class io_device_client : public io_device_with_reply
         {
         public:
             io_device_client(data::location_ptr home, bool low_latency);

@@ -190,9 +190,6 @@ namespace kungfu
         {
             live_home_ = location::make(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
             url_factory_ = std::make_shared<ipc_url_factory>();
-
-            rep_sock_ = std::make_shared<socket>(protocol::REPLY);
-            rep_sock_->bind(url_factory_->make_path_bind(home_, protocol::REPLY));
         }
 
         reader_ptr io_device::open_reader_to_subscribe()
@@ -200,7 +197,7 @@ namespace kungfu
             return std::make_shared<reader>(lazy_);
         }
 
-        reader_ptr io_device::open_reader(const data::location_ptr& location, uint32_t dest_id)
+        reader_ptr io_device::open_reader(const data::location_ptr &location, uint32_t dest_id)
         {
             auto r = std::make_shared<reader>(lazy_);
             r->join(location, dest_id, 0);
@@ -212,7 +209,7 @@ namespace kungfu
             return std::make_shared<writer>(home_, dest_id, lazy_, publisher_);
         }
 
-        writer_ptr io_device::open_writer_at(const data::location_ptr& location, uint32_t dest_id)
+        writer_ptr io_device::open_writer_at(const data::location_ptr &location, uint32_t dest_id)
         {
             return std::make_shared<writer>(location, dest_id, lazy_, publisher_);
         }
@@ -235,7 +232,14 @@ namespace kungfu
             return s;
         }
 
-        io_device_master::io_device_master(data::location_ptr home, bool low_latency) : io_device(std::move(home), low_latency, false)
+        io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :
+                io_device(std::move(home), low_latency, lazy)
+        {
+            rep_sock_ = std::make_shared<socket>(protocol::REPLY);
+            rep_sock_->bind(url_factory_->make_path_bind(home_, protocol::REPLY));
+        }
+
+        io_device_master::io_device_master(data::location_ptr home, bool low_latency) : io_device_with_reply(std::move(home), low_latency, false)
         {
             auto publisher = std::make_shared<nanomsg_publisher_master>(low_latency);
             publisher->init(*this);
@@ -245,7 +249,7 @@ namespace kungfu
             observer_ = observer;
         }
 
-        io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device(std::move(home), low_latency, true)
+        io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device_with_reply(std::move(home), low_latency, true)
         {
             auto publisher = std::make_shared<nanomsg_publisher_client>(low_latency);
             publisher->init(*this);

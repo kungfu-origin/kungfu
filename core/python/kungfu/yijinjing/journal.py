@@ -123,8 +123,7 @@ def collect_journal_locations(ctx):
 
 
 def find_sessions(ctx):
-    home = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "master", "master", ctx.locator)
-    io_device = pyyjj.io_device_client(home, False)
+    io_device = pyyjj.io_device(ctx.journal_util_location)
 
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
@@ -208,7 +207,7 @@ def trace_journal(ctx, session_id, io_type):
     locations = collect_journal_locations(ctx)
     location = locations[uid]
     home = make_location_from_dict(ctx, location)
-    io_device = pyyjj.io_device_client(home, False)
+    io_device = pyyjj.io_device(home)
     reader = io_device.open_reader_to_subscribe()
 
     if io_type == 'out' or io_type == 'all':

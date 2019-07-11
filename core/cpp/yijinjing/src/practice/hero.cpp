@@ -24,7 +24,7 @@ namespace kungfu
     namespace practice
     {
 
-        hero::hero(yijinjing::io_device_ptr io_device) :
+        hero::hero(yijinjing::io_device_with_reply_ptr io_device) :
                 io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
         {
             if (spdlog::default_logger()->name().empty())

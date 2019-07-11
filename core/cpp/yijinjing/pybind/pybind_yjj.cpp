@@ -243,7 +243,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("close", &socket::close)
             .def("send", &socket::send, py::arg("msg"), py::arg("flags") = 0)
             .def("recv", &socket::recv_msg, py::arg("flags") = 0)
-            .def("last_messsage", &socket::last_message);
+            .def("last_message", &socket::last_message);
 
     py::class_<publisher, PyPublisher, publisher_ptr>(m, "publisher")
             .def("publish", &publisher::publish)
@@ -265,7 +265,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("write_raw", &writer::write_raw);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-    io_device.def_property_readonly("publisher", &io_device::get_publisher)
+    io_device.def(py::init<data::location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)
+            .def_property_readonly("publisher", &io_device::get_publisher)
             .def_property_readonly("observer", &io_device::get_observer)
             .def_property_readonly("home", &io_device::get_home)
             .def_property_readonly("live_home", &io_device::get_live_home)
@@ -274,10 +275,13 @@ PYBIND11_MODULE(pyyjj, m)
             .def("open_writer", &io_device::open_writer)
             .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
 
-    py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device)
+    py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
+    io_device_with_reply.def(py::init<data::location_ptr, bool, bool>());
+
+    py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
             .def(py::init<data::location_ptr, bool>());
 
-    py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device)
+    py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
             .def(py::init<data::location_ptr, bool>());
 
     py::class_<master, PyMaster>(m, "master")

@@ -20,7 +20,7 @@ namespace kungfu
         class hero
         {
         public:
-            explicit hero(yijinjing::io_device_ptr io_device);
+            explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
             virtual ~hero()
             {}
@@ -39,7 +39,7 @@ namespace kungfu
             void signal_stop()
             { live_ = false; };
 
-            yijinjing::io_device_ptr get_io_device() const
+            yijinjing::io_device_with_reply_ptr get_io_device() const
             { return io_device_; }
 
             uint32_t get_home_uid() const
@@ -89,7 +89,7 @@ namespace kungfu
             virtual void react(const rx::observable<yijinjing::event_ptr> &events) = 0;
 
         private:
-            yijinjing::io_device_ptr io_device_;
+            yijinjing::io_device_with_reply_ptr io_device_;
             bool live_ = true;
         };
     }

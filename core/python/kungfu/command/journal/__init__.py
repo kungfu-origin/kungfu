@@ -19,9 +19,9 @@ def journal(ctx, mode, category, group, name):
     ctx.group = group
     ctx.name = name
     ctx.location = pyyjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.locator)
-    log_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
-    ctx.logger = create_logger('journal', ctx.log_level, log_location)
-    pyyjj.setup_log(log_location, 'journal')
+    ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
+    ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
+    pyyjj.setup_log(ctx.journal_util_location, 'journal')
 
 
 def pass_ctx_from_parent(ctx):
@@ -34,3 +34,4 @@ def pass_ctx_from_parent(ctx):
     ctx.name = ctx.parent.name
     ctx.locator = ctx.parent.locator
     ctx.location = ctx.parent.location
+    ctx.journal_util_location = ctx.parent.journal_util_location
