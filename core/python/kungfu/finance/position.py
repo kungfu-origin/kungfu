@@ -104,6 +104,8 @@ class StockPosition(Position):
                 "direction": int(Direction.Long),
                 "volume":self.volume,
                 "yesterday_volume": self.yesterday_volume,
+                "last_price": self.last_price,
+                "open_price": self.avg_open_price,
                 "realized_pnl": self.realized_pnl,
                 "unrealized_pnl": self.unrealized_pnl
             }
@@ -153,6 +155,7 @@ class StockPosition(Position):
         self.ledger.dispatch([self.ledger.message, self.message])
 
     def apply_settlement(self, close_price):
+        self._last_price = close_price
         self._close_price = close_price
 
     def apply_quote(self, quote):
