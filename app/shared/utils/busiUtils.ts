@@ -5,12 +5,39 @@ const path = require("path");
 const fs = require('fs-extra');
 const moment = require('moment');
 
+interface LogLineData {
+    message: string;
+    type: string;
+    timestamp: string;
+    [propName: string]: any;
+}
+
+interface LogMessageData {
+    updateTime: string;
+    type: string;
+    pid: string;
+    action: string;
+    message: string;
+}
+
+interface SourceAccountId {
+    source: string,
+    id: string
+}
+
+declare global {
+    interface String {
+        toAccountId(): string;
+        parseSourceAccountId(): SourceAccountId;
+    }
+}
+
+export {}
+
 //因为accountid都是source_accountID,需要截取掉柜台名称
 String.prototype.toAccountId = function(): string{
     return this.split('_').slice(1).join('_')
 }
-
-
 
 String.prototype.parseSourceAccountId = function(): SourceAccountId {
     const parseList = this.toString().split('_');

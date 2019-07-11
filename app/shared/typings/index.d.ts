@@ -1,38 +1,15 @@
-
 declare var __resources: string;
 
 
-interface SourceAccountId {
-    source: string,
-    id: string
-}
-
-interface String {
-    toAccountId(): string;
-    parseSourceAccountId(): SourceAccountId;
-}
 
 interface NumberToStringObject {
     [propName: number]: string;
 }
+
 interface StringToStringObject {
     [propName: string]: string;
 }
 
-interface LogLineData {
-    message: string;
-    type: string;
-    timestamp: string;
-    [propName: string]: any;
-}
-
-interface LogMessageData {
-    updateTime: string;
-    type: string;
-    pid: string;
-    action: string;
-    message: string;
-}
 
 interface OrderData {
     id: string;
@@ -49,8 +26,6 @@ interface OrderData {
     orderId: string;
     exchangeId: string;
 }
-
-
 
 interface PosData {
     id: string;

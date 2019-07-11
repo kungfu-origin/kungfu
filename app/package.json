@@ -16,12 +16,11 @@
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
     "buildInstaller": "electron-builder",
-    "build": "yarn run copy && node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
-    "dev": "yarn run copy && node .electron-kungfu/dev-runner.js",
+    "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
+    "dev": "node .electron-kungfu/dev-runner.js",
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
-    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
-    "copy": "copyfiles -f ../core/cpp/wingchun/resources/commission.db resources/default && copyfiles -f ../core/cpp/wingchun/resources/holidays.db resources/default"
+    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js"
   },
   "cmake-js": {
     "runtime": "electron",

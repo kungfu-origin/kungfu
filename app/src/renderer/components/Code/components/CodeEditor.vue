@@ -8,7 +8,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
-import * as CODE_UTILS from "__gUtils/fileUtils.js";
+import * as CODE_UTILS from "__gUtils/fileUtils";
 
 import CodeMirror from 'codemirror/lib/codemirror'
 import 'codemirror/lib/codemirror.css';
