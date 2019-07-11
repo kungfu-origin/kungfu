@@ -40,26 +40,11 @@ namespace kungfu
                     AssetInfoSnapshot = 207,
                     PositionDetail = 208,
 
-                    ReqLogin = 301,
                     Subscribe = 302,
-                    ReqOrderInput = 303,
-                    ReqOrderAction = 304,
-
-                    RspLogin = 351,
-                    RspSubscribe = 352,
-                    RspOrderInput = 353,
-                    RspOrderAction = 354,
-
                     GatewayState = 401,
-
-                    AlgoOrderInput = 501,
-                    AlgoOrderStatus = 502,
-                    AlgoOrderAction = 503,
 
                     SwitchDay = 601,
                     RspTradingDay = 602,
-
-                    ReloadFutureInstrument = 701,
 
                     PositionEnd = 800,
                     PositionDetailEnd = 801,

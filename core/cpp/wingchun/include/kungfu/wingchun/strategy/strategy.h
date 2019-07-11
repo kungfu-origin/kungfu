@@ -67,7 +67,7 @@ namespace kungfu
                 //@param trade             订单成交数据
                 virtual void on_trade(Context_ptr context, const msg::data::Trade &trade)
                 {};
-                
+
             };
 
             DECLARE_PTR(Strategy)

@@ -188,15 +188,7 @@ PYBIND11_MODULE(pywingchun, m)
         .value("AssetInfoSnapshot", kungfu::wingchun::msg::type::AssetInfoSnapshot)
         .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
         .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
-        .value("ReqOrderInput", kungfu::wingchun::msg::type::MsgType::ReqOrderInput)
-        .value("ReqOrderAction", kungfu::wingchun::msg::type::MsgType::ReqOrderAction)
-        .value("RspLogin", kungfu::wingchun::msg::type::MsgType::RspLogin)
-        .value("RspSubscribe", kungfu::wingchun::msg::type::MsgType::RspSubscribe)
-        .value("RspOrderInput", kungfu::wingchun::msg::type::MsgType::RspOrderInput)
         .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
-        .value("AlgoOrderInput", kungfu::wingchun::msg::type::MsgType::AlgoOrderInput)
-        .value("AlgoOrderStatus", kungfu::wingchun::msg::type::MsgType::AlgoOrderStatus)
-        .value("AlgoOrderAction", kungfu::wingchun::msg::type::MsgType::AlgoOrderAction)
         .value("SwitchDay", kungfu::wingchun::msg::type::MsgType::SwitchDay)
         .value("RspTradingDay", kungfu::wingchun::msg::type::MsgType::RspTradingDay)
         .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
@@ -495,6 +487,5 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_transaction", &strategy::Strategy::on_transaction)
             .def("on_order", &strategy::Strategy::on_order)
             .def("on_trade", &strategy::Strategy::on_trade)
-            .def("on_algo_order_status", &strategy::Strategy::on_algo_order_status);
-
+            ;
 }
