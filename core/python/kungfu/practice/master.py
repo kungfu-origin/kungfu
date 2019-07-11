@@ -26,8 +26,8 @@ class Master(pyyjj.master):
         self.ctx.logger = create_logger("watcher", ctx.log_level, self.io_device.home)
         self.ctx.apprentices = {}
 
-        ctx.calendar = Calendar(ctx)
-        ctx.trading_day = ctx.calendar.trading_day
+        # ctx.calendar = Calendar(ctx)
+        # ctx.trading_day = ctx.calendar.trading_day
 
         os_signal.handle_os_signals(self.exit_gracefully)
 
