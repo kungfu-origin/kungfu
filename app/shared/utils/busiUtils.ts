@@ -36,6 +36,7 @@ export {}
 
 //因为accountid都是source_accountID,需要截取掉柜台名称
 String.prototype.toAccountId = function(): string{
+    if(this.indexOf('_') === -1) return this.toString();
     return this.split('_').slice(1).join('_')
 }
 
@@ -382,7 +383,7 @@ export const dealPos = (item: any): PosData => {
         yesterdayVolume: toDecimal(item.yesterday_volume),
         todayVolume: toDecimal(item.volume - item.yesterday_volume),
         totalVolume: toDecimal(item.volume),
-        costPrice: +toDecimal(item.cost_price) || '--',
+        openPrice: +toDecimal(item.open_price) || '--',
         lastPrice: +toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })

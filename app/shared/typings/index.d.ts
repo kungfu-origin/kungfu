@@ -33,8 +33,7 @@ interface PosData {
     direction: string;
     yesterdayVolume: number;
     todayVolume: number;
-    totalVolume: number;
-    costPrice: number | string;
+    openPrice: number | string;
     lastPrice: number | string;
     unRealizedPnl: number | string;
 }

@@ -78,14 +78,15 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
  * 
  */
 export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
+    accountId = accountId.toAccountId();
     id = id || '';
     const filterDate = buildDateRange(dateRange, tradingDay)
     //查询总数的时候也需要根据筛选条件来
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT rowId, * FROM trades` + 
-        ` WHERE (account_id="${accountId}"` +
-        ` AND instrument_id LIKE '%${id}%'` +
+        ` WHERE account_id="${accountId}"` +
+        ` AND (instrument_id LIKE '%${id}%'` +
         ` OR client_id LIKE '%${id}%')` +
         ` AND trade_time > ${filterDate[0]}` + 
         ` AND trade_time < ${filterDate[1]}` + //有日期筛选的时候
@@ -100,6 +101,7 @@ export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
 export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
+    accountId = accountId.toAccountId();    
     id = id || '';
     dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
@@ -107,8 +109,8 @@ export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM orders` +  
-        ` WHERE (account_id='${accountId}'` +
-        ` AND order_id LIKE '%${id}%'` +
+        ` WHERE account_id='${accountId}'` +
+        ` AND (order_id LIKE '%${id}%'` +
         ` OR instrument_id LIKE '%${id}%'` +
         ` OR client_id LIKE '%${id}%')` +
         ` AND insert_time >= ${filterDate[0]}` +
