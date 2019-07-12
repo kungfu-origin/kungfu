@@ -115,6 +115,7 @@ PYBIND11_MODULE(pywingchun, m)
         .value("Account", kungfu::wingchun::LedgerCategory::Account)
         .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
         .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
+        .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)
         .export_values()
         ;
 

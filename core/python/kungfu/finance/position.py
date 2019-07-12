@@ -64,7 +64,6 @@ class Position:
     def apply_trade(self, trade):
         raise NotImplementationError
 
-
     def apply_quote(self, quote):
         raise NotImplementationError
 

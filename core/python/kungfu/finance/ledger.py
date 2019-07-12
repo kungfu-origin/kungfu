@@ -19,17 +19,9 @@ class Ledger:
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
 
-        self._category = kwargs.pop("ledger_category")
-        if self._category == LedgerCategory.Account:
-            self._account_id = kwargs.pop("account_id")
-            self._client_id = None
-        elif self._category == LedgerCategory.Portfolio:
-            self._account_id = None
-            self._client_id = kwargs.pop("client_id")
-        else:
-            self._account_id = kwargs.pop("account_id")
-            self._client_id = kwargs.pop("client_id")
-
+        self._category = kwargs.pop("ledger_category", LedgerCategory.Unknown)
+        self._account_id = kwargs.pop("account_id", None)
+        self._client_id = kwargs.pop("client_id", None)
         self._source_id = kwargs.pop("source_id", None)
 
         self._callbacks = []
