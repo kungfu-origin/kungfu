@@ -1,7 +1,5 @@
 declare var __resources: string;
 
-
-
 interface NumberToStringObject {
     [propName: number]: string;
 }
@@ -10,6 +8,23 @@ interface StringToStringObject {
     [propName: string]: string;
 }
 
+interface Account {
+    account_id: string;
+    source_name: string;
+    receive_md: boolean;
+    config?: any;
+}
+
+interface Strategy {
+    stratgy_id: string;
+    strategy_path: string;
+    add_time: number;
+}
+
+interface MessageData {
+    type: string;
+    message: string;
+}
 
 interface OrderData {
     id: string;
@@ -38,6 +53,16 @@ interface PosData {
     unRealizedPnl: number | string;
 }
 
+interface PosInputData {
+    instrument_id: string;
+    direction: string;
+    yesterday_volume: number;
+    volume: number;
+    last_price: number;
+    margin: number;
+    [propName: string]: any;
+}
+
 interface TradeData {
     id: string;
     tradeTime: string;
@@ -61,4 +86,12 @@ interface TradeInputData {
     price: number;
     volume: number;
     [propName: string]: any;
+}
+
+
+interface TradingDataFilter {
+    instrumentId?: string;
+    type?: string;
+    id?: string;
+    dateRange?: string[];
 }

@@ -1,4 +1,4 @@
-import { createInterface } from 'readline';
+import readline from 'readline';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 
 const path = require("path");
@@ -24,6 +24,8 @@ interface SourceAccountId {
     source: string,
     id: string
 }
+
+
 
 declare global {
     interface String {
@@ -318,7 +320,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<{}> => {
                 return;
             }
 
-            const lineReader = createInterface({
+            const lineReader = readline.createInterface({
                 input: fs.createReadStream(logPath)
             })
 

@@ -290,11 +290,10 @@ export const openReadFile = (logPath: string): void => {
     shell.openItem(logPath)
 }
 
-export const existsSync = (filePath: string): void => {
+export const existsSync = (filePath: string): boolean => {
     return fse.existsSync(filePath)
 }
 
 export const copySync = (fromPath: string, toPath: string): void => {
-    return fse.copySync(fromPath, toPath)
-
+    fse.copySync(fromPath, toPath)
 }

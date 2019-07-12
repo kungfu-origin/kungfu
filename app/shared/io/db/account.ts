@@ -11,7 +11,7 @@ export const getAccountList = () => {
     return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config ORDER BY account_id')
 }
 
-export const getAccountBySource = (sourceName) => {
+export const getAccountBySource = (sourceName: string) => {
     return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config WHERE source_name = ?', sourceName)
 }
 
@@ -20,7 +20,7 @@ export const getAccountBySource = (sourceName) => {
  * @param {String} account_id 账户id
  */
 
-export const addAccount = (account_id, source_name, receive_md, config) => {
+export const addAccount = (account_id: string, source_name: string, receive_md: boolean, config: any) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO account_config(account_id, source_name,receive_md, config) VALUES (?, ?, ?, ?)', [account_id, source_name, receive_md, config])
 }
 
@@ -28,7 +28,7 @@ export const addAccount = (account_id, source_name, receive_md, config) => {
  * 更改账户配置
  * @param  {} account_id
  */
-export const updateAccountConfig = (account_id, config) => {
+export const updateAccountConfig = (account_id: string, config: any) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE account_config SET config = ? WHERE account_id = ?', [config, account_id])
 }
 
@@ -36,7 +36,7 @@ export const updateAccountConfig = (account_id, config) => {
  * 删除账户
  * @param  {} account_id 账户id
  */
-export const deleteAccount = (account_id) => {
+export const deleteAccount = (account_id: string) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM account_config WHERE account_id = ?", account_id)
 }
 
@@ -45,7 +45,7 @@ export const deleteAccount = (account_id) => {
  * @param  {} account_id 账户id
  * @param  {} receive_md 是否接受行情
  */
-export const changeAccountMd = (account_id, receive_md) => {
+export const changeAccountMd = (account_id: string, receive_md: boolean) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE account_config SET receive_md = ? WHERE account_id = ?', [receive_md, account_id])
 }
 
@@ -61,9 +61,10 @@ export const getAccountAsset = () => {
  * 获取账户持仓情况
  * 
  */
-export const getAccountPos = (accountId, {instrumentId, type}) => {
+export const getAccountPos = (accountId: string, { instrumentId, type }: TradingDataFilter) => {
     accountId = accountId.toAccountId();
     instrumentId = instrumentId || '';
+    type = type || '';
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM account_position` + 
@@ -77,9 +78,10 @@ export const getAccountPos = (accountId, {instrumentId, type}) => {
  * 获取账户成交情况
  * 
  */
-export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
+export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
     accountId = accountId.toAccountId();
     id = id || '';
+    dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
     //查询总数的时候也需要根据筛选条件来
     return runSelectDB(
@@ -100,7 +102,7 @@ export const getAccountTrade = (accountId, { id, dateRange }, tradingDay) => {
  * @param {String} id  模糊查询的id部分数据
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
-export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
+export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
     accountId = accountId.toAccountId();    
     id = id || '';
     dateRange = dateRange || [];
@@ -124,7 +126,7 @@ export const getAccountOrder = (accountId, { id, dateRange }, tradingDay) => {
  * 获取账户收益曲线分钟线
  * 
  */
-export const getAccountPnlMin = (accountId, tradingDay) => {
+export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
     if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(LIVE_TRADING_DATA_DB, 
@@ -135,27 +137,27 @@ export const getAccountPnlMin = (accountId, tradingDay) => {
  * 获取账户收益曲线日线
  * 
  */
-export const getAccountPnlDay = (accountId) => {
+export const getAccountPnlDay = (accountId: string) => {
     if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM trading_account_1d_snapshots')
 }
 
 
-export const setFeeSettingData = (accountId, feeSettingData) => {
+export const setFeeSettingData = (accountId: string, feeSettingData: any) => {
     if(feeSettingData.length < 1) throw new Error('fees length is 0')
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
     if(!existsSync(COMMISSION_DB)) throw new Error('commission.db is not exist!')
     return new Promise((resolve, reject) => {
-        const keys = Object.keys(feeSettingData[0], {})
+        const keys = Object.keys(feeSettingData[0] || {})
         const q = [...keys].fill("?")
         runClearDB(COMMISSION_DB, 'commission')
-        .then(() => runBatchInsertDB(COMMISSION_DB, `INSERT INTO commission(${keys.join(", ")}) VALUES (${q.join(", ")})`, feeSettingData.map(f => [...Object.values(f)])))
+        .then(() => runBatchInsertDB(COMMISSION_DB, `INSERT INTO commission(${keys.join(", ")}) VALUES (${q.join(", ")})`, feeSettingData.map((f: any): any[] => [...Object.values(f)])))
         .then(() => resolve(true))
-        .catch(err => reject(err))
+        .catch((err: Error): void => reject(err))
     })
 }
 
-export const getFeeSettingData = (accountId) => {
+export const getFeeSettingData = (accountId: string) => {
     const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
     if(!existsSync(COMMISSION_DB)) {
         try{

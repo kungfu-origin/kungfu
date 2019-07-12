@@ -1,0 +1,1 @@
+export const uploadUrl: string = "http://taurusai.com/kungfu"

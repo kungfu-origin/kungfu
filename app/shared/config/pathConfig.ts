@@ -3,6 +3,7 @@ const path = require('path');
 const mainProcess = require('electron').app;
 const renderProcess = require('electron').remote;
 
+
 //ELEC_BASE
 var ELEC_BASE_DIR_RESOLVE;
 if(process.env.APP_TYPE === 'cli') ELEC_BASE_DIR_RESOLVE = process.env.APPDATA || (process.platform == 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support', 'kungfu') : path.join('var', 'local', 'kungfu'))
@@ -63,13 +64,13 @@ export const TASKS_DB = path.join(BASE_DB_DIR, 'task.db')
 //================= account related start ==========================
 
 //gateway
-export const buildGatewayPath = (gatewayName) => path.join(KF_HOME, ...gatewayName.split('_'))
+export const buildGatewayPath = (gatewayName: string) => path.join(KF_HOME, ...gatewayName.split('_'))
 
 //gateway data
-export const buildGatewayLiveDBPath = (gatewayName) => path.join(buildGatewayPath(gatewayName), 'db', 'live')
+export const buildGatewayLiveDBPath = (gatewayName: string) => path.join(buildGatewayPath(gatewayName), 'db', 'live')
 
 //account commission 手续费
-export const buildAccountCommissionDBPath = (accountId) => path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
+export const buildAccountCommissionDBPath = (accountId: string) => path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
 
 //================= account related end ==========================
 
@@ -85,10 +86,10 @@ export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
 //================= strategy related start =======================
 
 //strategyPos 某策略下的持仓
-export const buildStrategyPosDBPath = (strategyId) => path.join(STRATEGY_DIR, strategyId, 'assets.db')
+export const buildStrategyPosDBPath = (strategyId: string) => path.join(STRATEGY_DIR, strategyId, 'assets.db')
 
 //snapshorts
-export const buildStrategySnapshortsDBPath = (accountId) => path.join(STRATEGY_DIR, accountId, 'snapshots.db')
+export const buildStrategySnapshortsDBPath = (accountId: string) => path.join(STRATEGY_DIR, accountId, 'snapshots.db')
 
 //================== strategy related end =========================
 
@@ -98,7 +99,7 @@ export const buildStrategySnapshortsDBPath = (accountId) => path.join(STRATEGY_D
 export const GLOBAL_COMMISSION_DB = path.join(BASE_DB_DIR, 'commission.db');
 
 //获取进程日志地址
-export const buildProcessLogPath = (processId) => path.join(LOG_DIR, `${processId}.log`)
+export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${processId}.log`)
 
 //获取watcher nano pub 地址
 export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
@@ -106,13 +107,13 @@ export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', '
 //获取watcher nano rep 地址
 export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
 
-
 //================== others end ===================================
 
 //kungfu-engine
-export const KUNGFU_ENGINE = process.env.NODE_ENV === 'production' 
+export const KUNGFU_ENGINE: string = process.env.NODE_ENV === 'production' 
     ? process.env.APP_TYPE === 'cli' 
         ? path.join('.') 
+        //@ts-ignore
         : process.resourcesPath
     : process.env.APP_TYPE === 'cli' 
         ? path.join(__dirname, '..', '..', '..', '..', 'core', 'build')

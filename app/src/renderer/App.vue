@@ -7,7 +7,7 @@
 import path from 'path';
 import { mapState } from 'vuex';
 
-import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig.js';
+import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
