@@ -40,7 +40,7 @@ namespace kungfu
 
                 //交易日切换回调
                 //@param next_trading_day  下一个交易日
-                virtual void on_switch_day(Context_ptr context, const std::string &next_trading_day)
+                virtual void on_trading_day(Context_ptr context, const std::string &next_trading_day)
                 {};
 
                 //行情数据更新回调

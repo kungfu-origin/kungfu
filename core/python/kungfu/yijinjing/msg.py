@@ -7,3 +7,4 @@ RequestUnsubscribe = 10022
 RequestWriteTo = 10023
 RequestUnpublish = 10024
 RequestStart = 10025
+TradingDay = 10027

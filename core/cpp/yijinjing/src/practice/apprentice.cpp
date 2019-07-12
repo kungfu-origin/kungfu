@@ -135,6 +135,12 @@ namespace kungfu
                   on_start(events);
               });
 
+            events | is(msg::type::TradingDay) |
+            $([&](event_ptr e)
+              {
+                  on_trading_day(e, e->data<int64_t>());
+              });
+
             reader_->join(master_home_location_, 0, begin_time_);
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {

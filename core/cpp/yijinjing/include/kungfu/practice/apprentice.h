@@ -61,7 +61,7 @@ namespace kungfu
                 }
             }
 
-            virtual void on_switch_day(const yijinjing::event_ptr &event, int64_t daytime)
+            virtual void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime)
             {}
 
         protected:

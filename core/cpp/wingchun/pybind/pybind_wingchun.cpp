@@ -49,9 +49,9 @@ public:
     void on_assets(const AssetInfo& asset_info, const std::vector<Position>& positions) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, asset_info, positions) }
 
-    void on_switch_day(const event_ptr &event, int64_t daytime) override
+    void on_trading_day(const event_ptr &event, int64_t daytime) override
     {
-        PYBIND11_OVERLOAD(void, Watcher, on_switch_day, event, daytime);
+        PYBIND11_OVERLOAD(void, Watcher, on_trading_day, event, daytime);
     }
 };
 
@@ -60,9 +60,9 @@ class PyRunner : public strategy::Runner
 public:
     using strategy::Runner::Runner;
 
-    void on_switch_day(const event_ptr &event, int64_t daytime) override
+    void on_trading_day(const event_ptr &event, int64_t daytime) override
     {
-        PYBIND11_OVERLOAD(void, strategy::Runner, on_switch_day, event, daytime);
+        PYBIND11_OVERLOAD(void, strategy::Runner, on_trading_day, event, daytime);
     }
 };
 
@@ -83,8 +83,8 @@ public:
     void post_stop(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, post_stop, context); }
 
-    void on_switch_day(strategy::Context_ptr context, const std::string &next_trading_day) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_switch_day, context, next_trading_day); }
+    void on_trading_day(strategy::Context_ptr context, const std::string &next_trading_day) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, next_trading_day); }
 
     void on_quote(strategy::Context_ptr context, const Quote &quote) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote); }
@@ -205,8 +205,6 @@ PYBIND11_MODULE(pywingchun, m)
         .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
         .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
         .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
-        .value("SwitchDay", kungfu::wingchun::msg::type::MsgType::SwitchDay)
-        .value("RspTradingDay", kungfu::wingchun::msg::type::MsgType::RspTradingDay)
         .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
         .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
         .export_values()
@@ -471,7 +469,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_assets", &Watcher::on_assets)
             .def("set_begin_time", &Watcher::set_begin_time)
             .def("set_end_time", &Watcher::set_end_time)
-            .def("on_switch_day", &Watcher::on_switch_day)
+            .def("on_trading_day", &Watcher::on_trading_day)
             .def("run", &Watcher::run);
 
     py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
@@ -479,7 +477,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("set_begin_time", &strategy::Runner::set_begin_time)
             .def("set_end_time", &strategy::Runner::set_end_time)
             .def("run", &strategy::Runner::run)
-            .def("on_switch_day", &strategy::Runner::on_switch_day)
+            .def("on_trading_day", &strategy::Runner::on_trading_day)
             .def("add_strategy", &strategy::Runner::add_strategy);
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
@@ -499,7 +497,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("post_start", &strategy::Strategy::post_start)
             .def("pre_stop", &strategy::Strategy::pre_stop)
             .def("post_stop", &strategy::Strategy::post_stop)
-            .def("on_switch_day", &strategy::Strategy::on_switch_day)
+            .def("on_trading_day", &strategy::Strategy::on_trading_day)
             .def("on_quote", &strategy::Strategy::on_quote)
             .def("on_entrust", &strategy::Strategy::on_entrust)
             .def("on_transaction", &strategy::Strategy::on_transaction)

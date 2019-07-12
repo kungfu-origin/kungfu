@@ -144,9 +144,9 @@ class PyApprentice : public apprentice
 public:
     using apprentice::apprentice;
 
-    void on_switch_day(const event_ptr &event, int64_t daytime) override
+    void on_trading_day(const event_ptr &event, int64_t daytime) override
     {
-        PYBIND11_OVERLOAD(void, apprentice, on_switch_day, event, daytime);
+        PYBIND11_OVERLOAD(void, apprentice, on_trading_day, event, daytime);
     }
 };
 
@@ -317,7 +317,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("set_begin_time", &apprentice::set_begin_time)
             .def("set_end_time", &apprentice::set_end_time)
-            .def("on_switch_day", &apprentice::on_switch_day)
+            .def("on_trading_day", &apprentice::on_trading_day)
             .def("run", &apprentice::run);
 
 

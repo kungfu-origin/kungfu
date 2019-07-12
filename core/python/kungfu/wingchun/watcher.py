@@ -19,6 +19,8 @@ class Watcher(pywingchun.Watcher):
         self.ctx = ctx
         self.ctx.logger = create_logger("watcher", ctx.log_level, self.io_device.home)
 
+        self.trading_day = None
+
         location = pyyjj.location(mode, pyyjj.category.SYSTEM, 'watcher', 'watcher', ctx.locator)
         url = make_url(ctx.locator, location, ctx.name)
         self.data_proxy = DataProxy(url)
@@ -34,8 +36,14 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.debug("handle request json %s", json.dumps(req))
         return json.dumps(req)
 
-    def on_switch_day(self, event, daytime):
-        self.ctx.logger.info('on switch day %s', kft.to_datetime(daytime))
+    def on_trading_day(self, event, daytime):
+        self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
+        trading_day = kft.to_datetime(daytime)
+        for acc in self.accounts.values():
+            acc.apply_trading_day(trading_day)
+        for cli in self.portfolios.values():
+            cli.apply_trading_day(trading_day)
+        self.trading_day = trading_day
 
     def on_quote(self, event, quote):
         self.ctx.logger.info('on quote')
@@ -66,7 +74,7 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.info("on assets, acc: %s", asset_info.account_id)
         for pos in positions:
             self.ctx.logger.info("on assets, pos: %s", pos)
-        account = Ledger(ledger_category = asset_info.ledger_category, account_id = asset_info.account_id, source_id = asset_info.source_id, avail = asset_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
+        account = Ledger(trading_day = self.trading_day, ledger_category = asset_info.ledger_category, account_id = asset_info.account_id, source_id = asset_info.source_id, avail = asset_info.avail, positions = {get_symbol_id(pos.instrument_id, pos.exchange_id): StockPosition(**to_dict(pos)) for pos in positions})
         self.accounts[asset_info.account_id] = account
         account.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
         account.register_callback(self.ledger_holder.on_messages)
@@ -75,7 +83,9 @@ class Watcher(pywingchun.Watcher):
         if not client_id in self.portfolios:
             ledger = self.ledger_holder.load(LedgerCategory.Portfolio, client_id = client_id)
             if ledger is None:
-                ledger = Ledger(ledger_category = LedgerCategory.Portfolio, client_id = client_id, avail = DEFAULT_INIT_CASH)
+                ledger = Ledger(ledger_category = LedgerCategory.Portfolio, client_id = client_id, avail = DEFAULT_INIT_CASH, trading_day = self.trading_day)
+            else:
+                ledger.apply_trading_day(self.trading_day)
             ledger.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
             ledger.register_callback(self.ledger_holder.on_messages)
             self.portfolios[client_id] = ledger

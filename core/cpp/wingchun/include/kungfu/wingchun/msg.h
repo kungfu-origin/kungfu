@@ -43,9 +43,6 @@ namespace kungfu
                     Subscribe = 302,
                     GatewayState = 401,
 
-                    SwitchDay = 601,
-                    RspTradingDay = 602,
-
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
 

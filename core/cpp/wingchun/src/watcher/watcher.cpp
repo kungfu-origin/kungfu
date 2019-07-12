@@ -211,12 +211,6 @@ namespace kungfu
                   memset(&asset_info_, 0, sizeof(asset_info_));
               });
 
-            events | is(msg::type::SwitchDay) |
-            $([&](event_ptr e)
-              {
-                  on_switch_day(e, e->data<int64_t>());
-              });
-
 //            events | timeout(std::chrono::seconds(5)) |
 //            $([&](event_ptr event)
 //              {

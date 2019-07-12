@@ -8,6 +8,7 @@ import pywingchun
 import kungfu.service.kfs as kfs
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.time as kft
+import kungfu.yijinjing.msg as yjj_msg
 from kungfu import nanomsg
 from kungfu.log import create_logger
 from . import os_signal
@@ -29,7 +30,7 @@ class Master(pyyjj.master):
 
         ctx.calendar = Calendar(ctx)
         ctx.trading_day = ctx.calendar.trading_day
-        self.publish_time(601, ctx.calendar.trading_day_ns)
+        self.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)
 
         ctx.master = self
 
@@ -46,7 +47,7 @@ class Master(pyyjj.master):
         kfs.run_tasks(self.ctx)
 
     def on_register(self, event):
-        self.send_time(event.source, 601, self.ctx.calendar.trading_day_ns)
+        self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def exit_gracefully(self, signum, frame):
         self.ctx.logger.info('kungfu master stopping')

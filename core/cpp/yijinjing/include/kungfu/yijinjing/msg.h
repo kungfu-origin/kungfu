@@ -29,7 +29,8 @@ namespace kungfu
                     RequestWriteTo = 10023,
                     RequestUnpublish = 10024,
                     RequestStart = 10025,
-                    Location = 10026
+                    Location = 10026,
+                    TradingDay = 10027,
                 };
             }
 

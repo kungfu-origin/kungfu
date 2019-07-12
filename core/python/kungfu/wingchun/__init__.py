@@ -7,5 +7,5 @@ class Runner(pywingchun.Runner):
         pywingchun.Runner.__init__(self, ctx.locator, ctx.group, ctx.name, mode, ctx.low_latency)
         self.ctx = ctx
 
-    def on_switch_day(self, event, daytime):
+    def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on switch day %s', kft.to_datetime(daytime))

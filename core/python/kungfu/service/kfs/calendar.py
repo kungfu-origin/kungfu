@@ -1,19 +1,10 @@
-import json
+
 import kungfu.service.kfs as kfs
-from kungfu.wingchun.constants import *
-
-
-@kfs.on('calendar/current')
-def current(ctx, request):
-    return {
-        'msg_type': MsgType.RspTradingDay,
-        'data': {'trading_day': str(ctx.calendar.trading_day)}
-    }
-
+import kungfu.yijinjing.msg as yjj_msg
 
 @kfs.task
 def switch_trading_day(ctx):
     trading_day = ctx.calendar.trading_day
     if ctx.trading_day < trading_day:
         ctx.trading_day = trading_day
-        ctx.master.publish_time(601, ctx.calendar.trading_day_ns)
+        ctx.master.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)
