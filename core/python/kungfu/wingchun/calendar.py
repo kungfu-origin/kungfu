@@ -1,10 +1,11 @@
-
-from kungfu.data.sqlite.data_proxy import DataProxy, make_url
 import datetime
 import collections
+import kungfu.yijinjing.time as kft
+from kungfu.data.sqlite.data_proxy import DataProxy, make_url
 from kungfu.wingchun.constants import *
 
 TradingSession = collections.namedtuple('TradingSession', 'exchange_id trading_day start_time end_time')
+
 
 class CalendarUtil:
     @classmethod
@@ -23,25 +24,34 @@ class CalendarUtil:
             #TODO
             return []
 
+
 class Calendar:
     def __init__(self, ctx):
         self.holidays = DataProxy(make_url(ctx.locator, ctx.system_config_location, "holidays")).get_holidays()
+        self.update_trading_day(datetime.datetime.now())
+
+    def update_trading_day(self, now):
+        self.date = now.date()
+        if now.hour >= 18:
+            self.date = self.date + datetime.timedelta(days=1)
+        while not self.is_trading_day(self.date):
+            self.date = self.date + datetime.timedelta(days=1)
 
     @property
     def trading_day(self):
         now = datetime.datetime.now()
-        date = now.date()
         if now.hour >= 18:
-            date = date + datetime.timedelta(days =1)
-        while True:
-            if self.is_trading_day(date):
-                break
-            else:
-                date = date + datetime.timedelta(days = 1)
-        return date
+            self.update_trading_day(now)
+        return self.date
+
+    @property
+    def trading_day_ns(self):
+        d = self.trading_day
+        day = datetime.datetime(year=d.year, month=d.month, day=d.day)
+        return int((day - kft.EPOCH).total_seconds() * kft.NANO_PER_SECOND)
 
     def is_trading_day(self, dt):
-        return dt.isoweekday() < 5 and not self.is_holiday(dt)
+        return dt.isoweekday() <= 5 and not self.is_holiday(dt)
 
     def is_holiday(self, dt):
         return dt in self.holidays

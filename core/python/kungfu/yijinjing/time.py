@@ -13,10 +13,13 @@ DURATION_FORMAT = '%H:%M:%S.%N'
 DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
 
 
+def to_datetime(nanotime):
+    return EPOCH + timedelta(microseconds=nanotime/1000)
+
+
 def strftime(nanotime, format=DATETIME_FORMAT):
-    dt = EPOCH + timedelta(microseconds=nanotime/1000)
     normal_format = format.replace("%N", '{:09d}'.format(nanotime % NANO_PER_SECOND))
-    return dt.strftime(normal_format)
+    return to_datetime(nanotime).strftime(normal_format)
 
 
 def strptime(timestr, format=DATETIME_FORMAT):

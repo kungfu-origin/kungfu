@@ -84,6 +84,12 @@ namespace kungfu
                           strategy->on_transaction(context_, event->data<Transaction>());
                       }
                   });
+
+                events | is(msg::type::SwitchDay) |
+                $([&](event_ptr e)
+                  {
+                      on_switch_day(e, e->data<int64_t>());
+                  });
             }
 
             void Runner::on_start(const rx::observable<yijinjing::event_ptr> &events)

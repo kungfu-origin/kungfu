@@ -34,7 +34,7 @@ namespace kungfu
             get_io_device()->get_publisher()->notify();
         }
 
-        void master::register_app(event_ptr e)
+        void master::register_app(const event_ptr& e)
         {
             auto request_loc = e->data<nlohmann::json>();
             auto app_location = std::make_shared<location>(
@@ -109,6 +109,16 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(msg.dump());
         }
 
+        void master::publish_time(int32_t msg_type, int64_t nanotime)
+        {
+            writers_[0]->write(0, msg_type, nanotime);
+        }
+
+        void master::send_time(uint32_t dest, int32_t msg_type, int64_t nanotime)
+        {
+            writers_[dest]->write(0, msg_type, nanotime);
+        }
+
         bool master::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
         {
             auto now = time::now_in_nano();
@@ -152,6 +162,7 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   register_app(e);
+                  on_register(e);
               });
 
             events | is(msg::type::RequestWriteTo) |

@@ -2,6 +2,7 @@ import pyyjj
 import pywingchun
 import click
 from kungfu.command import kfc, pass_ctx_from_parent, replay_setup
+from kungfu.wingchun import Runner
 from kungfu.wingchun.strategy import Strategy
 from kungfu.log import create_logger
 from kungfu.oms.order import *
@@ -25,7 +26,7 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
     ctx.logger = create_logger(name, ctx.log_level, pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator))
     ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
-    runner = pywingchun.Runner(ctx.locator, ctx.group, ctx.name, mode, ctx.low_latency)
+    runner = Runner(ctx, mode)
     runner.add_strategy(ctx.strategy)
     if replay:
         ctx.category = 'strategy'

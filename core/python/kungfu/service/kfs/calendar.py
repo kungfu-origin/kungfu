@@ -10,9 +10,10 @@ def current(ctx, request):
         'data': {'trading_day': str(ctx.calendar.trading_day)}
     }
 
+
 @kfs.task
 def switch_trading_day(ctx):
     trading_day = ctx.calendar.trading_day
     if ctx.trading_day < trading_day:
         ctx.trading_day = trading_day
-        #TODO publish trading day changed
+        ctx.master.publish_time(601, ctx.calendar.trading_day_ns)

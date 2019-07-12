@@ -1,6 +1,7 @@
 import pywingchun
 import pyyjj
 import json
+import kungfu.yijinjing.time as kft
 from kungfu.log import create_logger
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import to_dict
@@ -9,6 +10,7 @@ from kungfu.finance.ledger import *
 from kungfu.finance.position import *
 
 DEFAULT_INIT_CASH = 1e7
+
 
 class Watcher(pywingchun.Watcher):
     def __init__(self, ctx):
@@ -31,6 +33,9 @@ class Watcher(pywingchun.Watcher):
         self.ctx.logger.debug("handle request %s", msg)
         self.ctx.logger.debug("handle request json %s", json.dumps(req))
         return json.dumps(req)
+
+    def on_switch_day(self, event, daytime):
+        self.ctx.logger.info('on switch day %s', kft.to_datetime(daytime))
 
     def on_quote(self, event, quote):
         self.ctx.logger.info('on quote')

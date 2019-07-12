@@ -48,6 +48,22 @@ public:
 
     void on_assets(const AssetInfo& asset_info, const std::vector<Position>& positions) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, asset_info, positions) }
+
+    void on_switch_day(const event_ptr &event, int64_t daytime) override
+    {
+        PYBIND11_OVERLOAD(void, Watcher, on_switch_day, event, daytime);
+    }
+};
+
+class PyRunner : public strategy::Runner
+{
+public:
+    using strategy::Runner::Runner;
+
+    void on_switch_day(const event_ptr &event, int64_t daytime) override
+    {
+        PYBIND11_OVERLOAD(void, strategy::Runner, on_switch_day, event, daytime);
+    }
 };
 
 class PyStrategy : public strategy::Strategy
@@ -443,7 +459,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
 
-    py::class_<Watcher, PyWatcher>(m, "Watcher")
+    py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Watcher::get_io_device)
             .def("get_location", &Watcher::get_location)
@@ -455,13 +471,15 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_assets", &Watcher::on_assets)
             .def("set_begin_time", &Watcher::set_begin_time)
             .def("set_end_time", &Watcher::set_end_time)
+            .def("on_switch_day", &Watcher::on_switch_day)
             .def("run", &Watcher::run);
 
-    py::class_<strategy::Runner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
+    py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
             .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
             .def("set_begin_time", &strategy::Runner::set_begin_time)
             .def("set_end_time", &strategy::Runner::set_end_time)
             .def("run", &strategy::Runner::run)
+            .def("on_switch_day", &strategy::Runner::on_switch_day)
             .def("add_strategy", &strategy::Runner::add_strategy);
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")

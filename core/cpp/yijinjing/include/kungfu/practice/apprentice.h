@@ -61,6 +61,9 @@ namespace kungfu
                 }
             }
 
+            virtual void on_switch_day(const yijinjing::event_ptr &event, int64_t daytime)
+            {}
+
         protected:
             yijinjing::data::location_ptr config_location_;
 

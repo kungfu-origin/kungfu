@@ -29,15 +29,21 @@ namespace kungfu
 
             void on_notify() override ;
 
-            virtual void on_notice(yijinjing::event_ptr event)
+            virtual void on_notice(const yijinjing::event_ptr &event)
             {}
 
             virtual void on_interval_check(int64_t nanotime)
             {}
 
-            void register_app(yijinjing::event_ptr e);
+            virtual void on_register(const yijinjing::event_ptr &event)
+            {}
+
+            void register_app(const yijinjing::event_ptr& e);
 
             void deregister_app(int64_t trigger_time, uint32_t app_location_uid);
+
+            void publish_time(int32_t msg_type, int64_t nanotime);
+            void send_time(uint32_t dest, int32_t msg_type, int64_t nanotime);
 
         protected:
 
