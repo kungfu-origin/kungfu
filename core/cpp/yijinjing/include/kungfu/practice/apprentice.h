@@ -76,6 +76,60 @@ namespace kungfu
 
             virtual void on_read_from(const yijinjing::event_ptr &event);
 
+            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> timer(int64_t nanotime)
+            {
+                auto writer = writers_[master_commands_location_->uid];
+                int32_t timer_usage_count = timer_usage_count_;
+                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                r.id = timer_usage_count;
+                r.duration = nanotime - now_;
+                r.repeat = 1;
+                writer->close_data();
+                timer_checkpoints_[timer_usage_count] = now_;
+                timer_usage_count_++;
+                return [&](rx::observable<yijinjing::event_ptr> src)
+                {
+                    return src;
+                };
+            }
+
+            template<typename Duration, typename Enabled = rx::is_duration<Duration>>
+            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> time_interval(Duration &&d)
+            {
+                auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
+                auto writer = writers_[master_commands_location_->uid];
+                int32_t timer_usage_count = timer_usage_count_;
+                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                r.id = timer_usage_count;
+                r.duration = duration_ns;
+                r.repeat = 1;
+                writer->close_data();
+                timer_checkpoints_[timer_usage_count] = now_;
+                timer_usage_count_++;
+                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
+                {
+                    return (events_ |
+                            rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                                       {
+                                           if (e->msg_type() == msg::type::Time &&
+                                               e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
+                                           {
+                                               auto writer = writers_[master_commands_location_->uid];
+                                               msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                                               r.id = timer_usage_count;
+                                               r.duration = duration_ns;
+                                               r.repeat = 1;
+                                               writer->close_data();
+                                               timer_checkpoints_[timer_usage_count] = now_;
+                                               return true;
+                                           } else
+                                           {
+                                               return false;
+                                           }
+                                       })).merge(src);
+                };
+            }
+
             template<typename Duration, typename Enabled = rx::is_duration<Duration>>
             std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> timeout(Duration &&d)
             {
@@ -116,43 +170,6 @@ namespace kungfu
                                                                                 }
                                                                                 return false;
                                                                             }));
-                };
-            }
-
-            template<typename Duration, typename Enabled = rx::is_duration<Duration>>
-            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> time_interval(Duration &&d)
-            {
-                auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
-                auto writer = writers_[master_commands_location_->uid];
-                int32_t timer_usage_count = timer_usage_count_;
-                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
-                r.id = timer_usage_count;
-                r.duration = duration_ns;
-                r.repeat = 1;
-                writer->close_data();
-                timer_checkpoints_[timer_usage_count] = now_;
-                timer_usage_count_++;
-                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
-                {
-                    return events_ |
-                           rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
-                                      {
-                                          if (e->msg_type() == msg::type::Time &&
-                                              e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
-                                          {
-                                              auto writer = writers_[master_commands_location_->uid];
-                                              msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
-                                              r.id = timer_usage_count;
-                                              r.duration = duration_ns;
-                                              r.repeat = 1;
-                                              writer->close_data();
-                                              timer_checkpoints_[timer_usage_count] = now_;
-                                              return true;
-                                          } else
-                                          {
-                                              return false;
-                                          }
-                                      });
                 };
             }
 
