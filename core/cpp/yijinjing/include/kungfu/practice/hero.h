@@ -15,8 +15,6 @@ namespace kungfu
 {
     namespace practice
     {
-        namespace msg = yijinjing::msg;
-
         class hero
         {
         public:

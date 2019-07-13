@@ -58,13 +58,9 @@ namespace kungfu
                              time::strftime(current_page_->begin_time(), "%F %T"), time::strftime(current_page_->end_time(), "%F %T"));
                 while (current_page_->is_full() && current_page_->end_time() <= nanotime)
                 {
-                    SPDLOG_CRITICAL("{} [{}] is full, {}", location_->uname, current_page_->page_id_, current_page_->header_->last_frame_position);
                     int i = 1;
                     while (frame_->has_data())
                     {
-                        SPDLOG_INFO("[{:04d}] {} {} pp{} fp{}, [{}] {} - {} = {}", i, time::strftime(frame_->gen_time()), frame_->frame_length(), current_page_->header_->frame_header_length, frame_->header_->length,
-                                    frame_->address() + frame_->frame_length(), frame_->address(), current_page_->address(),
-                                    frame_->address() - current_page_->address());
                         frame_->move_to_next();
                         i++;
                     }

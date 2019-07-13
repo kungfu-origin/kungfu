@@ -209,8 +209,8 @@ namespace kungfu
 
                 virtual ~location() = default;
 
-                const mode mode;
-                const category category;
+                const data::mode mode;
+                const data::category category;
                 const std::string group;
                 const std::string name;
                 const std::string uname;

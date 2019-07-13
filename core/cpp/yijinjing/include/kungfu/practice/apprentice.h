@@ -80,7 +80,7 @@ namespace kungfu
             {
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
                 r.id = timer_usage_count;
                 r.duration = nanotime - now_;
                 r.repeat = 1;
@@ -99,7 +99,7 @@ namespace kungfu
                 auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
                 r.id = timer_usage_count;
                 r.duration = duration_ns;
                 r.repeat = 1;
@@ -111,11 +111,11 @@ namespace kungfu
                     return (events_ |
                             rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
                                        {
-                                           if (e->msg_type() == msg::type::Time &&
+                                           if (e->msg_type() == yijinjing::msg::type::Time &&
                                                e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
                                            {
                                                auto writer = writers_[master_commands_location_->uid];
-                                               msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                                               yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
                                                r.id = timer_usage_count;
                                                r.duration = duration_ns;
                                                r.repeat = 1;
@@ -136,7 +136,7 @@ namespace kungfu
                 auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
                 r.id = timer_usage_count;
                 r.duration = duration_ns;
                 r.repeat = 1;
@@ -147,10 +147,10 @@ namespace kungfu
                 {
                     return (src | rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
                                              {
-                                                 if (e->msg_type() != msg::type::Time)
+                                                 if (e->msg_type() != yijinjing::msg::type::Time)
                                                  {
                                                      auto writer = writers_[master_commands_location_->uid];
-                                                     msg::data::TimeRequest &r = writer->open_data<msg::data::TimeRequest>(0, msg::type::TimeRequest);
+                                                     yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
                                                      r.id = timer_usage_count;
                                                      r.duration = duration_ns;
                                                      r.repeat = 1;

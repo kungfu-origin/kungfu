@@ -105,7 +105,7 @@ namespace kungfu
                 friend class writer;
             };
 
-            constexpr static uint32_t find_page_size(const data::location_ptr& location, uint32_t dest_id)
+            inline static uint32_t find_page_size(const data::location_ptr& location, uint32_t dest_id)
             {
                 if (location->category == data::category::MD && dest_id == 0)
                 {

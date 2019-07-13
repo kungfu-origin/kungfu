@@ -148,6 +148,10 @@ endif ()
 add_library(fmt ${FMT_SOURCES} ${FMT_HEADERS} README.rst ChangeLog.rst)
 add_library(fmt::fmt ALIAS fmt)
 
+if (UNIX AND (CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
+  set_target_properties(fmt PROPERTIES COMPILE_FLAGS "-fPIC")
+endif (UNIX AND (CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
+
 if (FMT_WERROR)
   target_compile_options(fmt PRIVATE ${WERROR_FLAG})
 endif ()

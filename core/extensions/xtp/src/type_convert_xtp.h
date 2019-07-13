@@ -22,7 +22,7 @@ namespace kungfu
 
             using namespace kungfu::wingchun::msg::data;
 
-            inline void from_xtp_timestamp(const int64_t &xtp_time, int64_t &nsec)
+            inline void from_xtp_timestamp(int64_t xtp_time, int64_t nsec)
             {
                 //YYYYMMDDHHMMSSsss -> nano seconds
                 nsec = kungfu::yijinjing::time::strptime(std::to_string(xtp_time).c_str(), "%Y%m%d%H%M%S") +

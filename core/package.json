@@ -12,11 +12,11 @@
   },
   "scripts": {
     "postinstall": "echo postinstall at $(pwd) && pipenv install && yarn run config:cmake",
-    "config": "yarn run config:py && yarn run config:cmake && yarn run config:cpp",
+    "config": "yarn run config:py && yarn run config:cpp",
     "config:cmake": " cross-var cross-env KF_LOG_LEVEL_COMPILE=\"$npm_package_config_loglevel\" pipenv run python python/cmakesetup.py",
     "config:cpp": "cross-var cmake-js configure --$npm_package_config_cmakejsopt",
     "config:py": "cross-var pipenv --$npm_package_config_pyver",
-    "postconfig:py": "pipenv install && pipenv run python python/cmakesetup.py",
+    "postconfig:py": "pipenv install && yarn run config:cmake",
     "config:echo": "cross-var echo \"python:\" $npm_package_config_pyver \"cmakejsopt:\" $npm_package_config_cmakejsopt \"loglevel:\" $npm_package_config_loglevel",
     "clean": "cmake-js clean",
     "build:cpp": "cross-var cmake-js build --$npm_package_config_cmakejsopt",

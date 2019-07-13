@@ -5,14 +5,23 @@ import time
 import functools
 import pyyjj
 import pywingchun
-import kungfu.service.kfs as kfs
-import kungfu.yijinjing.journal as kfj
-import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.msg as yjj_msg
+
+from . import os_signal
+
 from kungfu import nanomsg
 from kungfu.log import create_logger
-from . import os_signal
+
+import kungfu.service.kfs as kfs
+from kungfu.service.kfs import system
+from kungfu.service.kfs import calendar
+
+import kungfu.yijinjing.journal as kfj
+import kungfu.yijinjing.time as kft
+from kungfu import nanomsg
+from kungfu.log import create_logger
+
 from kungfu.wingchun.calendar import Calendar
+import kungfu.yijinjing.msg as yjj_msg
 
 SECOND_IN_NANO = int(1e9)
 

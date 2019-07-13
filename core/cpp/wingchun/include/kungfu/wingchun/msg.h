@@ -139,6 +139,9 @@ namespace kungfu
                     j["short_margin_ratio"] = instrument.short_margin_ratio;
                 }
 
+                struct FutureInstrument : public Instrument
+                {};
+
                 //行情
                 struct Quote
                 {

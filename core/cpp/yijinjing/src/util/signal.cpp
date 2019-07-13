@@ -52,7 +52,6 @@ namespace kungfu
                     case SIGCHLD:      // discard signal       child status has changed
                     case SIGIO:        // discard signal       I/O is possible on a descriptor (see fcntl(2))
                     case SIGWINCH:     // discard signal       Window size change
-                    case SIGINFO:      // discard signal       status request from keyboard
                         SPDLOG_INFO("kungfu app discard signal {}", signum);
                         break;
                     case SIGSTOP:      // stop process         stop (cannot be caught or ignored)
@@ -89,7 +88,7 @@ namespace kungfu
                     case SIGILL:       // create core image    illegal instruction
                     case SIGTRAP:      // create core image    trace trap
                     case SIGABRT:      // create core image    abort program (formerly SIGIOT)
-                    case SIGEMT:       // create core image    emulate instruction executed
+//                    case SIGEMT:       // create core image    emulate instruction executed
                     case SIGFPE:       // create core image    floating-point exception
                     case SIGBUS:       // create core image    bus error
                         SPDLOG_CRITICAL("bus error");
@@ -101,6 +100,14 @@ namespace kungfu
                         SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
                         exit(signum);
 #endif // _WINDOWS
+#ifdef __APPLE__
+                    case SIGINFO:      // discard signal       status request from keyboard
+                        SPDLOG_INFO("kungfu app discard signal {}", signum);
+                        break;
+                    case SIGEMT:       // create core image    emulate instruction executed
+                        SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
+                        exit(signum);
+#endif
                     default:
                         SPDLOG_INFO("kungfu app caught unknown signal {}, signal ignored", signum);
                 }
