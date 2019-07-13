@@ -136,10 +136,10 @@ class Ledger:
 
     def apply_trading_day(self, trading_day):
         if not self.trading_day == trading_day:
+            self._trading_day = trading_day
             for pos in self._positions.values():
                 pos.switch_day(trading_day)
             self._static_equity = self.dynamic_equity
-            self._trading_day = trading_day
             self.dispatch([self.message])
 
     def _get_position(self, instrument_id, exchange_id):
