@@ -242,7 +242,6 @@ class FuturePositionDetail:
 
 
     def apply_close(self, price, volume=None):
-        #平仓
         volume_closed = min(self._volume, volume) if volume else self._volume
         realized_pnl = self._calculate_realized_pnl(price, volume_closed)
         margin_delta = self._calculate_margin(price, volume_closed) * -1
@@ -250,7 +249,6 @@ class FuturePositionDetail:
         return (volume_closed, realized_pnl, margin_delta)
 
     def apply_settlement(self, settlement_price):
-        #结算
         pre_margin = self.margin
         self._pre_settlement_price = self._settlement_price
         self._settlement_price = settlement_price

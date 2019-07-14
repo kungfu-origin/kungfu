@@ -111,4 +111,6 @@ class LedgerHolder(DataProxy):
                 for obj in session.query(position_cls).filter(position_cls.account_id == account_id, position_cls.client_id == client_id).all():
                     cls = StockPosition if get_instrument_type(obj.instrument_id, obj.exchange_id) == InstrumentType.Stock else FuturePosition
                     positions[get_symbol_id(obj.instrument_id, obj.exchange_id)] = cls(**object_as_dict(obj))
-                return Ledger(**{**asset_info, "positions": positions, "ledger_category": ledger_category})
+                args = {"positions": positions, "ledger_category": ledger_category}
+                args.update(asset_info)
+                return Ledger(**args)
