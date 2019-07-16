@@ -100,6 +100,7 @@ namespace kungfu
         {
             deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
+            timer_tasks_.erase(app_location_uid);
             nlohmann::json msg{};
             auto now = time::now_in_nano();
             msg["gen_time"] = now;
