@@ -20,7 +20,8 @@
     "dev": "node .electron-kungfu/dev-runner.js",
     "dist": "yarn run dist:render && yarn run dist:main",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
-    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js"
+    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
+    "test": "mocha --timeout 10000"
   },
   "cmake-js": {
     "runtime": "electron",
@@ -165,7 +166,7 @@
     "css-loader": "^2.1.1",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "4.2.0",
+    "electron": "4.2.6",
     "electron-builder": "^20.38.5",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
@@ -175,8 +176,10 @@
     "file-loader": "^0.11.2",
     "html-webpack-plugin": "^2.30.1",
     "inject-loader": "^3.0.0",
+    "jquery": "^3.4.1",
     "mime": "^2.4.0",
     "mkdirp": "^0.5.1",
+    "mocha": "^6.1.4",
     "moment": "^2.24.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
@@ -188,7 +191,7 @@
     "rimraf": "^2.6.3",
     "rxjs": "^6.5.2",
     "sass-loader": "^7.0.3",
-    "spectron": "^3.7.1",
+    "spectron": "6.0.0",
     "style-loader": "^0.21.0",
     "ts-loader": "3.5.0",
     "typescript": "^3.5.3",
