@@ -17,16 +17,12 @@ from kungfu.service.kfs import calendar
 
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.time as kft
-from kungfu import nanomsg
 from kungfu.log import create_logger
 
 from kungfu.wingchun.calendar import Calendar
 import kungfu.yijinjing.msg as yjj_msg
 
 SECOND_IN_NANO = int(1e9)
-
-def get_socket_fd(socket):
-    return socket.getsockopt(level=nanomsg.SOL_SOCKET, option=nanomsg.RCVFD)
 
 
 class Master(pyyjj.master):

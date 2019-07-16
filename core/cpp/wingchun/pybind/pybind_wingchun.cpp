@@ -37,22 +37,23 @@ public:
     std::string handle_request(const std::string &msg) override
     {PYBIND11_OVERLOAD_PURE(std::string, Watcher, handle_request, msg) }
 
-    void on_quote(event_ptr event, const Quote& quote) override
+    void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_quote, event, quote) }
 
-    void on_order(event_ptr event, const Order& order) override
+    void on_order(event_ptr event, const Order &order) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_order, event, order) }
 
-    void on_trade(event_ptr event, const Trade& trade) override
+    void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
 
-    void on_assets(const AssetInfo& asset_info, const std::vector<Position>& positions) override
+    void on_assets(const AssetInfo &asset_info, const std::vector<Position> &positions) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, asset_info, positions) }
 
     void on_trading_day(const event_ptr &event, int64_t daytime) override
-    {
-        PYBIND11_OVERLOAD(void, Watcher, on_trading_day, event, daytime);
-    }
+    {PYBIND11_OVERLOAD(void, Watcher, on_trading_day, event, daytime); }
+
+    void pre_start() override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, pre_start) }
 };
 
 class PyRunner : public strategy::Runner
@@ -61,9 +62,7 @@ public:
     using strategy::Runner::Runner;
 
     void on_trading_day(const event_ptr &event, int64_t daytime) override
-    {
-        PYBIND11_OVERLOAD(void, strategy::Runner, on_trading_day, event, daytime);
-    }
+    {PYBIND11_OVERLOAD(void, strategy::Runner, on_trading_day, event, daytime); }
 };
 
 class PyStrategy : public strategy::Strategy
@@ -105,111 +104,100 @@ public:
 
 PYBIND11_MODULE(pywingchun, m)
 {
-    auto m_utils =  m.def_submodule("utils");
+    auto m_utils = m.def_submodule("utils");
     m_utils.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
 
     auto m_constants = m.def_submodule("constants");
 
     py::enum_<kungfu::wingchun::LedgerCategory>(m_constants, "LedgerCategory", py::arithmetic())
-        .value("Account", kungfu::wingchun::LedgerCategory::Account)
-        .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
-        .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
-        .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)
-        .export_values()
-        ;
+            .value("Account", kungfu::wingchun::LedgerCategory::Account)
+            .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
+            .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
+            .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)
+            .export_values();
 
     py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
-        .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
-        .value("Stock", kungfu::wingchun::InstrumentType::Stock)
-        .value("Future", kungfu::wingchun::InstrumentType::Future)
-        .value("Bond", kungfu::wingchun::InstrumentType::Bond)
-        .value("StockOption", kungfu::wingchun::InstrumentType::StockOption)
-        .export_values()
-        ;
+            .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
+            .value("Stock", kungfu::wingchun::InstrumentType::Stock)
+            .value("Future", kungfu::wingchun::InstrumentType::Future)
+            .value("Bond", kungfu::wingchun::InstrumentType::Bond)
+            .value("StockOption", kungfu::wingchun::InstrumentType::StockOption)
+            .export_values();
 
     py::enum_<kungfu::wingchun::ExecType>(m_constants, "ExecType", py::arithmetic())
-        .value("Unknown", kungfu::wingchun::ExecType::Unknown)
-        .value("Cancel", kungfu::wingchun::ExecType::Cancel)
-        .value("Trade", kungfu::wingchun::ExecType::Trade)
-        .export_values()
-        ;
+            .value("Unknown", kungfu::wingchun::ExecType::Unknown)
+            .value("Cancel", kungfu::wingchun::ExecType::Cancel)
+            .value("Trade", kungfu::wingchun::ExecType::Trade)
+            .export_values();
 
     py::enum_<kungfu::wingchun::Side>(m_constants, "Side", py::arithmetic())
-        .value("Buy", kungfu::wingchun::Side::Buy)
-        .value("Sell", kungfu::wingchun::Side::Sell)
-        .export_values()
-        ;
+            .value("Buy", kungfu::wingchun::Side::Buy)
+            .value("Sell", kungfu::wingchun::Side::Sell)
+            .export_values();
 
     py::enum_<kungfu::wingchun::Offset>(m_constants, "Offset", py::arithmetic())
-        .value("Open", kungfu::wingchun::Offset::Open)
-        .value("Close", kungfu::wingchun::Offset::Close)
-        .value("CloseToday", kungfu::wingchun::Offset::CloseToday)
-        .value("CloseYesterday", kungfu::wingchun::Offset::CloseYesterday)
-        .export_values()
-        ;
+            .value("Open", kungfu::wingchun::Offset::Open)
+            .value("Close", kungfu::wingchun::Offset::Close)
+            .value("CloseToday", kungfu::wingchun::Offset::CloseToday)
+            .value("CloseYesterday", kungfu::wingchun::Offset::CloseYesterday)
+            .export_values();
 
     py::enum_<kungfu::wingchun::OrderStatus>(m_constants, "OrderStatus", py::arithmetic())
-        .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
-        .value("Submitted", kungfu::wingchun::OrderStatus::Submitted)
-        .value("Pending", kungfu::wingchun::OrderStatus::Pending)
-        .value("Cancelled", kungfu::wingchun::OrderStatus::Cancelled)
-        .value("Error", kungfu::wingchun::OrderStatus::Error)
-        .value("Filled", kungfu::wingchun::OrderStatus::Filled)
-        .value("PartialFilledNotActive", kungfu::wingchun::OrderStatus::PartialFilledNotActive)
-        .value("PartialFilledActive", kungfu::wingchun::OrderStatus::PartialFilledActive)
-        .export_values()
-        ;
+            .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
+            .value("Submitted", kungfu::wingchun::OrderStatus::Submitted)
+            .value("Pending", kungfu::wingchun::OrderStatus::Pending)
+            .value("Cancelled", kungfu::wingchun::OrderStatus::Cancelled)
+            .value("Error", kungfu::wingchun::OrderStatus::Error)
+            .value("Filled", kungfu::wingchun::OrderStatus::Filled)
+            .value("PartialFilledNotActive", kungfu::wingchun::OrderStatus::PartialFilledNotActive)
+            .value("PartialFilledActive", kungfu::wingchun::OrderStatus::PartialFilledActive)
+            .export_values();
 
     py::enum_<kungfu::wingchun::Direction>(m_constants, "Direction", py::arithmetic())
-        .value("Long", kungfu::wingchun::Direction::Long)
-        .value("Short", kungfu::wingchun::Direction::Short)
-        .export_values()
-        ;
+            .value("Long", kungfu::wingchun::Direction::Long)
+            .value("Short", kungfu::wingchun::Direction::Short)
+            .export_values();
 
     py::enum_<kungfu::wingchun::PriceType>(m_constants, "PriceType", py::arithmetic())
-        .value("Any", kungfu::wingchun::PriceType::Any)
-        .value("Best", kungfu::wingchun::PriceType::Best)
-        .value("Best5", kungfu::wingchun::PriceType::Best5)
-        .value("Limit", kungfu::wingchun::PriceType::Limit)
-        .value("ForwardBest", kungfu::wingchun::PriceType::ForwardBest)
-        .value("ReverseBest", kungfu::wingchun::PriceType::ReverseBest)
-        .export_values()
-        ;
+            .value("Any", kungfu::wingchun::PriceType::Any)
+            .value("Best", kungfu::wingchun::PriceType::Best)
+            .value("Best5", kungfu::wingchun::PriceType::Best5)
+            .value("Limit", kungfu::wingchun::PriceType::Limit)
+            .value("ForwardBest", kungfu::wingchun::PriceType::ForwardBest)
+            .value("ReverseBest", kungfu::wingchun::PriceType::ReverseBest)
+            .export_values();
 
     py::enum_<kungfu::wingchun::VolumeCondition>(m_constants, "VolumeCondition", py::arithmetic())
-        .value("Any", kungfu::wingchun::VolumeCondition::Any)
-        .value("Min", kungfu::wingchun::VolumeCondition::Min)
-        .value("All", kungfu::wingchun::VolumeCondition::All)
-        .export_values()
-        ;
+            .value("Any", kungfu::wingchun::VolumeCondition::Any)
+            .value("Min", kungfu::wingchun::VolumeCondition::Min)
+            .value("All", kungfu::wingchun::VolumeCondition::All)
+            .export_values();
 
     py::enum_<kungfu::wingchun::TimeCondition>(m_constants, "TimeCondition", py::arithmetic())
-        .value("IOC", kungfu::wingchun::TimeCondition::IOC)
-        .value("GFD", kungfu::wingchun::TimeCondition::GFD)
-        .value("GTC", kungfu::wingchun::TimeCondition::GTC)
-        .export_values()
-        ;
+            .value("IOC", kungfu::wingchun::TimeCondition::IOC)
+            .value("GFD", kungfu::wingchun::TimeCondition::GFD)
+            .value("GTC", kungfu::wingchun::TimeCondition::GTC)
+            .export_values();
 
     py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
-        .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
-        .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
-        .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
-        .value("Transaction", kungfu::wingchun::msg::type::MsgType::Transaction)
-        .value("OrderInput", kungfu::wingchun::msg::type::MsgType::OrderInput)
-        .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
-        .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
-        .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
-        .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
-        .value("AssetInfo", kungfu::wingchun::msg::type::MsgType::AssetInfo)
-        .value("AssetInfoSnapshot", kungfu::wingchun::msg::type::AssetInfoSnapshot)
-        .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
-        .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
-        .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
-        .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
-        .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
-        .export_values()
-        ;
+            .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
+            .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
+            .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
+            .value("Transaction", kungfu::wingchun::msg::type::MsgType::Transaction)
+            .value("OrderInput", kungfu::wingchun::msg::type::MsgType::OrderInput)
+            .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
+            .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
+            .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
+            .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
+            .value("AssetInfo", kungfu::wingchun::msg::type::MsgType::AssetInfo)
+            .value("AssetInfoSnapshot", kungfu::wingchun::msg::type::AssetInfoSnapshot)
+            .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
+            .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
+            .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
+            .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
+            .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
+            .export_values();
 
     py::class_<Instrument>(m, "Instrument")
             .def_readonly("instrument_type", &Instrument::instrument_type)
@@ -461,6 +449,7 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Watcher::get_io_device)
+            .def("now", &Watcher::now)
             .def("get_location", &Watcher::get_location)
             .def("publish", &Watcher::publish)
             .def("handle_request", &Watcher::handle_request)
@@ -471,6 +460,9 @@ PYBIND11_MODULE(pywingchun, m)
             .def("set_begin_time", &Watcher::set_begin_time)
             .def("set_end_time", &Watcher::set_end_time)
             .def("on_trading_day", &Watcher::on_trading_day)
+            .def("pre_start", &Watcher::pre_start)
+            .def("add_timer", &Watcher::add_timer)
+            .def("add_time_interval", &Watcher::add_time_interval)
             .def("run", &Watcher::run);
 
     py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
@@ -483,6 +475,8 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
             .def("now", &strategy::Context::now)
+            .def("add_timer", &strategy::Context::add_timer)
+            .def("add_time_interval", &strategy::Context::add_time_interval)
             .def("add_account", &strategy::Context::add_account)
             .def("subscribe", &strategy::Context::subscribe)
             .def("insert_order", &strategy::Context::insert_order)
@@ -503,6 +497,5 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_entrust", &strategy::Strategy::on_entrust)
             .def("on_transaction", &strategy::Strategy::on_transaction)
             .def("on_order", &strategy::Strategy::on_order)
-            .def("on_trade", &strategy::Strategy::on_trade)
-            ;
+            .def("on_trade", &strategy::Strategy::on_trade);
 }

@@ -30,6 +30,13 @@ class Watcher(pywingchun.Watcher):
         self.subportfolios = {}
         self.portfolios = {}
 
+    def pre_start(self):
+        self.add_timer(self.now() + kft.NANO_PER_SECOND, self.print_trading_day)
+        self.add_time_interval(5 * kft.NANO_PER_SECOND, self.print_trading_day)
+
+    def print_trading_day(self, event):
+        self.ctx.logger.info('timer print trading day %s', self.trading_day)
+
     def handle_request(self, msg):
         req = json.loads(msg)
         self.ctx.logger.debug("handle request %s", msg)

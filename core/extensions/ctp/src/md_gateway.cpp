@@ -41,9 +41,10 @@ namespace kungfu
                 password_ = config_str["password"];
             }
 
-            void MdGateway::on_start(const rx::observable<yijinjing::event_ptr> &events)
+            void MdGateway::on_start()
             {
-                gateway::MarketData::on_start(events);
+                gateway::MarketData::on_start();
+
                 auto home = get_io_device()->get_home();
                 std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
                 SPDLOG_INFO(runtime_folder);

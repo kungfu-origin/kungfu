@@ -45,11 +45,11 @@ namespace kungfu
                 return false;
             }
 
-            void PassiveTrader::on_start(const rx::observable<yijinjing::event_ptr> &events)
+            void PassiveTrader::on_start()
             {
-                gateway::Trader::on_start(events);
+                gateway::Trader::on_start();
 
-                events | is(msg::type::PassiveCtrl) |
+                events_ | is(msg::type::PassiveCtrl) |
                 $([&](event_ptr e)
                   {
                       const nlohmann::json &data = e->data<nlohmann::json>();

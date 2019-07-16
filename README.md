@@ -77,7 +77,7 @@ $ pip install pipenv
 Windows需要额外安装 [Boost 1.64.0](https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/)，下载并安装 boost_1_64_0-msvc-14.1-64.exe。
 
 ```
-C:\> npm instal -g yarn electron-builder
+C:\> npm install -g yarn electron-builder
 C:\> pip install pipenv
 ```
 

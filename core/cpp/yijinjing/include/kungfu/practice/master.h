@@ -49,7 +49,7 @@ namespace kungfu
 
             bool produce_one(const rx::subscriber<yijinjing::event_ptr> &sb) override ;
 
-            void react(const rx::observable<yijinjing::event_ptr> &events) override;
+            void react() override;
 
         private:
             int64_t last_check_;

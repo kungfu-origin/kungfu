@@ -30,8 +30,21 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
 
+    def __add_timer(self, nanotime, callback):
+        def wrap_callback(event):
+            callback(self.ctx, event)
+        self.wc_context.add_timer(nanotime, wrap_callback)
+
+    def __add_time_interval(self, duration, callback):
+        def wrap_callback(event):
+            callback(self.ctx, event)
+        self.wc_context.add_time_interval(duration, wrap_callback)
+
     def pre_start(self, wc_context):
+        self.wc_context = wc_context
         self.ctx.now = wc_context.now
+        self.ctx.add_timer = self.__add_timer
+        self.ctx.add_time_interval = self.__add_time_interval
         self.ctx.subscribe = wc_context.subscribe
         self.ctx.add_account = wc_context.add_account
         self.ctx.insert_order = wc_context.insert_order

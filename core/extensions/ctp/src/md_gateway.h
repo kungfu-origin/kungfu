@@ -75,7 +75,7 @@ namespace kungfu
 
             protected:
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+                void on_start() override;
 
             private:
                 std::string front_uri_;

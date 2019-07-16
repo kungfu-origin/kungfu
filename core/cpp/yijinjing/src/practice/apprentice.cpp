@@ -58,11 +58,29 @@ namespace kungfu
             require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
         }
 
-        void apprentice::react(const observable<event_ptr> &events)
+        void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)>& callback)
+        {
+            events_ | timer(nanotime) |
+            $([&, callback](event_ptr e)
+            {
+                callback(e);
+            });
+        }
+
+        void apprentice::add_time_interval(int64_t duration, const std::function<void(event_ptr)>& callback)
+        {
+            events_ | time_interval(std::chrono::nanoseconds(duration)) |
+            $([&, callback](event_ptr e)
+              {
+                  callback(e);
+              });
+        }
+
+        void apprentice::react()
         {
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {
-                events | skip_until(events | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
+                events_ | skip_until(events_ | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
                 rx::timeout(seconds(1), observe_on_new_thread()) |
                 $([&](event_ptr e)
                   {
@@ -84,7 +102,7 @@ namespace kungfu
                       // once registered this subscriber finished, no worry for performance.
                   });
 
-                events | skip_until(events | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
+                events_ | skip_until(events_ | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
                 $([&](event_ptr e)
                   {
                       reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
@@ -94,19 +112,25 @@ namespace kungfu
                 reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
             }
 
-            events | is(msg::type::Location) |
+            events_ |
+            $([&](event_ptr event)
+              {
+                  now_ = event->gen_time();
+              });
+
+            events_ | is(msg::type::Location) |
             $([&](event_ptr e)
               {
                   register_location_from_event(e);
               });
 
-            events | is(msg::type::Register) |
+            events_ | is(msg::type::Register) |
             $([&](event_ptr e)
               {
                   register_location_from_event(e);
               });
 
-            events | is(msg::type::Deregister) |
+            events_ | is(msg::type::Deregister) |
             $([&](event_ptr e)
               {
                   reader_->disjoin(e->source());
@@ -114,13 +138,13 @@ namespace kungfu
                   deregister_location(e->gen_time(), e->source());
               });
 
-            events | is(msg::type::RequestWriteTo) |
+            events_ | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
                   on_write_to(e);
               });
 
-            events | filter([&](event_ptr e)
+            events_ | filter([&](event_ptr e)
                             {
                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
                             }) |
@@ -129,13 +153,13 @@ namespace kungfu
                   on_read_from(e);
               });
 
-            events | is(msg::type::RequestStart) | first() |
+            events_ | is(msg::type::RequestStart) | first() |
             $([&](event_ptr e)
               {
-                  on_start(events);
+                  on_start();
               });
 
-            events | is(msg::type::TradingDay) |
+            events_ | is(msg::type::TradingDay) |
             $([&](event_ptr e)
               {
                   on_trading_day(e, e->data<int64_t>());
@@ -334,6 +358,9 @@ public:
         std::cout << sizeof(journal::frame_header) << std::endl;
 
         events_.connect();
+
+        std::shared_ptr<std::vector<char>> vp;
+        vp->insert(vp->end(), 0);
     }
 };
 

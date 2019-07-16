@@ -22,45 +22,39 @@ namespace kungfu
     {
         namespace strategy
         {
-            Context::Context(practice::apprentice &app, const rx::observable<yijinjing::event_ptr> &events) :
-                    app_(app), events_(events), now_(0)
+            Context::Context(practice::apprentice &app, const rx::connectable_observable<yijinjing::event_ptr> &events) :
+                    app_(app), events_(events)
             {}
 
-            void Context::react(const rx::observable<yijinjing::event_ptr> &events)
+            void Context::react()
             {
-                events |
+                events_ | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
-                      now_ = event->gen_time();
-                  });
-
-                events | is(msg::type::Quote) |
-                $([&](event_ptr event)
-                  {
-                      auto quote = event->data<Quote>();
+                      const Quote &quote = event->data<Quote>();
                       auto id = get_symbol_id(quote.get_instrument_id(), quote.get_exchange_id());
                       quotes_[id].last_price = quote.last_price;
                   });
 
-                events | is(msg::type::Order) |
+                events_ | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {
                       auto order = event->data<Order>();
                   });
 
-                events | is(msg::type::Trade) |
+                events_ | is(msg::type::Trade) |
                 $([&](event_ptr event)
                   {
                       auto trade = event->data<Trade>();
                   });
 
-                events | is(msg::type::Entrust) |
+                events_ | is(msg::type::Entrust) |
                 $([&](event_ptr event)
                   {
                       auto entrust = event->data<Entrust>();
                   });
 
-                events | is(msg::type::Transaction) |
+                events_ | is(msg::type::Transaction) |
                 $([&](event_ptr event)
                   {
                       auto transaction = event->data<Transaction>();
@@ -69,7 +63,17 @@ namespace kungfu
 
             int64_t Context::now() const
             {
-                return now_;
+                return app_.now();
+            }
+
+            void Context::add_timer(int64_t nanotime, const std::function<void(yijinjing::event_ptr)>& callback)
+            {
+                app_.add_timer(nanotime, callback);
+            }
+
+            void Context::add_time_interval(int64_t duration, const std::function<void(yijinjing::event_ptr)>& callback)
+            {
+                app_.add_time_interval(duration, callback);
             }
 
             void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
@@ -88,9 +92,9 @@ namespace kungfu
                 }
                 account_location_ids_[account_id] = account_location->uid;
 
-                app_.request_write_to(now_, account_location->uid);
-                app_.request_read_from(now_, account_location->uid, true);
-                app_.request_read_from(now_, account_location->uid);
+                app_.request_write_to(app_.now(), account_location->uid);
+                app_.request_read_from(app_.now(), account_location->uid, true);
+                app_.request_read_from(app_.now(), account_location->uid);
                 SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
             }
 
@@ -104,8 +108,8 @@ namespace kungfu
                     {
                         throw wingchun_error(fmt::format("invalid md {}", source));
                     }
-                    app_.request_read_from(now_, md_location->uid, true);
-                    app_.request_write_to(now_, md_location->uid);
+                    app_.request_read_from(app_.now(), md_location->uid, true);
+                    app_.request_write_to(app_.now(), md_location->uid);
                     market_data_[source] = md_location->uid;
                     SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);
                 }
@@ -132,7 +136,7 @@ namespace kungfu
             void Context::request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange)
             {
                 auto writer = app_.get_writer(source);
-                char *buffer = const_cast<char *>(&(writer->open_frame(now_, msg::type::Subscribe, 4096)->data<char>()));
+                char *buffer = const_cast<char *>(&(writer->open_frame(app_.now(), msg::type::Subscribe, 4096)->data<char>()));
                 hffix::message_writer sub_msg(buffer, buffer + 4096);
                 sub_msg.push_back_header("FIX.4.2");
                 sub_msg.push_back_string(hffix::tag::MsgType, "V");

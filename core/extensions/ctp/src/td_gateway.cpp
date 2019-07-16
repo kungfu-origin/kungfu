@@ -48,9 +48,9 @@ namespace kungfu
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
             }
 
-            void TdGateway::on_start(const rx::observable<yijinjing::event_ptr> &events)
+            void TdGateway::on_start()
             {
-                gateway::Trader::on_start(events);
+                gateway::Trader::on_start();
 
                 auto home = get_io_device()->get_home();
                 std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);

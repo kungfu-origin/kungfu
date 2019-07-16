@@ -39,9 +39,8 @@ namespace kungfu
                 virtual bool req_account() = 0;
 
             protected:
-                void react(const rx::observable<yijinjing::event_ptr> &events) override ;
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override ;
+                void on_start() override ;
 
             private:
                 std::string source_;

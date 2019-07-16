@@ -27,9 +27,8 @@ namespace kungfu
                 virtual bool unsubscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
             protected:
-                void react(const rx::observable<yijinjing::event_ptr> &events) override;
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+                void on_start() override;
             };
         }
     }

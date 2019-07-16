@@ -156,16 +156,16 @@ namespace kungfu
             return hero::produce_one(sb);
         }
 
-        void master::react(const observable<event_ptr> &events)
+        void master::react()
         {
-            events | is(msg::type::Register) |
+            events_ | is(msg::type::Register) |
             $([&](event_ptr e)
               {
                   register_app(e);
                   on_register(e);
               });
 
-            events | is(msg::type::RequestWriteTo) |
+            events_ | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
                   const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
@@ -179,7 +179,7 @@ namespace kungfu
                   require_read_from(request.dest_id, e->gen_time(), e->source(), false);
               });
 
-            events | filter([&](event_ptr e)
+            events_ | filter([&](event_ptr e)
                             {
                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
                             }) |
@@ -199,7 +199,7 @@ namespace kungfu
                   require_read_from(e->source(), e->gen_time(), request.source_id, e->msg_type() == msg::type::RequestReadFromPublic);
               });
 
-            events | is(msg::type::TimeRequest) |
+            events_ | is(msg::type::TimeRequest) |
             $([&](event_ptr e)
               {
                   const msg::data::TimeRequest &request = e->data<msg::data::TimeRequest>();
@@ -217,11 +217,11 @@ namespace kungfu
                   task.duration = request.duration;
                   task.repeat_count = 0;
                   task.repeat_limit = request.repeat;
-                  SPDLOG_INFO("time request from {} duration {} repeat {}, next checkpoint {}",
+                  SPDLOG_DEBUG("time request from {} duration {} repeat {}, next checkpoint {}",
                           get_location(e->source())->uname, request.duration, request.repeat, time::strftime(task.checkpoint));
               });
 
-            events |
+            events_ |
             filter([=](yijinjing::event_ptr e)
                    {
                        return dynamic_cast<nanomsg::nanomsg_json *>(e.get()) != nullptr;

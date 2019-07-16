@@ -173,7 +173,7 @@ namespace kungfu
 
             protected:
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+                void on_start() override;
 
             private:
                 int client_id_;
