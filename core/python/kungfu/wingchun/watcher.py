@@ -31,11 +31,20 @@ class Watcher(pywingchun.Watcher):
         self.portfolios = {}
 
     def pre_start(self):
-        self.add_timer(self.now() + kft.NANO_PER_SECOND, self.print_trading_day)
-        self.add_time_interval(5 * kft.NANO_PER_SECOND, self.print_trading_day)
+        self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self.dump_snapshot())
 
     def print_trading_day(self, event):
         self.ctx.logger.info('timer print trading day %s', self.trading_day)
+
+    def dump_snapshot(self):
+        messages = []
+        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
+            message = ledger.message
+            message["data"]["update_time"] = self.now()
+            message["msg_type"] = int(MsgType.AssetInfoSnapshot)
+            self.publish(json.dumps(message))
+            messages.append(message)
+        self.ledger_holder.on_messages(messages)
 
     def handle_request(self, msg):
         req = json.loads(msg)

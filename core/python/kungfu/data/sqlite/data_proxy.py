@@ -80,6 +80,11 @@ class LedgerHolder(DataProxy):
                 cls =  PortfolioPosition
             elif ledger_category == int(LedgerCategory.SubPortfolio):
                 cls = SubPortfolioPosition
+        elif msg_type == int(MsgType.AssetInfoSnapshot):
+            if ledger_category == int(LedgerCategory.Account):
+                cls = AccountAssetInfoSnapshot
+            elif ledger_category == int(LedgerCategory.Portfolio):
+                cls = PortfolioAssetInfoSnapshot
         return cls
 
     def process_message(self, session, message):

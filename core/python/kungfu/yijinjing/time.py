@@ -5,6 +5,9 @@ import pyyjj
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%N'
 NANO_PER_SECOND = 1000000000
+SECOND_PER_MINUTE = 60
+NANO_PER_MINUTE = NANO_PER_SECOND * SECOND_PER_MINUTE
+
 EPOCH = datetime.fromtimestamp(0)
 
 

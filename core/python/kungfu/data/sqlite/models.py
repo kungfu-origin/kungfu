@@ -101,6 +101,7 @@ class LedgerMeta(Base):
 
 class AssetInfoMixin(object):
     trading_day = Column(String)
+    update_time = Column(Integer)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
@@ -136,6 +137,14 @@ class PortfolioAssetInfo(AssetInfoMixin, Base):
 class SubPortfolioAssetInfo(AssetInfoMixin, Base):
     __tablename__ = "subportfolio"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id'),)
+
+class AccountAssetInfoSnapshot(AssetInfoMixin, Base):
+    __tablename__ = "account_snapshot"
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'update_time'),)
+
+class PortfolioAssetInfoSnapshot(AssetInfoMixin, Base):
+    __tablename__ = "portfolio_snapshot"
+    __table_args__ = (PrimaryKeyConstraint('client_id', "update_time"),)
 
 class PositionMixin(object):
     trading_day = Column(String)
