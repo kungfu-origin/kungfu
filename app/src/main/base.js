@@ -32,8 +32,8 @@ export const initDB = () => {
         if(err) logger.error(err);
     })
 
-    // //holidays.db
-    // fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(BASE_DB_DIR, 'holidays.db'), err => {
-    //     if(err) logger.error(err);
-    // })
+    //holidays.db
+    fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(BASE_DB_DIR, 'holidays.db'), err => {
+        if(err) logger.error(err);
+    })
 }
