@@ -36,12 +36,13 @@ class Watcher(pywingchun.Watcher):
     def print_trading_day(self, event):
         self.ctx.logger.info('timer print trading day %s', self.trading_day)
 
-    def dump_snapshot(self):
+    def dump_snapshot(self, data_frequency = "minute"):
         messages = []
         for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
             message = ledger.message
             message["data"]["update_time"] = self.now()
             message["msg_type"] = int(MsgType.AssetInfoSnapshot)
+            message["data_frequency"] = data_frequency
             self.publish(json.dumps(message))
             messages.append(message)
         self.ledger_holder.on_messages(messages)
@@ -55,10 +56,10 @@ class Watcher(pywingchun.Watcher):
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)
-        for acc in self.accounts.values():
-            acc.apply_trading_day(trading_day)
-        for cli in self.portfolios.values():
-            cli.apply_trading_day(trading_day)
+        if self.trading_day is not None and self.trading_day != trading_day:
+            self.dump_snapshot(data_frequency="daily")
+        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
+            ledger.apply_trading_day(trading_day)
         self.trading_day = trading_day
 
     def on_quote(self, event, quote):
