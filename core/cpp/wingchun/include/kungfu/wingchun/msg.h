@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
-
 #include <kungfu/wingchun/common.h>
 
 #define FORMAT_DOUBLE(x) rounded(x, 4)
@@ -673,6 +672,7 @@ namespace kungfu
                     uint64_t parent_order_id;                //母订单ID
 
                     int64_t trade_time;                     //成交时间
+                    char trading_day[DATE_LEN];              //交易日
 
                     char instrument_id[INSTRUMENT_ID_LEN];   //合约ID
                     char exchange_id[EXCHANGE_ID_LEN];       //交易所ID
@@ -690,18 +690,22 @@ namespace kungfu
                     double tax;                              //税
                     double commission;                       //手续费
 
-                    std::string get_instrument_id()
+                    const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    std::string get_exchange_id()
+                    const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
-                    std::string get_account_id()
+                    const std::string get_account_id() const
                     { return std::string(account_id); }
 
-                    std::string get_client_id()
+                    const std::string get_client_id() const
                     { return std::string(client_id); }
 
+                    const std::string get_trading_day() const
+                    {
+                        return std::string(trading_day);
+                    }
 #ifndef _WIN32
                 } __attribute__((packed));
 
@@ -716,6 +720,8 @@ namespace kungfu
                     j["order_id"] = std::to_string(trade.order_id);
 
                     j["trade_time"] = trade.trade_time;
+                    j["trading_day"] = std::string(trade.trading_day);
+
                     j["instrument_id"] = std::string(trade.instrument_id);
                     j["exchange_id"] = std::string(trade.exchange_id);
                     j["account_id"] = std::string(trade.account_id);
@@ -928,8 +934,61 @@ namespace kungfu
                 {
                     nlohmann::json j;
                     to_json(j, ori);
-                    return j.dump();
+                    return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);;
                 }
+                
+                class Decoder
+                {
+                public:
+                    virtual ~Decoder() {}
+                    virtual std::string json_from_ptr(uintptr_t address) const = 0;
+                };
+
+                template<typename T>
+                class DecoderT: public Decoder
+                {
+                public:
+                    virtual std::string json_from_ptr(uintptr_t address) const
+                    {
+                        const T& data = *(reinterpret_cast<const T *>(address));
+                        return to_string(data);
+                    }
+                };
+
+                typedef std::shared_ptr<Decoder> decoder_ptr;
+
+                template<typename T>
+                decoder_ptr make_decoder()
+                {
+                    return std::shared_ptr<Decoder>(new DecoderT<T>());
+                }
+
+                typedef std::unordered_map<int, decoder_ptr> decoder_map;
+
+                inline decoder_ptr select_decoder(int msg_type)
+                {
+                    static decoder_map d_map;
+                    if (d_map.empty())
+                    {
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Quote), make_decoder<msg::data::Quote>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Entrust), make_decoder<msg::data::Entrust>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Transaction), make_decoder<msg::data::Transaction>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::OrderInput), make_decoder<msg::data::OrderInput>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::OrderAction), make_decoder<msg::data::OrderAction>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Order), make_decoder<msg::data::Order>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Trade), make_decoder<msg::data::Trade>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Position), make_decoder<msg::data::Position>()));
+                        d_map.insert(std::make_pair(static_cast<int>(msg::type::AssetInfo), make_decoder<msg::data::AssetInfo>()));
+                    }
+                    const auto& it = d_map.find(msg_type);
+                    return it == d_map.end() ? nullptr : it->second;
+                }
+                
+                inline std::string json_from_address(int msg_type, uintptr_t address)
+                {
+                    decoder_ptr decoder = select_decoder(msg_type);
+                    return decoder == nullptr ? "{}" : decoder->json_from_ptr(address);
+                }    
             }
         }
     }

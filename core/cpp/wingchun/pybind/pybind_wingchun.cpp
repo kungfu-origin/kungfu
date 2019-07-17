@@ -107,6 +107,7 @@ PYBIND11_MODULE(pywingchun, m)
     auto m_utils = m.def_submodule("utils");
     m_utils.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
+    m_utils.def("json_from_address", &json_from_address);
 
     auto m_constants = m.def_submodule("constants");
 
@@ -372,6 +373,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readonly("volume", &Trade::volume)
             .def_readonly("tax", &Trade::tax)
             .def_readonly("commission", &Trade::commission)
+            .def_property_readonly("trading_day", &Trade::get_trading_day)
             .def_property_readonly("instrument_id", &Trade::get_instrument_id)
             .def_property_readonly("exchange_id", &Trade::get_exchange_id)
             .def_property_readonly("account_id", &Trade::get_account_id)

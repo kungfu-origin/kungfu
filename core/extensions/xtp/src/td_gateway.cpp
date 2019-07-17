@@ -253,6 +253,8 @@ namespace kungfu
                     trade.trade_id = writer->current_frame_uid();
                     trade.order_id = xtp_order.internal_order_id;
                     trade.parent_order_id = xtp_order.parent_id;
+                    trade.trade_time = kungfu::yijinjing::time::now_in_nano();
+                    strcpy(trade.trading_day, trading_day_.c_str());
                     strcpy(trade.client_id, xtp_order.client_id);
                     strcpy(trade.account_id, this->get_account_id().c_str());
                     trade.instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id);
