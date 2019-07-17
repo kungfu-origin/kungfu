@@ -83,16 +83,6 @@ export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
 
 //================= live trading end =============================
 
-//================= strategy related start =======================
-
-//strategyPos 某策略下的持仓
-export const buildStrategyPosDBPath = (strategyId: string) => path.join(STRATEGY_DIR, strategyId, 'assets.db')
-
-//snapshorts
-export const buildStrategySnapshortsDBPath = (accountId: string) => path.join(STRATEGY_DIR, accountId, 'snapshots.db')
-
-//================== strategy related end =========================
-
 //================== others start =================================
 
 //global commission 手续费

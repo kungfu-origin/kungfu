@@ -2,8 +2,7 @@ import { runSelectDB, runInsertUpdateDeleteDB } from '__gUtils/dbUtils';
 import { buildDateRange } from '__gUtils/busiUtils';
 import {
     STRATEGYS_DB, 
-    LIVE_TRADING_DATA_DB,
-    buildStrategySnapshortsDBPath,
+    LIVE_TRADING_DATA_DB
 } from '__gConfig/pathConfig';
 import moment from "moment"
 
@@ -130,8 +129,16 @@ export const getStrategyPos = (strategyId: string, { instrumentId }: TradingData
  */
 export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
-    return runSelectDB(buildStrategySnapshortsDBPath(strategyId), `SELECT * FROM portfolio_1m_snapshots WHERE trading_day = '${tradingDay}'`)
+    return runSelectDB(LIVE_TRADING_DATA_DB, `SELECT * FROM portfolio_snapshot WHERE trading_day = '${tradingDay}'`)
 }
+
+/**
+ * 获取某策略下收益曲线日线
+ */
+export const getStrategyPnlDay = (strategyId: string) => {
+    return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM portfolio_snapshot')
+}
+
 
 interface LastPnl {
     lastPnl: number;
@@ -147,14 +154,6 @@ export const getStrategysPnl = (ids: string[], tradingDay: string): Promise<Last
         return { lastPnl: res[lastIndex], strategyId: id }
     }))
     return Promise.all(promises)
-}
-
-
-/**
- * 获取某策略下收益曲线日线
- */
-export const getStrategyPnlDay = (strategyId: string) => {
-    return runSelectDB(buildStrategySnapshortsDBPath(strategyId), 'SELECT * FROM portfolio_1d_snapshots')
 }
 
 
