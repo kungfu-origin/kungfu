@@ -34,6 +34,10 @@ namespace kungfu
             protected:
 
                 void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+
+            private:
+
+                void on_passivectrl(const yijinjing::event_ptr& event);
             };
         }
     }

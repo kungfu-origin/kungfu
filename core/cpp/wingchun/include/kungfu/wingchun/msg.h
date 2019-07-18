@@ -639,6 +639,44 @@ namespace kungfu
 
                 }
 
+                inline void from_json(const nlohmann::json &j, Order &order)
+                {
+                    order.order_id = j["order_id"];
+                    order.insert_time = j["insert_time"];
+                    order.update_time = j["update_time"];
+                    strncpy(order.trading_day, j["trading_day"].get<std::string>().c_str(), DATE_LEN);
+                    strncpy(order.instrument_id, j["instrument_id"].get<std::string>().c_str(), INSTRUMENT_ID_LEN);
+                    strncpy(order.exchange_id, j["exchange_id"].get<std::string>().c_str(), EXCHANGE_ID_LEN);
+
+                    strncpy(order.account_id, j["account_id"].get<std::string>().c_str(), ACCOUNT_ID_LEN);
+                    strncpy(order.client_id, j["client_id"].get<std::string>().c_str(), CLIENT_ID_LEN);
+
+                    order.instrument_type = j["instrument_type"];
+
+                    order.limit_price = j["limit_price"].get<double>();
+                    order.frozen_price = j["frozen_price"].get<double>();
+
+                    order.volume = j["volume"];
+                    order.volume_traded = j["volume_traded"];
+                    order.volume_left = j["volume_left"];
+
+                    order.tax = j["tax"].get<double>();
+                    order.commission = j["commission"].get<double>();
+
+                    order.error_id = j["error_id"];
+                    strncpy(order.error_msg, j["error_msg"].get<std::string>().c_str(), ERROR_MSG_LEN);
+
+                    order.status = j["status"];
+
+                    order.parent_id = j["parent_id"];
+
+                    order.side = j["side"];
+                    order.offset = j["offset"];
+                    order.price_type = j["price_type"];
+                    order.volume_condition = j["volume_condition"];
+                    order.time_condition = j["time_condition"];
+                }
+
                 inline void order_from_input(const msg::data::OrderInput &input, msg::data::Order &order)
                 {
                     order.parent_id = input.parent_id;
@@ -663,6 +701,7 @@ namespace kungfu
                     order.time_condition = input.time_condition;
 
                 }
+
 
                 //成交信息
                 struct Trade
@@ -732,6 +771,30 @@ namespace kungfu
                     j["tax"] = FORMAT_DOUBLE(trade.tax);
                     j["commission"] = FORMAT_DOUBLE(trade.commission);
 
+                }
+
+                inline void from_json(const nlohmann::json &j, Trade &trade)
+                {
+                    trade.trade_id = j["trade_id"];
+                    
+                    trade.order_id = j["order_id"].get<uint64_t>();
+
+                    trade.trade_time = j["trade_time"];
+                    strncpy(trade.instrument_id, j["instrument_id"].get<std::string>().c_str(), INSTRUMENT_ID_LEN);
+                    strncpy(trade.exchange_id, j["exchange_id"].get<std::string>().c_str(), EXCHANGE_ID_LEN);
+                    strncpy(trade.account_id, j["account_id"].get<std::string>().c_str(), ACCOUNT_ID_LEN);
+                    strncpy(trade.client_id, j["client_id"].get<std::string>().c_str(), CLIENT_ID_LEN);
+
+                    trade.instrument_type = j["instrument_type"];
+
+                    trade.side = j["side"];
+                    trade.offset = j["offset"];
+
+                    trade.price = j["price"].get<double>();
+                    trade.volume = j["volume"];
+
+                    trade.tax = j["tax"].get<double>();
+                    trade.commission = j["commission"].get<double>();
                 }
 
                 //账户信息

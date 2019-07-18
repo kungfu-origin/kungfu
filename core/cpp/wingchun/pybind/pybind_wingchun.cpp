@@ -315,6 +315,7 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<Order>(m, "Order")
+            .def(py::init<>())
             .def_readonly("order_id", &Order::order_id)
             .def_readonly("insert_time", &Order::insert_time)
             .def_readonly("update_time", &Order::update_time)
@@ -346,6 +347,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<OrderAction>(m, "OrderAction")
+            .def(py::init<>())
             .def_readonly("order_id", &OrderAction::order_id)
             .def_readonly("order_action_id", &OrderAction::order_action_id)
             .def_readonly("action_flag", &OrderAction::action_flag)
@@ -358,6 +360,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
     py::class_<Trade>(m, "Trade")
+            .def(py::init<>())
             .def_readonly("trade_id", &Trade::trade_id)
             .def_readonly("order_id", &Trade::order_id)
             .def_readonly("parent_order_id", &Trade::parent_order_id)
