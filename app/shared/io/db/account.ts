@@ -130,6 +130,8 @@ export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDat
  */
 export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
+    if(!accountId) return new Promise(resolve => resolve([]))
+    accountId = accountId.toAccountId();
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM account_snapshot` + 
@@ -144,6 +146,7 @@ export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
  */
 export const getAccountPnlDay = (accountId: string) => {
     if(!accountId) return new Promise(resolve => resolve([]))
+    accountId = accountId.toAccountId();
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         'SELECT * FROM account_snapshot' + 

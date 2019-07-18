@@ -138,7 +138,6 @@ export default {
         getMinData() {
             const t = this
             const id = t.currentId;
-            console.log(t.calendar.trading_day);
             t.getCalendar()
             .then(() => t.minMethod(t.currentId, t.calendar.trading_day))
             .then(data => {

@@ -29,7 +29,9 @@ export default {
     props: {
        
     },
+
     inheritAttrs: false,
+    
     data(){
         return {
             chartType: 'min',
@@ -42,6 +44,7 @@ export default {
     },
 
     mounted() {
+        const t = this;
         window.addEventListener("resize", () => { 
             t.$refs['day-chart'].myChart && t.$refs['day-chart'].myChart.resize()
             t.$refs['min-chart'].myChart && t.$refs['min-chart'].myChart.resize()
