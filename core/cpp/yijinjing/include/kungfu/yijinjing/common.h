@@ -231,7 +231,7 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
-        auto is = [](int32_t msg_type)
+        inline auto is = [](int32_t msg_type)
         {
             return filter([=](yijinjing::event_ptr e)
                           {
@@ -239,7 +239,7 @@ namespace kungfu
                           });
         };
 
-        auto from = [](uint32_t source)
+        inline auto from = [](uint32_t source)
         {
             return filter([=](yijinjing::event_ptr e)
                           {
@@ -247,7 +247,7 @@ namespace kungfu
                           });
         };
 
-        auto trace = []()
+        inline auto trace = []()
         {
             return map([=](yijinjing::event_ptr e)
                        {
@@ -257,7 +257,7 @@ namespace kungfu
         };
 
         template<class... ArgN>
-        auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
+        inline auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
         {
             return subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...);
         }

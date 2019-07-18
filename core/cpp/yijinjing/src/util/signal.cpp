@@ -32,11 +32,11 @@ namespace kungfu
                     case SIGINT:          // interrupt
                     case SIGBREAK:        // Ctrl-Break sequence
                         SPDLOG_INFO("kungfu app interrupted");
-                        exit(signum);
+                        stop_hero();
                         break;
                     case SIGTERM:         // Software termination signal from kill
-                        SPDLOG_INFO("kungfu app killed");
-                        exit(signum);
+                        SPDLOG_INFO("kungfu app terminated");
+                        stop_hero();
                         break;
                     case SIGILL:          // illegal instruction - invalid function image
                     case SIGFPE:          // floating point exception
@@ -65,7 +65,7 @@ namespace kungfu
                         stop_hero();
                         break;
                     case SIGTERM:      // terminate process    software termination signal
-                        SPDLOG_INFO("kungfu app interrupted");
+                        SPDLOG_INFO("kungfu app terminated");
                         stop_hero();
                         break;
                     case SIGKILL:      // terminate process    kill program

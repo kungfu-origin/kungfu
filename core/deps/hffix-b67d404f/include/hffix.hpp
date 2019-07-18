@@ -2145,7 +2145,7 @@ public:
     /*!
      * \brief Returns the FIX version prefix BeginString field value size. (Example: returns 7 for "FIX.4.4")
      */
-    ssize_t prefix_size() const {
+    size_t prefix_size() const {
         return prefix_end_ - buffer_ - 2;
     }
 

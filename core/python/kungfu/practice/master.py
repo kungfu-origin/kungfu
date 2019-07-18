@@ -39,8 +39,6 @@ class Master(pyyjj.master):
 
         ctx.master = self
 
-        os_signal.handle_os_signals(self.exit_gracefully)
-
     def on_notice(self, event):
         try:
             kfs.handle(event.msg_type, self.ctx, json.loads(event.to_string()))
@@ -54,7 +52,7 @@ class Master(pyyjj.master):
     def on_register(self, event):
         self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
-    def exit_gracefully(self, signum, frame):
+    def on_exit(self):
         self.ctx.logger.info('kungfu master stopping')
 
         for pid in self.ctx.apprentices:

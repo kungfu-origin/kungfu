@@ -137,6 +137,11 @@ public:
     {
         PYBIND11_OVERLOAD(void, master, on_register, event);
     }
+
+    void on_exit() override
+    {
+        PYBIND11_OVERLOAD(void, master, on_exit);
+    }
 };
 
 class PyApprentice : public apprentice
@@ -309,6 +314,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("on_notice", &master::on_notice)
             .def("on_interval_check", &master::on_interval_check)
             .def("on_register", &master::on_register)
+            .def("on_exit", &master::on_exit)
             .def("deregister_app", &master::deregister_app)
             ;
 
