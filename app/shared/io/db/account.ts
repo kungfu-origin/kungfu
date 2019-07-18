@@ -74,27 +74,6 @@ export const getAccountPos = (accountId: string, { instrumentId, type }: Trading
         ' ORDER BY instrument_id'
     )
 }
-/**
- * 获取账户成交情况
- * 
- */
-export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
-    accountId = accountId.toAccountId();
-    id = id || '';
-    dateRange = dateRange || [];
-    const filterDate = buildDateRange(dateRange, tradingDay)
-    //查询总数的时候也需要根据筛选条件来
-    return runSelectDB(
-        LIVE_TRADING_DATA_DB, 
-        `SELECT rowId, * FROM trades` + 
-        ` WHERE account_id="${accountId}"` +
-        ` AND (instrument_id LIKE '%${id}%'` +
-        ` OR client_id LIKE '%${id}%')` +
-        ` AND trade_time > ${filterDate[0]}` + 
-        ` AND trade_time < ${filterDate[1]}` + //有日期筛选的时候
-        ` ORDER BY trade_id DESC`
-    )
-}
 
 /**
  * 获取账户委托情况
@@ -123,16 +102,40 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
 }
 
 /**
+ * 获取账户成交情况
+ * 
+ */
+export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
+    accountId = accountId.toAccountId();
+    id = id || '';
+    dateRange = dateRange || [];
+    const filterDate = buildDateRange(dateRange, tradingDay)
+    //查询总数的时候也需要根据筛选条件来
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        `SELECT rowId, * FROM trades` + 
+        ` WHERE account_id="${accountId}"` +
+        ` AND (instrument_id LIKE '%${id}%'` +
+        ` OR client_id LIKE '%${id}%')` +
+        ` AND trade_time > ${filterDate[0]}` + 
+        ` AND trade_time < ${filterDate[1]}` + //有日期筛选的时候
+        ` ORDER BY trade_id DESC`
+    )
+}
+
+
+/**
  * 获取账户收益曲线分钟线
  * 
  */
 export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
-    if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        `SELECT * FROM account_snapshot`, 
-        ` WHERE trading_day = '${tradingDay}'`)
+        `SELECT * FROM account_snapshot` + 
+        ` WHERE trading_day = '${tradingDay}'` +
+        ` AND account_id='${accountId}'`
+    )
 }
 
 /**
@@ -143,7 +146,10 @@ export const getAccountPnlDay = (accountId: string) => {
     if(!accountId) return new Promise(resolve => resolve([]))
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        'SELECT * FROM account_snapshot')
+        'SELECT * FROM account_snapshot' + 
+        ` WHERE account_id='${accountId}'` +
+        ` GROUP BY trading_day`
+    )
 }
 
 

@@ -136,6 +136,11 @@ export default {
                     if(ledgerCategory !== 0) return;
                     t.posFromNmsg = Object.freeze(tradingData);
                     break
+                case MSG_TYPE.portfolio:
+                    if(accountId !== currentId) return;
+                    if(ledgerCategory !== 0) return;
+                    console.log(tradingData)
+                    
             }
         })
     },

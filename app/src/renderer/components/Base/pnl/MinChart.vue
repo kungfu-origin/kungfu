@@ -39,7 +39,8 @@ export default {
     data() {
         this.dataZoomBottomPadding = 70;
         this.bottomPadding = 70;
-        this.minGroupKey = {}
+        this.minGroupKey = {};
+        this.myChart = null;
         this.echartsSeries = {
             type: 'line',
             showSymbol: false, //默认不显示原点，鼠标放上会显示
@@ -55,7 +56,6 @@ export default {
                 }
             },
         };
-        this.myChart = null;
         return {
             minData: [[],[]],
             minPnlData: [],
@@ -72,37 +72,36 @@ export default {
         intradayPnlRatio(){
             const t = this;
             if(!t.minPnlData.length) return '--'
-            return t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].intraday_pnl_ratio, 4, 2)
+            const firstEquityDaily = t.$utils.toDecimal(t.minPnlData[0].dynamic_equity, 2)
+            const lastEquityDaily = t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].dynamic_equity, 2)
+            return t.$utils.toDecimal((lastEquityDaily - firstEquityDaily) / firstEquityDaily , 4, 2)
         },
+        
 
         intradayPnl(){
             const t = this;
-            if(!t.minPnlData.length) return '--'
-            return t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].intraday_pnl, 2)
+            if(!t.minPnlData.length) return '--';
+            const firstPnlDaily = t.$utils.toDecimal(t.minPnlData[0].unrealized_pnl, 2)
+            const lastPnlDaily = t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].unrealized_pnl, 2)
+            return lastPnlDaily - firstPnlDaily
         }
     },
 
     
     mounted() {
-        const t = this
-        t.rendererPnl = true;
-        if(t.currentId) t.getMinData();
-        window.addEventListener("resize", () => { 
-            t.myChart && t.myChart.resize()
-        })
+        this.rendererPnl = true;
+        if(this.currentId) this.getMinData();
     },
 
     watch: {
         currentId(val) {
-            const t = this
-            t.resetData();
             if(!val)return;
-            t.getMinData()
+            this.resetData();
+            this.getMinData()
         },
 
         value(val) {
-            const t = this
-            t.myChart && t.myChart.resize()
+            this.myChart && this.myChart.resize()
         },
 
         //接收推送的数据
@@ -112,18 +111,14 @@ export default {
         },
 
         minPnlData(newVal, oldVal){
-            const t = this;
-            if(oldVal.length === 0 && newVal.length !== 0){
-                t.initChart()
-            }
+            if(oldVal.length === 0 && newVal.length !== 0) this.initChart()
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据
         'calendar.trading_day'(val, oldVal) {
-            const t = this;
-            if(!oldVal && !val && !t.currentId) return;
-            t.resetData();
-            t.getMinData();
+            if(!oldVal && !val && !this.currentId) return;
+            this.resetData();
+            this.getMinData();
         }
     },
 
@@ -131,91 +126,89 @@ export default {
         initChart() {
             const t = this
             const dom = document.getElementById('min-chart')
-            if(dom){
-                t.myChart = echarts.getInstanceByDom(dom)
-                if( t.myChart === undefined){ 
-                    t.myChart = echarts.init(dom)
-                }
-                let defaultConfig = t.$utils.deepClone(lineConfig)  
-                defaultConfig.xAxis.data = t.minData[0]
-                //自定义标签数据
-                defaultConfig.tooltip.formatter = function(params) {
-                    if(!params && !params.length) return
-                    const time = params[0].name
-                    const {accumulated_pnl_ratio, accumulated_pnl, intraday_pnl_ratio, intraday_pnl, update_time} = t.minGroupKey[time]
-                    const html = '<div style="color:#c7cce6;font-size: 11px"><div>' + moment(update_time/1000000).format('YYYY.MM.DD HH:mm') + '</div>' + 
-                        '<div>日内收益率：' +  t.$utils.toDecimal(intraday_pnl_ratio, 4, 2) + '%</div>' +
-                        '<div>日内盈亏：' +  t.$utils.toDecimal(intraday_pnl, 2) + '</div> </div>' 
-                    return html
-                }
-
-                defaultConfig.series = {
-                    data: t.minData[1],
-                    ...t.echartsSeries
-                }
-                t.myChart.setOption(defaultConfig) 
-            }
+            if(!dom) return;
+            t.myChart = echarts.getInstanceByDom(dom)
+            if(t.myChart === undefined) t.myChart = echarts.init(dom);
+            let defaultConfig = t.$utils.deepClone(lineConfig)  
+            defaultConfig.xAxis.data = t.minData[0]
+            defaultConfig.series = { data: t.minData[1], ...t.echartsSeries }
+            t.myChart.setOption(defaultConfig)
         },
 
         getMinData() {
             const t = this
             const id = t.currentId;
-            (() => {
-                //如果有交易日，则不获取
-                if(t.calendar.trading_day) return new Promise(resolve => resolve())
-                else return t.$store.dispatch('getCalendar')
-            })()
+            console.log(t.calendar.trading_day);
+            t.getCalendar()
             .then(() => t.minMethod(t.currentId, t.calendar.trading_day))
             .then(data => {
                 //当调用的传值和当前的传值不同的是，则返回
-                if(id != t.currentId) {
-                    return
-                }
+                if(id != t.currentId) return
                 let xAxisData = []
                 let serirsData = []
                 t.minGroupKey = {}
-                data && data.map(item => {
-                    const time = moment(item.update_time/1000000).format('HH:mm')
-                    t.minGroupKey[time] = item
-                    xAxisData.push(time)
-                    serirsData.push(t.$utils.toDecimal(item.accumulated_pnl_ratio, 4, 2))
+                data && data.forEach(item => {
+                    const hhmmTime = moment(item.update_time / 1000000).format('HH:mm')
+                    t.minGroupKey[hhmmTime] = item
+                    xAxisData.push(hhmmTime)
+                    serirsData.push(t.$utils.toDecimal(item.unrealized_pnl, 2))
                 })
-                t.minData = [xAxisData, serirsData]
-                t.minPnlData = data || []
-            }).catch(err =>{
-                t.$message.error(err.message || '获取失败')
-            }).finally(() => {
-                t.initChart()
+                t.minData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
+                t.minPnlData = Object.freeze(data || [])
             })
-            
+            .catch(err => t.$message.error(err.message || '获取失败'))
+            .finally(() => t.initChart())
+        },
+
+        //如果有交易日，则不获取
+        getCalendar() {
+            const t = this;
+            if(t.calendar.trading_day) return new Promise(resolve => resolve())
+            else return t.$store.dispatch('getCalendar')
         },
 
         dealNanomsg(nanomsg) {
             const t = this;
             const oldPnlDataLen = t.minPnlData.length;
-            const time = moment(nanomsg.update_time/1000000).format('HH:mm')
-            t.minGroupKey[time] = nanomsg
-            t.minData[0].push(time)
-            t.minData[1].push(t.$utils.toDecimal(nanomsg.accumulated_pnl_ratio, 4, 2))
-            t.minPnlData.push(nanomsg)
-            if(!oldPnlDataLen) {t.$nextTick().then(() => t.initChart())}
-            else{
-                t.myChart && t.myChart.setOption({
-                    series: {
-                        data: t.minData[1],
-                        ...t.echartsSeries
-                    },
-                    xAxis: {data:t.minData[0]}
-                })
-            }
+            const hhmmTime = moment(nanomsg.update_time / 1000000).format('HH:mm')
+            t.minGroupKey[hhmmTime] = nanomsg
+            let tmpMinData0 = t.minData[0].slice();
+            tmpMinData0.push(hhmmTime)
+            t.minData[0] = tmpMinData0
+
+            let tmpMinData1 = t.minData[1].slice();
+            tmpMinData1.push(t.$utils.toDecimal(nanomsg.unrealized_pnl, 2))
+            t.minData[1] = tmpMinData1
+
+            let tmpMinPnlData = t.minPnlData.slice();
+            tmpMinPnlData.push(nanomsg)
+            t.minPnlData = tmpMinPnlData
+
+            t.$nextTick().then(() => {
+                if(!oldPnlDataLen) t.initChart();
+                else t.updateChart();
+            })
+        },
+
+        updateChart() {
+            const t = this;
+            t.myChart && t.myChart.setOption({
+                series: {
+                    data: t.minData[1],
+                    ...t.echartsSeries
+                },
+                xAxis: {
+                    data:t.minData[0]
+                }
+            })
         },
 
         resetData(){
             const t = this;
-            this.myChart && this.myChart.clear();
-            this.myChart = null;
-            this.minData = [[],[]];
-            this.minPnlData = [];
+            t.myChart && t.myChart.clear();
+            t.myChart = null;
+            t.minData = [Object.freeze([]), Object.freeze([])];
+            t.minPnlData = [];
             return true;
         },
     }

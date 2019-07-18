@@ -129,14 +129,24 @@ export const getStrategyPos = (strategyId: string, { instrumentId }: TradingData
  */
 export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
-    return runSelectDB(LIVE_TRADING_DATA_DB, `SELECT * FROM portfolio_snapshot WHERE trading_day = '${tradingDay}'`)
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        `SELECT * FROM portfolio_snapshot` + 
+        ` WHERE trading_day = '${tradingDay}'` + 
+        ` AND client_id = '${strategyId}'`
+    )
 }
 
 /**
  * 获取某策略下收益曲线日线
  */
 export const getStrategyPnlDay = (strategyId: string) => {
-    return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM portfolio_snapshot')
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB,
+        `SELECT * FROM portfolio_snapshot` +
+        ` where client_id = '${strategyId}'` +
+        ` GROUP BY trading_day`
+    )
 }
 
 
