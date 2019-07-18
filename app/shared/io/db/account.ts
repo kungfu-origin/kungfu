@@ -149,7 +149,7 @@ export const getAccountPnlDay = (accountId: string) => {
     accountId = accountId.toAccountId();
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        'SELECT * FROM account_snapshot' + 
+        'SELECT * FROM (select * from account_snapshot ORDER BY update_time DESC)' + 
         ` WHERE account_id='${accountId}'` +
         ` GROUP BY trading_day`
     )

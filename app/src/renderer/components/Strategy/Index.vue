@@ -101,6 +101,10 @@ export default {
                     if(ledgerCategory !== 1) return;
                     t.posFromNmsg = Object.freeze(tradingData);
                     break
+                case MSG_TYPE.portfolio:
+                    if(strategyId !== currentId) return;
+                    if(ledgerCategory !== 1) return;
+                    t.minPnlFromNmsg = Object.freeze(tradingData);
             }
         })
     },

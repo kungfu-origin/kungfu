@@ -46,8 +46,8 @@ export default {
     mounted() {
         const t = this;
         window.addEventListener("resize", () => { 
-            t.$refs['day-chart'].myChart && t.$refs['day-chart'].myChart.resize()
-            t.$refs['min-chart'].myChart && t.$refs['min-chart'].myChart.resize()
+            t.$refs['day-chart'] && t.$refs['day-chart'].myChart && t.$refs['day-chart'].myChart.resize()
+            t.$refs['min-chart'] && t.$refs['min-chart'].myChart && t.$refs['min-chart'].myChart.resize()
         })
     },
 

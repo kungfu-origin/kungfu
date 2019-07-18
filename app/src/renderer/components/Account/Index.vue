@@ -122,6 +122,7 @@ export default {
             const ledgerCategory = tradingData.ledger_category
             const accountId = tradingData.account_id || '';
             const currentId = t.currentId.toAccountId();
+            console.log(d)
             switch (msgType) {
                 case MSG_TYPE.order:
                     if(accountId !== currentId) return;
@@ -139,7 +140,7 @@ export default {
                 case MSG_TYPE.portfolio:
                     if(accountId !== currentId) return;
                     if(ledgerCategory !== 0) return;
-                    console.log(tradingData)
+                    t.minPnlFromNmsg = Object.freeze(tradingData);
                     
             }
         })

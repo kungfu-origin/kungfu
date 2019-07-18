@@ -143,7 +143,7 @@ export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
 export const getStrategyPnlDay = (strategyId: string) => {
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
-        `SELECT * FROM portfolio_snapshot` +
+        'SELECT * FROM (select * from portfolio_snapshot ORDER BY update_time DESC)' + 
         ` where client_id = '${strategyId}'` +
         ` GROUP BY trading_day`
     )
