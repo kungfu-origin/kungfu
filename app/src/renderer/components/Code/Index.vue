@@ -35,10 +35,6 @@ export default {
             return
         }
         t.updateStrategy(strategyId)
-        
-        //绑定全局 fileId
-        window.fileId = 0;
-
 
         t.shouldClose = false;
 

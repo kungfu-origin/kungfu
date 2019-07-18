@@ -143,7 +143,8 @@ namespace kungfu
         {
             Account,
             Portfolio,
-            SubPortfolio
+            SubPortfolio,
+            Unknown
         };
 
         class wingchun_error : public std::runtime_error

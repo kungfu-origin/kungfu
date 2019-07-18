@@ -9,7 +9,7 @@ import * as monaco from "monaco-editor";
 import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
 import { mapState } from "vuex";
-import * as CODE_UTILS from "__gUtils/fileUtils.js";
+import * as CODE_UTILS from "__gUtils/fileUtils";
 
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from "../config/Monokai.json";

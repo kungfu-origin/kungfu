@@ -34,7 +34,7 @@ namespace kungfu
             get_io_device()->get_publisher()->notify();
         }
 
-        void master::register_app(event_ptr e)
+        void master::register_app(const event_ptr& e)
         {
             auto request_loc = e->data<nlohmann::json>();
             auto app_location = std::make_shared<location>(
@@ -100,6 +100,7 @@ namespace kungfu
         {
             deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
+            timer_tasks_.erase(app_location_uid);
             nlohmann::json msg{};
             auto now = time::now_in_nano();
             msg["gen_time"] = now;
@@ -107,6 +108,16 @@ namespace kungfu
             msg["msg_type"] = msg::type::Deregister;
             msg["source"] = app_location_uid;
             get_io_device()->get_publisher()->publish(msg.dump());
+        }
+
+        void master::publish_time(int32_t msg_type, int64_t nanotime)
+        {
+            writers_[0]->write(0, msg_type, nanotime);
+        }
+
+        void master::send_time(uint32_t dest, int32_t msg_type, int64_t nanotime)
+        {
+            writers_[dest]->write(0, msg_type, nanotime);
         }
 
         bool master::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
@@ -146,15 +157,16 @@ namespace kungfu
             return hero::produce_one(sb);
         }
 
-        void master::react(const observable<event_ptr> &events)
+        void master::react()
         {
-            events | is(msg::type::Register) |
+            events_ | is(msg::type::Register) |
             $([&](event_ptr e)
               {
                   register_app(e);
+                  on_register(e);
               });
 
-            events | is(msg::type::RequestWriteTo) |
+            events_ | is(msg::type::RequestWriteTo) |
             $([&](event_ptr e)
               {
                   const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
@@ -168,7 +180,7 @@ namespace kungfu
                   require_read_from(request.dest_id, e->gen_time(), e->source(), false);
               });
 
-            events | filter([&](event_ptr e)
+            events_ | filter([&](event_ptr e)
                             {
                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
                             }) |
@@ -188,7 +200,7 @@ namespace kungfu
                   require_read_from(e->source(), e->gen_time(), request.source_id, e->msg_type() == msg::type::RequestReadFromPublic);
               });
 
-            events | is(msg::type::TimeRequest) |
+            events_ | is(msg::type::TimeRequest) |
             $([&](event_ptr e)
               {
                   const msg::data::TimeRequest &request = e->data<msg::data::TimeRequest>();
@@ -206,11 +218,11 @@ namespace kungfu
                   task.duration = request.duration;
                   task.repeat_count = 0;
                   task.repeat_limit = request.repeat;
-                  SPDLOG_INFO("time request from {} duration {} repeat {}, next checkpoint {}",
+                  SPDLOG_DEBUG("time request from {} duration {} repeat {}, next checkpoint {}",
                           get_location(e->source())->uname, request.duration, request.repeat, time::strftime(task.checkpoint));
               });
 
-            events |
+            events_ |
             filter([=](yijinjing::event_ptr e)
                    {
                        return dynamic_cast<nanomsg::nanomsg_json *>(e.get()) != nullptr;

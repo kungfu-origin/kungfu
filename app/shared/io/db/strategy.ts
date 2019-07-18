@@ -1,12 +1,8 @@
 import { runSelectDB, runInsertUpdateDeleteDB } from '__gUtils/dbUtils';
 import { buildDateRange } from '__gUtils/busiUtils';
-
 import {
     STRATEGYS_DB, 
-    LIVE_TRADING_DATA_DB,
-    buildStrategyPosDBPath,
-    buildStrategySnapshortsDBPath,
-    buildAccountTradesDBPath
+    LIVE_TRADING_DATA_DB
 } from '__gConfig/pathConfig';
 import moment from "moment"
 
@@ -21,7 +17,7 @@ export const getStrategyList = () => {
  * 获取策略by id
  * @param  {string} id
  */
-export const getStrategyById = (id) => {
+export const getStrategyById = (id: string) => {
     return runSelectDB(STRATEGYS_DB, "SELECT * FROM strategys WHERE strategy_id = ?", id)
 }
 
@@ -30,7 +26,7 @@ export const getStrategyById = (id) => {
  * @param {String} id 交易任务名 
  */
 
-export const addStrategy = (strategy_id, strategy_path) => {
+export const addStrategy = (strategy_id: string, strategy_path: string) => {
     const addTime = +new Date().getTime() * Math.pow(10,6)
     return runInsertUpdateDeleteDB(STRATEGYS_DB, 'INSERT INTO strategys(strategy_id, strategy_path, add_time) VALUES (?, ?, ?)', [strategy_id, strategy_path || null, addTime])
 }
@@ -39,7 +35,7 @@ export const addStrategy = (strategy_id, strategy_path) => {
  * 删除策略
  * @param  {} strategy_id
  */
-export const deleteStrategy = (strategy_id) => {
+export const deleteStrategy = (strategy_id: string) => {
     return runInsertUpdateDeleteDB(STRATEGYS_DB, "DELETE FROM strategys WHERE strategy_id = ?", strategy_id)
 }
  
@@ -48,14 +44,14 @@ export const deleteStrategy = (strategy_id) => {
  * @param  {String} strategy_id
  * @param  {String} strategy_path
  */
-export const updateStrategyPath = (strategy_id, strategy_path) => {
+export const updateStrategyPath = (strategy_id: string, strategy_path: string) => {
     return runInsertUpdateDeleteDB(STRATEGYS_DB, 'UPDATE strategys SET strategy_path = ? WHERE strategy_id = ?', [strategy_path, strategy_id])    
 }
 
 /**
  * 获取某策略下委托
  */
-export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) => {
+export const getStrategyOrder = async(strategyId: string, {id, dateRange}: TradingDataFilter, tradingDay: string) => {
     dateRange = dateRange || [];
     id = id || ''
     //新建与之前重名策略，防止get之前的数据
@@ -79,7 +75,7 @@ export const getStrategyOrder = async(strategyId, {id, dateRange}, tradingDay) =
 /**
  * 获取某策略下成交
  */
-export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay) => {
+export const getStrategyTrade = async(strategyId: string, { id, dateRange }: TradeInputData, tradingDay: string) => {
     dateRange = dateRange || [];
     id = id || ''
     //新建与之前重名策略，防止get之前的数据    
@@ -101,7 +97,7 @@ export const getStrategyTrade = async(strategyId, { id, dateRange }, tradingDay)
 /**
  * 获取某策略下的持仓
  */
-export const getStrategyPos = (strategyId, { instrumentId }) => {
+export const getStrategyPos = (strategyId: string, { instrumentId }: TradingDataFilter) => {
     instrumentId = instrumentId || '';
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
@@ -110,10 +106,10 @@ export const getStrategyPos = (strategyId, { instrumentId }) => {
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         ` ORDER BY instrument_id`
     )
-    .then(pos => {
-        let posList = {}
+    .then((pos: PosInputData[]): any => {
+        let posList: any = {}
         //策略的pos是一条一条成交记录？
-        pos.map(item => {
+        pos.map((item: PosInputData): void => {
             let key = item.instrument_id + item.direction
             if(posList[key]) {
                 posList[key].yesterday_volume = posList[key].yesterday_volume + item.yesterday_volume
@@ -131,29 +127,43 @@ export const getStrategyPos = (strategyId, { instrumentId }) => {
 /**
  * 获取某策略下收益曲线分钟线
  */
-export const getStrategyPnlMin = (strategyId, tradingDay) => {
+export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
-    return runSelectDB(buildStrategySnapshortsDBPath(strategyId), `SELECT * FROM portfolio_1m_snapshots WHERE trading_day = '${tradingDay}'`)
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        `SELECT * FROM portfolio_snapshot` + 
+        ` WHERE trading_day = '${tradingDay}'` + 
+        ` AND client_id = '${strategyId}'`
+    )
 }
-
-
-export const getStrategysPnl = (ids, tradingDay) => {
-    if(!tradingDay) throw new Error('无交易日！')
-    const promises = ids.map(id => getStrategyPnlMin(id, tradingDay).then(res => {
-        const resLen = Object.keys(res || {}).length;
-        let lastIndex = 0;
-        if(resLen > 0) lastIndex = resLen - 1;
-        return {lastPnl: res[lastIndex], strategyId: id}
-    }))
-    return Promise.all(promises)
-}
-
 
 /**
  * 获取某策略下收益曲线日线
  */
-export const getStrategyPnlDay = (strategyId) => {
-    return runSelectDB(buildStrategySnapshortsDBPath(strategyId), 'SELECT * FROM portfolio_1d_snapshots')
+export const getStrategyPnlDay = (strategyId: string) => {
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB,
+        `SELECT * FROM portfolio_snapshot` +
+        ` where client_id = '${strategyId}'` +
+        ` GROUP BY trading_day`
+    )
+}
+
+
+interface LastPnl {
+    lastPnl: number;
+    strategyId: string;
+}
+
+export const getStrategysPnl = (ids: string[], tradingDay: string): Promise<LastPnl[]> => {
+    if(!tradingDay) throw new Error('无交易日！')
+    const promises = ids.map(id => getStrategyPnlMin(id, tradingDay).then((res: any) => {
+        const resLen = Object.keys(res || {}).length;
+        let lastIndex = 0;
+        if(resLen > 0) lastIndex = resLen - 1;
+        return { lastPnl: res[lastIndex], strategyId: id }
+    }))
+    return Promise.all(promises)
 }
 
 

@@ -28,7 +28,7 @@ a = Analysis(['kungfu/__main__.py'],
           ],
      hookspath=None,
      runtime_hooks=None,
-     excludes=None,
+     excludes=['extensions'],
      cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
      cipher=block_cipher)

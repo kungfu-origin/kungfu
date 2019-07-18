@@ -15,8 +15,6 @@ namespace kungfu
 {
     namespace practice
     {
-        namespace msg = yijinjing::msg;
-
         class hero
         {
         public:
@@ -50,6 +48,9 @@ namespace kungfu
 
             const std::string &get_home_uname() const
             { return get_io_device()->get_home()->uname; }
+
+            int64_t now()
+            { return now_; }
 
             bool has_location(uint32_t hash);
 
@@ -86,7 +87,7 @@ namespace kungfu
 
             virtual bool produce_one(const rx::subscriber<yijinjing::event_ptr> &sb);
 
-            virtual void react(const rx::observable<yijinjing::event_ptr> &events) = 0;
+            virtual void react() = 0;
 
         private:
             yijinjing::io_device_with_reply_ptr io_device_;

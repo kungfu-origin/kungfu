@@ -33,11 +33,11 @@ namespace kungfu
                 return false;
             }
 
-            void PassiveMarketData::on_start(const rx::observable<yijinjing::event_ptr> &events)
+            void PassiveMarketData::on_start()
             {
-                gateway::MarketData::on_start(events);
+                gateway::MarketData::on_start();
 
-                events | is(msg::type::PassiveCtrl) |
+                events_ | is(msg::type::PassiveCtrl) |
                 $([&](event_ptr e)
                   {
                       const nlohmann::json &data = e->data<nlohmann::json>();

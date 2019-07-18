@@ -30,13 +30,9 @@ namespace kungfu
                 bool req_position() override ;
 
                 bool req_account() override ;
-
-            protected:
-
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
-
+                
             private:
-
+                void on_start() override;
                 void on_passivectrl(const yijinjing::event_ptr& event);
             };
         }

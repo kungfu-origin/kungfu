@@ -10,12 +10,12 @@ export const pm2 = require('pm2');
 
 //=========================== task kill =========================================
 
-const winKill = (tasks) => {
-    let pIdList = [];
+const winKill = (tasks: string[]): any => {
+    let pIdList: number[] = [];
     return getProcesses().then(processes => {
         processes.forEach(p => {
             const rawCommandLine = p.rawCommandLine
-            tasks.forEach(task => {
+            tasks.forEach((task: string): void => {
                 if(rawCommandLine.indexOf(task) !== -1) pIdList.push(p.pid)
             })
         })
@@ -27,14 +27,14 @@ const winKill = (tasks) => {
     })
 }
 
-const unixKill = (tasks) => {
+const unixKill = (tasks: string[]): any => {
     return fkill(tasks, {
         force: true,
         silent: true 
     })
 }
 
-const kfKill = (tasks) => {
+const kfKill = (tasks: string[]): any => {
     if(platform !== 'win') return unixKill(tasks)
     else return winKill(tasks)
 }
@@ -46,12 +46,12 @@ export const killExtra = () => kfKill(['kfc', 'pm2'])
 
 //=========================== pm2 manager =========================================
 
-const pm2Connect = () => {
+const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try{
             let noDaemon = platform === 'win' ? true : false
             if(process.env.NODE_ENV === 'development') noDaemon = false;
-            pm2.connect(noDaemon, (err) => {
+            pm2.connect(noDaemon, (err: Error): void => {
                 if(err) {
                     process.exit(2);
                     logger.error(err);
@@ -59,7 +59,7 @@ const pm2Connect = () => {
                     reject(err);
                     return;
                 }
-                resolve([])
+                resolve()
             })
         }catch(err){
             pm2.disconnect()
@@ -69,10 +69,10 @@ const pm2Connect = () => {
     })
 }
 
-const pm2List = () => {
+const pm2List = (): Promise<any[]> => {
     return new Promise((resolve, reject) => {
         try{
-            pm2.list((err, pList) => {
+            pm2.list((err: Error, pList: any[]): void => {
                 if(err){
                     logger.error(err)
                     reject(err)
@@ -87,17 +87,17 @@ const pm2List = () => {
     })
 }
 
-const pm2Delete = async(target) => {
+const pm2Delete = async (target: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
-                pm2.delete(target, err => {
+                pm2.delete(target, (err: Error): void => {
                     if(err) {
                         logger.error(err)
                         reject(err)
                         return;
                     }
-                    resolve(true)
+                    resolve()
                     
                 })
             }catch(err){
@@ -109,16 +109,16 @@ const pm2Delete = async(target) => {
 }
 
 
-const dealSpaceInPath = (pathname) => {
+const dealSpaceInPath = (pathname: string): string => {
     const normalizePath = path.normalize(pathname);
     return normalizePath.replace(/ /g, '\ ')
 }
 
-export const describeProcess = (name) => {
+export const describeProcess = (name: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
-                pm2.describe(name, (err, res) => {
+                pm2.describe(name, (err: Error, res: object): void => {
                     if(err){
                         logger.error(err)
                         reject(err);
@@ -134,7 +134,7 @@ export const describeProcess = (name) => {
     })
 }
 
-export const startProcess = async (options, no_ext=false) => {
+export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     options = {
         ...options,
@@ -160,7 +160,7 @@ export const startProcess = async (options, no_ext=false) => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
-                pm2.start(options, (err, apps) => { 
+                pm2.start(options, (err: Error, apps: object): void => { 
                     logger.info(err, apps)
                     if(err) {
                         logger.error(err)
@@ -178,11 +178,11 @@ export const startProcess = async (options, no_ext=false) => {
 }
 
 //启动pageEngine
-export const startMaster = async(force) => {
+export const startMaster = async(force: boolean): Promise<void> => {
     const processName = 'master';
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
-    const masterStatus = master.filter(m => m.pm2_env.status === 'online')
+    const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
     if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
     try{ await killKfc() } catch (err) {}
     return startProcess({
@@ -192,11 +192,11 @@ export const startMaster = async(force) => {
 }
 
 //启动watcher
-export const startWatcher = async(force) => {
+export const startWatcher = async(force: boolean): Promise<void> => {
     const processName = 'watcher';
     const watcher = await describeProcess(processName);
     if(watcher instanceof Error) throw watcher
-    const watcherStatus = watcher.filter(m => m.pm2_env.status === 'online')
+    const watcherStatus = watcher.filter((m: any): boolean => m.pm2_env.status === 'online')
     if(!force && watcherStatus.length === watcher.length && watcher.length !== 0) throw new Error('kungfu watcher 正在运行！')
     return startProcess({
         'name': processName,
@@ -205,7 +205,7 @@ export const startWatcher = async(force) => {
 }
 
 //启动md
-export const startMd = (source) => {
+export const startMd = (source: string): Promise<void> => {
     return startProcess({
         "name": `md_${source}`,
         "args": `md -s ${source}`,
@@ -213,7 +213,7 @@ export const startMd = (source) => {
 }
 
 //启动td
-export const startTd = (accountId) => {
+export const startTd = (accountId: string): Promise<void> => {
     const { source, id } = accountId.parseSourceAccountId();
     return startProcess({
         "name": `td_${accountId}`,
@@ -222,7 +222,7 @@ export const startTd = (accountId) => {
 }
 
 //启动strategy
-export const startStrategy = (strategyId, strategyPath) => {
+export const startStrategy = (strategyId: string, strategyPath: string): Promise<void> => {
     strategyPath = dealSpaceInPath(strategyPath)
     return startProcess({
         "name": strategyId,
@@ -232,8 +232,8 @@ export const startStrategy = (strategyId, strategyPath) => {
 
 //列出所有进程
 export const listProcessStatus = () => {
-    return pm2List().then(pList => {
-        let processStatus = {}
+    return pm2List().then((pList: any[]): StringToStringObject => {
+        let processStatus: any = {}
         Object.freeze(pList).forEach(p => {
             const name = p.name;
             const status = p.pm2_env.status
@@ -244,7 +244,7 @@ export const listProcessStatus = () => {
 }
 
 //删除进程
-export const deleteProcess = (processName) => {
+export const deleteProcess = (processName: string) => {
     return new Promise(async(resolve, reject) => {
         let processes = [];
         try{
@@ -258,11 +258,11 @@ export const deleteProcess = (processName) => {
             resolve(true)
             return;
         }
-        const pids = processes.map(prc => prc.pid);
+        const pids = processes.map((prc: any): number => prc.pid);
         pm2Delete(processName)
         .then(() => resolve(true))
         .catch(err => reject(err))
-        .finally(() => kfKill(pids).catch(err => {}))
+        .finally(() => kfKill(pids).catch((err: Error): void => {}))
     })
 }
 
@@ -271,7 +271,7 @@ export const killGodDaemon = () => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
-                pm2.killDaemon(err => {
+                pm2.killDaemon((err: Error): void => {
                     pm2.disconnect()
                     if(err) {
                         logger.error(err)

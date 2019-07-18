@@ -29,7 +29,9 @@ export default {
     props: {
        
     },
+
     inheritAttrs: false,
+    
     data(){
         return {
             chartType: 'min',
@@ -41,19 +43,20 @@ export default {
         DayChart
     },
 
+    mounted() {
+        const t = this;
+        window.addEventListener("resize", () => { 
+            t.$refs['day-chart'].myChart && t.$refs['day-chart'].myChart.resize()
+            t.$refs['min-chart'].myChart && t.$refs['min-chart'].myChart.resize()
+        })
+    },
+
     methods: {
         handleSelectChart(type) {
             const t = this
             t.chartType = type
-        },
-
-        init(){
-            const t = this;
-            t.$refs['day-chart'] && t.$refs['day-chart'].resetData() && t.$refs['day-chart'].getDayData();
-            t.$refs['min-chart'] && t.$refs['min-chart'].resetData() && t.$refs['min-chart'].getMinData();
-        },
+        }
     }
-
 }
 </script>
 

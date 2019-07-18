@@ -10,19 +10,18 @@
 
 namespace py = pybind11;
 
+using namespace kungfu::yijinjing::data;
+using namespace kungfu::wingchun::ctp;
+
 PYBIND11_MODULE(kfext_ctp, m)
 {
-    py::class_<kungfu::ctp::MdGateway>(m, "MD")
-    .def(py::init<std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("init", &kungfu::ctp::MdGateway::init)
-    .def("start", &kungfu::ctp::MdGateway::start)
-    .def("stop", &kungfu::ctp::MdGateway::stop)
+    py::class_<MdGateway>(m, "MD")
+    .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
+    .def("run", &MdGateway::run)
     ;
 
-    py::class_<kungfu::ctp::TdGateway>(m, "TD")
-    .def(py::init<std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("init", &kungfu::ctp::TdGateway::init)
-    .def("start", &kungfu::ctp::TdGateway::start)
-    .def("stop", &kungfu::ctp::TdGateway::stop)
+    py::class_<TdGateway>(m, "TD")
+    .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
+    .def("run", &TdGateway::run)
     ;
 }

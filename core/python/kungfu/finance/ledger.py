@@ -5,6 +5,7 @@ from kungfu.wingchun.constants import *
 
 class Ledger:
     def __init__(self, **kwargs):
+        self._trading_day = kwargs.pop("trading_day")
         self._initial_equity = kwargs.pop("initial_equity", 0.0)
         self._static_equity = kwargs.pop("static_equity", 0.0)
         self._avail = kwargs.pop("avail", 0.0)
@@ -18,16 +19,9 @@ class Ledger:
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
 
-        self._category = kwargs.pop("ledger_category")
-        if self._category == LedgerCategory.Account:
-            self._account_id = kwargs.pop("account_id")
-            self._client_id = None
-        elif self._category == LedgerCategory.Portfolio:
-            self._account_id = None
-            self._client_id = kwargs.pop("client_id")
-        else:
-            self._account_id = kwargs.pop("account_id")
-            self._client_id = kwargs.pop("client_id")
+        self._category = kwargs.pop("ledger_category", LedgerCategory.Unknown)
+        self._account_id = kwargs.pop("account_id", None)
+        self._client_id = kwargs.pop("client_id", None)
         self._source_id = kwargs.pop("source_id", None)
 
         self._callbacks = []
@@ -68,11 +62,16 @@ class Ledger:
        return int(MsgType.AssetInfo)
 
     @property
+    def trading_day(self):
+        return self._trading_day
+
+    @property
     def message(self):
         return {
             "msg_type": self.msg_type,
             "data": {
                 "ledger_category": int(self.category),
+                "trading_day": self.trading_day.strftime("%Y%m%d"),
                 "account_id": self.account_id,
                 "client_id": self.client_id,
                 "source_id": self.source_id,
@@ -134,6 +133,14 @@ class Ledger:
                 
     def apply_trade(self, trade):
         self._get_position(trade.instrument_id, trade.exchange_id).apply_trade(trade)
+
+    def apply_trading_day(self, trading_day):
+        if not self.trading_day == trading_day:
+            self._trading_day = trading_day
+            for pos in self._positions.values():
+                pos.switch_day(trading_day)
+            self._static_equity = self.dynamic_equity
+            self.dispatch([self.message])
 
     def _get_position(self, instrument_id, exchange_id):
         symbol_id = get_symbol_id(instrument_id, exchange_id)

@@ -123,7 +123,7 @@ class PyMaster : public master
 public:
     using master::master;
 
-    void on_notice(kungfu::yijinjing::event_ptr event) override
+    void on_notice(const kungfu::yijinjing::event_ptr &event) override
     {
         PYBIND11_OVERLOAD(void, master, on_notice, event);
     }
@@ -131,6 +131,22 @@ public:
     void on_interval_check(int64_t nanotime) override
     {
         PYBIND11_OVERLOAD(void, master, on_interval_check, nanotime);
+    }
+
+    void on_register(const kungfu::yijinjing::event_ptr &event) override
+    {
+        PYBIND11_OVERLOAD(void, master, on_register, event);
+    }
+};
+
+class PyApprentice : public apprentice
+{
+public:
+    using apprentice::apprentice;
+
+    void on_trading_day(const event_ptr &event, int64_t daytime) override
+    {
+        PYBIND11_OVERLOAD(void, apprentice, on_trading_day, event, daytime);
     }
 };
 
@@ -288,16 +304,20 @@ PYBIND11_MODULE(pyyjj, m)
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &master::get_io_device)
             .def("run", &master::run)
+            .def("publish_time", &master::publish_time)
+            .def("send_time", &master::send_time)
             .def("on_notice", &master::on_notice)
             .def("on_interval_check", &master::on_interval_check)
+            .def("on_register", &master::on_register)
             .def("deregister_app", &master::deregister_app)
             ;
 
-    py::class_<apprentice, apprentice_ptr>(m, "apprentice")
+    py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
             .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
             .def_property_readonly("io_device", &apprentice::get_io_device)
             .def("set_begin_time", &apprentice::set_begin_time)
             .def("set_end_time", &apprentice::set_end_time)
+            .def("on_trading_day", &apprentice::on_trading_day)
             .def("run", &apprentice::run);
 
 

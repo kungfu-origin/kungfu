@@ -28,16 +28,6 @@ namespace kungfu
                 const std::string &get_source() const
                 { return source_; }
 
-                const std::string &trading_day() const
-                {
-                    return trading_day_;
-                }
-
-                void set_trading_day(const std::string& trading_day)
-                {
-                    trading_day_ = trading_day;
-                }
-
                 virtual const AccountType get_account_type() const = 0;
 
                 virtual bool insert_order(const yijinjing::event_ptr& event) = 0;
@@ -49,14 +39,12 @@ namespace kungfu
                 virtual bool req_account() = 0;
 
             protected:
-                void react(const rx::observable<yijinjing::event_ptr> &events) override ;
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override ;
+                void on_start() override ;
 
             private:
                 std::string source_;
                 std::string account_id_;
-                std::string trading_day_;
             };
         }
     }

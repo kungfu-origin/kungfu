@@ -187,6 +187,7 @@ def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, n
             session_start_time, last_frame_time, False,
             last_frame_time - session_start_time, frame_count
         ]
+        ctx.session_count = ctx.session_count + 1
 
 
 def make_location_from_dict(ctx, location):
@@ -215,7 +216,7 @@ def trace_journal(ctx, session_id, io_type):
             dest_id = int(dest, 16)
             reader.join(home, dest_id, session['begin_time'])
 
-    if io_type == 'in' or io_type == 'all':
+    if (io_type == 'in' or io_type == 'all') and not (home.category == pyyjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
         master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, location['uid'], session['begin_time'])

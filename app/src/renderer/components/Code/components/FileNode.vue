@@ -70,7 +70,7 @@ import {mapState} from 'vuex';
 import iconFolderJSON from '../config/iconFolderConfig.json'
 import iconFileJSON from '../config/iconFileConfig.json'
 import path from 'path';
-import * as CODE_UTILS from "__gUtils/fileUtils.js";
+import * as CODE_UTILS from "__gUtils/fileUtils";
 import { error } from 'util';
 
 export default {

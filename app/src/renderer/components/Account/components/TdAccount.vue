@@ -184,7 +184,7 @@ import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
-import { removeFileFolder, openReadFile } from "__gUtils/fileUtils.js";
+import { removeFileFolder, openReadFile } from "__gUtils/fileUtils";
 import { deleteAccount, switchTd } from '__io/actions/account';
 
 import path from 'path'

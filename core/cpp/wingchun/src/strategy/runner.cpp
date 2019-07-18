@@ -33,14 +33,19 @@ namespace kungfu
                 strategies_.push_back(strategy);
             }
 
-            void Runner::react(const rx::observable<yijinjing::event_ptr> &events)
+            void Runner::on_start()
             {
-                apprentice::react(events);
+                apprentice::on_start();
 
-                context_ = std::make_shared<Context>(*this, events);
-                context_->react(events);
+                context_ = std::make_shared<Context>(*this, events_);
+                context_->react();
 
-                events | is(msg::type::Quote) |
+                for (const auto &strategy : strategies_)
+                {
+                    strategy->pre_start(context_);
+                }
+
+                events_ | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -49,7 +54,7 @@ namespace kungfu
                       }
                   });
 
-                events | is(msg::type::Order) |
+                events_ | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -58,7 +63,7 @@ namespace kungfu
                       }
                   });
 
-                events | is(msg::type::Trade) |
+                events_ | is(msg::type::Trade) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -67,7 +72,7 @@ namespace kungfu
                       }
                   });
 
-                events | is(msg::type::Entrust) |
+                events_ | is(msg::type::Entrust) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -76,7 +81,7 @@ namespace kungfu
                       }
                   });
 
-                events | is(msg::type::Transaction) |
+                events_ | is(msg::type::Transaction) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -84,13 +89,10 @@ namespace kungfu
                           strategy->on_transaction(context_, event->data<Transaction>());
                       }
                   });
-            }
 
-            void Runner::on_start(const rx::observable<yijinjing::event_ptr> &events)
-            {
                 for (const auto &strategy : strategies_)
                 {
-                    strategy->pre_start(context_);
+                    strategy->post_start(context_);
                 }
             }
 

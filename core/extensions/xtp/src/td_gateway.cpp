@@ -23,7 +23,7 @@ namespace kungfu
         {
             TdGateway::TdGateway(bool low_latency, yijinjing::data::locator_ptr locator, std::map<std::string, std::string> &config_str, std::map<std::string, int> &config_int,
                                  std::map<std::string, double> &config_double) :
-                    gateway::Trader(low_latency, std::move(locator), SOURCE_XTP, config_str["user_id"])
+                    gateway::Trader(low_latency, std::move(locator), SOURCE_XTP, config_str["user_id"]), trading_day_("")
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), config_str["user_id"]);
 
@@ -49,9 +49,9 @@ namespace kungfu
                 }
             }
 
-            void TdGateway::on_start(const rx::observable<yijinjing::event_ptr> &events)
+            void TdGateway::on_start()
             {
-                gateway::Trader::on_start(events);
+                gateway::Trader::on_start();
 
                 SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
                 if (api_ != nullptr)
@@ -104,7 +104,7 @@ namespace kungfu
                 {
                     order.insert_time = nano;
                     order.update_time = nano;
-                    strcpy(order.trading_day, trading_day().c_str());
+                    strcpy(order.trading_day, trading_day_.c_str());
 
                     XTPRI *error_info = api_->GetApiLastError();
                     order.error_id = error_info->error_id;
@@ -126,7 +126,7 @@ namespace kungfu
                     info.parent_id = input.parent_id;
                     info.source = event->source();
                     info.insert_time = nano;
-                    strcpy(info.trading_day, trading_day().c_str());
+                    strcpy(info.trading_day, trading_day_.c_str());
                     order_mapper_->add_order(info);
 
                     INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id));
@@ -159,6 +159,11 @@ namespace kungfu
                     CANCEL_ORDER_TRACE(fmt::format("fail to cancel order, can't find related xtp order id of order_id {}", action.order_id));
                     return false;
                 }
+            }
+
+            void TdGateway::on_trading_day(const yijinjing::event_ptr &event, int64_t daytime)
+            {
+                this->trading_day_ = yijinjing::time::strftime(daytime, "%Y%m%d");
             }
 
             bool TdGateway::req_position()
@@ -205,10 +210,10 @@ namespace kungfu
                                         error_info == nullptr ? 0 : error_info->error_id,
                                         error_info == nullptr ? "" : error_info->error_msg,
                                         session_id));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day().c_str(), order_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, trading_day()));
+                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, trading_day_));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -236,10 +241,10 @@ namespace kungfu
             void TdGateway::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
             {
                 TRADE_TRACE(fmt::format("(trade_info) {}", to_string(*trade_info)));
-                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day().c_str(), trade_info->order_xtp_id);
+                XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), trade_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, trading_day()));
+                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, trading_day_));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -248,6 +253,8 @@ namespace kungfu
                     trade.trade_id = writer->current_frame_uid();
                     trade.order_id = xtp_order.internal_order_id;
                     trade.parent_order_id = xtp_order.parent_id;
+                    trade.trade_time = kungfu::yijinjing::time::now_in_nano();
+                    strcpy(trade.trading_day, trading_day_.c_str());
                     strcpy(trade.client_id, xtp_order.client_id);
                     strcpy(trade.account_id, this->get_account_id().c_str());
                     trade.instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id);

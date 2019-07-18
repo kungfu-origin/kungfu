@@ -125,8 +125,8 @@ export default {
                     flex: 1
                 },{
                     type: 'text',
-                    label: '持仓均价',
-                    prop: 'costPrice',
+                    label: '开仓均价',
+                    prop: 'openPrice',
                     flex: 1.2
                 },{
                     type: 'text',
@@ -290,8 +290,8 @@ export default {
                     else if(item.unRealizedPnl < 0) return 'green'
                     break
                 case 'lastPrice':
-                    if(item.lastPrice > item.costPrice) return 'red'
-                    else if(item.lastPrice < item.costPrice) return 'green'
+                    if(item.lastPrice > item.openPrice) return 'red'
+                    else if(item.lastPrice < item.openPrice) return 'green'
                     break;
             }
         }

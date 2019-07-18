@@ -1,13 +1,24 @@
-
+import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
+
 source = Source.XTP
 exchange = Exchange.SSE
+
+
+def test_timer(context, event):
+    context.log.info('test timer')
+
+def test_time_interval(context, event):
+    context.log.info('test time interval')
+
 
 def pre_start(context):
     print("pre run strategy")
     # context.add_account(source, "15011218", 100000000.0)
     context.add_account(source, "15040900", 100000000.0)
     context.subscribe(source, ["601988", "600000"], exchange)
+    context.add_timer(context.now() + kft.NANO_PER_SECOND, test_timer)
+    context.add_time_interval(5 * kft.NANO_PER_SECOND, test_time_interval)
     # context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
     # sub_portfolio = context.get_sub_portfolio_info("15040900")
     # print(sub_portfolio)

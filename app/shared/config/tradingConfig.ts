@@ -4,19 +4,19 @@
 // close = '1',
 // close_today = '2',
 // close_yesterday = '3'
-export const offsetName = {
+export const offsetName: NumberToStringObject = {
     0: '开仓',
     1: '平仓',
     2: '平今',
     3: '平昨'
 }
 
-export const sideName = {
+export const sideName: NumberToStringObject = {
     0: '买',
     1: '卖'
 }
 
-export const statusName = {
+export const statusName: StringToStringObject = {
     all_traded: '全部成交',
     pending: '非最终状态',
     error: '错误',
@@ -32,20 +32,20 @@ export const statusName = {
 // PartialFilledNotActive = '6', //部分撤单
 // PartialFilledActive = '7' //正在交易
 // 3,4,5,6已完成
-export const orderStatus = {
-    '0': '等待中',
-    '1': '已提交',
-    '2': '等待中',
-    '3': '已撤单',
-    '4': '错误',
-    '5': '已成交',
-    '6': '部分撤单',
-    '7': '正在交易',
+export const orderStatus: NumberToStringObject = {
+    0: '等待中',
+    1: '已提交',
+    2: '等待中',
+    3: '已撤单',
+    4: '错误',
+    5: '已成交',
+    6: '部分撤单',
+    7: '正在交易',
 }
 
 //     DirectionLong = '0'
 //    DirectionShort = '1'
-export const posDirection = {
+export const posDirection: NumberToStringObject = {
     0: '多',
     1: '空' 
 }

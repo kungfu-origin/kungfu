@@ -28,7 +28,7 @@ import * as STRATEGY_API from '__io/db/strategy';
 import path from 'path';
 import FileNode from './FileNode';
 import {mapState} from 'vuex';
-import * as CODE_UTILS from "__gUtils/fileUtils.js";
+import * as CODE_UTILS from "__gUtils/fileUtils";
 
 export default {
     props: {
@@ -156,7 +156,7 @@ export default {
             //获取第一级文件树
             let ids, fileTree;
             try {
-                const fileTreeData = await CODE_UTILS.getTreeByFilePath({strategy: rootFile, fileTree: {}})
+                const fileTreeData = await CODE_UTILS.getTreeByFilePath(rootFile, fileTree)
                 ids = fileTreeData.ids;
                 fileTree = fileTreeData.fileTree;
             } catch (err) {

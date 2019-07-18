@@ -37,6 +37,8 @@ namespace kungfu
 
                 bool cancel_order(const yijinjing::event_ptr& event) override;
 
+                void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime) override;
+
                 bool req_position() override;
 
                 bool req_account() override;
@@ -171,7 +173,7 @@ namespace kungfu
 
             protected:
 
-                void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+                void on_start() override;
 
             private:
                 int client_id_;
@@ -187,8 +189,9 @@ namespace kungfu
 
                 int request_id_;
 
-                std::shared_ptr<OrderMapper> order_mapper_;
+                std::string trading_day_;
 
+                std::shared_ptr<OrderMapper> order_mapper_;
             };
         }
     }

@@ -11,9 +11,10 @@
 </template>
 
 <script>
-import lineConfig from './config/lineEchart'
-import moment from 'moment'
-import { mapGetters, mapState } from 'vuex'
+import lineConfig from './config/lineEchart';
+import moment from 'moment';
+import { mapGetters, mapState } from 'vuex';
+import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')
 
 export default {
@@ -40,33 +41,32 @@ export default {
             default: () => {},
         },
         //接收推送的数据
-        nanomsgBackData: ''
+        nanomsgBackData: {}
     },
 
     data() {
         this.dataZoomBottomPadding = 70;
         this.bottomPadding = 70;
         this.myChart = null;
+        this.dayGroupKey = {}; //记录以时间为key的数据
+        this.echartsSeries = {
+            type: 'line',
+            showSymbol: false, //默认不显示原点，鼠标放上会显示
+            areaStyle: {
+                normal: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                        offset: 0,
+                        color: 'rgba(30, 90, 130, 1)'
+                    }, {
+                        offset: 1,
+                        color: 'rgba(22, 27, 46, 0)'
+                    }])
+                }
+            },
+        };
         return {
             dayData: [[],[]],
             dayPnlData: [],
-            dayGroupKey: {}, //记录以时间为key的数据
-            echartsSeries: {
-                name: '累计收益',
-                type: 'line',
-                showSymbol: false, //默认不显示原点，鼠标放上会显示
-                areaStyle: {
-                    normal: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                            offset: 0,
-                            color: 'rgba(30, 90, 130, 1)'
-                        }, {
-                            offset: 1,
-                            color: 'rgba(22, 27, 46, 0)'
-                        }])
-                    }
-                }
-            }
         }
     },
 
@@ -86,13 +86,15 @@ export default {
         accumulatedPnlRatio(){
             const t = this;
             if(!t.dayPnlData.length) return '--'
-            return t.$utils.toDecimal(t.dayPnlData[t.dayPnlData.length - 1].accumulated_pnl_ratio, 4, 2)
+            const len =  t.dayPnlData.length;
+            return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1])
         },
 
         accumulatedPnl(){
             const t = this;
             if(!t.dayPnlData.length) return '--'
-            return t.$utils.toDecimal(t.dayPnlData[t.dayPnlData.length - 1].accumulated_pnl, 2)
+            const len =  t.dayPnlData.length;
+            return t.calcuAccumlatedPnl(t.dayPnlData[len - 1])
         }
     },
 
@@ -101,6 +103,7 @@ export default {
             const t = this
             t.myChart && t.myChart.resize()
         },
+
         currentId(val) {
             const t = this
             t.resetData();
@@ -109,10 +112,7 @@ export default {
         },
 
         dayPnlData(newVal, oldVal){
-            const t = this;
-            if(oldVal.length === 0 && newVal.length !== 0){
-                t.initChart()
-            }
+            if(oldVal.length === 0 && newVal.length !== 0) this.initChart()
         },
 
         //接收推送的数据
@@ -125,32 +125,14 @@ export default {
         initChart() {
             const t = this
             const dom = document.getElementById('day-chart')
-            if(dom){
-                t.myChart = echarts.getInstanceByDom(dom)
-                if( t.myChart === undefined){ 
-                    t.myChart = echarts.init(dom)
-                }
-                let defaultConfig = t.$utils.deepClone(lineConfig)  
-                defaultConfig.xAxis.data = t.dayData[0]
-                //自定义标签
-                defaultConfig.tooltip.formatter = function(params) {
-                    if(!params && !params.length) return
-                    const time = params[0].name
-                    const {accumulated_pnl_ratio, accumulated_pnl, intraday_pnl_ratio, intraday_pnl, trading_day} = t.dayGroupKey[time]
-                    const html = '<div style="color:#c7cce6;font-size: 11px"><div>' + trading_day + '</div>' + 
-                        '<div>累计收益率：' +  t.$utils.toDecimal(accumulated_pnl_ratio, 4, 2) + '%</div>' +
-                        '<div>累计盈亏：' +  t.$utils.toDecimal(accumulated_pnl, 2) + '</div>'
-                    return html
-                }
-
-                defaultConfig.series = {
-                    data: t.dayData[1],
-                    ...t.echartsSeries
-                }
-                t.myChart.setOption(defaultConfig)
-            }
+            if(!dom) return;
+            t.myChart = echarts.getInstanceByDom(dom)
+            if( t.myChart === undefined) t.myChart = echarts.init(dom)
+            let defaultConfig = deepClone(lineConfig)  
+            defaultConfig.xAxis.data = t.dayData[0] || ''
+            defaultConfig.series = { data: t.dayData[1], ...t.echartsSeries }
+            t.myChart.setOption(defaultConfig)
         },
-
 
         //获取日线数据
         getDayData() {
@@ -161,51 +143,71 @@ export default {
                 let xAxisData = []
                 let serirsData = []
                 t.dayGroupKey = {}
-                data && data.map(item => {
-                    const time = item.trading_day
-                    t.dayGroupKey[time] = item
-                    xAxisData.push(time)
-                    serirsData.push(t.$utils.toDecimal(item.accumulated_pnl_ratio, 4, 2))
+                data && data.forEach(item => {
+                    const tradingDay = item.trading_day
+                    t.dayGroupKey[tradingDay] = item
+                    xAxisData.push(tradingDay)
+                    serirsData.push(t.calcuAccumlatedPnl(item))
                 })
-
-                t.dayData = [xAxisData, serirsData]
-                t.dayPnlData = data || []
+                t.dayData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
+                t.dayPnlData = Object.freeze(data || [])
             })
+            .then(() => t.initChart())
             .then(() => t.minMethod(t.currentId, t.calendar.trading_day)) //查找分钟线的数据库中的数据，拿到最后一条数据放入日线最后
-            .then(minData => {
-                const {length} = minData
-                length && t.dealMinData(minData[length-1])
-            })
-            .catch(err =>{
-                t.$message.error(err.message || '获取失败')
-            })
-            .finally(() => {
-                t.initChart()
-            })
+            .then(minData => minData.length && t.dealMinData(minData[minData.length - 1]))
+            .catch(err => t.$message.error(err.message || '获取失败'))
+            .finally(() => t.updateChart())
         },
 
         //处理分钟线的数据，看是直接插入日线中还是替换日线最后一条数据
         dealMinData(data) {
+            if(!data) return;
             const t = this
-            const time = data.trading_day
-            t.dayGroupKey[time] = data
+            const tradingDay = data.trading_day
+            t.dayGroupKey[tradingDay] = data
             const timeLength = t.dayData[0].length
             //判断最后一条数据是否是当天的，是当天的是替换新的，不是则插入
-            if(timeLength && t.dayData[0][timeLength - 1] === time) {
-                t.dayData[1].pop()
-                t.dayData[1].push(data.accumulated_pnl_ratio * 100) //修改y轴最后一个数据
-                t.dayPnlData.pop()
-                t.dayPnlData.push(Object.freeze(data))//修改保存的所有数据的最后一个数据
+            if(timeLength && t.dayData[0][timeLength - 1] === tradingDay) {
+                let tmpDayData1 = t.dayData[1].slice();
+                tmpDayData1.pop()
+                tmpDayData1.push(t.calcuAccumlatedPnl(data))
+                t.dayData[1] = Object.freeze(tmpDayData1);
+
+                let tmpDayPnlData = t.dayPnlData.slice();
+                tmpDayPnlData.pop();
+                tmpDayPnlData.push(Object.freeze(data));
+                t.dayPnlData = Object.freeze(tmpDayPnlData)
             }else{
-                t.dayData[0].push(time)
-                t.dayData[1].push(t.$utils.toDecimal(data.accumulated_pnl_ratio, 4, 2))
-                t.dayPnlData.push(Object.freeze(data))
+                let tmpDayData0 = t.dayData[0].slice();
+                tmpDayData0.push(tradingDay);
+                t.dayData[0] = Object.freeze(tmpDayData0);
+
+                let tmpDayData1 = t.dayData[1].slice()
+                tmpDayData1.push(t.calcuAccumlatedPnl(data))
+                t.dayPnlData[1] = Object.freeze(tmpDayData1)
+
+                let tmpDayPnlData = t.dayPnlData.slice();
+                tmpDayPnlData.push(Object.freeze(data));
+                t.dayPnlData = tmpDayPnlData
             }
+        },
+
+        calcuAccumlatedPnl(pnlData) {
+            return toDecimal(pnlData.realized_pnl + pnlData.unrealized_pnl, 2)
+        },
+
+        calcuAccumlatedPnlRatio(pnlData) {
+            return toDecimal((pnlData.realized_pnl + pnlData.unrealized_pnl) / pnlData.initial_equity, 4, 2)
         },
 
         dealNanomsg(nanomsg) {
             const t = this
             t.dealMinData(nanomsg)
+            t.updateChart();
+        },
+
+        updateChart() {
+            const t = this;
             t.myChart && t.myChart.setOption({
                 series: {
                     ...t.echartsSeries,
@@ -215,9 +217,9 @@ export default {
             })
         },
 
-        resetData(){
+        resetData() {
             const t = this;
-            t.dayData = [[],[]];
+            t.dayData = [Object.freeze([]), Object.freeze([])];
             t.dayPnlData = [];
             t.dayGroupKey = {};
             t.myChart && t.myChart.clear();

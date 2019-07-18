@@ -25,34 +25,30 @@ namespace kungfu
             Trader::Trader(bool low_latency, locator_ptr locator, const std::string &source, const std::string &account_id)
                     :
                     apprentice(location::make(mode::LIVE, category::TD, source, account_id, std::move(locator)), low_latency),
-                    source_(source), account_id_(account_id), trading_day_("")
+                    source_(source), account_id_(account_id)
             {
                 log::copy_log_settings(get_io_device()->get_home(), account_id);
             }
 
-            void Trader::react(const rx::observable<yijinjing::event_ptr> &events)
+            void Trader::on_start()
             {
-                apprentice::react(events);
+                apprentice::on_start();
 
-                events | is(msg::type::OrderInput) |
+                auto home = get_io_device()->get_home();
+                auto md_location = location::make(home->mode, category::MD, source_, source_, home->locator);
+                request_read_from(time::now_in_nano(), md_location->uid, true);
+
+                events_ | is(msg::type::OrderInput) |
                 $([&](event_ptr event)
                   {
                       insert_order(event);
                   });
 
-                events | is(msg::type::OrderAction) |
+                events_ | is(msg::type::OrderAction) |
                 $([&](event_ptr event)
                   {
                       cancel_order(event);
                   });
-            }
-
-            void Trader::on_start(const rx::observable<yijinjing::event_ptr> &events)
-            {
-                apprentice::on_start(events);
-                auto home = get_io_device()->get_home();
-                auto md_location = location::make(home->mode, category::MD, source_, source_, home->locator);
-                request_read_from(time::now_in_nano(), md_location->uid, true);
             }
         }
     }

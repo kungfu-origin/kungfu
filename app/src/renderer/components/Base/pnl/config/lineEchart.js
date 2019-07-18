@@ -63,7 +63,6 @@ export default {
             inside: true,                                                                                                
             showMaxLabel: false,                                              
             showMinLabel: false, 
-            formatter: "{value}%",
             margin: 4 //刻度标签与轴线之间的距离
         },
         axisLine: {

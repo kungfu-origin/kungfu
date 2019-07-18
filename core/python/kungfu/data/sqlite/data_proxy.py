@@ -1,9 +1,10 @@
 
 from . import *
-from kungfu.data.sqlite.models import *
-import pyyjj
-from kungfu.wingchun.constants import *
 from sqlalchemy import inspect
+import datetime
+import pyyjj
+from kungfu.data.sqlite.models import *
+from kungfu.wingchun.constants import *
 from kungfu.finance.position import *
 from kungfu.finance.ledger import *
 
@@ -79,6 +80,11 @@ class LedgerHolder(DataProxy):
                 cls =  PortfolioPosition
             elif ledger_category == int(LedgerCategory.SubPortfolio):
                 cls = SubPortfolioPosition
+        elif msg_type == int(MsgType.AssetInfoSnapshot):
+            if ledger_category == int(LedgerCategory.Account):
+                cls = AccountAssetInfoSnapshot
+            elif ledger_category == int(LedgerCategory.Portfolio):
+                cls = PortfolioAssetInfoSnapshot
         return cls
 
     def process_message(self, session, message):
@@ -105,8 +111,11 @@ class LedgerHolder(DataProxy):
                 return None
             else:
                 asset_info = object_as_dict(asset_info)
+                asset_info["trading_day"] = datetime.datetime.strptime(asset_info["trading_day"], "%Y%m%d")
                 positions = {}
-                for obj in session.query(position_cls).filter(position_cls.account_id == account_id, position_cls == client_id).all():
-                    cls = StockPosition if obj.instrument_type == int(InstrumentType.Stock) else FuturePosition
+                for obj in session.query(position_cls).filter(position_cls.account_id == account_id, position_cls.client_id == client_id).all():
+                    cls = StockPosition if get_instrument_type(obj.instrument_id, obj.exchange_id) == InstrumentType.Stock else FuturePosition
                     positions[get_symbol_id(obj.instrument_id, obj.exchange_id)] = cls(**object_as_dict(obj))
-                return Ledger(**{**asset_info, "positions": positions, "ledger_category": ledger_category})
+                args = {"positions": positions, "ledger_category": ledger_category}
+                args.update(asset_info)
+                return Ledger(**args)

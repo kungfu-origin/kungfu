@@ -144,11 +144,6 @@ export default {
     },
 
     computed: {
-        isArray(){
-            const t = this;
-            return Object.prototype.toString.call(t.data)
-        },
-
         headerWidth(){
             const t = this;
             let widths = []; //column use with

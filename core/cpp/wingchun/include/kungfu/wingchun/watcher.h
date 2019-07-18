@@ -35,6 +35,8 @@ namespace kungfu
 
             virtual void on_assets(const msg::data::AssetInfo& info, const std::vector<msg::data::Position>& positions) = 0;
 
+            virtual void pre_start() = 0;
+
         protected:
 
             void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
@@ -45,7 +47,7 @@ namespace kungfu
 
             void on_read_from(const yijinjing::event_ptr &event) override;
 
-            void on_start(const rx::observable<yijinjing::event_ptr> &events) override;
+            void on_start() override;
 
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;

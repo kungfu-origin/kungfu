@@ -1,1 +1,0 @@
-export const uploadUrl = "http://taurusai.com/kungfu"

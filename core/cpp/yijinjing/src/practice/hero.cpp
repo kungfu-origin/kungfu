@@ -107,7 +107,7 @@ namespace kungfu
 
                     }) | publish();
 
-            react(events_);
+            react();
 
             events_.connect();
             SPDLOG_INFO("{} finished", get_home_uname());

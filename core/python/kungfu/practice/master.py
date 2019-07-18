@@ -5,17 +5,24 @@ import time
 import functools
 import pyyjj
 import pywingchun
-import kungfu.service.kfs as kfs
-import kungfu.yijinjing.journal as kfj
+
+from . import os_signal
+
 from kungfu import nanomsg
 from kungfu.log import create_logger
-from . import os_signal
+
+import kungfu.service.kfs as kfs
+from kungfu.service.kfs import system
+from kungfu.service.kfs import calendar
+
+import kungfu.yijinjing.journal as kfj
+import kungfu.yijinjing.time as kft
+from kungfu.log import create_logger
+
 from kungfu.wingchun.calendar import Calendar
+import kungfu.yijinjing.msg as yjj_msg
 
 SECOND_IN_NANO = int(1e9)
-
-def get_socket_fd(socket):
-    return socket.getsockopt(level=nanomsg.SOL_SOCKET, option=nanomsg.RCVFD)
 
 
 class Master(pyyjj.master):
@@ -28,6 +35,9 @@ class Master(pyyjj.master):
 
         ctx.calendar = Calendar(ctx)
         ctx.trading_day = ctx.calendar.trading_day
+        self.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)
+
+        ctx.master = self
 
         os_signal.handle_os_signals(self.exit_gracefully)
 
@@ -40,6 +50,9 @@ class Master(pyyjj.master):
 
     def on_interval_check(self, nanotime):
         kfs.run_tasks(self.ctx)
+
+    def on_register(self, event):
+        self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def exit_gracefully(self, signum, frame):
         self.ctx.logger.info('kungfu master stopping')

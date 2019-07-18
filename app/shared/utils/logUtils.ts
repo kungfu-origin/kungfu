@@ -1,6 +1,8 @@
 import  { LOG_DIR } from '__gConfig/pathConfig';
+
 const path = require('path')
 const log4js = require('log4js');
+
 log4js.configure({
     appenders: {
         app: {
@@ -9,7 +11,6 @@ log4js.configure({
         }
     },
     categories: { default: { appenders: ['app'], level: 'info' } }
-
 })
 
 export const logger = log4js.getLogger('app');

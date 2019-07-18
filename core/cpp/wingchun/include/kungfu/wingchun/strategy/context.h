@@ -21,16 +21,22 @@ namespace kungfu
                 return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
             }
 
-            class Context
+            FORWARD_DECLARE_PTR(Context)
+
+            class Context : public std::enable_shared_from_this<Context>
             {
             public:
-                explicit Context(practice::apprentice &app, const rx::observable<yijinjing::event_ptr> &events);
+                explicit Context(practice::apprentice &app, const rx::connectable_observable<yijinjing::event_ptr> &events);
 
                 ~Context() = default;
 
                 //获取当前纳秒时间
                 //@return            当前纳秒时间
                 int64_t now() const;
+
+                void add_timer(int64_t nanotime, const std::function<void(yijinjing::event_ptr)> &callback);
+
+                void add_time_interval(int64_t duration, const std::function<void(yijinjing::event_ptr)> &callback);
 
                 //添加策略使用的交易账户
                 //@param source_id   柜台ID
@@ -99,7 +105,7 @@ namespace kungfu
                 uint64_t cancel_order(uint64_t order_id);
 
             protected:
-                void react(const rx::observable<yijinjing::event_ptr>& events);
+                void react();
 
             private:
                 uint32_t lookup_account_location_id(const std::string &account);
@@ -107,9 +113,8 @@ namespace kungfu
                 void request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange);
 
             private:
-                practice::apprentice& app_;
-                const rx::observable<yijinjing::event_ptr> &events_;
-                int64_t now_;
+                practice::apprentice &app_;
+                const rx::connectable_observable<yijinjing::event_ptr> &events_;
 
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
                 std::unordered_map<uint32_t, std::string> accounts_;
@@ -119,7 +124,6 @@ namespace kungfu
 
                 friend class Runner;
             };
-            DECLARE_PTR(Context)
         }
     }
 }

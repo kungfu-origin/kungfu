@@ -41,6 +41,7 @@ Setup 编译及运行环境
 =============
 
 功夫的编译依赖以下工具：
+支持 C++17 的编译器
 git
 Node.js (>=8 <11)
 yarn
@@ -76,11 +77,20 @@ $ pip install pipenv
 Windows需要额外安装 [Boost 1.64.0](https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/)，下载并安装 boost_1_64_0-msvc-14.1-64.exe。
 
 ```
-C:\> npm instal -g yarn electron-builder
+C:\> npm install -g yarn electron-builder
 C:\> pip install pipenv
 ```
 
 #### Linux
+
+确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 5.0 以上：
+
+```
+yum -y install centos-release-scl
+yum -y install devtoolset-8-gcc devtoolset-8-gcc-c++ devtoolset-8-binutils
+echo "source /opt/rh/devtoolset-8/enable" >> /etc/profile
+source /etc/profile
+```
 
 ```
 $ # install git cmake node.js
@@ -98,35 +108,33 @@ Compile 编译
 $ git clone https://github.com/taurusai/kungfu
 $ cd kungfu
 $ yarn install
-$ cd core && yarn run build
-$ cd ../app && yarn run build
-$ yarn run build
+$ yarn workspaces run build
 ```
 
-编译结果输出在 build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 build/mac/Kungfu.Trader.app。
+编译结果输出在 app/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/mac/Kungfu.Trader.app。
 
 遇到编译问题需要完整的重新编译时，执行以下命令清理临时文件：
 ```
-$ yarn run clean
+$ yarn workspaces run clean
 ```
 
 #### 选择编译模式
 
 功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/v3.12/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
 ```
-$ yarn config set kungfu:cmakejsopt "debug"
+$ npm config set kungfu-core:cmakejsopt "debug"
 ```
 
 执行以下命令恢复 Release 模式：
 ```
-$ yarn config set kungfu:cmakejsopt
+$ npm config delete kungfu-core:cmakejsopt
 ```
 
 更多可选设置请参考 [CMake.js Options](https://www.npmjs.com/package/cmake-js)。
 
 切换编译模式后，需要执行以下命令重新生成配置文件：
 ```
-$ yarn run config
+$ yarn workspace kungfu-core run config
 ```
 
 
@@ -135,17 +143,17 @@ $ yarn run config
 功夫支持 Python 2 及 Python 3，在系统预装了相应版本的情况下，编译时可以自行选择所需的 Python 版本。
 执行以下命令选择 Python 3：
 ```
-$ yarn config set kungfu:pyver three
+$ npm config set kungfu-core:pyver three
 ```
 
 执行以下命令选择 Python 2：
 ```
-$ yarn config set kungfu:pyver two
+$ npm config set kungfu-core:pyver two
 ```
 
 切换 Python 版本后，需要执行以下命令重新生成配置文件：
 ```
-$ yarn run config
+$ yarn workspace kungfu-core run config
 ```
 
 #### 编译过程产生的临时文件
@@ -158,7 +166,7 @@ dist
 ```
 通常情况下可通过执行如下命令对 build 和 dist 进行清理：
 ```
-$ yarn run clean
+$ yarn workspaces run clean
 ```
 需要注意 node_modules 目录为 npm 产生的包目录，一般情况下无需清除，如有特殊需要可手动删除。
 
