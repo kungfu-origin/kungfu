@@ -26,6 +26,9 @@ namespace kungfu
             virtual void on_notify()
             {}
 
+            virtual void on_exit()
+            {}
+
             void set_begin_time(int64_t begin_time)
             { begin_time_ = begin_time; }
 

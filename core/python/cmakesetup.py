@@ -25,3 +25,4 @@ loglevel = spdlog_levels[loglevel_env] if loglevel_env else spdlog_levels['warn'
 
 subprocess.Popen([npm_path, "config", "set", "cmake_PYTHON_EXECUTABLE", python_path])
 subprocess.Popen([npm_path, "config", "set", "cmake_SPDLOG_LOG_LEVEL_COMPILE", loglevel])
+subprocess.Popen([npm_path, "config", "set", "cmake_CMAKE_GENERATOR_PLATFORM", 'x64'])

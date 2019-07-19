@@ -13,7 +13,8 @@
 <script>
 import lineConfig from './config/lineEchart'
 import moment from 'moment'
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
+import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')
 
 export default {
@@ -69,22 +70,18 @@ export default {
             calendar: state => state.BASE.calendar, //日期信息，包含交易日
         }),
 
+        intradayPnl(){
+            const t = this;
+            const len = t.minPnlData.length;
+            return t.calcuIntradayPnl(t.minPnlData[len - 1])
+        },
+
         intradayPnlRatio(){
             const t = this;
             if(!t.minPnlData.length) return '--'
-            const firstEquityDaily = t.$utils.toDecimal(t.minPnlData[0].dynamic_equity, 2)
-            const lastEquityDaily = t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].dynamic_equity, 2)
-            return t.$utils.toDecimal((lastEquityDaily - firstEquityDaily) / firstEquityDaily , 4, 2)
+            const firstEquityDaily = toDecimal(t.minPnlData[0].static_equity, 2)
+            return toDecimal(t.intradayPnl / firstEquityDaily , 4, 2)
         },
-        
-
-        intradayPnl(){
-            const t = this;
-            if(!t.minPnlData.length) return '--';
-            const firstPnlDaily = t.$utils.toDecimal(t.minPnlData[0].unrealized_pnl, 2)
-            const lastPnlDaily = t.$utils.toDecimal(t.minPnlData[t.minPnlData.length - 1].unrealized_pnl, 2)
-            return lastPnlDaily - firstPnlDaily
-        }
     },
 
     
@@ -129,7 +126,7 @@ export default {
             if(!dom) return;
             t.myChart = echarts.getInstanceByDom(dom)
             if(t.myChart === undefined) t.myChart = echarts.init(dom);
-            let defaultConfig = t.$utils.deepClone(lineConfig)  
+            let defaultConfig = deepClone(lineConfig)  
             defaultConfig.xAxis.data = t.minData[0]
             defaultConfig.series = { data: t.minData[1], ...t.echartsSeries }
             t.myChart.setOption(defaultConfig)
@@ -150,7 +147,8 @@ export default {
                     const hhmmTime = moment(item.update_time / 1000000).format('HH:mm')
                     t.minGroupKey[hhmmTime] = item
                     xAxisData.push(hhmmTime)
-                    serirsData.push(t.$utils.toDecimal(item.unrealized_pnl, 2))
+                    console.log(item, t.calcuIntradayPnl(item))
+                    serirsData.push(t.calcuIntradayPnl(item))
                 })
                 t.minData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
                 t.minPnlData = Object.freeze(data || [])
@@ -176,7 +174,7 @@ export default {
             t.minData[0] = tmpMinData0
 
             let tmpMinData1 = t.minData[1].slice();
-            tmpMinData1.push(t.$utils.toDecimal(nanomsg.unrealized_pnl, 2))
+            tmpMinData1.push(t.calcuIntradayPnl(nanomsg))
             t.minData[1] = tmpMinData1
 
             let tmpMinPnlData = t.minPnlData.slice();
@@ -187,6 +185,10 @@ export default {
                 if(!oldPnlDataLen) t.initChart();
                 else t.updateChart();
             })
+        },
+
+        calcuIntradayPnl(pnlData) {
+            return toDecimal(pnlData.dynamic_equity - pnlData.static_equity)
         },
 
         updateChart() {

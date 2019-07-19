@@ -82,7 +82,7 @@ namespace kungfu
                                 case EAGAIN:
                                 case ETIMEDOUT:
                                 {
-                                    SPDLOG_INFO("apprentice quit because {}", ex.what());
+                                    SPDLOG_INFO("kungfu app quit because {}", ex.what());
                                     return observable<>::empty<event_ptr>();
                                 }
                                 default:
@@ -110,6 +110,8 @@ namespace kungfu
             react();
 
             events_.connect();
+
+            on_exit();
             SPDLOG_INFO("{} finished", get_home_uname());
         }
 

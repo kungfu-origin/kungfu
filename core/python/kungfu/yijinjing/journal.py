@@ -5,12 +5,14 @@ import re
 import pyyjj
 import pandas as pd
 
+
+os_sep = re.escape(os.sep)
 JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
-    r'(.*)', os.sep,  # category
-    r'(.*)', os.sep,  # group
-    r'(.*)', os.sep,  # name
-    r'journal', os.sep,  # mode
-    r'(.*)', os.sep,  # mode
+    r'(.*)', os_sep,  # category
+    r'(.*)', os_sep,  # group
+    r'(.*)', os_sep,  # name
+    r'journal', os_sep,  # mode
+    r'(.*)', os_sep,  # mode
     r'(\w+).(\d+).journal',  # hash + page_id
 )
 JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
