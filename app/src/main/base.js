@@ -4,7 +4,7 @@ import { logger } from '__gUtils/logUtils'
 import { existsSync, addFile } from '__gUtils/fileUtils';
 const path = require('path')
 const fse = require('fs-extra');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('kungfu-core').sqlite3.verbose();
 
 ;if (process.env.NODE_ENV === 'production') {
     if(process.env.APP_TYPE === 'cli') global.__resources = path.join('.', 'resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}

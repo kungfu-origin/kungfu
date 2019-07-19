@@ -1,6 +1,6 @@
 import { existsSync } from '__gUtils/fileUtils'; 
 
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('kungfu-core').sqlite3.verbose();
 /**
  * @param  {String} dbPath
  * @param  {sql string} sql

@@ -1,8 +1,4 @@
-var binary = require('node-pre-gyp');
-var path = require('path');
-var binding_path = binary.find(path.resolve(path.join(__dirname,'../package.json')));
-var binding = require(binding_path);
-var sqlite3 = module.exports = exports = binding;
+var sqlite3 = module.exports = exports = require('bindings')('node_sqlite3.node');
 var EventEmitter = require('events').EventEmitter;
 
 function normalizeMethod (fn) {
