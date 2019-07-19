@@ -7,6 +7,10 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+if (POLICY CMP0068)
+  cmake_policy(SET CMP0068 NEW)
+endif()
+
 # Add a CMake parameter for choosing a desired Python version
 if(NOT PYBIND11_PYTHON_VERSION)
   set(PYBIND11_PYTHON_VERSION "" CACHE STRING "Python version to use for compiling modules")

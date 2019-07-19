@@ -6,7 +6,13 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": ["core", "app"],
+  "scripts": {
+    "postinstall": "yarn wsrun --serial install-deps",
+    "build": "yarn wsrun --serial build",
+    "clean": "yarn wsrun clean"
+  },
   "dependencies": {
+    "wsrun": "^5.0.0",
     "nan": "0.3.0"
   }
 }

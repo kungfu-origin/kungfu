@@ -42,7 +42,6 @@ Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
 支持 C++17 的编译器
-git
 Node.js (>=8 <11)
 yarn
 Python 2
@@ -54,10 +53,9 @@ cmake (>3.12)
 功夫编译依赖 [Node.js](https://nodejs.org)，建议预先进行如下设置加速依赖包的下载：
 ```
 $ npm config set registry https://registry.npm.taobao.org
-$ npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
-$ npm config set PUPPETEER_DOWNLOAD_HOST https://npm.taobao.org/mirrors
 $ npm config set puppeteer_download_host https://npm.taobao.org/mirrors
-$ npm config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
+$ npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
+$ npm config set sass-binary-site https://npm.taobao.org/mirrors/node-sass
 ```
 
 #### MacOSX
@@ -107,15 +105,15 @@ Compile 编译
 ```
 $ git clone https://github.com/taurusai/kungfu
 $ cd kungfu
-$ yarn install
-$ yarn workspaces run build
+$ yarn
+$ yarn build
 ```
 
 编译结果输出在 app/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/mac/Kungfu.Trader.app。
 
 遇到编译问题需要完整的重新编译时，执行以下命令清理临时文件：
 ```
-$ yarn workspaces run clean
+$ yarn clean
 ```
 
 #### 选择编译模式
@@ -166,7 +164,7 @@ dist
 ```
 通常情况下可通过执行如下命令对 build 和 dist 进行清理：
 ```
-$ yarn workspaces run clean
+$ yarn clean
 ```
 需要注意 node_modules 目录为 npm 产生的包目录，一般情况下无需清除，如有特殊需要可手动删除。
 

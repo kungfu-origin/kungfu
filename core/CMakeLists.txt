@@ -36,16 +36,12 @@ if(APPLE)
     SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
 endif()
 if(WIN32)
-    # install boost using binaries from https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/
-    SET(BOOST_ROOT "C:\\local\\boost_1_64_0")
-#    ADD_COMPILE_DEFINITIONS(_WIN32_WINNT=0x0A00) # Target Windows 10 https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt?view=vs-2019
-    ADD_COMPILE_DEFINITIONS(BOOST_ALL_NO_LIB)
-    ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
-#    ADD_COMPILE_DEFINITIONS(BOOST_ALL_DYN_LINK)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w /permissive-")
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
+    ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
+#    ADD_COMPILE_DEFINITIONS(_WIN32_WINNT=0x0A00) # Target Windows 10 https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt?view=vs-2019
 endif()
 
 #OPTION(test "Build all tests." ON) # Makes boolean 'test' available.
