@@ -29,6 +29,10 @@ namespace kungfu
             protected:
 
                 void on_start() override;
+
+                void write_1();
+            private:
+                void sin_quota(msg::data::Quote &quote, double cycle, double amplitude, double initial_value, double pass_time);
             };
         }
     }

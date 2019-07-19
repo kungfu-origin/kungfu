@@ -1,19 +1,22 @@
 from kungfu.wingchun.constants import *
 source = "passive"
 account = "test"
-ticker = "600000"
+ticker = ["600000"]
 price = 13.1
 volume = 10000
 exchange = Exchange.SSE
 
-def init(context):
-    context.add_md(source)
-    context.add_account(source, account, 100000000.0)
-    context.subscribe(source, ticker, exchange, True)
-    context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
+def pre_start(context):
+    #context.add_md(source)
+    #context.add_account(source, account, 100000000.0)
+    context.subscribe(source, ticker, exchange)
+    #context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
 
 def pre_run(context):
     pass
+
+def on_quote(context, quote):
+    context.log.info("{} {} {}".format(quote.instrument_id, quote.last_price, quote.trading_day))
 
 def insert_order(context, nano):
     #order_id = context.insert_market_order(ticker, exchange, "15040900", 100, Side.Buy, Offset.Open)
