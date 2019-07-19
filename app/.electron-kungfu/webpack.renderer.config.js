@@ -136,13 +136,9 @@ let rendererConfig = {
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new PreloadWebpackPlugin({
       rel: 'preload',
-    }),
-    new OptimizeJsPlugin({
-      sourceMap: false
     })
   ],
   output: {
@@ -170,6 +166,7 @@ let rendererConfig = {
  */
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
+    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`
     })
@@ -182,10 +179,8 @@ if (process.env.NODE_ENV !== 'production') {
 if (process.env.NODE_ENV === 'production') {
   rendererConfig.devtool = ''
   rendererConfig.plugins.push(
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
+    new OptimizeJsPlugin({
+      sourceMap: false
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',

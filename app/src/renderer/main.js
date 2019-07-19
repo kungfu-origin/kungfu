@@ -12,6 +12,8 @@ import { ipcRenderer } from 'electron'
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
+
+
 //element
 Vue.use(Tag)
 Vue.use(Table)
@@ -109,3 +111,4 @@ function startAutoUpdate(){
 }
 
 window.fileId = 0;
+

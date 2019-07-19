@@ -43,6 +43,34 @@ let mainConfig = {
       {
         test: /\.node$/,
         use: 'node-loader'
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        use: {
+          loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'imgs/[name]--[folder].[ext]'
+          }
+        }
+      },
+      {
+        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: 'media/[name]--[folder].[ext]'
+        }
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        use: {
+          loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'fonts/[name]--[folder].[ext]'
+          }
+        }
       }
     ]
   },
@@ -57,9 +85,6 @@ let mainConfig = {
   },
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
-    new OptimizeJsPlugin({
-      sourceMap: false
-    })
   ],
   resolve: {
     alias: {
@@ -80,7 +105,7 @@ let mainConfig = {
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`
+      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
     })
   )
 }
@@ -90,10 +115,8 @@ if (process.env.NODE_ENV !== 'production') {
  */
 if (process.env.NODE_ENV === 'production') {
   mainConfig.plugins.push(
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
+    new OptimizeJsPlugin({
+      sourceMap: false
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',

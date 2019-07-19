@@ -41,6 +41,7 @@ interface FileInputData extends FileData {
 
 
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
+    fileTree = fileTree || {};
     let strategyPath: string = strategy.filePath;
     strategyPath = path.normalize(strategyPath)
     const filePath: string = path.resolve(strategyPath);

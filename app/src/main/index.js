@@ -113,7 +113,8 @@ var appReady = false, killExtraFinished = false;
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
 	appReady = true;
-	if(appReady && killExtraFinished) createWindow()
+	createWindow()
+	// if(appReady && killExtraFinished) createWindow()
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
@@ -122,9 +123,8 @@ killExtra()
 .catch(err => console.error(err))
 .finally(() => {
 	killExtraFinished = true;
-	if(appReady && killExtraFinished) createWindow()
+	// if(appReady && killExtraFinished) createWindow()
 	console.timeEnd('finish kill extra')
-	
 })
 
 

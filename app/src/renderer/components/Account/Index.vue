@@ -70,7 +70,7 @@ import MdAccount from './components/MdAccount';
 import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
-import Pnl from '../Base/pnl/Pnl';
+import Pnl from '../Base/pnl';
 import { sourceType } from '__gConfig/accountConfig';
 import * as ACCOUNT_API from '__io/db/account';
 import { debounce } from '__gUtils/busiUtils';
@@ -122,7 +122,6 @@ export default {
             const ledgerCategory = tradingData.ledger_category
             const accountId = tradingData.account_id || '';
             const currentId = t.currentId.toAccountId();
-            console.log(d)
             switch (msgType) {
                 case MSG_TYPE.order:
                     if(accountId !== currentId) return;

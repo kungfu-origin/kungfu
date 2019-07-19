@@ -4,7 +4,6 @@ import StrategyRouter from './strategy'
 import AccountRouter from './account'
 import CodeRouter from './code';
 
-
 Vue.use(VueRouter)
 
 export default new VueRouter({
@@ -13,6 +12,6 @@ export default new VueRouter({
         ...StrategyRouter,
         ...AccountRouter,
         ...CodeRouter,
-        {path: '*', redirect: '/'}
+        { path: '*', redirect: '/' }
     ]
 })

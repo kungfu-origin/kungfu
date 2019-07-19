@@ -72,8 +72,8 @@ export default {
 
         intradayPnl(){
             const t = this;
-            const len = t.minPnlData.length;
-            return t.calcuIntradayPnl(t.minPnlData[len - 1])
+            if(!t.minPnlData.length) return '--';
+            return t.calcuIntradayPnl(t.minPnlData[t.minPnlData.length - 1])
         },
 
         intradayPnlRatio(){
@@ -147,7 +147,6 @@ export default {
                     const hhmmTime = moment(item.update_time / 1000000).format('HH:mm')
                     t.minGroupKey[hhmmTime] = item
                     xAxisData.push(hhmmTime)
-                    console.log(item, t.calcuIntradayPnl(item))
                     serirsData.push(t.calcuIntradayPnl(item))
                 })
                 t.minData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
