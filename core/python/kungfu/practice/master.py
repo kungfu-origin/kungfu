@@ -4,11 +4,7 @@ import json
 import time
 import functools
 import pyyjj
-import pywingchun
 
-from . import os_signal
-
-from kungfu import nanomsg
 from kungfu.log import create_logger
 
 import kungfu.service.kfs as kfs

@@ -156,7 +156,7 @@ int socket::recv (int flags)
             case EINTR:
             {
                 SPDLOG_WARN("interrupted when receiving from {}", relative_path_);
-                throw nn_exception ();
+                break;
             }
             default:
             {
