@@ -106,7 +106,7 @@
         {
           "target": "nsis",
           "arch": [
-            "ia32"
+            "x64"
           ]
         }
       ]
@@ -164,7 +164,7 @@
     "css-loader": "^2.1.1",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^5.0.1",
+    "electron": "5.0.7",
     "electron-chromedriver": "^5.0.1",
     "electron-builder": "^20.38.5",
     "electron-debug": "^1.4.0",
