@@ -19,6 +19,7 @@
 #include <utility>
 #include <mutex>
 
+#include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/page.h>
@@ -166,6 +167,29 @@ namespace kungfu
                 {
                     auto frame = open_frame(trigger_time, msg_type, sizeof(T));
                     close_frame(frame->copy_data<T>(data));
+                }
+
+                template<typename T>
+                void write_with_time(int64_t gen_time, int32_t msg_type, const T &data)
+                {
+                    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->current_page_->get_page_size());
+                    if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->current_page_->address_border())
+                    {
+                        mark(gen_time, msg::type::PageEnd);
+                        journal_->load_next_page();
+                    }
+                    auto frame = journal_->current_frame();
+                    frame->set_header_length();
+                    frame->set_trigger_time(0);
+                    frame->set_msg_type(msg_type);
+                    frame->set_source(journal_->location_->uid);
+                    frame->set_dest(journal_->dest_id_);
+
+                    frame->copy_data<T>(data);
+                    frame->set_gen_time(gen_time);
+                    frame->set_data_length(sizeof(T));
+                    journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                    journal_->next();
                 }
 
                 void write_raw(int64_t trigger_time, int32_t msg_type, char *data, uint32_t length);

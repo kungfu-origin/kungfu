@@ -102,12 +102,19 @@ public:
 
 };
 
+Quote get_quote(journal::frame_ptr frame)
+{
+    return frame->data<Quote>();
+}
+
 PYBIND11_MODULE(pywingchun, m)
 {
     auto m_utils = m.def_submodule("utils");
     m_utils.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
     m_utils.def("json_from_address", &json_from_address);
+
+    m_utils.def("get_quote", get_quote);
 
     auto m_constants = m.def_submodule("constants");
 
@@ -223,15 +230,16 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<Quote>(m, "Quote")
+            .def(py::init<>())
             .def_property_readonly("source_id", &Quote::get_source_id)
             .def_property_readonly("trading_day", &Quote::get_trading_day)
-            .def_readonly("data_time", &Quote::data_time)
+            .def_readwrite("data_time", &Quote::data_time)
             .def_property_readonly("instrument_id", &Quote::get_instrument_id)
             .def_property_readonly("exchange_id", &Quote::get_exchange_id)
             .def_readonly("instrument_type", &Quote::instrument_type)
             .def_readonly("pre_close_price", &Quote::pre_close_price)
             .def_readonly("pre_settlement_price", &Quote::pre_settlement_price)
-            .def_readonly("last_price", &Quote::last_price)
+            .def_readwrite("last_price", &Quote::last_price)
             .def_readonly("volume", &Quote::volume)
             .def_readonly("turnover", &Quote::turnover)
             .def_readonly("pre_open_interest", &Quote::pre_open_interest)
@@ -251,6 +259,11 @@ PYBIND11_MODULE(pywingchun, m)
                  [](const Quote &a)
                  {
                      return to_string(a);
+                 })
+            .def("__write__",
+                 [](const Quote &a, int64_t gen_time, const journal::writer_ptr w)
+                 {
+                     w->write_with_time(gen_time, kungfu::wingchun::msg::type::Quote, a);
                  }
             );
 
