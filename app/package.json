@@ -10,12 +10,12 @@
   },
   "main": "./dist/app/main.js",
   "engines": {
-    "node": ">=8.0.0 <11.0.0"
+    "node": ">8.0.0"
   },
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
-    "buildInstaller": "electron-builder",
+    "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "dev": "node .electron-kungfu/dev-runner.js",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
@@ -59,6 +59,7 @@
       "**/kungfu-core/package.json",
       "**/kungfu-core/build/*/node_nanomsg.node",
       "**/kungfu-core/build/*/node_sqlite3.node",
+      "**/kungfu-core/build/*/libnanomsg.*",
       "**/kungfu-core/node/*",
       "!**/kungfu-core/build/kfc/**/*"
     ],

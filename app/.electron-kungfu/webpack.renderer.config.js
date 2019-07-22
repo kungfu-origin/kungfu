@@ -25,8 +25,6 @@ let whiteListedModules = [
   "fast-csv"
 ];
 
-// dependencies['kungfu-core'] = 'commonjs kungfu-core';
-
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
   entry: {
