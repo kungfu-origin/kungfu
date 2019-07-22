@@ -176,6 +176,8 @@ namespace kungfu
                 uint64_t frame_id_base_;
                 publisher_ptr publisher_;
                 size_t size_to_write_;
+
+                void close_page(int64_t trigger_time);
             };
         }
     }

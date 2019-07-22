@@ -22,6 +22,7 @@
 #include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/journal.h>
+#include <spdlog/spdlog.h>
 
 namespace kungfu
 {
@@ -56,8 +57,7 @@ namespace kungfu
                 writer_mtx_.lock();
                 if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->current_page_->address_border())
                 {
-                    mark(trigger_time, msg::type::PageEnd);
-                    journal_->load_next_page();
+                    close_page(trigger_time);
                 }
                 auto frame = journal_->current_frame();
                 frame->set_header_length();
@@ -90,6 +90,20 @@ namespace kungfu
                 auto frame = open_frame(trigger_time, msg_type, length);
                 memcpy(const_cast<void*>(frame->data_address()), data, length);
                 close_frame(length);
+            }
+
+            void writer::close_page(int64_t trigger_time)
+            {
+                auto frame = journal_->current_frame();
+                frame->set_header_length();
+                frame->set_trigger_time(trigger_time);
+                frame->set_msg_type(msg::type::PageEnd);
+                frame->set_source(journal_->location_->uid);
+                frame->set_dest(journal_->dest_id_);
+                frame->set_gen_time(time::now_in_nano());
+                frame->set_data_length(0);
+                journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                journal_->load_next_page();
             }
         }
     }
