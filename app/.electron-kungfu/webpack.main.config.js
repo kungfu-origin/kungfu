@@ -21,6 +21,10 @@ let whiteListedModules = [
   "fast-csv"
 ];
 
+// dependencies['kungfu-core'] = 'commonjs kungfu-core';
+
+
+
 let mainConfig = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js')

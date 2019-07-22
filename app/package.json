@@ -66,18 +66,9 @@
       {
         "from": "../core/build/kfc",
         "to": "kfc"
-      },
-      {
-        "from": "../node_modules/kungfu-core",
-        "to": "app.asar.unpacked/node_modules/kungfu-core",
-        "filter": [
-          "node/*",
-          "build/**/node_nanomsg.node",
-          "package.json"
-        ]
       }
     ],
-    "asar": true,
+    "asar": false,
     "dmg": {
       "contents": [
         {

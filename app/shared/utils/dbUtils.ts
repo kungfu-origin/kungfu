@@ -1,5 +1,6 @@
-import { existsSync } from '__gUtils/fileUtils'; 
-
+import { existsSync } from '__gUtils/fileUtils';
+console.log(require('kungfu-core'), '---')
+console.log(require('kungfu-core').sqlite3, '---')
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 /**
  * @param  {String} dbPath
