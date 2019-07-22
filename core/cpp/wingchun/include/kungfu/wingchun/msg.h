@@ -30,6 +30,8 @@ namespace kungfu
                     Entrust = 102,
                     Transaction = 103,
 
+                    Bar = 110,
+
                     OrderInput = 201,
                     OrderAction = 202,
                     Order = 203,
@@ -366,6 +368,41 @@ namespace kungfu
                     j["seq"] = transaction.seq;
                 }
 
+                struct Bar
+                {
+                    char trading_day[DATE_LEN];            //交易日 
+                    char instrument_id[INSTRUMENT_ID_LEN]; //合约代码
+                    double PreClosePrice;                //昨收价
+                    int64_t start_time;                    //开始时间
+                    int64_t end_time;                      //结束时间
+                    double Open;                           //开
+                    double Close;                          //收
+                    double Low;                            //低
+                    double High;                           //高
+                    int Volume;                         //区间交易量
+                    int StartVolume;                    //初始总交易量
+                    int Count;                             //区间有效tick数
+                    int64_t next_time;                     //下次开始时间
+                };
+
+
+
+                inline void to_json(nlohmann::json &j, const Bar &bar)
+                {
+                    j["trading_day"] = std::string(bar.trading_day);
+                    j["instrument_id"] = std::string(bar.instrument_id);
+                    j["pre_close_price"] = FORMAT_DOUBLE(bar.PreClosePrice);
+                    j["start_time"] = bar.start_time;
+                    j["end_time"] = bar.end_time;
+                    j["Open"] = FORMAT_DOUBLE(bar.Open);
+                    j["Close"] = FORMAT_DOUBLE(bar.Close);
+                    j["Low"] = FORMAT_DOUBLE(bar.Low);
+                    j["High"] = FORMAT_DOUBLE(bar.High);
+                    j["Volume"] = bar.Volume;
+                    j["StartVolume"] = bar.StartVolume;
+                    j["Count"] = bar.Count;
+                    j["next_time"] = bar.next_time;
+                }
 
                 //合约手续费率
                 struct InstrumentCommissionRate

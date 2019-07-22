@@ -15,6 +15,23 @@ namespace kungfu
     {
         namespace passive
         {
+            
+            enum DataType
+            {
+                StandardSine,
+                StandardLine,
+                StandardRandom,
+                GusssRandom
+            };
+            struct MdParameter
+            {
+                char InstrumentId[INSTRUMENT_ID_LEN];
+                double Cycle;
+                double Limit;
+                double PrePrice;
+                int Interval = 1;
+            };
+
             class PassiveMarketData : public gateway::MarketData
             {
             public:
@@ -23,16 +40,18 @@ namespace kungfu
                                   std::map<std::string, double> &config_double);
 
                 bool subscribe(const std::vector<msg::data::Instrument> &instruments) override ;
-
                 bool unsubscribe(const std::vector<msg::data::Instrument> &instruments) override ;
 
-            protected:
-
-                void on_start() override;
-
-                void write_1();
             private:
-                void sin_quota(msg::data::Quote &quote, double cycle, double amplitude, double initial_value, double pass_time);
+                void on_start() override;
+                bool init_md();
+
+                void create_md();
+                void sin_quota(msg::data::Quote &quote, int time, MdParameter parameter);
+            
+            private:
+                std::map<DataType, std::vector<MdParameter>> md_parameters;
+                std::map<std::string, msg::data::Quote> mds;
             };
         }
     }
