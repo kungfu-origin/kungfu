@@ -110,22 +110,22 @@ namespace kungfu
             void PassiveMarketData::create_md()
             {
                 SPDLOG_INFO("********create_md call************");
-                // auto writer = writers_[0];
-                // int timep = int(kungfu::yijinjing::time::now_in_nano()/1e9);
-                // for (auto it = md_parameters.begin();it != md_parameters.end();it++)
-                // {
-                //     SPDLOG_INFO("type {}", it->first);
-                //     for (auto parameter : it->second)
-                //     {
-                //         SPDLOG_INFO("instrument {}", parameter.InstrumentId);
-                //         if (timep%parameter.Interval == 0)
-                //         {
-                //             msg::data::Quote &quote = writer->open_data<msg::data::Quote>(kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
-                //             sin_quota(quote, timep, parameter);
-                //             writer->close_data();
-                //         }
-                //     }
-                // }
+                auto writer = writers_[0];
+                int timep = int(kungfu::yijinjing::time::now_in_nano()/1e9);
+                for (auto it = md_parameters.begin();it != md_parameters.end();it++)
+                {
+                    SPDLOG_INFO("type {}", it->first);
+                    for (auto parameter : it->second)
+                    {
+                        SPDLOG_INFO("instrument {}", parameter.InstrumentId);
+                        if (timep%parameter.Interval == 0)
+                        {
+                            msg::data::Quote &quote = writer->open_data<msg::data::Quote>(kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
+                            sin_quota(quote, timep, parameter);
+                            writer->close_data();
+                        }
+                    }
+                }
             }
 
             int get_inter_val(char* instrument_id)
