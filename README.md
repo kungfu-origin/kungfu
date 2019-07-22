@@ -1,9 +1,8 @@
-Intro 简介
-========
+# Intro 简介
 
 功夫是 [Taurus.ai](http://taurus.ai) 团队专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
 * 低延迟交易 - 量化交易者对系统内响应速度有极高要求，功夫提供微秒级别的系统响应，支持带纳秒级时间戳的交易数据实时存储和盘后分析。
-* 开放的策略编写方式 - 功夫支持 Python 2/3 及 C++ 形式的策略编写，策略师可以不受限的自由使用第三方计算库，放飞创意。
+* 开放的策略编写方式 - 功夫支持 Python 3 及 C++ 形式的策略编写，策略师可以不受限的自由使用第三方计算库，放飞创意。
 * 友好的使用方式 - 告别 Linux shell 小黑屋，功夫提供图形化操作界面，简化策略运维流程。而进阶用户仍然具备通过底层 API 以无界面形式使用系统的能力。
 * 跨平台运行 - 三大主流平台（Windows、MacOSX、Linux）皆可编译运行。
 * 灵活的扩展接口 - 功夫提供几种不同的数据交互接口（易筋经、SQLite、nanomsg），支持用户自行开发各种功能模块。
@@ -15,7 +14,7 @@ Intro 简介
 * 中台交互（C++/Python/nodejs）
   * [SQLite](https://www.sqlite.org/index.html) - 功夫使用内嵌式数据库 SQLite 存储配置信息及中间数据
   * [nanomsg](https://nanomsg.org) - 功夫使用 nanomsg 作为前后台通信机制，系统内对延迟不敏感的指令（例如手动下单等）可通过 nanomsg 信道传达。
-* 前端UI（nodejs）
+* 前端UI（Node.js）
   * [Electron](https://electronjs.org) - 跨平台的桌面应用开发框架
   * [Vue.js](https://vuejs.org) - UI开发框架
 * 打包机制
@@ -32,23 +31,19 @@ Intro 简介
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
-License
-==========
+# License
 
 功夫采用 Apache License 2.0 发布。
 
-Setup 编译及运行环境
-=============
+# Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
 支持 C++17 的编译器
 Node.js (>=8 <11)
 yarn
-Python 2
+Python 3
 pipenv
 cmake (>3.12)
-
-功夫的编译需要系统默认（$PATH指向）的 Python 版本为 2。如果系统中也存在 Python 3，则可以通过下述 pipenv 的方式使得最终输出的 app 使用 Python 3，但仍然需要默认的 Python 是 2。
 
 功夫编译依赖 [Node.js](https://nodejs.org)，建议预先进行如下设置加速依赖包的下载：
 ```
@@ -68,11 +63,9 @@ $ pip install pipenv
 
 #### Windows
 
-开发组在 Visual Studio 2017 15.9.11 环境下进行工作，安装时需要勾选 VC140（Visual Studio 2015) toolset。
+开发组在 Visual Studio 2017 15.9.14 环境下进行工作，安装时需要勾选 VC140（Visual Studio 2015) toolset。
 
-下载并安装 [git](https://git-scm.com/download/win)，[Python](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[Node.js LTS 10.15.3](https://nodejs.org/en/download/) 并添加相应路径至 %PATH% 环境变量。
-
-Windows需要额外安装 [Boost 1.64.0](https://sourceforge.net/projects/boost/files/boost-binaries/1.64.0/)，下载并安装 boost_1_64_0-msvc-14.1-64.exe。
+下载并安装 [git](https://git-scm.com/download/win)，[Python 3](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[Node.js LTS 10.15.3](https://nodejs.org/en/download/) 并添加相应路径至 %PATH% 环境变量。
 
 ```
 C:\> npm install -g yarn electron-builder
@@ -91,13 +84,12 @@ source /etc/profile
 ```
 
 ```
-$ # install git cmake node.js
+$ # install cmake3 node.js
 $ node-v10.15.3-linux-x64/bin/npm install -g yarn electron-builder
 $ pip install pipenv
 ```
 
-Compile 编译
-==========
+# Compile 编译
 
 #### 常规操作
 
@@ -136,24 +128,6 @@ $ yarn workspace kungfu-core run config
 ```
 
 
-#### 选择 Python 版本
-
-功夫支持 Python 2 及 Python 3，在系统预装了相应版本的情况下，编译时可以自行选择所需的 Python 版本。
-执行以下命令选择 Python 3：
-```
-$ npm config set kungfu-core:pyver three
-```
-
-执行以下命令选择 Python 2：
-```
-$ npm config set kungfu-core:pyver two
-```
-
-切换 Python 版本后，需要执行以下命令重新生成配置文件：
-```
-$ yarn workspace kungfu-core run config
-```
-
 #### 编译过程产生的临时文件
 
 编译过程会在代码所在目录下生成如下临时文件：
@@ -176,12 +150,12 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 ```
 如果需要清理这些文件，都需要手动删除。
 
-Version 版本
-=============
+
+# Version 版本
 
 * 2.0.0:
     * 跨平台支持
-    * 支持 Python 2/3
+    * 支持 Python 3
     * 提供基于 Electron 的图形化操作界面
 * 1.0.0:
     * 以 Docker/rpm 方式运行的最后稳定版本
@@ -200,8 +174,7 @@ Version 版本
 * 0.0.1:
     初始化版本
 
-Contribute 开发
-=============
+# Contribute 开发
 
 开发文档即将上线，请关注 [Taurus.ai](http://taurus.ai) 官网。
 QQ 交流群 312745666，入群问题答案：taurus.ai
