@@ -102,7 +102,7 @@ export default {
                     t.posFromNmsg = Object.freeze(tradingData);
                     break
                 case MSG_TYPE.portfolio:
-                    if(strategyId !== currentId) return;
+                    if(strategyId !== t.strategyId) return;
                     if(ledgerCategory !== 1) return;
                     t.minPnlFromNmsg = Object.freeze(tradingData);
             }
