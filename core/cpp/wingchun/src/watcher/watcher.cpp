@@ -70,6 +70,16 @@ namespace kungfu
                 {
                     watch(trigger_time, app_location);
                     publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
+
+                    uint32_t md_source_id = app_location->uid;
+                    events_ | from(app_location->uid) | is(msg::type::Quote) | timeout(std::chrono::seconds(30)) |
+                    $([&](event_ptr e)
+                      {},
+                      [&, md_source_id](std::exception_ptr e)
+                      {
+                          auto md_location = get_location(md_source_id);
+                          publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Idle);
+                      });
                     break;
                 }
                 case category::TD:
@@ -155,6 +165,14 @@ namespace kungfu
             apprentice::on_start();
 
             pre_start();
+
+            events_ | is(msg::type::GatewayState) |
+            $([&](event_ptr event)
+              {
+                  auto gateway_location = get_location(event->source());
+                  publish_state(event->gen_time(), gateway_location->category, gateway_location->group, gateway_location->name,
+                                static_cast<GatewayState>(event->data<int32_t>()));
+              });
 
             /**
              * process active query from clients

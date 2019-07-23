@@ -63,12 +63,6 @@ namespace kungfu
 
             yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
-            template<typename T>
-            inline void write_to(int64_t trigger_time, int32_t msg_type, T &data, uint32_t dest_id = 0)
-            {
-                writers_[dest_id]->write(trigger_time, msg_type, get_home_uid(), data);
-            }
-
         protected:
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
             yijinjing::journal::reader_ptr reader_;

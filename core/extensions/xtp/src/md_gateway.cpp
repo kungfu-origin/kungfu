@@ -30,7 +30,6 @@ namespace kungfu
                 ip_ = config_str["md_ip"];
                 port_ = config_int["md_port"];
                 save_file_path_ = config_str["save_file_path"];
-                api_ = nullptr;
             }
 
             MdGateway::~MdGateway()
@@ -38,7 +37,6 @@ namespace kungfu
                 if (api_ != nullptr)
                 {
                     api_->Release();
-                    api_ = nullptr;
                 }
             }
 
@@ -47,26 +45,18 @@ namespace kungfu
                 gateway::MarketData::on_start();
                 SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
 
-                if (api_ != nullptr)
-                {
-                    api_->Release();
-                    api_ = nullptr;
-                }
                 api_ = XTP::API::QuoteApi::CreateQuoteApi(client_id_, save_file_path_.c_str());
                 api_->RegisterSpi(this);
                 int res = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
-                if (res != 0 && res != -2)
+                if (res == 0)
                 {
-                    XTPRI *error_info = api_->GetApiLastError();
-                    LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-//                    set_state(GatewayState::LoggedInFailed, error_info->error_msg);
-
-                    client_id_++;
-//                    std::this_thread::sleep_for(std::chrono::seconds(2));
-//                    start();
+                    publish_state(GatewayState::Ready);
+                    LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
                 } else
                 {
-                    LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
+                    publish_state(GatewayState::LoggedInFailed);
+                    XTPRI *error_info = api_->GetApiLastError();
+                    LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
                 }
             }
 
@@ -131,25 +121,7 @@ namespace kungfu
             void MdGateway::OnDisconnected(int reason)
             {
                 DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
-//                set_state(GatewayState::DisConnected, fmt::format("reason {}", reason));
-                int retry = 5;
-                while (retry > 0)
-                {
-                    int res = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
-                    if (res != 0 && res != -2)
-                    {
-                        XTPRI *error_info = api_->GetApiLastError();
-                        LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-//                        set_state(GatewayState::LoggedInFailed, error_info->error_msg);
-                        std::this_thread::sleep_for(std::chrono::seconds(2));
-                        retry--;
-                    } else
-                    {
-                        LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
-//                        set_state(GatewayState::Ready);
-                        break;
-                    }
-                }
+                publish_state(GatewayState::DisConnected);
             }
 
             void MdGateway::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)

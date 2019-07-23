@@ -1,9 +1,8 @@
-#include <utility>
-
 //
 // Created by Keren Dong on 2019-06-20.
 //
 
+#include <utility>
 #include <hffix.hpp>
 
 #include <kungfu/wingchun/msg.h>

@@ -61,6 +61,12 @@ namespace kungfu
                 }
             }
 
+            template<typename T>
+            inline void write_to(int64_t trigger_time, int32_t msg_type, T &data, uint32_t dest_id = 0)
+            {
+                writers_[dest_id]->write(trigger_time, msg_type, data);
+            }
+
             virtual void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime)
             {}
 

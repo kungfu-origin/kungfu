@@ -62,18 +62,7 @@ namespace kungfu
                     Idle = 1,
                     DisConnected = 2,
                     Connected = 3,
-                    LoggedIn = 4,
                     LoggedInFailed = 5,
-                    SettlementConfirmed = 6,
-                    SettlementConfirmFailed = 7,
-                    AccountInfoConfirmed = 8,
-                    AccountInfoConfirmFailed = 9,
-                    PositionInfoConfirmed = 10,
-                    PositionInfoConfirmFailed = 11,
-                    InstrumentInfoConfirmed = 12,
-                    InstrumentInfoConfirmFailed = 13,
-                    PositionDetailConfirmed = 14,
-                    PositionDetailConfirmFailed = 15,
                     Ready = 100
                 };
 

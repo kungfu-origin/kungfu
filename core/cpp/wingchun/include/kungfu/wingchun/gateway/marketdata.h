@@ -29,6 +29,12 @@ namespace kungfu
             protected:
 
                 void on_start() override;
+
+                void publish_state(msg::data::GatewayState state)
+                {
+                    auto s = static_cast<int32_t>(state);
+                    write_to(0, msg::type::GatewayState, s);
+                }
             };
         }
     }

@@ -42,6 +42,12 @@ namespace kungfu
 
                 void on_start() override ;
 
+                void publish_state(msg::data::GatewayState state)
+                {
+                    auto s = static_cast<int32_t>(state);
+                    write_to(0, msg::type::GatewayState, s);
+                }
+
             private:
                 std::string source_;
                 std::string account_id_;

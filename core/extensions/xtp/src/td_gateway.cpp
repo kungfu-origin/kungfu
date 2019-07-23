@@ -21,7 +21,8 @@ namespace kungfu
     {
         namespace xtp
         {
-            TdGateway::TdGateway(bool low_latency, yijinjing::data::locator_ptr locator, std::map<std::string, std::string> &config_str, std::map<std::string, int> &config_int,
+            TdGateway::TdGateway(bool low_latency, yijinjing::data::locator_ptr locator, std::map<std::string, std::string> &config_str,
+                                 std::map<std::string, int> &config_int,
                                  std::map<std::string, double> &config_double) :
                     gateway::Trader(low_latency, std::move(locator), SOURCE_XTP, config_str["user_id"]), trading_day_("")
             {
@@ -36,7 +37,6 @@ namespace kungfu
                 save_file_path_ = config_str["save_file_path"];
                 session_id_ = 0;
                 request_id_ = 0;
-                api_ = nullptr;
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
             }
 
@@ -45,46 +45,35 @@ namespace kungfu
                 if (api_ != nullptr)
                 {
                     api_->Release();
-                    api_ = nullptr;
                 }
             }
 
             void TdGateway::on_start()
             {
                 gateway::Trader::on_start();
-
                 SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
-                if (api_ != nullptr)
-                {
-                    api_->Release();
-                    api_ = nullptr;
-                }
+
                 api_ = XTP::API::TraderApi::CreateTraderApi(client_id_, save_file_path_.c_str());
                 api_->RegisterSpi(this);
                 api_->SubscribePublicTopic(XTP_TERT_QUICK);//只传送登录后公有流（订单响应、成交回报）的内容
                 api_->SetSoftwareVersion("1.1.0");
                 api_->SetSoftwareKey(software_key_.c_str());
 
-                int retry = 2;
-                while (retry > 0)
+                session_id_ = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
+                if (session_id_ > 0)
                 {
-                    session_id_ = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
-                    if (session_id_ > 0)
-                    {
-                        LOGIN_INFO("login success");
-                        req_account();
-                        break;
-                    } else
-                    {
-                        XTPRI *error_info = api_->GetApiLastError();
-                        LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-                        std::this_thread::sleep_for(std::chrono::seconds(2));
-                        retry--;
-                    }
+                    publish_state(GatewayState::Ready);
+                    LOGIN_INFO("login success");
+                    req_account();
+                } else
+                {
+                    publish_state(GatewayState::LoggedInFailed);
+                    XTPRI *error_info = api_->GetApiLastError();
+                    LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
                 }
             }
 
-            bool TdGateway::insert_order(const yijinjing::event_ptr& event)
+            bool TdGateway::insert_order(const yijinjing::event_ptr &event)
             {
                 const OrderInput &input = event->data<OrderInput>();
                 XTPOrderInsertInfo xtp_input = {};
@@ -134,7 +123,7 @@ namespace kungfu
                 }
             }
 
-            bool TdGateway::cancel_order(const yijinjing::event_ptr& event)
+            bool TdGateway::cancel_order(const yijinjing::event_ptr &event)
             {
                 const OrderAction &action = event->data<OrderAction>();
                 uint64_t xtp_order_id = order_mapper_->get_xtp_order_id(action.order_id);
@@ -182,24 +171,8 @@ namespace kungfu
             {
                 if (session_id == session_id_)
                 {
+                    publish_state(GatewayState::DisConnected);
                     DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
-                    int retry = 10;
-                    while (retry > 0)
-                    {
-                        session_id_ = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
-                        if (session_id_ > 0)
-                        {
-                            LOGIN_INFO("login success");
-                            req_account();
-                            break;
-                        } else
-                        {
-                            XTPRI *error_info = api_->GetApiLastError();
-                            LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
-                            std::this_thread::sleep_for(std::chrono::seconds(2));
-                            retry--;
-                        }
-                    }
                 }
             }
 
