@@ -56,12 +56,13 @@
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
       "!**/kungfu-core/**/**/*",
+      "!**/kungfu-core/build/kfc/**/*",
       "**/kungfu-core/package.json",
       "**/kungfu-core/build/*/node_nanomsg.node",
       "**/kungfu-core/build/*/node_sqlite3.node",
       "**/kungfu-core/build/*/libnanomsg.*",
-      "**/kungfu-core/node/*",
-      "!**/kungfu-core/build/kfc/**/*"
+      "**/kungfu-core/build/*/nanomsg.*",
+      "**/kungfu-core/node/*"
     ],
     "extraResources": [
       {
@@ -69,7 +70,7 @@
         "to": "kfc"
       }
     ],
-    "asar": true,
+    "asar": false,
     "dmg": {
       "contents": [
         {
