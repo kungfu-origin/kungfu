@@ -36,7 +36,7 @@ class Watcher(pywingchun.Watcher):
     def print_trading_day(self, event):
         self.ctx.logger.info('timer print trading day %s', self.trading_day)
 
-    def dump_snapshot(self, data_frequency = "minute"):
+    def dump_snapshot(self, data_frequency="minute"):
         messages = []
         for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
             message = ledger.message

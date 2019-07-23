@@ -35,7 +35,7 @@ class Master(pyyjj.master):
 
         ctx.master = self
 
-    def on_notice(self, event):
+    def on_json(self, event):
         try:
             kfs.handle(event.msg_type, self.ctx, json.loads(event.to_string()))
         except Exception as err:

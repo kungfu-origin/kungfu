@@ -29,13 +29,13 @@ namespace kungfu
 
             void on_notify() override ;
 
-            virtual void on_notice(const yijinjing::event_ptr &event)
+            virtual void on_register(const yijinjing::event_ptr &event)
+            {}
+
+            virtual void on_json(const yijinjing::event_ptr &event)
             {}
 
             virtual void on_interval_check(int64_t nanotime)
-            {}
-
-            virtual void on_register(const yijinjing::event_ptr &event)
             {}
 
             void register_app(const yijinjing::event_ptr& e);

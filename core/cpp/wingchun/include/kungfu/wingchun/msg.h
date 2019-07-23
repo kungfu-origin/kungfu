@@ -47,7 +47,10 @@ namespace kungfu
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
 
-                    PassiveCtrl = 10099
+                    PassiveCtrl = 10099,
+                    UIActionNewOrderSingle = 20000,
+                    UIActionCancelOrder = 20001,
+                    UIActionCancelAllOrder = 20002
                 };
             }
 

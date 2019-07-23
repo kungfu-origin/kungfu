@@ -24,6 +24,16 @@ namespace kungfu
                 }
             }
 
+            void exit_hero(int signum)
+            {
+                if (hero_instance != nullptr)
+                {
+                    hero_instance->signal_stop();
+                    hero_instance->on_exit();
+                }
+                exit(signum);
+            }
+
             void kf_os_signal_handler(int signum)
             {
                 switch (signum)
@@ -44,7 +54,7 @@ namespace kungfu
                     case SIGABRT:         // abnormal termination triggered by abort call
                     case SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
                         SPDLOG_CRITICAL("kungfu app stopped by signal {}", signum);
-                        exit(signum);
+                        exit_hero(signum);
                         break;
 #else
                     case SIGURG:       // discard signal       urgent condition present on socket
@@ -59,7 +69,7 @@ namespace kungfu
                     case SIGTTIN:      // stop process         background read attempted from control terminal
                     case SIGTTOU:      // stop process         background write attempted to control terminal
                         SPDLOG_CRITICAL("kungfu app stopped by signal {}", signum);
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGINT:       // terminate process    interrupt program
                         SPDLOG_INFO("kungfu app interrupted");
                         stop_hero();
@@ -70,7 +80,7 @@ namespace kungfu
                         break;
                     case SIGKILL:      // terminate process    kill program
                         SPDLOG_INFO("kungfu app killed");
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGHUP:       // terminate process    terminal line hangup
                     case SIGPIPE:      // terminate process    write on a pipe with no reader
                     case SIGALRM:      // terminate process    real-time timer expired
@@ -79,26 +89,25 @@ namespace kungfu
                     case SIGVTALRM:    // terminate process    virtual time alarm (see setitimer(2))
                     case SIGPROF:      // terminate process    profiling timer alarm (see setitimer(2))
                         SPDLOG_CRITICAL("kungfu app terminated by signal {}", signum);
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGUSR1:      // terminate process    User defined signal 1
                     case SIGUSR2:      // terminate process    User defined signal 2
                         SPDLOG_CRITICAL("kungfu app caught user defined signal {}", signum);
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGQUIT:      // create core image    quit program
                     case SIGILL:       // create core image    illegal instruction
                     case SIGTRAP:      // create core image    trace trap
                     case SIGABRT:      // create core image    abort program (formerly SIGIOT)
-//                    case SIGEMT:       // create core image    emulate instruction executed
                     case SIGFPE:       // create core image    floating-point exception
                     case SIGBUS:       // create core image    bus error
                         SPDLOG_CRITICAL("bus error");
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGSEGV:      // create core image    segmentation violation
                         SPDLOG_CRITICAL("segmentation violation");
-                        exit(signum);
+                        exit_hero(signum);
                     case SIGSYS:       // create core image    non-existent system call invoked
                         SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
-                        exit(signum);
+                        exit_hero(signum);
 #endif // _WINDOWS
 #ifdef __APPLE__
                     case SIGINFO:      // discard signal       status request from keyboard
@@ -106,8 +115,8 @@ namespace kungfu
                         break;
                     case SIGEMT:       // create core image    emulate instruction executed
                         SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
-                        exit(signum);
-#endif
+                        exit_hero(signum);
+#endif // __APPLE__
                     default:
                         SPDLOG_INFO("kungfu app caught unknown signal {}, signal ignored", signum);
                 }

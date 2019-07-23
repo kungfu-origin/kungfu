@@ -1,6 +1,6 @@
-
 import kungfu.service.kfs as kfs
 import kungfu.yijinjing.msg as yjj_msg
+
 
 @kfs.task
 def switch_trading_day(ctx):

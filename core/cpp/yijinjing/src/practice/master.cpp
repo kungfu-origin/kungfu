@@ -128,8 +128,7 @@ namespace kungfu
             {
                 uint32_t app_id = app.first;
                 auto &app_tasks = app.second;
-                auto it = app_tasks.begin();
-                while (it != app_tasks.end())
+                for (auto it = app_tasks.begin(); it != app_tasks.end();)
                 {
                     auto &task = it->second;
                     if (task.checkpoint <= now)
@@ -228,7 +227,7 @@ namespace kungfu
                    }) |
             $([&](event_ptr e)
               {
-                  on_notice(e);
+                  on_json(e);
               });
         }
     }
