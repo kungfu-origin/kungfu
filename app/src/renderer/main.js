@@ -79,7 +79,7 @@ export const startGetProcessStatus = () => {
 }
 
 //start pm2 kungfu master
-// process.env.ELECTRON_RUN_AS_NODE = true;
+process.env.ELECTRON_RUN_AS_NODE = true;
 startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {

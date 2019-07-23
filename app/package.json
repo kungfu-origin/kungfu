@@ -69,7 +69,7 @@
         "to": "kfc"
       }
     ],
-    "asar": false,
+    "asar": true,
     "dmg": {
       "contents": [
         {

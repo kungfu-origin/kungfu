@@ -1,6 +1,4 @@
 import { NMSG_PUB_FILE, NMSG_REP_FILE } from '__gConfig/pathConfig';
-console.log(require('kungfu-core'), '====')
-console.log(require('kungfu-core').nanomsg, '====')
 const nano = require('kungfu-core').nanomsg;
 /**
  * 重新开启nano，必须把之前的nano close掉，为了防止重复监听
