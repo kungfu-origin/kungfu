@@ -32,7 +32,6 @@ namespace kungfu
                 log::setup_log(io_device_->get_home(), io_device_->get_home()->name);
             }
             os::handle_os_signals(this);
-            SPDLOG_DEBUG("creating {} low_latency {}", io_device_->get_home()->uname, io_device_->is_low_latency());
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
@@ -63,7 +62,8 @@ namespace kungfu
 
         void hero::run()
         {
-            SPDLOG_INFO("{} observing", get_home_uname());
+            SPDLOG_INFO("{} [{:08x}] running", get_home_uname(), get_home_uid());
+            SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
 
             events_ = observable<>::create<event_ptr>(
                     [&](subscriber<event_ptr> sb)
@@ -118,12 +118,12 @@ namespace kungfu
         void hero::register_location(int64_t trigger_time, const location_ptr &location)
         {
             locations_[location->uid] = location;
-            SPDLOG_INFO("registered location {:08x} {} at {}", location->uid, location->uname, time::strftime(trigger_time));
+            SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
         }
 
         void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
         {
-            SPDLOG_INFO("deregistered location {:08x} {} at {}", location_uid, get_location(location_uid)->uname, time::strftime(trigger_time));
+            SPDLOG_INFO("deregistered location {} [{:08x}]", get_location(location_uid)->uname, location_uid);
             locations_.erase(location_uid);
         }
 
@@ -153,8 +153,6 @@ namespace kungfu
         {
             try
             {
-                SPDLOG_INFO("{} generating events with source id {:08x}", get_home_uname(), get_home_uid());
-                SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), time::strftime(end_time_));
                 while (live_)
                 {
                     if (not produce_one(sb))
@@ -179,7 +177,6 @@ namespace kungfu
                     now_ = time::now_in_nano();
                     if (notice.length() > 2)
                     {
-                        SPDLOG_DEBUG("got notice {}", notice);
                         sb.on_next(std::make_shared<nanomsg_json>(notice));
                     } else
                     {

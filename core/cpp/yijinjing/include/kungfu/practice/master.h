@@ -25,7 +25,7 @@ namespace kungfu
         class master : public hero
         {
         public:
-            master(yijinjing::data::location_ptr home, bool low_latency = false);
+            explicit master(yijinjing::data::location_ptr home, bool low_latency = false);
 
             void on_notify() override ;
 
@@ -43,6 +43,7 @@ namespace kungfu
             void deregister_app(int64_t trigger_time, uint32_t app_location_uid);
 
             void publish_time(int32_t msg_type, int64_t nanotime);
+
             void send_time(uint32_t dest, int32_t msg_type, int64_t nanotime);
 
         protected:

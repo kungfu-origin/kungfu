@@ -58,9 +58,7 @@ namespace kungfu
 
             ~nanomsg_publisher() override
             {
-                SPDLOG_DEBUG("publisher closing");
                 socket_.close();
-                SPDLOG_DEBUG("publisher closed");
             }
 
             void init(const io_device &io)
@@ -133,9 +131,7 @@ namespace kungfu
 
             virtual ~nanomsg_observer()
             {
-                SPDLOG_DEBUG("observer closing");
                 socket_.close();
-                SPDLOG_DEBUG("observer closed");
             }
 
             bool wait() override

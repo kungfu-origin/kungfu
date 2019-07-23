@@ -49,7 +49,7 @@ class Master(pyyjj.master):
         self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def on_exit(self):
-        self.ctx.logger.info('kungfu master stopping')
+        self.ctx.logger.info('master checking on exit')
 
         for pid in self.ctx.apprentices:
             apprentice = self.ctx.apprentices[pid]['process']
@@ -77,4 +77,4 @@ class Master(pyyjj.master):
                 self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
                 apprentice.kill()
 
-        self.ctx.logger.info('kungfu master stopped')
+        self.ctx.logger.info('master cleaned up')

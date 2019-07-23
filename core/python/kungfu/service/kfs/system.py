@@ -14,7 +14,7 @@ def register(ctx, event):
     name = data['name']
     location = pyyjj.location(mode, category, group, name, ctx.locator)
     pid = data['pid']
-    ctx.logger.info('apprentice %s %d checking in', location.uname, pid)
+    ctx.logger.info('app %s %d checking in', location.uname, pid)
     if pid not in ctx.apprentices:
         ctx.apprentices[pid] = {
             'process': psutil.Process(pid),
@@ -25,7 +25,7 @@ def register(ctx, event):
 @kfs.on(msg.Deregister)
 def deregister(ctx, event):
     pid = event['pid']
-    ctx.logger.info('apprentice %s checking out', pid)
+    ctx.logger.info('app %d checking out', pid)
     ctx.master.deregister_app(event['gen_time'], ctx.apprentices[pid]['location'].uid)
 
 
@@ -33,6 +33,6 @@ def deregister(ctx, event):
 def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
-            ctx.logger.warn('cleaning up stale process pid %s clients %s', pid, ctx.apprentices[pid]['location'].uname)
+            ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['location'].uname, pid)
             ctx.master.deregister_app(pyyjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
             del ctx.apprentices[pid]

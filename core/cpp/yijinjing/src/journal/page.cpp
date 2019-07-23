@@ -73,8 +73,8 @@ namespace kungfu
 
                 if (header->version != __JOURNAL_VERSION__)
                 {
-                    throw journal_error(
-                            fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, header->version));
+                    throw journal_error(fmt::format("version mismatch for page {}, required {}, found {}",
+                                                    path, __JOURNAL_VERSION__, header->version));
                 }
                 if (header->page_header_length != sizeof(page_header))
                 {
@@ -110,7 +110,6 @@ namespace kungfu
                     page_ptr page = page::load(location, dest_id, page_ids[i], false, true);
                     if (page->begin_time() < time)
                     {
-                        SPDLOG_INFO("found page [{}] begin time {}", page_ids[i], time::strftime(page->begin_time()));
                         return page_ids[i];
                     }
                 }

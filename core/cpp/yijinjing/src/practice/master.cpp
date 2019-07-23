@@ -34,7 +34,7 @@ namespace kungfu
             get_io_device()->get_publisher()->notify();
         }
 
-        void master::register_app(const event_ptr& e)
+        void master::register_app(const event_ptr &e)
         {
             auto request_loc = e->data<nlohmann::json>();
             auto app_location = std::make_shared<location>(
@@ -43,57 +43,57 @@ namespace kungfu
                     request_loc["group"], request_loc["name"],
                     get_io_device()->get_home()->locator
             );
+
             if (has_location(app_location->uid))
             {
                 SPDLOG_ERROR("location {} has already been registered", app_location->uname);
-            } else
-            {
-                auto now = time::now_in_nano();
-                auto uid_str = fmt::format("{:08x}", app_location->uid);
-                auto home = get_io_device()->get_home();
-                if (app_locations_.find(app_location->uid) == app_locations_.end())
-                {
-                    auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-                    register_location(e->gen_time(), master_location);
-                    app_locations_[app_location->uid] = master_location->uid;
-                }
-
-                register_location(e->gen_time(), app_location);
-
-                auto master_location = get_location(app_locations_[app_location->uid]);
-                auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
-                writers_[app_location->uid] = writer;
-
-                {
-                    auto msg = request_loc.dump();
-                    auto frame = writers_[0]->open_frame(e->gen_time(), msg::type::Register, msg.length());
-                    SPDLOG_DEBUG("register to {}/{} location {}", writers_[0]->get_location()->uname, writers_[0]->get_dest(), msg);
-                    memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
-                    writers_[0]->close_frame(msg.length());
-                }
-
-                reader_->join(app_location, 0, now);
-                require_write_to(app_location->uid, e->gen_time(), 0);
-
-                reader_->join(app_location, master_location->uid, now);
-                require_write_to(app_location->uid, e->gen_time(), master_location->uid);
-
-                for (const auto &item : locations_)
-                {
-                    nlohmann::json location;
-                    location["mode"] = item.second->mode;
-                    location["category"] = item.second->category;
-                    location["group"] = item.second->group;
-                    location["name"] = item.second->name;
-                    auto msg = location.dump();
-                    auto frame = writer->open_frame(e->gen_time(), msg::type::Location, msg.length());
-                    SPDLOG_DEBUG("adding location {}", msg);
-                    memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
-                    writer->close_frame(msg.length());
-                }
-
-                writer->mark(e->gen_time(), msg::type::RequestStart);
+                return;
             }
+
+            auto now = time::now_in_nano();
+            auto uid_str = fmt::format("{:08x}", app_location->uid);
+            auto home = get_io_device()->get_home();
+
+            if (app_locations_.find(app_location->uid) == app_locations_.end())
+            {
+                auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+                register_location(e->gen_time(), master_location);
+                app_locations_[app_location->uid] = master_location->uid;
+            }
+
+            register_location(e->gen_time(), app_location);
+
+            auto master_location = get_location(app_locations_[app_location->uid]);
+            auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
+            writers_[app_location->uid] = writer;
+
+            {
+                auto msg = request_loc.dump();
+                auto frame = writers_[0]->open_frame(e->gen_time(), msg::type::Register, msg.length());
+                memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
+                writers_[0]->close_frame(msg.length());
+            }
+
+            reader_->join(app_location, 0, now);
+            require_write_to(app_location->uid, e->gen_time(), 0);
+            reader_->join(app_location, master_location->uid, now);
+            require_write_to(app_location->uid, e->gen_time(), master_location->uid);
+
+            for (const auto &item : locations_)
+            {
+                nlohmann::json location;
+                location["mode"] = item.second->mode;
+                location["category"] = item.second->category;
+                location["group"] = item.second->group;
+                location["name"] = item.second->name;
+                auto msg = location.dump();
+                auto frame = writer->open_frame(e->gen_time(), msg::type::Location, msg.length());
+                SPDLOG_DEBUG("adding location {}", msg);
+                memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
+                writer->close_frame(msg.length());
+            }
+
+            writer->mark(e->gen_time(), msg::type::RequestStart);
         }
 
         void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
@@ -135,9 +135,9 @@ namespace kungfu
                     if (task.checkpoint <= now)
                     {
                         writers_[app_id]->mark(0, msg::type::Time);
+                        SPDLOG_DEBUG("sent time event to {}", get_location(app_id)->uname);
                         task.checkpoint += task.duration;
                         task.repeat_count++;
-                        SPDLOG_TRACE("sent time event to {}", get_location(app_id)->uname);
                         if (task.repeat_count >= task.repeat_limit)
                         {
                             it = app_tasks.erase(it);
@@ -181,9 +181,9 @@ namespace kungfu
               });
 
             events_ | filter([&](event_ptr e)
-                            {
-                                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
-                            }) |
+                             {
+                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+                             }) |
             $([&](event_ptr e)
               {
                   const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
@@ -218,8 +218,7 @@ namespace kungfu
                   task.duration = request.duration;
                   task.repeat_count = 0;
                   task.repeat_limit = request.repeat;
-                  SPDLOG_DEBUG("time request from {} duration {} repeat {}, next checkpoint {}",
-                          get_location(e->source())->uname, request.duration, request.repeat, time::strftime(task.checkpoint));
+                  SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
               });
 
             events_ |
