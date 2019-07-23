@@ -310,7 +310,7 @@ function buildListByLineNum(num: number): any {
  * @param  {path} logPath
  * @param  {string} searchKeyword
  */
-export const getLog = (logPath: string, searchKeyword: string): Promise<{}> => {
+export const getLog = (logPath: string, searchKeyword: string): Promise<any> => {
     const numList: any = buildListByLineNum(201);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
@@ -325,7 +325,9 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<{}> => {
             })
 
             lineReader.on('line', line => {
+                console.log(line)
                 const messageData = dealLogMessage(line, searchKeyword)
+                console.log(messageData, '----------------')
                 if(!messageData) return;
                 messageData.forEach((msg: LogMessageData): void => {
                     if(!msg) return;
@@ -357,6 +359,7 @@ export const buildDateRange = (dateRange: string[], tradingDay: string, addTime 
 }
 
 // ========================== 交易数据处理 start ===========================
+
 export const dealOrder = (item: any): OrderData => {
     return Object.freeze({
         id: item.order_id.toString() + '_' + item.account_id.toString(),

@@ -139,8 +139,7 @@ export default {
                 case MSG_TYPE.portfolio:
                     if(accountId !== currentId) return;
                     if(ledgerCategory !== 0) return;
-                    t.minPnlFromNmsg = Object.freeze(tradingData);
-                    
+                    t.minPnlFromNmsg = Object.freeze(tradingData);     
             }
         })
     },

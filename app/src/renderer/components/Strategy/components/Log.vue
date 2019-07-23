@@ -165,7 +165,7 @@ export default {
         getLogByTask(logPath, searchKeyword){
             const t = this;
             return new Promise((resolve, reject) => {
-                t.$utils.buildTask('getStrategyLog', BrowserWindow.getFocusedWindow(), BrowserWindow).then(({win, curWinId}) => {
+                t.$utils.buildTask('getStrategyLog', BrowserWindow.getFocusedWindow(), BrowserWindow).then(({ win, curWinId }) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,
                         logPath,
