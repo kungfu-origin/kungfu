@@ -2,12 +2,9 @@
     <div class="main-header">
         <div>
             <div class="container-logo">
-                <!-- <i class="iconfont tr-LOGO-1"></i> -->
                 <img width="64" height="50" src="../../../assets/img/LOGO.svg"/>
             </div>
             <div class="logo-name">
-                <!-- KungFu -->
-                <!-- <img src="../../../assets/img/logo.png"/> -->
                 <i class="iconfont tr-logo1"></i>
             </div>
         </div>

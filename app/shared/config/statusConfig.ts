@@ -10,11 +10,11 @@ interface StatusConfig {
 }
 
 export const statusConfig: StatusConfig = { 
-    online:    { name: '运行中', color: 'bg-green', level: 1 },
-    stopping:  { name: '停止中', color: 'bg-gray', level: 0 },
-    stopped:   { name: '已停止', color: 'bg-gray', level: 0 },
-    launching: { name: '启动中', color: 'bg-gray', level: 0 },
-    errored:   { name: '错误', color: 'bg-red', level: -1 },
+    'online':    { name: '运行中', color: 'bg-green', level: 1 },
+    'stopping':  { name: '停止中', color: 'bg-gray', level: 0 },
+    'stopped':   { name: '已停止', color: 'bg-gray', level: 0 },
+    'launching': { name: '启动中', color: 'bg-gray', level: 0 },
+    'errored':   { name: '错误', color: 'bg-red', level: -1 },
     '1':   { name: '无数据', color: 'bg-gray', level: 0 },
     '2':   { name: '断开', color: 'bg-red', level: -1 },
     '3':   { name: '连接', color: 'tr-dot-wave', level: 1 },

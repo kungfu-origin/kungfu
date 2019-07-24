@@ -33,6 +33,10 @@
         <el-footer height="30px">
             <div class="footer-content">
                 <tr-footer-item class="fr">
+                    <CoreStatus></CoreStatus>
+                </tr-footer-item>
+             
+                <tr-footer-item class="fr">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
             </div>
@@ -45,6 +49,7 @@
 import {deepClone} from '__gUtils/busiUtils';
 import {mapState, mapGetters} from 'vuex';
 import EngineStatus from './components/EngineStatus';
+import CoreStatus from './components/CoreStatus';
 import MainHeader from './components/MainHeader';
 
 export default {
@@ -64,19 +69,14 @@ export default {
 
     components: {
         EngineStatus,
-        MainHeader
+        MainHeader,
+        CoreStatus
     },
 
     computed:{
         ...mapState({
             tradeLogVisible: state => state.BASE.tradeLogVisible
-        }),
-        ...mapGetters({
-        }),
-        
-        //当没有柜台的时候，不显示
-        showEngines() {
-        }
+        })
     },
 
     methods:{
@@ -87,11 +87,5 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/layout.scss';
 @import '@/assets/scss/skin.scss';
-// .title-bar{
-//     height: 24px;
-//     line-height: 24px;
-//     background: $bg;
-//     border-bottom: 1px solid $bg_dark;
-// }
 </style>
 

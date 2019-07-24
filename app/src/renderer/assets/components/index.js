@@ -65,12 +65,13 @@ export default function (Vue) {
 
     //message 换
     const Message = {
-        error: function(message){
+        error: function(message, duration){
             Vue.notify({
                 title: '错误',
                 message: message,
                 position: "bottom-right",
-                type: 'error'
+                type: 'error',
+                duration: duration === 0 ? 0 : 4500
             })
         },
         warning: function(message){

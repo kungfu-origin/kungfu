@@ -185,6 +185,7 @@ export default {
         }
         .account-status{
             font-size: 14px;
+            padding: 3px 0;
             .account-process-item{
                 display: inline-block;
                 width: 80px;

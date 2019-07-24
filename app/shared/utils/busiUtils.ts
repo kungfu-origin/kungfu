@@ -325,9 +325,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
             })
 
             lineReader.on('line', line => {
-                console.log(line)
                 const messageData = dealLogMessage(line, searchKeyword)
-                console.log(messageData, '----------------')
                 if(!messageData) return;
                 messageData.forEach((msg: LogMessageData): void => {
                     if(!msg) return;

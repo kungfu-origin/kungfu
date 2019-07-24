@@ -57,7 +57,6 @@ Vue.notify =  Vue.prototype.$notify = Notification;
 //tr的
 Vue.use(Components)
 
-
 //moment 格式
 Vue.filter('moment', function (value, formatString) {
     formatString = formatString || 'YYYY-MM-DD HH:mm:ss';
@@ -112,5 +111,4 @@ function startAutoUpdate(){
 
 window.fileId = 0;
 
-console.log(process.version)
 
