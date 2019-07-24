@@ -173,9 +173,10 @@ export default {
 }
 .account-status-content{
     max-width: 300px;
+    font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     .account-item{
         float: left;
-        width: 290px;
+        width: 295px;
         margin: 10px;
         .type-name{
             font-size: 16px;

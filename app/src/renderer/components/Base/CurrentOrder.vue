@@ -125,7 +125,7 @@ export default {
                 label: "开平",
                 prop: "offset",
             },{
-                type: "text",
+                type: "number",
                 label: "委托价",
                 prop: "limitPrice",
             },{

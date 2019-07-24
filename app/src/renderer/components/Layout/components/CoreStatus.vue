@@ -9,7 +9,7 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item core-process-title text-overflow" title="主进程">
-                        主进程  <el-tag type="danger">master</el-tag>
+                        主进程  <el-tag type="warning">master</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 81px;">
                         <tr-status 
@@ -22,7 +22,7 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item  core-process-title text-overflow" title="数据进程">
-                        数据进程
+                        数据进程 <el-tag>watcher</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 81px;">
                         <tr-status 
@@ -98,13 +98,14 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
 .core-status-popover{
-    box-shadow: 0px 0px 30px $bg
+    box-shadow: 0px 0px 30px $bg;
 }
 .core-status-content{
-    max-width: 250px;
+    font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+    max-width: 255px;
     .core-item{
         float: left;
-        width: 245px;
+        width: 250px;
         margin: 10px;
         .type-name{
             font-size: 16px;

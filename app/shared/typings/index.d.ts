@@ -32,7 +32,7 @@ interface OrderData {
     instrumentId: string;
     side: string;
     offset: string;
-    limitPrice: number;
+    limitPrice: string;
     volumeTraded: string;
     statusName: string;
     status: string;
@@ -46,31 +46,31 @@ interface PosData {
     id: string;
     instrumentId: string;
     direction: string;
-    yesterdayVolume: number;
-    todayVolume: number;
-    openPrice: number | string;
-    lastPrice: number | string;
-    unRealizedPnl: number | string;
+    yesterdayVolume: string;
+    todayVolume: string;
+    openPrice: string;
+    lastPrice: string;
+    unRealizedPnl: string;
 }
 
 interface PosInputData {
     instrument_id: string;
-    direction: string;
-    yesterday_volume: number;
-    volume: number;
-    last_price: number;
-    margin: number;
+    direction: number;
+    yesterday_volume: string;
+    volume: string;
+    last_price: string;
+    margin: string;
     [propName: string]: any;
 }
 
 interface TradeData {
     id: string;
-    tradeTime: string;
     instrumentId: string;
+    tradeTime: string;
     side: string;
     offset: string;
-    price: number;
-    volume: number;
+    price: string;
+    volume: string;
     clientId: string;
     accountId: string;
 }
@@ -83,8 +83,8 @@ interface TradeInputData {
     trade_time: number;
     offset: number;
     side: number;
-    price: number;
-    volume: number;
+    price: string;
+    volume: string;
     [propName: string]: any;
 }
 

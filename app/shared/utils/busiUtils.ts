@@ -63,18 +63,19 @@ export const deepClone = <T>(obj: T): T => {
  
 //保留几位数据
 //(数据，保留位数，结果乘几个10，类型)
-export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): number => {
+export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): string => {
     if(num === null) num = 0;
-    if(isNaN(parseFloat(num.toString()))) return NaN; //如果为转换后为NaN,返回空
+    if(isNaN(parseFloat(num.toString()))) return ''; //如果为转换后为NaN,返回空
     //如果存在科学计数法的数据则返回不做处理
-    if(num.toString().indexOf('e') != -1) return +num.toExponential(2)
+    if(num.toString().indexOf('e') != -1) return new Number(num).toExponential(2)
     const multiplyNum: number = Math.pow(10, multiply);
     let floatNum = parseFloat(num.toString());
     const digitNum: number = Math.pow(10, digit);
     // @ts-ignore
     const mathFunc = Math[type]
     floatNum = mathFunc(floatNum * digitNum) / (digitNum / multiplyNum);
-    return floatNum;
+    // const fixedNum: number = pa
+    return new Number(floatNum).toFixed(2)
 }
 
 /**
@@ -390,8 +391,8 @@ export const dealPos = (item: any): PosData => {
         yesterdayVolume: toDecimal(item.yesterday_volume),
         todayVolume: toDecimal(item.volume - item.yesterday_volume),
         totalVolume: toDecimal(item.volume),
-        openPrice: +toDecimal(item.open_price) || '--',
-        lastPrice: +toDecimal(item.last_price) || '--',
+        openPrice: toDecimal(item.open_price) || '--',
+        lastPrice: toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
 }
@@ -399,12 +400,12 @@ export const dealPos = (item: any): PosData => {
 export const dealTrade = (item: TradeInputData): TradeData => {
     return {
         id: item.account_id.toString() + '_' + item.trade_id.toString() + '_' + item.trade_time.toString(),
-        tradeTime: item.trade_time && moment(item.trade_time/1000000).format('YYYY-MM-DD HH:mm:ss'),
+        tradeTime: item.trade_time && moment(+item.trade_time / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],
-        price: item.price,
-        volume: item.volume,
+        price: toDecimal(+item.price),
+        volume: toDecimal(+item.volume),
         clientId: item.client_id,
         accountId: item.account_id
     }     

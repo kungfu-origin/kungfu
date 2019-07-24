@@ -10,7 +10,8 @@
 */
 body {
     color: $font;
-    font-family: 'HanHei SC', 'PingFang SC',"Microsoft YaHei" ;
+    // font-family: 'HanHei SC', 'PingFang SC',"Microsoft YaHei" ;
+    font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     font-size: 14px;
     direction: ltr;
     -webkit-text-size-adjust: 100%;

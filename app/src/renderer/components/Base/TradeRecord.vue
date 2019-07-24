@@ -98,11 +98,11 @@ export default {
                 label: '开平',
                 prop: 'offset',
             },{
-                type: 'text',
+                type: 'number',
                 label: '成交价',
                 prop: 'price',
             },{
-                type: 'text',
+                type: 'number',
                 label: '成交量',
                 prop: 'volume',
             },{

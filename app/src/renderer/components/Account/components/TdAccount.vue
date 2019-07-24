@@ -65,6 +65,7 @@
                 <el-table-column
                     label="实现盈亏"
                     show-overflow-tooltip
+                    align="right"
                     >
                     <template slot-scope="props">
                         <span :class="{
@@ -78,6 +79,7 @@
                 <el-table-column
                     label="浮动盈亏"
                     show-overflow-tooltip
+                    align="right"
                     >
                     <template slot-scope="props">
                         <span :class="{
@@ -91,6 +93,7 @@
                 <el-table-column
                     label="市值/保证金"
                     show-overflow-tooltip
+                    align="right"
                     >
                     <template slot-scope="props" >
                         <template v-if="(config[props.row.source_name] || {}).typeName == 'future'">
@@ -105,6 +108,7 @@
                 <el-table-column
                     label="可用资金"
                     show-overflow-tooltip
+                    align="right"
                     >
                         <template slot-scope="props">
                         {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).avail) + '' || '--'}}
@@ -113,7 +117,7 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="100"
+                    min-width="140"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
