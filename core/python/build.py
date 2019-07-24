@@ -51,14 +51,14 @@ def package(ctx):
     osname = platform.system()
 
     if osname == 'Linux':
-        subprocess.Popen(' '.join(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec'])).wait()
+        subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
     if osname == 'Darwin':
-        subprocess.Popen(' '.join(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec'])).wait()
+        subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
         os.chdir('build/kfc')
         os.rename('.Python', 'Python')
         os.symlink('Python', '.Python')
     if osname == 'Windows':
-        subprocess.Popen(' '.join(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec'])).wait()
+        subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait()
 
 
 def find(tool):
