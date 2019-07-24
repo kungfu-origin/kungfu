@@ -77,8 +77,10 @@ export default {
                 return 'color-gray'
             }
             if(!ifProcessRunning('master', t.processStatus) || !ifProcessRunning('watcher', t.processStatus)){
-                !t.errControllert && t.$message.error('主进程断开，不可交易，请重启应用！', 0)
-                t.errController = true;
+                if(!t.errController) {
+                    t.$message.error('主进程断开，不可交易，请重启应用！', 0)
+                    t.errController = true;                
+                }
                 return 'color-red'
             }
             return 'color-green'
