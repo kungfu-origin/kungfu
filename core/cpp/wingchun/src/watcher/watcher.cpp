@@ -176,8 +176,15 @@ namespace kungfu
             $([&](event_ptr event)
               {
                   // let python do the actual job, we just operate the I/O part
-                  std::string response = handle_request(event->to_string());
-                  get_io_device()->get_rep_sock()->send(response);
+                  try
+                  {
+                      std::string response = handle_request(event->to_string());
+                      get_io_device()->get_rep_sock()->send(response);
+                  }
+                  catch (const std::exception & e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
               });
 
             /**
@@ -186,20 +193,34 @@ namespace kungfu
             events_ | is(msg::type::Quote) |
             $([&](event_ptr event)
               {
-                  on_quote(event, event->data<Quote>());
+                  try
+                  { on_quote(event, event->data<Quote>()); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
               });
 
             events_ | is(msg::type::Order) |
             $([&](event_ptr event)
               {
-                  SPDLOG_INFO("hanlde order from {} {:08x}", get_location(event->source())->uname, get_location(event->source())->uid);
-                  on_order(event, event->data<Order>());
+                  try
+                  { on_order(event, event->data<Order>()); }
+                  catch (const std::exception & e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
               });
 
             events_ | is(msg::type::Trade) |
             $([&](event_ptr event)
               {
-                  on_trade(event, event->data<Trade>());
+                  try
+                  { on_trade(event, event->data<Trade>()); }
+                  catch (const std::exception & e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
               });
 
             events_ | is(msg::type::AssetInfo) |
@@ -217,7 +238,12 @@ namespace kungfu
             events_ | is(msg::type::PositionEnd) |
             $([&](event_ptr event)
               {
-                  on_assets(asset_info_, position_buffer_);
+                  try
+                  { on_assets(asset_info_, position_buffer_); }
+                  catch (const std::exception & e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
                   position_buffer_.clear();
                   memset(&asset_info_, 0, sizeof(asset_info_));
               });

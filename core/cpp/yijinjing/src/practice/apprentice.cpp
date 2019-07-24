@@ -63,7 +63,12 @@ namespace kungfu
             events_ | timer(nanotime) |
             $([&, callback](event_ptr e)
               {
-                  callback(e);
+                  try
+                  { callback(e); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
+                  }
               });
         }
 
@@ -72,7 +77,12 @@ namespace kungfu
             events_ | time_interval(std::chrono::nanoseconds(duration)) |
             $([&, callback](event_ptr e)
               {
-                  callback(e);
+                  try
+                  { callback(e); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what());
+                  }
               });
         }
 
