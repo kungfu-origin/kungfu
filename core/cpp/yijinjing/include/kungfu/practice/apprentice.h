@@ -199,6 +199,7 @@ namespace kungfu
             void checkin();
 
             void register_location_from_event(const yijinjing::event_ptr &event);
+            void deregister_location_from_event(const yijinjing::event_ptr &event);
         };
 
         DECLARE_PTR(apprentice)

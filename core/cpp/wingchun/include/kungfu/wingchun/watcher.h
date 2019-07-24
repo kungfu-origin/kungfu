@@ -33,7 +33,7 @@ namespace kungfu
 
             virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
 
-            virtual void on_assets(const msg::data::AssetInfo& info, const std::vector<msg::data::Position>& positions) = 0;
+            virtual void on_assets(const msg::data::AssetInfo &info, const std::vector<msg::data::Position> &positions) = 0;
 
             virtual void pre_start() = 0;
 
@@ -51,14 +51,14 @@ namespace kungfu
 
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;
-
             std::unordered_map<std::string, int> accounts_;
-
-            void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
-
             msg::data::AssetInfo asset_info_;
             std::vector<msg::data::Position> position_buffer_;
 
+            void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
+
+            void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);
+            void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
         };
     }
 }

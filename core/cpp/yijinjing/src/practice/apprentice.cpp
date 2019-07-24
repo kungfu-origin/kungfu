@@ -58,16 +58,16 @@ namespace kungfu
             require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
         }
 
-        void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)>& callback)
+        void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback)
         {
             events_ | timer(nanotime) |
             $([&, callback](event_ptr e)
-            {
-                callback(e);
-            });
+              {
+                  callback(e);
+              });
         }
 
-        void apprentice::add_time_interval(int64_t duration, const std::function<void(event_ptr)>& callback)
+        void apprentice::add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback)
         {
             events_ | time_interval(std::chrono::nanoseconds(duration)) |
             $([&, callback](event_ptr e)
@@ -133,9 +133,7 @@ namespace kungfu
             events_ | is(msg::type::Deregister) |
             $([&](event_ptr e)
               {
-                  reader_->disjoin(e->source());
-                  writers_.erase(e->source());
-                  deregister_location(e->gen_time(), e->source());
+                  deregister_location_from_event(e);
               });
 
             events_ | is(msg::type::RequestWriteTo) |
@@ -145,9 +143,9 @@ namespace kungfu
               });
 
             events_ | filter([&](event_ptr e)
-                            {
-                                return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
-                            }) |
+                             {
+                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+                             }) |
             $([&](event_ptr e)
               {
                   on_read_from(e);
@@ -242,6 +240,18 @@ namespace kungfu
                     get_io_device()->get_home()->locator
             );
             register_location(event->trigger_time(), app_location);
+        }
+
+        void apprentice::deregister_location_from_event(const yijinjing::event_ptr &event)
+        {
+            const char *buffer = &(event->data<char>());
+            std::string json_str{};
+            json_str.assign(buffer, event->data_length());
+            nlohmann::json location_json = nlohmann::json::parse(json_str);
+            uint32_t location_uid = location_json["uid"];
+            reader_->disjoin(location_uid);
+            writers_.erase(location_uid);
+            deregister_location(event->trigger_time(), location_uid);
         }
     }
 }

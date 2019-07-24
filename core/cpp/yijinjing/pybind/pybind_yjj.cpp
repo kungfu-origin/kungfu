@@ -280,7 +280,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("seek_to_time", &reader::seek_to_time)
             .def("data_available", &reader::data_available)
             .def("next", &reader::next)
-            .def("join", &reader::join);
+            .def("join", &reader::join)
+            .def("disjoin", &reader::disjoin);
 
     py::class_<writer, writer_ptr>(m, "writer")
             .def("write_raw", &writer::write_raw);

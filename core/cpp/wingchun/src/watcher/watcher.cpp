@@ -70,16 +70,7 @@ namespace kungfu
                 {
                     watch(trigger_time, app_location);
                     publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
-
-                    uint32_t md_source_id = app_location->uid;
-                    events_ | from(app_location->uid) | is(msg::type::Quote) | timeout(std::chrono::seconds(30)) |
-                    $([&](event_ptr e)
-                      {},
-                      [&, md_source_id](std::exception_ptr e)
-                      {
-                          auto md_location = get_location(md_source_id);
-                          publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Idle);
-                      });
+                    monitor_market_data(trigger_time, app_location->uid);
                     break;
                 }
                 case category::TD:
@@ -238,6 +229,28 @@ namespace kungfu
             auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
             reader_->join(master_cmd_location, app_location->uid, trigger_time);
             reader_->join(app_location, 0, trigger_time);
+        }
+
+        void Watcher::monitor_market_data(int64_t trigger_time, uint32_t md_location_uid)
+        {
+            events_ | from(md_location_uid) | is(msg::type::Quote) | first() |
+            $([&, trigger_time, md_location_uid](event_ptr event)
+              {
+                  alert_market_data(trigger_time, md_location_uid);
+              });
+        }
+
+        void Watcher::alert_market_data(int64_t trigger_time, uint32_t md_location_uid)
+        {
+            events_ | from(md_location_uid) | is(msg::type::Quote) | timeout(std::chrono::seconds(5)) |
+            $([&](event_ptr e)
+              {},
+              [&, trigger_time, md_location_uid](std::exception_ptr e)
+              {
+                  auto md_location = get_location(md_location_uid);
+                  publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Idle);
+                  monitor_market_data(trigger_time, md_location_uid);
+              });
         }
     }
 }

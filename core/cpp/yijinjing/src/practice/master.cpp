@@ -98,16 +98,23 @@ namespace kungfu
 
         void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
         {
+            auto location = get_location(app_location_uid);
+            nlohmann::json location_desc{};
+            location_desc["mode"] = location->mode;
+            location_desc["category"] = location->category;
+            location_desc["group"] = location->group;
+            location_desc["name"] = location->name;
+            location_desc["uname"] = location->uname;
+            location_desc["uid"] = app_location_uid;
+
             deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
             timer_tasks_.erase(app_location_uid);
-            nlohmann::json msg{};
-            auto now = time::now_in_nano();
-            msg["gen_time"] = now;
-            msg["trigger_time"] = now;
-            msg["msg_type"] = msg::type::Deregister;
-            msg["source"] = app_location_uid;
-            get_io_device()->get_publisher()->publish(msg.dump());
+
+            auto msg = location_desc.dump();
+            auto frame = writers_[0]->open_frame(trigger_time, msg::type::Deregister, msg.length());
+            memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
+            writers_[0]->close_frame(msg.length());
         }
 
         void master::publish_time(int32_t msg_type, int64_t nanotime)
