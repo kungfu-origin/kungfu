@@ -320,11 +320,11 @@ p.el-select-dropdown__empty{
 }
 .el-table{
     background: $bg_card;
-    // font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     .cell{
         transform: translateZ(0);
         white-space: nowrap;
         line-height: 25px;
+        font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     }
     th{
         background: $tab_header; //头部的颜色
