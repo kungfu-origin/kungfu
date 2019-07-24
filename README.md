@@ -112,19 +112,17 @@ $ yarn clean
 
 功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/v3.12/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
 ```
-$ npm config set kungfu-core:cmakejsopt "debug"
+$ npm config set kungfu-core:buildtype "Debug"
 ```
 
 执行以下命令恢复 Release 模式：
 ```
-$ npm config delete kungfu-core:cmakejsopt
+$ npm config set kungfu-core:buildtype "Release"
 ```
-
-更多可选设置请参考 [CMake.js Options](https://www.npmjs.com/package/cmake-js)。
 
 切换编译模式后，需要执行以下命令重新生成配置文件：
 ```
-$ yarn workspace kungfu-core run config
+$ yarn workspace kungfu-core run configure
 ```
 
 

@@ -3,6 +3,7 @@ import click
 import kungfu.yijinjing.journal as kfj
 import pyyjj
 
+
 @click.group(invoke_without_command=True)
 @click.option('-H', '--home', type=str, required=True, help='kungfu home folder')
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
@@ -31,6 +32,7 @@ def pass_ctx_from_parent(ctx):
     ctx.locator = ctx.parent.locator
     ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name
+
 
 def execute():
     kfc(auto_envvar_prefix='KF')

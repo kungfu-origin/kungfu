@@ -9,7 +9,7 @@ a = Analysis(['kungfu/__main__.py'],
      pathex=['python'],
      binaries=[],
      datas=[
-        ('../build/' + os.environ['CMAKEBUILDTYPE'] + '/*', '.'),
+        ('../build/' + os.environ['CMAKE_BUILD_TYPE'] + '/*', '.'),
         ('extensions', 'extensions'),
         ('../build/build_extensions', 'extensions'),
         ('../cpp/yijinjing/include', 'include'),
