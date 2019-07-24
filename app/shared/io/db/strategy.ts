@@ -68,7 +68,7 @@ export const getStrategyOrder = async(strategyId: string, {id, dateRange}: Tradi
         ` AND insert_time >= ${filterDate[0]}` + 
         ` AND insert_time < ${filterDate[1]}` +
         (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
-        ` ORDER BY insert_time`
+        ` ORDER BY insert_time DESC`
     )
 }
 
@@ -90,7 +90,7 @@ export const getStrategyTrade = async(strategyId: string, { id, dateRange }: Tra
         ` AND instrument_id LIKE '%${id}%'` + //有id筛选的时候
         ` AND trade_time >= ${filterDate[0]}` + 
         ` AND trade_time < ${filterDate[1]}` +
-        ` ORDER BY trade_time`
+        ` ORDER BY trade_time DESC`
     )
 }
 

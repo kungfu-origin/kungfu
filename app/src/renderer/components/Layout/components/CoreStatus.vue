@@ -73,7 +73,7 @@ export default {
 
         currentStatus(){
             const t = this;
-            if(t.processStatus['master'] === undefined && t.processStatus['watcher'] === undefined){
+            if(t.processStatus === null){
                 return 'color-gray'
             }
             if(!ifProcessRunning('master', t.processStatus) || !ifProcessRunning('watcher', t.processStatus)){
