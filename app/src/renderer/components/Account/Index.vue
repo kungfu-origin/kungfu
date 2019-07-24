@@ -70,7 +70,7 @@ import MdAccount from './components/MdAccount';
 import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
-import Pnl from '../Base/pnl';
+import Pnl from '../Base/pnl/Index';
 import { sourceType } from '__gConfig/accountConfig';
 import * as ACCOUNT_API from '__io/db/account';
 import { debounce } from '__gUtils/busiUtils';

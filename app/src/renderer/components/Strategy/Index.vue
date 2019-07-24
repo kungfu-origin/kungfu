@@ -62,7 +62,7 @@ import Log from './components/Log';
 import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
-import Pnl from '../Base/pnl';
+import Pnl from '../Base/pnl/Index';
 import { mapState, mapGetters } from 'vuex';
 import * as STRATEGY_API from '__io/db/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
