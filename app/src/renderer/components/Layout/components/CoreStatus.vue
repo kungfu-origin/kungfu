@@ -17,9 +17,6 @@
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <!-- <span class="core-process-item status-switch" @click.stop>
-                        <el-switch :value="$utils.ifProcessRunning('md_' + accountItem.source_name, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
-                    </span> -->
                 </div>
             </div>
             <div class="core-item" >
@@ -33,9 +30,6 @@
                         :value="buildState('watcher')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <!-- <span class="core-process-item status-switch" @click.stop>
-                        <el-switch :value="$utils.ifProcessRunning('md_' + accountItem.source_name, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
-                    </span> -->
                 </div>
             </div>
         </div>
@@ -58,6 +52,7 @@ export default {
         Object.keys(statusConfig || {}).map(key => {
             statusLevel[key] = statusConfig[key].level;
         })
+        this.errController = false;
         return {
             config: sourceType,
             statusLevel
@@ -82,7 +77,8 @@ export default {
                 return 'color-gray'
             }
             if(!ifProcessRunning('master', t.processStatus) || !ifProcessRunning('watcher', t.processStatus)){
-                t.$message.error('主进程断开，不可交易，请重启应用！', 0)
+                !t.errControllert && t.$message.error('主进程断开，不可交易，请重启应用！', 0)
+                t.errController = true;
                 return 'color-red'
             }
             return 'color-green'
