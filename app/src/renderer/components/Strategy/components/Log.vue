@@ -195,7 +195,7 @@ export default {
                 useWatchFile: platform === 'mac',
                 follow: true,
             });   
-            t.tailObserver.watch();    
+            t.tailObserver.watch();  
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
                 if(curProcId !== processId) return;
@@ -203,9 +203,9 @@ export default {
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
                     t.tableData = t.pushTableData(logList);
+                    if(t.ifScrollToBottom) t.scrollToBottom()
                 })
                 throttleClearLog()
-                if(t.ifScrollToBottom) t.scrollToBottom()
             })(processId, searchKeyword))
 
             t.tailObserver.on('error', err => {
@@ -249,7 +249,6 @@ export default {
         //加载完数据
         scrollToBottom: throttle(function() {
             const t = this;
-            if(!t.$refs['logTable']) return;
             const $logTable = t.$refs['logTable'];
             if(!$logTable) return;
             t.$nextTick().then(() => { 

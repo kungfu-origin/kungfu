@@ -83,22 +83,25 @@ export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): num
  * @param {number} interval 执行频率，默认为300
  */
 export const debounce = (fn: Function, interval = 300): Function => {
-    let timeout: NodeJS.Timer;
+    let timeout: NodeJS.Timer | null;
     return function() {
         //@ts-ignore
         const t: any = this;
         const args: any = arguments;
         timeout && clearTimeout(timeout);
+        timeout = null;
         timeout = setTimeout(() => {
             if(!timeout) return;
             fn.apply(t, args);
+            timeout && clearTimeout(timeout);
+            timeout = null;
         }, interval);
     }
 }
 
 export const throttleInsert = (interval = 300, type = 'push'): Function => {
     let streamList: any = [];
-    let timer: NodeJS.Timer;
+    let timer: NodeJS.Timer | null;
     return (data: any) => {
         return new Promise((resolve) => {
             if(type === 'push'){
@@ -108,7 +111,6 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
                 if(data instanceof Array) streamList = [...data, ...streamList]
                 else if(data) streamList.unshift(data)
             }
-            
             if(timer) {
                 resolve(false)
                 return;
@@ -117,21 +119,23 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
                 resolve(streamList)
                 streamList = []
                 timer && clearTimeout(timer)
+                timer = null;
             }, interval)
         })
     }
 }
 
-export const throttle = (fn: Function, interval=300): Function => {
-    let timer: NodeJS.Timer;
+export const throttle = (fn: Function, interval = 300): Function => {
+    let timer: NodeJS.Timer | null;
     return function(){
-        if(timer !== null) return 
+        if(timer) return 
         //@ts-ignore
         const t: any = this;
         const args: any = arguments;
         timer = setTimeout(() => {
             fn.apply(t, args);
-            clearTimeout(timer)
+            timer && clearTimeout(timer)
+            timer = null
         }, interval)
     }
 }
