@@ -29,7 +29,7 @@ def build(ctx, log_level, build_type, arch, runtime, node_version, electron_vers
 @click.pass_context
 def configure(ctx):
     set_cmake_var(ctx)
-    cmake_configure = ['cmake-js', 'configure', '--debug' if ctx.parent.build_type == 'Debug' else '',
+    cmake_configure = [find('yarn'), 'cmake-js', 'configure', '--debug' if ctx.parent.build_type == 'Debug' else '',
                        '--arch', ctx.parent.arch, '--runtime', ctx.parent.runtime, '--runtime-version', ctx.parent.runtime_version]
     subprocess.Popen(cmake_configure).wait()
 
@@ -38,7 +38,7 @@ def configure(ctx):
 @click.pass_context
 def make(ctx):
     set_cmake_var(ctx)
-    cmake_build = ['cmake-js', 'build', '--debug' if ctx.parent.build_type == 'Debug' else '',
+    cmake_build = [find('yarn'), 'cmake-js', 'build', '--debug' if ctx.parent.build_type == 'Debug' else '',
                    '--arch', ctx.parent.arch, '--runtime', ctx.parent.runtime, '--runtime-version', ctx.parent.runtime_version]
     subprocess.Popen(cmake_build).wait()
 
@@ -61,14 +61,19 @@ def package(ctx):
         subprocess.Popen(' '.join(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec'])).wait()
 
 
-def set_cmake_var(ctx):
-    python_path = subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE).stdout.read().decode().strip()
-    npm_path = "npm"
+def find(tool):
+    tool_path = tool
     if platform.system() == 'Windows':
-        for line in subprocess.Popen(["where", "npm"], stdout=subprocess.PIPE).stdout.readlines():
+        for line in subprocess.Popen(['where', tool], stdout=subprocess.PIPE).stdout.readlines():
             path = line.decode('utf8').strip()
             if path.endswith('.cmd'):
-                npm_path = path
+                tool_path = path
+    return tool_path
+
+
+def set_cmake_var(ctx):
+    python_path = subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE).stdout.read().decode().strip()
+    npm = find('npm')
 
     spdlog_levels = {
         'trace':        'SPDLOG_LEVEL_TRACE',
@@ -80,16 +85,16 @@ def set_cmake_var(ctx):
     }
     loglevel = spdlog_levels[ctx.parent.log_level]
 
-    cmake_py_exe = [npm_path, 'config', 'set', 'cmake_PYTHON_EXECUTABLE', python_path]
+    cmake_py_exe = [npm, 'config', 'set', 'cmake_PYTHON_EXECUTABLE', python_path]
     click.echo(' '.join(cmake_py_exe))
     subprocess.Popen(cmake_py_exe).wait()
 
-    cmake_spdlog = [npm_path, 'config', 'set', 'cmake_SPDLOG_LOG_LEVEL_COMPILE', loglevel]
+    cmake_spdlog = [npm, 'config', 'set', 'cmake_SPDLOG_LOG_LEVEL_COMPILE', loglevel]
     click.echo(' '.join(cmake_spdlog))
     subprocess.Popen(cmake_spdlog).wait()
 
     if platform.system() == 'Windows':
-        cmake_arch = [npm_path, 'config', 'set', 'cmake_CMAKE_GENERATOR_PLATFORM', ctx.parent.arch]
+        cmake_arch = [npm, 'config', 'set', 'cmake_CMAKE_GENERATOR_PLATFORM', ctx.parent.arch]
         click.echo(' '.join(cmake_arch))
         subprocess.Popen(cmake_arch).wait()
 
