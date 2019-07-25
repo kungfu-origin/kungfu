@@ -68,14 +68,20 @@
                 position: relative;
             }
 
+            #scroll-to-bottom-btn{
+                height: 30px;
+                line-height: 30px;
+                color: #fff;
+            }
+
             #log-content{
                 color: #c7cce6;
                 background: #0C0F1C;
                 white-space: nowrap;
                 overflow: auto;
-                height: calc(100% - 20px);
+                height: calc(100% - 50px);
                 width: 100%;
-                padding: 10px 10px;
+                padding: 10px 10px; 
                 box-sizing: border-box;
                 font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
                 line-height: 24px;
@@ -130,8 +136,9 @@
     </head>
     <body>
         <div id="content">
-            <div id="title"></div>
-            <div id="path"></div>
+            <div id="scroll-to-bottom-btn">
+                <input type="checkbox" id="scroll-to-bottom-checkbox"></input> 滚动到底部
+            </div>
             <div id="log-content"></div>
         </div>
        
@@ -143,7 +150,7 @@
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce } = require('./utils.js');
     const gaze = require('gaze');
-
+    
     function dealMessage(line) {
         let lineData;
         try{
@@ -171,34 +178,34 @@
     }
 
     function scrollToBottom() {
-        const $logContent = document.getElementById('log-content');
-        const scrollTop = $logContent.scrollTop;
-        const clientHeight = $logContent.clientHeight;
-        const scrollHeight = $logContent.scrollHeight;
-        if(scrollTop + clientHeight + 550 > scrollHeight) {
-            $logContent.scrollTop = scrollHeight - clientHeight
-        }
+        const btn = document.getElementById('scroll-to-bottom-checkbox')
+        let timer = setTimeout(() => {
+            if(btn && btn.value === 'on') {
+                const $logContent = document.getElementById('log-content');
+                $logContent.scrollTop = 100000000000
+            }
+            clearTimeout(timer)
+        }, 300)
     }
 
     function showLogs(logPath, dealMessage) {
-        getLog(logPath, '', dealMessage).then(res => {
+        return getLog(logPath, '', dealMessage).then(res => {
             let logs = [];
             res.list.forEach(l => logs.push(l.message))
             let logsHTML = logs.join('<br/>');
             const $logContent = document.getElementById('log-content');
             $logContent.innerHTML = logsHTML
-            scrollToBottom()
         })
     }
 
     ipc.on('show-log', function(event, { winId, logPath }){
         ipc.removeAllListeners('show-log')
         document.title = logPath;
-        showLogs(logPath, dealMessage)
+        showLogs(logPath, dealMessage).then(() => scrollToBottom())
         gaze(logPath, (err, watcher) => {
             const watched = watcher.watched();
             watcher.on('changed', debounce((...args) => {
-                showLogs(logPath, dealMessage)
+                showLogs(logPath, dealMessage).then(() => scrollToBottom())
             }))
         })
     })
