@@ -93,10 +93,12 @@ export default {
                 type: 'text',
                 label: '买卖',
                 prop: 'side',
+                width: '50px'
             },{
                 type: 'text',
                 label: '开平',
                 prop: 'offset',
+                width: '50px'
             },{
                 type: 'number',
                 label: '成交价',

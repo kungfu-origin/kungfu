@@ -2,7 +2,11 @@
     <div class="tr-table">
         <ul class="tr-table-header">
             <li 
-            class="text-overflow tr-table-cell" 
+            :class="[
+            'text-overflow', 
+            'tr-table-cell',
+            column.type === 'number' ? 'number' : ''
+            ]" 
             v-for="column in schema" 
             :key="column.prop" 
             :title="column.label"
@@ -219,6 +223,9 @@ export default {
             line-height: 25px;
             display: inline-block;
             color: $font;
+        }
+        .tr-table-cell.number{
+            text-align: right;
         }
     }
 
