@@ -165,9 +165,19 @@
             message.indexOf('Failed') !== -1 ||
             message.indexOf('Traceback') !== -1 ||
             message.indexOf('critical') !== -1 ||
-            message.indexOf('error') !== -1 
+            message.indexOf('uncaught exception') !== -1
         ) message = `<span class="error red">${message}</span>`
         return [ { message } ]
+    }
+
+    function scrollToBottom() {
+        const $logContent = document.getElementById('log-content');
+        const scrollTop = $logContent.scrollTop;
+        const clientHeight = $logContent.clientHeight;
+        const scrollHeight = $logContent.scrollHeight;
+        if(scrollTop + clientHeight + 550 > scrollHeight) {
+            $logContent.scrollTop = scrollHeight - clientHeight
+        }
     }
 
     function showLogs(logPath, dealMessage) {
@@ -177,14 +187,7 @@
             let logsHTML = logs.join('<br/>');
             const $logContent = document.getElementById('log-content');
             $logContent.innerHTML = logsHTML
-
-            const scrollTop = $logContent.scrollTop;
-            const clientHeight = $logContent.clientHeight;
-            const scrollHeight = $logContent.scrollHeight;
-
-            if(scrollTop + clientHeight + 100 > scrollHeight) {
-                $logContent.scrollTop = scrollHeight - clientHeight
-            }
+            scrollToBottom()
         })
     }
 
