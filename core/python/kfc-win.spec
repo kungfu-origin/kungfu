@@ -22,7 +22,8 @@ a = Analysis(['kungfu\\__main__.py'],
         ('..\\deps\\fmt-5.3.0\\include', 'include'),
         ('..\\deps\\rxcpp-4.1.0\\include', 'include'),
         ('..\\deps\\hffix-b67d404f\\include', 'include'),
-        ('..\\deps\\SQLiteCpp-2.3.0\\include', 'include')
+        ('..\\deps\\SQLiteCpp-2.3.0\\include', 'include'),
+        ('..\\deps\\pybind11-2.2.4', 'pybind11')
      ],
      hiddenimports=[
           'numpy',
