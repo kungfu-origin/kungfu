@@ -17,10 +17,11 @@ def object_as_dict(obj):
             for c in inspect(obj).mapper.column_attrs}
 
 class DataProxy:
-    def __init__(self, url):
+    def __init__(self, url, readonly=False):
         self.engine = create_engine(url)
-        Base.metadata.create_all(self.engine)
-        self.session_factory = sessionmaker(bind = self.engine)
+        if not readonly:
+            Base.metadata.create_all(self.engine)
+        self.session_factory = sessionmaker(bind=self.engine)
 
     def add_trade(self, **kwargs):
         with session_scope(self.session_factory) as session:

@@ -27,7 +27,7 @@ class CalendarUtil:
 
 class Calendar:
     def __init__(self, ctx):
-        self.holidays = DataProxy(make_url(ctx.locator, ctx.system_config_location, "holidays")).get_holidays()
+        self.holidays = DataProxy(make_url(ctx.locator, ctx.system_config_location, "holidays"), readonly=True).get_holidays()
         self.update_trading_day(datetime.datetime.now())
 
     def update_trading_day(self, now):

@@ -8,7 +8,7 @@ from kungfu.log import create_logger
 
 def run_extension(ctx, registry):
     if registry.has_extension(ctx.source):
-        config = DataProxy(make_url(ctx.locator, ctx.system_config_location, "task")).get_task_config(ctx.name)
+        config = DataProxy(make_url(ctx.locator, ctx.system_config_location, "task"), readonly=True).get_task_config(ctx.name)
         config_str = {}
         config_int = {}
         config_double = {}
