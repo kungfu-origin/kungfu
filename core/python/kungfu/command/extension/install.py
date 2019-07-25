@@ -3,14 +3,14 @@ import os, shutil
 import tarfile
 import extensions
 import click
-from kungfu.command.extension import extension as kfext
+from kungfu.command.extension import extension as kfext, pass_ctx_from_parent
 
 
 @kfext.command(help='install extension')
 @click.option("-f", "--file", required=True, help="KungFu extension file (tgz)")
 @click.pass_context
 def install(ctx, file):
-    ctx.logger = ctx.parent.logger
+    pass_ctx_from_parent(ctx)
     filename = os.path.basename(file)
     filename_re = re.match(r'(\w+)-v\d+\.\d+\.\d+\.tgz', filename)
     if filename_re:
@@ -30,7 +30,7 @@ def install(ctx, file):
                 shutil.rmtree(install_path)
             os.rename(os.path.join(ext_cache_dir, 'package'), install_path)
             ctx.logger.info("extension %s installed", ext_name)
-            click.echo('Installed extension', ext_name)
+            click.echo('Installed extension %s' % ext_name)
     else:
         print('Bad extension filename', filename)
         ctx.logger.error("Invalid extension filename %s", file)

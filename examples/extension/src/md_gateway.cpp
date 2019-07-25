@@ -2,33 +2,33 @@
 
 namespace kungfu
 {
-    namespace kfext_demo
+    namespace wingchun
     {
-        MdGateway::MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double): kungfu::MdGatewayImpl("kfext_demo_md")
+        namespace kfext_demo
         {
-            SPDLOG_INFO("Connecting kfext demo MD");
-        }
+            MdGateway::MdGateway(bool low_latency, yijinjing::data::locator_ptr locator,
+                                 std::map<std::string, std::string> &config_str,
+                                 std::map<std::string, int> &config_int,
+                                 std::map<std::string, double> &config_double) : gateway::MarketData(low_latency, std::move(locator), "kfext_demo")
+            {
+                SPDLOG_INFO("Connecting kfext demo MD");
+            }
 
-        void MdGateway::init()
-        {
-            SPDLOG_INFO("Init kfext demo MD");
-            MdGatewayImpl::init();
-        }
+            void MdGateway::on_start()
+            {
+                gateway::MarketData::on_start();
+                SPDLOG_INFO("Start kfext demo MD");
+            }
 
-        void MdGateway::start()
-        {
-            SPDLOG_INFO("Start kfext demo MD");
-            GatewayImpl::start();
-        }
+            bool MdGateway::subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments)
+            {
+                return false;
+            }
 
-        bool MdGateway::subscribe(const std::vector<Instrument>& instruments, bool is_level2)
-        {
-            return false;
-        }
-
-        bool MdGateway::unsubscribe(const std::vector<Instrument>& instruments)
-        {
-            return false;
+            bool MdGateway::unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments)
+            {
+                return false;
+            }
         }
     }
 }

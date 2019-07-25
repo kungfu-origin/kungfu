@@ -1,11 +1,12 @@
 import extensions
 import click
-from kungfu.command.extension import extension as kfext
+from kungfu.command.extension import extension as kfext, pass_ctx_from_parent
 
 
 @kfext.command(help='list extensions')
 @click.pass_context
 def list(ctx):
+    pass_ctx_from_parent(ctx)
     click.echo("Installed extensions:")
     for ext_name in extensions.EXTENSIONS.keys():
         ext_funcs = []

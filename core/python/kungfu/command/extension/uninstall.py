@@ -1,13 +1,14 @@
 import os, shutil
 import extensions
 import click
-from kungfu.command.extension import extension as kfext
+from kungfu.command.extension import extension as kfext, pass_ctx_from_parent
 
 
 @kfext.command(help='uninstall extension')
 @click.option("-n", "--name", required=True, help="KungFu extension name")
 @click.pass_context
 def uninstall(ctx, name):
+    pass_ctx_from_parent(ctx)
     install_path = os.path.join(extensions.extension_path, name)
     if os.path.exists(install_path):
         shutil.rmtree(install_path)

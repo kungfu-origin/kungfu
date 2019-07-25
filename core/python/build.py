@@ -10,8 +10,8 @@ import click
 @click.option('--build_type', type=click.Choice(['Release', 'Debug']), default='Release', help='build type')
 @click.option('--arch', type=click.Choice(['x64', 'ia32']), default='x64', help='arch')
 @click.option('--runtime', type=click.Choice(['electron', 'node']), default='electron', help='Node.js runtime')
-@click.option('--node_version', type=str, default='10.15.3', help='Node.js runtime version')
-@click.option('--electron_version', type=str, default='5.0.7', help='Electron runtime version')
+@click.option('--node_version', type=str, default='10.0.0', help='Node.js runtime version')
+@click.option('--electron_version', type=str, default='5.0.0', help='Electron runtime version')
 @click.pass_context
 def build(ctx, log_level, build_type, arch, runtime, node_version, electron_version):
     ctx.log_level = log_level

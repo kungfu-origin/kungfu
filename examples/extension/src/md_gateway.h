@@ -3,21 +3,32 @@
 
 #include <string>
 #include <map>
-#include <kungfu/wingchun/gateway/gateway_impl.h>
+
+#include <kungfu/yijinjing/common.h>
+#include <kungfu/wingchun/msg.h>
+#include <kungfu/wingchun/gateway/marketdata.h>
 
 namespace kungfu
 {
-    namespace kfext_demo
+    namespace wingchun
     {
-        class MdGateway: public kungfu::MdGatewayImpl
+        namespace kfext_demo
         {
-        public:
-            MdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double);
-            virtual void init();
-            virtual void start();
-            virtual bool subscribe(const std::vector<Instrument>& instruments, bool is_level2 = false);
-            virtual bool unsubscribe(const std::vector<Instrument>& instruments);
-        };
+            class MdGateway : public gateway::MarketData
+            {
+            public:
+                MdGateway(bool low_latency, yijinjing::data::locator_ptr locator,
+                          std::map<std::string, std::string> &config_str,
+                          std::map<std::string, int> &config_int,
+                          std::map<std::string, double> &config_double);
+
+                void on_start() override;
+
+                bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
+
+                bool unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
+            };
+        }
     }
 }
 

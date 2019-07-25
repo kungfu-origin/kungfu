@@ -2,44 +2,44 @@
 
 namespace kungfu
 {
-    namespace kfext_demo
+    namespace wingchun
     {
-        TdGateway::TdGateway(std::map<std::string, std::string>& config_str, std::map<std::string, int>& config_int, std::map<std::string, double>& config_double):
-            kungfu::TdGatewayImpl("kfext_demo_td", "kfext_demo_td")
+        namespace kfext_demo
         {
-            SPDLOG_INFO("Connecting kfext demo TD");
-        }
+            TdGateway::TdGateway(bool low_latency, yijinjing::data::locator_ptr locator,
+                                 std::map<std::string, std::string> &config_str,
+                                 std::map<std::string, int> &config_int,
+                                 std::map<std::string, double> &config_double) :
+                    gateway::Trader(low_latency, std::move(locator), "kfext_demo_td", "kfext_demo_td")
+            {
+                SPDLOG_INFO("Connecting kfext demo TD");
+            }
 
-        void TdGateway::init()
-        {
-            SPDLOG_INFO("Init kfext demo TD");
-            TdGatewayImpl::init();
-        }
+            void TdGateway::on_start()
+            {
+                gateway::Trader::on_start();
+                SPDLOG_INFO("Start kfext demo TD");
+            }
 
-        void TdGateway::start()
-        {
-            SPDLOG_INFO("Start kfext demo TD");
-            GatewayImpl::start();
-        }
+            bool TdGateway::insert_order(const yijinjing::event_ptr &event)
+            {
+                return false;
+            }
 
-        bool TdGateway::insert_order(const OrderInput &input)
-        {
-            return false;
-        }
+            bool TdGateway::cancel_order(const yijinjing::event_ptr &event)
+            {
+                return false;
+            }
 
-        bool TdGateway::cancel_order(const OrderAction &action)
-        {
-            return false;
-        }
+            bool TdGateway::req_position()
+            {
+                return false;
+            }
 
-        bool TdGateway::req_position()
-        {
-            return false;
-        }
-
-        bool TdGateway::req_account()
-        {
-            return false;
+            bool TdGateway::req_account()
+            {
+                return false;
+            }
         }
     }
 }
