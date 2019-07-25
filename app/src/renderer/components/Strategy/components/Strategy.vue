@@ -58,7 +58,7 @@
           
             <el-table-column
                 label="" 
-                width="100px"  
+                width="110px"  
                 align="right"       
             >
                 <template slot-scope="props">
