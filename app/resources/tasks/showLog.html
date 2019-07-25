@@ -141,29 +141,62 @@
     const fs = require('fs');
     const ipc = require('electron').ipcRenderer
     const BrowserWindow = require('electron').remote.BrowserWindow;
-    const { getLog, dealMessage2 } = require('./utils.js');
+    const { getLog, debounce } = require('./utils.js');
+    const gaze = require('gaze');
+
+    function dealMessage(line) {
+        let lineData;
+        try{
+            lineData = JSON.parse(line);
+        }catch(err){
+            console.error(err)
+            return false;
+        }
+        let message = lineData.message
+        .split('\n[')
+        .join('<br\>[')
+        .replace(/\[  info  \]/g, '[ <span class="green">info</span> &nbsp;&nbsp;&nbsp;]')
+        .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
+        .replace(/\[ error  \]/g, '[ <span class="red">error</span> &nbsp;&nbsp;]')
+        .replace(/\[warning \]/g, '[ <span class="yellow">warning</span> ]')
+        .replace(/\[ debug  \]/g, '[ <span class="blue">debug</span> &nbsp;&nbsp;]')
+        .replace(/\[critical\]/g, '[ critical]')
+        if(
+            message.indexOf('Failed') !== -1 ||
+            message.indexOf('Traceback') !== -1 ||
+            message.indexOf('critical') !== -1 ||
+            message.indexOf('error') !== -1 
+        ) message = `<span class="error red">${message}</span>`
+        return [ { message } ]
+    }
+
+    function showLogs(logPath, dealMessage) {
+        getLog(logPath, '', dealMessage).then(res => {
+            let logs = [];
+            res.list.forEach(l => logs.push(l.message))
+            let logsHTML = logs.join('<br/>');
+            const $logContent = document.getElementById('log-content');
+            $logContent.innerHTML = logsHTML
+
+            const scrollTop = $logContent.scrollTop;
+            const clientHeight = $logContent.clientHeight;
+            const scrollHeight = $logContent.scrollHeight;
+
+            if(scrollTop + clientHeight + 100 > scrollHeight) {
+                $logContent.scrollTop = scrollHeight - clientHeight
+            }
+        })
+    }
 
     ipc.on('show-log', function(event, { winId, logPath }){
         ipc.removeAllListeners('show-log')
         document.title = logPath;
-        getLog(logPath, '', dealMessage2).then(res => {
-            let logs = [];
-            res.list.forEach(l => {
-                let msg = l.message
-                .replace(/\[  info  \]/g, '[ <span class="green">info</span> &nbsp;&nbsp;&nbsp;]')
-                .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
-                .replace(/\[ error  \]/g, '[ <span class="red">error</span> &nbsp;&nbsp;]')
-                .replace(/\[warning \]/g, '[ <span class="yellow">warning</span> ]')
-                .replace(/\[ debug  \]/g, '[ <span class="blue">debug</span> &nbsp;&nbsp;]')
-                if(
-                    msg.indexOf('Failed') !== -1 ||
-                    msg.indexOf('Traceback') !== -1 ||
-                    msg.indexOf('critical') !== -1
-                ) msg = `<span class="error red">${msg}</span>`
-                logs.push(msg)
-            })
-            let logsHTML = logs.join('<br/>')
-            document.getElementById('log-content').innerHTML = logsHTML
+        showLogs(logPath, dealMessage)
+        gaze(logPath, (err, watcher) => {
+            const watched = watcher.watched();
+            watcher.on('changed', debounce((...args) => {
+                showLogs(logPath, dealMessage)
+            }))
         })
     })
     </script>

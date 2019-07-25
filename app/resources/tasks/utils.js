@@ -81,18 +81,6 @@ function dealMessage(line, searchKeyword){
     })
 }
 
-function dealMessage2(line) {
-    let lineData;
-    try{
-        lineData = JSON.parse(line);
-    }catch(err){
-        console.error(err)
-        return false;
-    }
-    const message = lineData.message.split('\n[').join('<br\>[')
-    return [ { message } ]
-}
-
 function getLog(logPath, searchKeyword, dealMessageFunc){
     const numList = buildListByLineNum(201);    
     let logId = 0;            
@@ -127,6 +115,51 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
     })
 }
 
+function debounce(fn, interval = 300) {
+    let timeout = null
+    return function() {
+        //@ts-ignore
+        const t = this;
+        const args = arguments;
+        timeout && clearTimeout(timeout);
+        timeout = null;
+        timeout = setTimeout(() => {
+            if(!timeout) return;
+            fn.apply(t, args);
+            timeout && clearTimeout(timeout);
+            timeout = null;
+        }, interval);
+    }
+}
+
+//开始监听日志尾部
+function startWatchingTail(logPath, searchKeyword){
+    let tailObserver = null;
+    tailObserver = new Tail(logPath, {
+        flushAtEOF: true,
+        useWatchFile: true,
+        follow: true,
+    });   
+    tailObserver.watch();  
+    tailObserver.on('line', line => ((curProcId, curKw) => {
+        if(curKw) return;
+        if(curProcId !== processId) return;
+        const logData = dealLogMessage(line, t.searchKeyword);
+        throttleInsertLog(logData).then(logList => {
+            if(!logList) return;
+            t.tableData = t.pushTableData(logList);
+            if(t.ifScrollToBottom) t.scrollToBottom()
+        })
+        throttleClearLog()
+    })(processId, searchKeyword))
+
+    tailObserver.on('error', err => {
+        if(tailObserver !== null) t.clearTailWatcher();
+        tailObserver = null;
+    }) 
+}
+
+
 exports.getLog = getLog;
 exports.dealMessage = dealMessage;
-exports.dealMessage2 = dealMessage2;
+exports.debounce = debounce;

@@ -19,7 +19,8 @@ function createWindow () {
 		{
 			label: "Application",
 			submenu: [
-				{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+				{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
+				{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
 			]
 		}, 
 		{

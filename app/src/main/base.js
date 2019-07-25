@@ -28,12 +28,20 @@ export const initDB = () => {
     })
 
     //commission.db
-    fse.copy(path.join(__resources, 'default', 'commission.db'), path.join(BASE_DB_DIR, 'commission.db'), err => {
+    fse.copy(
+        path.join(__resources, 'default', 'commission.db'), 
+        path.join(BASE_DB_DIR, 'commission.db')
+    )
+    .catch(err => {
         if(err) logger.error(err);
     })
 
     //holidays.db
-    fse.copy(path.join(__resources, 'default', 'holidays.db'), path.join(BASE_DB_DIR, 'holidays.db'), err => {
+    fse.copy(
+        path.join(__resources, 'default', 'holidays.db'), 
+        path.join(BASE_DB_DIR, 'holidays.db')
+    )
+    .catch(err => {
         if(err) logger.error(err);
     })
 }
