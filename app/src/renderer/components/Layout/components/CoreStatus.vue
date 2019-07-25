@@ -9,7 +9,7 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item core-process-title text-overflow" title="主进程">
-                        主进程  <el-tag type="warning">master</el-tag>
+                        主控进程  <el-tag type="warning">master</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 81px;">
                         <tr-status 
@@ -34,7 +34,7 @@
             </div>
         </div>
         <span slot="reference" :class="[currentStatus]">
-            <i class="el-icon-s-operation"></i>
+            <i class="el-icon-monitor"></i>
             主进程状态
         </span>
     </el-popover>
@@ -52,7 +52,8 @@ export default {
         Object.keys(statusConfig || {}).map(key => {
             statusLevel[key] = statusConfig[key].level;
         })
-        this.errController = false;
+        this.nasterErrController = false;
+        this.watcherErrController = false;
         return {
             config: sourceType,
             statusLevel
@@ -76,13 +77,23 @@ export default {
             if(t.processStatus === null){
                 return 'color-gray'
             }
-            if(!ifProcessRunning('master', t.processStatus) || !ifProcessRunning('watcher', t.processStatus)){
-                if(!t.errController) {
-                    t.$message.error('主进程断开，不可交易，请重启应用！', 0)
-                    t.errController = true;                
+
+            if(!ifProcessRunning('master', t.processStatus)){
+                if(!t.nasterErrController){
+                    t.$message.error('主控进程断开，不可交易，请重启应用！', 0)
+                    t.nasterErrController = true;  
                 }
                 return 'color-red'
             }
+
+            if(!ifProcessRunning('watcher', t.processStatus)){
+                if(!t.watcherErrController){
+                    t.$message.error('数据进程断开，交易数据将会丢失，请重启应用！', 0)
+                    t.watcherErrController = true;  
+                }
+                return 'color-red'
+            }
+
             return 'color-green'
         }
     },
