@@ -150,7 +150,12 @@
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce } = require('./utils.js');
     const gaze = require('gaze');
-    
+
+    var ifScrollToBottom = false;
+    document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
+        ifScrollToBottom = !ifScrollToBottom;
+    })
+
     function dealMessage(line) {
         let lineData;
         try{
@@ -178,9 +183,8 @@
     }
 
     function scrollToBottom() {
-        const btn = document.getElementById('scroll-to-bottom-checkbox')
         let timer = setTimeout(() => {
-            if(btn && btn.value === 'on') {
+            if(ifScrollToBottom) {
                 const $logContent = document.getElementById('log-content');
                 $logContent.scrollTop = 100000000000
             }
