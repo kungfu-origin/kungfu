@@ -37,7 +37,7 @@ namespace kungfu
             writer::writer(const data::location_ptr& location, uint32_t dest_id, bool lazy, publisher_ptr publisher) :
                     publisher_(std::move(publisher)), size_to_write_(0)
             {
-                frame_id_base_ = location->uid;
+                frame_id_base_ = location->uid ^ dest_id;
                 frame_id_base_ = frame_id_base_ << 32;
                 journal_ = std::make_shared<journal>(location, dest_id, true, lazy);
                 journal_->seek_to_time(time::now_in_nano());

@@ -176,34 +176,43 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
-                  if (not has_location(request.dest_id))
+                  if (has_location(request.dest_id))
                   {
-                      SPDLOG_ERROR("Request publish to unknown location {:08x}", request.dest_id);
-                      return;
+                      reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
+                      require_write_to(e->source(), e->gen_time(), request.dest_id);
+                      require_read_from(request.dest_id, e->gen_time(), e->source(), false);
+                  } else
+                  {
+                      SPDLOG_ERROR("Request write to unknown location {:08x}", request.dest_id);
                   }
-                  reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-                  require_write_to(e->source(), e->gen_time(), request.dest_id);
-                  require_read_from(request.dest_id, e->gen_time(), e->source(), false);
               });
 
-            events_ | filter([&](event_ptr e)
-                             {
-                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
-                             }) |
+            events_ | is(msg::type::RequestReadFrom) |
             $([&](event_ptr e)
               {
                   const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
-                  if (not has_location(request.source_id))
-                  {
-                      SPDLOG_ERROR("Request subscribe to unknown location {:08x}", request.source_id);
-                      return;
-                  }
-                  if (e->msg_type() == msg::type::RequestReadFrom)
+                  if (has_location(request.source_id))
                   {
                       reader_->join(get_location(request.source_id), e->source(), e->gen_time());
+                      require_write_to(request.source_id, e->gen_time(), e->source());
+                      require_read_from(e->source(), e->gen_time(), request.source_id, false);
+                  } else
+                  {
+                      SPDLOG_ERROR("Request read from unknown location {:08x}", request.source_id);
                   }
-                  require_write_to(request.source_id, e->gen_time(), e->source());
-                  require_read_from(e->source(), e->gen_time(), request.source_id, e->msg_type() == msg::type::RequestReadFromPublic);
+              });
+
+            events_ | is(msg::type::RequestReadFromPublic) |
+            $([&](event_ptr e)
+              {
+                  const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
+                  if (has_location(request.source_id))
+                  {
+                      require_read_from(e->source(), e->gen_time(), request.source_id, true);
+                  } else
+                  {
+                      SPDLOG_ERROR("Request read public from unknown location {:08x}", request.source_id);
+                  }
               });
 
             events_ | is(msg::type::TimeRequest) |

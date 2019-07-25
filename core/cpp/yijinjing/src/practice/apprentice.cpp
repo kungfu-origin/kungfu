@@ -69,6 +69,19 @@ namespace kungfu
                   {
                       SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
                   }
+              },
+              [&](std::exception_ptr e)
+              {
+                  try
+                  { std::rethrow_exception(e); }
+                  catch (const rx::empty_error &ex)
+                  {
+                      SPDLOG_WARN("{}", ex.what());
+                  }
+                  catch (const std::exception &ex)
+                  {
+                      SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
+                  }
               });
         }
 
@@ -116,6 +129,10 @@ namespace kungfu
                 $([&](event_ptr e)
                   {
                       reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
+                  },
+                  [&](std::exception_ptr e)
+                  {
+                      SPDLOG_ERROR("Register failed");
                   });
             } else
             {
@@ -165,6 +182,19 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   on_start();
+              },
+              [&](std::exception_ptr e)
+              {
+                  try
+                  { std::rethrow_exception(e); }
+                  catch (const rx::empty_error &ex)
+                  {
+                      SPDLOG_WARN("{}", ex.what());
+                  }
+                  catch (const std::exception &ex)
+                  {
+                      SPDLOG_WARN("Unexpected exception before start {}", ex.what());
+                  }
               });
 
             events_ | is(msg::type::TradingDay) |

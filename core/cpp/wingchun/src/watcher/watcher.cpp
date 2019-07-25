@@ -35,7 +35,7 @@ namespace kungfu
             {
                 pub_sock_->send(msg);
             }
-            SPDLOG_INFO("published {}", msg);
+            SPDLOG_TRACE("published {}", msg);
         }
 
         void Watcher::publish_state(int64_t trigger_time, yijinjing::data::category c, const std::string &group, const std::string &name,
@@ -181,7 +181,7 @@ namespace kungfu
                       std::string response = handle_request(event->to_string());
                       get_io_device()->get_rep_sock()->send(response);
                   }
-                  catch (const std::exception & e)
+                  catch (const std::exception &e)
                   {
                       SPDLOG_ERROR("Unexpected exception {}", e.what());
                   }
@@ -206,7 +206,7 @@ namespace kungfu
               {
                   try
                   { on_order(event, event->data<Order>()); }
-                  catch (const std::exception & e)
+                  catch (const std::exception &e)
                   {
                       SPDLOG_ERROR("Unexpected exception {}", e.what());
                   }
@@ -217,7 +217,7 @@ namespace kungfu
               {
                   try
                   { on_trade(event, event->data<Trade>()); }
-                  catch (const std::exception & e)
+                  catch (const std::exception &e)
                   {
                       SPDLOG_ERROR("Unexpected exception {}", e.what());
                   }
@@ -240,7 +240,7 @@ namespace kungfu
               {
                   try
                   { on_assets(asset_info_, position_buffer_); }
-                  catch (const std::exception & e)
+                  catch (const std::exception &e)
                   {
                       SPDLOG_ERROR("Unexpected exception {}", e.what());
                   }
@@ -263,6 +263,19 @@ namespace kungfu
             $([&, trigger_time, md_location_uid](event_ptr event)
               {
                   alert_market_data(trigger_time, md_location_uid);
+              },
+              [&](std::exception_ptr e)
+              {
+                  try
+                  { std::rethrow_exception(e); }
+                  catch (const rx::empty_error &ex)
+                  {
+                      SPDLOG_WARN("{}", ex.what());
+                  }
+                  catch (const std::exception &ex)
+                  {
+                      SPDLOG_WARN("Unexpected exception {}", ex.what());
+                  }
               });
         }
 
