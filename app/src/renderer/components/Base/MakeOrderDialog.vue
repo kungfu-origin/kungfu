@@ -232,10 +232,9 @@ export default {
         getAvailCash(accountId){
             const t = this;
             if(!accountId) return 0;
-            const targetAccount = t.accountsAsset.filter(a => a.accountId === accountId)
-            if(!targetAccount.length) return 0
-            const cashData = targetAccount[0].cashData || {}
-            return cashData.avail || 0
+            const targetAccount = t.accountsAsset[accountId] || null
+            if(!targetAccount) return 0
+            return targetAccount.avail || 0
         },
 
         getSourceName(accountId){

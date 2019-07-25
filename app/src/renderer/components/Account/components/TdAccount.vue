@@ -188,7 +188,7 @@ import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
-import { removeFileFolder, openReadFile } from "__gUtils/fileUtils";
+import { removeFileFolder } from "__gUtils/fileUtils";
 import { deleteAccount, switchTd } from '__io/actions/account';
 
 import path from 'path'
@@ -363,7 +363,7 @@ export default {
         //打开日志
         handleOpenLogFile(row){
             const logPath = path.join(LOG_DIR, `td_${row.account_id}.log`);
-            openReadFile(logPath)
+            this.$showLog(logPath)
         },
 
         //获取账户列表

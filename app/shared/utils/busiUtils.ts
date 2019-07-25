@@ -168,20 +168,18 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (taskPath: string, curWin: any, BrowserWindow: any) => {
+export const buildTask = (
+    taskPath: string, 
+    curWin: any, 
+    BrowserWindow: any, 
+    debugOptions = { 
+        width: 0,
+        height: 0,
+        show: false
+    }) => {
     const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
     return new Promise((resolve, reject) => {
-        //debug
-        const debugOptions = taskPath === '' ? {
-            width: 800,
-            height: 600,
-            show: true,
-        } : {}
-
         const win = new BrowserWindow({
-            width: 0,
-            height: 0,
-            show: false,
             webPreferences: {
                 nodeIntegration: true
             },

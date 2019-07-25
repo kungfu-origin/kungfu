@@ -11,11 +11,14 @@
                     <span class="core-process-item core-process-title text-overflow" title="主进程">
                         主控进程  <el-tag type="warning">master</el-tag>
                     </span>
-                    <span  class="core-process-item text-overflow" style="width: 81px;">
+                    <span class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
                         v-if="$utils.ifProcessRunning('master', processStatus)"
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
+                    </span>
+                    <span class="core-process-item get-log">
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('master.log')" ></i>
                     </span>
                 </div>
             </div>
@@ -24,11 +27,14 @@
                     <span class="core-process-item  core-process-title text-overflow" title="数据进程">
                         数据进程 <el-tag>watcher</el-tag>
                     </span>
-                    <span  class="core-process-item text-overflow" style="width: 81px;">
+                    <span  class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
                         v-if="$utils.ifProcessRunning('watcher', processStatus)"
                         :value="buildState('watcher')"></tr-status>
                         <tr-status v-else></tr-status>
+                    </span>
+                     <span class="core-process-item get-log">
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('watcher.log')" ></i>
                     </span>
                 </div>
             </div>
@@ -45,6 +51,9 @@ import { accountSource, sourceType } from '__gConfig/accountConfig';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 import { ifProcessRunning } from '__gUtils/busiUtils';
+import { LOG_DIR } from '__gConfig/pathConfig';
+
+const path = require('path');
 
 export default {
     data(){
@@ -99,9 +108,13 @@ export default {
     },
 
     methods: {
-        buildState(processId){
+        buildState(processId) {
             const t = this;
             return t.processStatus[processId]
+        },
+
+        handleOpenLog(target) {
+            this.$showLog(path.join(LOG_DIR, target))
         }
     }
 }
@@ -113,10 +126,10 @@ export default {
 }
 .core-status-content{
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
-    max-width: 255px;
+    max-width: 295px;
     .core-item{
         float: left;
-        width: 250px;
+        width: 295px;
         margin: 10px;
         .type-name{
             font-size: 16px;
@@ -134,6 +147,9 @@ export default {
                 text-align: left;
                 vertical-align: bottom;
                 color: $font;
+            }
+            .core-process-item.get-log{
+                width: 20px;
             }
             .core-process-item.core-process-title{
                 width: 150px;

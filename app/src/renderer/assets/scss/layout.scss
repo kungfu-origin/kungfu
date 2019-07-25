@@ -153,27 +153,3 @@
 }
 
 
-
-
-//二级菜单悬浮定位，所以无法属于哪个class下
-.el-menu--vertical{
-    background: $bg_light;
-    .el-menu{
-        background: $bg_light;
-        li:hover{
-            background: $font;
-            color: $vi;
-        }
-    }
-    .el-menu--popup{
-        padding: 0px;
-        min-width: 120px;
-    }
-    .el-menu--popup-right-start{
-        margin: 0px;
-        .el-menu-item{
-            height: 40px;
-            line-height: 40px;
-        }
-    }
-}

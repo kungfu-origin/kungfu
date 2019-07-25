@@ -321,45 +321,6 @@
 .handsontable,
 div
 {
-
-    // ::-webkit-scrollbar{
-    //     transition: width 0.3s ease 0s;
-    //     width: 0px;
-    //     background: rgba(0,0,0,0);
-    //     position: absolute;
-    // }
-    // ::-webkit-scrollbar:horizontal{
-    //     transition: height 0.3s ease 0s;
-    //     height: 0px;
-    //     background: rgba(0,0,0,0);
-    //     position: absolute;
-    // }
-    
-    // &:hover ::-webkit-scrollbar{
-    //     width: 8px;
-    // }
-    
-    // &:hover ::-webkit-scrollbar:horizontal{
-    //     height: 8px;
-    // }
-    
-    // // /* 滚动条滑块 */
-    // ::-webkit-scrollbar-thumb {
-    //     border-radius: 2px !important;
-    //     background: $input_bg;  
-    // }
-    
-    // 内层轨道，滚动条中间部分
-    // ::-webkit-scrollbar-track-piece{
-    //     background: $bg_dark;
-    // }
-    
-    // ::-webkit-scrollbar-track-piece:horizontal{
-    //     background: $bg_dark;
-    // }
-    
-    
-    
     
     // 滚动条的轨道（里面装有Thumb）
     ::-webkit-scrollbar-track{    
@@ -370,16 +331,6 @@ div
     ::-webkit-scrollbar-button {
         visibility: hidden;
     }
-    
-    // // 边角，即垂直滚动条和水平滚动条相交的地方
-    // ::-webkit-scrollbar-corner{
-    //     visibility: hidden;
-    // }
-    
-    // // 两个滚动条的交汇处上用于拖动调整元素大小的小控件
-    // ::-webkit-resizer{
-    //     visibility: hidden;
-    // }
 
     // 滚动条整体部分
     ::-webkit-scrollbar{

@@ -33,10 +33,10 @@
 <script>
 import { mapState } from 'vuex'
 import moment from 'moment'
-import { debounce, throttle, throttleInsert, dealLogMessage } from '__gUtils/busiUtils'
+import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
-import { clearFileContent, addFile, openReadFile, existsSync } from '__gUtils/fileUtils';
+import { clearFileContent, addFile, existsSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
 const BrowserWindow = require('electron').remote.BrowserWindow;
@@ -135,7 +135,7 @@ export default {
         },
 
         handleOpenLogFile(logPath){
-            openReadFile(logPath);
+            this.$showLog(logPath)
         },
 
         handleRefresh(){
@@ -165,7 +165,7 @@ export default {
         getLogByTask(logPath, searchKeyword){
             const t = this;
             return new Promise((resolve, reject) => {
-                t.$utils.buildTask('getStrategyLog', BrowserWindow.getFocusedWindow(), BrowserWindow).then(({ win, curWinId }) => {
+                buildTask('getStrategyLog', BrowserWindow.getFocusedWindow(), BrowserWindow).then(({ win, curWinId }) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,
                         logPath,

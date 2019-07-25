@@ -1,0 +1,170 @@
+<html>
+    <head>
+	    <title></title>
+        <style>
+            html,body{
+                height: 100%;
+                width: 100%;
+                background: #161B2E;
+            } 
+        
+            /*
+            系统共用部分
+            */
+            body {
+                font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+                font-size: 14px;
+                direction: ltr;
+                -webkit-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
+                text-rendering: optimizelegibility;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* 内外边距通常让各个浏览器样式的表现位置不同 */
+            body,
+            dl,
+            dt,
+            dd,
+            ul,
+            ol,
+            li,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            pre,
+            code,
+            form,
+            fieldset,
+            legend,
+            input,
+            textarea,
+            p,
+            blockquote,
+            button,
+            article,
+            aside,
+            details,
+            figcaption,
+            figure,
+            footer,
+            header,
+            menu,
+            nav,
+            i,
+            select,
+            section {
+                margin: 0;
+                padding: 0;
+            }
+
+            #content {
+                height: 100%;
+                padding: 10px;
+                position: relative;
+            }
+
+            #log-content{
+                color: #c7cce6;
+                background: #0C0F1C;
+                white-space: nowrap;
+                overflow: auto;
+                height: calc(100% - 20px);
+                width: 100%;
+                padding: 10px 10px;
+                box-sizing: border-box;
+                font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+                line-height: 24px;
+            }
+            .red {
+                color: #ff3636;
+            }
+            .yellow {
+                color: #FAAD14;
+            }
+            .green {
+                color: #17b07f
+            }
+            .blue {
+                color: #3384FF;
+            }
+            module, frozen{
+                display: block;
+
+            }
+
+
+            ::-webkit-scrollbar-track{    
+                background: #101425;
+            }
+
+            ::-webkit-scrollbar-button {
+                visibility: hidden;
+            }
+
+            ::-webkit-scrollbar{
+                position: relative;
+                transition: all 0.2s ease 0s;
+                cursor: pointer;
+            }
+            ::-webkit-scrollbar:horizontal{
+                position: relative;
+                transition: all 0.2s ease 0s;
+                background: transparent; 
+                cursor: pointer;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #2C345099;  
+            }
+
+            ::-webkit-scrollbar-corner {
+                background: transparent; 
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="content">
+            <div id="title"></div>
+            <div id="path"></div>
+            <div id="log-content"></div>
+        </div>
+       
+    </body>
+    <script type="text/javascript">
+    const path = require('path');
+    const fs = require('fs');
+    const ipc = require('electron').ipcRenderer
+    const BrowserWindow = require('electron').remote.BrowserWindow;
+    const { getLog, dealMessage2 } = require('./utils.js');
+
+    ipc.on('show-log', function(event, { winId, logPath }){
+        ipc.removeAllListeners('show-log')
+        document.title = logPath;
+        getLog(logPath, '', dealMessage2).then(res => {
+            let logs = [];
+            res.list.forEach(l => {
+                let msg = l.message
+                .replace(/\[  info  \]/g, '[ <span class="green">info</span> &nbsp;&nbsp;&nbsp;]')
+                .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
+                .replace(/\[ error  \]/g, '[ <span class="red">error</span> &nbsp;&nbsp;]')
+                .replace(/\[warning \]/g, '[ <span class="yellow">warning</span> ]')
+                .replace(/\[ debug  \]/g, '[ <span class="blue">debug</span> &nbsp;&nbsp;]')
+                if(
+                    msg.indexOf('Failed') !== -1 ||
+                    msg.indexOf('Traceback') !== -1 ||
+                    msg.indexOf('critical') !== -1
+                ) msg = `<span class="error red">${msg}</span>`
+                logs.push(msg)
+            })
+            let logsHTML = logs.join('<br/>')
+            document.getElementById('log-content').innerHTML = logsHTML
+        })
+    })
+    </script>
+</html>

@@ -79,10 +79,25 @@ export const startGetProcessStatus = () => {
 
 //start pm2 kungfu master
 process.env.ELECTRON_RUN_AS_NODE = true;
+
+const startWatcherTimeout = () => {
+    return new Promise((resolve, reject) => {
+        let timer = setTimeout(async () => {
+            try {
+                await startWatcher(false)
+                resolve()
+            } catch (err) {
+                reject(err)
+            }
+            clearTimeout(timer)
+        }, 2000)
+    })
+}
+
 startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
-    startWatcher(false)
+    startWatcherTimeout()
     .catch(err => console.error(err))
     .finally(() => startGetProcessStatus())
 })
