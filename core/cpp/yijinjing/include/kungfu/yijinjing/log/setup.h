@@ -10,7 +10,7 @@
 
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"
 #define DEFAULT_LOG_LEVEL_NAME "info"
-#define DEFAULT_LOG_PATTERN "[%Y-%m-%d %T.%F] [%^%=8l%$] [pid/tid %6P/%-6t] [%@#%!] %v"
+#define DEFAULT_LOG_PATTERN "[%m/%d %T.%F] [%^%=8l%$] [%6P/%-6t] [%@#%!] %v"
 
 namespace kungfu {
 

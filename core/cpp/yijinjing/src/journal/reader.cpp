@@ -1,5 +1,3 @@
-#include <utility>
-
 /*****************************************************************************
  * Copyright [taurus.ai]
  *
@@ -15,6 +13,7 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <utility>
 #include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/time.h>

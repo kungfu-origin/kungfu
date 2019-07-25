@@ -3,7 +3,7 @@ import os, sys, platform
 import pyyjj
 from kungfu.yijinjing.time import *
 
-LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [pid/tid %(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
+LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
 LOG_FILE_DATEEXT_FORMAT = '%Y-%m-%d'
 
 LOG_LEVELS = {
@@ -63,7 +63,7 @@ class KungfuFormatter(logging.Formatter):
 
     def format(self, record):
         record.loglevel = self.format_level(record.levelname.lower())
-        record.nanotime = strfnow()
+        record.nanotime = strfnow(format='%m/%d %H:%M:%S.%N')
         record.tid = pyyjj.thread_id()
         return logging.Formatter.format(self, record)
 
