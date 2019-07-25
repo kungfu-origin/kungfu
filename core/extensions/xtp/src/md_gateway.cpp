@@ -50,7 +50,7 @@ namespace kungfu
                 int res = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
                 if (res == 0)
                 {
-                    publish_state(GatewayState::Ready);
+                    publish_state(GatewayState::LoggedIn);
                     LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
                 } else
                 {

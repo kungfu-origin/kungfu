@@ -262,6 +262,8 @@ namespace kungfu
             events_ | from(md_location_uid) | is(msg::type::Quote) | first() |
             $([&, trigger_time, md_location_uid](event_ptr event)
               {
+                  auto md_location = get_location(md_location_uid);
+                  publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Ready);
                   alert_market_data(trigger_time, md_location_uid);
               },
               [&](std::exception_ptr e)

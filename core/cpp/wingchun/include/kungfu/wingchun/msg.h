@@ -62,6 +62,7 @@ namespace kungfu
                     Idle = 1,
                     DisConnected = 2,
                     Connected = 3,
+                    LoggedIn = 4,
                     LoggedInFailed = 5,
                     Ready = 100
                 };
