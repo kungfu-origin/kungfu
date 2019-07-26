@@ -15,7 +15,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::wingchun;
 
 PYBIND11_MODULE(kfext_bar, m) {
-    py::class_<BarHandle>(m, "bar")
+    py::class_<bar::BarHandle>(m, "bar")
             .def(py::init<location_ptr, const std::string, int, bool>(), py::arg("home"), py::arg("source"), py::arg("frequency"), py::arg("low_latency") = false)
-            .def("run", &BarHandle::run);
+            .def("run", &bar::BarHandle::run);
 }

@@ -365,16 +365,16 @@ namespace kungfu
                 {
                     char trading_day[DATE_LEN];            //交易日 
                     char instrument_id[INSTRUMENT_ID_LEN]; //合约代码
-                    double PreClosePrice;                //昨收价
+                    double pre_close_price;                //昨收价
                     int64_t start_time;                    //开始时间
                     int64_t end_time;                      //结束时间
-                    double Open;                           //开
-                    double Close;                          //收
-                    double Low;                            //低
-                    double High;                           //高
-                    int Volume;                         //区间交易量
-                    int StartVolume;                    //初始总交易量
-                    int Count;                             //区间有效tick数
+                    double open;                           //开
+                    double close;                          //收
+                    double low;                            //低
+                    double high;                           //高
+                    int volume;                            //区间交易量
+                    int start_volume;                       //初始总交易量
+                    int count;                             //区间有效tick数
                     int64_t next_time;                     //下次开始时间
                 };
 
@@ -384,16 +384,16 @@ namespace kungfu
                 {
                     j["trading_day"] = std::string(bar.trading_day);
                     j["instrument_id"] = std::string(bar.instrument_id);
-                    j["pre_close_price"] = FORMAT_DOUBLE(bar.PreClosePrice);
+                    j["pre_close_price"] = FORMAT_DOUBLE(bar.pre_close_price);
                     j["start_time"] = bar.start_time;
                     j["end_time"] = bar.end_time;
-                    j["Open"] = FORMAT_DOUBLE(bar.Open);
-                    j["Close"] = FORMAT_DOUBLE(bar.Close);
-                    j["Low"] = FORMAT_DOUBLE(bar.Low);
-                    j["High"] = FORMAT_DOUBLE(bar.High);
-                    j["Volume"] = bar.Volume;
-                    j["StartVolume"] = bar.StartVolume;
-                    j["Count"] = bar.Count;
+                    j["open"] = FORMAT_DOUBLE(bar.open);
+                    j["close"] = FORMAT_DOUBLE(bar.close);
+                    j["low"] = FORMAT_DOUBLE(bar.low);
+                    j["high"] = FORMAT_DOUBLE(bar.high);
+                    j["volume"] = bar.volume;
+                    j["start_volume"] = bar.start_volume;
+                    j["count"] = bar.count;
                     j["next_time"] = bar.next_time;
                 }
 

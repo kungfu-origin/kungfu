@@ -18,137 +18,120 @@ namespace kungfu
 {
     namespace wingchun
     {
-
-        BarHandle::BarHandle(yijinjing::data::location_ptr home, const std::string &source, int frequency, bool low_latency): apprentice(home, low_latency), _source(source),_frequency(frequency)
+        namespace bar
         {
-        }
 
-        void BarHandle::snapshot_updata(const msg::data::Quote &quote,uint32_t source)
-        {
-            // nlohmann::json _quote;
-            // msg::data::to_json(_quote, quote);
-            // SPDLOG_INFO("[quote] {}", _quote.dump());
-
-            if (bar_map.find(quote.get_instrument_id()) == bar_map.end())
+            BarHandle::BarHandle(yijinjing::data::location_ptr home, const std::string &source, int frequency,
+                                 bool low_latency) : apprentice(home, low_latency), source_(source),
+                                                     frequency_(frequency)
             {
-                bar_map[quote.get_instrument_id()] = msg::data::Bar();
-                auto& bar = bar_map[quote.get_instrument_id()];
-                new_bar(bar, quote);
-                bar.start_time = quote.data_time;
-                bar.end_time = quote.data_time;
-                bar.next_time = quote.data_time + _frequency*yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
-                nlohmann::json j;
-                msg::data::to_json(j, bar);
             }
-            else
+
+            void BarHandle::snapshot_updata(const msg::data::Quote &quote, uint32_t source)
             {
-                auto& bar = bar_map[quote.get_instrument_id()];
-                nlohmann::json j;
-                msg::data::to_json(j, bar);
-                while (quote.data_time > bar.next_time)
+                // nlohmann::json _quote;
+                // msg::data::to_json(_quote, quote);
+                // SPDLOG_INFO("[quote] {}", _quote.dump());
+
+                if (bar_map.find(quote.get_instrument_id()) == bar_map.end())
                 {
-                    int64_t next_time = bar.next_time;
-                    send_bar(bar);
+                    bar_map[quote.get_instrument_id()] = msg::data::Bar();
+                    auto &bar = bar_map[quote.get_instrument_id()];
                     new_bar(bar, quote);
-                    bar.start_time = next_time;
-                    bar.end_time = next_time + _frequency*yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
-                    bar.next_time = next_time + _frequency*yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
-                }
-                if (bar.Volume  == 0)
-                {
                     bar.start_time = quote.data_time;
-                }
-                bar.end_time = quote.data_time;
-                bar.Close = quote.last_price;
-                bar.Low = std::min(bar.Low, quote.last_price);
-                bar.High = std::max(bar.High, quote.last_price);
-                bar.Volume = quote.volume - bar.StartVolume;
-                bar.Count += 1;
-            }
-        }
-
-        void BarHandle::send_bar(const msg::data::Bar &bar)
-        {
-            nlohmann::json j;
-            msg::data::to_json(j, bar);
-            SPDLOG_INFO("[BAR] {}",j.dump());
-            auto writer = writers_[0];
-            int timep = kungfu::yijinjing::time::now_in_nano()/1e9;
-            msg::data::Bar &_bar = writer->open_data<msg::data::Bar>(kungfu::yijinjing::time::now_in_nano(), msg::type::Bar);
-            _bar = bar;
-            writer->close_data();
-        }
-
-        void inline BarHandle::new_bar(msg::data::Bar &bar, const msg::data::Quote &quote)
-        {
-            strncpy(bar.trading_day, quote.trading_day, DATE_LEN);
-            strncpy(bar.instrument_id , quote.instrument_id , INSTRUMENT_ID_LEN);
-            bar.PreClosePrice = quote.pre_close_price;
-            bar.Open = quote.last_price;
-            bar.Close = quote.last_price;
-            bar.Low = quote.last_price;
-            bar.High = quote.last_price;
-            bar.Volume = 0;
-            bar.StartVolume = quote.volume;
-            bar.start_time = quote.data_time;
-            bar.end_time = quote.data_time;
-            bar.next_time = 0;
-        }
-
-        void BarHandle::react()
-        {
-            apprentice::react();
-            events_ | is(msg::type::Quote) |
-            $([&](event_ptr event)
+                    bar.end_time = quote.data_time;
+                    bar.next_time = quote.data_time + frequency_ * yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
+                    nlohmann::json j;
+                    msg::data::to_json(j, bar);
+                } else
                 {
-                    snapshot_updata(event->data<msg::data::Quote>(), event->source());
-                });
-        }
-
-        void BarHandle::on_start()
-        {
-            SPDLOG_INFO("try to add md {} ", _source);
-            auto md_location = location::make(mode::LIVE, category::MD, _source, _source, get_io_device()->get_home()->locator);
-            if (not has_location(md_location->uid))
-            {
-                throw wingchun_error(fmt::format("invalid md {}", _source));
+                    auto &bar = bar_map[quote.get_instrument_id()];
+                    nlohmann::json j;
+                    msg::data::to_json(j, bar);
+                    while (quote.data_time > bar.next_time)
+                    {
+                        int64_t next_time = bar.next_time;
+                        send_bar(bar);
+                        new_bar(bar, quote);
+                        bar.start_time = next_time;
+                        bar.end_time = next_time + frequency_ * yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
+                        bar.next_time = next_time + frequency_ * yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
+                    }
+                    if (bar.volume == 0)
+                    {
+                        bar.start_time = quote.data_time;
+                    }
+                    bar.end_time = quote.data_time;
+                    bar.close = quote.last_price;
+                    bar.low = std::min(bar.low, quote.last_price);
+                    bar.high = std::max(bar.high, quote.last_price);
+                    bar.volume = quote.volume - bar.start_volume;
+                    bar.count += 1;
+                }
             }
-            request_read_from(now(), md_location->uid, true);
-            SPDLOG_INFO("added md {} [{:08x}]", _source, md_location->uid);
-            // test();
-        }
 
-        void set_quote(kungfu::wingchun::msg::data::Quote &quote)
-        {
-            strncpy(quote.source_id , "1", SOURCE_ID_LEN);
-            quote.data_time = 0;
-            strncpy(quote.instrument_id, "rb1912", INSTRUMENT_ID_LEN);
-            quote.pre_close_price = 10;
-            quote.last_price = 11;
-            quote.volume = 10000;
-        }
-
-
-        void BarHandle::test()
-        {
-            SPDLOG_WARN("test start");
-            auto home = get_io_device()->get_home();
-            auto location = location::make(home->mode, category::MD, _source, _source, home->locator);
-            request_write_to(time::now_in_nano(), location->uid);
-            request_read_from(time::now_in_nano(), location->uid, true);
-            int64_t data_time = 0;
-            int volume = 0;
-            for (int i = 0; i < 1000; i++)
+            void BarHandle::send_bar(const msg::data::Bar &bar)
             {
-                data_time += 3*kungfu::yijinjing::time_unit::NANOSECONDS_PER_SECOND;
-                volume += 1*100;
-                auto writer = get_writer(0);
-                kungfu::wingchun::msg::data::Quote &quote = writer->open_data<kungfu::wingchun::msg::data::Quote>(time::now_in_nano(), msg::type::Quote);
-                quote.data_time = data_time;
-                quote.volume = volume;
+                nlohmann::json j;
+                msg::data::to_json(j, bar);
+                SPDLOG_INFO("[BAR] {}", j.dump());
+                auto writer = writers_[0];
+                int timep = kungfu::yijinjing::time::now_in_nano() / 1e9;
+                msg::data::Bar &_bar = writer->open_data<msg::data::Bar>(kungfu::yijinjing::time::now_in_nano(),
+                                                                         msg::type::Bar);
+                _bar = bar;
                 writer->close_data();
             }
-            SPDLOG_WARN("test finish");
+
+            void inline BarHandle::new_bar(msg::data::Bar &bar, const msg::data::Quote &quote)
+            {
+                strncpy(bar.trading_day, quote.trading_day, DATE_LEN);
+                strncpy(bar.instrument_id, quote.instrument_id, INSTRUMENT_ID_LEN);
+                bar.pre_close_price = quote.pre_close_price;
+                bar.open = quote.last_price;
+                bar.close = quote.last_price;
+                bar.low = quote.last_price;
+                bar.high = quote.last_price;
+                bar.volume = 0;
+                bar.start_volume = quote.volume;
+                bar.start_time = quote.data_time;
+                bar.end_time = quote.data_time;
+                bar.next_time = 0;
+            }
+
+            void BarHandle::react()
+            {
+                apprentice::react();
+                events_ | is(msg::type::Quote) |
+                $([&](event_ptr event)
+                  {
+                      snapshot_updata(event->data<msg::data::Quote>(), event->source());
+                  });
+            }
+
+            void BarHandle::on_start()
+            {
+                SPDLOG_INFO("try to add md {} ", source_);
+                auto md_location = location::make(mode::LIVE, category::MD, source_, source_,
+                                                  get_io_device()->get_home()->locator);
+                if (not has_location(md_location->uid))
+                {
+                    throw wingchun_error(fmt::format("invalid md {}", source_));
+                }
+                request_read_from(now(), md_location->uid, true);
+                SPDLOG_INFO("added md {} [{:08x}]", source_, md_location->uid);
+                // test();
+            }
+
+            void set_quote(msg::data::Quote &quote)
+            {
+                strncpy(quote.source_id, "1", SOURCE_ID_LEN);
+                quote.data_time = 0;
+                strncpy(quote.instrument_id, "rb1912", INSTRUMENT_ID_LEN);
+                quote.pre_close_price = 10;
+                quote.last_price = 11;
+                quote.volume = 10000;
+            }
         }
     }
 }
