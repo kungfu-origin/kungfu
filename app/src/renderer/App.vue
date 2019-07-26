@@ -15,6 +15,7 @@ import * as BASE_API from '__io/db/base';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 
+import { deleteProcess } from '__gUtils/processUtils';
 
 
 
@@ -50,9 +51,13 @@ export default {
         subGatewayState() {
             const t = this;
             t.gatewayStatePipe = buildGatewayStatePipe().subscribe(data => {
+                const processId = data[0];
+                const stateData = data[1];
+                //if state is 2 means disconnect, kill process; 
+                if(stateData.state === 2) deleteProcess(processId);
                 t.$store.dispatch('setOneMdTdState', {
-                    id: data[0],
-                    stateData: data[1]
+                    id: processId,
+                    stateData: stateData
                 })
             })
         },
