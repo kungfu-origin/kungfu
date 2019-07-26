@@ -68,16 +68,17 @@
                 position: relative;
             }
 
-            #scroll-to-bottom-btn{
+            .header-item{
+                padding: 0 10px;
                 height: 30px;
                 line-height: 30px;
-                color: #fff;
+                color: #7D89B8;
+                display: inline-block;
             }
 
             #log-content{
                 color: #c7cce6;
                 background: #0C0F1C;
-                white-space: nowrap;
                 overflow: auto;
                 height: calc(100% - 50px);
                 width: 100%;
@@ -100,7 +101,6 @@
             }
             module, frozen{
                 display: block;
-
             }
 
 
@@ -136,9 +136,12 @@
     </head>
     <body>
         <div id="content">
-            <div id="scroll-to-bottom-btn">
+            <div class="header-item" >
                 <input type="checkbox" id="scroll-to-bottom-checkbox"></input> 滚动到底部
             </div>
+            <div class="header-item" >
+                    <input type="checkbox" id="norwap-checkbox"></input> 换行显示
+                </div>
             <div id="log-content"></div>
         </div>
        
@@ -151,10 +154,29 @@
     const { getLog, debounce } = require('./utils.js');
     const gaze = require('gaze');
 
-    var ifScrollToBottom = false;
-    document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
-        ifScrollToBottom = !ifScrollToBottom;
-    })
+    var getGlobalData = buildGLobalData();
+
+    function buildGLobalData() {
+        var ifScrollToBottom = false;
+
+        document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
+            ifScrollToBottom = !ifScrollToBottom;
+        })
+
+        document.querySelector('#log-content').style.whiteSpace = 'nowrap'
+        document.getElementById('norwap-checkbox').addEventListener('input', () => {
+            const $logContent = document.querySelector('#log-content');            
+            const whiteSpace = $logContent.style.whiteSpace;
+            if(whiteSpace != 'nowrap') $logContent.style.whiteSpace = 'nowrap';
+            else $logContent.style.whiteSpace = '';
+        })
+
+        return function(){
+            return {
+                ifScrollToBottom,
+            }
+        }
+    }
 
     function dealMessage(line) {
         let lineData;
@@ -184,7 +206,7 @@
 
     function scrollToBottom() {
         let timer = setTimeout(() => {
-            if(ifScrollToBottom) {
+            if(getGlobalData.ifScrollToBottom) {
                 const $logContent = document.getElementById('log-content');
                 $logContent.scrollTop = 100000000000
             }

@@ -183,7 +183,8 @@ export const buildTask = (
             webPreferences: {
                 nodeIntegration: true
             },
-            ...debugOptions
+            ...debugOptions,
+		    backgroundColor: '#161B2E',
         })
 
         win.webContents.loadURL(taskFullPath)
