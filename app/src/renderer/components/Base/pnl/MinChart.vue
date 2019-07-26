@@ -58,7 +58,7 @@ export default {
             },
         };
         return {
-            minData: [[],[]],
+            minData: [Object.freeze([]), Object.freeze([])],
             minPnlData: [],
             rendererPnl: false
         }
@@ -170,11 +170,9 @@ export default {
             t.minGroupKey[hhmmTime] = nanomsg
             let tmpMinData0 = t.minData[0].slice();
             tmpMinData0.push(hhmmTime)
-            t.minData[0] = tmpMinData0
-
             let tmpMinData1 = t.minData[1].slice();
             tmpMinData1.push(t.calcuIntradayPnl(nanomsg))
-            t.minData[1] = tmpMinData1
+            t.minData = [Object.freeze(tmpMinData0), Object.freeze(tmpMinData1)]
 
             let tmpMinPnlData = t.minPnlData.slice();
             tmpMinPnlData.push(nanomsg)

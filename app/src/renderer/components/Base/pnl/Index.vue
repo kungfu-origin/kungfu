@@ -63,15 +63,8 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
 .pnl-header{
-    // position:absolute;
-    // top: 0px;
-    // height: 30px;
-    // line-height: 30px;
-    // padding-left: 8px;
     font-size: 11px;
-    // z-index: 1;
     span{
-        // margin-right: 8px;
         &:hover{
             color: $vi;
             cursor: pointer;

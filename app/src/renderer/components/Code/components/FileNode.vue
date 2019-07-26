@@ -134,7 +134,7 @@ export default {
             //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
             //如果children为空，读取文件夹下文件，赋值children
             if(t.type == 'folder' && !file.root){
-                CODE_UTILS.openFolder(file, t.fileTree)
+                CODE_UTILS.openFolder(t.$store, file, t.fileTree)
             }
 
         },

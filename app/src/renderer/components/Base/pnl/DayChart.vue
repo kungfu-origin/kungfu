@@ -65,7 +65,7 @@ export default {
             },
         };
         return {
-            dayData: [[],[]],
+            dayData: [Object.freeze([]), Object.freeze([])],
             dayPnlData: [],
         }
     },
@@ -129,8 +129,8 @@ export default {
             t.myChart = echarts.getInstanceByDom(dom)
             if( t.myChart === undefined) t.myChart = echarts.init(dom)
             let defaultConfig = deepClone(lineConfig)  
-            defaultConfig.xAxis.data = t.dayData[0] || ''
-            defaultConfig.series = { data: t.dayData[1], ...t.echartsSeries }
+            defaultConfig.xAxis.data = t.dayData[0] || []
+            defaultConfig.series = { data: t.dayData[1] || [], ...t.echartsSeries }
             t.myChart.setOption(defaultConfig)
         },
 
@@ -179,12 +179,10 @@ export default {
                 t.dayPnlData = Object.freeze(tmpDayPnlData)
             }else{
                 let tmpDayData0 = t.dayData[0].slice();
-                tmpDayData0.push(tradingDay);
-                t.dayData[0] = Object.freeze(tmpDayData0);
-
+                tmpDayData0.push(tradingDay);       
                 let tmpDayData1 = t.dayData[1].slice()
                 tmpDayData1.push(t.calcuAccumlatedPnl(data))
-                t.dayPnlData[1] = Object.freeze(tmpDayData1)
+                t.dayData = [Object.freeze(tmpDayData0), Object.freeze(tmpDayData1)]
 
                 let tmpDayPnlData = t.dayPnlData.slice();
                 tmpDayPnlData.push(Object.freeze(data));
