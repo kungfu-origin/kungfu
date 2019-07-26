@@ -7,6 +7,7 @@
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/gateway/trader.h>
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {
@@ -30,10 +31,21 @@ namespace kungfu
                 bool req_position() override ;
 
                 bool req_account() override ;
-                
-            private:
+
+                void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime) override{};
+
                 void on_start() override;
+
+                void on_md(const msg::data::Quote &quote, uint32_t source);
+
                 void on_passivectrl(const yijinjing::event_ptr& event);
+
+                void rtn_order_from(const msg::data::OrderInput &input, OrderStatus status, int error_id = 0);
+            
+            private:
+                std::map<std::string, msg::data::Quote> mds;
+                std::map<int, msg::data::Order> pending_orders;
+                int order_id = 0;
             };
         }
     }

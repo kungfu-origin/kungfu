@@ -23,22 +23,28 @@ namespace kungfu
         {
         }
 
-        void BarHandle::snapshot_updata(const msg::data::Quote &quote,int source)
+        void BarHandle::snapshot_updata(const msg::data::Quote &quote,uint32_t source)
         {
             // nlohmann::json _quote;
             // msg::data::to_json(_quote, quote);
             // SPDLOG_INFO("[quote] {}", _quote.dump());
-            if (bar_map.find(quote.instrument_id) == bar_map.end())
+
+            if (bar_map.find(quote.get_instrument_id()) == bar_map.end())
             {
-                auto& bar = bar_map[quote.instrument_id];
+                bar_map[quote.get_instrument_id()] = msg::data::Bar();
+                auto& bar = bar_map[quote.get_instrument_id()];
                 new_bar(bar, quote);
                 bar.start_time = quote.data_time;
                 bar.end_time = quote.data_time;
                 bar.next_time = quote.data_time + _frequency*yijinjing::time_unit::NANOSECONDS_PER_MINUTE;
+                nlohmann::json j;
+                msg::data::to_json(j, bar);
             }
             else
             {
-                auto& bar = bar_map[quote.instrument_id];
+                auto& bar = bar_map[quote.get_instrument_id()];
+                nlohmann::json j;
+                msg::data::to_json(j, bar);
                 while (quote.data_time > bar.next_time)
                 {
                     int64_t next_time = bar.next_time;
@@ -55,8 +61,9 @@ namespace kungfu
                 bar.end_time = quote.data_time;
                 bar.Close = quote.last_price;
                 bar.Low = std::min(bar.Low, quote.last_price);
-                bar.High = std::max(bar.Low, quote.last_price);
+                bar.High = std::max(bar.High, quote.last_price);
                 bar.Volume = quote.volume - bar.StartVolume;
+                bar.Count += 1;
             }
         }
 
@@ -75,7 +82,7 @@ namespace kungfu
         void inline BarHandle::new_bar(msg::data::Bar &bar, const msg::data::Quote &quote)
         {
             strncpy(bar.trading_day, quote.trading_day, DATE_LEN);
-            strncpy(bar.trading_day, quote.trading_day, INSTRUMENT_ID_LEN);
+            strncpy(bar.instrument_id , quote.instrument_id , INSTRUMENT_ID_LEN);
             bar.PreClosePrice = quote.pre_close_price;
             bar.Open = quote.last_price;
             bar.Close = quote.last_price;

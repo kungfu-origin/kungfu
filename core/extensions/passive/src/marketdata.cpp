@@ -42,13 +42,10 @@ namespace kungfu
 
             bool PassiveMarketData::init_md()
             {
-                SPDLOG_INFO("******init_md*****");
                 for (auto it = md_parameters.begin();it != md_parameters.end();it++)
-                {
-                    SPDLOG_INFO("******init_md  1*****");
+                {;
                     for (auto parameter : it->second)
                     {
-                        SPDLOG_INFO("******init_md  2*****");
                         msg::data::Quote quote;
                         strcpy(quote.source_id,"passive");
                         strcpy(quote.trading_day,"");
@@ -60,19 +57,30 @@ namespace kungfu
                                 strcpy(quote.exchange_id, "SZE");
                             else
                                 strcpy(quote.exchange_id, "SSE");
+                            quote.pre_close_price = 0;
                             quote.pre_settlement_price = parameter.PrePrice;
                         }
                         else
                         {
                             strcpy(quote.exchange_id, "SHFE");
                             quote.pre_close_price = parameter.PrePrice;
+                            quote.pre_settlement_price = 0;
                         }
                         quote.volume = 0;
+                        quote.last_price = parameter.PrePrice;
                         quote.open_price = parameter.PrePrice;
                         quote.high_price = parameter.PrePrice;
                         quote.low_price = parameter.PrePrice;
                         quote.upper_limit_price = parameter.PrePrice;
                         quote.lower_limit_price = parameter.PrePrice;
+                        for (int i = 0; i < 10; i++)
+                        {
+                            quote.ask_price[i] = 0;
+                            quote.ask_volume[i] = 0;
+                            quote.bid_price[i] = 0;
+                            quote.bid_volume[i] = 0;
+                        }
+                        mds[std::string(parameter.InstrumentId)] = quote;
                     }
                 }
                 return true;
@@ -91,7 +99,6 @@ namespace kungfu
             void PassiveMarketData::on_start()
             {
                 gateway::MarketData::on_start();
-                SPDLOG_INFO("************start***************");
 
                 events_ | is(msg::type::PassiveCtrl) |
                 $([&](event_ptr e)
@@ -109,35 +116,64 @@ namespace kungfu
 
             void PassiveMarketData::create_md()
             {
-                SPDLOG_INFO("********create_md call************");
                 auto writer = writers_[0];
                 int timep = int(kungfu::yijinjing::time::now_in_nano()/1e9);
                 for (auto it = md_parameters.begin();it != md_parameters.end();it++)
                 {
-                    SPDLOG_INFO("type {}", it->first);
                     for (auto parameter : it->second)
                     {
-                        SPDLOG_INFO("instrument {}", parameter.InstrumentId);
                         if (timep%parameter.Interval == 0)
                         {
                             msg::data::Quote &quote = writer->open_data<msg::data::Quote>(kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
+                            
+                            quote = mds[std::string(parameter.InstrumentId)];
+                            quote.data_time = kungfu::yijinjing::time::now_in_nano();
+                            mds[std::string(quote.instrument_id)].volume +=  10;
+                            quote.volume = mds[std::string(quote.instrument_id)].volume;
                             sin_quota(quote, timep, parameter);
+                            nlohmann::json j;
+                            msg::data::to_json(j, quote);
+                            SPDLOG_TRACE("[QUOTE] {}",j.dump());
                             writer->close_data();
                         }
                     }
+
                 }
             }
 
             int get_inter_val(char* instrument_id)
             {
-                return 3;
+                if ((instrument_id[0] >='0') && (instrument_id[0]<='9'))
+                    return 3;
+                else
+                    return 1;
             }
 
-            void PassiveMarketData::sin_quota(msg::data::Quote &quote, int time, MdParameter parameter)
+            void PassiveMarketData::static_quota(msg::data::Quote &quote, const  int &time, const MdParameter &parameter)
             {
-                quote = mds[std::string(parameter.InstrumentId)];
-                quote.last_price = parameter.PrePrice + (parameter.PrePrice*parameter.Limit)*sin(time/parameter.Cycle);
-                quote.data_time = kungfu::yijinjing::time::now_in_nano();
+                quote.last_price = parameter.PrePrice;
+            }
+
+            void PassiveMarketData::sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter)
+            {
+                quote.last_price = parameter.PrePrice + (parameter.PrePrice*parameter.Limit/100.0)*sin(time/parameter.Cycle);
+            }
+
+            void PassiveMarketData::line_quota(msg::data::Quote &quote, const int &time, const  MdParameter &parameter)
+            {
+                quote.last_price = pow(-1, int(time) / int(parameter.Cycle)) * (parameter.Limit/parameter.Cycle*time - int(time +parameter.Cycle)/(2*int(parameter.Cycle*2*parameter.Limit))) -1.0*parameter.Limit/2;
+            }
+
+            void PassiveMarketData::random_quota(msg::data::Quote &quote, const int &time, const  MdParameter &parameter)
+            {
+                double last_price =  mds[std::string(quote.instrument_id)].last_price;
+                double pre_price = std::max(mds[std::string(quote.instrument_id)].pre_close_price, mds[std::string(quote.instrument_id)].pre_settlement_price);
+                double up_limit_price = pre_price * (1 + parameter.Limit/100);
+                double low_limit_price = pre_price * (1 - parameter.Limit/100);
+                if (pow(-1, int(time) / int(parameter.Cycle) ) > 0)
+                    quote.last_price = last_price + (up_limit_price - last_price) * (rand()%100/100.0);
+                else
+                    quote.last_price = last_price + (low_limit_price - last_price) * (rand()%100/100.0);
             }
         }
     }

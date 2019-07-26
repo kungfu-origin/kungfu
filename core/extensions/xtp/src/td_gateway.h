@@ -37,7 +37,7 @@ namespace kungfu
 
                 bool cancel_order(const yijinjing::event_ptr& event) override;
 
-                void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime) override;
+                void on_trading_day(const yijinjing::event_ptr& event, int64_t daytime) override;
 
                 bool req_position() override;
 

@@ -18,10 +18,10 @@ namespace kungfu
             
             enum DataType
             {
+                Static,
                 StandardSine,
                 StandardLine,
-                StandardRandom,
-                GusssRandom
+                StandardRandom
             };
             struct MdParameter
             {
@@ -47,7 +47,10 @@ namespace kungfu
                 bool init_md();
 
                 void create_md();
-                void sin_quota(msg::data::Quote &quote, int time, MdParameter parameter);
+                void static_quota(msg::data::Quote &quote, const  int &time, const MdParameter &parameter);
+                void sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter);
+                void line_quota(msg::data::Quote &quote, const int &time, const  MdParameter &parameter);
+                void random_quota(msg::data::Quote &quote, const int &time, const  MdParameter &parameter);
             
             private:
                 std::map<DataType, std::vector<MdParameter>> md_parameters;
