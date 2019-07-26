@@ -1,6 +1,6 @@
 
 import click
-from kungfu.command import kfc, pass_ctx_from_parent, replay_setup
+from kungfu.command import kfc, pass_ctx_from_parent
 
 @kfc.command()
 @click.pass_context

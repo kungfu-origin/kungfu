@@ -3,7 +3,7 @@ import json
 import click
 from kungfu.command.dev import dev, pass_ctx_from_parent
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 from kungfu.data.sqlite.data_proxy import make_url, DataProxy
 

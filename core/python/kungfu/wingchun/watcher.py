@@ -2,12 +2,12 @@ import pywingchun
 import pyyjj
 import json
 import kungfu.yijinjing.time as kft
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import to_dict
 from kungfu.data.sqlite.data_proxy import make_url, DataProxy, LedgerHolder
-from kungfu.finance.ledger import *
-from kungfu.finance.position import *
+from kungfu.wingchun.finance.ledger import *
+from kungfu.wingchun.finance.position import *
 
 DEFAULT_INIT_CASH = 1e7
 

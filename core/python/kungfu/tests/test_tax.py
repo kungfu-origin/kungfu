@@ -1,6 +1,6 @@
 
 import unittest
-from kungfu.finance.tax import *
+from kungfu.wingchun.finance.tax import *
 from kungfu.wingchun.constants import *
 import collections
 

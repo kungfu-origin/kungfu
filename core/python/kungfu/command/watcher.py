@@ -1,5 +1,6 @@
 import click
-from kungfu.command import kfc, pass_ctx_from_parent, replay_setup
+from kungfu.command import kfc, pass_ctx_from_parent
+from kungfu.wingchun import replay_setup
 from kungfu.wingchun.watcher import Watcher
 
 

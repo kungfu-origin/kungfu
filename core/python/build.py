@@ -55,8 +55,9 @@ def package(ctx):
     if osname == 'Darwin':
         subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
         os.chdir('build/kfc')
-        os.rename('.Python', 'Python')
-        os.symlink('Python', '.Python')
+        if os.path.exists('.Python'):
+            os.rename('.Python', 'Python')
+            os.symlink('Python', '.Python')
     if osname == 'Windows':
         subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait()
 

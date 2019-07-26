@@ -1,8 +1,8 @@
 
 
 import unittest
-from kungfu.finance.ledger import *
-from kungfu.finance.position import *
+from kungfu.wingchun.finance.ledger import *
+from kungfu.wingchun.finance.position import *
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import *
 import datetime

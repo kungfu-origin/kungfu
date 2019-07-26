@@ -4,7 +4,7 @@ import traceback
 import pkgutil
 import pyyjj
 import kungfu.yijinjing.journal as kfj
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 
 kf_home = os.getenv('KF_HOME')

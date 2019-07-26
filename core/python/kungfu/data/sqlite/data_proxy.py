@@ -5,8 +5,8 @@ import datetime
 import pyyjj
 from kungfu.data.sqlite.models import *
 from kungfu.wingchun.constants import *
-from kungfu.finance.position import *
-from kungfu.finance.ledger import *
+from kungfu.wingchun.finance.position import *
+from kungfu.wingchun.finance.ledger import *
 
 def make_url(locator, location, filename):
     db_file = locator.layout_file(location, pyyjj.layout.SQLITE, filename)

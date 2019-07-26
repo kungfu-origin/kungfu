@@ -25,7 +25,7 @@
   },
   "build": {
     "productName": "Kungfu.Trader",
-    "artifactName": "${productName}-${version}.${ext}",
+    "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {
       "output": "build/app"

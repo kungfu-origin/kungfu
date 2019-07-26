@@ -2,7 +2,7 @@ import pyyjj
 import json
 import click
 from kungfu.command.test import test, pass_ctx_from_parent, send_to_passive
-import kungfu.nanomsg as nn
+import kungfu.yijinjing.nanomsg as nn
 import time
 import pywingchun
 import copy

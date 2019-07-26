@@ -5,7 +5,7 @@ import time
 import functools
 import pyyjj
 
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 import kungfu.service.kfs as kfs
 from kungfu.service.kfs import system
@@ -13,7 +13,7 @@ from kungfu.service.kfs import calendar
 
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.time as kft
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 from kungfu.wingchun.calendar import Calendar
 import kungfu.yijinjing.msg as yjj_msg

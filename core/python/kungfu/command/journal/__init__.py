@@ -2,7 +2,7 @@ import pyyjj
 import kungfu.yijinjing.journal as kfj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 
 @kfc.group()
