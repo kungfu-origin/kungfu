@@ -127,6 +127,8 @@ namespace kungfu
                         return "replay";
                     case mode::BACKTEST:
                         return "backtest";
+                    default:
+                        return "live";
                 }
             }
 
@@ -150,6 +152,8 @@ namespace kungfu
                         return "strategy";
                     case category::SYSTEM:
                         return "system";
+                    default:
+                        return "system";
                 }
             }
 
@@ -172,6 +176,8 @@ namespace kungfu
                     case layout::NANOMSG:
                         return "nn";
                     case layout::LOG:
+                        return "log";
+                    default:
                         return "log";
                 }
             }
