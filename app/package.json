@@ -1,9 +1,13 @@
 {
   "name": "kungfu",
-  "author": "taurus.ai",
   "version": "2.0.0",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/taurusai/kungfu",
+  "author": {
+    "name": "taurus.ai",
+    "email": "info@taurus.ai"
+  },
   "config": {
     "pyver": "three",
     "cmakejsopt": ""
@@ -90,23 +94,20 @@
     "mac": {
       "icon": "./resources/logo/icon.icns",
       "type": "distribution",
-      "target": [
-        "dmg"
-      ]
+      "target": ["dmg"]
     },
     "win": {
       "icon": "./resources/logo/icon.ico",
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
       ]
     },
     "linux": {
-      "icon": "./resources/logo"
+      "icon": "./resources/logo",
+      "target": ["rpm"]
     },
     "nsis": {
       "oneClick": false,

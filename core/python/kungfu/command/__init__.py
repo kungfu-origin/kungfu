@@ -6,7 +6,8 @@ import pyyjj
 
 
 @click.group(invoke_without_command=True)
-@click.option('-H', '--home', type=str, help='kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, $XDG_CONFIG_HOME on linux, ~/Library/Application Support on mac')
+@click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
+                                             "~/.config or $XDG_CONFIG_HOME (if set) on linux, ~/Library/Application Support on mac")
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('-n', '--name', type=str, help='name for the process, defaults to command if not set')
