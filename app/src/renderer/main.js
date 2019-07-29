@@ -13,7 +13,7 @@ import { ipcRenderer } from 'electron'
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
-
+window.alert(process.env.APP_TYPE)
 
 //element
 Vue.use(Tag)

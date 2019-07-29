@@ -1,12 +1,17 @@
-    const Application = require('spectron').Application
-    const assert = require('assert')
-    const electronPath = require('electron') // Require Electron from the binaries included in node_modules.
-    const path = require('path')
+const Application = require('spectron').Application
+const assert = require('assert')
+const electronPath = require('electron') // Require Electron from the binaries included in node_modules.
+const path = require('path');
+const config = require('./config.json');
+
+process.env.APP_TYPE = 'test'
+process.env.KUNGFU_ENGINE = config.KF_ENGINE;
+process.env.ELEC_BASE_DIR = config.KF_HOME
 
 describe('Application launch', function () {
     this.timeout(100000000)
 
-    beforeEach(function () {
+    before(function () {
 		const t = this;
         t.app = new Application({
 			// Your electron path can be any binary
@@ -28,8 +33,7 @@ describe('Application launch', function () {
 
 			// The following line tells spectron to look and use the main.js file
 			// and the package.json located 1 level above.
-			args: [path.join(__dirname, '..', 'dist', 'app', 'main.js')],
-			requireName: 'electronRequire'
+			args: [path.join(__dirname, '..')]
         })
 		return t.app.start()
 		.then(() => {
@@ -47,11 +51,11 @@ describe('Application launch', function () {
 		}
     })
 
-    // afterEach(function () {
-    //     if (this.app && this.app.isRunning()) {
-    //     	return this.app.stop()
-    //     }
-    // })
+    after(function () {
+        if (this.app && this.app.isRunning()) {
+        	return this.app.stop()
+        }
+    })
 
     it('shows an initial window', function () {
         return this.app.client.getWindowCount().then(function (count) {

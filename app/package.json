@@ -60,14 +60,12 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
-      "!**/kungfu-core/**/**/*",
-      "!**/kungfu-core/build/kfc/**/*",
-      "**/kungfu-core/package.json",
       "**/kungfu-core/build/*/node_nanomsg.node",
       "**/kungfu-core/build/*/node_sqlite3.node",
       "**/kungfu-core/build/*/libnanomsg.*",
       "**/kungfu-core/build/*/nanomsg.*",
-      "**/kungfu-core/node/*"
+      "**/kungfu-core/node/*",
+      "**/kungfu-core/package.json"
     ],
     "extraResources": [
       {
@@ -124,11 +122,11 @@
     "@babel/polyfill": "^7.2.5",
     "bindings": "^1.5.0",
     "electron-updater": "^4.0.6",
+    "kungfu-core": "2.0.0",
     "fkill": "^6.1.0",
     "fs-extra": "^7.0.1",
     "gaze": "^1.1.3",
     "getprocesses": "^1.1.1",
-    "kungfu-core": "^2.0.0",
     "log4js": "^4.0.2",
     "pm2": "^3.5.0",
     "tail": "^2.0.2",

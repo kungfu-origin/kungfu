@@ -6,8 +6,10 @@ const renderProcess = require('electron').remote;
 
 //ELEC_BASE
 var ELEC_BASE_DIR_RESOLVE;
-if(process.env.APP_TYPE === 'cli') ELEC_BASE_DIR_RESOLVE = process.env.APPDATA || (process.platform == 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support', 'kungfu') : path.join('var', 'local', 'kungfu'))
+if (process.env.APP_TYPE === 'cli') ELEC_BASE_DIR_RESOLVE = process.env.APPDATA || (process.platform == 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support', 'kungfu') : path.join('var', 'local', 'kungfu'))
+else if (process.env.APP_TYPE === 'test') ELEC_BASE_DIR_RESOLVE = process.env.ELEC_BASE_DIR || ''; 
 else ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData')
+
 addFile('', ELEC_BASE_DIR_RESOLVE, 'folder')
 
 export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
@@ -100,7 +102,7 @@ export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', '
 //================== others end ===================================
 
 //kungfu-engine
-export const KUNGFU_ENGINE: string = process.env.NODE_ENV === 'production' 
+var KUNGFU_ENGINE_RESOLVE: string = process.env.NODE_ENV === 'production' 
     ? process.env.APP_TYPE === 'cli' 
         ? path.join('.') 
         //@ts-ignore
@@ -108,3 +110,7 @@ export const KUNGFU_ENGINE: string = process.env.NODE_ENV === 'production'
     : process.env.APP_TYPE === 'cli' 
         ? path.join(__dirname, '..', '..', '..', '..', 'core', 'build')
         : path.join(__dirname, '..', '..', '..', 'core', 'build')
+
+if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_ENGINE || ''
+
+export const KUNGFU_ENGINE = KUNGFU_ENGINE_RESOLVE;
