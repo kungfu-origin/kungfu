@@ -14,15 +14,15 @@
   },
   "main": "./dist/app/main.js",
   "engines": {
-    "node": ">8.0.0"
+    "node": ">=8.0.0 <11.0.0"
   },
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
-    "build:dist": "yarn run dist:main && yarn run dist:render && electron-builder",
     "dev": "node .electron-kungfu/dev-runner.js",
+    "dist": "yarn run dist:main && yarn run dist:render",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.main.config.js",
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.renderer.config.js",
     "test": " mocha"

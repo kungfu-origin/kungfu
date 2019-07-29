@@ -13,6 +13,7 @@ describe('Application launch', function () {
 			// i.e for OSX an example path could be '/Applications/MyApp.app/Contents/MacOS/MyApp'
 			// But for the sake of the example we fetch it from our node_modules.
 			path: electronPath,
+			// path: '/Applications/Kungfu.Trader.app/Contents/MacOS/Kungfu.Trader'
 
 			// Assuming you have the following directory structure
 
@@ -27,16 +28,13 @@ describe('Application launch', function () {
 
 			// The following line tells spectron to look and use the main.js file
 			// and the package.json located 1 level above.
-			args: [path.join(__dirname, '..', 'dist', 'app', 'main.js')]
+			args: [path.join(__dirname, '..', 'dist', 'app', 'main.js')],
+			requireName: 'electronRequire'
         })
 		return t.app.start()
 		.then(() => {
 			return delay(5000)
 		})
-		.then(() => {
-			return t.app.client.waitUntilWindowLoaded()
-		})
-
 
 		function delay(interval) {
 			return new Promise(resolve => {
@@ -49,11 +47,11 @@ describe('Application launch', function () {
 		}
     })
 
-    afterEach(function () {
-        if (this.app && this.app.isRunning()) {
-        	return this.app.stop()
-        }
-    })
+    // afterEach(function () {
+    //     if (this.app && this.app.isRunning()) {
+    //     	return this.app.stop()
+    //     }
+    // })
 
     it('shows an initial window', function () {
         return this.app.client.getWindowCount().then(function (count) {

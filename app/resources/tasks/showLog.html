@@ -148,7 +148,7 @@
     </body>
     <script type="text/javascript">
     const path = require('path');
-    const fs = require('fs');
+    const fs = require('fs-extra');
     const ipc = require('electron').ipcRenderer
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce } = require('./utils.js');

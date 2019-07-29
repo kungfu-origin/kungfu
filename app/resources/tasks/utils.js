@@ -1,5 +1,5 @@
 const readline = require('readline');
-const fs = require('fs'); 
+const fs = require('fs-extra'); 
   
 //建立固定条数的list数据结构
 function buildListByLineNum(num){

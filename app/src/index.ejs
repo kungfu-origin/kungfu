@@ -138,6 +138,9 @@
 	<div id="app"></div>
 </body>
 <script>
+  window.electronRequire = require
+</script>
+<script>
 	if ('<%= process.env.NODE_ENV %>' === 'production') window.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')
 </script>
 </html>
