@@ -58,7 +58,7 @@ function createWindow () {
 	}
 
 	// Open the DevTools.
-	mainWindow.webContents.openDevTools()
+	// mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
@@ -108,14 +108,15 @@ if(!gotTheLock) {
 }
 
 
+
 var appReady = false, killExtraFinished = false;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
 	appReady = true;
-	createWindow()
-	// if(appReady && killExtraFinished) createWindow()
+	// createWindow()
+	if(appReady && killExtraFinished) createWindow()
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
@@ -124,9 +125,13 @@ killExtra()
 .catch(err => console.error(err))
 .finally(() => {
 	killExtraFinished = true;
-	// if(appReady && killExtraFinished) createWindow()
+	if(appReady && killExtraFinished) createWindow()
 	console.timeEnd('finish kill extra')
 })
+
+// app.on('ready', () => {
+// 	createWindow()
+// })
 
 
 // Quit when all windows are closed.
