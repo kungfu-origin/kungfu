@@ -8,7 +8,7 @@ import click
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('--build_type', type=click.Choice(['Release', 'Debug']), default='Release', help='build type')
-@click.option('--arch', type=click.Choice(['x64', 'ia32']), default='x64', help='arch')
+@click.option('--arch', type=click.Choice(['x64', 'x86']), default='x64', help='arch')
 @click.option('--runtime', type=click.Choice(['electron', 'node']), default='electron', help='Node.js runtime')
 @click.option('--node_version', type=str, default='10.0.0', help='Node.js runtime version')
 @click.option('--electron_version', type=str, default='5.0.0', help='Electron runtime version')
@@ -28,18 +28,14 @@ def build(ctx, log_level, build_type, arch, runtime, node_version, electron_vers
 @build.command()
 @click.pass_context
 def configure(ctx):
-    set_cmake_var(ctx)
-    cmake_configure = [find('yarn'), 'cmake-js', 'configure', '--debug' if ctx.parent.build_type == 'Debug' else '',
-                       '--arch', ctx.parent.arch, '--runtime', ctx.parent.runtime, '--runtime-version', ctx.parent.runtime_version]
+    cmake_configure = build_cmake_js_cmd(ctx, 'configure')
     subprocess.Popen(cmake_configure).wait()
 
 
 @build.command()
 @click.pass_context
 def make(ctx):
-    set_cmake_var(ctx)
-    cmake_build = [find('yarn'), 'cmake-js', 'build', '--debug' if ctx.parent.build_type == 'Debug' else '',
-                   '--arch', ctx.parent.arch, '--runtime', ctx.parent.runtime, '--runtime-version', ctx.parent.runtime_version]
+    cmake_build = build_cmake_js_cmd(ctx, 'build')
     subprocess.Popen(cmake_build).wait()
 
 
@@ -72,9 +68,8 @@ def find(tool):
     return tool_path
 
 
-def set_cmake_var(ctx):
+def build_cmake_js_cmd(ctx, cmd):
     python_path = subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE).stdout.read().decode().strip()
-    npm = find('npm')
 
     spdlog_levels = {
         'trace':        'SPDLOG_LEVEL_TRACE',
@@ -86,18 +81,18 @@ def set_cmake_var(ctx):
     }
     loglevel = spdlog_levels[ctx.parent.log_level]
 
-    cmake_py_exe = [npm, 'config', 'set', 'cmake_PYTHON_EXECUTABLE', python_path]
-    click.echo(' '.join(cmake_py_exe))
-    subprocess.Popen(cmake_py_exe).wait()
-
-    cmake_spdlog = [npm, 'config', 'set', 'cmake_SPDLOG_LOG_LEVEL_COMPILE', loglevel]
-    click.echo(' '.join(cmake_spdlog))
-    subprocess.Popen(cmake_spdlog).wait()
+    cmake_js_cmd = [find('yarn'), 'cmake-js', '--debug' if ctx.parent.build_type == 'Debug' else '',
+                    '--arch', ctx.parent.arch,
+                    '--runtime', ctx.parent.runtime,
+                    '--runtime-version', ctx.parent.runtime_version,
+                    '--CDPYTHON_EXECUTABLE=' + python_path,
+                    '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel]
 
     if platform.system() == 'Windows':
-        cmake_arch = [npm, 'config', 'set', 'cmake_CMAKE_GENERATOR_PLATFORM', ctx.parent.arch]
-        click.echo(' '.join(cmake_arch))
-        subprocess.Popen(cmake_arch).wait()
+        return cmake_js_cmd + ['--toolset', 'host=' + ctx.parent.arch,
+                               '--CDCMAKE_GENERATOR_PLATFORM=' + ctx.parent.arch, cmd]
+    else:
+        return cmake_js_cmd + [cmd]
 
 
 build(auto_envvar_prefix='KF_BUILD')
