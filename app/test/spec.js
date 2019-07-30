@@ -53,6 +53,7 @@ describe('Application launch', function () {
 			await t.app.client.$('#select-source-dialog .source-xtp .el-radio').click()
 			await delay(500)
 			await t.app.client.$('.confirm-select-source-btn').click()
+			await delay(500)
 		})
 	})
 
