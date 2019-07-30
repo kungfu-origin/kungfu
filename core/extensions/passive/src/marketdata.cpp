@@ -23,65 +23,70 @@ namespace kungfu
                     gateway::MarketData(low_latency, std::move(locator), SOURCE_PASSIVE)
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_PASSIVE);
-                for (auto it = config_str.begin(); it != config_str.end(); it++)
-                    SPDLOG_INFO("config_str {}: {}", it->first, it->second);
-                for (auto it = config_int.begin(); it != config_int.end(); it++)
-                    SPDLOG_INFO("config_int {}: {}", it->first, it->second);
-                for (auto it = config_double.begin(); it != config_double.end(); it++)
-                    SPDLOG_INFO("config_double {}: {}", it->first, it->second);
                 if (config_str.find("md_parameter") != config_str.end())
                 {
-                    //此处应解析一个字符串{id:[type,cycle,limit,pre],id:[type,cycle,limit,pre]]
-                    SPDLOG_INFO("******md_parameter*****: {}", config_str["md_parameter"]);
-
-                    MdParameter md1 = {"rb1901", 2, 10, 3500, 1};
-                    MdParameter md2 = {"600000", 2, 10, 13.1, 3};
-                    md_parameters_[StandardSine] = {md1, md2};
+                    nlohmann::json j = nlohmann::json::parse(config_str["md_parameter"]);
+                    for (nlohmann::json::iterator it =j.begin(); it != j.end(); ++it)
+                    {
+                        //合约、数据类型、幅值、周期、前收价、行情时间间隔
+                        MdParameter mdp;
+                        strcpy(mdp.instrument_id ,it.key().c_str());
+                        mdp.type = DataType(it.value()["type"]);
+                        mdp.cycle = it.value()["cycle"];
+                        mdp.limit = it.value()["limit"];
+                        mdp.pre_price = it.value()["pre"];
+                        mdp.interval = it.value()["interval"];
+                        md_parameters_.push_back(mdp);
+                    }
                     init_md();
+                }
+                else
+                {
+                    SPDLOG_ERROR("no md_parameter was found");
                 }
             }
 
             bool PassiveMarketData::init_md()
             {
-                for (auto it = md_parameters_.begin(); it != md_parameters_.end(); it++)
-                { ;
-                    for (auto parameter : it->second)
+                for (auto mdp : md_parameters_)
+                {
+                    msg::data::Quote quote;
+                    strcpy(quote.source_id, "passive");
+                    strcpy(quote.trading_day, "");
+                    quote.data_time = time::now_in_nano();
+                    strcpy(quote.instrument_id, mdp.instrument_id);
+                    if ((quote.instrument_id[0] >= '0') && (quote.instrument_id[0] <= '9'))
                     {
-                        msg::data::Quote quote;
-                        strcpy(quote.source_id, "passive");
-                        strcpy(quote.trading_day, "");
-                        quote.data_time = time::now_in_nano();
-                        strcpy(quote.instrument_id, parameter.InstrumentId);
-                        if ((parameter.InstrumentId[0] >= '0') && (parameter.InstrumentId[0] <= '9'))
-                        {
-                            if (parameter.InstrumentId[0] >= '3')
-                                strcpy(quote.exchange_id, "SZE");
-                            else
-                                strcpy(quote.exchange_id, "SSE");
-                            quote.pre_close_price = 0;
-                            quote.pre_settlement_price = parameter.PrePrice;
-                        } else
-                        {
-                            strcpy(quote.exchange_id, "SHFE");
-                            quote.pre_close_price = parameter.PrePrice;
-                            quote.pre_settlement_price = 0;
-                        }
-                        quote.volume = 0;
-                        quote.last_price = parameter.PrePrice;
-                        quote.open_price = parameter.PrePrice;
-                        quote.high_price = parameter.PrePrice;
-                        quote.low_price = parameter.PrePrice;
-                        quote.upper_limit_price = parameter.PrePrice;
-                        quote.lower_limit_price = parameter.PrePrice;
-                        for (int i = 0; i < 10; i++)
-                        {
-                            quote.ask_price[i] = 0;
-                            quote.ask_volume[i] = 0;
-                            quote.bid_price[i] = 0;
-                            quote.bid_volume[i] = 0;
-                        }
-                        mds_[std::string(parameter.InstrumentId)] = quote;
+                        if (quote.instrument_id[0] >= '3')
+                            strcpy(quote.exchange_id, "SSE");
+                        else
+                            strcpy(quote.exchange_id, "SZE");
+                        quote.pre_close_price = 0;
+                        quote.pre_settlement_price = mdp.pre_price;
+                    } else
+                    {
+                        strcpy(quote.exchange_id, "SHFE");
+                        quote.pre_close_price = mdp.pre_price;
+                        quote.pre_settlement_price = 0;
                     }
+                    quote.volume = 0;
+                    quote.last_price = mdp.pre_price;
+                    quote.open_price = mdp.pre_price;
+                    quote.high_price = mdp.pre_price;
+                    quote.low_price = mdp.pre_price;
+                    quote.upper_limit_price = mdp.pre_price;
+                    quote.lower_limit_price = mdp.pre_price;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        quote.ask_price[i] = 0;
+                        quote.ask_volume[i] = 0;
+                        quote.bid_price[i] = 0;
+                        quote.bid_volume[i] = 0;
+                    }
+                    nlohmann::json j;
+                    msg::data::to_json(j, quote);
+                    SPDLOG_TRACE("[QUOTE] {}", j.dump());
+                    mds_[std::string(mdp.instrument_id)] = quote;
                 }
                 return true;
             }
@@ -118,27 +123,28 @@ namespace kungfu
             {
                 auto writer = writers_[0];
                 int timep = int(kungfu::yijinjing::time::now_in_nano() / 1e9);
-                for (auto it = md_parameters_.begin(); it != md_parameters_.end(); it++)
+                for (auto mdp : md_parameters_)
                 {
-                    for (auto parameter : it->second)
+                    if (timep % mdp.interval == 0)
                     {
-                        if (timep % parameter.Interval == 0)
-                        {
-                            msg::data::Quote &quote = writer->open_data<msg::data::Quote>(
-                                    kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
+                        msg::data::Quote &quote = writer->open_data<msg::data::Quote>(
+                                kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
 
-                            quote = mds_[std::string(parameter.InstrumentId)];
-                            quote.data_time = kungfu::yijinjing::time::now_in_nano();
-                            mds_[std::string(quote.instrument_id)].volume += 10;
-                            quote.volume = mds_[std::string(quote.instrument_id)].volume;
-                            sin_quota(quote, timep, parameter);
-                            //nlohmann::json j;
-                            //msg::data::to_json(j, quote);
-                            //SPDLOG_TRACE("[QUOTE] {}", j.dump());
-                            writer->close_data();
-                        }
+                        quote = mds_[std::string(mdp.instrument_id)];
+                        quote.data_time = kungfu::yijinjing::time::now_in_nano();
+                        mds_[std::string(quote.instrument_id)].volume += 10;
+                        quote.volume = mds_[std::string(quote.instrument_id)].volume;
+                        if (mdp.type == DataType::StandardSine)
+                            sin_quota(quote, timep, mdp);
+                        else if (mdp.type == DataType::StandardLine)
+                            line_quota(quote, timep, mdp);
+                        else if (mdp.type == DataType::StandardRandom)
+                            random_quota(quote, timep, mdp);
+                        nlohmann::json j;
+                        msg::data::to_json(j, quote);
+                        SPDLOG_TRACE("[QUOTE] {}", j.dump());
+                        writer->close_data();
                     }
-
                 }
             }
 
@@ -150,33 +156,34 @@ namespace kungfu
                     return 1;
             }
 
-            void PassiveMarketData::static_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter)
+            void PassiveMarketData::static_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
-                quote.last_price = parameter.PrePrice;
+                quote.last_price = mdp.pre_price;
             }
 
-            void PassiveMarketData::sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter)
+            void PassiveMarketData::sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
-                quote.last_price = parameter.PrePrice +
-                                   (parameter.PrePrice * parameter.Limit / 100.0) * sin(time / parameter.Cycle);
+                quote.last_price = mdp.pre_price +
+                                   (mdp.pre_price * double(mdp.limit) / 100.0) * sin(time / double(mdp.cycle));
+                quote.last_price = int(quote.last_price * 100.00 + 0.5) / 100.00;
             }
 
-            void PassiveMarketData::line_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter)
+            void PassiveMarketData::line_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
-                quote.last_price = pow(-1, int(time) / int(parameter.Cycle)) *
-                                   (parameter.Limit / parameter.Cycle * time -
-                                    int(time + parameter.Cycle) / (2 * int(parameter.Cycle * 2 * parameter.Limit))) -
-                                   1.0 * parameter.Limit / 2;
+                quote.last_price = pow(-1, int(time) / int(mdp.cycle)) * (mdp.limit / mdp.cycle * time -
+                                    int(time + mdp.cycle) / (2 * int(mdp.cycle* 2 * mdp.limit))) -
+                                   1.0 * mdp.limit / 2;
+                quote.last_price = int(quote.last_price * 100.00 + 0.5) / 100.00;
             }
 
-            void PassiveMarketData::random_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter)
+            void PassiveMarketData::random_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
                 double last_price = mds_[std::string(quote.instrument_id)].last_price;
                 double pre_price = std::max(mds_[std::string(quote.instrument_id)].pre_close_price,
                                             mds_[std::string(quote.instrument_id)].pre_settlement_price);
-                double up_limit_price = pre_price * (1 + parameter.Limit / 100);
-                double low_limit_price = pre_price * (1 - parameter.Limit / 100);
-                if (pow(-1, int(time) / int(parameter.Cycle)) > 0)
+                double up_limit_price = pre_price * (1 + mdp.limit / 100);
+                double low_limit_price = pre_price * (1 - mdp.limit / 100);
+                if (pow(-1, int(time) / int(mdp.cycle)) > 0)
                     quote.last_price = last_price + (up_limit_price - last_price) * (rand() % 100 / 100.0);
                 else
                     quote.last_price = last_price + (low_limit_price - last_price) * (rand() % 100 / 100.0);

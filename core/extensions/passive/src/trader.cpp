@@ -45,6 +45,7 @@ namespace kungfu
                         break;
                     case OrderStatus::Pending:
                         order.insert_time = nano;
+                        pending_orders_[order_id_] = order;
                         break;
                     case OrderStatus::Filled:
                     {
@@ -76,6 +77,7 @@ namespace kungfu
 
             bool PassiveTrader::insert_order(const yijinjing::event_ptr &event)
             {
+                
                 const msg::data::OrderInput &input = event->data<msg::data::OrderInput>();
 
                 if (mds_.find(std::string(input.instrument_id)) == mds_.end())
@@ -97,7 +99,8 @@ namespace kungfu
                             else
                                 rtn_order_from(input, OrderStatus::Pending);
                             //add dic
-                        } else
+                        } 
+                        else
                         {
                             if (input.limit_price <= mds_[std::string(input.instrument_id)].last_price)
                                 rtn_order_from(input, OrderStatus::Filled);
@@ -107,6 +110,7 @@ namespace kungfu
                         }
                     }
                 }
+                order_id_ +=1;
                 return true;
             }
 
@@ -128,6 +132,9 @@ namespace kungfu
             void PassiveTrader::on_start()
             {
                 gateway::Trader::on_start();
+                add_md("passive");
+
+
 
                 events_ | is(msg::type::PassiveCtrl) |
                 $([&](event_ptr e)
@@ -143,12 +150,49 @@ namespace kungfu
 
             }
 
+            void PassiveTrader::add_md(std::string source_)
+            {
+                SPDLOG_INFO("try to add md {} ", source_);
+                auto md_location = data::location::make(data::mode::LIVE, data::category::MD, source_, source_,
+                                                  get_io_device()->get_home()->locator);
+                if (not has_location(md_location->uid))
+                {
+                    throw wingchun_error(fmt::format("invalid md {}", source_));
+                }
+                request_read_from(now(), md_location->uid, true);
+                SPDLOG_INFO("added md {} [{:08x}]", source_, md_location->uid);
+            }
+
             void PassiveTrader::on_md(const msg::data::Quote &quote, uint32_t source)
             {
-                //nlohmann::json _quote;
-                //msg::data::to_json(_quote, quote);
-                //SPDLOG_INFO("[quote] {}", _quote.dump());
-                //mds_[std::string(quote.instrument_id)] = quote;
+                nlohmann::json _quote;
+                msg::data::to_json(_quote, quote);
+                SPDLOG_INFO("[quote] {}", _quote.dump());
+                mds_[std::string(quote.instrument_id)] = quote;
+                for (auto &val : pending_orders_)
+                {
+                    if (std::strcmp(quote.instrument_id,val.second.instrument_id) == 0)
+                    {
+                        if (((val.second.side == Side::Buy) && (val.second.limit_price >= mds_[std::string(val.second.instrument_id)].last_price)) || ((val.second.side == Side::Buy) && (val.second.limit_price <= mds_[std::string(val.second.instrument_id)].last_price)))
+                        {
+                            auto writer = writers_[0];
+                            int64_t nano = time::now_in_nano();
+                            msg::data::Order &order = writer->open_data<msg::data::Order>(nano, msg::type::Order);
+                            order = val.second;
+                            order.volume_traded = order.volume;
+                            writer->close_data();
+                            msg::data::Trade &trade = writer->open_data<msg::data::Trade>(nano, msg::type::Trade);
+                            strcpy(trade.instrument_id, val.second.instrument_id);
+                            strcpy(trade.exchange_id, val.second.exchange_id);
+                            trade.price = val.second.limit_price;
+                            trade.volume = val.second.volume;
+                            trade.trade_id = writer->current_frame_uid();
+                            trade.trade_time = nano;
+                            strcpy(trade.account_id, this->get_account_id().c_str());
+                            writer->close_data();
+                        } 
+                    }
+                }
             }
 
             void PassiveTrader::on_passivectrl(const yijinjing::event_ptr &event)

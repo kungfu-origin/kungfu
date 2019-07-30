@@ -4,7 +4,7 @@ from kungfu.wingchun.constants import *
 source = "passive"
 account = "test"
 ticker = "600000"
-price = 13.1
+price = 13.2
 volume = 10000
 exchange = Exchange.SSE
 
@@ -16,7 +16,7 @@ def pre_run(context):
     pass
 
 def on_quote(context, quote):
-    context.log.info("{} {} {}".format(quote.instrument_id, quote.last_price, quote.trading_day))
+    context.log.info("[on_quote] (ticker){} (last_price){} (trading_day){}".format(quote.instrument_id, quote.last_price, quote.trading_day))
     insert_order(context, quote.data_time)
 
 def insert_order(context, nano):
@@ -35,10 +35,10 @@ def on_entrust(context, entrust):
     pass
 
 def on_order(context, order):
-    context.log.warning('[on_order] ticker {} order_id {}, status {}'.format( order.instrument_id, order.order_id, order.status))
+    context.log.warning('[on_order] (ticker){} (order_id){}, (status){}'.format(order.instrument_id, order.order_id, order.status))
 
 def on_trade(context, trade):
-    context.log.warning('[on_trade] rcv_time {} '.format( trade.order_id))
+    context.log.warning('[on_trade] (ticker){} (order_id){}, (volume){}'.format(trade.instrument_id, trade.order_id, trade.volume))
 
 def pre_quit(context):
     context.log.warning("pre quit")

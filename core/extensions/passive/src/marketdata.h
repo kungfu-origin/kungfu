@@ -26,11 +26,12 @@ namespace kungfu
 
             struct MdParameter
             {
-                char InstrumentId[INSTRUMENT_ID_LEN];
-                double Cycle;
-                double Limit;
-                double PrePrice;
-                int Interval = 1;
+                char instrument_id[INSTRUMENT_ID_LEN];
+                DataType type;
+                double cycle;
+                double limit;
+                double pre_price;
+                int interval = 1;
             };
 
             class PassiveMarketData : public gateway::MarketData
@@ -52,18 +53,18 @@ namespace kungfu
 
                 void creat_md();
 
-                void static_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter);
+                void static_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter);
+                void sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void line_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter);
+                void line_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void random_quota(msg::data::Quote &quote, const int &time, const MdParameter &parameter);
+                void random_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
                 int get_inter_val(char *instrument_id);
 
             private:
-                std::map <DataType, std::vector<MdParameter>> md_parameters_;
+                std::vector<MdParameter> md_parameters_;
                 std::map <std::string, msg::data::Quote> mds_;
             };
         }

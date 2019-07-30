@@ -40,6 +40,8 @@ namespace kungfu
 
                 void on_md(const msg::data::Quote &quote, uint32_t source);
 
+                void add_md(std::string source_);
+
                 void on_passivectrl(const yijinjing::event_ptr &event);
 
                 void rtn_order_from(const msg::data::OrderInput &input, OrderStatus status, int error_id = 0);
