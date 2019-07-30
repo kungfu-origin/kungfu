@@ -58,7 +58,7 @@ function createWindow () {
 	}
 
 	// Open the DevTools.
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
@@ -149,8 +149,17 @@ app.on('activate', function () {
     else mainWindow.show()
 })
 
-app.on('will-quit', (e) => {
+app.on('will-quit', async (e) => {
 	if(allowQuit) return
+	if(process.env.APP_TYPE === 'test') {
+		try {
+			await KillAll()
+		} catch (err) {
+			console.error(err)
+		}
+		app.quit()
+		return;
+	}
 	if (platform === 'mac') showQuitMessageBox();
 	e.preventDefault()
 })

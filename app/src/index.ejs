@@ -138,6 +138,6 @@
 	<div id="app"></div>
 </body>
 <script>
-	if ('<%= process.env.NODE_ENV %>' === 'production') window.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')
+	if ('<%= process.env.NODE_ENV %>' !== 'development') window.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')
 </script>
 </html>

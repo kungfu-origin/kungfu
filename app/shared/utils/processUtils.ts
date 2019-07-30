@@ -50,7 +50,7 @@ const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try{
             let noDaemon = platform === 'win' ? true : false
-            if(process.env.NODE_ENV !== 'production') noDaemon = false;
+            if(process.env.NODE_ENV === 'development') noDaemon = false;
             pm2.connect(noDaemon, (err: Error): void => {
                 if(err) {
                     process.exit(2);

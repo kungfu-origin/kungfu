@@ -16,11 +16,11 @@
             :rules="buildValidators(item)"
             >
                 <el-col :span="19">
-                    <el-input v-if="item.type === 'str'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && sourceType[source].key == item.key"></el-input>
-                    <el-input v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && sourceType[source].key == item.key" show-password></el-input>
-                    <el-switch v-if="item.type === 'bool'" v-model.trim="value[item.key]"></el-switch>
-                    <el-input-number v-if="item.type === 'int'"  :controls="false" v-model.trim="value[item.key]"></el-input-number>
-                    <el-select size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="value[item.key]" placeholder="请选择">
+                    <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && sourceType[source].key == item.key"></el-input>
+                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && sourceType[source].key == item.key" show-password></el-input>
+                    <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="value[item.key]"></el-switch>
+                    <el-input-number :class="item.key" v-if="item.type === 'int'"  :controls="false" v-model.trim="value[item.key]"></el-input-number>
+                    <el-select :class="item.key" size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="value[item.key]" placeholder="请选择">
                         <el-option
                             v-for="item in item.data"
                             :key="item.value"
@@ -39,7 +39,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="handleCancel" size="mini">取 消</el-button>
-            <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
+            <el-button type="primary" size="mini" @click="handleSubmitSetting" class="confirm-add-edit-account-btn">确 定</el-button>
         </div>
     </el-dialog>
 </template>

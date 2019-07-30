@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleAddAccount" title="添加">添加</el-button>
+                <el-button size="mini" @click="handleAddAccount" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="table-body">
@@ -132,10 +132,11 @@
             <el-dialog title="选择柜台" 
             width="400px" 
             :visible.sync="visiblity.selectSource"
+            id="select-source-dialog"
             >
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
-                            <el-col :span="12" v-for="item of Object.values(config)" :key="item.platform">
+                            <el-col :span="12" v-for="item of Object.values(config)" :key="item.source" :class="`source-${item.source}`">
                                 <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
@@ -150,7 +151,7 @@
                     </el-radio-group>
                 <div slot="footer" class="dialog-footer">
                     <el-button @click="handleCloseSelectSource" size="mini">取 消</el-button>
-                    <el-button type="primary" size="mini" @click="handleSelectSource">确 定</el-button>
+                    <el-button type="primary" size="mini" @click="handleSelectSource" class="confirm-select-source-btn">确 定</el-button>
                 </div>
             </el-dialog>
 
