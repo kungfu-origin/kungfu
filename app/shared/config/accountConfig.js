@@ -109,76 +109,7 @@ export const accountSource = {
             validator: [validate099, validateInt],
             tip: '多点登陆Id，需是0～99内整数'
         },
-    ],
-    // oes: [
-    //     {
-    //         key: 'user_id',
-    //         name: 'user_id',
-    //         type: 'str',
-    //         rule: '请填写user_id！',
-    //         required: true,
-    //     },
-    //     {
-    //         key: 'password',
-    //         name: 'Password',
-    //         type: 'str',
-    //         rule: '请填写password！',
-    //         required: true,
-    //         validator: blankValidator //不能包含空格
-    //     },
-    //     {
-    //         key: 'md_uri',
-    //         name: 'md_uri',
-    //         type: 'str',
-    //         rule: '请填写md_uri！',
-    //         required: true
-    //     },
-    //     {
-    //         key: 'qry_uri',
-    //         name: 'qry_uri',
-    //         type: 'str',
-    //         rule: '请填写qry_uri！',
-    //         required: true
-    //     },
-    //     {
-    //         key: 'ord_uri',
-    //         name: 'ord_uri',
-    //         type: 'str',
-    //         rule: '请填写ord_uri！',
-    //         required: true
-    //     },
-    //     {
-    //         key: 'rpt_uri',
-    //         name: 'rpt_uri',
-    //         type: 'str',
-    //         rule: '请填写rpt_uri！',
-    //         required: true
-    //     },
-    // ],
-    // sandbox: [
-    //     {
-    //         key: 'account_id',
-    //         name: 'account_id',
-    //         type: 'str',
-    //         rule: '请填写account_id！',
-    //         required: true,
-    //     },
-    //     {
-    //         key: 'db_file',
-    //         name: 'db_file',
-    //         type: 'str',
-    //         rule: '请填写db_file！',
-    //         required: true,
-    //     },
-    //     {
-    //         key: 'is_loop',
-    //         name: 'is_loop',
-    //         type: 'bool',
-    //         rule: '请填写is_loop！',
-    //         required: false,
-    //         default: false
-    //     },
-    // ]
+    ]
 }
 
 export const sourceType = {
@@ -193,17 +124,5 @@ export const sourceType = {
         type: '',
         typeName: 'stock',
         key:'user_id'
-    },
-    // oes: {
-    //     source: 'oes',
-    //     type: '',
-    //     typeName: '股票',
-    //     key:'user_id'
-    // },
-    // sandbox: {
-    //     source: 'sandbox',
-    //     type: 'success',
-    //     typeName: '模拟',
-    //     key:'account_id'
-    // }
+    }
 }
