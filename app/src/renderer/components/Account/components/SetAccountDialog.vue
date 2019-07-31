@@ -6,6 +6,7 @@
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleCancel"
+    id="confirm-set-account-dialog"
     >
         <el-form ref="accountForm" label-width="140px" :model="value">
             <!-- 自定义部分 -->
@@ -39,7 +40,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="handleCancel" size="mini">取 消</el-button>
-            <el-button type="primary" size="mini" @click="handleSubmitSetting" class="confirm-add-edit-account-btn">确 定</el-button>
+            <el-button type="primary" size="mini" @click="handleSubmitSetting" id="confirm-set-account-btn">确 定</el-button>
         </div>
     </el-dialog>
 </template>

@@ -8,7 +8,7 @@
                 <el-button size="mini" @click="handleAddAccount" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
-        <div class="table-body">
+        <div class="table-body accounts-table">
             <el-table
                 v-if="renderTable"
                 size="small"
@@ -23,7 +23,7 @@
                     show-overflow-tooltip
                 >
                     <template slot-scope="props">
-                        {{props.row.account_id.toAccountId()}}
+                        <span :class="props.row.account_id">{{props.row.account_id.toAccountId()}}</span> 
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -123,7 +123,7 @@
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="el-icon-money mouse-over" title="费率设置"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
-                        <span class="tr-oper-delete" @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -151,7 +151,7 @@
                     </el-radio-group>
                 <div slot="footer" class="dialog-footer">
                     <el-button @click="handleCloseSelectSource" size="mini">取 消</el-button>
-                    <el-button type="primary" size="mini" @click="handleSelectSource" class="confirm-select-source-btn">确 定</el-button>
+                    <el-button type="primary" size="mini" @click="handleSelectSource" id="confirm-select-source-btn">确 定</el-button>
                 </div>
             </el-dialog>
 
