@@ -137,7 +137,7 @@
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
                             <el-col :span="12" v-for="item of Object.values(config)" :key="item.source" :class="`source-${item.source}`">
-                                <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()]">
+                                <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()] || false">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
                                     v-if="item.typeName"
@@ -184,7 +184,7 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import * as BASE_API from '__io/db/base';
-import {accountSource, sourceType, ifSourceDisable} from '__gConfig/accountConfig';
+import { accountSource, ifSourceDisable } from '__gConfig/accountConfig';
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
@@ -197,7 +197,7 @@ export default {
     name: 'account',
 
     data() {
-        this.config = sourceType;
+        this.config = accountSource;
         this.ifSourceDisable = ifSourceDisable;
         return {
             accountIdKey: '',
@@ -325,7 +325,7 @@ export default {
             //是否是该柜台下的第一个账户记住，行情自动选中
             t.sourceFirstAccount = -1 === t.accountList.findIndex(item => (item.source_name == t.selectedSource))
             // 加上某些参数的默认值
-            accountSource[t.selectedSource].map(item => {
+            accountSource[t.selectedSource].config.map(item => {
                 if(item.default !== undefined) {
                     t.accountForm[item.key] = item.default
                 }

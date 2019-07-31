@@ -111,7 +111,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { sourceType } from '__gConfig/accountConfig'
+import { accountSource } from '__gConfig/accountConfig'
 import { biggerThanZeroValidator } from '__assets/validator';
 import { nanoMakeOrder } from '__io/nano/nanoReq';
 import { deepClone } from '__gUtils/busiUtils';
@@ -145,7 +145,7 @@ export default {
         // side; //买卖方向 '0': 买, '1': 卖
         // offset; //开平方向 '0': 开, '1': 平, '2': 平今, '3': 平昨
         // price_type; //价格类型 '0': 市价(任意价), '3': 限价 先提供这两选项吧，别的不一定是交易所通用的
-        this.sourceType = sourceType;
+        this.config = accountSource;
         return {
             makeOrderForm: {
                 instrument_id: '',
@@ -183,7 +183,7 @@ export default {
             const targetAccount = t.accountList.filter(a => a.account_id === targetAccountId)
             if(!targetAccount.length) return 'stock'
             const sourceName = targetAccount[0].source_name;
-            return t.sourceType[sourceName].typeName
+            return t.config[sourceName].typeName
         },
     },
 
@@ -245,7 +245,7 @@ export default {
         },
 
         getAccountType(sourceName){
-            return this.sourceType[sourceName]
+            return this.config[sourceName]
         },
         
         clearData(){

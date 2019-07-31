@@ -71,7 +71,7 @@ import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Index';
-import { sourceType } from '__gConfig/accountConfig';
+import { accountSource } from '__gConfig/accountConfig';
 import * as ACCOUNT_API from '__io/db/account';
 import { debounce } from '__gUtils/busiUtils';
 import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
@@ -105,7 +105,7 @@ export default {
         accountType() {
             const source_name = this.currentAccount.source_name
             if(!source_name) return
-            return sourceType[source_name].typeName
+            return accountSource[source_name].typeName
         },
 
         currentId() {

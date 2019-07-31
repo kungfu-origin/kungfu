@@ -66,7 +66,7 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { accountSource, sourceType } from '__gConfig/accountConfig';
+import { accountSource } from '__gConfig/accountConfig';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 
@@ -77,7 +77,7 @@ export default {
             statusLevel[key] = statusConfig[key].level;
         })
         return {
-            config: sourceType,
+            config: accountSource,
             statusLevel,
             // processStatus: Object.freeze({})
         }

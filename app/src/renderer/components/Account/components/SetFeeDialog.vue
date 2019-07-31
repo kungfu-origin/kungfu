@@ -47,8 +47,8 @@
 
 <script>
 import Vue from 'vue';
-import {feeTemplate} from '../config/feeConfig.js';
-import {Card} from 'element-ui';
+import { feeTemplate } from '../config/feeConfig.js';
+import { Card } from 'element-ui';
 Vue.use(Card)
 
 export default {
@@ -133,7 +133,7 @@ export default {
             const t = this;
             t.$refs['feeSettingForm'].validate(valid => {
                 if(valid){
-                    const feeSettingData = t.resolveFeeSettingData(t.feeSettingForm.fees, t.sourceType)
+                    const feeSettingData = t.resolveFeeSettingData(t.feeSettingForm.fees, t.accountType)
                     t.setFeeSettingData(t.accountId, feeSettingData).then(res => {
                         t.$message.success('操作成功！')
                         t.clearData()
