@@ -132,12 +132,12 @@ export default {
             if(t.method == 'add' && t.config[t.source].key == item.key){
                 return [
                     {validator: t.validateAccountId, trigger: 'blur'},
-                    {required: true, message: item.rule, trigger: 'blur'}
+                    {required: true, message: item.errMsg, trigger: 'blur'}
                 ] 
             }else{
                 let validators = [];
                 if(item.validator && item.validator.length) validators = item.validator.map(v => ({validator: v, trigger: 'blur'}))
-                if(item.required) validators.push({required: true, message: item.rule, trigger: 'blur'})
+                if(item.required) validators.push({required: true, message: item.errMsg, trigger: 'blur'})
                 return validators
             }
         },
