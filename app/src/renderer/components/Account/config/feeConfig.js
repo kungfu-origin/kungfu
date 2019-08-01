@@ -1,4 +1,4 @@
-import {blankValidator, validateTCPUri, validate099, validateInt} from '__assets/validator'
+import {blankValidator, tcpUriValidator, o99Validator, intValidator} from '__assets/validator'
 /**
  * @param  {String} type stock/future
  */

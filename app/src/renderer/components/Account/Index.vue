@@ -165,10 +165,6 @@ export default {
     height: 100%;
 }
 
-.account-content{
-    height: 100%;
-}
-
 .account-content > .el-row{
     height: 50%;
 }

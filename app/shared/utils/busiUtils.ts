@@ -1,5 +1,7 @@
 import readline from 'readline';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
+import { EXTENSION_DIR } from '__gConfig/pathConfig';
+import { listDir, statSync } from '__gUtils/fileUtils';
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -147,6 +149,7 @@ export const throttle = (fn: Function, interval = 300): Function => {
  * @param  {string} htmlPath
  */
 export const openWin = (htmlPath: string, BrowserWindow: any): void => {
+
     const modalPath = process.env.NODE_ENV === 'development'
     ? `http://localhost:9090/#/${htmlPath}`
     : `file://${__dirname}/index.html#${htmlPath}`
@@ -413,3 +416,28 @@ export const dealTrade = (item: TradeInputData): TradeData => {
 
 // ========================== 交易数据处理 end ===========================
 
+
+
+export const getExtensions = (): Promise<any> => {
+    return listDir(EXTENSION_DIR).then(async (files: string[]) => {
+        console.log(files)
+        const promises = files.map(fp => {
+            fp = path.join(EXTENSION_DIR, fp);
+            const stat: any = statSync(fp);
+            let isDir: boolean;
+            if(stat) isDir = stat.isDirectory();    
+            else return false;
+            if(isDir) {
+                return listDir(fp).then((childFiles: string[]) => {
+                    if(childFiles.indexOf('package.json') !== -1) return fp;
+                    else return false;
+                })
+            } else {
+                return false
+            }
+           
+        })
+        const fpList = await Promise.all(promises)
+        return fpList.filter(f => !!f)
+    })
+}

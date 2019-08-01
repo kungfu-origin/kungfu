@@ -1,4 +1,6 @@
 import { deepClone } from '__gUtils/busiUtils';
+// import { EXTENSION_DIR } from '__gConfig/pathConfig';
+
 const path = require("path");
 const fse = require('fs-extra');
 const csv = require("fast-csv");
@@ -39,6 +41,21 @@ interface FileInputData extends FileData {
 }
 
 
+export const listDir = (filePath: string): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+        fse.readdir(filePath, (err: Error, files: any[]) => {
+            if(err) {
+                reject(err)
+                return;
+            }
+            resolve(files)
+        })
+    })
+}
+
+export const statSync = (filePath: string): any => {
+    return fse.statSync(filePath)
+}
 
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
     fileTree = fileTree || {};
@@ -50,59 +67,55 @@ export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<Fi
     let ids: FileIds = { file: [], folder: [] };
     const ignoreList = ['.git', '.DS_Store']
     return new Promise((resolve, reject) => {
-        fse.readdir(filePath, (err: Error, files: any[]) => {
-            if(err) {
-                console.error(err)
-                reject(err)
-            }else {
-                files.forEach((file: any) => {
-                    if(ignoreList.indexOf(file) !== -1) return;
-                    const fileDir: string = path.join(filePath, file);
-                    const stats: any = fse.statSync(fileDir)
-                    if(stats){
-                        const isDir: boolean = stats.isDirectory();
-                        const fileInfo: FileData = buildFileObj({
-                                id: 0,
-                                parentId: strategy.id,
-                                isDir,
-                                name: file,
-                                ext: path.extname(fileDir).slice(path.extname(fileDir).indexOf('.') + 1),
-                                filePath: fileDir,
-                                children: {
-                                    folder: [],
-                                    file: []
-                                },
-                                stats,
-                                root: false,
-                                open: false
-                        })
-                        //保证顺序
-                        if(isDir){
-                            dirList.push(fileInfo)
-                        }else{
-                            fileList.push(fileInfo)
-                        }
+        listDir(filePath).then(files => {
+            files.forEach((file: any) => {
+                if(ignoreList.indexOf(file) !== -1) return;
+                const fileDir: string = path.join(filePath, file);
+                const stats: any = fse.statSync(fileDir)
+                if(stats){
+                    const isDir: boolean = stats.isDirectory();
+                    const fileInfo: FileData = buildFileObj({
+                            id: 0,
+                            parentId: strategy.id,
+                            isDir,
+                            name: file,
+                            ext: path.extname(fileDir).slice(path.extname(fileDir).indexOf('.') + 1),
+                            filePath: fileDir,
+                            children: {
+                                folder: [],
+                                file: []
+                            },
+                            stats,
+                            root: false,
+                            open: false
+                    })
+                    //保证顺序
+                    if(isDir){
+                        dirList.push(fileInfo)
+                    }else{
+                        fileList.push(fileInfo)
                     }
-                })
-                dirList.forEach((dir: FileData): void => {
-                    const id: number = window.fileId++
-                    ids.folder.push(id);
-                    fileTree[id] = {
-                        ...dir,
-                        id
-                    }
-                })
-                fileList.forEach((file: FileData): void => {
-                    const id: number = window.fileId++
-                    ids.file.push(id);
-                    fileTree[id] = {
-                        ...file,
-                        id
-                    }
-                })
-                resolve({ ids, fileTree })
-            }
+                }
+            })
+            dirList.forEach((dir: FileData): void => {
+                const id: number = window.fileId++
+                ids.folder.push(id);
+                fileTree[id] = {
+                    ...dir,
+                    id
+                }
+            })
+            fileList.forEach((file: FileData): void => {
+                const id: number = window.fileId++
+                ids.file.push(id);
+                fileTree[id] = {
+                    ...file,
+                    id
+                }
+            })
+            resolve({ ids, fileTree })
         })
+        // .catch(err => reject(err))
     })    
 }
 
@@ -298,3 +311,4 @@ export const existsSync = (filePath: string): boolean => {
 export const copySync = (fromPath: string, toPath: string): void => {
     fse.copySync(fromPath, toPath)
 }
+

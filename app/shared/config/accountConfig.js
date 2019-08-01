@@ -1,4 +1,4 @@
-import {blankValidator, validateTCPUri, validate099, validateInt} from '__assets/validator'
+import {blankValidator, tcpUriValidator, o99Validator, intValidator} from '__assets/validator'
 import {platform} from '__gConfig/platformConfig';
 
 export const ifSourceDisable = {
@@ -46,7 +46,7 @@ export const accountSource = {
                 type: 'str',
                 errMsg: '请填写md_uri！',
                 required: true,
-                validator: [validateTCPUri]
+                validator: [tcpUriValidator]
             },
             {
                 key: 'td_uri',
@@ -54,7 +54,7 @@ export const accountSource = {
                 type: 'str',
                 errMsg: '请填写td_uri！',
                 required: true,
-                validator: [validateTCPUri]
+                validator: [tcpUriValidator]
             }
         ]
     },
@@ -99,7 +99,7 @@ export const accountSource = {
                 name: 'md_port',
                 type: 'int',
                 errMsg: '请填写md_port！',
-                validator: [validateInt],
+                validator: [intValidator],
                 required: true
             },
             {
@@ -114,7 +114,7 @@ export const accountSource = {
                 name: 'td_port',
                 type: 'int',
                 errMsg: '请填写td_port！',
-                validator: [validateInt],
+                validator: [intValidator],
                 required: true
             },
             {
@@ -123,7 +123,7 @@ export const accountSource = {
                 type: 'int',
                 errMsg: '请填写0-99整数',
                 required: false,
-                validator: [validate099, validateInt],
+                validator: [o99Validator, intValidator],
                 tip: '多点登陆Id，需是0～99内整数'
             },
         ]

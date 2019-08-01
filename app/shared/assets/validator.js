@@ -52,7 +52,7 @@ export const blankValidator = (rule, value, callback) => {
 }
 
  //check 只能字母数字
-export const validateNumberAndWords = (rule, value, callback) => {
+export const numberAndWordsValidator = (rule, value, callback) => {
     const p = /^[A-Za-z0-9]+$/;
     if(!p.test(value)){
         callback(new Error('策略名称只能包含字母与数字！'))
@@ -62,7 +62,7 @@ export const validateNumberAndWords = (rule, value, callback) => {
 }
 
 //必须以tcp://开头
-export const validateTCPUri = (rule, value, callback) => {
+export const tcpUriValidator = (rule, value, callback) => {
     const keyword = 'tcp://';
     if(value && (value.indexOf(keyword) === -1 || value.indexOf(keyword) !== 0)) {
         callback(new Error('uri 必须以 “tcp://” 开头！'))
@@ -72,7 +72,7 @@ export const validateTCPUri = (rule, value, callback) => {
 }
 
 //0-99
-export const validate099 = (rule, value, callback) => {
+export const o99Validator = (rule, value, callback) => {
     if(value && (value < 1 || value > 99)) {
         callback(new Error('必须是 1～99 内整数！'))
     }else{
@@ -81,7 +81,7 @@ export const validate099 = (rule, value, callback) => {
 }
 
 //整数
-export const validateInt = (rule, value, callback) => {
+export const intValidator = (rule, value, callback) => {
     if(value && value % 1 !== 0) {
         callback(new Error('必须是整数！'))        
     }else{
@@ -90,7 +90,7 @@ export const validateInt = (rule, value, callback) => {
 }
 
 //必填
-export const validateRequired = (rule, value, callback) => {
+export const requiredValidator = (rule, value, callback) => {
     if(!!(value + '')) return callback()
     else callback(new Error('不能为空！'))
 }
