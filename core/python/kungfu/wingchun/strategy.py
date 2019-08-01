@@ -53,6 +53,10 @@ class Strategy(pywingchun.Strategy):
         self.ctx.insert_fak_order = wc_context.insert_fak_order
         self.ctx.insert_market_order = wc_context.insert_market_order
         self.ctx.cancel_order = wc_context.cancel_order
+        self.ctx.get_quotes = wc_context.get_quotes
+        self.ctx.get_orders = wc_context.get_orders
+        self.ctx.get_trades = wc_context.get_trades
+
         self._pre_start(self.ctx)
         self.ctx.log.info('strategy prepare to run')
 
@@ -60,10 +64,10 @@ class Strategy(pywingchun.Strategy):
         self._post_start(self.ctx)
         self.ctx.log.info('strategy ready to run')
 
-    def pre_quit(self, wc_context):
+    def pre_stop(self, wc_context):
         self._pre_stop(self.ctx)
 
-    def post_quit(self, wc_context):
+    def post_stop(self, wc_context):
         self._post_stop(self, self.ctx)
 
     def on_trading_day(self, wc_context, trading_day):

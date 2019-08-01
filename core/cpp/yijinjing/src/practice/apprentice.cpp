@@ -134,9 +134,13 @@ namespace kungfu
                   {
                       SPDLOG_ERROR("Register failed");
                   });
-            } else
+            } else if (get_io_device()->get_home()->mode == mode::REPLAY)
             {
                 reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
+            } else if (get_io_device()->get_home()->mode == mode::BACKTEST)
+            {
+                // dest_id 0 should be configurable TODO
+                reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, bt_source_, bt_source_, get_io_device()->get_home()->locator), 0, begin_time_);
             }
 
             events_ |
@@ -203,7 +207,20 @@ namespace kungfu
                   on_trading_day(e, e->data<int64_t>());
               });
 
-            reader_->join(master_home_location_, 0, begin_time_);
+
+            if (get_io_device()->get_home()->mode != mode::BACKTEST)
+            {
+                reader_->join(master_home_location_, 0, begin_time_);
+                events_ | is(msg::type::RequestStart) | first() |
+                $([&](event_ptr e)
+                {
+                    on_start();
+                });
+            } else
+            {
+                on_start();
+            }
+
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {
                 checkin();

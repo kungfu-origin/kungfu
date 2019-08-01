@@ -140,6 +140,8 @@ namespace kungfu
 
                 void mark(int64_t trigger_time, int32_t msg_type);
 
+                void mark_with_time(int64_t trigger_time, int32_t msg_type);
+
                 /**
                  * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
                  * @tparam T

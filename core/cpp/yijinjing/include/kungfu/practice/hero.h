@@ -35,6 +35,9 @@ namespace kungfu
             void set_end_time(int64_t end_time)
             { end_time_ = end_time; }
 
+            void set_bt_source(const std::string &bt_source)
+            { bt_source_ = bt_source; }
+
             void run();
 
             void signal_stop()
@@ -70,6 +73,7 @@ namespace kungfu
             int64_t begin_time_;
             int64_t end_time_;
             int64_t now_;
+            std::string bt_source_;
             rx::connectable_observable<yijinjing::event_ptr> events_;
 
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);

@@ -284,7 +284,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("disjoin", &reader::disjoin);
 
     py::class_<writer, writer_ptr>(m, "writer")
-            .def("write_raw", &writer::write_raw);
+            .def("write_raw", &writer::write_raw)
+            .def("mark_with_time", &writer::mark_with_time);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
     io_device.def(py::init<data::location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)

@@ -84,6 +84,26 @@ namespace kungfu
                 close_frame(0);
             }
 
+            void writer::mark_with_time(int64_t gen_time, int32_t msg_type)
+            {
+                assert(sizeof(frame_header) + sizeof(frame_header) <= journal_->current_page_->get_page_size());
+                if (journal_->current_frame()->address() + sizeof(frame_header) > journal_->current_page_->address_border())
+                {
+                    mark(gen_time, msg::type::PageEnd);
+                    journal_->load_next_page();
+                }
+                auto frame = journal_->current_frame();
+                frame->set_header_length();
+                frame->set_trigger_time(gen_time);
+                frame->set_msg_type(msg_type);
+                frame->set_source(journal_->location_->uid);
+                frame->set_dest(journal_->dest_id_);
+                frame->set_gen_time(gen_time);
+                frame->set_data_length(0);
+                journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                journal_->next();
+            }
+
             void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, uint32_t length)
             {
                 auto frame = open_frame(trigger_time, msg_type, length);

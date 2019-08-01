@@ -1,8 +1,9 @@
 import pyyjj
 import pywingchun
 import click
-from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.wingchun import Runner, replay_setup
+import os
+from kungfu.command import kfc, pass_ctx_from_parent, replay_setup, backtest_setup
+from kungfu.wingchun import Runner
 from kungfu.wingchun.strategy import Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.oms.order import *
@@ -14,21 +15,35 @@ from kungfu.wingchun.oms.order import *
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
 @click.option('-r', '--replay', is_flag=True, help='run in replay mode')
 @click.option('-i', '--session_id', type=int, help='replay session id, MUST be specified if replay is set')
+@click.option('-b', '--backtest', is_flag=True, help='run in backtest mode')
 @click.pass_context
-def strategy(ctx, group, name, path, low_latency, replay, session_id):
+def strategy(ctx, group, name, path, low_latency, replay, session_id, backtest):
     pass_ctx_from_parent(ctx)
     ctx.group = group
     ctx.name = name
     ctx.path = path
     ctx.low_latency = low_latency if not replay else True
+    ctx.md_path = None
+
+    assert not(replay and backtest), "Replay mode and BackTest mode cannot be selected together"
     ctx.replay = replay
-    ctx.session_id = session_id
-    mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
+    ctx.backtest = backtest
+    mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.BACKTEST if ctx.backtest else ctx.pyyjj.mode.LIVE
+
     ctx.logger = create_logger(name, ctx.log_level, pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator))
+
     ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
     runner = Runner(ctx, mode)
     runner.add_strategy(ctx.strategy)
+    ctx.category = 'strategy'
+
     if replay:
-        ctx.category = 'strategy'
+        ctx.session_id = session_id
         replay_setup.setup(ctx, session_id, strategy, runner)
+    if backtest:
+        ctx.md_path = os.path.join(ctx.home, 'md', group, name, 'journal', 'backtest', '00000000.*.journal')
+        ctx.session_id = session_id
+        backtest_setup.setup(ctx, session_id, strategy, runner)
+
     runner.run()
+

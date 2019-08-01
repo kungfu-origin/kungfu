@@ -35,8 +35,14 @@ namespace kungfu
             void Runner::on_start()
             {
                 apprentice::on_start();
-
-                context_ = std::make_shared<Context>(*this, events_);
+                if (get_io_device()->get_home()->mode == mode::BACKTEST)
+                {
+                    context_ = std::make_shared<ContextBackTest>(*this, events_, strategies_);
+                } else
+                {
+                    context_ = std::make_shared<Context>(*this, events_);
+                }
+                
                 context_->react();
 
                 for (const auto &strategy : strategies_)

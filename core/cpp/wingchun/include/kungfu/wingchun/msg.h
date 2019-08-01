@@ -177,26 +177,70 @@ namespace kungfu
                     std::string get_source_id() const
                     { return std::string(source_id); }
 
+                    void set_source_id(const std::string & source_id_)
+                    {strncpy(source_id, source_id_.c_str(), SOURCE_ID_LEN);}
+
                     std::string get_trading_day() const
                     { return std::string(trading_day); }
+
+                    void set_trading_day(const std::string & trading_day_)
+                    {strncpy(trading_day, trading_day_.c_str(), DATE_LEN);}
 
                     std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
+                    void set_instrument_id(const std::string & instrument_id_)
+                    { strncpy(instrument_id, instrument_id_.c_str(), INSTRUMENT_ID_LEN);}
+
                     std::string get_exchange_id() const
                     { return std::string(exchange_id); }
+
+                    void set_exchange_id(const std::string & exchange_id_)
+                    {strncpy(exchange_id, exchange_id_.c_str(), EXCHANGE_ID_LEN);}
 
                     std::vector<double> get_bid_price() const
                     { return std::vector<double>(bid_price, bid_price + 10); }
 
+                    void set_bid_price(std::vector<double> & bid_price_)
+                    {
+                        int len = bid_price_.size();
+                        len = len > 10 ? 10 : len;
+                        if(len > 0)
+                        { memcpy(bid_price, &bid_price_[0], len*sizeof(double)); }
+                    }
+
                     std::vector<double> get_ask_price() const
                     { return std::vector<double>(ask_price, ask_price + 10); }
+
+                    void set_ask_price(std::vector<double> & ask_price_)
+                    {
+                        int len = ask_price_.size();
+                        len = len > 10 ? 10 : len;
+                        if(len > 0)
+                        { memcpy(ask_price, &ask_price_[0], len*sizeof(double)); }
+                    }
 
                     std::vector<int64_t> get_bid_volume() const
                     { return std::vector<int64_t>(bid_volume, bid_volume + 10); }
 
+                    void set_bid_volume(std::vector<int64_t> & bid_volume_)
+                    {
+                        int len = bid_volume_.size();
+                        len = len > 10 ? 10 : len;
+                        if(len > 0)
+                        { memcpy(bid_volume, &bid_volume_[0], len*sizeof(int64_t)); }
+                    }
+
                     std::vector<int64_t> get_ask_volume() const
                     { return std::vector<int64_t>(ask_volume, ask_volume + 10); }
+
+                    void set_ask_volume(std::vector<int64_t> & ask_volume_)
+                    {
+                        int len = ask_volume_.size();
+                        len = len > 10 ? 10 : len;
+                        if(len > 0)
+                        { memcpy(ask_volume, &ask_volume_[0], len*sizeof(int64_t)); }
+                    }
 
 #ifndef _WIN32
                 } __attribute__((packed));

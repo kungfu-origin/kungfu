@@ -19,6 +19,8 @@ namespace kungfu
     {
         namespace strategy
         {
+            FORWARD_DECLARE_PTR(Context)
+            
             class Strategy
             {
             public:
