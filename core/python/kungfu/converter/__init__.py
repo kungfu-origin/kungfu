@@ -5,7 +5,7 @@ from pywingchun.constants import MsgType
 import kungfu.yijinjing.msg as kfm
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
-from kungfu.log import create_logger
+from kungfu.yijinjing.log import create_logger
 
 import pandas as pd
 import sys
