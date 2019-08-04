@@ -11,7 +11,11 @@ export default {
             trading_day: moment().format('YYYYMMDD')
         },
         processStatus: null,
+<<<<<<< HEAD
         accountSource: {}
+=======
+        sourceAccount: {}
+>>>>>>> [add] fix extension
     },
     actions,
     mutations,
