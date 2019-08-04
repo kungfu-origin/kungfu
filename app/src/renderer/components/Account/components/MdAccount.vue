@@ -14,8 +14,8 @@
                 >
                     <template slot-scope="props">
                         <el-tag
-                        v-if="(config[props.row.source_name] || {}).typeName"
-                        :type="config[props.row.source_name].type" 
+                        v-if="(accountSource[props.row.source_name] || {}).typeName"
+                        :type="accountSource[props.row.source_name].type" 
                         >
                             {{props.row.source_name}}
                         </el-tag>
@@ -77,7 +77,6 @@
 import path from 'path';
 import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
-import { accountSource } from '__gConfig/accountConfig'
 import * as ACCOUNT_API from '__io/db/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd } from '__io/actions/account';
@@ -86,7 +85,6 @@ import SetMdSourceDialog from './SetMdSourceDialog';
 export default {
     data(){
         return {
-            config: accountSource,
             setMdSourceDialogVisiblity: false,
             currentMdSourceAccount: null,
             renderTable: false
@@ -95,6 +93,7 @@ export default {
 
     computed: {
         ...mapState({
+            accountSource: state => state.BASE.accountSource || {},
             accountList: state => state.ACCOUNT.accountList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus

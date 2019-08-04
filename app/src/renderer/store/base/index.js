@@ -11,6 +11,7 @@ export default {
             trading_day: moment().format('YYYYMMDD')
         },
         processStatus: null,
+        sourceAccount: {}
     },
     actions,
     mutations,

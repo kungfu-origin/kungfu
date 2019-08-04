@@ -10,18 +10,18 @@
     
     >
         <el-form 
-        v-if="!!config[source] && config[source].config"        
+        v-if="!!accountSource[source] && accountSource[source].config"        
         ref="accountForm" label-width="140px" :model="value">
             <!-- 自定义部分 -->
             <el-form-item 
-            v-for="item of config[source].config" :key="item.key"
+            v-for="item of accountSource[source].config" :key="item.key"
             :label="item.name"
             :prop="item.key"
             :rules="buildValidators(item)"
             >
                 <el-col :span="19">
-                    <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && config[source].key == item.key"></el-input>
-                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && config[source].key == item.key" show-password></el-input>
+                    <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key"></el-input>
+                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key" show-password></el-input>
                     <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="value[item.key]"></el-switch>
                     <el-input-number :class="item.key" v-if="item.type === 'int'"  :controls="false" v-model.trim="value[item.key]"></el-input-number>
                     <el-select :class="item.key" size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="value[item.key]" placeholder="请选择">
@@ -49,7 +49,6 @@
 </template>
 
 <script>
-import { accountSource } from '__gConfig/accountConfig';
 import { mapState } from 'vuex';
 import * as ACCOUNT_API from '__io/db/account';
 export default {
@@ -83,7 +82,6 @@ export default {
         }
     },
     data() {
-        this.config = accountSource;
         //存放初始数据格式
         this.initData = {
             resolve_mode: 'auto',
@@ -92,6 +90,12 @@ export default {
             need_settlement_confirm: false,
         }
         return {}
+    },
+
+    computed: {
+        ...mapState({
+            accountSource: state => state.BASE.accountSource
+        })
     },
 
     methods:{
@@ -104,7 +108,7 @@ export default {
             const t = this
             t.$refs.accountForm.validate(valid => {
                 if(valid) {
-                    let account_id = `${t.source}_${t.value[t.config[t.source].key]}`
+                    let account_id = `${t.source}_${t.value[t.accountSource[t.source].key]}`
                     const formValue = t.value
                     let changeAccount 
                     if(t.method == 'add') { //添加账户
@@ -129,7 +133,7 @@ export default {
 
         buildValidators(item) {
             const t = this;
-            if(t.method == 'add' && t.config[t.source].key == item.key){
+            if(t.method == 'add' && t.accountSource[t.source].key == item.key){
                 return [
                     {validator: t.validateAccountId, trigger: 'blur'},
                     {required: true, message: item.errMsg, trigger: 'blur'}

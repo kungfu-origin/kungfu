@@ -71,7 +71,6 @@ import CurrentOrder from '../Base/CurrentOrder';
 import TradeRecord from '../Base/TradeRecord';
 import Pos from '../Base/Pos';
 import Pnl from '../Base/pnl/Index';
-import { accountSource } from '__gConfig/accountConfig';
 import * as ACCOUNT_API from '__io/db/account';
 import { debounce } from '__gUtils/busiUtils';
 import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
@@ -99,13 +98,15 @@ export default {
     computed:{
         ...mapState({
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
+            accountSource: state => (state.BASE.accountSource || {})
         }),
 
         //账户的类型，根据是哪个柜台的，可以判断是是期货还是股票还是证券
         accountType() {
-            const source_name = this.currentAccount.source_name
+            const t = this;
+            const source_name = t.currentAccount.source_name
             if(!source_name) return
-            return accountSource[source_name].typeName
+            return (t.accountSource[source_name] || {}).typeName || ''
         },
 
         currentId() {

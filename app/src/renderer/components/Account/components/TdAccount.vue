@@ -32,8 +32,8 @@
                     >
                     <template slot-scope="props">
                         <el-tag
-                        v-if="(config[props.row.source_name] || {}).typeName"
-                        :type="config[props.row.source_name].type" 
+                        v-if="(accountSource[props.row.source_name] || {}).typeName"
+                        :type="accountSource[props.row.source_name].type" 
                         >
                             {{props.row.source_name}}
                         </el-tag>
@@ -96,7 +96,7 @@
                     align="right"
                     >
                     <template slot-scope="props" >
-                        <template v-if="(config[props.row.source_name] || {}).typeName == 'future'">
+                        <template v-if="(accountSource[props.row.source_name] || {}).typeName == 'future'">
                             {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).margin) + '' || '--'}}
                         </template>
                         <!-- market_value -->
@@ -136,7 +136,7 @@
             >
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
-                            <el-col :span="12" v-for="item of Object.values(config)" :key="item.source" :class="`source-${item.source}`">
+                            <el-col :span="12" v-for="item of Object.values(accountSource || {})" :key="item.source" :class="`source-${item.source}`">
                                 <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()] || false">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
@@ -171,7 +171,7 @@
             <SetFeeDialog
             v-if="visiblity.setFee"
             :visible.sync="visiblity.setFee"
-            :accountType="(config[feeAccount.source_name] || {}).typeName"
+            :accountType="(accountSource[feeAccount.source_name] || {}).typeName"
             :accountId="feeAccount.account_id"
             :setFeeSettingData="setFeeSettingData"
             :getFeeSettingData="getFeeSettingData"
@@ -184,7 +184,7 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import * as BASE_API from '__io/db/base';
-import { accountSource, ifSourceDisable } from '__gConfig/accountConfig';
+import { ifSourceDisable } from '__gConfig/accountConfig';
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
@@ -197,7 +197,6 @@ export default {
     name: 'account',
 
     data() {
-        this.config = accountSource;
         this.ifSourceDisable = ifSourceDisable;
         return {
             accountIdKey: '',
@@ -228,6 +227,7 @@ export default {
 
     computed:{
         ...mapState({
+            accountSource: state => state.BASE.accountSource || {},
             mdTdState: state => state.ACCOUNT.mdTdState,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             accountList: state => state.ACCOUNT.accountList, 
@@ -325,7 +325,7 @@ export default {
             //是否是该柜台下的第一个账户记住，行情自动选中
             t.sourceFirstAccount = -1 === t.accountList.findIndex(item => (item.source_name == t.selectedSource))
             // 加上某些参数的默认值
-            accountSource[t.selectedSource].config.map(item => {
+            t.accountSource[t.selectedSource].config.map(item => {
                 if(item.default !== undefined) {
                     t.accountForm[item.key] = item.default
                 }

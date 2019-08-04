@@ -1,5 +1,10 @@
-import {blankValidator, tcpUriValidator, o99Validator, intValidator} from '__assets/validator'
-import {platform} from '__gConfig/platformConfig';
+// import { blankValidator, tcpUriValidator, o99Validator, intValidator } from '__assets/validator'
+import * as VALIDATOR from '__assets/validator'
+import { platform } from '__gConfig/platformConfig';
+import { getExtensionConfigs } from '__gUtils/busiUtils';
+
+const path = require('path');
+
 
 export const ifSourceDisable = {
     ctp: platform === 'mac',
@@ -11,175 +16,34 @@ const tagColor = {
     'stock': ''
 };
 
-export const accountSource = {
-    ctp: {
-        source: 'ctp',
-        type: tagColor['future'] || '',
-        typeName: 'future',
-        key:'account_id',
-        config: [
-            {
-                key: 'account_id',
-                name: 'account_id',
-                type: 'str',
-                errMsg: '请填写用户account_id！',
-                required: true,
-            },
-            {
-                key: 'password',
-                name: 'password',
-                type: 'password',
-                errMsg: '请填写password！',
-                required: true,
-                validator: [blankValidator] //不能包含空格
-            },
-            {
-                key: 'broker_id',
-                name: 'broker_id',
-                type: 'str',
-                errMsg: '请填写broker_id！',
-                required: true
-            },
-            {
-                key: 'md_uri',
-                name: 'md_uri',
-                type: 'str',
-                errMsg: '请填写md_uri！',
-                required: true,
-                validator: [tcpUriValidator]
-            },
-            {
-                key: 'td_uri',
-                name: 'td_uri',
-                type: 'str',
-                errMsg: '请填写td_uri！',
-                required: true,
-                validator: [tcpUriValidator]
+export const getAccountSource = async () => {
+    let sources = {}
+    try {
+        const configs = await getExtensionConfigs();
+        configs.forEach(c => {
+            if(c.type === 'source') {
+                const config = c.config;
+                const source = config.name;
+                const typeName = config.type;
+                const type = tagColor[typeName] || '';
+                const itemConfig = config.config;
+                itemConfig.forEach(item => {
+                    if(item.validator) {
+                        item.validator = (item.validator || []).map(validatorName => VALIDATOR[validatorName])
+                    }
+                })
+                sources[source] = {
+                    ...config,
+                    source,
+                    type,
+                    typeName,
+                    config: itemConfig
+                }
             }
-        ]
-    },
-    
-    xtp: {
-        source: 'xtp',
-        type: tagColor['stock'] || '',
-        typeName: 'stock',
-        key:'user_id',
-        config: [
-            {
-                key: 'user_id',
-                name: 'user_id',
-                type: 'str',
-                errMsg: '请填写user_id！',
-                required: true,
-            },
-            {
-                key: 'password',
-                name: 'password',
-                type: 'password',
-                errMsg: '请填写password！',
-                required: true,
-                validator: [blankValidator] //不能包含空格
-            },
-            {
-                key: 'software_key',
-                name: 'software_key',
-                type: 'str',
-                errMsg: '请填写software_key！',
-                required: true
-            },
-            {
-                key: 'md_ip',
-                name: 'md_ip',
-                type: 'str',
-                errMsg: '请填写md_ip！',
-                required: true
-            },
-            {
-                key: 'md_port',
-                name: 'md_port',
-                type: 'int',
-                errMsg: '请填写md_port！',
-                validator: [intValidator],
-                required: true
-            },
-            {
-                key: 'td_ip',
-                name: 'td_ip',
-                type: 'str',
-                errMsg: '请填写td_ip！',
-                required: true
-            },
-            {
-                key: 'td_port',
-                name: 'td_port',
-                type: 'int',
-                errMsg: '请填写td_port！',
-                validator: [intValidator],
-                required: true
-            },
-            {
-                key: 'client_id',
-                name: 'client_id',
-                type: 'int',
-                errMsg: '请填写0-99整数',
-                required: false,
-                validator: [o99Validator, intValidator],
-                tip: '多点登陆Id，需是0～99内整数'
-            },
-        ]
-    },
-
-    tora: {
-        source: 'tora',
-        type: tagColor['stock'] || '',
-        typeName: 'stock',
-        key:'account_id',
-        config: [
-            {
-                key: 'account_id',
-                name: 'account_id',
-                type: 'str',
-                errMsg: '请填写用户account_id！',
-                required: true,
-            },
-            {
-                key: 'user_id',
-                name: 'user_id',
-                type: 'str',
-                errMsg: '请填写用户user_id！',
-                required: true,
-            },
-            {
-                key: 'password',
-                name: 'password',
-                type: 'password',
-                errMsg: '请填写password！',
-                required: true,
-                validator: [blankValidator] //不能包含空格
-            },
-            {
-                key: 'department_id',
-                name: 'department_id',
-                type: 'str',
-                errMsg: '请填写department_id！',
-                required: true
-            },
-            {
-                key: 'md_uri',
-                name: 'md_uri',
-                type: 'str',
-                errMsg: '请填写md_uri！',
-                required: true,
-                validator: [validateTCPUri]
-            },
-            {
-                key: 'td_uri',
-                name: 'td_uri',
-                type: 'str',
-                errMsg: '请填写td_uri！',
-                required: true,
-                validator: [validateTCPUri]
-            }
-        ]
+        })
+    } catch (err) {
+        sources = {}
     }
+    return sources
 }
+

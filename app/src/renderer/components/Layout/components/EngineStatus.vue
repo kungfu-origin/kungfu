@@ -11,8 +11,8 @@
                 <div class="account-status" v-for="accountItem in sourceList" :key="accountItem.account_id">
                     <span class="account-process-item source-name">
                         <el-tag
-                        v-if="(config[accountItem.source_name]||{}).typeName"
-                        :type="config[accountItem.source_name].type" 
+                        v-if="(accountSource[accountItem.source_name]||{}).typeName"
+                        :type="accountSource[accountItem.source_name].type" 
                         >
                             {{accountItem.source_name}}
                         </el-tag> 
@@ -36,8 +36,8 @@
                 <div class="account-status" v-for="accountItem in accountList" :key="accountItem.account_id">
                     <span class="account-process-item source-name">
                         <el-tag
-                        v-if="(config[accountItem.source_name]||{}).typeName"
-                        :type="config[accountItem.source_name].type" 
+                        v-if="(accountSource[accountItem.source_name]||{}).typeName"
+                        :type="accountSource[accountItem.source_name].type" 
                         >
                             {{accountItem.source_name}}
                         </el-tag> 
@@ -66,7 +66,6 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { accountSource } from '__gConfig/accountConfig';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 
@@ -77,9 +76,7 @@ export default {
             statusLevel[key] = statusConfig[key].level;
         })
         return {
-            config: accountSource,
-            statusLevel,
-            // processStatus: Object.freeze({})
+            statusLevel
         }
     },
 
@@ -92,7 +89,8 @@ export default {
         ...mapState({
             accountList: state => state.ACCOUNT.accountList,
             mdTdState: state => state.ACCOUNT.mdTdState,
-            processStatus: state => state.BASE.processStatus
+            processStatus: state => state.BASE.processStatus,
+            accountSource: state => (state.BASE.accountSource || {})
         }),
 
         //展示最坏的情况

@@ -1,7 +1,7 @@
 import readline from 'readline';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
-import { listDir, statSync } from '__gUtils/fileUtils';
+import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -27,6 +27,19 @@ interface SourceAccountId {
     id: string
 }
 
+interface SourceConfig {
+    "name": string,
+    "type": string,
+    "key": string,
+    "config": {}
+}
+
+interface ExtensionJSON {
+    type: string,
+    config: SourceConfig
+}
+
+const KUNGFU_KEY_IN_PACKAGEJSON = 'kungfuConfig'
 
 
 declare global {
@@ -420,7 +433,6 @@ export const dealTrade = (item: TradeInputData): TradeData => {
 
 export const getExtensions = (): Promise<any> => {
     return listDir(EXTENSION_DIR).then(async (files: string[]) => {
-        console.log(files)
         const promises = files.map(fp => {
             fp = path.join(EXTENSION_DIR, fp);
             const stat: any = statSync(fp);
@@ -440,4 +452,33 @@ export const getExtensions = (): Promise<any> => {
         const fpList = await Promise.all(promises)
         return fpList.filter(f => !!f)
     })
+}
+
+export const getExtensionPaths = (): Promise<any> => {
+    return getExtensions().then((filePaths: string[]): string[] => {
+        return filePaths.map((fp: string): string => path.join(fp, 'package.json'))
+    })
+}
+
+
+export const getExtensionConfigs = async (): Promise<any> => {
+    try {
+
+        const packageJSONPaths: string[] = await getExtensionPaths()
+        return packageJSONPaths.map((p: string) => {
+            const packageJSON: any = readJsonSync(p)
+            console.log(packageJSON)
+            const kungfuConfig: ExtensionJSON = packageJSON[KUNGFU_KEY_IN_PACKAGEJSON];
+            if(kungfuConfig) {
+                const type: string = kungfuConfig.type;
+                const config: SourceConfig = kungfuConfig.config
+                return  {
+                    type,
+                    config
+                }
+            }
+        }).filter(config => !!config)
+    } catch (err) {
+        console.error(err)
+    }
 }
