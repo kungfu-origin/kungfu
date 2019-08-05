@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 
 def setup(ctx, session_id, cmd, instance):
-    ctx.mode = 'live'  # to get live data
+    #ctx.mode = 'live'  # to get live data
     ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
     if not session_id:
         all_sessions = kfj.find_sessions(ctx)

@@ -88,10 +88,8 @@ class Locator(pyyjj.locator):
 
 
 def collect_journal_locations(ctx):
-    if ctx.md_path:
-        search_path = ctx.md_path
-    else:
-        search_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
+
+    search_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
 
     locations = {}
     for journal in glob.glob(search_path):
