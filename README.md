@@ -85,7 +85,7 @@ source /etc/profile
 
 ```
 $ # install cmake3 node.js
-$ node-v10.15.3-linux-x64/bin/npm install -g yarn electron-builder
+$ node-v10.15.3-linux-x64/bin/npm install -g yarn
 $ pip install pipenv
 ```
 
