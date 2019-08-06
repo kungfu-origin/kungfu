@@ -140,7 +140,8 @@ namespace kungfu
             } else if (get_io_device()->get_home()->mode == mode::BACKTEST)
             {
                 // dest_id 0 should be configurable TODO
-                reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, bt_source_, bt_source_, get_io_device()->get_home()->locator), 0, begin_time_);
+                reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, bt_source_, bt_source_, get_io_device()->get_home()->locator),
+                              0, begin_time_);
             }
 
             events_ |
@@ -182,25 +183,6 @@ namespace kungfu
                   on_read_from(e);
               });
 
-            events_ | is(msg::type::RequestStart) | first() |
-            $([&](event_ptr e)
-              {
-                  on_start();
-              },
-              [&](std::exception_ptr e)
-              {
-                  try
-                  { std::rethrow_exception(e); }
-                  catch (const rx::empty_error &ex)
-                  {
-                      SPDLOG_WARN("{}", ex.what());
-                  }
-                  catch (const std::exception &ex)
-                  {
-                      SPDLOG_WARN("Unexpected exception before start {}", ex.what());
-                  }
-              });
-
             events_ | is(msg::type::TradingDay) |
             $([&](event_ptr e)
               {
@@ -213,9 +195,22 @@ namespace kungfu
                 reader_->join(master_home_location_, 0, begin_time_);
                 events_ | is(msg::type::RequestStart) | first() |
                 $([&](event_ptr e)
-                {
-                    on_start();
-                });
+                  {
+                      on_start();
+                  },
+                  [&](std::exception_ptr e)
+                  {
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const rx::empty_error &ex)
+                      {
+                          SPDLOG_WARN("{}", ex.what());
+                      }
+                      catch (const std::exception &ex)
+                      {
+                          SPDLOG_WARN("Unexpected exception before start {}", ex.what());
+                      }
+                  });
             } else
             {
                 on_start();

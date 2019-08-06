@@ -28,7 +28,7 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id, backtest):
     assert not(replay and backtest), "Replay mode and BackTest mode cannot be selected together"
     ctx.replay = replay
     ctx.backtest = backtest
-    mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.BACKTEST if ctx.backtest else ctx.pyyjj.mode.LIVE
+    mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.BACKTEST if ctx.backtest else pyyjj.mode.LIVE
     ctx.logger = create_logger(name, ctx.log_level, pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator))
 
     ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11

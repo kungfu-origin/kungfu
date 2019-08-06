@@ -17,7 +17,7 @@ def pre_start(context):
     context.log.info("pre run strategy")
     #context.add_account(source, "15011218", 100000000.0)
     context.add_account(source, "15040900", 100000000.0)
-    context.subscribe(source, ["AL1602"], exchange)
+    context.subscribe(source, ["600000", "601988"], exchange)
     #context.add_timer(context.now() + kft.NANO_PER_SECOND, test_timer)
     #context.add_time_interval(5 * kft.NANO_PER_SECOND, test_time_interval)
     # context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
