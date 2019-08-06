@@ -32,3 +32,5 @@ def trace(ctx, session_id, io_type, tablefmt, pager):
         click.echo_via_pager(table)
     else:
         click.echo(table)
+
+# yarn dev history -g xtp -n csvConverter trace -t out -i 1

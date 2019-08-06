@@ -29,3 +29,5 @@ def sessions(ctx, sortby, ascending, tablefmt, pager):
         click.echo_via_pager(table)
     else:
         click.echo(table)
+
+# yarn dev history -g xtp -n csvConverter sessions

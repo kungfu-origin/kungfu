@@ -19,3 +19,5 @@ def rm(ctx, filepath, time):
         click.echo('history journals in {} is cleared'.format(journal_path))
     else:
         click.echo('invalid journal path')
+
+# yarn dev history -g xtp -n csvConverter rm
