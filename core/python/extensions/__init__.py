@@ -43,6 +43,7 @@ class ExtensionRegistry:
 
 EXTENSION_REGISTRY_MD = ExtensionRegistry('MD')
 EXTENSION_REGISTRY_TD = ExtensionRegistry('TD')
+EXTENSION_REGISTRY_BT = ExtensionRegistry('BT')
 EXTENSIONS = {}
 
 

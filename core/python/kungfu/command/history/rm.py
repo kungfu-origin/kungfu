@@ -2,10 +2,7 @@ import click
 import os, glob
 
 from kungfu.command.history import history, pass_ctx_from_parent
-from kungfu.converter import Converter
-
 import kungfu.yijinjing.time as kft
-
 
 @history.command()
 @click.option('-f', '--filepath', type=str, help='csv_file_path')
