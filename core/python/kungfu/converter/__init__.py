@@ -9,7 +9,6 @@ from kungfu.yijinjing.log import create_logger
 
 import pandas as pd
 import sys
-#from ctypes import c_char_p
 
 class Converter:
 
@@ -22,7 +21,7 @@ class Converter:
         # dest_id 0 should be configurable TODO
         self.dest_id = 0
 
-        self.location = pyyjj.location(kfj.MODES['backtest'], kfj.CATEGORIES['md'], ctx.grp, ctx.nm, ctx.locator)
+        self.location = pyyjj.location(kfj.MODES['backtest'], kfj.CATEGORIES['md'], ctx.group, ctx.name, ctx.locator)
         self.io_device = pyyjj.io_device(self.location, False, True)
         self.writer = self.io_device.open_writer(self.dest_id)
         self.reader = self.io_device.open_reader_to_subscribe()
