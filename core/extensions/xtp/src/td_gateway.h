@@ -178,7 +178,6 @@ namespace kungfu
             private:
                 int client_id_;
                 std::string software_key_;
-                std::string save_file_path_;
                 std::string ip_;
                 int port_;
                 std::string user_;

@@ -23,7 +23,6 @@ namespace kungfu
                 uint32_t source;
                 int64_t insert_time;
                 char trading_day[50];
-                char client_id[50];
             };
 
             class OrderMapper
@@ -38,7 +37,7 @@ namespace kungfu
                 {
                     try
                     {
-                        std::string sql = "CREATE TABLE IF NOT EXISTS xtp_order(\"internal_order_id\" INTERGER PRIMARY KEY NOT NULL,\"xtp_order_id\" INTERGER NOT NULL, \"parent_id\" INTERGER, \"source\" INTERGER, \"insert_time\" INTERGER,\"trading_day\" char(50),\"client_id\" char(50));";
+                        std::string sql = "CREATE TABLE IF NOT EXISTS xtp_order(\"internal_order_id\" INTERGER PRIMARY KEY NOT NULL,\"xtp_order_id\" INTERGER NOT NULL, \"parent_id\" INTERGER, \"source\" INTERGER, \"insert_time\" INTERGER,\"trading_day\" char(50));";
                         db_.exec(sql);
                     }
                     catch (std::exception &e)
@@ -51,14 +50,13 @@ namespace kungfu
                 {
                     try
                     {
-                        SQLite::Statement insert(db_, "INSERT INTO xtp_order VALUES(?, ?, ?, ?, ?, ?, ?)");
+                        SQLite::Statement insert(db_, "INSERT INTO xtp_order VALUES(?, ?, ?, ?, ?, ?)");
                         insert.bind(1, (long long) order.internal_order_id);
                         insert.bind(2, (long long) order.xtp_order_id);
                         insert.bind(3, (long long) order.parent_id);
                         insert.bind(4, (long long) order.source);
                         insert.bind(5, order.insert_time);
                         insert.bind(6, order.trading_day);
-                        insert.bind(7, order.client_id);
                         insert.exec();
                     }
                     catch (std::exception &e)
@@ -83,7 +81,6 @@ namespace kungfu
                             order.source = (long long) (query.getColumn(3));
                             order.insert_time = (long long) (query.getColumn(4));
                             strcpy(order.trading_day, query.getColumn(5));
-                            strcpy(order.client_id, query.getColumn(6));
                         }
                     }
                     catch (std::exception &e)
@@ -131,27 +128,6 @@ namespace kungfu
                     }
                     return internal_order_id;
                 }
-
-                const uint64_t get_internal_order_id(const uint64_t xtp_order_id)
-                {
-                    uint64_t internal_order_id = 0;
-                    try
-                    {
-                        SQLite::Statement query(db_,
-                                                "SELECT internal_order_id FROM xtp_order WHERE xtp_order_id = ? ORDER BY internal_order_id desc");
-                        query.bind(1, (long long) xtp_order_id);
-                        if (query.executeStep())
-                        {
-                            internal_order_id = (long long) (query.getColumn(0));
-                        }
-                    }
-                    catch (std::exception &e)
-                    {
-                        SPDLOG_TRACE(e.what());
-                    }
-                    return internal_order_id;
-                }
-
             private:
                 SQLite::Database db_;
             };

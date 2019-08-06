@@ -82,13 +82,8 @@ namespace kungfu
                 std::string broker_id_;
                 std::string account_id_;
                 std::string password_;
-
                 int request_id_;
-
                 CThostFtdcMdApi *api_;
-
-                static const std::unordered_map<int, std::string> kDisconnectedReasonMap;
-
             };
         }
     }

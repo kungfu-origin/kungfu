@@ -2,10 +2,12 @@
 from . import *
 from sqlalchemy import inspect
 import datetime
+from itertools import groupby
 import pyyjj
+from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.models import *
 from kungfu.wingchun.constants import *
-from kungfu.wingchun.finance.position import *
+from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
 from kungfu.wingchun.finance.ledger import *
 
 def make_url(locator, location, filename):
@@ -23,6 +25,10 @@ class DataProxy:
             Base.metadata.create_all(self.engine)
         self.session_factory = sessionmaker(bind=self.engine)
 
+    @classmethod
+    def setup_logger(cls, level, location):
+        create_logger("sqlalchemy.engine", level, location)
+
     def add_trade(self, **kwargs):
         with session_scope(self.session_factory) as session:
             session.add(Trade(**kwargs))
@@ -38,12 +44,17 @@ class DataProxy:
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass
 
-    def get_margin_ratio(self, instrument_id, exchange_id, direction):
-        pass
+    def set_instruments(self, instruments):
+        with session_scope(self.session_factory) as session:
+            session.query(FutureInstrument).delete()
+            objects = [FutureInstrument(**inst) for inst in instruments]
+            session.bulk_save_objects(objects)
 
-    def reset_instruments(self, instruments):
-        pass
-
+    def get_instrument_info(self, instrument_id):
+        with session_scope(self.session_factory) as session:
+            obj = session.query(FutureInstrument).filter(FutureInstrument.instrument_id == instrument_id).first()
+            return {} if obj is None else object_as_dict(obj)
+            
     def get_task_config(self, task_name):
         with session_scope(self.session_factory) as session:
             task = session.query(Task).get(task_name)
@@ -65,58 +76,79 @@ class LedgerHolder(DataProxy):
     def __init__(self, url):
         super(LedgerHolder, self).__init__(url)
 
-    def get_model_cls(self, msg_type, ledger_category):
-        cls = None
-        if msg_type == int(MsgType.AssetInfo):
-            if ledger_category == int(LedgerCategory.Account):
-                cls = AccountAssetInfo
-            elif ledger_category == int(LedgerCategory.Portfolio):
-                cls = PortfolioAssetInfo
-            elif ledger_category == int(LedgerCategory.SubPortfolio):
-                cls = SubPortfolioAssetInfo
-        elif msg_type == int(MsgType.Position):
-            if ledger_category == int(LedgerCategory.Account):
-                cls = AccountPosition
-            elif ledger_category == int(LedgerCategory.Portfolio):
-                cls =  PortfolioPosition
-            elif ledger_category == int(LedgerCategory.SubPortfolio):
-                cls = SubPortfolioPosition
-        elif msg_type == int(MsgType.AssetInfoSnapshot):
-            if ledger_category == int(LedgerCategory.Account):
-                cls = AccountAssetInfoSnapshot
-            elif ledger_category == int(LedgerCategory.Portfolio):
-                cls = PortfolioAssetInfoSnapshot
-        return cls
-
-    def process_message(self, session, message):
-        msg_type = message["msg_type"]
-        category = message["data"].pop("ledger_category")
-        cls = self.get_model_cls(msg_type, category)
-        if cls is not None:
-            obj = cls(**message["data"])
-            session.merge(obj)
-            if isinstance(obj, PositionMixin) and obj.volume == 0:
-                session.delete(obj)
-
     def on_messages(self, messages):
         with session_scope(self.session_factory) as session:
             for message in messages:
-                self.process_message(session, message)
+                obj = self.object_from_msg(message)
+                session.merge(obj)
 
-    def load(self, ledger_category, account_id = None, client_id = None):
-        asset_info_cls = self.get_model_cls(int(MsgType.AssetInfo), int(ledger_category))
-        position_cls = self.get_model_cls(int(MsgType.Position), int(ledger_category))
+    def get_stock_positions(self, session, ledger_category, account_id, client_id):
+        positions = session.query(Position).filter(Position.account_id == account_id,
+                                                   Position.client_id == client_id,
+                                                   Position.ledger_category == int(ledger_category),
+                                                   Position.instrument_type == int(InstrumentType.Stock)).all()
+        return [StockPosition(**object_as_dict(obj)) for obj in positions]
+
+    def get_future_positions(self, session, ledger_category, account_id, client_id):
+        objs = session.query(PositionDetail).filter(PositionDetail.account_id == account_id,
+                                                    PositionDetail.client_id == client_id,
+                                                    PositionDetail.ledger_category == int(ledger_category)
+                                                    ).all()
+        result = []
+        for inst, details in groupby(objs, key= lambda e: e.instrument_id):
+            details = [FuturePositionDetail(**object_as_dict(detail)) for detail in sorted(details, key = lambda obj: (obj.open_date, obj.trade_time))]
+            inst_info = self.get_instrument_info(inst)
+            pos = FuturePosition(instrument_id = inst_info["instrument_id"],
+                                 exchange_id = inst_info["exchange_id"],
+                                 short_margin_ratio = inst_info["short_margin_ratio"],
+                                 long_margin_ratio = inst_info["long_margin_ratio"],
+                                 contract_multiplier = inst_info["contract_multiplier"],
+                                 details = details,
+                                 trading_day = details[0].trading_day)
+            result.append(pos)
+        return result
+
+    def get_positions(self, session, ledger_category, account_id, client_id):
+        return self.get_stock_positions(session, ledger_category, account_id, client_id) + \
+               self.get_future_positions(session, ledger_category, account_id, client_id)
+
+    def drop(self, session, ledger_category, account_id="", client_id=""):
+        for cls in [Asset, Position, PositionDetail]:
+            session.query(cls).filter(cls.account_id == account_id, cls.client_id == client_id,cls.ledger_category == int(ledger_category)).delete()
+
+    def load(self, ledger_category, account_id = "", client_id = ""):
         with session_scope(self.session_factory) as session:
-            asset_info = session.query(asset_info_cls).filter(asset_info_cls.account_id == account_id, asset_info_cls.client_id == client_id).first()
-            if asset_info is None:
+            asset_obj = session.query(Asset).filter(Asset.account_id == account_id,
+                                                    Asset.client_id == client_id,
+                                                    Asset.ledger_category == int(ledger_category)).first()
+            if not asset_obj:
                 return None
             else:
-                asset_info = object_as_dict(asset_info)
-                asset_info["trading_day"] = datetime.datetime.strptime(asset_info["trading_day"], "%Y%m%d")
-                positions = {}
-                for obj in session.query(position_cls).filter(position_cls.account_id == account_id, position_cls.client_id == client_id).all():
-                    cls = StockPosition if get_instrument_type(obj.instrument_id, obj.exchange_id) == InstrumentType.Stock else FuturePosition
-                    positions[get_symbol_id(obj.instrument_id, obj.exchange_id)] = cls(**object_as_dict(obj))
-                args = {"positions": positions, "ledger_category": ledger_category}
-                args.update(asset_info)
-                return Ledger(**args)
+                args = object_as_dict(asset_obj)
+                positions = self.get_positions(session, ledger_category, account_id, client_id)
+                args.update({"positions": positions, "ledger_category": ledger_category})
+                return Ledger(ctx = None, **args)
+
+    def dump(self, ledger):
+        with session_scope(self.session_factory) as  session:
+            self.drop(session, ledger.category, ledger.account_id, ledger.client_id)
+            messages = ledger.detail_messages
+            objects = [self.object_from_msg(message) for message in messages]
+            session.bulk_save_objects(objects)
+
+    def get_model_cls(self, msg_type):
+        if msg_type == MsgType.Asset:
+            return Asset
+        elif msg_type == MsgType.Position:
+            return Position
+        elif msg_type == MsgType.PositionDetail:
+            return PositionDetail
+        elif msg_type == MsgType.AssetSnapshot:
+            return AssetSnapshot
+        else:
+            raise ValueError('could not find class for msg_type {}'.format(msg_type))
+
+    def object_from_msg(self, message):
+        cls =  self.get_model_cls(message["msg_type"])
+        return cls(**message["data"])
+

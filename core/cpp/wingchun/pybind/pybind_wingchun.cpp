@@ -56,8 +56,14 @@ public:
     void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
 
-    void on_assets(const AssetInfo &asset_info, const std::vector<Position> &positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_assets, asset_info, positions) }
+    void on_stock_account(const Asset &asset_info, const std::vector<Position> &positions) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_stock_account, asset_info, positions) }
+
+    void on_future_account(const Asset &asset_info, const std::vector<PositionDetail> &position_details) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_future_account, asset_info, position_details) }
+
+    void on_instruments(const std::vector<Instrument> &instruments) override
+    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_instruments, instruments) }
 
     void on_trading_day(const event_ptr &event, int64_t daytime) override
     {PYBIND11_OVERLOAD(void, Watcher, on_trading_day, event, daytime); }
@@ -120,8 +126,9 @@ Quote get_quote(journal::frame_ptr frame)
 PYBIND11_MODULE(pywingchun, m)
 {
     auto m_utils = m.def_submodule("utils");
-    m_utils.def("get_symbol_id", &kungfu::wingchun::strategy::get_symbol_id);
+    m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
+    m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
     m_utils.def("json_from_address", &json_from_address);
 
     m_utils.def("get_quote", get_quote);
@@ -132,34 +139,64 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Account", kungfu::wingchun::LedgerCategory::Account)
             .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
             .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
-            .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)
-            .export_values();
+            .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)            
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::LedgerCategory &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
             .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
             .value("Stock", kungfu::wingchun::InstrumentType::Stock)
             .value("Future", kungfu::wingchun::InstrumentType::Future)
             .value("Bond", kungfu::wingchun::InstrumentType::Bond)
-            .value("StockOption", kungfu::wingchun::InstrumentType::StockOption)
-            .export_values();
+            .value("StockOption", kungfu::wingchun::InstrumentType::StockOption)            
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::InstrumentType &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::ExecType>(m_constants, "ExecType", py::arithmetic())
             .value("Unknown", kungfu::wingchun::ExecType::Unknown)
             .value("Cancel", kungfu::wingchun::ExecType::Cancel)
             .value("Trade", kungfu::wingchun::ExecType::Trade)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::ExecType &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::Side>(m_constants, "Side", py::arithmetic())
             .value("Buy", kungfu::wingchun::Side::Buy)
             .value("Sell", kungfu::wingchun::Side::Sell)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::Side &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::Offset>(m_constants, "Offset", py::arithmetic())
             .value("Open", kungfu::wingchun::Offset::Open)
             .value("Close", kungfu::wingchun::Offset::Close)
             .value("CloseToday", kungfu::wingchun::Offset::CloseToday)
             .value("CloseYesterday", kungfu::wingchun::Offset::CloseYesterday)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::Offset &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::OrderStatus>(m_constants, "OrderStatus", py::arithmetic())
             .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
@@ -169,13 +206,25 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Error", kungfu::wingchun::OrderStatus::Error)
             .value("Filled", kungfu::wingchun::OrderStatus::Filled)
             .value("PartialFilledNotActive", kungfu::wingchun::OrderStatus::PartialFilledNotActive)
-            .value("PartialFilledActive", kungfu::wingchun::OrderStatus::PartialFilledActive)
-            .export_values();
+            .value("PartialFilledActive", kungfu::wingchun::OrderStatus::PartialFilledActive)     
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::OrderStatus &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::Direction>(m_constants, "Direction", py::arithmetic())
             .value("Long", kungfu::wingchun::Direction::Long)
             .value("Short", kungfu::wingchun::Direction::Short)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::Direction &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::PriceType>(m_constants, "PriceType", py::arithmetic())
             .value("Any", kungfu::wingchun::PriceType::Any)
@@ -184,19 +233,37 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Limit", kungfu::wingchun::PriceType::Limit)
             .value("ForwardBest", kungfu::wingchun::PriceType::ForwardBest)
             .value("ReverseBest", kungfu::wingchun::PriceType::ReverseBest)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::PriceType &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::VolumeCondition>(m_constants, "VolumeCondition", py::arithmetic())
             .value("Any", kungfu::wingchun::VolumeCondition::Any)
             .value("Min", kungfu::wingchun::VolumeCondition::Min)
             .value("All", kungfu::wingchun::VolumeCondition::All)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::VolumeCondition &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::TimeCondition>(m_constants, "TimeCondition", py::arithmetic())
             .value("IOC", kungfu::wingchun::TimeCondition::IOC)
             .value("GFD", kungfu::wingchun::TimeCondition::GFD)
             .value("GTC", kungfu::wingchun::TimeCondition::GTC)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::TimeCondition &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
             .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
@@ -208,14 +275,20 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
             .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
             .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
-            .value("AssetInfo", kungfu::wingchun::msg::type::MsgType::AssetInfo)
-            .value("AssetInfoSnapshot", kungfu::wingchun::msg::type::AssetInfoSnapshot)
+            .value("Asset", kungfu::wingchun::msg::type::MsgType::Asset)
+            .value("AssetSnapshot", kungfu::wingchun::msg::type::AssetSnapshot)
             .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
             .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
             .value("GatewayState", kungfu::wingchun::msg::type::MsgType::GatewayState)
             .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
             .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::msg::type::MsgType &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
 
     py::class_<Instrument>(m, "Instrument")
             .def_readonly("instrument_type", &Instrument::instrument_type)
@@ -231,7 +304,19 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("product_id", &Instrument::get_product_id)
             .def_property_readonly("open_date", &Instrument::get_open_date)
             .def_property_readonly("create_date", &Instrument::get_create_date)
-            .def_property_readonly("expire_date", &Instrument::get_expire_date)
+            .def_property_readonly("expire_date", &Instrument::get_expire_date)            
+            .def("__hash__",
+                 [](const Instrument &a)
+                 {
+                     return get_symbol_id(a.get_instrument_id(), a.get_exchange_id());
+                 }
+            )
+            .def("__eq__",
+                [](const Instrument &a, const Instrument &b)
+                {
+                    return strcmp(a.instrument_id, b.instrument_id) == 0 && strcmp(a.exchange_id, b.exchange_id) == 0;
+                }
+            )
             .def("__repr__",
                  [](const Instrument &a)
                  {
@@ -369,6 +454,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readonly("price_type", &Order::price_type)
             .def_readonly("volume_condition", &Order::volume_condition)
             .def_readonly("time_condition", &Order::time_condition)
+            .def_readonly("parent_id", &Order::parent_id)
             .def_property_readonly("trading_day", &Order::get_trading_day)
             .def_property_readonly("instrument_id", &Order::get_instrument_id)
             .def_property_readonly("exchange_id", &Order::get_exchange_id)
@@ -419,46 +505,45 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
 
-    py::class_<AssetInfo>(m, "AssetInfo")
-            .def_readonly("update_time", &AssetInfo::update_time)
-            .def_readonly("ledger_category", &AssetInfo::ledger_category)
-            .def_readonly("initial_equity", &AssetInfo::initial_equity)
-            .def_readonly("static_equity", &AssetInfo::static_equity)
-            .def_readonly("dynamic_equity", &AssetInfo::dynamic_equity)
-            .def_readonly("realized_pnl", &AssetInfo::realized_pnl)
-            .def_readonly("unrealized_pnl", &AssetInfo::unrealized_pnl)
-            .def_readonly("avail", &AssetInfo::avail)
-            .def_readonly("market_value", &AssetInfo::market_value)
-            .def_readonly("margin", &AssetInfo::margin)
-            .def_readonly("accumulated_fee", &AssetInfo::accumulated_fee)
-            .def_readonly("intraday_fee", &AssetInfo::intraday_fee)
-            .def_readonly("frozen_cash", &AssetInfo::frozen_cash)
-            .def_readonly("frozen_margin", &AssetInfo::frozen_margin)
-            .def_readonly("frozen_fee", &AssetInfo::frozen_fee)
-            .def_readonly("position_pnl", &AssetInfo::position_pnl)
-            .def_readonly("close_pnl", &AssetInfo::close_pnl)
-            .def_property_readonly("trading_day", &AssetInfo::get_trading_day)
-            .def_property_readonly("account_id", &AssetInfo::get_account_id)
-            .def_property_readonly("broker_id", &AssetInfo::get_broker_id)
-            .def_property_readonly("source_id", &AssetInfo::get_source_id)
+    py::class_<Asset>(m, "Asset")
+            .def_readonly("update_time", &Asset::update_time)
+            .def_readonly("initial_equity", &Asset::initial_equity)
+            .def_readonly("static_equity", &Asset::static_equity)
+            .def_readonly("dynamic_equity", &Asset::dynamic_equity)
+            .def_readonly("realized_pnl", &Asset::realized_pnl)
+            .def_readonly("unrealized_pnl", &Asset::unrealized_pnl)
+            .def_readonly("avail", &Asset::avail)
+            .def_readonly("market_value", &Asset::market_value)
+            .def_readonly("margin", &Asset::margin)
+            .def_readonly("accumulated_fee", &Asset::accumulated_fee)
+            .def_readonly("intraday_fee", &Asset::intraday_fee)
+            .def_readonly("frozen_cash", &Asset::frozen_cash)
+            .def_readonly("frozen_margin", &Asset::frozen_margin)
+            .def_readonly("frozen_fee", &Asset::frozen_fee)
+            .def_readonly("position_pnl", &Asset::position_pnl)
+            .def_readonly("close_pnl", &Asset::close_pnl)
+            .def_property_readonly("trading_day", &Asset::get_trading_day)
+            .def_property_readonly("account_id", &Asset::get_account_id)
+            .def_property_readonly("broker_id", &Asset::get_broker_id)
+            .def_property_readonly("source_id", &Asset::get_source_id)
             .def("__repr__",
-                 [](const AssetInfo &a)
+                 [](const Asset &a)
                  {
                      return to_string(a);
                  }
             );
+
     py::class_<Position>(m, "Position")
             .def_readonly("update_time", &Position::update_time)
             .def_readonly("instrument_type", &Position::instrument_type)
-            .def_readonly("ledger_category", &Position::ledger_category)
             .def_readonly("direction", &Position::direction)
             .def_readonly("volume", &Position::volume)
             .def_readonly("yesterday_volume", &Position::yesterday_volume)
             .def_readonly("frozen_total", &Position::frozen_total)
             .def_readonly("frozen_yesterday", &Position::frozen_yesterday)
             .def_readonly("last_price", &Position::last_price)
-            .def_readonly("open_price", &Position::open_price)
-            .def_readonly("cost_price", &Position::cost_price)
+            .def_readonly("avg_open_price", &Position::avg_open_price)
+            .def_readonly("position_cost_price", &Position::position_cost_price)
             .def_readonly("close_price", &Position::close_price)
             .def_readonly("pre_close_price", &Position::pre_close_price)
             .def_readonly("settlement_price", &Position::settlement_price)
@@ -473,13 +558,36 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("exchange_id", &Position::get_exchange_id)
             .def_property_readonly("account_id", &Position::get_account_id)
             .def_property_readonly("client_id", &Position::get_client_id)
-            .def_property_readonly("open_date", &Position::get_open_date)
-            .def_property_readonly("expire_date", &Position::get_expire_date)
             .def("__repr__",
                  [](const Position &a)
                  {
                      return to_string(a);
                  }
+            );
+
+            py::class_<PositionDetail>(m, "PositionDetail")
+            .def_readonly("update_time", &PositionDetail::update_time)
+            .def_readonly("instrument_type", &PositionDetail::instrument_type)
+            .def_readonly("direction", &PositionDetail::direction)
+            .def_readonly("volume", &PositionDetail::volume)
+            .def_readonly("frozen_volume", &PositionDetail::frozen_volume)
+            .def_readonly("last_price", &PositionDetail::last_price)
+            .def_readonly("open_price", &PositionDetail::open_price)
+            .def_readonly("settlement_price", &PositionDetail::settlement_price)
+            .def_readonly("pre_settlement_price", &PositionDetail::pre_settlement_price)
+            .def_readonly("trade_id", &PositionDetail::trade_id)
+            .def_readonly("trade_time", &PositionDetail::trade_time)
+            .def_property_readonly("trading_day", &PositionDetail::get_trading_day)
+            .def_property_readonly("instrument_id", &PositionDetail::get_instrument_id)
+            .def_property_readonly("exchange_id", &PositionDetail::get_exchange_id)
+            .def_property_readonly("account_id", &PositionDetail::get_account_id)
+            .def_property_readonly("client_id", &PositionDetail::get_client_id)
+            .def_property_readonly("open_date", &PositionDetail::get_open_date)
+            .def("__repr__",
+            [](const PositionDetail &a)
+            {
+                return to_string(a);
+            }
             );
 
     py::class_<Commander, PyController, kungfu::practice::apprentice, std::shared_ptr<Commander>>(m, "Commander")
@@ -488,7 +596,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("get_location", &Commander::get_location)
             .def("handle_request", &Commander::handle_request)
             .def("run", &Commander::run);
-
+    
     py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Watcher::get_io_device)
@@ -496,13 +604,15 @@ PYBIND11_MODULE(pywingchun, m)
             .def("get_location", &Watcher::get_location)
             .def("publish", &Watcher::publish)
             .def("handle_request", &Watcher::handle_request)
+            .def("on_trading_day", &Watcher::on_trading_day)
             .def("on_quote", &Watcher::on_quote)
             .def("on_order", &Watcher::on_order)
             .def("on_trade", &Watcher::on_trade)
-            .def("on_assets", &Watcher::on_assets)
+            .def("on_stock_account", &Watcher::on_stock_account)
+            .def("on_future_account", &Watcher::on_future_account)
+            .def("on_instruments", &Watcher::on_instruments)
             .def("set_begin_time", &Watcher::set_begin_time)
             .def("set_end_time", &Watcher::set_end_time)
-            .def("on_trading_day", &Watcher::on_trading_day)
             .def("pre_start", &Watcher::pre_start)
             .def("add_timer", &Watcher::add_timer)
             .def("add_time_interval", &Watcher::add_time_interval)

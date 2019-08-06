@@ -10,9 +10,10 @@
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/gateway/macro.h>
 
+#include "td_gateway.h"
 #include "serialize_ctp.h"
 #include "type_convert_ctp.h"
-#include "td_gateway.h"
+#include "common.h"
 
 using namespace kungfu::wingchun::msg::data;
 
@@ -22,48 +23,43 @@ namespace kungfu
     {
         namespace ctp
         {
-            const std::unordered_map<int, std::string> TdGateway::kDisconnectedReasonMap{
-                    {0x1001, "网络读失败"},
-                    {0x1002, "网络写失败"},
-                    {0x2001, "接收心跳超时"},
-                    {0x2002, "发送心跳失败"},
-                    {0x2003, "收到错误报文"}
-            };
-
-
             TdGateway::TdGateway(bool low_latency, yijinjing::data::locator_ptr locator,
                                  std::map<std::string, std::string> &config_str,
                                  std::map<std::string, int> &config_int,
                                  std::map<std::string, double> &config_double) :
-                    gateway::Trader(low_latency, std::move(locator), SOURCE_CTP, config_str["account_id"])
+                    gateway::Trader(low_latency, std::move(locator), SOURCE_CTP, config_str["account_id"]), api_(nullptr)
             {
                 front_uri_ = config_str["td_uri"];
                 broker_id_ = config_str["broker_id"];
                 account_id_ = config_str["account_id"];
                 password_ = config_str["password"];
+                auth_code_ = config_str["auth_code"];
+                product_info_ = config_str["product_info"];
+                app_id_ = config_str["app_id"];
                 front_id_ = -1;
                 session_id_ = -1;
                 order_ref_ = -1;
                 request_id_ = 0;
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
+                trade_mapper_ = std::make_shared<TradeMapper>(get_app_db_file("trade_mapper"));
             }
 
             void TdGateway::on_start()
             {
                 gateway::Trader::on_start();
 
-                auto home = get_io_device()->get_home();
-                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
-#ifdef  _WINDOWS
-                std::replace(runtime_folder.begin(), runtime_folder.end(), '/', '\\');
-#endif
-                SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
-                api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
-                api_->RegisterSpi(this);
-                api_->RegisterFront((char *) front_uri_.c_str());
-                api_->SubscribePublicTopic(THOST_TERT_QUICK);
-                api_->SubscribePrivateTopic(THOST_TERT_QUICK);
-                api_->Init();
+                if (api_ == nullptr)
+                {
+                    auto home = get_io_device()->get_home();
+                    std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+                    SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
+                    api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
+                    api_->RegisterSpi(this);
+                    api_->RegisterFront((char *) front_uri_.c_str());
+                    api_->SubscribePublicTopic(THOST_TERT_QUICK);
+                    api_->SubscribePrivateTopic(THOST_TERT_QUICK);
+                    api_->Init();
+                }
             }
 
             bool TdGateway::login()
@@ -94,6 +90,50 @@ namespace kungfu
                 return rtn == 0;
             }
 
+            bool TdGateway::req_auth()
+            {
+                struct CThostFtdcReqAuthenticateField req = {};
+                strcpy(req.UserID, account_id_.c_str());
+                strcpy(req.BrokerID, broker_id_.c_str());
+                strcpy(req.UserProductInfo, product_info_.c_str());
+                strcpy(req.AppID, app_id_.c_str());
+                strcpy(req.AuthCode, auth_code_.c_str());
+                return this->api_->ReqAuthenticate(&req, ++request_id_);
+            }
+
+            bool TdGateway::req_account()
+            {
+                CThostFtdcQryTradingAccountField req = {};
+                strcpy(req.BrokerID, broker_id_.c_str());
+                strcpy(req.InvestorID, account_id_.c_str());
+                int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
+                return rtn == 0;
+            }
+
+            bool TdGateway::req_position()
+            {
+                CThostFtdcQryInvestorPositionField req = {};
+                strcpy(req.BrokerID, broker_id_.c_str());
+                strcpy(req.InvestorID, account_id_.c_str());
+                int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
+                return rtn == 0;
+            }
+
+            bool TdGateway::req_position_detail()
+            {
+                CThostFtdcQryInvestorPositionDetailField req = {};
+                strcpy(req.BrokerID, broker_id_.c_str());
+                strcpy(req.InvestorID, account_id_.c_str());
+                int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
+                return rtn == 0;
+            }
+
+            bool TdGateway::req_qry_instrument()
+            {
+                CThostFtdcQryInstrumentField req = {};
+                int rtn = api_->ReqQryInstrument(&req, ++request_id_);
+                return rtn == 0;
+            }
 
             bool TdGateway::insert_order(const yijinjing::event_ptr& event)
             {
@@ -102,28 +142,26 @@ namespace kungfu
                 CThostFtdcInputOrderField ctp_input;
                 memset(&ctp_input, 0, sizeof(ctp_input));
 
-                strcpy(ctp_input.BrokerID, broker_id_.c_str());
                 to_ctp(ctp_input, input);
+                strcpy(ctp_input.BrokerID, broker_id_.c_str());
+                strcpy(ctp_input.InvestorID, account_id_.c_str());
 
                 int order_ref = order_ref_++;
                 strcpy(ctp_input.OrderRef, std::to_string(order_ref).c_str());
 
                 INSERT_ORDER_TRACE(to_string(ctp_input));
                 int error_id = api_->ReqOrderInsert(&ctp_input, ++request_id_);
-
                 int64_t nano = kungfu::yijinjing::time::now_in_nano();
-
-                Order order{};// = get_order(input);
-                order.insert_time = nano;
-                order.update_time = nano;
-
                 if (error_id != 0)
                 {
+                    auto writer = get_writer(event->source());
+                    msg::data::Order &order = writer->open_data<msg::data::Order>(event->gen_time(), msg::type::Order);
+                    order_from_input(input, order);
+                    order.insert_time = nano;
+                    order.update_time = nano;
                     order.error_id = error_id;
                     order.status = OrderStatus::Error;
-
-//                    on_order(order);
-
+                    writer->close_data();
                     INSERT_ORDER_ERROR(fmt::format("(error_id) {}", error_id));
                     return false;
                 } else
@@ -137,11 +175,10 @@ namespace kungfu
                     order_record.order_ref = ctp_input.OrderRef;
                     order_record.front_id = front_id_;
                     order_record.session_id = session_id_;
-//                    order_record.client_id = input.client_id;
+                    order_record.source = event->source();
                     order_record.parent_id = input.parent_id;
                     order_record.insert_time = nano;
-                    order_mapper_->add_ctp_order(input.order_id, order_record);
-
+                    order_mapper_->add_order(input.order_id, order_record);
                     INSERT_ORDER_INFO(fmt::format("(FrontID) {} (SessionID) {} (OrderRef) {}", front_id_, session_id_, ctp_input.OrderRef));
                     return true;
                 }
@@ -149,7 +186,6 @@ namespace kungfu
 
             bool TdGateway::cancel_order(const yijinjing::event_ptr& event)
             {
-//                CANCEL_ORDER_TRACE(fmt::format("(order_id) {} (action_id) {}", action.order_id, action.order_action_id));
                 const OrderAction &action = event->data<OrderAction>();
 
                 CtpOrder order_record = order_mapper_->get_order_info(action.order_id);
@@ -176,61 +212,29 @@ namespace kungfu
                 }
             }
 
-            bool TdGateway::req_account()
-            {
-                CThostFtdcQryTradingAccountField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
-                int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
-                return rtn == 0;
-            }
-
-            bool TdGateway::req_position()
-            {
-                long_pos_map_.clear();
-                short_pos_map_.clear();
-                CThostFtdcQryInvestorPositionField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
-                int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
-                return rtn == 0;
-            }
-
-            bool TdGateway::req_position_detail()
-            {
-                CThostFtdcQryInvestorPositionDetailField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
-                int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
-                return rtn == 0;
-            }
-
-            bool TdGateway::req_qry_instrument()
-            {
-                future_instruments_.clear();
-                CThostFtdcQryInstrumentField req = {};
-                int rtn = api_->ReqQryInstrument(&req, ++request_id_);
-                return rtn == 0;
-            }
 
             void TdGateway::OnFrontConnected()
             {
                 CONNECT_INFO();
-//                set_state(GatewayState::Connected);
-                login();
+                req_auth();
             }
 
             void TdGateway::OnFrontDisconnected(int nReason)
             {
-                auto it = kDisconnectedReasonMap.find(nReason);
-                if (it != kDisconnectedReasonMap.end())
+                DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason)));
+            }
+
+            void TdGateway::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField,
+                                              CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+            {
+                if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, it->second));
-//                    set_state(GatewayState::DisConnected, it->second);
-                } else
+                    LOGIN_ERROR(fmt::format("[OnRspAuthenticate] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                }
+                else
                 {
-                    DISCONNECTED_ERROR(fmt::format("(nReason) {}", nReason));
-//                    set_state(GatewayState::DisConnected);
+                    LOGIN_INFO("[OnRspAuthenticate]");
+                    login();
                 }
             }
 
@@ -239,9 +243,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    std::string utf_msg = gbk2utf8(pRspInfo->ErrorMsg);
-//                    LOGIN_ERROR(fmt::format("[OnRspUserLogin] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, utf_msg));
-//                    set_state(GatewayState::LoggedInFailed, utf_msg);
+                    LOGIN_ERROR(fmt::format("[OnRspUserLogin] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
                     LOGIN_INFO(fmt::format("[OnRspUserLogin] (Bid) {} (Uid) {} (SName) {} (TradingDay) {} (FrontID) {} (SessionID) {}",
@@ -251,9 +253,6 @@ namespace kungfu
                     session_id_ = pRspUserLogin->SessionID;
                     front_id_ = pRspUserLogin->FrontID;
                     order_ref_ = atoi(pRspUserLogin->MaxOrderRef);
-
-//                    set_state(GatewayState::LoggedIn);
-
                     req_settlement_confirm();
                 }
             }
@@ -267,13 +266,11 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    std::string utf_msg = gbk2utf8(pRspInfo->ErrorMsg);
-//                    LOGIN_ERROR(fmt::format("[OnRspSettlementInfoConfirm] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, utf_msg));
-//                    set_state(GatewayState::SettlementConfirmFailed, utf_msg);
+                    LOGIN_ERROR(fmt::format("[OnRspSettlementInfoConfirm] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
                     LOGIN_INFO(fmt::format("[OnRspSettlementInfoConfirm]"));
-//                    set_state(GatewayState::SettlementConfirmed);
+                    publish_state(GatewayState::Ready);
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                     req_qry_instrument();
                 }
@@ -289,21 +286,18 @@ namespace kungfu
                     {
                         OrderInput input = {};
                         from_ctp(*pInputOrder, input);
-
-//                        auto order = get_order(input);
-                        Order order {};
+                        auto writer = get_writer(order_info.source);
+                        msg::data::Order &order = writer->open_data<msg::data::Order>(0, msg::type::Order);
                         order.order_id = order_info.internal_order_id;
                         order.parent_id = order_info.parent_id;
                         order.insert_time = order_info.insert_time;
-                        strcpy(order.client_id, order_info.client_id.c_str());
                         order.error_id = pRspInfo->ErrorID;
+                        order.update_time = kungfu::yijinjing::time::now_in_nano();
                         strcpy(order.error_msg, pRspInfo->ErrorMsg);
                         order.status = OrderStatus::Error;
-
-//                        on_order(order);
+                        writer->close_data();
                     }
-//                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID,
-//                                            gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
+                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
                 }
             }
 
@@ -312,9 +306,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    CANCEL_ORDER_ERROR(fmt::format("[OnRspOrderAction] (ErrorId) {} (ErrorMsg) {} (InputOrderAction) {}", pRspInfo->ErrorID,
-//                                                   gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction ==
-//                                                                                 nullptr ? "" : to_string(*pInputOrderAction)));
+                    CANCEL_ORDER_ERROR(fmt::format("[OnRspOrderAction] (ErrorId) {} (ErrorMsg) {} (InputOrderAction) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction)));
                 }
             }
 
@@ -326,16 +318,17 @@ namespace kungfu
                 if (order_info.internal_order_id == 0)
                 {
                     ORDER_ERROR(fmt::format("can't find FrontID {} SessionID {} OrderRef {}", pOrder->FrontID, pOrder->SessionID, pOrder->OrderRef));
-                } else
+                }
+                else
                 {
-                    Order order = {};
+                    auto writer = get_writer(order_info.source);
+                    msg::data::Order &order = writer->open_data<msg::data::Order>(0, msg::type::Order);
                     from_ctp(*pOrder, order);
                     order.order_id = order_info.internal_order_id;
                     order.parent_id = order_info.parent_id;
                     order.insert_time = order_info.insert_time;
-                    strcpy(order.client_id, order_info.client_id.c_str());
-
-//                    on_order(order);
+                    order.update_time = kungfu::yijinjing::time::now_in_nano();
+                    writer->close_data();
                 }
             }
 
@@ -343,19 +336,23 @@ namespace kungfu
             {
                 TRADE_TRACE(to_string(*pTrade));
                 auto order_info = order_mapper_->get_order_info_by_sys_id(pTrade->ExchangeID, pTrade->OrderSysID);
-
                 if (order_info.internal_order_id == 0)
                 {
                     TRADE_ERROR(fmt::format("can't find ExchangeID {} and OrderSysID {}", pTrade->ExchangeID, pTrade->OrderSysID));
-                } else
+                }
+                else
                 {
-                    Trade trade = {};
+                    auto writer = get_writer(order_info.source);
+                    msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
                     from_ctp(*pTrade, trade);
-
+                    uint64_t trade_id = writer->current_frame_uid();
+                    trade.trade_id = trade_id;
                     trade.order_id = order_info.internal_order_id;
                     trade.parent_order_id = order_info.parent_id;
-                    strcpy(trade.client_id, order_info.client_id.c_str());
-//                    on_trade(trade);
+                    writer->close_data();
+
+                    trade_mapper_->save(trade_id, kungfu::yijinjing::time::now_in_nano(), pTrade->TradingDay, pTrade->ExchangeID, pTrade->TradeID);
+
                 }
             }
 
@@ -364,66 +361,25 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    ACCOUNT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
-                } else
+                    ACCOUNT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                }
+                else
                 {
                     ACCOUNT_TRACE(to_string(*pTradingAccount));
-
-                    AssetInfo account = {};
+                    auto writer = get_writer(0);
+                    msg::data::Asset &account = writer->open_data<msg::data::Asset>(0, msg::type::Asset);
                     strcpy(account.account_id, get_account_id().c_str());
                     from_ctp(*pTradingAccount, account);
-                    int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    account.update_time = nano;
-//                    on_account(account);
-
-//                    set_state(GatewayState::AssetInfoConfirmed);
+                    account.update_time = kungfu::yijinjing::time::now_in_nano();
+                    writer->close_data();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
-                    req_position();
+                    req_position_detail();
                 }
             }
 
             void TdGateway::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
                                                      CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
-            {
-                if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
-                {
-//                    POSITION_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
-                } else
-                {
-                    if (pInvestorPosition != nullptr)
-                    {
-                        POSITION_TRACE(to_string(*pInvestorPosition));
-                        Position pos = {};
-                        from_ctp(*pInvestorPosition, pos);
-                        int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                        pos.update_time = nano;
-                        auto &pos_map = pos.direction == Direction::Long ? long_pos_map_ : short_pos_map_;
-                        auto iter = pos_map.find(std::string(pInvestorPosition->InstrumentID));
-                        if (iter != pos_map.end())
-                        {
-                            pos.cost_price = (pos.cost_price * pos.volume + iter->second.cost_price * iter->second.volume) /
-                                             (pos.volume + iter->second.volume);
-                            pos.volume += iter->second.volume;
-                            pos.yesterday_volume += iter->second.yesterday_volume;
-                            pos.margin += iter->second.margin;
-                            pos.realized_pnl += iter->second.realized_pnl;
-                            pos.unrealized_pnl += iter->second.unrealized_pnl;
-                            pos.position_pnl = pos.realized_pnl + pos.unrealized_pnl;
-                        }
-                        pos_map[std::string(pInvestorPosition->InstrumentID)] = pos;
-//                        on_position(pos, bIsLast);
-                    }
-
-                    if (bIsLast)
-                    {
-                        long_pos_map_.clear();
-                        short_pos_map_.clear();
-//                        set_state(GatewayState::PositionInfoConfirmed);
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                        req_position_detail();
-                    }
-                }
-            }
+            {}
 
             void TdGateway::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail,
                                                            CThostFtdcRspInfoField *pRspInfo, int nRequestID,
@@ -431,22 +387,31 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    POSITION_DETAIL_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
-//                    set_state(GatewayState::PositionDetailConfirmFailed);
+                    POSITION_DETAIL_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
+                    auto writer = get_writer(0);
                     if (pInvestorPositionDetail != nullptr)
                     {
                         POSITION_DETAIL_TRACE(to_string(*pInvestorPositionDetail));
-                        Position pos_detail = {};
+                        msg::data::PositionDetail &pos_detail = writer->open_data<msg::data::PositionDetail>(0, msg::type::PositionDetail);
                         from_ctp(*pInvestorPositionDetail, pos_detail);
-                        int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                        pos_detail.update_time = nano;
-//                        on_position_detail(pos_detail, bIsLast);
+                        pos_detail.update_time = kungfu::yijinjing::time::now_in_nano();
+                        CtpTrade trade_info = trade_mapper_->get(pInvestorPositionDetail->OpenDate, pInvestorPositionDetail->ExchangeID, pInvestorPositionDetail->TradeID);
+                        if (trade_info.trade_id != 0)
+                        {
+                            pos_detail.trade_id = trade_info.trade_id;
+                            pos_detail.trade_time = trade_info.trade_time;
+                        }
+                        else
+                        {
+                            pos_detail.trade_id = writer->current_frame_uid();
+                        }
+                        writer->close_data();
                     }
                     if (bIsLast)
                     {
-//                        set_state(GatewayState::Ready);
+                        writer->mark(0, msg::type::PositionDetailEnd);
                     }
                 }
             }
@@ -456,26 +421,21 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    INSTRUMENT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
-//                    set_state(GatewayState::InstrumentInfoConfirmFailed);
+                    INSTRUMENT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
-//                    INSTRUMENT_TRACE(kungfu::ctp::to_string(*pInstrument));
+                    INSTRUMENT_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
+                    auto writer = get_writer(0);
                     if (pInstrument->ProductClass == THOST_FTDC_PC_Futures)
                     {
-                        FutureInstrument instrument;
+                        msg::data::Instrument &instrument = writer->open_data<msg::data::Instrument>(0, msg::type::Instrument);
                         from_ctp(*pInstrument, instrument);
-//                        INSTRUMENT_TRACE(kungfu::journal::to_string(instrument));
-                        future_instruments_.emplace_back(instrument);
+                        writer->close_data();
                     }
                     if (bIsLast)
                     {
-//                        set_state(GatewayState::InstrumentInfoConfirmed);
-
-//                        FutureInstrumentStorage(FUTURE_INSTRUMENT_DB_FILE).set_future_instruments(future_instruments_);
-//                        nlohmann::json j;
-//                        get_publisher()->publish(msg::type::ReloadFutureInstrument, j);
-
+                        writer->mark(0, msg::type::InstrumentEnd);
+                        std::this_thread::sleep_for(std::chrono::seconds(1));
                         req_account();
                     }
                 }

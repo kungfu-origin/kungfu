@@ -219,29 +219,74 @@ namespace kungfu
                   }
               });
 
-            events_ | is(msg::type::AssetInfo) |
+            events_ | is(msg::type::Instrument) |
             $([&](event_ptr event)
               {
-                  memcpy(&asset_info_, &event->data<AssetInfo>(), sizeof(AssetInfo));
+                  auto &instrument_buffer = instrument_buffer_[event->source()];
+                  instrument_buffer.push_back(event->data<Instrument>());
+              });
+
+            events_ | is(msg::type::InstrumentEnd) |
+            $([&](event_ptr event)
+              {
+                  auto &instrument_buffer = instrument_buffer_[event->source()];
+                  try
+                  { on_instruments(instrument_buffer); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
+                  instrument_buffer.clear();
+              });
+
+            events_ | is(msg::type::Asset) |
+            $([&](event_ptr event)
+              {
+                  asset_info_[event->source()] = event->data<Asset>();
               });
 
             events_ | is(msg::type::Position) |
             $([&](event_ptr event)
               {
-                  position_buffer_.push_back(event->data<Position>());
+                  auto &position_buffer = position_buffer_[event->source()];
+                  position_buffer.push_back(event->data<Position>());
               });
+
+            events_ | is(msg::type::PositionDetail) |
+            $([&](event_ptr event)
+            {
+                auto &buffer = position_detail_buffer_[event->source()];
+                buffer.push_back(event->data<PositionDetail>());
+            });
 
             events_ | is(msg::type::PositionEnd) |
             $([&](event_ptr event)
-              {
+            {
+                  auto &asset_info = asset_info_[event->source()];
+                  auto &position_buffer = position_buffer_[event->source()];
                   try
-                  { on_assets(asset_info_, position_buffer_); }
+                  { on_stock_account(asset_info, position_buffer); }
                   catch (const std::exception &e)
                   {
                       SPDLOG_ERROR("Unexpected exception {}", e.what());
                   }
-                  position_buffer_.clear();
-                  memset(&asset_info_, 0, sizeof(asset_info_));
+                  position_buffer.clear();
+                  memset(&asset_info, 0, sizeof(asset_info));
+            });
+
+            events_ | is(msg::type::PositionDetailEnd) |
+            $([&](event_ptr event)
+              {
+                  auto &asset_info = asset_info_[event->source()];
+                  auto &buffer = position_detail_buffer_[event->source()];
+                  try
+                  { on_future_account(asset_info, buffer); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
+                  buffer.clear();
+                  memset(&asset_info, 0, sizeof(asset_info));
               });
         }
 

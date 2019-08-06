@@ -23,13 +23,11 @@ namespace kungfu
                                  std::map<std::string, double> &config_double) : gateway::MarketData(low_latency, std::move(locator), SOURCE_XTP)
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
-
                 client_id_ = config_int["client_id"];
                 user_ = config_str["user_id"];
                 password_ = config_int["password"];
                 ip_ = config_str["md_ip"];
                 port_ = config_int["md_port"];
-                save_file_path_ = config_str["save_file_path"];
             }
 
             MdGateway::~MdGateway()
@@ -43,9 +41,12 @@ namespace kungfu
             void MdGateway::on_start()
             {
                 gateway::MarketData::on_start();
-                SPDLOG_INFO("Connecting XTP MD for {} at {}:{}", user_, ip_, port_);
 
-                api_ = XTP::API::QuoteApi::CreateQuoteApi(client_id_, save_file_path_.c_str());
+                auto home = get_io_device()->get_home();
+                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+                SPDLOG_INFO("Connecting XTP MD for {} at {}:{} with runtime folder {}", user_, ip_, port_, runtime_folder);
+
+                api_ = XTP::API::QuoteApi::CreateQuoteApi(client_id_, runtime_folder.c_str());
                 api_->RegisterSpi(this);
                 int res = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
                 if (res == 0)
@@ -92,14 +93,15 @@ namespace kungfu
             bool MdGateway::subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id)
             {
                 int size = instruments.size();
-                char **insts = new char *[size];
-                for (int i = 0; i < size; i++)
+                std::vector<char*> insts;
+                insts.reserve(size);
+                for(auto& s: instruments)
                 {
-                    insts[i] = (char *) instruments[i].c_str();
+                    insts.push_back((char*)&s[0]);
                 }
                 XTP_EXCHANGE_TYPE exchange;
                 to_xtp(exchange, (char *) exchange_id.c_str());
-                int rtn = api_->SubscribeMarketData(insts, size, exchange);
+                int rtn = api_->SubscribeMarketData(insts.data(), size, exchange);
                 if (rtn == 0)
                 {
                     SUBSCRIBE_INFO(fmt::format("subscribe request success, (size) {} (exchange_id) {}", size, exchange_id));
@@ -107,7 +109,7 @@ namespace kungfu
                 {
                     SUBSCRIBE_ERROR("failed to subscribe");
                 }
-                int level2_rtn = api_->SubscribeTickByTick(insts, size, exchange);
+                int level2_rtn = api_->SubscribeTickByTick(insts.data(), size, exchange);
                 if (level2_rtn == 0)
                 {
                     SUBSCRIBE_INFO(fmt::format("subscribe tick by tick request success, (size) {} (exchange_id) {}", size, exchange_id));
@@ -151,7 +153,6 @@ namespace kungfu
                                               int32_t max_ask1_count)
             {
                 QUOTE_TRACE(to_string(*market_data));
-
                 msg::data::Quote &quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
                 from_xtp(*market_data, quote);
                 get_writer(0)->close_data();

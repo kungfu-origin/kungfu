@@ -236,15 +236,15 @@ namespace kungfu
                 }
             }
 
-            inline void from_ctp_time(const char *date, const char *update_time, int millisec, int64_t nano_sec)
+            inline int64_t nsec_from_ctp_time(const char *date, const char *update_time, int millisec = 0)
             {
-                nano_sec = kungfu::yijinjing::time::strptime((std::string(date) + "-" + std::string(update_time)).c_str(), "%Y%m%d-%H:%M:%S");
+                static char datetime[17];
+                memset(datetime, 0, 17);
+                strcpy(datetime, date);
+                strcat(datetime, update_time);
+                int64_t nano_sec = kungfu::yijinjing::time::strptime(std::string(datetime), "%Y%m%d%H:%M:%S");
                 nano_sec += millisec * kungfu::yijinjing::time_unit::NANOSECONDS_PER_MILLISECOND;
-            }
-
-            inline void from_ctp_datetime(const TThostFtdcDateType date, const TThostFtdcTimeType time, int64_t n_secs)
-            {
-                n_secs = kungfu::yijinjing::time::strptime((std::string(date) + "-" + std::string(time)).c_str(), "%Y%m%d-%H:%M:%S");
+                return nano_sec;
             }
 
             inline void to_ctp(CThostFtdcDepthMarketDataField &des, const Quote &ori)
@@ -257,8 +257,8 @@ namespace kungfu
                 strcpy(des.source_id, SOURCE_CTP);
                 strcpy(des.trading_day, ori.TradingDay);
                 strcpy(des.instrument_id, ori.InstrumentID);
-                strcpy(des.exchange_id, ori.ExchangeID);
-                from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec, des.data_time);
+                strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(std::string(ori.InstrumentID)).c_str());
+                des.data_time = nsec_from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec);
                 des.last_price = ori.LastPrice;
                 des.pre_settlement_price = ori.PreSettlementPrice;
                 des.pre_close_price = ori.PreClosePrice;
@@ -369,16 +369,16 @@ namespace kungfu
                 des.volume = ori.Volume;
                 from_ctp_offset(ori.OffsetFlag, des.offset);
                 from_ctp_direction(ori.Direction, des.side);
-                from_ctp_datetime(ori.TradeDate, ori.TradeTime, des.trade_time);
+                des.trade_time = nsec_from_ctp_time(ori.TradeDate,ori.TradeTime);
             }
 
             inline void from_ctp(const CThostFtdcInvestorPositionField &ori, Position &des)
             {
-                //strcpy(des.trading_day, ori.TradingDay);
+                /*
+                strcpy(des.trading_day, ori.TradingDay);
                 strcpy(des.instrument_id, ori.InstrumentID);
                 des.instrument_type = InstrumentType::Future;
                 strcpy(des.account_id, ori.InvestorID);
-                strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(ori.InstrumentID).c_str());
                 des.volume = ori.Position;
                 des.yesterday_volume = ori.Position - ori.TodayPosition;
 
@@ -391,9 +391,6 @@ namespace kungfu
                     des.frozen_total = ori.ShortFrozen;
                 }
 
-                int multiplier = 1;//InstrumentManager::get_instrument_manager()->get_future_multiplier(des.instrument_id, des.exchange_id);
-                des.cost_price = ori.PositionCost / multiplier / des.volume;
-
                 des.pre_settlement_price = ori.PreSettlementPrice;
                 des.settlement_price = is_too_large(ori.SettlementPrice) ? 0.0 : ori.SettlementPrice;
 
@@ -402,15 +399,14 @@ namespace kungfu
                 des.realized_pnl = ori.CloseProfit;
                 des.unrealized_pnl = ori.PositionProfit;
                 des.position_pnl = des.realized_pnl + des.unrealized_pnl;
-
+                */
             }
 
-            inline void from_ctp(const CThostFtdcInstrumentField &ori, FutureInstrument &des)
+            inline void from_ctp(const CThostFtdcInstrumentField &ori,Instrument &des)
             {
                 strcpy(des.instrument_id, ori.InstrumentID);
                 strcpy(des.exchange_id, ori.ExchangeID);
                 des.instrument_type = InstrumentType::Future;
-//                strcpy(des.product_id, gbk2utf8(ori.ProductID).c_str());
                 des.delivery_year = ori.DeliveryYear;
                 des.delivery_month = ori.DeliveryMonth;
                 des.contract_multiplier = ori.VolumeMultiple;
@@ -441,7 +437,7 @@ namespace kungfu
                 }
             }
 
-            inline void from_ctp(const CThostFtdcTradingAccountField &ori, AssetInfo &des)
+            inline void from_ctp(const CThostFtdcTradingAccountField &ori, Asset &des)
             {
                 strcpy(des.account_id, ori.AccountID);
                 strcpy(des.broker_id, ori.BrokerID);
@@ -453,17 +449,16 @@ namespace kungfu
                 des.close_pnl = ori.CloseProfit;
 
                 des.margin = ori.CurrMargin;
-                //des.fee = ori.Commission;
 
                 des.frozen_margin = ori.FrozenMargin;
                 des.frozen_fee = ori.FrozenCommission;
                 des.frozen_cash = ori.FrozenCash;
             }
 
-            inline void from_ctp(const CThostFtdcInvestorPositionDetailField &ori, Position &des)
+            inline void from_ctp(const CThostFtdcInvestorPositionDetailField &ori, PositionDetail &des)
             {
-                //strcpy(des.trading_day, ori.TradingDay);
                 strcpy(des.open_date, ori.OpenDate);
+                strcpy(des.trading_day, ori.TradingDay);
                 strcpy(des.instrument_id, ori.InstrumentID);
                 des.instrument_type = InstrumentType::Future;
                 strcpy(des.exchange_id, ori.ExchangeID);
@@ -471,6 +466,7 @@ namespace kungfu
                 des.direction = ori.Direction == THOST_FTDC_D_Buy ? Direction::Long : Direction::Short;
                 des.volume = ori.Volume;
                 des.open_price = ori.OpenPrice;
+                des.pre_settlement_price = ori.LastSettlementPrice;
             }
         }
     }

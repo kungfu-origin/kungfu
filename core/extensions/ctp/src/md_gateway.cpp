@@ -14,6 +14,7 @@
 #include "md_gateway.h"
 #include "type_convert_ctp.h"
 #include "serialize_ctp.h"
+#include "common.h"
 
 namespace kungfu
 {
@@ -21,19 +22,11 @@ namespace kungfu
     {
         namespace ctp
         {
-            const std::unordered_map<int, std::string> MdGateway::kDisconnectedReasonMap{
-                    {0x1001, "网络读失败"},
-                    {0x1002, "网络写失败"},
-                    {0x2001, "接收心跳超时"},
-                    {0x2002, "发送心跳失败"},
-                    {0x2003, "收到错误报文"}
-            };
-
             MdGateway::MdGateway(bool low_latency, yijinjing::data::locator_ptr locator,
                                  std::map<std::string, std::string> &config_str,
                                  std::map<std::string, int> &config_int,
                                  std::map<std::string, double> &config_double) :
-                    gateway::MarketData(low_latency, std::move(locator), SOURCE_CTP)
+                    gateway::MarketData(low_latency, std::move(locator), SOURCE_CTP), api_(nullptr), request_id_(0)
             {
                 front_uri_ = config_str["md_uri"];
                 broker_id_ = config_str["broker_id"];
@@ -45,17 +38,16 @@ namespace kungfu
             {
                 gateway::MarketData::on_start();
 
-                auto home = get_io_device()->get_home();
-                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
-                SPDLOG_INFO(runtime_folder);
-#ifdef  _WINDOWS
-                std::replace(runtime_folder.begin(), runtime_folder.end(), '/', '\\');
-#endif
-                SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
-                api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
-                api_->RegisterSpi(this);
-                api_->RegisterFront((char *) front_uri_.c_str());
-                api_->Init();
+                if (api_ == nullptr)
+                {
+                    auto home = get_io_device()->get_home();
+                    std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+                    SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
+                    api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
+                    api_->RegisterSpi(this);
+                    api_->RegisterFront((char *) front_uri_.c_str());
+                    api_->Init();
+                }
             }
 
             bool MdGateway::login()
@@ -93,49 +85,41 @@ namespace kungfu
 
             bool MdGateway::subscribe(const std::vector<std::string> &instrument_ids)
             {
-                const int count = instrument_ids.size();
-                char **insts = new char *[count];
-                for (int i = 0; i < count; i++)
+                if (api_ == nullptr)
                 {
-                    insts[i] = (char *) instrument_ids[i].c_str();
+                    SUBSCRIBE_ERROR("api is not initialized");
+                    return false;
                 }
-                int rtn = api_->SubscribeMarketData(insts, count);
-                delete[] insts;
-                return rtn == 0;
+
+                std::vector<char*> insts;
+                insts.reserve(instrument_ids.size());
+                for(auto& s: instrument_ids)
+                {
+                    insts.push_back((char*)&s[0]);
+                }
+                return api_->SubscribeMarketData(insts.data(), insts.size()) == 0;
             }
 
             bool MdGateway::unsubscribe(const std::vector<std::string> &instrument_ids)
             {
-                int count = instrument_ids.size();
-                char **insts = new char *[count];
-                for (int i = 0; i < count; i++)
+                std::vector<char*> insts;
+                insts.reserve(instrument_ids.size());
+                for(auto& s: instrument_ids)
                 {
-                    insts[i] = (char *) instrument_ids[i].c_str();
+                    insts.push_back((char*)&s[0]);
                 }
-                int rtn = api_->UnSubscribeMarketData(insts, count);
-                delete[] insts;
-                return rtn == 0;
+                return api_->UnSubscribeMarketData(insts.data(), insts.size()) == 0;
             }
 
             void MdGateway::OnFrontConnected()
             {
                 CONNECT_INFO();
-//                set_state(GatewayState::Connected);
                 login();
             }
 
             void MdGateway::OnFrontDisconnected(int nReason)
             {
-                auto it = kDisconnectedReasonMap.find(nReason);
-                if (it == kDisconnectedReasonMap.end())
-                {
-                    DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, it->second));
-//                    set_state(GatewayState::DisConnected, it->second);
-                } else
-                {
-                    DISCONNECTED_ERROR(fmt::format("(nReason) {}", nReason));
-//                    set_state(GatewayState::DisConnected);
-                }
+                DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason)));
             }
 
             void MdGateway::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
@@ -143,32 +127,24 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    std::string utf_msg = gbk2utf8(pRspInfo->ErrorMsg);
-//                    LOGIN_ERROR(fmt::format("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, utf_msg));
-//                    set_state(GatewayState::LoggedInFailed, utf_msg);
-                } else
+                    LOGIN_ERROR(fmt::format("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                }
+                else
                 {
-                    LOGIN_INFO(fmt::format("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID,
-                                           pRspUserLogin->TradingDay));
-//                    set_state(GatewayState::Ready);
-
-//                    auto instruments = get_subscriptions();
-//                    subscribe(instruments);
+                    LOGIN_INFO(fmt::format("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->TradingDay));
                 }
             }
 
             void MdGateway::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo,
                                             int nRequestID, bool bIsLast)
-            {
-
-            }
+            {}
 
             void MdGateway::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
                                                CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
+                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
                     SUBSCRIBE_INFO(fmt::format("(Inst) {} (bIsLast) {}",
@@ -181,7 +157,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-//                    UNSUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
+                    UNSUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 } else
                 {
                     UNSUBSCRIBE_INFO(fmt::format("(Inst) {} (bIsLast) {}", pSpecificInstrument->InstrumentID, bIsLast));
@@ -193,11 +169,9 @@ namespace kungfu
                 if (pDepthMarketData != nullptr)
                 {
                     QUOTE_TRACE(to_string(*pDepthMarketData));
-
-                    msg::data::Quote quote = {};
+                    msg::data::Quote &quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
                     from_ctp(*pDepthMarketData, quote);
-                    strcpy(quote.exchange_id, get_exchange_id_from_future_instrument_id(quote.instrument_id).c_str());
-//                    on_quote(quote);
+                    get_writer(0)->close_data();
                 }
             }
         }

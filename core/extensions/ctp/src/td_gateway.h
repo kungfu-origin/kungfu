@@ -13,6 +13,8 @@
 #include <kungfu/wingchun/gateway/trader.h>
 
 #include "order_mapper.h"
+#include "trade_mapper.h"
+
 #include "ThostFtdcTraderApi.h"
 
 namespace kungfu
@@ -21,6 +23,9 @@ namespace kungfu
     {
         namespace ctp
         {
+            typedef std::shared_ptr<OrderMapper> OrderMapperPtr;
+            typedef std::shared_ptr<TradeMapper> TradeMapperPtr;
+
             class TdGateway : public CThostFtdcTraderSpi, public gateway::Trader
             {
             public:
@@ -29,8 +34,7 @@ namespace kungfu
                         std::map<std::string, int> &config_int,
                         std::map<std::string, double> &config_double);
 
-                ~TdGateway()
-                {};
+                ~TdGateway() {};
 
                 virtual const std::string &get_account_id() const
                 { return account_id_; }
@@ -48,10 +52,11 @@ namespace kungfu
 
                 virtual bool req_position_detail() ;
 
-
                 virtual void OnFrontConnected();
 
                 virtual void OnFrontDisconnected(int nReason);
+
+                virtual void OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
 
                 virtual void
                 OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
@@ -84,7 +89,6 @@ namespace kungfu
                 virtual void
                 OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo,
                                            int nRequestID, bool bIsLast);
-
             protected:
 
                 void on_start() override;
@@ -94,6 +98,9 @@ namespace kungfu
                 std::string broker_id_;
                 std::string account_id_;
                 std::string password_;
+                std::string auth_code_;
+                std::string product_info_;
+                std::string app_id_;
 
                 int front_id_;
                 int session_id_;
@@ -102,20 +109,18 @@ namespace kungfu
                 int request_id_;
 
                 CThostFtdcTraderApi *api_;
-                std::shared_ptr<OrderMapper> order_mapper_;
 
-                static const std::unordered_map<int, std::string> kDisconnectedReasonMap;
-
-                std::vector<wingchun::msg::data::FutureInstrument> future_instruments_;
+                OrderMapperPtr order_mapper_;
+                TradeMapperPtr trade_mapper_;
 
                 bool login();
 
                 bool req_settlement_confirm();
 
+                bool req_auth();
+
                 bool req_qry_instrument();
 
-                std::unordered_map<std::string, wingchun::msg::data::Position> long_pos_map_;
-                std::unordered_map<std::string, wingchun::msg::data::Position> short_pos_map_;
             };
         }
     }

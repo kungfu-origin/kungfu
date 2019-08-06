@@ -33,7 +33,6 @@ namespace kungfu
                 password_ = config_str["password"];
                 ip_ = config_str["td_ip"];
                 port_ = config_int["td_port"];
-                save_file_path_ = config_str["save_file_path"];
                 session_id_ = 0;
                 request_id_ = 0;
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
@@ -50,9 +49,12 @@ namespace kungfu
             void TdGateway::on_start()
             {
                 gateway::Trader::on_start();
-                SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", user_, ip_, port_);
 
-                api_ = XTP::API::TraderApi::CreateTraderApi(client_id_, save_file_path_.c_str());
+                auto home = get_io_device()->get_home();
+                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+                SPDLOG_INFO("Connecting XTP TD for {} at {}:{} with runtime folder {}", user_, ip_, port_, runtime_folder);
+
+                api_ = XTP::API::TraderApi::CreateTraderApi(client_id_, runtime_folder.c_str());
                 api_->RegisterSpi(this);
                 api_->SubscribePublicTopic(XTP_TERT_QUICK);//只传送登录后公有流（订单响应、成交回报）的内容
                 api_->SetSoftwareVersion("1.1.0");
@@ -177,16 +179,20 @@ namespace kungfu
 
             void TdGateway::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t session_id)
             {
-                ORDER_TRACE(fmt::format("(xtp_order_info) {}, (error_id){}, (error_msg){}, (session_id){}",
-                                        order_info == nullptr ? "" : to_string(*order_info),
-                                        error_info == nullptr ? 0 : error_info->error_id,
-                                        error_info == nullptr ? "" : error_info->error_msg,
-                                        session_id));
+                if (order_info != nullptr)
+                {
+                    ORDER_TRACE(fmt::format("(xtp_order_info) {} (session_id){}", to_string(*order_info), session_id));
+                }
+                if (error_info != nullptr)
+                {
+                    ORDER_TRACE(fmt::format("(error_id){} (error_msg){} (session_id)", error_info->error_id, error_info->error_msg, session_id));
+                }
                 XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {}, trading_day: {}", order_info->order_xtp_id, trading_day_));
-                } else
+                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {} @ trading_day: {}", order_info->order_xtp_id, trading_day_));
+                }
+                else
                 {
                     auto writer = get_writer(xtp_order.source);
                     msg::data::Order &order = writer->open_data<msg::data::Order>(0, msg::type::Order);
@@ -195,9 +201,7 @@ namespace kungfu
                     order.order_id = xtp_order.internal_order_id;
                     order.parent_id = xtp_order.parent_id;
                     order.insert_time = xtp_order.insert_time;
-                    int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    order.update_time = nano;
-                    strcpy(order.client_id, xtp_order.client_id);
+                    order.update_time = kungfu::yijinjing::time::now_in_nano();
                     strcpy(order.account_id, get_account_id().c_str());
                     strcpy(order.trading_day, xtp_order.trading_day);
                     order.instrument_type = get_instrument_type(order.instrument_id, order.exchange_id);
@@ -216,7 +220,7 @@ namespace kungfu
                 XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), trade_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {}, trading_day: {}", trade_info->order_xtp_id, trading_day_));
+                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {} @trading_day: {}", trade_info->order_xtp_id, trading_day_));
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -227,31 +231,32 @@ namespace kungfu
                     trade.parent_order_id = xtp_order.parent_id;
                     trade.trade_time = kungfu::yijinjing::time::now_in_nano();
                     strcpy(trade.trading_day, trading_day_.c_str());
-                    strcpy(trade.client_id, xtp_order.client_id);
                     strcpy(trade.account_id, this->get_account_id().c_str());
                     trade.instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id);
-
                     writer->close_data();
                 }
             }
 
             void TdGateway::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id)
             {
-                CANCEL_ORDER_ERROR(
-                        fmt::format("(cancel_info){}, (error_id){}, (error_msg){}, (session_id){}", to_string(*cancel_info), error_info->error_id,
-                                    error_info->error_msg, session_id));
+                CANCEL_ORDER_ERROR(fmt::format("(cancel_info){}, (error_id){}, (error_msg){}, (session_id){}", to_string(*cancel_info),
+                        error_info->error_id, error_info->error_msg, session_id));
             }
 
             void TdGateway::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
             {
-                POSITION_TRACE(fmt::format("(position){},(error_id){},(error_msg){}", position != nullptr ? to_string(*position) : "",
-                                           error_info != nullptr ? error_info->error_id : 0,
-                                           error_info != nullptr ? error_info->error_msg : ""));
+                if (position != nullptr)
+                {
+                    POSITION_TRACE(fmt::format("(position){} (request_id) {} (last) {}", to_string(*position), request_id, is_last));
+                }
+                if (error_info != nullptr)
+                {
+                    POSITION_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
+                }
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
                     msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
-                    stock_pos.ledger_category = LedgerCategory::Account;
                     strcpy(stock_pos.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
@@ -259,45 +264,39 @@ namespace kungfu
                     }
                     stock_pos.instrument_type = get_instrument_type(stock_pos.instrument_id, stock_pos.exchange_id);
                     stock_pos.direction = Direction::Long;
-                    int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    stock_pos.update_time = nano;
+                    strcpy(stock_pos.trading_day, this->trading_day_.c_str());
+                    stock_pos.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
 
                     if (is_last)
                     {
                         writer->mark(0, msg::type::PositionEnd);
                     }
-                } else
-                {
-                    POSITION_ERROR(fmt::format("(error_id) {} (error_msg) {}", error_info->error_id, error_info->error_msg));
                 }
             }
 
             void TdGateway::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
             {
-                ACCOUNT_TRACE(fmt::format("(asset){},(error_id){},(error_msg){}",
-                                          asset != nullptr ? to_string(*asset) : "",
-                                          error_info != nullptr ? error_info->error_id : 0,
-                                          error_info != nullptr ? error_info->error_msg : ""));
-
+                if (asset != nullptr)
+                {
+                    ACCOUNT_TRACE(fmt::format("(asset){} (request_id){} (last){}", to_string(*asset), request_id, is_last));
+                }
+                if (error_info != nullptr)
+                {
+                    ACCOUNT_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
+                }
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
                     auto writer = get_writer(0);
-                    msg::data::AssetInfo &account = writer->open_data<msg::data::AssetInfo>(0, msg::type::AssetInfo);
+                    msg::data::Asset &account = writer->open_data<msg::data::Asset>(0, msg::type::Asset);
                     strcpy(account.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
                         from_xtp(*asset, account);
                     }
-                    int64_t nano = kungfu::yijinjing::time::now_in_nano();
-                    account.update_time = nano;
+                    account.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
-
                     req_position();
-
-                } else
-                {
-                    ACCOUNT_ERROR(fmt::format("(error_id) {} (error_msg) {}", error_info->error_id, error_info->error_msg));
                 }
             }
         }

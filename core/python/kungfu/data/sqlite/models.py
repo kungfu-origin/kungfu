@@ -94,14 +94,10 @@ class Trade(Base):
     tax = Column(Float)
     commission = Column(Float)
 
-class LedgerMeta(Base):
-    __tablename__ = "ledger_meta"
-    uname = Column(String,  primary_key = True)
-    update_time = Column(Integer)
-
-class AssetInfoMixin(object):
+class AssetMixin:
     trading_day = Column(String)
     update_time = Column(Integer)
+    ledger_category = Column(Integer)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
@@ -126,68 +122,103 @@ class AssetInfoMixin(object):
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
 
-class AccountAssetInfo(AssetInfoMixin, Base):
-    __tablename__ = "account"
-    __table_args__ = (PrimaryKeyConstraint('account_id'),)
+class Asset(AssetMixin, Base):
+    __tablename__ = "asset"
+    __table_args__ = (PrimaryKeyConstraint('account_id','client_id', 'ledger_category'),)
 
-class PortfolioAssetInfo(AssetInfoMixin, Base):
-    __tablename__ = "portfolio"
-    __table_args__ = (PrimaryKeyConstraint('client_id'),)
+class AssetSnapshot(AssetMixin, Base):
+    __tablename__ = "asset_snapshot"
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id', 'ledger_category', 'update_time'),)
 
-class SubPortfolioAssetInfo(AssetInfoMixin, Base):
-    __tablename__ = "subportfolio"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id'),)
+class Position(Base):
+    __tablename__ = "position"
+    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id', 'ledger_category', 'instrument_id', 'exchange_id', 'direction'),)
 
-class AccountAssetInfoSnapshot(AssetInfoMixin, Base):
-    __tablename__ = "account_snapshot"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'update_time'),)
-
-class PortfolioAssetInfoSnapshot(AssetInfoMixin, Base):
-    __tablename__ = "portfolio_snapshot"
-    __table_args__ = (PrimaryKeyConstraint('client_id', "update_time"),)
-
-class PositionMixin(object):
+    update_time = Column(Integer)
     trading_day = Column(String)
-    account_id = Column(String)
-    source_id = Column(String)
-    client_id = Column(String)
+
     instrument_id = Column(String)
     instrument_type = Column(String)
     exchange_id = Column(String)
+
+    account_id = Column(String)
+    source_id = Column(String)
+    client_id = Column(String)
+
     direction = Column(Integer)
     volume = Column(Integer)
     yesterday_volume = Column(Integer)
     frozen_total = Column(Integer)
     frozen_yesterday =Column(Integer)
+
     last_price = Column(Float)
-    open_price = Column(Float)
-    cost_price = Column(Float)
+    avg_open_price = Column(Float)
+    position_cost_price = Column(Float)
+
     close_price = Column(Float)
     pre_close_price = Column(Float)
+
     settlement_price = Column(Float)
     pre_settlement_price = Column(Float)
+
     margin = Column(Float)
     position_pnl = Column(Float)
     close_pnl = Column(Float)
+
     realized_pnl = Column(Float)
     unrealized_pnl = Column(Float)
-    open_date = Column(String)
-    expire_date = Column(String)
+
+    margin_ratio = Column(Float)
+    contract_multiplier = Column(Integer)
+
+    ledger_category = Column(Integer)
 
     def __init__(self, **kwargs):
         for attr in self.__mapper__.columns.keys():
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
 
-class AccountPosition(PositionMixin, Base):
-    __tablename__ = "account_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'instrument_id', 'exchange_id', 'direction'),)
+class PositionDetail(Base):
+    __tablename__ = "position_detail"
+    __table_args__ = (PrimaryKeyConstraint('ledger_category', 'trade_id'),)
 
-class PortfolioPosition(PositionMixin, Base):
-    __tablename__ = "portfolio_position"
-    __table_args__ = (PrimaryKeyConstraint('client_id', 'instrument_id', 'exchange_id', 'direction'),)
+    update_time = Column(Integer)
+    trading_day = Column(String)
 
+    instrument_id = Column(String)
+    instrument_type = Column(String)
+    exchange_id = Column(String)
 
-class SubPortfolioPosition(PositionMixin, Base):
-    __tablename__ = "subportfolio_position"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id','instrument_id', 'exchange_id', 'direction'),)
+    account_id = Column(String)
+    source_id = Column(String)
+    client_id = Column(String)
+
+    direction = Column(Integer)
+
+    volume = Column(Integer)
+    frozen_volume = Column(Integer)
+
+    last_price = Column(Float)
+    open_price = Column(Float)
+
+    settlement_price = Column(Float)
+    pre_settlement_price = Column(Float)
+
+    open_date = Column(String)
+
+    trade_id = Column(String)
+    trade_time = Column(Integer)
+
+    margin_ratio = Column(Float)
+    contract_multiplier = Column(Integer)
+
+    ledger_category = Column(Integer)
+
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                value = kwargs[attr]
+                if attr == "trade_id":
+                    value = str(value)
+                setattr(self, attr, value)
+

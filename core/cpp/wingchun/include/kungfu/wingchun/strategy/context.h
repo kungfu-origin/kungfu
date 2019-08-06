@@ -16,12 +16,7 @@ namespace kungfu
         namespace strategy
         {
             class Runner;
-
-            inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
-            {
-                return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
-            }
-
+           
             class Context : public std::enable_shared_from_this<Context>
             {
             public:

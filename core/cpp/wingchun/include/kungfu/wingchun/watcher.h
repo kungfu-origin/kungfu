@@ -33,7 +33,11 @@ namespace kungfu
 
             virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
 
-            virtual void on_assets(const msg::data::AssetInfo &info, const std::vector<msg::data::Position> &positions) = 0;
+            virtual void on_stock_account(const msg::data::Asset &asset, const std::vector<msg::data::Position> &positions) = 0;
+
+            virtual void on_future_account(const msg::data::Asset &asset, const std::vector<msg::data::PositionDetail> &position_details) = 0;
+
+            virtual void on_instruments(const std::vector<msg::data::Instrument> &instruments) = 0;
 
             virtual void pre_start() = 0;
 
@@ -51,9 +55,10 @@ namespace kungfu
 
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;
-            std::unordered_map<std::string, int> accounts_;
-            msg::data::AssetInfo asset_info_;
-            std::vector<msg::data::Position> position_buffer_;
+            std::unordered_map<uint32_t, msg::data::Asset> asset_info_;
+            std::unordered_map<uint32_t, std::vector<msg::data::Position>> position_buffer_;
+            std::unordered_map<uint32_t, std::vector<msg::data::PositionDetail>> position_detail_buffer_;
+            std::unordered_map<uint32_t, std::vector<msg::data::Instrument>> instrument_buffer_;
 
             void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 

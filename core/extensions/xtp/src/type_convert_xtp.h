@@ -276,13 +276,12 @@ namespace kungfu
                 from_xtp(ori.market, des.exchange_id);
                 des.volume = ori.total_qty;
                 des.yesterday_volume = ori.yesterday_position;
-                des.cost_price = ori.avg_price;
+                des.position_cost_price = ori.avg_price;
             }
 
-            inline void from_xtp(const XTPQueryAssetRsp &ori, AssetInfo &des)
+            inline void from_xtp(const XTPQueryAssetRsp &ori, Asset &des)
             {
                 strcpy(des.source_id, SOURCE_XTP);
-                des.ledger_category = LedgerCategory::Account;
                 des.avail = ori.buying_power;
             }
 

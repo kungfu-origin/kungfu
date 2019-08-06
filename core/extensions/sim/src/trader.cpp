@@ -228,7 +228,7 @@ namespace kungfu
                     writer->close_data();
                 } else if (data["msg_type"] == static_cast<int>(msg::type::Position))
                 {
-                } else if (data["msg_type"] == static_cast<int>(msg::type::AssetInfo))
+                } else if (data["msg_type"] == static_cast<int>(msg::type::Asset))
                 {
                 } else if (data["msg_type"] == static_cast<int>(msg::type::PositionDetail))
                 {

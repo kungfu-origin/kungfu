@@ -2,11 +2,10 @@
 // Created by qlu on 2019/1/14.
 //
 
-#ifndef WC_2_ORDER_MAPPER_H
-#define WC_2_ORDER_MAPPER_H
+#ifndef CTP_EXT_ORDER_MAPPER_H
+#define CTP_EXT_ORDER_MAPPER_H
 
 #include <string>
-#include <iostream>
 #include <spdlog/spdlog.h>
 #include <SQLiteCpp/SQLiteCpp.h>
 
@@ -32,9 +31,9 @@ namespace kungfu
                 std::string order_ref;
 
                 uint64_t parent_id;
-                std::string client_id;
+                uint32_t source;
 
-                uint64_t insert_time;
+                int64_t insert_time;
             };
 
             class OrderMapper
@@ -58,7 +57,7 @@ namespace kungfu
                                       "                    session_id    INTEGER,\n"
                                       "                    order_ref     CHAR(50),\n"
                                       "                    parent_id     INTEGER,\n"
-                                      "                    client_id     CHAR(50),\n"
+                                      "                    source        INTEGER,\n"
                                       "                    insert_time   INTEGER);";
                     try
                     {
@@ -70,11 +69,11 @@ namespace kungfu
                     }
                 }
 
-                void add_ctp_order(uint64_t internal_order_id, const CtpOrder &order)
+                void add_order(uint64_t internal_order_id, const CtpOrder &order)
                 {
+                    SQLite::Statement insert(db_, "INSERT INTO ctp_order VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     try
                     {
-                        SQLite::Statement insert(db_, "INSERT INTO ctp_order VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         insert.bind(1, (long long) (order.internal_order_id));
                         insert.bind(2, order.broker_id);
                         insert.bind(3, order.investor_id);
@@ -85,7 +84,7 @@ namespace kungfu
                         insert.bind(8, order.session_id);
                         insert.bind(9, order.order_ref);
                         insert.bind(10, (long long) order.parent_id);
-                        insert.bind(11, order.client_id);
+                        insert.bind(11, (long long)order.source);
                         insert.bind(12, (long long) order.insert_time);
                         insert.exec();
                     }
@@ -97,10 +96,9 @@ namespace kungfu
 
                 void update_sys_id(int front_id, int session_id, const char *order_ref, const char *exchange_id, const char *order_sys_id)
                 {
+                    SQLite::Statement query(db_, "update ctp_order SET exchange_id = ?, order_sys_id = ? WHERE front_id = ? AND session_id = ? AND order_ref = ?");
                     try
                     {
-                        SQLite::Statement query(db_,
-                                                "update ctp_order SET exchange_id = ?, order_sys_id = ? WHERE front_id = ? AND session_id = ? AND order_ref = ?");
                         query.bind(1, exchange_id);
                         query.bind(2, order_sys_id);
                         query.bind(3, front_id);
@@ -115,12 +113,12 @@ namespace kungfu
                     }
                 }
 
-                const CtpOrder get_order_info(uint64_t internal_order_id)
+                CtpOrder get_order_info(uint64_t internal_order_id)
                 {
                     CtpOrder result = {};
+                    SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE internal_order_id = ?");
                     try
                     {
-                        SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE internal_order_id = ?");
                         query.bind(1, (long long) internal_order_id);
                         if (query.executeStep())
                         {
@@ -134,7 +132,7 @@ namespace kungfu
                             result.session_id = query.getColumn(7).getInt();
                             result.order_ref = query.getColumn(8).getString();
                             result.parent_id = query.getColumn(9).getInt64();
-                            result.client_id = query.getColumn(10).getString();
+                            result.source = query.getColumn(10).getInt64();
                             result.insert_time = query.getColumn(11).getInt64();
                         }
                     }
@@ -145,12 +143,12 @@ namespace kungfu
                     return result;
                 }
 
-                const uint64_t get_internal_id_by_sys_id(const char *exchange_id, const char *order_sys_id)
+                uint64_t get_internal_id_by_sys_id(const char *exchange_id, const char *order_sys_id)
                 {
                     uint64_t result = 0;
+                    SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE exchange_id = ? and order_sys_id = ?");
                     try
                     {
-                        SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE exchange_id = ? and order_sys_id = ?");
                         query.bind(1, exchange_id);
                         query.bind(2, order_sys_id);
                         if (query.executeStep())
@@ -165,12 +163,12 @@ namespace kungfu
                     return result;
                 }
 
-                const CtpOrder get_order_info_by_sys_id(const char *exchange_id, const char *order_sys_id)
+                CtpOrder get_order_info_by_sys_id(const char *exchange_id, const char *order_sys_id)
                 {
                     CtpOrder result = {};
+                    SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE exchange_id = ? and order_sys_id = ?");
                     try
                     {
-                        SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE exchange_id = ? and order_sys_id = ?");
                         query.bind(1, exchange_id);
                         query.bind(2, order_sys_id);
                         if (query.executeStep())
@@ -185,7 +183,7 @@ namespace kungfu
                             result.session_id = query.getColumn(7).getInt();
                             result.order_ref = query.getColumn(8).getString();
                             result.parent_id = query.getColumn(9).getInt64();
-                            result.client_id = query.getColumn(10).getString();
+                            result.source = query.getColumn(10).getInt64();
                             result.insert_time = query.getColumn(11).getInt64();
                         }
                     }
@@ -196,12 +194,12 @@ namespace kungfu
                     return result;
                 }
 
-                const CtpOrder get_order_info_by_order_ref(int front_id, int session_id, const char *order_ref)
+                CtpOrder get_order_info_by_order_ref(int front_id, int session_id, const char *order_ref)
                 {
                     CtpOrder result = {};
+                    SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE front_id = ? and session_id = ? and order_ref = ?");
                     try
                     {
-                        SQLite::Statement query(db_, "SELECT * FROM ctp_order WHERE front_id = ? and session_id = ? and order_ref = ?");
                         query.bind(1, front_id);
                         query.bind(2, session_id);
                         query.bind(3, order_ref);
@@ -217,7 +215,7 @@ namespace kungfu
                             result.session_id = query.getColumn(7).getInt();
                             result.order_ref = query.getColumn(8).getString();
                             result.parent_id = query.getColumn(9).getInt64();
-                            result.client_id = query.getColumn(10).getString();
+                            result.source = query.getColumn(10).getInt64();
                             result.insert_time = query.getColumn(11).getInt64();
                         }
                     }
@@ -234,4 +232,4 @@ namespace kungfu
         }
     }
 }
-#endif //WC_2_ORDER_MAPPER_H
+#endif //CTP_EXT_ORDER_MAPPER_H
