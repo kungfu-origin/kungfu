@@ -14,5 +14,3 @@ def importer(ctx, arguments):
     cv = EXTENSION_REGISTRY_BT.get_extension(ctx.name)(ctx)
     cv.write_data_to_journal()
     cv.read_data_from_journal()
-
-# yarn dev history -g xtp -n csvConverter importer -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1601.csv

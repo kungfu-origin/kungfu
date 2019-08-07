@@ -7,8 +7,6 @@ import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 from kungfu.yijinjing.log import create_logger
 
-import sys
-
 class Converter:
 
     def __init__(self, ctx):

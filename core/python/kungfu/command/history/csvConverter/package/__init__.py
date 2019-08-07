@@ -1,24 +1,15 @@
-import pyyjj
 import pywingchun
-
-import kungfu.yijinjing.msg as kfm
-import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.journal as kfj
-from kungfu.yijinjing.log import create_logger
 from kungfu.command.history.converter import Converter
-
 from extensions import EXTENSION_REGISTRY_BT
 
 import pandas as pd
-import sys
-
 
 class csvConverter(Converter):
 
     def __init__(self, ctx):
         super(csvConverter, self).__init__(ctx)
         self.filepath = ctx.arguments['file_path']
-        self.logger.info("converter creation success!")
+        self.logger.info("csvConverter creation success!")
 
     def read_data_source(self):
         # transfer csv to df
@@ -67,3 +58,4 @@ EXTENSION_REGISTRY_BT.register_extension('csvConverter', csvConverter)
 
 # tar -zcvf csvConverter-v0.0.1.tgz package
 # yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/history/csvConverter/csvConverter-v0.0.1.tgz 
+# yarn dev history -g xtp -n csvConverter importer -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1601.csv
