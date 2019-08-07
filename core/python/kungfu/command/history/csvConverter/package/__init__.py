@@ -17,6 +17,7 @@ class csvConverter(Converter):
 
     def write_data_to_journal(self):
         df = self.read_data_source()
+        df = df.sort_values(by=['Timestamp'], ascending=True).reset_index(drop=True)
         self.mark_SessionStart(int(df.loc[0,:].Timestamp * 1e6 + 1.4517500485e18 - 1e6))
 
         for i in range(len(df)):

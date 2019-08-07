@@ -39,6 +39,7 @@ class tsConverter(Converter):
 
     def write_data_to_journal(self):
         df = self.get_data_from_source()
+        df = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
         self.mark_SessionStart(kft.strptime(df.loc[0,'trade_date'], '%Y%m%d'))
 
         for i in range(len(df)):
@@ -61,7 +62,7 @@ class tsConverter(Converter):
         #quote.pre_settlement_price = 0
         quote.last_price = data.close
         quote.volume = int(data.vol * 100)
-        quote.turnover = data.amount
+        quote.turnover = data.amount *1000
         #quote.pre_open_interest = data.PreOpenInterest
         #quote.open_interest = data.OpenInterest
         quote.open_price = data.open
