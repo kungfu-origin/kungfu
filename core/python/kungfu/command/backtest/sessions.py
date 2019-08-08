@@ -1,13 +1,13 @@
 from tabulate import tabulate
 
 import click
-from kungfu.command.history import history, pass_ctx_from_parent
+from kungfu.command.backtest import backtest, pass_ctx_from_parent
 
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 
 
-@history.command()
+@backtest.command()
 @click.option('-s', '--sortby', default='begin_time',
               type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name']),
               help='sorting method')
@@ -30,4 +30,4 @@ def sessions(ctx, sortby, ascending, tablefmt, pager):
     else:
         click.echo(table)
 
-# yarn dev history -g xtp -n csvConverter sessions
+# yarn dev backtest -g xtp -n tushare sessions

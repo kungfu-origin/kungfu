@@ -1,10 +1,10 @@
 import click
 import os, glob, shutil
 
-from kungfu.command.history import history, pass_ctx_from_parent
+from kungfu.command.backtest import backtest, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
 
-@history.command()
+@backtest.command()
 @click.option('-f', '--filepath', type=str, help='csv_file_path')
 @click.option('-t', '--time', type=str, help='time')
 @click.pass_context
@@ -19,4 +19,4 @@ def rm(ctx, filepath, time):
     else:
         click.echo('invalid journal path')
 
-# yarn dev history -g csvConverter rm
+# yarn dev backtest -g tushare rm

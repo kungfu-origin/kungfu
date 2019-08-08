@@ -1,6 +1,6 @@
 import pywingchun
 import kungfu.yijinjing.time as kft
-from kungfu.command.history.converter import Converter
+from kungfu.command.backtest.converter import Converter
 from extensions import EXTENSION_REGISTRY_BT
 
 import os
@@ -80,8 +80,8 @@ class tsConverter(Converter):
         #quote.set_bid_volume([int(vol) for vol in [data.BidVolume1, data.BidVolume2, data.BidVolume3, data.BidVolume4, data.BidVolume5]])
         #quote.set_ask_volume([int(vol) for vol in [data.AskVolume1, data.AskVolume2, data.AskVolume3, data.AskVolume4, data.AskVolume5]])
 
-EXTENSION_REGISTRY_BT.register_extension('tsConverter', tsConverter)
+EXTENSION_REGISTRY_BT.register_extension('tushare', tsConverter)
 
-# tar -zcvf tsConverter-v0.0.1.tgz package
-# yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/history/tsConverter/tsConverter-v0.0.1.tgz 
-# yarn dev history -g tsConverter importer -a ts_code 000001.SZ -a start_date 20180701 -a end_date 20180718 -a api daily
+# tar -zcvf tushare-v0.0.1.tgz package
+# yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/backtest/tushare/tushare-v0.0.1.tgz 
+# yarn dev backtest -g tushare add -a ts_code 000001.SZ -a start_date 20180701 -a end_date 20180718

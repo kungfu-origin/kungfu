@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from tabulate import tabulate
 
 import click
-from kungfu.command.history import history, pass_ctx_from_parent
+from kungfu.command.backtest import backtest, pass_ctx_from_parent
 
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
@@ -12,7 +12,7 @@ DURATION_FORMAT = '%H:%M:%S.%N'
 DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
 
 
-@history.command()
+@backtest.command()
 @click.option('-i', '--session_id', type=int, required=True, help='session id')
 @click.option('-t', '--io_type', type=click.Choice(['all', 'in', 'out']), default='all', help='input or output during this session')
 @click.option('-f', '--tablefmt', default='simple',
@@ -33,4 +33,4 @@ def trace(ctx, session_id, io_type, tablefmt, pager):
     else:
         click.echo(table)
 
-# yarn dev history -g xtp -n csvConverter trace -t out -i 1
+# yarn dev backtest -g xtp -n tushare trace -t out -i 1

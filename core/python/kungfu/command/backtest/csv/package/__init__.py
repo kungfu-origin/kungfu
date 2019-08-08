@@ -1,5 +1,5 @@
 import pywingchun
-from kungfu.command.history.converter import Converter
+from kungfu.command.backtest.converter import Converter
 from extensions import EXTENSION_REGISTRY_BT
 
 import pandas as pd
@@ -55,8 +55,8 @@ class csvConverter(Converter):
         quote.set_bid_volume([int(vol) for vol in [data.BidVolume1, data.BidVolume2, data.BidVolume3, data.BidVolume4, data.BidVolume5]])
         quote.set_ask_volume([int(vol) for vol in [data.AskVolume1, data.AskVolume2, data.AskVolume3, data.AskVolume4, data.AskVolume5]])
 
-EXTENSION_REGISTRY_BT.register_extension('csvConverter', csvConverter)
+EXTENSION_REGISTRY_BT.register_extension('csv', csvConverter)
 
-# tar -zcvf csvConverter-v0.0.1.tgz package
-# yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/history/csvConverter/csvConverter-v0.0.1.tgz 
-# yarn dev history -g csvConverter importer -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1602.csv
+# tar -zcvf csv-v0.0.1.tgz package
+# yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/backtest/csv/csv-v0.0.1.tgz 
+# yarn dev backtest -g csv add -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1602.csv
