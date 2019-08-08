@@ -495,7 +495,6 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
             .def("set_begin_time", &strategy::Runner::set_begin_time)
             .def("set_end_time", &strategy::Runner::set_end_time)
-            .def("set_bt_source", &strategy::Runner::set_bt_source)
             .def("run", &strategy::Runner::run)
             .def("on_trading_day", &strategy::Runner::on_trading_day)
             .def("add_strategy", &strategy::Runner::add_strategy);

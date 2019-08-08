@@ -29,8 +29,8 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id, backtest):
     ctx.replay = replay
     ctx.backtest = backtest
     mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.BACKTEST if ctx.backtest else pyyjj.mode.LIVE
+    ctx.mode = pyyjj.get_mode_name(mode)
     ctx.logger = create_logger(name, ctx.log_level, pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator))
-
     ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
     runner = Runner(ctx, mode)
     runner.add_strategy(ctx.strategy)
@@ -40,9 +40,7 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id, backtest):
         ctx.session_id = session_id
         replay_setup.setup(ctx, session_id, strategy, runner)
     if backtest:
-        #ctx.md_path = os.path.join(ctx.home, 'md', group, name, 'journal', 'backtest', '00000000.*.journal')
         ctx.category = 'md'
-        ctx.mode = pyyjj.get_mode_name(mode)
         ctx.session_id = session_id
         backtest_setup.setup(ctx, session_id, strategy, runner)
 

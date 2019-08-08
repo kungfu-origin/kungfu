@@ -542,7 +542,8 @@ namespace kungfu
                 if (iter != quotes_.end())
                 {
                     auto quote = iter->second;
-                    volume_price_generator(trade, quote, price_type);
+                    trade.price = quote.last_price;
+                    //volume_price_generator(trade, quote, price_type);
                     //SPDLOG_INFO("trade record recieved: volumn {}, price {}, trade type {}", trade.volume, trade.price, price_type);
                 }
                 else

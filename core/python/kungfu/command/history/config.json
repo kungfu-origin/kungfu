@@ -1,0 +1,20 @@
+{
+    "plug-ins":{
+        "tsConverter": {
+            "token":"eb8dbad659d8467f46b318c4047fe30b71db86d46f393b957c14060b"
+            "daily": {
+                
+            }
+        },
+        "csvConverter": {
+        },
+        "bar_handle": {
+        },
+        "passive": {
+        },
+        "xtp": {
+        },
+        "ctp": {
+        }
+    }
+}

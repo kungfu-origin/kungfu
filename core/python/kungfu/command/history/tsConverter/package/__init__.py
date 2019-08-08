@@ -3,6 +3,8 @@ import kungfu.yijinjing.time as kft
 from kungfu.command.history.converter import Converter
 from extensions import EXTENSION_REGISTRY_BT
 
+import os
+import json
 import time
 import tushare as ts
 
@@ -25,8 +27,9 @@ class tsConverter(Converter):
 
     def __init__(self, ctx):
         super(tsConverter, self).__init__(ctx)
-        token = self.ctx.arguments.pop('token')
-        self.ts_pro = ts.pro_api(token) #eb8dbad659d8467f46b318c4047fe30b71db86d46f393b957c14060b
+        self.config_file = os.path.join(ctx.home, 'config.json')
+        self.token = json.loads(open(self.config_file).read())['plug-ins'][self.ctx.group]['token']
+        self.ts_pro = ts.pro_api(self.token) #eb8dbad659d8467f46b318c4047fe30b71db86d46f393b957c14060b
 
     def get_data_from_source(self):
         retry_times = 3
@@ -81,4 +84,4 @@ EXTENSION_REGISTRY_BT.register_extension('tsConverter', tsConverter)
 
 # tar -zcvf tsConverter-v0.0.1.tgz package
 # yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/history/tsConverter/tsConverter-v0.0.1.tgz 
-# yarn dev history -g xtp -n tsConverter importer -a token eb8dbad659d8467f46b318c4047fe30b71db86d46f393b957c14060b -a ts_code 000001.SZ -a start_date 20180701 -a end_date 20180718
+# yarn dev history -g tsConverter importer -a ts_code 000001.SZ -a start_date 20180701 -a end_date 20180718 -a api daily

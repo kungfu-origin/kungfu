@@ -1,8 +1,9 @@
 import click
-import os, pkgutil
+import os
+import datetime
+
 from kungfu.command.history import history, pass_ctx_from_parent
 from extensions import EXTENSION_REGISTRY_BT
-import kungfu.yijinjing.time as kft
 
 
 @history.command()
@@ -10,7 +11,9 @@ import kungfu.yijinjing.time as kft
 @click.pass_context
 def importer(ctx, arguments):
     pass_ctx_from_parent(ctx)
+    if ctx.name == '*':
+        ctx.name = datetime.datetime.today().strftime('%Y%m%d')
     ctx.arguments = {arg[0]: arg[1] for arg in arguments}
-    cv = EXTENSION_REGISTRY_BT.get_extension(ctx.name)(ctx)
+    cv = EXTENSION_REGISTRY_BT.get_extension(ctx.group)(ctx)
     cv.write_data_to_journal()
     cv.read_data_from_journal()

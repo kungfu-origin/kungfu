@@ -59,4 +59,4 @@ EXTENSION_REGISTRY_BT.register_extension('csvConverter', csvConverter)
 
 # tar -zcvf csvConverter-v0.0.1.tgz package
 # yarn dev -l trace extension install -f /Users/yetaoran/Documents/kungfu_new/kungfu/core/python/kungfu/command/history/csvConverter/csvConverter-v0.0.1.tgz 
-# yarn dev history -g xtp -n csvConverter importer -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1601.csv
+# yarn dev history -g csvConverter importer -a file_path /Users/yetaoran/Documents/futures/2016/201601/20160104/Daily_20160104_AL1602.csv

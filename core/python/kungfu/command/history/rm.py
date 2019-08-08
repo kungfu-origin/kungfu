@@ -1,5 +1,5 @@
 import click
-import os, glob
+import os, glob, shutil
 
 from kungfu.command.history import history, pass_ctx_from_parent
 import kungfu.yijinjing.time as kft
@@ -11,13 +11,12 @@ import kungfu.yijinjing.time as kft
 def rm(ctx, filepath, time):
     pass_ctx_from_parent(ctx)
 
-    journal_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode)
-
-    if os.path.exists(journal_path):
-        for file in glob.glob(journal_path + os.sep + '*'):
-            os.remove(file)
-        click.echo('history journals in {} is cleared'.format(journal_path))
+    journal_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name)
+    if os.path.exists(journal_path) or '*' in journal_path:
+        for file in glob.glob(journal_path):
+            shutil.rmtree(file)
+            click.echo('history journals in {} is cleared'.format(file))
     else:
         click.echo('invalid journal path')
 
-# yarn dev history -g xtp -n csvConverter rm
+# yarn dev history -g csvConverter rm

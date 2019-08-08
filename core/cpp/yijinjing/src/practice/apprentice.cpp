@@ -140,8 +140,8 @@ namespace kungfu
             } else if (get_io_device()->get_home()->mode == mode::BACKTEST)
             {
                 // dest_id 0 should be configurable TODO
-                reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, bt_source_, bt_source_, get_io_device()->get_home()->locator),
-                              0, begin_time_);
+                reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, get_io_device()->get_home()->group, 
+                             get_io_device()->get_home()->name, get_io_device()->get_home()->locator), 0, begin_time_);
             }
 
             events_ |

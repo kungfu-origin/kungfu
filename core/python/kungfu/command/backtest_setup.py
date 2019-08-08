@@ -8,7 +8,6 @@ from tabulate import tabulate
 
 
 def setup(ctx, session_id, cmd, instance):
-    #ctx.mode = 'live'  # to get live data
     ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
     if not session_id:
         all_sessions = kfj.find_sessions(ctx)
@@ -23,7 +22,5 @@ def setup(ctx, session_id, cmd, instance):
         session = kfj.find_session(ctx, session_id)
         instance.set_begin_time(session['begin_time'])
         instance.set_end_time(session['end_time'])
-        instance.set_bt_source(ctx.group)
-
 
     #auto md_location = location::make(mode::LIVE, category::MD, source, source, home->locator);

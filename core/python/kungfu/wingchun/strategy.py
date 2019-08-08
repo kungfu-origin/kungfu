@@ -53,9 +53,10 @@ class Strategy(pywingchun.Strategy):
         self.ctx.insert_fak_order = wc_context.insert_fak_order
         self.ctx.insert_market_order = wc_context.insert_market_order
         self.ctx.cancel_order = wc_context.cancel_order
-        # self.ctx.get_quotes = wc_context.get_quotes
-        # self.ctx.get_orders = wc_context.get_orders
-        # self.ctx.get_trades = wc_context.get_trades
+        if self.ctx.mode == "backtest":
+            self.ctx.get_quotes = wc_context.get_quotes
+            self.ctx.get_orders = wc_context.get_orders
+            self.ctx.get_trades = wc_context.get_trades
 
         self._pre_start(self.ctx)
         self.ctx.log.info('strategy prepare to run')
