@@ -2,7 +2,7 @@ import pyyjj
 import pywingchun
 import click
 import os
-from kungfu.command import kfc, pass_ctx_from_parent, backtest_setup
+from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import Runner, replay_setup
 from kungfu.wingchun.strategy import Strategy
 from kungfu.yijinjing.log import create_logger

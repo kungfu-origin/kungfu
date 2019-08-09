@@ -2,8 +2,8 @@ import sys
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
 
-#source = Source.XTP
-#exchange = Exchange.SHFE
+source = Source.XTP
+exchange = Exchange.SSE
 
 def test_timer(context, event):
     context.log.info('test timer')
@@ -14,8 +14,8 @@ def test_time_interval(context, event):
 def pre_start(context):
     context.log.info("pre run strategy")
     #context.add_account(source, "15011218", 100000000.0)
-    #context.add_account(source, "15040900", 100000000.0)
-    #context.subscribe(source, ["600000", "601988"], exchange)
+    context.add_account(source, "15040900", 100000000.0)
+    context.subscribe(source, ["600000", "601988"], exchange)
     #context.add_timer(context.now() + kft.NANO_PER_SECOND, test_timer)
     #context.add_time_interval(5 * kft.NANO_PER_SECOND, test_time_interval)
     # context.register_nanotime_callback(context.get_nano() + int(5* 1e9), insert_order)
@@ -32,9 +32,9 @@ def pre_start(context):
 
 def on_quote(context, quote):
     #context.log.info("{} {}".format(quote.data_time, quote.last_price))
-    #order_id = context.insert_limit_order("601988", exchange, "15040900", 75, 200, Side.Buy, Offset.Open)
+    order_id = context.insert_limit_order("601988", exchange, "15040900", 75, 200, Side.Buy, Offset.Open)
     context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
-    context.insert_market_order("000001.SZ", "", "15040900", 20, Side.Buy, Offset.Open)
+    # context.insert_market_order("000001.SZ", "", "15040900", 20, Side.Buy, Offset.Open)
     pass
 
 def on_transaction(context, transaction):

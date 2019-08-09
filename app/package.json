@@ -49,14 +49,6 @@
           "resources"
         ]
       },
-      {
-        "from": "../core/cpp/wingchun/resources",
-        "to": "dist/app/resources/default",
-        "filter": [
-          "commission.db",
-          "holidays.db"
-        ]
-      },
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
