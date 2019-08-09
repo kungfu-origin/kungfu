@@ -8,7 +8,7 @@ import pyyjj
 @click.option('-s', '--source',type=str, help='md source')
 @click.option('-f', '--frequency',type=int, help='bar frequency')
 @click.pass_context
-def bar_handle(ctx, source, frequency, low_latency):
+def bar(ctx, source, frequency, low_latency):
     print(source, frequency, low_latency)
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
