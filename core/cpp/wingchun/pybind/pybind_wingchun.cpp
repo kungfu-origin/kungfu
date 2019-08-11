@@ -19,6 +19,7 @@
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
+#include <kungfu/wingchun/controller.h>
 #include <kungfu/wingchun/watcher.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
@@ -28,6 +29,15 @@ namespace py = pybind11;
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::msg::data;
+
+class PyController : public Controller
+{
+public:
+    using Controller::Controller;
+
+    std::string handle_request(const std::string &msg) override
+    {PYBIND11_OVERLOAD_PURE(std::string, Controller, handle_request, msg) }
+};
 
 class PyWatcher : public Watcher
 {
@@ -471,6 +481,13 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
+    py::class_<Controller, PyController, kungfu::practice::apprentice, std::shared_ptr<Controller>>(m, "Controller")
+            .def(py::init<data::locator_ptr, data::mode, bool>())
+            .def_property_readonly("io_device", &Controller::get_io_device)
+            .def("get_location", &Controller::get_location)
+            .def("handle_request", &Controller::handle_request)
+            .def("run", &Controller::run);
 
     py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")
             .def(py::init<data::locator_ptr, data::mode, bool>())

@@ -20,7 +20,8 @@
     "build:pyi": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron package",
     "configure": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron configure",
     "clean": "cmake-js clean",
-    "dev": "pipenv run python python/devrun.py"
+    "dev": "pipenv run python python/dev_run.py",
+    "test": "pipenv run python python/dev_test.py"
   },
   "dependencies": {
     "bindings": "^1.5.0",
