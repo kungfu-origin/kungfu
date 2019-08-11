@@ -1,9 +1,9 @@
 import unittest
 import click
+import extensions
 
 
 @click.command()
-@click.pass_context
 def test():
     loader = unittest.TestLoader()
     suite = loader.discover('.')
@@ -11,4 +11,4 @@ def test():
     runner.run(suite)
 
 
-test(auto_envvar_prefix='KF_TEST')
+test()

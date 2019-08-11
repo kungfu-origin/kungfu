@@ -13,12 +13,12 @@ namespace kungfu
 {
     namespace wingchun
     {
-        class Controller : public practice::apprentice
+        class Commander : public practice::apprentice
         {
         public:
-            explicit Controller(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
+            explicit Commander(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
 
-            virtual ~Controller() = default;
+            virtual ~Commander() = default;
 
             virtual std::string handle_request(const std::string &msg) = 0;
 

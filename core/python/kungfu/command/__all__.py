@@ -5,9 +5,9 @@ from . import master
 from . import gateway
 from . import strategy
 from . import watcher
-from . import controller
+from . import commander
 
-from kungfu.command.extension import __all__
+from kungfu.command.ext import __all__
 from kungfu.command.journal import __all__
 from kungfu.command.backtest import __all__
 

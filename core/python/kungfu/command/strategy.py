@@ -8,7 +8,8 @@ from kungfu.wingchun.strategy import Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.oms.order import *
 
-@kfc.command()
+
+@kfc.command(help_priority=4)
 @click.option('-g', '--group', type=str, default='default', help='group')
 @click.option('-n', '--name', type=str, required=True, help='name')
 @click.option('-p', '--path', type=str, required=True, help='path of strategy py file')

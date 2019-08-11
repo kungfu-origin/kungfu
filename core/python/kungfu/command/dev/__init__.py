@@ -5,7 +5,7 @@ from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
 
 
-@kfc.group()
+@kfc.group(help_priority=99)
 @click.pass_context
 def dev(ctx):
     pass_ctx_from_root(ctx)

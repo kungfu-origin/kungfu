@@ -1,7 +1,7 @@
 import os, shutil
 import extensions
 import click
-from kungfu.command.extension import extension as kfext, pass_ctx_from_parent
+from kungfu.command.ext import ext as kfext, pass_ctx_from_parent
 
 
 @kfext.command(help='uninstall extension')

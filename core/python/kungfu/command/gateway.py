@@ -30,7 +30,7 @@ def run_extension(ctx, registry):
         ctx.logger.error('Unrecognized %s arg %s', registry.ext_type.lower(), ctx.name)
 
 
-@kfc.command()
+@kfc.command(help_priority=3)
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_MD.names()), help='data source')
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
 @click.pass_context
@@ -43,7 +43,7 @@ def md(ctx, source, low_latency):
     run_extension(ctx, EXTENSION_REGISTRY_MD)
 
 
-@kfc.command()
+@kfc.command(help_priority=3)
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_TD.names()), help='destination to send order')
 @click.option('-a', '--account', type=str, help='account')
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')

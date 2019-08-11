@@ -51,7 +51,7 @@ namespace kungfu
                 for (auto mdp : md_parameters_)
                 {
                     msg::data::Quote quote;
-                    strcpy(quote.source_id, "passive");
+                    strcpy(quote.source_id, "sim");
                     strcpy(quote.trading_day, "");
                     quote.data_time = time::now_in_nano();
                     strcpy(quote.instrument_id, mdp.instrument_id);

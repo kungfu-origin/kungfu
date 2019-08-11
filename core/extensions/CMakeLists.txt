@@ -7,7 +7,8 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/cpp/wingchun/include)
 
 ############################################################
 
-ADD_SUBDIRECTORY(passive)
+ADD_SUBDIRECTORY(sim)
+ADD_SUBDIRECTORY(btdata)
 ADD_SUBDIRECTORY(bar)
 
 ADD_SUBDIRECTORY(xtp)

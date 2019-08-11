@@ -1,7 +1,7 @@
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
 
-source = "passive"
+source = "sim"
 account = "test"
 ticker = "600000"
 price = 13.2

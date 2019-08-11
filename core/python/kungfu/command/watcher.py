@@ -4,7 +4,7 @@ from kungfu.wingchun import replay_setup
 from kungfu.wingchun.watcher import Watcher
 
 
-@kfc.command()
+@kfc.command(help_priority=2)
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
 @click.option('-r', '--replay', is_flag=True, help='run in replay mode')
 @click.option('-i', '--session_id', type=int, help='replay session id, MUST be specified if replay is set')

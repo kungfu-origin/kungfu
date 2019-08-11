@@ -7,7 +7,7 @@
 #include <kungfu/yijinjing/time.h>
 
 #include <kungfu/wingchun/msg.h>
-#include <kungfu/wingchun/controller.h>
+#include <kungfu/wingchun/commander.h>
 
 using namespace kungfu::practice;
 using namespace kungfu::rx;
@@ -19,13 +19,13 @@ namespace kungfu
 {
     namespace wingchun
     {
-        Controller::Controller(locator_ptr locator, mode m, bool low_latency) :
-                apprentice(location::make(m, category::SYSTEM, "controller", "controller", std::move(locator)), low_latency)
+        Commander::Commander(locator_ptr locator, mode m, bool low_latency) :
+                apprentice(location::make(m, category::SYSTEM, "commander", "commander", std::move(locator)), low_latency)
         {
             log::copy_log_settings(get_io_device()->get_home(), "watcher");
         }
 
-        void Controller::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
+        void Commander::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
         {
             if (has_location(app_location->uid))
             {
@@ -57,13 +57,13 @@ namespace kungfu
             }
         }
 
-        void Controller::deregister_location(int64_t trigger_time, uint32_t location_uid)
+        void Commander::deregister_location(int64_t trigger_time, uint32_t location_uid)
         {
             auto app_location = get_location(location_uid);
             apprentice::deregister_location(trigger_time, location_uid);
         }
 
-        void Controller::on_write_to(const yijinjing::event_ptr &event)
+        void Commander::on_write_to(const yijinjing::event_ptr &event)
         {
             if (event->source() == get_master_commands_uid())
             {
@@ -71,7 +71,7 @@ namespace kungfu
             }
         }
 
-        void Controller::on_read_from(const yijinjing::event_ptr &event)
+        void Commander::on_read_from(const yijinjing::event_ptr &event)
         {
             const yijinjing::msg::data::RequestReadFrom &request = event->data<yijinjing::msg::data::RequestReadFrom>();
             auto source_location = get_location(request.source_id);
@@ -96,7 +96,7 @@ namespace kungfu
             }
         }
 
-        void Controller::on_start()
+        void Commander::on_start()
         {
             apprentice::on_start();
 
@@ -129,7 +129,7 @@ namespace kungfu
               });
         }
 
-        void Controller::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
+        void Commander::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
         {
             auto app_uid_str = fmt::format("{:08x}", app_location->uid);
             auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);

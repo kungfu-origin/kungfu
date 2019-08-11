@@ -1,14 +1,12 @@
-import click
-
 import pyyjj
-import kungfu.yijinjing.journal as kfj
+import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
-
 from extensions import EXTENSION_REGISTRY_BT
 
-@kfc.group()
-@click.option('-g', '--group', type=click.Choice(EXTENSION_REGISTRY_BT.names()), help='group')
+
+@kfc.group(help_priority=5)
+@click.option('-g', '--group', type=click.Choice(EXTENSION_REGISTRY_BT.names()), required=True, help='group')
 @click.option('-n', '--name', type=str, default='*', help='name')
 @click.pass_context
 def backtest(ctx, group, name):
@@ -23,6 +21,7 @@ def backtest(ctx, group, name):
     ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
     pyyjj.setup_log(ctx.journal_util_location, 'journal')
+
 
 def pass_ctx_from_parent(ctx):
     pass_ctx_from_root(ctx)

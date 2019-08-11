@@ -132,7 +132,7 @@ namespace kungfu
             void PassiveTrader::on_start()
             {
                 gateway::Trader::on_start();
-                add_md("passive");
+                add_md("sim");
 
 
 

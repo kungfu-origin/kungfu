@@ -46,7 +46,6 @@ EXTENSION_REGISTRY_TD = ExtensionRegistry('TD')
 EXTENSION_REGISTRY_BT = ExtensionRegistry('BT')
 EXTENSIONS = {}
 
-
 extension_path = __path__
 __path__ = pkgutil.extend_path(__path__, __name__)
 if not os.getenv('KF_NO_EXT'):

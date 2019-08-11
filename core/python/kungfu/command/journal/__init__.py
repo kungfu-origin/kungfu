@@ -5,7 +5,7 @@ from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
 
 
-@kfc.group()
+@kfc.group(help_priority=5)
 @click.option('-m', '--mode', default='*', type=click.Choice(kfj.MODES.keys()), help='mode')
 @click.option('-c', '--category', default='*', type=click.Choice(kfj.CATEGORIES.keys()), help='category')
 @click.option('-g', '--group', type=str, default='*', help='group')

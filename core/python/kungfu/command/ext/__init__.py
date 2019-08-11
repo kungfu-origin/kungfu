@@ -7,7 +7,7 @@ from kungfu.yijinjing.log import create_logger
 
 @kfc.group()
 @click.pass_context
-def extension(ctx):
+def ext(ctx):
     pass_ctx_from_root(ctx)
     ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'extension', ctx.locator)
     ctx.logger = create_logger('extension', ctx.log_level, ctx.journal_util_location)

@@ -15,7 +15,7 @@ namespace py = pybind11;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::wingchun::passive;
 
-PYBIND11_MODULE(kfext_passive, m) {
+PYBIND11_MODULE(kfext_sim, m) {
 py::class_<PassiveMarketData, kungfu::practice::apprentice, std::shared_ptr<PassiveMarketData>>(m, "MD")
 .def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
 .def("run", &PassiveMarketData::run);
