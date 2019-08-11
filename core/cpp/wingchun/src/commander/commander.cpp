@@ -19,10 +19,10 @@ namespace kungfu
 {
     namespace wingchun
     {
-        Commander::Commander(locator_ptr locator, mode m, bool low_latency) :
-                apprentice(location::make(m, category::SYSTEM, "commander", "commander", std::move(locator)), low_latency)
+        Commander::Commander(locator_ptr locator, bool low_latency, const std::string &name) :
+                apprentice(location::make(mode::LIVE, category::SYSTEM, "commander", name, std::move(locator)), low_latency)
         {
-            log::copy_log_settings(get_io_device()->get_home(), "watcher");
+            log::copy_log_settings(get_io_device()->get_home(), name);
         }
 
         void Commander::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
@@ -35,19 +35,10 @@ namespace kungfu
             apprentice::register_location(trigger_time, app_location);
             switch (app_location->category)
             {
-                case category::MD:
-                {
-                    watch(trigger_time, app_location);
-                    break;
-                }
                 case category::TD:
-                {
-                    watch(trigger_time, app_location);
-                    break;
-                }
                 case category::STRATEGY:
                 {
-                    watch(trigger_time, app_location);
+                    connect(trigger_time, app_location);
                     break;
                 }
                 default:
@@ -91,7 +82,7 @@ namespace kungfu
             if (event->msg_type() == yijinjing::msg::type::RequestReadFrom &&
                 source_location->category == category::TD && dest_location->category == category::STRATEGY)
             {
-                SPDLOG_INFO("watcher read order/trades from {} to {}", source_location->uname, dest_location->uname);
+                SPDLOG_INFO("commander read order/trades from {} to {}", source_location->uname, dest_location->uname);
                 reader_->join(source_location, dest_id, event->gen_time());
             }
         }
@@ -99,12 +90,6 @@ namespace kungfu
         void Commander::on_start()
         {
             apprentice::on_start();
-
-            events_ | is(msg::type::GatewayState) |
-            $([&](event_ptr event)
-              {
-                  auto gateway_location = get_location(event->source());
-              });
 
             /**
              * process active query from clients
@@ -129,7 +114,7 @@ namespace kungfu
               });
         }
 
-        void Commander::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
+        void Commander::connect(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
         {
             auto app_uid_str = fmt::format("{:08x}", app_location->uid);
             auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);

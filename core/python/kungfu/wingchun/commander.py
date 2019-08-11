@@ -7,8 +7,7 @@ from kungfu.yijinjing.log import create_logger
 
 class Commander(pywingchun.Commander):
     def __init__(self, ctx):
-        mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
-        pywingchun.Controller.__init__(self, ctx.locator, mode, ctx.low_latency)
+        pywingchun.Commander.__init__(self, ctx.locator, ctx.low_latency, ctx.name)
         self.ctx = ctx
-        self.ctx.logger = create_logger("commander", ctx.log_level, self.io_device.home)
+        self.ctx.logger = create_logger(ctx.name, ctx.log_level, self.io_device.home)
 

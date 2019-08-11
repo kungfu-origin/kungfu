@@ -97,10 +97,6 @@ namespace kungfu
             switch (app_location->category)
             {
                 case category::MD:
-                {
-                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
-                    break;
-                }
                 case category::TD:
                 {
                     publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);

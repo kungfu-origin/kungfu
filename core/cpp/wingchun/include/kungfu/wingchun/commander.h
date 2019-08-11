@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2019-08-10.
 //
 
-#ifndef KUNGFU_WINGCHUN_CONTROLLER_H
-#define KUNGFU_WINGCHUN_CONTROLLER_H
+#ifndef KUNGFU_WINGCHUN_COMMANDER_H
+#define KUNGFU_WINGCHUN_COMMANDER_H
 
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
@@ -16,7 +16,7 @@ namespace kungfu
         class Commander : public practice::apprentice
         {
         public:
-            explicit Commander(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
+            explicit Commander(yijinjing::data::locator_ptr locator, bool low_latency = false, const std::string &name = "commander");
 
             virtual ~Commander() = default;
 
@@ -36,9 +36,9 @@ namespace kungfu
 
         private:
 
-            void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
+            void connect(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 
         };
     }
 }
-#endif //KUNGFU_WINGCHUN_CONTROLLER_H
+#endif //KUNGFU_WINGCHUN_COMMANDER_H

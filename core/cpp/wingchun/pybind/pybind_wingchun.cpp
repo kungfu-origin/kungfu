@@ -483,7 +483,7 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<Commander, PyController, kungfu::practice::apprentice, std::shared_ptr<Commander>>(m, "Commander")
-            .def(py::init<data::locator_ptr, data::mode, bool>())
+            .def(py::init<data::locator_ptr, bool, const std::string &>())
             .def_property_readonly("io_device", &Commander::get_io_device)
             .def("get_location", &Commander::get_location)
             .def("handle_request", &Commander::handle_request)
