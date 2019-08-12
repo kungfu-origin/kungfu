@@ -13,6 +13,6 @@ def uninstall(ctx, name):
     if os.path.exists(install_path):
         shutil.rmtree(install_path)
         ctx.parent.logger.info('Uninstalled extension %s', name)
-        click.echo('Uninstalled extension', name)
+        click.echo('Uninstalled extension ' + name)
     else:
-        click.echo('Extension', name, 'not found')
+        click.echo('Extension ' + name + 'not found')

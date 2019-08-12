@@ -274,13 +274,9 @@ namespace kungfu
 
             uint64_t Context::cancel_order(uint64_t order_id)
             {
-                uint32_t account_id = order_id >> 32;
-                if (account_location_ids_.find(account_id) == account_location_ids_.end())
-                {
-                    throw wingchun_error(fmt::format("invalid order id {}", order_id));
-                }
-
-                auto writer = app_.get_writer(account_location_ids_[account_id]);
+                uint32_t account_location_id = (order_id >> 32) ^ app_.get_home_uid();
+                SPDLOG_INFO("{:08x} cancel order {:016x} with account location {:08x}", app_.get_home_uid(), order_id, account_location_id);
+                auto writer = app_.get_writer(account_location_id);
                 msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
 
                 action.order_action_id = writer->current_frame_uid();
@@ -294,6 +290,7 @@ namespace kungfu
             uint32_t Context::lookup_account_location_id(const std::string &account)
             {
                 uint32_t account_id = yijinjing::util::hash_str_32(account);
+                SPDLOG_ERROR("(account_id){}", account_id);
                 if (account_location_ids_.find(account_id) == account_location_ids_.end())
                 {
                     throw wingchun_error("invalid account " + account);
