@@ -104,6 +104,8 @@ namespace kungfu
                   // let python do the actual job, we just operate the I/O part
                   try
                   {
+                      const nlohmann::json& cmd = event->data<nlohmann::json>();
+                      SPDLOG_INFO("handle cmd {}", cmd.dump());
                       std::string response = handle_request(event->to_string());
                       get_io_device()->get_rep_sock()->send(response);
                   }
