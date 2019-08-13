@@ -137,7 +137,7 @@
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>
                             <el-col :span="12" v-for="item of Object.values(accountSource || {})" :key="item.source" :class="`source-${item.source}`">
-                                <el-radio :label="item.source" :disabled="ifSourceDisable[item.source.toLowerCase()] || false">
+                                <el-radio :label="item.source">
                                     {{item.source.toUpperCase()}}
                                     <el-tag
                                     v-if="item.typeName"
@@ -184,7 +184,6 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import * as BASE_API from '__io/db/base';
-import { ifSourceDisable } from '__gConfig/accountConfig';
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
@@ -197,7 +196,6 @@ export default {
     name: 'account',
 
     data() {
-        this.ifSourceDisable = ifSourceDisable;
         return {
             accountIdKey: '',
             selectedExecutor: '',
