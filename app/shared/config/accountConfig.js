@@ -127,5 +127,59 @@ export const accountSource = {
                 tip: '多点登陆Id，需是0～99内整数'
             },
         ]
-    } 
+    },
+
+    tora: {
+        source: 'tora',
+        type: tagColor['stock'] || '',
+        typeName: 'stock',
+        key:'account_id',
+        config: [
+            {
+                key: 'account_id',
+                name: 'account_id',
+                type: 'str',
+                errMsg: '请填写用户account_id！',
+                required: true,
+            },
+            {
+                key: 'user_id',
+                name: 'user_id',
+                type: 'str',
+                errMsg: '请填写用户user_id！',
+                required: true,
+            },
+            {
+                key: 'password',
+                name: 'password',
+                type: 'password',
+                errMsg: '请填写password！',
+                required: true,
+                validator: [blankValidator] //不能包含空格
+            },
+            {
+                key: 'department_id',
+                name: 'department_id',
+                type: 'str',
+                errMsg: '请填写department_id！',
+                required: true
+            },
+            {
+                key: 'md_uri',
+                name: 'md_uri',
+                type: 'str',
+                errMsg: '请填写md_uri！',
+                required: true,
+                validator: [validateTCPUri]
+            },
+            {
+                key: 'td_uri',
+                name: 'td_uri',
+                type: 'str',
+                errMsg: '请填写td_uri！',
+                required: true,
+                validator: [validateTCPUri]
+            }
+        ]
+    }
 }
