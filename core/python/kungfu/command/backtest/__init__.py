@@ -10,7 +10,6 @@ from extensions import EXTENSION_REGISTRY_BT
 @click.option('-n', '--name', type=str, default='*', help='name')
 @click.pass_context
 def backtest(ctx, group, name):
-    print('entering history')
     pass_ctx_from_root(ctx)
     ctx.category = 'md'
     ctx.group = group

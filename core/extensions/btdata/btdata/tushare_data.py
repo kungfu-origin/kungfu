@@ -1,6 +1,6 @@
 import pywingchun
 import kungfu.yijinjing.time as kft
-from kungfu.command.backtest.converter import Converter
+from extensions.btdata.converter import Converter
 from extensions import EXTENSION_REGISTRY_BT
 
 import os
