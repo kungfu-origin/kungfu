@@ -188,19 +188,19 @@ namespace kungfu
                 {};
 
                 int64_t gen_time() const override
-                { return binding_["gen_time"]; }
+                { return get_meta<int64_t>("gen_time", 0); }
 
                 int64_t trigger_time() const override
-                { return binding_["trigger_time"]; }
+                { return get_meta<int64_t>("trigger_time", 0); }
 
                 int32_t msg_type() const override
-                { return binding_["msg_type"]; }
+                { return get_meta<int32_t>("msg_type", 0); }
 
                 uint32_t source() const override
-                { return binding_["source"]; }
+                { return get_meta<uint32_t>("source", 0); }
 
                 uint32_t dest() const override
-                { return binding_["dest"]; }
+                { return get_meta<uint32_t>("dest", 0); }
 
                 uint32_t data_length() const override
                 { return binding_.size(); }
@@ -221,6 +221,19 @@ namespace kungfu
             private:
                 const nlohmann::json binding_;
                 const std::string msg_;
+
+                template<typename T>
+                T get_meta(const std::string &name, T default_value) const
+                {
+                    if (binding_.find(name) == binding_.end())
+                    {
+                        return default_value;
+                    } else
+                    {
+                        T value = binding_[name];
+                        return value;
+                    }
+                }
             };
 
             DECLARE_PTR(nanomsg_json)
