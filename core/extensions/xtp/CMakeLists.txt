@@ -51,3 +51,7 @@ IF(APPLE)
     FILE(COPY api/${XTP_API_VERSION}/lib/macosx/libxtpquoteapi.dylib DESTINATION ${KF_EXTENSION_BUILD_DIR})
     FILE(COPY api/${XTP_API_VERSION}/lib/macosx/libxtptraderapi.dylib DESTINATION ${KF_EXTENSION_BUILD_DIR})
 ENDIF()
+
+ADD_CUSTOM_COMMAND(OUTPUT package_json
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/package.json ${KF_EXTENSION_BUILD_DIR})
+ADD_CUSTOM_TARGET(kfext_xtp_package_json ALL DEPENDS package_json)
