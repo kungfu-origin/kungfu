@@ -1,0 +1,72 @@
+{
+    "kungfuConfig": {
+        "type": "source",
+        "config": {
+            "name": "xtp",
+            "type": "stock",
+            "key": "user_id",
+            "config": [{
+                    "key": "user_id",
+                    "name": "user_id",
+                    "type": "str",
+                    "errMsg": "请填写user_id！",
+                    "required": true
+                },
+                {
+                    "key": "password",
+                    "name": "password",
+                    "type": "password",
+                    "errMsg": "请填写password！",
+                    "required": true,
+                    "validator": ["blankValidator"]
+                },
+                {
+                    "key": "software_key",
+                    "name": "software_key",
+                    "type": "str",
+                    "errMsg": "请填写software_key！",
+                    "required": true
+                },
+                {
+                    "key": "md_ip",
+                    "name": "md_ip",
+                    "type": "str",
+                    "errMsg": "请填写md_ip！",
+                    "required": true
+                },
+                {
+                    "key": "md_port",
+                    "name": "md_port",
+                    "type": "int",
+                    "errMsg": "请填写md_port！",
+                    "validator": ["intValidator"],
+                    "required": true
+                },
+                {
+                    "key": "td_ip",
+                    "name": "td_ip",
+                    "type": "str",
+                    "errMsg": "请填写td_ip！",
+                    "required": true
+                },
+                {
+                    "key": "td_port",
+                    "name": "td_port",
+                    "type": "int",
+                    "errMsg": "请填写td_port！",
+                    "validator": ["intValidator"],
+                    "required": true
+                },
+                {
+                    "key": "client_id",
+                    "name": "client_id",
+                    "type": "int",
+                    "errMsg": "请填写0-99整数",
+                    "required": false,
+                    "validator": ["o99Validator", "intValidator"],
+                    "tip": "多点登陆Id，需是0～99内整数"
+                }
+            ]
+        }
+    }
+}
