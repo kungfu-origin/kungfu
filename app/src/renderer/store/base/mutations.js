@@ -10,6 +10,6 @@ export const SET_PROCESS_STATUS = (state, processStatus) => {
     state.processStatus = processStatus
 }
 
-export const SET_SOURCE_ACCOUNT = (state, sourceAccount) => {
-    state.sourceAccount = sourceAccount
+export const SET_ACCOUNT_SOURCE = (state, accountSource) => {
+    state.accountSource = accountSource
 }

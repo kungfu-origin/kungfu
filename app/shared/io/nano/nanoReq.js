@@ -5,7 +5,7 @@ import * as msgType from '__io/nano/msgType'
 
 //日历
 //主动获得交易日
-export const nanoGetCalendar = () => {
+export const nanoReqCalendar = () => {
     return new Promise(resolve => {
         resolve({});
         return

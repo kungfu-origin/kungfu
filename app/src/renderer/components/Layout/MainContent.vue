@@ -21,12 +21,12 @@
                         <i class="el-icon-s-order" ></i>
                         <template slot="title">策略</template>
                     </tr-menu-item>
-                     <tr-menu-item
+                     <!-- <tr-menu-item
                     route="/extension"
                     >
                         <i class="el-icon-box" ></i>
                         <template slot="title">插件</template>
-                    </tr-menu-item>
+                    </tr-menu-item> -->
                 </tr-menu>
             </el-aside>
             <el-main class="tr-main">

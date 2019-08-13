@@ -16,7 +16,7 @@ import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
-
+import { getAccountSource } from '__gConfig/accountConfig';
 
 
 export default {
@@ -33,12 +33,15 @@ export default {
 
     created() {
         const t = this;
-        this.subGatewayState();
-        this.subAccountCash();
+        this.getAccountSource();
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
         .then(accountList => t.getAccountsCash(accountList))
-        this.getCalendarNanomsg();
+
+        this.subGatewayState();
+        this.subAccountCash();
+      
+        this.reqCalendar();
     },
 
     destroyed() {
@@ -85,10 +88,18 @@ export default {
         },
         
         //获得交易日的推送
-        getCalendarNanomsg() {
+        reqCalendar() {
             const t = this
             //先主动获取
-            t.$store.dispatch('getCalendar');
+            t.$store.dispatch('reqCalendar')
+        },
+
+        //获取柜台信息
+        getAccountSource() {
+            const t = this;
+            getAccountSource().then(res => {
+                t.$store.dispatch('setAccountSource', res)
+            })
         }
     }
 }

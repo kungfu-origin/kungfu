@@ -463,11 +463,9 @@ export const getExtensionPaths = (): Promise<any> => {
 
 export const getExtensionConfigs = async (): Promise<any> => {
     try {
-
         const packageJSONPaths: string[] = await getExtensionPaths()
         return packageJSONPaths.map((p: string) => {
             const packageJSON: any = readJsonSync(p)
-            console.log(packageJSON)
             const kungfuConfig: ExtensionJSON = packageJSON[KUNGFU_KEY_IN_PACKAGEJSON];
             if(kungfuConfig) {
                 const type: string = kungfuConfig.type;
