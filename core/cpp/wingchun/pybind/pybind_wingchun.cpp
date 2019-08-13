@@ -590,6 +590,10 @@ PYBIND11_MODULE(pywingchun, m)
             }
             );
 
+    py::class_<MsgWriter, std::shared_ptr<MsgWriter>>(m, "MsgWriter")
+            .def(py::init<kungfu::yijinjing::journal::writer_ptr>())
+            .def("write_data", &MsgWriter::write_data);
+
     py::class_<Commander, PyController, kungfu::practice::apprentice, std::shared_ptr<Commander>>(m, "Commander")
             .def(py::init<data::locator_ptr, bool, const std::string &>())
             .def_property_readonly("io_device", &Commander::get_io_device)
@@ -665,4 +669,5 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_transaction", &strategy::Strategy::on_transaction)
             .def("on_order", &strategy::Strategy::on_order)
             .def("on_trade", &strategy::Strategy::on_trade);
+
 }

@@ -11,6 +11,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <kungfu/wingchun/common.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu
 {
@@ -201,45 +202,33 @@ namespace kungfu
                     std::vector<double> get_bid_price() const
                     { return std::vector<double>(bid_price, bid_price + 10); }
 
-                    void set_bid_price(std::vector<double> & bid_price_)
+                    void set_bid_price(const std::vector<double> &bp)
                     {
-                        int len = bid_price_.size();
-                        len = len > 10 ? 10 : len;
-                        if(len > 0)
-                        { memcpy(bid_price, &bid_price_[0], len*sizeof(double)); }
+                        memcpy(bid_price, (const void*) bp.data(), sizeof(double) * std::min(10, int(bp.size())));
                     }
 
                     std::vector<double> get_ask_price() const
                     { return std::vector<double>(ask_price, ask_price + 10); }
 
-                    void set_ask_price(std::vector<double> & ask_price_)
+                    void set_ask_price(const std::vector<double> &ap)
                     {
-                        int len = ask_price_.size();
-                        len = len > 10 ? 10 : len;
-                        if(len > 0)
-                        { memcpy(ask_price, &ask_price_[0], len*sizeof(double)); }
+                        memcpy(ask_price, (const void*) ap.data(), sizeof(double) * std::min(10, int(ap.size())));
                     }
 
                     std::vector<int64_t> get_bid_volume() const
                     { return std::vector<int64_t>(bid_volume, bid_volume + 10); }
 
-                    void set_bid_volume(std::vector<int64_t> & bid_volume_)
+                    void set_bid_volume(const std::vector<int64_t> &bv)
                     {
-                        int len = bid_volume_.size();
-                        len = len > 10 ? 10 : len;
-                        if(len > 0)
-                        { memcpy(bid_volume, &bid_volume_[0], len*sizeof(int64_t)); }
+                        memcpy(bid_volume, (const void*) bv.data(), sizeof(int64_t) * std::min(10, int(bv.size())));
                     }
 
                     std::vector<int64_t> get_ask_volume() const
                     { return std::vector<int64_t>(ask_volume, ask_volume + 10); }
 
-                    void set_ask_volume(std::vector<int64_t> & ask_volume_)
+                    void set_ask_volume(const std::vector<int64_t> &av)
                     {
-                        int len = ask_volume_.size();
-                        len = len > 10 ? 10 : len;
-                        if(len > 0)
-                        { memcpy(ask_volume, &ask_volume_[0], len*sizeof(int64_t)); }
+                        memcpy(ask_volume, (const void*) av.data(), sizeof(int64_t) * std::min(10, int(av.size())));
                     }
 
 #ifndef _WIN32
@@ -283,6 +272,37 @@ namespace kungfu
 
                     j["bid_volume"] = std::vector<int64_t>(quote.bid_volume, std::end(quote.bid_volume));
                     j["ask_volume"] = std::vector<int64_t>(quote.ask_volume, std::end(quote.ask_volume));
+                }
+
+                inline void from_json(const nlohmann::json &j, Quote &quote)
+                {
+                    quote.set_trading_day(j["trading_day"].get<std::string>());
+                    quote.data_time = j["data_time"];
+                    quote.set_instrument_id(j["instrument_id"].get<std::string>());
+                    quote.set_exchange_id(j["exchange_id"].get<std::string>());
+                    quote.instrument_type = j["instrument_type"];
+                    quote.pre_close_price = j["pre_close_price"];
+                    quote.pre_settlement_price = j["pre_settlement_price"];
+                    quote.last_price = j["last_price"];
+                    quote.volume = j["volume"];
+                    quote.turnover = j["turnover"];
+                    quote.pre_open_interest = j["pre_open_interest"];
+                    quote.open_interest = j["open_interest"];
+
+                    quote.open_price = j["open_price"];
+                    quote.high_price = j["high_price"];
+                    quote.low_price = j["low_price"];
+
+                    quote.upper_limit_price = j["upper_limit_price"];
+                    quote.lower_limit_price = j["lower_limit_price"];
+
+                    quote.close_price = j["close_price"];
+                    quote.settlement_price = j["settlement_price"];
+
+                    quote.set_bid_price(j["bid_price"].get<std::vector<double>>());
+                    quote.set_ask_price(j["ask_price"].get<std::vector<double>>());
+                    quote.set_bid_volume(j["bid_volume"].get<std::vector<int64_t>>());
+                    quote.set_ask_volume(j["ask_volume"].get<std::vector<int64_t>>());
                 }
 
                 //逐笔委托
@@ -1132,8 +1152,32 @@ namespace kungfu
                     to_json(j, ori);
                     return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);;
                 }
-                
-                class Decoder
+
+            class MsgWriter
+            {
+            public:
+                MsgWriter(kungfu::yijinjing::journal::writer_ptr writer): writer_(writer) {};
+                void write_data(int msg_type, const std::string &json_str)
+                {
+                    switch (msg_type)
+                    {
+                        case kungfu::wingchun::msg::type::Quote:
+                        {
+                            auto j = nlohmann::json::parse(json_str);
+                            Quote &quote = writer_->open_data<Quote>(0, msg::type::Quote);
+                            from_json(j, quote);
+                            writer_->close_data();
+                            break;
+                        }
+                        default:
+                            throw wingchun_error("unrecognized msg_type");
+                    }
+                }
+            private:
+                kungfu::yijinjing::journal::writer_ptr writer_;
+            };
+
+            class Decoder
                 {
                 public:
                     virtual ~Decoder() {}
