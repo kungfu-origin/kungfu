@@ -414,7 +414,7 @@ export const dealPos = (item: any): PosData => {
 
 export const dealTrade = (item: TradeInputData): TradeData => {
     return {
-        id: item.account_id.toString() + '_' + item.trade_id.toString() + '_' + item.trade_time.toString(),
+        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), item.trade_time.toString()].join('_'),
         tradeTime: item.trade_time && moment(+item.trade_time / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         instrumentId: item.instrument_id,
         side: sideName[item.side],
