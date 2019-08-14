@@ -62,7 +62,10 @@
     "extraResources": [
       {
         "from": "../core/build/kfc",
-        "to": "kfc"
+        "to": "kfc",
+        "filter": [
+          "!**/btdata"
+        ]
       }
     ],
     "asar": true,
