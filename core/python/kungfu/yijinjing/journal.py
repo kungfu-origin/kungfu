@@ -50,6 +50,10 @@ def find_category(c):
     return pyyjj.category.SYSTEM
 
 
+def get_location_from_json(ctx, data):
+    return pyyjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
+
+
 class Locator(pyyjj.locator):
     def __init__(self, home):
         pyyjj.locator.__init__(self)

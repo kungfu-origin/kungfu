@@ -37,6 +37,9 @@ public:
 
     std::string handle_request(const std::string &msg) override
     {PYBIND11_OVERLOAD_PURE(std::string, Commander, handle_request, msg) }
+
+    void on_order(event_ptr event, const Order &order) override
+    {PYBIND11_OVERLOAD_PURE(void, Commander, on_order, event, order) }
 };
 
 class PyWatcher : public Watcher
@@ -599,6 +602,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("io_device", &Commander::get_io_device)
             .def("get_location", &Commander::get_location)
             .def("handle_request", &Commander::handle_request)
+            .def("on_order", &Commander::on_order)
             .def("run", &Commander::run);
     
     py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")

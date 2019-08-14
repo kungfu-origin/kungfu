@@ -2,23 +2,32 @@ import sys
 import traceback
 import json
 import time
+import psutil
 import functools
 import pyyjj
-
-from kungfu.yijinjing.log import create_logger
-
-import kungfu.service.kfs as kfs
-from kungfu.service.kfs import system
-from kungfu.service.kfs import calendar
-
-import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.time as kft
+import kungfu.yijinjing.msg as yjj_msg
+import kungfu.yijinjing.journal as kfj
 from kungfu.yijinjing.log import create_logger
 
 from kungfu.wingchun.calendar import Calendar
 import kungfu.yijinjing.msg as yjj_msg
 
 SECOND_IN_NANO = int(1e9)
+TASKS = dict()
+
+
+def task(func):
+    @functools.wraps(func)
+    def task_wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    TASKS[func.__name__] = task_wrapper
+    return task_wrapper
+
+
+def run_tasks(*args, **kwargs):
+    for task_name in TASKS:
+        TASKS[task_name](*args, **kwargs)
 
 
 class Master(pyyjj.master):
@@ -35,17 +44,22 @@ class Master(pyyjj.master):
 
         ctx.master = self
 
-    def on_json(self, event):
+    def on_interval_check(self, nanotime):
         try:
-            kfs.handle(event.msg_type, self.ctx, json.loads(event.to_string()))
+            run_tasks(self.ctx)
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('Invalid passive notice %s, [%s] %s', event.to_string(), exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+            self.ctx.logger.error('task error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
-    def on_interval_check(self, nanotime):
-        kfs.run_tasks(self.ctx)
-
-    def on_register(self, event):
+    def on_register(self, event, app_location):
+        data = json.loads(event.data_as_string)
+        pid = data['pid']
+        self.ctx.logger.info('app %s %d checking in', app_location.uname, pid)
+        if pid not in self.ctx.apprentices:
+            self.ctx.apprentices[pid] = {
+                'process': psutil.Process(pid),
+                'location': app_location
+            }
         self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def on_exit(self):
@@ -78,3 +92,20 @@ class Master(pyyjj.master):
                 apprentice.kill()
 
         self.ctx.logger.info('master cleaned up')
+
+
+@task
+def health_check(ctx):
+    for pid in list(ctx.apprentices.keys()):
+        if not ctx.apprentices[pid]['process'].is_running():
+            ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['location'].uname, pid)
+            ctx.master.deregister_app(pyyjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
+            del ctx.apprentices[pid]
+
+
+@task
+def switch_trading_day(ctx):
+    trading_day = ctx.calendar.trading_day
+    if ctx.trading_day < trading_day:
+        ctx.trading_day = trading_day
+        ctx.master.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)

@@ -91,6 +91,17 @@ namespace kungfu
         {
             apprentice::on_start();
 
+            events_ | is(msg::type::Order) |
+            $([&](event_ptr event)
+              {
+                  try
+                  { on_order(event, event->data<Order>()); }
+                  catch (const std::exception &e)
+                  {
+                      SPDLOG_ERROR("Unexpected exception {}", e.what());
+                  }
+              });
+
             /**
              * process active query from clients
              */
@@ -105,7 +116,7 @@ namespace kungfu
                   try
                   {
                       const nlohmann::json& cmd = event->data<nlohmann::json>();
-                      SPDLOG_INFO("handle cmd {}", cmd.dump());
+                      SPDLOG_INFO("handle command {}", cmd.dump());
                       std::string response = handle_request(event->to_string());
                       get_io_device()->get_rep_sock()->send(response);
                   }
@@ -123,5 +134,14 @@ namespace kungfu
             reader_->join(master_cmd_location, app_location->uid, trigger_time);
             reader_->join(app_location, 0, trigger_time);
         }
+
+        void Commander::new_order(const yijinjing::event_ptr &event)
+        {}
+
+        void Commander::cancel_order(const yijinjing::event_ptr &event)
+        {}
+
+        void Commander::cancel_all_order(const yijinjing::event_ptr &event)
+        {}
     }
 }

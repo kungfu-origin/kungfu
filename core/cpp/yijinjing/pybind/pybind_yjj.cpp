@@ -123,14 +123,9 @@ class PyMaster : public master
 public:
     using master::master;
 
-    void on_register(const kungfu::yijinjing::event_ptr &event) override
+    void on_register(const event_ptr &event, data::location_ptr app_location) override
     {
-        PYBIND11_OVERLOAD(void, master, on_register, event);
-    }
-
-    void on_json(const kungfu::yijinjing::event_ptr &event) override
-    {
-        PYBIND11_OVERLOAD(void, master, on_json, event);
+        PYBIND11_OVERLOAD(void, master, on_register, event, app_location);
     }
 
     void on_interval_check(int64_t nanotime) override
@@ -314,7 +309,6 @@ PYBIND11_MODULE(pyyjj, m)
             .def("publish_time", &master::publish_time)
             .def("send_time", &master::send_time)
             .def("on_register", &master::on_register)
-            .def("on_json", &master::on_json)
             .def("on_interval_check", &master::on_interval_check)
             .def("on_exit", &master::on_exit)
             .def("deregister_app", &master::deregister_app)

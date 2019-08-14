@@ -93,6 +93,8 @@ namespace kungfu
                 writer->close_frame(msg.length());
             }
 
+            on_register(e, app_location);
+
             writer->mark(e->gen_time(), msg::type::RequestStart);
         }
 
@@ -169,7 +171,6 @@ namespace kungfu
             $([&](event_ptr e)
               {
                   register_app(e);
-                  on_register(e);
               });
 
             events_ | is(msg::type::RequestWriteTo) |
@@ -234,16 +235,6 @@ namespace kungfu
                   task.repeat_count = 0;
                   task.repeat_limit = request.repeat;
                   SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
-              });
-
-            events_ |
-            filter([=](yijinjing::event_ptr e)
-                   {
-                       return dynamic_cast<nanomsg::nanomsg_json *>(e.get()) != nullptr;
-                   }) |
-            $([&](event_ptr e)
-              {
-                  on_json(e);
               });
         }
     }

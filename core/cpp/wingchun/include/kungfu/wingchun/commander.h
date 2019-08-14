@@ -20,7 +20,15 @@ namespace kungfu
 
             virtual ~Commander() = default;
 
+            void new_order(const yijinjing::event_ptr &event);
+
+            void cancel_order(const yijinjing::event_ptr &event);
+
+            void cancel_all_order(const yijinjing::event_ptr &event);
+
             virtual std::string handle_request(const std::string &msg) = 0;
+
+            virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
 
         protected:
 
