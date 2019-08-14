@@ -1,10 +1,12 @@
 import pywingchun
 import pyyjj
 import json
+import http
 import functools
 import kungfu.yijinjing.journal as kfj
 from kungfu.yijinjing import msg
 from kungfu.yijinjing.log import create_logger
+from kungfu.wingchun.calendar import Calendar
 
 HANDLERS = dict()
 
@@ -28,34 +30,70 @@ def handle(msg_type, *args, **kwargs):
 class Commander(pywingchun.Commander):
     def __init__(self, ctx):
         pywingchun.Commander.__init__(self, ctx.locator, ctx.low_latency, ctx.name)
+        ctx.calendar = Calendar(ctx)
         self.ctx = ctx
+        self.ctx.commander = self
         self.ctx.logger = create_logger(ctx.name, ctx.log_level, self.io_device.home)
-        self.orders = {}
+        self.ctx.orders = {}
 
-    def handle_request(self, msg):
+    def handle_request(self, event, msg):
         req = json.loads(msg)
-        self.ctx.logger.debug("handle request %s", msg)
-        self.ctx.logger.debug("handle request json %s", json.dumps(req))
-        handle(req['msg_type'], self.ctx, req)
-        return msg
+        data = req['data']
+        location = kfj.get_location_from_json(self.ctx, data)
+        return json.dumps(handle(req['msg_type'], self.ctx, event, location))
 
     def on_order(self, event, order):
         self.ctx.logger.info('on order %s from %s', order, self.get_location(event.dest).uname)
-        self.orders[order.order_id] = order
+        order_record = {
+            'source': event.source,
+            'dest': event.dest,
+            'order': order
+        }
+        self.ctx.orders[order.order_id] = order_record
+
+
+@on(msg.UICalendarRequest)
+def calendar_request(ctx, event, location):
+    return {
+        'status': http.HTTPStatus.OK,
+        'trading_day': '%s' % ctx.calendar.trading_day
+    }
 
 
 @on(msg.UIActionNewOrderSingle)
-def cancel_order(ctx, event):
-    data = event['data']
+def new_order_single(ctx, event, location):
+    # ctx.commander.new_order_single(event, location.uid)
+    return {
+        'status': http.HTTPStatus.OK
+    }
 
 
 @on(msg.UIActionCancelOrder)
-def cancel_order(ctx, event):
-    data = event['data']
+def cancel_order(ctx, event, location):
+    order_id = event['data']['order_id']
+    if order_id in ctx.orders:
+        order_record = ctx.orders[order_id]
+        ctx.logger.info('cancel account order %s', order_record['order'])
+        ctx.commander.cancel_order(event, location.uid, order_id)
+        return {
+            'status': http.HTTPStatus.OK
+        }
+    else:
+        return {
+            'status': http.HTTPStatus.NOT_FOUND
+        }
 
 
 @on(msg.UIActionCancelAllOrder)
-def cancel_all_order(ctx, event):
-    data = event['data']
-    location = kfj.get_location_from_json(ctx, data)
-    ctx.logger.warn('canceling all order for %s' % location.uid)
+def cancel_all_order(ctx, event, location):
+    for order_id in ctx.orders:
+        order_record = ctx.orders[order_id]
+        if order_record['source'] == location.uid:
+            ctx.logger.info('cancel account order %s', order_record['order'])
+            ctx.commander.cancel_order(event, location.uid, order_id)
+        if order_record['dest'] == location.uid:
+            ctx.logger.info('cancel strategy order %s', order_record['order'])
+            ctx.commander.cancel_order(event, location.uid, order_id)
+    return {
+        'status': http.HTTPStatus.OK
+    }

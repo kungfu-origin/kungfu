@@ -19,6 +19,22 @@ def new_order_single(cmd_sock, commander_location, account):
     print(cmd_sock.last_message())
 
 
+def cancel_order(cmd_sock, commander_location, account, order_id):
+    cmd_sock.send(json.dumps({
+        'msg_type': msg.UIActionCancelAllOrder,
+        'dest': commander_location.uid,
+        'data': {
+            'mode': 'live',
+            'category': 'td',
+            'group': 'xtp',
+            'name': account,
+            'order_id': order_id
+        }
+    }))
+    cmd_sock.recv()
+    print(cmd_sock.last_message())
+
+
 def cancel_all_order_for_account(cmd_sock, commander_location, account):
     cmd_sock.send(json.dumps({
         'msg_type': msg.UIActionCancelAllOrder,

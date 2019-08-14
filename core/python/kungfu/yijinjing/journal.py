@@ -51,7 +51,10 @@ def find_category(c):
 
 
 def get_location_from_json(ctx, data):
-    return pyyjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
+    if 'mode' in data and 'category' in data and 'group' in data and 'name' in data:
+        return pyyjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
+    else:
+        return None
 
 
 class Locator(pyyjj.locator):

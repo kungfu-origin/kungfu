@@ -35,8 +35,8 @@ class PyController : public Commander
 public:
     using Commander::Commander;
 
-    std::string handle_request(const std::string &msg) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Commander, handle_request, msg) }
+    std::string handle_request(const event_ptr &event, const std::string &msg) override
+    {PYBIND11_OVERLOAD_PURE(std::string, Commander, handle_request, event, msg) }
 
     void on_order(event_ptr event, const Order &order) override
     {PYBIND11_OVERLOAD_PURE(void, Commander, on_order, event, order) }
@@ -603,6 +603,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("get_location", &Commander::get_location)
             .def("handle_request", &Commander::handle_request)
             .def("on_order", &Commander::on_order)
+            .def("new_order_single", &Commander::new_order_single)
+            .def("cancel_order", &Commander::cancel_order)
             .def("run", &Commander::run);
     
     py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")

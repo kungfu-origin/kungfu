@@ -36,6 +36,9 @@ namespace kungfu
             switch (app_location->category)
             {
                 case category::TD:
+                {
+                    request_write_to(trigger_time, app_location->uid);
+                }
                 case category::STRATEGY:
                 {
                     connect(trigger_time, app_location);
@@ -117,7 +120,7 @@ namespace kungfu
                   {
                       const nlohmann::json& cmd = event->data<nlohmann::json>();
                       SPDLOG_INFO("handle command {}", cmd.dump());
-                      std::string response = handle_request(event->to_string());
+                      std::string response = handle_request(event, event->to_string());
                       get_io_device()->get_rep_sock()->send(response);
                   }
                   catch (const std::exception &e)
@@ -135,13 +138,17 @@ namespace kungfu
             reader_->join(app_location, 0, trigger_time);
         }
 
-        void Commander::new_order(const yijinjing::event_ptr &event)
+        void Commander::new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input)
         {}
 
-        void Commander::cancel_order(const yijinjing::event_ptr &event)
-        {}
-
-        void Commander::cancel_all_order(const yijinjing::event_ptr &event)
-        {}
+        void Commander::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
+        {
+            auto writer = get_writer(account_location_uid);
+            msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);
+            action.order_action_id = writer->current_frame_uid();
+            action.order_id = order_id;
+            action.action_flag = OrderActionFlag::Cancel;
+            writer->close_data();
+        }
     }
 }
