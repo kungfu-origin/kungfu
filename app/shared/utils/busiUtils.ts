@@ -90,7 +90,7 @@ export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): str
     const mathFunc = Math[type]
     floatNum = mathFunc(floatNum * digitNum) / (digitNum / multiplyNum);
     // const fixedNum: number = pa
-    return new Number(floatNum).toFixed(2)
+    return new Number(floatNum).toFixed(digit)
 }
 
 /**
@@ -403,9 +403,9 @@ export const dealPos = (item: any): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
-        yesterdayVolume: toDecimal(item.yesterday_volume),
-        todayVolume: toDecimal(item.volume - item.yesterday_volume),
-        totalVolume: toDecimal(item.volume),
+        yesterdayVolume: toDecimal(item.yesterday_volume, 0),
+        todayVolume: toDecimal(item.volume - item.yesterday_volume, 0),
+        totalVolume: toDecimal(item.volume, 0),
         openPrice: toDecimal(item.open_price) || '--',
         lastPrice: toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
@@ -420,7 +420,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         side: sideName[item.side],
         offset: offsetName[item.offset],
         price: toDecimal(+item.price),
-        volume: toDecimal(+item.volume),
+        volume: toDecimal(+item.volume, 0),
         clientId: item.client_id,
         accountId: item.account_id
     }     
