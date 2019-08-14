@@ -194,12 +194,12 @@ class StockPosition(Position):
 
     def switch_day(self, trading_day):
         if not is_valid_price(self.close_price):
-            self.apply_settlement(self.last_price)
+            self._apply_settlement(self.last_price)
         self._pre_close_price = self.close_price
         self._yesterday_volume = self.volume
         self._close_price = 0.0
         self.trading_day = trading_day
-        self.ledger.dispatch([self.asset_message])
+        self.ledger.dispatch([self.ledger.asset_message])
 
     def _apply_settlement(self, close_price):
         self._last_price = close_price
