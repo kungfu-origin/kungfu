@@ -290,7 +290,6 @@ namespace kungfu
             uint32_t Context::lookup_account_location_id(const std::string &account)
             {
                 uint32_t account_id = yijinjing::util::hash_str_32(account);
-                SPDLOG_ERROR("(account_id){}", account_id);
                 if (account_location_ids_.find(account_id) == account_location_ids_.end())
                 {
                     throw wingchun_error("invalid account " + account);
