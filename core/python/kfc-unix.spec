@@ -21,11 +21,13 @@ a = Analysis(['kungfu/__main__.py'],
         ('../deps/rxcpp-4.1.0/include', 'include'),
         ('../deps/hffix-b67d404f/include', 'include'),
         ('../deps/SQLiteCpp-2.3.0/include', 'include'),
-        ('../deps/pybind11-2.2.4', 'pybind11')
+        ('../deps/pybind11-2.2.4', 'pybind11'),
+        ('tushare', 'tushare')
      ],
      hiddenimports=[
           'numpy',
-          'pandas'
+          'pandas',
+          'tushare'
           ],
      hookspath=None,
      runtime_hooks=None,
