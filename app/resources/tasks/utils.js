@@ -1,5 +1,19 @@
 const readline = require('readline');
 const fs = require('fs-extra'); 
+
+//清空文件内容
+function clearFileContent(filePath) {
+    filePath = path.normalize(filePath)
+    return new Promise((resolve, reject) => {
+        fs.outputFile(filePath, '', (err, data) => {
+            if(err){
+                reject(err);
+                return;
+            }
+            resolve(data)
+        })
+    })
+}
   
 //建立固定条数的list数据结构
 function buildListByLineNum(num){
@@ -163,3 +177,4 @@ function startWatchingTail(logPath, searchKeyword){
 exports.getLog = getLog;
 exports.dealMessage = dealMessage;
 exports.debounce = debounce;
+exports.clearFileContent = clearFileContent;

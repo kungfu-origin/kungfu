@@ -38,6 +38,22 @@
                     </span>
                 </div>
             </div>
+            <div class="core-item" >
+                <div class="core-status">
+                    <span class="core-process-item  core-process-title text-overflow" title="指令进程">
+                        指令进程 <el-tag>commander</el-tag>
+                    </span>
+                    <span  class="core-process-item text-overflow" style="width: 71px;">
+                        <tr-status 
+                        v-if="$utils.ifProcessRunning('commander', processStatus)"
+                        :value="buildState('commander')"></tr-status>
+                        <tr-status v-else></tr-status>
+                    </span>
+                     <span class="core-process-item get-log">
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('commander.log')" ></i>
+                    </span>
+                </div>
+            </div>
         </div>
         <span slot="reference" :class="[currentStatus]">
             <i class="el-icon-monitor"></i>
@@ -101,6 +117,14 @@ export default {
                 return 'color-red'
             }
 
+             if(!ifProcessRunning('commander', t.processStatus)){
+                if(!t.watcherErrController){
+                    t.$message.error('指令进程断开，无法发起主动指令，请重启应用！', 0)
+                    t.watcherErrController = true;  
+                }
+                return 'color-red'
+            }
+
             return 'color-green'
         }
     },
@@ -150,7 +174,7 @@ export default {
                 width: 20px;
             }
             .core-process-item.core-process-title{
-                width: 150px;
+                width: 155px;
             }
             .source-name{
                 width: 45px;

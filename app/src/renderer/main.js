@@ -8,7 +8,7 @@ import * as utils from '__gUtils/busiUtils'
 import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip} from 'element-ui';
 import moment from 'moment';
 import App from './App.vue';
-import { listProcessStatus, startMaster, startWatcher } from '__gUtils/processUtils';
+import { listProcessStatus, startMaster, startWatcher, startCommander } from '__gUtils/processUtils';
 import { ipcRenderer } from 'electron'
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
@@ -79,24 +79,13 @@ export const startGetProcessStatus = () => {
 //start pm2 kungfu master
 process.env.ELECTRON_RUN_AS_NODE = true;
 
-const startWatcherTimeout = () => {
-    return new Promise((resolve, reject) => {
-        let timer = setTimeout(async () => {
-            try {
-                await startWatcher(false)
-                resolve()
-            } catch (err) {
-                reject(err)
-            }
-            clearTimeout(timer)
-        }, 2000)
-    })
-}
-
 startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
-    startWatcherTimeout()
+    Promise.all([
+        startWatcher(false),
+        startCommander(false)
+    ])
     .catch(err => console.error(err))
     .finally(() => startGetProcessStatus())
 })
