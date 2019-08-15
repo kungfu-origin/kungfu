@@ -83,10 +83,9 @@ startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
     Promise.all([
-        startWatcher(false),
-        startCommander(false)
+        startWatcher(false).catch(err => console.error(err)),
+        startCommander(false).catch(err => console.error(err))
     ])
-    .catch(err => console.error(err))
     .finally(() => startGetProcessStatus())
 })
 

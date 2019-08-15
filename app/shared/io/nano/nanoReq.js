@@ -23,13 +23,19 @@ export const nanoReqCalendar = () => {
 }
 
 //撤单
-export const nanoCancelOrder = ({gatewayName, orderId}) => {
+export const nanoCancelOrder = ({ gatewayName, orderId }) => {
     return new Promise(resolve => {
         const reqMsg = JSON.stringify({
-            req: 304, 
-            data: {order_id: [orderId]}
+            msg_type: msgType.cancelOrder, 
+            data: {
+                'mode': 'live',
+                'category': 'td',
+                'group': 'xtp',
+                'name': account,
+                'order_id': orderId
+            }
         })
-        const req = buildRepNmsg(gatewayName)
+        const req = buildRepNmsg()
         req.send(reqMsg)
         req.on('data', buf => {
             req.close()
