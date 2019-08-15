@@ -101,8 +101,9 @@ export const getStrategyPos = (strategyId: string, { instrumentId }: TradingData
     instrumentId = instrumentId || '';
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
-        `SELECT * FROM portfolio_position` + 
-        ` WHERE client_id = "${strategyId}"` + 
+        `SELECT * FROM position` + 
+        ` WHERE ledger_category = 1` + 
+        ` AND client_id = "${strategyId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         ` ORDER BY instrument_id`
     )
@@ -131,8 +132,9 @@ export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        `SELECT * FROM portfolio_snapshot` + 
-        ` WHERE trading_day = '${tradingDay}'` + 
+        `SELECT * FROM asset_snapshot` + 
+        ` WHERE ledger_category = 1` +
+        ` AND trading_day = '${tradingDay}'` + 
         ` AND client_id = '${strategyId}'`
     )
 }
@@ -143,7 +145,7 @@ export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
 export const getStrategyPnlDay = (strategyId: string) => {
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
-        'SELECT * FROM (select * from portfolio_snapshot ORDER BY update_time DESC)' + 
+        'SELECT * FROM (select * from asset_snapshot WHERE ledger_category = 1 ORDER BY update_time DESC)' + 
         ` where client_id = '${strategyId}'` +
         ` GROUP BY trading_day`
     )

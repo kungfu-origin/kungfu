@@ -54,7 +54,11 @@ export const changeAccountMd = (account_id: string, receive_md: boolean) => {
  * 
  */
 export const getAccountAsset = () => {
-    return runSelectDB(LIVE_TRADING_DATA_DB, 'SELECT * FROM account')
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        'SELECT * FROM asset' + 
+        ' WHERE ledger_category = 0'
+    )
 }
 
 /**
@@ -67,8 +71,9 @@ export const getAccountPos = (accountId: string, { instrumentId, type }: Trading
     type = type || '';
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        `SELECT * FROM account_position` + 
-        ` where account_id = "${accountId}"` + 
+        `SELECT * FROM position` + 
+        ` WHERE ledger_category = 0` + 
+        ` AND account_id = "${accountId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         (type ? ` AND instrument_type = ${type || ''}` : ``) + 
         ' ORDER BY instrument_id'
@@ -134,8 +139,9 @@ export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
     accountId = accountId.toAccountId();
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        `SELECT * FROM account_snapshot` + 
-        ` WHERE trading_day = '${tradingDay}'` +
+        `SELECT * FROM asset_snapshot` + 
+        ` WHERE ledger_category = 0` +
+        ` AND trading_day = '${tradingDay}'` +
         ` AND account_id='${accountId}'`
     )
 }
@@ -149,7 +155,7 @@ export const getAccountPnlDay = (accountId: string) => {
     accountId = accountId.toAccountId();
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
-        'SELECT * FROM (select * from account_snapshot ORDER BY update_time DESC)' + 
+        'SELECT * FROM (select * from account_snapshot WHERE ledger_category = 0 ORDER BY update_time DESC)' + 
         ` WHERE account_id='${accountId}'` +
         ` GROUP BY trading_day`
     )
