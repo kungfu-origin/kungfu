@@ -102,7 +102,7 @@ export default {
             }
 
             if(!ifProcessRunning('master', t.processStatus)){
-                if(!t.nasterErrController){
+                if(!t.nasterErrController && !!t.processStatus['master']){
                     t.$message.error('主控进程断开，不可交易，请重启应用！', 0)
                     t.nasterErrController = true;  
                 }
@@ -110,7 +110,7 @@ export default {
             }
 
             if(!ifProcessRunning('watcher', t.processStatus)){
-                if(!t.watcherErrController){
+                if(!t.watcherErrController && !!t.processStatus['watcher']){
                     t.$message.error('数据进程断开，交易数据将会丢失，请重启应用！', 0)
                     t.watcherErrController = true;  
                 }
@@ -118,7 +118,7 @@ export default {
             }
 
              if(!ifProcessRunning('commander', t.processStatus)){
-                if(!t.watcherErrController){
+                if(!t.watcherErrController && !!t.processStatus['commander']){
                     t.$message.error('指令进程断开，无法发起主动指令，请重启应用！', 0)
                     t.watcherErrController = true;  
                 }

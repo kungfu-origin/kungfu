@@ -9,7 +9,7 @@ RequestUnpublish = 10024
 RequestStart = 10025
 TradingDay = 10027
 
-UICalendarRequest = 601
+UICalendarRequest = 602
 UIActionNewOrderSingle = 20000
 UIActionCancelOrder = 20001
 UIActionCancelAllOrder = 20002
