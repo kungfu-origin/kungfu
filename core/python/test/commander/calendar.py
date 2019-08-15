@@ -5,7 +5,7 @@ from kungfu.wingchun import msg
 
 def calendar_request(cmd_sock, commander_location):
     cmd_sock.send(json.dumps({
-        'msg_type': msg.CalendarRequest,
+        'msg_type': msg.Calendar,
         'dest': commander_location.uid,
         'data': {}
     }))

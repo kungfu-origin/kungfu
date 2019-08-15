@@ -54,7 +54,7 @@ class Commander(pywingchun.Commander):
         self.ctx.orders[order.order_id] = order_record
 
 
-@on(msg.CalendarRequest)
+@on(msg.Calendar)
 def calendar_request(ctx, event, location):
     return {
         'status': http.HTTPStatus.OK,
