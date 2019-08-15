@@ -139,6 +139,11 @@ namespace kungfu
             $([&](event_ptr event)
               {
                   publish_all_states(event->gen_time());
+
+                  nlohmann::json msg;
+                  msg["status"] = 200;
+                  msg["msg_type"] = msg::type::GatewayStateRefresh;
+                  get_io_device()->get_rep_sock()->send(msg.dump());
               });
 
             events_ | is(msg::type::GatewayState) |
