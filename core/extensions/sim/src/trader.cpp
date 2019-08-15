@@ -134,14 +134,6 @@ namespace kungfu
                 gateway::Trader::on_start();
                 add_md("sim");
 
-
-
-                events_ | is(msg::type::PassiveCtrl) |
-                $([&](event_ptr e)
-                  {
-                      on_passivectrl(e);
-                  });
-
                 events_ | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {

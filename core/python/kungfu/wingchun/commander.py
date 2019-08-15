@@ -4,7 +4,7 @@ import json
 import http
 import functools
 import kungfu.yijinjing.journal as kfj
-from kungfu.yijinjing import msg
+from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.calendar import Calendar
 
@@ -16,8 +16,10 @@ def on(msg_type):
         @functools.wraps(func)
         def handler_wrapper(*args, **kwargs):
             return func(*args, **kwargs)
+
         HANDLERS[msg_type] = handler_wrapper
         return on
+
     return register_handler
 
 
@@ -52,23 +54,27 @@ class Commander(pywingchun.Commander):
         self.ctx.orders[order.order_id] = order_record
 
 
-@on(msg.UICalendarRequest)
+@on(msg.CalendarRequest)
 def calendar_request(ctx, event, location):
     return {
         'status': http.HTTPStatus.OK,
-        'trading_day': '%s' % ctx.calendar.trading_day
+        'msg_type': msg.Calendar,
+        'data': {
+            'trading_day': '%s' % ctx.calendar.trading_day
+        }
     }
 
 
-@on(msg.UIActionNewOrderSingle)
+@on(msg.NewOrderSingle)
 def new_order_single(ctx, event, location):
     # ctx.commander.new_order_single(event, location.uid)
     return {
-        'status': http.HTTPStatus.OK
+        'status': http.HTTPStatus.OK,
+        'msg_type': msg.NewOrderSingle
     }
 
 
-@on(msg.UIActionCancelOrder)
+@on(msg.CancelOrder)
 def cancel_order(ctx, event, location):
     order_id = event['data']['order_id']
     if order_id in ctx.orders:
@@ -76,15 +82,17 @@ def cancel_order(ctx, event, location):
         ctx.logger.info('cancel account order %s', order_record['order'])
         ctx.commander.cancel_order(event, location.uid, order_id)
         return {
-            'status': http.HTTPStatus.OK
+            'status': http.HTTPStatus.OK,
+            'msg_type': msg.CancelOrder
         }
     else:
         return {
-            'status': http.HTTPStatus.NOT_FOUND
+            'status': http.HTTPStatus.NOT_FOUND,
+            'msg_type': msg.CancelOrder
         }
 
 
-@on(msg.UIActionCancelAllOrder)
+@on(msg.CancelAllOrder)
 def cancel_all_order(ctx, event, location):
     for order_id in ctx.orders:
         order_record = ctx.orders[order_id]
@@ -95,5 +103,6 @@ def cancel_all_order(ctx, event, location):
             ctx.logger.info('cancel strategy order %s', order_record['order'])
             ctx.commander.cancel_order(event, location.uid, order_id)
     return {
-        'status': http.HTTPStatus.OK
+        'status': http.HTTPStatus.OK,
+        'msg_type': msg.CancelAllOrder
     }

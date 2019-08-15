@@ -42,16 +42,15 @@ namespace kungfu
                     Instrument = 209,
 
                     Subscribe = 302,
+                    NewOrderSingle = 353,
+                    CancelOrder = 354,
+                    CancelAllOrder = 355,
+
                     GatewayState = 401,
 
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
                     InstrumentEnd = 802,
-
-                    PassiveCtrl = 10099,
-                    UIActionNewOrderSingle = 20000,
-                    UIActionCancelOrder = 20001,
-                    UIActionCancelAllOrder = 20002
                 };
             }
 

@@ -1,11 +1,11 @@
 import json
 import pyyjj
-from kungfu.yijinjing import msg
+from kungfu.wingchun import msg
 
 
 def new_order_single(cmd_sock, commander_location, account):
     cmd_sock.send(json.dumps({
-        'msg_type': msg.UIActionNewOrderSingle,
+        'msg_type': msg.NewOrderSingle,
         'dest': commander_location.uid,
         'data': {
             'mode': 'live',
@@ -21,7 +21,7 @@ def new_order_single(cmd_sock, commander_location, account):
 
 def cancel_order(cmd_sock, commander_location, account, order_id):
     cmd_sock.send(json.dumps({
-        'msg_type': msg.UIActionCancelAllOrder,
+        'msg_type': msg.CancelOrder,
         'dest': commander_location.uid,
         'data': {
             'mode': 'live',
@@ -37,7 +37,7 @@ def cancel_order(cmd_sock, commander_location, account, order_id):
 
 def cancel_all_order_for_account(cmd_sock, commander_location, account):
     cmd_sock.send(json.dumps({
-        'msg_type': msg.UIActionCancelAllOrder,
+        'msg_type': msg.CancelAllOrder,
         'dest': commander_location.uid,
         'data': {
             'mode': 'live',
@@ -52,7 +52,7 @@ def cancel_all_order_for_account(cmd_sock, commander_location, account):
 
 def cancel_all_order_for_strategy(cmd_sock, commander_location, name):
     cmd_sock.send(json.dumps({
-        'msg_type': msg.UIActionCancelAllOrder,
+        'msg_type': msg.CancelAllOrder,
         'dest': commander_location.uid,
         'data': {
             'mode': 'live',

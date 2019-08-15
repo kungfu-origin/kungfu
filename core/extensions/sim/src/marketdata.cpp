@@ -105,13 +105,6 @@ namespace kungfu
             {
                 gateway::MarketData::on_start();
 
-                events_ | is(msg::type::PassiveCtrl) |
-                $([&](event_ptr e)
-                  {
-                      const nlohmann::json &data = e->data<nlohmann::json>();
-                      SPDLOG_INFO("received {}", data.dump());
-                  });
-
                 events_ | time_interval(std::chrono::seconds(1)) |
                 $([&](event_ptr e)
                   {
