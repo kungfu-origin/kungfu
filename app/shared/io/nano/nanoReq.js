@@ -7,17 +7,17 @@ import * as msgType from '__io/nano/msgType'
 //主动获得交易日
 export const nanoReqCalendar = () => {
     return new Promise(resolve => {
-        resolve({});
-        return
         const reqMsg = JSON.stringify({
-            request: "calendar/current"
+            'msg_type': msgType.calendar,
+            'data': {}
         });
         const req = buildRepNmsg();
         req.send(reqMsg)
         req.on('data', buf => {
             req.close();
             const data = JSON.parse(String(buf));
-            if(msgType.reqCalendar === data.msg_type) resolve(data.data)
+            console.log(data)
+            if(data.msg_type === msgType.reqCalendar ) resolve(data)
         })
     })
 }

@@ -12,7 +12,7 @@ export const setAccountSource = ({ commit }, accountSource) => {
 //主动获得交易日
 export const reqCalendar = ({ commit }) => {
     return nanoReqCalendar()
-    .then((calendar) => {
+    .then(calendar => {
         if(calendar && calendar.trading_day) commit('SET_CALENDAR', calendar);
         return calendar
     })

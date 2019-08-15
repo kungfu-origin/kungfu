@@ -206,10 +206,10 @@ export const startWatcher = async(force: boolean): Promise<void> => {
 
 export const startCommander = async(force: boolean): Promise<void> => {
     const processName = 'commander';
-    const watcher = await describeProcess(processName);
-    if(watcher instanceof Error) throw watcher
-    const watcherStatus = watcher.filter((m: any): boolean => m.pm2_env.status === 'online')
-    if(!force && watcherStatus.length === watcher.length && watcher.length !== 0) throw new Error('kungfu commander 正在运行！')
+    const commander = await describeProcess(processName);
+    if(commander instanceof Error) throw commander
+    const watcherStatus = commander.filter((m: any): boolean => m.pm2_env.status === 'online')
+    if(!force && watcherStatus.length === commander.length && commander.length !== 0) throw new Error('kungfu commander 正在运行！')
     return startProcess({
         'name': processName,
         'args': 'commander'
