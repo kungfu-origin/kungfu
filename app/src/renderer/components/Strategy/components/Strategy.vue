@@ -292,8 +292,7 @@ export default {
         handleStrategySwitch(value, strategy){
             const t = this;
             const strategyId = strategy.strategy_id;
-            t.getStrategyList();
-            switchStrategy(strategyId, value).then(({ type, message }) => t.$message[type](message))
+            switchStrategy(strategyId, value).then(({ type, message }) => t.$message[type](message));
         },
 
         //关闭添加strategy弹窗, refresh数据
