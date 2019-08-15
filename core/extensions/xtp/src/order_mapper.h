@@ -61,7 +61,7 @@ namespace kungfu
                     }
                     catch (std::exception &e)
                     {
-                        SPDLOG_TRACE(e.what());
+                        SPDLOG_ERROR(e.what());
                     }
                 }
 
@@ -85,7 +85,7 @@ namespace kungfu
                     }
                     catch (std::exception &e)
                     {
-                        SPDLOG_TRACE(e.what());
+                        SPDLOG_ERROR(e.what());
                     }
                     return order;
                 }
@@ -124,7 +124,7 @@ namespace kungfu
                     }
                     catch (std::exception &e)
                     {
-                        SPDLOG_TRACE(e.what());
+                        SPDLOG_ERROR(e.what());
                     }
                     return internal_order_id;
                 }

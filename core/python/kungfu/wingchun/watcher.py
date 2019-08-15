@@ -150,7 +150,7 @@ class Watcher(pywingchun.Watcher):
         return self._get_ledger(ledger_category=LedgerCategory.Account,account_id=account_id, create_if_not_existing=True)
 
     def _get_portfolio_ledger(self, client_id):
-       return self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id="",create_if_not_existing=True)
+       return self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id,create_if_not_existing=True)
 
     def _get_ledger(self, ledger_category, account_id = "", client_id = "", create_if_not_existing=False):
         if ledger_category == LedgerCategory.Account:
