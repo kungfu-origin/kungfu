@@ -25,12 +25,14 @@ namespace kungfu
                 void add_strategy(const Strategy_ptr& strategy);
 
             protected:
+                std::vector<Strategy_ptr> strategies_;
 
                 void on_start() override ;
 
+                virtual Context_ptr make_context();
+
             private:
                 Context_ptr context_;
-                std::vector<Strategy_ptr> strategies_;
             };
         }
     }

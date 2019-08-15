@@ -649,20 +649,6 @@ PYBIND11_MODULE(pywingchun, m)
             .def("insert_fok_order", &strategy::Context::insert_fok_order)
             .def("cancel_order", &strategy::Context::cancel_order);
 
-    py::class_<strategy::ContextBackTest, std::shared_ptr<strategy::ContextBackTest>>(m, "ContextBackTest")
-            .def("now", &strategy::ContextBackTest::now)
-            .def("add_account", &strategy::ContextBackTest::add_account)
-            .def("subscribe", &strategy::ContextBackTest::subscribe)
-            .def("insert_order", &strategy::ContextBackTest::insert_order)
-            .def("insert_market_order", &strategy::ContextBackTest::insert_market_order)
-            .def("insert_limit_order", &strategy::ContextBackTest::insert_limit_order)
-            .def("insert_fak_order", &strategy::ContextBackTest::insert_fak_order)
-            .def("insert_fok_order", &strategy::ContextBackTest::insert_fok_order)
-            .def("cancel_order", &strategy::ContextBackTest::cancel_order)
-            .def("get_quotes", &strategy::ContextBackTest::get_quotes)
-            .def("get_orders", &strategy::ContextBackTest::get_orders)
-            .def("get_trades", &strategy::ContextBackTest::get_trades);
-
     py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
             .def(py::init())
             .def("pre_start", &strategy::Strategy::pre_start)

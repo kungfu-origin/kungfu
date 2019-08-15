@@ -27,6 +27,11 @@ namespace kungfu
                     : apprentice(location::make(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
             {}
 
+            Context_ptr Runner::make_context()
+            {
+                return std::make_shared<Context>(*this, events_);
+            }
+
             void Runner::add_strategy(const Strategy_ptr &strategy)
             {
                 strategies_.push_back(strategy);
@@ -34,15 +39,7 @@ namespace kungfu
 
             void Runner::on_start()
             {
-                apprentice::on_start();
-                if (get_io_device()->get_home()->mode == mode::BACKTEST)
-                {
-                    context_ = std::make_shared<ContextBackTest>(*this, events_, strategies_);
-                } else
-                {
-                    context_ = std::make_shared<Context>(*this, events_);
-                }
-                
+                context_ = make_context();
                 context_->react();
 
                 for (const auto &strategy : strategies_)
