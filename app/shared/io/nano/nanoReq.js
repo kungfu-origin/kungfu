@@ -8,7 +8,7 @@ import * as msgType from '__io/nano/msgType'
 export const nanoReqCalendar = () => {
     return new Promise(resolve => {
         const reqMsg = JSON.stringify({
-            'msg_type': msgType.reqCalendar,
+            'msg_type': msgType.calendar,
             'data': {}
         });
         const req = buildRepNmsg();

@@ -45,7 +45,7 @@ class Commander(pywingchun.Commander):
         return json.dumps(handle(req['msg_type'], self.ctx, event, location))
 
     def on_order(self, event, order):
-        self.ctx.logger.info('on order %s from %s', order, self.get_location(event.dest).uname)
+        self.ctx.logger.debug('on order %s from %s', order, self.get_location(event.dest).uname)
         order_record = {
             'source': event.source,
             'dest': event.dest,

@@ -34,12 +34,6 @@ class Watcher(pywingchun.Watcher):
     def pre_start(self):
         self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
 
-    def handle_request(self, msg):
-        req = json.loads(msg)
-        self.ctx.logger.debug("handle request %s", msg)
-        self.ctx.logger.debug("handle request json %s", json.dumps(req))
-        return json.dumps(req)
-
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)

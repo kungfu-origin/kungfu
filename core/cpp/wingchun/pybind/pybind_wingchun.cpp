@@ -47,9 +47,6 @@ class PyWatcher : public Watcher
 public:
     using Watcher::Watcher;
 
-    std::string handle_request(const std::string &msg) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Watcher, handle_request, msg) }
-
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, Watcher, on_quote, event, quote) }
 
@@ -613,7 +610,6 @@ PYBIND11_MODULE(pywingchun, m)
             .def("now", &Watcher::now)
             .def("get_location", &Watcher::get_location)
             .def("publish", &Watcher::publish)
-            .def("handle_request", &Watcher::handle_request)
             .def("on_trading_day", &Watcher::on_trading_day)
             .def("on_quote", &Watcher::on_quote)
             .def("on_order", &Watcher::on_order)

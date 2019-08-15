@@ -38,24 +38,6 @@ namespace kungfu
             SPDLOG_TRACE("published {}", msg);
         }
 
-        void Watcher::publish_state(int64_t trigger_time, yijinjing::data::category c, const std::string &group, const std::string &name,
-                                    GatewayState state)
-        {
-            nlohmann::json msg;
-            msg["gen_time"] = time::now_in_nano();
-            msg["trigger_time"] = trigger_time;
-            msg["msg_type"] = msg::type::GatewayState;
-            msg["source"] = get_io_device()->get_home()->uid;
-
-            nlohmann::json data;
-            data["category"] = c;
-            data["group"] = group;
-            data["name"] = name;
-            data["state"] = state;
-            msg["data"] = data;
-            publish(msg.dump());
-        }
-
         void Watcher::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
         {
             if (has_location(app_location->uid))
@@ -69,14 +51,14 @@ namespace kungfu
                 case category::MD:
                 {
                     watch(trigger_time, app_location);
-                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
+                    update_and_publish_state(trigger_time, app_location, GatewayState::Connected);
                     monitor_market_data(trigger_time, app_location->uid);
                     break;
                 }
                 case category::TD:
                 {
                     watch(trigger_time, app_location);
-                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::Connected);
+                    update_and_publish_state(trigger_time, app_location, GatewayState::Connected);
                     break;
                 }
                 case category::STRATEGY:
@@ -99,7 +81,7 @@ namespace kungfu
                 case category::MD:
                 case category::TD:
                 {
-                    publish_state(trigger_time, app_location->category, app_location->group, app_location->name, GatewayState::DisConnected);
+                    update_and_publish_state(trigger_time, app_location, GatewayState::DisConnected);
                     break;
                 }
                 case category::STRATEGY:
@@ -153,34 +135,17 @@ namespace kungfu
 
             pre_start();
 
+            events_ | is(msg::type::GatewayStateRefresh) |
+            $([&](event_ptr event)
+              {
+                  publish_all_states(event->gen_time());
+              });
+
             events_ | is(msg::type::GatewayState) |
             $([&](event_ptr event)
               {
                   auto gateway_location = get_location(event->source());
-                  publish_state(event->gen_time(), gateway_location->category, gateway_location->group, gateway_location->name,
-                                static_cast<GatewayState>(event->data<int32_t>()));
-              });
-
-            /**
-             * process active query from clients
-             */
-            events_ |
-            filter([&](event_ptr event)
-                   {
-                       return dynamic_cast<nanomsg::nanomsg_json *>(event.get()) != nullptr and event->source() == 0;
-                   }) |
-            $([&](event_ptr event)
-              {
-                  // let python do the actual job, we just operate the I/O part
-                  try
-                  {
-                      std::string response = handle_request(event->to_string());
-                      get_io_device()->get_rep_sock()->send(response);
-                  }
-                  catch (const std::exception &e)
-                  {
-                      SPDLOG_ERROR("Unexpected exception {}", e.what());
-                  }
+                  update_and_publish_state(event->gen_time(), gateway_location, static_cast<GatewayState>(event->data<int32_t>()));
               });
 
             /**
@@ -290,6 +255,38 @@ namespace kungfu
               });
         }
 
+        void Watcher::publish_state(int64_t trigger_time, const location_ptr &gateway_location, GatewayState state)
+        {
+            nlohmann::json msg;
+            msg["gen_time"] = time::now_in_nano();
+            msg["trigger_time"] = trigger_time;
+            msg["msg_type"] = msg::type::GatewayState;
+            msg["source"] = get_io_device()->get_home()->uid;
+
+            nlohmann::json data;
+            data["category"] = gateway_location->category;
+            data["group"] = gateway_location->group;
+            data["name"] = gateway_location->name;
+            data["state"] = state;
+            msg["data"] = data;
+            publish(msg.dump());
+        }
+
+        void Watcher::update_and_publish_state(int64_t trigger_time, const location_ptr &gateway_location, GatewayState state)
+        {
+            gateway_states_[gateway_location->uid] = state;
+            publish_state(trigger_time, gateway_location, state);
+        }
+
+        void Watcher::publish_all_states(int64_t trigger_time)
+        {
+            SPDLOG_INFO("publishing gateway states");
+            for (auto item : gateway_states_)
+            {
+                publish_state(trigger_time, get_location(item.first), item.second);
+            }
+        }
+
         void Watcher::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
         {
             auto app_uid_str = fmt::format("{:08x}", app_location->uid);
@@ -304,7 +301,7 @@ namespace kungfu
             $([&, trigger_time, md_location_uid](event_ptr event)
               {
                   auto md_location = get_location(md_location_uid);
-                  publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Ready);
+                  update_and_publish_state(trigger_time, md_location, GatewayState::Ready);
                   alert_market_data(trigger_time, md_location_uid);
               },
               [&](std::exception_ptr e)
@@ -330,7 +327,7 @@ namespace kungfu
               [&, trigger_time, md_location_uid](std::exception_ptr e)
               {
                   auto md_location = get_location(md_location_uid);
-                  publish_state(trigger_time, md_location->category, md_location->group, md_location->name, GatewayState::Idle);
+                  update_and_publish_state(trigger_time, md_location, GatewayState::Idle);
                   monitor_market_data(trigger_time, md_location_uid);
               });
         }

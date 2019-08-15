@@ -22,11 +22,6 @@ namespace kungfu
 
             void publish(const std::string &msg);
 
-            void publish_state(int64_t trigger_time, yijinjing::data::category c, const std::string &group, const std::string &name,
-                               msg::data::GatewayState state);
-
-            virtual std::string handle_request(const std::string &msg) = 0;
-
             virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
 
             virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
@@ -53,8 +48,15 @@ namespace kungfu
 
             void on_start() override;
 
+            void publish_state(int64_t trigger_time, const yijinjing::data::location_ptr &gateway_location, msg::data::GatewayState state);
+
+            void update_and_publish_state(int64_t trigger_time, const yijinjing::data::location_ptr &gateway_location, msg::data::GatewayState state);
+
+            void publish_all_states(int64_t trigger_time);
+
         private:
             yijinjing::nanomsg::socket_ptr pub_sock_;
+            std::unordered_map<uint32_t, msg::data::GatewayState> gateway_states_;
             std::unordered_map<uint32_t, msg::data::Asset> asset_info_;
             std::unordered_map<uint32_t, std::vector<msg::data::Position>> position_buffer_;
             std::unordered_map<uint32_t, std::vector<msg::data::PositionDetail>> position_detail_buffer_;

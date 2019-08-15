@@ -46,6 +46,7 @@ namespace kungfu
                     CancelOrder = 354,
                     CancelAllOrder = 355,
 
+                    GatewayStateRefresh = 400,
                     GatewayState = 401,
 
                     PositionEnd = 800,

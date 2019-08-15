@@ -19,7 +19,6 @@ export const reqCancelAllAccountOrder = 20002
 export const reqCancelAllStrategyOrder = 20002
 export const gatewayState = 401
 export const calendar = 601  //自动推送日期相关信息，目前只有交易日
-export const reqCalendar = 602 //主动日期相关信息，目前只有交易日
 export const strategyUsedAccountUpdate = 701 //策略中账户的更新
 
 export const category = {
