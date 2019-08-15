@@ -32,7 +32,8 @@ a = Analysis(['kungfu\\__main__.py'],
      hiddenimports=[
           'numpy',
           'pandas',
-          'tushare'
+          'tushare',
+          'plotly'
           ],
      hookspath=None,
      runtime_hooks=None,

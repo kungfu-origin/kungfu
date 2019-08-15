@@ -14,6 +14,7 @@ tabulate = "~=0.8.3"
 click = "~=7.0"
 clint = "~=0.5.1"
 tushare = "~=1.2.39"
+plotly = "~=4.0.0"
 
 [dev-packages]
 pytest = "*"
