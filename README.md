@@ -27,7 +27,7 @@
 如果需要接入更多柜台请通过 [Taurus.ai](http://taurus.ai) 官网联系我们。
 开发者也可根据长拳标准自行开发新的柜台接口。
 
-初次使用请参考 [功夫交易系统用户手册](https://app.gitbook.com/@taurusai/s/kungfu-userdoc/)
+初次使用请参考 [功夫交易系统用户手册](https://taurusai.gitbook.io/kungfu-manual/)
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
