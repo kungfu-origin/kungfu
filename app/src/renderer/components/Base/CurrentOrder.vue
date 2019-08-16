@@ -230,10 +230,11 @@ export default {
             //撤单
             t.$message.info('正在发送撤单指令...')           
             nanoCancelOrder({
-                gatewayName,
+                accountId,
                 orderId: props.orderId
             })
-            .then(() => t.$message.success(`撤单指令已发送！`))
+            .then(() => t.$message.success('撤单指令已发送！'))
+            .catch(err => t.$message.error('撤单指令发送失败！'))
         },
 
         handleCancelAllOrders(){

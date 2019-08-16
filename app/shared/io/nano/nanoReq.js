@@ -2,11 +2,10 @@
 import { buildRepNmsg } from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
 
-
 //日历
 //主动获得交易日
 export const nanoReqCalendar = () => {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const reqMsg = JSON.stringify({
             'msg_type': msgType.calendar,
             'data': {}
@@ -16,22 +15,28 @@ export const nanoReqCalendar = () => {
         req.on('data', buf => {
             req.close();
             const data = JSON.parse(String(buf));
-            console.log(data)
-            if(data.msg_type === msgType.reqCalendar ) resolve(data)
+            if(data.msg_type === msgType.calendar ) {
+                if(data.status === 200) {
+                    resolve(data)
+                } else {
+                    reject(new Error('请求交易日失败！'))
+                }
+            }
         })
     })
 }
 
 //撤单
-export const nanoCancelOrder = ({ gatewayName, orderId }) => {
-    return new Promise(resolve => {
+export const nanoCancelOrder = ({ sourceAccountId, orderId }) => {
+    return new Promise((resolve, reject) => {
+        const { source, id } = sourceAccountId.parseSourceAccountId();
         const reqMsg = JSON.stringify({
             msg_type: msgType.cancelOrder, 
             data: {
                 'mode': 'live',
                 'category': 'td',
-                'group': 'xtp',
-                'name': account,
+                'group': source,
+                'name': id,
                 'order_id': orderId
             }
         })
@@ -40,7 +45,13 @@ export const nanoCancelOrder = ({ gatewayName, orderId }) => {
         req.on('data', buf => {
             req.close()
             const data = JSON.parse(String(buf))
-            if(msgType.cancelOrder === data.msg_type) resolve(true)
+            if(data.msg_type === msgType.cancelOrder) {
+                if(data.status === 200) {
+                    resolve(true)
+                } else {
+                    reject(new Error(''))
+                } 
+            }
         })
     })
 }
@@ -50,23 +61,49 @@ export const nanoCancelOrder = ({ gatewayName, orderId }) => {
  * @param  {String} cancelType account / strategy
  * @param  {String} id strategyId / accountId}
  */
-export const nanoCancelAllOrder = ({targetId, cancelType, id}) => {
+export const nanoCancelAllOrder = ({ cancelType, id }) => {
     return new Promise(resolve => {
-        const postData = cancelType === 'account' ? {account_id: id} : {client_id: id}
         const reqMsg = JSON.stringify({
-            req: 304, 
-            data: postData
+            'msg_type': msgType.cancelAllOrder,
+            'data': {
+                'mode': 'live',
+                ...buildCancalAllOrderPostData(cancelType, id)
+            }
         })
-        const req = cancelType ==='account' ? buildRepNmsg(targetId) : buildRepNmsg(targetId)
+        console.log(reqMsg)
+        const req = buildRepNmsg();
         req.send(reqMsg)
         req.on('data', buf => {
             req.close()
             const data = JSON.parse(String(buf))
-            if(msgType.cancelOrder === data.msg_type) resolve(true)
+            if(data.msg_type === msgType.cancelAllOrder) {
+                if(data.status === 200) {
+                    resolve(true)
+                } else {
+                    reject(new Error(''))
+                } 
+            }
         })
     })
 }
 
+function buildCancalAllOrderPostData(type, accountOrStrategyId) {
+    if(type === 'account') {
+        const { source, id } = accountOrStrategyId.parseSourceAccountId();
+        return {
+            category: 'td',
+            group: source,
+            name: id,
+        }
+    } else {
+        return {
+            category: 'strategy',
+            group: 'default',
+            name: accountOrStrategyId
+        }
+    }
+
+}
 
 export const nanoMakeOrder = (gatewayName, makeOrderData) => {
     return new Promise(resolve => {

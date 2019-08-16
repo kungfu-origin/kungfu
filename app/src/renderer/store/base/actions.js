@@ -16,6 +16,7 @@ export const reqCalendar = ({ commit }) => {
         if(calendar && calendar.trading_day) commit('SET_CALENDAR', calendar);
         return calendar
     })
+    .catch(err => console.error(err))
 }
 
 
