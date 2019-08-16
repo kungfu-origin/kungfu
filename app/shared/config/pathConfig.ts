@@ -93,14 +93,11 @@ export const GLOBAL_COMMISSION_DB = path.join(BASE_DB_DIR, 'commission.db');
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${processId}.log`)
 
-//获取watcher nano pub 地址
-export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
+//获取 ledger nano pub 地址
+export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'live', 'pub.nn')
 
-//获取watcher nano rep 地址
-export const WATCHER_NMSG_REP_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
-
-//获取commander nano rep 地址
-export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'commander', 'commander', 'nn', 'live', 'rep.nn')
+//获取 ledger nano rep 地址
+export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'live', 'rep.nn')
 
 //================== others end ===================================
 

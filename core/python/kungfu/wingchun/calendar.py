@@ -1,7 +1,7 @@
 import datetime
 import collections
 import kungfu.yijinjing.time as kft
-from kungfu.data.sqlite.data_proxy import DataProxy, make_url
+from kungfu.data.sqlite.data_proxy import CalendarDB, make_url
 from kungfu.wingchun.constants import *
 
 TradingSession = collections.namedtuple('TradingSession', 'exchange_id trading_day start_time end_time')
@@ -27,7 +27,7 @@ class CalendarUtil:
 
 class Calendar:
     def __init__(self, ctx):
-        self.holidays = DataProxy(make_url(ctx.locator, ctx.system_config_location, "holidays"), readonly=True).get_holidays()
+        self.holidays = CalendarDB(ctx.system_config_location, "holidays").get_holidays()
         self.update_trading_day(datetime.datetime.now())
 
     def update_trading_day(self, now):

@@ -1,7 +1,7 @@
 
 
 import unittest
-from kungfu.wingchun.finance.ledger import *
+from kungfu.wingchun.finance.book import *
 from kungfu.wingchun.finance.position import *
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import *

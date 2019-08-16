@@ -1,14 +1,18 @@
-
-import os
-import sys
-from contextlib import contextmanager
-from sqlalchemy import Column, ForeignKey, Integer, String, Date, Float, Boolean, PrimaryKeyConstraint
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
+import pyyjj
 import json
-from sqlalchemy import TypeDecorator, types
-from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
+from sqlalchemy import inspect, types, TypeDecorator
+
+
+def make_url(location, filename):
+    db_file = location.locator.layout_file(location, pyyjj.layout.SQLITE, filename)
+    return 'sqlite:///{}'.format(db_file)
+
+
+def object_as_dict(obj):
+    return {c.key: getattr(obj, c.key)
+            for c in inspect(obj).mapper.column_attrs}
+
 
 class Json(TypeDecorator):
     @property
@@ -28,6 +32,7 @@ class Json(TypeDecorator):
             return json.loads(value)
         except (ValueError, TypeError):
             return None
+
 
 @contextmanager
 def session_scope(session_factory):

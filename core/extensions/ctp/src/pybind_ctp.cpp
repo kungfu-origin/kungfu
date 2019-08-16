@@ -5,8 +5,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "md_gateway.h"
-#include "td_gateway.h"
+#include "marketdata_ctp.h"
+#include "trader_ctp.h"
 
 namespace py = pybind11;
 
@@ -15,13 +15,13 @@ using namespace kungfu::wingchun::ctp;
 
 PYBIND11_MODULE(kfext_ctp, m)
 {
-    py::class_<MdGateway>(m, "MD")
-    .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("run", &MdGateway::run)
+    py::class_<MarketDataCTP>(m, "MD")
+    .def(py::init<bool, locator_ptr, const std::string &>())
+    .def("run", &MarketDataCTP::run)
     ;
 
-    py::class_<TdGateway>(m, "TD")
-    .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("run", &TdGateway::run)
+    py::class_<TraderCTP>(m, "TD")
+    .def(py::init<bool, locator_ptr, const std::string &, const std::string &>())
+    .def("run", &TraderCTP::run)
     ;
 }

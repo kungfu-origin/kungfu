@@ -20,7 +20,7 @@
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/commander.h>
-#include <kungfu/wingchun/watcher.h>
+#include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 
@@ -28,48 +28,40 @@ namespace py = pybind11;
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
+using namespace kungfu::wingchun::service;
 using namespace kungfu::wingchun::msg::data;
 
-class PyController : public Commander
+class PyLedger : public Ledger
 {
 public:
-    using Commander::Commander;
+    using Ledger::Ledger;
 
     std::string handle_request(const event_ptr &event, const std::string &msg) override
-    {PYBIND11_OVERLOAD_PURE(std::string, Commander, handle_request, event, msg) }
-
-    void on_order(event_ptr event, const Order &order) override
-    {PYBIND11_OVERLOAD_PURE(void, Commander, on_order, event, order) }
-};
-
-class PyWatcher : public Watcher
-{
-public:
-    using Watcher::Watcher;
+    {PYBIND11_OVERLOAD_PURE(std::string, Ledger, handle_request, event, msg) }
 
     void on_quote(event_ptr event, const Quote &quote) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_quote, event, quote) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_quote, event, quote) }
 
     void on_order(event_ptr event, const Order &order) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_order, event, order) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_order, event, order) }
 
     void on_trade(event_ptr event, const Trade &trade) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_trade, event, trade) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_trade, event, trade) }
 
     void on_stock_account(const Asset &asset_info, const std::vector<Position> &positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_stock_account, asset_info, positions) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_stock_account, asset_info, positions) }
 
     void on_future_account(const Asset &asset_info, const std::vector<PositionDetail> &position_details) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_future_account, asset_info, position_details) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_future_account, asset_info, position_details) }
 
     void on_instruments(const std::vector<Instrument> &instruments) override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, on_instruments, instruments) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_instruments, instruments) }
 
     void on_trading_day(const event_ptr &event, int64_t daytime) override
-    {PYBIND11_OVERLOAD(void, Watcher, on_trading_day, event, daytime); }
+    {PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime); }
 
     void pre_start() override
-    {PYBIND11_OVERLOAD_PURE(void, Watcher, pre_start) }
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, pre_start) }
 };
 
 class PyRunner : public strategy::Runner
@@ -594,36 +586,29 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<MsgWriter, std::shared_ptr<MsgWriter>>(m, "MsgWriter")
             .def(py::init<kungfu::yijinjing::journal::writer_ptr>())
             .def("write_data", &MsgWriter::write_data);
-
-    py::class_<Commander, PyController, kungfu::practice::apprentice, std::shared_ptr<Commander>>(m, "Commander")
-            .def(py::init<data::locator_ptr, bool, const std::string &>())
-            .def_property_readonly("io_device", &Commander::get_io_device)
-            .def("get_location", &Commander::get_location)
-            .def("handle_request", &Commander::handle_request)
-            .def("on_order", &Commander::on_order)
-            .def("new_order_single", &Commander::new_order_single)
-            .def("cancel_order", &Commander::cancel_order)
-            .def("run", &Commander::run);
     
-    py::class_<Watcher, PyWatcher, kungfu::practice::apprentice, std::shared_ptr<Watcher>>(m, "Watcher")
+    py::class_<Ledger, PyLedger, kungfu::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
             .def(py::init<data::locator_ptr, data::mode, bool>())
-            .def_property_readonly("io_device", &Watcher::get_io_device)
-            .def("now", &Watcher::now)
-            .def("get_location", &Watcher::get_location)
-            .def("publish", &Watcher::publish)
-            .def("on_trading_day", &Watcher::on_trading_day)
-            .def("on_quote", &Watcher::on_quote)
-            .def("on_order", &Watcher::on_order)
-            .def("on_trade", &Watcher::on_trade)
-            .def("on_stock_account", &Watcher::on_stock_account)
-            .def("on_future_account", &Watcher::on_future_account)
-            .def("on_instruments", &Watcher::on_instruments)
-            .def("set_begin_time", &Watcher::set_begin_time)
-            .def("set_end_time", &Watcher::set_end_time)
-            .def("pre_start", &Watcher::pre_start)
-            .def("add_timer", &Watcher::add_timer)
-            .def("add_time_interval", &Watcher::add_time_interval)
-            .def("run", &Watcher::run);
+            .def_property_readonly("io_device", &Ledger::get_io_device)
+            .def("now", &Ledger::now)
+            .def("get_location", &Ledger::get_location)
+            .def("publish", &Ledger::publish)
+            .def("new_order_single", &Ledger::new_order_single)
+            .def("cancel_order", &Ledger::cancel_order)
+            .def("handle_request", &Ledger::handle_request)
+            .def("on_trading_day", &Ledger::on_trading_day)
+            .def("on_quote", &Ledger::on_quote)
+            .def("on_order", &Ledger::on_order)
+            .def("on_trade", &Ledger::on_trade)
+            .def("on_stock_account", &Ledger::on_stock_account)
+            .def("on_future_account", &Ledger::on_future_account)
+            .def("on_instruments", &Ledger::on_instruments)
+            .def("set_begin_time", &Ledger::set_begin_time)
+            .def("set_end_time", &Ledger::set_end_time)
+            .def("pre_start", &Ledger::pre_start)
+            .def("add_timer", &Ledger::add_timer)
+            .def("add_time_interval", &Ledger::add_time_interval)
+            .def("run", &Ledger::run);
 
     py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
             .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())

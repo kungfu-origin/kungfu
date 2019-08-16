@@ -1,33 +1,60 @@
-
+import json
 from . import *
-from sqlalchemy import inspect
-import datetime
+from .models import *
 from itertools import groupby
-import pyyjj
-from kungfu.yijinjing.log import create_logger
-from kungfu.data.sqlite.models import *
-from kungfu.wingchun.constants import *
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
-from kungfu.wingchun.finance.ledger import *
+from kungfu.wingchun.finance.book import *
 
-def make_url(locator, location, filename):
-    db_file = locator.layout_file(location, pyyjj.layout.SQLITE, filename)
-    return 'sqlite:///{}'.format(db_file)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-def object_as_dict(obj):
-    return {c.key: getattr(obj, c.key)
-            for c in inspect(obj).mapper.column_attrs}
 
-class DataProxy:
-    def __init__(self, url, readonly=False):
-        self.engine = create_engine(url)
-        if not readonly:
-            Base.metadata.create_all(self.engine)
+class SessionFactoryHolder:
+    def __init__(self, location, filename):
+        self.engine = create_engine(make_url(location, filename))
         self.session_factory = sessionmaker(bind=self.engine)
 
-    @classmethod
-    def setup_logger(cls, level, location):
-        create_logger("sqlalchemy.engine", level, location)
+
+class AccountsDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(AccountsDB, self).__init__(location, filename)
+        Account.metadata.create_all(self.engine)
+
+    def get_accounts(self):
+        with session_scope(self.session_factory) as session:
+            return [object_as_dict(obj) for obj in session.query(Account).all()]
+
+    def get_td_account_config(self, source_name, account_id):
+        with session_scope(self.session_factory) as session:
+            account = session.query(Account).filter(Account.source_name == source_name and Account.account_id == account_id).first()
+            return json.dumps(object_as_dict(account)['config'])
+
+    def get_md_account_config(self, source_name):
+        with session_scope(self.session_factory) as session:
+            account = session.query(Account).filter(Account.source_name == source_name and Account.receive_md).first()
+            return json.dumps(object_as_dict(account)['config'])
+
+
+class CalendarDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(CalendarDB, self).__init__(location, filename)
+        Holiday.metadata.create_all(self.engine)
+
+    def get_holidays(self, region=Region.CN):
+        with session_scope(self.session_factory) as session:
+            return [obj.holiday for obj in session.query(Holiday).filter(Holiday.region == region).all()]
+
+
+class LedgerDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(LedgerDB, self).__init__(location, filename)
+        Base.metadata.create_all(self.engine)
+
+    def on_messages(self, messages):
+        with session_scope(self.session_factory) as session:
+            for message in messages:
+                obj = self.object_from_msg(message)
+                session.merge(obj)
 
     def add_trade(self, **kwargs):
         with session_scope(self.session_factory) as session:
@@ -36,10 +63,6 @@ class DataProxy:
     def add_order(self, **kwargs):
         with session_scope(self.session_factory) as session:
             session.merge(Order(**kwargs))
-
-    def get_holidays(self, region = Region.CN):
-        with session_scope(self.session_factory) as session:
-            return [obj.holiday for obj in session.query(Holiday).filter(Holiday.region == region).all()]
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass
@@ -54,33 +77,6 @@ class DataProxy:
         with session_scope(self.session_factory) as session:
             obj = session.query(FutureInstrument).filter(FutureInstrument.instrument_id == instrument_id).first()
             return {} if obj is None else object_as_dict(obj)
-            
-    def get_task_config(self, task_name):
-        with session_scope(self.session_factory) as session:
-            task = session.query(Task).get(task_name)
-            if task:
-                return task.config
-            else:
-                return {}
-
-    def set_task_config(self, task_name, config):
-        with session_scope(self.session_factory) as session:
-            task = session.query(Task).get(task_name)
-            if task is None:
-                task = Task(name=task_name, config=config)
-                session.add(task)
-            else:
-                task.config = config
-
-class LedgerHolder(DataProxy):
-    def __init__(self, url):
-        super(LedgerHolder, self).__init__(url)
-
-    def on_messages(self, messages):
-        with session_scope(self.session_factory) as session:
-            for message in messages:
-                obj = self.object_from_msg(message)
-                session.merge(obj)
 
     def get_stock_positions(self, session, ledger_category, account_id, client_id):
         positions = session.query(Position).filter(Position.account_id == account_id,

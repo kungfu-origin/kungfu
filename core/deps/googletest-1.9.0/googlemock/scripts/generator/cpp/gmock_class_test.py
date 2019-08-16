@@ -226,11 +226,11 @@ class Foo {
     source = """
 class Foo {
  public:
-  virtual const string& Bar(int /* keeper */, int b);
+  virtual const string& Bar(int /* ledger */, int b);
 };
 """
     self.assertEqualIgnoreLeadingWhitespace(
-        'MOCK_METHOD2(Bar,\nconst string&(int /* keeper */, int b));',
+        'MOCK_METHOD2(Bar,\nconst string&(int /* ledger */, int b));',
         self.GenerateMethodSource(source))
 
   def testArgsOfTemplateTypes(self):

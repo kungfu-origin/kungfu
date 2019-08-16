@@ -5,16 +5,17 @@ name = "pypi"
 
 [packages]
 pywin32 = {version = "*",sys_platform = "== 'win32'"}
-pyinstaller = ">=3.0"
-sqlalchemy = "~=1.2"
-psutil = "~=5.6.2"
-numpy = "~=1.16.4"
-pandas = "~=0.24.2"
-tabulate = "~=0.8.3"
-click = "~=7.0"
-clint = "~=0.5.1"
-tushare = "~=1.2.39"
-plotly = "~=4.0.0"
+pyinstaller = "==3.5"
+sqlalchemy = "==1.2"
+psutil = "==5.6.2"
+numpy = "==1.16.4"
+pandas = "==0.24.2"
+tabulate = "==0.8.3"
+click = "==7.0"
+PyInquirer = "==1.0.3"
+prompt_toolkit = "==1.0.14"
+tushare = "==1.2.39"
+plotly = "==4.0.0"
 
 [dev-packages]
 pytest = "*"
