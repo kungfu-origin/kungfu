@@ -44,54 +44,19 @@ namespace kungfu
                 //@param exchange_id 交易所ID
                 virtual void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "");
 
-                virtual uint64_t insert_order(const msg::data::OrderInput &input);
-
-                //限价单报单
+                //报单
                 //@param instrument_id 合约ID
                 //@param exchange_id   交易所ID
                 //@param account_id    账户ID
                 //@param limit_price   价格
                 //@param volume        数量
+                //@param type          报单价格类型
                 //@param side          买卖方向
                 //@param offset        开平方向
                 //@return              订单ID
-                virtual uint64_t insert_limit_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                                    double limit_price, int64_t volume, Side side, Offset offset);
+                virtual uint64_t insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+                                              double limit_price, int64_t volume, PriceType type, Side side, Offset offset = Offset::Open);
 
-                //fok单报单
-                //@param instrument_id 合约ID
-                //@param exchange_id   交易所ID
-                //@param account_id    账户ID
-                //@param limit_price   价格
-                //@param volume        数量
-                //@param side          买卖方向
-                //@param offset        开平方向
-                //@return              订单ID
-                virtual uint64_t insert_fok_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                                  double limit_price, int64_t volume, Side side, Offset offset);
-
-                //fak单报单
-                //@param instrument_id 合约ID
-                //@param exchange_id   交易所ID
-                //@param account_id    账户ID
-                //@param limit_price   价格
-                //@param volume        数量
-                //@param side          买卖方向
-                //@param offset        开平方向
-                //@return              订单ID
-                virtual uint64_t insert_fak_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                                  double limit_price, int64_t volume, Side side, Offset offset);
-
-                //市价单报单
-                //@param instrument_id 合约ID
-                //@param exchange_id   交易所ID
-                //@param account_id    账户ID
-                //@param volume        数量
-                //@param side          买卖方向
-                //@param offset        开平方向
-                //@return              订单ID
-                virtual uint64_t insert_market_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                                     int64_t volume, Side side, Offset offset);
 
                 //撤单
                 //@param order_id      订单ID

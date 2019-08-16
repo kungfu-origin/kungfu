@@ -87,8 +87,7 @@ namespace kungfu
                 } else
                 {
                     rtn_order_from(input, OrderStatus::Submitted);
-                    if ((input.price_type == PriceType::Any) || (input.price_type == PriceType::Best) ||
-                        (input.price_type == PriceType::Best5))
+                    if (input.price_type == PriceType::Any)
                         rtn_order_from(input, OrderStatus::Filled);
                     else if (input.price_type == PriceType::Limit)
                     {
