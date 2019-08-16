@@ -37,7 +37,7 @@
             </el-col>
 
             <el-col :span="10">
-                <el-row style="height: 66.666%">
+                <el-row style="height: 50%">
                     <Pos 
                     ref="pos"
                     :currentId="currentId" 
@@ -48,7 +48,7 @@
                     />
                 </el-row>
                 
-                <el-row style="height: 33.333%">
+                <el-row style="height: 50%">
                     <TradeRecord
                     ref="trade-record"
                     :currentId="currentId"

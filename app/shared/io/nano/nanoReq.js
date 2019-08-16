@@ -39,7 +39,7 @@ export const nanoReqCalendar = () => {
             const data = JSON.parse(String(buf));
             if(data.msg_type === msgType.calendar ) {
                 if(data.status === 200) {
-                    resolve(data)
+                    resolve(data.data)
                 } else {
                     reject(new Error('请求交易日失败！'))
                 }
@@ -69,7 +69,7 @@ export const nanoCancelOrder = ({ sourceAccountId, orderId }) => {
             const data = JSON.parse(String(buf))
             if(data.msg_type === msgType.cancelOrder) {
                 if(data.status === 200) {
-                    resolve(true)
+                    resolve(data)
                 } else {
                     reject(new Error(''))
                 } 
@@ -92,7 +92,6 @@ export const nanoCancelAllOrder = ({ cancelType, id }) => {
                 ...buildCancalAllOrderPostData(cancelType, id)
             }
         })
-        console.log(reqMsg)
         const req = buildRepNmsg();
         req.send(reqMsg)
         req.on('data', buf => {
@@ -100,7 +99,7 @@ export const nanoCancelAllOrder = ({ cancelType, id }) => {
             const data = JSON.parse(String(buf))
             if(data.msg_type === msgType.cancelAllOrder) {
                 if(data.status === 200) {
-                    resolve(true)
+                    resolve(data)
                 } else {
                     reject(new Error(''))
                 } 

@@ -192,7 +192,7 @@ export default {
                 
             t.tailObserver = new Tail(logPath, {
                 flushAtEOF: true,
-                useWatchFile: platform === 'mac',
+                useWatchFile: true,
                 follow: true,
             });   
             t.tailObserver.watch();  
