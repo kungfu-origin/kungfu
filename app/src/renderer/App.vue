@@ -17,6 +17,7 @@ import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
 import { getAccountSource } from '__gConfig/accountConfig';
+import { nanoReqGatewayState } from '__io/nano/nanoReq';
 
 
 export default {
@@ -42,6 +43,7 @@ export default {
         this.subAccountCash();
       
         this.reqCalendar();
+        this.reqGatewayState();
     },
 
     destroyed() {
@@ -92,6 +94,11 @@ export default {
             const t = this
             //先主动获取
             t.$store.dispatch('reqCalendar')
+        },
+
+        //获取gatewayState（req后会从subGatewayState中获取）
+        reqGatewayState(){
+            nanoReqGatewayState()
         },
 
         //获取柜台信息

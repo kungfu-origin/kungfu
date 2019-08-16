@@ -1,14 +1,36 @@
 
-import { buildRepNmsg } from '__io/nano/buildNmsg'
+import { buildRepNmsg, buildWatcherRepNmsg } from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
+
+export const nanoReqGatewayState = () => {
+    return new Promise((resolve, reject) => {
+        const reqMsg = JSON.stringify({
+            msg_type: msgType.reqGatewayState,
+            data: {}
+        })
+        const req = buildWatcherRepNmsg();
+        req.send(reqMsg)
+        req.on('data', buf => {
+            req.close();
+            const data = JSON.parse(String(buf));
+            if(data.msg_type === msgType.reqGatewayState ) {
+                if(data.status === 200) {
+                    resolve(data)
+                } else {
+                    reject(new Error('请求gatewayState失败！'))
+                }
+            }
+        })
+    })
+}
 
 //日历
 //主动获得交易日
 export const nanoReqCalendar = () => {
     return new Promise((resolve, reject) => {
         const reqMsg = JSON.stringify({
-            'msg_type': msgType.calendar,
-            'data': {}
+            msg_type: msgType.calendar,
+            data: {}
         });
         const req = buildRepNmsg();
         req.send(reqMsg)
@@ -122,3 +144,4 @@ export const nanoMakeOrder = (gatewayName, makeOrderData) => {
         })
     })
 }
+

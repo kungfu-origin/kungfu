@@ -97,6 +97,9 @@ export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${
 export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'pub.nn')
 
 //获取watcher nano rep 地址
+export const WATCHER_NMSG_REP_FILE = path.join(SYSTEM_DIR, 'watcher', 'watcher', 'nn', 'live', 'rep.nn')
+
+//获取commander nano rep 地址
 export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'commander', 'commander', 'nn', 'live', 'rep.nn')
 
 //================== others end ===================================
