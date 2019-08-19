@@ -9,6 +9,7 @@ tickers = ["600000"]
 price = 11.0
 volume = 300
 exchange = Exchange.SSE
+#exchange = Exchange.SZE
 
 def pre_start(context):
     context.add_account(source, account, 100000000.0)
@@ -30,13 +31,13 @@ def test_time_interval(context, event):
 
 def on_quote(context, quote):
     context.log.info("[on_quote] (ticker){} (last_price){} (trading_day){}".format(quote.instrument_id, quote.last_price, quote.trading_day))
-	if quote.instrument_id in tickers:
-		if (context.count/100) == 0:
-		    #order_id = context.insert_limit_order(ticker, exchange, account, quote.last_price, volume, Side.Buy, Offset.Open)
+    if quote.instrument_id in tickers:
+        if (context.count/100) == 0:
+            #order_id = context.insert_limit_order(ticker, exchange, account, quote.last_price, volume, Side.Buy, Offset.Open)
 		    order_id = context.insert_order(quote.instrument_id, exchange, account, quote.last_price, volume, PriceType.Limit, Side.Buy, Offset.Open)
-		    context.count += 1;
-		    if order_id > 0:
-		        context.log.info("[order] (rid){} (ticker){}".format(order_id, quote.instrument_id))
+            context.count = context.count + 1
+            if order_id > 0:
+                context.log.info("[order] (rid){} (ticker){}".format(order_id, quote.instrument_id))
 
 def on_transaction(context, transaction):
     context.log_info("[on_transaction] {} {}".format(transaction.instrument_id, transaction.exchange_id))
