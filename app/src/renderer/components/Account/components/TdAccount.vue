@@ -183,7 +183,6 @@
 import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
-import * as BASE_API from '__io/db/base';
 import SetAccountDialog from './SetAccountDialog';
 import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';

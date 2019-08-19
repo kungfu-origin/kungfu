@@ -11,7 +11,6 @@ import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
-import * as BASE_API from '__io/db/base';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 

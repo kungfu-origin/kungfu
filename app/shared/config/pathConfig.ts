@@ -58,9 +58,6 @@ export const STRATEGYS_DB = path.join(BASE_DB_DIR, 'strategys.db')
 //accounts(td)
 export const ACCOUNTS_DB = path.join(BASE_DB_DIR, 'accounts.db')
 
-//tasks
-export const TASKS_DB = path.join(BASE_DB_DIR, 'task.db')
-
 //================= global db end =================================
 
 //================= account related start ==========================

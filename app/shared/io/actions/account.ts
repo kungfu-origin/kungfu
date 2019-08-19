@@ -2,7 +2,6 @@ import * as ACCOUNT_API from '__io/db/account';
 import { TD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
-import { setTasksDB, deleteTask } from '__io/db/base';
 
 const path = require('path')
 
@@ -20,10 +19,8 @@ export const deleteAccount = (row: Account, accountList = []): Promise<any> => {
     return removeFileFolder(path.join(TD_DIR, account_id.toAccountId()))
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
     .then(() => deleteProcess('td_' + row.account_id))
-    .then(() => deleteTask(tdProcessId))
     .then(() => {if(receive_md) return removeFileFolder(buildGatewayPath(mdProcessId))})
     .then(() => {if(receive_md) return deleteProcess('md_' + row.source_name)})                     
-    .then(() => {if(receive_md) return deleteTask(mdProcessId)})
     .then(() => ACCOUNT_API.deleteAccount(account_id))//删除账户表中的数据    
     .then(() => {if(receive_md && leftAccounts.length) return ACCOUNT_API.changeAccountMd(leftAccounts[0].account_id, true)})
 }
@@ -34,14 +31,12 @@ export const switchTd = (account: Account, value: boolean): Promise<any> => {
     const tdProcessId: string = `td_${account_id}`
     if(!value){
         return deleteProcess(tdProcessId)
-        .then(() => deleteTask(tdProcessId))
         .then((): MessageData => ({ type: 'success', message: '操作成功！' }))       
         .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))
     }
 
     //改变数据库表内容，添加或修改
-    return setTasksDB({name: tdProcessId, type: 'td', config})   
-    .then(() => startTd(account_id)) //开启td,pm2
+    return startTd(account_id)
     .then((): MessageData => ({ type: 'start', message: '正在启动...' }))       
     .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))
 }
@@ -52,14 +47,12 @@ export const switchMd = (account: Account, value: boolean) => {
     const mdProcessId: string = `md_${source_name}`
     if(!value){
         return deleteProcess(mdProcessId)
-        .then(() => deleteTask(mdProcessId))
         .then((): MessageData => ({ type: 'success', message: '操作成功！' }))       
         .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))
     }
 
     //改变数据库表内容，添加或修改
-    return setTasksDB({name: mdProcessId, type: 'md', config}) 
-    .then(() => startMd(source_name)) //开启td,pm2
+    return startMd(source_name)
     .then((): MessageData => ({ type: 'start', message: '正在启动...' }))       
     .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))     
 }
