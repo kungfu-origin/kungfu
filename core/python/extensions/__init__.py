@@ -59,7 +59,7 @@ if not os.getenv('KF_NO_EXT'):
             EXTENSIONS[ext_name] = extension_path
             package_json_path = os.path.join(extension_path, ext_name, 'package.json')
             if os.path.exists(package_json_path):
-                with open(package_json_path) as package_json_file:
+                with open(package_json_path, encoding='utf-8') as package_json_file:
                     package_json = json.load(package_json_file)
                     if 'kungfuConfig' in package_json and 'config' in package_json['kungfuConfig']:
                         ACCOUNT_SCHEMA[ext_name] = package_json['kungfuConfig']['config']

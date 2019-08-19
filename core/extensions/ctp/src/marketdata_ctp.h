@@ -2,15 +2,14 @@
 // Created by qlu on 2019/1/10.
 //
 
-#ifndef MD_GATEWAY_CTP_H
-#define MD_GATEWAY_CTP_H
-
-#include <string>
-#include <map>
+#ifndef KUNGFU_CTP_EXT_MARKETDATA_H
+#define KUNGFU_CTP_EXT_MARKETDATA_H
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/marketdata.h>
+
+#include "common.h"
 
 #include "ThostFtdcMdApi.h"
 
@@ -75,14 +74,11 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                std::string front_uri_;
-                std::string broker_id_;
-                std::string account_id_;
-                std::string password_;
+                Configuration config_;
                 int request_id_;
                 CThostFtdcMdApi *api_;
             };
         }
     }
 }
-#endif //MD_GATEWAY_CTP_H
+#endif //KUNGFU_CTP_EXT_MARKETDATA_H

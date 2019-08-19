@@ -2,8 +2,8 @@
 // Created by qlu on 2019/1/10.
 //
 
-#ifndef KUNGFU_DATAPARSER_H
-#define KUNGFU_DATAPARSER_H
+#ifndef KUNGFU_XTP_EXT_TYPE_CONVERT_H
+#define KUNGFU_XTP_EXT_TYPE_CONVERT_H
 
 #include <cstdio>
 #include <cstring>
@@ -369,4 +369,4 @@ namespace kungfu
         }
     }
 }
-#endif //KUNGFU_DATAPARSER_H
+#endif //KUNGFU_XTP_EXT_TYPE_CONVERT_H

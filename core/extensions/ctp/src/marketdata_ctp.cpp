@@ -25,11 +25,7 @@ namespace kungfu
             MarketDataCTP::MarketDataCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config) :
                     MarketData(low_latency, std::move(locator), SOURCE_CTP), api_(nullptr), request_id_(0)
             {
-                nlohmann::json config = nlohmann::json::parse(json_config);
-                front_uri_ = config["md_uri"];
-                broker_id_ = config["broker_id"];
-                account_id_ = config["account_id"];
-                password_ = config["password"];
+                config_ = nlohmann::json::parse(json_config);
             }
 
             void MarketDataCTP::on_start()
@@ -43,7 +39,7 @@ namespace kungfu
                     SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
                     api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
                     api_->RegisterSpi(this);
-                    api_->RegisterFront((char *) front_uri_.c_str());
+                    api_->RegisterFront((char *) config_.md_uri.c_str());
                     api_->Init();
                 }
             }
@@ -51,9 +47,9 @@ namespace kungfu
             bool MarketDataCTP::login()
             {
                 CThostFtdcReqUserLoginField login_field = {};
-                strcpy(login_field.UserID, account_id_.c_str());
-                strcpy(login_field.BrokerID, broker_id_.c_str());
-                strcpy(login_field.Password, password_.c_str());
+                strcpy(login_field.UserID, config_.account_id.c_str());
+                strcpy(login_field.BrokerID, config_.broker_id.c_str());
+                strcpy(login_field.Password, config_.password.c_str());
 
                 int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
 

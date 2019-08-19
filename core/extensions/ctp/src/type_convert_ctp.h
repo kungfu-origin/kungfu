@@ -2,16 +2,13 @@
 // Created by qlu on 2019/1/10.
 //
 
-#ifndef KUNGFU_DATAPARSER_H
-#define KUNGFU_DATAPARSER_H
+#ifndef KUNGFU_CTP_EXT_TYPE_CONVERT_H
+#define KUNGFU_CTP_EXT_TYPE_CONVERT_H
 
 #include <stdio.h>
 #include <cstring>
-
 #include "ThostFtdcUserApiStruct.h"
-
 #include <kungfu/yijinjing/time.h>
-
 #include <kungfu/wingchun/msg.h>
 
 namespace kungfu
@@ -20,7 +17,6 @@ namespace kungfu
     {
         namespace ctp
         {
-
             using namespace kungfu::wingchun::msg::data;
 
             inline void to_ctp_comb_offset(TThostFtdcCombOffsetFlagType ctp_offset, const Offset &offset)
@@ -471,4 +467,4 @@ namespace kungfu
         }
     }
 }
-#endif //KUNGFU_DATAPARSER_H
+#endif //KUNGFU_CTP_EXT_TYPE_CONVERT_H
