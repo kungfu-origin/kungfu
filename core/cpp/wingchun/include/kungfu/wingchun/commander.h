@@ -16,7 +16,7 @@ namespace kungfu
         class Commander : public practice::apprentice
         {
         public:
-            explicit Commander(yijinjing::data::locator_ptr locator, bool low_latency = false, const std::string &name = "commander");
+            explicit Commander(yijinjing::data::locator_ptr locator, bool low_latency = false, const std::string &name = "ledger");
 
             virtual ~Commander() = default;
 

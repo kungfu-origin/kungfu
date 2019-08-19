@@ -1,18 +1,26 @@
 from . import *
 
+from sqlalchemy import Column, ForeignKey, Integer, String, Date, Float, Boolean, PrimaryKeyConstraint
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
 Base = declarative_base()
 
-class Task(Base):
-    __tablename__ = 'kungfu_task'
-    name = Column(String, nullable=False, primary_key=True)
-    task_type = Column(String)
+
+class Account(Base):
+    __tablename__ = 'account_config'
+    account_id = Column(String, nullable=False, primary_key=True)
+    source_name = Column(String)
+    receive_md = Column(Boolean)
     config = Column(Json, nullable=False)
+
 
 class Holiday(Base):
     __tablename__ = "holidays"
     __table_args__ = (PrimaryKeyConstraint('region', 'holiday'),)
     region = Column(String)
     holiday = Column(Date)
+
 
 class FutureInstrument(Base):
     __tablename__ = 'future_instrument'
@@ -32,6 +40,7 @@ class FutureInstrument(Base):
     long_margin_ratio = Column(Float)
     short_margin_ratio = Column(Float)
 
+
 class Commission(Base):
     __tablename__ = 'commission'
     __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id', 'instrument_type'),)
@@ -45,6 +54,7 @@ class Commission(Base):
     close_ratio = Column(Float)
     close_today_ratio = Column(Float)
     min_commission = Column(Float)
+
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -94,6 +104,7 @@ class Trade(Base):
     tax = Column(Float)
     commission = Column(Float)
 
+
 class AssetMixin:
     trading_day = Column(String)
     update_time = Column(Integer)
@@ -122,13 +133,16 @@ class AssetMixin:
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
 
+
 class Asset(AssetMixin, Base):
     __tablename__ = "asset"
     __table_args__ = (PrimaryKeyConstraint('account_id','client_id', 'ledger_category'),)
 
+
 class AssetSnapshot(AssetMixin, Base):
     __tablename__ = "asset_snapshot"
     __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id', 'ledger_category', 'update_time'),)
+
 
 class Position(Base):
     __tablename__ = "position"
@@ -177,6 +191,7 @@ class Position(Base):
         for attr in self.__mapper__.columns.keys():
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
+
 
 class PositionDetail(Base):
     __tablename__ = "position_detail"

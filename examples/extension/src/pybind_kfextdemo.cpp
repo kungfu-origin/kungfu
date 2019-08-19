@@ -1,8 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "md_gateway.h"
-#include "td_gateway.h"
+#include "marketdata_demo.h"
+#include "trader_demo.h"
 
 namespace py = pybind11;
 
@@ -11,11 +11,11 @@ using namespace kungfu::wingchun::kfext_demo;
 
 PYBIND11_MODULE(kfextdemo, m)
 {
-    py::class_<MdGateway>(m, "MD")
+    py::class_<MarketDataDemo>(m, "MD")
     .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("run", &MdGateway::run);
+    .def("run", &MarketDataDemo::run);
 
-    py::class_<TdGateway>(m, "TD")
+    py::class_<TraderDemo>(m, "TD")
     .def(py::init<bool, locator_ptr, std::map<std::string, std::string>&, std::map<std::string, int>&, std::map<std::string, double>&>())
-    .def("run", &TdGateway::run);
+    .def("run", &TraderDemo::run);
 }

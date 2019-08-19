@@ -7,21 +7,22 @@
 
 #include <kungfu/yijinjing/io.h>
 
-#include "marketdata.h"
-#include "trader.h"
+#include "marketdata_sim.h"
+#include "trader_sim.h"
 
 namespace py = pybind11;
 
 using namespace kungfu::yijinjing::data;
-using namespace kungfu::wingchun::passive;
+using namespace kungfu::wingchun::sim;
 
-PYBIND11_MODULE(kfext_sim, m) {
-py::class_<PassiveMarketData, kungfu::practice::apprentice, std::shared_ptr<PassiveMarketData>>(m, "MD")
-.def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-.def("run", &PassiveMarketData::run);
+PYBIND11_MODULE(kfext_sim, m)
+{
+    py::class_<MarketDataSim, kungfu::practice::apprentice, std::shared_ptr<MarketDataSim>>(m, "MD")
+            .def(py::init<bool, locator_ptr, const std::string &>())
+            .def("run", &MarketDataSim::run);
 
-py::class_<PassiveTrader, kungfu::practice::apprentice, std::shared_ptr<PassiveTrader>>(m, "TD")
-.def(py::init<bool, locator_ptr, std::map<std::string, std::string> &, std::map<std::string, int> &, std::map<std::string, double> &>())
-.def("run", &PassiveTrader::run);
+    py::class_<TraderSim, kungfu::practice::apprentice, std::shared_ptr<TraderSim>>(m, "TD")
+            .def(py::init<bool, locator_ptr, const std::string &, const std::string &>())
+            .def("run", &TraderSim::run);
 }
 

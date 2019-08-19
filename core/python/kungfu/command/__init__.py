@@ -109,3 +109,7 @@ def pass_ctx_from_parent(ctx):
 
 def execute():
     kfc(auto_envvar_prefix='KF')
+
+
+def get_account(ctx, source, account):
+    return

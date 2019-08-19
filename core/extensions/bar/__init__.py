@@ -1,4 +1,4 @@
-from . import ${PROJECT_NAME} as kfext_bar
+from . import kfext_bar
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 import pyyjj

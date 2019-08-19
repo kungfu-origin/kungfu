@@ -205,14 +205,14 @@ export const startWatcher = async(force: boolean): Promise<void> => {
 }
 
 export const startCommander = async(force: boolean): Promise<void> => {
-    const processName = 'commander';
+    const processName = 'ledger';
     const commander = await describeProcess(processName);
     if(commander instanceof Error) throw commander
     const watcherStatus = commander.filter((m: any): boolean => m.pm2_env.status === 'online')
-    if(!force && watcherStatus.length === commander.length && commander.length !== 0) throw new Error('kungfu commander 正在运行！')
+    if(!force && watcherStatus.length === commander.length && commander.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
-        'args': 'commander'
+        'args': 'ledger'
     }).catch(err => logger.error(err))
 }
 
