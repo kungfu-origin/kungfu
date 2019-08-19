@@ -8,7 +8,7 @@
     @close="handleClose"
     >
         <el-form class="fee-setting-form" :model="feeSettingForm" ref="feeSettingForm" label-width="90px" size="mini">
-            <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="index" size="mini">
+            <el-card v-for="(feeSetting, index) in feeSettingForm.fees" :key="`${feeSetting.instrument_id}_${index}`" size="mini">
                 <div slot="header">
                     <span>{{feeSetting.default ? '默认' : (feeSetting.instrument_id || '新费率设置')}}</span>
                     <el-button v-if="accountType !== 'stock'" class="fee-setting-oper" size="mini" @click="handleAddFeeSetting(index)" icon="el-icon-plus" title="添加"></el-button>            
