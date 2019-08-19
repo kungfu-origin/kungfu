@@ -184,37 +184,30 @@ export const startMaster = async(force: boolean): Promise<void> => {
     if(master instanceof Error) throw master
     const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
     if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
-    try{ await killKfc() } catch (err) {}
+    try{ 
+        await killKfc()
+    } catch (err) {
+        console.error(err)
+    }
     return startProcess({
         "name": processName,
         "args": "-l trace master"
     }, true).catch(err => logger.error(err))
 }
 
-//启动watcher
-export const startWatcher = async(force: boolean): Promise<void> => {
-    const processName = 'watcher';
-    const watcher = await describeProcess(processName);
-    if(watcher instanceof Error) throw watcher
-    const watcherStatus = watcher.filter((m: any): boolean => m.pm2_env.status === 'online')
-    if(!force && watcherStatus.length === watcher.length && watcher.length !== 0) throw new Error('kungfu watcher 正在运行！')
+//启动ledger
+export const startLedger = async(force: boolean): Promise<void> => {
+    const processName = 'ledger';
+    const ledger = await describeProcess(processName);
+    if(ledger instanceof Error) throw ledger
+    const ledgerStatus = ledger.filter((m: any): boolean => m.pm2_env.status === 'online')
+    if(!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
-        'args': '-l trace watcher'
+        'args': '-l trace ledger'
     }).catch(err => logger.error(err))
 }
 
-export const startCommander = async(force: boolean): Promise<void> => {
-    const processName = 'ledger';
-    const commander = await describeProcess(processName);
-    if(commander instanceof Error) throw commander
-    const watcherStatus = commander.filter((m: any): boolean => m.pm2_env.status === 'online')
-    if(!force && watcherStatus.length === commander.length && commander.length !== 0) throw new Error('kungfu ledger 正在运行！')
-    return startProcess({
-        'name': processName,
-        'args': 'ledger'
-    }).catch(err => logger.error(err))
-}
 
 //启动md
 export const startMd = (source: string): Promise<void> => {

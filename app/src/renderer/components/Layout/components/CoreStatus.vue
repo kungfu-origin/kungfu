@@ -9,7 +9,7 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item core-process-title text-overflow" title="主进程">
-                        主控进程  <el-tag type="warning">master</el-tag>
+                        主控进程  <el-tag type="warning">Master</el-tag>
                     </span>
                     <span class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
@@ -25,32 +25,16 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item  core-process-title text-overflow" title="数据进程">
-                        数据进程 <el-tag>watcher</el-tag>
+                        数据进程 <el-tag>Ledger</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('watcher', processStatus)"
-                        :value="buildState('watcher')"></tr-status>
+                        v-if="$utils.ifProcessRunning('ledger', processStatus)"
+                        :value="buildState('ledger')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                      <span class="core-process-item get-log">
-                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('watcher.log')" ></i>
-                    </span>
-                </div>
-            </div>
-            <div class="core-item" >
-                <div class="core-status">
-                    <span class="core-process-item  core-process-title text-overflow" title="指令进程">
-                        指令进程 <el-tag>commander</el-tag>
-                    </span>
-                    <span  class="core-process-item text-overflow" style="width: 71px;">
-                        <tr-status 
-                        v-if="$utils.ifProcessRunning('commander', processStatus)"
-                        :value="buildState('commander')"></tr-status>
-                        <tr-status v-else></tr-status>
-                    </span>
-                     <span class="core-process-item get-log">
-                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('commander.log')" ></i>
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('ledger.log')" ></i>
                     </span>
                 </div>
             </div>
@@ -77,7 +61,7 @@ export default {
             statusLevel[key] = statusConfig[key].level;
         })
         this.nasterErrController = false;
-        this.watcherErrController = false;
+        this.ledgerErrController = false;
         return {
             statusLevel
         }
@@ -109,18 +93,10 @@ export default {
                 return 'color-red'
             }
 
-            if(!ifProcessRunning('watcher', t.processStatus)){
-                if(!t.watcherErrController && !!t.processStatus['watcher']){
+            if(!ifProcessRunning('ledger', t.processStatus)){
+                if(!t.ledgerErrController && !!t.processStatus['ledger']){
                     t.$message.error('数据进程断开，交易数据将会丢失，请重启应用！', 0)
-                    t.watcherErrController = true;  
-                }
-                return 'color-red'
-            }
-
-             if(!ifProcessRunning('commander', t.processStatus)){
-                if(!t.watcherErrController && !!t.processStatus['commander']){
-                    t.$message.error('指令进程断开，无法发起主动指令，请重启应用！', 0)
-                    t.watcherErrController = true;  
+                    t.ledgerErrController = true;  
                 }
                 return 'color-red'
             }

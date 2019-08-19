@@ -1,4 +1,4 @@
-import { NMSG_PUB_FILE, NMSG_REP_FILE, WATCHER_NMSG_REP_FILE } from '__gConfig/pathConfig';
+import { NMSG_PUB_FILE, NMSG_REP_FILE } from '__gConfig/pathConfig';
 const nano = require('kungfu-core').nanomsg;
 /**
  * 重新开启nano，必须把之前的nano close掉，为了防止重复监听
@@ -21,7 +21,7 @@ export const buildRepNmsg = () => {
 
 export const buildWatcherRepNmsg = () => {
     const req = nano.socket('req');
-    const addr = `ipc://${WATCHER_NMSG_REP_FILE}`;
+    const addr = `ipc://${NMSG_REP_FILE}`;
     req.connect(addr)
     return req
 }
