@@ -1,5 +1,4 @@
 import json
-import pyyjj
 from kungfu.wingchun import msg
 
 

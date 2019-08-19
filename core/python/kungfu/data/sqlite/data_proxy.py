@@ -24,6 +24,16 @@ class AccountsDB(SessionFactoryHolder):
         with session_scope(self.session_factory) as session:
             return [object_as_dict(obj) for obj in session.query(Account).all()]
 
+    def find_account(self, account_id):
+        with session_scope(self.session_factory) as session:
+            account = session.query(Account).filter(Account.account_id == account_id).first()
+            return object_as_dict(account)
+
+    def list_source_accounts(self, source_name):
+        with session_scope(self.session_factory) as session:
+            accounts = session.query(Account).filter(Account.source_name == source_name)
+            return [object_as_dict(obj) for obj in accounts]
+
     def get_td_account_config(self, source_name, account_id):
         with session_scope(self.session_factory) as session:
             account = session.query(Account).filter(Account.source_name == source_name and Account.account_id == account_id).first()
@@ -33,6 +43,20 @@ class AccountsDB(SessionFactoryHolder):
         with session_scope(self.session_factory) as session:
             account = session.query(Account).filter(Account.source_name == source_name and Account.receive_md).first()
             return json.dumps(object_as_dict(account)['config'])
+
+    def reset_receive_md(self):
+        with session_scope(self.session_factory) as session:
+            for obj in session.query(Account):
+                obj.receive_md = False
+                session.merge(obj)
+
+    def add_account(self, **kwargs):
+        with session_scope(self.session_factory) as session:
+            session.merge(Account(**kwargs))
+
+    def delete_account(self, account_id):
+        with session_scope(self.session_factory) as session:
+            session.query(Account).filter(Account.account_id == account_id).delete()
 
 
 class CalendarDB(SessionFactoryHolder):
