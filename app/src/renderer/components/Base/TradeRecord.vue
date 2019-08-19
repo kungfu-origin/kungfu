@@ -125,19 +125,18 @@ export default {
             deep: true,
             handler() {
                 const t = this;
-                t.currentId && t.init(true)
+                if(t.currentId) t.init();
             }
         },
         
         currentId(val) {
             const t = this;
             t.resetData();
-            if(!val) return;
-            t.rendererTable = false;
-            t.$nextTick().then(() => {
-                t.rendererTable = true;
-                t.init();
-            })
+            if(val) t.init();
+            // t.rendererTable = false;
+            // t.$nextTick().then(() => {
+                // t.rendererTable = true;
+            // })
         },
 
         //接收推送返回的数据
@@ -153,14 +152,14 @@ export default {
         const t = this;
         t.rendererTable = true;
         t.resetData();
-        t.currentId && t.init();
+        if(t.currentId) t.init();
     },
 
     methods:{
         handleRefresh(){
             const t = this;
             t.resetData();
-            t.currentId && t.init();
+            if(t.currentId) t.init();
         },
 
         //选择日期以及保存

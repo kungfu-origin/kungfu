@@ -47,18 +47,18 @@ cmake (>3.12)
 
 功夫编译依赖 [Node.js](https://nodejs.org)，建议预先进行如下设置加速依赖包的下载：
 ```
-$ npm config set registry https://registry.npm.taobao.org
-$ npm config set puppeteer_download_host https://npm.taobao.org/mirrors
-$ npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
-$ npm config set sass-binary-site https://npm.taobao.org/mirrors/node-sass
+npm config set registry https://registry.npm.taobao.org
+npm config set puppeteer_download_host https://npm.taobao.org/mirrors
+npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
+npm config set sass-binary-site https://npm.taobao.org/mirrors/node-sass
 ```
 
 #### MacOSX
 
 ```
-$ brew install git cmake node@10
-$ npm install -g yarn electron-builder
-$ pip install pipenv
+brew install git cmake node@10
+npm install -g yarn electron-builder
+pip install pipenv
 ```
 
 #### Windows

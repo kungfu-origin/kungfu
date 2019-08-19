@@ -86,15 +86,16 @@ export default {
 
     
     mounted() {
-        this.rendererPnl = true;
-        if(this.currentId) this.getMinData();
+        const t = this;
+        t.rendererPnl = true;
+        t.resetData();
+        if(t.currentId) t.getMinData();
     },
 
     watch: {
         currentId(val) {
-            if(!val)return;
             this.resetData();
-            this.getMinData()
+            if(val) this.getMinData();
         },
 
         value(val) {
@@ -113,9 +114,10 @@ export default {
 
         //检测交易日的变化，当变化的时候，重新获取数据
         'calendar.trading_day'(val, oldVal) {
-            if(!oldVal && !val && !this.currentId) return;
-            this.resetData();
-            this.getMinData();
+            const t = this;
+            if(!oldVal && !val && !t.currentId) return;
+            t.resetData();
+            if(t.currentId) t.getMinData();
         }
     },
 

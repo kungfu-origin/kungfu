@@ -72,9 +72,10 @@ export default {
 
     mounted() {
         const t = this
-        if(t.currentId) t.getDayData()
+        t.resetData();
+        if(t.currentId) t.getDayData();
         window.addEventListener("resize", () => { 
-            t.myChart && t.myChart.resize()
+            t.myChart && t.myChart.resize();
         })
     },
 
@@ -105,10 +106,10 @@ export default {
         },
 
         currentId(val) {
-            const t = this
+            const t = this;
             t.resetData();
-            if(!val) return;
-            t.getDayData()            
+            if(val) t.getDayData();
+                     
         },
 
         dayPnlData(newVal, oldVal){

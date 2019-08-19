@@ -157,19 +157,14 @@ export default {
         currentId(val) {
             const t = this;
             t.resetData();
-            if(!val) return;
-            t.rendererTable = false;
-            t.$nextTick().then(() => {
-                t.rendererTable = true;
-                t.init()
-            })
+            if(val) t.init();
         },
 
         filter:{
             deep: true,
             handler() {
                 const t = this;
-                t.currentId && t.init(true)
+                t.currentId && t.init()
             }
         },
 
