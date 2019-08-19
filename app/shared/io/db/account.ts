@@ -137,6 +137,7 @@ export const getAccountPnlMin = (accountId: string, tradingDay: string) => {
     if(!tradingDay) throw new Error('无交易日！')
     if(!accountId) return new Promise(resolve => resolve([]))
     accountId = accountId.toAccountId();
+    tradingDay = moment(tradingDay).format('YYYYMMDD');
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM asset_snapshot` + 

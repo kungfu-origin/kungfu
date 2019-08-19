@@ -72,7 +72,6 @@ export default {
 
     mounted() {
         const t = this
-        t.resetData();
         if(t.currentId) t.getDayData();
         window.addEventListener("resize", () => { 
             t.myChart && t.myChart.resize();

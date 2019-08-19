@@ -129,7 +129,9 @@ export const getStrategyPos = (strategyId: string, { instrumentId }: TradingData
  * 获取某策略下收益曲线分钟线
  */
 export const getStrategyPnlMin = (strategyId: string, tradingDay: string) => {
-    if(!tradingDay) throw new Error('无交易日！')
+    if(!tradingDay) throw new Error('无交易日！');
+    if(!strategyId) return new Promise(resolve => resolve([]))
+    tradingDay = moment(tradingDay).format('YYYYMMDD');
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM asset_snapshot` + 

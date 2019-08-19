@@ -116,7 +116,7 @@ export default {
         'calendar.trading_day'(val, oldVal) {
             const t = this;
             if(!oldVal && !val && !t.currentId) return;
-            t.resetData();
+            this.resetData();            
             if(t.currentId) t.getMinData();
         }
     },
