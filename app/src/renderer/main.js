@@ -83,6 +83,7 @@ startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
     startLedger(false)
+    .catch(err => console.error(err))
     .finally(() => startGetProcessStatus())
 })
 

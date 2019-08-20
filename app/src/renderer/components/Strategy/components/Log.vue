@@ -268,10 +268,12 @@ export default {
         renderCellClass(prop, item){
             const t = this;
             if(prop === 'type') {
-                if( item.type === 'error' || item.type === 'warning' || item.type === 'critical'){
-                    return this.logColor[item.type]
-                }
+                return t.logColor[item.type] || ''
             }
+            if(item.type === 'error' || item.type === 'critical') {
+                return t.logColor[item.type]
+            }
+            
         },
     }
 }
