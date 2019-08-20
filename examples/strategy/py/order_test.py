@@ -21,7 +21,8 @@ def on_quote(context, quote):
 
 def insert_order(context, nano):
     context.log.info("before insert order")
-    order_id = context.insert_limit_order(ticker, exchange, account, price, volume, Side.Buy, Offset.Open)
+    #order_id = context.insert_limit_order(ticker, exchange, account, price, volume, Side.Buy, Offset.Open)
+    order_id = context.insert_order(ticker, exchange, account, price, volume, PriceType.Limit, Side.Buy, Offset.Open)
     if order_id > 0:
         context.log.info("insert order")
         #context.log.warning("insert market order: [order_id] {} [account] {}".format(order_id, "15040900"))

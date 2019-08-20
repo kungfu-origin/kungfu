@@ -103,83 +103,59 @@ namespace kungfu
                 }
             }
 
-            inline void to_ctp_price_type(TThostFtdcOrderPriceTypeType &des, const PriceType &ori)
+            inline void to_ctp_price_type(TThostFtdcOrderPriceTypeType &price_type, TThostFtdcVolumeConditionType &volume_condition, TThostFtdcTimeConditionType &time_condition, const PriceType &ori)
             {
                 if (ori == PriceType::Limit)
                 {
-                    des = THOST_FTDC_OPT_LimitPrice;
-                } else if (ori == PriceType::Any)
-                {
-                    des = THOST_FTDC_OPT_AnyPrice;
+                    price_type = THOST_FTDC_OPT_LimitPrice;
+                    volume_condition = THOST_FTDC_VC_AV;
+                    time_condition = THOST_FTDC_TC_GFD;
                 }
+                else if (ori == PriceType::Any)
+                {
+                    price_type = THOST_FTDC_OPT_AnyPrice;
+                    volume_condition = THOST_FTDC_VC_AV;
+                    time_condition = THOST_FTDC_TC_IOC;
+                }
+                else if (ori == PriceType::Fak)
+                {
+                    price_type = THOST_FTDC_OPT_LimitPrice;
+                    volume_condition = THOST_FTDC_VC_AV;
+                    time_condition = THOST_FTDC_TC_IOC;
+                }
+                else if (ori == PriceType::Fok)
+                {
+                    price_type = THOST_FTDC_OPT_LimitPrice;
+                    volume_condition = THOST_FTDC_VC_CV;
+                    time_condition = THOST_FTDC_TC_IOC;
+                }
+
             }
 
-            inline void from_ctp_price_type(const TThostFtdcOrderPriceTypeType &ori, PriceType &des)
+            inline void from_ctp_price_type(const TThostFtdcOrderPriceTypeType &price_type, const TThostFtdcVolumeConditionType &volume_condition, const TThostFtdcTimeConditionType &time_condition, PriceType &des)
             {
-                if (ori == THOST_FTDC_OPT_LimitPrice)
+                if (price_type == THOST_FTDC_OPT_LimitPrice)
                 {
-                    des = PriceType::Limit;
-                } else if (ori == THOST_FTDC_OPT_AnyPrice)
+                    if (time_condition == THOST_FTDC_TC_GFD)
+                    {
+                        des = PriceType::Limit;
+                    }
+                    else if(time_condition == THOST_FTDC_TC_IOC)
+                    {
+                        if (volume_condition == THOST_FTDC_VC_AV)
+                        {
+                            des = PriceType::Fak;
+                        } else
+                        {
+                            des = PriceType::Fok;
+                        }
+                    }
+                } else if (price_type == THOST_FTDC_OPT_AnyPrice)
                 {
                     des = PriceType::Any;
                 }
             }
 
-            inline void to_ctp_volume_condition(TThostFtdcVolumeConditionType &des, const VolumeCondition &ori)
-            {
-                if (ori == VolumeCondition::Any)
-                {
-                    des = THOST_FTDC_VC_AV;
-                } else if (ori == VolumeCondition::Min)
-                {
-                    des = THOST_FTDC_VC_MV;
-                } else if (ori == VolumeCondition::All)
-                {
-                    des = THOST_FTDC_VC_CV;
-                }
-            }
-
-            inline void from_ctp_volume_condition(const TThostFtdcVolumeConditionType &ori, VolumeCondition &des)
-            {
-                if (ori == THOST_FTDC_VC_AV)
-                {
-                    des = VolumeCondition::Any;
-                } else if (ori == THOST_FTDC_VC_MV)
-                {
-                    des = VolumeCondition::Min;
-                } else if (ori == THOST_FTDC_VC_CV)
-                {
-                    des = VolumeCondition::All;
-                }
-            }
-
-            inline void to_ctp_time_condition(TThostFtdcTimeConditionType &des, const TimeCondition &ori)
-            {
-                if (ori == TimeCondition::GFD)
-                {
-                    des = THOST_FTDC_TC_GFD;
-                } else if (ori == TimeCondition::IOC)
-                {
-                    des = THOST_FTDC_TC_IOC;
-                } else if (ori == TimeCondition::GTC)
-                {
-                    des = THOST_FTDC_TC_GTC;
-                }
-            }
-
-            inline void from_ctp_time_condition(const TThostFtdcTimeConditionType &ori, TimeCondition &des)
-            {
-                if (ori == THOST_FTDC_TC_IOC)
-                {
-                    des = TimeCondition::IOC;
-                } else if (ori == THOST_FTDC_TC_GFD)
-                {
-                    des = TimeCondition::GFD;
-                } else if (ori == THOST_FTDC_TC_GTC)
-                {
-                    des = TimeCondition::GTC;
-                }
-            }
 
             inline void from_ctp_order_status(const TThostFtdcOrderStatusType &order_status, const TThostFtdcOrderSubmitStatusType &submit_status,
                                               OrderStatus &des)
@@ -308,13 +284,11 @@ namespace kungfu
                 des.CombHedgeFlag[0] = THOST_FTDC_HF_Speculation;
                 des.VolumeTotalOriginal = ori.volume;
                 des.ContingentCondition = THOST_FTDC_CC_Immediately;
-                to_ctp_volume_condition(des.VolumeCondition, ori.volume_condition);
-                to_ctp_time_condition(des.TimeCondition, ori.time_condition);
+                to_ctp_price_type(des.OrderPriceType , des.VolumeCondition, des.TimeCondition, ori.price_type);
                 des.MinVolume = 1;
                 des.ForceCloseReason = THOST_FTDC_FCC_NotForceClose;
                 des.IsAutoSuspend = 0;
                 des.UserForceClose = 0;
-                to_ctp_price_type(des.OrderPriceType, ori.price_type);
                 des.LimitPrice = ori.limit_price;
             }
 
@@ -330,9 +304,7 @@ namespace kungfu
                 from_ctp_direction(ori.Direction, des.side);
                 from_ctp_comb_offset(ori.CombOffsetFlag, des.offset);
                 des.volume = ori.VolumeTotalOriginal;
-                from_ctp_volume_condition(ori.VolumeCondition, des.volume_condition);
-                from_ctp_time_condition(ori.TimeCondition, des.time_condition);
-                from_ctp_price_type(ori.OrderPriceType, des.price_type);
+                from_ctp_price_type(ori.OrderPriceType, ori.VolumeCondition, ori.TimeCondition, des.price_type);
                 des.limit_price = ori.LimitPrice;
             }
 
@@ -345,10 +317,8 @@ namespace kungfu
                 from_ctp_comb_offset(ori.CombOffsetFlag, des.offset);
                 from_ctp_order_status(ori.OrderStatus, ori.OrderSubmitStatus, des.status);
                 from_ctp_direction(ori.Direction, des.side);
-                from_ctp_volume_condition(ori.VolumeCondition, des.volume_condition);
-                from_ctp_time_condition(ori.TimeCondition, des.time_condition);
+                from_ctp_price_type(ori.OrderPriceType, ori.VolumeCondition, ori.TimeCondition, des.price_type);
                 des.limit_price = ori.LimitPrice;
-                from_ctp_price_type(ori.OrderPriceType, des.price_type);
                 strcpy(des.trading_day, ori.TradingDay);
                 des.volume = ori.VolumeTotalOriginal;
                 des.volume_left = ori.VolumeTotal;
