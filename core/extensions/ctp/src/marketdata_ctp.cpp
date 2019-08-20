@@ -25,6 +25,7 @@ namespace kungfu
             MarketDataCTP::MarketDataCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config) :
                     MarketData(low_latency, std::move(locator), SOURCE_CTP), api_(nullptr), request_id_(0)
             {
+                yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
                 config_ = nlohmann::json::parse(json_config);
             }
 

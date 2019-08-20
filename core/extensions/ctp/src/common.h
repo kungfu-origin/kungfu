@@ -34,8 +34,8 @@ namespace kungfu
                 j.at("broker_id").get_to(c.broker_id);
                 j.at("password").get_to(c.password);
                 j.at("auth_code").get_to(c.auth_code);
-                j.at("product_info").get_to(c.product_info);
                 j.at("app_id").get_to(c.app_id);
+                c.product_info = j.value("product_info", "");
             }
 
             inline std::string disconnected_reason(int reason)

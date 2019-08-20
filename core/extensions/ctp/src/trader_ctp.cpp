@@ -23,6 +23,7 @@ namespace kungfu
             TraderCTP::TraderCTP(bool low_latency, data::locator_ptr locator, const std::string &account_id, const std::string &json_config) :
                     Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1),order_ref_(-1), request_id_(0), api_(nullptr)
             {
+                yijinjing::log::copy_log_settings(get_io_device()->get_home(), account_id);
                 config_ =  nlohmann::json::parse(json_config);
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
                 trade_mapper_ = std::make_shared<TradeMapper>(get_app_db_file("trade_mapper"));
@@ -79,7 +80,10 @@ namespace kungfu
                 struct CThostFtdcReqAuthenticateField req = {};
                 strcpy(req.UserID, config_.account_id.c_str());
                 strcpy(req.BrokerID, config_.broker_id.c_str());
-                strcpy(req.UserProductInfo, config_.product_info.c_str());
+                if (config_.product_info.length() > 0)
+                {
+                    strcpy(req.UserProductInfo, config_.product_info.c_str());
+                }
                 strcpy(req.AppID, config_.app_id.c_str());
                 strcpy(req.AuthCode, config_.auth_code.c_str());
                 int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
@@ -114,6 +118,11 @@ namespace kungfu
                 strcpy(req.BrokerID, config_.broker_id.c_str());
                 strcpy(req.InvestorID, config_.account_id.c_str());
                 int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
+                if (rtn != 0)
+                {
+                    LOGIN_ERROR("failed to req position detail");
+                }
+
                 return rtn == 0;
             }
 
@@ -398,10 +407,11 @@ namespace kungfu
                         }
                         writer->close_data();
                     }
-                    if (bIsLast)
-                    {
-                        writer->mark(0, msg::type::PositionDetailEnd);
-                    }
+                }
+                if (bIsLast)
+                {
+                    POSITION_DETAIL_TRACE(fmt::format("PositionDetailEnd, RequestID {}", nRequestID));
+                    get_writer(0)->mark(0, msg::type::PositionDetailEnd);
                 }
             }
 

@@ -374,7 +374,7 @@ namespace kungfu
             {
                 nlohmann::json j;
                 to_json(j, ori);
-                return j.dump();
+                return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);;
             }
         }
     }
