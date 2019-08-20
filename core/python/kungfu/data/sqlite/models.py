@@ -3,6 +3,7 @@ from . import *
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, Float, Boolean, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+import time
 
 Base = declarative_base()
 
@@ -129,10 +130,11 @@ class AssetMixin:
     close_pnl = Column(Float)
 
     def __init__(self, **kwargs):
+        if not "update_time" in kwargs:
+            kwargs["update_time"] = int(round(time.time() * 1000000000))
         for attr in self.__mapper__.columns.keys():
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
-
 
 class Asset(AssetMixin, Base):
     __tablename__ = "asset"
