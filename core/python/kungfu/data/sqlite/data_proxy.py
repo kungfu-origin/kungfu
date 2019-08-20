@@ -146,7 +146,7 @@ class LedgerDB(SessionFactoryHolder):
                 args = object_as_dict(asset_obj)
                 positions = self.get_positions(session, ledger_category, account_id, client_id)
                 args.update({"positions": positions, "ledger_category": ledger_category})
-                return Ledger(ctx = None, **args)
+                return AccountBook(ctx=None, **args)
 
     def dump(self, ledger):
         with session_scope(self.session_factory) as  session:
