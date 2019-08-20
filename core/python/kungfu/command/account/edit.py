@@ -12,7 +12,7 @@ def edit(ctx, receive_md, id):
     account_id = ctx.source + '_' + id
     account_data = ctx.db.find_account(account_id)
     if account_data:
-        answers = encrypt(prompt(make_questions(ctx.schema, account_data['config'])))
+        answers = encrypt(ctx.schema, prompt(make_questions(ctx.schema, account_data['config'])))
         receive_md = receive_md or account_data['receive_md']
         if receive_md:
             ctx.db.reset_receive_md()

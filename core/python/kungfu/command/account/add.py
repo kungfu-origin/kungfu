@@ -8,7 +8,7 @@ from PyInquirer import prompt
 @click.pass_context
 def add(ctx, receive_md):
     pass_ctx_from_parent(ctx)
-    answers = encrypt(prompt(make_questions(ctx.schema)))
+    answers = encrypt(ctx.schema, prompt(make_questions(ctx.schema)))
     account_id = ctx.source + '_' + answers[ctx.schema['key']]
     if find_account(ctx, account_id):
         click.echo('Duplicate account')

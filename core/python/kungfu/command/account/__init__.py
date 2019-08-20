@@ -3,7 +3,6 @@ import codecs
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, ACCOUNT_SCHEMA
-from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import AccountsDB
 
 
@@ -45,12 +44,19 @@ def make_questions(schema, defaults={}):
             'validate': lambda value: check(value, config)
         }
         if config['key'] in defaults:
-            question['default'] = defaults[config['key']]
+            question['default'] = str(defaults[config['key']])
         return question
     return map(make_question, schema['config'])
 
 
-def encrypt(answers):
-    # if 'password' in answers:
-    #     answers['password'] = codecs.encode(answers['password'], 'rot13')
-    return answers
+def encrypt(schema, answers):
+    type_config = {}
+    for s in schema['config']:
+        type_config[s['key']] = s['type']
+    encrypted_answers = {}
+    for key in answers:
+        if type_config[key] == 'int':
+            encrypted_answers[key] = int(answers[key])
+        else:
+            encrypted_answers[key] = answers[key]
+    return encrypted_answers
