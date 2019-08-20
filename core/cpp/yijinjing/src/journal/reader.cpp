@@ -53,9 +53,14 @@ namespace kungfu
 
             void reader::disjoin(const uint32_t location_uid)
             {
+                current_.reset();
                 journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
                                                [&](journal_ptr j)
                                                { return j->location_->uid == location_uid || j->dest_id_ == location_uid; }), journals_.end());
+                if (not journals_.empty())
+                {
+                    current_ = journals_.back();
+                }
                 sort();
             }
 
