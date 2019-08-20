@@ -2,16 +2,14 @@
 // Created by qlu on 2019/1/14.
 //
 
-#ifndef TD_GATEWAY_CTP_H
-#define TD_GATEWAY_CTP_H
-
-#include <string>
-#include <map>
+#ifndef KUNGFU_CTP_EXT_TRADER_H
+#define KUNGFU_CTP_EXT_TRADER_H
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/trader.h>
 
+#include "common.h"
 #include "order_mapper.h"
 #include "trade_mapper.h"
 
@@ -33,10 +31,7 @@ namespace kungfu
 
                 ~TraderCTP() {};
 
-                virtual const std::string &get_account_id() const
-                { return account_id_; }
-
-                virtual const AccountType get_account_type() const
+                const AccountType get_account_type() const override
                 { return AccountType::Future; }
 
                 bool insert_order(const yijinjing::event_ptr& event) override;
@@ -91,13 +86,7 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                std::string front_uri_;
-                std::string broker_id_;
-                std::string account_id_;
-                std::string password_;
-                std::string auth_code_;
-                std::string product_info_;
-                std::string app_id_;
+                Configuration config_;
 
                 int front_id_;
                 int session_id_;
@@ -122,4 +111,4 @@ namespace kungfu
         }
     }
 }
-#endif //TD_GATEWAY_CTP_H
+#endif //KUNGFU_CTP_EXT_TRADER_H

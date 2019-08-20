@@ -10,14 +10,14 @@
                     "key": "account_id",
                     "name": "account_id",
                     "type": "str",
-                    "errMsg": "请填写用户account_id！",
+                    "errMsg": "请填写账户[account_id]",
                     "required": true
                 },
                 {
                     "key": "password",
                     "name": "password",
                     "type": "password",
-                    "errMsg": "请填写password！",
+                    "errMsg": "请填写密码[password]",
                     "required": true,
                     "validator": ["blankValidator"]
                 },
@@ -25,14 +25,14 @@
                     "key": "broker_id",
                     "name": "broker_id",
                     "type": "str",
-                    "errMsg": "请填写broker_id！",
+                    "errMsg": "请填写[broker_id]",
                     "required": true
                 },
                 {
                     "key": "md_uri",
                     "name": "md_uri",
                     "type": "str",
-                    "errMsg": "请填写md_uri！",
+                    "errMsg": "请填写行情地址[md_uri]",
                     "required": true,
                     "validator": ["tcpUriValidator"]
                 },
@@ -40,7 +40,7 @@
                     "key": "td_uri",
                     "name": "td_uri",
                     "type": "str",
-                    "errMsg": "请填写td_uri！",
+                    "errMsg": "请填写交易地址[td_uri]",
                     "required": true,
                     "validator": ["tcpUriValidator"]
                 }

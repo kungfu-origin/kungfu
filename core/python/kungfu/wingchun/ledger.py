@@ -10,6 +10,7 @@ from kungfu.data.sqlite.data_proxy import LedgerDB
 from kungfu.wingchun import msg
 from kungfu.wingchun.finance.book import *
 from kungfu.wingchun.finance.position import *
+from kungfu.wingchun.calendar import Calendar
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
@@ -38,6 +39,7 @@ class Ledger(pywingchun.Ledger):
         pywingchun.Ledger.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
         self.ctx = ctx
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
+        self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
         self.ctx.orders = {}
 

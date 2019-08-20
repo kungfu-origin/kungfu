@@ -2,10 +2,7 @@
 // Created by qlu on 2019/1/14.
 //
 
-#include <cstring>
-#include <fstream>
 #include <chrono>
-#include <algorithm>
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/macro.h>
@@ -13,7 +10,6 @@
 #include "trader_ctp.h"
 #include "serialize_ctp.h"
 #include "type_convert_ctp.h"
-#include "common.h"
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun::msg::data;
@@ -25,20 +21,9 @@ namespace kungfu
         namespace ctp
         {
             TraderCTP::TraderCTP(bool low_latency, data::locator_ptr locator, const std::string &account_id, const std::string &json_config) :
-                    Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), api_(nullptr)
+                    Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1),order_ref_(-1), request_id_(0), api_(nullptr)
             {
-                nlohmann::json config = nlohmann::json::parse(json_config);
-                front_uri_ = config["td_uri"];
-                broker_id_ = config["broker_id"];
-                account_id_ = config["account_id"];
-                password_ = config["password"];
-                auth_code_ = config["auth_code"];
-                product_info_ = config["product_info"];
-                app_id_ = config["app_id"];
-                front_id_ = -1;
-                session_id_ = -1;
-                order_ref_ = -1;
-                request_id_ = 0;
+                config_ =  nlohmann::json::parse(json_config);
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
                 trade_mapper_ = std::make_shared<TradeMapper>(get_app_db_file("trade_mapper"));
             }
@@ -54,7 +39,7 @@ namespace kungfu
                     SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
                     api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
                     api_->RegisterSpi(this);
-                    api_->RegisterFront((char *) front_uri_.c_str());
+                    api_->RegisterFront((char *) config_.td_uri.c_str());
                     api_->SubscribePublicTopic(THOST_TERT_QUICK);
                     api_->SubscribePrivateTopic(THOST_TERT_QUICK);
                     api_->Init();
@@ -65,9 +50,9 @@ namespace kungfu
             {
                 CThostFtdcReqUserLoginField login_field = {};
                 strcpy(login_field.TradingDay, "");
-                strcpy(login_field.UserID, account_id_.c_str());
-                strcpy(login_field.BrokerID, broker_id_.c_str());
-                strcpy(login_field.Password, password_.c_str());
+                strcpy(login_field.UserID, config_.account_id.c_str());
+                strcpy(login_field.BrokerID, config_.broker_id.c_str());
+                strcpy(login_field.Password, config_.password.c_str());
                 LOGIN_TRACE(fmt::format("(UserID) {} (BrokerID) {} (Password) ***", login_field.UserID, login_field.BrokerID));
                 int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
                 if (rtn != 0)
@@ -83,8 +68,8 @@ namespace kungfu
             bool TraderCTP::req_settlement_confirm()
             {
                 CThostFtdcSettlementInfoConfirmField req = {};
-                strcpy(req.InvestorID, account_id_.c_str());
-                strcpy(req.BrokerID, broker_id_.c_str());
+                strcpy(req.InvestorID, config_.account_id.c_str());
+                strcpy(req.BrokerID, config_.broker_id.c_str());
                 int rtn = api_->ReqSettlementInfoConfirm(&req, ++request_id_);
                 return rtn == 0;
             }
@@ -92,19 +77,24 @@ namespace kungfu
             bool TraderCTP::req_auth()
             {
                 struct CThostFtdcReqAuthenticateField req = {};
-                strcpy(req.UserID, account_id_.c_str());
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.UserProductInfo, product_info_.c_str());
-                strcpy(req.AppID, app_id_.c_str());
-                strcpy(req.AuthCode, auth_code_.c_str());
-                return this->api_->ReqAuthenticate(&req, ++request_id_);
+                strcpy(req.UserID, config_.account_id.c_str());
+                strcpy(req.BrokerID, config_.broker_id.c_str());
+                strcpy(req.UserProductInfo, config_.product_info.c_str());
+                strcpy(req.AppID, config_.app_id.c_str());
+                strcpy(req.AuthCode, config_.auth_code.c_str());
+                int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
+                if (rtn != 0)
+                {
+                    LOGIN_ERROR(fmt::format("failed to req auth, error id = {}", rtn));
+                }
+                return rtn == 0;
             }
 
             bool TraderCTP::req_account()
             {
                 CThostFtdcQryTradingAccountField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
+                strcpy(req.BrokerID, config_.broker_id.c_str());
+                strcpy(req.InvestorID, config_.account_id.c_str());
                 int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
                 return rtn == 0;
             }
@@ -112,8 +102,8 @@ namespace kungfu
             bool TraderCTP::req_position()
             {
                 CThostFtdcQryInvestorPositionField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
+                strcpy(req.BrokerID, config_.broker_id.c_str());
+                strcpy(req.InvestorID, config_.account_id.c_str());
                 int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
                 return rtn == 0;
             }
@@ -121,8 +111,8 @@ namespace kungfu
             bool TraderCTP::req_position_detail()
             {
                 CThostFtdcQryInvestorPositionDetailField req = {};
-                strcpy(req.BrokerID, broker_id_.c_str());
-                strcpy(req.InvestorID, account_id_.c_str());
+                strcpy(req.BrokerID, config_.broker_id.c_str());
+                strcpy(req.InvestorID, config_.account_id.c_str());
                 int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
                 return rtn == 0;
             }
@@ -142,8 +132,8 @@ namespace kungfu
                 memset(&ctp_input, 0, sizeof(ctp_input));
 
                 to_ctp(ctp_input, input);
-                strcpy(ctp_input.BrokerID, broker_id_.c_str());
-                strcpy(ctp_input.InvestorID, account_id_.c_str());
+                strcpy(ctp_input.BrokerID, config_.broker_id.c_str());
+                strcpy(ctp_input.InvestorID, config_.account_id.c_str());
 
                 int order_ref = order_ref_++;
                 strcpy(ctp_input.OrderRef, std::to_string(order_ref).c_str());
@@ -167,8 +157,8 @@ namespace kungfu
                 {
                     CtpOrder order_record = {};
                     order_record.internal_order_id = input.order_id;
-                    order_record.broker_id = broker_id_;
-                    order_record.investor_id = account_id_;
+                    order_record.broker_id = config_.broker_id;
+                    order_record.investor_id = config_.account_id;
                     order_record.exchange_id = input.exchange_id;
                     order_record.instrument_id = ctp_input.InstrumentID;
                     order_record.order_ref = ctp_input.OrderRef;

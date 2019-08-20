@@ -15,7 +15,7 @@ test_strategy = 'test1'
 @click.pass_context
 def ledger(ctx):
     pass_ctx_from_parent(ctx)
-    commander_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'gateway', 'ledger', ctx.locator)
+    commander_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'service', 'ledger', ctx.locator)
     ctx.logger = create_logger("ledger_test", ctx.log_level, commander_location)
     io_device = pyyjj.io_device(commander_location)
     cmd_sock = io_device.connect_socket(commander_location, pyyjj.protocol.REQUEST, 10000)

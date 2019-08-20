@@ -6,6 +6,7 @@
 #define KUNGFU_CTP_EXT_COMMON_H
 
 #include <string>
+#include <nlohmann/json.hpp>
 
 namespace kungfu
 {
@@ -13,6 +14,30 @@ namespace kungfu
     {
         namespace ctp
         {
+            struct Configuration
+            {
+                std::string md_uri;
+                std::string td_uri;
+                std::string account_id;
+                std::string broker_id;
+                std::string password;
+                std::string auth_code;
+                std::string product_info;
+                std::string app_id;
+            };
+
+            inline void from_json(const nlohmann::json& j, kungfu::wingchun::ctp::Configuration& c)
+            {
+                j.at("md_uri").get_to(c.md_uri);
+                j.at("td_uri").get_to(c.td_uri);
+                j.at("account_id").get_to(c.account_id);
+                j.at("broker_id").get_to(c.broker_id);
+                j.at("password").get_to(c.password);
+                j.at("auth_code").get_to(c.auth_code);
+                j.at("product_info").get_to(c.product_info);
+                j.at("app_id").get_to(c.app_id);
+            }
+
             inline std::string disconnected_reason(int reason)
             {
                 switch (reason)

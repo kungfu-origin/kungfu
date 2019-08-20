@@ -78,6 +78,11 @@ typedef char TThostFtdcClientIDType[11];
 typedef char TThostFtdcInstrumentIDType[31];
 
 /////////////////////////////////////////////////////////////////////////
+///TFtdcInstrumentCodeType是一个合约标识码类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcInstrumentCodeType[31];
+
+/////////////////////////////////////////////////////////////////////////
 ///TFtdcMarketIDType是一个市场代码类型
 /////////////////////////////////////////////////////////////////////////
 typedef char TThostFtdcMarketIDType[31];
@@ -243,6 +248,10 @@ typedef char TThostFtdcIdentifiedCardNoType[51];
 #define THOST_FTDC_ICT_HKMCIDCard 'I'
 ///人行开户许可证
 #define THOST_FTDC_ICT_AccountsPermits 'J'
+///外国人永久居留证
+#define THOST_FTDC_ICT_FrgPrmtRdCard 'K'
+///资管产品备案函
+#define THOST_FTDC_ICT_CptMngPrdLetter 'L'
 ///其他证件
 #define THOST_FTDC_ICT_OtherCard 'x'
 
@@ -487,6 +496,28 @@ typedef char TThostFtdcFunctionCodeType;
 #define THOST_FTDC_BFC_ParkedOrderInsert 'K'
 ///预埋报单操作
 #define THOST_FTDC_BFC_ParkedOrderAction 'L'
+///资金不够仍允许行权
+#define THOST_FTDC_BFC_ExecOrderNoCheck 'M'
+///指定
+#define THOST_FTDC_BFC_Designate 'N'
+///证券处置
+#define THOST_FTDC_BFC_StockDisposal 'O'
+///席位资金预警
+#define THOST_FTDC_BFC_BrokerDepositWarn 'Q'
+///备兑不足预警
+#define THOST_FTDC_BFC_CoverWarn 'S'
+///行权试算
+#define THOST_FTDC_BFC_PreExecOrder 'T'
+///行权交收风险
+#define THOST_FTDC_BFC_ExecOrderRisk 'P'
+///持仓限额预警
+#define THOST_FTDC_BFC_PosiLimitWarn 'U'
+///持仓限额查询
+#define THOST_FTDC_BFC_QryPosiLimit 'V'
+///银期签到签退
+#define THOST_FTDC_BFC_FBSign 'W'
+///银期签约解约
+#define THOST_FTDC_BFC_FBAccount 'X'
 
 typedef char TThostFtdcBrokerFunctionCodeType;
 
@@ -677,6 +708,12 @@ typedef char TThostFtdcRatioAttrType;
 #define THOST_FTDC_HF_Arbitrage '2'
 ///套保
 #define THOST_FTDC_HF_Hedge '3'
+///做市商
+#define THOST_FTDC_HF_MarketMaker '5'
+///第一腿投机第二腿套保 大商所专用
+#define THOST_FTDC_HF_SpecHedge '6'
+///第一腿套保第二腿投机  大商所专用
+#define THOST_FTDC_HF_HedgeSpec '7'
 
 typedef char TThostFtdcHedgeFlagType;
 
@@ -701,6 +738,8 @@ typedef char TThostFtdcBillHedgeFlagType;
 #define THOST_FTDC_CIDT_Arbitrage '2'
 ///套保
 #define THOST_FTDC_CIDT_Hedge '3'
+///做市商
+#define THOST_FTDC_CIDT_MarketMaker '5'
 
 typedef char TThostFtdcClientIDTypeType;
 
@@ -799,6 +838,10 @@ typedef char TThostFtdcForceCloseReasonType;
 #define THOST_FTDC_ORDT_ConditionalOrder '4'
 ///互换单
 #define THOST_FTDC_ORDT_Swap '5'
+///大宗交易成交衍生
+#define THOST_FTDC_ORDT_DeriveFromBlockTrade '6'
+///期转现成交衍生
+#define THOST_FTDC_ORDT_DeriveFromEFPTrade '7'
 
 typedef char TThostFtdcOrderTypeType;
 
@@ -917,6 +960,8 @@ typedef char TThostFtdcOrderSourceType;
 #define THOST_FTDC_TRDT_EFPDerived '3'
 ///组合衍生成交
 #define THOST_FTDC_TRDT_CombinationDerived '4'
+///大宗交易成交
+#define THOST_FTDC_TRDT_BlockTrade '5'
 
 typedef char TThostFtdcTradeTypeType;
 
@@ -929,6 +974,8 @@ typedef char TThostFtdcTradeTypeType;
 #define THOST_FTDC_PSRC_Buy '1'
 ///卖委托价
 #define THOST_FTDC_PSRC_Sell '2'
+///场外成交价
+#define THOST_FTDC_PSRC_OTC '3'
 
 typedef char TThostFtdcPriceSourceType;
 
@@ -1396,6 +1443,32 @@ typedef char TThostFtdcSystemParamIDType;
 #define THOST_FTDC_TPID_LoginFailMaxNum 'L'
 ///是否强制认证
 #define THOST_FTDC_TPID_IsAuthForce 'A'
+///是否冻结证券持仓
+#define THOST_FTDC_TPID_IsPosiFreeze 'F'
+///是否限仓
+#define THOST_FTDC_TPID_IsPosiLimit 'M'
+///郑商所询价时间间隔
+#define THOST_FTDC_TPID_ForQuoteTimeInterval 'Q'
+///是否期货限仓
+#define THOST_FTDC_TPID_IsFuturePosiLimit 'B'
+///是否期货下单频率限制
+#define THOST_FTDC_TPID_IsFutureOrderFreq 'C'
+///行权冻结是否计算盈利
+#define THOST_FTDC_TPID_IsExecOrderProfit 'H'
+///银期开户是否验证开户银行卡号是否是预留银行账户
+#define THOST_FTDC_TPID_IsCheckBankAcc 'I'
+///弱密码最后修改日期
+#define THOST_FTDC_TPID_PasswordDeadLine 'J'
+///强密码校验
+#define THOST_FTDC_TPID_IsStrongPassword 'K'
+///自有资金质押比
+#define THOST_FTDC_TPID_BalanceMorgage 'a'
+///最小密码长度
+#define THOST_FTDC_TPID_MinPwdLen 'O'
+///IP当日最大登陆失败次数
+#define THOST_FTDC_TPID_LoginFailMaxNumForIP 'U'
+///密码有效期
+#define THOST_FTDC_TPID_PasswordPeriod 'V'
 
 typedef char TThostFtdcTradeParamIDType;
 
@@ -2180,6 +2253,11 @@ typedef char TThostFtdcCapitalCurrencyType[4];
 #define THOST_FTDC_UT_SuperUser '2'
 
 typedef char TThostFtdcUserTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcBranchIDType是一个营业部编号类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcBranchIDType[9];
 
 /////////////////////////////////////////////////////////////////////////
 ///TFtdcRateTypeType是一个费率类型类型
@@ -3648,6 +3726,12 @@ typedef char TThostFtdcReqRspTypeType;
 #define THOST_FTDC_FBTUET_SignOut 'A'
 ///密钥同步
 #define THOST_FTDC_FBTUET_SyncKey 'B'
+///预约开户
+#define THOST_FTDC_FBTUET_ReserveOpenAccount 'C'
+///撤销预约开户
+#define THOST_FTDC_FBTUET_CancelReserveOpenAccount 'D'
+///预约开户确认
+#define THOST_FTDC_FBTUET_ReserveOpenAccountConfirm 'E'
 ///其他
 #define THOST_FTDC_FBTUET_Other 'Z'
 
@@ -5339,6 +5423,8 @@ typedef char TThostFtdcCloseDealTypeType;
 #define THOST_FTDC_MFUR_Margin '1'
 ///用于手续费、盈亏、保证金
 #define THOST_FTDC_MFUR_All '2'
+///人民币方案3
+#define THOST_FTDC_MFUR_CNY3 '3'
 
 typedef char TThostFtdcMortgageFundUseRangeType;
 
@@ -6110,12 +6196,42 @@ typedef char TThostFtdcStrikeTimeType[13];
 typedef char TThostFtdcCombinationTypeType;
 
 /////////////////////////////////////////////////////////////////////////
+///TFtdcDceCombinationTypeType是一个组合类型类型
+/////////////////////////////////////////////////////////////////////////
+///期货对锁组合
+#define THOST_FTDC_DCECOMBT_SPL '0'
+///期权对锁组合
+#define THOST_FTDC_DCECOMBT_OPL '1'
+///期货跨期组合
+#define THOST_FTDC_DCECOMBT_SP '2'
+///期货跨品种组合
+#define THOST_FTDC_DCECOMBT_SPC '3'
+///买入期权垂直价差组合
+#define THOST_FTDC_DCECOMBT_BLS '4'
+///卖出期权垂直价差组合
+#define THOST_FTDC_DCECOMBT_BES '5'
+///期权日历价差组合
+#define THOST_FTDC_DCECOMBT_CAS '6'
+///期权跨式组合
+#define THOST_FTDC_DCECOMBT_STD '7'
+///期权宽跨式组合
+#define THOST_FTDC_DCECOMBT_STG '8'
+///买入期货期权组合
+#define THOST_FTDC_DCECOMBT_BFO '9'
+///卖出期货期权组合
+#define THOST_FTDC_DCECOMBT_SFO 'a'
+
+typedef char TThostFtdcDceCombinationTypeType;
+
+/////////////////////////////////////////////////////////////////////////
 ///TFtdcOptionRoyaltyPriceTypeType是一个期权权利金价格类型类型
 /////////////////////////////////////////////////////////////////////////
 ///昨结算价
 #define THOST_FTDC_ORPT_PreSettlementPrice '1'
 ///开仓价
 #define THOST_FTDC_ORPT_OpenPrice '4'
+///最新价与昨结算价较大值
+#define THOST_FTDC_ORPT_MaxPreSettlementPrice '5'
 
 typedef char TThostFtdcOptionRoyaltyPriceTypeType;
 
@@ -6272,5 +6388,276 @@ typedef char TThostFtdcCFFEXUploadFileNameType;
 #define THOST_FTDC_CMDR_UnComb '1'
 
 typedef char TThostFtdcCombDirectionType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcStrikeOffsetTypeType是一个行权偏移类型类型
+/////////////////////////////////////////////////////////////////////////
+///实值额
+#define THOST_FTDC_STOV_RealValue '1'
+///盈利额
+#define THOST_FTDC_STOV_ProfitValue '2'
+///实值比例
+#define THOST_FTDC_STOV_RealRatio '3'
+///盈利比例
+#define THOST_FTDC_STOV_ProfitRatio '4'
+
+typedef char TThostFtdcStrikeOffsetTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcReserveOpenAccStasType是一个预约开户状态类型
+/////////////////////////////////////////////////////////////////////////
+///等待处理中
+#define THOST_FTDC_ROAST_Processing '0'
+///已撤销
+#define THOST_FTDC_ROAST_Cancelled '1'
+///已开户
+#define THOST_FTDC_ROAST_Opened '2'
+///无效请求
+#define THOST_FTDC_ROAST_Invalid '3'
+
+typedef char TThostFtdcReserveOpenAccStasType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcLoginRemarkType是一个登录备注类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcLoginRemarkType[36];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcInvestUnitIDType是一个投资单元代码类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcInvestUnitIDType[17];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcBulletinIDType是一个公告编号类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcBulletinIDType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcNewsTypeType是一个公告类型类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcNewsTypeType[3];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcNewsUrgencyType是一个紧急程度类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcNewsUrgencyType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcAbstractType是一个消息摘要类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcAbstractType[81];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcComeFromType是一个消息来源类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcComeFromType[21];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcURLLinkType是一个WEB地址类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcURLLinkType[201];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcLongIndividualNameType是一个长个人姓名类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcLongIndividualNameType[161];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcLongFBEBankAccountNameType是一个长换汇银行账户名类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcLongFBEBankAccountNameType[161];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcDateTimeType是一个日期时间类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcDateTimeType[17];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcWeakPasswordSourceType是一个弱密码来源类型
+/////////////////////////////////////////////////////////////////////////
+///弱密码库
+#define THOST_FTDC_WPSR_Lib '1'
+///手工录入
+#define THOST_FTDC_WPSR_Manual '2'
+
+typedef char TThostFtdcWeakPasswordSourceType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcRandomStringType是一个随机串类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcRandomStringType[17];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcOptSelfCloseFlagType是一个期权行权的头寸是否自对冲类型
+/////////////////////////////////////////////////////////////////////////
+///自对冲期权仓位
+#define THOST_FTDC_OSCF_CloseSelfOptionPosition '1'
+///保留期权仓位
+#define THOST_FTDC_OSCF_ReserveOptionPosition '2'
+///自对冲卖方履约后的期货仓位
+#define THOST_FTDC_OSCF_SellCloseSelfFuturePosition '3'
+///保留卖方履约后的期货仓位
+#define THOST_FTDC_OSCF_ReserveFuturePosition '4'
+
+typedef char TThostFtdcOptSelfCloseFlagType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcBizTypeType是一个业务类型类型
+/////////////////////////////////////////////////////////////////////////
+///期货
+#define THOST_FTDC_BZTP_Future '1'
+///证券
+#define THOST_FTDC_BZTP_Stock '2'
+
+typedef char TThostFtdcBizTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcAppTypeType是一个用户App类型类型
+/////////////////////////////////////////////////////////////////////////
+///直连的投资者
+#define THOST_FTDC_APP_TYPE_Investor '1'
+///为每个投资者都创建连接的中继
+#define THOST_FTDC_APP_TYPE_InvestorRelay '2'
+///所有投资者共享一个操作员连接的中继
+#define THOST_FTDC_APP_TYPE_OperatorRelay '3'
+///未知
+#define THOST_FTDC_APP_TYPE_UnKnown '4'
+
+typedef char TThostFtdcAppTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcAppIDType是一个App代码类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcAppIDType[33];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcSystemInfoLenType是一个系统信息长度类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcSystemInfoLenType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcAdditionalInfoLenType是一个补充信息长度类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcAdditionalInfoLenType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcClientSystemInfoType是一个交易终端系统信息类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcClientSystemInfoType[273];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcAdditionalInfoType是一个系统外部信息类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcAdditionalInfoType[261];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcBase64ClientSystemInfoType是一个base64交易终端系统信息类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcBase64ClientSystemInfoType[365];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcBase64AdditionalInfoType是一个base64系统外部信息类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcBase64AdditionalInfoType[349];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcCurrentAuthMethodType是一个当前可用的认证模式，0代表无需认证模式 A从低位开始最后一位代表图片验证码，倒数第二位代表动态口令，倒数第三位代表短信验证码类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcCurrentAuthMethodType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcCaptchaInfoLenType是一个图片验证信息长度类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcCaptchaInfoLenType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcCaptchaInfoType是一个图片验证信息类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcCaptchaInfoType[2561];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcUserTextSeqType是一个用户短信验证码的编号类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcUserTextSeqType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcHandshakeDataType是一个握手数据内容类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcHandshakeDataType[301];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcHandshakeDataLenType是一个握手数据内容长度类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcHandshakeDataLenType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcCryptoKeyVersionType是一个api与front通信密钥版本号类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcCryptoKeyVersionType[31];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcRsaKeyVersionType是一个公钥版本号类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcRsaKeyVersionType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcSoftwareProviderIDType是一个交易软件商ID类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcSoftwareProviderIDType[22];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcCollectTimeType是一个信息采集时间类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcCollectTimeType[21];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcQueryFreqType是一个查询频率类型
+/////////////////////////////////////////////////////////////////////////
+typedef int TThostFtdcQueryFreqType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcResponseValueType是一个应答类型类型
+/////////////////////////////////////////////////////////////////////////
+///检查成功
+#define THOST_FTDC_RV_Right '0'
+///检查失败
+#define THOST_FTDC_RV_Refuse '1'
+
+typedef char TThostFtdcResponseValueType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcOTCTradeTypeType是一个OTC成交类型类型
+/////////////////////////////////////////////////////////////////////////
+///大宗交易
+#define THOST_FTDC_OTC_TRDT_Block '0'
+///期转现
+#define THOST_FTDC_OTC_TRDT_EFP '1'
+
+typedef char TThostFtdcOTCTradeTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcMatchTypeType是一个期现风险匹配方式类型
+/////////////////////////////////////////////////////////////////////////
+///基点价值
+#define THOST_FTDC_OTC_MT_DV01 '1'
+///面值
+#define THOST_FTDC_OTC_MT_ParValue '2'
+
+typedef char TThostFtdcMatchTypeType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcOTCTraderIDType是一个OTC交易员代码类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcOTCTraderIDType[31];
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcRiskValueType是一个期货风险值类型
+/////////////////////////////////////////////////////////////////////////
+typedef double TThostFtdcRiskValueType;
+
+/////////////////////////////////////////////////////////////////////////
+///TFtdcIDBNameType是一个握手数据内容类型
+/////////////////////////////////////////////////////////////////////////
+typedef char TThostFtdcIDBNameType[100];
 
 #endif
