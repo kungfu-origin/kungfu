@@ -62,7 +62,6 @@ class AccountsDB(SessionFactoryHolder):
 class CalendarDB(SessionFactoryHolder):
     def __init__(self, location, filename):
         super(CalendarDB, self).__init__(location, filename)
-        Holiday.metadata.create_all(self.engine)
 
     def get_holidays(self, region=Region.CN):
         with session_scope(self.session_factory) as session:

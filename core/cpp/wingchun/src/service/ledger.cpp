@@ -60,6 +60,7 @@ namespace kungfu
                     case category::TD:
                     {
                         watch(trigger_time, app_location);
+                        request_write_to(trigger_time, app_location->uid);
                         update_and_publish_state(trigger_time, app_location, GatewayState::Connected);
                         break;
                     }

@@ -5,7 +5,7 @@ from PyInquirer import prompt
 
 @account.command()
 @click.option('--receive_md', is_flag=True, help='receive market data with this account')
-@click.option('--id', type=str, required=True, help='id')
+@click.option('-i', '--id', type=str, required=True, help='id')
 @click.pass_context
 def edit(ctx, receive_md, id):
     pass_ctx_from_parent(ctx)

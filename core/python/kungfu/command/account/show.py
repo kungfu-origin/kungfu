@@ -1,6 +1,7 @@
-from tabulate import tabulate
+import re
 import click
 from kungfu.command.account import account, pass_ctx_from_parent
+from tabulate import tabulate
 
 
 @account.command()
@@ -15,4 +16,4 @@ def show(ctx):
 
 
 def sort_account_config(account_config, headers):
-    return [account_config[header] for header in headers]
+    return [account_config[header] if header != 'password' else re.sub(r'.', '*', account_config[header]) for header in headers]

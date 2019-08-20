@@ -9,14 +9,14 @@
                     "key": "user_id",
                     "name": "user_id",
                     "type": "str",
-                    "errMsg": "请填写账户[user_id]",
+                    "errMsg": "请填写账户 user_id",
                     "required": true
                 },
                 {
                     "key": "password",
                     "name": "password",
                     "type": "password",
-                    "errMsg": "请填写密码[password]",
+                    "errMsg": "请填写密码 password",
                     "required": true,
                     "validator": ["blankValidator"]
                 },
@@ -24,21 +24,21 @@
                     "key": "software_key",
                     "name": "software_key",
                     "type": "str",
-                    "errMsg": "请填写[software_key]",
+                    "errMsg": "请填写 software_key",
                     "required": true
                 },
                 {
                     "key": "md_ip",
                     "name": "md_ip",
                     "type": "str",
-                    "errMsg": "请填写行情IP[md_ip]",
+                    "errMsg": "请填写行情IP md_ip",
                     "required": true
                 },
                 {
                     "key": "md_port",
                     "name": "md_port",
                     "type": "int",
-                    "errMsg": "请填写行情端口[md_port]",
+                    "errMsg": "请填写行情端口 md_port",
                     "validator": ["intValidator"],
                     "required": true
                 },
@@ -46,14 +46,14 @@
                     "key": "td_ip",
                     "name": "td_ip",
                     "type": "str",
-                    "errMsg": "请填写交易IP[td_ip]",
+                    "errMsg": "请填写交易IP td_ip",
                     "required": true
                 },
                 {
                     "key": "td_port",
                     "name": "td_port",
                     "type": "int",
-                    "errMsg": "请填写交易端口[td_port]",
+                    "errMsg": "请填写交易端口 td_port",
                     "validator": ["intValidator"],
                     "required": true
                 },
@@ -61,7 +61,7 @@
                     "key": "client_id",
                     "name": "client_id",
                     "type": "int",
-                    "errMsg": "请填写自定义多点登录ID[0-99整数]",
+                    "errMsg": "请填写自定义多点登录ID 0-99整数",
                     "required": false,
                     "validator": ["o99Validator", "intValidator"],
                     "tip": "自定义多点登陆ID，需是0～99内整数"
