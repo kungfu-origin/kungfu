@@ -94,7 +94,7 @@ namespace kungfu
             ReverseBest,            //深圳对手方最优价格申报，不需要报价
             Fak,                    //深圳即时成交剩余撤销，不需要报价
             Fok,                    //深圳市价全额成交或者撤销，不需要报价
-            UnKnow
+            UnKnown
         };
 
         enum class VolumeCondition: int8_t

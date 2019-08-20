@@ -100,7 +100,7 @@ namespace kungfu
                         price_type = PriceType::ReverseBest;
                 }
                 else
-                    price_type = PriceType::UnKnow;
+                    price_type = PriceType::UnKnown;
             }
 
             inline void to_xtp(XTP_PRICE_TYPE &xtp_price_type, const PriceType &price_type, const char* exchange)
