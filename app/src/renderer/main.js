@@ -98,7 +98,7 @@ new Vue({
 
 
 //自动更新逻辑
-startAutoUpdate()
+// startAutoUpdate()
 
 function startAutoUpdate(){
     if(window.location.href.split('#')[1].indexOf('code') !== -1) return;
