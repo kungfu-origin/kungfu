@@ -210,6 +210,15 @@
         }
     }
 
+    const logColor = {
+        info: 'green',
+        trace: '',
+        error: 'red',
+        warning: 'yellow',
+        debug: 'blue',
+        critical: 'red'
+    }
+
     function dealMessage(line) {
         let lineData;
         try{
@@ -221,12 +230,12 @@
         let message = lineData.message
         .split('\n[')
         .join('<br\>[')
-        .replace(/\[  info  \]/g, '[ <span class="green">info</span> &nbsp;&nbsp;&nbsp;]')
+        .replace(/\[  info  \]/g, `[ <span class="${logColor.info}">info</span> &nbsp;&nbsp;&nbsp;]`)
         .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
-        .replace(/\[ error  \]/g, '[ <span class="red">error</span> &nbsp;&nbsp;]')
-        .replace(/\[warning \]/g, '[ <span class="yellow">warning</span> ]')
-        .replace(/\[ debug  \]/g, '[ <span class="blue">debug</span> &nbsp;&nbsp;]')
-        .replace(/\[critical\]/g, '[ critical]')
+        .replace(/\[ error  \]/g, `[ <span class="${logColor.error}">error</span> &nbsp;&nbsp;]`)
+        .replace(/\[warning \]/g, `[ <span class="${logColor.warning}">warning</span> ]`)
+        .replace(/\[ debug  \]/g, `[ <span class="${logColor.debug}">debug</span> &nbsp;&nbsp;]`)
+        .replace(/\[critical\]/g, `[ <span class="${logColor.critical}">critical</span>]`)
         if(
             message.indexOf('Failed') !== -1 ||
             message.indexOf('Traceback') !== -1 ||

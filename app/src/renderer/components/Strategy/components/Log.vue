@@ -45,6 +45,15 @@ const BrowserWindow = require('electron').remote.BrowserWindow;
 export default {
     name: 'log',
     data() {
+        this.logColor = {
+            info: 'green',
+            trace: '',
+            error: 'red',
+            warning: 'yellow',
+            debug: 'blue',
+            critical: 'red'
+        }
+
         this.schema = [
             {
                 label: '时间',
@@ -258,10 +267,10 @@ export default {
 
         renderCellClass(prop, item){
             const t = this;
-            if(item.type === 'error'){
-                return 'red'
-            }else{
-                return ''
+            if(prop === 'type') {
+                if( item.type === 'error' || item.type === 'warning' || item.type === 'critical'){
+                    return this.logColor[item.type]
+                }
             }
         },
     }
