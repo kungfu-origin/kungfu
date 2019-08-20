@@ -17,6 +17,7 @@ import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub';
 import { deleteProcess } from '__gUtils/processUtils';
 import { getAccountSource } from '__gConfig/accountConfig';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
+import { clearTimeout } from 'timers';
 
 
 export default {
@@ -97,7 +98,10 @@ export default {
 
         //获取gatewayState（req后会从subGatewayState中获取）
         reqGatewayState(){
-            nanoReqGatewayState()
+            let timer = setTimeout(() => {
+                nanoReqGatewayState()
+                clearTimeout(timer)
+            }, 1000)
         },
 
         //获取柜台信息

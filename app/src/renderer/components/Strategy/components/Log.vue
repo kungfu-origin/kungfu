@@ -108,6 +108,11 @@ export default {
                 t.rendererTable = true;
                 t.init(t.processId, t.logPath)
             })
+        },
+
+        ifScrollToBottom(val){
+            const t = this;
+            if(t.ifScrollToBottom) t.scrollToBottom()
         }
     },
 
