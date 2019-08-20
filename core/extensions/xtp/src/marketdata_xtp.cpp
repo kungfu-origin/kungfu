@@ -9,7 +9,6 @@
 #include <kungfu/yijinjing/log/setup.h>
 
 #include "marketdata_xtp.h"
-
 #include "serialize_xtp.h"
 #include "type_convert_xtp.h"
 
@@ -23,12 +22,7 @@ namespace kungfu
                     MarketData(low_latency, std::move(locator), SOURCE_XTP)
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
-                nlohmann::json config = nlohmann::json::parse(json_config);
-                client_id_ = config["client_id"];
-                user_ = config["user_id"];
-                password_ = config["password"];
-                ip_ = config["md_ip"];
-                port_ = config["md_port"];
+                config_ = nlohmann::json::parse(json_config);
             }
 
             MarketDataXTP::~MarketDataXTP()
@@ -39,21 +33,28 @@ namespace kungfu
                 }
             }
 
+            std::string MarketDataXTP::get_runtime_folder() const
+            {
+                auto home = get_io_device()->get_home();
+                return home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+            }
+
             void MarketDataXTP::on_start()
             {
                 MarketData::on_start();
-
-                auto home = get_io_device()->get_home();
-                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
-                SPDLOG_INFO("Connecting XTP MD for {} at {}:{} with runtime folder {}", user_, ip_, port_, runtime_folder);
-
-                api_ = XTP::API::QuoteApi::CreateQuoteApi(client_id_, runtime_folder.c_str());
+                std::string runtime_folder = get_runtime_folder();
+                SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{} with runtime folder {}", config_.user_id, config_.protocol, config_.md_ip, config_.md_port, runtime_folder);
+                api_ = XTP::API::QuoteApi::CreateQuoteApi(config_.client_id, runtime_folder.c_str());
+                if (config_.protocol == "udp")
+                {
+                    api_->SetUDPBufferSize(config_.buffer_size);
+                }
                 api_->RegisterSpi(this);
-                int res = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
+                int res = api_->Login(config_.md_ip.c_str(), config_.md_port, config_.user_id.c_str(), config_.password.c_str(), get_xtp_protocol_type(config_.protocol));
                 if (res == 0)
                 {
                     publish_state(GatewayState::LoggedIn);
-                    LOGIN_INFO(fmt::format("login success! (user_id) {}", user_));
+                    LOGIN_INFO(fmt::format("login success! (user_id) {}", config_.user_id));
                 } else
                 {
                     publish_state(GatewayState::LoggedInFailed);
@@ -146,6 +147,17 @@ namespace kungfu
                 } else
                 {
                     SUBSCRIBE_INFO(fmt::format("(ticker) {} (is_last) {}", ticker->ticker, is_last));
+                }
+            }
+
+            void MarketDataXTP::OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
+            {
+                if (error_info != nullptr && error_info->error_id != 0)
+                {
+                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} {error_msg} {}", error_info->error_id, error_info->error_msg));
+                } else
+                {
+                    SUBSCRIBE_INFO(fmt::format("subscribe all tick by tick success, exchange: {}", exchange_id_from_xtp(exchange_id)));
                 }
             }
 

@@ -21,19 +21,10 @@ namespace kungfu
         namespace xtp
         {
             TraderXTP::TraderXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id, const std::string &json_config) :
-                    Trader(low_latency, std::move(locator), SOURCE_XTP, account_id), trading_day_("")
+                    Trader(low_latency, std::move(locator), SOURCE_XTP, account_id), api_(nullptr), session_id_(0), request_id_(0), trading_day_("")
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), account_id);
-                nlohmann::json config = nlohmann::json::parse(json_config);
-
-                client_id_ = config["client_id"];
-                software_key_ = config["software_key"];
-                user_ = config["user_id"];
-                password_ = config["password"];
-                ip_ = config["td_ip"];
-                port_ = config["td_port"];
-                session_id_ = 0;
-                request_id_ = 0;
+                config_ = nlohmann::json::parse(json_config);
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
             }
 
@@ -45,21 +36,23 @@ namespace kungfu
                 }
             }
 
+            std::string TraderXTP::get_runtime_folder() const
+            {
+                auto home = get_io_device()->get_home();
+                return home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+            }
+
             void TraderXTP::on_start()
             {
                 Trader::on_start();
-
-                auto home = get_io_device()->get_home();
-                std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
-                SPDLOG_INFO("Connecting XTP TD for {} at {}:{} with runtime folder {}", user_, ip_, port_, runtime_folder);
-
-                api_ = XTP::API::TraderApi::CreateTraderApi(client_id_, runtime_folder.c_str());
+                std::string runtime_folder = get_runtime_folder();
+                SPDLOG_INFO("Connecting XTP TD for {} at {}:{} with runtime folder {}", config_.user_id, config_.td_ip, config_.td_port, runtime_folder);
+                api_ = XTP::API::TraderApi::CreateTraderApi(config_.client_id, runtime_folder.c_str());
                 api_->RegisterSpi(this);
                 api_->SubscribePublicTopic(XTP_TERT_QUICK);//只传送登录后公有流（订单响应、成交回报）的内容
                 api_->SetSoftwareVersion("1.1.0");
-                api_->SetSoftwareKey(software_key_.c_str());
-
-                session_id_ = api_->Login(ip_.c_str(), port_, user_.c_str(), password_.c_str(), XTP_PROTOCOL_TCP);
+                api_->SetSoftwareKey(config_.software_key.c_str());
+                session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.user_id.c_str(), config_.password.c_str(), XTP_PROTOCOL_TCP);
                 if (session_id_ > 0)
                 {
                     publish_state(GatewayState::Ready);

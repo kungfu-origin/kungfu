@@ -2,16 +2,14 @@
 // Created by qlu on 2019/2/11.
 //
 
-#ifndef MD_GATEWAY_XTP_H
-#define MD_GATEWAY_XTP_H
-
-#include <string>
-#include <map>
+#ifndef KUNGFU_XTP_EXT_MARKET_DATA_H
+#define KUNGFU_XTP_EXT_MARKET_DATA_H
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 
+#include "common.h"
 #include "xtp_quote_api.h"
 
 namespace kungfu
@@ -143,8 +141,7 @@ namespace kungfu
                 ///@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
                 ///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
                 ///@remark 需要快速返回
-                void OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info) override
-                {};
+                void OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info) override;
 
                 ///退订全市场的股票逐笔行情应答
                 ///@param exchange_id 表示当前退订的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
@@ -215,19 +212,13 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                int client_id_;
-                std::string save_file_path_;
-                std::string ip_;
-                int port_;
-                std::string user_;
-                std::string password_;
-
+                Configuration config_;
                 XTP::API::QuoteApi *api_;
-
+                std::string get_runtime_folder() const;
                 bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
             };
         }
     }
 }
 
-#endif //MD_GATEWAY_XTP_H
+#endif //KUNGFU_XTP_EXT_MARKET_DATA_H

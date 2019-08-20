@@ -1,8 +1,33 @@
+version 1.1.19.2
+（1）修复IsServerRestart()接口无法正确返回结果的bug
+
+version 1.1.19.1
+（1）支持科创板业务
+（2）XTPQueryIPOTickerRsp结构体中增加证券类型ticker_type证券类型字段
+（3）XTP_TICKER_TYPE新增枚举值：科创板股票XTP_TICKER_TYPE_TECH_STOCK
+（4）XTPQueryIPOQuotaRsp结构体中增加上海科创板新股申购额度tech_quantity字段
+
+version 1.1.18.32
+（1）TradeAPI新增分页查询报单接口QueryOrdersByPage()以及对应的响应接口OnQueryOrderByPage()
+（2）TradeAPI新增分页查询成交接口QueryTradesByPage()以及对应的响应接口OnQueryTradeByPage()
+（3）TradeAPI新增确认服务器是否重启接口IsServerRestart()
+
+version 1.1.18.19
+（1）优化行情UDP接收
+
+version 1.1.18.18
+（1）TradeAPI支持一账号两中心节点之间的资金划拨
+（2）XTP_FUND_TRANSFER_TYPE增加节点之间的资金划拨方向枚举值
+
+version 1.1.18.14
+（1）TXTPTradeTypeType 新增跨市场资金成交枚举值 XTP_TRDT_CROSS_MKT_CASH
+（2）TradeAPI新增跨市场ETF业务支持
+
 version 1.1.18.13
 （1）修复QuoteAPI在linux下使用UDP连接会crash的bug
 
 version 1.1.18.12
-（1）QuoteAPI修改笔误，将exchage_id更改为为exchange_id
+（1）QuoteAPI修改笔误，将exchage_id更改为exchange_id
 （2）修改头文件编码，从GB2312改为UTF-8
 
 version 1.1.18.9

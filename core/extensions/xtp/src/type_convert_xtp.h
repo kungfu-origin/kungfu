@@ -19,8 +19,18 @@ namespace kungfu
     {
         namespace xtp
         {
-
             using namespace kungfu::wingchun::msg::data;
+            inline XTP_PROTOCOL_TYPE get_xtp_protocol_type(const std::string &p)
+            {
+                if (p == "udp")
+                {
+                    return XTP_PROTOCOL_UDP;
+                }
+                else
+                {
+                    return XTP_PROTOCOL_TCP;
+                }
+            }
 
             inline void from_xtp_timestamp(int64_t xtp_time, int64_t nsec)
             {
@@ -51,6 +61,22 @@ namespace kungfu
                 } else
                 {
                     xtp_market_type = XTP_MKT_UNKNOWN;
+                }
+            }
+
+            inline std::string exchange_id_from_xtp(const XTP_EXCHANGE_TYPE ex)
+            {
+                if (ex == XTP_EXCHANGE_SH)
+                {
+                    return EXCHANGE_SSE;
+                }
+                else if(ex == XTP_EXCHANGE_SZ)
+                {
+                    return EXCHANGE_SZE;
+                }
+                else
+                {
+                    return "Unknown";
                 }
             }
 

@@ -2,18 +2,15 @@
 // Created by qlu on 2019/2/11.
 //
 
-#ifndef TD_GATEWAY_XTP_H
-#define TD_GATEWAY_XTP_H
-
-#include <memory>
-#include <string>
-#include <map>
+#ifndef KUNGFU_XTP_EXT_TRADER_H
+#define KUNGFU_XTP_EXT_TRADER_H
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/trader.h>
 
 #include "xtp_trader_api.h"
+#include "common.h"
 #include "order_mapper.h"
 
 namespace kungfu
@@ -175,23 +172,15 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                int client_id_;
-                std::string software_key_;
-                std::string ip_;
-                int port_;
-                std::string user_;
-                std::string password_;
-
+                Configuration config_;
                 XTP::API::TraderApi *api_;
                 uint64_t session_id_;
-
                 int request_id_;
-
                 std::string trading_day_;
-
+                std::string get_runtime_folder() const;
                 std::shared_ptr<OrderMapper> order_mapper_;
             };
         }
     }
 }
-#endif //TD_GATEWAY_XTP_H
+#endif //KUNGFU_XTP_EXT_TRADER_H
