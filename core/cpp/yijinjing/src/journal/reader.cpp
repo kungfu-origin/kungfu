@@ -45,29 +45,25 @@ namespace kungfu
                 }
                 journals_.push_back(std::make_shared<journal>(location, dest_id, false, lazy_));
                 journals_.back()->seek_to_time(from_time);
-                if (current_.get() == nullptr)
+                if (current_ == nullptr)
                 {
-                    current_ = journals_.back();
+                    sort(); // do not sort if current_ is set (because we could be in process of reading)
                 }
             }
 
             void reader::disjoin(const uint32_t location_uid)
             {
-                current_.reset();
                 journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
                                                [&](journal_ptr j)
                                                { return j->location_->uid == location_uid || j->dest_id_ == location_uid; }), journals_.end());
-                if (not journals_.empty())
-                {
-                    current_ = journals_.back();
-                }
+                current_ = nullptr;
                 sort();
             }
 
             bool reader::data_available()
             {
                 sort();
-                return current_.get() != nullptr && current_frame()->has_data();
+                return current_ != nullptr && current_frame()->has_data();
             }
 
             void reader::seek_to_time(int64_t nanotime)
@@ -81,18 +77,13 @@ namespace kungfu
 
             void reader::next()
             {
-                assert(current_.get() != nullptr);
+                assert(current_ != nullptr);
                 current_->next();
                 sort();
             }
 
             void reader::sort()
             {
-                if (journals_.size() == 1)
-                {
-                    return;
-                }
-
                 int64_t min_time = time::now_in_nano();
                 for (const auto &journal : journals_)
                 {
@@ -100,8 +91,12 @@ namespace kungfu
                     if (frame->has_data() && frame->gen_time() <= min_time)
                     {
                         min_time = frame->gen_time();
-                        current_ = journal;
+                        current_ = journal.get();
                     }
+                }
+                if (current_ == nullptr and not journals_.empty())
+                {
+                    current_ = journals_.back().get();
                 }
             }
 

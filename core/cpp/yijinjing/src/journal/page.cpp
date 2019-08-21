@@ -43,6 +43,7 @@ namespace kungfu
 
             void page::release()
             {
+                SPDLOG_TRACE("releasing page {}/{:08x}.{}.journal", location_->uname, dest_id_, page_id_);
                 if (!os::release_mmap_buffer(address(), size_, lazy_))
                 {
                     throw journal_error("failed to release memory for page " + get_page_path(location_, dest_id_, page_id_));

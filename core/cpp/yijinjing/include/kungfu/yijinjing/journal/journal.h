@@ -87,7 +87,7 @@ namespace kungfu
             class reader
             {
             public:
-                explicit reader(bool lazy) : lazy_(lazy)
+                explicit reader(bool lazy) : lazy_(lazy), current_(nullptr)
                 {};
 
                 ~reader();
@@ -117,7 +117,7 @@ namespace kungfu
 
             private:
                 const bool lazy_;
-                journal_ptr current_;
+                journal *current_;
                 std::vector<journal_ptr> journals_;
             };
 
