@@ -196,7 +196,6 @@ export default {
         //开始监听日志尾部
         startWatchingTail(processId, logPath, searchKeyword){
             const t = this;
-            let timer = null;
             let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {

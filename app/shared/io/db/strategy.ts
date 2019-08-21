@@ -111,6 +111,7 @@ export const getStrategyPos = async (strategyId: string, { instrumentId }: Tradi
         ` AND client_id = "${strategyId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         ` AND update_time > "${strategyAddTime}"` +
+        ` AND volume != 0` +
         ` ORDER BY instrument_id`
     )
     .then((pos: PosInputData[]): any => {

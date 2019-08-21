@@ -9,7 +9,7 @@ import { mapState } from 'vuex';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone, delaySeconds } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
@@ -17,8 +17,6 @@ import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub';
 import { deleteProcess } from '__gUtils/processUtils';
 import { getAccountSource } from '__gConfig/accountConfig';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
-import { clearTimeout } from 'timers';
-
 
 export default {
     name: 'app',
@@ -58,8 +56,11 @@ export default {
             t.gatewayStatePipe = buildGatewayStatePipe().subscribe(data => {
                 const processId = data[0];
                 const stateData = data[1];
-                //if state is 2 means disconnect, kill process; 
-                if(stateData.state === 2) deleteProcess(processId);
+                //if state is 2 means disconnect, kill process, delay 3s; 
+                if(+stateData.state === 2 || +stateData.state === 5) {
+                    delaySeconds(5000)
+                    .then(() => deleteProcess(processId))
+                }
                 t.$store.dispatch('setOneMdTdState', {
                     id: processId,
                     stateData: stateData
@@ -98,10 +99,8 @@ export default {
 
         //获取gatewayState（req后会从subGatewayState中获取）
         reqGatewayState(){
-            let timer = setTimeout(() => {
-                nanoReqGatewayState()
-                clearTimeout(timer)
-            }, 1000)
+            delaySeconds(1000)
+            .then(() => nanoReqGatewayState())
         },
 
         //获取柜台信息

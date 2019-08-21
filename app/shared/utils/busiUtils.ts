@@ -70,6 +70,15 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
     }
 }
 
+export const delaySeconds = (seconds: 100): Promise<void> => {
+    return new Promise(resolve => {
+        let timer = setTimeout(() => {
+            resolve()
+            clearTimeout(timer)
+        }, seconds)
+    })
+}
+
 //深度克隆obj
 export const deepClone = <T>(obj: T): T => {
     if(!obj) return obj

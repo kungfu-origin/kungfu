@@ -76,6 +76,7 @@ export const getAccountPos = (accountId: string, { instrumentId, type }: Trading
         ` AND account_id = "${accountId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         (type ? ` AND instrument_type = ${type || ''}` : ``) + 
+        ` AND volume != 0` +
         ' ORDER BY instrument_id'
     )
 }
