@@ -38,9 +38,9 @@ addFile('', TD_DIR, 'folder')
 export const MD_DIR = path.join(KF_HOME, 'md');
 addFile('', MD_DIR, 'folder')
 
-//watcher 
-export const WATCHER_DIR = path.join(SYSTEM_DIR, 'watcher', 'watcher')
-addFile('', WATCHER_DIR, 'folder')
+//ledger 
+export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
+addFile('', LEDGER_DIR, 'folder')
 
 //log
 export const LOG_DIR = path.join(KF_HOME, 'log');
@@ -76,9 +76,9 @@ export const buildAccountCommissionDBPath = (accountId: string) => path.join(bui
 //================= live trading start ===========================
 
 //trading data
-export const LIVE_TRADING_DB_DIR = path.join(WATCHER_DIR, 'db', 'live');
+export const LIVE_TRADING_DB_DIR = path.join(LEDGER_DIR, 'db', 'live');
 
-export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'watcher.db')
+export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'ledger.db')
 
 //================= live trading end =============================
 

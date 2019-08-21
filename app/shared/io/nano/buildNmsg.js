@@ -19,13 +19,6 @@ export const buildRepNmsg = () => {
     return req
 }
 
-export const buildWatcherRepNmsg = () => {
-    const req = nano.socket('req');
-    const addr = `ipc://${NMSG_REP_FILE}`;
-    req.connect(addr)
-    return req
-}
-
 
 
 

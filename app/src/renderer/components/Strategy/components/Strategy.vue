@@ -124,6 +124,7 @@ import { switchStrategy } from '__io/actions/strategy';
 import { debounce } from '__gUtils/busiUtils';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator } from '__assets/validator';
 
+
 const BrowserWindow = require('electron').remote.BrowserWindow
 
 export default {
@@ -229,6 +230,7 @@ export default {
                 }
             })
             .then(() => deleteProcess(strategy_id))
+            .then(() => removePosRecordsByStrategyId(strategy_id))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return

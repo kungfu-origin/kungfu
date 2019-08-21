@@ -1,5 +1,5 @@
 
-import { buildRepNmsg, buildWatcherRepNmsg } from '__io/nano/buildNmsg'
+import { buildRepNmsg } from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
 
 export const nanoReqGatewayState = () => {
@@ -8,7 +8,7 @@ export const nanoReqGatewayState = () => {
             msg_type: msgType.reqGatewayState,
             data: {}
         })
-        const req = buildWatcherRepNmsg();
+        const req = buildRepNmsg();
         req.send(reqMsg)
         req.on('data', buf => {
             req.close();

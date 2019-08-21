@@ -181,5 +181,14 @@ export const getStrategysPnl = (ids: string[], tradingDay: string): Promise<Last
     return Promise.all(promises)
 }
 
-
+export const removePosRecordsByStrategyId = (strategyId: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        return runInsertUpdateDeleteDB(
+            STRATEGYS_DB, 
+            `DELETE FROM position` + 
+            ` WHERE client_id = ${strategyId}` +
+            ` AND ledger_category = 1`,
+        )    
+    })
+}
 
