@@ -136,8 +136,10 @@ export const describeProcess = (name: string): Promise<any> => {
 
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
+    const ifTrace = process.env.NODE_ENV === 'development' ? '-l trace ' : ''
     options = {
         ...options,
+        "args": ifTrace + options.args,
         "cwd": path.join(KUNGFU_ENGINE, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",
@@ -191,7 +193,7 @@ export const startMaster = async(force: boolean): Promise<void> => {
     }
     return startProcess({
         "name": processName,
-        "args": "-l trace master"
+        "args": "master"
     }, true).catch(err => logger.error(err))
 }
 
@@ -204,7 +206,7 @@ export const startLedger = async(force: boolean): Promise<void> => {
     if(!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
-        'args': '-l trace ledger'
+        'args': 'ledger'
     }).catch(err => logger.error(err))
 }
 
@@ -231,7 +233,7 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     strategyPath = dealSpaceInPath(strategyPath)
     return startProcess({
         "name": strategyId,
-        "args": `-l trace strategy -n ${strategyId} -p ${strategyPath}`,
+        "args": `strategy -n ${strategyId} -p ${strategyPath}`,
     }).catch(err => logger.error(err))
 }
 
