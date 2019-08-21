@@ -230,7 +230,6 @@ export default {
                 }
             })
             .then(() => deleteProcess(strategy_id))
-            .then(() => removePosRecordsByStrategyId(strategy_id))
             .then(() => t.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
