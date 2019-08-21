@@ -73,10 +73,10 @@ export const getAccountPos = (accountId: string, { instrumentId, type }: Trading
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM position` + 
         ` WHERE ledger_category = 0` + 
+        ` AND volume != 0` +
         ` AND account_id = "${accountId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         (type ? ` AND instrument_type = ${type || ''}` : ``) + 
-        ` AND volume != 0` +
         ' ORDER BY instrument_id'
     )
 }

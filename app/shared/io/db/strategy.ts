@@ -108,10 +108,10 @@ export const getStrategyPos = async (strategyId: string, { instrumentId }: Tradi
         LIVE_TRADING_DATA_DB,
         `SELECT * FROM position` + 
         ` WHERE ledger_category = 1` + 
+        ` AND volume = 0` +
         ` AND client_id = "${strategyId}"` + 
         ` AND instrument_id LIKE '%${instrumentId}%'` +
         ` AND update_time > "${strategyAddTime}"` +
-        ` AND volume != 0` +
         ` ORDER BY instrument_id`
     )
     .then((pos: PosInputData[]): any => {
