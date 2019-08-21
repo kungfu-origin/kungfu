@@ -114,6 +114,7 @@ namespace kungfu
 
             void MarketDataCTP::OnFrontDisconnected(int nReason)
             {
+                publish_state(GatewayState::DisConnected);
                 DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason)));
             }
 
@@ -122,10 +123,12 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
+                    publish_state(GatewayState::LoggedInFailed);
                     LOGIN_ERROR(fmt::format("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
                 }
                 else
                 {
+                    publish_state(GatewayState::LoggedIn);
                     LOGIN_INFO(fmt::format("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->TradingDay));
                 }
             }
