@@ -48,7 +48,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
-import { switchTd, switchMd } from '__io/actions/account';
 import { ifProcessRunning } from '__gUtils/busiUtils';
 import { LOG_DIR } from '__gConfig/pathConfig';
 

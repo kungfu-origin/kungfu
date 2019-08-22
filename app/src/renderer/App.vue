@@ -9,7 +9,7 @@ import { mapState } from 'vuex';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
-import { deepClone, delaySeconds } from '__gUtils/busiUtils';
+import { deepClone, delaySeconds, debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
@@ -50,6 +50,27 @@ export default {
         t.cashPipe.unsubscribe();
     },
 
+    computed: {
+        ...mapState({
+            processStatus: state => state.BASE.processStatus
+        })
+    },
+
+    watch: {
+        //reset state of td/md every time close
+        processStatus: function(status){
+            const t = this;
+            Object.keys(status || {}).forEach(key => {
+                const s = status[key]
+                if(s !== 'online') {
+                    if(key.indexOf('td') !== -1 || key.indexOf('md') !== -1) {
+                        t.$store.dispatch('deleteOneMdTdState', key)
+                    }
+                }
+            })
+        }
+    },
+
     methods: {   
         subGatewayState() {
             const t = this;
@@ -58,8 +79,9 @@ export default {
                 const stateData = data[1];
                 //if state is 2 means disconnect, kill process, delay 3s; 
                 if(+stateData.state === 2 || +stateData.state === 5) {
-                    delaySeconds(5000)
+                    delaySeconds(1000)
                     .then(() => deleteProcess(processId))
+                    return
                 }
                 t.$store.dispatch('setOneMdTdState', {
                     id: processId,
