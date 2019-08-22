@@ -193,6 +193,10 @@ namespace kungfu
 
                 virtual ~locator() = default;
 
+                virtual bool has_env(const std::string &name) const = 0;
+
+                virtual const std::string get_env(const std::string &name) const = 0;
+
                 virtual const std::string layout_dir(location_ptr location, layout l) const = 0;
 
                 virtual const std::string layout_file(location_ptr location, layout l, const std::string &name) const = 0;

@@ -62,6 +62,12 @@ class Locator(pyyjj.locator):
         pyyjj.locator.__init__(self)
         self._home = home
 
+    def has_env(self, name):
+        return os.getenv(name) is not None
+
+    def get_env(self, name):
+        return os.getenv(name)
+
     def layout_dir(self, location, layout):
         mode = pyyjj.get_mode_name(location.mode)
         category = pyyjj.get_category_name(location.category)

@@ -94,10 +94,6 @@ namespace kungfu
                         current_ = journal.get();
                     }
                 }
-                if (current_ == nullptr and not journals_.empty())
-                {
-                    current_ = journals_.back().get();
-                }
             }
 
         }

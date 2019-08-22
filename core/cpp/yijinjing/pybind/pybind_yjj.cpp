@@ -40,6 +40,16 @@ class PyLocator : public data::locator
 {
     using data::locator::locator;
 
+    bool has_env(const std::string &name) const override
+    {
+        PYBIND11_OVERLOAD_PURE(bool, data::locator, has_env, name)
+    }
+
+    const std::string get_env(const std::string &name) const override
+    {
+        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, get_env, name)
+    }
+
     const std::string layout_dir(data::location_ptr location, data::layout l) const override
     {
         PYBIND11_OVERLOAD_PURE(const std::string, data::locator, layout_dir, location, l)
@@ -235,6 +245,8 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
             .def(py::init())
+            .def("has_env", &data::locator::has_env)
+            .def("get_env", &data::locator::get_env)
             .def("layout_dir", &data::locator::layout_dir)
             .def("layout_file", &data::locator::layout_file)
             .def("list_page_id", &data::locator::list_page_id);

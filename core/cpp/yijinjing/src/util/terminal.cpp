@@ -38,7 +38,7 @@ public:
         colors_["critical"] = BACKGROUND_RED | WHITE | BOLD;
         colors_["off"] = 0;
     }
-    void print(std::string level, std::string log)
+    void print(const std::string& level, const std::string& log)
     {
         HANDLE out_handle_ = spdlog::details::console_stdout::handle();
         WORD color_attribs = colors_[level];

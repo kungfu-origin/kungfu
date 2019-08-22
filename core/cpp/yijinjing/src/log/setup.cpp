@@ -15,14 +15,10 @@ namespace kungfu {
 
         namespace log {
 
-            spdlog::level::level_enum get_env_log_level() {
-                std::string level_name = DEFAULT_LOG_LEVEL_NAME;
-                const char *level_env_name = LOG_LEVEL_ENV;
-                char *level_env_value = getenv(level_env_name);
-                if (level_env_value != NULL) {
-                    level_name = std::string(level_env_value);
-                }
-                return spdlog::level::from_str(level_name);
+            spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator) {
+                return spdlog::level::from_str(
+                        locator->has_env(LOG_LEVEL_ENV) ? locator->get_env(LOG_LEVEL_ENV) : DEFAULT_LOG_LEVEL_NAME
+                        );
             }
 
             std::shared_ptr<spdlog::logger> get_main_logger() {
@@ -39,7 +35,7 @@ namespace kungfu {
                     spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
                     auto logger = std::make_shared<spdlog::logger>(name, log_sinks);
                     logger->set_pattern(DEFAULT_LOG_PATTERN);
-                    spdlog::level::level_enum env_log_level = get_env_log_level();
+                    spdlog::level::level_enum env_log_level = get_env_log_level(locator);
                     logger->set_level(env_log_level);
                     spdlog::set_default_logger(logger);
                 } else {

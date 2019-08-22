@@ -17,7 +17,7 @@ namespace kungfu {
     namespace yijinjing {
 
         namespace log {
-            spdlog::level::level_enum get_env_log_level();
+            spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);
 
             const std::string& setup_log(data::location_ptr location, const std::string &name);
 

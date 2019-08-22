@@ -93,10 +93,10 @@ class WinConsoleHandler(logging.StreamHandler):
             msg = self.format(record)
             stream = self.stream
             if pyyjj.in_color_terminal():
-                stream.write(msg[:33])
+                stream.write(msg[:28])
                 self.flush()
                 pyyjj.color_print(record.levelname.lower(), '{:^8}'.format(record.levelname.lower()))
-                stream.write(msg[41:])
+                stream.write(msg[36:])
                 stream.write(self.terminator)
                 self.flush()
             else:
