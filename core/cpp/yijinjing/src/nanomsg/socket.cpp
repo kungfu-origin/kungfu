@@ -87,7 +87,6 @@ int socket::getsockopt_int (int level, int option)
 int socket::bind (const std::string &path)
 {
     url_ = "ipc://" + path;
-    relative_path_ = strip_kf_home(path);
     int rc = nn_bind (sock_, url_.c_str());
     if (rc < 0)
     {
@@ -100,7 +99,6 @@ int socket::bind (const std::string &path)
 int socket::connect (const std::string &path)
 {
     url_ = "ipc://" + path;
-    relative_path_ = strip_kf_home(path);
     int rc = nn_connect (sock_, url_.c_str());
     if (rc < 0)
     {
@@ -155,12 +153,12 @@ int socket::recv (int flags)
                 break;
             case EINTR:
             {
-                SPDLOG_WARN("interrupted when receiving from {}", relative_path_);
+                SPDLOG_WARN("interrupted when receiving from {}", url_);
                 break;
             }
             default:
             {
-                SPDLOG_ERROR("can not recv from {} errno [{}] {}", relative_path_, nn_errno(), nn_strerror(nn_errno()));
+                SPDLOG_ERROR("can not recv from {} errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
                 throw nn_exception ();
             }
         }

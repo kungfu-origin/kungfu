@@ -159,9 +159,6 @@ namespace kungfu
                 const std::string &get_url() const
                 { return url_; };
 
-                const std::string &get_relative_path() const
-                { return relative_path_; };
-
                 const std::string &last_message() const
                 { return message_; };
 
@@ -169,7 +166,6 @@ namespace kungfu
                 int sock_;
                 protocol protocol_;
                 std::string url_;
-                std::string relative_path_;
                 std::vector<char> buf_;
                 std::string message_;
 
