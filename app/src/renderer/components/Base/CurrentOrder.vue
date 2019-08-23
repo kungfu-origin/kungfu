@@ -168,11 +168,6 @@ export default {
             const t = this;
             t.resetData();
             if(val) t.init();
-
-            // t.rendererTable = false;
-            // t.$nextTick().then(() => {
-                // t.rendererTable = true;
-            // })
         },
 
         //接收推送返回的数据
@@ -239,6 +234,8 @@ export default {
 
         handleCancelAllOrders(){
             const t = this;
+            if(!t.accountList.length) return;
+
             //先判断对应进程是否启动
             if(t.moduleType === 'account'){
                 if(t.processStatus[t.gatewayName] !== 'online') {
