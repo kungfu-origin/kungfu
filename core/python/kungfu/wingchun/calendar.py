@@ -11,17 +11,17 @@ class CalendarUtil:
     @classmethod
     def get_trading_sessions(cls, exchange_id, trading_day):
         if exchange_id == Exchange.SSE or exchange_id == Exchange.SZE:
-            return [TradingSession(exchange_id = exchange_id,
-                                   trading_day = trading_day,
-                                   start_time = datetime.datetime.combine(trading_day, datetime.time(9, 30)),
-                                   end_time = datetime.datetime.combine(trading_day, datetime.time(11, 30))),
-                    TradingSession(exchange_id = exchange_id,
-                                   trading_day = trading_day,
-                                   start_time = datetime.datetime.combine(trading_day, datetime.time(13, 00)),
-                                   end_time = datetime.datetime.combine(trading_day, datetime.time(15, 00))),
+            return [TradingSession(exchange_id=exchange_id,
+                                   trading_day=trading_day,
+                                   start_time=datetime.datetime.combine(trading_day, datetime.time(9, 30)),
+                                   end_time=datetime.datetime.combine(trading_day, datetime.time(11, 30))),
+                    TradingSession(exchange_id=exchange_id,
+                                   trading_day=trading_day,
+                                   start_time=datetime.datetime.combine(trading_day, datetime.time(13, 00)),
+                                   end_time=datetime.datetime.combine(trading_day, datetime.time(15, 00))),
                     ]
         else:
-            #TODO
+            # TODO
             return []
 
 
@@ -55,5 +55,3 @@ class Calendar:
 
     def is_holiday(self, dt):
         return dt in self.holidays
-
-

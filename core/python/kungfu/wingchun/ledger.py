@@ -92,43 +92,43 @@ class Ledger(pywingchun.Ledger):
         self._get_account_ledger(account_id=trade.account_id).apply_trade(trade)
         self._get_portfolio_ledger(client_id).apply_trade(trade)
 
-    def on_instruments(self, instruments):               
-        if list(set(instruments)):            
+    def on_instruments(self, instruments):
+        if list(set(instruments)):
             self.ctx.db.set_instruments([object_as_dict(inst) for inst in list(set(instruments))])
 
     def on_stock_account(self, asset, positions):
         pos_objects = [StockPosition(**object_as_dict(pos)) for pos in positions]
-        account = AccountBook(ctx = self.ctx,
-                         trading_day = self.trading_day,
-                         ledger_category = LedgerCategory.Account,
-                         account_id = asset.account_id,
-                         source_id = asset.source_id,
-                         avail = asset.avail,
-                         positions = pos_objects)
+        account = AccountBook(ctx=self.ctx,
+                              trading_day=self.trading_day,
+                              ledger_category=LedgerCategory.Account,
+                              account_id=asset.account_id,
+                              source_id=asset.source_id,
+                              avail=asset.avail,
+                              positions=pos_objects)
         self._reset_account_ledger(asset.account_id, account)
 
     def on_future_account(self, asset, position_details):
         pos_objects = []
-        for inst, details in groupby(position_details, key= lambda e: e.instrument_id):
+        for inst, details in groupby(position_details, key=lambda e: e.instrument_id):
             instrument_info = self.ctx.db.get_instrument_info(inst)
             detail_objects = []
             for detail in sorted(details, key=lambda detail: (detail.open_date, detail.trade_time)):
                 args = object_as_dict(detail)
-                args.update({"contract_multiplier":instrument_info["contract_multiplier"],
+                args.update({"contract_multiplier": instrument_info["contract_multiplier"],
                              "long_margin_ratio": instrument_info["long_margin_ratio"],
                              "short_margin_ratio": instrument_info["short_margin_ratio"]})
                 detail_objects.append(FuturePositionDetail(**args))
-            pos_args = {"details": detail_objects,"trading_day":self.trading_day}
+            pos_args = {"details": detail_objects, "trading_day": self.trading_day}
             pos_args.update(instrument_info)
             pos = FuturePosition(**pos_args)
             pos_objects.append(pos)
-        account_book = AccountBook(ctx = self.ctx,
-                         trading_day = self.trading_day,
-                         ledger_category = LedgerCategory.Account,
-                         account_id = asset.account_id,
-                         source_id = asset.source_id,
-                         avail = asset.avail,
-                         positions = pos_objects)
+        account_book = AccountBook(ctx=self.ctx,
+                                   trading_day=self.trading_day,
+                                   ledger_category=LedgerCategory.Account,
+                                   account_id=asset.account_id,
+                                   source_id=asset.source_id,
+                                   avail=asset.avail,
+                                   positions=pos_objects)
         self._reset_account_ledger(asset.account_id, account_book)
 
     def _message_from_order_event(self, event, order):
@@ -136,7 +136,7 @@ class Ledger(pywingchun.Ledger):
         order_dict["order_id"] = str(order.order_id)
         order_dict["parent_id"] = str(order.parent_id)
         order_dict["client_id"] = self.get_location(event.dest).name
-        return {"msg_type": event.msg_type,"data": order_dict}
+        return {"msg_type": event.msg_type, "data": order_dict}
 
     def _message_from_trade_event(self, event, trade):
         client_id = self.get_location(event.dest).name
@@ -145,7 +145,7 @@ class Ledger(pywingchun.Ledger):
         trade_dict["parent_order_id"] = str(trade.parent_order_id)
         trade_dict["trade_id"] = str(trade.trade_id)
         trade_dict["client_id"] = client_id
-        return {"msg_type": event.msg_type,"data": trade_dict}
+        return {"msg_type": event.msg_type, "data": trade_dict}
 
     def _dump_snapshot(self, data_frequency="minute"):
         messages = []
@@ -159,6 +159,12 @@ class Ledger(pywingchun.Ledger):
         self.ctx.db.on_messages(messages)
 
     def _switch_day(self):
+        self.publish(json.dumps({
+            'msg_type': msg.Calendar,
+            'data': {
+                'trading_day': '%s' % self.ctx.calendar.trading_day
+            }
+        }))
         self._dump_snapshot(data_frequency="daily")
         for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
             self.ctx.db.dump(ledger)
@@ -170,16 +176,16 @@ class Ledger(pywingchun.Ledger):
         self.ctx.db.dump(account)
 
     def _get_account_ledger(self, account_id):
-        return self._get_ledger(ledger_category=LedgerCategory.Account,account_id=account_id, create_if_not_existing=True)
+        return self._get_ledger(ledger_category=LedgerCategory.Account, account_id=account_id, create_if_not_existing=True)
 
     def _get_portfolio_ledger(self, client_id):
-       return self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id,create_if_not_existing=True)
+        return self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id, create_if_not_existing=True)
 
-    def _get_ledger(self, ledger_category, account_id = "", client_id = "", create_if_not_existing=False):
+    def _get_ledger(self, ledger_category, account_id="", client_id="", create_if_not_existing=False):
         if ledger_category == LedgerCategory.Account:
             ledger_dict = self.accounts
             ledger_key = account_id
-        elif ledger_category ==  LedgerCategory.Portfolio:
+        elif ledger_category == LedgerCategory.Portfolio:
             ledger_dict = self.portfolios
             ledger_key = client_id
         else:
@@ -189,11 +195,12 @@ class Ledger(pywingchun.Ledger):
         else:
             ledger = self.ctx.db.load(ledger_category=ledger_category, account_id=account_id, client_id=client_id)
             if not ledger and create_if_not_existing:
-                ledger = AccountBook(self.ctx, ledger_category = ledger_category,account_id=account_id,client_id = client_id, avail = DEFAULT_INIT_CASH, trading_day = self.trading_day)
+                ledger = AccountBook(self.ctx, ledger_category=ledger_category, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH,
+                                     trading_day=self.trading_day)
             if ledger:
                 ledger._ctx = self.ctx
                 ledger.apply_trading_day(self.trading_day)
-                ledger.register_callback(lambda messages: [ self.publish(json.dumps(message)) for message in messages])
+                ledger.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
                 ledger.register_callback(self.ctx.db.on_messages)
                 ledger_dict[ledger_key] = ledger
             return ledger
