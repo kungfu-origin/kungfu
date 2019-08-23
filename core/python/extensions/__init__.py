@@ -17,7 +17,7 @@ if not kfext_log_level:
 kfext_logger = None
 if kf_home:
     kfext_log_locator = kfj.Locator(kf_home)
-    kfext_log_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'extensions', 'extensions', kfext_log_locator)
+    kfext_log_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'extension', kfext_log_locator)
     kfext_logger = create_logger('extensions', kfext_log_level, kfext_log_location)
 else:
     kfext_logger = create_logger('extensions', kfext_log_level, None)
