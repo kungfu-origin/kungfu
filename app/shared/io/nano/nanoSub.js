@@ -41,7 +41,12 @@ export const buildCashPipe = () => {
     )
 }
 
-
+//tradingDay
+export const buildTradingDayPipe = () => {
+    return subObservable.pipe(
+        filter(d => d.msg_type === MSG_TYPE.calendar)
+    )
+}
 
 
  

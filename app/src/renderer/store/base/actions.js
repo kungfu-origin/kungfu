@@ -1,5 +1,5 @@
 import { nanoReqCalendar } from '__io/nano/nanoReq';
-
+import { buildTradingDayPipe } from '__io/nano/nanoSub';
 
 export const setProcessStatus = ({ commit }, processStatus) => {
     commit('SET_PROCESS_STATUS', processStatus)
@@ -23,4 +23,9 @@ export const reqCalendar = ({ commit }) => {
     .catch(err => console.error(err))
 }
 
-
+//sub 交易日
+buildTradingDayPipe().subscribe(d => {
+    const calendar = d.data;
+    console.log('sub calendar', calendar)
+    if(calendar && calendar.trading_day) commit('SET_CALENDAR', calendar);
+})
