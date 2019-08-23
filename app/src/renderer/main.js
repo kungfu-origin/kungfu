@@ -111,4 +111,10 @@ function startAutoUpdate(){
 
 window.fileId = 0;
 
+window.setTradingDay = (targetDay) => {
+    store.dispatch('setTradingDay', targetDay)
+}
 
+window.getTradingDay = () => {
+    return store.state.BASE.calendar
+}

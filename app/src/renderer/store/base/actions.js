@@ -9,6 +9,10 @@ export const setAccountSource = ({ commit }, accountSource) => {
     commit('SET_ACCOUNT_SOURCE', accountSource)
 }
 
+export const setTradingDay = ({ commit }, tradingDay) => {
+    commit('SET_TRADING_DAY', tradingDay);
+}
+
 //主动获得交易日
 export const reqCalendar = ({ commit }) => {
     return nanoReqCalendar()
