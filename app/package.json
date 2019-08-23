@@ -100,7 +100,7 @@
     },
     "linux": {
       "icon": "./resources/logo",
-      "target": ["AppImage"]
+      "target": ["rpm"]
     },
     "nsis": {
       "oneClick": false,
