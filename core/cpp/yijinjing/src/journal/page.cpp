@@ -29,25 +29,24 @@ namespace kungfu
     {
         namespace journal
         {
-
             page::page(const data::location_ptr &location, uint32_t dest_id, const int id, const size_t size, const bool lazy, uintptr_t address) :
                     location_(location), dest_id_(dest_id), page_id_(id), size_(size), lazy_(lazy), header_(reinterpret_cast<page_header *>(address))
             {
                 assert(address > 0);
             }
 
-            void page::set_last_frame_position(uint64_t position)
-            {
-                const_cast<page_header *>(header_)->last_frame_position = position;
-            }
-
-            void page::release()
+            page::~page()
             {
                 SPDLOG_TRACE("releasing page {}/{:08x}.{}.journal", location_->uname, dest_id_, page_id_);
                 if (!os::release_mmap_buffer(address(), size_, lazy_))
                 {
                     throw journal_error("failed to release memory for page " + get_page_path(location_, dest_id_, page_id_));
                 }
+            }
+
+            void page::set_last_frame_position(uint64_t position)
+            {
+                const_cast<page_header *>(header_)->last_frame_position = position;
             }
 
             page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, int page_id, bool is_writing, bool lazy)
@@ -109,7 +108,6 @@ namespace kungfu
                 {
                     auto page = page::load(location, dest_id, page_ids[i], false, true);
                     auto page_begin_time = page->begin_time();
-                    page->release();
                     if (page_begin_time < time)
                     {
                         return page_ids[i];

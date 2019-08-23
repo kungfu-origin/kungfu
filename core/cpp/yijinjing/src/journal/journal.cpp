@@ -32,7 +32,7 @@ namespace kungfu
             {
                 if (current_page_.get() != nullptr)
                 {
-                    current_page_->release();
+                    current_page_.reset();
                 }
             }
 

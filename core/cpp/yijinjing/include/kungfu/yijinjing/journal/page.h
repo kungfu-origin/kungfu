@@ -43,6 +43,7 @@ namespace kungfu
             class page
             {
             public:
+                ~page();
 
                 const uint32_t get_page_size() const
                 { return header_->page_size; }
@@ -76,8 +77,6 @@ namespace kungfu
 
                 bool is_full() const
                 { return last_frame_address() + reinterpret_cast<frame_header *>(last_frame_address())->length > address_border(); }
-
-                void release();
 
                 static page_ptr load(const data::location_ptr& location, uint32_t dest_id, int page_id, bool is_writing, bool lazy);
 
