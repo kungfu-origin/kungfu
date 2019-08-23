@@ -115,7 +115,30 @@ namespace kungfu
                 int timep = int(kungfu::yijinjing::time::now_in_nano() / 1e9);
                 for (auto mdp : md_parameters_)
                 {
-                    if (timep % mdp.interval == 0)
+                    if (mdp.interval == 0)
+                    {
+                        for (int i = 0; i<10000; i++)
+                        {
+                            msg::data::Quote &quote = writer->open_data<msg::data::Quote>(
+                                    kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
+
+                            quote = mds_[std::string(mdp.instrument_id)];
+                            quote.data_time = kungfu::yijinjing::time::now_in_nano();
+                            mds_[std::string(quote.instrument_id)].volume += 10;
+                            quote.volume = mds_[std::string(quote.instrument_id)].volume;
+                            if (mdp.type == DataType::StandardSine)
+                                sin_quota(quote, timep, mdp);
+                            else if (mdp.type == DataType::StandardLine)
+                                line_quota(quote, timep, mdp);
+                            else if (mdp.type == DataType::StandardRandom)
+                                random_quota(quote, timep, mdp);
+                            nlohmann::json j;
+                            msg::data::to_json(j, quote);
+                            SPDLOG_TRACE("[QUOTE] {}", j.dump());
+                            writer->close_data();
+                        }
+                    }
+                    else if (timep % mdp.interval == 0)
                     {
                         msg::data::Quote &quote = writer->open_data<msg::data::Quote>(
                                 kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
