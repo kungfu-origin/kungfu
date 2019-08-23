@@ -1,5 +1,5 @@
-#ifndef TD_GATEWAY_KFEXT_DEMO_H
-#define TD_GATEWAY_KFEXT_DEMO_H
+#ifndef TD_KFEXT_DEMO_H
+#define TD_KFEXT_DEMO_H
 
 #include <memory>
 #include <string>
@@ -39,4 +39,4 @@ namespace kungfu
         }
     }
 }
-#endif //TD_GATEWAY_KFEXT_DEMO_H
+#endif //TD_KFEXT_DEMO_H

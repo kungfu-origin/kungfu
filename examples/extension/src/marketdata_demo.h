@@ -1,5 +1,5 @@
-#ifndef MD_GATEWAY_KFEXT_DEMO_H
-#define MD_GATEWAY_KFEXT_DEMO_H
+#ifndef MD_KFEXT_DEMO_H
+#define MD_KFEXT_DEMO_H
 
 #include <string>
 #include <map>
@@ -32,4 +32,4 @@ namespace kungfu
     }
 }
 
-#endif //MD_GATEWAY_KFEXT_DEMO_H
+#endif //MD_KFEXT_DEMO_H

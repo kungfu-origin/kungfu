@@ -55,12 +55,12 @@ namespace kungfu
                 session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.user_id.c_str(), config_.password.c_str(), XTP_PROTOCOL_TCP);
                 if (session_id_ > 0)
                 {
-                    publish_state(GatewayState::Ready);
+                    publish_state(BrokerState::Ready);
                     LOGIN_INFO("login success");
                     req_account();
                 } else
                 {
-                    publish_state(GatewayState::LoggedInFailed);
+                    publish_state(BrokerState::LoggedInFailed);
                     XTPRI *error_info = api_->GetApiLastError();
                     LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
                 }
@@ -164,7 +164,7 @@ namespace kungfu
             {
                 if (session_id == session_id_)
                 {
-                    publish_state(GatewayState::DisConnected);
+                    publish_state(BrokerState::DisConnected);
                     DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
                 }
             }

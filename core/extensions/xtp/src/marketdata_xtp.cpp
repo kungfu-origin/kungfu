@@ -53,11 +53,11 @@ namespace kungfu
                 int res = api_->Login(config_.md_ip.c_str(), config_.md_port, config_.user_id.c_str(), config_.password.c_str(), get_xtp_protocol_type(config_.protocol));
                 if (res == 0)
                 {
-                    publish_state(GatewayState::LoggedIn);
+                    publish_state(BrokerState::LoggedIn);
                     LOGIN_INFO(fmt::format("login success! (user_id) {}", config_.user_id));
                 } else
                 {
-                    publish_state(GatewayState::LoggedInFailed);
+                    publish_state(BrokerState::LoggedInFailed);
                     XTPRI *error_info = api_->GetApiLastError();
                     LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
                 }
@@ -125,7 +125,7 @@ namespace kungfu
             void MarketDataXTP::OnDisconnected(int reason)
             {
                 DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
-                publish_state(GatewayState::DisConnected);
+                publish_state(BrokerState::DisConnected);
             }
 
             void MarketDataXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)

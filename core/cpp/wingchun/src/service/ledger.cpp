@@ -53,7 +53,7 @@ namespace kungfu
                     case category::MD:
                     {
                         watch(trigger_time, app_location);
-                        update_and_publish_state(trigger_time, app_location, GatewayState::Connected);
+                        update_and_publish_state(trigger_time, app_location, BrokerState::Connected);
                         monitor_market_data(trigger_time, app_location->uid);
                         break;
                     }
@@ -61,7 +61,7 @@ namespace kungfu
                     {
                         watch(trigger_time, app_location);
                         request_write_to(trigger_time, app_location->uid);
-                        update_and_publish_state(trigger_time, app_location, GatewayState::Connected);
+                        update_and_publish_state(trigger_time, app_location, BrokerState::Connected);
                         break;
                     }
                     case category::STRATEGY:
@@ -84,7 +84,7 @@ namespace kungfu
                     case category::MD:
                     case category::TD:
                     {
-                        update_and_publish_state(trigger_time, app_location, GatewayState::DisConnected);
+                        update_and_publish_state(trigger_time, app_location, BrokerState::DisConnected);
                         break;
                     }
                     case category::STRATEGY:
@@ -96,6 +96,7 @@ namespace kungfu
                         break;
                     }
                 }
+                broker_states_.erase(location_uid);
                 apprentice::deregister_location(trigger_time, location_uid);
             }
 
@@ -138,22 +139,22 @@ namespace kungfu
 
                 pre_start();
 
-                events_ | is(msg::type::GatewayStateRefresh) |
+                events_ | is(msg::type::BrokerStateRefresh) |
                 $([&](event_ptr event)
                   {
                       publish_all_states(event->gen_time());
 
                       nlohmann::json msg;
                       msg["status"] = 200;
-                      msg["msg_type"] = msg::type::GatewayStateRefresh;
+                      msg["msg_type"] = msg::type::BrokerStateRefresh;
                       get_io_device()->get_rep_sock()->send(msg.dump());
                   });
 
-                events_ | is(msg::type::GatewayState) |
+                events_ | is(msg::type::BrokerState) |
                 $([&](event_ptr event)
                   {
-                      auto gateway_location = get_location(event->source());
-                      update_and_publish_state(event->gen_time(), gateway_location, static_cast<GatewayState>(event->data<int32_t>()));
+                      auto broker_location = get_location(event->source());
+                      update_and_publish_state(event->gen_time(), broker_location, static_cast<BrokerState>(event->data<int32_t>()));
                   });
 
                 /**
@@ -263,33 +264,33 @@ namespace kungfu
                   });
             }
 
-            void Ledger::publish_state(int64_t trigger_time, const location_ptr &gateway_location, GatewayState state)
+            void Ledger::publish_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
             {
                 nlohmann::json msg;
                 msg["gen_time"] = time::now_in_nano();
                 msg["trigger_time"] = trigger_time;
-                msg["msg_type"] = msg::type::GatewayState;
+                msg["msg_type"] = msg::type::BrokerState;
                 msg["source"] = get_io_device()->get_home()->uid;
 
                 nlohmann::json data;
-                data["category"] = gateway_location->category;
-                data["group"] = gateway_location->group;
-                data["name"] = gateway_location->name;
+                data["category"] = broker_location->category;
+                data["group"] = broker_location->group;
+                data["name"] = broker_location->name;
                 data["state"] = state;
                 msg["data"] = data;
                 publish(msg.dump());
             }
 
-            void Ledger::update_and_publish_state(int64_t trigger_time, const location_ptr &gateway_location, GatewayState state)
+            void Ledger::update_and_publish_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
             {
-                gateway_states_[gateway_location->uid] = state;
-                publish_state(trigger_time, gateway_location, state);
+                broker_states_[broker_location->uid] = state;
+                publish_state(trigger_time, broker_location, state);
             }
 
             void Ledger::publish_all_states(int64_t trigger_time)
             {
-                SPDLOG_INFO("publishing gateway states");
-                for (auto item : gateway_states_)
+                SPDLOG_DEBUG("publishing broker states");
+                for (auto item : broker_states_)
                 {
                     publish_state(trigger_time, get_location(item.first), item.second);
                 }
@@ -309,7 +310,7 @@ namespace kungfu
                 $([&, trigger_time, md_location_uid](event_ptr event)
                   {
                       auto md_location = get_location(md_location_uid);
-                      update_and_publish_state(trigger_time, md_location, GatewayState::Ready);
+                      update_and_publish_state(trigger_time, md_location, BrokerState::Ready);
                       alert_market_data(trigger_time, md_location_uid);
                   },
                   [&](std::exception_ptr e)
@@ -335,7 +336,7 @@ namespace kungfu
                   [&, trigger_time, md_location_uid](std::exception_ptr e)
                   {
                       auto md_location = get_location(md_location_uid);
-                      update_and_publish_state(trigger_time, md_location, GatewayState::Idle);
+                      update_and_publish_state(trigger_time, md_location, BrokerState::Idle);
                       monitor_market_data(trigger_time, md_location_uid);
                   });
             }

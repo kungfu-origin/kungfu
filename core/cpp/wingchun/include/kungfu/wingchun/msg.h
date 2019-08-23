@@ -46,8 +46,8 @@ namespace kungfu
                     CancelOrder = 354,
                     CancelAllOrder = 355,
 
-                    GatewayStateRefresh = 400,
-                    GatewayState = 401,
+                    BrokerStateRefresh = 400,
+                    BrokerState = 401,
 
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
@@ -57,7 +57,7 @@ namespace kungfu
 
             namespace data
             {
-                enum class GatewayState : int
+                enum class BrokerState : int
                 {
                     Unknown = 0,
                     Idle = 1,

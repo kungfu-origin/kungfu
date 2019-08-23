@@ -30,10 +30,10 @@ namespace kungfu
 
                 void on_start() override;
 
-                void publish_state(msg::data::GatewayState state)
+                void publish_state(msg::data::BrokerState state)
                 {
                     auto s = static_cast<int32_t>(state);
-                    write_to(0, msg::type::GatewayState, s);
+                    write_to(0, msg::type::BrokerState, s);
                 }
             };
         }

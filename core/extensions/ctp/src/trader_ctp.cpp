@@ -268,7 +268,7 @@ namespace kungfu
                 } else
                 {
                     LOGIN_INFO(fmt::format("[OnRspSettlementInfoConfirm]"));
-                    publish_state(GatewayState::Ready);
+                    publish_state(BrokerState::Ready);
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                     req_qry_instrument();
                 }
