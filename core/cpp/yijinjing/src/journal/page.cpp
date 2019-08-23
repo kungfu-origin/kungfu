@@ -107,8 +107,10 @@ namespace kungfu
                 }
                 for (int i = page_ids.size() - 1; i >= 0; i--)
                 {
-                    page_ptr page = page::load(location, dest_id, page_ids[i], false, true);
-                    if (page->begin_time() < time)
+                    auto page = page::load(location, dest_id, page_ids[i], false, true);
+                    auto page_begin_time = page->begin_time();
+                    page->release();
+                    if (page_begin_time < time)
                     {
                         return page_ids[i];
                     }

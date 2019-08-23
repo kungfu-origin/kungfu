@@ -71,6 +71,8 @@ namespace kungfu {
                     int nRet = GetLastError();
                     throw journal_error("failed to load page " + path + ", MapViewOfFile Error " + std::to_string(nRet));
                 }
+                CloseHandle(fileMappingObject);
+                CloseHandle(dumpFileDescriptor);
 #else
                 bool master = is_writing || !lazy;
                 int fd = open(path.c_str(), (master ? O_RDWR : O_RDONLY) | O_CREAT, (mode_t) 0600);
@@ -117,7 +119,7 @@ namespace kungfu {
                 close(fd);
 #endif // _WINDOWS
 
-                SPDLOG_TRACE("mapped {} - {} - {}", path, is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
+                SPDLOG_DEBUG("mapped {} - {} - {}", path, is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
                 return reinterpret_cast<uintptr_t>(buffer);
             }
 
@@ -125,6 +127,7 @@ namespace kungfu {
             {
                 void *buffer = reinterpret_cast<void *>(address);
 #ifdef _WINDOWS
+                FlushViewOfFile(buffer, 0);
                 UnmapViewOfFile(buffer);
 #else
                 //unlock and unmap
