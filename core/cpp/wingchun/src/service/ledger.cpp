@@ -85,6 +85,7 @@ namespace kungfu
                     case category::TD:
                     {
                         update_and_publish_state(trigger_time, app_location, BrokerState::DisConnected);
+                        broker_states_.erase(location_uid);
                         break;
                     }
                     case category::STRATEGY:
@@ -96,7 +97,6 @@ namespace kungfu
                         break;
                     }
                 }
-                broker_states_.erase(location_uid);
                 apprentice::deregister_location(trigger_time, location_uid);
             }
 
@@ -292,7 +292,10 @@ namespace kungfu
                 SPDLOG_DEBUG("publishing broker states");
                 for (auto item : broker_states_)
                 {
-                    publish_state(trigger_time, get_location(item.first), item.second);
+                    if (has_location(item.first))
+                    {
+                        publish_state(trigger_time, get_location(item.first), item.second);
+                    }
                 }
             }
 
