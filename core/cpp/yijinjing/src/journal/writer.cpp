@@ -113,16 +113,20 @@ namespace kungfu
 
             void writer::close_page(int64_t trigger_time)
             {
-                auto frame = journal_->current_frame();
-                frame->set_header_length();
-                frame->set_trigger_time(trigger_time);
-                frame->set_msg_type(msg::type::PageEnd);
-                frame->set_source(journal_->location_->uid);
-                frame->set_dest(journal_->dest_id_);
-                frame->set_gen_time(time::now_in_nano());
-                frame->set_data_length(0);
-                journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                page_ptr last_page = journal_->current_page_;
                 journal_->load_next_page();
+
+                frame last_page_frame;
+                last_page_frame.set_address(last_page->last_frame_address());
+                last_page_frame.move_to_next();
+                last_page_frame.set_header_length();
+                last_page_frame.set_trigger_time(trigger_time);
+                last_page_frame.set_msg_type(msg::type::PageEnd);
+                last_page_frame.set_source(journal_->location_->uid);
+                last_page_frame.set_dest(journal_->dest_id_);
+                last_page_frame.set_gen_time(time::now_in_nano());
+                last_page_frame.set_data_length(0);
+                last_page->set_last_frame_position(last_page_frame.address() - journal_->current_page_->address());
             }
         }
     }
