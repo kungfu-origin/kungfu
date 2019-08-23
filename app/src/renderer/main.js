@@ -82,7 +82,8 @@ process.env.ELECTRON_RUN_AS_NODE = true;
 startMaster(false)
 .catch(err => console.error(err))
 .finally(() => {
-    startLedger(false)
+    utils.delaySeconds(2000)
+    .then(() => startLedger(false))
     .catch(err => console.error(err))
     .finally(() => startGetProcessStatus())
 })
