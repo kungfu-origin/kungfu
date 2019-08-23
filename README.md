@@ -77,6 +77,7 @@ C:\> pip install pipenv
 确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 5.0 以上：
 
 ```
+yum install rpm-build
 yum -y install centos-release-scl
 yum -y install devtoolset-8-gcc devtoolset-8-gcc-c++ devtoolset-8-binutils
 echo "source /opt/rh/devtoolset-8/enable" >> /etc/profile
