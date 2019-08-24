@@ -8,6 +8,7 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
+#include <kungfu/wingchun/msg.h>
 
 namespace kungfu
 {
