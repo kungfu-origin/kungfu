@@ -21,6 +21,7 @@ namespace kungfu
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_PASSIVE);
                 nlohmann::json config = nlohmann::json::parse(json_config);
+                SPDLOG_INFO("[json_config] {}",json_config);
                 if (config.find("md_parameter") != config.end())
                 {
                     for (nlohmann::json::iterator it =config["md_parameter"].begin(); it != config["md_parameter"].end(); ++it)

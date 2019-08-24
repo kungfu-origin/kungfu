@@ -1,25 +1,25 @@
 {
-    "kungfuConfig": {
-        "type": "source",
-        "config": {
-            "name": "sim",
-            "type": "stock",
-            "key": "user_id",
-            "config": [{
-                    "key": "user_id",
-                    "name": "user_id",
-                    "type": "str",
-                    "errMsg": "请填写账户 user_id",
-                    "required": true
-                },
-                {
-                    "key": "md_parameter",
-                    "name": "md_parameter",
-                    "type": "str",
-                    "errMsg": "请填写行情信息",
-                    "required": true
-                }
-            ]
+  "kungfuConfig": {
+    "type": "source",
+    "config": {
+      "name": "sim",
+      "type": "stock",
+      "key": "user_id",
+      "config": [{
+        "key": "user_id",
+        "name": "user_id",
+        "type": "str",
+        "errMsg": "请填写账户 user_id",
+        "required": true
+      },
+        {
+          "key": "md_parameter",
+          "name": "md_parameter",
+          "type": "str",
+          "errMsg": "请填写行情信息",
+          "required": true
         }
+      ]
     }
+  }
 }
