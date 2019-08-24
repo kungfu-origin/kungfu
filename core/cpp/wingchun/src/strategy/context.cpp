@@ -24,7 +24,10 @@ namespace kungfu
         {
             Context::Context(practice::apprentice &app, const rx::connectable_observable<yijinjing::event_ptr> &events) :
                     app_(app), events_(events)
-            {}
+            {
+                auto home = app.get_io_device()->get_home();
+                log::copy_log_settings(home, home->name);
+            }
 
             void Context::react()
             {
