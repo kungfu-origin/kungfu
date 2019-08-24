@@ -45,37 +45,37 @@ namespace kungfu
             public:
                 ~page();
 
-                const uint32_t get_page_size() const
+                [[nodiscard]] uint32_t get_page_size() const
                 { return header_->page_size; }
 
-                const data::location_ptr get_location() const
+                [[nodiscard]] data::location_ptr get_location() const
                 { return location_; }
 
-                const uint32_t get_dest_id() const
+                [[nodiscard]] uint32_t get_dest_id() const
                 { return dest_id_; }
 
-                const int get_page_id() const
+                [[nodiscard]] int get_page_id() const
                 { return page_id_; }
 
-                int64_t begin_time() const
+                [[nodiscard]] int64_t begin_time() const
                 { return reinterpret_cast<frame_header *>(first_frame_address())->gen_time; }
 
-                int64_t end_time() const
+                [[nodiscard]] int64_t end_time() const
                 { return reinterpret_cast<frame_header *>(last_frame_address())->gen_time; }
 
-                uintptr_t address() const
+                [[nodiscard]] uintptr_t address() const
                 { return reinterpret_cast<uintptr_t>(header_); }
 
-                uintptr_t address_border() const
+                [[nodiscard]] uintptr_t address_border() const
                 { return address() + header_->page_size - sizeof(frame_header); }
 
-                uintptr_t first_frame_address() const
+                [[nodiscard]] uintptr_t first_frame_address() const
                 { return address() + header_->page_header_length; }
 
-                uintptr_t last_frame_address() const
+                [[nodiscard]] uintptr_t last_frame_address() const
                 { return address() + header_->last_frame_position; }
 
-                bool is_full() const
+                [[nodiscard]] bool is_full() const
                 { return last_frame_address() + reinterpret_cast<frame_header *>(last_frame_address())->length > address_border(); }
 
                 static page_ptr load(const data::location_ptr& location, uint32_t dest_id, int page_id, bool is_writing, bool lazy);
@@ -102,6 +102,7 @@ namespace kungfu
 
                 friend class journal;
                 friend class writer;
+                friend class reader;
             };
 
             inline static uint32_t find_page_size(const data::location_ptr& location, uint32_t dest_id)

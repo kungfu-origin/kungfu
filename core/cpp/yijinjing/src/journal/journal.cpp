@@ -39,13 +39,13 @@ namespace kungfu
             void journal::next()
             {
                 assert(current_page_.get() != nullptr);
-
-                frame_->move_to_next();
-                page_frame_nb_++;
-
                 if (frame_->msg_type() == msg::type::PageEnd)
                 {
                     load_next_page();
+                } else
+                {
+                    frame_->move_to_next();
+                    page_frame_nb_++;
                 }
             }
 

@@ -38,10 +38,7 @@ namespace kungfu
             page::~page()
             {
                 SPDLOG_TRACE("releasing page {}/{:08x}.{}.journal", location_->uname, dest_id_, page_id_);
-                if (!os::release_mmap_buffer(address(), size_, lazy_))
-                {
-                    throw journal_error("failed to release memory for page " + get_page_path(location_, dest_id_, page_id_));
-                }
+                os::release_mmap_buffer(address(), size_, lazy_);
             }
 
             void page::set_last_frame_position(uint64_t position)
