@@ -5,13 +5,14 @@
       "name": "sim",
       "type": "stock",
       "key": "user_id",
-      "config": [{
-        "key": "user_id",
-        "name": "user_id",
-        "type": "str",
-        "errMsg": "请填写账户 user_id",
-        "required": true
-      },
+      "config": [
+        {
+          "key": "user_id",
+          "name": "user_id",
+          "type": "str",
+          "errMsg": "请填写账户 user_id",
+          "required": true
+        },
         {
           "key": "md_parameter",
           "name": "md_parameter",

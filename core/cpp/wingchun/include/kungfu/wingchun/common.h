@@ -21,7 +21,7 @@
 #define EXCHANGE_CFFEX "CFFEX"
 #define EXCHANGE_INE "INE"
 
-#define SOURCE_PASSIVE "passive"
+#define SOURCE_SIM "sim"
 #define SOURCE_CTP "ctp"
 #define SOURCE_XTP "xtp"
 

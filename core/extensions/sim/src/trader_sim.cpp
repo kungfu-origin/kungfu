@@ -21,7 +21,7 @@ namespace kungfu
         namespace sim
         {
             TraderSim::TraderSim(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id, const std::string &json_config) :
-                    Trader(low_latency, std::move(locator), SOURCE_PASSIVE, account_id)
+                    Trader(low_latency, std::move(locator), SOURCE_SIM, account_id)
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), account_id);
                 SPDLOG_INFO("[account] {}", account_id);

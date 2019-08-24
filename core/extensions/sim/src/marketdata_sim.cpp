@@ -17,14 +17,16 @@ namespace kungfu
         namespace sim
         {
             MarketDataSim::MarketDataSim(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config) :
-                    MarketData(low_latency, std::move(locator), SOURCE_PASSIVE)
+                    MarketData(low_latency, std::move(locator), SOURCE_SIM)
             {
-                yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_PASSIVE);
+                yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_SIM);
                 nlohmann::json config = nlohmann::json::parse(json_config);
                 SPDLOG_INFO("[json_config] {}",json_config);
                 if (config.find("md_parameter") != config.end())
                 {
-                    for (nlohmann::json::iterator it =config["md_parameter"].begin(); it != config["md_parameter"].end(); ++it)
+                    std::string md_param_str = config["md_parameter"];
+                    nlohmann::json md_param = nlohmann::json::parse(md_param_str);
+                    for (nlohmann::json::iterator it = md_param.begin(); it != md_param.end(); ++it)
                     {
                         //合约、数据类型、幅值、周期、前收价、行情时间间隔
                         MdParameter mdp;
@@ -36,7 +38,7 @@ namespace kungfu
                         mdp.interval = it.value()["interval"];
                         md_parameters_.push_back(mdp);
                     }
-                    init_md();
+                    init();
                 }
                 else
                 {
@@ -44,7 +46,7 @@ namespace kungfu
                 }
             }
 
-            bool MarketDataSim::init_md()
+            void MarketDataSim::init()
             {
                 for (auto mdp : md_parameters_)
                 {
@@ -86,7 +88,6 @@ namespace kungfu
                     SPDLOG_TRACE("[QUOTE] {}", j.dump());
                     mds_[std::string(mdp.instrument_id)] = quote;
                 }
-                return true;
             }
 
             bool MarketDataSim::subscribe(const std::vector <msg::data::Instrument> &instruments)
@@ -106,11 +107,11 @@ namespace kungfu
                 events_ | time_interval(std::chrono::seconds(1)) |
                 $([&](event_ptr e)
                   {
-                      creat_md();
+                      generate();
                   });
             }
 
-            void MarketDataSim::creat_md()
+            void MarketDataSim::generate()
             {
                 auto writer = writers_[0];
                 int timep = int(kungfu::yijinjing::time::now_in_nano() / 1e9);
@@ -118,21 +119,21 @@ namespace kungfu
                 {
                     if (mdp.interval == 0)
                     {
+                        auto gen_time = time::now_in_nano();
                         for (int i = 0; i<10000; i++)
                         {
-                            msg::data::Quote &quote = writer->open_data<msg::data::Quote>(
-                                    kungfu::yijinjing::time::now_in_nano(), msg::type::Quote);
+                            msg::data::Quote &quote = writer->open_data<msg::data::Quote>(gen_time, msg::type::Quote);
 
                             quote = mds_[std::string(mdp.instrument_id)];
                             quote.data_time = kungfu::yijinjing::time::now_in_nano();
                             mds_[std::string(quote.instrument_id)].volume += 10;
                             quote.volume = mds_[std::string(quote.instrument_id)].volume;
                             if (mdp.type == DataType::StandardSine)
-                                sin_quota(quote, timep, mdp);
+                                sin_quote(quote, timep, mdp);
                             else if (mdp.type == DataType::StandardLine)
-                                line_quota(quote, timep, mdp);
+                                line_quote(quote, timep, mdp);
                             else if (mdp.type == DataType::StandardRandom)
-                                random_quota(quote, timep, mdp);
+                                random_quote(quote, timep, mdp);
                             nlohmann::json j;
                             msg::data::to_json(j, quote);
                             SPDLOG_TRACE("[QUOTE] {}", j.dump());
@@ -149,11 +150,11 @@ namespace kungfu
                         mds_[std::string(quote.instrument_id)].volume += 10;
                         quote.volume = mds_[std::string(quote.instrument_id)].volume;
                         if (mdp.type == DataType::StandardSine)
-                            sin_quota(quote, timep, mdp);
+                            sin_quote(quote, timep, mdp);
                         else if (mdp.type == DataType::StandardLine)
-                            line_quota(quote, timep, mdp);
+                            line_quote(quote, timep, mdp);
                         else if (mdp.type == DataType::StandardRandom)
-                            random_quota(quote, timep, mdp);
+                            random_quote(quote, timep, mdp);
                         nlohmann::json j;
                         msg::data::to_json(j, quote);
                         SPDLOG_TRACE("[QUOTE] {}", j.dump());
@@ -170,19 +171,19 @@ namespace kungfu
                     return 1;
             }
 
-            void MarketDataSim::static_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
+            void MarketDataSim::static_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
                 quote.last_price = mdp.pre_price;
             }
 
-            void MarketDataSim::sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
+            void MarketDataSim::sin_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
                 quote.last_price = mdp.pre_price +
                                    (mdp.pre_price * double(mdp.limit) / 100.0) * sin(time / double(mdp.cycle));
                 quote.last_price = int(quote.last_price * 100.00 + 0.5) / 100.00;
             }
 
-            void MarketDataSim::line_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
+            void MarketDataSim::line_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
                 quote.last_price = pow(-1, int(time) / int(mdp.cycle)) * (mdp.limit / mdp.cycle * time -
                                     int(time + mdp.cycle) / (2 * int(mdp.cycle* 2 * mdp.limit))) -
@@ -190,7 +191,7 @@ namespace kungfu
                 quote.last_price = int(quote.last_price * 100.00 + 0.5) / 100.00;
             }
 
-            void MarketDataSim::random_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
+            void MarketDataSim::random_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp)
             {
                 double last_price = mds_[std::string(quote.instrument_id)].last_price;
                 double pre_price = std::max(mds_[std::string(quote.instrument_id)].pre_close_price,

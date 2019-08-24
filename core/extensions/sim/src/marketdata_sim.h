@@ -46,17 +46,17 @@ namespace kungfu
             private:
                 void on_start() override;
 
-                bool init_md();
+                void init();
 
-                void creat_md();
+                void generate();
 
-                void static_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
+                void static_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void sin_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
+                void sin_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void line_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
+                void line_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
-                void random_quota(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
+                void random_quote(msg::data::Quote &quote, const int &time, const MdParameter &mdp);
 
                 int get_inter_val(char *instrument_id);
 
