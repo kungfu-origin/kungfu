@@ -104,7 +104,7 @@ namespace kungfu
             char* str = new char[len + 1];
             memset(str, 0, len + 1);
             WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
-            string strTemp = str;
+            std::string strTemp = str;
             if (wstr) delete[] wstr;
             if (str) delete[] str;
             return strTemp;
