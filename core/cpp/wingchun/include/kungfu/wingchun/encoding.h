@@ -19,82 +19,8 @@ namespace kungfu
 {
     namespace wingchun
     {
-        /*
-        inline int gbk2utf8_convert(char *utfStr, size_t maxUtfStrlen, const char *srcStr)
-        {
-            if(!srcStr||!utfStr)
-            {
-                return -1;
-            }
-
-#if defined(_WIN32) || defined(_WIN64)
-            int len = MultiByteToWideChar(CP_ACP, 0, (LPCCH)srcStr, -1, NULL,0);
-            unsigned short * strUnicode = new unsigned short[len+1];
-            memset(strUnicode, 0, len * 2 + 2);
-            MultiByteToWideChar(CP_ACP, 0, (LPCCH)srcStr, -1, (LPWSTR)strUnicode, len);
-            len = WideCharToMultiByte(CP_UTF8, 0, (LPWSTR)strUnicode, -1, NULL, 0, NULL, NULL);
-            if (len > (int)maxUtfStrlen)
-            {
-                delete[] strUnicode;
-                return -1;
-            }
-            WideCharToMultiByte (CP_UTF8, 0, (LPWSTR)strUnicode, -1, utfStr, len, NULL,NULL);
-            delete[] strUnicode;
-            return len;
-#else
-            if(nullptr == setlocale(LC_ALL,"zh_CN.gbk"))
-            {
-                return -1;
-            }
-
-            int unicodeLen = mbstowcs(NULL,srcStr,0);
-            if(unicodeLen <= 0)
-            {
-                return -1;
-            }
-            wchar_t *unicodeStr = (wchar_t *)calloc(sizeof(wchar_t),unicodeLen+1);
-            mbstowcs(unicodeStr,srcStr,strlen(srcStr));
-
-            if(nullptr == setlocale(LC_ALL,"zh_CN.utf8"))
-            {
-                free(unicodeStr);
-                return -1;
-            }
-            int utfLen=wcstombs(NULL,unicodeStr,0);
-            if(utfLen<=0)
-            {
-                free(unicodeStr);
-                return -1;
-            }
-            else if(utfLen>=(int)maxUtfStrlen)
-            {
-                free(unicodeStr);
-                return -1;
-            }
-            wcstombs(utfStr,unicodeStr,utfLen);
-            utfStr[utfLen] = 0;
-            free(unicodeStr);
-            return utfLen;
-#endif
-        }
-
-        inline std::string gbk2utf8(const std::string& srcStr)
-        {
-            if (srcStr.empty())
-            {
-                return "";
-            }
-            int tarLen = srcStr.size() * 2 + 1;
-            char *tarStr = new char[tarLen];
-            gbk2utf8_convert(tarStr, tarLen - 1, srcStr.c_str());
-            std::string target = tarStr;
-            delete []tarStr;
-            return target;
-        }
-         */
-
 #ifdef _WIN32
-        std::string gbk2utf8(const std::string& src_str)
+        inline std::string gbk2utf8(const std::string& src_str)
         {
             int len = MultiByteToWideChar(CP_ACP, 0, src_str.c_str(), -1, NULL, 0);
             wchar_t* wstr = new wchar_t[len + 1];
@@ -110,7 +36,7 @@ namespace kungfu
             return strTemp;
         }
 #else
-        std::string gbk2utf8(const std::string& src_str)
+        inline std::string gbk2utf8(const std::string& src_str)
         {
             iconv_t conv = iconv_open("utf8", "gbk");
             if (conv == (iconv_t)-1)
