@@ -6,6 +6,7 @@
 
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/macro.h>
+#include <kungfu/wingchun/encoding.h>
 
 #include "trader_ctp.h"
 #include "serialize_ctp.h"
@@ -241,7 +242,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    LOGIN_ERROR(fmt::format("[OnRspUserLogin] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    LOGIN_ERROR(fmt::format("[OnRspUserLogin] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
                 } else
                 {
                     LOGIN_INFO(fmt::format("[OnRspUserLogin] (Bid) {} (Uid) {} (SName) {} (TradingDay) {} (FrontID) {} (SessionID) {}",
@@ -264,7 +265,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    LOGIN_ERROR(fmt::format("[OnRspSettlementInfoConfirm] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    LOGIN_ERROR(fmt::format("[OnRspSettlementInfoConfirm] (ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
                 } else
                 {
                     LOGIN_INFO(fmt::format("[OnRspSettlementInfoConfirm]"));
@@ -291,11 +292,11 @@ namespace kungfu
                         order.insert_time = order_info.insert_time;
                         order.error_id = pRspInfo->ErrorID;
                         order.update_time = kungfu::yijinjing::time::now_in_nano();
-                        strcpy(order.error_msg, pRspInfo->ErrorMsg);
+                        strcpy(order.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str());
                         order.status = OrderStatus::Error;
                         writer->close_data();
                     }
-                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
+                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
                 }
             }
 
@@ -304,7 +305,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    CANCEL_ORDER_ERROR(fmt::format("[OnRspOrderAction] (ErrorId) {} (ErrorMsg) {} (InputOrderAction) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction)));
+                    CANCEL_ORDER_ERROR(fmt::format("[OnRspOrderAction] (ErrorId) {} (ErrorMsg) {} (InputOrderAction) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction)));
                 }
             }
 
@@ -359,7 +360,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    ACCOUNT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    ACCOUNT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
                 }
                 else
                 {
@@ -385,7 +386,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    POSITION_DETAIL_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    POSITION_DETAIL_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
                 } else
                 {
                     auto writer = get_writer(0);
@@ -420,7 +421,7 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    INSTRUMENT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    INSTRUMENT_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg)));
                 } else
                 {
                     INSTRUMENT_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
