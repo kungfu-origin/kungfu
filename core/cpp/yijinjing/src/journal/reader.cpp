@@ -87,7 +87,7 @@ namespace kungfu
                 int64_t min_time = time::now_in_nano();
                 for (const auto &journal : journals_)
                 {
-                    auto frame = journal->current_frame();
+                    const auto &&frame = journal->current_frame();
                     if (frame->has_data() && frame->gen_time() <= min_time)
                     {
                         min_time = frame->gen_time();
@@ -95,7 +95,6 @@ namespace kungfu
                     }
                 }
             }
-
         }
     }
 }

@@ -86,8 +86,8 @@ namespace kungfu
                 location["category"] = item.second->category;
                 location["group"] = item.second->group;
                 location["name"] = item.second->name;
-                auto msg = location.dump();
-                auto frame = writer->open_frame(e->gen_time(), msg::type::Location, msg.length());
+                auto &&msg = location.dump();
+                auto &&frame = writer->open_frame(e->gen_time(), msg::type::Location, msg.length());
                 SPDLOG_DEBUG("adding location {}", msg);
                 memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
                 writer->close_frame(msg.length());
@@ -113,8 +113,8 @@ namespace kungfu
             reader_->disjoin(app_location_uid);
             timer_tasks_.erase(app_location_uid);
 
-            auto msg = location_desc.dump();
-            auto frame = writers_[0]->open_frame(trigger_time, msg::type::Deregister, msg.length());
+            auto &&msg = location_desc.dump();
+            auto &&frame = writers_[0]->open_frame(trigger_time, msg::type::Deregister, msg.length());
             memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
             writers_[0]->close_frame(msg.length());
         }
