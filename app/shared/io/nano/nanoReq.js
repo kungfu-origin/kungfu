@@ -73,11 +73,11 @@ export const nanoCancelOrder = ({ accountId, orderId }) => {
                 if(data.status === 200) {
                     resolve(data)
                 } else {
-                    reject(new Error(''))
+                    reject(new Error('撤单失败！'))
                 } 
             }
         })
-    }).catch(err => console.error(err))
+    })
 }
 
 /** 全部撤单

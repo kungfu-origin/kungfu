@@ -214,13 +214,13 @@ export default {
             const accountIds = t.getSourceNameByAccountId(props.accountId)
             if(!accountIds.length) {
                 t.$message.error(`${props.accountId} 不在系统内！`)
-                // return;
+                return;
             }
             const accountId = accountIds[0]
             const gatewayName = `td_${accountId}`
             if(t.processStatus[gatewayName] !== 'online') {
                 t.$message.warning(`需要先启动 ${accountId} 交易进程！`)
-                // return;
+                return;
             }
             //撤单
             t.$message.info('正在发送撤单指令...')     
@@ -229,7 +229,7 @@ export default {
                 orderId: props.orderId
             })
             .then(() => t.$message.success('撤单指令已发送！'))
-            .catch(err => t.$message.error('撤单指令发送失败！'))
+            .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
         },
 
         handleCancelAllOrders(){
