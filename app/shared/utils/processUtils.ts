@@ -136,7 +136,7 @@ export const describeProcess = (name: string): Promise<any> => {
 
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
-    const trace = process.env.NODE_ENV === 'development' ? '-l trace ' : '-l trace '
+    const trace = process.env.NODE_ENV === 'development' ? '-l trace ' : ''
     options = {
         ...options,
         "args": trace + options.args,

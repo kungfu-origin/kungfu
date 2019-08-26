@@ -17,6 +17,7 @@ export const setTradingDay = ({ commit }, tradingDay) => {
 export const reqCalendar = ({ commit }) => {
     return nanoReqCalendar()
     .then(calendar => {
+        console.log('req calendar', calendar)
         if(calendar && calendar.trading_day) commit('SET_CALENDAR', calendar);
         return calendar
     })
