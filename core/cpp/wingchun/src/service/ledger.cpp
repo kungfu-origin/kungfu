@@ -128,7 +128,7 @@ namespace kungfu
                 if (event->msg_type() == yijinjing::msg::type::RequestReadFrom &&
                     source_location->category == category::TD && dest_location->category == category::STRATEGY)
                 {
-                    SPDLOG_INFO("watcher read order/trades from {} to {}", source_location->uname, dest_location->uname);
+                    SPDLOG_INFO("ledger read order/trades from {} to {}", source_location->uname, dest_location->uname);
                     reader_->join(source_location, dest_id, event->gen_time());
                 }
             }

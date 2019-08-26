@@ -67,7 +67,6 @@ class Ledger(pywingchun.Ledger):
         self.trading_day = trading_day
 
     def on_quote(self, event, quote):
-        self.ctx.logger.debug('on quote')
         for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
             ledger.apply_quote(quote)
 
@@ -228,6 +227,7 @@ def new_order_single(ctx, event, location):
 
 @on(msg.CancelOrder)
 def cancel_order(ctx, event, location):
+    ctx.logger.info('cancel account order request')
     order_id = event['data']['order_id']
     if order_id in ctx.orders:
         order_record = ctx.orders[order_id]
@@ -238,6 +238,7 @@ def cancel_order(ctx, event, location):
             'msg_type': msg.CancelOrder
         }
     else:
+        ctx.logger.error('can not cancel order %s from orders %s', order_id, list(ctx.orders.keys()))
         return {
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.CancelOrder
@@ -246,6 +247,7 @@ def cancel_order(ctx, event, location):
 
 @on(msg.CancelAllOrder)
 def cancel_all_order(ctx, event, location):
+    ctx.logger.info('cancel all account order request')
     for order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         if order_record['source'] == location.uid:

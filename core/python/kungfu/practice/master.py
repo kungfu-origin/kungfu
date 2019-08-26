@@ -35,7 +35,7 @@ class Master(pyyjj.master):
         pyyjj.master.__init__(self, pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
         self.ctx = ctx
         self.ctx.master = self
-        self.ctx.logger = create_logger("watcher", ctx.log_level, self.io_device.home)
+        self.ctx.logger = create_logger("master", ctx.log_level, self.io_device.home)
         self.ctx.apprentices = {}
 
         ctx.calendar = Calendar(ctx)
