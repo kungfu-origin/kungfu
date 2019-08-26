@@ -49,9 +49,9 @@ export const nanoReqCalendar = () => {
 }
 
 //撤单
-export const nanoCancelOrder = ({ sourceAccountId, orderId }) => {
+export const nanoCancelOrder = ({ accountId, orderId }) => {
     return new Promise((resolve, reject) => {
-        const { source, id } = sourceAccountId.parseSourceAccountId();
+        const { source, id } = accountId.parseSourceAccountId();
         const reqMsg = JSON.stringify({
             msg_type: msgType.cancelOrder, 
             data: {
@@ -62,6 +62,8 @@ export const nanoCancelOrder = ({ sourceAccountId, orderId }) => {
                 'order_id': orderId
             }
         })
+
+        console.log(reqMsg,'---')
         const req = buildRepNmsg()
         req.send(reqMsg)
         req.on('data', buf => {
@@ -75,7 +77,7 @@ export const nanoCancelOrder = ({ sourceAccountId, orderId }) => {
                 } 
             }
         })
-    })
+    }).catch(err => console.error(err))
 }
 
 /** 全部撤单

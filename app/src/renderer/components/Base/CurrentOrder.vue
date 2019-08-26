@@ -214,16 +214,16 @@ export default {
             const accountIds = t.getSourceNameByAccountId(props.accountId)
             if(!accountIds.length) {
                 t.$message.error(`${props.accountId} 不在系统内！`)
-                return;
+                // return;
             }
             const accountId = accountIds[0]
             const gatewayName = `td_${accountId}`
             if(t.processStatus[gatewayName] !== 'online') {
                 t.$message.warning(`需要先启动 ${accountId} 交易进程！`)
-                return;
+                // return;
             }
             //撤单
-            t.$message.info('正在发送撤单指令...')           
+            t.$message.info('正在发送撤单指令...')     
             nanoCancelOrder({
                 accountId,
                 orderId: props.orderId

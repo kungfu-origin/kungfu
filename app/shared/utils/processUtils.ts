@@ -139,8 +139,6 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
     const extensionName = platform === 'win' ? '.exe' : ''
     const logConfig: any = readJsonSync(LOG_CONFIG) || {}
     const trace = logConfig.logConfig || '';
-    console.log('trace is', trace)
-
     options = {
         ...options,
         "args": trace + options.args,
