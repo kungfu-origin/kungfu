@@ -262,6 +262,30 @@ namespace kungfu
                       buffer.clear();
                       memset(&asset_info, 0, sizeof(asset_info));
                   });
+
+                /**
+                 * process active query from clients
+                 */
+                events_ |
+                filter([&](event_ptr event)
+                       {
+                           return dynamic_cast<nanomsg::nanomsg_json *>(event.get()) != nullptr and event->source() == 0;
+                       }) |
+                $([&](event_ptr event)
+                  {
+                      // let python do the actual job, we just operate the I/O part
+                      try
+                      {
+                          const nlohmann::json& cmd = event->data<nlohmann::json>();
+                          SPDLOG_INFO("handle command {}", cmd.dump());
+                          std::string response = handle_request(event, event->to_string());
+                          get_io_device()->get_rep_sock()->send(response);
+                      }
+                      catch (const std::exception &e)
+                      {
+                          SPDLOG_ERROR("Unexpected exception {}", e.what());
+                      }
+                  });
             }
 
             void Ledger::publish_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)

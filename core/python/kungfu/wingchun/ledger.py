@@ -55,7 +55,7 @@ class Ledger(pywingchun.Ledger):
         req = json.loads(msg)
         data = req['data']
         location = kfj.get_location_from_json(self.ctx, data)
-        return json.dumps(handle(req['msg_type'], self.ctx, event, location))
+        return json.dumps(handle(req['msg_type'], self.ctx, event, location, data))
 
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
@@ -206,7 +206,7 @@ class Ledger(pywingchun.Ledger):
 
 
 @on(msg.Calendar)
-def calendar_request(ctx, event, location):
+def calendar_request(ctx, event, location, data):
     return {
         'status': http.HTTPStatus.OK,
         'msg_type': msg.Calendar,
@@ -217,7 +217,7 @@ def calendar_request(ctx, event, location):
 
 
 @on(msg.NewOrderSingle)
-def new_order_single(ctx, event, location):
+def new_order_single(ctx, event, location, data):
     # ctx.ledger.new_order_single(event, location.uid)
     return {
         'status': http.HTTPStatus.OK,
@@ -226,9 +226,9 @@ def new_order_single(ctx, event, location):
 
 
 @on(msg.CancelOrder)
-def cancel_order(ctx, event, location):
+def cancel_order(ctx, event, location, data):
     ctx.logger.info('cancel account order request')
-    order_id = event['data']['order_id']
+    order_id = data['order_id']
     if order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         ctx.logger.info('cancel account order %s', order_record['order'])
@@ -246,7 +246,7 @@ def cancel_order(ctx, event, location):
 
 
 @on(msg.CancelAllOrder)
-def cancel_all_order(ctx, event, location):
+def cancel_all_order(ctx, event, location, data):
     ctx.logger.info('cancel all account order request')
     for order_id in ctx.orders:
         order_record = ctx.orders[order_id]
