@@ -1,6 +1,7 @@
-import { KF_HOME, KUNGFU_ENGINE, buildProcessLogPath } from '__gConfig/pathConfig';
-import { logger } from '__gUtils/logUtils';
+import { KF_HOME, KUNGFU_ENGINE, LOG_CONFIG, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
+import { logger } from '__gUtils/logUtils';
+import { readJsonSync } from '__gUtils/fileUtils';
 import { getProcesses } from 'getprocesses';
 
 const path = require('path');
@@ -136,7 +137,10 @@ export const describeProcess = (name: string): Promise<any> => {
 
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
-    const trace = process.env.NODE_ENV === 'development' ? '-l trace ' : ''
+    const logConfig: any = readJsonSync(LOG_CONFIG) || {}
+    const trace = logConfig.logConfig || '';
+    console.log('trace is', trace)
+
     options = {
         ...options,
         "args": trace + options.args,

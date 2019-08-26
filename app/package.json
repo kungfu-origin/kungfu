@@ -66,6 +66,11 @@
         "filter": [
           "!**/btdata"
         ]
+      },
+
+      {
+        "from": "./resources/logConfig.json",
+        "to": "logConfig.json"
       }
     ],
     "asar": true,

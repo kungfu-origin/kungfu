@@ -1,5 +1,4 @@
 import { deepClone } from '__gUtils/busiUtils';
-// import { EXTENSION_DIR } from '__gConfig/pathConfig';
 
 const path = require("path");
 const fse = require('fs-extra');
