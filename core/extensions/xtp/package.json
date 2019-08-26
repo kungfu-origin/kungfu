@@ -62,7 +62,7 @@
                     "name": "client_id",
                     "type": "int",
                     "errMsg": "请填写自定义多点登录ID 0-99整数",
-                    "required": false,
+                    "required": true,
                     "validator": ["o99Validator", "intValidator"],
                     "tip": "自定义多点登陆ID，需是0～99内整数"
                 }
