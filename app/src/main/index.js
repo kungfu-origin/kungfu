@@ -65,7 +65,7 @@ function createWindow () {
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
-		if (platform === 'win' && !allowQuit) {
+		if (platform !== 'mac' && !allowQuit) {
 			showQuitMessageBox();	
 			e.preventDefault();
 		}
@@ -89,7 +89,7 @@ function createWindow () {
 
 	//create db
 	initDB()
-	if(platform === 'win') updateHandler(mainWindow)
+	// if(platform === 'win') updateHandler(mainWindow)
 }
 
 
@@ -176,15 +176,16 @@ function showQuitMessageBox(){
 		defaultId: 0,
 		cancelId: 1,
 		message: "退出应用会结束所有交易进程，确认退出吗？",
-		buttons: ['确认', `最小化至${platform === 'win' ? '任务栏' : ' Dock'}`],
+		buttons: ['确认', `最小化至${platform !== 'mac' ? '任务栏' : ' Dock'}`],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
 			KillAll().then(() => app.quit())
 		}else{
 			if((mainWindow !== null) && !mainWindow.isDestroyed()){
-				if(platform === 'win') mainWindow.minimize();
+				// if(platform === 'win') mainWindow.minimize();
 				if(platform === 'mac') mainWindow.hide();
+				else mainWindow.minimize();
 			}
 		}
 	})

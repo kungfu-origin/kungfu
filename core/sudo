@@ -1,0 +1,2 @@
+source /opt/rh/devtoolset-8/enable /etc/profile
+source /opt/rh/devtoolset-8/enable /home/taurus/.bash_profile
