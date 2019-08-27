@@ -3,6 +3,7 @@ import json
 from .models import *
 from itertools import groupby
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
+from kungfu.wingchun.finance.position import get_uid as get_position_uid
 from kungfu.wingchun.finance.book import *
 from kungfu.wingchun.constants import *
 from sqlalchemy import create_engine
@@ -15,7 +16,6 @@ class SessionFactoryHolder:
     def __init__(self, location, filename):
         self.engine = create_engine(make_url(location, filename))
         self.session_factory = sessionmaker(bind=self.engine)
-
 
 class AccountsDB(SessionFactoryHolder):
     def __init__(self, location, filename):
@@ -114,59 +114,62 @@ class LedgerDB(SessionFactoryHolder):
             obj = session.query(FutureInstrument).filter(FutureInstrument.instrument_id == instrument_id).first()
             return {} if obj is None else object_as_dict(obj)
 
-    def get_stock_positions(self, session, ledger_category, account_id, client_id):
-        positions = session.query(Position).filter(Position.account_id == account_id,
-                                                   Position.client_id == client_id,
-                                                   Position.ledger_category == int(ledger_category),
-                                                   Position.instrument_type == int(InstrumentType.Stock)).all()
-        return [StockPosition(**object_as_dict(obj)) for obj in positions]
-
-    def get_future_positions(self, session, ledger_category, account_id, client_id):
-        objs = session.query(PositionDetail).filter(PositionDetail.account_id == account_id,
-                                                    PositionDetail.client_id == client_id,
-                                                    PositionDetail.ledger_category == int(ledger_category)
-                                                    ).all()
-        result = []
-        for inst, details in groupby(objs, key= lambda e: e.instrument_id):
-            details = [FuturePositionDetail(**object_as_dict(detail)) for detail in sorted(details, key = lambda obj: (obj.open_date, obj.trade_time))]
-            inst_info = self.get_instrument_info(inst)
-            pos = FuturePosition(instrument_id = inst_info["instrument_id"],
-                                 exchange_id = inst_info["exchange_id"],
-                                 short_margin_ratio = inst_info["short_margin_ratio"],
-                                 long_margin_ratio = inst_info["long_margin_ratio"],
-                                 contract_multiplier = inst_info["contract_multiplier"],
-                                 details = details,
-                                 trading_day = details[0].trading_day)
-            result.append(pos)
-        return result
-
-    def get_positions(self, session, ledger_category, account_id, client_id):
-        return self.get_stock_positions(session, ledger_category, account_id, client_id) + \
-               self.get_future_positions(session, ledger_category, account_id, client_id)
-
-    def drop(self, session, ledger_category, account_id="", client_id=""):
-        for cls in [Asset, Position, PositionDetail]:
-            session.query(cls).filter(cls.account_id == account_id, cls.client_id == client_id,cls.ledger_category == int(ledger_category)).delete()
-
-    def load(self, ledger_category, account_id = "", client_id = ""):
+    def all_instrument_infos(self):
         with session_scope(self.session_factory) as session:
-            asset_obj = session.query(Asset).filter(Asset.account_id == account_id,
+            objs = session.query(FutureInstrument).all()
+            return [object_as_dict(obj) for obj in objs]
+
+    def drop(self, session, ledger_category, source_id="",account_id="", client_id=""):
+        for cls in [Asset, Position, PositionDetail]:
+            session.query(cls).filter(cls.source_id==source_id, cls.account_id == account_id, cls.client_id == client_id,cls.ledger_category == int(ledger_category)).delete()
+
+    def load(self, ledger_category, source_id="",account_id = "", client_id = ""):
+        with session_scope(self.session_factory) as session:
+            asset_obj = session.query(Asset).filter(Asset.source_id==source_id,
+                                                    Asset.account_id == account_id,
                                                     Asset.client_id == client_id,
                                                     Asset.ledger_category == int(ledger_category)).first()
             if not asset_obj:
                 return None
             else:
                 args = object_as_dict(asset_obj)
-                positions = self.get_positions(session, ledger_category, account_id, client_id)
+                pos_objs = session.query(Position).filter(Position.source_id==source_id,
+                                                          Position.account_id == account_id,
+                                                          Position.client_id == client_id,
+                                                          Position.ledger_category == int(ledger_category)).all()
+                detail_objs = session.query(PositionDetail).filter(PositionDetail.source_id==source_id,
+                                                                   PositionDetail.account_id == account_id,
+                                                                   PositionDetail.client_id == client_id,
+                                                                   PositionDetail.ledger_category == int(ledger_category)).all()
+                pos_dict = {get_position_uid(pos.instrument_id, pos.exchange_id, pos.direction): pos for pos in pos_objs}
+                positions = []
+                for uid, pos in pos_dict.items():
+                    if pos.instrument_type == int(InstrumentType.Stock):
+                        positions.append(StockPosition(**object_as_dict(pos)))
+                for uid, details in groupby(detail_objs, key= lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
+                    details = [FuturePositionDetail(**object_as_dict(detail)) for detail in sorted(details, key = lambda obj: (obj.open_date, obj.trade_time))]
+                    summary = pos_dict[uid]
+                    pos = FuturePosition(instrument_id = summary.instrument_id,
+                                         exchange_id = summary.exchange_id,
+                                         margin_ratio = summary.margin_ratio,
+                                         contract_multiplier = summary.contract_multiplier,
+                                         realized_pnl = summary.realized_pnl,
+                                         details = details,
+                                         trading_day = details[0].trading_day)
+                    positions.append(pos)
                 args.update({"positions": positions, "ledger_category": ledger_category})
                 return AccountBook(ctx=None, **args)
 
     def dump(self, ledger):
-        with session_scope(self.session_factory) as  session:
-            self.drop(session, ledger.category, ledger.account_id, ledger.client_id)
+        with session_scope(self.session_factory) as session:
+            self.drop(session, ledger.category, source_id=ledger.source_id, account_id=ledger.account_id, client_id=ledger.client_id)
             messages = ledger.detail_messages
             objects = [self.object_from_msg(message) for message in messages]
             session.bulk_save_objects(objects)
+
+    def remove(self, ledger):
+        with session_scope(self.session_factory) as session:
+            self.drop(session, ledger.category, source_id=ledger.source_id, account_id=ledger.account_id, client_id=ledger.client_id)
 
     def get_model_cls(self, msg_type):
         if msg_type == MsgType.Asset:

@@ -1,14 +1,24 @@
 
+from pyyjj import hash_str_32
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import *
 import datetime
+
+def get_uname(instrument_id, exchange_id, direction):
+    return "{}.{}.{}".format(instrument_id, exchange_id, int(direction))
+
+def get_uid(instrument_id, exchange_id, direction):
+    uname = get_uname(instrument_id, exchange_id, direction)
+    return hash_str_32(uname)
 
 class Position:
     registry = {}
     def __init__(self, **kwargs):
         self._instrument_id = kwargs.pop("instrument_id")
         self._exchange_id = kwargs.pop("exchange_id")
-        self._symbol_id = get_symbol_id(self._instrument_id, self._exchange_id)
+        self._direction = kwargs.pop("direction", Direction.Long)
+        self._uname = get_uname(self._instrument_id, self._exchange_id, self._direction)
+        self._uid = get_uid(self._instrument_id, self._exchange_id, self._direction)
         self._trading_day = kwargs.pop("trading_day")
         if isinstance(self._trading_day, str):
             self._trading_day = datetime.datetime.strptime(self._trading_day, "%Y%m%d")
@@ -17,6 +27,9 @@ class Position:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls.registry[cls._INSTRUMENT_TYPE] = cls
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__, self.message["data"])
 
     @classmethod
     def factory(cls, instrument_type, **kwargs):
@@ -39,8 +52,12 @@ class Position:
         return self._exchange_id
 
     @property
-    def symbol_id(self):
-        return self._symbol_id
+    def direction(self):
+        return self._direction
+
+    @property
+    def uid(self):
+        return self._uid
 
     @property
     def margin(self):
@@ -83,11 +100,9 @@ class StockPosition(Position):
     _INSTRUMENT_TYPE = InstrumentType.Stock
     def __init__(self, **kwargs):
         super(StockPosition, self).__init__(**kwargs)
-        
         self._last_price = kwargs.pop("last_price", 0.0)
         self._volume = kwargs.pop("volume", 0)
         self._yesterday_volume = kwargs.pop("yesterday_volume", 0)
-
         self._avg_open_price = kwargs.pop("avg_open_price", 0.0)
         self._position_cost_price = kwargs.pop("position_cost_price", 0.0)
         if not is_valid_price(self._avg_open_price) and is_valid_price(self._position_cost_price):
@@ -106,7 +121,7 @@ class StockPosition(Position):
                 "instrument_id": self.instrument_id,
                 "exchange_id":self.exchange_id,
                 "instrument_type": int(InstrumentType.Stock),
-                "direction": int(Direction.Long),
+                "direction": int(self.direction),
                 "trading_day": self.trading_day.strftime("%Y%m%d"),
                 "volume":self.volume,
                 "yesterday_volume": self.yesterday_volume,
@@ -167,30 +182,27 @@ class StockPosition(Position):
         self.ledger._ctx.logger.info("merge {} with {}".format(self, position))
         if self.realized_pnl == 0.0 and position.realized_pnl != 0.0:
             self.realized_pnl = position.realized_pnl
-        if self._volume != position.volume:
-            self._volume = position.volume
-        if self._yesterday_volume != position.yesterday_volume:
-            self._yesterday_volume = position.yesterday_volume
+        self._volume = position.volume
+        self._yesterday_volume = position.yesterday_volume
         self.ledger._ctx.logger.info("merged {}".format(self))
         return self
 
-    def apply_trade(self, trade):
+    def apply_trade(self, trade):        
         if trade.side == Side.Buy:
             self._apply_buy(trade.price, trade.volume)
         else:
             self._apply_sell(trade.price, trade.volume)
-        self.ledger.dispatch([self.ledger.asset_message, self.message])
+        self.ledger.dispatch([self.ledger.message, self.message])
 
     def apply_quote(self, quote):
-        # self.ledger._ctx.logger.debug("apply quote (inst){}(last_price){}(pre_close_price){}(close_price){}".
-        #                               format(quote.instrument_id, quote.last_price, quote.pre_close_price, quote.close_price))
+        self.ledger._ctx.logger.debug("{} apply quote[(inst){}(last_price){}(pre_close_price){}(close_price){}]".format(self._uname, quote.instrument_id, quote.last_price, quote.pre_close_price, quote.close_price))
         pre_market_value = self.market_value
         if is_valid_price(quote.close_price):
             self._apply_settlement(quote.close_price)
         elif is_valid_price(quote.last_price):
             self._last_price = quote.last_price
         if  abs(self.market_value - pre_market_value) >= self.ledger._notice_threshold:
-            self.ledger.dispatch([self.ledger.asset_message, self.message])
+            self.ledger.dispatch([self.ledger.message, self.message])
 
     def switch_day(self, trading_day):
         if not is_valid_price(self.close_price):
@@ -199,7 +211,7 @@ class StockPosition(Position):
         self._yesterday_volume = self.volume
         self._close_price = 0.0
         self.trading_day = trading_day
-        self.ledger.dispatch([self.ledger.asset_message])
+        self.ledger.dispatch([self.ledger.message])
 
     def _apply_settlement(self, close_price):
         self._last_price = close_price
@@ -382,24 +394,29 @@ class FuturePosition(Position):
     _INSTRUMENT_TYPE = InstrumentType.Future
     def __init__(self, **kwargs):
         super(FuturePosition, self).__init__(**kwargs)
-
         details = kwargs.pop("details", [])
-        self._long_details = [detail for detail in details if detail.direction == Direction.Long]
-        self._short_details = [detail for detail in details if detail.direction == Direction.Short]
-
-        self._short_margin_ratio = kwargs.pop("short_margin_ratio")
-        self._long_margin_ratio = kwargs.pop("long_margin_ratio")
+        self._details = [detail for detail in details if detail.direction == self.direction]
         self._contract_multiplier = kwargs.pop("contract_multiplier")
+        if "margin_ratio" in kwargs:
+            self._margin_ratio = kwargs.pop("margin_ratio")
+        elif self.direction == Direction.Long:
+            self._margin_ratio = kwargs.pop("long_margin_ratio")
+        elif self.direction == Direction.Short:
+            self._margin_ratio = kwargs.pop("short_margin_ratio")
 
         self._pre_settlement_price = kwargs.pop("pre_settlement_price", 0.0)            
         self._settlement_price = kwargs.pop("settlement_price", 0.0)            
         self._last_price = kwargs.pop("last_price", 0.0)
 
-        self._long_realized_pnl = kwargs.pop("long_realized_pnl", 0.0)
-        self._short_realized_pnl = kwargs.pop("short_realized_pnl", 0.0)
+        if "realized_pnl" in kwargs:
+            self._realized_pnl = kwargs.pop("realized_pnl")
+        elif self.direction == Direction.Long:
+            self._realized_pnl = kwargs.pop("long_realized_pnl", 0.0)
+        elif self.direction == Direction.Short:
+            self._realized_pnl = kwargs.pop("short_realized_pnl", 0.0)
 
     @property
-    def long_position_message(self):
+    def message(self):
         return {
             "msg_type": int(MsgType.Position),
             "data": {
@@ -407,52 +424,20 @@ class FuturePosition(Position):
                 "instrument_id": self._instrument_id,
                 "exchange_id": self._exchange_id,
                 "instrument_type": int(InstrumentType.Future),
-                "direction": int(Direction.Long),
-                "volume": self.long_volume,
-                "yesterday_volume": self.long_yesterday_volume,
+                "direction": int(self.direction),
+                "volume": self.volume,
+                "yesterday_volume": self.yesterday_volume,
                 "last_price": self.last_price,
                 "settlement_price": self._settlement_price,
                 "pre_settlement_price": self._pre_settlement_price,
-                "unrealized_pnl": self.long_unrealized_pnl,
-                "position_pnl": self.long_position_pnl,
-                "realized_pnl": self.long_realized_pnl,
-                "margin": self.long_margin,
-                "margin_ratio": self._long_margin_ratio,
+                "unrealized_pnl": self.unrealized_pnl,
+                "position_pnl": self.position_pnl,
+                "realized_pnl": self.realized_pnl,
+                "margin": self.margin,
+                "margin_ratio": self._margin_ratio,
                 "contract_multiplier": self._contract_multiplier
             }
         }
-
-    @property
-    def short_position_message(self):
-        return {
-            "msg_type": int(MsgType.Position),
-            "data": {
-                "trading_day": self._trading_day.strftime("%Y%m%d"),
-                "instrument_id": self._instrument_id,
-                "exchange_id": self._exchange_id,
-                "direction": int(Direction.Short),
-                "volume": self.short_volume,
-                "yesterday_volume": self.short_yesterday_volume,
-                "last_price": self.last_price,
-                "settlement_price": self._settlement_price,
-                "pre_settlement_price": self._pre_settlement_price,
-                "unrealized_pnl": self.short_unrealized_pnl,
-                "position_pnl": self.short_position_pnl,
-                "realized_pnl": self.short_realized_pnl,
-                "margin": self.short_margin,
-                "margin_ratio": self._short_margin_ratio,
-                "contract_multiplier": self._contract_multiplier
-            }
-        }
-
-    @property
-    def messages(self):
-        messages = []
-        if self.long_volume > 0:
-            messages.append(self.long_position_message)
-        if self.short_volume > 0:
-            messages.append(self.short_position_message)
-        return messages
 
     @property
     def last_price(self):
@@ -460,81 +445,37 @@ class FuturePosition(Position):
 
     @property
     def details(self):
-        return self._long_details + self._short_details
+        return self._details
 
     @property
-    def long_volume(self):
-        return sum([detail.volume for detail in self._long_details])
+    def volume(self):
+        return sum([detail.volume for detail in self._details])
 
     @property
-    def long_yesterday_volume(self):
-        return sum([detail.volume for detail in self._long_details if detail.open_date != detail.trading_day])
-
-    @property
-    def short_volume(self):
-        return sum([detail.volume for detail in self._short_details])
-
-    @property
-    def short_yesterday_volume(self):
-        return sum([detail.volume for detail in self._short_details if detail.open_date != detail.trading_day])
+    def yesterday_volume(self):
+        return sum([detail.volume for detail in self._details if detail.open_date != detail.trading_day])
 
     @property
     def unrealized_pnl(self):
-        return self.long_unrealized_pnl + self.short_unrealized_pnl
-
-    @property
-    def long_unrealized_pnl(self):
-        return sum([detail.unrealized_pnl for detail in self._long_details])
-
-    @property
-    def short_unrealized_pnl(self):
-        return sum([detail.unrealized_pnl for detail in self._short_details])
+        return sum([detail.unrealized_pnl for detail in self._details])
 
     @property
     def realized_pnl(self):
-        return self.long_realized_pnl + self.short_realized_pnl
-
-    @property
-    def long_realized_pnl(self):
-        return self._long_realized_pnl
-
-    @property
-    def short_realized_pnl(self):
-        return self._short_realized_pnl
+        return self._realized_pnl
 
     @property
     def margin(self):
-        return self.long_margin + self.short_margin
+        return sum([detail.margin for detail in self._details])
 
     @property
-    def long_margin(self):
-        return sum([detail.margin for detail in self._long_details])
-
-    @property
-    def short_margin(self):
-        return sum([detail.margin for detail in self._short_details])
-
-    @property
-    def position_pnl(self):                
-        return self.long_position_pnl + self.short_position_pnl
-
-    @property
-    def long_position_pnl(self):
-         return sum([detail.position_pnl for detail in self._long_details])
-
-    @property
-    def short_position_pnl(self):
-         return sum([detail.position_pnl for detail in self._short_details])       
-
-    def __repr__(self):
-        return "%s(%r)" % (self.__class__, [message["data"] for message in self.messages])
+    def position_pnl(self):
+         return sum([detail.position_pnl for detail in self._details])
 
     def merge(self, position):
         self.ledger._ctx.logger.info("merge {} with {}".format(self, position))
         if self.realized_pnl == 0.0 and position.realized_pnl != 0.0:
             self.realized_pnl = position.realized_pnl
-        self._long_details = position._long_details
-        self._short_details = position._short_details
+        self._details = position.details
         self.ledger._ctx.logger.info("merged {}".format(self))
         return self
 
@@ -561,45 +502,31 @@ class FuturePosition(Position):
     def _apply_close(self, trade):
         self.ledger._ctx.logger.debug("{} close {}, volume {} price {}".format(self.instrument_id, "long" if trade.side == Side.Sell else "short", trade.volume, trade.price))
         volume_left = trade.volume
-        details = self._short_details if trade.side == Side.Buy else self._long_details
         messages = []
-        while volume_left > 0 and len(details) > 0:
-            detail = details[0]
+        while volume_left > 0 and len(self._details) > 0:
+            detail = self._details[0]
             volume_closed, close_pnl, margin_delta = detail.apply_close(trade.price, volume_left)
             self.ledger._ctx.logger.debug("detail({},{}|{}) {} closed {} left {}, pnl {}, margin delta {}".format(detail._trade_id, detail.open_date, detail.open_price, detail.volume, volume_closed, detail.volume, close_pnl, margin_delta))
-            if trade.side == Side.Buy:
-                self._short_realized_pnl += close_pnl
-            else:
-                self._long_realized_pnl += close_pnl
+            self._realized_pnl += close_pnl
             self.ledger.avail += (close_pnl - margin_delta)
             volume_left -= volume_closed
             messages.append(detail.message)
             if detail.volume <= 0:
-                details.pop(0)
-
-        messages.append(self.ledger.asset_message)
-        messages.append(self.short_position_message if trade.side == Side.Buy else self.long_position_message)
+                self._details.pop(0)
+        messages.append(self.ledger.message)
+        messages.append(self.message)
         self.ledger.dispatch(messages)
 
     def _apply_open(self, trade):
-        if trade.side == Side.Buy:
-            details = self._long_details
-            direction = int(Direction.Long)
-            margin_ratio = self._long_margin_ratio
-            self.ledger._ctx.logger.debug("{} open long, volume: {} price: {}".format(self.instrument_id, trade.volume, trade.price))
-        else:
-            details = self._short_details
-            direction = int(Direction.Short)
-            margin_ratio = self._short_margin_ratio
-            self.ledger._ctx.logger.debug("{} open short, volume: {} price: {}".format(self.instrument_id, trade.volume, trade.price))
+        self.ledger._ctx.logger.debug("{} open volume: {} price: {}".format(self._uname, trade.volume, trade.price))
         detail = FuturePositionDetail(instrument_id = self.instrument_id,
                                       exchange_id = self.exchange_id,
                                       trading_day = self.ledger.trading_day,
                                       open_date = self.ledger.trading_day,
                                       open_price = trade.price,
                                       volume = trade.volume,
-                                      direction = direction,
-                                      margin_ratio = margin_ratio,
+                                      direction = self.direction,
+                                      margin_ratio = self._margin_ratio,
                                       contract_multiplier = self._contract_multiplier,
                                       pre_settlement_price = self._pre_settlement_price,
                                       last_price = self._last_price,
@@ -609,17 +536,16 @@ class FuturePosition(Position):
                                       )
         self.ledger.avail -= detail.margin
         self.ledger._ctx.logger.debug("after open, margin delta {}".format(detail.margin))
-        details.append(detail)
-        summary_message = self.long_position_message if trade.side == Side.Buy else self.short_position_message
-        self.ledger.dispatch([detail.message, self.ledger.asset_message, summary_message])
+        self._details.append(detail)
+        self.ledger.dispatch([detail.message, self.ledger.message, self.message])
 
     def _apply_settlement(self, settlement_price):
-        self.ledger._ctx.logger.debug("{} apply settlement with price {}".format(self.instrument_id, settlement_price))
+        self.ledger._ctx.logger.debug("{} apply settlement with price {}".format(self._uname, settlement_price))
         self._settlement_price = settlement_price
         margin_delta = sum([detail.apply_settlement(settlement_price) for detail in self.details])
         self.ledger._ctx.logger.debug("margin delta: {}".format(margin_delta))
         self.ledger.avail -= margin_delta
-        self.ledger.dispatch([self.ledger.asset_message] + self.messages)
+        self.ledger.dispatch([self.ledger.message, self.message])
 
     def _update_last_price(self, last_price):
         self.ledger._ctx.logger.debug("update {} last price from {} to {}".format(self.instrument_id, self.last_price, last_price))
@@ -627,4 +553,4 @@ class FuturePosition(Position):
         position_pnl_delta = sum([detail.update_last_price(last_price) for detail in self.details])
         self.ledger._ctx.logger.debug("position pnl delta: {}".format(position_pnl_delta))
         if abs(position_pnl_delta) > self.ledger._notice_threshold:
-            self.ledger.dispatch([self.ledger.asset_message] + self.messages)
+            self.ledger.dispatch([self.ledger.message, self.message])

@@ -4,27 +4,6 @@ import kungfu.yijinjing.time as kft
 from kungfu.data.sqlite.data_proxy import CalendarDB, make_url
 from kungfu.wingchun.constants import *
 
-TradingSession = collections.namedtuple('TradingSession', 'exchange_id trading_day start_time end_time')
-
-
-class CalendarUtil:
-    @classmethod
-    def get_trading_sessions(cls, exchange_id, trading_day):
-        if exchange_id == Exchange.SSE or exchange_id == Exchange.SZE:
-            return [TradingSession(exchange_id=exchange_id,
-                                   trading_day=trading_day,
-                                   start_time=datetime.datetime.combine(trading_day, datetime.time(9, 30)),
-                                   end_time=datetime.datetime.combine(trading_day, datetime.time(11, 30))),
-                    TradingSession(exchange_id=exchange_id,
-                                   trading_day=trading_day,
-                                   start_time=datetime.datetime.combine(trading_day, datetime.time(13, 00)),
-                                   end_time=datetime.datetime.combine(trading_day, datetime.time(15, 00))),
-                    ]
-        else:
-            # TODO
-            return []
-
-
 class Calendar:
     def __init__(self, ctx):
         self.holidays = CalendarDB(ctx.system_config_location, "holidays").get_holidays()

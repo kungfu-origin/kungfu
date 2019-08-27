@@ -132,6 +132,20 @@ namespace kungfu
                 }
             }
 
+            inline mode get_mode_by_name(const std::string& name)
+            {
+                if(name == "live")
+                    return mode::LIVE;
+                else if(name == "data")
+                    return mode::DATA;
+                else if(name == "replay")
+                    return mode::REPLAY;
+                else if(name == "backtest")
+                    return mode::BACKTEST;
+                else
+                    return mode::LIVE;
+            }
+
             enum class category : int8_t
             {
                 MD,

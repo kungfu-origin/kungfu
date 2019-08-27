@@ -14,11 +14,22 @@ def object_as_dict(obj):
     return d
 
 def is_final_status(order_status):
-    if int(order_status) in [int(OrderStatus.Submitted), int(OrderStatus.Pending),
-                             int(OrderStatus.PartialFilledNotActive), int(OrderStatus.Unknown)]:
+    if int(order_status) in AllFinalOrderStatus:
         return False
     else:
         return True
+
+def get_position_effect(side, offset):
+    if side == Side.Buy and offset == Offset.Open:
+        return Direction.Long
+    elif side == Side.Sell and (offset == Offset.Close or offset == Offset.CloseToday):
+        return Direction.Long
+    elif side == Side.Sell and offset == Offset.Open:
+        return Direction.Short
+    elif side == Side.Buy and (offset == Offset.Close or offset == Offset.CloseToday):
+        return Direction.Short
+    else:
+        raise ValueError('could not find position effect for {} and {}'.format(side, offset))
 
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price

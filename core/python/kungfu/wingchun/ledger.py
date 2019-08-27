@@ -9,7 +9,8 @@ from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import LedgerDB
 from kungfu.wingchun import msg
 from kungfu.wingchun.finance.book import *
-from kungfu.wingchun.finance.position import *
+from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
+from kungfu.wingchun.finance.position import get_uid as get_position_uid
 from kungfu.wingchun.calendar import Calendar
 
 DEFAULT_INIT_CASH = 1e7
@@ -42,12 +43,10 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
+        self.ctx.inst_infos = {}
         self.ctx.orders = {}
-
-        self.trading_day = None
-        self.accounts = {}
-        self.subportfolios = {}
-        self.portfolios = {}
+        self.ctx.trading_day = None
+        self.ctx.ledgers = {}
 
     def pre_start(self):
         self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
@@ -69,14 +68,15 @@ class Ledger(pywingchun.Ledger):
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)
-        if self.trading_day is not None and self.trading_day != trading_day:
+        if self.ctx.trading_day is not None and self.ctx.trading_day != trading_day:
             self._switch_day()
-        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
+        for ledger in self.ctx.ledgers.values():
             ledger.apply_trading_day(trading_day)
-        self.trading_day = trading_day
+        self.ctx.trading_day = trading_day
 
     def on_quote(self, event, quote):
-        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
+        self.ctx.logger.debug('on quote')
+        for ledger in self.ctx.ledgers.values():
             ledger.apply_quote(quote)
 
     def on_order(self, event, order):
@@ -97,47 +97,53 @@ class Ledger(pywingchun.Ledger):
         message = self._message_from_trade_event(event, trade)
         self.ctx.db.add_trade(**message["data"])
         self.publish(json.dumps(message))
-        self._get_account_ledger(account_id=trade.account_id).apply_trade(trade)
-        self._get_portfolio_ledger(client_id).apply_trade(trade)
+        self._get_ledger(ledger_category=LedgerCategory.Account, account_id=trade.account_id).apply_trade(trade)
+        self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id).apply_trade(trade)
 
     def on_instruments(self, instruments):
-        if list(set(instruments)):
-            self.ctx.db.set_instruments([object_as_dict(inst) for inst in list(set(instruments))])
+        inst_list = list(set(instruments))
+        if inst_list:
+            self.ctx.db.set_instruments([object_as_dict(inst) for inst in inst_list])
+            self.ctx.inst_infos = {inst.instrument_id: object_as_dict(inst)}
 
     def on_stock_account(self, asset, positions):
         pos_objects = [StockPosition(**object_as_dict(pos)) for pos in positions]
         account = AccountBook(ctx=self.ctx,
-                              trading_day=self.trading_day,
+                              trading_day=self.ctx.trading_day,
                               ledger_category=LedgerCategory.Account,
                               account_id=asset.account_id,
                               source_id=asset.source_id,
                               avail=asset.avail,
                               positions=pos_objects)
-        self._reset_account_ledger(asset.account_id, account)
+        ledger = self._get_ledger(ledger_category=LedgerCategory.Account, source_id = asset.source_id, account_id=asset.account_id).merge(account)
+        self.ctx.db.dump(ledger)
 
     def on_future_account(self, asset, position_details):
         pos_objects = []
-        for inst, details in groupby(position_details, key=lambda e: e.instrument_id):
-            instrument_info = self.ctx.db.get_instrument_info(inst)
+        for uid, details in groupby(position_details, key=lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
             detail_objects = []
+            instrument_info = None
             for detail in sorted(details, key=lambda detail: (detail.open_date, detail.trade_time)):
                 args = object_as_dict(detail)
+                if instrument_info is None:
+                    instrument_info = self.ctx.db.get_instrument_info(detail.instrument_id)
                 args.update({"contract_multiplier": instrument_info["contract_multiplier"],
                              "long_margin_ratio": instrument_info["long_margin_ratio"],
                              "short_margin_ratio": instrument_info["short_margin_ratio"]})
                 detail_objects.append(FuturePositionDetail(**args))
-            pos_args = {"details": detail_objects, "trading_day": self.trading_day}
+            pos_args = {"details": detail_objects, "trading_day": self.ctx.trading_day}
             pos_args.update(instrument_info)
             pos = FuturePosition(**pos_args)
             pos_objects.append(pos)
         account_book = AccountBook(ctx=self.ctx,
-                                   trading_day=self.trading_day,
+                                   trading_day=self.ctx.trading_day,
                                    ledger_category=LedgerCategory.Account,
                                    account_id=asset.account_id,
                                    source_id=asset.source_id,
                                    avail=asset.avail,
                                    positions=pos_objects)
-        self._reset_account_ledger(asset.account_id, account_book)
+        ledger = self._get_ledger(ledger_category=LedgerCategory.Account, source_id=asset.source_id,account_id=asset.account_id).merge(account_book)
+        self.ctx.db.dump(ledger)
 
     def _message_from_order_event(self, event, order):
         order_dict = object_as_dict(order)
@@ -157,8 +163,8 @@ class Ledger(pywingchun.Ledger):
 
     def _dump_snapshot(self, data_frequency="minute"):
         messages = []
-        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
-            message = ledger.asset_message
+        for ledger in self.ctx.ledgers.values():
+            message = ledger.message
             message["msg_type"] = int(MsgType.AssetSnapshot)
             tags = {"update_time": self.now(), "data_frequency": data_frequency}
             message["data"].update(tags)
@@ -174,45 +180,29 @@ class Ledger(pywingchun.Ledger):
             }
         }))
         self._dump_snapshot(data_frequency="daily")
-        for ledger in list(self.accounts.values()) + list(self.portfolios.values()):
+        for ledger in self.ctx.ledgers.values:
             self.ctx.db.dump(ledger)
 
-    def _reset_account_ledger(self, account_id, ledger):
-        self.ctx.logger.info("reset account ledger, {}".format(account_id))
-        account = self._get_account_ledger(account_id)
-        account.merge(ledger)
-        self.ctx.db.dump(account)
-
-    def _get_account_ledger(self, account_id):
-        return self._get_ledger(ledger_category=LedgerCategory.Account, account_id=account_id, create_if_not_existing=True)
-
-    def _get_portfolio_ledger(self, client_id):
-        return self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id, create_if_not_existing=True)
-
-    def _get_ledger(self, ledger_category, account_id="", client_id="", create_if_not_existing=False):
-        if ledger_category == LedgerCategory.Account:
-            ledger_dict = self.accounts
-            ledger_key = account_id
-        elif ledger_category == LedgerCategory.Portfolio:
-            ledger_dict = self.portfolios
-            ledger_key = client_id
+    def _get_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
+        uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
+        if uid in self.ctx.ledgers:
+            return self.ctx.ledgers[uid]
         else:
-            raise ValueError("Unrecognized ledger category {}".format(ledger_category))
-        if ledger_key in ledger_dict:
-            return ledger_dict[ledger_key]
-        else:
-            ledger = self.ctx.db.load(ledger_category=ledger_category, account_id=account_id, client_id=client_id)
-            if not ledger and create_if_not_existing:
-                ledger = AccountBook(self.ctx, ledger_category=ledger_category, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH,
-                                     trading_day=self.trading_day)
+            ledger = self.ctx.db.load(ledger_category=ledger_category, source_id=source_id,account_id=account_id, client_id=client_id)
+            if not ledger:
+                ledger = AccountBook(self.ctx, ledger_category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH, trading_day=self.ctx.trading_day)
             if ledger:
                 ledger._ctx = self.ctx
-                ledger.apply_trading_day(self.trading_day)
+                ledger.apply_trading_day(self.ctx.trading_day)
                 ledger.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
                 ledger.register_callback(self.ctx.db.on_messages)
-                ledger_dict[ledger_key] = ledger
+                self.ctx.ledgers[uid] = ledger
             return ledger
 
+    def get_inst_info(self, instrument_id):
+        if not instrument_id in self.ctx.inst_infos:
+            self.ctx.inst_infos[instrument_id] = self.ctx.db.get_instrument_info(instrument_id)
+        return self.ctx.db.get_instrument_info(instrument_id)
 
 @on(msg.Calendar)
 def calendar_request(ctx, event, location, data):
@@ -261,7 +251,6 @@ def cancel_order(ctx, event, location, data):
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.CancelOrder
         }
-
 
 @on(msg.CancelAllOrder)
 def cancel_all_order(ctx, event, location, data):

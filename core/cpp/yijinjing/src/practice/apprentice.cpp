@@ -104,7 +104,7 @@ namespace kungfu
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {
                 events_ | skip_until(events_ | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
-                rx::timeout(seconds(1), observe_on_new_thread()) |
+                rx::timeout(seconds(10), observe_on_new_thread()) |
                 $([&](event_ptr e)
                   {
                       // timeout happens on new thread, can not subscribe journal reader here

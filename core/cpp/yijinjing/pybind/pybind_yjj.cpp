@@ -190,6 +190,7 @@ PYBIND11_MODULE(pyyjj, m)
             .value("BACKTEST", data::mode::BACKTEST)
             .export_values();
     m.def("get_mode_name", &data::get_mode_name);
+    m.def("get_mode_by_name", &data::get_mode_by_name);
 
     py::enum_<data::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
             .value("MD", data::category::MD)
