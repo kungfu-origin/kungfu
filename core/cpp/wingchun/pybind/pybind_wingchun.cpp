@@ -39,6 +39,9 @@ public:
     std::string handle_request(const event_ptr &event, const std::string &msg) override
     {PYBIND11_OVERLOAD_PURE(std::string, Ledger, handle_request, event, msg) }
 
+    void on_trader_started(int64_t trigger_time, const kungfu::yijinjing::data::location_ptr &app_location) override
+    { PYBIND11_OVERLOAD_PURE(void, Ledger, on_trader_started, trigger_time, app_location) }
+
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_quote, event, quote) }
 
@@ -120,6 +123,7 @@ PYBIND11_MODULE(pywingchun, m)
     auto m_utils = m.def_submodule("utils");
     m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
+    m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
     m_utils.def("json_from_address", &json_from_address);
 
@@ -598,6 +602,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("cancel_order", &Ledger::cancel_order)
             .def("handle_request", &Ledger::handle_request)
             .def("on_trading_day", &Ledger::on_trading_day)
+            .def("on_trader_started", &Ledger::on_trader_started)
             .def("on_quote", &Ledger::on_quote)
             .def("on_order", &Ledger::on_order)
             .def("on_trade", &Ledger::on_trade)

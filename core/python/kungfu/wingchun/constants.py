@@ -23,6 +23,7 @@ InstrumentType = pywingchun.constants.InstrumentType
 Side = pywingchun.constants.Side
 Offset = pywingchun.constants.Offset
 OrderStatus = pywingchun.constants.OrderStatus
+AllFinalOrderStatus = [int(OrderStatus.Filled), int(OrderStatus.Error), int(OrderStatus.PartialFilledNotActive), int(OrderStatus.Cancelled)]
 Direction = pywingchun.constants.Direction
 PriceType = pywingchun.constants.PriceType
 VolumeCondition = pywingchun.constants.VolumeCondition

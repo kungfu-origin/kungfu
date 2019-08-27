@@ -4,10 +4,10 @@ from .models import *
 from itertools import groupby
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
 from kungfu.wingchun.finance.book import *
-
+from kungfu.wingchun.constants import OrderStatus, AllFinalOrderStatus
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy import not_
 
 class SessionFactoryHolder:
     def __init__(self, location, filename):
@@ -86,6 +86,10 @@ class LedgerDB(SessionFactoryHolder):
     def add_order(self, **kwargs):
         with session_scope(self.session_factory) as session:
             session.merge(Order(**kwargs))
+
+    def mark_orders_status_unknown(self, source_id, account_id):
+        with session_scope(self.session_factory) as session:
+            session.query(Order).filter(Order.account_id == account_id, not_(Order.status.in_(AllFinalOrderStatus))).update({"status": int(OrderStatus.Unknown)}, synchronize_session='fetch')
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass

@@ -74,6 +74,7 @@ namespace kungfu
                         watch(trigger_time, app_location);
                         request_write_to(trigger_time, app_location->uid);
                         update_broker_state(trigger_time, app_location, BrokerState::Connected);
+                        on_trader_started(trigger_time, app_location);
                         break;
                     }
                     case category::STRATEGY:

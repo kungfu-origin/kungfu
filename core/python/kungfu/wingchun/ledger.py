@@ -58,6 +58,12 @@ class Ledger(pywingchun.Ledger):
         location = kfj.get_location_from_json(self.ctx, data)
         return json.dumps(handle(req['msg_type'], self.ctx, event, location, data))
 
+    def on_trader_started(self, trigger_time, location):
+        self.ctx.logger.info("on trader started, trigger_time:{}, uname:{}".format(trigger_time, location.uname))
+        account_id = location.name
+        source_id = location.group
+        self.ctx.db.mark_orders_status_unknown(source_id, account_id)
+
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)

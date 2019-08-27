@@ -32,6 +32,8 @@ namespace kungfu
 
                 virtual std::string handle_request(const yijinjing::event_ptr &event, const std::string &msg) = 0;
 
+                virtual void on_trader_started(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
+
                 virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
 
                 virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
