@@ -104,7 +104,7 @@ class Ledger(pywingchun.Ledger):
         inst_list = list(set(instruments))
         if inst_list:
             self.ctx.db.set_instruments([object_as_dict(inst) for inst in inst_list])
-            self.ctx.inst_infos = {inst.instrument_id: object_as_dict(inst)}
+            self.ctx.inst_infos = {inst.instrument_id: object_as_dict(inst) for inst in inst_list}
 
     def on_stock_account(self, asset, positions):
         pos_objects = [StockPosition(**object_as_dict(pos)) for pos in positions]
@@ -267,3 +267,17 @@ def cancel_all_order(ctx, event, location, data):
         'status': http.HTTPStatus.OK,
         'msg_type': msg.CancelAllOrder
     }
+
+@on(msg.QryAsset)
+def qry_asset(ctx, event, location, data):
+    ctx.logger.info("qry asset, input: {}".format(data))
+    uid = AccountBook.get_uid(category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
+    if uid in ctx.ledgers:
+        message = ctx.ledgers[uid].message
+        message.update({'status': http.HTTPStatus.OK, 'msg_type': msg.QryAsset})
+        return message
+    else:
+        return {
+            'status': http.HTTPStatus.NOT_FOUND,
+            'msg_type': msg.QryAsset
+        }

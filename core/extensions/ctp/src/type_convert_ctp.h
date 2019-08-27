@@ -409,6 +409,7 @@ namespace kungfu
                 strcpy(des.account_id, ori.AccountID);
                 strcpy(des.broker_id, ori.BrokerID);
                 strcpy(des.trading_day, ori.TradingDay);
+                strcpy(des.source_id, SOURCE_CTP);
 
                 des.avail = ori.Available;
 

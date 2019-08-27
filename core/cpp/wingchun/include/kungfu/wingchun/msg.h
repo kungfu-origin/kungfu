@@ -48,6 +48,7 @@ namespace kungfu
 
                     BrokerStateRefresh = 400,
                     BrokerState = 401,
+                    QryAsset = 402,
 
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
