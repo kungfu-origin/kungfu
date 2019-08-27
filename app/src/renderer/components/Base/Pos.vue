@@ -173,6 +173,12 @@ export default {
             const t = this;
             if(!val || t.getDataLock) return
             t.dealNanomsg(val)
+        },
+
+         tradingDay() {
+            const t = this;
+            t.resetData();
+            if(t.currentId) t.init();
         }
 
     },

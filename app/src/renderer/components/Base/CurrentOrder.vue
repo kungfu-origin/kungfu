@@ -94,7 +94,7 @@ export default {
     computed: {
         ...mapState({
             accountList: state => state.ACCOUNT.accountList,
-            calendar: state => state.BASE.calendar, //日期信息，包含交易日
+            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             processStatus: state => state.BASE.processStatus
         }),
 
@@ -175,6 +175,12 @@ export default {
             const t = this;
             if(!val || t.getDataLock) return
             t.dealNanomsg(val)
+        },
+
+        tradingDay() {
+            const t = this;
+            t.resetData();
+            if(t.currentId) t.init();
         }
     },
 
@@ -188,6 +194,7 @@ export default {
     methods: {
         handleRefresh(){
             const t = this;
+            t.resetData();
             if(t.currentId) t.init();
         },
 
@@ -197,7 +204,7 @@ export default {
             t.getDataMethod(t.currentId, {
                 id: t.filter.id,
                 dateRange
-            }, t.calendar.trading_day).then(res => {
+            }, t.tradingDay).then(res => {
                 if(!res) return;
                 t.$saveFile({
                     title: '委托记录',
@@ -271,7 +278,7 @@ export default {
         handleCheckTodayFinished(){
             const t = this;
             t.todayFinish = true;
-            const tradingDay = t.calendar.trading_day;
+            const tradingDay = t.tradingDay;
             const momentDay = tradingDay ? moment(tradingDay) : moment();
             //获取当天是日期范围
             const startDate = momentDay.format('YYYY-MM-DD')
@@ -298,7 +305,7 @@ export default {
             //clear Data
             t.orderDataByKey = {};
             t.tableData = []
-            return t.getDataMethod(t.currentId, t.filter, t.calendar.trading_day)
+            return t.getDataMethod(t.currentId, t.filter, t.tradingDay)
             .then(res => {
                 if(!res) {
                     t.tableData = Object.freeze([]);                    

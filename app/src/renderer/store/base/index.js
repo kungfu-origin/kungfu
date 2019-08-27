@@ -8,8 +8,9 @@ export default {
     state: {
         tasks: null, // 系统内正在运行的tasks
         calendar: { //交易日等相关日期信息
-            trading_day: moment().format('YYYYMMDD')
+           
         },
+        tradingDay: moment().format('YYYYMMDD'),
         processStatus: null,
         accountSource: {}
     },

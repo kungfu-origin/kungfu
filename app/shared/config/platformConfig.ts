@@ -1,4 +1,3 @@
-console.log(process.platform)
 export const platform = ((): string => {
     switch (process.platform) {
         case 'win32':

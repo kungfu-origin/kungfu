@@ -117,5 +117,7 @@ window.setTradingDay = (targetDay) => {
 }
 
 window.getTradingDay = () => {
-    return store.state.BASE.calendar
+    return store.state.BASE.tradingDay
 }
+
+window.store = store

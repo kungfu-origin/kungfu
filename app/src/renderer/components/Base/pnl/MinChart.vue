@@ -67,7 +67,7 @@ export default {
 
     computed:{
         ...mapState({
-            calendar: state => state.BASE.calendar, //日期信息，包含交易日
+            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
         }),
 
         intradayPnl(){
@@ -113,7 +113,7 @@ export default {
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据
-        'calendar.trading_day'(val, oldVal) {
+        tradingDay(val, oldVal) {
             const t = this;
             if(!oldVal && !val && !t.currentId) return;
             this.resetData();            
@@ -138,7 +138,7 @@ export default {
             const t = this
             const id = t.currentId;
             t.reqCalendar()
-            .then(() => t.minMethod(t.currentId, t.calendar.trading_day))
+            .then(() => t.minMethod(t.currentId, t.tradingDay))
             .then(data => {
                 //当调用的传值和当前的传值不同的是，则返回
                 if(id != t.currentId) return
@@ -161,7 +161,7 @@ export default {
         //如果有交易日，则不获取
         reqCalendar() {
             const t = this;
-            if(t.calendar.trading_day) return new Promise(resolve => resolve())
+            if(t.tradingDay) return new Promise(resolve => resolve())
             else return t.$store.dispatch('reqCalendar')
         },
 

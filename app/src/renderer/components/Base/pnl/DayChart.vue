@@ -80,7 +80,7 @@ export default {
 
     computed: {
         ...mapState({
-            calendar: state => state.BASE.calendar, //日期信息，包含交易日
+            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
         }),
 
         accumulatedPnlRatio(){
@@ -153,7 +153,7 @@ export default {
                 t.dayPnlData = Object.freeze(data || [])
             })
             .then(() => t.initChart())
-            .then(() => t.minMethod(t.currentId, t.calendar.trading_day)) //查找分钟线的数据库中的数据，拿到最后一条数据放入日线最后
+            .then(() => t.minMethod(t.currentId, t.tradingDay)) //查找分钟线的数据库中的数据，拿到最后一条数据放入日线最后
             .then(minData => minData.length && t.dealMinData(minData[minData.length - 1]))
             .catch(err => t.$message.error(err.message || '获取失败'))
             .finally(() => t.updateChart())
