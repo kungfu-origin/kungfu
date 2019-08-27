@@ -394,7 +394,7 @@ export const dealOrder = (item: any): OrderData => {
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-        limitPrice: item.limit_price,
+        limitPrice: toDecimal(item.limit_price) || '--',
         volumeTraded: item.volume_traded + "/" + (item.volume),
         statusName: orderStatus[item.status],
         status: item.status,
@@ -403,6 +403,20 @@ export const dealOrder = (item: any): OrderData => {
         orderId: item.order_id,
         exchangeId: item.exchange_id
     })
+}
+
+export const dealTrade = (item: TradeInputData): TradeData => {
+    return {
+        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), item.trade_time.toString()].join('_'),
+        tradeTime: item.trade_time && moment(+item.trade_time / 1000000).format('YYYY-MM-DD HH:mm:ss'),
+        instrumentId: item.instrument_id,
+        side: sideName[item.side],
+        offset: offsetName[item.offset],
+        price: toDecimal(+item.price),
+        volume: toDecimal(+item.volume, 0),
+        clientId: item.client_id,
+        accountId: item.account_id
+    }     
 }
 
 export const dealPos = (item: any): PosData => {
@@ -421,19 +435,7 @@ export const dealPos = (item: any): PosData => {
     })
 }
 
-export const dealTrade = (item: TradeInputData): TradeData => {
-    return {
-        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), item.trade_time.toString()].join('_'),
-        tradeTime: item.trade_time && moment(+item.trade_time / 1000000).format('YYYY-MM-DD HH:mm:ss'),
-        instrumentId: item.instrument_id,
-        side: sideName[item.side],
-        offset: offsetName[item.offset],
-        price: toDecimal(+item.price),
-        volume: toDecimal(+item.volume, 0),
-        clientId: item.client_id,
-        accountId: item.account_id
-    }     
-}
+
 
 
 // ========================== 交易数据处理 end ===========================

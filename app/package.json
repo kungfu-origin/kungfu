@@ -103,7 +103,7 @@
       ]
     },
     "linux": {
-      "icon": "./resources/logo",
+      "icon": "./resources/logo/icon.icns",
       "target": ["rpm"]
     },
     "nsis": {
