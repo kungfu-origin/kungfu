@@ -182,7 +182,7 @@ class AccountBook:
         return self
 
     def apply_quote(self, quote):
-        self._ctx.logger.info("(acc){} (cli){} apply quote".format(self.account_id, self.client_id))
+        # self._ctx.logger.info("(acc){} (cli){} apply quote".format(self.account_id, self.client_id))
         self._get_position(quote.instrument_id, quote.exchange_id).apply_quote(quote)
 
     def apply_trade(self, trade):

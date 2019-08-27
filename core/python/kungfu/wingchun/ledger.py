@@ -38,6 +38,7 @@ class Ledger(pywingchun.Ledger):
     def __init__(self, ctx):
         pywingchun.Ledger.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
         self.ctx = ctx
+        self.ctx.ledger = self
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
@@ -213,6 +214,15 @@ def calendar_request(ctx, event, location, data):
         'data': {
             'trading_day': '%s' % ctx.calendar.trading_day
         }
+    }
+
+
+@on(msg.BrokerStateRefresh)
+def broker_state_refresh(ctx, event, location, data):
+    ctx.ledger.publish_broker_states(event.gen_time)
+    return {
+        'status': http.HTTPStatus.OK,
+        'msg_type': msg.BrokerStateRefresh
     }
 
 

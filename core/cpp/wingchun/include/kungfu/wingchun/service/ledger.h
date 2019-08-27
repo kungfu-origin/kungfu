@@ -24,6 +24,8 @@ namespace kungfu
 
                 void publish(const std::string &msg);
 
+                void publish_broker_states(int64_t trigger_time);
+
                 void new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input);
 
                 void cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
@@ -56,12 +58,9 @@ namespace kungfu
 
                 void on_start() override;
 
-                void publish_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, msg::data::BrokerState state);
+                void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, msg::data::BrokerState state);
 
-                void
-                update_and_publish_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, msg::data::BrokerState state);
-
-                void publish_all_states(int64_t trigger_time);
+                void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, msg::data::BrokerState state);
 
             private:
                 yijinjing::nanomsg::socket_ptr pub_sock_;

@@ -37,7 +37,19 @@ namespace kungfu
                 {
                     pub_sock_->send(msg);
                 }
-                SPDLOG_TRACE("published {}", msg);
+                SPDLOG_INFO("published {}", msg);
+            }
+
+            void Ledger::publish_broker_states(int64_t trigger_time)
+            {
+                SPDLOG_DEBUG("publishing broker states");
+                for (auto item : broker_states_)
+                {
+                    if (has_location(item.first))
+                    {
+                        publish_broker_state(trigger_time, get_location(item.first), item.second);
+                    }
+                }
             }
 
             void Ledger::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
@@ -53,7 +65,7 @@ namespace kungfu
                     case category::MD:
                     {
                         watch(trigger_time, app_location);
-                        update_and_publish_state(trigger_time, app_location, BrokerState::Connected);
+                        update_broker_state(trigger_time, app_location, BrokerState::Connected);
                         monitor_market_data(trigger_time, app_location->uid);
                         break;
                     }
@@ -61,7 +73,7 @@ namespace kungfu
                     {
                         watch(trigger_time, app_location);
                         request_write_to(trigger_time, app_location->uid);
-                        update_and_publish_state(trigger_time, app_location, BrokerState::Connected);
+                        update_broker_state(trigger_time, app_location, BrokerState::Connected);
                         break;
                     }
                     case category::STRATEGY:
@@ -84,7 +96,7 @@ namespace kungfu
                     case category::MD:
                     case category::TD:
                     {
-                        update_and_publish_state(trigger_time, app_location, BrokerState::DisConnected);
+                        update_broker_state(trigger_time, app_location, BrokerState::DisConnected);
                         broker_states_.erase(location_uid);
                         break;
                     }
@@ -139,22 +151,11 @@ namespace kungfu
 
                 pre_start();
 
-                events_ | is(msg::type::BrokerStateRefresh) |
-                $([&](event_ptr event)
-                  {
-                      publish_all_states(event->gen_time());
-
-                      nlohmann::json msg;
-                      msg["status"] = 200;
-                      msg["msg_type"] = msg::type::BrokerStateRefresh;
-                      get_io_device()->get_rep_sock()->send(msg.dump());
-                  });
-
                 events_ | is(msg::type::BrokerState) |
                 $([&](event_ptr event)
                   {
                       auto broker_location = get_location(event->source());
-                      update_and_publish_state(event->gen_time(), broker_location, static_cast<BrokerState>(event->data<int32_t>()));
+                      update_broker_state(event->gen_time(), broker_location, static_cast<BrokerState>(event->data<int32_t>()));
                   });
 
                 /**
@@ -277,7 +278,7 @@ namespace kungfu
                       try
                       {
                           const nlohmann::json& cmd = event->data<nlohmann::json>();
-                          SPDLOG_INFO("handle command {}", cmd.dump());
+                          SPDLOG_INFO("handle command type {} data {}", event->msg_type(), cmd.dump());
                           std::string response = handle_request(event, event->to_string());
                           get_io_device()->get_rep_sock()->send(response);
                       }
@@ -288,7 +289,7 @@ namespace kungfu
                   });
             }
 
-            void Ledger::publish_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
+            void Ledger::publish_broker_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
             {
                 nlohmann::json msg;
                 msg["gen_time"] = time::now_in_nano();
@@ -305,22 +306,10 @@ namespace kungfu
                 publish(msg.dump());
             }
 
-            void Ledger::update_and_publish_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
+            void Ledger::update_broker_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
             {
                 broker_states_[broker_location->uid] = state;
-                publish_state(trigger_time, broker_location, state);
-            }
-
-            void Ledger::publish_all_states(int64_t trigger_time)
-            {
-                SPDLOG_DEBUG("publishing broker states");
-                for (auto item : broker_states_)
-                {
-                    if (has_location(item.first))
-                    {
-                        publish_state(trigger_time, get_location(item.first), item.second);
-                    }
-                }
+                publish_broker_state(trigger_time, broker_location, state);
             }
 
             void Ledger::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
@@ -337,7 +326,7 @@ namespace kungfu
                 $([&, trigger_time, md_location_uid](event_ptr event)
                   {
                       auto md_location = get_location(md_location_uid);
-                      update_and_publish_state(trigger_time, md_location, BrokerState::Ready);
+                      update_broker_state(trigger_time, md_location, BrokerState::Ready);
                       alert_market_data(trigger_time, md_location_uid);
                   },
                   [&](std::exception_ptr e)
@@ -363,7 +352,7 @@ namespace kungfu
                   [&, trigger_time, md_location_uid](std::exception_ptr e)
                   {
                       auto md_location = get_location(md_location_uid);
-                      update_and_publish_state(trigger_time, md_location, BrokerState::Idle);
+                      update_broker_state(trigger_time, md_location, BrokerState::Idle);
                       monitor_market_data(trigger_time, md_location_uid);
                   });
             }

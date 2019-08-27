@@ -182,8 +182,8 @@ class StockPosition(Position):
         self.ledger.dispatch([self.ledger.asset_message, self.message])
 
     def apply_quote(self, quote):
-        self.ledger._ctx.logger.debug("apply quote (inst){}(last_price){}(pre_close_price){}(close_price){}".
-                                      format(quote.instrument_id, quote.last_price, quote.pre_close_price, quote.close_price))
+        # self.ledger._ctx.logger.debug("apply quote (inst){}(last_price){}(pre_close_price){}(close_price){}".
+        #                               format(quote.instrument_id, quote.last_price, quote.pre_close_price, quote.close_price))
         pre_market_value = self.market_value
         if is_valid_price(quote.close_price):
             self._apply_settlement(quote.close_price)
