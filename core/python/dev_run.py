@@ -7,5 +7,6 @@ if __name__ == '__main__':
     kfc_dir = os.path.join(base_dir, 'build', 'kfc')
     sys.path.append(py_dir)
     sys.path.append(kfc_dir)
+    os.environ['PATH'] = kfc_dir + os.pathsep + os.environ['PATH']
     import kungfu.command as kfc
     from kungfu import __main__
