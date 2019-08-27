@@ -114,7 +114,7 @@ namespace kungfu
                 else if (xtp_exchange_type == XTP_MKT_SZ_A)
                 {
                     if (xtp_price_type == XTP_PRICE_BEST_OR_CANCEL)
-                        price_type = PriceType::ForwardBest;
+                        price_type = PriceType::ReverseBest;
                 }
                 else if(xtp_exchange_type == XTP_MKT_SH_A)
                 {
@@ -137,7 +137,7 @@ namespace kungfu
                     xtp_price_type = XTP_PRICE_BEST5_OR_CANCEL;
                 else if (strcmp(exchange, EXCHANGE_SSE) == 0)
                 {
-                    if (price_type == PriceType::ForwardBest)
+                    if (price_type == PriceType::ReverseBest)
                         xtp_price_type = XTP_PRICE_BEST_OR_CANCEL;
                 }
                 else if (strcmp(exchange, EXCHANGE_SZE) == 0)
