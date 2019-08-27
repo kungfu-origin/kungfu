@@ -13,6 +13,6 @@ from kungfu.data.sqlite.data_proxy import AccountsDB
 def td(ctx, source, account, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.db = AccountsDB(pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator), 'accounts')
-    account_config = ctx.db.get_td_account_config(source, account)
+    account_config = ctx.db.get_td_account_config(source, source + '_' + account)
     ext = EXTENSION_REGISTRY_TD.get_extension(source)(low_latency, ctx.locator, account, account_config)
     ext.run()

@@ -37,7 +37,9 @@ class AccountsDB(SessionFactoryHolder):
 
     def get_td_account_config(self, source_name, account_id):
         with session_scope(self.session_factory) as session:
-            account = session.query(Account).filter(Account.source_name == source_name and Account.account_id == account_id).first()
+            account = session.query(Account).\
+                filter(Account.source_name == source_name).\
+                filter(Account.account_id == account_id).first()
             return json.dumps(object_as_dict(account)['config'])
 
     def get_md_account_config(self, source_name):
