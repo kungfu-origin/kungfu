@@ -146,34 +146,6 @@ function debounce(fn, interval = 300) {
     }
 }
 
-//开始监听日志尾部
-function startWatchingTail(logPath, searchKeyword){
-    let tailObserver = null;
-    tailObserver = new Tail(logPath, {
-        flushAtEOF: true,
-        useWatchFile: true,
-        follow: true,
-    });   
-    tailObserver.watch();  
-    tailObserver.on('line', line => ((curProcId, curKw) => {
-        if(curKw) return;
-        if(curProcId !== processId) return;
-        const logData = dealLogMessage(line, t.searchKeyword);
-        throttleInsertLog(logData).then(logList => {
-            if(!logList) return;
-            t.tableData = t.pushTableData(logList);
-            if(t.ifScrollToBottom) t.scrollToBottom()
-        })
-        throttleClearLog()
-    })(processId, searchKeyword))
-
-    tailObserver.on('error', err => {
-        if(tailObserver !== null) t.clearTailWatcher();
-        tailObserver = null;
-    }) 
-}
-
-
 exports.getLog = getLog;
 exports.dealMessage = dealMessage;
 exports.debounce = debounce;

@@ -226,22 +226,25 @@
             console.error(err)
             return false;
         }
-        let message = lineData.message
-        .split('\n[')
-        .join('<br\>[')
-        .replace(/\[  info  \]/g, `[ <span class="${logColor.info}">info</span> &nbsp;&nbsp;&nbsp;]`)
-        .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
-        .replace(/\[ error  \]/g, `[ <span class="${logColor.error}">error</span> &nbsp;&nbsp;]`)
-        .replace(/\[warning \]/g, `[ <span class="${logColor.warning}">warning</span> ]`)
-        .replace(/\[ debug  \]/g, `[ <span class="${logColor.debug}">debug</span> &nbsp;&nbsp;]`)
-        .replace(/\[critical\]/g, `[ <span class="${logColor.critical}">critical</span>]`)
-        if(
-            message.indexOf('Failed') !== -1 ||
-            message.indexOf('Traceback') !== -1 ||
-            message.indexOf('critical') !== -1 ||
-            message.indexOf('uncaught exception') !== -1
-        ) message = `<span class="error red">${message}</span>`
-        return [ { message } ]
+        let messages = lineData.message.split('\n').filter(m => m !== '');
+        return messages.map(message => {
+            message = message.split('\n[')
+                .join('<br\>[')
+                .replace(/\[  info  \]/g, `[ <span class="${logColor.info}">info</span> &nbsp;&nbsp;&nbsp;]`)
+                .replace(/\[ trace  \]/g, '[ trace &nbsp;&nbsp;]')
+                .replace(/\[ error  \]/g, `[ <span class="${logColor.error}">error</span> &nbsp;&nbsp;]`)
+                .replace(/\[warning \]/g, `[ <span class="${logColor.warning}">warning</span> ]`)
+                .replace(/\[ debug  \]/g, `[ <span class="${logColor.debug}">debug</span> &nbsp;&nbsp;]`)
+                .replace(/\[critical\]/g, `[ <span class="${logColor.critical}">critical</span>]`)
+            if(
+                message.indexOf('Failed') !== -1 ||
+                message.indexOf('Traceback') !== -1 ||
+                message.indexOf('critical') !== -1 ||
+                message.indexOf('uncaught exception') !== -1
+            ) 
+            message = `<span class="error red">${message}</span>`
+            return { message }
+        })
     }
 
     function scrollToBottom() {
