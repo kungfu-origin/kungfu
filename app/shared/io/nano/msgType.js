@@ -10,6 +10,7 @@ export const cancelAllOrder = 355
 
 export const reqGatewayState = 400
 export const gatewayState = 401
+export const reqCash = 403
 export const calendar = 601  //自动推送日期相关信息，目前只有交易日
 
 export const category = {

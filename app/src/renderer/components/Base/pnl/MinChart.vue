@@ -137,8 +137,7 @@ export default {
         getMinData() {
             const t = this
             const id = t.currentId;
-            t.reqCalendar()
-            .then(() => t.minMethod(t.currentId, t.tradingDay))
+            t.minMethod(t.currentId, t.tradingDay)
             .then(data => {
                 //当调用的传值和当前的传值不同的是，则返回
                 if(id != t.currentId) return

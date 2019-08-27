@@ -17,7 +17,30 @@ export const nanoReqGatewayState = () => {
                 if(data.status === 200) {
                     resolve(data)
                 } else {
-                    reject(new Error('请求gatewayState失败！'))
+                    reject(new Error('请求柜台状态失败！'))
+                }
+            }
+        })
+    })
+}
+
+export const nanoReqCash = () => {
+    return new Promise((resolve, reject) => {
+        const reqMsg = JSON.stringify({
+            msg_type: msgType.reqCash,
+            data: {}
+        })
+        const req = buildRepNmsg();
+        req.send(reqMsg);
+        req.on('data', buf => {
+            req.close();
+            const data = JSON.parse(String(buf));
+            if(data.msg_type === msgType.reqCash ) {
+                console.log(data)
+                if(data.status === 200) {
+                    resolve(data)
+                } else {
+                    reject(new Error('请求资金信息失败！'))
                 }
             }
         })
@@ -63,7 +86,6 @@ export const nanoCancelOrder = ({ accountId, orderId }) => {
             }
         })
 
-        console.log(reqMsg,'---')
         const req = buildRepNmsg()
         req.send(reqMsg)
         req.on('data', buf => {
