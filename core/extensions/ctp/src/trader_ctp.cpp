@@ -296,7 +296,7 @@ namespace kungfu
                         order.status = OrderStatus::Error;
                         writer->close_data();
                     }
-                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
+                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
                 }
             }
 

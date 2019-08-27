@@ -276,9 +276,7 @@ namespace kungfu
             {
                 strcpy(des.InvestorID, ori.account_id);
                 strcpy(des.InstrumentID, ori.instrument_id);
-#ifdef __linux__
                 strcpy(des.ExchangeID, ori.exchange_id);
-#endif
                 to_ctp_direction(des.Direction, ori.side);
                 to_ctp_comb_offset(des.CombOffsetFlag, ori.offset);
                 des.CombHedgeFlag[0] = THOST_FTDC_HF_Speculation;
@@ -295,11 +293,7 @@ namespace kungfu
             inline void from_ctp(const CThostFtdcInputOrderField &ori, OrderInput &des)
             {
                 strcpy(des.instrument_id, ori.InstrumentID);
-#ifdef __linux__
                 strcpy(des.exchange_id, ori.ExchangeID);
-#else
-                strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(ori.InstrumentID).c_str());
-#endif
                 strcpy(des.account_id, ori.InvestorID);
                 from_ctp_direction(ori.Direction, des.side);
                 from_ctp_comb_offset(ori.CombOffsetFlag, des.offset);
@@ -341,32 +335,7 @@ namespace kungfu
 
             inline void from_ctp(const CThostFtdcInvestorPositionField &ori, Position &des)
             {
-                /*
-                strcpy(des.trading_day, ori.TradingDay);
-                strcpy(des.instrument_id, ori.InstrumentID);
-                des.instrument_type = InstrumentType::Future;
-                strcpy(des.account_id, ori.InvestorID);
-                des.volume = ori.Position;
-                des.yesterday_volume = ori.Position - ori.TodayPosition;
-
-                from_ctp_pos_direction(ori.PosiDirection, des.direction);
-                if (des.direction == Direction::Long)
-                {
-                    des.frozen_total = ori.LongFrozen;
-                } else if (des.direction == Direction::Short)
-                {
-                    des.frozen_total = ori.ShortFrozen;
-                }
-
-                des.pre_settlement_price = ori.PreSettlementPrice;
-                des.settlement_price = is_too_large(ori.SettlementPrice) ? 0.0 : ori.SettlementPrice;
-
-                des.margin = ori.UseMargin;
-
-                des.realized_pnl = ori.CloseProfit;
-                des.unrealized_pnl = ori.PositionProfit;
-                des.position_pnl = des.realized_pnl + des.unrealized_pnl;
-                */
+               //TODO
             }
 
             inline void from_ctp(const CThostFtdcInstrumentField &ori,Instrument &des)

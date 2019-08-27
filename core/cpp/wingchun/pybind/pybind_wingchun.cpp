@@ -17,6 +17,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
+#include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/commander.h>

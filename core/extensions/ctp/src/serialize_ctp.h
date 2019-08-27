@@ -2,8 +2,8 @@
 // Created by qlu on 2019/3/21.
 //
 
-#ifndef KUNGFU_SERIALIZE_H
-#define KUNGFU_SERIALIZE_H
+#ifndef KF_EXT_CTP_SERIALIZE_H
+#define KF_EXT_CTP_SERIALIZE_H
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -40,7 +40,6 @@ namespace kungfu
                 j["RequestID"] = ori.RequestID;
                 j["UserForceClose"] = ori.UserForceClose;
                 j["IsSwapOrder"] = ori.IsSwapOrder;
-#ifdef __linux__
                 j["ExchangeID"] = std::string(ori.ExchangeID);
                 j["InvestUnitID"] = std::string(ori.InvestUnitID);
                 j["AccountID"] = std::string(ori.AccountID);
@@ -48,7 +47,6 @@ namespace kungfu
                 j["ClientID"] = std::string(ori.ClientID);
                 j["IPAddress"] = std::string(ori.IPAddress);
                 j["MacAddress"] = std::string(ori.MacAddress);
-#endif
             }
 
             inline void to_json(nlohmann::json &j, const CThostFtdcOrderField &ori)
@@ -103,21 +101,18 @@ namespace kungfu
                 j["FrontID"] = ori.FrontID;
                 j["SessionID"] = ori.SessionID;
                 j["UserProductInfo"] = std::string(ori.UserProductInfo);
-//                j["StatusMsg"] = gbk2utf8(ori.StatusMsg);
                 j["UserForceClose"] = ori.UserForceClose;
                 j["ActiveUserID"] = std::string(ori.ActiveUserID);
                 j["BrokerOrderSeq"] = ori.BrokerOrderSeq;
                 j["RelativeOrderSysID"] = std::string(ori.RelativeOrderSysID);
                 j["ZCETotalTradedVolume"] = ori.ZCETotalTradedVolume;
                 j["IsSwapOrder"] = ori.IsSwapOrder;
-#ifdef __linux__
                 j["BranchID"] = std::string(ori.BranchID);
                 j["InvestUnitID"] = std::string(ori.InvestUnitID);
                 j["AccountID"] = std::string(ori.AccountID);
                 j["CurrencyID"] = std::string(ori.CurrencyID);
                 j["IPAddress"] = std::string(ori.IPAddress);
                 j["MacAddress"] = std::string(ori.MacAddress);
-#endif
             }
 
             inline void to_json(nlohmann::json &j, const CThostFtdcTradingAccountField &ori)
@@ -379,6 +374,6 @@ namespace kungfu
         }
     }
 }
-#endif //KUNGFU_SERIALIZE_H
+#endif //KF_EXT_CTP_SERIALIZE_H
 
 
