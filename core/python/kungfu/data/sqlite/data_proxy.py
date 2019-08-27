@@ -1,9 +1,10 @@
 import json
+
 from .models import *
 from itertools import groupby
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
 from kungfu.wingchun.finance.book import *
-from kungfu.wingchun.constants import OrderStatus, AllFinalOrderStatus
+from kungfu.wingchun.constants import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import not_
@@ -44,7 +45,9 @@ class AccountsDB(SessionFactoryHolder):
 
     def get_md_account_config(self, source_name):
         with session_scope(self.session_factory) as session:
-            account = session.query(Account).filter(Account.source_name == source_name and Account.receive_md).first()
+            account = session.query(Account).\
+                filter(Account.source_name == source_name).\
+                filter(Account.receive_md).first()
             return json.dumps(object_as_dict(account)['config'])
 
     def reset_receive_md(self):
