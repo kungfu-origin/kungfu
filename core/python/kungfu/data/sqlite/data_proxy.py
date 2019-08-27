@@ -29,7 +29,7 @@ class AccountsDB(SessionFactoryHolder):
     def find_account(self, account_id):
         with session_scope(self.session_factory) as session:
             account = session.query(Account).filter(Account.account_id == account_id).first()
-            return object_as_dict(account)
+            return object_as_dict(account) if account is not None else {}
 
     def list_source_accounts(self, source_name):
         with session_scope(self.session_factory) as session:
