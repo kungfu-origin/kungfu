@@ -36,7 +36,6 @@ export const nanoReqCash = () => {
             req.close();
             const data = JSON.parse(String(buf));
             if(data.msg_type === msgType.reqCash ) {
-                console.log(data)
                 if(data.status === 200) {
                     resolve(data)
                 } else {

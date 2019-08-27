@@ -80,12 +80,10 @@ export default {
                 const stateData = data[1];
                 //if state is 2 means disconnect, kill process, delay 3s; 
                 if(+stateData.state === 2 || +stateData.state === 5) {
-                    console.log('state == 2 || 5, deleteProcess', processId, stateData)
                     delaySeconds(1000)
                     .then(() => deleteProcess(processId))
                     return
                 } else { 
-                    console.log('md/td state', processId, stateData)
                     t.$store.dispatch('setOneMdTdState', {
                         id: processId,
                         stateData: stateData
@@ -100,8 +98,7 @@ export default {
                 const { account_id, source_id, ledger_category } = data;
                 const accountId = `${source_id}_${account_id}`;                  
                 if(ledger_category !== 0) return;
-                console.log('account cash', accountId, data)
-                t.$store.dispatch('setAccountAssetById', { accountId, accountAsset: Object.freeze(data) })
+                t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze(data) })
             })
         },
         
@@ -121,19 +118,19 @@ export default {
         reqCalendar() {
             const t = this
             //先主动获取
-            delaySeconds(5000)//需要等ledger起来
+            delaySeconds(3000)//需要等ledger起来
             .then(() => t.$store.dispatch('reqCalendar'))
         },
 
         //获取gatewayState（req后会从subGatewayState中获取）
         reqGatewayState(){
-            delaySeconds(5000)//需要等ledger起来
+            delaySeconds(3000)//需要等ledger起来
             .then(() => nanoReqGatewayState())
         },
 
         //获取资金信息
         reqCash() {
-            delaySeconds(5000)//需要等ledger起来
+            delaySeconds(3000)//需要等ledger起来
             .then(() => nanoReqCash())
         },
 

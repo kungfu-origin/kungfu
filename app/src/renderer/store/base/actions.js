@@ -18,7 +18,6 @@ export const setTradingDay = ({ commit }, tradingDay) => {
 export const reqCalendar = ({ commit }) => {
     return nanoReqCalendar()
     .then(calendar => {
-        console.log('req calendar', calendar)
         if(calendar && calendar.trading_day) {
             const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
             commit('SET_TRADING_DAY', tradingDay);
@@ -31,7 +30,6 @@ export const reqCalendar = ({ commit }) => {
 //sub 交易日
 buildTradingDayPipe().subscribe(d => {
     const calendar = d.data;
-    console.log('sub calendar', calendar)
     if(calendar && calendar.trading_day) {
         const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
         commit('SET_TRADING_DAY', tradingDay);

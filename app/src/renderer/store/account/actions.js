@@ -21,8 +21,8 @@ export const setAccountsAsset = ({ commit }, accountsAsset) => {
     commit('SET_ACCOUNTS_ASSET', accountsAsset)
 }
 
-export const setAccountAssetById = ({ commit },  { accountId, accountAsset }) => {
-    commit('SET_ACCOUNT_ASSET',  { accountId, accountAsset })
+export const setAccountAssetById = ({ commit },  { accountId, accountsAsset }) => {
+    commit('SET_ACCOUNT_ASSET',  { accountId, accountsAsset })
 }
 
 export const setAccountList = ({ commit }, accountList) => {
