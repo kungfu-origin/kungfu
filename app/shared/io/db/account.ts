@@ -102,7 +102,7 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
         ` OR client_id LIKE '%${id}%')` +
         ` AND insert_time >= ${filterDate[0]}` +
         ` AND insert_time < ${filterDate[1]}` +
-        (dateRange.length ? `` : ` AND status NOT IN (3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
+        (dateRange.length ? `` : ` AND status NOT IN (0,3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
         ` ORDER BY insert_time DESC`
     )
 }

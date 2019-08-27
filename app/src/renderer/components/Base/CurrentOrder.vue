@@ -352,8 +352,8 @@ export default {
             //推送的时候也要满足筛选条件
             if(!(order_id.toString().includes(id) || data.instrument_id.includes(id) || data.client_id.includes(id))) return
 
-            //status为3,4,5,6的时候不显示在当前委托中
-            if([3, 4, 5, 6].indexOf(+status) !== -1) {
+            //status为0,3,4,5,6的时候不显示在当前委托中
+            if([0, 3, 4, 5, 6].indexOf(+status) !== -1) {
                 if(!t.orderDataByKey[order_id]) return
                 t.orderDataByKey[order_id] = null;
                 delete t.orderDataByKey[order_id]

@@ -23,6 +23,7 @@ export const statusName: StringToStringObject = {
     canceled: '全部撤销',
     part_traded_not_queueing: '部分撤销部分成交'
 }
+
 // Unknown = '0', // 未知
 // Submitted = '1', //已提交 
 // Pending = '2', // 等待
@@ -33,7 +34,7 @@ export const statusName: StringToStringObject = {
 // PartialFilledActive = '7' //正在交易
 // 3,4,5,6已完成
 export const orderStatus: NumberToStringObject = {
-    0: '等待中',
+    0: '未知',
     1: '已提交',
     2: '等待中',
     3: '已撤单',
