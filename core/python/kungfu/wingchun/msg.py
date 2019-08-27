@@ -5,3 +5,4 @@ CancelAllOrder = 355
 BrokerStateRefresh = 400
 BrokerState = 401
 QryAsset = 402
+PublishAllAssetInfo = 403

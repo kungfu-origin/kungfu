@@ -9,3 +9,12 @@ def asset_request(cmd_sock, commander_location):
     }))
     cmd_sock.recv()
     print("reply {} for request: {}".format(cmd_sock.last_message(), msg.QryAsset))
+
+def all_asset_info_request(cmd_sock, commander_location):
+    cmd_sock.send(json.dumps({
+        'msg_type': msg.PublishAllAssetInfo,
+        'dest': commander_location.uid,
+        'data': {}
+    }))
+    cmd_sock.recv()
+    print("reply {} for request: {}".format(cmd_sock.last_message(), msg.PublishAllAssetInfo))

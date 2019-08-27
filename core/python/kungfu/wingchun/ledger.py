@@ -16,7 +16,6 @@ from kungfu.wingchun.calendar import Calendar
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
 
-
 def on(msg_type):
     def register_handler(func):
         @functools.wraps(func)
@@ -27,7 +26,6 @@ def on(msg_type):
         return on
 
     return register_handler
-
 
 def handle(msg_type, *args, **kwargs):
     if msg_type not in HANDLERS:
@@ -281,3 +279,13 @@ def qry_asset(ctx, event, location, data):
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.QryAsset
         }
+
+@on(msg.PublishAllAssetInfo)
+def publish_all_asset(ctx, event, location, data):
+    ctx.logger.info("req publish all recorded asset info")
+    for ledger in ctx.ledgers.values():
+        ctx.ledger.publish(json.dumps(ledger.message))
+    return {
+        'status': http.HTTPStatus.OK,
+        'msg_type': msg.PublishAllAssetInfo
+    }

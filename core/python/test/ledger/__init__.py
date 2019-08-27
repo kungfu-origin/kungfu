@@ -33,6 +33,7 @@ def ledger(ctx, protocol, msg_type):
     # ctx.logger.info('done')
     order.cancel_all_order_for_account(cmd_sock, commander_location, test_account)
     asset.asset_request(cmd_sock, commander_location)
+    asset.all_asset_info_request(cmd_sock, commander_location)
     ctx.logger.info('done')
 
     # order.cancel_all_order_for_strategy(cmd_sock, commander_location, test_strategy)
