@@ -1,5 +1,4 @@
 import json
-from . import *
 from .models import *
 from itertools import groupby
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
@@ -8,6 +7,8 @@ from kungfu.wingchun.constants import OrderStatus, AllFinalOrderStatus
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import not_
+from . import object_as_dict
+from . import make_url
 
 class SessionFactoryHolder:
     def __init__(self, location, filename):
@@ -89,7 +90,10 @@ class LedgerDB(SessionFactoryHolder):
 
     def mark_orders_status_unknown(self, source_id, account_id):
         with session_scope(self.session_factory) as session:
-            session.query(Order).filter(Order.account_id == account_id, not_(Order.status.in_(AllFinalOrderStatus))).update({"status": int(OrderStatus.Unknown)}, synchronize_session='fetch')
+            pending_orders = session.query(Order).filter(Order.account_id == account_id, not_(Order.status.in_(AllFinalOrderStatus))).all()
+            for order in pending_orders:
+                order.status = int(OrderStatus.Unknown)
+            return [object_as_dict(order) for order in pending_orders]
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass

@@ -62,7 +62,9 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.info("on trader started, trigger_time:{}, uname:{}".format(trigger_time, location.uname))
         account_id = location.name
         source_id = location.group
-        self.ctx.db.mark_orders_status_unknown(source_id, account_id)
+        orders = self.ctx.db.mark_orders_status_unknown(source_id, account_id)
+        for order in orders:
+            self.publish(json.dumps({"msg_type": int(MsgType.Order), "data": order}))
 
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
