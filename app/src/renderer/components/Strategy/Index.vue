@@ -90,6 +90,7 @@ export default {
             switch (msgType) {
                 case MSG_TYPE.order:
                     if(strategyId !== t.strategyId) return;
+                    console.log('strategy order', tradingData)
                     t.ordersFromNmsg = Object.freeze(tradingData);
                     break
                 case MSG_TYPE.trade:
