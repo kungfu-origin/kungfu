@@ -116,7 +116,7 @@ export default {
                     (level < tdStatusReady) && (tdStatusReady = level);
                 }
 
-                if(a.receive_md === 1){
+                if(!!a.receive_md){
                     const mdProcessStatus = t.$utils.ifProcessRunning('md_' + a.source_name, t.processStatus)                                       
                     if (mdProcessStatus) mdProcessReady = true;  
                     const mdStatus = t.buildMdState(a)

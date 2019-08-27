@@ -13,8 +13,9 @@ export const deleteAccount = (row: Account, accountList = []): Promise<any> => {
     //查看该账户下是否存在task中的td任务
     const tdProcessId: string = `td_${account_id}`
     const mdProcessId: string = `md_${source_name}`
-    const leftAccounts: Account[] = accountList.filter((a: Account): boolean => a.source_name === source_name && a.receive_md === false && a.account_id !== account_id)
-
+    const leftAccounts: Account[] = accountList.filter((a: Account): boolean => {
+        return (a.source_name === source_name) && (!!a.receive_md === false) && (a.account_id !== account_id)
+    })
     //删除td
     return removeFileFolder(path.join(TD_DIR, account_id.toAccountId()))
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
