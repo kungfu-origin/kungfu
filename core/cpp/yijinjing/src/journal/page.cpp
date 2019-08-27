@@ -18,8 +18,6 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/journal/page.h>
 

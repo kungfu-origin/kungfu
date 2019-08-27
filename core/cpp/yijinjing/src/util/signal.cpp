@@ -6,7 +6,10 @@
 #include <spdlog/spdlog.h>
 
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/practice/hero.h>
+
+using namespace kungfu::yijinjing::util;
 
 namespace kungfu
 {
@@ -14,7 +17,7 @@ namespace kungfu
     {
         namespace os
         {
-            static practice::hero * hero_instance;
+            static practice::hero *hero_instance;
 
             void stop_hero()
             {
@@ -89,10 +92,12 @@ namespace kungfu
                     case SIGVTALRM:    // terminate process    virtual time alarm (see setitimer(2))
                     case SIGPROF:      // terminate process    profiling timer alarm (see setitimer(2))
                         SPDLOG_CRITICAL("kungfu app terminated by signal {}", signum);
+                        print_stack_trace();
                         exit_hero(signum);
                     case SIGUSR1:      // terminate process    User defined signal 1
                     case SIGUSR2:      // terminate process    User defined signal 2
                         SPDLOG_CRITICAL("kungfu app caught user defined signal {}", signum);
+                        print_stack_trace();
                         exit_hero(signum);
                     case SIGQUIT:      // create core image    quit program
                     case SIGILL:       // create core image    illegal instruction
@@ -101,12 +106,15 @@ namespace kungfu
                     case SIGFPE:       // create core image    floating-point exception
                     case SIGBUS:       // create core image    bus error
                         SPDLOG_CRITICAL("bus error");
+                        print_stack_trace();
                         exit_hero(signum);
                     case SIGSEGV:      // create core image    segmentation violation
                         SPDLOG_CRITICAL("segmentation violation");
+                        print_stack_trace();
                         exit_hero(signum);
                     case SIGSYS:       // create core image    non-existent system call invoked
                         SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
+                        print_stack_trace();
                         exit_hero(signum);
 #endif // _WINDOWS
 #ifdef __APPLE__
@@ -115,6 +123,7 @@ namespace kungfu
                         break;
                     case SIGEMT:       // create core image    emulate instruction executed
                         SPDLOG_CRITICAL("kungfu app caught unexpected signal {}", signum);
+                        print_stack_trace();
                         exit_hero(signum);
 #endif // __APPLE__
                     default:

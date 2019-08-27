@@ -15,6 +15,7 @@ Debug/
 .vscode/
 .idea/
 .arcconfig
+*.flow
 
 # Build related
 cmake-build-debug/
