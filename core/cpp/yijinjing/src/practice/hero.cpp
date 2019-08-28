@@ -9,6 +9,7 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/practice/hero.h>
@@ -66,9 +67,9 @@ namespace kungfu
             SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
 
             events_ = observable<>::create<event_ptr>(
-                    [&](subscriber<event_ptr> sb)
+                    [&, this](subscriber<event_ptr> sb)
                     {
-                        produce(sb);
+                        produce(this, sb);
                     }) | on_error_resume_next(
                     [&](std::exception_ptr e) -> observable<event_ptr>
                     {
@@ -149,24 +150,6 @@ namespace kungfu
                         get_location(source_id)->uname, source_id);
         }
 
-        void hero::produce(const rx::subscriber<yijinjing::event_ptr> &sb)
-        {
-            try
-            {
-                while (live_)
-                {
-                    if (not produce_one(sb))
-                    {
-                        break;
-                    }
-                }
-            } catch (...)
-            {
-                sb.on_error(std::current_exception());
-            }
-            sb.on_completed();
-        }
-
         bool hero::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
         {
             if (io_device_->get_home()->mode == mode::LIVE)
@@ -208,6 +191,33 @@ namespace kungfu
                 return false;
             }
             return true;
+        }
+
+        void hero::produce(hero *instance, const rx::subscriber<yijinjing::event_ptr> &sb)
+        {
+#ifdef _WINDOWS
+            __try
+#else
+            try
+#endif //_WINDOWS
+            {
+                while (instance->live_)
+                {
+                    if (not instance->produce_one(sb))
+                    {
+                        break;
+                    }
+                }
+#ifdef _WINDOWS
+            } __except(yijinjing::util::print_stack_trace(GetExceptionInformation()))
+            {}
+#else
+            } catch (...)
+            {
+                sb.on_error(std::current_exception());
+            }
+#endif //_WINDOWS
+            sb.on_completed();
         }
     }
 }

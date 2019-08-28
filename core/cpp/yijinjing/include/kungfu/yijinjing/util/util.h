@@ -7,12 +7,10 @@
 
 #define KUNGFU_HASH_SEED 42
 
-namespace kungfu
-{
-    namespace yijinjing
-    {
-        namespace util
-        {
+
+namespace kungfu {
+    namespace yijinjing {
+        namespace util {
             /**
              * Murmur Hash 2
              * @param key content to be hashed
@@ -20,11 +18,9 @@ namespace kungfu
              * @param seed
              * @return hash result
              */
-            uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed=KUNGFU_HASH_SEED);
+            uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed = KUNGFU_HASH_SEED);
 
-            uint32_t hash_str_32(const std::string &key, uint32_t seed=KUNGFU_HASH_SEED);
-
-            void print_backtrace();
+            uint32_t hash_str_32(const std::string &key, uint32_t seed = KUNGFU_HASH_SEED);
 
             void color_print(std::string level, std::string log);
 
