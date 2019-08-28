@@ -87,14 +87,14 @@ export default {
             const t = this;
             if(!t.dayPnlData.length) return '--'
             const len =  t.dayPnlData.length;
-            return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1])
+            return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1], t.dayPnlData[0])
         },
 
         accumulatedPnl(){
             const t = this;
             if(!t.dayPnlData.length) return '--'
             const len =  t.dayPnlData.length;
-            return t.calcuAccumlatedPnl(t.dayPnlData[len - 1])
+            return t.calcuAccumlatedPnl(t.dayPnlData[len - 1], t.dayPnlData[0])
         }
     },
 
@@ -147,7 +147,8 @@ export default {
                     const tradingDay = item.trading_day
                     t.dayGroupKey[tradingDay] = item
                     xAxisData.push(tradingDay)
-                    serirsData.push(t.calcuAccumlatedPnl(item))
+                    const fistCashData = serirsData[0] || null
+                    serirsData.push(t.calcuAccumlatedPnl(item, fistCashData))
                 })
                 t.dayData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
                 t.dayPnlData = Object.freeze(data || [])
@@ -170,7 +171,7 @@ export default {
             if(timeLength && t.dayData[0][timeLength - 1] === tradingDay) {
                 let tmpDayData1 = t.dayData[1].slice();
                 tmpDayData1.pop()
-                tmpDayData1.push(t.calcuAccumlatedPnl(data))
+                tmpDayData1.push(t.calcuAccumlatedPnl(data, tmpDayData1[0]))
                 t.dayData[1] = Object.freeze(tmpDayData1);
 
                 let tmpDayPnlData = t.dayPnlData.slice();
@@ -181,7 +182,7 @@ export default {
                 let tmpDayData0 = t.dayData[0].slice();
                 tmpDayData0.push(tradingDay);       
                 let tmpDayData1 = t.dayData[1].slice()
-                tmpDayData1.push(t.calcuAccumlatedPnl(data))
+                tmpDayData1.push(t.calcuAccumlatedPnl(data, tmpDayData1[0]))
                 t.dayData = [Object.freeze(tmpDayData0), Object.freeze(tmpDayData1)]
 
                 let tmpDayPnlData = t.dayPnlData.slice();
@@ -190,12 +191,14 @@ export default {
             }
         },
 
-        calcuAccumlatedPnl(pnlData) {
-            return toDecimal(pnlData.realized_pnl + pnlData.unrealized_pnl, 2)
+        calcuAccumlatedPnl(pnlData, firstPnlData) {
+            if(!firstPnlData) firstPnlData = {}
+            return toDecimal((pnlData.dynamic_equity || 0) - (firstPnlData.static_equity || 0), 2)
         },
 
-        calcuAccumlatedPnlRatio(pnlData) {
-            return toDecimal((pnlData.realized_pnl + pnlData.unrealized_pnl) / pnlData.initial_equity, 4, 2)
+        calcuAccumlatedPnlRatio(pnlData, firstPnlData) {
+            if(!firstPnlData) firstPnlData = {}
+            return toDecimal(((pnlData.dynamic_equity || 0) - (firstPnlData.static_equity || 0)) / firstPnlData.static_equity, 4, 2)
         },
 
         dealNanomsg(nanomsg) {
