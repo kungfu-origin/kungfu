@@ -6,14 +6,15 @@
 <script>
 import path from 'path';
 import { mapState } from 'vuex';
+import moment from 'moment';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delaySeconds, debounce } from '__gUtils/busiUtils';
-import * as ACCOUNT_API from '__io/db/account';
+import { getAccountAsset } from '__io/db/account';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
-import { buildGatewayStatePipe, buildCashPipe } from '__io/nano/nanoSub'; 
+import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
 import { getAccountSource } from '__gConfig/accountConfig';
 import { nanoReqGatewayState, nanoReqCash } from '__io/nano/nanoReq';
@@ -23,6 +24,7 @@ export default {
     data() {
         this.gatewayStatePipe = null;
         this.cashPipe = null;
+        this.tradingDayPipe = null;
         return {}
     },
 
@@ -39,6 +41,7 @@ export default {
 
         this.subGatewayState();
         this.subAccountCash();
+        this.subTradingDay();
       
         this.reqCalendar();
         this.reqCash();
@@ -49,6 +52,7 @@ export default {
         const t = this;
         t.gatewayStatePipe.unsubscribe();
         t.cashPipe.unsubscribe();
+        t.tradingDayPipe.unsubscribe();
     },
 
     computed: {
@@ -101,13 +105,24 @@ export default {
                 t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze(data) })
             })
         },
+
+        subTradingDay() {
+            //sub 交易日
+            t.tradingDayPipe = buildTradingDayPipe().subscribe(d => {
+                const calendar = d.data;
+                if(calendar && calendar.trading_day) {
+                    const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
+                    t.$store.dispatch('setTradingDay', tradingDay);
+                }
+            })
+        },
         
         //获取accounts的cash
         getAccountsCash(accountList) {
             const t = this
             //从数据库中查找
             if(!accountList || !accountList.length) return
-            ACCOUNT_API.getAccountAsset().then(cashList => {
+            getAccountAsset().then(cashList => {
                 const cashData = {} 
                 cashList.forEach(cash => cashData[`${cash.source_id}_${cash.account_id}`] = cash)
                 t.$store.dispatch('setAccountsAsset', cashData)
