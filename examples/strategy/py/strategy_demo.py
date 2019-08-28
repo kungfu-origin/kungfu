@@ -32,7 +32,7 @@ def pre_start(context):
 
 def on_quote(context, quote):
     #context.log.info("{} {}".format(quote.data_time, quote.last_price))
-    order_id = context.insert_order("601988", exchange, "15040900", 75, 200, PriceType.Limit, Side.Buy, Offset.Open)
+    order_id = context.insert_order(quote.instrument_id, exchange, "15040900", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open)
     context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
     # context.insert_market_order("000001.SZ", "", "15040900", 20, Side.Buy, Offset.Open)
     pass

@@ -19,3 +19,4 @@ plotly = "==4.0.0"
 
 [dev-packages]
 pytest = "*"
+mock ="*"

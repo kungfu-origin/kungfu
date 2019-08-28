@@ -14,7 +14,7 @@
     "electron": "4.2.9"
   },
   "scripts": {
-    "install-deps": "pipenv --three install",
+    "install-deps": "pipenv --three install -d",
     "build": "yarn run build:cpp && yarn run build:pyi",
     "build:cpp": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron make",
     "build:pyi": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron package",

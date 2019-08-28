@@ -154,7 +154,7 @@ class Position(Base):
     trading_day = Column(String)
 
     instrument_id = Column(String)
-    instrument_type = Column(String)
+    instrument_type = Column(Integer)
     exchange_id = Column(String)
 
     account_id = Column(String)

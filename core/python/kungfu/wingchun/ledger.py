@@ -45,6 +45,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.orders = {}
         self.ctx.trading_day = None
         self.ctx.ledgers = {}
+        self.ctx.get_inst_info = self.get_inst_info
 
     def pre_start(self):
         self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
@@ -92,10 +93,11 @@ class Ledger(pywingchun.Ledger):
     def on_trade(self, event, trade):
         self.ctx.logger.debug('on trade %s from %s', trade, self.get_location(event.dest).uname)
         client_id = self.get_location(event.dest).name
+        source_id = self.get_location(event.source).group
         message = self._message_from_trade_event(event, trade)
         self.ctx.db.add_trade(**message["data"])
         self.publish(json.dumps(message))
-        self._get_ledger(ledger_category=LedgerCategory.Account, account_id=trade.account_id).apply_trade(trade)
+        self._get_ledger(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id).apply_trade(trade)
         self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id).apply_trade(trade)
 
     def on_instruments(self, instruments):
@@ -114,6 +116,7 @@ class Ledger(pywingchun.Ledger):
                               avail=asset.avail,
                               positions=pos_objects)
         ledger = self._get_ledger(ledger_category=LedgerCategory.Account, source_id = asset.source_id, account_id=asset.account_id).merge(account)
+        self.publish(json.dumps(ledger.message))
         self.ctx.db.dump(ledger)
 
     def on_future_account(self, asset, position_details):
@@ -141,6 +144,7 @@ class Ledger(pywingchun.Ledger):
                                    avail=asset.avail,
                                    positions=pos_objects)
         ledger = self._get_ledger(ledger_category=LedgerCategory.Account, source_id=asset.source_id,account_id=asset.account_id).merge(account_book)
+        self.publish(json.dumps(ledger.message))
         self.ctx.db.dump(ledger)
 
     def _message_from_order_event(self, event, order):
@@ -183,18 +187,21 @@ class Ledger(pywingchun.Ledger):
 
     def _get_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
         uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
+        uname = AccountBook.get_uname(category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
+        self.ctx.logger.info("get ledger, uid: {}, uname: {}".format(uid, uname))
         if uid in self.ctx.ledgers:
             return self.ctx.ledgers[uid]
         else:
             ledger = self.ctx.db.load(ledger_category=ledger_category, source_id=source_id,account_id=account_id, client_id=client_id)
             if not ledger:
+                self.ctx.logger.info("failed to load ledger {}.{}.{}.{} from sqlite".format(ledger_category, source_id, account_id, client_id))
                 ledger = AccountBook(self.ctx, ledger_category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH, trading_day=self.ctx.trading_day)
-            if ledger:
-                ledger._ctx = self.ctx
-                ledger.apply_trading_day(self.ctx.trading_day)
-                ledger.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
-                ledger.register_callback(self.ctx.db.on_messages)
-                self.ctx.ledgers[uid] = ledger
+            ledger._ctx = self.ctx
+            ledger.apply_trading_day(self.ctx.trading_day)
+            ledger.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
+            ledger.register_callback(self.ctx.db.on_messages)
+            self.ctx.ledgers[uid] = ledger
+            self.ctx.logger.info("success to init ledger, uid: {}, uname: {}".format(uid, uname))
             return ledger
 
     def get_inst_info(self, instrument_id):

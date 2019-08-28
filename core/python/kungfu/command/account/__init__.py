@@ -57,7 +57,7 @@ def encrypt(schema, answers):
     for key in answers:
         if type_config[key] == 'int':
             encrypted_answers[key] = int(answers[key])
-        if type_config[key] == 'bool':
+        elif type_config[key] == 'bool':
             encrypted_answers[key] = True if answers[key].lower() == 'true' else False
         else:
             encrypted_answers[key] = answers[key]
