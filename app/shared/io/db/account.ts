@@ -92,7 +92,6 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
     id = id || '';
     dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
-    console.log(filterDate)
     //查询总数的时候也需要根据筛选条件来
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
