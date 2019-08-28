@@ -201,7 +201,7 @@ function KillAll(){
 		.catch(err => console.error(err)) 
 		.finally(() => {
 			console.timeEnd('kill kfcs');
-			if(platform === 'win') killKungfu()
+			if(platform === 'linux') killKungfu()
 			console.time('kill daemon');
 			killGodDaemon()
 			.catch(err => console.error(err)) 				
