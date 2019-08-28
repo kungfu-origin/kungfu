@@ -38,7 +38,7 @@ namespace kungfu
                 /** trigger time for this frame, use for latency stats */
                 int64_t trigger_time;
                 /** msg type of the data in frame */
-                int32_t msg_type;
+                volatile int32_t msg_type;
                 /** source of this frame */
                 uint32_t source;
                 /** dest of this frame */
@@ -60,43 +60,43 @@ namespace kungfu
 
                 ~frame() override = default;
 
-                bool has_data() const
-                { return header_->length > 0; }
+                [[nodiscard]] bool has_data() const
+                { return header_->length > 0 && header_->msg_type > 0; }
 
-                uintptr_t address() const
+                [[nodiscard]] uintptr_t address() const
                 { return reinterpret_cast<uintptr_t>(header_); }
 
-                uint32_t frame_length() const
+                [[nodiscard]] uint32_t frame_length() const
                 { return header_->length; }
 
-                uint32_t header_length() const
+                [[nodiscard]] uint32_t header_length() const
                 { return header_->header_length; }
 
-                uint32_t data_length() const override
+                [[nodiscard]] uint32_t data_length() const override
                 { return frame_length() - header_length(); }
 
-                int64_t gen_time() const override
+                [[nodiscard]] int64_t gen_time() const override
                 { return header_->gen_time; }
 
-                int64_t trigger_time() const override
+                [[nodiscard]] int64_t trigger_time() const override
                 { return header_->trigger_time; }
 
-                int32_t msg_type() const override
+                [[nodiscard]] int32_t msg_type() const override
                 { return header_->msg_type; }
 
-                uint32_t source() const override
+                [[nodiscard]] uint32_t source() const override
                 { return header_->source; }
 
-                uint32_t dest() const override
+                [[nodiscard]] uint32_t dest() const override
                 { return header_->dest; }
 
-                const char *data_as_bytes() const override
+                [[nodiscard]] const char *data_as_bytes() const override
                 { return reinterpret_cast<char *>(address() + header_length()); }
 
-                const std::string data_as_string() const override
+                [[nodiscard]] const std::string data_as_string() const override
                 { return std::string(data_as_bytes()); }
 
-                const std::string to_string() const override
+                [[nodiscard]] const std::string to_string() const override
                 { return std::string(reinterpret_cast<char *>(address())); }
 
                 template<typename T>
@@ -108,7 +108,7 @@ namespace kungfu
                 }
 
             protected:
-                const void *data_address() const override
+                [[nodiscard]] const void *data_address() const override
                 { return reinterpret_cast<void *>(address() + header_length()); }
 
             private:
