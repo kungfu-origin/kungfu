@@ -10,8 +10,8 @@
     "loglevel": "trace",
     "arch": "x64",
     "runtime": "electron",
-    "node": "10.15.3",
-    "electron": "5.0.7"
+    "node": "10.16.0",
+    "electron": "4.2.9"
   },
   "scripts": {
     "install-deps": "pipenv --three install",
