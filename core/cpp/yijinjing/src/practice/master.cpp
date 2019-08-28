@@ -64,8 +64,8 @@ namespace kungfu
             register_location(e->gen_time(), app_location);
 
             auto master_location = get_location(app_locations_[app_location->uid]);
-            auto writer = get_io_device()->open_writer_at(master_location, app_location->uid);
-            writers_[app_location->uid] = writer;
+            writers_[app_location->uid] = get_io_device()->open_writer_at(master_location, app_location->uid);
+            auto &writer = writers_[app_location->uid];
 
             {
                 auto msg = request_loc.dump();
@@ -111,6 +111,7 @@ namespace kungfu
 
             deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
+            writers_.erase(app_location_uid);
             timer_tasks_.erase(app_location_uid);
 
             auto msg = location_desc.dump();
@@ -126,7 +127,13 @@ namespace kungfu
 
         void master::send_time(uint32_t dest, int32_t msg_type, int64_t nanotime)
         {
-            writers_[dest]->write(0, msg_type, nanotime);
+            if (has_location(dest))
+            {
+                writers_[dest]->write(0, msg_type, nanotime);
+            } else
+            {
+                SPDLOG_ERROR("Can not send time to {:08x}", dest);
+            }
         }
 
         bool master::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
