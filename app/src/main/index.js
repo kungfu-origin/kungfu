@@ -4,7 +4,7 @@ const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const electron = require('electron');
 //base setting, init db
 const { initDB } = require('./base');
-const { killGodDaemon,  killExtra, killKfc } = require('__gUtils/processUtils');
+const { killGodDaemon,  killExtra, killKfc, killKungfu } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
 
@@ -201,6 +201,7 @@ function KillAll(){
 		.catch(err => console.error(err)) 
 		.finally(() => {
 			console.timeEnd('kill kfcs');
+			if(platform === 'win') killKungfu()
 			console.time('kill daemon');
 			killGodDaemon()
 			.catch(err => console.error(err)) 				

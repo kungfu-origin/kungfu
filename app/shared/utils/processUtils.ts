@@ -41,10 +41,9 @@ const kfKill = (tasks: string[]): any => {
 }
 
 
-export const killKfc = () => kfKill([
-    'kfc', 
-    platform === 'win' ? '' : 'kungfu'
-])
+export const killKfc = () => kfKill(['kfc'])
+
+export const killKungfu = () => kfKill(['kungfu'])
 
 export const killExtra = () => kfKill(['kfc', 'pm2'])
 
