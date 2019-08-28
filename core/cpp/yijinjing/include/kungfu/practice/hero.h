@@ -86,7 +86,7 @@ namespace kungfu
 
         private:
             yijinjing::io_device_with_reply_ptr io_device_;
-            bool live_ = true;
+            volatile bool live_ = true;
 
             static void produce(hero *instance, const rx::subscriber<yijinjing::event_ptr> &sb);
         };
