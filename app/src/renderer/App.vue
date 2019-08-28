@@ -86,8 +86,8 @@ export default {
                 if(+stateData.state === 2 || +stateData.state === 5) {
                     delaySeconds(1000)
                     .then(() => deleteProcess(processId))
-                    return
                 } else { 
+                    console.log('[GATEWAY STATE] sub', processId, stateData)
                     t.$store.dispatch('setOneMdTdState', {
                         id: processId,
                         stateData: stateData
@@ -114,6 +114,7 @@ export default {
                 const calendar = d.data;
                 if(calendar && calendar.trading_day) {
                     const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
+                    console.log('[TRADING DAY] sub', tradingDay)
                     t.$store.dispatch('setTradingDay', tradingDay);
                 }
             })
