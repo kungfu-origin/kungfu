@@ -157,13 +157,6 @@ export default {
             .finally(() => t.initChart())
         },
 
-        //如果有交易日，则不获取
-        reqCalendar() {
-            const t = this;
-            if(t.tradingDay) return new Promise(resolve => resolve())
-            else return t.$store.dispatch('reqCalendar')
-        },
-
         dealNanomsg(nanomsg) {
             const t = this;
             const oldPnlDataLen = t.minPnlData.length;

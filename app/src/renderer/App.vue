@@ -17,7 +17,7 @@ import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
 import { getAccountSource } from '__gConfig/accountConfig';
-import { nanoReqGatewayState, nanoReqCash } from '__io/nano/nanoReq';
+import { nanoReqGatewayState, nanoReqCash, nanoReqCalendar } from '__io/nano/nanoReq';
 
 export default {
     name: 'app',
@@ -107,6 +107,7 @@ export default {
         },
 
         subTradingDay() {
+            const t = this;
             //sub 交易日
             t.tradingDayPipe = buildTradingDayPipe().subscribe(d => {
                 const calendar = d.data;
@@ -123,8 +124,10 @@ export default {
             //从数据库中查找
             if(!accountList || !accountList.length) return
             getAccountAsset().then(cashList => {
-                const cashData = {} 
-                cashList.forEach(cash => cashData[`${cash.source_id}_${cash.account_id}`] = cash)
+                const cashData = [{}, ...cashList].reduce((cash, curr) => {
+                    cash[`${curr.source_id}_${curr.account_id}`] = curr
+                    return cash
+                })
                 t.$store.dispatch('setAccountsAsset', cashData)
             })
         },
@@ -134,7 +137,14 @@ export default {
             const t = this
             //先主动获取
             delaySeconds(3000)//需要等ledger起来
-            .then(() => t.$store.dispatch('reqCalendar'))
+            .then(() => nanoReqCalendar())
+            .then(calendar => {
+                if(calendar && calendar.trading_day) {
+                    const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
+                    t.$store.dispatch('setTradingDay', tradingDay);
+                }
+            })
+            .catch(err => console.error(err))
         },
 
         //获取gatewayState（req后会从subGatewayState中获取）
