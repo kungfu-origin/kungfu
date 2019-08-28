@@ -53,7 +53,10 @@ namespace kungfu
             frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length)
             {
                 assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_->current_page_->get_page_size());
-                writer_mtx_.lock();
+                if (not writer_mtx_.try_lock())
+                {
+                    throw journal_error("Can not lock writer for " + journal_->location_->uname);
+                }
                 if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->current_page_->address_border())
                 {
                     close_page(trigger_time);

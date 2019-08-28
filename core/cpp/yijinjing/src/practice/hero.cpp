@@ -101,9 +101,16 @@ namespace kungfu
                     }) | finally(
                     [&]()
                     {
-                        if (writers_.find(0) != writers_.end())
+                        try
                         {
-                            writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
+                            if (writers_.find(0) != writers_.end())
+                            {
+                                writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
+                            }
+                        }
+                        catch (const std::exception &ex)
+                        {
+                            SPDLOG_ERROR("Unexpected exception when closing journal session: {}", ex.what());
                         }
 
                     }) | publish();
