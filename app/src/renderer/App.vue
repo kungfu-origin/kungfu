@@ -102,6 +102,7 @@ export default {
                 const { account_id, source_id, ledger_category } = data;
                 const accountId = `${source_id}_${account_id}`;                  
                 if(ledger_category !== 0) return;
+                console.log('[CASH] sub get', accountId, data)
                 t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze(data) })
             })
         },
@@ -126,6 +127,7 @@ export default {
             getAccountAsset().then(cashList => {
                 const cashData = [{}, ...cashList].reduce((cash, curr) => {
                     cash[`${curr.source_id}_${curr.account_id}`] = curr
+                    console.log('[CASH] db get', cash)
                     return cash
                 })
                 t.$store.dispatch('setAccountsAsset', cashData)
