@@ -204,14 +204,15 @@ class Ledger(pywingchun.Ledger):
 
 @on(msg.Calendar)
 def calendar_request(ctx, event, location, data):
-    return {
-        'status': http.HTTPStatus.OK,
+    message = {
         'msg_type': msg.Calendar,
         'data': {
-            'trading_day': '%s' % ctx.calendar.trading_day
+            'trading_day': ctx.calendar.trading_day.strftime("%Y%m%d"),
         }
     }
-
+    ctx.ledger.publish(json.dumps(message))
+    message.update({'status': http.HTTPStatus.OK})
+    return message
 
 @on(msg.BrokerStateRefresh)
 def broker_state_refresh(ctx, event, location, data):
