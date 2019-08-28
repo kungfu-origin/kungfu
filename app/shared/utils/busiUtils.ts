@@ -373,16 +373,13 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
     })
 }
 
-export const buildDateRange = (dateRange: string[], tradingDay: string, addTime = 0): number[] => {
-    dateRange = dateRange || [];
-    const momentDay: any = tradingDay ? moment(tradingDay) : moment();
-    //获取当天是日期范围
-    const startDate: number = Math.max((moment(momentDay.format('YYYY-MM-DD')).valueOf()) * 1000000, addTime)
-    const endDate: number = (moment(momentDay.add(1, 'd').format('YYYY-MM-DD')).valueOf()) * 1000000
-    //日期控件选出的日期都是0点的，需要加上一天才能将最后一天包含在内
-    const dateRange0: number = Math.max(moment(dateRange.length ? dateRange[0] : undefined).valueOf() * 1000000, addTime);
-    const dateRange1: number = moment(dateRange.length ? dateRange[1] : undefined).add(1, 'd').valueOf() * 1000000;
-    return dateRange.length ? [dateRange0, dateRange1] : [startDate, endDate];
+export const buildDateRange = (dateRange: string[], tradingDay: string, addTime = 0): string[] => {
+    if(dateRange.length === 2) {
+        return [moment(dateRange[0]).format('YYYYMMDD'), moment(dateRange[1]).format('YYYYMMDD')]
+    } else if (tradingDay) {
+        tradingDay = moment(tradingDay).format('YYYYMMDD')
+        return [tradingDay, tradingDay]
+    } else throw new Error('dateRange == [] and tradingDay undefined!')
 }
 
 // ========================== 交易数据处理 start ===========================

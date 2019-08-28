@@ -92,6 +92,7 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
     id = id || '';
     dateRange = dateRange || [];
     const filterDate = buildDateRange(dateRange, tradingDay)
+    console.log(filterDate)
     //查询总数的时候也需要根据筛选条件来
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
@@ -100,8 +101,8 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
         ` AND (order_id LIKE '%${id}%'` +
         ` OR instrument_id LIKE '%${id}%'` +
         ` OR client_id LIKE '%${id}%')` +
-        ` AND insert_time >= ${filterDate[0]}` +
-        ` AND insert_time < ${filterDate[1]}` +
+        ` AND trading_day >= ${filterDate[0]}` +
+        ` AND trading_day <= ${filterDate[1]}` +
         (dateRange.length ? `` : ` AND status NOT IN (0,3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
         ` ORDER BY insert_time DESC`
     )
@@ -123,8 +124,8 @@ export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDat
         ` WHERE account_id="${accountId}"` +
         ` AND (instrument_id LIKE '%${id}%'` +
         ` OR client_id LIKE '%${id}%')` +
-        ` AND trade_time >= ${filterDate[0]}` + 
-        ` AND trade_time < ${filterDate[1]}` + //有日期筛选的时候
+        ` AND trading_day >= ${filterDate[0]}` +
+        ` AND trading_day <= ${filterDate[1]}` +
         ` ORDER BY trade_time DESC`
     )
 }
