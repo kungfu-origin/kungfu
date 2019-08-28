@@ -112,6 +112,7 @@ if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_E
 
 export const KUNGFU_ENGINE = KUNGFU_ENGINE_RESOLVE;
 
+
 export const LOG_CONFIG = process.env.NODE_ENV === 'production' 
     //@ts-ignore
     ? path.join(process.resourcesPath, 'logConfig.json') 

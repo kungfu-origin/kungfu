@@ -41,9 +41,10 @@ const kfKill = (tasks: string[]): any => {
 }
 
 
-export const killKfc = () => kfKill(['kfc'])
+export const killKfc = () => kfKill(['kfc', 'kungfu'])
 
 export const killExtra = () => kfKill(['kfc', 'pm2'])
+
 
 //=========================== pm2 manager =========================================
 
