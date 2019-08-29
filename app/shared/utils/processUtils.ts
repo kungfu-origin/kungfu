@@ -40,12 +40,13 @@ const kfKill = (tasks: string[]): any => {
     else return winKill(tasks)
 }
 
+const kfc = platform === 'win' ? 'kfc.exe' : 'kfc';
 
-export const killKfc = () => kfKill(['kfc'])
+export const killKfc = () => kfKill([kfc])
 
 export const killKungfu = () => kfKill(['kungfu'])
 
-export const killExtra = () => kfKill(['kfc', 'pm2'])
+export const killExtra = () => kfKill([kfc, 'pm2'])
 
 
 //=========================== pm2 manager =========================================

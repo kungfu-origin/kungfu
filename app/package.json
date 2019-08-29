@@ -72,7 +72,7 @@
         "to": "logConfig.json"
       }
     ],
-    "asar": true,
+    "asar": false,
     "dmg": {
       "contents": [
         {
