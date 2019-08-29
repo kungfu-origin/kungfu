@@ -278,8 +278,14 @@ export const deleteProcess = (processName: string) => {
         
         pm2Delete(processName)
         .then(() => resolve(true))
-        .then(() => kfKill(pids))
         .catch(err => reject(err))
+        .finally(() => {
+            if(pids.length) {
+                kfKill(pids).catch((err: Error) => {
+                    console.error(err)
+                })
+            }
+        })
     })
 }
 
