@@ -261,7 +261,9 @@ export default {
     methods:{
         //添加账户，打开选择柜台弹窗
         handleAddAccount(){
-            this.visiblity.selectSource = true
+            this.visiblity.selectSource = true;
+            this.$store.dispatch('getAccountSourceConfig')
+     
         },
 
         //编辑账户

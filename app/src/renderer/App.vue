@@ -34,7 +34,7 @@ export default {
 
     created() {
         const t = this;
-        this.getAccountSource();
+        this.$store.dispatch('getAccountSourceConfig')
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
         .then(accountList => t.getAccountsCash(accountList))
@@ -159,14 +159,6 @@ export default {
         reqCash() {
             delaySeconds(3000)//需要等ledger起来
             .then(() => nanoReqCash())
-        },
-
-        //获取柜台信息
-        getAccountSource() {
-            const t = this;
-            getAccountSource().then(res => {
-                t.$store.dispatch('setAccountSource', res)
-            })
         }
     }
 }
