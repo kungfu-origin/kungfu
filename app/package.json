@@ -46,7 +46,8 @@
         "from": ".",
         "to": "dist/app",
         "filter": [
-          "resources"
+          "resources",
+          "!default/*"
         ]
       },
       "!**/kungfu-core/*",
@@ -68,8 +69,12 @@
         ]
       },
       {
-        "from": "./resources/logConfig.json",
-        "to": "logConfig.json"
+        "from": "./resources",
+        "to": "kungfu-resources",
+        "filter": [
+          "default/*",
+          "config/*"
+        ]
       }
     ],
     "asar": false,

@@ -112,10 +112,13 @@ if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_E
 
 export const KUNGFU_ENGINE = KUNGFU_ENGINE_RESOLVE;
 
+const KUNGFU_RESOURCES = process.env.NODE_ENV === 'production' 
+//@ts-ignore
+? path.join(process.resourcesPath, 'kungfu-resources') 
+: path.join(__resources)
 
-export const LOG_CONFIG = process.env.NODE_ENV === 'production' 
-    //@ts-ignore
-    ? path.join(process.resourcesPath, 'logConfig.json') 
-    : path.join(__resources, 'logConfig.json')
+export const LOG_CONFIG = path.join(KUNGFU_RESOURCES, 'config', 'logConfig.json')
+
+export const DEFUALT_DB = path.join(KUNGFU_RESOURCES, 'default')
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE, 'kfc', 'extensions');
