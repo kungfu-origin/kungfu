@@ -182,7 +182,7 @@ class Ledger(pywingchun.Ledger):
             }
         }))
         self._dump_snapshot(data_frequency="daily")
-        for ledger in self.ctx.ledgers.values:
+        for ledger in self.ctx.ledgers.values():
             self.ctx.db.dump(ledger)
 
     def _get_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
