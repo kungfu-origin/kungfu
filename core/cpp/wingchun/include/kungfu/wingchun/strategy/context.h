@@ -82,13 +82,6 @@ namespace kungfu
 
                 friend class Runner;
             };
-
-            enum OrderType
-            {
-                UNKNOWN = 0,
-                MARKET = 1,
-                LIMIT = 2,
-            };
         }
     }
 }

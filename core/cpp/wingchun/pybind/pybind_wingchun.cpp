@@ -94,8 +94,8 @@ public:
     void post_stop(strategy::Context_ptr context) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, post_stop, context); }
 
-    void on_trading_day(strategy::Context_ptr context, const std::string &next_trading_day) override
-    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, next_trading_day); }
+    void on_trading_day(strategy::Context_ptr context, int64_t daytime) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, daytime); }
 
     void on_quote(strategy::Context_ptr context, const Quote &quote) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote); }

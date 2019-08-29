@@ -37,6 +37,14 @@ namespace kungfu
                 strategies_.push_back(strategy);
             }
 
+            void Runner::on_trading_day(const yijinjing::event_ptr &event, int64_t daytime)
+            {
+                for (const auto &strategy : strategies_)
+                {
+                    strategy->on_trading_day(context_, daytime);
+                }
+            }
+
             void Runner::on_start()
             {
                 context_ = make_context();
@@ -91,6 +99,7 @@ namespace kungfu
                           strategy->on_transaction(context_, event->data<Transaction>());
                       }
                   });
+
 
                 for (const auto &strategy : strategies_)
                 {

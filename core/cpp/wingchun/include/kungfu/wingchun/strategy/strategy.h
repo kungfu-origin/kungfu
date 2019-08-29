@@ -41,8 +41,8 @@ namespace kungfu
                 {};
 
                 //交易日切换回调
-                //@param next_trading_day  下一个交易日
-                virtual void on_trading_day(Context_ptr context, const std::string &next_trading_day)
+                //@param daytime 交易日
+                virtual void on_trading_day(Context_ptr context, int64_t daytime)
                 {};
 
                 //行情数据更新回调

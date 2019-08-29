@@ -24,10 +24,13 @@ namespace kungfu
 
                 void add_strategy(const Strategy_ptr& strategy);
 
+                void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime) override;
+
             protected:
                 std::vector<Strategy_ptr> strategies_;
 
                 void on_start() override ;
+
 
                 virtual Context_ptr make_context();
 
