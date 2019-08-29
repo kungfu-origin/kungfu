@@ -229,7 +229,6 @@ def broker_state_refresh(ctx, event, location, data):
         'msg_type': msg.BrokerStateRefresh
     }
 
-
 @on(msg.NewOrderSingle)
 def new_order_single(ctx, event, location, data):
     # ctx.ledger.new_order_single(event, location.uid)
@@ -238,7 +237,6 @@ def new_order_single(ctx, event, location, data):
         'msg_type': msg.NewOrderSingle
     }
 
-
 @on(msg.CancelOrder)
 def cancel_order(ctx, event, location, data):
     ctx.logger.info('cancel account order request')
@@ -246,7 +244,7 @@ def cancel_order(ctx, event, location, data):
     if order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         ctx.logger.info('cancel account order %s', order_record['order'])
-        ctx.commander.cancel_order(event, location.uid, order_id)
+        ctx.ledger.cancel_order(event, location.uid, order_id)
         return {
             'status': http.HTTPStatus.OK,
             'msg_type': msg.CancelOrder
@@ -265,10 +263,10 @@ def cancel_all_order(ctx, event, location, data):
         order_record = ctx.orders[order_id]
         if order_record['source'] == location.uid:
             ctx.logger.info('cancel account order %s', order_record['order'])
-            ctx.commander.cancel_order(event, location.uid, order_id)
+            ctx.ledger.cancel_order(event, location.uid, order_id)
         if order_record['dest'] == location.uid:
             ctx.logger.info('cancel strategy order %s', order_record['order'])
-            ctx.commander.cancel_order(event, location.uid, order_id)
+            ctx.ledger.cancel_order(event, location.uid, order_id)
     return {
         'status': http.HTTPStatus.OK,
         'msg_type': msg.CancelAllOrder
