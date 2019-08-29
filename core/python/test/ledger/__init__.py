@@ -7,6 +7,8 @@ from kungfu.yijinjing.log import create_logger
 from . import calendar
 from . import order
 from . import asset
+from . import broker
+
 test_account = '15040900'
 test_strategy = 'test1'
 
@@ -23,14 +25,12 @@ def ledger(ctx, protocol, msg_type):
 
     cmd_sock = io_device.connect_socket(commander_location, pyyjj.protocol.SUBSCRIBE if protocol == 'sub' else pyyjj.protocol.REQUEST, 10000)
     if protocol == "sub":
+        cmd_sock.setsockopt(int(pyyjj.protocol.SUBSCRIBE), 1, "")
         while True:
             cmd_sock.recv()
             print(cmd_sock.last_message())
-           
     calendar.calendar_request(cmd_sock, commander_location)
-
-    # order.new_order_single(cmd_sock, commander_location, test_account)
-    # ctx.logger.info('done')
+    broker.broker_state_request(cmd_sock, commander_location)
     order.cancel_all_order_for_account(cmd_sock, commander_location, test_account)
     asset.asset_request(cmd_sock, commander_location)
     asset.all_asset_info_request(cmd_sock, commander_location)

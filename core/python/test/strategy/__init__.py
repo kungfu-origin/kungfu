@@ -51,3 +51,22 @@ def sub(ctx, source_name, ticker, exchange_id):
     ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}", quote)
     ctx.runner.add_strategy(ctx.strategy)
     ctx.runner.run()
+
+@strategy.group()
+@click.pass_context
+def order(ctx):
+    pass_ctx_from_parent(ctx)
+
+@order.group()
+@click.pass_context
+@click.option('-t', '--ticker', type=str, help='ticker to subscribe')
+@click.option('-e', '--exchange_id', type=str, help="exchange id")
+def new(ctx,ticker, exchange_id):
+    pass_ctx_from_parent(ctx)
+    print(ticker, exchange_id)
+
+@order.group()
+@click.pass_context
+@click.option('-i', '--order_id', type=int, help='order to cancel')
+def cancel(ctx, order_id):
+    pass_ctx_from_parent(ctx)
