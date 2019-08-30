@@ -196,13 +196,10 @@ class Ledger(pywingchun.Ledger):
     def _get_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
         uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
         uname = AccountBook.get_uname(category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
-        self.ctx.logger.info("get ledger, uid: {}, uname: {}".format(uid, uname))
-        if uid in self.ctx.ledgers:
-            return self.ctx.ledgers[uid]
-        else:
+        if uid not in self.ctx.ledgers:
             ledger = self.ctx.db.load(ledger_category=ledger_category, source_id=source_id,account_id=account_id, client_id=client_id)
             if not ledger:
-                self.ctx.logger.info("failed to load ledger {}.{}.{}.{} from sqlite".format(ledger_category, source_id, account_id, client_id))
+                self.ctx.logger.info("failed to load ledger {} from sqlite".format(uname))
                 ledger = AccountBook(self.ctx, ledger_category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH, trading_day=self.ctx.trading_day)
             ledger._ctx = self.ctx
             ledger.apply_trading_day(self.ctx.trading_day)
@@ -210,7 +207,7 @@ class Ledger(pywingchun.Ledger):
             ledger.register_callback(self.ctx.db.on_messages)
             self.ctx.ledgers[uid] = ledger
             self.ctx.logger.info("success to init ledger, uid: {}, uname: {}".format(uid, uname))
-            return ledger
+        return self.ctx.ledgers[uid]
 
     def get_inst_info(self, instrument_id):
         if not instrument_id in self.ctx.inst_infos:
