@@ -197,7 +197,7 @@ class Ledger(pywingchun.Ledger):
         uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
         uname = AccountBook.get_uname(category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
         if uid not in self.ctx.ledgers:
-            ledger = self.ctx.db.load(ledger_category=ledger_category, source_id=source_id,account_id=account_id, client_id=client_id)
+            ledger = self.ctx.db.load(ctx = self.ctx, ledger_category=ledger_category, source_id=source_id,account_id=account_id, client_id=client_id)
             if not ledger:
                 self.ctx.logger.info("failed to load ledger {} from sqlite".format(uname))
                 ledger = AccountBook(self.ctx, ledger_category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id, avail=DEFAULT_INIT_CASH, trading_day=self.ctx.trading_day)

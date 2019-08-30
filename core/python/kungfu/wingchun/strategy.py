@@ -23,7 +23,7 @@ class Strategy(pywingchun.Strategy):
         ledger_location = pyyjj.location(pyyjj.get_mode_by_name(self.ctx.mode), pyyjj.category.SYSTEM, 'service', 'ledger', self.ctx.locator)
         self.ctx.ledger_db = LedgerDB(ledger_location, "ledger")
         self.ctx.inst_infos = { inst["instrument_id"]: inst for inst in self.ctx.ledger_db.all_instrument_infos() }
-        self.ctx.ledger = self.ctx.ledger_db.load(ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
+        self.ctx.ledger = self.ctx.ledger_db.load(ctx=self.ctx,ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
         if self.ctx.ledger is None:
             self.ctx.ledger = AccountBook(self.ctx, ledger_category=LedgerCategory.Portfolio,client_id=self.ctx.name, avail=1e7, trading_day=self.ctx.trading_day)
 

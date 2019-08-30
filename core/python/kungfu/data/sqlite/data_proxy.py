@@ -123,7 +123,7 @@ class LedgerDB(SessionFactoryHolder):
         for cls in [Asset, Position, PositionDetail]:
             session.query(cls).filter(cls.source_id==source_id, cls.account_id == account_id, cls.client_id == client_id,cls.ledger_category == int(ledger_category)).delete()
 
-    def load(self, ledger_category, source_id="",account_id = "", client_id = ""):
+    def load(self, ctx, ledger_category, source_id="",account_id = "", client_id = ""):
         with session_scope(self.session_factory) as session:
             asset_obj = session.query(Asset).filter(Asset.source_id==source_id,
                                                     Asset.account_id == account_id,
@@ -158,7 +158,7 @@ class LedgerDB(SessionFactoryHolder):
                                          trading_day = details[0].trading_day)
                     positions.append(pos)
                 args.update({"positions": positions, "ledger_category": ledger_category})
-                return AccountBook(ctx=None, **args)
+                return AccountBook(ctx=ctx, **args)
 
     def dump(self, ledger):
         with session_scope(self.session_factory) as session:
