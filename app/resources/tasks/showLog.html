@@ -185,28 +185,9 @@
     const { getLog, debounce, clearFileContent } = require('./utils.js');
     const gaze = require('gaze');
 
-    var getGlobalData = buildGLobalData();
-
-    function buildGLobalData() {
-        var ifScrollToBottom = false;
-
-        document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
-            ifScrollToBottom = !ifScrollToBottom;
-        })
-
-        const $logContent = document.querySelector('#log-content');            
-        $logContent.style.whiteSpace = ''
-        document.getElementById('norwap-checkbox').addEventListener('input', () => {
-            if($logContent.style.whiteSpace !== '') $logContent.style.whiteSpace = '';
-            else $logContent.style.whiteSpace = 'nowrap';
-        })
-
-        return function(){
-            return {
-                ifScrollToBottom,
-                logPath: ''
-            }
-        }
+    var getGlobalData = {
+        ifScrollToBottom: false,
+        logPath: ''
     }
 
     const logColor = {
@@ -290,6 +271,18 @@
         const logPath = getGlobalData.logPath;
         if(!logPath) return;
         showLogs(logPath, dealMessage).then(() => scrollToBottom())
+    })
+
+    document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
+            getGlobalData.ifScrollToBottom = !getGlobalData.ifScrollToBottom
+            if(getGlobalData.ifScrollToBottom) scrollToBottom();
+        })
+
+    const $logContent = document.querySelector('#log-content');            
+    $logContent.style.whiteSpace = ''
+    document.getElementById('norwap-checkbox').addEventListener('input', () => {
+        if($logContent.style.whiteSpace !== '') $logContent.style.whiteSpace = '';
+        else $logContent.style.whiteSpace = 'nowrap';
     })
 
     </script>
