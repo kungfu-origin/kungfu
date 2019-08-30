@@ -274,14 +274,13 @@ export const deleteProcess = (processName: string) => {
         }
         const pids = processes
         .map((prc: any): number => prc.pid)
-        .filter((pid: number): boolean => +pid != 0)
-        console.log(pids)
-        
+        .filter((pid: number): boolean => !!pid)
+
         pm2Delete(processName)
         .then(() => resolve(true))
         .catch(err => reject(err))
         .finally(() => {
-            if(pids.length) {
+            if(pids && pids.length) { 
                 logger.info('[KILL PROCESS] by pids', pids)
                 kfKill(pids)
                 .then(() => { 
