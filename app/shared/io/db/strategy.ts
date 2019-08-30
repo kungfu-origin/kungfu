@@ -64,7 +64,7 @@ export const getStrategyOrder = async (strategyId: string, {id, dateRange}: Trad
     id = id || ''
     //新建与之前重名策略，防止get之前的数据
     const strategyAddTime = await getStrategyAddTime(strategyId);
-    const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)    
+    const filterDate = buildDateRange(dateRange, tradingDay)    
     return runSelectDB(
         LIVE_TRADING_DATA_DB, 
         `SELECT * FROM orders` +
@@ -73,6 +73,7 @@ export const getStrategyOrder = async (strategyId: string, {id, dateRange}: Trad
         ` OR instrument_id LIKE '%${id}%')` + //有id筛选的时候
         ` AND trading_day >= ${filterDate[0]}` +
         ` AND trading_day <= ${filterDate[1]}` +
+        ` AND update_time > ${strategyAddTime}` +
         (dateRange.length ? `` : ` AND status NOT IN (0,3,4,5,6)`) + //有日期筛选的时候,获取所有状态的数据；无日期的时候，获取的是当天的且未完成的
         ` ORDER BY insert_time DESC`
     )
@@ -94,6 +95,7 @@ export const getStrategyTrade = async (strategyId: string, { id, dateRange }: Tr
         ` AND instrument_id LIKE '%${id}%'` + //有id筛选的时候
         ` AND trading_day >= ${filterDate[0]}` +
         ` AND trading_day <= ${filterDate[1]}` +
+        ` AND update_time > ${strategyAddTime}` +
         ` ORDER BY trade_time DESC`
     )
 }

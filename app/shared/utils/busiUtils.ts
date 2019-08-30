@@ -373,7 +373,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
     })
 }
 
-export const buildDateRange = (dateRange: string[], tradingDay: string, addTime = 0): string[] => {
+export const buildDateRange = (dateRange: string[], tradingDay: string): string[] => {
     if(dateRange.length === 2) {
         return [moment(dateRange[0]).format('YYYYMMDD'), moment(dateRange[1]).format('YYYYMMDD')]
     } else if (tradingDay) {
