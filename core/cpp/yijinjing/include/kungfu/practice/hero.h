@@ -61,6 +61,8 @@ namespace kungfu
 
             const yijinjing::data::location_ptr get_location(uint32_t hash);
 
+            bool has_writer(uint32_t dest_id);
+
             yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
         protected:

@@ -118,7 +118,7 @@ namespace kungfu
                 }
                 uint32_t md_source = market_data_[source];
                 SPDLOG_INFO("strategy subscribe from {} [{:08x}]", source, md_source);
-                if (app_.get_writer(market_data_[source]).get() == nullptr)
+                if (not app_.has_writer(md_source))
                 {
                     events_ | is(yijinjing::msg::type::RequestWriteTo) |
                     filter([=](yijinjing::event_ptr e)

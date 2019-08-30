@@ -52,11 +52,16 @@ namespace kungfu
             return locations_[hash];
         }
 
+        bool hero::has_writer(uint32_t dest_id)
+        {
+            return writers_.find(dest_id) != writers_.end();
+        }
+
         writer_ptr hero::get_writer(uint32_t dest_id)
         {
             if (writers_.find(dest_id) == writers_.end())
             {
-                return writer_ptr();
+                SPDLOG_ERROR("has no writer for [{:08x}]", dest_id);
             }
             return writers_[dest_id];
         }
@@ -131,30 +136,48 @@ namespace kungfu
 
         void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
         {
-            SPDLOG_INFO("deregistered location {} [{:08x}]", get_location(location_uid)->uname, location_uid);
-            locations_.erase(location_uid);
+            if (has_location(location_uid))
+            {
+                SPDLOG_INFO("deregistered location {} [{:08x}]", get_location(location_uid)->uname, location_uid);
+                locations_.erase(location_uid);
+            } else
+            {
+                SPDLOG_ERROR("location [{:08x}] not exists", location_uid);
+            }
         }
 
         void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
         {
-            auto writer = get_writer(source_id);
-            msg::data::RequestWriteTo &msg = writer->open_data<msg::data::RequestWriteTo>(trigger_time, msg::type::RequestWriteTo);
-            msg.dest_id = dest_id;
-            writer->close_data();
-            SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
-                        dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
+            if (has_location(source_id))
+            {
+                auto writer = get_writer(source_id);
+                msg::data::RequestWriteTo &msg = writer->open_data<msg::data::RequestWriteTo>(trigger_time, msg::type::RequestWriteTo);
+                msg.dest_id = dest_id;
+                writer->close_data();
+                SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
+                            dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
+            } else
+            {
+                SPDLOG_ERROR("location [{:08x}] not exists", source_id);
+            }
         }
 
         void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub)
         {
-            auto writer = get_writer(dest_id);
-            auto msg_type = pub ? msg::type::RequestReadFromPublic : msg::type::RequestReadFrom;
-            msg::data::RequestReadFrom &msg = writer->open_data<msg::data::RequestReadFrom>(trigger_time, msg_type);
-            msg.source_id = source_id;
-            msg.from_time = trigger_time;
-            writer->close_data();
-            SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
-                        get_location(source_id)->uname, source_id);
+            if (has_location(dest_id))
+            {
+                auto writer = get_writer(dest_id);
+                auto msg_type = pub ? msg::type::RequestReadFromPublic : msg::type::RequestReadFrom;
+                msg::data::RequestReadFrom &msg = writer->open_data<msg::data::RequestReadFrom>(trigger_time, msg_type);
+                msg.source_id = source_id;
+                msg.from_time = trigger_time;
+                writer->close_data();
+                SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
+                            get_location(source_id)->uname, source_id);
+            } else
+            {
+                SPDLOG_ERROR("location [{:08x}] not exists", dest_id);
+            }
         }
 
         bool hero::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
