@@ -32,7 +32,7 @@
                     "key": "auth_code",
                     "name": "auth_code",
                     "type": "str",
-                    "errMsg": "请填写穿透认证吗 auth_code ",
+                    "errMsg": "请填写穿透认证码 auth_code ",
                     "required": true
                 },
                 {
