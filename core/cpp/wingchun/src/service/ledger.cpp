@@ -278,7 +278,7 @@ namespace kungfu
                       // let python do the actual job, we just operate the I/O part
                       try
                       {
-                          const nlohmann::json& cmd = event->data<nlohmann::json>();
+                          const nlohmann::json &cmd = event->data<nlohmann::json>();
                           SPDLOG_INFO("handle command type {} data {}", event->msg_type(), cmd.dump());
                           std::string response = handle_request(event, event->to_string());
                           get_io_device()->get_rep_sock()->send(response);
@@ -326,9 +326,12 @@ namespace kungfu
                 events_ | from(md_location_uid) | is(msg::type::Quote) | first() |
                 $([&, trigger_time, md_location_uid](event_ptr event)
                   {
-                      auto md_location = get_location(md_location_uid);
-                      update_broker_state(trigger_time, md_location, BrokerState::Ready);
-                      alert_market_data(trigger_time, md_location_uid);
+                      if (has_location(md_location_uid))
+                      {
+                          auto md_location = get_location(md_location_uid);
+                          update_broker_state(trigger_time, md_location, BrokerState::Ready);
+                          alert_market_data(trigger_time, md_location_uid);
+                      }
                   },
                   [&](std::exception_ptr e)
                   {
@@ -352,9 +355,12 @@ namespace kungfu
                   {},
                   [&, trigger_time, md_location_uid](std::exception_ptr e)
                   {
-                      auto md_location = get_location(md_location_uid);
-                      update_broker_state(trigger_time, md_location, BrokerState::Idle);
-                      monitor_market_data(trigger_time, md_location_uid);
+                      if (has_location(md_location_uid))
+                      {
+                          auto md_location = get_location(md_location_uid);
+                          update_broker_state(trigger_time, md_location, BrokerState::Idle);
+                          monitor_market_data(trigger_time, md_location_uid);
+                      }
                   });
             }
 
