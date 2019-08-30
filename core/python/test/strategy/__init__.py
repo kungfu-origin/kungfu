@@ -48,7 +48,8 @@ def sub(ctx, source_name, ticker, exchange_id):
     pass_ctx_from_parent(ctx)
     ctx.strategy._pre_start = lambda ctx: ctx.subscribe(source_name, [ticker], exchange_id)
     ctx.strategy._post_start = lambda ctx: None
-    ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}", quote)
+    ctx.strategy._on_trading_day = lambda ctx, daytime: None
+    ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}.{} {}|{} {}|{}".format(quote.instrument_id, quote.exchange_id, quote.bid_price[0], quote.bid_volume[0], quote.ask_price[0], quote.ask_volume[0]))
     ctx.runner.add_strategy(ctx.strategy)
     ctx.runner.run()
 
