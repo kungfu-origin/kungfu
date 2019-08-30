@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 
 #include "xtp_api_struct.h"
 
@@ -32,11 +33,19 @@ namespace kungfu
                 }
             }
 
-            inline void from_xtp_timestamp(int64_t xtp_time, int64_t nsec)
+            inline int64_t nsec_from_xtp_timestamp(int64_t xtp_time)
             {
-                //YYYYMMDDHHMMSSsss -> nano seconds
-                nsec = kungfu::yijinjing::time::strptime(std::to_string(xtp_time).c_str(), "%Y%m%d%H%M%S") +
-                       xtp_time % 1000 * kungfu::yijinjing::time_unit::NANOSECONDS_PER_MILLISECOND;
+                std::tm result = {};
+                result.tm_year =  xtp_time / (int64_t)1e13 - 1900;
+                result.tm_mon = xtp_time % (int64_t)1e13 / (int64_t)1e11 -1;
+                result.tm_mday = xtp_time % (int64_t)1e11 / (int64_t)1e9;
+                result.tm_hour = xtp_time % (int64_t)1e9 / (int64_t)1e7;
+                result.tm_min =  xtp_time % (int)1e7 / (int)1e5;
+                result.tm_sec = xtp_time % (int)1e5 /(int)1e3;
+                int milli_sec = xtp_time %(int)1e3;
+                std::time_t parsed_time = std::mktime(&result);
+                int64_t nano = parsed_time * kungfu::yijinjing::time_unit::NANOSECONDS_PER_SECOND;
+                return parsed_time * kungfu::yijinjing::time_unit::NANOSECONDS_PER_SECOND + milli_sec * kungfu::yijinjing::time_unit::NANOSECONDS_PER_MILLISECOND;
             }
 
             inline void from_xtp(const XTP_MARKET_TYPE &xtp_market_type, char *exchange_id)
@@ -209,8 +218,8 @@ namespace kungfu
             inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des)
             {
                 strcpy(des.source_id, SOURCE_XTP);
+                des.data_time = nsec_from_xtp_timestamp(ori.data_time);
                 strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, "%Y%m%d").c_str());
-                from_xtp_timestamp(ori.data_time, des.data_time);
                 strcpy(des.instrument_id, ori.ticker);
                 from_xtp(ori.exchange_id, des.exchange_id);
 
@@ -285,7 +294,7 @@ namespace kungfu
                 }
                 if (ori.update_time > 0)
                 {
-                    from_xtp_timestamp(ori.update_time, des.update_time);
+                    des.update_time = nsec_from_xtp_timestamp(ori.update_time);
                 }
             }
 
@@ -301,7 +310,7 @@ namespace kungfu
                 {
                     des.instrument_type = InstrumentType::Stock;
                 }
-                from_xtp_timestamp(ori.trade_time, des.trade_time);
+                des.trade_time = nsec_from_xtp_timestamp(ori.trade_time);
             }
 
             inline void from_xtp(const XTPQueryStkPositionRsp &ori, Position &des)
@@ -323,7 +332,7 @@ namespace kungfu
             {
                 from_xtp(ori.exchange_id, des.exchange_id);
                 strcpy(des.instrument_id, ori.ticker);
-                from_xtp_timestamp(ori.data_time, des.data_time);
+                des.data_time = nsec_from_xtp_timestamp(ori.data_time);
 
                 des.price = ori.entrust.price;
                 des.volume = ori.entrust.qty;
@@ -348,7 +357,7 @@ namespace kungfu
 
                 from_xtp(ori.exchange_id, des.exchange_id);
                 strcpy(des.instrument_id, ori.ticker);
-                from_xtp_timestamp(ori.data_time, des.data_time);
+                des.data_time = nsec_from_xtp_timestamp(ori.data_time);
 
                 des.main_seq = ori.trade.channel_no;
                 des.seq = ori.trade.seq;

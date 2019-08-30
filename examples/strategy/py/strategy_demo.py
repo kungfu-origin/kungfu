@@ -33,4 +33,4 @@ def on_order(context, order):
     context.log.info('order received: [instrument_id]{} [volume]{} [price]{}'.format(order.instrument_id, order.volume, order.limit_price))
 
 def on_trade(context, trade):
-    context.log.info('trade received: [trade_id]{} [volume]{} [price]{}'.format(trade.order_id, trade.volume, trade.price))
+    context.log.info('trade received: {} [trade_id]{} [volume]{} [price]{}'.format(kft.strftime(trade.trade_time), trade.order_id, trade.volume, trade.price))
