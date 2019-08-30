@@ -87,7 +87,7 @@ export const getStrategyTrade = async (strategyId: string, { id, dateRange }: Tr
     id = id || ''
     //新建与之前重名策略，防止get之前的数据    
     const strategyAddTime = await getStrategyAddTime(strategyId);
-    const filterDate = buildDateRange(dateRange, tradingDay, strategyAddTime)
+    const filterDate = buildDateRange(dateRange, tradingDay)
     return runSelectDB(
         LIVE_TRADING_DATA_DB,
         `SELECT rowId, * FROM trades` +
