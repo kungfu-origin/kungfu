@@ -210,11 +210,16 @@ namespace kungfu
 
             inline int64_t nsec_from_ctp_time(const char *date, const char *update_time, int millisec = 0)
             {
-                static char datetime[17];
-                memset(datetime, 0, 17);
-                strcpy(datetime, date);
-                strcat(datetime, update_time);
-                int64_t nano_sec = kungfu::yijinjing::time::strptime(std::string(datetime), "%Y%m%d%H:%M:%S");
+                static char datetime[21];
+                memset(datetime, 0, 21);
+                memcpy(datetime, date, 4);
+                datetime[4] = '-';
+                memcpy(datetime + 5, date + 4, 2);
+                datetime[7] = '-';
+                memcpy(datetime + 8, date + 6, 2);
+                datetime[10] = ' ';
+                memcpy(datetime + 11, update_time, 8);
+                int64_t nano_sec = kungfu::yijinjing::time::strptime(std::string(datetime), "%Y-%m-%d %H:%M:%S");
                 nano_sec += millisec * kungfu::yijinjing::time_unit::NANOSECONDS_PER_MILLISECOND;
                 return nano_sec;
             }
