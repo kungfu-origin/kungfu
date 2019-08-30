@@ -50,7 +50,8 @@ namespace kungfu
                     BrokerState = 401,
                     QryAsset = 402,
                     PublishAllAssetInfo = 403,
-
+                    RemoveStrategy = 404,
+                    
                     PositionEnd = 800,
                     PositionDetailEnd = 801,
                     InstrumentEnd = 802,

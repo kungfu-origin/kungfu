@@ -6,3 +6,4 @@ BrokerStateRefresh = 400
 BrokerState = 401
 QryAsset = 402
 PublishAllAssetInfo = 403
+RemoveStrategy = 404

@@ -8,7 +8,7 @@ from . import calendar
 from . import order
 from . import asset
 from . import broker
-
+from . import strategy
 test_account = '15040900'
 test_strategy = 'test1'
 
@@ -31,6 +31,7 @@ def ledger(ctx, protocol, msg_type):
             print(cmd_sock.last_message())
     calendar.calendar_request(cmd_sock, commander_location)
     broker.broker_state_request(cmd_sock, commander_location)
+    strategy.remove_strategy_request(cmd_sock, commander_location)
     order.cancel_all_order_for_account(cmd_sock, commander_location, test_account)
     asset.asset_request(cmd_sock, commander_location)
     asset.all_asset_info_request(cmd_sock, commander_location)

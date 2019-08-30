@@ -185,6 +185,14 @@ class Ledger(pywingchun.Ledger):
         for ledger in self.ctx.ledgers.values():
             self.ctx.db.dump(ledger)
 
+    def has_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
+        uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
+        return uid in self.ctx.ledgers
+
+    def pop_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
+        uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
+        return self.ctx.ledgers.pop(uid, None)
+
     def _get_ledger(self, ledger_category, source_id="", account_id="", client_id=""):
         uid = AccountBook.get_uid(category=ledger_category,source_id=source_id, account_id=account_id, client_id=client_id)
         uname = AccountBook.get_uname(category=ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
@@ -295,3 +303,25 @@ def publish_all_asset(ctx, event, location, data):
         'status': http.HTTPStatus.OK,
         'msg_type': msg.PublishAllAssetInfo
     }
+
+@on(msg.RemoveStrategy)
+def remove_strategy(ctx, event, location, data):
+    if location is None:
+        ctx.logger.warning("location is None, data: {}".format(data))
+        return {
+            'status': http.HTTPStatus.NOT_FOUND,
+            'msg_type': msg.RemoveStrategy
+        }
+    elif ctx.ledger.get_location(location.uid) is not None:
+        ctx.logger.warning("strategy is running, failed to delete")
+        return {
+            'status': http.HTTPStatus.NOT_FOUND,
+            'msg_type': msg.RemoveStrategy
+        }
+    else:
+        ctx.ledger.pop_ledger(LedgerCategory.Portfolio, client_id=data["name"])
+        ctx.db.remove(LedgerCategory.Portfolio, client_id=data["name"])
+        return {
+            'status': http.HTTPStatus.OK,
+            'msg_type': msg.RemoveStrategy
+        }

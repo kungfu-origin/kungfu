@@ -167,9 +167,9 @@ class LedgerDB(SessionFactoryHolder):
             objects = [self.object_from_msg(message) for message in messages]
             session.bulk_save_objects(objects)
 
-    def remove(self, ledger):
+    def remove(self,ledger_category, source_id="",account_id = "", client_id = ""):
         with session_scope(self.session_factory) as session:
-            self.drop(session, ledger.category, source_id=ledger.source_id, account_id=ledger.account_id, client_id=ledger.client_id)
+            self.drop(session, ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
 
     def get_model_cls(self, msg_type):
         if msg_type == MsgType.Asset:
