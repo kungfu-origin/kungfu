@@ -82,6 +82,8 @@ namespace kungfu
 
             void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub);
 
+            void produce(const rx::subscriber<yijinjing::event_ptr> &sb);
+
             virtual bool produce_one(const rx::subscriber<yijinjing::event_ptr> &sb);
 
             virtual void react() = 0;
@@ -90,7 +92,7 @@ namespace kungfu
             yijinjing::io_device_with_reply_ptr io_device_;
             volatile bool live_ = true;
 
-            static void produce(hero *instance, const rx::subscriber<yijinjing::event_ptr> &sb);
+            static void delegate_produce(hero *instance, const rx::subscriber<yijinjing::event_ptr> &sb);
         };
     }
 }

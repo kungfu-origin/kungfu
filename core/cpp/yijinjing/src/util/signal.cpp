@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <spdlog/spdlog.h>
 
-#include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/practice/hero.h>
 
@@ -57,6 +56,7 @@ namespace kungfu
                     case SIGABRT:         // abnormal termination triggered by abort call
                     case SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
                         SPDLOG_CRITICAL("kungfu app stopped by signal {}", signum);
+                        print_stack_trace(nullptr);
                         exit_hero(signum);
                         break;
 #else

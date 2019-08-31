@@ -17,7 +17,10 @@
 #define KUNGFU_YIJINJING_COMMON_H
 
 #include <utility>
+#include <typeinfo>
+#include <signal.h>
 #include <fmt/format.h>
+#include <spdlog/spdlog.h>
 #include <rxcpp/rx.hpp>
 
 #include <kungfu/common.h>
@@ -277,6 +280,23 @@ namespace kungfu
                            return e;
                        });
         };
+
+        inline auto interrupt_on_error(std::exception_ptr e)
+        {
+            try
+            { std::rethrow_exception(e); }
+            catch (const std::exception &ex)
+            {
+                SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
+            }
+            raise(SIGINT);
+        }
+
+        template<class Arg>
+        inline auto $(Arg an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<Arg>(an), interrupt_on_error))
+        {
+            return subscribe<yijinjing::event_ptr>(std::forward<Arg>(an), interrupt_on_error);
+        }
 
         template<class... ArgN>
         inline auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
