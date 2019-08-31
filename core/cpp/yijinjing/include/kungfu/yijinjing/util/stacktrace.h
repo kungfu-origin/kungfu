@@ -5,7 +5,6 @@
 #ifndef KUNGFU_STACKTRACE_H
 #define KUNGFU_STACKTRACE_H
 
-
 #ifdef _WINDOWS
 #include <cstdio>
 #include <Windows.h>
@@ -19,7 +18,7 @@ namespace kungfu {
 #ifdef _WINDOWS
             DWORD print_stack_trace(EXCEPTION_POINTERS *ep);
 #else
-            void print_stack_trace(FILE *out = stderr, unsigned int max_frames = 63);
+            void print_stack_trace(FILE *out = stderr);
 #endif // _WINDOWS
         }
     }

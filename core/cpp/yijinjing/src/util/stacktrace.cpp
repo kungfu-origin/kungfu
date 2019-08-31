@@ -35,7 +35,8 @@ namespace kungfu
                 return EXCEPTION_EXECUTE_HANDLER;
             }
 #else
-            void print_stack_trace(FILE *out = stderr, unsigned int max_frames = 63) {
+            void print_stack_trace(FILE *out = stderr) {
+                unsigned int max_frames = 127;
                 // storage array for stack trace address data
                 void *addrlist[max_frames + 1];
 
@@ -82,16 +83,7 @@ namespace kungfu
                         size_t funcnamesize = 8192;
                         char funcname[8192];
                         char *ret = abi::__cxa_demangle(begin_name, &funcname[0], &funcnamesize, &status);
-                        if (status == 0)
-                        {
-                            fprintf(out, "  %-30s %-40s %s\n", symbollist[i], ret, begin_offset);
-                        } else
-                        {
-                            // demangling failed. Output function name as a C function with
-                            // no arguments.
-                            fprintf(out, "  %-30s %-38s() %s\n", symbollist[i], begin_name, begin_offset);
-                        }
-
+                        SPDLOG_CRITICAL(" {:<30} {:<40} {}", symbollist[i], status == 0 ? ret : begin_name, begin_offset);
 #else // !__APPLE__ - but is posix
                     // not OSX style
                     // ./module(function+0x15c) [0x8048a6d]
@@ -117,22 +109,15 @@ namespace kungfu
                         int status = 0;
                         size_t funcnamesize = 8192;
                         char funcname[8192];
-                        char *ret = abi::__cxa_demangle(begin_name, funcname,
-                                                        &funcnamesize, &status);
+                        char *ret = abi::__cxa_demangle(begin_name, funcname, &funcnamesize, &status);
                         char *fname = begin_name;
                         if (status == 0)
                             fname = ret;
-
-                        if (begin_offset) {
-                            fprintf(out, "  %-30s ( %-40s  + %-6s) %s\n", symbollist[i], fname, begin_offset,
-                                    end_offset);
-                        } else {
-                            fprintf(out, "  %-30s ( %-40s    %-6s) %s\n", symbollist[i], fname, "", end_offset);
-                        }
+                        SPDLOG_CRITICAL("{:<30} ( {:<40}  + {:<6}) {}", symbollist[i], fname, begin_offset ? begin_offset : "", end_offset);
 #endif  // !DARWIN - but is posix
                     } else {
                         // couldn't parse the line? print the whole line.
-                        fprintf(out, "  %-40s\n", symbollist[i]);
+                        SPDLOG_CRITICAL("{}", symbollist[i]);
                     }
                 }
                 free(symbollist);

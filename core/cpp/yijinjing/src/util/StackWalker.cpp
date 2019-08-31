@@ -84,6 +84,7 @@
 
 #ifdef _WINDOWS
 
+#include <spdlog/spdlog.h>
 #include <kungfu/yijinjing/util/StackWalker.h>
 
 #include <stdio.h>
@@ -1396,15 +1397,15 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry& ent
       MyStrCpy(entry.lineFileName, STACKWALK_MAX_NAMELEN, "()");
       if (entry.moduleName[0] == 0)
         MyStrCpy(entry.moduleName, STACKWALK_MAX_NAMELEN, "(module-name not available)");
-      _snprintf_s(buffer, maxLen, "\t%-30s %p: %s: %s\n",
+      _snprintf_s(buffer, maxLen, "%-16s %p: %s: %s",
               entry.moduleName, (LPVOID)entry.offset, entry.lineFileName, entry.name);
     }
     else
-      _snprintf_s(buffer, maxLen, "\t%-30s %s:%d: %s\n",
+      _snprintf_s(buffer, maxLen, "%-16s %s:%d: %s",
                   entry.moduleName, entry.lineFileName, entry.lineNumber, entry.name);
     buffer[STACKWALK_MAX_NAMELEN - 1] = 0;
-    printf("%s", buffer);
     OnOutput(buffer);
+    SPDLOG_CRITICAL("{}", buffer);
   }
 }
 

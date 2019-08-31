@@ -309,7 +309,7 @@ def remove_strategy(ctx, event, location, data):
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.RemoveStrategy
         }
-    elif ctx.ledger.get_location(location.uid) is not None:
+    elif ctx.ledger.has_location(location.uid):
         ctx.logger.warning("strategy is running, failed to delete")
         return {
             'status': http.HTTPStatus.NOT_FOUND,

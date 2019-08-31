@@ -41,15 +41,15 @@ namespace kungfu
             return locations_.find(hash) != locations_.end();
         }
 
-        bool hero::has_location(mode m, category c, const std::string &group, const std::string &name)
+        location_ptr hero::get_location(uint32_t hash)
         {
-            location loc(m, c, group, name, get_io_device()->get_home()->locator);
-            return has_location(loc.uid);
-        }
-
-        const location_ptr hero::get_location(uint32_t hash)
-        {
-            return locations_[hash];
+            if (has_location(hash))
+            {
+                return locations_[hash];
+            } else
+            {
+                throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", hash));
+            }
         }
 
         bool hero::has_writer(uint32_t dest_id)
@@ -139,8 +139,9 @@ namespace kungfu
         {
             if (has_location(location_uid))
             {
-                SPDLOG_INFO("deregistered location {} [{:08x}]", get_location(location_uid)->uname, location_uid);
+                auto location = get_location(location_uid);
                 locations_.erase(location_uid);
+                SPDLOG_INFO("deregister-ed location {} [{:08x}] {}", location->uname, location_uid, has_location(location_uid));
             } else
             {
                 SPDLOG_ERROR("location [{:08x}] not exists", location_uid);
