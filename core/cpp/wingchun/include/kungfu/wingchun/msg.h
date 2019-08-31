@@ -262,11 +262,11 @@ namespace kungfu
                     j["close_price"] = quote.close_price;
                     j["settlement_price"] = quote.settlement_price;
 
-                    j["bid_price"] = std::vector<double>(quote.bid_price, std::end(quote.bid_price));
-                    j["ask_price"] = std::vector<double>(quote.ask_price, std::end(quote.ask_price));
+                    j["bid_price"] = quote.get_bid_price();
+                    j["ask_price"] = quote.get_ask_price();
 
-                    j["bid_volume"] = std::vector<int64_t>(quote.bid_volume, std::end(quote.bid_volume));
-                    j["ask_volume"] = std::vector<int64_t>(quote.ask_volume, std::end(quote.ask_volume));
+                    j["bid_volume"] = quote.get_bid_volume();
+                    j["ask_volume"] = quote.get_ask_volume();
                 }
 
                 inline void from_json(const nlohmann::json &j, Quote &quote)
