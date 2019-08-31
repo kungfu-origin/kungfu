@@ -56,10 +56,13 @@ class Master(pyyjj.master):
         pid = data['pid']
         self.ctx.logger.info('app %s %d checking in', app_location.uname, pid)
         if pid not in self.ctx.apprentices:
-            self.ctx.apprentices[pid] = {
-                'process': psutil.Process(pid),
-                'location': app_location
-            }
+            try:
+                self.ctx.apprentices[pid] = {
+                    'process': psutil.Process(pid),
+                    'location': app_location
+                }
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                self.ctx.logger.warn("app %s %d does not exist", app_location.uname, pid)
         self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def on_exit(self):
