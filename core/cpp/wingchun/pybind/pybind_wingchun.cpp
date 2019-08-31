@@ -616,13 +616,13 @@ PYBIND11_MODULE(pywingchun, m)
             .def("pre_start", &Ledger::pre_start)
             .def("add_timer", &Ledger::add_timer)
             .def("add_time_interval", &Ledger::add_time_interval)
-            .def("run", &Ledger::run);
+            .def("run", &Ledger::run, py::call_guard<py::gil_scoped_release>());
 
     py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
             .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
             .def("set_begin_time", &strategy::Runner::set_begin_time)
             .def("set_end_time", &strategy::Runner::set_end_time)
-            .def("run", &strategy::Runner::run)
+            .def("run", &strategy::Runner::run, py::call_guard<py::gil_scoped_release>())
             .def("on_trading_day", &strategy::Runner::on_trading_day)
             .def("add_strategy", &strategy::Runner::add_strategy);
 
