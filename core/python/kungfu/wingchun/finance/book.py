@@ -211,7 +211,8 @@ class AccountBook:
 
     def apply_trade(self, trade):
         self._ctx.logger.info("{} apply trade[(trade_id){} (inst){} (price){} (volume){}]".format(self.uname, trade.trade_id, trade.instrument_id, trade.price, trade.volume))
-        direction = get_position_effect(trade.side, trade.offset)
+        instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id)
+        direction = get_position_effect(instrument_type, trade.side, trade.offset)
         self._get_position(trade.instrument_id, trade.exchange_id, direction).apply_trade(trade)
 
     def apply_trading_day(self, trading_day):

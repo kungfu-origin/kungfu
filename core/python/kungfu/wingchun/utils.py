@@ -19,8 +19,10 @@ def is_final_status(order_status):
     else:
         return True
 
-def get_position_effect(side, offset):
-    if side == Side.Buy and offset == Offset.Open:
+def get_position_effect(instrument_type, side, offset):
+    if instrument_type == InstrumentType.Stock:
+        return Direction.Long
+    elif side == Side.Buy and offset == Offset.Open:
         return Direction.Long
     elif side == Side.Sell and (offset == Offset.Close or offset == Offset.CloseToday):
         return Direction.Long
@@ -29,7 +31,7 @@ def get_position_effect(side, offset):
     elif side == Side.Buy and (offset == Offset.Close or offset == Offset.CloseToday):
         return Direction.Short
     else:
-        raise ValueError('could not find position effect for {} and {}'.format(side, offset))
+        raise ValueError('could not find position effect for instrument_type {}, side {}, offset {}'.format(instrument_type, side, offset))
 
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price
