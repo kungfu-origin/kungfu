@@ -11,7 +11,7 @@
     "arch": "x64",
     "runtime": "electron",
     "node": "10.16.0",
-    "electron": "6.0.5"
+    "electron": "5.0.10"
   },
   "scripts": {
     "install-deps": "pipenv --three install -d",
