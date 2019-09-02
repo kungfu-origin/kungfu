@@ -223,7 +223,7 @@ namespace kungfu
                     sb.on_next(std::make_shared<nanomsg_json>(msg));
                 }
             }
-            if (reader_->data_available())
+            while (reader_->data_available())
             {
                 if (reader_->current_frame()->gen_time() <= end_time_)
                 {
@@ -235,7 +235,8 @@ namespace kungfu
                     SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
                     return false;
                 }
-            } else if (get_io_device()->get_home()->mode != mode::LIVE)
+            }
+            if (get_io_device()->get_home()->mode != mode::LIVE and not reader_->data_available())
             {
                 SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
                 return false;
