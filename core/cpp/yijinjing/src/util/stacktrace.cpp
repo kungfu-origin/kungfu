@@ -110,10 +110,8 @@ namespace kungfu
                         size_t funcnamesize = 8192;
                         char funcname[8192];
                         char *ret = abi::__cxa_demangle(begin_name, funcname, &funcnamesize, &status);
-                        char *fname = begin_name;
-                        if (status == 0)
-                            fname = ret;
-                        SPDLOG_CRITICAL("{:<30} ( {:<40}  + {:<6}) {}", symbollist[i], fname, begin_offset ? begin_offset : "", end_offset);
+                        SPDLOG_CRITICAL("{}", ret);
+                        SPDLOG_CRITICAL("{:<30} ( {:<40}  + {:<6}) {}", symbollist[i], status == 0 ? ret : begin_name, begin_offset ? begin_offset : "", end_offset);
 #endif  // !DARWIN - but is posix
                     } else {
                         // couldn't parse the line? print the whole line.

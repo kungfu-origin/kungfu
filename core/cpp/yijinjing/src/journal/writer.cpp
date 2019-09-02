@@ -53,9 +53,13 @@ namespace kungfu
             frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length)
             {
                 assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_->current_page_->get_page_size());
-                if (not writer_mtx_.try_lock())
+                int64_t t = time::now_in_nano();
+                while (not writer_mtx_.try_lock())
                 {
-                    throw journal_error("Can not lock writer for " + journal_->location_->uname);
+                    if (time::now_in_nano() - t > time_unit::NANOSECONDS_PER_MILLISECOND)
+                    {
+                        throw journal_error("Can not lock writer for " + journal_->location_->uname);
+                    }
                 }
                 if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->current_page_->address_border())
                 {
@@ -129,7 +133,7 @@ namespace kungfu
                 last_page_frame.set_dest(journal_->dest_id_);
                 last_page_frame.set_gen_time(time::now_in_nano());
                 last_page_frame.set_data_length(0);
-                last_page->set_last_frame_position(last_page_frame.address() - journal_->current_page_->address());
+                last_page->set_last_frame_position(last_page_frame.address() - last_page->address());
             }
         }
     }
