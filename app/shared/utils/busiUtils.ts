@@ -426,7 +426,7 @@ export const dealPos = (item: any): PosData => {
         yesterdayVolume: toDecimal(item.yesterday_volume, 0),
         todayVolume: toDecimal(item.volume - item.yesterday_volume, 0),
         totalVolume: toDecimal(item.volume, 0),
-        openPrice: toDecimal(item.avg_open_price) || '--',
+        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price) || '--',
         lastPrice: toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
