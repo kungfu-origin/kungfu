@@ -11,3 +11,4 @@ from . import ledger
 from kungfu.command.account import __all__
 from kungfu.command.journal import __all__
 from kungfu.command.ext import __all__
+from kungfu.command.package import __all__

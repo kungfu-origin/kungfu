@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 import json
 import click
@@ -7,6 +8,16 @@ import pyyjj
 
 DEFAULT_CMD_PRIORITY = 100
 
+def get_bundle_dir():
+    frozen = 'not'
+    if getattr(sys, 'frozen', False):
+        # we are running in a bundle
+        frozen = 'ever so'
+        bundle_dir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        bundle_dir = os.path.dirname(os.path.abspath(__file__))
+    return bundle_dir
 
 class SpecialHelpOrder(click.Group):
 
@@ -77,6 +88,10 @@ def kfc(ctx, home, log_level, name):
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
 
+    bundle_dir = get_bundle_dir()
+    package_path = os.path.join(bundle_dir, "site-packages")
+    sys.path.append(package_path)
+
     settings_path = os.path.join(home, 'settings.json')
     if not os.path.exists(settings_path):
         default_settings_file = open(settings_path, 'w+')
@@ -90,13 +105,13 @@ def kfc(ctx, home, log_level, name):
     # https://github.com/pybind/pybind11/issues/1546
     ctx.locator = kfj.Locator(home)
     ctx.system_config_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
-
+    ctx.bundle_dir = bundle_dir
+    ctx.package_path = package_path
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:
         ctx.name = name if name else ctx.invoked_subcommand
     pass
-
 
 def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
@@ -105,11 +120,9 @@ def pass_ctx_from_parent(ctx):
     ctx.locator = ctx.parent.locator
     ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name
-
+    ctx.bundle_dir = ctx.parent.bundle_dir
+    ctx.package_path = ctx.parent.package_path
 
 def execute():
     kfc(auto_envvar_prefix='KF')
 
-
-def get_account(ctx, source, account):
-    return

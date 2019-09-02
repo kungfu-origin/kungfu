@@ -16,7 +16,7 @@ PyInquirer = "==1.0.3"
 prompt_toolkit = "==1.0.14"
 tushare = "==1.2.39"
 plotly = "==4.0.0"
-
+pip = "==19.0.3"
 [dev-packages]
 pytest = "*"
 mock ="*"
