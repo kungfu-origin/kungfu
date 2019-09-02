@@ -177,7 +177,11 @@ class AccountBook:
         self._ctx.logger.info("merge {} with {}".format(self, ledger))
         if self.realized_pnl == 0.0 and ledger.realized_pnl != 0.0:
             self.realized_pnl = ledger.realized_pnl
-        self._ctx.avail = ledger.avail
+        if self._static_equity == 1e7 and ledger.static_equity != 1e7:
+            self._static_equity = ledger.static_equity
+        if self._initial_equity == 1e7 and ledger.initial_equity != 1e7:
+            self._initial_equity = ledger.initial_equity
+        self.avail = ledger.avail
         for symbol in set(self._positions.keys()).union(set(ledger._positions.keys())):
             l_pos = self._positions.pop(symbol, None)
             r_pos = ledger._positions.get(symbol, None)
@@ -197,7 +201,7 @@ class AccountBook:
         return self._positions.get(uid, None)
 
     def apply_quote(self, quote):
-        self._ctx.logger.info("{} apply quote".format(self.uname))
+        self._ctx.logger.debug("{} apply quote".format(self.uname))
         position = self.get_position(quote.instrument_id, quote.exchange_id, Direction.Long)
         if position is not None:
             position.apply_quote(quote)
