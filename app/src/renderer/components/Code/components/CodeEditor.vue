@@ -55,7 +55,7 @@ export default {
                 theme: 'monokai',
                 lineNumbers: true,
                 lineWrapping: true,
-                indentUnit: 4, // 缩进单位为4
+                // indentUnit: 4, // 缩进单位为4
                 // tabSize: 4,
                 // indentWithTabs: true,
                 styleActiveLine: true, // 当前行背景高亮
@@ -70,10 +70,10 @@ export default {
                 autoMatchParens: true,
                 extraKeys: {//智能提示
                     Ctrl: 'autocomplete',
-                    Tab: function(cm) {
-                    	var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                        cm.replaceSelection(spaces);
-                    },
+                    // Tab: function(cm) {
+                    // 	var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                    //     cm.replaceSelection(spaces);
+                    // },
                 },
                 scrollTimer: null,
                 smartIndent: true,
@@ -85,6 +85,7 @@ export default {
 
     mounted() {
         const t = this;
+        
     },
 
     computed: {
@@ -127,6 +128,7 @@ export default {
                 CODE_UTILS.getCodeText(filePath).then(codeText => {
                     t.$nextTick().then(() => {
                         t.editor = t.buildEditor(t.editor, newFile, codeText)
+                        t.updateSpaceTab(t.codeSpaceTab)
                     });
                 }).catch(err => t.$message.error(err));
             }else{
@@ -150,24 +152,7 @@ export default {
 
         codeSpaceTab(newVal) {
             const t = this;
-            const type = newVal.type || 'spaces';
-            const size = newVal.size || 4;
-            if(type === 'spaces') {
-                t.editor.setOption('indentUnit', size);
-                t.editor.setOption(
-                    'extraKeys', 
-                    {//智能提示
-                        Ctrl: 'autocomplete',
-                        Tab: function(cm) {
-                            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                            cm.replaceSelection(spaces);
-                        },
-                    },
-                )
-            } else if (type === 'tabs') {
-                t.editor.setOption('extraKeys', { Ctrl: 'autocomplete' })
-                t.editor.setOption('tabSize', size)
-            }
+            t.updateSpaceTab(newVal)
         }
     },
 
@@ -243,6 +228,28 @@ export default {
             const t = this;
             t.editor != null && t.editor.getWrapperElement().parentNode.removeChild(t.editor.getWrapperElement());
             t.editor = null;
+        },
+
+        updateSpaceTab(spaceTabSetting) {
+            const t = this;
+            const type = spaceTabSetting.type || 'spaces';
+            const size = spaceTabSetting.size || 4;
+            if(type === 'spaces') {
+                t.editor.setOption('indentUnit', size);
+                t.editor.setOption(
+                    'extraKeys', 
+                    {//智能提示
+                        Ctrl: 'autocomplete',
+                        Tab: function(cm) {
+                            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                            cm.replaceSelection(spaces);
+                        },
+                    },
+                )
+            } else if (type === 'tabs') {
+                t.editor.setOption('extraKeys', { Ctrl: 'autocomplete' })
+                t.editor.setOption('tabSize', size)
+            }
         }
     }
 };
