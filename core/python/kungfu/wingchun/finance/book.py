@@ -169,6 +169,7 @@ class AccountBook:
     def dispatch(self, messages):
         for msg in messages:
             self.fill_msg_tag(msg)
+        self._ctx.logger.debug("messages: {}".format(messages))
         for cb in self._callbacks:
             cb(messages)
 
@@ -188,6 +189,7 @@ class AccountBook:
             l_pos = self._positions.pop(symbol, None)
             r_pos = ledger._positions.get(symbol, None)
             if l_pos and r_pos:
+                self._ctx.logger.info("merge position {} with {}".format(l_pos, r_pos))
                 l_pos.merge(r_pos)
                 self._positions[symbol] = l_pos
             elif not l_pos and r_pos:

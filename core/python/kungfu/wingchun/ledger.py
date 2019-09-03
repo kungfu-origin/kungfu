@@ -107,6 +107,9 @@ class Ledger(pywingchun.Ledger):
             self.ctx.inst_infos = {inst.instrument_id: object_as_dict(inst) for inst in inst_list}
 
     def on_stock_account(self, asset, positions):
+        self.ctx.logger.info("asset: {}".format(asset))
+        for pos in positions:
+            self.ctx.logger.info("pos: {}".format(pos))
         pos_objects = [StockPosition(**object_as_dict(pos)) for pos in positions]
         account = AccountBook(ctx=self.ctx,
                               trading_day=self.ctx.trading_day,
