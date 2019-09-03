@@ -270,8 +270,12 @@ def cancel_all_order(ctx, event, location, data):
             ctx.logger.info('cancel account order %s', order_record['order'])
             ctx.ledger.cancel_order(event, location.uid, order_id)
         if order_record['dest'] == location.uid:
-            ctx.logger.info('cancel strategy order %s', order_record['order'])
-            ctx.ledger.cancel_order(event, location.uid, order_id)
+            source = order_record["source"]
+            if ctx.ledger.has_location(source):
+                ctx.logger.info('cancel strategy order %s', order_record['order'])
+                ctx.ledger.cancel_order(event, source, order_id)
+            else:
+                ctx.logger.warn("failed to find location {}".format(source))
     return {
         'status': http.HTTPStatus.OK,
         'msg_type': msg.CancelAllOrder
@@ -304,13 +308,13 @@ def publish_all_asset(ctx, event, location, data):
 @on(msg.RemoveStrategy)
 def remove_strategy(ctx, event, location, data):
     if location is None:
-        ctx.logger.warning("location is None, data: {}".format(data))
+        ctx.logger.warn("location is None, data: {}".format(data))
         return {
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.RemoveStrategy
         }
     elif ctx.ledger.has_location(location.uid):
-        ctx.logger.warning("strategy is running, failed to delete")
+        ctx.logger.warn("strategy is running, failed to delete")
         return {
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.RemoveStrategy

@@ -186,8 +186,12 @@ namespace kungfu
             bool TraderCTP::cancel_order(const yijinjing::event_ptr& event)
             {
                 const OrderAction &action = event->data<OrderAction>();
-
                 CtpOrder order_record = order_mapper_->get_order_info(action.order_id);
+                if (order_record.internal_order_id == 0)
+                {
+                    SPDLOG_ERROR("failed to find order info for {}", action.order_id);
+                    return false;
+                }
                 CThostFtdcInputOrderActionField ctp_action = {};
                 strcpy(ctp_action.BrokerID, order_record.broker_id.c_str());
                 strcpy(ctp_action.InvestorID, order_record.investor_id.c_str());
@@ -196,7 +200,7 @@ namespace kungfu
                 ctp_action.SessionID = order_record.session_id;
                 ctp_action.ActionFlag = THOST_FTDC_AF_Delete;
                 strcpy(ctp_action.InstrumentID, order_record.instrument_id.c_str());
-
+                strcpy(ctp_action.ExchangeID, order_record.exchange_id.c_str());
                 CANCEL_ORDER_TRACE(
                         fmt::format("(FrontID) {} (SessionID) {} (OrderRef)", ctp_action.FrontID, ctp_action.SessionID, ctp_action.OrderRef));
 
@@ -210,7 +214,6 @@ namespace kungfu
                     return false;
                 }
             }
-
 
             void TraderCTP::OnFrontConnected()
             {
@@ -296,7 +299,7 @@ namespace kungfu
                         order.status = OrderStatus::Error;
                         writer->close_data();
                     }
-                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg, pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
+                    ORDER_ERROR(fmt::format("[OnRspOrderInsert] (ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder)));
                 }
             }
 

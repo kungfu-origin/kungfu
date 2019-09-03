@@ -369,6 +369,7 @@ namespace kungfu
 
             void Ledger::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
             {
+                SPDLOG_INFO("cancel order {}", order_id);
                 auto writer = get_writer(account_location_uid);
                 msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);
                 action.order_action_id = writer->current_frame_uid();

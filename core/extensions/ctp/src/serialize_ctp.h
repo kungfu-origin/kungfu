@@ -361,7 +361,9 @@ namespace kungfu
 
             inline void to_json(nlohmann::json &j, const CThostFtdcInputOrderActionField &ori)
             {
-                //TODO
+                j["OrderRef"] = std::string(ori.OrderRef);
+                j["ExchangeID"] = std::string(ori.ExchangeID);
+                j["OrderSysID"] = std::string(ori.OrderSysID);
             }
 
             template<typename T>
