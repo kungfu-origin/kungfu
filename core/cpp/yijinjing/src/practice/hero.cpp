@@ -61,7 +61,13 @@ namespace kungfu
         {
             if (writers_.find(dest_id) == writers_.end())
             {
-                SPDLOG_ERROR("has no writer for [{:08x}]", dest_id);
+                if (has_location(dest_id))
+                {
+                    throw yijinjing_error(fmt::format("has no writer for [{:08x}] {}", dest_id, get_location(dest_id)->uname));
+                } else
+                {
+                    throw yijinjing_error(fmt::format("has no writer for [{:08x}]", dest_id));
+                }
             }
             return writers_[dest_id];
         }
