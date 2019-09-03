@@ -4,6 +4,8 @@ from kungfu.wingchun.utils import *
 from kungfu.wingchun.constants import *
 import datetime
 from pyyjj import hash_str_32
+import sys
+import traceback
 
 class AccountBook:
     def __init__(self, ctx, **kwargs):
@@ -213,7 +215,11 @@ class AccountBook:
         self._ctx.logger.info("{} apply trade[(trade_id){} (inst){} (price){} (volume){}]".format(self.uname, trade.trade_id, trade.instrument_id, trade.price, trade.volume))
         instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id)
         direction = get_position_effect(instrument_type, trade.side, trade.offset)
-        self._get_position(trade.instrument_id, trade.exchange_id, direction).apply_trade(trade)
+        try:
+            self._get_position(trade.instrument_id, trade.exchange_id, direction).apply_trade(trade)
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self._ctx.logger.error('apply trade error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
     def apply_trading_day(self, trading_day):
         self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
