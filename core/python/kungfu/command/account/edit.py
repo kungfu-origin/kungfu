@@ -14,8 +14,6 @@ def edit(ctx, receive_md, id):
     if account_data:
         answers = encrypt(ctx.schema, prompt(make_questions(ctx.schema, account_data['config'])))
         receive_md = receive_md or account_data['receive_md']
-        if receive_md:
-            ctx.db.reset_receive_md()
         ctx.db.add_account(account_id=account_id, source_name=ctx.source, receive_md=receive_md, config=answers)
     else:
         click.echo('Account not found')

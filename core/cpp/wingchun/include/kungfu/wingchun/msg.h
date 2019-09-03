@@ -424,17 +424,20 @@ namespace kungfu
                 {
                     char trading_day[DATE_LEN];            //交易日 
                     char instrument_id[INSTRUMENT_ID_LEN]; //合约代码
-                    double pre_close_price;                //昨收价
+                    char exchange_id[EXCHANGE_ID_LEN];     //交易所代码
+
                     int64_t start_time;                    //开始时间
                     int64_t end_time;                      //结束时间
+
                     double open;                           //开
                     double close;                          //收
                     double low;                            //低
                     double high;                           //高
-                    int volume;                            //区间交易量
-                    int start_volume;                       //初始总交易量
-                    int count;                             //区间有效tick数
-                    int64_t next_time;                     //下次开始时间
+
+                    int64_t volume;                        //区间交易量
+                    int64_t start_volume;                  //初始总交易量
+
+                    int32_t tick_count;                    //区间有效tick数
                 };
 
 
@@ -443,7 +446,7 @@ namespace kungfu
                 {
                     j["trading_day"] = std::string(bar.trading_day);
                     j["instrument_id"] = std::string(bar.instrument_id);
-                    j["pre_close_price"] = bar.pre_close_price;
+                    j["exchange_id"] = std::string(bar.exchange_id);
                     j["start_time"] = bar.start_time;
                     j["end_time"] = bar.end_time;
                     j["open"] = bar.open;
@@ -452,8 +455,7 @@ namespace kungfu
                     j["high"] = bar.high;
                     j["volume"] = bar.volume;
                     j["start_volume"] = bar.start_volume;
-                    j["count"] = bar.count;
-                    j["next_time"] = bar.next_time;
+                    j["tick_count"] = bar.tick_count;
                 }
 
                 //合约手续费率
