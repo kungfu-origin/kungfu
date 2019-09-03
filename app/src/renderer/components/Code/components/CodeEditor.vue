@@ -72,7 +72,7 @@ export default {
                 extraKeys: {//智能提示
                     Ctrl: 'autocomplete',
                     Tab: function(cm) {
-                        var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                    	var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                         cm.replaceSelection(spaces);
                     },
                 },

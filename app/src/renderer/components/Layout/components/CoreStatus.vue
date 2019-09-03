@@ -3,7 +3,7 @@
         placement="top-start"
         width="auto"
         trigger="click"
-        popper-class="core-status-popover"
+        popper-class="kf-footer-popover"
         >
         <div class="core-status-content">
             <div class="core-item" >

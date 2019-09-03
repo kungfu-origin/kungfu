@@ -117,7 +117,7 @@ const KUNGFU_RESOURCES = process.env.NODE_ENV === 'production'
 ? path.join(process.resourcesPath, 'kungfu-resources') 
 : path.join(__resources)
 
-export const LOG_CONFIG = path.join(KUNGFU_RESOURCES, 'config', 'logConfig.json')
+export const KF_CONFIG = path.join(KUNGFU_RESOURCES, 'config', 'kfConfig.json')
 
 export const DEFUALT_DB = path.join(KUNGFU_RESOURCES, 'default')
 

@@ -1,0 +1,7 @@
+{
+    "log": "-l trace ",
+    "codeSpaceTab": {
+        "type": "space",
+        "size": "4"
+    }
+}

@@ -1,4 +1,4 @@
-import { KF_HOME, KUNGFU_ENGINE, LOG_CONFIG, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE, KF_CONFIG, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
@@ -142,7 +142,8 @@ export const describeProcess = (name: string): Promise<any> => {
 
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
-    const logConfig: any = readJsonSync(LOG_CONFIG) || {}
+    const kfConfig: any = (readJsonSync(KF_CONFIG) || {})
+    const logConfig = kfConfig.log;
     const trace = logConfig.logConfig || '';
     options = {
         ...options,

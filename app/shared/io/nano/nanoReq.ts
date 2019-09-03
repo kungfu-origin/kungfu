@@ -16,7 +16,6 @@ const buildRequest = (reqMsg: string, msgTypeVal: number, errMsg: string): Promi
         req.on('data', (buf: string) => {
             req.close();
             const data: RepData = JSON.parse(String(buf));
-            console.log(data)
             if(data.msg_type === msgTypeVal ) {
                 if(data.status === 200) {
                     resolve(data.data || {})

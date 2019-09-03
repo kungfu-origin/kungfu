@@ -3,7 +3,7 @@
         placement="top-start"
         width="auto"
         trigger="click"
-        popper-class="account-status-popover"
+        popper-class="kf-footer-popover"
         >
         <div class="account-status-content">
             <div class="account-item" >
@@ -166,9 +166,7 @@ export default {
 </script>
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
-.account-status-popover{
-    box-shadow: 0px 0px 30px $bg
-}
+
 .account-status-content{
     max-width: 300px;
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;

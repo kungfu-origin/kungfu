@@ -36,12 +36,12 @@
 
         <!-- 底部 -->
         <el-footer height="30px">
-            <div class="footer-content">
-                <tr-footer-item class="fr">
+            <div class="footer-content" >
+                <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
                     <CoreStatus></CoreStatus>
                 </tr-footer-item>
              
-                <tr-footer-item class="fr">
+                <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
             </div>
@@ -65,11 +65,17 @@ export default {
             default: true
         }
     },
+
     data() {
         return {
+            currentRouter: '',
             infoListVisiblity: false,
             navOpend: deepClone(this.$store.state.BASE.navOpend),
         }
+    },
+
+    created() {
+        this.currentRouter = this.$router.history.current.name
     },
 
     components: {
@@ -92,5 +98,9 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/layout.scss';
 @import '@/assets/scss/skin.scss';
+
+.kf-footer-popover{
+    box-shadow: 0px 0px 30px $bg
+}
 </style>
 
