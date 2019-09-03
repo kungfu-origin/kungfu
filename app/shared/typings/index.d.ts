@@ -95,4 +95,3 @@ interface TradingDataFilter {
     id?: string;
     dateRange?: string[];
 }
-

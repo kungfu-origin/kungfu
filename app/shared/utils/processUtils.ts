@@ -1,8 +1,9 @@
-import { KF_HOME, KUNGFU_ENGINE, KF_CONFIG, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { getProcesses } from 'getprocesses';
+
 
 const path = require('path');
 const fkill = require('fkill');
@@ -142,13 +143,12 @@ export const describeProcess = (name: string): Promise<any> => {
 
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
-    const kfConfig: any = (readJsonSync(KF_CONFIG) || {})
-    const logConfig = kfConfig.log;
-    const trace = logConfig.logConfig || '';
+    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const trace: string = kfConfig.log || '';
     options = {
         ...options,
         "args": trace + options.args,
-        "cwd": path.join(KUNGFU_ENGINE, 'kfc'),
+        "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",
         "out_file": buildProcessLogPath(options.name),

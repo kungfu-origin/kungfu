@@ -46,6 +46,8 @@ export default {
         this.reqCalendar();
         this.reqCash();
         this.reqGatewayState();
+
+        this.$store.dispatch('getKungfuConfig')
     },
 
     destroyed() {

@@ -86,7 +86,8 @@ export const nanoCancelOrder = ({ accountId, orderId }: MakeOrderParams) : Promi
             'order_id': orderId
         }
     })
-    return buildRequest(reqMsg, msgType.cancelOrder, '删除策略持仓失败！') 
+    console.log('[REQ CANCEL ORDER]', reqMsg)
+    return buildRequest(reqMsg, msgType.cancelOrder, '撤单失败！') 
 }
 
 /** 全部撤单
@@ -106,6 +107,7 @@ export const nanoCancelAllOrder = ({ cancelType, id }: CancelAllOrderParams): Pr
                 ...buildCancalAllOrderPostData(cancelType, id)
             }
         })
+        console.log('[REQ CANCEL ALL ORDER]', reqMsg)
         return buildRequest(reqMsg, msgType.cancelAllOrder, '全部撤单失败！') 
 }
 

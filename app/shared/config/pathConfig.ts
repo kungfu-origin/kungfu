@@ -108,17 +108,17 @@ var KUNGFU_ENGINE_RESOLVE: string = process.env.NODE_ENV === 'production'
         ? path.join(__dirname, '..', '..', '..', '..', 'core', 'build')
         : path.join(__dirname, '..', '..', '..', 'core', 'build')
 
-if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_ENGINE || ''
+if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_ENGINE_PATH || ''
 
-export const KUNGFU_ENGINE = KUNGFU_ENGINE_RESOLVE;
+export const KUNGFU_ENGINE_PATH = KUNGFU_ENGINE_RESOLVE;
 
-const KUNGFU_RESOURCES = process.env.NODE_ENV === 'production' 
+const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production' 
 //@ts-ignore
 ? path.join(process.resourcesPath, 'kungfu-resources') 
 : path.join(__resources)
 
-export const KF_CONFIG = path.join(KUNGFU_RESOURCES, 'config', 'kfConfig.json')
+export const KF_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
 
-export const DEFUALT_DB = path.join(KUNGFU_RESOURCES, 'default')
+export const DEFUALT_DB_PATH = path.join(KUNGFU_RESOURCES_DIR, 'default')
 
-export const EXTENSION_DIR = path.join(KUNGFU_ENGINE, 'kfc', 'extensions');
+export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'extensions');

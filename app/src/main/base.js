@@ -1,5 +1,5 @@
 import initGlobalDB from '__gConfig/initGlobalDB.json'
-import { BASE_DB_DIR, DEFUALT_DB } from '__gConfig/pathConfig';
+import { BASE_DB_DIR, DEFUALT_DB_PATH } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
 import { existsSync, addFile } from '__gUtils/fileUtils';
 const path = require('path')
@@ -29,7 +29,7 @@ export const initDB = () => {
 
     //commission.db
     fse.copy(
-        path.join(DEFUALT_DB, 'commission.db'), 
+        path.join(DEFUALT_DB_PATH, 'commission.db'), 
         path.join(BASE_DB_DIR, 'commission.db')
     )
     .catch(err => {
@@ -38,7 +38,7 @@ export const initDB = () => {
 
     //holidays.db
     fse.copy(
-        path.join(DEFUALT_DB, 'holidays.db'), 
+        path.join(DEFUALT_DB_PATH, 'holidays.db'), 
         path.join(BASE_DB_DIR, 'holidays.db')
     )
     .catch(err => {

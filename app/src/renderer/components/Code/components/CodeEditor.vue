@@ -51,14 +51,13 @@ export default {
     data() {
         this.editor = null;
         return {
-            // file: null,
             options: {
                 theme: 'monokai',
                 lineNumbers: true,
                 lineWrapping: true,
                 indentUnit: 4, // 缩进单位为4
-                tabSize: 4,
-                indentWithTabs: true,
+                // tabSize: 4,
+                // indentWithTabs: true,
                 styleActiveLine: true, // 当前行背景高亮
                 matchBrackets: true, // 括号匹配
                 lineWrapping: "wrap", //在长行时文字是换行(wrap)还是滚动(scroll)，默认为滚动(scroll)
@@ -83,6 +82,7 @@ export default {
         };
 
     },
+
     mounted() {
         const t = this;
     },
@@ -90,7 +90,8 @@ export default {
     computed: {
         ...mapState({
             currentFile: state => state.STRATEGY.currentFile,
-            fileTree: state => state.STRATEGY.fileTree
+            fileTree: state => state.STRATEGY.fileTree,
+            codeSpaceTab: state => state.BASE.kfConfig.codeSpaceTab   
         }),
 
         //代码提示
@@ -144,6 +145,28 @@ export default {
             })[0];
             if (newRootPath != oldRootPath) {
                 t.clearState()
+            }
+        },
+
+        codeSpaceTab(newVal) {
+            const t = this;
+            const type = newVal.type || 'spaces';
+            const size = newVal.size || 4;
+            if(type === 'spaces') {
+                t.editor.setOption('indentUnit', size);
+                t.editor.setOption(
+                    'extraKeys', 
+                    {//智能提示
+                        Ctrl: 'autocomplete',
+                        Tab: function(cm) {
+                            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                            cm.replaceSelection(spaces);
+                        },
+                    },
+                )
+            } else if (type === 'tabs') {
+                t.editor.setOption('extraKeys', { Ctrl: 'autocomplete' })
+                t.editor.setOption('tabSize', size)
             }
         }
     },

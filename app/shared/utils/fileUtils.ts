@@ -311,6 +311,11 @@ export const copySync = (fromPath: string, toPath: string): void => {
     fse.copySync(fromPath, toPath)
 }
 
-export const readJsonSync = (jsonPath: string): JSON => {
+export const readJsonSync = (jsonPath: string): {} => {
     return fse.readJsonSync(jsonPath)
+}
+
+export const outputJson = (jsonPath: string, json: {}): void => {
+    return fse.outputJson(jsonPath, json)
+    .catch((err: Error) => console.error(err))
 }

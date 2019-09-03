@@ -44,6 +44,10 @@
                 <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
+
+				<tr-footer-item class="fr" v-if="currentRouter === 'code'">
+					<CodeSpaceTab></CodeSpaceTab>
+				</tr-footer-item>
             </div>
         </el-footer>
 
@@ -55,6 +59,7 @@ import {deepClone} from '__gUtils/busiUtils';
 import {mapState, mapGetters} from 'vuex';
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
+import CodeSpaceTab from './components/CodeSpaceTab';
 import MainHeader from './components/MainHeader';
 
 export default {
@@ -81,7 +86,8 @@ export default {
     components: {
         EngineStatus,
         MainHeader,
-        CoreStatus
+		CoreStatus,
+		CodeSpaceTab
     },
 
     computed:{
