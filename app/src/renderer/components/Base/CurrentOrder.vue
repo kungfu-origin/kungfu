@@ -249,11 +249,6 @@ export default {
                     t.$message.warning(`需要先启动 ${t.gatewayName.toAccountId()} 交易进程！`)
                     return;
                 }
-            }else if(t.moduleType === 'strategy'){
-                if(t.processStatus[t.currentId] !== 'online') {
-                    t.$message.warning(`需要先启动 ${t.currentId} 策略进程！`)
-                    return;
-                }
             }
 
             t.$confirm(`确认全部撤单？`, '提示', {
