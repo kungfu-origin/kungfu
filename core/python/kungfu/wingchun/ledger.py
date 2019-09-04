@@ -248,7 +248,7 @@ def new_order_single(ctx, event, location, data):
 @on(msg.CancelOrder)
 def cancel_order(ctx, event, location, data):
     ctx.logger.info('cancel account order request')
-    order_id = data['order_id']
+    order_id = int(data['order_id'])
     if order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         ctx.logger.info('cancel account order %s', order_record['order'])

@@ -156,6 +156,7 @@ namespace kungfu
 
             bool TraderXTP::req_account()
             {
+
                 int rtn = api_->QueryAsset(session_id_, ++request_id_);
                 return rtn == 0;
             }
@@ -177,7 +178,7 @@ namespace kungfu
                 }
                 if (error_info != nullptr)
                 {
-                    ORDER_TRACE(fmt::format("(error_id){} (error_msg){} (session_id)", error_info->error_id, error_info->error_msg, session_id));
+                    ORDER_ERROR(fmt::format("(error_id){} (error_msg){} (session_id)", error_info->error_id, error_info->error_msg, session_id));
                 }
                 XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
