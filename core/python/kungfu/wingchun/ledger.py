@@ -252,12 +252,13 @@ def cancel_order(ctx, event, location, data):
     if order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         dest = order_record["dest"]
-        ctx.logger.info('cancel account order %s', order_record['order'])
-        ctx.ledger.cancel_order(event, dest, order_id)
-        return {
-            'status': http.HTTPStatus.OK,
-            'msg_type': msg.CancelOrder
-        }
+        source = order_record["source"]
+        ctx.logger.info('cancel account order dest: %s, source: %s, order: %s', order_record["dest"], order_record["source"], order_record['order'])
+        try:
+            ctx.ledger.cancel_order(event, source, order_id)
+            return {'status': http.HTTPStatus.OK,'msg_type': msg.CancelOrder}
+        except:
+            return {'status': http.HTTPStatus.NOT_FOUND,'msg_type': msg.CancelOrder}
     else:
         ctx.logger.error('can not cancel order %s from orders %s', order_id, list(ctx.orders.keys()))
         return {
