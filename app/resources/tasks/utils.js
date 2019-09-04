@@ -59,10 +59,9 @@ function dealMessage(line, searchKeyword){
                 break;
             case 4:
                 messageData = {
-                    updateTime: messageList[0].trim().slice(1).trim(),
-                    type: messageList[1].trim().slice(1).trim(),
-                    action: messageList[2].trim().slice(1).trim(),
-                    message: messageList[3].trim(),
+                    updateTime: lineData.timestamp,
+                    action: '',
+                    message: messageList.join(']')
                 }
                 break;
             default:
@@ -74,7 +73,7 @@ function dealMessage(line, searchKeyword){
                         type,
                         pid: '',
                         action: '',
-                        message
+                        message: messageList.slice(1).join(']').trim()
                     }
                 }else{
                     messageData = {
@@ -111,7 +110,7 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
 
             lineReader.on('line', line => {
                 const messageData = dealMessageFunc(line, searchKeyword)
-                if(!messageData) return;
+                if(!messageData || !messageData.length) return;
                 messageData.forEach(msg => {
                     if(!msg) return;
                     logId++

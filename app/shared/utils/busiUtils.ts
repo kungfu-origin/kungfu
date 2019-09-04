@@ -273,11 +273,11 @@ export const dealLogMessage = (line: string, searchKeyword: string):any => {
                 break;
             case 4:
                 messageData = {
-                    updateTime: messageList[0].trim().slice(1).trim(),
-                    type: messageList[1].trim().slice(1).trim(),
+                    updateTime: lineData.timestamp,
+                    type: '',
                     pid: '',
-                    action: messageList[2].trim().slice(1).trim(),
-                    message: messageList[3].trim(),
+                    action: '',
+                    message: messageList.join(']')
                 }
                 break;
             default:
