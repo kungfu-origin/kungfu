@@ -2,6 +2,8 @@ import pywingchun
 import json
 import http
 import functools
+import sys
+import traceback
 from itertools import groupby
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
@@ -273,7 +275,9 @@ def cancel_order(ctx, event, location, data):
         try:
             ctx.ledger.cancel_order(event, source, order_id)
             return {'status': http.HTTPStatus.OK,'msg_type': msg.CancelOrder}
-        except:
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            ctx.logger.error('failed to cancel order %s, error [%s] %s', order_id, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
             return {'status': http.HTTPStatus.NOT_FOUND,'msg_type': msg.CancelOrder}
     else:
         ctx.logger.error('can not cancel order %s from orders %s', order_id, list(ctx.orders.keys()))
