@@ -6,6 +6,7 @@
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
+    @keyup.enter.native="handleSubmitSetting"
     >
         <el-form ref="date-range-form" label-width="90px" :model="form">
             <el-form-item

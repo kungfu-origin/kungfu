@@ -5,6 +5,7 @@
     v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
+    @keyup.enter.native="handleSubmitSetting"
     @close="handleClose"
     >
         <el-form class="fee-setting-form" :model="feeSettingForm" ref="feeSettingForm" label-width="90px" size="mini">

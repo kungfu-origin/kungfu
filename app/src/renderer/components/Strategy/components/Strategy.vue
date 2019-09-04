@@ -77,6 +77,7 @@
     :visible.sync="setStrategyDialogVisiblity" 
     :close-on-click-modal="false"
     @close="handleClearAddStrategyDialog"
+    @keyup.enter.native="handleConfirmAddEditorStrategy"
     >
         <el-form ref="setStrategyForm" label-width="90px" :model="setStrategyForm">
             <!-- 自定义部分 -->
@@ -92,7 +93,11 @@
                 {validator: noZeroAtFirstValidator, trigger: 'blur'}
                 ]"
             >
-                <el-input v-model.trim="setStrategyForm.strategyId" :disabled="setStrategyDialogType == 'set'" placeholder="请输入策略名称"></el-input>
+                <el-input 
+                v-model.trim="setStrategyForm.strategyId" 
+                :disabled="setStrategyDialogType == 'set'"
+                 placeholder="请输入策略名称"
+                 ></el-input>
             </el-form-item>
             <el-form-item
             label="入口文件"
@@ -298,7 +303,7 @@ export default {
         //关闭添加strategy弹窗, refresh数据
         handleClearAddStrategyDialog(){
             const t = this;
-            t.setStrategyForm = {strategyId: '', strategyPath: ''};
+            t.setStrategyForm = { strategyId: '', strategyPath: '' };
             t.setStrategyDialogVisiblity = false;
             t.setStrategyDialogType = ''
         },

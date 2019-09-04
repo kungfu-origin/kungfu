@@ -133,6 +133,7 @@
             width="400px" 
             :visible.sync="visiblity.selectSource"
             id="select-source-dialog"
+            @keyup.enter.native="handleSelectSource"
             >
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>

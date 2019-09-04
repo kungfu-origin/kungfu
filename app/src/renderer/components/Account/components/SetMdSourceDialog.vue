@@ -6,6 +6,7 @@
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleClose"
+    @keyup.enter.native="handleSubmitSetting"
     >
         <el-radio-group v-model.trim="selectedMdAccountId" style="width: 100%">
             <el-row>

@@ -30,6 +30,13 @@ export default {
 
     mounted(){
         if(document.getElementById('loading')) document.getElementById('loading').remove();
+        //解除回车带来的一些不好的影响
+        //比如页面重新刷新的问题
+        document.body.addEventListener('keydown', (event) => {
+            if(event.keyCode == 13) {
+                event.preventDefault()
+            }
+        })
     },
 
     created() {

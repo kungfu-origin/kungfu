@@ -6,6 +6,7 @@
     :visible="visible" 
     :close-on-click-modal="false"
     @close="handleCancel"
+    @keyup.enter.native="handleSubmitSetting"
     id="confirm-set-account-dialog"
     
     >
