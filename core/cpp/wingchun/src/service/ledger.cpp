@@ -7,6 +7,7 @@
 #include <kungfu/yijinjing/time.h>
 
 #include <kungfu/wingchun/msg.h>
+#include <kungfu/wingchun/utils.h>
 #include <kungfu/wingchun/service/ledger.h>
 
 using namespace kungfu::practice;
@@ -65,6 +66,7 @@ namespace kungfu
                     case category::MD:
                     {
                         watch(trigger_time, app_location);
+                        request_write_to(trigger_time, app_location->uid);
                         update_broker_state(trigger_time, app_location, BrokerState::Connected);
                         monitor_market_data(trigger_time, app_location->uid);
                         break;
@@ -240,6 +242,7 @@ namespace kungfu
                   {
                       auto &asset_info = asset_info_[event->source()];
                       auto &position_buffer = position_buffer_[event->source()];
+                      subscribe_holdings(event->source(), position_buffer);
                       try
                       { on_stock_account(asset_info, position_buffer); }
                       catch (const std::exception &e)
@@ -376,6 +379,36 @@ namespace kungfu
                 action.order_id = order_id;
                 action.action_flag = OrderActionFlag::Cancel;
                 writer->close_data();
+            }
+
+            void Ledger::request_subscribe(const std::string& source_name, const std::vector<msg::data::Instrument> insts)
+            {
+                auto location = location::make(get_io_device()->get_home()->mode, category::MD, source_name, source_name, get_io_device()->get_home()->locator);
+                SPDLOG_INFO("subscribe from {} [{:08x}]", source_name, location->uid);
+                if (has_location(location->uid))
+                {
+                    auto writer = get_writer(location->uid);
+                    char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
+                    size_t length = fill_subscribe_msg(buffer, 4096, insts);
+                    writer->close_frame(length);
+                }
+            }
+
+            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions)
+            {
+                if (!has_location(account_location_id))
+                {
+                    SPDLOG_ERROR("failed to find account location [{:08x}]", account_location_id);
+                    return;
+                }
+                auto location = get_location(account_location_id);
+                SPDLOG_INFO("subscribe {} holdings for account {}@{}", positions.size(), location->name, location->group);
+                std::vector<msg::data::Instrument> insts;
+                for (const auto& pos: positions)
+                {
+                    insts.push_back(inst_from_position(pos));
+                }
+                request_subscribe(location->group, insts);
             }
         }
     }

@@ -77,6 +77,10 @@ namespace kungfu
                 void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);
 
                 void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
+
+                void request_subscribe(const std::string& source_name, const std::vector<msg::data::Instrument> insts);
+
+                void subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions);
             };
         }
     }

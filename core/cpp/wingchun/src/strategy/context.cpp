@@ -9,6 +9,7 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/msg.h>
 #include <kungfu/wingchun/strategy/context.h>
+#include <kungfu/wingchun/utils.h>
 
 using namespace kungfu::practice;
 using namespace kungfu::rx;
@@ -140,27 +141,9 @@ namespace kungfu
             {
                 auto writer = app_.get_writer(source);
                 char *buffer = const_cast<char *>(&(writer->open_frame(app_.now(), msg::type::Subscribe, 4096)->data<char>()));
-                hffix::message_writer sub_msg(buffer, buffer + 4096);
-                sub_msg.push_back_header("FIX.4.2");
-                sub_msg.push_back_string(hffix::tag::MsgType, "V");
-                sub_msg.push_back_int(hffix::tag::MDReqID, 1);
-                sub_msg.push_back_int(hffix::tag::SubscriptionRequestType, 1); // Snapshot + Updates (Subscribe)
-                sub_msg.push_back_int(hffix::tag::MarketDepth, 1);
-
-                sub_msg.push_back_int(hffix::tag::NoMDEntryTypes, 1);
-                sub_msg.push_back_int(hffix::tag::MDEntryType, 2);
-                sub_msg.push_back_int(hffix::tag::NoRelatedSym, symbols.size());
-                for (const auto &symbol : symbols)
-                {
-                    sub_msg.push_back_string(hffix::tag::Symbol, symbol);
-                    sub_msg.push_back_string(hffix::tag::SecurityExchange, exchange);
-                    quotes_[get_symbol_id(symbol, exchange)] = msg::data::Quote{};
-                    SPDLOG_INFO("request subscribe {}", symbol);
-                }
-                sub_msg.push_back_trailer();
-                writer->close_frame(sub_msg.message_end() - buffer);
+                size_t length = fill_subscribe_msg(buffer, 4096, symbols, exchange);
+                writer->close_frame(length);
             }
-
 
             uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                  double limit_price, int64_t volume, PriceType type, Side side, Offset offset)
