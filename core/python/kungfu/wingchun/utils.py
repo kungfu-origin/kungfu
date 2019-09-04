@@ -15,9 +15,9 @@ def object_as_dict(obj):
 
 def is_final_status(order_status):
     if int(order_status) in AllFinalOrderStatus:
-        return False
-    else:
         return True
+    else:
+        return False
 
 def get_position_effect(instrument_type, side, offset):
     if instrument_type == InstrumentType.Stock:

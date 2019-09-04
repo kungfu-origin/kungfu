@@ -12,6 +12,8 @@ from kungfu.wingchun.finance.book import *
 from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
 from kungfu.wingchun.finance.position import get_uid as get_position_uid
 from kungfu.wingchun.calendar import Calendar
+from kungfu.wingchun.constants import OrderStatus
+from kungfu.wingchun.utils import is_final_status
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
@@ -95,8 +97,22 @@ class Ledger(pywingchun.Ledger):
         client_id = self.get_location(event.dest).name
         source_id = self.get_location(event.source).group
         message = self._message_from_trade_event(event, trade)
+        if source_id == "xtp" and trade.order_id in self.ctx.orders:
+            self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
+            order_record = self.ctx.orders[trade.order_id]
+            order = order_record["order"]
+            if not is_final_status(order.status):
+                order_message = self._message_from_order_event(event, order)
+                order_message["data"]["volume_left"] = order.volume_left - trade.volume
+                order_message["data"]["volume_traded"] = order.volume_traded + trade.volume
+                order_message["data"]["status"] = int(OrderStatus.PartialFilledActive) if order_message["data"]["volume_left"] > 0 else int(OrderStatus.PartialFilledNotActive)
+                self.ctx.db.add_order(**order_message["data"])
+                self.publish(json.dumps(order_message))
+            else:
+                self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order.status))
         self.ctx.db.add_trade(**message["data"])
         self.publish(json.dumps(message))
+
         self._get_ledger(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id).apply_trade(trade)
         self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id).apply_trade(trade)
 
