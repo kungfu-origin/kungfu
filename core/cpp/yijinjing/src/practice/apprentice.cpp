@@ -234,9 +234,9 @@ namespace kungfu
                 }
             } else
             {
-                SPDLOG_ERROR("{} [{:08x}] asks publish to {} [{:08x}] for more than once",
-                             get_location(event->source())->uname, event->source(),
-                             get_location(request.dest_id)->uname, request.dest_id);
+                SPDLOG_INFO("writer from {} [{:08x}] to {} [{:08x}] already existed",
+                        get_location(event->source())->uname, event->source(),
+                        get_location(request.dest_id)->uname, request.dest_id);
             }
         }
 
@@ -302,7 +302,6 @@ namespace kungfu
             nlohmann::json location_json = nlohmann::json::parse(json_str);
             uint32_t location_uid = location_json["uid"];
             reader_->disjoin(location_uid);
-            writers_.erase(location_uid);
             deregister_location(event->trigger_time(), location_uid);
         }
     }

@@ -373,24 +373,43 @@ namespace kungfu
             void Ledger::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
             {
                 SPDLOG_INFO("cancel order {}", order_id);
-                auto writer = get_writer(account_location_uid);
-                msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);
-                action.order_action_id = writer->current_frame_uid();
-                action.order_id = order_id;
-                action.action_flag = OrderActionFlag::Cancel;
-                writer->close_data();
+                if(has_writer(account_location_uid))
+                {
+                    auto writer = get_writer(account_location_uid);
+                    msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);
+                    action.order_action_id = writer->current_frame_uid();
+                    action.order_id = order_id;
+                    action.action_flag = OrderActionFlag::Cancel;
+                    writer->close_data();
+                }
+                else
+                {
+                    if (has_location(account_location_uid))
+                    {
+                        auto location = get_location(account_location_uid);
+                        SPDLOG_ERROR("writer to {} [{:08x}] not exists", location->uname, account_location_uid);
+                    }
+                    else
+                    {
+                        SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);
+                    }
+                }
             }
 
             void Ledger::request_subscribe(const std::string& source_name, const std::vector<msg::data::Instrument> insts)
             {
                 auto location = location::make(get_io_device()->get_home()->mode, category::MD, source_name, source_name, get_io_device()->get_home()->locator);
                 SPDLOG_INFO("subscribe from {} [{:08x}]", source_name, location->uid);
-                if (has_location(location->uid))
+                if (has_writer(location->uid))
                 {
                     auto writer = get_writer(location->uid);
                     char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
                     size_t length = fill_subscribe_msg(buffer, 4096, insts);
                     writer->close_frame(length);
+                }
+                else
+                {
+                    SPDLOG_ERROR("writer to {} [{:08x}] not exists", location->uname, location->uid);
                 }
             }
 
