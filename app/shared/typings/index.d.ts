@@ -16,7 +16,7 @@ interface Account {
 }
 
 interface Strategy {
-    stratgy_id: string;
+    strategy_id: string;
     strategy_path: string;
     add_time: number;
 }
