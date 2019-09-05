@@ -115,7 +115,6 @@ var appReady = false, killExtraFinished = false;
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
 	appReady = true;
-	// createWindow()
 	if(appReady && killExtraFinished) createWindow()
 })
 
@@ -128,11 +127,6 @@ killExtra()
 	if(appReady && killExtraFinished) createWindow()
 	console.timeEnd('finish kill extra')
 })
-
-// app.on('ready', () => {
-// 	createWindow()
-// })
-
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function (e) {
