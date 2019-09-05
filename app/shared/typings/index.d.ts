@@ -1,5 +1,16 @@
 declare var __resources: string;
 
+declare module NodeJS {
+    interface Global {
+        __resources: string
+    }
+}
+
+declare module "*.json" {
+    const value: any;
+    export default value;
+}
+
 interface NumberToStringObject {
     [propName: number]: string;
 }
@@ -16,7 +27,7 @@ interface Account {
 }
 
 interface Strategy {
-    stratgy_id: string;
+    strategy_id: string;
     strategy_path: string;
     add_time: number;
 }

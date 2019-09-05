@@ -70,7 +70,7 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
     }
 }
 
-export const delaySeconds = (seconds: 100): Promise<void> => {
+export const delaySeconds = (seconds: number): Promise<void> => {
     return new Promise(resolve => {
         let timer = setTimeout(() => {
             resolve()
