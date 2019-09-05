@@ -6,9 +6,8 @@ const path = require('path')
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 
-;if (process.env.NODE_ENV !== 'development') {
-    if(process.env.APP_TYPE === 'cli') global.__resources = path.join('.', 'resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
-    else global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')// eslint-disable-line{{/if_eq}}
+if (process.env.NODE_ENV !== 'development') {
+    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
 }
 
 export const initDB = () => {
