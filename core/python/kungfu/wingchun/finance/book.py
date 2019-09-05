@@ -193,6 +193,7 @@ class AccountBook:
                 l_pos.merge(r_pos)
                 self._positions[symbol] = l_pos
             elif not l_pos and r_pos:
+                r_pos.ledger = self
                 self._positions[symbol] = r_pos
                 self._ctx.logger.info("add position {}".format(r_pos))
             elif l_pos and not r_pos:
