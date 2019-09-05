@@ -254,7 +254,10 @@ def trace_journal(ctx, session_id, io_type):
         if frame.dest == home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
             request = pyyjj.get_RequestReadFrom(frame)
             source_location = make_location_from_dict(ctx, locations[request.source_id])
-            reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)
+            try:
+                reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)
+            except Exception as err:
+                ctx.logger.error("failed to join journal {}/{}, exception: {}".format(source_location.uname, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0), err)
         if frame.dest == home.uid and frame.msg_type == yjj_msg.Deregister:
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc['uid'])
