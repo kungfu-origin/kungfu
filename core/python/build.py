@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import platform
 import click
@@ -29,14 +30,14 @@ def build(ctx, log_level, build_type, arch, runtime, node_version, electron_vers
 @click.pass_context
 def configure(ctx):
     cmake_configure = build_cmake_js_cmd(ctx, 'configure')
-    subprocess.Popen(cmake_configure).wait()
+    sys.exit(subprocess.Popen(cmake_configure).wait())
 
 
 @build.command()
 @click.pass_context
 def make(ctx):
     cmake_build = build_cmake_js_cmd(ctx, 'build')
-    subprocess.Popen(cmake_build).wait()
+    sys.exit(subprocess.Popen(cmake_build).wait())
 
 
 @build.command()
@@ -47,15 +48,16 @@ def package(ctx):
     osname = platform.system()
 
     if osname == 'Linux':
-        subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
+        sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait())
     if osname == 'Darwin':
-        subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
+        rc = subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
         os.chdir('build/kfc')
         if os.path.exists('.Python'):
             os.rename('.Python', 'Python')
             os.symlink('Python', '.Python')
+        sys.exit(rc)
     if osname == 'Windows':
-        subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait()
+        sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait())
 
 
 def find(tool):
