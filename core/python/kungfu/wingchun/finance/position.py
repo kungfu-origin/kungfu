@@ -196,13 +196,11 @@ class StockPosition(Position):
 
     def apply_quote(self, quote):
         self.ledger._ctx.logger.debug("{} apply quote[(inst){}(last_price){}(pre_close_price){}(close_price){}]".format(self._uname, quote.instrument_id, quote.last_price, quote.pre_close_price, quote.close_price))
-        pre_market_value = self.market_value
         if is_valid_price(quote.close_price):
             self._apply_settlement(quote.close_price)
         elif is_valid_price(quote.last_price):
             self._last_price = quote.last_price
-        if  abs(self.market_value - pre_market_value) >= self.ledger._notice_threshold:
-            self.ledger.dispatch([self.ledger.message, self.message])
+        self.ledger.dispatch([self.ledger.message, self.message])
 
     def switch_day(self, trading_day):
         if not is_valid_price(self.close_price):
@@ -552,5 +550,4 @@ class FuturePosition(Position):
         self._last_price = last_price
         position_pnl_delta = sum([detail.update_last_price(last_price) for detail in self.details])
         self.ledger._ctx.logger.debug("position pnl delta: {}".format(position_pnl_delta))
-        if abs(position_pnl_delta) > self.ledger._notice_threshold:
-            self.ledger.dispatch([self.ledger.message, self.message])
+        self.ledger.dispatch([self.ledger.message, self.message])
