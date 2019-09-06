@@ -364,10 +364,7 @@ export default {
             }
             //更新数据, 根据ID来排序
             const sortOrderList = Object.values(t.orderDataByKey).sort((a, b) =>{
-                console.log('a', a.updateTimeNum)
-                console.log('b', b.updateTimeNum)
-                console.log('a-b', a.updateTimeNum - b.updateTimeNum)
-                return  b.updateTimeNum - b.updateTimeNum
+                return  b.updateTimeNum - a.updateTimeNum
             })
             t.tableData = Object.freeze(sortOrderList.slice(0, 200))
         },

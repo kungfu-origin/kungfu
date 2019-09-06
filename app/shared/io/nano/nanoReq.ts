@@ -65,7 +65,7 @@ export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {
             "group": "default"
         }
     })
-    console.log('[REQ DELETE POS]', reqMsg)
+    // console.log('[REQ DELETE POS]', reqMsg)
     return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, '删除策略持仓失败！') 
 }
 
@@ -86,7 +86,7 @@ export const nanoCancelOrder = ({ accountId, orderId }: MakeOrderParams) : Promi
             'order_id': orderId
         }
     })
-    console.log('[REQ CANCEL ORDER]', reqMsg)
+    // console.log('[REQ CANCEL ORDER]', reqMsg)
     return buildRequest(reqMsg, msgType.cancelOrder, '撤单失败！') 
 }
 
@@ -107,7 +107,7 @@ export const nanoCancelAllOrder = ({ cancelType, id }: CancelAllOrderParams): Pr
                 ...buildCancalAllOrderPostData(cancelType, id)
             }
         })
-        console.log('[REQ CANCEL ALL ORDER]', reqMsg)
+        // console.log('[REQ CANCEL ALL ORDER]', reqMsg)
         return buildRequest(reqMsg, msgType.cancelAllOrder, '全部撤单失败！') 
 }
 

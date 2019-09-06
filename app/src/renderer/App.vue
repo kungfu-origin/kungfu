@@ -96,7 +96,7 @@ export default {
                     delaySeconds(1000)
                     .then(() => deleteProcess(processId))
                 } else { 
-                    console.log('[GATEWAY STATE] sub', processId, stateData)
+                    // console.log('[GATEWAY STATE] sub', processId, stateData)
                     t.$store.dispatch('setOneMdTdState', {
                         id: processId,
                         stateData: stateData
@@ -111,7 +111,7 @@ export default {
                 const { account_id, source_id, ledger_category } = data;
                 const accountId = `${source_id}_${account_id}`;                  
                 if(ledger_category !== 0) return;
-                console.log('[CASH] sub', accountId, data)
+                // console.log('[CASH] sub', accountId, data)
                 t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze(data) })
             })
         },
@@ -123,7 +123,7 @@ export default {
                 const calendar = d.data;
                 if(calendar && calendar.trading_day) {
                     const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
-                    console.log('[TRADING DAY] sub', tradingDay)
+                    // console.log('[TRADING DAY] sub', tradingDay)
                     t.$store.dispatch('setTradingDay', tradingDay);
                 }
             })
