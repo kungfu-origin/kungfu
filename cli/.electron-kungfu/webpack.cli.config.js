@@ -69,7 +69,7 @@ let cliConfig = {
   },
   target: 'electron-main'
 }
-
+console.log(path.join(__dirname, '../src'))
 /**
  * Adjust cliConfig for development settings
  */
