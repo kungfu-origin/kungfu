@@ -14,11 +14,20 @@ const program = require('commander');
 
 program
     .version(version)
+<<<<<<< HEAD
+=======
+    // .option('-a --add', 'add a account|strategy')
+>>>>>>> [add] list finish
     // .option('-r --remove', 'remove a account|strategy ')
     // .option('-u --update', 'update accounts|strategys config')
     // .option('-s --switch-md-source', 'switch md source')
     // .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
     .action(async (options: any) => {
+<<<<<<< HEAD
+=======
+        // const add = options.add;
+        // if(add) return addAccountStrategy();
+>>>>>>> [add] list finish
 
         // const remove = options.remove;
         // if(remove) return removeAccountStrategy();
