@@ -318,7 +318,7 @@ namespace kungfu
                 strcpy(des.instrument_id, ori.ticker);
                 from_xtp(ori.market, des.exchange_id);
                 des.volume = ori.total_qty;
-                des.yesterday_volume = ori.yesterday_position;
+                des.yesterday_volume = ori.sellable_qty;
                 des.position_cost_price = ori.avg_price;
             }
 
