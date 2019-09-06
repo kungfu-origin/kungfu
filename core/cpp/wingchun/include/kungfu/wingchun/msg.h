@@ -71,6 +71,9 @@ namespace kungfu
                     Ready = 100
                 };
 
+#ifdef _WIN32
+    #pragma pack(push, 1)
+#endif
                 struct Instrument
                 {
                     char instrument_id[INSTRUMENT_ID_LEN];     //合约ID
@@ -114,10 +117,8 @@ namespace kungfu
 
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Instrument &instrument)
@@ -136,9 +137,6 @@ namespace kungfu
                     j["long_margin_ratio"] = instrument.long_margin_ratio;
                     j["short_margin_ratio"] = instrument.short_margin_ratio;
                 }
-
-                struct FutureInstrument : public Instrument
-                {};
 
                 //行情
                 struct Quote
@@ -228,10 +226,8 @@ namespace kungfu
 
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Quote &quote)
@@ -335,10 +331,8 @@ namespace kungfu
 
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Entrust &entrust)
@@ -396,10 +390,8 @@ namespace kungfu
 
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Transaction &transaction)
@@ -438,7 +430,11 @@ namespace kungfu
                     int64_t start_volume;                  //初始总交易量
 
                     int32_t tick_count;                    //区间有效tick数
+#ifndef _WIN32
+                } __attribute__((packed));
+#else
                 };
+#endif
 
 
 
@@ -494,7 +490,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 //订单输入
@@ -549,7 +544,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const OrderInput &input)
@@ -602,7 +596,6 @@ namespace kungfu
                 } __attribute__((packed));
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const OrderAction &action)
@@ -686,11 +679,11 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Order &order)
                 {
+
                     j["order_id"] = std::to_string(order.order_id);
                     j["insert_time"] = order.insert_time;
                     j["update_time"] = order.update_time;
@@ -792,7 +785,6 @@ namespace kungfu
 
                 }
 
-
                 //成交信息
                 struct Trade
                 {
@@ -841,7 +833,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Trade &trade)
@@ -948,7 +939,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Asset &asset_info)
@@ -1033,7 +1023,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 inline void to_json(nlohmann::json &j, const Position &position)
@@ -1116,7 +1105,10 @@ namespace kungfu
 
 #else
             };
-#pragma pack(pop)
+#endif
+
+#ifdef _WIN32
+    #pragma pack(pop)
 #endif
 
             inline void to_json(nlohmann::json &j, const PositionDetail &detail)

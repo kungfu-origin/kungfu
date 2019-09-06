@@ -26,7 +26,9 @@ namespace kungfu
 
         namespace journal
         {
-
+#ifdef _WIN32
+#pragma  pack(push, 1)
+#endif
             struct frame_header
             {
                 /** total frame length (including header and data body) */
