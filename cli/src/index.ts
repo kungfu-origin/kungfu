@@ -47,8 +47,8 @@ program
 
 //add
 program
-    .command('add [types]')
-    .description('add "accounts" or "strategys" or inquirer if no type supplied')
+    .command('add')
+    .description('add "accounts" or "strategys"')
     .action((type: string) => {
 
     })
