@@ -40,7 +40,8 @@ namespace kungfu
                 {
                     if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
                     {
-                        throw journal_error(fmt::format("reader can not join journal {}/{} more than once", location->uname, dest_id));
+                        SPDLOG_WARN("reader can not join journal {}/{} more than once", location->uname, dest_id);
+                        return;
                     }
                 }
                 journals_.push_back(std::make_shared<journal>(location, dest_id, false, lazy_));
@@ -55,7 +56,7 @@ namespace kungfu
             {
                 journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
                                                [&](journal_ptr j)
-                                               { return j->location_->uid == location_uid || j->dest_id_ == location_uid; }), journals_.end());
+                                               { return j->location_->uid == location_uid; }), journals_.end());
                 current_ = nullptr;
                 sort();
             }
