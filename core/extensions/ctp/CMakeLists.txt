@@ -29,7 +29,7 @@ IF(WIN32)
 ENDIF()
 
 IF(UNIX)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ctpthostmduserapi ctpthosttraderapi wingchun iconv)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ctpthostmduserapi ctpthosttraderapi wingchun)
     FILE(COPY api/${CTP_API_VERSION}/lib/libctpthostmduserapi.so DESTINATION ${KF_EXTENSION_BUILD_DIR})
     FILE(COPY api/${CTP_API_VERSION}/lib/libctpthosttraderapi.so DESTINATION ${KF_EXTENSION_BUILD_DIR})
 ENDIF()
