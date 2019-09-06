@@ -228,7 +228,8 @@ class AccountBook:
         if not self.trading_day == trading_day:
             self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
             self._trading_day = trading_day
-            for pos in self.positions:
+            for pos in self._positions.values():
+                self._ctx.logger.info("position {} for {} switch trading day from {} to {}".format(pos.uname, self.uname, pos.trading_day, trading_day))
                 pos.switch_day(trading_day)
             self._static_equity = self.dynamic_equity
             self.dispatch([self.message])

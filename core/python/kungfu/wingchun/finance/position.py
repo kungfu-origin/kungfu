@@ -60,6 +60,10 @@ class Position:
         return self._uid
 
     @property
+    def uname(self):
+        return self._uname
+
+    @property
     def margin(self):
         raise NotImplementationError
 
