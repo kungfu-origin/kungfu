@@ -92,7 +92,7 @@ export default {
                 const processId = data[0];
                 const stateData = data[1];
                 //if state is 2 means disconnect, kill process, delay 3s; 
-                if(+stateData.state === 2 || +stateData.state === 5) {
+                if(+stateData.state === 5) {
                     delaySeconds(1000)
                     .then(() => deleteProcess(processId))
                 } else { 
