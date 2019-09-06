@@ -36,6 +36,9 @@ namespace kungfu
 
             namespace data
             {
+#ifdef _WIN32
+#pragma  pack(push, 1)
+#endif
                 struct TimeRequest
                 {
                     int32_t id;
@@ -46,7 +49,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 struct RequestReadFrom
@@ -59,7 +61,6 @@ namespace kungfu
 
 #else
                 };
-#pragma pack(pop)
 #endif
 
                 struct RequestWriteTo
@@ -71,6 +72,9 @@ namespace kungfu
 
 #else
                 };
+#endif
+
+#ifdef _WIN32
 #pragma pack(pop)
 #endif
             }

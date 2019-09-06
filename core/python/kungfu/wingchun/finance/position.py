@@ -496,6 +496,7 @@ class FuturePosition(Position):
             detail.switch_day(trading_day)
         self._pre_settlement_price = self._settlement_price
         self._settlement_price = 0.0
+        self.ledger.dispatch(self.message)
 
     def _apply_close(self, trade):
         self.ledger._ctx.logger.debug("{} close {}, volume {} price {}".format(self.instrument_id, "long" if trade.side == Side.Sell else "short", trade.volume, trade.price))

@@ -225,13 +225,15 @@ class AccountBook:
             self._ctx.logger.error('apply trade error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
     def apply_trading_day(self, trading_day):
-        self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
         if not self.trading_day == trading_day:
+            self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
             self._trading_day = trading_day
             for pos in self.positions:
                 pos.switch_day(trading_day)
             self._static_equity = self.dynamic_equity
             self.dispatch([self.message])
+        else:
+            self._ctx.logger.debug("{} receive duplicate trading_day message {}".format(self.uname, trading_day))
 
     def _get_position(self, instrument_id, exchange_id, direction = Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)
