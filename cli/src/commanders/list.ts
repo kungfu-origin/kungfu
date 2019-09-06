@@ -4,23 +4,22 @@ import { parseToString } from '@/assets/utils';
 
 const colors = require('colors');
 
-export const listAccountsStrategys = async (asUtil: boolean): Promise<any> => {
+export const listAccountsStrategys = async (type = ''): Promise<any> => {
 
     const getAccounts = getAccountList();
     const getStrategys = getStrategyList();
     const accounts = await getAccounts;
     const strategys = await getStrategys;
 
-    if(asUtil) return { accounts, strategys };
-    const accountsList = accounts.map((a: Account): string[] => {
-        const asMd = !!a.receive_md ? colors.green('md ✓') : ''
+    const accountsList = accounts.map((a: Account): string => {
+        const asMd: string = !!a.receive_md ? colors.green('md ✓') : ''
         return parseToString(
-            [colors.cyan('account'), colors.bold(a.account_id), a.source_name, asMd,   a.config],
+            [colors.cyan('account'), colors.bold(a.account_id), a.source_name, asMd, a.config],
             [10, 12, 5, 10, 'auto'],
             1
         )
     })
-    const strategyList = strategys.map((s: Strategy): string[] => {
+    const strategyList = strategys.map((s: Strategy): string => {
         return parseToString(
             [colors.yellow('strategy'), colors.bold(s.strategy_id), s.strategy_path],
             [10, 12, 'auto'],
@@ -28,9 +27,28 @@ export const listAccountsStrategys = async (asUtil: boolean): Promise<any> => {
         )
     })
 
-    if(!accountsList.length && !strategyList.length) {
-        console.log('还未添加账户及策略！')
-    } else {
-        console.log([...accountsList, ...strategyList].join('\n'))
+    switch (type) {
+        case 'strategys':
+            if(!strategyList.length) {
+                console.log('no strategys!')
+            } else {
+                console.log([...strategyList].join('\n'))
+            }
+            break;
+        case 'accounts':
+            if(!accountsList.length) {
+                console.log('no accounts!')
+            } else {
+                console.log([...accountsList].join('\n'))
+            }
+            break;
+        default: 
+            if(!accountsList.length && !strategyList.length) {
+                console.log('no accounts and strategys!')
+            } else {
+                console.log([...accountsList, ...strategyList].join('\n'))
+            }
     }
+
+    return { accounts, strategys };
 }

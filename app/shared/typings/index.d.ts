@@ -37,6 +37,12 @@ interface MessageData {
     message: string;
 }
 
+interface LogData {
+    type: string,
+    updateTime: string,
+    message: string
+}
+
 interface OrderData {
     id: string;
     insertTime: string;

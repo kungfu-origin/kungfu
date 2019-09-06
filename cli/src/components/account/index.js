@@ -223,12 +223,12 @@ class AccountDashboard extends Dashboard {
 			.then(trades => t.globalData.tradeData = trades || [])
 			.then(() => t.refresh())
 			//pnl
-			const pnlPromise = getAccountPnlDay(currentId)
-			.then(data => {
-				t.globalData.pnl = dealPnlData(data)
-				t.refresh()
-			})
-			.catch(err => {})
+			// const pnlPromise = getAccountPnlDay(currentId)
+			// .then(data => {
+				// t.globalData.pnl = dealPnlData(data)
+				// t.refresh()
+			// })
+			// .catch(err => {})
 
 			Promise.all([
 				mdTdPromise, 
