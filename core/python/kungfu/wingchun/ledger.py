@@ -173,7 +173,7 @@ class Ledger(pywingchun.Ledger):
         order_dict["order_id"] = str(order.order_id)
         order_dict["parent_id"] = str(order.parent_id)
         order_dict["client_id"] = self.get_location(event.dest).name
-        return {"msg_type": event.msg_type, "data": order_dict}
+        return {"msg_type": int(MsgType.Order), "data": order_dict}
 
     def _message_from_trade_event(self, event, trade):
         client_id = self.get_location(event.dest).name
@@ -182,7 +182,7 @@ class Ledger(pywingchun.Ledger):
         trade_dict["parent_order_id"] = str(trade.parent_order_id)
         trade_dict["trade_id"] = str(trade.trade_id)
         trade_dict["client_id"] = client_id
-        return {"msg_type": event.msg_type, "data": trade_dict}
+        return {"msg_type": int(MsgType.Trade), "data": trade_dict}
 
     def _dump_snapshot(self, data_frequency="minute"):
         messages = []
