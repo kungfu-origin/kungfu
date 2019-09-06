@@ -387,7 +387,8 @@ export const buildDateRange = (dateRange: string[], tradingDay: string): string[
 export const dealOrder = (item: any): OrderData => {
     return Object.freeze({
         id: item.order_id.toString() + '_' + item.account_id.toString(),
-        insertTime: item.insert_time && moment(item.insert_time / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        updateTime: item.update_time && moment(item.update_time / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        updateTimeNum: +item.update_time,
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
@@ -403,9 +404,11 @@ export const dealOrder = (item: any): OrderData => {
 }
 
 export const dealTrade = (item: TradeInputData): TradeData => {
+    const updateTime = item.trade_time || item.update_time || 0
     return {
-        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), item.trade_time.toString()].join('_'),
-        tradeTime: item.trade_time && moment(+item.trade_time / 1000000).format('YYYY-MM-DD HH:mm:ss'),
+        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
+        updateTime: updateTime && moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
+        updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],

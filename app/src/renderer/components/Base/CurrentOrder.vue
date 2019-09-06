@@ -109,7 +109,7 @@ export default {
             {
                 type: "text",
                 label: "下单时间",
-                prop: "insertTime",
+                prop: "updateTime",
                 width: '160px'
             },{
                 type: "text",
@@ -364,7 +364,10 @@ export default {
             }
             //更新数据, 根据ID来排序
             const sortOrderList = Object.values(t.orderDataByKey).sort((a, b) =>{
-                return b.orderId - a.orderId
+                console.log('a', a.updateTimeNum)
+                console.log('b', b.updateTimeNum)
+                console.log('a-b', a.updateTimeNum - b.updateTimeNum)
+                return  b.updateTimeNum - b.updateTimeNum
             })
             t.tableData = Object.freeze(sortOrderList.slice(0, 200))
         },

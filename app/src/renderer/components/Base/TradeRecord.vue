@@ -82,7 +82,7 @@ export default {
             return [{
                 type: 'text',
                 label: '成交时间',
-                prop: 'tradeTime',
+                prop: 'updateTime',
                 width: '160px'
             },{
                 type: 'text',

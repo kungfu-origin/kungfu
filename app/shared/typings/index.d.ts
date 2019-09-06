@@ -28,7 +28,8 @@ interface MessageData {
 
 interface OrderData {
     id: string;
-    insertTime: string;
+    updateTime: string,
+    updateTimeNum: number;
     instrumentId: string;
     side: string;
     offset: string;
@@ -66,7 +67,8 @@ interface PosInputData {
 interface TradeData {
     id: string;
     instrumentId: string;
-    tradeTime: string;
+    updateTime: string;
+    updateTimeNum: number;
     side: string;
     offset: string;
     price: string;
