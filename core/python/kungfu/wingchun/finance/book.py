@@ -250,6 +250,7 @@ class AccountBook:
                                           exchange_id = exchange_id,
                                           trading_day = self.trading_day,
                                           margin_ratio = margin_ratio,
+                                          direction = direction,
                                           contract_multiplier = instrument_info["contract_multiplier"])
             self._positions[uid] = position
         return self._positions[uid]
