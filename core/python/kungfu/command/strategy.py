@@ -1,12 +1,11 @@
-import pyyjj
-import pywingchun
-import click
 import os
+import pyyjj
+import click
+from importlib import util
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import Runner, replay_setup
 from kungfu.wingchun.strategy import Strategy
 from kungfu.yijinjing.log import create_logger
-from kungfu.wingchun.oms.order import *
 
 
 @kfc.command(help_priority=4)
@@ -27,9 +26,17 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.category = 'strategy'
     mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
     ctx.mode = pyyjj.get_mode_name(mode)
-    ctx.logger = create_logger(name, ctx.log_level, pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator))
+    ctx.location = pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator)
+    ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
-    ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
+    if path.endswith('.py'):
+        ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
+    else:
+        spec = util.spec_from_file_location(os.path.basename(path).split('.')[0], path)
+        cpp = util.module_from_spec(spec)
+        spec.loader.exec_module(cpp)
+        ctx.strategy = cpp.Strategy(ctx.location)
+
     runner = Runner(ctx, mode)
     runner.add_strategy(ctx.strategy)
 

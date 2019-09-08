@@ -1,0 +1,21 @@
+{
+  "name": "kf_cpp_demo",
+  "author": "taurus.ai",
+  "version": "1.0.0",
+  "description": "KungFu Strategy Cpp Demo",
+  "license": "Apache-2.0",
+  "scripts": {
+    "configure": "cmake-js configure",
+    "clean": "cmake-js clean",
+    "build": "cmake-js build"
+  },
+  "dependencies": {
+    "nan": "^2.14.0"
+  },
+  "devDependencies": {
+    "cmake-js": "^5.3.1",
+    "copyfiles": "^2.1.0",
+    "cross-env": "^5.0.5",
+    "cross-var": "^1.1.0"
+  }
+}
