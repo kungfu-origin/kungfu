@@ -39,6 +39,7 @@ export const getAccountSource = async (): Promise<Sources> => {
                     key: config.key,
                     config: itemConfig
                 }
+                console.log(accountSetting,'-=-------')
                 sources[source] = accountSetting
             }
         })
