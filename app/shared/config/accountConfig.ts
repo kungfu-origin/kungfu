@@ -3,41 +3,11 @@ import * as VALIDATOR from '__assets/validator'
 import { platform } from '__gConfig/platformConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 
+
 const tagColor: any = {
     'future': 'danger', //red,
     'stock': ''
 };
-
-interface AccountSettingItem {
-    key: string,
-    name: string,
-    type: string,
-    errMsg?: string,
-    required?: boolean,
-    validator?: any[],
-    tip?: string
-}
-
-interface AccountSettingOrigin {
-    name: string,
-    type: string,
-    key: string,
-    config: AccountSettingItem[]
-}
-
-interface AccountSetting {
-    source: string,
-    type: string,
-    typeName: string,
-    config: AccountSettingItem[],
-
-}
-
-interface Sources {
-    [propName: string]: AccountSetting
-}
-
-
 
 export const getAccountSource = async (): Promise<Sources> => {
     let sources: Sources = {}
@@ -60,8 +30,10 @@ export const getAccountSource = async (): Promise<Sources> => {
                     source,
                     type,
                     typeName,
+                    key: config.key,
                     config: itemConfig
                 }
+                console.log(accountSetting,'-=-------')
                 sources[source] = accountSetting
             }
         })
