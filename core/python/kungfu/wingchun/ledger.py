@@ -99,6 +99,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.debug('on trade %s', trade)
         source_id = self.get_location(event.source).group
         message = self._message_from_trade_event(event, trade)
+        client_id = message["data"]["client_id"]
         if source_id == "xtp" and trade.order_id in self.ctx.orders:
             self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
             order_record = self.ctx.orders[trade.order_id]
@@ -116,7 +117,7 @@ class Ledger(pywingchun.Ledger):
         self.publish(json.dumps(message))
 
         self._get_ledger(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id).apply_trade(trade)
-        self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=message["client_id"]).apply_trade(trade)
+        self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id).apply_trade(trade)
 
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
