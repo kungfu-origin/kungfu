@@ -32,23 +32,23 @@ const selectSourcePrompt = (accountSource: Sources) => inquirer.prompt([
     }
 ])
 
-// export const addAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
-//     if(!key) throw new Error('something wrong with the key!')
-//     const accountId = `${source}_${config[key]}`
-//     const accountsBySource = await getAccountBySource(source)
-//     try {
-//         if(updateModule) {
-//             await updateAccountConfig(accountId, JSON.stringify(config))
-//             console.log(`Update account ${JSON.stringify(config, null , '')} sucess!`)   
-//         }else{
-//             await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
-//             console.log(`Add account ${JSON.stringify(config, null , '')} sucess!`)   
-//         }
-//     }catch(err){
-//         throw err
-//     }
-//     return
-// }
+export const addAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
+    if(!key) throw new Error('something wrong with the key!')
+    const accountId = `${source}_${config[key]}`
+    const accountsBySource = await getAccountBySource(source)
+    try {
+        if(updateModule) {
+            await updateAccountConfig(accountId, JSON.stringify(config))
+            console.log(`Update account ${JSON.stringify(config, null , '')} successfully!`)   
+        }else{
+            await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
+            console.log(`Add account ${JSON.stringify(config, null , '')} sucess!`)   
+        }
+    }catch(err){
+        throw err
+    }
+    return
+}
 
 <<<<<<< HEAD
 export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule?: boolean, accountData?: any ): Promise<any> => {
@@ -97,6 +97,7 @@ const addAccountPrompt = (accountSource: Sources) => {
         if(!accountSetting) throw new Error(`No ${source} config information!`)
         return accountConfigPrompt(accountSetting)
     })
+<<<<<<< HEAD
     
 
 =======
@@ -108,6 +109,11 @@ const addAccountPrompt = (accountSource: Sources) => {
     })
 >>>>>>> [add] working on add
     // .then(({ source, key, config }: { source: string, key: string, config: any}) => addAccountByPrompt(source, key, config))
+=======
+    .then(({ source, key, config }: { source: string, key: string, config: any}) => {
+        addAccountByPrompt(source, key, config)
+    })
+>>>>>>> [add] add account finish
 }
 
 
@@ -129,7 +135,7 @@ export const addStrategyPrompt = async (strategyData: any, updateModule: boolean
                 
                 const strategyList = await getStrategyList()
                 const existedIds = strategyList.map((s: Strategy) => s.strategy_id);
-                (existedIds.indexOf(value) !== -1) && (hasError = new Error('该 strategy_id 已存在！'));
+                (existedIds.indexOf(value) !== -1) && (hasError = new Error('Strategy_id has existed!'));
                 
                 if(hasError) return hasError
                 else return true;
@@ -197,13 +203,12 @@ function paresAccountQuestion({
         name: key,
         message: `${updateModule ? 'Update' : 'Enter'} ${key} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
         validate: async (value: any) => {
+            let hasError: Error | null = null; 
             const validatorList: Array<any>  = [
-                //@ts-ignore
-                ...(validator || []).map((v: string) => (VALIDATOR[v] || null)),
-                (required && !updateModule) ? VALIDATOR.requiredValidator : null
+                ...(validator || []),
+                (required && !updateModule) ? requiredValidator : null
             ]
 
-            let hasError: Error | null = null; 
             validatorList
             .filter((v: Function | null): boolean => !!v)
             .forEach((v: Function) => {
@@ -227,6 +232,7 @@ function paresAccountQuestion({
 async function existedAccountIdValidator(value: any):Promise<any> {
     const accountList = await getAccountList()
     const existedIds = accountList.map((a: Account) => a.account_id.toAccountId());
+<<<<<<< HEAD
     if (existedIds.indexOf(value) !== -1) return new Error('accountId is existed!');
 }
 =======
@@ -261,3 +267,7 @@ async function existedAccountIdValidator(value: any):Promise<any> {
 //     }
 // }
 >>>>>>> [add] working on add
+=======
+    if (existedIds.indexOf(value) !== -1) return new Error('AccountId has existed!');
+}
+>>>>>>> [add] add account finish

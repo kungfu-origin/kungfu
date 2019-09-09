@@ -11,7 +11,6 @@ import { listAccountsStrategys } from '@/commanders/list';
 
 const program = require('commander');
 
-process.env.LANG_ENV = 'en'
 
 program
     .version(version)

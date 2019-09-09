@@ -55,7 +55,10 @@ let cliConfig = {
     path: path.join(__dirname, '../dist/cli')
   },
   plugins: [
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.LANG_ENV': '"en"',
+    }),
   ],
   resolve: {
     alias: {
