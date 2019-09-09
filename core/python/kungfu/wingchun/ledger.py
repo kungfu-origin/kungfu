@@ -143,18 +143,19 @@ class Ledger(pywingchun.Ledger):
     def on_future_account(self, asset, position_details):
         pos_objects = []
         for uid, details in groupby(position_details, key=lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
-            direction = details[0].direction
+            detail_list = list(details)
+            direction = detail_list[0].direction
+            instrument_id = detail_list[0].instrument_id
+            exchange_id = detail_list[0].exchange_id
+            instrument_info = self.ctx.db.get_instrument_info(instrument_id)
             detail_objects = []
-            instrument_info = None
             for detail in sorted(details, key=lambda detail: (detail.open_date, detail.trade_time)):
                 args = object_as_dict(detail)
-                if instrument_info is None:
-                    instrument_info = self.ctx.db.get_instrument_info(detail.instrument_id)
                 args.update({"contract_multiplier": instrument_info["contract_multiplier"],
                              "long_margin_ratio": instrument_info["long_margin_ratio"],
                              "short_margin_ratio": instrument_info["short_margin_ratio"]})
                 detail_objects.append(FuturePositionDetail(**args))
-            pos_args = {"details": detail_objects, "trading_day": self.ctx.trading_day, "direction": direction}
+            pos_args = {"instrument_id": instrument_id, "exchange_id": exchange_id, "details": detail_objects, "trading_day": self.ctx.trading_day, "direction": direction}
             pos_args.update(instrument_info)
             pos = FuturePosition(**pos_args)
             pos_objects.append(pos)
