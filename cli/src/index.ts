@@ -20,8 +20,6 @@ program
     // .option('-s --switch-md-source', 'switch md source')
     // .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
     .action(async (options: any) => {
-        // const add = options.add;
-        // if(add) return addAccountStrategy();
 
         // const remove = options.remove;
         // if(remove) return removeAccountStrategy();
