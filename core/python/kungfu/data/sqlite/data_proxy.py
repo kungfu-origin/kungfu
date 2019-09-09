@@ -148,9 +148,9 @@ class LedgerDB(SessionFactoryHolder):
                         positions.append(StockPosition(**object_as_dict(pos)))
                 for uid, details in groupby(detail_objs, key= lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
                     detail_list = list(details)
+                    summary = pos_dict[uid]
                     direction = detail_list[0].direction
                     details = [FuturePositionDetail(**object_as_dict(detail)) for detail in sorted(details, key = lambda obj: (obj.open_date, obj.trade_time))]
-                    summary = pos_dict[uid]
                     pos = FuturePosition(instrument_id = summary.instrument_id,
                                          exchange_id = summary.exchange_id,
                                          margin_ratio = summary.margin_ratio,
@@ -158,7 +158,7 @@ class LedgerDB(SessionFactoryHolder):
                                          realized_pnl = summary.realized_pnl,
                                          details = details,
                                          direction = direction,
-                                         trading_day = details[0].trading_day)
+                                         trading_day = summary.trading_day)
                     positions.append(pos)
                 args.update({"positions": positions, "ledger_category": ledger_category})
                 return AccountBook(ctx=ctx, **args)
