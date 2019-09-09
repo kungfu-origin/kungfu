@@ -107,6 +107,19 @@ namespace kungfu
                 }
             }
 
+            void Runner::on_exit()
+            {
+                for (const auto &strategy : strategies_)
+                {
+                    strategy->pre_stop(context_);
+                }
+
+                for (const auto &strategy : strategies_)
+                {
+                    strategy->post_stop(context_);
+                }
+            }
+
         }
     }
 }
