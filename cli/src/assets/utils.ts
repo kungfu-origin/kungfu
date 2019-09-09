@@ -213,19 +213,9 @@ export const buildTradingDay = () => {
 	return moment().format('YYYYMMDD')
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 export const parseSources = (accountSource: Sources): string[] => {
     return Object.values(accountSource).map((s: any) => `${s.source} (${s.typeName})`)
-=======
-export const parseSources = (sourcesData: any) => {
-    return Object.values(sourcesData).map((s: any) => `${s.source} (${s.typeName})`)
->>>>>>> [add] list finish
-=======
-export const parseSources = (accountSource: Sources) => {
-    return Object.values(accountSource).map((s: any) => `${s.source} (${s.typeName})`)
->>>>>>> [add] working on add
-}
 
 export const getStatus = (processId: string, processStatus: any) => {
 	return processStatus[processId] === 'online'

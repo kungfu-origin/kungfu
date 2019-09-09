@@ -37,7 +37,7 @@ program
     .description('list accounts or strategys or all if no type supplied')
     .action((type: string) => {
         return listAccountsStrategys(type)
-        .catch((err: Error): void => console.error(err))
+        .catch((err: Error) => console.error(err))
         .finally(() => {
             process.exit(0)
         });
@@ -48,7 +48,11 @@ program
     .command('add [account|strategy]')
     .description('add a account or strategy')
     .action((type: string) => {
-        return addAccountStrategy(type);
+        return addAccountStrategy(type)
+        .catch((err: Error): void => console.error(err))
+        .finally(() => {
+            process.exit(0)
+        });
     })
 
 //update
