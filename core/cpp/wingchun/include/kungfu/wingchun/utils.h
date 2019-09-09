@@ -7,6 +7,7 @@
 
 #include <hffix.hpp>
 #include <kungfu/wingchun/msg.h>
+#include <kungfu/wingchun/common.h>
 
 using namespace kungfu::wingchun::msg::data;
 
@@ -48,14 +49,22 @@ namespace kungfu
             return fill_subscribe_msg(buffer, buffer_size,instruments);
         }
 
-        inline Instrument inst_from_position(const Position& pos)
+        template <class T> std::vector<Instrument> get_insts(const std::vector<T>& vec)
         {
-            Instrument inst = {};
-            strcpy(inst.instrument_id, pos.instrument_id);
-            strcpy(inst.exchange_id, pos.exchange_id);
-            return inst;
-        }
+            std::vector<Instrument> insts;
+            for (const auto& item: vec)
+            {
+                Instrument inst = {};
+                strcpy(inst.instrument_id, item.instrument_id);
+                strcpy(inst.exchange_id, item.exchange_id);
+                insts.push_back(inst);
+            }
 
+            std::sort(insts.begin(), insts.end());
+            auto it= std::unique(insts.begin(), insts.end());
+            insts.erase(it, insts.end());
+            return insts;
+        }
     }
 }
 

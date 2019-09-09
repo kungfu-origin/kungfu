@@ -258,6 +258,7 @@ namespace kungfu
                   {
                       auto &asset_info = asset_info_[event->source()];
                       auto &buffer = position_detail_buffer_[event->source()];
+                      subscribe_holdings(event->source(), buffer);
                       try
                       { on_future_account(asset_info, buffer); }
                       catch (const std::exception &e)
@@ -396,24 +397,7 @@ namespace kungfu
                 }
             }
 
-            void Ledger::request_subscribe(const std::string& source_name, const std::vector<msg::data::Instrument> insts)
-            {
-                auto location = location::make(get_io_device()->get_home()->mode, category::MD, source_name, source_name, get_io_device()->get_home()->locator);
-                SPDLOG_INFO("subscribe from {} [{:08x}]", source_name, location->uid);
-                if (has_writer(location->uid))
-                {
-                    auto writer = get_writer(location->uid);
-                    char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
-                    size_t length = fill_subscribe_msg(buffer, 4096, insts);
-                    writer->close_frame(length);
-                }
-                else
-                {
-                    SPDLOG_ERROR("writer to {} [{:08x}] not exists", location->uname, location->uid);
-                }
-            }
-
-            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions)
+            void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &insts)
             {
                 if (!has_location(account_location_id))
                 {
@@ -421,13 +405,33 @@ namespace kungfu
                     return;
                 }
                 auto location = get_location(account_location_id);
-                SPDLOG_INFO("subscribe {} holdings for account {}@{}", positions.size(), location->name, location->group);
-                std::vector<msg::data::Instrument> insts;
-                for (const auto& pos: positions)
+                SPDLOG_INFO("subscribe {} insts for account {}@{}", insts.size(), location->name, location->group);
+
+                auto md_location = location::make(get_io_device()->get_home()->mode, category::MD, location->group, location->group, get_io_device()->get_home()->locator);
+                SPDLOG_INFO("subscribe from {} [{:08x}]", md_location->uname, md_location->uid);
+                if (has_writer(md_location->uid))
                 {
-                    insts.push_back(inst_from_position(pos));
+                    auto writer = get_writer(md_location->uid);
+                    char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
+                    size_t length = fill_subscribe_msg(buffer, 4096, insts);
+                    writer->close_frame(length);
                 }
-                request_subscribe(location->group, insts);
+                else
+                {
+                    SPDLOG_ERROR("writer to {} [{:08x}] not exists", md_location->uname, md_location->uid);
+                }
+            }
+
+            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions)
+            {
+                std::vector<msg::data::Instrument> insts = get_insts<msg::data::Position>(positions);
+                request_subscribe(account_location_id, insts);
+            }
+
+            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::PositionDetail>& position_details)
+            {
+                std::vector<msg::data::Instrument> insts = get_insts<msg::data::PositionDetail>(position_details);
+                request_subscribe(account_location_id, insts);
             }
         }
     }
