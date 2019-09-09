@@ -169,7 +169,7 @@ class AccountBook:
     def dispatch(self, messages):
         for msg in messages:
             self.fill_msg_tag(msg)
-        self._ctx.logger.trace("dispatch messages: %s for callbacks: %s", messages, self._callbacks)
+        self._ctx.logger.debug("dispatch messages: %s for callbacks: %s", messages, self._callbacks)
         for cb in self._callbacks:
             cb(messages)
 
