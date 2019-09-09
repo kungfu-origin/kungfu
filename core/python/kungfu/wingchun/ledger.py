@@ -84,7 +84,7 @@ class Ledger(pywingchun.Ledger):
             ledger.apply_quote(quote)
 
     def on_order(self, event, order):
-        self.ctx.logger.debug('on order %s from %s', order, self.get_location(event.dest).uname)
+        self.ctx.logger.debug('on order %s', order)
         message = self._message_from_order_event(event, order)
         order_record = {
             'source': event.source,
@@ -96,8 +96,7 @@ class Ledger(pywingchun.Ledger):
         self.publish(json.dumps(message))
 
     def on_trade(self, event, trade):
-        self.ctx.logger.debug('on trade %s from %s', trade, self.get_location(event.dest).uname)
-        client_id = self.get_location(event.dest).name
+        self.ctx.logger.debug('on trade %s', trade)
         source_id = self.get_location(event.source).group
         message = self._message_from_trade_event(event, trade)
         if source_id == "xtp" and trade.order_id in self.ctx.orders:
@@ -117,7 +116,7 @@ class Ledger(pywingchun.Ledger):
         self.publish(json.dumps(message))
 
         self._get_ledger(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id).apply_trade(trade)
-        self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=client_id).apply_trade(trade)
+        self._get_ledger(ledger_category=LedgerCategory.Portfolio, client_id=message["client_id"]).apply_trade(trade)
 
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
@@ -175,11 +174,25 @@ class Ledger(pywingchun.Ledger):
         order_dict = object_as_dict(order)
         order_dict["order_id"] = str(order.order_id)
         order_dict["parent_id"] = str(order.parent_id)
-        order_dict["client_id"] = self.get_location(event.dest).name
+        if self.has_location(event.dest):
+            order_dict["client_id"] = self.get_location(event.dest).name
+        else:
+            order_info = self.ctx.db.get_order(order.order_id)
+            if not order_info:
+                raise ValueError("failed to find order dest location info, dest uid: {}, order {}".format(event.dest, order))
+            else:
+                order_dict["client_id"] = order_info["client_id"]
         return {"msg_type": int(MsgType.Order), "data": order_dict}
 
     def _message_from_trade_event(self, event, trade):
-        client_id = self.get_location(event.dest).name
+        if self.has_location(event.dest):
+            client_id = self.get_location(event.dest).name
+        else:
+            order_info = self.ctx.db.get_order(order.order_id)
+            if not order_info:
+                raise ValueError("failed to find order dest location info, dest uid: {}, order {}".format(event.dest, order))
+            else:
+                client_id = order_info["client_id"]
         trade_dict = object_as_dict(trade)
         trade_dict["order_id"] = str(trade.order_id)
         trade_dict["parent_order_id"] = str(trade.parent_order_id)
