@@ -150,13 +150,15 @@ class LedgerDB(SessionFactoryHolder):
                     detail_list = list(details)
                     summary = pos_dict[uid]
                     direction = detail_list[0].direction
-                    details = [FuturePositionDetail(**object_as_dict(detail)) for detail in sorted(details, key = lambda obj: (obj.open_date, obj.trade_time))]
+                    pos_details = []
+                    for detail in sorted(detail_list, key = lambda obj: (obj.open_date, obj.trade_time)):
+                        pos_details.append(FuturePositionDetail(**object_as_dict(detail)))
                     pos = FuturePosition(instrument_id = summary.instrument_id,
                                          exchange_id = summary.exchange_id,
                                          margin_ratio = summary.margin_ratio,
                                          contract_multiplier = summary.contract_multiplier,
                                          realized_pnl = summary.realized_pnl,
-                                         details = details,
+                                         details = pos_details,
                                          direction = direction,
                                          trading_day = summary.trading_day)
                     positions.append(pos)
