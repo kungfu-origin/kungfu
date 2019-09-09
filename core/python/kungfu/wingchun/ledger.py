@@ -7,6 +7,7 @@ import traceback
 from itertools import groupby
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
+import kungfu.yijinjing.msg as yjj_msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import LedgerDB
 from kungfu.wingchun import msg
@@ -149,7 +150,7 @@ class Ledger(pywingchun.Ledger):
             exchange_id = detail_list[0].exchange_id
             instrument_info = self.ctx.db.get_instrument_info(instrument_id)
             detail_objects = []
-            for detail in sorted(details, key=lambda detail: (detail.open_date, detail.trade_time)):
+            for detail in sorted(detail_list, key=lambda detail: (detail.open_date, detail.trade_time)):
                 args = object_as_dict(detail)
                 args.update({"contract_multiplier": instrument_info["contract_multiplier"],
                              "long_margin_ratio": instrument_info["long_margin_ratio"],
@@ -353,3 +354,10 @@ def remove_strategy(ctx, event, location, data):
             'status': http.HTTPStatus.OK,
             'msg_type': msg.RemoveStrategy
         }
+
+@on(yjj_msg.TradingDay)
+def update_trading_day(ctx, event, location, data):
+    ctx.logger.warn("switch trading day from UI for test")
+    daytime = data["daytime"]
+    ctx.ledger.on_trading_day(event, daytime)
+    return {'status': http.HTTPStatus.OK, 'msg_type': yjj_msg.TradingDay}

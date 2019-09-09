@@ -82,6 +82,13 @@ def refresh_broker(ctx):
     print("refresh broker state")
     print("result: {}".format(ctx.ledger_client.refresh_broker_state()))
 
+@ledger.command()
+@click.option('-d', '--date', type=str,  help="next trading day", required=True)
+@click.pass_context
+def switch_day(ctx, date):
+    pass_ctx_from_parent(ctx)
+    print("switch trading day to {}".format(date))
+    print("result: {}".format(ctx.ledger_client.switch_trading_day(date)))
 
 
 

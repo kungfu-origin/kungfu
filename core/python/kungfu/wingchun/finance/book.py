@@ -233,6 +233,7 @@ class AccountBook:
                 pos.switch_day(trading_day)
             self._static_equity = self.dynamic_equity
             self.dispatch([self.message])
+            self.dispatch(self.detail_messages)
         else:
             self._ctx.logger.debug("{} receive duplicate trading_day message {}".format(self.uname, trading_day))
 
