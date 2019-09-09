@@ -72,6 +72,29 @@ C:\> npm install -g yarn electron-builder
 C:\> pip install pipenv
 ```
 
+注意不要使用 Win64 后缀的 generator，如果遇到如下报错：
+
+```
+CMake Error:
+  Generator
+
+    Visual Studio 15 2017 Win64
+
+  does not support platform specification, but platform
+
+    x64
+
+  was specified.
+```
+
+需要手动指定 cmake generator 之后重新编译：
+
+```
+npm config set cmake_js_G "Visual Studio 15 2017"
+yarn clean
+yarn build
+```
+
 #### Linux
 
 确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 5.0 以上：
