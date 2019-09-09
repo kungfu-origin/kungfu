@@ -213,7 +213,6 @@ class StockPosition(Position):
         self._yesterday_volume = self.volume
         self._close_price = 0.0
         self.trading_day = trading_day
-        self.ledger.dispatch([self.ledger.message])
 
     def _apply_settlement(self, close_price):
         self._last_price = close_price
@@ -500,7 +499,7 @@ class FuturePosition(Position):
             detail.switch_day(trading_day)
         self._pre_settlement_price = self._settlement_price
         self._settlement_price = 0.0
-        self.ledger.dispatch(self.message)
+        self.trading_day = trading_day
 
     def _apply_close(self, trade):
         self.ledger._ctx.logger.debug("{} close {}, volume {} price {}".format(self.instrument_id, "long" if trade.side == Side.Sell else "short", trade.volume, trade.price))

@@ -2,6 +2,9 @@
 import pyyjj
 import json
 from kungfu.wingchun import msg
+import kungfu.yijinjing.msg as yjj_msg
+import datetime
+import time
 
 class LedgerClient:
     def __init__(self, locator, name="ledger_client"):
@@ -25,6 +28,15 @@ class LedgerClient:
     def calendar(self):
         msg_type = msg.Calendar
         return self._request(msg_type)
+
+    def switch_trading_day(self, date):
+        if isinstance(date, datetime.date):
+            daytime = int(time.mktime(date.timetuple()) * 1e9)
+        elif isinstance(date, str):
+            daytime = int(time.mktime(datetime.datetime.strptime(date, "%Y%m%d").timetuple()) * 1e9)
+        else:
+            raise ValueError("invalid date: {}", date)
+        return self._request(yjj_msg.TradingDay, {"daytime": daytime})
 
     def refresh_broker_state(self):
         msg_type = msg.BrokerStateRefresh
