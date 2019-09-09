@@ -215,7 +215,8 @@ export const buildTradingDay = () => {
 
 
 export const parseSources = (accountSource: Sources): string[] => {
-    return Object.values(accountSource).map((s: any) => `${s.source} (${s.typeName})`)
+	return Object.values(accountSource).map((s: any) => `${s.source} (${s.typeName})`)
+}
 
 export const getStatus = (processId: string, processStatus: any) => {
 	return processStatus[processId] === 'online'

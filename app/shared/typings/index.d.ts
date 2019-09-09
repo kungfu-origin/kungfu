@@ -136,8 +136,9 @@ interface AccountSetting {
     source: string,
     type: string,
     typeName: string,
+    key: string,
     config: AccountSettingItem[],
-
+    [propName: string]: any
 }
 
 interface Sources {

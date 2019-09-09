@@ -10,11 +10,6 @@ const tagColor: any = {
 };
 
 
-
-
-
-
-
 export const getAccountSource = async (): Promise<Sources> => {
     let sources: Sources = {}
     try {
@@ -39,7 +34,6 @@ export const getAccountSource = async (): Promise<Sources> => {
                     key: config.key,
                     config: itemConfig
                 }
-                console.log(accountSetting,'-=-------')
                 sources[source] = accountSetting
             }
         })
