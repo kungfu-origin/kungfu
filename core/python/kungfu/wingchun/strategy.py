@@ -81,7 +81,7 @@ class Strategy(pywingchun.Strategy):
         self._pre_stop(self.ctx)
 
     def post_stop(self, wc_context):
-        self._post_stop(self, self.ctx)
+        self._post_stop(self.ctx)
 
     def on_quote(self, wc_context, quote):
         self._on_quote(self.ctx, quote)
