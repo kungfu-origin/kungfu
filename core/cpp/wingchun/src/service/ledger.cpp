@@ -38,7 +38,7 @@ namespace kungfu
                 {
                     pub_sock_->send(msg);
                 }
-                SPDLOG_INFO("published {}", msg);
+                SPDLOG_DEBUG("published {}", msg);
             }
 
             void Ledger::publish_broker_states(int64_t trigger_time)

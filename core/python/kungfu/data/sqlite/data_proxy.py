@@ -93,6 +93,11 @@ class LedgerDB(SessionFactoryHolder):
         with session_scope(self.session_factory) as session:
             session.merge(Order(**kwargs))
 
+    def get_order(self, order_id):
+        with session_scope(self.session_factory) as session:
+            order = session.query(Order).get(str(order_id))
+            return {} if order is None else object_as_dict(order)
+
     def mark_orders_status_unknown(self, source_id, account_id):
         with session_scope(self.session_factory) as session:
             pending_orders = session.query(Order).filter(Order.account_id == account_id, not_(Order.status.in_(AllFinalOrderStatus))).all()
