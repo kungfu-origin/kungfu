@@ -213,7 +213,7 @@ export const buildTradingDay = () => {
 	return moment().format('YYYYMMDD')
 }
 
-export const parseSources = (accountSource: Sources) => {
+export const parseSources = (accountSource: Sources): string[] => {
     return Object.values(accountSource).map((s: any) => `${s.source} (${s.typeName})`)
 }
 

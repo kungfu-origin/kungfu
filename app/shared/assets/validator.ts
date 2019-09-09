@@ -1,3 +1,4 @@
+const isEnglish = process.env.LANG_ENV === 'en';
 //大于零
 export const biggerThanZeroValidator = (rule: any, value: any, callback: Function): void => {
     if(value === '' || value == null){
@@ -6,7 +7,10 @@ export const biggerThanZeroValidator = (rule: any, value: any, callback: Functio
     }
 
     if(+value <= 0){
-        callback(new Error('必须大于零！'))
+        callback(new Error(
+            isEnglish 
+            ? 'should bigger than zero!' 
+            : '必须大于零！'))
     }else{
         callback();
     }
@@ -16,7 +20,10 @@ export const biggerThanZeroValidator = (rule: any, value: any, callback: Functio
 export const specialStrValidator = (rule: any, value: any, callback: Function): void => {
     const reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]")
     if(reg.test(value)) {
-        callback(new Error('不能包含特殊字符！'))
+        callback(new Error(
+            isEnglish 
+            ? 'should exclude special characters!' 
+            : '不能包含特殊字符！'))
     }else{
         callback()
     }
@@ -25,7 +32,10 @@ export const specialStrValidator = (rule: any, value: any, callback: Function): 
 //不能以0开头
 export const noZeroAtFirstValidator = (rule: any, value: any, callback: Function): void => {
     if(value[0].toString() === '0') {
-        callback(new Error('不能以数字0开头！'))
+        callback(new Error(
+            isEnglish 
+            ? 'should not start with "0"!'
+            : '不能以数字0开头！'))
     }else{
         callback()
     }
@@ -35,7 +45,10 @@ export const noZeroAtFirstValidator = (rule: any, value: any, callback: Function
 export const chineseValidator = (rule: any, value: any, callback: Function): void => {
     const reg = new RegExp("[\u4e00-\u9fa5]")
     if(reg.test(value)) {
-        callback(new Error('不能包含中文！'))
+        callback(new Error(
+            isEnglish 
+            ? 'should exclude chinese characters!'
+            : '不能包含中文！'))
     }else{
         callback()
     }
@@ -45,7 +58,10 @@ export const chineseValidator = (rule: any, value: any, callback: Function): voi
 export const blankValidator = (rule: any, value: any, callback: Function): void => {
     const reg = new RegExp(/\s+/g)
     if(reg.test(value)) {
-        callback(new Error('不能有空格！'))
+        callback(new Error(
+            isEnglish 
+            ? 'should exclude spaces!'
+            : '不能有空格！'))
     }else{
         callback()
     }
@@ -55,7 +71,10 @@ export const blankValidator = (rule: any, value: any, callback: Function): void 
 export const numberAndWordsValidator = (rule: any, value: any, callback: Function): void => {
     const p = /^[A-Za-z0-9]+$/;
     if(!p.test(value)){
-        callback(new Error('策略名称只能包含字母与数字！'))
+        callback(new Error(
+            isEnglish
+            ? 'should only include A-Za-z0-9!'
+            : '策略名称只能包含字母与数字！'))
     }else{
         callback()
     }
@@ -65,7 +84,10 @@ export const numberAndWordsValidator = (rule: any, value: any, callback: Functio
 export const tcpUriValidator = (rule: any, value: any, callback: Function): void => {
     const keyword: string = 'tcp://';
     if(value && (value.indexOf(keyword) === -1 || value.indexOf(keyword) !== 0)) {
-        callback(new Error('uri 必须以 “tcp://” 开头！'))
+        callback(new Error(
+            isEnglish
+            ? 'should start with "tcp://"!'
+            : 'uri 必须以 “tcp://” 开头！'))
     }else{
         callback()
     }
@@ -74,7 +96,10 @@ export const tcpUriValidator = (rule: any, value: any, callback: Function): void
 //0-99
 export const o99Validator = (rule: any, value: any, callback: Function): void => {
     if(value && (value < 1 || value > 99)) {
-        callback(new Error('必须是 1～99 内整数！'))
+        callback(new Error(
+            isEnglish
+            ? 'should be integer between 1 and 99!'
+            : '必须是 1～99 内整数！'))
     }else{
         callback()
     }
@@ -83,7 +108,10 @@ export const o99Validator = (rule: any, value: any, callback: Function): void =>
 //整数
 export const intValidator = (rule: any, value: any, callback: Function): void => {
     if(value && value % 1 !== 0) {
-        callback(new Error('必须是整数！'))        
+        callback(new Error(
+            isEnglish
+            ? 'should be integer!'
+            : '必须是整数！'))        
     }else{
         callback()
     }
@@ -92,5 +120,8 @@ export const intValidator = (rule: any, value: any, callback: Function): void =>
 //必填
 export const requiredValidator = (rule: any, value: any, callback: Function): void => {
     if(!!(value + '')) callback()
-    else callback(new Error('不能为空！'))
+    else callback(new Error(
+        isEnglish
+        ? 'required!'
+        : '不能为空！'))
 }

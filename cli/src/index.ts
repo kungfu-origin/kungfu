@@ -11,6 +11,8 @@ import { listAccountsStrategys } from '@/commanders/list';
 
 const program = require('commander');
 
+process.env.LANG_ENV = 'en'
+
 program
     .version(version)
     // .option('-r --remove', 'remove a account|strategy ')
@@ -69,7 +71,6 @@ program
     })
 
 program.parse(process.argv)
-
 
 
 initDB()
