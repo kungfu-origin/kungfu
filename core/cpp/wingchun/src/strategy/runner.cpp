@@ -114,6 +114,8 @@ namespace kungfu
                     strategy->pre_stop(context_);
                 }
 
+                apprentice::on_exit();
+
                 for (const auto &strategy : strategies_)
                 {
                     strategy->post_stop(context_);
