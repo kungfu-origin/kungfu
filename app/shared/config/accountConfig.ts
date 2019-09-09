@@ -3,6 +3,7 @@ import * as VALIDATOR from '__assets/validator'
 import { platform } from '__gConfig/platformConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 
+
 const tagColor: any = {
     'future': 'danger', //red,
     'stock': ''
@@ -35,8 +36,10 @@ export const getAccountSource = async (): Promise<Sources> => {
                     source,
                     type,
                     typeName,
+                    key: config.key,
                     config: itemConfig
                 }
+                console.log(accountSetting,'-=-------')
                 sources[source] = accountSetting
             }
         })
