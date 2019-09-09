@@ -112,3 +112,32 @@ interface TradingDataFilter {
     id?: string;
     dateRange?: string[];
 }
+
+interface AccountSettingItem {
+    key: string,
+    name: string,
+    type: string,
+    errMsg?: string,
+    required?: boolean,
+    validator?: any[],
+    tip?: string
+}
+
+interface AccountSettingOrigin {
+    name: string,
+    type: string,
+    key: string,
+    config: AccountSettingItem[]
+}
+
+interface AccountSetting {
+    source: string,
+    type: string,
+    typeName: string,
+    config: AccountSettingItem[],
+
+}
+
+interface Sources {
+    [propName: string]: AccountSetting
+}

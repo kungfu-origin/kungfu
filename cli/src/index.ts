@@ -2,7 +2,7 @@
 import { initDB } from '@/base';
 //@ts-ignore
 import { version } from '../package.json';
-// import { addAccountStrategy } from './commanders/add';
+import { addAccountStrategy } from './commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
 // import { removeAccountStrategy } from './commanders/remove';
 // import { updateAccountStrategy } from './commanders/update';
@@ -13,14 +13,11 @@ const program = require('commander');
 
 program
     .version(version)
-    // .option('-a --add', 'add a account|strategy')
     // .option('-r --remove', 'remove a account|strategy ')
     // .option('-u --update', 'update accounts|strategys config')
     // .option('-s --switch-md-source', 'switch md source')
     // .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
     .action(async (options: any) => {
-        // const add = options.add;
-        // if(add) return addAccountStrategy();
 
         // const remove = options.remove;
         // if(remove) return removeAccountStrategy();
@@ -35,10 +32,10 @@ program
 
 //list
 program
-    .command('list [types]')
-    .description('list "accounts" or "strategys" or all if no type supplied')
+    .command('list [accounts|strategys]')
+    .description('list accounts or strategys or all if no type supplied')
     .action((type: string) => {
-        listAccountsStrategys(type)
+        return listAccountsStrategys(type)
         .catch((err: Error): void => console.error(err))
         .finally(() => {
             process.exit(0)
@@ -47,14 +44,29 @@ program
 
 //add
 program
-    .command('add')
-    .description('add "accounts" or "strategys"')
+    .command('add [account|strategy]')
+    .description('add a account or strategy')
     .action((type: string) => {
+        return addAccountStrategy(type);
+    })
 
+//update
+program
+    .command('update [account|strategy]')
+    .description('update a account or strategy')
+    .action((type: string) => {
+        // return addAccountStrategy();
+    })
+
+//remove
+program
+    .command('remove')
+    .description('remove a account or strategy')
+    .action((type: string) => {
+        // return addAccountStrategy();
     })
 
 program.parse(process.argv)
-
 
 
 

@@ -25,7 +25,9 @@ build-*/
 
 # NPM related
 node_modules/
+*/node_modules/
 dist/
+*/dist/
 .clang-format
 .project
 package-lock.json
