@@ -37,11 +37,7 @@ program
     .description('list accounts or strategys or all if no type supplied')
     .action((type: string) => {
         return listAccountsStrategys(type)
-<<<<<<< HEAD
         .catch((err: Error) => console.error(err))
-=======
-        .catch((err: Error): void => console.error(err))
->>>>>>> [add] working on add
         .finally(() => {
             process.exit(0)
         });
@@ -52,7 +48,6 @@ program
     .command('add [account|strategy]')
     .description('add a account or strategy')
     .action((type: string) => {
-<<<<<<< HEAD
         return addAccountStrategy(type)
         .catch((err: Error): void => console.error(err))
         .finally(() => {
@@ -64,14 +59,6 @@ program
 program
     .command('update [account|strategy]')
     .description('update a account or strategy')
-=======
-        return addAccountStrategy(type);
-    })
-
-//update
-program
-    .command('update [account|strategy]')
-    .description('update a account or strategy')
     .action((type: string) => {
         // return addAccountStrategy();
     })
@@ -80,22 +67,9 @@ program
 program
     .command('remove')
     .description('remove a account or strategy')
->>>>>>> [add] working on add
     .action((type: string) => {
         // return addAccountStrategy();
     })
-
-<<<<<<< HEAD
-//remove
-program
-    .command('remove')
-    .description('remove a account or strategy')
-    .action((type: string) => {
-        // return addAccountStrategy();
-    })
-=======
-program.parse(process.argv)
->>>>>>> [add] working on add
 
 program.parse(process.argv)
 
