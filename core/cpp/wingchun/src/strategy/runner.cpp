@@ -100,6 +100,7 @@ namespace kungfu
                       }
                   });
 
+                apprentice::on_start();
 
                 for (const auto &strategy : strategies_)
                 {
