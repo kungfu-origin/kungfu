@@ -1,9 +1,8 @@
 import { getAccountSource } from '__gConfig/accountConfig';
-import * as VALIDATOR from '__assets/validator';
 import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, chineseValidator } from '__assets/validator';
 import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '__io/db/account';
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
-import { parseSources } from '@/assets/utils';
+import { parseSources } from '@/assets/scripts/utils';
 
 var inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
@@ -43,7 +42,7 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
     }))
 }
 
-export const addAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
+export const addUpdateAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
     if(!key) throw new Error('something wrong with the key!')
     const accountId = `${source}_${config[key]}`
     const accountsBySource = await getAccountBySource(source)
@@ -69,7 +68,7 @@ const addAccountPrompt = (accountSource: Sources) => {
         return accountConfigPrompt(accountSetting)
     })
     .then(({ source, key, config }: { source: string, key: string, config: any}) => {
-        return addAccountByPrompt(source, key, config)
+        return addUpdateAccountByPrompt(source, key, config)
     })
 }
 
@@ -77,13 +76,13 @@ const addAccountPrompt = (accountSource: Sources) => {
 // ======================= add account end ============================
 
 // ======================= add strategy start ============================
-export const addStrategyPrompt = async (strategyData?: any, updateModule?: boolean): Promise<any> => {
+export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?: boolean): Promise<any> => {
     const { strategy_id, strategy_path } = await inquirer.prompt([
         !updateModule ? {
             type: 'input',
             name: 'strategy_id',
             message: 'Enter strategy_id',
-            validate: async (value: any) => {
+            validate: async (value: string) => {
                 let hasError: Error | null  = null;
                 [
                     requiredValidator, 
@@ -107,7 +106,7 @@ export const addStrategyPrompt = async (strategyData?: any, updateModule?: boole
             type: 'input',
             name: 'strategy_path',
             message: `${updateModule ? 'Update' : 'Enter'} strategy_path ${ updateModule ? `(${strategyData.strategy_path})` : '' }`,
-            validate: (value: any) => {
+            validate: (value: string) => {
                 let hasError = null;
                 !updateModule && requiredValidator(null, value, (err: Error) => hasError = err)
                 if(hasError) return hasError
@@ -144,7 +143,7 @@ export const addAccountStrategy = async (type: string): Promise<any> => {
     }
     else if(type === 'strategy') {
         try {
-            await addStrategyPrompt()
+            await addUpdateStrategyPrompt()
         } catch (err) {
             throw err
         }
@@ -165,7 +164,7 @@ function paresAccountQuestion({
         type: 'input',
         name: key,
         message: `${updateModule ? 'Update' : 'Enter'} ${key} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
-        validate: async (value: any) => {
+        validate: async (value: string | number) => {
             let hasError: Error | null = null; 
             const validatorList: Array<any>  = [
                 ...(validator || []),

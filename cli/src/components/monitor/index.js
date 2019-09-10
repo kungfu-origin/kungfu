@@ -5,7 +5,7 @@ import { Tail } from 'tail';
 
 import { LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '@/assets/components/Dashboard';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, parseToString, dealLog, getStatus } from '@/assets/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, parseToString, dealLog, getStatus } from '@/assets/scripts/utils';
 import { getAccountList } from '__io/db/account';
 import { getStrategyList } from '__io/db/strategy';
 import { dealLogMessage, getLog } from '__gUtils/busiUtils';

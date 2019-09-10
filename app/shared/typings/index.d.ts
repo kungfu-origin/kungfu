@@ -133,12 +133,12 @@ interface AccountSettingOrigin {
 }
 
 interface AccountSetting {
+    name: string,
     source: string,
     type: string,
     typeName: string,
     key: string,
     config: AccountSettingItem[],
-    [propName: string]: any
 }
 
 interface Sources {

@@ -2,10 +2,10 @@
 import { initDB } from '@/base';
 //@ts-ignore
 import { version } from '../package.json';
-import { addAccountStrategy } from './commanders/add';
+import { addAccountStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
 // import { removeAccountStrategy } from './commanders/remove';
-// import { updateAccountStrategy } from './commanders/update';
+import { updateAccountStrategy } from '@/commanders/update';
 // import { switchMdSource } from './commanders/switchMdSsource';
 // import { monitPrompt } from './components/index';
 
@@ -57,10 +57,14 @@ program
 
 //update
 program
-    .command('update [account|strategy]')
+    .command('update')
     .description('update a account or strategy')
-    .action((type: string) => {
-        // return addAccountStrategy();
+    .action(() => {
+        return updateAccountStrategy()
+        .catch((err: Error): void => console.error(err))
+        .finally(() => {
+            process.exit(0)
+        });
     })
 
 //remove
@@ -68,7 +72,7 @@ program
     .command('remove')
     .description('remove a account or strategy')
     .action((type: string) => {
-        // return addAccountStrategy();
+        // return removeAccountStrategy();
     })
 
 program.parse(process.argv)

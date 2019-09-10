@@ -1,5 +1,5 @@
 import { listAccountsStrategys } from './list';
-import { parseToString } from '@/assets/utils';
+import { parseToString } from '@/assets/scripts/utils';
 import { deleteAccount } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';
 

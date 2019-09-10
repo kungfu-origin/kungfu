@@ -21,7 +21,7 @@
     "clean": "rimraf ./dist/* ./build/*",
     "build": "yarn run dist && electron-builder",
     "dev": "node .electron-kungfu/dev-cli.js",
-    "dev:cli": "../node_modules/.bin/electron ./dist/cli/index.js",
+    "cli": "../node_modules/.bin/electron ./dist/cli/index.js",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .electron-kungfu/webpack.cli.config.js",
     "test": " mocha"
   },

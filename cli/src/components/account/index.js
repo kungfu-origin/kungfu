@@ -8,7 +8,7 @@ import tradeTable from '@/assets/components/TradeTable';
 import Dashboard from '@/assets/components/Dashboard';
 
 import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '__io/db/account';
-import { DEFAULT_PADDING, dealPnlData, getStatus } from '@/assets/utils';
+import { DEFAULT_PADDING, dealPnlData, getStatus } from '@/assets/scripts/utils';
 import { switchTd, switchMd } from '__io/actions/account';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';

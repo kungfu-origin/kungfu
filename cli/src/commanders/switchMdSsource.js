@@ -1,4 +1,4 @@
-import { parseSources } from '@/assets/utils';
+import { parseSources } from '@/assets/scripts/utils';
 import { getAccountList, changeAccountMd } from '__io/db/account';
 
 const colors = require('colors');

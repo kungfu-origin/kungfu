@@ -9,7 +9,7 @@ import tradeTable from '@/assets/components/TradeTable';
 import Dashboard from '@/assets/components/Dashboard';
 
 import { getStrategyList, getStrategyPos, getStrategyTrade, getStrategyOrder, getStrategysPnl } from '__io/db/strategy';
-import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealLog, getStatus, buildTradingDay } from '@/assets/utils';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealLog, getStatus, buildTradingDay } from '@/assets/scripts/utils';
 import { switchStrategy } from '__io/actions/strategy';
 import { dealLogMessage, getLog } from '__gUtils/busiUtils';
 import { LOG_DIR } from '__gConfig/pathConfig';
