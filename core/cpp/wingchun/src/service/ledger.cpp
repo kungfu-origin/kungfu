@@ -41,6 +41,18 @@ namespace kungfu
                 SPDLOG_DEBUG("published {}", msg);
             }
 
+            msg::data::BrokerState Ledger::get_broker_state(uint32_t broker_location) const
+            {
+                if (broker_states_.find(broker_location) != broker_states_.end())
+                {
+                    return broker_states_.at(broker_location);
+                }
+                else
+                {
+                    return msg::data::BrokerState::Unknown;
+                }
+            }
+
             void Ledger::publish_broker_states(int64_t trigger_time)
             {
                 SPDLOG_DEBUG("publishing broker states");
@@ -316,7 +328,7 @@ namespace kungfu
                 broker_states_[broker_location->uid] = state;
                 publish_broker_state(trigger_time, broker_location, state);
             }
-
+          
             void Ledger::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
             {
                 auto app_uid_str = fmt::format("{:08x}", app_location->uid);
@@ -409,16 +421,52 @@ namespace kungfu
 
                 auto md_location = location::make(get_io_device()->get_home()->mode, category::MD, location->group, location->group, get_io_device()->get_home()->locator);
                 SPDLOG_INFO("subscribe from {} [{:08x}]", md_location->uname, md_location->uid);
+                auto sub_from_md_location = [=]() 
+                {
+                    auto write_sub_msg = [=]()
+                    {
+                        auto writer = this->get_writer(md_location->uid);                    
+                        char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
+                        size_t length = fill_subscribe_msg(buffer, 4096, insts);
+                        writer->close_frame(length); 
+                    };
+
+                    msg::data::BrokerState state = this->get_broker_state(md_location->uid);
+                    if (state != msg::data::BrokerState::Ready && state != msg::data::BrokerState::LoggedIn)
+                    {
+                        events_ | is(msg::type::BrokerState) | from(md_location->uid) |  
+                        filter([=](yijinjing::event_ptr e)
+                        {
+                            const msg::data::BrokerState &data = e->data<msg::data::BrokerState>();
+                            return data == msg::data::BrokerState::LoggedIn;
+                        }) | first() |  
+                        $([=](event_ptr e)
+                        {
+                            write_sub_msg();
+                        });
+                    }
+                    else
+                    {
+                        write_sub_msg();
+                    }                   
+                };
+
                 if (has_writer(md_location->uid))
                 {
-                    auto writer = get_writer(md_location->uid);
-                    char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
-                    size_t length = fill_subscribe_msg(buffer, 4096, insts);
-                    writer->close_frame(length);
+                    sub_from_md_location();
                 }
                 else
                 {
-                    SPDLOG_ERROR("writer to {} [{:08x}] not exists", md_location->uname, md_location->uid);
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    filter([=](yijinjing::event_ptr e)
+                    {
+                        const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                        return data.dest_id == md_location->uid;
+                    }) | first() |
+                    $([=](event_ptr e)
+                    {
+                        sub_from_md_location();
+                    });                    
                 }
             }
 

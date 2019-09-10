@@ -72,6 +72,8 @@ namespace kungfu
                 std::unordered_map<uint32_t, std::vector<msg::data::PositionDetail>> position_detail_buffer_;
                 std::unordered_map<uint32_t, std::vector<msg::data::Instrument>> instrument_buffer_;
 
+                msg::data::BrokerState get_broker_state(uint32_t broker_location) const;
+
                 void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 
                 void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);

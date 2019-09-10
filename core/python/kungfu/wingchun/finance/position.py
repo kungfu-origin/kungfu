@@ -408,7 +408,9 @@ class FuturePosition(Position):
         self._pre_settlement_price = kwargs.pop("pre_settlement_price", 0.0)            
         self._settlement_price = kwargs.pop("settlement_price", 0.0)            
         self._last_price = kwargs.pop("last_price", 0.0)
-
+        self._avg_open_price = kwargs.pop("avg_open_price", 0.0)
+        if not is_valid_price(self._avg_open_price):
+            self._avg_open_price = sum([detail.volume * detail.open_price for detail in self._details]) / self.volume if self.volume > 0 else 0.0                  
         if "realized_pnl" in kwargs:
             self._realized_pnl = kwargs.pop("realized_pnl")
         elif self.direction == Direction.Long:
@@ -429,6 +431,8 @@ class FuturePosition(Position):
                 "volume": self.volume,
                 "yesterday_volume": self.yesterday_volume,
                 "last_price": self.last_price,
+                "avg_open_price": self.avg_open_price,
+                "position_cost_price": self.position_cost_price,
                 "settlement_price": self._settlement_price,
                 "pre_settlement_price": self._pre_settlement_price,
                 "unrealized_pnl": self.unrealized_pnl,
@@ -443,6 +447,14 @@ class FuturePosition(Position):
     @property
     def last_price(self):
         return self._last_price
+
+    @property
+    def avg_open_price(self):
+        return self._avg_open_price
+
+    @property
+    def position_cost_price(self):
+        return sum([ detail._select_cost_price() * detail.volume for detail in self.details]) / self.volume if self.volume > 0 else 0.0
 
     @property
     def details(self):
@@ -537,6 +549,7 @@ class FuturePosition(Position):
                                       trade_time=trade.trade_time
                                       )
         self.ledger.avail -= detail.margin
+        self._avg_open_price = (self._avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
         self.ledger._ctx.logger.debug("after open, margin delta {}".format(detail.margin))
         self._details.append(detail)
         self.ledger.dispatch([detail.message, self.ledger.message, self.message])
