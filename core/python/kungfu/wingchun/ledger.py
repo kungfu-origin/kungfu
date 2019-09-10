@@ -143,8 +143,10 @@ class Ledger(pywingchun.Ledger):
 
     def on_future_account(self, asset, position_details):
         pos_objects = []
-        for uid, details in groupby(position_details, key=lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
-            detail_list = list(details)
+        key_func = lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)
+        sorted_position_details = sorted(position_details, key=key_func)
+        for uid, detail_group in groupby(sorted_position_details, key=key_func):
+            detail_list = list(detail_group)
             direction = detail_list[0].direction
             instrument_id = detail_list[0].instrument_id
             exchange_id = detail_list[0].exchange_id

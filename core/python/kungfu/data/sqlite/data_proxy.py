@@ -151,7 +151,9 @@ class LedgerDB(SessionFactoryHolder):
                 for uid, pos in pos_dict.items():
                     if pos.instrument_type == int(InstrumentType.Stock):
                         positions.append(StockPosition(**object_as_dict(pos)))
-                for uid, details in groupby(detail_objs, key= lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)):
+                key_func = lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)
+                detail_objs = sorted(detail_objs, key=key_func)
+                for uid, details in groupby(detail_objs, key= key_func):
                     detail_list = list(details)
                     summary = pos_dict[uid]
                     direction = detail_list[0].direction
