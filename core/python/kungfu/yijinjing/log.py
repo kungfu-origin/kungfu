@@ -85,7 +85,7 @@ class UnixConsoleHandler(logging.StreamHandler):
 
 class WinConsoleHandler(logging.StreamHandler):
     def __init__(self):
-        logging.StreamHandler.__init__(self, sys.stdout)
+        logging.StreamHandler.__init__(self, open(sys.stdout.fileno(), mode='w', encoding='utf8'))
         self.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
 
     def emit(self, record):
@@ -100,7 +100,8 @@ class WinConsoleHandler(logging.StreamHandler):
                 stream.write(self.terminator)
                 self.flush()
             else:
-                stream.write(msg + self.terminator)
+                stream.write(msg)
+                stream.write(self.terminator)
                 self.flush()
         except Exception:
             self.handleError(record)
