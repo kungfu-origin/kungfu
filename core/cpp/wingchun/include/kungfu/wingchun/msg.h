@@ -115,12 +115,12 @@ namespace kungfu
                     const std::string get_expire_date() const
                     { return std::string(expire_date); }
 
-                    bool operator ==(const Instrument & obj)
+                    bool operator ==(const Instrument & obj) const
                     {
                         return strcmp(this->instrument_id, obj.instrument_id) == 0 && strcmp(this->exchange_id, obj.exchange_id) == 0;
                     }
 
-                    bool operator <(const Instrument & obj)
+                    bool operator <(const Instrument & obj) const
                     {
                         return get_symbol_id(this->get_instrument_id(), this->get_exchange_id()) < get_symbol_id(obj.get_instrument_id(), obj.get_exchange_id());
                     }
