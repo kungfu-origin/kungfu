@@ -2,7 +2,7 @@ import { getAccountsStrategys } from '@/assets/scripts/actions';
 import { parseToString } from '@/assets/scripts/utils';
 const colors = require('colors');
 
-export const listAccountsStrategys = async (type = ''): Promise<any> => {
+export const listAccountsStrategys = async (): Promise<any> => {
     const { accounts, strategys } = await getAccountsStrategys()
     const accountsList = accounts.map((a: Account): string => {
         const asMd: string = !!a.receive_md ? colors.green('md ✓') : ''
@@ -20,28 +20,14 @@ export const listAccountsStrategys = async (type = ''): Promise<any> => {
         )
     })
 
-    switch (type) {
-        case 'strategys':
-            if(!strategyList.length) {
-                console.log('No strategys!')
-            } else {
-                console.log([...strategyList].join('\n'))
-            }
-            break;
-        case 'accounts':
-            if(!accountsList.length) {
-                console.log('No accounts!')
-            } else {
-                console.log([...accountsList].join('\n'))
-            }
-            break;
-        default: 
-            if(!accountsList.length && !strategyList.length) {
-                console.log('No accounts and strategys!')
-            } else {
-                console.log([...accountsList, ...strategyList].join('\n'))
-            }
+    if(!accountsList.length && !strategyList.length) {
+        console.log('No accounts and strategys!')
+    } else {
+        console.log([
+            '\nAccounts: \n',
+            ...accountsList, 
+            '\nStrategys: \n', 
+            ...strategyList
+        ].join('\n'))
     }
-
-    return { accounts, strategys };
 }

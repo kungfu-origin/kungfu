@@ -4,7 +4,7 @@ import { initDB } from '@/base';
 import { version } from '../package.json';
 import { addAccountStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
-// import { removeAccountStrategy } from './commanders/remove';
+import { removeAccountStrategy } from './commanders/remove';
 import { updateAccountStrategy } from '@/commanders/update';
 // import { switchMdSource } from './commanders/switchMdSsource';
 // import { monitPrompt } from './components/index';
@@ -14,16 +14,9 @@ const program = require('commander');
 
 program
     .version(version)
-    // .option('-r --remove', 'remove a account|strategy ')
-    // .option('-u --update', 'update accounts|strategys config')
     // .option('-s --switch-md-source', 'switch md source')
     // .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
     .action(async (options: any) => {
-
-        // const remove = options.remove;
-        // if(remove) return removeAccountStrategy();
-        // const update = options.update;
-        // if(update) return updateAccountStrategy();
         // const sms = options.switchMdSource;
         // if(sms) return switchMdSource();
         // var monit = options.monit
@@ -33,14 +26,12 @@ program
 
 //list
 program
-    .command('list [accounts|strategys]')
-    .description('list accounts or strategys or all if no type supplied')
-    .action((type: string) => {
-        return listAccountsStrategys(type)
-        .catch((err: Error) => console.error(err))
-        .finally(() => {
-            process.exit(0)
-        });
+    .command('list')
+    .description('list accounts and strategys')
+    .action(() => {
+        return listAccountsStrategys()
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0));
     })
 
 //add
@@ -49,10 +40,8 @@ program
     .description('add a account or strategy')
     .action((type: string) => {
         return addAccountStrategy(type)
-        .catch((err: Error): void => console.error(err))
-        .finally(() => {
-            process.exit(0)
-        });
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0));
     })
 
 //update
@@ -61,10 +50,8 @@ program
     .description('update a account or strategy')
     .action(() => {
         return updateAccountStrategy()
-        .catch((err: Error): void => console.error(err))
-        .finally(() => {
-            process.exit(0)
-        });
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0));
     })
 
 //remove
@@ -72,7 +59,9 @@ program
     .command('remove')
     .description('remove a account or strategy')
     .action((type: string) => {
-        // return removeAccountStrategy();
+        return removeAccountStrategy()
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0));
     })
 
 program.parse(process.argv)

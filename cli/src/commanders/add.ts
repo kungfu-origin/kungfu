@@ -35,11 +35,12 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
         accountData
     }))
 
-    return inquirer.prompt(questions).then((answers: any) => ({
-        source,
-        key: idKey,
-        config: answers
-    }))
+    return inquirer.prompt(questions)
+        .then((answers: any) => ({
+            source,
+            key: idKey,
+            config: answers
+        }))
 }
 
 export const addUpdateAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {

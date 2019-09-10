@@ -1,36 +1,19 @@
 import { accountConfigPrompt, addUpdateAccountByPrompt, addUpdateStrategyPrompt } from '@/commanders/add';
-import { parseToString } from '@/assets/scripts/utils';
-import { getAccountsStrategys } from '@/assets/scripts/actions';
+import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
 import { getAccountSource } from '__gConfig/accountConfig';
-
-
 const inquirer = require('inquirer');
-const colors = require('colors');
 
 export const updateAccountStrategy = async () => {
     const { accounts, strategys } = await getAccountsStrategys();
-    const accountStrategyList = [
-        ...accounts.map((a: Account): string => parseToString(
-            [colors.cyan('account'), a.account_id],
-            [8, 'auto'],
-            1
-        )),
-        ...strategys.map((s: Strategy): string => parseToString(
-            [colors.yellow('strategy'), s.strategy_id],
-            [8, 'auto'],
-            1
-        ))
-    ]
-
+    const accountStrategyList = accountStrategyListStringify(accounts, strategys)
     const answers = await inquirer.prompt([
         {
             type: 'autocomplete',
             name: 'process',
             message: 'Select targeted account / strategy to update    ',
-            source: (answersSoFar: any, input: string) => {
-                input = input || ''
-                const selected = accountStrategyList.filter((s: string): boolean => s.indexOf(input) !== -1)
-                return new Promise(resolve => resolve(selected))
+            source: async (answersSoFar: any, input = '') => {
+                return accountStrategyList
+                    .filter((s: string): boolean => s.indexOf(input) !== -1)
             }
         }
     ])
