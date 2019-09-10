@@ -6,7 +6,7 @@ import { addAccountStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
 import { removeAccountStrategy } from './commanders/remove';
 import { updateAccountStrategy } from '@/commanders/update';
-// import { switchMdSource } from './commanders/switchMdSsource';
+import { switchMdSource } from './commanders/switchMdSsource';
 // import { monitPrompt } from './components/index';
 
 const program = require('commander');
@@ -60,6 +60,15 @@ program
     .description('remove a account or strategy')
     .action((type: string) => {
         return removeAccountStrategy()
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0));
+    })
+
+program
+    .command('switchMd')
+    .description('switch md source')
+    .action(() => {
+        return switchMdSource()
             .catch((err: Error) => console.error(err))
             .finally(() => process.exit(0));
     })
