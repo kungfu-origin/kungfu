@@ -117,7 +117,7 @@ namespace kungfu
 
                     bool operator ==(const Instrument & obj)
                     {
-                        return strcmp(this->instrument_id, obj.instrument_id) == 0 && strcmp(this->instrument_id, obj.instrument_id) == 0;
+                        return strcmp(this->instrument_id, obj.instrument_id) == 0 && strcmp(this->exchange_id, obj.exchange_id) == 0;
                     }
 
                     bool operator <(const Instrument & obj)
