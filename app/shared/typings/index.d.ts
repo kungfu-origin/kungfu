@@ -24,6 +24,7 @@ interface Account {
     source_name: string;
     receive_md: boolean;
     config?: any;
+    [propName: string]: any;
 }
 
 interface Strategy {

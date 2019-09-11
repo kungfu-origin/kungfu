@@ -1,15 +1,13 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '@/assets/components/Dashboard';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseAccountList, dealStatus, parseToString, dealLog, getStatus } from '@/assets/scripts/utils';
-import { getAccountList } from '__io/db/account';
-import { getStrategyList } from '__io/db/strategy';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, dealStatus, parseToString, dealLog, getStatus } from '@/assets/scripts/utils';
+import { processListObservable } from '@/assets/scripts/actions';
 import { dealLogMessage, getLog } from '__gUtils/busiUtils';
-import { listProcessStatus } from '__gUtils/processUtils';
 import { addFile } from '__gUtils/fileUtils';
 import { switchMaster, switchLedger } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
-import { logger } from '__gUtils/logUtils';
+import { startMaster } from '../../../../app/shared/utils/processUtils';
 
 const blessed = require('blessed');
 const colors = require('colors');
@@ -18,84 +16,53 @@ const { Tail } = require('tail');
 
 const WIDTH_LEFT_PANEL = 30;
 
+
+
 export class MonitorDashboard extends Dashboard {
     screen: any;
-    globalData: {
-        processes: any[],
-        accountData: Account | {},
-        mdData: any,
-        strategyList: Strategy[],
-        processStatus: any,
-        logList: any[]
-    }
 
-    boards: {
-        masterProcess: any;
-        processList: any;
-        mergedLogs: any;
-        boxInfo: any;
-        message: any;
+    boards: any;
+
+    globalData: {
+        processList: any[]
     }
   
     logWatchers: any[];
     
     constructor(){
         super()
-        this.screen.title = 'Account Dashboard';
-        this.globalData = {
-            processes: [],
-            accountData: {},
-            mdData: {},
-            strategyList: [],
-            processStatus: {},
-            logList: [],
-        }
+        this.screen.title = 'Processes Dashboard';
+
         this.boards = {
-            masterProcess: null,
             processList: null,
             mergedLogs: null,
-            boxInfo: null,
-            message: null
+            message: null,
+            boxInfo: null
+        }
+
+        this.globalData = {
+            processList: [],
         }
 
         this.logWatchers = [];
+
+        this.init();
     }
 
     init(){
         const t = this;
-        t.initMasterProcess();
         t.initProcessList();
         t.initLog();
         t.initBoxInfo();
         t.initLoader();
         t.screen.render();
 
-        // t.getProcessStatus().then(() => t.getLogs());
-        // t.bindEvent();
+        t.bindEvent();
+        t.bindData();
+
+        
     }
 
-
-    initMasterProcess(){
-        this.boards.masterProcess = blessed.list({
-            ...TABLE_BASE_OPTIONS,
-            label: ' Master Processes ',
-            parent: this.screen,
-            top: '0',
-            left: '0',
-            width: WIDTH_LEFT_PANEL + '%',
-            height: 6,
-            padding: DEFAULT_PADDING,
-            items: [" Master  -- "],
-            interactive: true,
-            style: {
-                ...TABLE_BASE_OPTIONS.style,
-                selected: {
-					bold: true,
-					bg: 'blue',
-                },
-            }
-        })
-    }
 
     initProcessList(){
         this.boards.processList = blessed.list({
@@ -103,12 +70,12 @@ export class MonitorDashboard extends Dashboard {
             label: ' Processes ',
             parent: this.screen,
             padding: DEFAULT_PADDING,
-            top: 6,
+            top: '0',
             left: '0',
-            interactive: false,
+            interactive: true,
 			mouse: false,			
             width: WIDTH_LEFT_PANEL + '%',
-            height: '95%-7',
+            height: '95%-1',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -117,6 +84,7 @@ export class MonitorDashboard extends Dashboard {
                 }
             }
         })
+        this.boards.processList.focus()
     }
 
     initLog(){
@@ -139,145 +107,114 @@ export class MonitorDashboard extends Dashboard {
         })
     }
 
-    initBoxInfo() {
-        this.boards.boxInfo = blessed.text({
-            content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | enter: process-switch',
-            parent: this.screen,		
-            left: '0%',
-            top: '94%',
-            width: '100%',
-            height: '6%',
-            valign: 'middle',
-            tags: true
-        });	
-    }
-
     initLoader(){
         const t = this;
         t.boards.message = blessed.message({
             parent: t.screen,
             top: '100%-5',
-            left: '100%-30',
+            left: '100%-40',
             height: 5,
             align: 'left',
             valign: 'center',
-            width: 30,
+            width: 40,
             tags: true,
             hidden: true,
-            border: 'line'
+            border: 'line',
+            style: {
+                bg: 'blue'
+            }
         });
     }
 
-    // bindEvent(){
-    //     const t = this;
-    //     let i = 0;
-    //     let boards = ['masterProcess', 'processList', 'mergedLogs'];
-    //     t.screen.key(['left', 'right'], (ch, key) => {
-    //         (key.name === 'left') ? i-- : i++;
-    //         if (i === 3) i = 0;
-    //         if (i === -1) i = 2;
-    //         t[boards[i]].focus();
-    //     });
+    initBoxInfo() {
+		const t = this;
+		t.boards.boxInfo = blessed.text({
+			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch',
+			parent: t.screen,		
+			left: '0%',
+			top: '95%',
+			width: '100%',
+			height: '6%',
+			valign: 'middle',
+			tags: true
+		});	
+	}
+
+    bindData() {
+        const t = this;
+        processListObservable.subscribe((processList: any) => {
+            t.globalData.processList = processList;
+            const processListResolve = processList
+                .map((proc: ProcessListItem) => parseToString([
+                    proc.typeName,
+                    proc.processName,
+                    proc.statusName
+                ], [5, 15, 8]))
+            t.boards.processList.setItems(processListResolve);
+            t.screen.render();
+        })
+    }
+
+    bindEvent(){
+        const t = this;
+        let i: number = 0;
+        let boards = ['processList', 'mergedLogs'];
+        t.screen.key(['left', 'right'], (ch: string, key: any) => {
+            (key.name === 'left') ? i-- : i++;
+            if (i === 2) i = 0;
+            if (i === -1) i = 2;
+            const nameKey: string = boards[i];
+            t.boards[nameKey].focus();
+        });
     
-    //     t.screen.key(['escape', 'q', 'C-c'], (ch, key) => {
-    //         t.screen.destroy();
-    //         process.exit(0);
-    //     });	
+        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: string) => {
+            t.screen.destroy();
+            process.exit(0);
+        });	
 
-    //     t.masterProcess.on('focus', () => t.masterProcess.interactive = true)
-    //     t.masterProcess.on('blur', () => t.masterProcess.interactive = false)
-    //     t.masterProcess.key(['enter'], (ch, key) => {
-    //         const pStatus = t.globalData.processStatus;
-    //         const selectedIndex = t.masterProcess.selected;
-    //         if(selectedIndex === 0) switchMaster(getStatus('master', pStatus)).then(() => {t.message.log(' operation sucess!', 2)})
-    //         else if(selectedIndex === 1) switchLedger(getStatus('watcher', pStatus)).then(() => {t.message.log(' operation sucess!', 2)})
-    //     })
+        t.boards.processList.key(['enter'], () => {
+            const selectedIndex: number = t.boards.processList.selected;
+            t._switchProcess(selectedIndex)
+        })
+    }
 
-    //     t.processList.on('focus', () => t.processList.interactive = true)
-    //     t.processList.on('blur', () => t.processList.interactive = false)
-    //     t.processList.key(['enter'], () => {
-    //         const selectedIndex = t.processList.selected;
-    //         t._switchProcess(selectedIndex)
-           
-    //     })
-    // }
+    _switchProcess(selectedIndex: number){
+        const t = this;
+        const proc = t.globalData.processList[selectedIndex];
+        const status = proc.status === 'online';
+        const startOrStop = !!status ? 'Stop' : 'Start';
+        switch(proc.type) {
+            case 'main':
+                if (proc.processId === 'master') {
+                    switchMaster(!status)
+                    .then(() => {t.boards.message.log(`${startOrStop} Master process sucessfully!`, 2)})
+                    .catch((err: Error) => {})
+                }
+                else if(proc.processId === 'ledger') {
+                    switchLedger(!status)
+                    .then(() => {t.boards.message.log(`${startOrStop} Ledger process sucessfully!`, 2)})
+                    .catch((err: Error) => {})
+                } 
+                break
+            case 'md':
+                switchMd(proc, !status)
+                .then(() => {t.boards.message.log(`${startOrStop} MD process sucessfully!`, 2)})
+                .catch((err: Error) => {})
+                break
+            case 'td':
+                switchTd(proc, !status)
+                .then(() => {t.boards.message.log(`${startOrStop} TD process sucessfully!`, 2)})
+                .catch((err: Error) => {})
+                break;
+            case 'strategy':
+                switchTd(proc.processId, !status)
+                .then(() => {t.boards.message.log(`${startOrStop} Strategy process sucessfully!`, 2)})
+                .catch((err: Error) => {})
+                break;
+        }
+    }
 
-    // _switchProcess(selectedIndex){
-    //     const t = this;
-    //     const cProc = t.globalData.processes[selectedIndex];
-    //     const pStatus = t.globalData.processStatus;
-    //     if(!cProc) return;
-    //     switch(cProc.type) {
-    //         case 'md':
-    //             switchMd(cProc, getStatus(`md_${cProc.source_name}`, pStatus)).then(() => {t.message.log(' operation sucess!', 2)})
-    //             break;
-    //         case 'td':
-    //             switchTd(cProc, getStatus(`td_${cProc.account_id}`, pStatus)).then(() => {t.message.log(' operation sucess!', 2)})
-    //             break;
-    //         case 'strategy':
-    //             const strategyId = cProc.strategy_id;
-    //             switchStrategy(strategyId, getStatus(strategyId, pStatus)).then(() => {t.message.log(' operation sucess!', 2)})
-    //             break;
-    //     }
-    // }
-
-    // refresh(){
-    //     const { processStatus } = this.globalData;
-    //     //master
-    //     this.masterProcess.setItems([
-    //         parseToString(['Master', dealStatus(processStatus.master)], [23, 8, 'auto']),
-    //         parseToString(['Watcher', dealStatus(processStatus.watcher)], [23, 8, 'auto'])
-    //     ])
-    //     //processes
-    //     const processes = this._dealProcessList();
-    //     this.processList.setItems(processes);;
-    //     this.screen.render();
-    // }
-
-    // getData(){
-    //     const t = this;
-    //     const getAccountDataPromise = getAccountList().then(accountList => {
-    //         const { mdData, accountData } = parseAccountList(t.globalData, accountList)
-    //         t.globalData = {
-    //             ...t.globalData,
-    //             mdData,
-    //             accountData
-    //         }
-    //     })
-
-    //     const getStrategyPromise = getStrategyList().then(strategyList => {
-    //         t.globalData.strategyList = strategyList
-    //     })
-
-    //     var timer = null
-    //     const promiseAll = () => {
-    //         clearTimeout(timer)
-    //         Promise.all([getAccountDataPromise, getStrategyPromise]).finally(() => {
-    //             t.refresh();
-    //             timer = setTimeout(promiseAll, 3000)
-    //         })
-    //     }
-    //     promiseAll();
-    // }
-
-    // getProcessStatus(){
-    //     const t = this;
-    //     //循环获取processStatus
-    //     var listProcessTimer;
-    //     const startGetProcessStatus = () => {
-    //         clearTimeout(listProcessTimer)
-    //         return listProcessStatus()
-    //         .then(res => {
-    //             t._diffOnlineProcess(res, t.globalData.processStatus);
-    //             t.globalData.processStatus = Object.freeze(res);
-    //             t.refresh();
-    //             return res;
-    //         })
-    //         .catch(err => console.error(err))
-    //         .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
-    //     }
-    //     return startGetProcessStatus()
-    // }
+ 
 
     // getLogs(){
     //     const t = this;
@@ -307,72 +244,7 @@ export class MonitorDashboard extends Dashboard {
     //     })
     // }
 
-    // _dealProcessList(){
-    //     const t = this;
-    //     const { mdData, accountData, processStatus, strategyList } = t.globalData;
-    //     const mdDataValues = Object.values(mdData || {})
-    //     const mdList = mdDataValues.map(m => {
-    //         const mdProcess = `md_${m.source_name}`;
-    //         const type = colors.magenta('Md');
-    //         const status = dealStatus(processStatus[mdProcess]);
-    //         return parseToString([
-    //             type,
-    //             mdProcess,
-    //             status
-    //         ], [5, 15, 8])
-    //     })
 
-    //     const tdDataValues = Object.values(accountData || {});
-    //     const tdList = tdDataValues.map(a => {
-    //         const tdProcess = `td_${a.account_id}`;
-    //         const type = colors.cyan('Td');
-    //         const status = dealStatus(processStatus[tdProcess]);
-    //         return parseToString([
-    //             type,
-    //             tdProcess,
-    //             status
-    //         ], [5, 15, 8])
-    //     })
-        
-    //     const stratList = strategyList.map(s => {
-    //         const stratProcess = s.strategy_id;
-    //         const type = colors.yellow('Strate');
-    //         const status = dealStatus(processStatus[stratProcess]);
-    //         return parseToString([
-    //             type,
-    //             stratProcess,
-    //             status
-    //         ], [5, 15, 8])
-    //     })
-
-    //     t.globalData.processes = [
-    //         ...mdDataValues.map(m => ({...m, type: "md"})), 
-    //         ...tdDataValues.map(td => ({...td, type: 'td'})), 
-    //         ...strategyList.map(s => ({...s, type: 'strategy'}))
-    //     ];
-    //     return [...mdList, ...tdList, ...stratList]
-    // }
-
-    // _diffOnlineProcess(processStatus, oldProcessStatus){
-    //     const t = this;
-    //     const aliveProcesses = Object.keys(processStatus)
-    //     .filter(p => processStatus[p] === 'online')
-    //     .sort((a, b) => {
-    //        if(a > b) return 1;
-    //        else if(a < b) return -1;
-    //        else return 0
-    //     })
-
-    //     const oldAliveProcesses = Object.keys(oldProcessStatus)
-    //     .filter(p => oldProcessStatus[p] === 'online')
-    //     .sort((a, b) => {
-    //        if(a > b) return 1;
-    //        else if(a < b) return -1;
-    //        else return 0
-    //     })
-
-    //     if(aliveProcesses.join('') !== oldAliveProcesses.join('')) t._triggerWatchLogFiles(aliveProcesses)
-    // }
 
     // _triggerWatchLogFiles(processes){
     //     const t = this;
@@ -403,7 +275,6 @@ export class MonitorDashboard extends Dashboard {
 export default () => {
     const monitorDashboard = new MonitorDashboard()
     // monitorDashboard.render();
-    monitorDashboard.init();
     // monitorDashboard.getData();
 }
 

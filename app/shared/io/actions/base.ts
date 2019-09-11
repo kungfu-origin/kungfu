@@ -21,6 +21,6 @@ export const switchMaster = async (status: boolean): Promise<any> => {
 }
 
 export const switchLedger = (status: boolean): Promise<any> => {
-    if(!status) return deleteProcess('watcher')   
+    if(!status) return deleteProcess('ledger')   
     return startLedger(false)
 }

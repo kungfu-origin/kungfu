@@ -165,6 +165,31 @@ export const dealNum = (num: number, percentage: boolean) => {
 	else return targetNum + percentageStr
 }
 
+// interface PnlData {
+// 	trading_day: string,
+// 	update_time: number,
+// 	ledger_category: number,
+// 	account_id: string, 
+// 	source_id: string,
+// 	client_id: string,
+// 	initial_equity: number,
+// 	static_equity: number,
+// 	daynamic_equity: number,
+// 	realized_pnl: number,
+// 	unrealized_pnl: number
+// }
+
+// export const dealPnlData = (data: PnlData[]) => {
+// 	let xAxisData: string[] = []
+// 	let serirsData: number[] = []
+// 	data && data.map((item: PnlData) => {
+// 		const time = item.trading_day
+// 		xAxisData.push(time.slice(4))
+// 		serirsData.push(toDecimal(item.accumulated_pnl_ratio, 4, 2))
+// 	})
+// 	return {x: xAxisData, y:serirsData}
+// }
+
 export const dealLog = (item: LogData) => {
 	let type = item.type;
 	if(type === 'error') type = colors.red(item.type);
@@ -194,5 +219,3 @@ export const parseSources = (accountSource: Sources): string[] => {
 export const getStatus = (processId: string, processStatus: any) => {
 	return processStatus[processId] === 'online'
 }
-
-

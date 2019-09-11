@@ -491,3 +491,17 @@ export const getExtensionConfigs = async (): Promise<any> => {
         console.error(err)
     }
 }
+
+export const setTimerPromiseTask = (fn: Function, interval = 500) => {
+    var taskTimer: NodeJS.Timer | null = null;
+    function timerPromiseTask (fn: Function, interval = 500) {
+        if(taskTimer) clearTimeout(taskTimer)
+        fn()
+        .finally(() => {
+            taskTimer = setTimeout(() => {
+                timerPromiseTask(fn, interval)
+            }, interval)
+        })
+    }
+    timerPromiseTask(fn, interval)
+} 
