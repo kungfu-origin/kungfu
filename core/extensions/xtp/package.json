@@ -65,6 +65,21 @@
                     "required": true,
                     "validator": ["o99Validator", "intValidator"],
                     "tip": "自定义多点登陆ID，需是0～99内整数"
+                },
+                {
+                    "key": "protocol",
+                    "name": "protocol",
+                    "type": "str",
+                    "errMsg": "请填写 protocol",
+                    "required": false,
+                    "tip": "请选择 protocol, tcp or udp"
+                },
+                {
+                    "key": "buffer_size",
+                    "name": "buffer_size",
+                    "type": "int",
+                    "errMsg": "请填写 buffer size",
+                    "required": false
                 }
             ]
         }
