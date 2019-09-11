@@ -9,6 +9,7 @@
     ],
     "typeRoots": [
         "../app/shared/typings",
+        "./src/assets/typings",
         "node_modules/@types"
     ],
     "exclude": [

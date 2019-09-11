@@ -1,7 +1,9 @@
-import blessed  from 'blessed';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '../utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '@/assets/scripts/utils';
+const blessed = require('blessed');
 
 class Dashboard {
+    screen: any
+    message: any
     constructor(){
         this.screen = blessed.screen({
             smartCSR: true,
@@ -13,15 +15,15 @@ class Dashboard {
     }
 
     init(){
-        console.error('init must be cover')
+        console.error('Init must be cover!')
     }
 
     refresh(){
-        console.error('refresh must be cover')
+        console.error('Refresh must be cover!')
     }
 
     bindEvent(){
-        console.error('bindEvent must be cover')
+        console.error('BindEvent must be cover!')
     }
     
     render(){

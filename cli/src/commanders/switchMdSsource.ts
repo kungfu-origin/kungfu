@@ -12,7 +12,7 @@ export const switchMdSource = async () => {
         .filter((a: Account) => a.receive_md)
         .map((a: Account) => `${a.source_name} (${a.account_id.toAccountId()})`)
 
-    if(!mdAccountData.length) throw new Error(' No account in KungFu system!')
+    if(!mdAccountData.length) throw new Error('No account in KungFu system!')
 
     const oldSourceAccount: {
         [ propName: string ]: { 

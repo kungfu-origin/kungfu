@@ -4,10 +4,10 @@ import { initDB } from '@/base';
 import { version } from '../package.json';
 import { addAccountStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
-import { removeAccountStrategy } from './commanders/remove';
+import { removeAccountStrategy } from '@/commanders/remove';
 import { updateAccountStrategy } from '@/commanders/update';
-import { switchMdSource } from './commanders/switchMdSsource';
-// import { monitPrompt } from './components/index';
+import { switchMdSource } from '@/commanders/switchMdSsource';
+import { monitPrompt } from '@/components/index';
 
 const program = require('commander');
 
@@ -36,7 +36,7 @@ program
 
 //add
 program
-    .command('add [account|strategy]')
+    .command('add <account|strategy>')
     .description('add a account or strategy')
     .action((type: string) => {
         return addAccountStrategy(type)
@@ -71,6 +71,13 @@ program
         return switchMdSource()
             .catch((err: Error) => console.error(err))
             .finally(() => process.exit(0));
+    })
+
+program
+    .command('monit [name]')
+    .description('monitor target process')
+    .action(() => {
+        return monitPrompt()
     })
 
 program.parse(process.argv)
