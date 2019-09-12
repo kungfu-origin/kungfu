@@ -32,7 +32,8 @@ a = Analysis(['kungfu/__main__.py'],
           'numpy',
           'pandas',
           'tushare',
-          'plotly'
+          'plotly',
+          'plotly.graph_objects'
           ],
      hookspath=None,
      runtime_hooks=None,
