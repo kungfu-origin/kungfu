@@ -38,6 +38,10 @@ namespace kungfu
                 j.at("td_ip").get_to(c.td_ip);
                 j.at("td_port").get_to(c.td_port);
                 c.protocol =  j.value("protocol", "tcp");
+                if (c.protocol != "udp")
+                {
+                    c.protocol = "tcp";
+                }
                 c.buffer_size = j.value("buffer_size", 64);
             }
         }
