@@ -1,11 +1,15 @@
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
+import { LOG_DIR } from '__gConfig/pathConfig';
+import { setTimerPromiseTask, getLog } from '__gUtils/busiUtils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { getAccountList } from '__io/db/account';
 import { getStrategyList } from '__io/db/strategy';
 import { parseToString, dealStatus } from '@/assets/scripts/utils';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, combineLatest, zip, concat } from 'rxjs';
+import { mergeAll, map, concatAll } from 'rxjs/operators'
+import logColor from '__gConfig/logColorConfig';
 
 const colors = require('colors');
+const path = require('path');
 
 export const getAccountsStrategys = async (): Promise<any> => {
     const getAccounts = getAccountList();
@@ -141,4 +145,67 @@ export const processListObservable = combineLatest(
     }
 )
 
+const renderColoredProcessName = (processId: string) => {
+    if(processId === 'master' || processId === 'ledger') 
+        return colors.bold.underline.bgMagenta(processId)
+    else if(processId.indexOf('td') !== -1) {
+        return colors.bold.underline.cyan(processId)
+    }
+    else if(processId.indexOf('md') !== -1) {
+        return colors.bold.underline.yellow(processId)
+    }
+    else 
+        return colors.bold.underline.blue(processId)
+}
 
+const _dealLogMessage = (line: string, processId: string) => {
+    let lineData: LogDataOrigin;
+    try{
+        lineData = JSON.parse(line);
+    }catch(err){
+        throw err;
+    }
+    let messages = lineData.message.split('\n').filter((m: string) => m !== '');
+    return messages.map((message: string) => {
+        message = message.split('\n[')
+            .join('[')
+            .replace(/\[  info  \]/g, `[ ${colors[logColor.info]('info')}    ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[ trace  \]/g, `[ trace   ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[ error  \]/g, `[ ${colors[logColor.error]('error')}   ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[warning \]/g, `[ ${colors[logColor.warning]('warning')} ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[ debug  \]/g, `[ ${colors[logColor.debug]('debug')}   ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] [${renderColoredProcessName(processId)}]`)
+        if(
+            message.indexOf('Failed') !== -1 ||
+            message.indexOf('Traceback') !== -1 ||
+            message.indexOf('critical') !== -1 ||
+            message.indexOf('uncaught exception') !== -1
+        ) message = `${colors[logColor.critical](message)}`
+        
+        return { 
+            message,
+            updateTime: lineData.timestamp
+        }
+    })
+}
+
+
+const getLogObservable = (pid: string) => {
+    const logPath = path.join(LOG_DIR, `${pid}.log`);
+    return new Observable(subscriber => {
+        getLog(logPath, '', (line: string) => _dealLogMessage(line, pid))
+        .then((logList: NumList) => subscriber.next(logList))
+        .catch((err: Error) => subscriber.next(null))
+        .finally(() => subscriber.complete())
+    })
+}
+
+
+export const getMergedLogsObservable = (processIds: string[]) => {
+    return zip(
+        ...processIds
+        .map((logPath: string) => {
+            return getLogObservable(logPath)
+        })
+    )
+}

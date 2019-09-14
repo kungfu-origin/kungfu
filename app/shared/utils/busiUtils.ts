@@ -245,12 +245,12 @@ export const sum = (list: number[]): number => {
 
 
 
-export const dealLogMessage = (line: string, searchKeyword: string):any => {
+export const dealLogMessage = (line: string, searchKeyword?: string):any => {
     let lineData: LogLineData;
     try{
         lineData = JSON.parse(line);
     }catch(err){
-        console.error(err)
+        // console.error(err)
         return false;
     }
     const message = lineData.message;
@@ -314,6 +314,7 @@ export const dealLogMessage = (line: string, searchKeyword: string):any => {
  * 建立固定条数的list数据结构
  * @param  {number} num
  */
+
 function buildListByLineNum(num: number): any {
     class ListByNum {
         list: any[];
@@ -339,8 +340,8 @@ function buildListByLineNum(num: number): any {
  * @param  {path} logPath
  * @param  {string} searchKeyword
  */
-export const getLog = (logPath: string, searchKeyword: string): Promise<any> => {
-    const numList: any = buildListByLineNum(201);    
+export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMethod = dealLogMessage): Promise<any> => {
+    const numList: NumList = buildListByLineNum(30);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
         fs.stat(logPath, (err: Error) => {
@@ -354,7 +355,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
             })
 
             lineReader.on('line', line => {
-                const messageData = dealLogMessage(line, searchKeyword)
+                const messageData = dealLogMessageMethod(line, searchKeyword)
                 if(!messageData) return;
                 messageData.forEach((msg: LogMessageData): void => {
                     if(!msg) return;

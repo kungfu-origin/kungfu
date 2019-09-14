@@ -41,8 +41,17 @@ interface MessageData {
 interface LogData {
     type: string,
     updateTime: string,
-    message: string
+    message: string,
 }
+
+interface LogDataOrigin {
+    timestamp: string,
+    type: string,
+    app_name: string,
+    message: string,
+    process_id: number
+}
+
 
 interface OrderData {
     id: string;
@@ -144,4 +153,12 @@ interface AccountSetting {
 
 interface Sources {
     [propName: string]: AccountSetting
+}
+
+
+interface NumList {
+    list: any[];
+    len: number;
+    num: number;
+    insert: Function;
 }

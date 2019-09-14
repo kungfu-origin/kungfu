@@ -1,21 +1,21 @@
-import { LOG_DIR } from '__gConfig/pathConfig';
 import Dashboard from '@/assets/components/Dashboard';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, dealStatus, parseToString, dealLog, getStatus } from '@/assets/scripts/utils';
-import { processListObservable } from '@/assets/scripts/actions';
-import { dealLogMessage, getLog } from '__gUtils/busiUtils';
-import { addFile } from '__gUtils/fileUtils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString} from '@/assets/scripts/utils';
+import { processListObservable, getMergedLogsObservable } from '@/assets/scripts/actions';
 import { switchMaster, switchLedger } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
-import { startMaster } from '../../../../app/shared/utils/processUtils';
 
 const blessed = require('blessed');
-const colors = require('colors');
-const path = require('path');
-const { Tail } = require('tail');
+const moment = require('moment');
 
 const WIDTH_LEFT_PANEL = 30;
 
+
+interface logDataWithProcessId {
+    updateTime: string,
+    message: string,
+    processId: string 
+}
 
 
 export class MonitorDashboard extends Dashboard {
@@ -41,7 +41,7 @@ export class MonitorDashboard extends Dashboard {
         }
 
         this.globalData = {
-            processList: [],
+            processList: []
         }
 
         this.logWatchers = [];
@@ -59,8 +59,6 @@ export class MonitorDashboard extends Dashboard {
 
         t.bindEvent();
         t.bindData();
-
-        
     }
 
 
@@ -75,7 +73,7 @@ export class MonitorDashboard extends Dashboard {
             interactive: true,
 			mouse: false,			
             width: WIDTH_LEFT_PANEL + '%',
-            height: '95%-1',
+            height: '96%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -95,7 +93,7 @@ export class MonitorDashboard extends Dashboard {
             top: '0',
             left: WIDTH_LEFT_PANEL + '%',
             width: 100 - WIDTH_LEFT_PANEL + '%',
-            height: '95%-1',
+            height: '96%',
             padding: DEFAULT_PADDING,
 			mouse: true,
             style: {
@@ -143,6 +141,16 @@ export class MonitorDashboard extends Dashboard {
     bindData() {
         const t = this;
         processListObservable.subscribe((processList: any) => {
+            //log
+            if(!t.globalData.processList 
+                ||
+                JSON.stringify(t.globalData.processList) !== JSON.stringify(processList)
+            ) 
+            {
+                t.getLogs(processList)
+            }
+
+            //processList
             t.globalData.processList = processList;
             const processListResolve = processList
                 .map((proc: ProcessListItem) => parseToString([
@@ -187,62 +195,56 @@ export class MonitorDashboard extends Dashboard {
             case 'main':
                 if (proc.processId === 'master') {
                     switchMaster(!status)
-                    .then(() => {t.boards.message.log(`${startOrStop} Master process sucessfully!`, 2)})
+                    .then(() => t.boards.message.log(`${startOrStop} Master process sucessfully!`, 2))
                     .catch((err: Error) => {})
                 }
                 else if(proc.processId === 'ledger') {
                     switchLedger(!status)
-                    .then(() => {t.boards.message.log(`${startOrStop} Ledger process sucessfully!`, 2)})
+                    .then(() => t.boards.message.log(`${startOrStop} Ledger process sucessfully!`, 2))
                     .catch((err: Error) => {})
                 } 
                 break
             case 'md':
                 switchMd(proc, !status)
-                .then(() => {t.boards.message.log(`${startOrStop} MD process sucessfully!`, 2)})
+                .then(() => t.boards.message.log(`${startOrStop} MD process sucessfully!`, 2))
                 .catch((err: Error) => {})
                 break
             case 'td':
                 switchTd(proc, !status)
-                .then(() => {t.boards.message.log(`${startOrStop} TD process sucessfully!`, 2)})
+                .then(() => t.boards.message.log(`${startOrStop} TD process sucessfully!`, 2))
                 .catch((err: Error) => {})
                 break;
             case 'strategy':
-                switchTd(proc.processId, !status)
+                switchStrategy(proc.processId, !status)
                 .then(() => {t.boards.message.log(`${startOrStop} Strategy process sucessfully!`, 2)})
                 .catch((err: Error) => {})
                 break;
         }
     }
-
  
 
-    // getLogs(){
-    //     const t = this;
-    //     const processStatus = t.globalData.processStatus;
-    //     const aliveProcesses = Object.keys(processStatus || {}).filter(k => processStatus[k] === 'online' && k !== 'master');
-    //     const logPromises = aliveProcesses.map(p => {
-    //         const logPath = path.join(LOG_DIR, `${p}.log`);
-    //         addFile('', logPath, 'file')		
-    //         return getLog(logPath)
-    //     })
-
-    //     Promise.all(logPromises).then(logList => {
-    //         let mergedLogs = [];
-    //         logList.map(({list}) => {
-    //             mergedLogs = [...mergedLogs, ...list]
-    //         })
-            
-    //         //sort
-    //         mergedLogs.sort((a, b) => {
-    //             if(a.updateTime > b.updateTime) return 1
-    //             else if(a.updateTime < b.updateTime) return -1
-    //             else return 0
-    //         })
-    //         mergedLogs.forEach(l => {
-    //             t.mergedLogs.add(dealLog(l))
-    //         })
-    //     })
-    // }
+    getLogs(processList: ProcessListItem[]){
+        const t = this;
+        const processIds = processList.map((p: ProcessListItem) => p.processId)
+        getMergedLogsObservable(processIds).subscribe((logs: any) => {
+            logs
+            .filter((l: any) => !!l)
+            .map((l: any) => l.list)
+            .reduce((a: logDataWithProcessId[], b: logDataWithProcessId[]): logDataWithProcessId[] => {
+                return a.concat(b)
+            })
+            .sort((a: logDataWithProcessId, b: logDataWithProcessId) => {
+                const aUpdateTime = moment(a.updateTime).valueOf()
+                const bUpdateTime = moment(b.updateTime).valueOf()
+                if(aUpdateTime > bUpdateTime) return 1;
+                else if(aUpdateTime < bUpdateTime) return -1
+                else return 0
+            })
+            .forEach((l: logDataWithProcessId) => {
+                t.boards.mergedLogs.log(l.message)
+            })
+        })
+    }
 
 
 
@@ -274,7 +276,5 @@ export class MonitorDashboard extends Dashboard {
 
 export default () => {
     const monitorDashboard = new MonitorDashboard()
-    // monitorDashboard.render();
-    // monitorDashboard.getData();
 }
 
