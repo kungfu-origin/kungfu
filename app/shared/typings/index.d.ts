@@ -19,6 +19,10 @@ interface StringToStringObject {
     [propName: string]: string;
 }
 
+interface StringToNumberObject {
+    [propName: string]: number;
+}
+
 interface Account {
     account_id: string;
     source_name: string;
@@ -76,6 +80,7 @@ interface PosData {
     direction: string;
     yesterdayVolume: string;
     todayVolume: string;
+    totalVolume: string;
     avgPrice: string;
     lastPrice: string;
     unRealizedPnl: string;

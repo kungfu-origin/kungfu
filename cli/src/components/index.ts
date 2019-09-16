@@ -1,6 +1,6 @@
 // import strategy from './strategy/index'
-import account from './account/index'
-import monitor from './monitor/index';
+import account from '@/components/account/index'
+import monitor from '@/components/monitor/index';
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
 const inquirer = require('inquirer');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
@@ -23,11 +23,10 @@ export const monitPrompt = async (list: boolean) => {
     ]);
 
     const { processName } = answers;
-    const processId = processName.split(' ')[1].trim();
-    const type = processName.split(' ')[0].indexOf('strategy') !== -1 ? 'strategys' : 'accounts';
+    const processSplit = processName.split(' ')
+    const processId = processSplit[processSplit.length - 1].trim();
+    const type = processSplit[0].indexOf('strategy') !== -1 ? 'strategys' : 'accounts';
     if (type === 'accounts') {
         return account(processId)
     }
-    
-    
 }

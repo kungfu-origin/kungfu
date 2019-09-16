@@ -1,6 +1,7 @@
-import blessed from 'blessed';
-import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from '../utils';
+import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from '@/assets/scripts/utils';
 import { logger } from '__gUtils/logUtils';
+
+const blessed = require('blessed')
 
 class Table {
 	headers: string[];
@@ -12,8 +13,8 @@ class Table {
 		this.headers = [];
 		this.columnWidth = [];
 		this.table = null;
-		this.getDataMethod = null;
-		this.afterSelectMethod = null;
+		// this.getDataMethod = null;
+		// this.afterSelectMethod = null;
 		this.pad = 2;
 	}
 
@@ -88,7 +89,7 @@ class Table {
 			if(!list.focused) list.focus()
 		})
 	
-		list.on('focus', (e) => {
+		list.on('focus', () => {
 			box.style.border.fg = 'blue'
 			process.nextTick(() => {
 				// t.afterSelected(list)

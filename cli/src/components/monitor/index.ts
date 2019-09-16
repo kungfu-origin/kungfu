@@ -237,7 +237,9 @@ export class MonitorDashboard extends Dashboard {
                 else return 0
             })
             .forEach((l: logDataWithProcessId) => {
-                t.boards.mergedLogs.add(l.message)
+                process.nextTick(() => {
+                    t.boards.mergedLogs.add(l.message)
+                })
             })
         })
     }

@@ -1,14 +1,13 @@
-import accountTable from '@/assets/components/AccountTable';
-// import posTable from '@/assets/components/PosTable';
+// import accountTable from '@/assets/components/AccountTable';
+import posTable from '@/assets/components/PosTable';
 // import mdTable from '@/assets/components/MdTable';
-// import orderTable from '@/assets/components/OrderTable';
-// import tradeTable from '@/assets/components/TradeTable';
+import orderTable from '@/assets/components/OrderTable';
+import tradeTable from '@/assets/components/TradeTable';
 import Dashboard from '@/assets/components/Dashboard';
 
-import { getAccountList, getAccountPos, getAccountOrder, getAccountTrade, getAccountAsset, getAccountPnlDay } from '__io/db/account';
-import { DEFAULT_PADDING, dealPnlData, getStatus } from '@/assets/scripts/utils';
+import { DEFAULT_PADDING, getStatus } from '@/assets/scripts/utils';
 import { switchTd, switchMd } from '__io/actions/account';
-import { listProcessStatus } from '__gUtils/processUtils';
+
 import { logger } from '__gUtils/logUtils';
 
 const blessed = require('blessed');
@@ -31,8 +30,8 @@ class AccountDashboard extends Dashboard {
 
 	constructor(accountId: string){
 		super()
-		this.accountId = accountId;
 		this.screen.title = 'Account Dashboard';
+		this.accountId = accountId;
 		this.globalData = {
 			assetData: {},
 			orders: {},
@@ -41,45 +40,46 @@ class AccountDashboard extends Dashboard {
 		};
 
 		this.boards = {};
+		this.init()
 	}
 
 	init(){
 		const t = this;
-		t.initAccountTable();
+		// t.initAccountTable();
 		// t.initMdTable();
-		// t.initPosTable();
+
+		t.initPosTable();
 		// t.initPnl();
-		// t.initOrderList();
-		// t.initTradeList();
+		t.initOrderList();
+		t.initTradeList();
 		t.initBoxInfo();
-		// t.initMessage();
 		t.screen.render();
 		t.bindEvent();
 	}
 	
-	initAccountTable(){
-		const t = this;
-		t.boards.accountTable = accountTable.build({
-			label: ' Trader Engines ',
-			top: '0',
-			parent: t.screen,
-			left: '0%',
-			width: WIDTH_LEFT_PANEL + '%',
-			height: '33.33%',
-			getDataMethod: getAccountList,
-			mouse: false,						
-			style: {
-				cell: {
-					selected: {
-						bold: true,
-						bg: 'blue',
-					},
-				},
-			}
+	// initAccountTable(){
+	// 	const t = this;
+	// 	t.boards.accountTable = accountTable.build({
+	// 		label: ' Trader Engines ',
+	// 		top: '0',
+	// 		parent: t.screen,
+	// 		left: '0%',
+	// 		width: WIDTH_LEFT_PANEL + '%',
+	// 		height: '33.33%',
+	// 		getDataMethod: getAccountList,
+	// 		mouse: false,						
+	// 		style: {
+	// 			cell: {
+	// 				selected: {
+	// 					bold: true,
+	// 					bg: 'blue',
+	// 				},
+	// 			},
+	// 		}
 	
-		})
-		t.boards.accountTable.focus();
-	}
+	// 	})
+	// 	t.boards.accountTable.focus();
+	// }
 	
 	// initMdTable(){
 	// 	const t = this;
@@ -103,68 +103,40 @@ class AccountDashboard extends Dashboard {
 	// 	});
 	// }
 	
-	// initPosTable(){
-	// 	const t = this;
-	// 	t.posTable = posTable.build({
-	// 		label: ' Positions ',
-	// 		parent: t.screen,
-	// 		top: '0',
-	// 		left: WIDTH_LEFT_PANEL + '%',
-	// 		width: 100 - WIDTH_LEFT_PANEL + '%',
-	// 		height: '55%',
-	// 		getDataMethod: getAccountPos
-	// 	})
-	// }
+	initPosTable(){
+		const t = this;
+		t.boards.posTable = posTable().build({
+			label: ' Positions ',
+			parent: t.screen,
+			top: '0',
+			left: WIDTH_LEFT_PANEL - 5 + '%',
+			width: 100 - WIDTH_LEFT_PANEL + 5.5 + '%',
+			height: '45%-1'
+		})
+	}
 	
-	// initPnl(){
-	// 	const t = this;
-	// 	this.pnl = line({ 
-	// 		style:{ 
-	// 			line: "yellow", 
-	// 			text: "white", 
-	// 			baseline: "white",
-	// 		},
-	// 		xPadding: 5,
-	// 		border: {
-	// 			type: 'line',
-	// 		},
-	// 		padding: DEFAULT_PADDING,
-	// 		showLegend: false,
-	// 		wholeNumbersOnly: false, //true=do not show fraction in y axis
-	// 		label: 'Pnl',
-	// 		top: '33.33%',
-	// 		left: WIDTH_LEFT_PANEL / 2 + '%',
-	// 		width: WIDTH_LEFT_PANEL / 2 + '%',
-	// 		height: '23.66%',
-	// 		align: 'center'
-	// 	})
-	//   	this.screen.append(this.pnl) //must append before setting data		
-	// }
+	initOrderList(){
+		const t = this;
+		t.boards.orderTable = orderTable('account').build({
+			label: ' Today Orders ',
+			parent: t.screen,
+			top: '45%',
+			width: WIDTH_LEFT_PANEL - 5 + '%',
+			height: '45%'
+		});
+	}
 	
-	// initOrderList(){
-	// 	const t = this;
-	// 	t.orderTable = orderTable.build({
-	// 		label: ' Today Orders ',
-	// 		parent: t.screen,
-	// 		top: '56%',
-	// 		width: WIDTH_LEFT_PANEL - 5 + '%',
-	// 		height: '39%',
-	// 		getDataMethod: getAccountOrder
-	// 	});
-	// }
-	
-	// initTradeList(){
-	// 	const t = this;
-	// 	t.tradeTable = tradeTable.build({
-	// 		label: ' Today Trades ',
-	// 		parent: t.screen,
-	// 		top: '56%',
-	// 		left: WIDTH_LEFT_PANEL - 5 + '%',
-	// 		width: 100 - WIDTH_LEFT_PANEL + 5.5 + '%',
-	// 		height: '39%',
-	// 		getDataMethod: getAccountTrade
-	// 	});
-	// }
+	initTradeList(){
+		const t = this;
+		t.boards.tradeTable = tradeTable('account').build({
+			label: ' Today Trades ',
+			parent: t.screen,
+			top: '45%',
+			left: WIDTH_LEFT_PANEL - 5 + '%',
+			width: 100 - WIDTH_LEFT_PANEL + 5.5 + '%',
+			height: '45%'
+		});
+	}
 	
 	initBoxInfo() {
 		const t = this;
@@ -262,14 +234,14 @@ class AccountDashboard extends Dashboard {
 		const t = this;
 		let i = 0;
 		let boards = ['accountTable', 'mdTable', 'posTable', 'orderTable', 'tradeTable'];
-		t.screen.key(['left', 'right'], (ch, key) => {
+		t.screen.key(['left', 'right'], (ch: any, key: any) => {
 			(key.name === 'left') ? i-- : i++;
 			if (i === 5) i = 0;
 			if (i === -1) i = 4;
-			t[boards[i]].focus();
+			t.boards[boards[i]].focus();
 		});
 	
-		t.screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+		t.screen.key(['escape', 'q', 'C-c'], function() {
 			t.screen.destroy();
 			process.exit(0);
 		});	
@@ -321,7 +293,6 @@ class AccountDashboard extends Dashboard {
 
 
 export default (accountId: string) => {
-	console.log(accountId,'---')
 	const accountDashboard = new AccountDashboard(accountId);
 	// accountDashboard.init();
 	// accountDashboard.render();

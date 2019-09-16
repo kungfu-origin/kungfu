@@ -11,14 +11,14 @@ String.prototype.toAccountId = function(){
 // close = '1',
 // close_today = '2',
 // close_yesterday = '3'
-export const offsetName = {
+export const offsetName: StringToStringObject = {
     '0': 'open',
     '1': 'close',
     '2': 'closeT',
     '3': 'closeY'
 }
 
-export const sideName = {
+export const sideName: StringToStringObject = {
     '0': 'buy',
     '1': 'sell'
 }
@@ -32,7 +32,7 @@ export const sideName = {
 // PartialFilledNotActive = '6', //部分撤单
 // PartialFilledActive = '7' //正在交易
 // 3,4,5,6已完成
-export const orderStatus = {
+export const orderStatus: StringToStringObject = {
     '0': 'wait',
     '1': 'Submitted',
     '2': 'Pending',
@@ -45,15 +45,15 @@ export const orderStatus = {
 
 //     DirectionLong = '0'
 //    DirectionShort = '1'
-export const posDirection = {
-    0: 'Long',
-    1: 'Short' 
+export const posDirection: StringToStringObject = {
+    '0': 'Long',
+    '1': 'Short' 
 }
 
-export const DEFAULT_PADDING = {
-    top : 1,
-    left : 1,
-    right : 1
+export const DEFAULT_PADDING: StringToNumberObject = {
+    'top' : 1,
+    'left' : 1,
+    'right' : 1
 };
 
 export const TABLE_BASE_OPTIONS = {
@@ -120,8 +120,9 @@ export const parseToString = (targetList: any[], columnWidth: any[], pad = 2) =>
 }
 
 
-export const calcuHeaderWidth = (target: any[], wish = []) => {
-	return target.map((t, i) => {
+export const calcuHeaderWidth = (target: string[], wish: any[]) => {
+	wish = wish || [];
+	return target.map((t: string, i) => {
 		if(wish[i] === 'auto') return wish[i];
 		if(t.length < (wish[i] || 0)) return wish[i]
 		else return t.length
@@ -154,7 +155,7 @@ export const dealStatus = (status: string) => {
 	else return colors.grey(status)
 }
 
-export const dealNum = (num: number, percentage: boolean) => {
+export const dealNum = (num: number, percentage?: boolean) => {
 	const percentageStr: string = percentage ? '%' : '';
 	const targetNum: string = (percentageStr ? toDecimal(num, 4, 2) : toDecimal(num)) + '' || '--'
 	if(targetNum === '--') return '--'
