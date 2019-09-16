@@ -67,6 +67,8 @@ class Strategy(pywingchun.Strategy):
         self.ctx.get_inst_info = self.__get_inst_info
         self.ctx.subscribe = wc_context.subscribe
         self.ctx.add_account = wc_context.add_account
+        self.ctx.list_accounts = wc_context.list_accounts
+        self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
         self.__init_ledger()

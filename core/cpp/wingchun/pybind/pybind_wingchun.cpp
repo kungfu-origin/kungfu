@@ -631,6 +631,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("add_timer", &strategy::Context::add_timer)
             .def("add_time_interval", &strategy::Context::add_time_interval)
             .def("add_account", &strategy::Context::add_account)
+            .def("list_accounts", &strategy::Context::list_accounts)
+            .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
             .def("subscribe", &strategy::Context::subscribe)
             .def("insert_order", &strategy::Context::insert_order)
             .def("cancel_order", &strategy::Context::cancel_order);

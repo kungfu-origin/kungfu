@@ -50,12 +50,18 @@ namespace kungfu
 
         void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
         {
-            require_write_to(master_commands_location_->uid, trigger_time, dest_id);
+            if (get_io_device()->get_home()->mode == mode::LIVE)
+            {
+                require_write_to(master_commands_location_->uid, trigger_time, dest_id);
+            }
         }
 
         void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, bool pub)
         {
-            require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
+            if (get_io_device()->get_home()->mode == mode::LIVE)
+            {
+                require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
+            }
         }
 
         void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback)

@@ -90,16 +90,40 @@ namespace kungfu
 
                 auto home = app_.get_io_device()->get_home();
                 auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
-                if (not app_.has_location(account_location->uid))
+                if (home->mode == mode::LIVE and not app_.has_location(account_location->uid))
                 {
                     throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
                 }
+
+                accounts_[account_id] = account_location;
+                account_cash_limits_[account_id] = cash_limit;
                 account_location_ids_[account_id] = account_location->uid;
 
                 app_.request_write_to(app_.now(), account_location->uid);
                 app_.request_read_from(app_.now(), account_location->uid, true);
                 app_.request_read_from(app_.now(), account_location->uid);
+
                 SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
+            }
+
+            std::vector<yijinjing::data::location_ptr> Context::list_accounts()
+            {
+                std::vector<yijinjing::data::location_ptr> acc_locations;
+                for (auto item : accounts_)
+                {
+                    acc_locations.push_back(item.second);
+                }
+                return acc_locations;
+            }
+
+            double Context::get_account_cash_limit(const std::string &account)
+            {
+                uint32_t account_id = yijinjing::util::hash_str_32(account);
+                if (account_cash_limits_.find(account_id) == account_cash_limits_.end())
+                {
+                    throw wingchun_error(fmt::format("invalid account {}", account));
+                }
+                return account_cash_limits_[account_id];
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
