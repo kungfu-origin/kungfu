@@ -27,7 +27,7 @@
                     <template v-if="feeSetting.default && key === 'instrument_id'"> 默认 </template>
                     <el-input size="mini" v-else-if="feeTmp[key].type === 'string'" :type="feeTmp[key].key" v-model.trim="feeSettingForm.fees[index][key]"></el-input>
                     <el-input-number size="mini" v-else-if="feeTmp[key].type === 'number'"  :controls="false" v-model.trim="feeSettingForm.fees[index][key]"></el-input-number>
-                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" :disabled="(accountType === 'stock') && (key === 'instrument_type')" placeholder="请选择">
+                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" placeholder="请选择">
                         <el-option
                             v-for="(value, key) in feeTmp[key].options"
                             :key="key"
@@ -99,7 +99,8 @@ export default {
         //需要保证与当前账户类型一致，
         //过滤 stock: 股票 债券 etf, 
         //    future: 其他
-        const targetTypes = t.accountType === 'stock' ? [0, 1, 3] : [2, 4]
+        // const targetTypes = t.accountType === 'stock' ? [0, 1, 3] : [2, 4]
+        const targetTypes = t.accountType === 'stock' ? [1] : [2]
         t.getFeeSettingData(t.accountId).then(res => {
             t.feeSettingForm.fees = res.map(res => {
                 //指定默认
@@ -145,14 +146,14 @@ export default {
         },
 
         resolveFeeSettingData(fees, sourceType){
-            const instrumentType = sourceType === 'future' ? '2' : '1'
+            // const instrumentType = sourceType === 'future' ? '2' : '1'
             return fees.map(fee => {
                 const f = JSON.parse(JSON.stringify(fee));
                 f.default = null;
                 delete f.default;
                 return {
                     ...f,
-                    instrument_type: instrumentType
+                    // instrument_type: instrumentType
                 }
             })
         },
