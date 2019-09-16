@@ -16,19 +16,19 @@ class Strategy(pywingchun.Strategy):
         ctx.strptime = kft.strptime
         ctx.inst_infos = {}
         self.ctx = ctx
-        self.ctx.ledger = None
+        self.ctx.book = None
         self.__init_strategy(ctx.path)
 
     def __init_ledger(self):
         ledger_location = pyyjj.location(pyyjj.get_mode_by_name(self.ctx.mode), pyyjj.category.SYSTEM, 'service', 'ledger', self.ctx.locator)
         self.ctx.ledger_db = LedgerDB(ledger_location, "ledger")
-        self.ctx.inst_infos = { inst["instrument_id"]: inst for inst in self.ctx.ledger_db.all_instrument_infos() }
-        self.ctx.ledger = self.ctx.ledger_db.load(ctx=self.ctx,ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
-        if self.ctx.ledger is None:
-            self.ctx.ledger = AccountBook(self.ctx, ledger_category=LedgerCategory.Portfolio,client_id=self.ctx.name, avail=1e7, trading_day=self.ctx.trading_day)
+        self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.ledger_db.all_instrument_infos()}
+        self.ctx.book = self.ctx.ledger_db.load(ctx=self.ctx, ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
+        if self.ctx.book is None:
+            self.ctx.book = AccountBook(self.ctx, ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name, avail=1e7, trading_day=self.ctx.trading_day)
 
     def __get_inst_info(self, instrument_id):
-        if not instrument_id in self.ctx.inst_infos:
+        if instrument_id not in self.ctx.inst_infos:
             self.ctx.inst_infos[instrument_id] = self.ctx.ledger_db.get_instrument_info(instrument_id)
         return self.ctx.inst_infos[instrument_id]
 
@@ -85,7 +85,7 @@ class Strategy(pywingchun.Strategy):
 
     def on_quote(self, wc_context, quote):
         self._on_quote(self.ctx, quote)
-        self.ctx.ledger.apply_quote(quote)
+        self.ctx.book.apply_quote(quote)
 
     def on_entrust(self, wc_context, entrust):
         self._on_entrust(self.ctx, entrust)
@@ -98,13 +98,13 @@ class Strategy(pywingchun.Strategy):
 
     def on_trade(self, wc_context, trade):
         self._on_trade(self.ctx, trade)
-        self.ctx.ledger.apply_trade(trade)
+        self.ctx.book.apply_trade(trade)
 
     def on_trading_day(self, wc_context, daytime):
         trading_day = kft.to_datetime(daytime)
         self.ctx.logger.info("on trading day {}".format(trading_day))
-        if self.ctx.ledger:
-            self.ctx.ledger.apply_trading_day(trading_day)
+        if self.ctx.book:
+            self.ctx.book.apply_trading_day(trading_day)
         self.ctx.trading_day = trading_day
         self.ctx.logger.info("assign trading day {} for ctx".format(trading_day))
         self._on_trading_day(self.ctx, daytime)

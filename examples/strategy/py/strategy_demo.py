@@ -17,7 +17,7 @@ def pre_start(context):
     context.subscribe(source, ["600000", "601988"], exchange)
 
 def on_quote(context, quote):
-    context.logger.info("position: {}".format(context.ledger.get_position(quote.instrument_id, exchange)))
+    context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
     order_id = context.insert_order(quote.instrument_id, exchange, "15040900", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open)
     context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
 
