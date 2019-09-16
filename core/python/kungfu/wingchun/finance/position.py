@@ -495,7 +495,7 @@ class FuturePosition(Position):
     def apply_trade(self, trade):
         if trade.offset == Offset.Open:
             self._apply_open(trade)
-        elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday:            
+        elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday or trade.offset == Offset.CloseYesterday:
             self._apply_close(trade)
 
     def apply_quote(self, quote):
