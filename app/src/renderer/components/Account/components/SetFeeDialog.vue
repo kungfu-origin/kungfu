@@ -27,7 +27,7 @@
                     <template v-if="feeSetting.default && key === 'instrument_id'"> 默认 </template>
                     <el-input size="mini" v-else-if="feeTmp[key].type === 'string'" :type="feeTmp[key].key" v-model.trim="feeSettingForm.fees[index][key]"></el-input>
                     <el-input-number size="mini" v-else-if="feeTmp[key].type === 'number'"  :controls="false" v-model.trim="feeSettingForm.fees[index][key]"></el-input-number>
-                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" placeholder="请选择">
+                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" :disabled="(accountType === 'stock') && (key === 'instrument_type')" placeholder="请选择">
                         <el-option
                             v-for="(value, key) in feeTmp[key].options"
                             :key="key"
