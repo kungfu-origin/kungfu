@@ -85,9 +85,6 @@ export default {
             if(b === 'instrument_type') a['instrument_type'] = this.accountType === 'future' ? '2' : '1';
             return a;
         })
-
-        console.log(defaultFeeSetting)
-
         t.defaultFeeSetting = Object.freeze(defaultFeeSetting)
         return {
             feeTmp,
