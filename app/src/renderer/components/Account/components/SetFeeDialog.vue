@@ -27,7 +27,7 @@
                     <template v-if="feeSetting.default && key === 'instrument_id'"> 默认 </template>
                     <el-input size="mini" v-else-if="feeTmp[key].type === 'string'" :type="feeTmp[key].key" v-model.trim="feeSettingForm.fees[index][key]"></el-input>
                     <el-input-number size="mini" v-else-if="feeTmp[key].type === 'number'"  :controls="false" v-model.trim="feeSettingForm.fees[index][key]"></el-input-number>
-                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" placeholder="请选择">
+                    <el-select size="mini" v-else-if="feeTmp[key].type === 'select'"  collapse-tags v-model="feeSettingForm.fees[index][key]" :disabled="key === 'instrument_type'" placeholder="请选择">
                         <el-option
                             v-for="(value, key) in feeTmp[key].options"
                             :key="key"
@@ -80,16 +80,31 @@ export default {
         const t = this;
         const feeTmp = feeTemplate(t.accountType);
         //初始化
-        let defaultFeeSetting = {};
-        Object.keys(feeTmp || {}).forEach(key => defaultFeeSetting[key] = '')
+        const defaultFeeSetting = [{}, ...Object.keys(feeTmp || {})].reduce((a, b) => {
+            a[b] = ''
+            if(b === 'instrument_type') a['instrument_type'] = this.accountType === 'future' ? '2' : '1';
+            return a;
+        })
+
+        console.log(defaultFeeSetting)
+
         t.defaultFeeSetting = Object.freeze(defaultFeeSetting)
         return {
             feeTmp,
             feeSettingForm: {
                 fees: [
-                    {...t.defaultFeeSetting, default: true}
+                    {
+                        ...t.defaultFeeSetting, 
+                        default: true
+                    }
                 ]
             }
+        }
+    },
+
+    computed: {
+        instrumentType() {
+            return this.accountType === 'future' ? '2' : '1'
         }
     },
 
@@ -146,14 +161,13 @@ export default {
         },
 
         resolveFeeSettingData(fees, sourceType){
-            // const instrumentType = sourceType === 'future' ? '2' : '1'
             return fees.map(fee => {
                 const f = JSON.parse(JSON.stringify(fee));
                 f.default = null;
                 delete f.default;
                 return {
                     ...f,
-                    // instrument_type: instrumentType
+                    instrument_type: t.instrumentType
                 }
             })
         },
