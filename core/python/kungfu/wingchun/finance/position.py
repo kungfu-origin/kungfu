@@ -97,7 +97,7 @@ class Position:
     def apply_quote(self, quote):
         raise NotImplementationError
 
-    def switch_day(self, trading_day):
+    def apply_trading_day(self, trading_day):
         raise NotImplementationError
 
 class StockPosition(Position):
@@ -206,13 +206,15 @@ class StockPosition(Position):
             self._last_price = quote.last_price
         self.ledger.dispatch([self.ledger.message, self.message])
 
-    def switch_day(self, trading_day):
-        if not is_valid_price(self.close_price):
-            self._apply_settlement(self.last_price)
-        self._pre_close_price = self.close_price
-        self._yesterday_volume = self.volume
-        self._close_price = 0.0
-        self.trading_day = trading_day
+    def apply_trading_day(self, trading_day):
+        if not self.trading_day == trading_day:
+            self.ledger._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
+            if not is_valid_price(self.close_price):
+                self._apply_settlement(self.last_price)
+            self._pre_close_price = self.close_price
+            self._yesterday_volume = self.volume
+            self._close_price = 0.0
+            self.trading_day = trading_day
 
     def _apply_settlement(self, close_price):
         self._last_price = close_price
@@ -353,10 +355,11 @@ class FuturePositionDetail:
         self._settlement_price = settlement_price
         return pre_margin - self.margin
 
-    def switch_day(self, trading_day):
-        self._trading_day = trading_day
-        self._pre_settlement_price = self._settlement_price
-        self._settlement_price = 0.0
+    def apply_trading_day(self, trading_day):
+        if not self._trading_day == trading_day:
+            self._pre_settlement_price = self._settlement_price
+            self._settlement_price = 0.0
+            self._trading_day = trading_day
 
     def update_last_price(self, last_price):
         pre_position_pnl = self.position_pnl
@@ -504,13 +507,15 @@ class FuturePosition(Position):
         elif is_valid_price(quote.last_price):
             self._update_last_price(quote.last_price)
 
-    def switch_day(self, trading_day):
-        if not is_valid_price(self._settlement_price):
-            self._apply_settlement(self._last_price)
+    def apply_trading_day(self, trading_day):
         for detail in self.details:
-            detail.switch_day(trading_day)
-        self._pre_settlement_price = self._settlement_price
-        self._settlement_price = 0.0
+            detail.apply_trading_day(trading_day)
+        if not self.trading_day == trading_day:
+            self.ledger._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
+            if not is_valid_price(self._settlement_price):
+                self._apply_settlement(self._last_price)
+                self._pre_settlement_price = self._settlement_price
+                self._settlement_price = 0.0
         self.trading_day = trading_day
 
     def _apply_close(self, trade):
@@ -527,6 +532,8 @@ class FuturePosition(Position):
             messages.append(detail.message)
             if detail.volume <= 0:
                 self._details.pop(0)
+        if volume_left != 0:
+            self.ledger._ctx.logger.warn("unprocessed trade volume: {}".format(volume_left))
         messages.append(self.ledger.message)
         messages.append(self.message)
         self.ledger.dispatch(messages)
