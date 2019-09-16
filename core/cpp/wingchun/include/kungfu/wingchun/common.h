@@ -354,10 +354,6 @@ namespace kungfu
                 {
                     return InstrumentType::Fund;
                 }
-                else if(startswith(instrument_id, "688"))
-                {
-                    return InstrumentType::TechStock;
-                }
                 else if(startswith(instrument_id, "6"))
                 {
                     return InstrumentType::Stock;
