@@ -21,11 +21,11 @@ def get_position_effect(instrument_type, side, offset):
         return Direction.Long
     elif side == Side.Buy and offset == Offset.Open:
         return Direction.Long
-    elif side == Side.Sell and (offset == Offset.Close or offset == Offset.CloseToday):
+    elif side == Side.Sell and (offset == Offset.Close or offset == Offset.CloseToday or offset == Offset.CloseYesterday):
         return Direction.Long
     elif side == Side.Sell and offset == Offset.Open:
         return Direction.Short
-    elif side == Side.Buy and (offset == Offset.Close or offset == Offset.CloseToday):
+    elif side == Side.Buy and (offset == Offset.Close or offset == Offset.CloseToday or offset == Offset.CloseYesterday):
         return Direction.Short
     else:
         raise ValueError('could not find position effect for instrument_type {}, side {}, offset {}'.format(instrument_type, side, offset))

@@ -148,6 +148,12 @@ namespace kungfu
             uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                                  double limit_price, int64_t volume, PriceType type, Side side, Offset offset)
             {
+                auto inst_type = get_instrument_type(symbol, exchange);
+                if (inst_type != InstrumentType::Stock && inst_type != InstrumentType::Future)
+                {
+                    SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(inst_type), symbol, exchange);
+                    return 0;
+                }
                 auto writer = app_.get_writer(lookup_account_location_id(account));
                 msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
                 input.order_id = writer->current_frame_uid();

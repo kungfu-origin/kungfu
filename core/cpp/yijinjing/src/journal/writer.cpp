@@ -77,6 +77,9 @@ namespace kungfu
             void writer::close_frame(size_t data_length)
             {
                 auto frame = journal_->current_frame();
+                auto next_frame_address = frame->address() + frame->header_length() + data_length;
+                assert(next_frame_address < journal_->current_page_->address_border());
+                memset(reinterpret_cast<void *>(next_frame_address), 0, sizeof(frame_header));
                 frame->set_gen_time(time::now_in_nano());
                 frame->set_data_length(data_length);
                 journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
@@ -105,6 +108,7 @@ namespace kungfu
                 frame->set_msg_type(msg_type);
                 frame->set_source(journal_->location_->uid);
                 frame->set_dest(journal_->dest_id_);
+                memset(reinterpret_cast<void *>(frame->address() + frame->header_length()), 0, sizeof(frame_header));
                 frame->set_gen_time(gen_time);
                 frame->set_data_length(0);
                 journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());

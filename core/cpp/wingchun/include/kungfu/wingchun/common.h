@@ -49,7 +49,11 @@ namespace kungfu
             Stock,
             Future,
             Bond,
-            StockOption
+            StockOption,
+            Fund,
+            TechStock,
+            Index,
+            Repo
         };
 
         enum class ExecType: int8_t
@@ -227,6 +231,16 @@ namespace kungfu
             return std::strncmp(s1.c_str(), s2.c_str(), l) == 0;
         }
 
+        inline bool endswith(const std::string& str, const std::string& suffix)
+        {
+            return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
+        }
+
+        inline bool startswith(const std::string& str, const std::string& prefix)
+        {
+            return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
+        }
+
         inline bool is_final_status(const OrderStatus &status)
         {
             switch (status)
@@ -318,20 +332,82 @@ namespace kungfu
 
         inline InstrumentType get_instrument_type(const std::string &instrument_id, const std::string &exchange_id)
         {
-            if (string_equals(exchange_id, EXCHANGE_SSE) || string_equals(exchange_id, EXCHANGE_SZE))
+            if (string_equals(exchange_id, EXCHANGE_SSE))
             {
-                if (is_reverse_repurchase(instrument_id, exchange_id))
+                if(startswith(instrument_id, "00"))
+                {
+                    return InstrumentType::Index;
+                }
+                else if(startswith(instrument_id, "0"))
                 {
                     return InstrumentType::Bond;
                 }
-                else
+                else if(startswith(instrument_id, "1"))
+                {
+                    return InstrumentType::Bond;
+                }
+                else if(startswith(instrument_id, "2"))
+                {
+                    return InstrumentType::Repo;
+                }
+                else if (startswith(instrument_id, "5"))
+                {
+                    return InstrumentType::Fund;
+                }
+                else if(startswith(instrument_id, "688"))
+                {
+                    return InstrumentType::TechStock;
+                }
+                else if(startswith(instrument_id, "6"))
                 {
                     return InstrumentType::Stock;
                 }
             }
-            else
+            else if(string_equals(exchange_id, EXCHANGE_SZE))
+            {
+                if (startswith(instrument_id, "0"))
+                {
+                    return InstrumentType::Stock;
+                }
+                else if(startswith(instrument_id, "1"))
+                {
+                    return InstrumentType::Bond;
+                }
+            }
+            else if(string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) || string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) || string_equals(exchange_id, EXCHANGE_INE))
             {
                 return InstrumentType::Future;
+            }
+            else
+            {
+                return InstrumentType::Unknown;
+            }
+        }
+
+        inline std::string str_from_instrument_type(InstrumentType type)
+        {
+            switch(type)
+            {
+                case InstrumentType::Unknown:
+                    return "Unknown";
+                case InstrumentType::Stock:
+                    return "Stock";
+                case InstrumentType::Future:
+                    return "Future";
+                case InstrumentType::Bond:
+                    return "Bond";
+                case InstrumentType::StockOption:
+                    return "StockOption";
+                case InstrumentType::Fund:
+                    return "Fund";
+                case InstrumentType::TechStock:
+                    return "TechStock";
+                case InstrumentType::Index:
+                    return "Index";
+                case InstrumentType::Repo:
+                    return "Repo";
+                default:
+                    return "Unknown";
             }
         }
 

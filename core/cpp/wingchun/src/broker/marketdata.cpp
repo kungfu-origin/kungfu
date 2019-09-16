@@ -36,7 +36,7 @@ namespace kungfu
                       SPDLOG_INFO("subscribe request");
                       std::vector<Instrument> symbols;
                       const char *buffer = &(event->data<char>());
-                      hffix::message_reader reader(buffer, buffer + 1024);
+                      hffix::message_reader reader(buffer, buffer + event->data_length());
                       for (; reader.is_complete(); reader = reader.next_message_reader())
                       {
                           if (reader.is_valid())
