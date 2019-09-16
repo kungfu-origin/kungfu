@@ -1,15 +1,17 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, getLog } from '__gUtils/busiUtils';
+import { addFile } from '__gUtils/fileUtils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { getAccountList } from '__io/db/account';
 import { getStrategyList } from '__io/db/strategy';
 import { parseToString, dealStatus } from '@/assets/scripts/utils';
-import { Observable, combineLatest, zip, concat } from 'rxjs';
-import { mergeAll, map, concatAll } from 'rxjs/operators'
+import { Observable, combineLatest, zip, merge } from 'rxjs';
 import logColor from '__gConfig/logColorConfig';
 
 const colors = require('colors');
 const path = require('path');
+const { Tail } = require('tail');
+
 
 export const getAccountsStrategys = async (): Promise<any> => {
     const getAccounts = getAccountList();
@@ -22,15 +24,17 @@ export const getAccountsStrategys = async (): Promise<any> => {
     }
 }
 
-export const accountStrategyListStringify = (accounts: Account[], strategys: Strategy[]) => {
+export const accountStrategyListStringify = (accounts: Account[], strategys: Strategy[], isTd?: boolean) => {
     return [
         ...accounts.map((a: Account): string => parseToString(
-            [colors.cyan('account'), a.account_id],
+            [colors.cyan(isTd ? 'td' : 'account'), 
+            isTd ? `td_${a.account_id}` : a.account_id],
             [8, 'auto'],
             1
         )),
         ...strategys.map((s: Strategy): string => parseToString(
-            [colors.yellow('strategy'), s.strategy_id],
+            [colors.blue('strategy'), 
+            s.strategy_id],
             [8, 'auto'],
             1
         ))
@@ -38,11 +42,11 @@ export const accountStrategyListStringify = (accounts: Account[], strategys: Str
 }
 
 export const processStatusObservable = () => {
-    return new Observable(subscriber => {
+    return new Observable(observer => {
         setTimerPromiseTask(() => {
             return listProcessStatus()
                 .then((processStatus: StringToStringObject) => {
-                    subscriber.next(processStatus)
+                    observer.next(processStatus)
                 })
                 .catch((err: Error) => console.error(err))
         }, 2000)    
@@ -50,11 +54,11 @@ export const processStatusObservable = () => {
 }
 
 export const accountListObservable = () => {
-    return new Observable(subsciber => {
+    return new Observable(observer => {
         setTimerPromiseTask(() => {
             return getAccountList()
                 .then((accountList: Account[]) => {
-                    subsciber.next(accountList)
+                    observer.next(accountList)
                 })
                 .catch((err: Error) => console.error(err))
         }, 5000)
@@ -62,11 +66,11 @@ export const accountListObservable = () => {
 }
 
 export const strategyListObservable = () => {
-    return new Observable(subsciber => {
+    return new Observable(observer => {
         setTimerPromiseTask(() => {
             return getStrategyList()
             .then((strategyList: Strategy[]) => {
-                subsciber.next(strategyList)
+                observer.next(strategyList)
             })
             .catch((err: Error) => console.error(err))
         }, 5000)
@@ -146,19 +150,21 @@ export const processListObservable = combineLatest(
 )
 
 const renderColoredProcessName = (processId: string) => {
-    if(processId === 'master' || processId === 'ledger') 
+    if(processId === 'master' || processId === 'ledger') {
         return colors.bold.underline.bgMagenta(processId)
+    } 
     else if(processId.indexOf('td') !== -1) {
         return colors.bold.underline.cyan(processId)
     }
     else if(processId.indexOf('md') !== -1) {
         return colors.bold.underline.yellow(processId)
     }
-    else 
+    else {
         return colors.bold.underline.blue(processId)
+    }
 }
 
-const _dealLogMessage = (line: string, processId: string) => {
+const dealLogMessage = (line: string, processId: string) => {
     let lineData: LogDataOrigin;
     try{
         lineData = JSON.parse(line);
@@ -192,11 +198,11 @@ const _dealLogMessage = (line: string, processId: string) => {
 
 const getLogObservable = (pid: string) => {
     const logPath = path.join(LOG_DIR, `${pid}.log`);
-    return new Observable(subscriber => {
-        getLog(logPath, '', (line: string) => _dealLogMessage(line, pid))
-        .then((logList: NumList) => subscriber.next(logList))
-        .catch((err: Error) => subscriber.next(null))
-        .finally(() => subscriber.complete())
+    return new Observable(observer => {
+        getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
+        .then((logList: NumList) => observer.next(logList))
+        .catch((err: Error) => observer.next(null))
+        .finally(() => observer.complete())
     })
 }
 
@@ -208,4 +214,27 @@ export const getMergedLogsObservable = (processIds: string[]) => {
             return getLogObservable(logPath)
         })
     )
+}
+
+const watchLogObservable = (processId: string) => {
+    return new Observable(observer => {
+        const logPath = path.join(LOG_DIR, `${processId}.log`);
+        addFile('', logPath, 'file');
+        const watcher = new Tail(logPath);
+        watcher.watch();
+        watcher.on('line', (line: string) => {
+            const logList: any = dealLogMessage(line, processId);
+            logList.forEach((l: any) => {
+                observer.next(l.message || '')
+            })
+        })
+        watcher.on('error', (err: Error) => {
+            watcher.unwatch();
+        })
+    })
+    
+}
+
+export const watchLogsObservable = (processIds: string[]) => {
+    return merge(...processIds.map(pid => watchLogObservable(pid)))
 }

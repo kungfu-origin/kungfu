@@ -21,12 +21,12 @@ export const listAccountsStrategys = async (): Promise<any> => {
     })
 
     if(!accountsList.length && !strategyList.length) {
-        console.log('No accounts and strategys!')
+        console.log('No accounts and strategies!')
     } else {
         console.log([
-            '\nAccounts: \n',
+            `\n${colors.bold.underline('Accounts:')} \n`,
             ...accountsList, 
-            '\nStrategys: \n', 
+            `\n${colors.bold.underline('Strategies:')} \n`, 
             ...strategyList
         ].join('\n'))
     }

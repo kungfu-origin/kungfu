@@ -341,7 +341,7 @@ function buildListByLineNum(num: number): any {
  * @param  {string} searchKeyword
  */
 export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMethod = dealLogMessage): Promise<any> => {
-    const numList: NumList = buildListByLineNum(30);    
+    const numList: NumList = buildListByLineNum(50);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
         fs.stat(logPath, (err: Error) => {

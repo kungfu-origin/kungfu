@@ -19,26 +19,20 @@ const program = require('commander');
 
 program
     .version(version)
-    // .option('-s --switch-md-source', 'switch md source')
-    // .option('-m --monit [type]', 'monit processes of account|strategy|all', 'all')
-    .action(async (options: any) => {
-        // const sms = options.switchMdSource;
-        // if(sms) return switchMdSource();
-        // var monit = options.monit
-        // if(monit) return monitPrompt(monit);
-    })
+    .option('-l --list', 'list target process to monit')
 
 program
-    .command('monit [name]')
+    .command('monit [options]')
     .description('monitor target process')
-    .action(() => {
-        return monitPrompt()
+    .action((type: any, commander: any) => {
+        const list = commander.parent.list
+        return monitPrompt(!!list)
     })
 
 //list
 program
     .command('list')
-    .description('list accounts and strategys')
+    .description('list accounts and strategies')
     .action(() => {
         return listAccountsStrategys()
             .catch((err: Error) => console.error(err))
@@ -69,7 +63,7 @@ program
 program
     .command('remove')
     .description('remove a account or strategy')
-    .action((type: string) => {
+    .action(() => {
         return removeAccountStrategy()
             .catch((err: Error) => console.error(err))
             .finally(() => process.exit(0));

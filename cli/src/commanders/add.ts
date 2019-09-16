@@ -4,7 +4,7 @@ import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } f
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
 
-var inquirer = require( 'inquirer' );
+const inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 

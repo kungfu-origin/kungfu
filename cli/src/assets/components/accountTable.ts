@@ -1,6 +1,5 @@
-import colors from 'colors';
-import Table from './Table';
-import { calcuHeaderWidth, parseToString, parseAccountList, dealNum, dealStatus } from '../utils';
+import Table from '@/assets/components/Table';
+import { calcuHeaderWidth, parseToString, parseAccountList, dealNum, dealStatus } from '@/assets/utils';
 import { sourceType } from '__gConfig/accountConfig';
 import { toDecimal } from '__gUtils/busiUtils';
 
