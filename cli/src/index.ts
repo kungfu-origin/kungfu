@@ -11,9 +11,6 @@ import { monitPrompt } from '@/components/index';
 import { delaySeconds } from '__gUtils/busiUtils';
 import { startLedger, startMaster } from '__gUtils/processUtils';
 
-
-
-
 const program = require('commander');
 
 

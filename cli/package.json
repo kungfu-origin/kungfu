@@ -1,5 +1,5 @@
 {
-  "name": "kungfu-cli",
+  "name": "kungfu",
   "version": "2.0.0",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
@@ -75,7 +75,7 @@
         ]
       }
     ],
-    "asar": false,
+    "asar": true,
     "dmg": {
       "contents": [
         {

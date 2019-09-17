@@ -52,7 +52,7 @@ export const posDirection: StringToStringObject = {
 
 export const DEFAULT_PADDING: StringToNumberObject = {
     'top' : 1,
-    'left' : 1,
+    'left' : 2,
     'right' : 1
 };
 
@@ -65,7 +65,8 @@ export const TABLE_BASE_OPTIONS = {
 		inverse: true
 	},
 	border: {
-		type: 'line'
+		type: 'line',
+		fg: 'grey'
 	},
 	keys: true,
 	align: 'left',
@@ -177,10 +178,10 @@ export const dealLog = (item: LogData) => {
 	)
 }
 
-export const buildDateRange = () => {
+export const buildTargetDateRange = () => {
 	const momentDay = moment();
-	const startDate =momentDay.format('YYYY-MM-DD')
-	const endDate = momentDay.add(1,'d').format('YYYY-MM-DD')
+	const startDate = momentDay.add(-1, 'd').format('YYYYMMDD')
+	const endDate = momentDay.add(2,'d').format('YYYYMMDD')
 	return [startDate, endDate]
 }
 

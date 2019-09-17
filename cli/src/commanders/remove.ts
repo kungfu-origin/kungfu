@@ -3,6 +3,7 @@ import { parseToString } from '@/assets/scripts/utils';
 import { deleteAccount } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';
 
+const colors = require('colors');
 const inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
@@ -34,7 +35,7 @@ export const removeAccountStrategy = async () => {
     if(type === 'strategy') {
         try{
             await deleteStrat(targetId)
-            console.log(`Delete ${targetType} ${targetId} sucessfully !`)
+            console.log(`Delete ${targetType} ${colors.bold(targetId)} sucessfully !`)
         }catch(err){
             console.error(err)
         }
@@ -42,7 +43,7 @@ export const removeAccountStrategy = async () => {
     else if(type === 'account') {
         try{
             await deleteAccount(targetAccount[0], accounts)
-            console.log(`Delete ${targetType} ${targetId} sucessfully !`)
+            console.log(`Delete ${targetType} ${colors.bold(targetId)} sucessfully !`)
         }catch(err){
             console.error(err)
         }

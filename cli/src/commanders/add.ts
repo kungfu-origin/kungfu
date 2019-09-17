@@ -4,6 +4,7 @@ import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } f
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
 
+const colors = require('colors');
 const inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
@@ -50,10 +51,10 @@ export const addUpdateAccountByPrompt = async (source: string, key: string, conf
     try {
         if(updateModule) {
             await updateAccountConfig(accountId, JSON.stringify(config))
-            console.log(`Update account ${JSON.stringify(config, null , '')} successfully!`)   
+            console.log(`Update ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')} successfully!`)   
         }else{
             await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
-            console.log(`Add account ${JSON.stringify(config, null , '')} successfully!`)   
+            console.log(`Add ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')} successfully!`)   
         }
     }catch(err){
         throw err
@@ -119,10 +120,10 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
         if(updateModule) {
             const strategyId = strategyData.strategy_id;
             await updateStrategyPath(strategyId, strategy_path)
-            console.log(`Update strategy ${strategyId} ${strategy_path} sucess!`)
+            console.log(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path} sucess!`)
         } else {
             await addStrategy(strategy_id, strategy_path)
-            console.log(`Add strategy ${strategy_id} ${strategy_path} sucess!`)
+            console.log(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path} sucess!`)
         }
        
     }catch(err) {

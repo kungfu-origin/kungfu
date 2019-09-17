@@ -1,4 +1,4 @@
-// import strategy from './strategy/index'
+import strategy from '@/components/strategy/index'
 import account from '@/components/account/index'
 import monitor from '@/components/monitor/index';
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
@@ -22,11 +22,16 @@ export const monitPrompt = async (list: boolean) => {
         }
     ]);
 
+    //it is so damn important, because inquirer event will conflict with blessed
+    process.stdin.removeAllListeners('data'); 
+
     const { processName } = answers;
     const processSplit = processName.split(' ')
     const processId = processSplit[processSplit.length - 1].trim();
-    const type = processSplit[0].indexOf('strategy') !== -1 ? 'strategys' : 'accounts';
-    if (type === 'accounts') {
+    const type = processSplit[0].indexOf('strategy') !== -1 ? 'strategy' : 'account';
+    if (type === 'account') {
         return account(processId)
+    } else if(type === 'strategy') {
+        return strategy(processId)
     }
 }

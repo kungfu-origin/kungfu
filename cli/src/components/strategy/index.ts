@@ -13,18 +13,18 @@ const blessed = require('blessed');
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
 
-class AccountDashboard extends Dashboard {
-	accountId: string
+class StrategyDashboard extends Dashboard {
+	strategyId: string
 	screen: any;
 	globalData: {
 		processList: ProcessListItem[];
 	};
 	boards: any;
 
-	constructor(accountId: string){
+	constructor(strategyId: string){
 		super()
-		this.screen.title = 'Account Dashboard';
-		this.accountId = accountId;
+		this.screen.title = 'Strategy Dashboard';
+		this.strategyId = strategyId;
 		this.globalData = {
 			processList: []
 		};
@@ -35,7 +35,7 @@ class AccountDashboard extends Dashboard {
 
 	init(){
 		const t = this;
-		t.initAccountProcessTable();
+		t.initStrategyProcessTable();
 		t.initAssetsTable();
 		t.initPosTable();
 		t.initOrderList();
@@ -47,11 +47,11 @@ class AccountDashboard extends Dashboard {
 		t.bindData();
 	}
 	
-	initAccountProcessTable(){
+	initStrategyProcessTable(){
 		const t = this;
-		this.boards.accountTable = blessed.list({
+		this.boards.strategyTable = blessed.list({
             ...TABLE_BASE_OPTIONS,
-            label: ' Account Trading Engines (Td/Md) ',
+            label: ' Strategy Trading Engines ',
             parent: this.screen,
             padding: DEFAULT_PADDING,
             top: '0',
@@ -68,7 +68,7 @@ class AccountDashboard extends Dashboard {
                 }
             }
         })
-        this.boards.accountTable.focus()
+        this.boards.strategyTable.focus()
 	}
 
 	initAssetsTable(){
@@ -168,7 +168,7 @@ class AccountDashboard extends Dashboard {
 	bindEvent() {
 		const t = this;
 		let i = 0;
-		let boards = ['accountTable', 'assetTable', 'posTable', 'orderTable', 'tradeTable'];
+		let boards = ['strategyTable', 'assetTable', 'posTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch: any, key: any) => {
 			(key.name === 'left') ? i-- : i++;
 			if (i === 5) i = 0;
@@ -181,8 +181,8 @@ class AccountDashboard extends Dashboard {
 			process.exit(0);
 		});	
 
-		t.boards.accountTable.key(['enter'], () => {
-			const selectedIndex: number = t.boards.accountTable.selected;
+		t.boards.strategyTable.key(['enter'], () => {
+			const selectedIndex: number = t.boards.strategyTable.selected;
             switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
         });
 	}
@@ -190,7 +190,8 @@ class AccountDashboard extends Dashboard {
 
 	bindData() {
 		const t = this;
-		tradingDataObservale('account', t.accountId).subscribe((tradingData: any) => {
+
+		tradingDataObservale('strategy', t.strategyId).subscribe((tradingData: any) => {
 			const type = tradingData[0];
 			const data = tradingData[1];
 			switch (type) {
@@ -227,8 +228,7 @@ class AccountDashboard extends Dashboard {
 		processListObservable().subscribe((processList: any) => {
 			processList = processList
 				.filter((proc: ProcessListItem) => {
-					if((proc.type === 'td') && (proc.account_id === t.accountId)) return true;
-					else if((proc.type === 'md') && (t.accountId.indexOf(proc.source_name) !== -1)) return true
+					if(proc.type === 'strategy') return true
 					else if(proc.type === 'main') return true
 					else return false
 			})
@@ -239,7 +239,7 @@ class AccountDashboard extends Dashboard {
                     proc.processName,
                     proc.statusName
                 ], [5, 15, 8]))
-            t.boards.accountTable.setItems(processListResolve);
+            t.boards.strategyTable.setItems(processListResolve);
             t.screen.render();
         })
 	}
@@ -247,7 +247,7 @@ class AccountDashboard extends Dashboard {
 	
 
 
-export default (accountId: string) => new AccountDashboard(accountId)
+export default (strategyId: string) => new StrategyDashboard(strategyId)
 
 
 

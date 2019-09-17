@@ -7,32 +7,40 @@ class TradeTable extends Table {
 	type: string;
 	headers: string[];
 	columnWidth: number[];
+	tradeList: TradeData[];
 
 	constructor(type: string) {
 		super()
 		this.type = type;
-		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Volume', 'Strate']
-		this.columnWidth = [0, 0, 0, 0, 0, 6]
+		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Volume', 
+			type === 'account' ? 'Strate' : 'AccountId '
+		]
+		this.columnWidth = [18, 0, 0, 0, 8, 6, 9];
+		this.tradeList = [];
 	}
 
+	setItems(tradeData: TradeData) {
+		this.tradeList.unshift(tradeData)
+		this.refresh()
+	}
 		/**
 	 * @param  {Object} accountData
 	 * @param  {Object} processStatus
 	 */
-	refresh(tradesData: TradeData[]){
+	refresh(){
 		const t = this;
-		const tradeListData = tradesData.map((trade: TradeData) => {
-			let side = sideName[trade.side] ? sideName[trade.side] : '--';
-			if(side === 'buy') side = colors.red(side);
-			else if(side === 'sell') side = colors.green(side);
-			let offset = offsetName[trade.offset] ? offsetName[trade.offset] : '--';
-			if(offset === 'open') offset = colors.red(offset);
-			else if(offset.indexOf('close') !== -1) offset = colors.green(offset);
+		const tradeListData = t.tradeList.map((trade: TradeData) => {
+			let side = trade.side;
+			if(side.toLowerCase() === 'buy') side = colors.red(side);
+			else if(side.toLowerCase() === 'sell') side = colors.green(side);
+			let offset = trade.offset
+			if(offset.toLowerCase() === 'open') offset = colors.red(offset);
+			else if(offset.toLowerCase() === 'close') offset = colors.green(offset);
 			let last = trade.clientId;
 			if(t.type === 'strategy') last = trade.accountId;
 			return parseToString(
 					[
-					trade.updateTime,
+					trade.updateTime.slice(2),
 					trade.instrumentId,
 					side,
 					offset,

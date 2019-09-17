@@ -5,7 +5,7 @@ const colors = require('colors');
 export const listAccountsStrategys = async (): Promise<any> => {
     const { accounts, strategys } = await getAccountsStrategys()
     const accountsList = accounts.map((a: Account): string => {
-        const asMd: string = !!a.receive_md ? colors.green('md ✓') : ''
+        const asMd: string = !!a.receive_md ? colors.yellow('md ✓') : ''
         return parseToString(
             [colors.cyan('account'), colors.bold(a.account_id), a.source_name, asMd, a.config],
             [10, 12, 5, 10, 'auto'],

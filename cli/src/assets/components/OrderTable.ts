@@ -1,50 +1,64 @@
 import Table from '@/assets/components/Table';
-import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString, buildDateRange } from "@/assets/scripts/utils";
+import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
 
 const colors = require('colors');
 
-interface OrderObject {
+interface OrdersData {
 	[propName: string]: OrderData
 }
 
 class OrderTable extends Table {
 	type: string;
 	headers: string[];
+	ordersData: OrdersData;
+	ordersList: OrderData[];
 	constructor(type: string) {
 		super();
 		this.type = type;
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 'Strate']    
+		this.columnWidth = [18, 0, 0, 0, 8, 12, 8, 9];
+		this.ordersData = {};
+		this.ordersList = []
 	}
 
+	setItems(orderData: OrderData) {
+		this.ordersData[orderData.id] = orderData;
+		this.ordersList = Object.values(this.ordersData || {}).sort((a: OrderData, b: OrderData) => {
+			return  b.updateTimeNum - a.updateTimeNum
+		})
+		this.refresh();
+	}
 	/**
 	 * @param  {Object} accountData
 	 * @param  {Object} processStatus
 	 */
-	refresh(orderData: OrderObject){
+	refresh(){
 		const t = this;
-		const orderListData = Object.values(orderData || {}).map(o => {
-			let side = sideName[o.side] ? sideName[o.side] : '--';
-			if(side === 'buy') side = colors.red(side);
-			else if(side === 'sell') side = colors.green(side);
-			let offset = offsetName[o.offset] ? offsetName[o.offset] : '--';
-			if(offset === 'open') offset = colors.red(offset);
-			else if(offset.indexOf('close') !== -1) offset = colors.green(offset);
-			let status = orderStatus[o.status]
-			if([3, 5, 6].indexOf(+o.status) !== -1) status = colors.green(status);
-			else if(+o.status === 4) status = colors.red(status);
-			else status = colors.grey(status);
+		const orderListData = t.ordersList.map(o => {
+			let side = o.side;
+			if(side.toLowerCase() === 'buy') side = colors.red(side);
+			else if(side.toLowerCase() === 'sell') side = colors.green(side);
+			let offset = o.offset
+			if(offset.toLowerCase() === 'open') offset = colors.red(offset);
+			else if(offset.toLowerCase() === 'close') offset = colors.green(offset);
+			let statusName = o.statusName
+			if([3, 5, 6].indexOf(+o.status) !== -1) statusName = colors.green(statusName);
+			else if(+o.status === 4) statusName = colors.red(statusName);
+			else statusName = colors.grey(statusName);
 
 			let last = o.clientId;
-			if(t.type === 'strategy') last = o.accountId;
+			if(t.type === 'strategy') {
+				last = o.accountId
+			};
 			return parseToString(
 				[
-					o.updateTime,
+					o.updateTime.slice(2),
 					o.instrumentId,
 					side,
 					offset,
 					o.limitPrice,
 					o.volumeTraded,
-					status,
+					statusName,
 					last
 				], 
 				calcuHeaderWidth(t.headers, t.columnWidth), 

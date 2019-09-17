@@ -13,8 +13,8 @@ class PosTable extends Table {
 	posData: PosObject;
 	constructor(){
         super();
-		this.headers = ['Ticker', 'Dir', 'Yest', 'Today/Avail', 'Total', 'Open', 'Last', 'UnrealPnl']
-		this.columnWidth = [0, 4];
+		this.headers = ['Ticker', 'Dir', 'Yesterday', 'Today', 'Total', 'Open', 'Last', 'UnrealPnl']
+		this.columnWidth = [8, 4, 9, 9, 9, 9, 9, 12];
 		this.posData = {};
 	}
 
@@ -24,18 +24,16 @@ class PosTable extends Table {
 	 * @param  {Object} processStatus
 	 */
 
-	setItems(posDataList: PosData[]) {
+	setItems(posData: PosData) {
 		const t = this;
-		posDataList.forEach((p: PosData) => {
-			t.posData[p.id] = p;
-		})
+		t.posData[posData.id] = posData
 		t.refresh(t.posData)
 	}
 
 	refresh(posData: PosObject) {
 		const t = this;
 		const posListData = Object.values(posData || {}).map((p: PosData) => {
-			let direction = posDirection[p.direction]
+			let direction = p.direction
 			if(direction === 'Long') direction = colors.red(direction);
 			else direction = colors.green(direction);
 			let unRealizedPnl = toDecimal(+p.unRealizedPnl);

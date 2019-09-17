@@ -1,17 +1,58 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
-import { setTimerPromiseTask, getLog } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
 import { addFile } from '__gUtils/fileUtils';
 import { listProcessStatus } from '__gUtils/processUtils';
-import { getAccountList } from '__io/db/account';
-import { getStrategyList } from '__io/db/strategy';
-import { parseToString, dealStatus } from '@/assets/scripts/utils';
-import { Observable, combineLatest, zip, merge } from 'rxjs';
+import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
+import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
+import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
+import { switchMaster, switchLedger } from '__io/actions/base';
+import { switchTd, switchMd } from '__io/actions/account';
+import { switchStrategy } from '__io/actions/strategy';
+import * as MSG_TYPE from '__io/nano/msgType';
+import { parseToString, dealStatus, buildTargetDateRange } from '@/assets/scripts/utils';
+import { Observable, combineLatest, zip, merge, observable } from 'rxjs';
 import logColor from '__gConfig/logColorConfig';
+import moment from 'moment';
 
 const colors = require('colors');
 const path = require('path');
 const { Tail } = require('tail');
 
+
+export const switchProcess = (proc: any, messageBoard: any) =>{
+    const status = proc.status === 'online';
+    const startOrStop = !!status ? 'Stop' : 'Start';
+    const startOrStopMaster = !!status ? 'Restart' : 'Start';
+    switch(proc.type) {
+        case 'main':
+            if (proc.processId === 'master') {
+                switchMaster(!status)
+                .then(() => messageBoard.log(`${startOrStopMaster} Master process sucessfully!`, 2))
+                .catch((err: Error) => {})
+            }
+            else if(proc.processId === 'ledger') {
+                switchLedger(!status)
+                .then(() => messageBoard.log(`${startOrStop} Ledger process sucessfully!`, 2))
+                .catch((err: Error) => {})
+            } 
+            break
+        case 'md':
+            switchMd(proc, !status)
+            .then(() => messageBoard.log(`${startOrStop} MD process sucessfully!`, 2))
+            .catch((err: Error) => {})
+            break
+        case 'td':
+            switchTd(proc, !status)
+            .then(() => messageBoard.log(`${startOrStop} TD process sucessfully!`, 2))
+            .catch((err: Error) => {})
+            break;
+        case 'strategy':
+            switchStrategy(proc.processId, !status)
+            .then(() => {messageBoard.log(`${startOrStop} Strategy process sucessfully!`, 2)})
+            .catch((err: Error) => {})
+            break;
+    }
+}
 
 export const getAccountsStrategys = async (): Promise<any> => {
     const getAccounts = getAccountList();
@@ -78,7 +119,7 @@ export const strategyListObservable = () => {
 }
 
 //系统所有进程列表
-export const processListObservable = combineLatest(
+export const processListObservable = () => combineLatest(
     processStatusObservable(),
     accountListObservable(),
     strategyListObservable(),
@@ -112,7 +153,7 @@ export const processListObservable = combineLatest(
             return a;
         })
         const strategyData = [{}, ...strategyList].reduce((a: any, b: any): any => {
-            const strategyProcessId = `td_${b.strategy_id}`
+            const strategyProcessId = `${b.strategy_id}`
             a[strategyProcessId] = {
                 ...b,
                 processName: strategyProcessId,
@@ -220,7 +261,9 @@ const watchLogObservable = (processId: string) => {
     return new Observable(observer => {
         const logPath = path.join(LOG_DIR, `${processId}.log`);
         addFile('', logPath, 'file');
-        const watcher = new Tail(logPath);
+        const watcher = new Tail(logPath, {
+            useWatchFile: true
+        });
         watcher.watch();
         watcher.on('line', (line: string) => {
             const logList: any = dealLogMessage(line, processId);
@@ -238,3 +281,139 @@ const watchLogObservable = (processId: string) => {
 export const watchLogsObservable = (processIds: string[]) => {
     return merge(...processIds.map(pid => watchLogObservable(pid)))
 }
+
+
+export const getOrdersObservable = (type: string, id: string) => {    
+    const getOrderMethods: StringToFunctionObject = {
+        account: getAccountOrder,
+        strategy: getStrategyOrder
+    }
+    const getOrderMethod = getOrderMethods[type]
+    return new Observable(observer => {
+        const dateRange = buildTargetDateRange();
+        getOrderMethod(id,  { dateRange }).then((orders: OrderInputData[]) => {
+            orders.forEach((order: OrderInputData) => {
+                observer.next(['order', dealOrder(order)])
+            })
+        }).finally(() => observer.complete())
+    })
+}
+
+export const getTradesObservable = (type: string, id: string) => {  
+    const getTradeMethods: StringToFunctionObject = {
+        account: getAccountTrade,
+        strategy: getStrategyTrade
+    }
+    const getTradeMethod = getTradeMethods[type]
+    return new Observable(observer => {
+        const dateRange = buildTargetDateRange();
+        getTradeMethod(id,  { dateRange }).then((trades: TradeInputData[]) => {
+            trades.reverse().forEach((trade: TradeInputData) => {
+                observer.next(['trade', dealTrade(trade)])
+            })
+        }).finally(() => observer.complete())
+    })
+}
+
+export const getPosObservable = (type: string, id: string) => {
+    const getPosMethods: StringToFunctionObject = {
+        account: getAccountPos,
+        strategy: getStrategyPos
+    }
+    const getPosMethod = getPosMethods[type]
+    return new Observable(observer => {
+        getPosMethod(id,  {}).then((positions: PosInputData[]) => {
+            positions.forEach((pos: PosInputData) => {
+                observer.next(['pos', dealPos(pos)]);
+            })
+        }).finally(() => observer.complete())
+    })
+}
+
+interface TraderDataSub {
+    msg_type: string;
+    data: any;
+}
+
+export const tradingDataNanoObservable = (type: string, id: string) => {
+    return new Observable(observer => {
+        buildTradingDataPipe().subscribe((d: TraderDataSub) => {
+            const msgType = d.msg_type;
+            const tradingData = d.data;
+            const { account_id, client_id } = tradingData; 
+            const ledgerCategory = tradingData.ledger_category;
+            let targetId: string = '';
+            if(type === 'account') targetId = account_id
+            else if (type === 'stratgy') targetId = client_id
+            
+            if(targetId !== id.toAccountId()) return;
+            switch (+msgType) {
+                case MSG_TYPE.order:
+                    observer.next(['order', dealOrder(tradingData)]);
+                    break
+                case MSG_TYPE.trade:
+                    observer.next(['trade', dealTrade(tradingData)]);
+                    break
+                case MSG_TYPE.position:
+                    if(type === 'account' && ledgerCategory !== 0) return
+                    if(type === 'strategy' && ledgerCategory !== 1) return
+                    observer.next(['pos', dealPos(tradingData)]);
+                    break
+            }
+        })
+    })
+}
+
+export const getAssetObservable = (type: string, id: string) => {
+    const getAssetMethods: StringToFunctionObject = {
+        account: getAccountAssetById,
+        strategy: getStrategyAssetById
+    }
+    const getAssetMethod = getAssetMethods[type]
+    return new Observable(observer => {
+        getAssetMethod(id).then((assets: AssetInputData[]) => {
+            assets.forEach((asset: AssetInputData) => {
+                const assetData = dealAsset(asset);
+                if(type === 'account') delete assetData['clientId']
+                else if(type === 'strategy') delete assetData['accountId']
+                observer.next(['asset', assetData])
+            })
+        }).finally(() => observer.complete())
+    })
+}
+
+export const AssetNanoObservable = (type: string, id: string) => {
+    return new Observable(observer => {
+        buildCashPipe().subscribe(({ data }: any) => {
+            const { account_id, source_id, ledger_category, client_id } = data;
+            if(type === 'account') {
+                const accountId = `${source_id}_${account_id}`;                  
+                if((ledger_category !== 0) || (accountId !== id)) return;
+                const assetData = dealAsset(data);
+                delete assetData['clientId']
+                observer.next(['asset', assetData])
+            } 
+            else if(type === 'strategy') {
+                if((ledger_category !== 1) || (client_id !== id)) return;
+                const assetData = dealAsset(data);
+                delete assetData['accountId']
+                observer.next(['asset', assetData])
+            }
+        })
+    })
+
+}
+
+
+export const tradingDataObservale = (type: string, id: string) => {
+    return merge(
+        getOrdersObservable(type, id),
+        getTradesObservable(type, id),
+        getPosObservable(type, id),
+        tradingDataNanoObservable(type, id),
+        getAssetObservable(type, id),
+        AssetNanoObservable(type, id)
+    )
+}
+
+

@@ -1,14 +1,11 @@
 import Dashboard from '@/assets/components/Dashboard';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString} from '@/assets/scripts/utils';
-import { processListObservable, getMergedLogsObservable, watchLogsObservable } from '@/assets/scripts/actions';
-import { switchMaster, switchLedger } from '__io/actions/base';
-import { switchTd, switchMd } from '__io/actions/account';
-import { switchStrategy } from '__io/actions/strategy';
+import { processListObservable, getMergedLogsObservable, watchLogsObservable, switchProcess } from '@/assets/scripts/actions';
 
 const blessed = require('blessed');
 const moment = require('moment');
 
-const WIDTH_LEFT_PANEL = 30;
+const WIDTH_LEFT_PANEL = 45;
 
 
 interface logDataWithProcessId {
@@ -72,7 +69,7 @@ export class MonitorDashboard extends Dashboard {
             left: '0',
             interactive: true,
 			mouse: false,			
-            width: WIDTH_LEFT_PANEL + '%',
+            width: WIDTH_LEFT_PANEL,
             height: '95%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
@@ -91,8 +88,8 @@ export class MonitorDashboard extends Dashboard {
             label: ' Merged Logs ',
             parent: this.screen,
             top: '0',
-            left: WIDTH_LEFT_PANEL + '%',
-            width: 100 - WIDTH_LEFT_PANEL + '%',
+            left: WIDTH_LEFT_PANEL + 1,
+            width: `100%-${WIDTH_LEFT_PANEL + 1}`,
             height: '95%',
             padding: DEFAULT_PADDING,
 			mouse: true,
@@ -140,7 +137,7 @@ export class MonitorDashboard extends Dashboard {
 
     bindData() {
         const t = this;
-        processListObservable.subscribe((processList: any) => {
+        processListObservable().subscribe((processList: any) => {
             //log the first time get Log
             if(!t.globalData.processList || !t.globalData.processList.length) {
                 t._getLogs(processList)
@@ -179,44 +176,8 @@ export class MonitorDashboard extends Dashboard {
 
         t.boards.processList.key(['enter'], () => {
             const selectedIndex: number = t.boards.processList.selected;
-            t._switchProcess(selectedIndex)
+            switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
         })
-    }
-
-    _switchProcess(selectedIndex: number){
-        const t = this;
-        const proc = t.globalData.processList[selectedIndex];
-        const status = proc.status === 'online';
-        const startOrStop = !!status ? 'Stop' : 'Start';
-        switch(proc.type) {
-            case 'main':
-                if (proc.processId === 'master') {
-                    switchMaster(!status)
-                    .then(() => t.boards.message.log(`${startOrStop} Master process sucessfully!`, 2))
-                    .catch((err: Error) => {})
-                }
-                else if(proc.processId === 'ledger') {
-                    switchLedger(!status)
-                    .then(() => t.boards.message.log(`${startOrStop} Ledger process sucessfully!`, 2))
-                    .catch((err: Error) => {})
-                } 
-                break
-            case 'md':
-                switchMd(proc, !status)
-                .then(() => t.boards.message.log(`${startOrStop} MD process sucessfully!`, 2))
-                .catch((err: Error) => {})
-                break
-            case 'td':
-                switchTd(proc, !status)
-                .then(() => t.boards.message.log(`${startOrStop} TD process sucessfully!`, 2))
-                .catch((err: Error) => {})
-                break;
-            case 'strategy':
-                switchStrategy(proc.processId, !status)
-                .then(() => {t.boards.message.log(`${startOrStop} Strategy process sucessfully!`, 2)})
-                .catch((err: Error) => {})
-                break;
-        }
     }
  
     _getLogs(processList: ProcessListItem[]){
@@ -237,9 +198,8 @@ export class MonitorDashboard extends Dashboard {
                 else return 0
             })
             .forEach((l: logDataWithProcessId) => {
-                process.nextTick(() => {
-                    t.boards.mergedLogs.add(l.message)
-                })
+                t.boards.mergedLogs.add(l.message)
+                t.screen.render()
             })
         })
     }
@@ -249,6 +209,7 @@ export class MonitorDashboard extends Dashboard {
         const processIds = processList.map((p: ProcessListItem) => p.processId)
         watchLogsObservable(processIds).subscribe((l: any) => {
             t.boards.mergedLogs.add(l)
+            t.screen.render()
         })
     }
 }
