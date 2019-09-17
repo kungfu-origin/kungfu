@@ -374,10 +374,7 @@ namespace kungfu
             {
                 return InstrumentType::Future;
             }
-            else
-            {
-                return InstrumentType::Unknown;
-            }
+            return InstrumentType::Unknown;
         }
 
         inline std::string str_from_instrument_type(InstrumentType type)
@@ -449,7 +446,8 @@ namespace kungfu
 
         inline std::string get_exchange_id_from_future_instrument_id(const std::string &instrument_id)
         {
-            std::string product = std::string(instrument_id).substr(0, instrument_id.length() - 4);
+            std::size_t found = instrument_id.find_first_of("0123456789");
+            std::string product = instrument_id.substr(0, found);
             std::transform(product.begin(), product.end(), product.begin(), ::tolower);
             if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
                 product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
