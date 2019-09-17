@@ -158,6 +158,7 @@ export default {
         },
 
         resolveFeeSettingData(fees, sourceType){
+            const t = this;
             return fees.map(fee => {
                 const f = JSON.parse(JSON.stringify(fee));
                 f.default = null;
