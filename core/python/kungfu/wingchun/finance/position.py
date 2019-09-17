@@ -31,7 +31,8 @@ class Position:
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.registry[cls._INSTRUMENT_TYPE] = cls
+        for inst_type in cls._INSTRUMENT_TYPES:
+            cls.registry[inst_type] = cls
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.message["data"])
@@ -107,7 +108,7 @@ class Position:
         raise NotImplementationError
 
 class StockPosition(Position):
-    _INSTRUMENT_TYPE = InstrumentType.Stock
+    _INSTRUMENT_TYPES = InstrumentTypeInStock
     def __init__(self, ctx, book, **kwargs):
         super(StockPosition, self).__init__(ctx, book, **kwargs)
         self._last_price = kwargs.pop("last_price", 0.0)
@@ -441,7 +442,7 @@ class FuturePositionDetail:
         return self._contract_multiplier * price * volume * self._margin_ratio
 
 class FuturePosition(Position):
-    _INSTRUMENT_TYPE = InstrumentType.Future
+    _INSTRUMENT_TYPES = [InstrumentType.Future]
     def __init__(self, ctx, book, **kwargs):
         super(FuturePosition, self).__init__(ctx, book, **kwargs)
         details = kwargs.pop("details", [])

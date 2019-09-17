@@ -20,6 +20,7 @@ class Region:
     HK = 'HK'
 
 InstrumentType = pywingchun.constants.InstrumentType
+InstrumentTypeInStock = [InstrumentType.Stock, InstrumentType.Fund, InstrumentType.TechStock]
 Side = pywingchun.constants.Side
 Offset = pywingchun.constants.Offset
 OrderStatus = pywingchun.constants.OrderStatus

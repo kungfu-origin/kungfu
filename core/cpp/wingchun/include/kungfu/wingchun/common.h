@@ -365,9 +365,17 @@ namespace kungfu
                 {
                     return InstrumentType::Stock;
                 }
+                else if(startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18"))
+                {
+                    return InstrumentType::Fund;
+                }
                 else if(startswith(instrument_id, "1"))
                 {
                     return InstrumentType::Bond;
+                }
+                else if(startswith(instrument_id, "30"))
+                {
+                    return InstrumentType::Stock;
                 }
             }
             else if(string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) || string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) || string_equals(exchange_id, EXCHANGE_INE))
