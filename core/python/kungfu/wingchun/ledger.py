@@ -295,7 +295,7 @@ def cancel_all_order(ctx, event, location, data):
 @on(msg.QryAsset)
 def qry_asset(ctx, event, location, data):
     ctx.logger.info("qry asset, input: {}".format(data))
-    book_tags = AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
+    book_tags = kwf.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
     if book_tags in ctx.books:
         message = ctx.books[book_tags].message
         message.update({'status': http.HTTPStatus.OK, 'msg_type': msg.QryAsset})
@@ -331,7 +331,7 @@ def remove_strategy(ctx, event, location, data):
             'msg_type': msg.RemoveStrategy
         }
     else:
-        book_tags = AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=data["name"])
+        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=data["name"])
         ctx.ledger.pop_book(book_tags=book_tags)
         ctx.db.remove(book_tags=book_tags)
         return {
