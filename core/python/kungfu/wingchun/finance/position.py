@@ -321,7 +321,7 @@ class FuturePositionDetail:
 
     @property
     def position(self):
-        return self.position
+        return self._position
 
     @position.setter
     def position(self, value):
@@ -526,6 +526,10 @@ class FuturePosition(Position):
     @property
     def realized_pnl(self):
         return self._realized_pnl
+
+    @realized_pnl.setter
+    def realized_pnl(self, value):
+        self._realized_pnl = value
 
     @property
     def margin(self):

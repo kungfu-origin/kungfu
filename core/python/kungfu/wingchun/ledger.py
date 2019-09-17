@@ -11,12 +11,10 @@ import kungfu.yijinjing.msg as yjj_msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import LedgerDB
 from kungfu.wingchun import msg
-from kungfu.wingchun.finance.book import *
-from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
-from kungfu.wingchun.finance.position import get_uid as get_position_uid
+import kungfu.wingchun.finance as kwf
 from kungfu.wingchun.calendar import Calendar
-from kungfu.wingchun.constants import OrderStatus
-from kungfu.wingchun.utils import is_final_status
+from kungfu.wingchun.constants import OrderStatus, MsgType, LedgerCategory
+import kungfu.wingchun.utils as wc_utils
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
@@ -105,7 +103,7 @@ class Ledger(pywingchun.Ledger):
             self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
             order_record = self.ctx.orders[trade.order_id]
             order = order_record["order"]
-            if not is_final_status(order.status):
+            if not wc_utils.is_final_status(order.status):
                 order_message = self._message_from_order_event(event, order)
                 order_message["data"]["volume_left"] = order.volume_left - trade.volume
                 order_message["data"]["volume_traded"] = order.volume_traded + trade.volume
@@ -117,45 +115,44 @@ class Ledger(pywingchun.Ledger):
         self.ctx.db.add_trade(**message["data"])
         self.publish(json.dumps(message))
         
-        self._get_book(book_tags= AccountBookTags(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id)).apply_trade(trade)
-        self._get_book(book_tags=AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=client_id)).apply_trade(trade)
+        self._get_book(book_tags= kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id)).apply_trade(trade)
+        self._get_book(book_tags=kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=client_id)).apply_trade(trade)
 
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
         if inst_list:
-            self.ctx.db.set_instruments([object_as_dict(inst) for inst in inst_list])
-            self.ctx.inst_infos = {inst.instrument_id: object_as_dict(inst) for inst in inst_list}
+            self.ctx.db.set_instruments([wc_utils.object_as_dict(inst) for inst in inst_list])
+            self.ctx.inst_infos = {inst.instrument_id: wc_utils.object_as_dict(inst) for inst in inst_list}
 
     def on_stock_account(self, asset, positions):
         self.ctx.logger.info("asset: {}".format(asset))
         for pos in positions:
             self.ctx.logger.info("pos: {}".format(pos))
-        book_tags = AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
-        account = AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,positions=[object_as_dict(pos) for pos in positions])
+        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
+        account = kwf.book.AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,positions=[wc_utils.object_as_dict(pos) for pos in positions])
         book = self._get_book(book_tags).merge(account)
         self.publish(json.dumps(book.message))
         self.ctx.db.dump(book)
 
     def on_future_account(self, asset, position_details):
         positions = []
-        key_func = lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)
+        key_func = lambda e: kwf.position.get_uid(e.instrument_id, e.exchange_id, e.direction)
         sorted_position_details = sorted(position_details, key=key_func)
         for uid, detail_group in groupby(sorted_position_details, key=key_func):
             detail_list = list(detail_group)
             direction = detail_list[0].direction
             instrument_id = detail_list[0].instrument_id
             exchange_id = detail_list[0].exchange_id
-            pos_dict = {"instrument_id": instrument_id, "exchange_id": exchange_id, "direction": direction, "details": [object_as_dict(detail) for detail in detail_list]}
+            pos_dict = {"instrument_id": instrument_id, "exchange_id": exchange_id, "direction": direction, "details": [wc_utils.object_as_dict(detail) for detail in detail_list]}
             positions.append(pos_dict)
-        book_tags = AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
-        self.ctx.logger.info("positions: {}".format(positions))
-        account_book = AccountBook(ctx=self.ctx, avail=asset.avail,tags = book_tags, positions= positions)
+        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
+        account_book = kwf.book.AccountBook(ctx=self.ctx, avail=asset.avail,tags = book_tags, positions= positions)
         book = self._get_book(book_tags).merge(account_book)
         self.publish(json.dumps(book.message))
         self.ctx.db.dump(book)
 
     def _message_from_order_event(self, event, order):
-        order_dict = object_as_dict(order)
+        order_dict = wc_utils.object_as_dict(order)
         order_dict["order_id"] = str(order.order_id)
         order_dict["parent_id"] = str(order.parent_id)
         if self.has_location(event.dest):
@@ -177,7 +174,7 @@ class Ledger(pywingchun.Ledger):
                 raise ValueError("failed to find order dest location info, dest uid: {}, order {}".format(event.dest, order))
             else:
                 client_id = order_info["client_id"]
-        trade_dict = object_as_dict(trade)
+        trade_dict = wc_utils.object_as_dict(trade)
         trade_dict["order_id"] = str(trade.order_id)
         trade_dict["parent_order_id"] = str(trade.parent_order_id)
         trade_dict["trade_id"] = str(trade.trade_id)
@@ -212,7 +209,7 @@ class Ledger(pywingchun.Ledger):
             book = self.ctx.db.load(ctx = self.ctx,book_tags=book_tags)
             if not book:
                 self.ctx.logger.info("failed to load book from sqlite, tags: {}".format(book_tags))
-                book = AccountBook(self.ctx, tags = book_tags, avail=DEFAULT_INIT_CASH)
+                book = kwf.book.AccountBook(self.ctx, tags = book_tags, avail=DEFAULT_INIT_CASH)
             book.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
             book.register_callback(self.ctx.db.on_messages)
             self.ctx.books[book_tags] = book

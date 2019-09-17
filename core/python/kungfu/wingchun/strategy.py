@@ -4,7 +4,7 @@ import importlib
 import pywingchun
 import pyyjj
 from kungfu.data.sqlite.data_proxy import LedgerDB
-import kungfu.wingchun.finance as kwf
+from kungfu.wingchun.finance.book import *
 from kungfu.wingchun.constants import *
 import kungfu.yijinjing.time as kft
 
@@ -23,10 +23,10 @@ class Strategy(pywingchun.Strategy):
         ledger_location = pyyjj.location(pyyjj.get_mode_by_name(self.ctx.mode), pyyjj.category.SYSTEM, 'service', 'ledger', self.ctx.locator)
         self.ctx.ledger_db = LedgerDB(ledger_location, "ledger")
         self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.ledger_db.all_instrument_infos()}
-        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
+        book_tags = AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
         self.ctx.book = self.ctx.ledger_db.load(ctx=self.ctx, book_tags=book_tags)
         if self.ctx.book is None:
-            self.ctx.book = kwf.book.AccountBook(self.ctx,tags=book_tags, avail=1e7)
+            self.ctx.book = AccountBook(self.ctx,tags=book_tags, avail=1e7)
 
     def __get_inst_info(self, instrument_id):
         if instrument_id not in self.ctx.inst_infos:
