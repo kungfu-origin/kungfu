@@ -49,6 +49,15 @@ export const updateStrategyPath = (strategy_id: string, strategy_path: string) =
 }
 
 
+export const getStrategyAssetById = (strategyId: string) => {
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        'SELECT * FROM asset' + 
+        ' WHERE ledger_category = 1' +
+        ` AND client_id = "${strategyId}"`
+    )
+}
+
 const getStrategyAddTime = async (strategyId: string): Promise<number | undefined> => {
     //新建与之前重名策略，防止get之前的数据
     const strategys = await getStrategyById(strategyId)
@@ -59,7 +68,7 @@ const getStrategyAddTime = async (strategyId: string): Promise<number | undefine
 /**
  * 获取某策略下委托
  */
-export const getStrategyOrder = async (strategyId: string, {id, dateRange}: TradingDataFilter, tradingDay: string) => {
+export const getStrategyOrder = async (strategyId: string, {id, dateRange}: TradingDataFilter, tradingDay?: string) => {
     dateRange = dateRange || [];
     id = id || ''
     //新建与之前重名策略，防止get之前的数据
@@ -82,7 +91,7 @@ export const getStrategyOrder = async (strategyId: string, {id, dateRange}: Trad
 /**
  * 获取某策略下成交
  */
-export const getStrategyTrade = async (strategyId: string, { id, dateRange }: TradeInputData, tradingDay: string) => {
+export const getStrategyTrade = async (strategyId: string, { id, dateRange }: TradeInputData, tradingDay?: string) => {
     dateRange = dateRange || [];
     id = id || ''
     //新建与之前重名策略，防止get之前的数据    

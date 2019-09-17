@@ -23,6 +23,10 @@ interface StringToNumberObject {
     [propName: string]: number;
 }
 
+interface StringToFunctionObject {
+    [propName: string]: Function;
+}
+
 interface Account {
     account_id: string;
     source_name: string;
@@ -74,6 +78,22 @@ interface OrderData {
     exchangeId: string;
 }
 
+interface OrderInputData {
+    update_time: number,
+    insert_time: number,
+    order_id: string,
+    instrument_id: string,
+    side: number,
+    offset: number,
+    volume: number,
+    volume_traded: number,
+    status: any,
+    limit_price: number,
+    client_id: string,
+    account_id: string,
+    exchange_id: string
+}
+
 interface PosData {
     id: string;
     instrumentId: string;
@@ -89,10 +109,10 @@ interface PosData {
 interface PosInputData {
     instrument_id: string;
     direction: number;
-    yesterday_volume: string;
-    volume: string;
-    last_price: string;
-    margin: string;
+    yesterday_volume: number;
+    volume: number;
+    last_price: number;
+    margin: number;
     [propName: string]: any;
 }
 
@@ -122,6 +142,33 @@ interface TradeInputData {
     [propName: string]: any;
 }
 
+interface AssetInputData {
+    account_id: string;
+    source_id: string;
+    client_id: string;
+    initial_equity: number;
+    static_equity: number;
+    dynamic_equity: number;
+    realized_pnl: number;
+    unrealized_pnl: number;
+    avail: number;
+    market_value: number;
+    margin: number,
+    ledger_category: number;
+}
+
+interface AssetData {
+    accountId: string;
+    clientId: string;
+    initialEquity: string;
+    staticEquity: string;
+    dynamicEquity: string;
+    realizedPnl: string;
+    unRealizedPnl: string;
+    avail: string;
+    marketValue: string;
+    margin: string;
+}
 
 interface TradingDataFilter {
     instrumentId?: string;

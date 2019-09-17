@@ -374,7 +374,7 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
     })
 }
 
-export const buildDateRange = (dateRange: string[], tradingDay: string): string[] => {
+export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<string|undefined> => {
     if(dateRange.length === 2) {
         return [moment(dateRange[0]).format('YYYYMMDD'), moment(dateRange[1]).format('YYYYMMDD')]
     } else if (tradingDay) {
@@ -385,11 +385,12 @@ export const buildDateRange = (dateRange: string[], tradingDay: string): string[
 
 // ========================== 交易数据处理 start ===========================
 
-export const dealOrder = (item: any): OrderData => {
+export const dealOrder = (item: OrderInputData): OrderData => {
+    const updateTime = item.update_time || item.insert_time || 0;
     return Object.freeze({
         id: item.order_id.toString() + '_' + item.account_id.toString(),
-        updateTime: item.update_time && moment(item.update_time / 1000000).format("YYYY-MM-DD HH:mm:ss"),
-        updateTimeNum: +item.update_time,
+        updateTime: moment(updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
@@ -405,9 +406,9 @@ export const dealOrder = (item: any): OrderData => {
 }
 
 export const dealTrade = (item: TradeInputData): TradeData => {
-    const updateTime = item.trade_time || item.update_time || 0
+    const updateTime = item.trade_time || item.update_time || 0;
     return {
-        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
+        id: [(item.rowid || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: updateTime && moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
@@ -420,7 +421,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     }     
 }
 
-export const dealPos = (item: any): PosData => {
+export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = posDirection[item.direction] || '--';
     return Object.freeze({
@@ -434,6 +435,21 @@ export const dealPos = (item: any): PosData => {
         lastPrice: toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
+}
+
+export const dealAsset = (item: AssetInputData): AssetData => {
+    return {
+        accountId: `${item.source_id}_${item.account_id}`,
+        clientId: item.client_id,
+        initialEquity: toDecimal(item.initial_equity) || '--',
+        staticEquity: toDecimal(item.static_equity) || '--',
+        dynamicEquity: toDecimal(item.dynamic_equity) || '--',
+        realizedPnl: toDecimal(item.realized_pnl) || '--',
+        unRealizedPnl: toDecimal(item.unrealized_pnl) || '--',
+        avail: toDecimal(item.avail) || '--',
+        marketValue: toDecimal(item.market_value) || '--',
+        margin: toDecimal(item.margin) || '--'
+    }
 }
 
 

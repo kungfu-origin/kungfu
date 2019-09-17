@@ -2,12 +2,19 @@ import { addFile } from '__gUtils/fileUtils';
 import { platform } from './platformConfig';
 const path = require('path');
 const mainProcess = require('electron').app;
-const renderProcess = require('electron').remote;
+const renderProcess = (require('electron').remote || {}).app;
+
+if(mainProcess) {
+    const appName = 'kungfu'
+    mainProcess.setName('kungfu')
+    const appData = mainProcess.getPath('appData');
+    mainProcess.setPath('userData', path.join(appData, appName));    
+}
 
 //ELEC_BASE
 var ELEC_BASE_DIR_RESOLVE;
 if (process.env.APP_TYPE === 'test') ELEC_BASE_DIR_RESOLVE = process.env.ELEC_BASE_DIR || ''; 
-else ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.app.getPath('userData');
+else ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.getPath('userData');
 
 addFile('', ELEC_BASE_DIR_RESOLVE, 'folder');
 
