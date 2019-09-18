@@ -6,3 +6,10 @@ interface ProcessListItem {
     status: string,
     [propName: string]: any
 }
+
+
+interface logDataWithProcessId {
+    updateTime: string,
+    message: string,
+    processId: string 
+}

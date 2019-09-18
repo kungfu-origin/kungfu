@@ -10,7 +10,8 @@ import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
 import { parseToString, dealStatus, buildTargetDateRange } from '@/assets/scripts/utils';
-import { Observable, combineLatest, zip, merge, observable } from 'rxjs';
+import { Observable, combineLatest, zip, merge, concat } from 'rxjs';
+import { map} from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
 import moment from 'moment';
 
@@ -205,6 +206,8 @@ const renderColoredProcessName = (processId: string) => {
     }
 }
 
+// =============================== logs start ==================================================
+
 const dealLogMessage = (line: string, processId: string) => {
     let lineData: LogDataOrigin;
     try{
@@ -241,7 +244,9 @@ const getLogObservable = (pid: string) => {
     const logPath = path.join(LOG_DIR, `${pid}.log`);
     return new Observable(observer => {
         getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
-        .then((logList: NumList) => observer.next(logList))
+        .then((logList: NumList) => {
+            observer.next(logList)
+        })
         .catch((err: Error) => observer.next(null))
         .finally(() => observer.complete())
     })
@@ -251,8 +256,17 @@ const getLogObservable = (pid: string) => {
 export const getMergedLogsObservable = (processIds: string[]) => {
     return zip(
         ...processIds
-        .map((logPath: string) => {
-            return getLogObservable(logPath)
+        .map((logPath: string) => getLogObservable(logPath))        
+    ).pipe(
+        map((list: any[]) => {
+
+            list = list
+                .filter((l: any) => !!l)
+                .map((l: any) => l.list)
+                .reduce((a: any, b: any): any => a.concat(b))
+                .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
+                .map((l: any) => l.message)            
+            return list
         })
     )
 }
@@ -282,6 +296,16 @@ export const watchLogsObservable = (processIds: string[]) => {
     return merge(...processIds.map(pid => watchLogObservable(pid)))
 }
 
+export const LogsAndWatcherConcatObservable = (processIds: string[]) => {
+    return concat(
+        getMergedLogsObservable(processIds),
+        watchLogsObservable(processIds)
+    )
+}
+
+// =============================== logs end ==================================================
+
+// =============================== trading Data start =========================================
 
 export const getOrdersObservable = (type: string, id: string) => {    
     const getOrderMethods: StringToFunctionObject = {
@@ -415,5 +439,7 @@ export const tradingDataObservale = (type: string, id: string) => {
         AssetNanoObservable(type, id)
     )
 }
+
+// =============================== trading Data end =========================================
 
 

@@ -1,18 +1,13 @@
 import Dashboard from '@/assets/components/Dashboard';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString} from '@/assets/scripts/utils';
-import { processListObservable, getMergedLogsObservable, watchLogsObservable, switchProcess } from '@/assets/scripts/actions';
-
+import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
+import { throttleInsert } from '__gUtils/busiUtils';
 const blessed = require('blessed');
 const moment = require('moment');
 
 const WIDTH_LEFT_PANEL = 45;
 
 
-interface logDataWithProcessId {
-    updateTime: string,
-    message: string,
-    processId: string 
-}
 
 
 export class MonitorDashboard extends Dashboard {
@@ -21,7 +16,8 @@ export class MonitorDashboard extends Dashboard {
     boards: any;
 
     globalData: {
-        processList: any[]
+        processList: any[],
+        logList: any[]
     }
   
     logWatchers: any[];
@@ -38,7 +34,8 @@ export class MonitorDashboard extends Dashboard {
         }
 
         this.globalData = {
-            processList: []
+            processList: [],
+            logList: []
         }
 
         this.logWatchers = [];
@@ -51,6 +48,7 @@ export class MonitorDashboard extends Dashboard {
         t.initProcessList();
         t.initLog();
         t.initBoxInfo();
+        t.initMessage();
         t.initLoader();
         t.screen.render();
 
@@ -83,7 +81,7 @@ export class MonitorDashboard extends Dashboard {
     }
 
     initLog(){
-        this.boards.mergedLogs = blessed.log({
+        this.boards.mergedLogs = blessed.list({
             ...TABLE_BASE_OPTIONS,
             label: ' Merged Logs ',
             parent: this.screen,
@@ -102,7 +100,7 @@ export class MonitorDashboard extends Dashboard {
         })
     }
 
-    initLoader(){
+    initMessage(){
         const t = this;
         t.boards.message = blessed.message({
             parent: t.screen,
@@ -118,6 +116,22 @@ export class MonitorDashboard extends Dashboard {
             style: {
                 bg: 'blue'
             }
+        });
+    }
+
+    initLoader() {
+        const t = this;
+        t.boards.loader = blessed.loading({
+            parent: t.screen,
+            top: '100%-5',
+            left: '100%-40',
+            height: 5,
+            align: 'left',
+            valign: 'center',
+            width: 40,
+            tags: true,
+            hidden: true,
+            border: 'line'
         });
     }
 
@@ -139,10 +153,7 @@ export class MonitorDashboard extends Dashboard {
         const t = this;
         processListObservable().subscribe((processList: any) => {
             //log the first time get Log
-            if(!t.globalData.processList || !t.globalData.processList.length) {
-                t._getLogs(processList)
-                t._watchLogs(processList)
-            }
+            if(!t.globalData.processList || !t.globalData.processList.length) t._getLogs(processList)
 
             //processList
             t.globalData.processList = processList;
@@ -183,35 +194,31 @@ export class MonitorDashboard extends Dashboard {
     _getLogs(processList: ProcessListItem[]){
         const t = this;
         const processIds = processList.map((p: ProcessListItem) => p.processId)
-        getMergedLogsObservable(processIds).subscribe((logs: any) => {
-            logs
-            .filter((l: any) => !!l)
-            .map((l: any) => l.list)
-            .reduce((a: logDataWithProcessId[], b: logDataWithProcessId[]): logDataWithProcessId[] => {
-                return a.concat(b)
-            })
-            .sort((a: logDataWithProcessId, b: logDataWithProcessId) => {
-                const aUpdateTime = moment(a.updateTime).valueOf()
-                const bUpdateTime = moment(b.updateTime).valueOf()
-                if(aUpdateTime > bUpdateTime) return 1;
-                else if(aUpdateTime < bUpdateTime) return -1
-                else return 0
-            })
-            .forEach((l: logDataWithProcessId) => {
-                t.boards.mergedLogs.add(l.message)
-                t.screen.render()
-            })
-        })
-    }
-    
-    _watchLogs(processList: ProcessListItem[]) {
-        const t = this;
-        const processIds = processList.map((p: ProcessListItem) => p.processId)
-        watchLogsObservable(processIds).subscribe((l: any) => {
-            t.boards.mergedLogs.add(l)
+        const throttleInsertLogs = throttleInsert(300);
+        t.boards.loader.load('loading the logs, please wait...')
+        LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
+            if(typeof l === 'string') {
+                throttleInsertLogs(l).then((logList: string[] | boolean) => {
+                    if(!logList) return;
+                    t.globalData.logList = t.globalData.logList.concat(logList)
+                    const len = t.globalData.logList.length;
+                    t.globalData.logList = t.globalData.logList.slice(len < 2000 ? 0 : (len - 2000))
+                    t.boards.mergedLogs.setItems(t.globalData.logList)
+                    t.boards.mergedLogs.select(t.globalData.logList.length - 1)
+                    if(!t.boards.mergedLogs.focused) {
+                        t.boards.mergedLogs.setScrollPerc(100)
+                    }
+                })
+                return
+            }
+
+            t.boards.loader.stop('')
+            t.globalData.logList = l;
+            t.boards.mergedLogs.setItems(t.globalData.logList)
             t.screen.render()
         })
     }
+
 }
 
 export default () => {

@@ -1,5 +1,4 @@
-import strategy from '@/components/strategy/index'
-import account from '@/components/account/index'
+import tradingData from '@/components/tradingData/index'
 import monitor from '@/components/monitor/index';
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
 const inquirer = require('inquirer');
@@ -29,9 +28,5 @@ export const monitPrompt = async (list: boolean) => {
     const processSplit = processName.split(' ')
     const processId = processSplit[processSplit.length - 1].trim();
     const type = processSplit[0].indexOf('strategy') !== -1 ? 'strategy' : 'account';
-    if (type === 'account') {
-        return account(processId)
-    } else if(type === 'strategy') {
-        return strategy(processId)
-    }
+    return tradingData(processId, type)
 }

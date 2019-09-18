@@ -6,25 +6,26 @@ import Dashboard from '@/assets/components/Dashboard';
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale, processListObservable, switchProcess } from '@/assets/scripts/actions';
 
-import { logger } from '__gUtils/logUtils';
 
 const blessed = require('blessed');
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
 
-class StrategyDashboard extends Dashboard {
-	strategyId: string
+class TradingDataDashboard extends Dashboard {
+	targetId: string;
+	type: string
 	screen: any;
 	globalData: {
 		processList: ProcessListItem[];
 	};
 	boards: any;
 
-	constructor(strategyId: string){
+	constructor(targetId: string, type: string){
 		super()
-		this.screen.title = 'Strategy Dashboard';
-		this.strategyId = strategyId;
+		this.screen.title = type === 'account' ? 'Account Dashboard' : 'Strategy Dashboard';
+		this.targetId = targetId;
+		this.type = type;
 		this.globalData = {
 			processList: []
 		};
@@ -35,24 +36,24 @@ class StrategyDashboard extends Dashboard {
 
 	init(){
 		const t = this;
-		t.initStrategyProcessTable();
+		t.initProcessTable();
 		t.initAssetsTable();
 		t.initPosTable();
 		t.initOrderList();
 		t.initTradeList();
 		t.initBoxInfo();
-		t.initLoader();
+		t.initMessage();
 		t.screen.render();
 		t.bindEvent();
 		t.bindData();
 	}
 	
-	initStrategyProcessTable(){
+	initProcessTable(){
 		const t = this;
-		this.boards.strategyTable = blessed.list({
+		t.boards.processTable = blessed.list({
             ...TABLE_BASE_OPTIONS,
-            label: ' Strategy Trading Engines ',
-            parent: this.screen,
+            label: t.type === 'account' ? ' Account Trading Engines (Td/Md) ' : ' Strategy Trading Engines ',
+            parent: t.screen,
             padding: DEFAULT_PADDING,
             top: '0',
             left: '0',
@@ -68,15 +69,15 @@ class StrategyDashboard extends Dashboard {
                 }
             }
         })
-        this.boards.strategyTable.focus()
+        t.boards.processTable.focus()
 	}
 
 	initAssetsTable(){
 		const t = this;
-		this.boards.assetTable = blessed.list({
+		t.boards.assetTable = blessed.list({
             ...TABLE_BASE_OPTIONS,
             label: ' Assets ',
-            parent: this.screen,
+            parent: t.screen,
             padding: DEFAULT_PADDING,
             top: '0',
             left: 45,
@@ -146,7 +147,7 @@ class StrategyDashboard extends Dashboard {
 		});	
 	}
 
-	initLoader(){
+	initMessage(){
         const t = this;
         t.boards.message = blessed.message({
             parent: t.screen,
@@ -168,7 +169,7 @@ class StrategyDashboard extends Dashboard {
 	bindEvent() {
 		const t = this;
 		let i = 0;
-		let boards = ['strategyTable', 'assetTable', 'posTable', 'orderTable', 'tradeTable'];
+		let boards = ['processTable', 'assetTable', 'posTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch: any, key: any) => {
 			(key.name === 'left') ? i-- : i++;
 			if (i === 5) i = 0;
@@ -181,8 +182,8 @@ class StrategyDashboard extends Dashboard {
 			process.exit(0);
 		});	
 
-		t.boards.strategyTable.key(['enter'], () => {
-			const selectedIndex: number = t.boards.strategyTable.selected;
+		t.boards.processTable.key(['enter'], () => {
+			const selectedIndex: number = t.boards.processTable.selected;
             switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
         });
 	}
@@ -190,8 +191,7 @@ class StrategyDashboard extends Dashboard {
 
 	bindData() {
 		const t = this;
-
-		tradingDataObservale('strategy', t.strategyId).subscribe((tradingData: any) => {
+		tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
 			const type = tradingData[0];
 			const data = tradingData[1];
 			switch (type) {
@@ -226,12 +226,24 @@ class StrategyDashboard extends Dashboard {
 		})
 
 		processListObservable().subscribe((processList: any) => {
-			processList = processList
-				.filter((proc: ProcessListItem) => {
-					if(proc.type === 'strategy') return true
-					else if(proc.type === 'main') return true
-					else return false
-			})
+			const t = this;
+			if(t.type === 'account') {
+				processList = processList
+					.filter((proc: ProcessListItem) => {
+						if((proc.type === 'td') && (proc.account_id === t.targetId)) return true;
+						else if((proc.type === 'md') && (t.targetId.indexOf(proc.source_name) !== -1)) return true
+						else if(proc.type === 'main') return true
+						else return false
+					})
+			} else if (t.type === 'strategy') {
+				processList = processList
+					.filter((proc: ProcessListItem) => {
+						if(proc.type === 'strategy') return true
+						else if(proc.type === 'main') return true
+						else return false
+					})
+			}
+
 			t.globalData.processList = processList;
 			const processListResolve = processList
                 .map((proc: ProcessListItem) => parseToString([
@@ -239,7 +251,7 @@ class StrategyDashboard extends Dashboard {
                     proc.processName,
                     proc.statusName
                 ], [5, 15, 8]))
-            t.boards.strategyTable.setItems(processListResolve);
+            t.boards.processTable.setItems(processListResolve);
             t.screen.render();
         })
 	}
@@ -247,7 +259,7 @@ class StrategyDashboard extends Dashboard {
 	
 
 
-export default (strategyId: string) => new StrategyDashboard(strategyId)
+export default (targetId: string, type: string) => new TradingDataDashboard(targetId, type)
 
 
 

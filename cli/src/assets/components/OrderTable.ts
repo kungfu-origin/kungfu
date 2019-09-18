@@ -67,7 +67,10 @@ class OrderTable extends Table {
 
 		})
 		t.table.setItems(orderListData)
-		if(!t.table.childList.focused) t.table.childList.setScrollPerc(0)
+		if(!t.table.childList.focused) {
+			t.table.childList.select(0);
+			t.table.childList.setScrollPerc(0);
+		}
 	}
 }
 
