@@ -94,7 +94,6 @@ const pm2List = (): Promise<any[]> => {
 }
 
 const pm2Delete = async (target: string): Promise<void> => {
-    logger.info('[KILL PROCESS] by id', target)
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
@@ -104,8 +103,7 @@ const pm2Delete = async (target: string): Promise<void> => {
                         reject(err)
                         return;
                     }
-                    resolve()
-                    logger.info('[KILL PROCESS] by id success', target)                    
+                    resolve()         
                 })
             }catch(err){
                 logger.error(err)
@@ -171,7 +169,6 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         pm2Connect().then(() => {
             try{
                 pm2.start(options, (err: Error, apps: object): void => { 
-                    logger.info(err, apps)
                     if(err) {
                         logger.error(err)
                         reject(err);
