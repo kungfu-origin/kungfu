@@ -75,9 +75,7 @@ program
             .finally(() => process.exit(0));
     })
 
-console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV !== 'production') {
-    console.log(process.argv,'---')
     program.parse(process.argv)
 } else {
     //@ts-ignore
