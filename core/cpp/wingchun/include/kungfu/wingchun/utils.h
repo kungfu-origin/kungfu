@@ -6,6 +6,7 @@
 #define KUNGFU_WINGCHUN_UTILS_H
 
 #include <hffix.hpp>
+#include <spdlog/spdlog.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 
@@ -34,6 +35,7 @@ namespace kungfu
             sub_msg.push_back_string(hffix::tag::Symbol, symbol);
             sub_msg.push_back_trailer();
             writer->close_frame(sub_msg.message_end() - buffer);
+            SPDLOG_TRACE("written subscribe msg for {}@{}", symbol, exchange);
         }
     }
 }
