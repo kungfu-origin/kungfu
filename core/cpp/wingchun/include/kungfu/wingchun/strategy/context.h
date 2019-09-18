@@ -38,6 +38,13 @@ namespace kungfu
                 //@param cash_limit  可用资金限制
                 virtual void add_account(const std::string &source, const std::string &account, double cash_limit);
 
+                //获取交易账户列表
+                virtual std::vector<yijinjing::data::location_ptr> list_accounts();
+
+                //获取交易账户可用资金限制
+                //@param account_id  账户ID
+                virtual double get_account_cash_limit(const std::string &account);
+
                 //订阅行情
                 //@param source_id   柜台ID
                 //@param instruments 合约列表
@@ -77,7 +84,8 @@ namespace kungfu
 
             private:
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
-                std::unordered_map<uint32_t, std::string> accounts_;
+                std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
+                std::unordered_map<uint32_t, double> account_cash_limits_;
                 std::unordered_map<std::string, uint32_t> market_data_;
 
                 friend class Runner;

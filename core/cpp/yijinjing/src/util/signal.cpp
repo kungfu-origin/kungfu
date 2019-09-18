@@ -20,7 +20,7 @@ namespace kungfu
 
             void stop_hero()
             {
-                if (hero_instance != nullptr)
+                if (hero_instance != nullptr && hero_instance->is_live())
                 {
                     hero_instance->signal_stop();
                 }
@@ -28,7 +28,7 @@ namespace kungfu
 
             void exit_hero(int signum)
             {
-                if (hero_instance != nullptr)
+                if (hero_instance != nullptr && hero_instance->is_live())
                 {
                     hero_instance->signal_stop();
                     hero_instance->on_exit();

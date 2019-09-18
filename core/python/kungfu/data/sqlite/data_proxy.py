@@ -1,10 +1,8 @@
-import json
 
+import json
 from .models import *
 from itertools import groupby
-from kungfu.wingchun.finance.position import StockPosition, FuturePosition, FuturePositionDetail
-from kungfu.wingchun.finance.position import get_uid as get_position_uid
-from kungfu.wingchun.finance.book import *
+import kungfu.wingchun.finance as kwf
 from kungfu.wingchun.constants import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -124,64 +122,45 @@ class LedgerDB(SessionFactoryHolder):
             objs = session.query(FutureInstrument).all()
             return [object_as_dict(obj) for obj in objs]
 
-    def drop(self, session, ledger_category, source_id="",account_id="", client_id=""):
+    def drop(self, session, book_tags):
         for cls in [Asset, Position, PositionDetail]:
-            session.query(cls).filter(cls.source_id==source_id, cls.account_id == account_id, cls.client_id == client_id,cls.ledger_category == int(ledger_category)).delete()
+            session.query(cls).filter(cls.source_id==book_tags.source_id, cls.account_id == book_tags.account_id, cls.client_id == book_tags.client_id,cls.ledger_category == int(book_tags.ledger_category)).delete()
 
-    def load(self, ctx, ledger_category, source_id="",account_id = "", client_id = ""):
+    def load(self, ctx, book_tags):
         with session_scope(self.session_factory) as session:
-            asset_obj = session.query(Asset).filter(Asset.source_id==source_id,
-                                                    Asset.account_id == account_id,
-                                                    Asset.client_id == client_id,
-                                                    Asset.ledger_category == int(ledger_category)).first()
+            asset_obj = session.query(Asset).filter(Asset.source_id==book_tags.source_id,
+                                                    Asset.account_id==book_tags.account_id,
+                                                    Asset.client_id ==book_tags.client_id,
+                                                    Asset.ledger_category==int(book_tags.ledger_category)).first()
             if not asset_obj:
                 return None
             else:
                 args = object_as_dict(asset_obj)
-                pos_objs = session.query(Position).filter(Position.source_id==source_id,
-                                                          Position.account_id == account_id,
-                                                          Position.client_id == client_id,
-                                                          Position.ledger_category == int(ledger_category)).all()
-                detail_objs = session.query(PositionDetail).filter(PositionDetail.source_id==source_id,
-                                                                   PositionDetail.account_id == account_id,
-                                                                   PositionDetail.client_id == client_id,
-                                                                   PositionDetail.ledger_category == int(ledger_category)).all()
-                pos_dict = {get_position_uid(pos.instrument_id, pos.exchange_id, pos.direction): pos for pos in pos_objs}
-                positions = []
-                for uid, pos in pos_dict.items():
-                    if pos.instrument_type == int(InstrumentType.Stock):
-                        positions.append(StockPosition(**object_as_dict(pos)))
-                key_func = lambda e: get_position_uid(e.instrument_id, e.exchange_id, e.direction)
-                detail_objs = sorted(detail_objs, key=key_func)
-                for uid, details in groupby(detail_objs, key= key_func):
-                    detail_list = list(details)
-                    summary = pos_dict[uid]
-                    direction = detail_list[0].direction
-                    pos_details = []
-                    for detail in sorted(detail_list, key = lambda obj: (obj.open_date, obj.trade_time)):
-                        pos_details.append(FuturePositionDetail(**object_as_dict(detail)))
-                    pos = FuturePosition(instrument_id = summary.instrument_id,
-                                         exchange_id = summary.exchange_id,
-                                         margin_ratio = summary.margin_ratio,
-                                         contract_multiplier = summary.contract_multiplier,
-                                         realized_pnl = summary.realized_pnl,
-                                         details = pos_details,
-                                         direction = direction,
-                                         trading_day = summary.trading_day)
-                    positions.append(pos)
-                args.update({"positions": positions, "ledger_category": ledger_category})
-                return AccountBook(ctx=ctx, **args)
+                pos_objs = session.query(Position).filter(Position.source_id==book_tags.source_id,
+                                                          Position.account_id==book_tags.account_id,
+                                                          Position.client_id==book_tags.client_id,
+                                                          Position.ledger_category==int(book_tags.ledger_category)).all()
+                detail_objs = session.query(PositionDetail).filter(PositionDetail.source_id==book_tags.source_id,
+                                                                   PositionDetail.account_id==book_tags.account_id,
+                                                                   PositionDetail.client_id==book_tags.client_id,
+                                                                   PositionDetail.ledger_category==int(book_tags.ledger_category)).all()
+                detail_dicts = [ object_as_dict(detail) for detail in detail_objs]
+                pos_dicts = [object_as_dict(pos) for pos in pos_objs]
+                for pos in pos_dicts:
+                    pos.update({"details": detail_dicts})
+                args.update({"positions": pos_dicts, "tags": book_tags})
+                return kwf.book.AccountBook(ctx=ctx, **args)
 
-    def dump(self, ledger):
+    def dump(self, book):
         with session_scope(self.session_factory) as session:
-            self.drop(session, ledger.category, source_id=ledger.source_id, account_id=ledger.account_id, client_id=ledger.client_id)
-            messages = ledger.detail_messages
+            self.drop(session, book.tags)
+            messages = book.detail_messages
             objects = [self.object_from_msg(message) for message in messages]
             session.bulk_save_objects(objects)
 
-    def remove(self,ledger_category, source_id="",account_id = "", client_id = ""):
+    def remove(self,book_tags):
         with session_scope(self.session_factory) as session:
-            self.drop(session, ledger_category, source_id=source_id, account_id=account_id, client_id=client_id)
+            self.drop(session, book_tags)
 
     def get_model_cls(self, msg_type):
         if msg_type == MsgType.Asset:

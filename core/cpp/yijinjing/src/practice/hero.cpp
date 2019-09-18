@@ -194,10 +194,7 @@ namespace kungfu
             {
                 while (live_)
                 {
-                    if (not produce_one(sb))
-                    {
-                        break;
-                    }
+                    live_ = produce_one(sb) && live_;
                 }
             } catch (...)
             {

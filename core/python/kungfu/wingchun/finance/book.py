@@ -1,4 +1,5 @@
-from kungfu.wingchun.finance.position import StockPosition, FuturePosition
+
+from kungfu.wingchun.finance.position import StockPosition, FuturePosition, Position
 from kungfu.wingchun.finance.position import get_uid as get_position_uid
 from kungfu.wingchun.utils import *
 from kungfu.wingchun.constants import *
@@ -6,72 +7,50 @@ import datetime
 from pyyjj import hash_str_32
 import sys
 import traceback
+from collections import namedtuple
+
+DATE_FORMAT = "%Y%m%d"
+DEFAULT_CASH = 1e7
+
+class AccountBookTags(namedtuple('AccountBookTags', 'ledger_category source_id account_id client_id uname uid')):
+    def __new__(cls, ledger_category, source_id="", account_id="", client_id=""):
+        uname = "{}|{}|{}|{}".format(int(ledger_category), source_id, account_id, client_id)
+        uid = hash_str_32(uname)
+        return super(AccountBookTags, cls).__new__(cls, int(ledger_category), source_id, account_id, client_id, uname, uid)
+
+    def __hash__(self):
+        return self.uid
+
+    def __eq__(self, other):
+        return self.uid == other.uid
+
+    def __ne__(self, other):
+        return not(self == other)
 
 class AccountBook:
     def __init__(self, ctx, **kwargs):
-        self._ctx = ctx        
-        self._trading_day = kwargs.pop("trading_day")
-        if isinstance(self._trading_day, str):
-            self._trading_day = datetime.datetime.strptime(self._trading_day, "%Y%m%d")
+        self._ctx = ctx
+        self._tags = kwargs.pop("tags")
+        self._callbacks = []
+        self._trading_day = kwargs.pop("trading_day", None)
+        if self._trading_day is None:
+            self._trading_day = self._ctx.trading_day
+        elif isinstance(self._trading_day, str):
+            self._trading_day = datetime.datetime.strptime(self._trading_day, DATE_FORMAT)
         self._initial_equity = kwargs.pop("initial_equity", 0.0)
         self._static_equity = kwargs.pop("static_equity", 0.0)
         self._avail = kwargs.pop("avail", 0.0)
         self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+        self._positions = {}
         positions = kwargs.pop("positions", [])
         for pos in positions:
-            pos.ledger = self
-        self._positions = {pos.uid: pos for pos in positions}
-
+            if isinstance(pos, dict):
+                pos = Position.factory(ctx=self._ctx, book=self, **pos)
+            self._positions[pos.uid] = pos
         if self._initial_equity <= 0.0:
             self._initial_equity = self.dynamic_equity # fill initial equity
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
-
-        self._category = kwargs.pop("ledger_category", int(LedgerCategory.Unknown))
-        self._account_id = kwargs.pop("account_id", '')
-        self._client_id = kwargs.pop("client_id", '')
-        self._source_id = kwargs.pop("source_id", '')
-        self._uname = AccountBook.get_uname(self._category, source_id=self._source_id, account_id=self._account_id,client_id=self._client_id)
-        self._uid = AccountBook.get_uid(self._category, source_id=self._source_id, account_id=self._account_id,client_id=self._client_id)
-
-        self._notice_threshold = kwargs.pop("notice_threshold", 10)
-
-        self._tags = {"ledger_category": int(self.category),
-                      "account_id": self.account_id,
-                      "client_id": self.client_id,
-                      "source_id": self.source_id
-                      }
-
-        self._callbacks = []
-
-    @classmethod
-    def get_uname(cls, category, source_id = "", account_id = "", client_id=""):
-        return "{}.{}.{}.{}".format(int(category), source_id, account_id, client_id)
-
-    @classmethod
-    def get_uid(cls, category, source_id = "", account_id = "", client_id=""):
-        uname = cls.get_uname(category, source_id, account_id, client_id)
-        return hash_str_32(uname)
-
-    @property
-    def category(self):
-        return self._category
-
-    @property
-    def account_id(self):
-        return self._account_id
-
-    @property
-    def client_id(self):
-        return self._client_id
-
-    @property
-    def source_id(self):
-        return self._source_id
-
-    @property
-    def uname(self):
-        return AccountBook.get_uname(self.category, self.source_id, self.account_id, self.client_id)
 
     @property
     def avail(self):
@@ -87,14 +66,10 @@ class AccountBook:
 
     @property
     def message(self):
-        return {
+        message = {
             "msg_type": int(MsgType.Asset),
             "data": {
-                "ledger_category": int(self.category),
-                "trading_day": self.trading_day.strftime("%Y%m%d"),
-                "account_id": self.account_id,
-                "client_id": self.client_id,
-                "source_id": self.source_id,
+                "trading_day": self.trading_day.strftime(DATE_FORMAT),
                 "avail": self.avail,
                 "margin": self.margin,
                 "market_value": self.market_value,
@@ -105,6 +80,8 @@ class AccountBook:
                 "unrealized_pnl": self.unrealized_pnl
             }
         }
+        self.fill_msg_tag(message)
+        return message
 
     @property
     def detail_messages(self):
@@ -160,6 +137,18 @@ class AccountBook:
     def unrealized_pnl(self):
         return sum([position.unrealized_pnl for position in self._positions.values()])
 
+    @property
+    def uname(self):
+        return self._tags.uname
+
+    @property
+    def uid(self):
+        return self._tags.uid
+
+    @property
+    def tags(self):
+        return self._tags
+
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.message["data"])
 
@@ -174,26 +163,26 @@ class AccountBook:
             cb(messages)
 
     def fill_msg_tag(self, message):
-        message["data"].update(self._tags)
+        message["data"].update(self._tags._asdict())
 
-    def merge(self, ledger):
-        self._ctx.logger.info("merge {} with {}".format(self, ledger))
-        if self.realized_pnl == 0.0 and ledger.realized_pnl != 0.0:
-            self.realized_pnl = ledger.realized_pnl
-        if self._static_equity == 1e7 and ledger.static_equity != 1e7:
-            self._static_equity = ledger.static_equity
-        if self._initial_equity == 1e7 and ledger.initial_equity != 1e7:
-            self._initial_equity = ledger.initial_equity
-        self.avail = ledger.avail
-        for symbol in set(self._positions.keys()).union(set(ledger._positions.keys())):
+    def merge(self, book):
+        self._ctx.logger.info("merge {} with {}".format(self, book))
+        if self.realized_pnl == 0.0:
+            self.realized_pnl = book.realized_pnl
+        if self._static_equity == DEFAULT_CASH:
+            self._static_equity = book.static_equity
+        if self._initial_equity == DEFAULT_CASH:
+            self._initial_equity = book.initial_equity
+        self.avail = book.avail
+        for symbol in set(self._positions.keys()).union(set(book._positions.keys())):
             l_pos = self._positions.pop(symbol, None)
-            r_pos = ledger._positions.get(symbol, None)
+            r_pos = book._positions.get(symbol, None)
             if l_pos and r_pos:
                 self._ctx.logger.info("merge position {} with {}".format(l_pos, r_pos))
                 l_pos.merge(r_pos)
                 self._positions[symbol] = l_pos
             elif not l_pos and r_pos:
-                r_pos.ledger = self
+                r_pos.book = self
                 self._positions[symbol] = r_pos
                 self._ctx.logger.info("add position {}".format(r_pos))
             elif l_pos and not r_pos:
@@ -225,34 +214,19 @@ class AccountBook:
             self._ctx.logger.error('apply trade error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
     def apply_trading_day(self, trading_day):
+        for pos in self._positions.values():
+            pos.apply_trading_day(trading_day)
         if not self.trading_day == trading_day:
             self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
             self._trading_day = trading_day
-            for pos in self._positions.values():
-                self._ctx.logger.info("position {} for {} switch trading day from {} to {}".format(pos.uname, self.uname, pos.trading_day, trading_day))
-                pos.switch_day(trading_day)
             self._static_equity = self.dynamic_equity
-            self.dispatch([self.message])
-            self.dispatch(self.detail_messages)
         else:
             self._ctx.logger.debug("{} receive duplicate trading_day message {}".format(self.uname, trading_day))
 
     def _get_position(self, instrument_id, exchange_id, direction = Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)
         if uid not in self._positions:
-            instrument_type = get_instrument_type(instrument_id, exchange_id)            
-            if instrument_type == InstrumentType.Stock:
-                position = StockPosition(ledger = self,instrument_id = instrument_id, exchange_id = exchange_id, trading_day = self.trading_day)
-            else:
-                instrument_info = self._ctx.get_inst_info(instrument_id)
-                margin_ratio = instrument_info["short_margin_ratio"] if direction == Direction.Short else instrument_info["long_margin_ratio"]
-                position = FuturePosition(ledger = self,
-                                          instrument_id = instrument_id,
-                                          exchange_id = exchange_id,
-                                          trading_day = self.trading_day,
-                                          margin_ratio = margin_ratio,
-                                          direction = direction,
-                                          contract_multiplier = instrument_info["contract_multiplier"])
+            position = Position.factory(ctx = self._ctx, book = self, instrument_id = instrument_id, exchange_id = exchange_id, direction = direction)
             self._positions[uid] = position
         return self._positions[uid]
 

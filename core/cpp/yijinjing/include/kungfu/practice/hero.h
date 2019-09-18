@@ -37,6 +37,9 @@ namespace kungfu
 
             void run();
 
+            bool is_live()
+            { return live_; }
+
             void signal_stop()
             { live_ = false; };
 
