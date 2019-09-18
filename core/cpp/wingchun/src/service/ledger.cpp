@@ -46,8 +46,7 @@ namespace kungfu
                 if (broker_states_.find(broker_location) != broker_states_.end())
                 {
                     return broker_states_.at(broker_location);
-                }
-                else
+                } else
                 {
                     return msg::data::BrokerState::Unknown;
                 }
@@ -254,7 +253,7 @@ namespace kungfu
                   {
                       auto &asset_info = asset_info_[event->source()];
                       auto &position_buffer = position_buffer_[event->source()];
-                      subscribe_holdings(event->source(), position_buffer);
+                      request_subscribe(event->source(), convert_to_instruments(position_buffer));
                       try
                       { on_stock_account(asset_info, position_buffer); }
                       catch (const std::exception &e)
@@ -270,7 +269,7 @@ namespace kungfu
                   {
                       auto &asset_info = asset_info_[event->source()];
                       auto &buffer = position_detail_buffer_[event->source()];
-                      subscribe_holdings(event->source(), buffer);
+                      request_subscribe(event->source(), convert_to_instruments(buffer));
                       try
                       { on_future_account(asset_info, buffer); }
                       catch (const std::exception &e)
@@ -328,7 +327,7 @@ namespace kungfu
                 broker_states_[broker_location->uid] = state;
                 publish_broker_state(trigger_time, broker_location, state);
             }
-          
+
             void Ledger::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
             {
                 auto app_uid_str = fmt::format("{:08x}", app_location->uid);
@@ -386,7 +385,7 @@ namespace kungfu
             void Ledger::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
             {
                 SPDLOG_INFO("cancel order {}", order_id);
-                if(has_writer(account_location_uid))
+                if (has_writer(account_location_uid))
                 {
                     auto writer = get_writer(account_location_uid);
                     msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);
@@ -394,22 +393,20 @@ namespace kungfu
                     action.order_id = order_id;
                     action.action_flag = OrderActionFlag::Cancel;
                     writer->close_data();
-                }
-                else
+                } else
                 {
                     if (has_location(account_location_uid))
                     {
                         auto location = get_location(account_location_uid);
                         SPDLOG_ERROR("writer to {} [{:08x}] not exists", location->uname, account_location_uid);
-                    }
-                    else
+                    } else
                     {
                         SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);
                     }
                 }
             }
 
-            void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &insts)
+            void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &&instruments)
             {
                 if (!has_location(account_location_id))
                 {
@@ -417,69 +414,43 @@ namespace kungfu
                     return;
                 }
                 auto location = get_location(account_location_id);
-                SPDLOG_INFO("subscribe {} insts for account {}@{}", insts.size(), location->name, location->group);
+                auto md_location = location::make(get_io_device()->get_home()->mode, category::MD, location->group, location->group,
+                                                  get_io_device()->get_home()->locator);
+                SPDLOG_INFO("subscribe {} instruments for account {}@{} from {} [{:08x}]",
+                        instruments.size(), location->name, location->group, md_location->uname, md_location->uid);
 
-                auto md_location = location::make(get_io_device()->get_home()->mode, category::MD, location->group, location->group, get_io_device()->get_home()->locator);
-                SPDLOG_INFO("subscribe from {} [{:08x}]", md_location->uname, md_location->uid);
-                auto sub_from_md_location = [=]() 
+                auto write_sub_msg = [=]()
                 {
-                    auto write_sub_msg = [=]()
+                    for (const auto &instrument : instruments)
                     {
-                        auto writer = this->get_writer(md_location->uid);                    
-                        char *buffer = const_cast<char *>(&(writer->open_frame(now(), msg::type::Subscribe, 4096)->data<char>()));
-                        size_t length = fill_subscribe_msg(buffer, 4096, insts);
-                        writer->close_frame(length); 
-                    };
-
-                    msg::data::BrokerState state = this->get_broker_state(md_location->uid);
-                    if (state != msg::data::BrokerState::Ready && state != msg::data::BrokerState::LoggedIn)
-                    {
-                        events_ | is(msg::type::BrokerState) | from(md_location->uid) |  
-                        filter([=](yijinjing::event_ptr e)
-                        {
-                            const msg::data::BrokerState &data = e->data<msg::data::BrokerState>();
-                            return data == msg::data::BrokerState::LoggedIn;
-                        }) | first() |  
-                        $([=](event_ptr e)
-                        {
-                            write_sub_msg();
-                        });
+                        write_subscribe_msg(this->get_writer(md_location->uid), now(), instrument.exchange_id, instrument.instrument_id);
                     }
-                    else
-                    {
-                        write_sub_msg();
-                    }                   
                 };
 
-                if (has_writer(md_location->uid))
+                msg::data::BrokerState state = this->get_broker_state(md_location->uid);
+                switch (state)
                 {
-                    sub_from_md_location();
-                }
-                else
-                {
-                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
-                    filter([=](yijinjing::event_ptr e)
+                    case msg::data::BrokerState::LoggedIn:
+                    case msg::data::BrokerState::Ready:
                     {
-                        const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
-                        return data.dest_id == md_location->uid;
-                    }) | first() |
-                    $([=](event_ptr e)
+                        write_sub_msg();
+                        break;
+                    }
+                    default:
                     {
-                        sub_from_md_location();
-                    });                    
+                        events_ | is(msg::type::BrokerState) | from(md_location->uid) |
+                        filter([=](yijinjing::event_ptr e)
+                               {
+                                   const msg::data::BrokerState &data = e->data<msg::data::BrokerState>();
+                                   return data == msg::data::BrokerState::LoggedIn or data == msg::data::BrokerState::Ready;
+                               }) | first() |
+                        $([=](event_ptr e)
+                          {
+                              write_sub_msg();
+                          });
+                        break;
+                    }
                 }
-            }
-
-            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions)
-            {
-                std::vector<msg::data::Instrument> insts = get_insts<msg::data::Position>(positions);
-                request_subscribe(account_location_id, insts);
-            }
-
-            void Ledger::subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::PositionDetail>& position_details)
-            {
-                std::vector<msg::data::Instrument> insts = get_insts<msg::data::PositionDetail>(position_details);
-                request_subscribe(account_location_id, insts);
             }
         }
     }

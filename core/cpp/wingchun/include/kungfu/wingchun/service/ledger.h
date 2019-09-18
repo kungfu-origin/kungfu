@@ -80,12 +80,23 @@ namespace kungfu
 
                 void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
 
-                void request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &insts);
+                void request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &&instruments);
 
-                void subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::Position> &positions);
-
-                void subscribe_holdings(uint32_t account_location_id, const std::vector<msg::data::PositionDetail> &position_details);
-
+                template <class T> std::vector<msg::data::Instrument> convert_to_instruments(const std::vector<T>& data)
+                {
+                    std::vector<msg::data::Instrument> instruments;
+                    for (const auto& item: data)
+                    {
+                        msg::data::Instrument instrument = {};
+                        strcpy(instrument.instrument_id, item.instrument_id);
+                        strcpy(instrument.exchange_id, item.exchange_id);
+                        instruments.push_back(instrument);
+                    }
+                    std::sort(instruments.begin(), instruments.end());
+                    auto it= std::unique(instruments.begin(), instruments.end());
+                    instruments.erase(it, instruments.end());
+                    return instruments;
+                }
             };
         }
     }
