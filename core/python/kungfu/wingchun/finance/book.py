@@ -29,7 +29,9 @@ class AccountBookTags(namedtuple('AccountBookTags', 'ledger_category source_id a
 
 class AccountBook:
     def __init__(self, ctx, **kwargs):
-        self._ctx = ctx        
+        self._ctx = ctx
+        self._tags = kwargs.pop("tags")
+        self._callbacks = []
         self._trading_day = kwargs.pop("trading_day", None)
         if self._trading_day is None:
             self._trading_day = self._ctx.trading_day
@@ -49,8 +51,6 @@ class AccountBook:
             self._initial_equity = self.dynamic_equity # fill initial equity
         if self._static_equity <= 0.0:
             self._static_equity = self.dynamic_equity
-        self._tags = kwargs.pop("tags")
-        self._callbacks = []
 
     @property
     def avail(self):
