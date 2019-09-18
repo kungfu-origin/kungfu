@@ -10,13 +10,13 @@ import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
 import { delaySeconds } from '__gUtils/busiUtils';
 import { startLedger, startMaster } from '__gUtils/processUtils';
+import { logger } from '__gUtils/logUtils';
 
 const program = require('commander');
 
-
 program
     .version(version)
-    .option('-l --list', 'list target process to monit')
+    .option('-l --list', 'list target process to monit');
 
 program
     .command('monit [options]')
@@ -75,10 +75,12 @@ program
             .finally(() => process.exit(0));
     })
 
-
-
-program.parse(process.argv)
-
+if (process.env.NODE_ENV === 'development') {
+    program.parse(process.argv)
+} else {
+    //@ts-ignore
+    program.parse([null].concat(process.argv))
+}
 
 initDB()
 
@@ -89,3 +91,4 @@ startMaster(false)
         .then(() => startLedger(false))
         .catch(() => {})
     })
+

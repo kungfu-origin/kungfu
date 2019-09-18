@@ -26,7 +26,7 @@
     "test": " mocha"
   },
   "build": {
-    "productName": "Kungfu-Cli",
+    "productName": "Kungfu",
     "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {

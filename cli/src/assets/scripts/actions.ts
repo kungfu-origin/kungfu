@@ -11,8 +11,9 @@ import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
 import { parseToString, dealStatus, buildTargetDateRange } from '@/assets/scripts/utils';
 import { Observable, combineLatest, zip, merge, concat } from 'rxjs';
-import { map} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
+import { logger } from '__gUtils/logUtils';
 import moment from 'moment';
 
 const colors = require('colors');
@@ -90,7 +91,7 @@ export const processStatusObservable = () => {
                 .then((processStatus: StringToStringObject) => {
                     observer.next(processStatus)
                 })
-                .catch((err: Error) => console.error(err))
+                .catch((err: Error) => logger.error(err))
         }, 2000)    
     })
 }
@@ -102,7 +103,7 @@ export const accountListObservable = () => {
                 .then((accountList: Account[]) => {
                     observer.next(accountList)
                 })
-                .catch((err: Error) => console.error(err))
+                .catch((err: Error) => logger.error(err))
         }, 5000)
     })
 }
@@ -114,7 +115,7 @@ export const strategyListObservable = () => {
             .then((strategyList: Strategy[]) => {
                 observer.next(strategyList)
             })
-            .catch((err: Error) => console.error(err))
+            .catch((err: Error) => logger.error(err))
         }, 5000)
     })
 }
@@ -191,6 +192,10 @@ export const processListObservable = () => combineLatest(
     }
 )
 
+
+
+// =============================== logs start ==================================================
+
 const renderColoredProcessName = (processId: string) => {
     if(processId === 'master' || processId === 'ledger') {
         return colors.bold.underline.bgMagenta(processId)
@@ -205,8 +210,6 @@ const renderColoredProcessName = (processId: string) => {
         return colors.bold.underline.blue(processId)
     }
 }
-
-// =============================== logs start ==================================================
 
 const dealLogMessage = (line: string, processId: string) => {
     let lineData: LogDataOrigin;
@@ -247,7 +250,7 @@ const getLogObservable = (pid: string) => {
         .then((logList: NumList) => {
             observer.next(logList)
         })
-        .catch((err: Error) => observer.next(null))
+        .catch((err: Error) => {})
         .finally(() => observer.complete())
     })
 }
@@ -259,11 +262,10 @@ export const getMergedLogsObservable = (processIds: string[]) => {
         .map((logPath: string) => getLogObservable(logPath))        
     ).pipe(
         map((list: any[]) => {
-
             list = list
-                .filter((l: any) => !!l)
                 .map((l: any) => l.list)
                 .reduce((a: any, b: any): any => a.concat(b))
+                .filter((l: any) => !!l)
                 .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
                 .map((l: any) => l.message)            
             return list
