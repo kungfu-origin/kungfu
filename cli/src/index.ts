@@ -9,8 +9,10 @@ import { updateAccountStrategy } from '@/commanders/update';
 import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
 import { delaySeconds } from '__gUtils/busiUtils';
-import { startLedger, startMaster } from '__gUtils/processUtils';
+import { startLedger, startMaster, killExtra } from '__gUtils/processUtils';
+import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
+import { LEDGER_DIR, LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
 const program = require('commander');
 
@@ -73,6 +75,46 @@ program
         return switchMdSource()
             .catch((err: Error) => console.error(err))
             .finally(() => process.exit(0));
+    })
+
+program
+    .command('shutdown')
+    .description('shutdown all kungfu processes')
+    .action(() => {
+        return killExtra()
+        .then(() => console.log('Shutdown kungfu successfully!'))
+        .finally(() => process.exit(0))
+    })
+
+program
+    .command('clearLog')
+    .description('clear all logs (Tips: should do it often)')
+    .action(() => {
+        return removeFilesInFolder(LOG_DIR)
+            .then(() => console.log('Clear all logs successfully!'))
+            .catch((err: Error) => console.error(err))
+            .finally(() => process.exit(0))
+    })
+
+program
+    .command('showDir <home|log|ledger|base>')
+    .description('show the dir path of home or log or ledger or base')
+    .action((target: string) => {
+        switch (target) {
+            case 'home':
+                console.log(KF_HOME)
+                break;
+            case 'log':
+                console.log(LOG_DIR)
+                break;
+            case 'ledger':
+                console.log(LIVE_TRADING_DB_DIR)
+                break;
+            case 'base':
+                console.log(BASE_DB_DIR)
+                break;
+        }
+        process.exit(0)
     })
 
 if (process.env.NODE_ENV !== 'production') {

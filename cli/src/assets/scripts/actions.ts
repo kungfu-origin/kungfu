@@ -14,6 +14,7 @@ import { Observable, combineLatest, zip, merge, concat } from 'rxjs';
 import { map } from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
 import { logger } from '__gUtils/logUtils';
+
 import moment from 'moment';
 
 const colors = require('colors');
@@ -250,7 +251,9 @@ const getLogObservable = (pid: string) => {
         .then((logList: NumList) => {
             observer.next(logList)
         })
-        .catch((err: Error) => {})
+        .catch((err: Error) => observer.next({
+            list: []
+        }))
         .finally(() => observer.complete())
     })
 }
@@ -266,8 +269,15 @@ export const getMergedLogsObservable = (processIds: string[]) => {
                 .map((l: any) => l.list)
                 .reduce((a: any, b: any): any => a.concat(b))
                 .filter((l: any) => !!l)
-                .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
-                .map((l: any) => l.message)            
+                .map((l: any) => {
+                    return l
+                })
+            if(list.length) {
+                list = list
+                    .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
+                    .map((l: any) => l.message)  
+            }
+                          
             return list
         })
     )
@@ -445,3 +455,6 @@ export const tradingDataObservale = (type: string, id: string) => {
 // =============================== trading Data end =========================================
 
 
+export const clearLog = () => {
+    LOG_DIR
+}

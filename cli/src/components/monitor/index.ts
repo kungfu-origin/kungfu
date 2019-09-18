@@ -197,7 +197,7 @@ export class MonitorDashboard extends Dashboard {
         const throttleInsertLogs = throttleInsert(300);
         t.boards.loader.load('Loading the logs, please wait...')
         LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
-            t.boards.loader.stop('')
+            t.boards.loader.stop()
             if(typeof l === 'string') {
                 throttleInsertLogs(l).then((logList: string[] | boolean) => {
                     if(!logList) return;
