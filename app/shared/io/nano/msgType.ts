@@ -15,8 +15,8 @@ export const reqRemoveStrategyPos = 404
 
 export const calendar = 601  //自动推送日期相关信息，目前只有交易日
 
-export const category = {
-    0: 'md',
-    1: 'td',
-    2: 'strategy'
+export const category: StringToStringObject = {
+    '0': 'md',
+    '1': 'td',
+    '2': 'strategy'
 }

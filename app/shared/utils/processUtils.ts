@@ -197,7 +197,7 @@ export const startMaster = async(force: boolean): Promise<void> => {
     try{ 
         await killKfc()
     } catch (err) {
-        console.error(err)
+        logger.error(err)
     }
     return startProcess({
         "name": processName,
@@ -265,7 +265,7 @@ export const deleteProcess = (processName: string) => {
         try{
             processes = await describeProcess(processName)
         }catch(err){
-            console.error(err)
+            logger.error(err)
         }
 
         //如果進程不存在，會跳過刪除步驟
@@ -288,7 +288,7 @@ export const deleteProcess = (processName: string) => {
                     logger.info('[KILL PROCESS] by pids success', pids)
                 })
                 .catch((err: Error) => {
-                    console.error(err)
+                    logger.error(err)
                     logger.error(err)
                 })
             }

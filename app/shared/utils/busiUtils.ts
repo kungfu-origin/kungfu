@@ -70,7 +70,7 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
     }
 }
 
-export const delaySeconds = (seconds: 100): Promise<void> => {
+export const delaySeconds = (seconds: number): Promise<void> => {
     return new Promise(resolve => {
         let timer = setTimeout(() => {
             resolve()
@@ -245,12 +245,12 @@ export const sum = (list: number[]): number => {
 
 
 
-export const dealLogMessage = (line: string, searchKeyword: string):any => {
+export const dealLogMessage = (line: string, searchKeyword?: string):any => {
     let lineData: LogLineData;
     try{
         lineData = JSON.parse(line);
     }catch(err){
-        console.error(err)
+        // console.error(err)
         return false;
     }
     const message = lineData.message;
@@ -314,6 +314,7 @@ export const dealLogMessage = (line: string, searchKeyword: string):any => {
  * 建立固定条数的list数据结构
  * @param  {number} num
  */
+
 function buildListByLineNum(num: number): any {
     class ListByNum {
         list: any[];
@@ -339,8 +340,8 @@ function buildListByLineNum(num: number): any {
  * @param  {path} logPath
  * @param  {string} searchKeyword
  */
-export const getLog = (logPath: string, searchKeyword: string): Promise<any> => {
-    const numList: any = buildListByLineNum(201);    
+export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMethod = dealLogMessage): Promise<any> => {
+    const numList: NumList = buildListByLineNum(50);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
         fs.stat(logPath, (err: Error) => {
@@ -354,7 +355,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
             })
 
             lineReader.on('line', line => {
-                const messageData = dealLogMessage(line, searchKeyword)
+                const messageData = dealLogMessageMethod(line, searchKeyword)
                 if(!messageData) return;
                 messageData.forEach((msg: LogMessageData): void => {
                     if(!msg) return;
@@ -373,7 +374,7 @@ export const getLog = (logPath: string, searchKeyword: string): Promise<any> => 
     })
 }
 
-export const buildDateRange = (dateRange: string[], tradingDay: string): string[] => {
+export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<string|undefined> => {
     if(dateRange.length === 2) {
         return [moment(dateRange[0]).format('YYYYMMDD'), moment(dateRange[1]).format('YYYYMMDD')]
     } else if (tradingDay) {
@@ -384,11 +385,12 @@ export const buildDateRange = (dateRange: string[], tradingDay: string): string[
 
 // ========================== 交易数据处理 start ===========================
 
-export const dealOrder = (item: any): OrderData => {
+export const dealOrder = (item: OrderInputData): OrderData => {
+    const updateTime = item.update_time || item.insert_time || 0;
     return Object.freeze({
         id: item.order_id.toString() + '_' + item.account_id.toString(),
-        updateTime: item.update_time && moment(item.update_time / 1000000).format("YYYY-MM-DD HH:mm:ss"),
-        updateTimeNum: +item.update_time,
+        updateTime: moment(updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
@@ -404,9 +406,9 @@ export const dealOrder = (item: any): OrderData => {
 }
 
 export const dealTrade = (item: TradeInputData): TradeData => {
-    const updateTime = item.trade_time || item.update_time || 0
+    const updateTime = item.trade_time || item.update_time || 0;
     return {
-        id: [(item.id || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
+        id: [(item.rowid || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: updateTime && moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
@@ -419,7 +421,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     }     
 }
 
-export const dealPos = (item: any): PosData => {
+export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = posDirection[item.direction] || '--';
     return Object.freeze({
@@ -433,6 +435,21 @@ export const dealPos = (item: any): PosData => {
         lastPrice: toDecimal(item.last_price) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
+}
+
+export const dealAsset = (item: AssetInputData): AssetData => {
+    return {
+        accountId: `${item.source_id}_${item.account_id}`,
+        clientId: item.client_id,
+        initialEquity: toDecimal(item.initial_equity) || '--',
+        staticEquity: toDecimal(item.static_equity) || '--',
+        dynamicEquity: toDecimal(item.dynamic_equity) || '--',
+        realizedPnl: toDecimal(item.realized_pnl) || '--',
+        unRealizedPnl: toDecimal(item.unrealized_pnl) || '--',
+        avail: toDecimal(item.avail) || '--',
+        marketValue: toDecimal(item.market_value) || '--',
+        margin: toDecimal(item.margin) || '--'
+    }
 }
 
 
@@ -491,3 +508,17 @@ export const getExtensionConfigs = async (): Promise<any> => {
         console.error(err)
     }
 }
+
+export const setTimerPromiseTask = (fn: Function, interval = 500) => {
+    var taskTimer: NodeJS.Timer | null = null;
+    function timerPromiseTask (fn: Function, interval = 500) {
+        if(taskTimer) clearTimeout(taskTimer)
+        fn()
+        .finally(() => {
+            taskTimer = setTimeout(() => {
+                timerPromiseTask(fn, interval)
+            }, interval)
+        })
+    }
+    timerPromiseTask(fn, interval)
+} 

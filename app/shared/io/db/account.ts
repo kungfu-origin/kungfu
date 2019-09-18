@@ -61,6 +61,16 @@ export const getAccountAsset = () => {
     )
 }
 
+export const getAccountAssetById = (accountId: string) => {
+    accountId = accountId.toAccountId();
+    return runSelectDB(
+        LIVE_TRADING_DATA_DB, 
+        'SELECT * FROM asset' + 
+        ' WHERE ledger_category = 0' +
+        ` AND account_id = "${accountId}"`
+    )
+}
+
 /**
  * 获取账户持仓情况
  * 
@@ -87,7 +97,7 @@ export const getAccountPos = (accountId: string, { instrumentId, type }: Trading
  * @param {String} id  模糊查询的id部分数据
  * @param {Array} dateRange  时间查询的开始时间和结束时间
  */
-export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
+export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay?: string) => {
     accountId = accountId.toAccountId();    
     id = id || '';
     dateRange = dateRange || [];
@@ -111,7 +121,7 @@ export const getAccountOrder = (accountId: string, { id, dateRange }: TradingDat
  * 获取账户成交情况
  * 
  */
-export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay: string) => {
+export const getAccountTrade = (accountId: string, { id, dateRange }: TradingDataFilter, tradingDay?: string) => {
     accountId = accountId.toAccountId();
     id = id || '';
     dateRange = dateRange || [];
