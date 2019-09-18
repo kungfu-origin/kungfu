@@ -45,8 +45,14 @@ class AccountBook:
         positions = kwargs.pop("positions", [])
         for pos in positions:
             if isinstance(pos, dict):
-                pos = Position.factory(ctx=self._ctx, book=self, **pos)
+                try:
+                    pos = Position.factory(ctx=self._ctx, book=self, **pos)
+                except Exception as err:
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    self._ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+                    continue
             self._positions[pos.uid] = pos
+
         if self._initial_equity <= 0.0:
             self._initial_equity = self.dynamic_equity # fill initial equity
         if self._static_equity <= 0.0:
