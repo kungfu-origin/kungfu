@@ -120,12 +120,12 @@ namespace kungfu
                     price_type = PriceType::Limit;
                 else if (xtp_price_type == XTP_PRICE_BEST5_OR_CANCEL)
                     price_type = PriceType::FakBest5;
-                else if (xtp_exchange_type == XTP_MKT_SZ_A)
+                else if (xtp_exchange_type == XTP_MKT_SH_A)
                 {
-                    if (xtp_price_type == XTP_PRICE_BEST_OR_CANCEL)
+                    if (xtp_price_type == XTP_PRICE_BEST5_OR_LIMIT)
                         price_type = PriceType::ReverseBest;
                 }
-                else if(xtp_exchange_type == XTP_MKT_SH_A)
+                else if(xtp_exchange_type == XTP_MKT_SZ_A)
                 {
                     if (xtp_price_type == XTP_PRICE_BEST_OR_CANCEL)
                         price_type = PriceType::Fak;
@@ -142,16 +142,16 @@ namespace kungfu
             {
                 if (price_type == PriceType::Limit)
                     xtp_price_type = XTP_PRICE_LIMIT;
-                else if (price_type == PriceType::FakBest5)
+                else if ((price_type == PriceType::Any) || (price_type == PriceType::FakBest5))
                     xtp_price_type = XTP_PRICE_BEST5_OR_CANCEL;
                 else if (strcmp(exchange, EXCHANGE_SSE) == 0)
                 {
                     if (price_type == PriceType::ReverseBest)
-                        xtp_price_type = XTP_PRICE_BEST_OR_CANCEL;
+                        xtp_price_type = XTP_PRICE_BEST5_OR_LIMIT;
                 }
                 else if (strcmp(exchange, EXCHANGE_SZE) == 0)
                 {
-                    if(price_type == PriceType::Fak)
+                    if (price_type == PriceType::Fak)
                         xtp_price_type = XTP_PRICE_BEST_OR_CANCEL;
                     else if (price_type == PriceType::ForwardBest)
                         xtp_price_type = XTP_PRICE_FORWARD_BEST;
