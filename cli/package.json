@@ -1,7 +1,7 @@
 {
-  "name": "kungfu",
+  "name": "kungfu-cli",
   "version": "2.0.0",
-  "description": "KungFu Trader App",
+  "description": "KungFu Trader Cli",
   "license": "Apache-2.0",
   "homepage": "https://github.com/taurusai/kungfu",
   "author": {
@@ -26,7 +26,7 @@
     "test": " mocha"
   },
   "build": {
-    "productName": "Kungfu",
+    "productName": "Kungfu-Cli",
     "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {
@@ -94,20 +94,26 @@
     "mac": {
       "icon": "../app/resources/logo/icon.icns",
       "type": "distribution",
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     },
     "win": {
       "icon": "../app/resources/logo/icon.ico",
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
     "linux": {
       "icon": "../app/resources/logo/icn.icns",
-      "target": ["rpm"]
+      "target": [
+        "rpm"
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -123,8 +129,6 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "bindings": "^1.5.0",
-    "kungfu-core": "2.0.0",
-    "gaze": "^1.1.3",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
     "colors": "^1.3.3",
@@ -132,9 +136,11 @@
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
     "fs-extra": "^7.0.1",
+    "gaze": "^1.1.3",
     "getprocesses": "^1.1.1",
     "inquirer": "^6.3.1",
     "inquirer-autocomplete-prompt": "^1.0.1",
+    "kungfu-core": "2.0.0",
     "log4js": "^4.0.2",
     "moment": "^2.24.0",
     "pm2": "^3.5.0",
@@ -153,6 +159,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "babili-webpack-plugin": "^0.1.2",
+    "builder-util": "^21.2.0",
     "cfonts": "^1.1.3",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
