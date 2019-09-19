@@ -70,7 +70,7 @@ let cliConfig = {
     },
     extensions: ['.ts', '.js', '.json', '.node']
   },
-  target: 'electron-main'
+  target: 'node'
 }
 console.log(path.join(__dirname, '../src'))
 /**
