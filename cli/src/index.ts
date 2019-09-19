@@ -134,3 +134,6 @@ startMaster(false)
         .catch(() => {})
     })
 
+//@ts-ignore
+process.env.ELECTRON_RUN_AS_NODE = true;
+    
