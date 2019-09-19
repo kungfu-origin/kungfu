@@ -21,6 +21,8 @@
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/commander.h>
+#include <kungfu/wingchun/broker/marketdata.h>
+#include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
@@ -29,8 +31,21 @@ namespace py = pybind11;
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
+using namespace kungfu::wingchun::broker;
 using namespace kungfu::wingchun::service;
 using namespace kungfu::wingchun::msg::data;
+
+class PyMarketData: public MarketData
+{
+public:
+    using MarketData::MarketData;
+    bool subscribe(const std::vector<Instrument> &instruments) override
+    { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments); }
+    bool unsubscribe(const std::vector<Instrument> &instruments)
+    { PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe,instruments); }
+    void on_start() override
+    {PYBIND11_OVERLOAD(void, MarketData, on_start, );}
+};
 
 class PyLedger : public Ledger
 {
@@ -114,6 +129,7 @@ public:
 
 };
 
+
 Quote get_quote(journal::frame_ptr frame)
 {
     return frame->data<Quote>();
@@ -127,7 +143,11 @@ PYBIND11_MODULE(pywingchun, m)
     m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
     m_utils.def("json_from_address", &json_from_address);
-
+    m_utils.def("write_quote",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Quote& quote)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Quote, quote);
+            });
     m_utils.def("get_quote", get_quote);
 
     auto m_constants = m.def_submodule("constants");
@@ -328,15 +348,11 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<Quote>(m, "Quote")
             .def(py::init<>())
-            .def_property_readonly("source_id", &Quote::get_source_id)
-            .def_property_readonly("trading_day", &Quote::get_trading_day)
-            .def("set_source_id", &Quote::set_source_id)
-            .def("set_trading_day", &Quote::set_trading_day)
+            .def_property("source_id", &Quote::get_source_id, &Quote::set_source_id)
+            .def_property("trading_day", &Quote::get_trading_day,  &Quote::set_trading_day)
             .def_readwrite("data_time", &Quote::data_time)
-            .def_property_readonly("instrument_id", &Quote::get_instrument_id)
-            .def_property_readonly("exchange_id", &Quote::get_exchange_id)
-            .def("set_instrument_id", &Quote::set_instrument_id)
-            .def("set_exchange_id", &Quote::set_exchange_id)
+            .def_property("instrument_id", &Quote::get_instrument_id, &Quote::set_instrument_id)
+            .def_property("exchange_id", &Quote::get_exchange_id, &Quote::set_exchange_id)
             .def_readwrite("instrument_type", &Quote::instrument_type)
             .def_readwrite("pre_close_price", &Quote::pre_close_price)
             .def_readwrite("pre_settlement_price", &Quote::pre_settlement_price)
@@ -352,14 +368,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("lower_limit_price", &Quote::lower_limit_price)
             .def_readwrite("close_price", &Quote::close_price)
             .def_readwrite("settlement_price", &Quote::settlement_price)
-            .def_property_readonly("bid_price", &Quote::get_bid_price)
-            .def_property_readonly("ask_price", &Quote::get_ask_price)
-            .def_property_readonly("bid_volume", &Quote::get_bid_volume)
-            .def_property_readonly("ask_volume", &Quote::get_ask_volume)
-            .def("set_bid_price", &Quote::set_bid_price)
-            .def("set_ask_price", &Quote::set_ask_price)
-            .def("set_bid_volume", &Quote::set_bid_volume)
-            .def("set_ask_volume", &Quote::set_ask_volume)
+            .def_property("bid_price", &Quote::get_bid_price, &Quote::set_bid_price)
+            .def_property("ask_price", &Quote::get_ask_price, &Quote::set_ask_price)
+            .def_property("bid_volume", &Quote::get_bid_volume, &Quote::set_bid_volume)
+            .def_property("ask_volume", &Quote::get_ask_volume, &Quote::set_ask_volume)
             .def("__repr__",
                  [](const Quote &a)
                  {
@@ -595,7 +607,18 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<MsgWriter, std::shared_ptr<MsgWriter>>(m, "MsgWriter")
             .def(py::init<kungfu::yijinjing::journal::writer_ptr>())
             .def("write_data", &MsgWriter::write_data);
-    
+
+    py::class_<MarketData, PyMarketData, kungfu::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
+            .def(py::init<bool, data::locator_ptr, const std::string&>())
+            .def_property_readonly("io_device", &Ledger::get_io_device)
+            .def("subscribe", &MarketData::subscribe)
+            .def("unsubscribe", &MarketData::unsubscribe)
+            .def("on_start", &MarketData::on_start)
+            .def("add_time_interval", &MarketData::add_time_interval)
+            .def("get_writer", &MarketData::get_writer)
+            .def("now", &MarketData::now)
+            .def("run", &MarketData::run);
+
     py::class_<Ledger, PyLedger, kungfu::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Ledger::get_io_device)

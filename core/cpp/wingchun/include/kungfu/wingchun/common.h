@@ -241,6 +241,34 @@ namespace kungfu
             return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
         }
 
+        inline void to_upper(std::string& data)
+        {
+            std::for_each(data.begin(), data.end(), [](char & c){
+                c = ::toupper(c);
+            });
+        }
+
+        inline std::string to_upper_copy(const std::string& data)
+        {
+            std::string rtn = data;
+            to_upper(rtn);
+            return rtn;
+        }
+
+        inline void to_lower(std::string& data)
+        {
+            std::for_each(data.begin(), data.end(), [](char & c){
+                c = ::tolower(c);
+            });
+        }
+
+        inline std::string to_lower_copy(const std::string& data)
+        {
+            std::string rtn = data;
+            to_lower(rtn);
+            return rtn;
+        }
+
         inline bool is_final_status(const OrderStatus &status)
         {
             switch (status)

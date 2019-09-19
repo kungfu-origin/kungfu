@@ -23,14 +23,13 @@ namespace kungfu
 
                 virtual ~MarketData() = default;
 
+                virtual void on_start() override;
+
                 virtual bool subscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
                 virtual bool unsubscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
             protected:
-
-                void on_start() override;
-
                 void publish_state(msg::data::BrokerState state)
                 {
                     auto s = static_cast<int32_t>(state);
