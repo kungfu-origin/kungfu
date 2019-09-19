@@ -133,7 +133,3 @@ startMaster(false)
         .then(() => startLedger(false))
         .catch(() => {})
     })
-
-//@ts-ignore
-process.env.ELECTRON_RUN_AS_NODE = true;
-    
