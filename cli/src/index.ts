@@ -12,9 +12,11 @@ import { delaySeconds } from '__gUtils/busiUtils';
 import { startLedger, startMaster, killExtra } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
-import { LEDGER_DIR, LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
+import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
 const program = require('commander');
+
+console.log('process.argv', process.argv)
 
 program
     .version(version)
@@ -117,12 +119,7 @@ program
         process.exit(0)
     })
 
-if (process.env.NODE_ENV !== 'production') {
-    program.parse(process.argv)
-} else {
-    //@ts-ignore
-    program.parse([null].concat(process.argv))
-}
+program.parse(process.argv)
 
 initDB()
 
@@ -133,3 +130,5 @@ startMaster(false)
         .then(() => startLedger(false))
         .catch(() => {})
     })
+
+

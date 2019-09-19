@@ -58,6 +58,7 @@ let cliConfig = {
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
       'process.env.LANG_ENV': '"en"',
+      'process.env.APP_TYPE': '"cli"',
     }),
   ],
   resolve: {
@@ -91,6 +92,8 @@ if (process.env.NODE_ENV === 'production') {
   cliConfig.plugins.push(
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
+      'process.env.LANG_ENV': '"en"',
+      'process.env.APP_TYPE': '"cli"',
     }),
     new OptimizeJsPlugin({
       sourceMap: false

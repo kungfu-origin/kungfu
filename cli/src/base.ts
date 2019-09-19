@@ -1,16 +1,19 @@
-import initGlobalDB from '__gConfig/initGlobalDB.json'
-import { BASE_DB_DIR, DEFUALT_DB_PATH } from '__gConfig/pathConfig';
-import { logger } from '__gUtils/logUtils'
-import { existsSync, addFile } from '__gUtils/fileUtils';
 const path = require('path')
+
+if (process.env.NODE_ENV === 'production') {
+    global.__resources = path.join('resources').replace(/\\/g, '\\\\')
+    //@ts-ignore
+    process.resourcesPath =  path.join('.').replace(/\\/g, '\\\\')
+}
+
+const initGlobalDB = require('__gConfig/initGlobalDB.json')
+const { BASE_DB_DIR, DEFUALT_DB_PATH } = require('__gConfig/pathConfig');
+const { logger } = require('__gUtils/logUtils');
+const { existsSync, addFile } = require('__gUtils/fileUtils');
+
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 
-
-
-if (process.env.NODE_ENV !== 'development') {
-    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
-}
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

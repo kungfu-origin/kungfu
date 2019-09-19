@@ -172,7 +172,7 @@ export const throttle = (fn: Function, interval = 300): Function => {
  */
 export const openWin = (htmlPath: string, BrowserWindow: any): void => {
 
-    const modalPath = process.env.NODE_ENV === 'development'
+    const modalPath = process.env.NODE_ENV !== 'production'
     ? `http://localhost:9090/#/${htmlPath}`
     : `file://${__dirname}/index.html#${htmlPath}`
     

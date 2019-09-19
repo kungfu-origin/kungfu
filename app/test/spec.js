@@ -6,7 +6,7 @@ const config = require('./config.json');
 
 process.env.APP_TYPE = 'test'
 process.env.KUNGFU_ENGINE_PATH = config.KF_ENGINE;
-process.env.ELEC_BASE_DIR = config.KF_HOME;
+process.env.KF_HOME_BASE_DIR = config.KF_HOME;
 
 function delay(interval) {
 	return new Promise(resolve => {

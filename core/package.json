@@ -9,16 +9,15 @@
     "buildtype": "Release",
     "loglevel": "info",
     "arch": "x64",
-    "runtime": "electron",
-    "node": "10.16.0",
-    "electron": "5.0.10"
+    "runtime": "node",
+    "node": "10.16.0"
   },
   "scripts": {
     "install-deps": "pipenv --three install -d",
     "build": "yarn run build:cpp && yarn run build:pyi",
-    "build:cpp": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron make",
-    "build:pyi": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron package",
-    "configure": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron configure",
+    "build:cpp": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node make",
+    "build:pyi": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node package",
+    "configure": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node configure",
     "clean": "cmake-js clean",
     "dev": "pipenv run python python/dev_run.py",
     "test": "pipenv run python python/dev_test.py"
