@@ -41,7 +41,7 @@ public:
     using MarketData::MarketData;
     bool subscribe(const std::vector<Instrument> &instruments) override
     { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments); }
-    bool unsubscribe(const std::vector<Instrument> &instruments)
+    bool unsubscribe(const std::vector<Instrument> &instruments) override
     { PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe,instruments); }
     void on_start() override
     {PYBIND11_OVERLOAD(void, MarketData, on_start, );}
