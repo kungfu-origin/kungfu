@@ -6,6 +6,7 @@
 #define KUNGFU_WINGCHUN_UTILS_H
 
 #include <hffix.hpp>
+#include <spdlog/spdlog.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 
@@ -15,8 +16,11 @@ namespace kungfu
 {
     namespace wingchun
     {
-        inline size_t fill_subscribe_msg(char* buffer, size_t buffer_size, const std::vector<Instrument> instruments)
+        inline void write_subscribe_msg(const yijinjing::journal::writer_ptr &writer, int64_t trigger_time,
+                const std::string &exchange, const std::string &symbol)
         {
+            const size_t buffer_size = 1024;
+            char *buffer = const_cast<char *>(&(writer->open_frame(trigger_time, msg::type::Subscribe, buffer_size)->data<char>()));
             hffix::message_writer sub_msg(buffer, buffer + buffer_size);
             sub_msg.push_back_header("FIX.4.2");
             sub_msg.push_back_string(hffix::tag::MsgType, "V");
@@ -26,44 +30,12 @@ namespace kungfu
 
             sub_msg.push_back_int(hffix::tag::NoMDEntryTypes, 1);
             sub_msg.push_back_int(hffix::tag::MDEntryType, 2);
-            sub_msg.push_back_int(hffix::tag::NoRelatedSym, instruments.size());
-            for (const auto &inst : instruments)
-            {
-                sub_msg.push_back_string(hffix::tag::Symbol, inst.instrument_id);
-                sub_msg.push_back_string(hffix::tag::SecurityExchange, inst.exchange_id);
-            }
+            sub_msg.push_back_int(hffix::tag::NoRelatedSym, 1);
+            sub_msg.push_back_string(hffix::tag::SecurityExchange, exchange);
+            sub_msg.push_back_string(hffix::tag::Symbol, symbol);
             sub_msg.push_back_trailer();
-            return sub_msg.message_end() - buffer;
-        }
-
-        inline size_t fill_subscribe_msg(char* buffer, size_t buffer_size, const std::vector<std::string> &symbols, const std::string &exchange_id)
-        {
-            std::vector<Instrument> instruments = {};
-            for (const auto& symbol : symbols)
-            {
-                Instrument inst = {};
-                strcpy(inst.instrument_id, symbol.c_str());
-                strcpy(inst.exchange_id, exchange_id.c_str());
-                instruments.push_back(inst);
-            }
-            return fill_subscribe_msg(buffer, buffer_size,instruments);
-        }
-
-        template <class T> std::vector<Instrument> get_insts(const std::vector<T>& vec)
-        {
-            std::vector<Instrument> insts;
-            for (const auto& item: vec)
-            {
-                Instrument inst = {};
-                strcpy(inst.instrument_id, item.instrument_id);
-                strcpy(inst.exchange_id, item.exchange_id);
-                insts.push_back(inst);
-            }
-
-            std::sort(insts.begin(), insts.end());
-            auto it= std::unique(insts.begin(), insts.end());
-            insts.erase(it, insts.end());
-            return insts;
+            writer->close_frame(sub_msg.message_end() - buffer);
+            SPDLOG_TRACE("written subscribe msg for {}@{}", symbol, exchange);
         }
     }
 }

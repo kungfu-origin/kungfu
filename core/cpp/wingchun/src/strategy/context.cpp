@@ -163,10 +163,10 @@ namespace kungfu
 
             void Context::request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange)
             {
-                auto writer = app_.get_writer(source);
-                char *buffer = const_cast<char *>(&(writer->open_frame(app_.now(), msg::type::Subscribe, 4096)->data<char>()));
-                size_t length = fill_subscribe_msg(buffer, 4096, symbols, exchange);
-                writer->close_frame(length);
+                for (const auto &symbol : symbols)
+                {
+                    write_subscribe_msg(app_.get_writer(source), app_.now(), exchange, symbol);
+                }
             }
 
             uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
