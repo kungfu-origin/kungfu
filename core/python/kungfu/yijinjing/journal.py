@@ -5,6 +5,7 @@ import re
 import json
 import pyyjj
 import pandas as pd
+import errno
 import kungfu.yijinjing.msg as yjj_msg
 
 
@@ -72,8 +73,11 @@ class Locator(pyyjj.locator):
         mode = pyyjj.get_mode_name(location.mode)
         category = pyyjj.get_category_name(location.category)
         p = os.path.join(self._home, category, location.group, location.name, pyyjj.get_layout_name(layout), mode)
-        if not os.path.exists(p):
+        try:
             os.makedirs(p)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
         return p
 
     def layout_file(self, location, layout, name):
