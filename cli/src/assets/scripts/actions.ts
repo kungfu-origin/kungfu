@@ -1,5 +1,5 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
-import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset, delaySeconds } from '__gUtils/busiUtils';
 import { addFile } from '__gUtils/fileUtils';
 import { listProcessStatus } from '__gUtils/processUtils';
 import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
@@ -10,7 +10,7 @@ import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
 import { parseToString, dealStatus, buildTargetDateRange } from '@/assets/scripts/utils';
-import { Observable, combineLatest, zip, merge, concat } from 'rxjs';
+import { Observable, combineLatest, forkJoin, merge, zip, concat } from 'rxjs';
 import { map } from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
 import { logger } from '__gUtils/logUtils';
@@ -87,6 +87,7 @@ export const accountStrategyListStringify = (accounts: Account[], strategys: Str
 
 export const processStatusObservable = () => {
     return new Observable(observer => {
+        observer.next({})
         setTimerPromiseTask(() => {
             return listProcessStatus()
                 .then((processStatus: StringToStringObject) => {
@@ -127,7 +128,6 @@ export const processListObservable = () => combineLatest(
     accountListObservable(),
     strategyListObservable(),
     (processStatus: StringToStringObject, accountList: Account[], strategyList: Strategy[]) => {
-
         const mdList = accountList.filter((a: Account) => !!a.receive_md)
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
@@ -260,7 +260,7 @@ const getLogObservable = (pid: string) => {
 
 
 export const getMergedLogsObservable = (processIds: string[]) => {
-    return zip(
+    return forkJoin(
         ...processIds
         .map((logPath: string) => getLogObservable(logPath))        
     ).pipe(

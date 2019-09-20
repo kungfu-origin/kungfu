@@ -9,7 +9,7 @@ import { updateAccountStrategy } from '@/commanders/update';
 import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
 import { delaySeconds } from '__gUtils/busiUtils';
-import { startLedger, startMaster, killExtra } from '__gUtils/processUtils';
+import { startLedger, startMaster, killExtra, killGodDaemon, killKfc } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
@@ -82,10 +82,17 @@ program
 program
     .command('shutdown')
     .description('shutdown all kungfu processes')
-    .action(() => {
-        return killExtra()
-        .then(() => console.log('Shutdown kungfu successfully!'))
-        .finally(() => process.exit(0))
+    .action(async () => {
+        try {
+            await killKfc();
+            await killGodDaemon();
+            await killExtra();
+            console.log('Shutdown kungfu successfully!')
+        } catch (err) {
+            console.log(err)
+        }
+        
+        process.exit(0)
     })
 
 program
@@ -123,12 +130,10 @@ program.parse(process.argv)
 
 initDB()
 
-startMaster(false)
-    .catch(() => {})
-    .finally(() => {
-        delaySeconds(1000)
-        .then(() => startLedger(false))
-        .catch(() => {})
-    })
-
-
+// startMaster(false)
+//     .catch(() => {})
+//     .finally(() => {   
+//         delaySeconds(1000)
+//         .then(() => startLedger(false))
+//         .catch(() => {})
+//     })

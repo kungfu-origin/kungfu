@@ -46,8 +46,8 @@ let cliConfig = {
     ]
   },
   node: {
-    __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __dirname: true,
+    __filename: true 
   },
   output: {
     filename: '[name].js',
