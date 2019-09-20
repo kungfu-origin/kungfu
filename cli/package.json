@@ -23,7 +23,13 @@
     "dev": "node .config/dev-cli.js",
     "cli": "node dist/cli/index",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .config/webpack.cli.config.js",
-    "test": " mocha"
+    "test": " mocha",
+    "cp": "yarn run cp:default && yarn run cp:config && yarn run cp:kfc && cp:node",
+    "cp:default": "copyfiles -a -f ../app/resources/default/* ./build/cli/resources/default",
+    "cp:config": "copyfiles -a -f ../app/resources/config/* ./build/cli/resources/config",
+    "cp:kfc": "copyfiles -u -e **/btdata -a ../core/build/kfc/* ../core/build/kfc/**/* ../core/build/kfc/**/**/* ../core/build/kfc/**/**/**/* ../core/build/kfc/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/**/* ./build/cli/kfc",
+    "cp:node": "copyfiles -a -f ../core/build/*/node_nanomsg.node ../core/build/*/node_sqlite3.node ../core/build/*/libnanomsg.* ../core/build/*/nanomsg.* ./build/cli"
+
   },
   "bin": "./dist/cli/index.js",
   "pkg": {

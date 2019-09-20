@@ -3,7 +3,7 @@ const path = require('path')
 if (process.env.NODE_ENV === 'production') {
     global.__resources = path.join(path.dirname(process.execPath), 'resources').replace(/\\/g, '\\\\')
     //@ts-ignore
-    process.resourcesPath =  path.join(path.dirname(process.execPath)).replace(/\\/g, '\\\\')
+    process.resourcesPath =  path.join(path.dirname(process.execPath), 'core', 'build').replace(/\\/g, '\\\\')
 }
 
 const initGlobalDB = require('__gConfig/initGlobalDB.json')
