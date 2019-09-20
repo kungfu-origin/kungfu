@@ -14,10 +14,10 @@
           "required": true
         },
         {
-          "key": "md_parameter",
-          "name": "md_parameter",
+          "key": "match_mode",
+          "name": "match_mode",
           "type": "str",
-          "errMsg": "请填写行情信息",
+          "errMsg": "请填写撮合模式, options: (reject, pend, cancel, partialfillandcancel, partialfill, fill, custom)",
           "required": true
         }
       ]

@@ -2,17 +2,7 @@
 // Created by Keren Dong on 2019-07-11.
 //
 
-#include <utility>
-
-#include <kungfu/wingchun/msg.h>
-
 #include "trader_sim.h"
-#include <typeinfo>
-
-
-using namespace kungfu::rx;
-using namespace kungfu::yijinjing;
-using namespace msg::data;
 
 namespace kungfu
 {
@@ -24,163 +14,124 @@ namespace kungfu
                     Trader(low_latency, std::move(locator), SOURCE_SIM, account_id)
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), account_id);
-                SPDLOG_INFO("[account] {}", account_id);
-            }
-
-            void TraderSim::rtn_order_from(const msg::data::OrderInput &input, OrderStatus status, int error_id)
-            {
-                auto writer = writers_[0];
-                int64_t nano = time::now_in_nano();
-                msg::data::Order &order = writer->open_data<msg::data::Order>(nano, msg::type::Order);
-                order_from_input(input, order);
-                order.update_time = nano;
-                order.status = status;
-                switch (status)
+                nlohmann::json config = nlohmann::json::parse(json_config);
+                std::string match_mode =  config.value("match_mode", "custom");
+                this->mode_ = get_mode(match_mode);
+                if (this->mode_ == MatchMode::Custom)
                 {
-                    case OrderStatus::Submitted:
-                        order.insert_time = nano;
-                        break;
-                    case OrderStatus::Pending:
-                        order.insert_time = nano;
-                        pending_orders_[order_id_] = order;
-                        break;
-                    case OrderStatus::Filled:
-                    {
-                        order.volume_traded = order.volume;
-                        writer->close_data();
-                        msg::data::Trade &trade = writer->open_data<msg::data::Trade>(nano, msg::type::Trade);
-                        strcpy(trade.instrument_id, input.instrument_id);
-                        strcpy(trade.exchange_id, input.exchange_id);
-                        trade.price = input.limit_price;
-                        trade.volume = input.volume;
-                        trade.trade_id = writer->current_frame_uid();
-                        trade.trade_time = nano;
-                        strcpy(trade.account_id, this->get_account_id().c_str());
-                        break;
-                    }
-                    case OrderStatus::Error:
-                    {
-                        strcpy(order.error_msg, "error");
-                        order.error_id = error_id;
-                        break;
-                    }
-                    case OrderStatus::Cancelled:
-                        break;
-                    default :
-                        break;
+                    throw wingchun_error("user defined match mode not supported");
                 }
-                writer->close_data();
             }
 
             bool TraderSim::insert_order(const yijinjing::event_ptr &event)
             {
-                
                 const msg::data::OrderInput &input = event->data<msg::data::OrderInput>();
-
-                if (mds_.find(std::string(input.instrument_id)) == mds_.end())
+                msg::data::Order order = {};
+                order_from_input(input, order);
+                order.insert_time = kungfu::yijinjing::time::now_in_nano();
+                order.update_time = kungfu::yijinjing::time::now_in_nano();
+                int min_vol = get_instrument_type(input.instrument_id, input.exchange_id) == InstrumentType::Stock ? 100 : 1;
+                if (order.volume < min_vol)
                 {
-                    rtn_order_from(input, OrderStatus::Error, 1);
-                    return false;
-                } else
+                    order.status = OrderStatus::Error;
+                }
+                else
                 {
-                    rtn_order_from(input, OrderStatus::Submitted);
-                    if (input.price_type == PriceType::Any)
-                        rtn_order_from(input, OrderStatus::Filled);
-                    else if (input.price_type == PriceType::Limit)
+                    switch (mode_)
                     {
-                        if (input.side == Side::Buy)
+                        case MatchMode::Reject:
                         {
-                            if (input.limit_price >= mds_[std::string(input.instrument_id)].last_price)
-                                rtn_order_from(input, OrderStatus::Filled);
-                            else
-                                rtn_order_from(input, OrderStatus::Pending);
-                            //add dic
-                        } 
-                        else
+                            order.status = OrderStatus::Error;
+                            break;
+                        }
+                        case MatchMode::Pend:
                         {
-                            if (input.limit_price <= mds_[std::string(input.instrument_id)].last_price)
-                                rtn_order_from(input, OrderStatus::Filled);
-                            else
-                                rtn_order_from(input, OrderStatus::Pending);
-                            //add dic
+                            order.status = OrderStatus::Pending;
+                            break;
+                        }
+                        case MatchMode::Cancel:
+                        {
+                            order.status = OrderStatus::Cancelled;
+                            break;
+                        }
+                        case MatchMode::Fill:
+                        {
+                            order.status = OrderStatus::Filled;
+                            order.volume_traded = order.volume;
+                            order.volume_left = 0;
+                            break;
+                        }
+                        case MatchMode::PartialFillAndCancel:
+                        {
+                            order.volume_traded = min_vol;
+                            order.volume_left = order.volume - order.volume_traded;
+                            order.status = order.volume_left == 0 ? OrderStatus::Filled : OrderStatus::PartialFilledNotActive;
+                            break;
+                        }
+                        case MatchMode::PartialFill:
+                        {
+                            order.volume_traded = min_vol;
+                            order.volume_left = order.volume - order.volume_traded;
+                            order.status = order.volume_left == 0 ? OrderStatus::Filled : OrderStatus::PartialFilledActive;
+                            break;
+                        }
+                        default:
+                        {
+                            throw wingchun_error("user defined match mode not supported");
                         }
                     }
                 }
-                order_id_ +=1;
+
+                if (order.volume_traded > 0)
+                {
+                    auto writer = get_writer(event->source());
+                    msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
+                    uint64_t trade_id = writer->current_frame_uid();
+                    trade.trade_id = trade_id;
+                    trade.order_id = input.order_id;
+                    trade.trade_time = kungfu::yijinjing::time::now_in_nano();
+                    strcpy(trade.instrument_id, input.instrument_id);
+                    strcpy(trade.exchange_id, input.exchange_id);
+                    strcpy(trade.account_id, input.account_id);
+                    trade.side = input.side;
+                    trade.offset = input.offset;
+                    trade.price = input.limit_price; //TODO support market order
+                    trade.volume = order.volume_traded;
+                    writer->close_data();
+                }
+
+                if (not is_final_status(order.status))
+                {
+                    pending_orders_[order.order_id] = order;
+                    oid2source_[order.order_id] = event->source();
+                }
+                get_writer(event->source())->write(0, msg::type::Order, order);
                 return true;
             }
 
             bool TraderSim::cancel_order(const yijinjing::event_ptr &event)
             {
-                return false;
-            }
-
-            bool TraderSim::req_position()
-            {
-                return false;
-            }
-
-            bool TraderSim::req_account()
-            {
-                return false;
-            }
-
-            void TraderSim::on_start()
-            {
-                Trader::on_start();
-                add_md("sim");
-
-                events_ | is(msg::type::Quote) |
-                $([&](event_ptr event)
-                  {
-                      on_md(event->data<msg::data::Quote>(), event->source());
-                  });
-
-            }
-
-            void TraderSim::add_md(std::string source_)
-            {
-                SPDLOG_INFO("try to add md {} ", source_);
-                auto md_location = data::location::make(data::mode::LIVE, data::category::MD, source_, source_,
-                                                  get_io_device()->get_home()->locator);
-                if (not has_location(md_location->uid))
+                auto& action = event->data<msg::data::OrderAction>();
+                auto order_id = action.order_id;
+                auto it = pending_orders_.find(order_id);
+                if (it == pending_orders_.end())
                 {
-                    throw wingchun_error(fmt::format("invalid md {}", source_));
+                    SPDLOG_ERROR("target order {} is finished", order_id);
+                    return false;
                 }
-                request_read_from(now(), md_location->uid, true);
-                SPDLOG_INFO("added md {} [{:08x}]", source_, md_location->uid);
-            }
-
-            void TraderSim::on_md(const msg::data::Quote &quote, uint32_t source)
-            {
-                nlohmann::json _quote;
-                msg::data::to_json(_quote, quote);
-                SPDLOG_INFO("[quote] {}", _quote.dump());
-                mds_[std::string(quote.instrument_id)] = quote;
-                for (auto &val : pending_orders_)
+                else
                 {
-                    if (std::strcmp(quote.instrument_id,val.second.instrument_id) == 0)
+                    auto& order =  it->second;
+                    order.status = order.volume_traded == 0 ? OrderStatus::Cancelled : OrderStatus::PartialFilledNotActive;
+                    if (oid2source_.find(order_id) != oid2source_.end())
                     {
-                        if (((val.second.side == Side::Buy) && (val.second.limit_price >= mds_[std::string(val.second.instrument_id)].last_price)) || ((val.second.side == Side::Buy) && (val.second.limit_price <= mds_[std::string(val.second.instrument_id)].last_price)))
-                        {
-                            auto writer = writers_[0];
-                            int64_t nano = time::now_in_nano();
-                            msg::data::Order &order = writer->open_data<msg::data::Order>(nano, msg::type::Order);
-                            order = val.second;
-                            order.volume_traded = order.volume;
-                            writer->close_data();
-                            msg::data::Trade &trade = writer->open_data<msg::data::Trade>(nano, msg::type::Trade);
-                            strcpy(trade.instrument_id, val.second.instrument_id);
-                            strcpy(trade.exchange_id, val.second.exchange_id);
-                            trade.price = val.second.limit_price;
-                            trade.volume = val.second.volume;
-                            trade.trade_id = writer->current_frame_uid();
-                            trade.trade_time = nano;
-                            strcpy(trade.account_id, this->get_account_id().c_str());
-                            writer->close_data();
-                        } 
+                        auto source = oid2source_[order_id];
+                        get_writer(source)->write(0, msg::type::Order, order);
+                        oid2source_.erase(order_id);
                     }
+                    pending_orders_.erase(it);
                 }
+                return true;
             }
         }
     }

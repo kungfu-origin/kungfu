@@ -18,7 +18,8 @@ PyInquirer = "==1.0.3"
 prompt_toolkit = "==1.0.14"
 tushare = "==1.2.39"
 plotly = "==4.0.0"
-
+sortedcontainers = "==2.1.0"
+recordclass = "==0.12.0.1"
 [dev-packages]
 pytest = "*"
 mock ="*"

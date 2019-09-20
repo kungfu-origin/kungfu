@@ -39,7 +39,9 @@ a = Analysis(['kungfu\\__main__.py'],
           'pandas',
           'tushare',
           'plotly',
-          'plotly.graph_objects'
+          'plotly.graph_objects',
+          "recordclass",
+          "sortedcontainers"
           ],
      hookspath=None,
      runtime_hooks=None,
