@@ -307,12 +307,7 @@ export const clearFileContent = (filePath: string): Promise<any> => {
     })
 }
 
-//打开查看文件
-export const openReadFile = (logPath: string): void => {
-    addFile('', logPath, 'file')
-    const shell = require('electron').shell;
-    shell.openItem(logPath)
-}
+
 
 export const existsSync = (filePath: string): boolean => {
     return fse.existsSync(filePath)
