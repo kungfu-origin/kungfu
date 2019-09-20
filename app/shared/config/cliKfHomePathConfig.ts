@@ -9,7 +9,7 @@ const getHomePath = () => {
         case 'win':
             return path.join(os.homedir(), 'AppData', 'Roaming', 'kungfu')
         case 'linux':
-            return path.join(os.homedir(), 'config', 'kungfu')
+            return path.join(os.homedir(), '.config', 'kungfu')
     }
 }
 
