@@ -124,9 +124,3 @@ export const KF_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfi
 export const DEFUALT_DB_PATH = path.join(KUNGFU_RESOURCES_DIR, 'default')
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'extensions');
-
-
-console.log('KF_CONFIG_PATH', KF_CONFIG_PATH)
-console.log('DEFUALT_DB_PATH', DEFUALT_DB_PATH)
-console.log('KF_HOME_BASE_DIR', KF_HOME_BASE_DIR)
-console.log('KUNGFU_ENGINE_PATH', KUNGFU_ENGINE_PATH)

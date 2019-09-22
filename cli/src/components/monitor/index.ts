@@ -224,4 +224,3 @@ export class MonitorDashboard extends Dashboard {
 export default () => {
     new MonitorDashboard()
 }
-
