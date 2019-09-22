@@ -77,21 +77,19 @@ const pm2Connect = (): Promise<void> => {
 
 const pm2List = (): Promise<any[]> => {
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try{
-                pm2.list((err: Error, pList: any[]): void => {
-                    if(err){
-                        logger.error(err)
-                        reject(err)
-                        return;
-                    }
-                    resolve(pList)
-                })
-            }catch(err){
-                logger.error(err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
+        try{
+            pm2.list((err: Error, pList: any[]): void => {
+                if(err){
+                    logger.error(err)
+                    reject(err)
+                    return;
+                }
+                resolve(pList)
+            })
+        }catch(err){
+            logger.error(err)
+            reject(err)
+        }
     })
 }
 

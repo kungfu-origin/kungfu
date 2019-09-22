@@ -33,6 +33,9 @@
   },
   "bin": "./dist/cli/index.js",
   "pkg": {
+    "scripts": [
+      "../node_modules/bodec/bodec-node.js"
+    ],
     "assets": [
 
     ]
