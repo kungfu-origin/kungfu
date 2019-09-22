@@ -35,9 +35,6 @@
   "pkg": {
     "scripts": [
       "../node_modules/bodec/bodec-node.js"
-    ],
-    "assets": [
-
     ]
   },
   "dependencies": {
