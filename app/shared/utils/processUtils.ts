@@ -190,7 +190,7 @@ export const startMaster = async(force: boolean): Promise<void> => {
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
     const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
-    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
+    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
     try{ 
         await killKfc()
     } catch (err) {
