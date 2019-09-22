@@ -138,7 +138,7 @@ export class MonitorDashboard extends Dashboard {
     initBoxInfo() {
 		const t = this;
 		t.boards.boxInfo = blessed.text({
-			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: process-switch',
+			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: start/stop process',
 			parent: t.screen,		
 			left: '0%',
 			top: '95%',

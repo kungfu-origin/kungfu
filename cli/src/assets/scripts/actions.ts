@@ -31,28 +31,28 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
             if (proc.processId === 'master') {
                 switchMaster(!status)
                 .then(() => messageBoard.log(`${startOrStopMaster} Master process sucessfully!`, 2))
-                .catch((err: Error) => {})
+                .catch((err: Error) => logger.error(err))
             }
             else if(proc.processId === 'ledger') {
                 switchLedger(!status)
                 .then(() => messageBoard.log(`${startOrStop} Ledger process sucessfully!`, 2))
-                .catch((err: Error) => {})
+                .catch((err: Error) => logger.error(err))
             } 
             break
         case 'md':
             switchMd(proc, !status)
             .then(() => messageBoard.log(`${startOrStop} MD process sucessfully!`, 2))
-            .catch((err: Error) => {})
+            .catch((err: Error) => logger.error(err))
             break
         case 'td':
             switchTd(proc, !status)
             .then(() => messageBoard.log(`${startOrStop} TD process sucessfully!`, 2))
-            .catch((err: Error) => {})
+            .catch((err: Error) => logger.error(err))
             break;
         case 'strategy':
             switchStrategy(proc.processId, !status)
             .then(() => {messageBoard.log(`${startOrStop} Strategy process sucessfully!`, 2)})
-            .catch((err: Error) => {})
+            .catch((err: Error) => logger.error(err))
             break;
     }
 }

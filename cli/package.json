@@ -29,7 +29,6 @@
     "cp:config": "copyfiles -a -f ../app/resources/config/* ./build/cli/resources/config",
     "cp:kfc": "copyfiles -u -e **/btdata -a ../core/build/kfc/* ../core/build/kfc/**/* ../core/build/kfc/**/**/* ../core/build/kfc/**/**/**/* ../core/build/kfc/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/* ../core/build/kfc/**/**/**/**/**/**/**/* ./build/cli/kfc",
     "cp:node": "copyfiles -a -f ../core/build/*/node_nanomsg.node ../core/build/*/node_sqlite3.node ../core/build/*/libnanomsg.* ../core/build/*/nanomsg.* ./build/cli"
-
   },
   "bin": "./dist/cli/index.js",
   "pkg": {
@@ -42,6 +41,7 @@
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
+    "cfonts": "^2.4.5",
     "colors": "^1.3.3",
     "commander": "^2.20.0",
     "fast-csv": "^2.5.0",
@@ -73,7 +73,6 @@
     "babel-register": "^6.26.0",
     "babili-webpack-plugin": "^0.1.2",
     "builder-util": "^21.2.0",
-    "cfonts": "^1.1.3",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-roughly": "^1.0.0",

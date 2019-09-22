@@ -14,6 +14,8 @@ import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
+const CFonts = require('cfonts');
+const colors = require('colors');
 
 startMaster(false)
     .catch(() => {})
@@ -23,6 +25,21 @@ startMaster(false)
         .catch(() => {})
     })
 
+if(process.argv.length === 2 || process.argv[2] === '-h') {
+    console.log(colors.green('Welcome to kungfu trader system'))
+    CFonts.say('KungFu', {
+        font: 'block',              // define the font face
+        align: 'left',              // define text alignment
+        colors: ['yellow'],         // define all colors
+        background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
+        letterSpacing: 2,           // define letter spacing
+        lineHeight: 2,              // define the line height
+        space: true,                // define if the output text should have empty lines on top and on the bottom
+        maxLength: '0',             // define how many character can be on one line
+    });
+    if( process.argv.length === 2 ) process.exit(0)
+}
+
 const program = require('commander');
 
 program
@@ -30,8 +47,8 @@ program
     .option('-l --list', 'list target process to monit');
 
 program
-    .command('monit [options]')
-    .description('monitor target process')
+    .command('monit [-l]')
+    .description('monitor all process with merged logs OR monitor one trading process')
     .action((type: any, commander: any) => {
         const list = commander.parent.list
         return monitPrompt(!!list)
@@ -104,7 +121,7 @@ program
 
 program
     .command('clearlog')
-    .description('clear all logs (Tips: should do it often)')
+    .description('clear all logs (should do it often)')
     .action(() => {
         return removeFilesInFolder(LOG_DIR)
             .then(() => console.log('Clear all logs successfully!'))
@@ -133,7 +150,18 @@ program
         process.exit(0)
     })
 
+program
+    .on('command:*', function () {
+        console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+        process.exit(1);
+        
+    });
+
+
+
 program.parse(process.argv)
+
+
 
 initDB()
 
