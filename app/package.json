@@ -8,6 +8,9 @@
     "name": "taurus.ai",
     "email": "info@taurus.ai"
   },
+  "env": [
+    "USE_HARD_LINKS=false"
+  ],
   "config": {
     "pyver": "three",
     "cmakejsopt": ""
