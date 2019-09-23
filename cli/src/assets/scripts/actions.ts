@@ -216,8 +216,8 @@ const dealLogMessage = (line: string, processId: string) => {
     let lineData: LogDataOrigin;
     try{
         lineData = JSON.parse(line);
-    }catch(err){
-        throw err;
+    } catch (err) {
+        return false
     }
     let messages = lineData.message.split('\n').filter((m: string) => m !== '');
     return messages.map((message: string) => {

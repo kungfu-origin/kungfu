@@ -18,7 +18,7 @@
   },
   "scripts": {
     "clean": "rimraf ./dist/* ./build/*",
-    "build:linux": " yarn run dist && pkg . -t=node10.15.3-linux-x64 --out-path=build/cli",
+    "build:linux": " yarn run dist && pkg . -t=node10.15.3-linux-x64 --out-path=build/cli && yarn run cp",
     "build:mac": " yarn run dist && pkg . -t=node10.15.3-macos-x64 --out-path=build/cli && yarn run cp",
     "dev": "node .config/dev-cli.js",
     "cli": "node dist/cli/index",

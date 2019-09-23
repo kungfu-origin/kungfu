@@ -84,13 +84,9 @@ class Table {
 
 	bindEvent(box: any, list: any){
 		//bind event
-		const t = this;
 		box.on('focus', () => {
-			if(!list.focused) list.focus()
-		})
-	
-		list.on('focus', () => {
 			box.style.border.fg = 'blue'
+			if(!list.focused) list.focus()
 		})
 	
 		list.on('blur', () => {

@@ -32,6 +32,7 @@ class TradingDataDashboard extends Dashboard {
 
 		this.boards = {};
 		this.init()
+
 	}
 
 	init(){
@@ -43,6 +44,7 @@ class TradingDataDashboard extends Dashboard {
 		t.initTradeList();
 		t.initBoxInfo();
 		t.initMessage();
+		t.initCancelOrderBtn();
 		t.screen.render();
 		t.bindEvent();
 		t.bindData();
@@ -79,12 +81,12 @@ class TradingDataDashboard extends Dashboard {
             label: ' Assets ',
             parent: t.screen,
             padding: DEFAULT_PADDING,
-            top: '0',
+            top: 0,
             left: 45,
             interactive: false,
 			mouse: false,			
             width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
-            height: '40%',
+            height: '40%-3',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
@@ -93,6 +95,36 @@ class TradingDataDashboard extends Dashboard {
                 }
             }
         })
+	}
+
+	initCancelOrderBtn() {
+		const t =this;
+		t.boards.cancelBtn = blessed.button({
+			content: 'Cancel Order',
+            parent: t.screen,
+			width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
+            height: 3,
+            left: 45,
+			top: '40%-3',
+			align: 'center',
+			valign: 'middle',
+            interactive: true,
+			mouse: true,
+			border: 'line',
+			style: {
+				fg: 'white',
+				bg: 'red',
+				border: {
+					fg: 'grey',
+				},
+				focus: {
+					border: {
+						fg: 'red',
+					}
+				},
+            }
+		})
+		t.boards.cancelBtn.setIndex(999)
 	}
 	
 	initPosTable(){
@@ -169,11 +201,11 @@ class TradingDataDashboard extends Dashboard {
 	bindEvent() {
 		const t = this;
 		let i = 0;
-		let boards = ['processTable', 'assetTable', 'posTable', 'orderTable', 'tradeTable'];
+		let boards = ['processTable', 'assetTable', 'cancelBtn', 'posTable', 'orderTable', 'tradeTable'];
 		t.screen.key(['left', 'right'], (ch: any, key: any) => {
 			(key.name === 'left') ? i-- : i++;
-			if (i === 5) i = 0;
-			if (i === -1) i = 4;
+			if (i === 6) i = 0;
+			if (i === -1) i = 5;
 			t.boards[boards[i]].focus();
 		});
 	
@@ -185,7 +217,11 @@ class TradingDataDashboard extends Dashboard {
 		t.boards.processTable.key(['enter'], () => {
 			const selectedIndex: number = t.boards.processTable.selected;
             switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
-        });
+		});
+		
+		t.boards.cancelBtn.on('press', () => {
+			t.boards.message.log('Is cancelling all order, please wait...')
+		})
 	}
 
 
@@ -238,7 +274,7 @@ class TradingDataDashboard extends Dashboard {
 			} else if (t.type === 'strategy') {
 				processList = processList
 					.filter((proc: ProcessListItem) => {
-						if(proc.type === 'strategy' && proc.strategy_id === this.targetId) return true
+						if(proc.type === 'strategy' && proc.strategy_id === t.targetId) return true
 						else if(proc.type === 'main') return true
 						else return false
 					})

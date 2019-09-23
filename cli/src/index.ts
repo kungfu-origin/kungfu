@@ -44,7 +44,7 @@ const program = require('commander');
 
 program
     .version(version)
-    .option('-l --list', 'list target process to monit');
+    .option('-l --list', 'list detail');
 
 program
     .command('monit [-l]')
