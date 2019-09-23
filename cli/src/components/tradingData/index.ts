@@ -238,7 +238,7 @@ class TradingDataDashboard extends Dashboard {
 			} else if (t.type === 'strategy') {
 				processList = processList
 					.filter((proc: ProcessListItem) => {
-						if(proc.type === 'strategy') return true
+						if(proc.type === 'strategy' && proc.strategy_id === this.targetId) return true
 						else if(proc.type === 'main') return true
 						else return false
 					})
