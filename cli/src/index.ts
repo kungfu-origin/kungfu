@@ -28,7 +28,7 @@ startMaster(false)
 if(process.argv.length === 2 || process.argv[2] === '-h') {
     console.log(colors.green('Welcome to kungfu trader system'))
     CFonts.say('KungFu', {
-        font: 'block',              // define the font face
+        font: '3d',              // define the font face
         align: 'left',              // define text alignment
         colors: ['yellow'],         // define all colors
         background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
