@@ -286,8 +286,6 @@ namespace kungfu
                     auto order_info = order_mapper_->get_order_info_by_order_ref(this->front_id_, this->session_id_, pInputOrder->OrderRef);
                     if (order_info.internal_order_id != 0)
                     {
-                        OrderInput input = {};
-                        from_ctp(*pInputOrder, input);
                         auto writer = get_writer(order_info.source);
                         msg::data::Order &order = writer->open_data<msg::data::Order>(0, msg::type::Order);
                         order.order_id = order_info.internal_order_id;

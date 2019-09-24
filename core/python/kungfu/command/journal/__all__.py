@@ -3,3 +3,4 @@
 
 from . import sessions
 from . import trace
+from . import reader

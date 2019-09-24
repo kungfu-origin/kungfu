@@ -424,7 +424,7 @@ namespace kungfu
 
                 struct Bar
                 {
-                    char trading_day[DATE_LEN];            //交易日 
+                    char trading_day[DATE_LEN];            //交易日
                     char instrument_id[INSTRUMENT_ID_LEN]; //合约代码
                     char exchange_id[EXCHANGE_ID_LEN];     //交易所代码
 
@@ -874,7 +874,7 @@ namespace kungfu
                 inline void from_json(const nlohmann::json &j, Trade &trade)
                 {
                     trade.trade_id = j["trade_id"];
-                    
+
                     trade.order_id = j["order_id"].get<uint64_t>();
 
                     trade.trade_time = j["trade_time"];
@@ -1144,90 +1144,12 @@ namespace kungfu
 
             }
 
-                template<typename T>
-                inline std::string to_string(const T &ori)
-                {
-                    nlohmann::json j;
-                    to_json(j, ori);
-                    return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);;
-                }
-
-            class MsgWriter
+            template<typename T> std::string to_string(const T &ori)
             {
-            public:
-                MsgWriter(kungfu::yijinjing::journal::writer_ptr writer): writer_(writer) {};
-                void write_data(int msg_type, const std::string &json_str)
-                {
-                    switch (msg_type)
-                    {
-                        case kungfu::wingchun::msg::type::Quote:
-                        {
-                            auto j = nlohmann::json::parse(json_str);
-                            Quote &quote = writer_->open_data<Quote>(0, msg::type::Quote);
-                            from_json(j, quote);
-                            writer_->close_data();
-                            break;
-                        }
-                        default:
-                            throw wingchun_error("unrecognized msg_type");
-                    }
-                }
-            private:
-                kungfu::yijinjing::journal::writer_ptr writer_;
-            };
-
-            class Decoder
-                {
-                public:
-                    virtual ~Decoder() {}
-                    virtual std::string json_from_ptr(uintptr_t address) const = 0;
-                };
-
-                template<typename T>
-                class DecoderT: public Decoder
-                {
-                public:
-                    virtual std::string json_from_ptr(uintptr_t address) const
-                    {
-                        const T& data = *(reinterpret_cast<const T *>(address));
-                        return to_string(data);
-                    }
-                };
-
-                typedef std::shared_ptr<Decoder> decoder_ptr;
-
-                template<typename T>
-                decoder_ptr make_decoder()
-                {
-                    return std::shared_ptr<Decoder>(new DecoderT<T>());
-                }
-
-                typedef std::unordered_map<int, decoder_ptr> decoder_map;
-
-                inline decoder_ptr select_decoder(int msg_type)
-                {
-                    static decoder_map d_map;
-                    if (d_map.empty())
-                    {
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Quote), make_decoder<msg::data::Quote>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Entrust), make_decoder<msg::data::Entrust>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Transaction), make_decoder<msg::data::Transaction>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::OrderInput), make_decoder<msg::data::OrderInput>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::OrderAction), make_decoder<msg::data::OrderAction>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Order), make_decoder<msg::data::Order>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Trade), make_decoder<msg::data::Trade>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Position), make_decoder<msg::data::Position>()));
-                        d_map.insert(std::make_pair(static_cast<int>(msg::type::Asset), make_decoder<msg::data::Asset>()));
-                    }
-                    const auto& it = d_map.find(msg_type);
-                    return it == d_map.end() ? nullptr : it->second;
-                }
-                
-                inline std::string json_from_address(int msg_type, uintptr_t address)
-                {
-                    decoder_ptr decoder = select_decoder(msg_type);
-                    return decoder == nullptr ? "{}" : decoder->json_from_ptr(address);
-                }    
+                nlohmann::json j;
+                to_json(j, ori);
+                return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);;
+            }
             }
         }
     }

@@ -289,7 +289,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
                         type,
                         pid: '',
                         action: '',
-                        message
+                        message: messageList.slice(0).join(']').trim()
                     }
                 }else{
                     messageData = {

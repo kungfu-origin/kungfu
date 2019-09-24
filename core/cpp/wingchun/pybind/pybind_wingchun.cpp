@@ -129,12 +129,6 @@ public:
 
 };
 
-
-Quote get_quote(journal::frame_ptr frame)
-{
-    return frame->data<Quote>();
-}
-
 PYBIND11_MODULE(pywingchun, m)
 {
     auto m_utils = m.def_submodule("utils");
@@ -142,13 +136,15 @@ PYBIND11_MODULE(pywingchun, m)
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
     m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
-    m_utils.def("json_from_address", &json_from_address);
     m_utils.def("write_quote",
             [](const journal::writer_ptr writer, int64_t trigger_time, const Quote& quote)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Quote, quote);
             });
-    m_utils.def("get_quote", get_quote);
+
+    m_utils.def("get_quote", [](journal::frame_ptr frame) { return frame->data<Quote>();});
+    m_utils.def("get_order", [](journal::frame_ptr frame) { return frame->data<Order>();});
+    m_utils.def("get_trade", [](journal::frame_ptr frame) { return frame->data<Trade>();});
 
     auto m_constants = m.def_submodule("constants");
 
@@ -376,13 +372,7 @@ PYBIND11_MODULE(pywingchun, m)
                  [](const Quote &a)
                  {
                      return to_string(a);
-                 })
-            .def("__write__",
-                 [](const Quote &a, int64_t gen_time, const journal::writer_ptr w)
-                 {
-                     w->write_with_time(gen_time, kungfu::wingchun::msg::type::Quote, a);
-                 }
-            );
+                 });
 
     py::class_<Entrust>(m, "Entrust")
             .def_property_readonly("source_id", &Entrust::get_source_id)
@@ -481,6 +471,7 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
     py::class_<OrderAction>(m, "OrderAction")
             .def(py::init<>())
             .def_readonly("order_id", &OrderAction::order_id)
@@ -579,7 +570,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
 
-            py::class_<PositionDetail>(m, "PositionDetail")
+    py::class_<PositionDetail>(m, "PositionDetail")
             .def_readonly("update_time", &PositionDetail::update_time)
             .def_readonly("instrument_type", &PositionDetail::instrument_type)
             .def_readonly("direction", &PositionDetail::direction)
@@ -603,10 +594,6 @@ PYBIND11_MODULE(pywingchun, m)
                 return to_string(a);
             }
             );
-
-    py::class_<MsgWriter, std::shared_ptr<MsgWriter>>(m, "MsgWriter")
-            .def(py::init<kungfu::yijinjing::journal::writer_ptr>())
-            .def("write_data", &MsgWriter::write_data);
 
     py::class_<MarketData, PyMarketData, kungfu::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
             .def(py::init<bool, data::locator_ptr, const std::string&>())

@@ -176,7 +176,7 @@ namespace kungfu
                 {
                     ORDER_TRACE(fmt::format("(xtp_order_info) {} (session_id){}", to_string(*order_info), session_id));
                 }
-                if (error_info != nullptr)
+                if (error_info != nullptr && error_info->error_id !=0)
                 {
                     ORDER_ERROR(fmt::format("(error_id){} (error_msg){} (session_id)", error_info->error_id, error_info->error_msg, session_id));
                 }
@@ -242,7 +242,7 @@ namespace kungfu
                 {
                     POSITION_TRACE(fmt::format("(position){} (request_id) {} (last) {}", to_string(*position), request_id, is_last));
                 }
-                if (error_info != nullptr)
+                if (error_info != nullptr && error_info->error_id != 0)
                 {
                     POSITION_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
                 }
@@ -274,7 +274,7 @@ namespace kungfu
                 {
                     ACCOUNT_TRACE(fmt::format("(asset){} (request_id){} (last){}", to_string(*asset), request_id, is_last));
                 }
-                if (error_info != nullptr)
+                if (error_info != nullptr && error_info->error_id !=0)
                 {
                     ACCOUNT_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
                 }

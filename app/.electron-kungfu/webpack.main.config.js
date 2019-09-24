@@ -7,6 +7,13 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
+var fs = require("fs")
+var gitHEAD = fs.readFileSync(path.join(__dirname, '..', '..', '.git', 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
+var ref = gitHEAD.split(': ')[1] // refs/heads/develop
+var develop = gitHEAD.split('/')[2] // 环境：develop
+var gitVersion = fs.readFileSync(path.join(__dirname, '..', '..', '.git', ref), 'utf-8').trim() // git版本号，例如：6ceb0ab5059d01fd444cf4e78467cc2dd1184a66
+var gitCommitVersion = '"' + develop + ': ' + gitVersion + '"'
+
 let whiteListedModules = [
   'vue', 
   'element-ui', 
@@ -88,6 +95,7 @@ let mainConfig = {
   ],
   resolve: {
     alias: {
+      '__root': path.join(__dirname, '..'),
       '@': path.join(__dirname, '../src/renderer'),
       '__gUtils': path.join(__dirname, '../shared/utils'),
       '__gConfig': path.join(__dirname, '../shared/config'),
@@ -98,12 +106,16 @@ let mainConfig = {
   },
   target: 'electron-main'
 }
-
+console.log(gitCommitVersion)
 /**
  * Adjust mainConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
+    new webpack.DefinePlugin({
+      'git_commit_version': `${gitCommitVersion}`,
+      'process.env.NODE_ENV': '"development"',
+    }),
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
     })
@@ -119,6 +131,7 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: false
     }),
     new webpack.DefinePlugin({
+      'git_commit_version': `${gitCommitVersion}`,
       'process.env.NODE_ENV': '"production"',
     })
   )

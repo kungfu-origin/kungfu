@@ -1,0 +1,35 @@
+stages:
+  - build
+build_win:
+  stage: build
+  tags:
+    - windows
+  script:
+    - yarn install
+    - yarn build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - app\\build\\app\\*exe
+build_centos:
+  stage: build
+  tags:
+    - centos
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - app/build/app/*.rpm
+  script:
+    - yarn install
+    - yarn build
+build_macosx:
+  stage: build
+  tags:
+    - macosx
+  script:
+    - yarn install
+    - yarn build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - app/build/app/*.dmg
