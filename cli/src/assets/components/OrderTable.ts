@@ -15,7 +15,9 @@ class OrderTable extends Table {
 	constructor(type: string) {
 		super();
 		this.type = type;
-		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 'Strate']    
+		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 
+			type === 'account' ? 'Strate' : 'AccountId'
+		]    
 		this.columnWidth = [18, 0, 0, 0, 8, 12, 8, 9];
 		this.ordersData = {};
 		this.ordersList = []
