@@ -4,11 +4,12 @@ import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } f
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
 
+const os = require('os');
 const colors = require('colors');
 const inquirer = require( 'inquirer' );
+const { PathPrompt } = require('inquirer-path');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
-
-
+inquirer.registerPrompt('path', PathPrompt);
 
 // ======================= add account start ============================
 const selectSourcePrompt = (accountSource: Sources) => inquirer.prompt([
@@ -106,9 +107,10 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
                 else return true;
             }
         } : null , {
-            type: 'input',
+            type: 'path',
             name: 'strategy_path',
-            message: `${updateModule ? 'Update' : 'Enter'} strategy_path ${ updateModule ? `(${strategyData.strategy_path})` : '' }`,
+            default: os.homedir(),
+            message: `${updateModule ? 'Update' : 'Enter'} strategy_path (absolute path) ${ updateModule ? `(${strategyData.strategy_path})` : '' }`,
             validate: (value: string) => {
                 let hasError = null;
                 !updateModule && requiredValidator(null, value, (err: Error) => hasError = err)
@@ -117,6 +119,7 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
             }
         }
     ].filter(q => !!q))
+
     try {
         if(updateModule) {
             const strategyId = strategyData.strategy_id;
