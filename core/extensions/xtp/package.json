@@ -69,7 +69,14 @@
                 {
                     "key": "protocol",
                     "name": "protocol",
-                    "type": "str",
+                    "type": "select",
+                    "data": [{
+                        "value": "tcp",
+                        "name": "tcp"
+                    }, {
+                        "value": "udp",
+                        "name": "udp"
+                    }],
                     "errMsg": "请填写 protocol",
                     "required": false,
                     "tip": "请选择 protocol, tcp or udp"
@@ -78,7 +85,8 @@
                     "key": "buffer_size",
                     "name": "buffer_size",
                     "type": "int",
-                    "errMsg": "请填写 buffer size",
+                    "tip": "请填写 buffer size（mb）",
+                    "validator": ["intValidator"],                    
                     "required": false
                 }
             ]
