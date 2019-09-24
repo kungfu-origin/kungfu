@@ -344,14 +344,17 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
     const numList: NumList = buildListByLineNum(50);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
-        fs.stat(logPath, (err: Error) => {
+        fs.stat(logPath, (err: Error, stats: any) => {
             if(err){
                 reject(err)
                 return;
             }
 
+            const startSize = stats.size - 1000000 < 0 ? 0 : stats.size - 1000000;
             const lineReader = readline.createInterface({
-                input: fs.createReadStream(logPath)
+                input: fs.createReadStream(logPath, {
+                    start: startSize
+                })
             })
 
             lineReader.on('line', line => {

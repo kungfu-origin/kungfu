@@ -100,7 +100,7 @@ class TradingDataDashboard extends Dashboard {
 	initCancelOrderBtn() {
 		const t =this;
 		t.boards.cancelBtn = blessed.button({
-			content: 'Cancel Order',
+			content: 'Cancel All Order',
             parent: t.screen,
 			width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
             height: 3,

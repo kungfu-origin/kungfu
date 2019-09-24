@@ -87,6 +87,10 @@ class Table {
 		box.on('focus', () => {
 			box.style.border.fg = 'blue'
 			if(!list.focused) list.focus()
+		
+		})
+		list.on('focus', () => {
+			box.style.border.fg = 'blue'
 		})
 	
 		list.on('blur', () => {
