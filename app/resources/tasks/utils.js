@@ -40,7 +40,6 @@ function dealMessage(line, searchKeyword){
         return false;
     }
     const message = lineData.message;
-    console.log(message)
     //message 提取 ‘\n’ 再循环
     return message.split('\n[').map((m,i) => {
         if(!m.length) return false;

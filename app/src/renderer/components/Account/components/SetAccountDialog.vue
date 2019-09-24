@@ -12,7 +12,7 @@
     >
         <el-form 
         v-if="!!accountSource[source] && accountSource[source].config"        
-        ref="accountForm" label-width="140px" :model="value">
+        ref="accountForm" label-width="140px" :model="postForm">
             <!-- 自定义部分 -->
             <el-form-item 
             v-for="item of accountSource[source].config" :key="item.key"
@@ -21,16 +21,16 @@
             :rules="buildValidators(item)"
             >
                 <el-col :span="19">
-                    <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key"></el-input>
-                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="value[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key" show-password></el-input>
-                    <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="value[item.key]"></el-switch>
-                    <el-input-number :class="item.key" v-if="item.type === 'int'"  :controls="false" v-model.trim="value[item.key]"></el-input-number>
-                    <el-select :class="item.key" size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="value[item.key]" placeholder="请选择">
+                    <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key"></el-input>
+                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key" show-password></el-input>
+                    <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="postForm[item.key]"></el-switch>
+                    <el-input-number :class="item.key" v-if="item.type === 'int'"  :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
+                    <el-select :class="item.key" size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="postForm[item.key]" placeholder="请选择">
                         <el-option
-                            v-for="item in item.data"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
+                            v-for="option in item.data"
+                            :key="option.value"
+                            :label="option.name"
+                            :value="option.value">
                         </el-option>
                     </el-select>
                 </el-col>
@@ -52,6 +52,8 @@
 <script>
 import { mapState } from 'vuex';
 import * as ACCOUNT_API from '__io/db/account';
+import { deepClone } from '__gUtils/busiUtils';
+
 export default {
     name: 'set-account-dialog',
     props: {
@@ -90,7 +92,20 @@ export default {
             need_auth: false,
             need_settlement_confirm: false,
         }
-        return {}
+
+        return {
+            postForm: deepClone(this.value)
+        }
+    },
+
+    mounted(){
+       this.initPostForm();
+    },
+
+    watch: {
+        postForm(){
+            this.initPostForm();
+        }
     },
 
     computed: {
@@ -109,8 +124,8 @@ export default {
             const t = this
             t.$refs.accountForm.validate(valid => {
                 if(valid) {
-                    let account_id = `${t.source}_${t.value[t.accountSource[t.source].key]}`
-                    const formValue = t.value
+                    let account_id = `${t.source}_${t.postForm[t.accountSource[t.source].key]}`
+                    const formValue = t.postForm
                     let changeAccount 
                     if(t.method == 'add') { //添加账户
                         changeAccount = ACCOUNT_API.addAccount(account_id, t.source, t.firstAccount, JSON.stringify(formValue))
@@ -128,6 +143,18 @@ export default {
                     .finally(() => {
                         t.close()
                     })
+                }
+            })
+        },
+
+        initPostForm() {
+             const t = this;
+            (t.accountSource[t.source].config || []).forEach(item => {
+                const key = item.key;
+                if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
+                    if(item.default) {
+                        t.postForm[key] = item.default
+                    }
                 }
             })
         },
