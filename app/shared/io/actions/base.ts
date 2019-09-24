@@ -9,15 +9,14 @@ export const switchMaster = async (status: boolean): Promise<any> => {
         } catch(err) {
             throw err
         }
-    }
-
+    } 
     try {
         await startMaster(false)
         await delaySeconds(1000)
         await startLedger(false)
-    } catch(err) {
+    } catch (err) {
         throw err
-    }    
+    }
 }
 
 export const switchLedger = (status: boolean): Promise<any> => {

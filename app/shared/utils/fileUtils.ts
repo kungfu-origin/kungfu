@@ -238,6 +238,17 @@ export const removeFileFolder = (targetPath: string): Promise<void> => {
     }) 
 }
 
+export const removeFilesInFolder = (targetDir: string) => {
+    targetDir = path.normalize(targetDir)
+    if(!fse.existsSync(targetDir)) throw new Error(`${targetDir} not existed!`)
+    const promises = fse.readdirSync(targetDir).map((file: any) => {
+        const filePath = path.join(targetDir, file)
+        return removeFileFolder(filePath)
+    });
+
+    return Promise.all(promises)
+}
+
 //获取文件内容
 export const getCodeText = (targetPath: string): Promise<string> => {
     if(!targetPath) throw new Error('文件路径不存在！')
@@ -296,12 +307,7 @@ export const clearFileContent = (filePath: string): Promise<any> => {
     })
 }
 
-//打开查看文件
-export const openReadFile = (logPath: string): void => {
-    addFile('', logPath, 'file')
-    const shell = require('electron').shell;
-    shell.openItem(logPath)
-}
+
 
 export const existsSync = (filePath: string): boolean => {
     return fse.existsSync(filePath)

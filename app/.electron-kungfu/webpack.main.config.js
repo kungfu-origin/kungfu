@@ -88,6 +88,7 @@ let mainConfig = {
   ],
   resolve: {
     alias: {
+      '__root': path.join(__dirname, '..'),
       '@': path.join(__dirname, '../src/renderer'),
       '__gUtils': path.join(__dirname, '../shared/utils'),
       '__gConfig': path.join(__dirname, '../shared/config'),

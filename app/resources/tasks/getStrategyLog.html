@@ -12,7 +12,7 @@
             getLog(logPath, searchKeyword, dealMessage).then(({list}) => {
                 fromWindow.webContents.send('res-strategy-log', list)
             }).finally(() => {
-                window.close()
+                // window.close()
             })
         })
 

@@ -150,7 +150,7 @@ function greeting () {
   let text = ''
 
   if (cols > 104) text = ''
-  else if (cols > 76) text = 'kungfu-|trader'
+  else if (cols > 76) text = 'kungfu'
   else text = false
 
   if (text) {
@@ -159,7 +159,7 @@ function greeting () {
       font: 'simple3d',
       space: false
     })
-  } else console.log(chalk.yellow.bold('\n  kungfu-trader'))
+  } else console.log(chalk.yellow.bold('\n  kungfu'))
   console.log(chalk.blue('  getting ready...') + '\n')
 }
 

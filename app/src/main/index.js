@@ -7,6 +7,8 @@ const { initDB } = require('./base');
 const { killGodDaemon,  killExtra, killKfc, killKungfu } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
+const packageJSON = require('__root/package.json');
+const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -17,8 +19,9 @@ function createWindow () {
 	if (platform === 'mac') {
 		const template = [
 		{
-			label: "Application",
+			label: "Kungfu",
 			submenu: [
+				{ label: "About Kungfu", click: showKungfuInfo},
 				{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
 				{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
 			]
@@ -159,8 +162,23 @@ app.on('will-quit', async (e) => {
 })
 
 
+
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+function showKungfuInfo() {
+	const version = packageJSON.version;
+	const electronVersion = packageJSON.devDependencies.electron;
+	dialog.showMessageBox({
+		type: 'info',
+		message: 'Kungfu',
+		defaultId: 0,
+		detail: `Version: ${version} \n electron: ${electronVersion} \n platform: ${platform} \n kfHome: ${KF_HOME} \n kungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')}`,
+		buttons: ['好的'],
+		icon: path.join(__resources, 'icon', 'icon.png')
+	})
+}
 
 //退出提示
 function showQuitMessageBox(){

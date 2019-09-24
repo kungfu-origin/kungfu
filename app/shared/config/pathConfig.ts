@@ -1,27 +1,21 @@
 import { addFile } from '__gUtils/fileUtils';
-import { platform } from './platformConfig';
+
 const path = require('path');
-const mainProcess = require('electron').app;
-const renderProcess = (require('electron').remote || {}).app;
 
-if(mainProcess) {
-    const appName = 'kungfu'
-    mainProcess.setName('kungfu')
-    const appData = mainProcess.getPath('appData');
-    mainProcess.setPath('userData', path.join(appData, appName));    
-}
 
-//ELEC_BASE
-var ELEC_BASE_DIR_RESOLVE;
-if (process.env.APP_TYPE === 'test') ELEC_BASE_DIR_RESOLVE = process.env.ELEC_BASE_DIR || ''; 
-else ELEC_BASE_DIR_RESOLVE = mainProcess ? mainProcess.getPath('userData') : renderProcess.getPath('userData');
+const KF_HOME_BASE_DIR_RESOLVE = (() => {
+    if ( process.env.APP_TYPE === 'cli' ) {
+        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
+     } else {
+        return require('__gConfig/appKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
+     }
+})()
 
-addFile('', ELEC_BASE_DIR_RESOLVE, 'folder');
-
-export const ELEC_BASE_DIR = ELEC_BASE_DIR_RESOLVE;
+addFile('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
+export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
 //BASE
-export const KF_HOME = path.join(ELEC_BASE_DIR, 'app')
+export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'app')
 addFile('', KF_HOME, 'folder')
 
 //system
@@ -104,17 +98,25 @@ export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'l
 
 //================== others end ===================================
 
-//kungfu-engine
-var KUNGFU_ENGINE_RESOLVE: string = process.env.NODE_ENV === 'production' 
+
+export const getKfEnginePath = () => {
+    if(process.env.NODE_ENV === 'production') {
+        if(process.env.APP_TYPE === 'test'){
+            return process.env.KUNGFU_ENGINE_PATH || ''
+        }
+    }
+}
+
+//@ts-ignore
+export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     //@ts-ignore
     ? process.resourcesPath
     : path.join(__dirname, '..', '..', '..', 'core', 'build')
-if(process.env.APP_TYPE === 'test') KUNGFU_ENGINE_RESOLVE = process.env.KUNGFU_ENGINE_PATH || ''
-export const KUNGFU_ENGINE_PATH = KUNGFU_ENGINE_RESOLVE;
 
-const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production' 
+
+const KUNGFU_RESOURCES_DIR = ((process.env.NODE_ENV === 'production') && (process.env.APP_TYPE !== 'cli'))
 //@ts-ignore
-? path.join(process.resourcesPath, 'kungfu-resources') 
+? path.join(process.resourcesPath, 'kungfu-resources')
 : path.join(__resources)
 
 export const KF_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')

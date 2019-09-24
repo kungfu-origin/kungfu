@@ -56,7 +56,7 @@ const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try{
             let noDaemon = platform === 'win' ? true : false
-            if(process.env.NODE_ENV === 'development') noDaemon = false;
+            if(process.env.NODE_ENV !== 'production') noDaemon = false;
             pm2.connect(noDaemon, (err: Error): void => {
                 if(err) {
                     process.exit(2);
@@ -94,7 +94,6 @@ const pm2List = (): Promise<any[]> => {
 }
 
 const pm2Delete = async (target: string): Promise<void> => {
-    logger.info('[KILL PROCESS] by id', target)
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
@@ -104,8 +103,7 @@ const pm2Delete = async (target: string): Promise<void> => {
                         reject(err)
                         return;
                     }
-                    resolve()
-                    logger.info('[KILL PROCESS] by id success', target)                    
+                    resolve()         
                 })
             }catch(err){
                 logger.error(err)
@@ -171,7 +169,6 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         pm2Connect().then(() => {
             try{
                 pm2.start(options, (err: Error, apps: object): void => { 
-                    logger.info(err, apps)
                     if(err) {
                         logger.error(err)
                         reject(err);
@@ -193,7 +190,7 @@ export const startMaster = async(force: boolean): Promise<void> => {
     const master = await describeProcess(processName);
     if(master instanceof Error) throw master
     const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
-    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('master正在运行！')
+    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
     try{ 
         await killKfc()
     } catch (err) {
