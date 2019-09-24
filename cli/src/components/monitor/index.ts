@@ -1,4 +1,5 @@
 import Dashboard from '@/assets/components/Dashboard';
+import MessageBox from '@/assets/components/MessageBox';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString} from '@/assets/scripts/utils';
 import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
 import { throttleInsert } from '__gUtils/busiUtils';
@@ -102,21 +103,7 @@ export class MonitorDashboard extends Dashboard {
 
     initMessage(){
         const t = this;
-        t.boards.message = blessed.message({
-            parent: t.screen,
-            top: '100%-5',
-            left: '100%-40',
-            height: 5,
-            align: 'left',
-            valign: 'center',
-            width: 40,
-            tags: true,
-            hidden: true,
-            border: 'line',
-            style: {
-                bg: 'blue'
-            }
-        });
+        t.boards.message = MessageBox(t.screen)
     }
 
     initLoader() {

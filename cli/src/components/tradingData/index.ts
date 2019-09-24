@@ -2,10 +2,11 @@ import posTable from '@/assets/components/PosTable';
 import orderTable from '@/assets/components/OrderTable';
 import tradeTable from '@/assets/components/TradeTable';
 import Dashboard from '@/assets/components/Dashboard';
+import MessageBox from '@/assets/components/MessageBox';
 
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale, processListObservable, switchProcess } from '@/assets/scripts/actions';
-
+import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 
 const blessed = require('blessed');
 
@@ -98,7 +99,7 @@ class TradingDataDashboard extends Dashboard {
 	}
 
 	initCancelOrderBtn() {
-		const t =this;
+		const t = this;
 		t.boards.cancelBtn = blessed.button({
 			content: 'Cancel All Order',
             parent: t.screen,
@@ -181,21 +182,7 @@ class TradingDataDashboard extends Dashboard {
 
 	initMessage(){
         const t = this;
-        t.boards.message = blessed.message({
-            parent: t.screen,
-            top: '100%-5',
-            left: '100%-40',
-            height: 5,
-            align: 'left',
-            valign: 'center',
-            width: 40,
-            tags: true,
-            hidden: true,
-            border: 'line',
-            style: {
-                bg: 'blue'
-            }
-        });
+        t.boards.message = MessageBox(t.screen);
     }
 	
 	bindEvent() {
@@ -220,7 +207,14 @@ class TradingDataDashboard extends Dashboard {
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
-			t.boards.message.log('Is cancelling all order, please wait...')
+			nanoCancelAllOrder({
+				cancelType: t.type, 
+				id: t.targetId
+			})
+			.then(() => t.boards.message.log('Is cancelling orders, please wait...'))
+			.catch((err: Error) => {
+				t.boards.message.log(err.message)
+			})
 		})
 	}
 
