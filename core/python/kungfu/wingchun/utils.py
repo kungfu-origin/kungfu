@@ -13,6 +13,16 @@ def object_as_dict(obj):
                 d[attr] = value
     return d
 
+def get_class_from_msg_type(msg_type):
+    if msg_type == pywingchun.constants.MsgType.Quote:
+        return pywingchun.Quote
+    elif msg_type == pywingchun.constants.MsgType.Order:
+        return pywingchun.Order
+    elif msg_type == pywingchun.constants.MsgType.Trade:
+        return pywingchun.Trade
+    else:
+        raise ValueError("invalid msg_type {}".fromat(msg_type))
+
 def is_final_status(order_status):
     return int(order_status) in AllFinalOrderStatus
 
@@ -33,3 +43,21 @@ def get_position_effect(instrument_type, side, offset):
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price
 get_symbol_id = pywingchun.utils.get_symbol_id
+
+def get_data(frame):
+    if frame.msg_type == pywingchun.constants.MsgType.Quote:
+        return pywingchun.utils.get_quote(frame)
+    elif frame.msg_type == pywingchun.constants.MsgType.Order:
+        return pywingchun.utils.get_order(frame)
+    elif frame.msg_type == pywingchun.constants.MsgType.Trade:
+        return pywingchun.utils.get_trade(frame)
+    else:
+        return None
+
+def write_data(writer, msg_type, trigger_time, data):
+    if msg_type == pywingchun.constants.MsgType.Quote:
+        return pywingchun.write_quote(writer, trigger_time, data)
+    else:
+        raise ValueError("invalid msg_type {}".fromat(msg_type))
+
+
