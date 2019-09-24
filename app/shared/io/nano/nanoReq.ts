@@ -1,7 +1,6 @@
-
 import { buildRepNmsg } from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
-import { order } from './msgType';
+const isEnglish = process.env.LANG_ENV === 'en';
 
 interface RepData {
     msg_type: number,
@@ -107,8 +106,7 @@ export const nanoCancelAllOrder = ({ cancelType, id }: CancelAllOrderParams): Pr
                 ...buildCancalAllOrderPostData(cancelType, id)
             }
         })
-        // console.log('[REQ CANCEL ALL ORDER]', reqMsg)
-        return buildRequest(reqMsg, msgType.cancelAllOrder, '全部撤单失败！') 
+        return buildRequest(reqMsg, msgType.cancelAllOrder, isEnglish ? 'Cancel orders failed!' : '全部撤单失败！') 
 }
 
 function buildCancalAllOrderPostData(type: string, accountOrStrategyId: string) {

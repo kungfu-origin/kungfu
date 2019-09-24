@@ -48,6 +48,9 @@ export const addUpdateAccountByPrompt = async (source: string, key: string, conf
     if(!key) throw new Error('something wrong with the key!')
     const accountId = `${source}_${config[key]}`
     const accountsBySource = await getAccountBySource(source)
+
+    console.log(config)
+
     try {
         if(updateModule) {
             await updateAccountConfig(accountId, JSON.stringify(config))
