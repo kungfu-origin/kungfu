@@ -106,7 +106,7 @@ let mainConfig = {
   },
   target: 'electron-main'
 }
-
+console.log(gitCommitVersion)
 /**
  * Adjust mainConfig for development settings
  */
@@ -131,7 +131,7 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: false
     }),
     new webpack.DefinePlugin({
-      'git_commit_version': `"${gitCommitVersion}"`,
+      'git_commit_version': `${gitCommitVersion}`,
       'process.env.NODE_ENV': '"production"',
     })
   )

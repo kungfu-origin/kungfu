@@ -10,6 +10,7 @@ const { platform } = require('__gConfig/platformConfig');
 const packageJSON = require('__root/package.json');
 const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
 
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
@@ -169,11 +170,17 @@ app.on('will-quit', async (e) => {
 function showKungfuInfo() {
 	const version = packageJSON.version;
 	const electronVersion = packageJSON.devDependencies.electron;
+	const info = `Version: ${version}\n`
+	+ `electron: ${electronVersion} \n`
+	+ `platform: ${platform} \n`
+	+ `kfHome: ${KF_HOME} \n`
+	+ `kungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \n`
+	+ `commit: ${git_commit_version}`
 	dialog.showMessageBox({
 		type: 'info',
 		message: 'Kungfu',
 		defaultId: 0,
-		detail: `Version: ${version} \nelectron: ${electronVersion} \nplatform: ${platform} \nkfHome: ${KF_HOME} \nkungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \ncommit: ${git_commit_version}`,
+		detail: info,
 		buttons: ['好的'],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	})
@@ -194,7 +201,6 @@ function showQuitMessageBox(){
 			KillAll().then(() => app.quit())
 		}else{
 			if((mainWindow !== null) && !mainWindow.isDestroyed()){
-				// if(platform === 'win') mainWindow.minimize();
 				if(platform === 'mac') mainWindow.hide();
 				else mainWindow.minimize();
 			}
