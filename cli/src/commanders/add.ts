@@ -36,6 +36,8 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
         accountData
     }))
 
+    console.log(questions)
+
     return inquirer.prompt(questions)
         .then((answers: any) => ({
             source,
@@ -155,6 +157,24 @@ export const addAccountStrategy = async (type: string): Promise<any> => {
     } 
 }
 
+function getType(originType: string) {
+    switch(originType) {
+        case 'str':
+            return 'input';
+        case 'int':
+            return 'number';
+        case 'select':
+            return 'list';
+        default:
+            return 'input'
+    }
+}
+
+function renderSelect(configItem: AccountSettingItem) {
+    if(configItem.type === 'select') return `(${(configItem.data || []).map(item => item.value || "").join('|')})`
+    else return ''
+}
+
 function paresAccountQuestion({
     idKey, configItem, updateModule, accountData
 }: {
@@ -165,10 +185,12 @@ function paresAccountQuestion({
 }) {
     const { validator, required, key } = configItem 
     const existedValue = (accountData || {})[key] || '';
+    const targetType = getType(configItem.type);
+    console.log(configItem)
     return {
-        type: 'input',
+        type: targetType,
         name: key,
-        message: `${updateModule ? 'Update' : 'Enter'} ${key} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
+        message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
         validate: async (value: string | number) => {
             let hasError: Error | null = null; 
             const validatorList: Array<any>  = [
