@@ -167,6 +167,9 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('development')
     })
   )
 }

@@ -166,7 +166,6 @@ app.on('will-quit', async (e) => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
 function showKungfuInfo() {
 	const version = packageJSON.version;
 	const electronVersion = packageJSON.devDependencies.electron;
@@ -174,7 +173,7 @@ function showKungfuInfo() {
 		type: 'info',
 		message: 'Kungfu',
 		defaultId: 0,
-		detail: `Version: ${version} \n electron: ${electronVersion} \n platform: ${platform} \n kfHome: ${KF_HOME} \n kungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')}`,
+		detail: `Version: ${version} \nelectron: ${electronVersion} \nplatform: ${platform} \nkfHome: ${KF_HOME} \nkungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \ncommit: ${git_commit_version}`,
 		buttons: ['好的'],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	})
