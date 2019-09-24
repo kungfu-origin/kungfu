@@ -36,8 +36,6 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
         accountData
     }))
 
-    console.log(questions)
-
     return inquirer.prompt(questions)
         .then((answers: any) => ({
             source,
@@ -50,8 +48,6 @@ export const addUpdateAccountByPrompt = async (source: string, key: string, conf
     if(!key) throw new Error('something wrong with the key!')
     const accountId = `${source}_${config[key]}`
     const accountsBySource = await getAccountBySource(source)
-
-    console.log(config)
 
     try {
         if(updateModule) {
@@ -165,6 +161,8 @@ function getType(originType: string) {
             return 'number';
         case 'select':
             return 'list';
+        case 'bool':
+            return 'confirm';
         default:
             return 'input'
     }
@@ -186,10 +184,11 @@ function paresAccountQuestion({
     const { validator, required, key } = configItem 
     const existedValue = (accountData || {})[key] || '';
     const targetType = getType(configItem.type);
-    console.log(configItem)
+
     return {
         type: targetType,
         name: key,
+        choices: targetType === 'list' ? (configItem.data || []).map(item => item.value) : [],
         message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
         validate: async (value: string | number) => {
             let hasError: Error | null = null; 
