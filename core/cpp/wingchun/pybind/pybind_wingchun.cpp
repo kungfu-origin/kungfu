@@ -372,13 +372,7 @@ PYBIND11_MODULE(pywingchun, m)
                  [](const Quote &a)
                  {
                      return to_string(a);
-                 })
-            .def("__write__",
-                 [](const Quote &a, int64_t gen_time, const journal::writer_ptr w)
-                 {
-                     w->write_with_time(gen_time, kungfu::wingchun::msg::type::Quote, a);
-                 }
-            );
+                 });
 
     py::class_<Entrust>(m, "Entrust")
             .def_property_readonly("source_id", &Entrust::get_source_id)
@@ -477,6 +471,7 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
     py::class_<OrderAction>(m, "OrderAction")
             .def(py::init<>())
             .def_readonly("order_id", &OrderAction::order_id)
@@ -575,7 +570,7 @@ PYBIND11_MODULE(pywingchun, m)
                  }
             );
 
-            py::class_<PositionDetail>(m, "PositionDetail")
+    py::class_<PositionDetail>(m, "PositionDetail")
             .def_readonly("update_time", &PositionDetail::update_time)
             .def_readonly("instrument_type", &PositionDetail::instrument_type)
             .def_readonly("direction", &PositionDetail::direction)
