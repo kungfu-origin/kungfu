@@ -141,8 +141,19 @@ PYBIND11_MODULE(pywingchun, m)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Quote, quote);
             });
-
+    m_utils.def("write_entrust",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Entrust& entrust)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Entrust, entrust);
+            });
+    m_utils.def("write_transaction",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Transaction& transaction)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Transaction, transaction);
+            });
     m_utils.def("get_quote", [](journal::frame_ptr frame) { return frame->data<Quote>();});
+    m_utils.def("get_entrust", [](journal::frame_ptr frame) { return frame->data<Entrust>();});
+    m_utils.def("get_transaction", [](journal::frame_ptr frame) { return frame->data<Transaction>();});
     m_utils.def("get_order", [](journal::frame_ptr frame) { return frame->data<Order>();});
     m_utils.def("get_trade", [](journal::frame_ptr frame) { return frame->data<Trade>();});
 

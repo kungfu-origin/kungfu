@@ -51,6 +51,10 @@ def get_msg_type(name):
         return pywingchun.constants.MsgType.Order
     elif name.lower() == "trade":
         return pywingchun.constants.MsgType.Trade
+    elif name.lower == "entrust":
+        return pywingchun.constants.MsgType.Entrust
+    elif name.lower == "transaction":
+        return pywingchun.constants.MsgType.Transaction
     else:
         raise ValueError("invalid msg name {}".fromat(name))
 
@@ -61,18 +65,25 @@ def get_data(frame):
         return pywingchun.utils.get_order(frame)
     elif frame.msg_type == pywingchun.constants.MsgType.Trade:
         return pywingchun.utils.get_trade(frame)
+    elif frame.msg_type == pywingchun.constants.MsgType.Entrust:
+        return pywingchun.utils.get_entrust(frame)
+    elif frame.msg_type == pywingchun.constants.MsgType.Transaction:
+        return pywingchun.utils.get_transaction(frame)
     else:
         return None
 
 def write_data(writer, msg_type, trigger_time, data):
     if msg_type == pywingchun.constants.MsgType.Quote:
         return pywingchun.write_quote(writer, trigger_time, data)
+    elif msg_type == pywingchun.constants.MsgType.Entrust:
+        return pywingchun.write_entrust(writer, trigger_time, data)
+    elif msg_type == pywingchun.constants.MsgType.Transaction:
+        return pywingchun.write_transaction(writer, trigger_time, data)
     else:
         raise ValueError("invalid msg_type {}".fromat(msg_type))
 
 def flatten_json(y):
     out = {}
-
     def flatten(x, name=''):
         if type(x) is dict:
             for a in x:

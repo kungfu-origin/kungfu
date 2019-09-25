@@ -19,7 +19,7 @@ pyyjj.frame.data = property(wc_utils.get_data)
 @click.option('-t', '--io_type', type=click.Choice(['all', 'in', 'out']), default='all', help='input or output during this session')
 @click.option("--from-beginning", is_flag=True, help="start with the earliest message within this session")
 @click.option("--max-messages", type=int, default=sys.maxsize, help="The maximum number of messages to reader before exiting")
-@click.option('--msg', type=click.Choice(['all', "quote", "order", "trade"]), default='all',help="msg type to reader")
+@click.option('--msg', type=click.Choice(['all', "quote", "order", "trade", "entrust", "transaction"]), default='all',help="msg type to reader")
 @click.option("--continuous", is_flag=True, help="reader not to stop when no data avail util the session end")
 @click.option("-o", "--output", type=str,help="output file to export")
 @click.pass_context
