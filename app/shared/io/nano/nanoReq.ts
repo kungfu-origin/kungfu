@@ -50,7 +50,7 @@ export const nanoReqCalendar = () : Promise<any> => {
         msg_type: msgType.calendar,
         data: {}
     });
-    return buildRequest(reqMsg, msgType.calendar, '请求交易日失败！') 
+    return buildRequest(reqMsg, msgType.calendar, isEnglish ? 'Req tradingDay failed' : '请求交易日失败！') 
 }
 
 //请求删除策略持仓
@@ -65,7 +65,7 @@ export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {
         }
     })
     // console.log('[REQ DELETE POS]', reqMsg)
-    return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, '删除策略持仓失败！') 
+    return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, isEnglish ? 'Req delete strategy position failed' : '删除策略持仓失败！') 
 }
 
 //撤单
