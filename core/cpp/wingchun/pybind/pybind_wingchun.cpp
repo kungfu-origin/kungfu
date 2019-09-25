@@ -141,15 +141,30 @@ PYBIND11_MODULE(pywingchun, m)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Quote, quote);
             });
+    m_utils.def("write_quote_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Quote& quote)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Quote, quote);
+            });
     m_utils.def("write_entrust",
             [](const journal::writer_ptr writer, int64_t trigger_time, const Entrust& entrust)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Entrust, entrust);
             });
+    m_utils.def("write_entrust_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Entrust& entrust)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Entrust, entrust);
+            });
     m_utils.def("write_transaction",
             [](const journal::writer_ptr writer, int64_t trigger_time, const Transaction& transaction)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Transaction, transaction);
+            });
+    m_utils.def("write_transaction_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Transaction& transaction)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Transaction, transaction);
             });
     m_utils.def("get_quote", [](journal::frame_ptr frame) { return frame->data<Quote>();});
     m_utils.def("get_entrust", [](journal::frame_ptr frame) { return frame->data<Entrust>();});
