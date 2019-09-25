@@ -17,14 +17,21 @@ var mainWindow = null;
 var allowQuit = false;
 function createWindow () {
 	//添加快捷键
+	let applicationOptions = [
+		{ label: "About Kungfu", click: showKungfuInfo},
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
+	]
+
+	if(platform === 'mac') {
+		applicationOptions.push(
+			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
+		)
+	}
+
 	const template = [
 	{
 		label: "Kungfu",
-		submenu: [
-			{ label: "About Kungfu", click: showKungfuInfo},
-			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
-			{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
-		]
+		submenu: applicationOptions
 	}, 
 	{
 		label: "Edit",
