@@ -1,7 +1,6 @@
-
 import { buildRepNmsg } from '__io/nano/buildNmsg'
 import * as msgType from '__io/nano/msgType'
-import { order } from './msgType';
+const isEnglish = process.env.LANG_ENV === 'en';
 
 interface RepData {
     msg_type: number,
@@ -51,7 +50,7 @@ export const nanoReqCalendar = () : Promise<any> => {
         msg_type: msgType.calendar,
         data: {}
     });
-    return buildRequest(reqMsg, msgType.calendar, '请求交易日失败！') 
+    return buildRequest(reqMsg, msgType.calendar, isEnglish ? 'Req tradingDay failed' : '请求交易日失败！') 
 }
 
 //请求删除策略持仓
@@ -66,7 +65,7 @@ export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {
         }
     })
     // console.log('[REQ DELETE POS]', reqMsg)
-    return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, '删除策略持仓失败！') 
+    return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, isEnglish ? 'Req delete strategy position failed' : '删除策略持仓失败！') 
 }
 
 //撤单
@@ -107,8 +106,7 @@ export const nanoCancelAllOrder = ({ cancelType, id }: CancelAllOrderParams): Pr
                 ...buildCancalAllOrderPostData(cancelType, id)
             }
         })
-        // console.log('[REQ CANCEL ALL ORDER]', reqMsg)
-        return buildRequest(reqMsg, msgType.cancelAllOrder, '全部撤单失败！') 
+        return buildRequest(reqMsg, msgType.cancelAllOrder, isEnglish ? 'Cancel orders failed!' : '全部撤单失败！') 
 }
 
 function buildCancalAllOrderPostData(type: string, accountOrStrategyId: string) {

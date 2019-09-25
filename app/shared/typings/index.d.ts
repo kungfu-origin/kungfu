@@ -184,7 +184,9 @@ interface AccountSettingItem {
     errMsg?: string,
     required?: boolean,
     validator?: any[],
-    tip?: string
+    tip?: string,
+    data? : any[],
+    default?: any
 }
 
 interface AccountSettingOrigin {
