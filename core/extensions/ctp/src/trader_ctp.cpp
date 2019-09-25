@@ -24,7 +24,6 @@ namespace kungfu
             TraderCTP::TraderCTP(bool low_latency, data::locator_ptr locator, const std::string &account_id, const std::string &json_config) :
                     Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1),order_ref_(-1), request_id_(0), api_(nullptr)
             {
-                yijinjing::log::copy_log_settings(get_io_device()->get_home(), account_id);
                 config_ =  nlohmann::json::parse(json_config);
                 order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
                 trade_mapper_ = std::make_shared<TradeMapper>(get_app_db_file("trade_mapper"));

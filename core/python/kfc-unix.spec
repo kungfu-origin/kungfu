@@ -35,7 +35,8 @@ a = Analysis(['kungfu/__main__.py'],
           'plotly',
           'plotly.graph_objects',
           "recordclass",
-          "sortedcontainers"
+          "sortedcontainers",
+          "dotted_dict"
           ],
      hookspath=None,
      runtime_hooks=None,

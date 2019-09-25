@@ -39,9 +39,9 @@ namespace kungfu
 
                 virtual bool req_account() = 0;
 
-            protected:
+                virtual void on_start() override;
 
-                void on_start() override;
+            protected:
 
                 void publish_state(msg::data::BrokerState state)
                 {
