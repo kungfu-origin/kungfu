@@ -16,7 +16,15 @@
         {
           "key": "match_mode",
           "name": "match_mode",
-          "type": "str",
+          "type": "select",
+          "data": [
+            {"value": "reject", "name": "reject"},
+            {"value": "pend", "name": "pend"},
+            {"value": "cancel", "name": "cancel"},
+            {"value": "partialfillandcancel", "name": "partialfillandcancel"},
+            {"value":"partialfill", "name": "partialfill"},
+            {"value":"fill", "name": "fill"}
+          ],
           "errMsg": "请填写撮合模式, options: (reject, pend, cancel, partialfillandcancel, partialfill, fill, custom)",
           "required": true
         }
