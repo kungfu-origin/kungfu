@@ -17,28 +17,31 @@ var mainWindow = null;
 var allowQuit = false;
 function createWindow () {
 	//添加快捷键
-	if (platform === 'mac') {
-		const template = [
-		{
-			label: "Kungfu",
-			submenu: [
-				{ label: "About Kungfu", click: showKungfuInfo},
-				{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
-				{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
-			]
-		}, 
-		{
-			label: "Edit",
-			submenu: [
-				{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-				{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-			]
-		}];
-		Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-	} else {
-		Menu.setApplicationMenu(null)
+	let applicationOptions = [
+		{ label: "About Kungfu", click: showKungfuInfo},
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
+	]
+
+	if(platform === 'mac') {
+		applicationOptions.push(
+			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
+		)
 	}
-	
+
+	const template = [
+	{
+		label: "Kungfu",
+		submenu: applicationOptions
+	}, 
+	{
+		label: "Edit",
+		submenu: [
+			{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+			{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+		]
+	}];
+	Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+
 	// Create the browser window.
 	const electronScreen = electron.screen;    
 	const { width,height } = electronScreen.getPrimaryDisplay().size

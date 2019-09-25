@@ -27,6 +27,16 @@ def strategy(ctx, group, name):
        pass
     with patch.object(Strategy, '_Strategy__init_strategy', init_strategy_patch):
         ctx.strategy = Strategy(ctx)
+        ctx.strategy._pre_start = lambda ctx: None
+        ctx.strategy._post_start = lambda ctx: None
+        ctx.strategy._pre_stop = lambda ctx: None
+        ctx.strategy._post_stop = lambda ctx: None
+        ctx.strategy._on_trading_day = lambda ctx, daytime: None
+        ctx.strategy._on_entrust = lambda ctx, entrust: None
+        ctx.strategy._on_transaction = lambda ctx, transaction: None
+        ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}".format(quote))
+        ctx.strategy._on_order = lambda ctx, order: ctx.logger.info("order received: {}".format(order))
+        ctx.strategy._on_trade = lambda ctx, trade: ctx.logger.info("trade received: {}".format(trade))
 
 def pass_ctx_from_parent(ctx):
     pass_ctx_from_root(ctx)
@@ -40,16 +50,13 @@ def pass_ctx_from_parent(ctx):
     ctx.runner = ctx.parent.runner
 
 @strategy.command()
-@click.option('-s', '--source_name', type=str, required=True, help='source name')
+@click.option('-s', '--source', type=str, required=True, help='source name')
 @click.option('-t', '--ticker', type=str, help='ticker to subscribe')
-@click.option('-e', '--exchange_id', type=str, help="exchange id")
+@click.option('-e', '--exchange', type=str, help="exchange id")
 @click.pass_context
-def sub(ctx, source_name, ticker, exchange_id):
+def sub(ctx, source, ticker, exchange):
     pass_ctx_from_parent(ctx)
-    ctx.strategy._pre_start = lambda ctx: ctx.subscribe(source_name, [ticker], exchange_id)
-    ctx.strategy._post_start = lambda ctx: None
-    ctx.strategy._on_trading_day = lambda ctx, daytime: None
-    ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}.{} {}|{} {}|{}".format(quote.instrument_id, quote.exchange_id, quote.bid_price[0], quote.bid_volume[0], quote.ask_price[0], quote.ask_volume[0]))
+    ctx.strategy._pre_start = lambda ctx: ctx.subscribe(source, [ticker], exchange)
     ctx.runner.add_strategy(ctx.strategy)
     ctx.runner.run()
 
@@ -58,16 +65,20 @@ def sub(ctx, source_name, ticker, exchange_id):
 def order(ctx):
     pass_ctx_from_parent(ctx)
 
-@order.group()
+@order.command()
 @click.pass_context
-@click.option('-t', '--ticker', type=str, help='ticker to subscribe')
-@click.option('-e', '--exchange_id', type=str, help="exchange id")
-def new(ctx,ticker, exchange_id):
+@click.option("-s", "--source", type=str, required=True, help='source name')
+@click.option("-a", "--account", type=str, required=True, help='account id')
+@click.option('-i', '--order-id', type=int, help='order to cancel')
+def cancel(ctx, source, account, order_id):
+    click.echo("cancel order {} for {}@{}".format(order_id, account, source))
     pass_ctx_from_parent(ctx)
-    print(ticker, exchange_id)
-
-@order.group()
-@click.pass_context
-@click.option('-i', '--order_id', type=int, help='order to cancel')
-def cancel(ctx, order_id):
-    pass_ctx_from_parent(ctx)
+    def pre_start(ctx):
+        ctx.add_account(source, account, 1e7)
+    def post_start(ctx):
+        ctx.logger.info("cancel order {}".format(order_id))
+        ctx.cancel_order(order_id)
+    ctx.strategy._pre_start = pre_start
+    ctx.strategy._post_start = post_start
+    ctx.runner.add_strategy(ctx.strategy)
+    ctx.runner.run()
