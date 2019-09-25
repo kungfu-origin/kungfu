@@ -4,14 +4,11 @@ from . import mdmaker
 from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
 import kungfu.yijinjing.time as kft
+import pyyjj
+
+pyyjj.writer.write_quote = lambda self, quote : pywingchun.utils.write_quote(self, 0, quote)
 
 MakerConfig = namedtuple("MakerConfig", ["base", "bound", "samples", "variation", "randseed"])
-
-class WriterWrapper:
-    def __init__(self, writer):
-        self.writer = writer
-    def write_quote(self, quote):
-        pywingchun.utils.write_quote(self.writer, 0, quote)
 
 class MarketDataSim(pywingchun.MarketData):
     def __init__(self, low_latency, locator, config_json):
@@ -35,9 +32,6 @@ class MarketDataSim(pywingchun.MarketData):
         quote.bid_volume = [ob.bid_qty(i) for i in range(0, min(10, ob.depth_bids()))]
         quote.last_price = ob.last_price
         return quote
-
-    def get_writer(self, uid):
-        return WriterWrapper(pywingchun.MarketData.get_writer(self, uid))
 
     def init_order_book(self, instrument_id, exchange_id):
         security = instrument_id + "." + exchange_id
