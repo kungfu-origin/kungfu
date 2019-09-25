@@ -27,8 +27,13 @@ def strategy(ctx, group, name):
        pass
     with patch.object(Strategy, '_Strategy__init_strategy', init_strategy_patch):
         ctx.strategy = Strategy(ctx)
+        ctx.strategy._pre_start = lambda ctx: None
         ctx.strategy._post_start = lambda ctx: None
+        ctx.strategy._pre_stop = lambda ctx: None
+        ctx.strategy._post_stop = lambda ctx: None
         ctx.strategy._on_trading_day = lambda ctx, daytime: None
+        ctx.strategy._on_entrust = lambda ctx, entrust: None
+        ctx.strategy._on_transaction = lambda ctx, transaction: None
         ctx.strategy._on_quote = lambda ctx, quote: ctx.logger.info("quote received: {}".format(quote))
         ctx.strategy._on_order = lambda ctx, order: ctx.logger.info("order received: {}".format(order))
         ctx.strategy._on_trade = lambda ctx, trade: ctx.logger.info("trade received: {}".format(trade))
