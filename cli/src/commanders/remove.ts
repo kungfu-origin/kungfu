@@ -35,7 +35,7 @@ export const removeAccountStrategy = async () => {
     if(type === 'strategy') {
         try{
             await deleteStrat(targetId)
-            console.log(`Delete ${targetType} ${colors.bold(targetId)} sucessfully !`)
+            console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
         }catch(err){
             console.error(err)
         }
@@ -43,7 +43,7 @@ export const removeAccountStrategy = async () => {
     else if(type === 'account') {
         try{
             await deleteAccount(targetAccount[0], accounts)
-            console.log(`Delete ${targetType} ${colors.bold(targetId)} sucessfully !`)
+            console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
         }catch(err){
             console.error(err)
         }

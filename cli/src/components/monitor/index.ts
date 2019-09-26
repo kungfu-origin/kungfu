@@ -162,7 +162,7 @@ export class MonitorDashboard extends Dashboard {
         t.screen.key(['left', 'right'], (ch: string, key: any) => {
             (key.name === 'left') ? i-- : i++;
             if (i === 2) i = 0;
-            if (i === -1) i = 2;
+            if (i === -1) i = 1;
             const nameKey: string = boards[i];
             t.boards[nameKey].focus();
         });
@@ -192,8 +192,8 @@ export class MonitorDashboard extends Dashboard {
                     const len = t.globalData.logList.length;
                     t.globalData.logList = t.globalData.logList.slice(len < 2000 ? 0 : (len - 2000))
                     t.boards.mergedLogs.setItems(t.globalData.logList)
-                    t.boards.mergedLogs.select(t.globalData.logList.length - 1)
                     if(!t.boards.mergedLogs.focused) {
+                        t.boards.mergedLogs.select(t.globalData.logList.length - 1)
                         t.boards.mergedLogs.setScrollPerc(100)
                     }
                 })

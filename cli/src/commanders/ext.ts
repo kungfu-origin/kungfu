@@ -86,7 +86,7 @@ export const listExtension = async (ifStdout = true): Promise<void | string> => 
 export const removeExtension = async () => {
     try {
         const list: any = await listExtension(false);
-        const extList = list.split('\n').slice(1);
+        const extList = list.split('\n').filter((l: string) => !!l).slice(1);
         const targetName = await inquirerRemoveByName(extList)
         const stdout = await execRemoveExtension(targetName)
         console.success(stdout)

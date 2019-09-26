@@ -9,11 +9,11 @@ declare global {
 }
 
 console.success = (log: string) => {
-    console.log(`${colors.green('success')}: ${log}`)
+    console.log(`${colors.green('SUCCESS')} ${log}`)
 }
 
 console.error = (log: string) => {
-    console.log(`${colors.red('error')}: ${log}`)
+    console.log(`${colors.red('ERROR')} ${log}`)
 }
 
 if (process.env.NODE_ENV === 'production') {

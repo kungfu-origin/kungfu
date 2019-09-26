@@ -35,12 +35,17 @@ export const updateAccountStrategy = async () => {
         const accountSource = await getAccountSource();
         const accountSetting = accountSource[source];
         const { key, config } = await accountConfigPrompt(accountSetting, true, accountData);
+
         Object.keys(config || {}).forEach(k => {
-            if(config[k].trim() === '') {
+            const str = config[k].toString().trim();
+            if(str === '' || str === 'NaN') {
                 config[k] = null
                 delete config[k]
             }
         })
+
+        console.log('Diff: ', config)
+
         try {
             await addUpdateAccountByPrompt(source, key, {
                 ...accountData,
