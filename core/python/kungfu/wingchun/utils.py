@@ -66,7 +66,8 @@ def get_msg_type(name):
         return pywingchun.constants.MsgType.Entrust
     elif name.lower == "transaction":
         return pywingchun.constants.MsgType.Transaction
-    else:e ValueError("invalid msg name {}".format(name))
+    else:
+        raise ValueError("invalid msg name {}".format(name))
 
 def get_data(event):
     if event.msg_type == pywingchun.constants.MsgType.Quote:
