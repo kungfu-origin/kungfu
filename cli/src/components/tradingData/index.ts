@@ -226,10 +226,6 @@ class TradingDataDashboard extends Dashboard {
 			const type = tradingData[0];
 			const data = tradingData[1];
 
-			if(t.type === 'strategy') {
-				console.log(type, data)
-			}
-
 			switch (type) {
 				case 'order':
 					t.boards.orderTable.setItems(data);
