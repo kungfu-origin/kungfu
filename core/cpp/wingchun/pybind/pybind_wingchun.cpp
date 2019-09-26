@@ -283,6 +283,17 @@ PYBIND11_MODULE(pywingchun, m)
                 }
             );
 
+    py::enum_<kungfu::wingchun::BsFlag>(m_constants, "BsFlag", py::arithmetic())
+            .value("Unknown", kungfu::wingchun::BsFlag::Unknown)
+            .value("Buy", kungfu::wingchun::BsFlag::Buy)
+            .value("Sell", kungfu::wingchun::BsFlag::Sell)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::BsFlag &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                });
+
     py::enum_<kungfu::wingchun::OrderStatus>(m_constants, "OrderStatus", py::arithmetic())
             .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
             .value("Submitted", kungfu::wingchun::OrderStatus::Submitted)
