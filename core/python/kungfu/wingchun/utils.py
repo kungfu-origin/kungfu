@@ -53,7 +53,7 @@ def get_class_from_msg_type(msg_type):
     elif msg_type == pywingchun.constants.MsgType.Entrust:
         return pywingchun.Entrust
     else:
-        raise ValueError("invalid msg_type {}".fromat(msg_type))
+        raise ValueError("invalid msg_type {}".format(msg_type))
 
 def get_msg_type(name):
     if name.lower() == "quote":
@@ -66,8 +66,7 @@ def get_msg_type(name):
         return pywingchun.constants.MsgType.Entrust
     elif name.lower == "transaction":
         return pywingchun.constants.MsgType.Transaction
-    else:
-        raise ValueError("invalid msg name {}".fromat(name))
+    else:e ValueError("invalid msg name {}".format(name))
 
 def get_data(event):
     if event.msg_type == pywingchun.constants.MsgType.Quote:
@@ -99,7 +98,7 @@ def write_data(writer, trigger_time, data):
     elif type(data) is pywingchun.Trade:
         return pywingchun.utils.write_trade(writer, trigger_time, data)
     else:
-        raise ValueError("invalid data type {}".fromat(type(data)))
+        raise ValueError("invalid data type {}".format(type(data)))
 
 def write_data_with_time(writer, gen_time, data):
     if type(data) is pywingchun.Quote:
@@ -109,7 +108,7 @@ def write_data_with_time(writer, gen_time, data):
     elif type(data) is pywingchun.Transaction:
         return pywingchun.write_transaction_with_time(writer, gen_time, data)
     else:
-        raise ValueError("invalid data type {}".fromat(type(data)))
+        raise ValueError("invalid data type {}".format(type(data)))
 
 def flatten_json(y):
     out = {}
