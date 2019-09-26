@@ -62,9 +62,9 @@ def get_msg_type(name):
         return pywingchun.constants.MsgType.Order
     elif name.lower() == "trade":
         return pywingchun.constants.MsgType.Trade
-    elif name.lower == "entrust":
+    elif name.lower() == "entrust":
         return pywingchun.constants.MsgType.Entrust
-    elif name.lower == "transaction":
+    elif name.lower() == "transaction":
         return pywingchun.constants.MsgType.Transaction
     else:
         raise ValueError("invalid msg name {}".format(name))
