@@ -24,7 +24,10 @@
                     <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key"></el-input>
                     <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && accountSource[source].key == item.key" show-password></el-input>
                     <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="postForm[item.key]"></el-switch>
-                    <el-input-number :class="item.key" v-if="item.type === 'int'"  :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
+                    <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
+                    <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
+                    <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="postForm[item.key]">{{postForm[item.key]}}</span>                    
+                    <el-button size="mini" icon="el-icon-more" v-if="item.type === 'file'" @click="handleSelectFile(item.key)"></el-button>
                     <el-select :class="item.key" size="small" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags  v-model.trim="postForm[item.key]" placeholder="请选择">
                         <el-option
                             v-for="option in item.data"
@@ -53,6 +56,7 @@
 import { mapState } from 'vuex';
 import * as ACCOUNT_API from '__io/db/account';
 import { deepClone } from '__gUtils/busiUtils';
+import { remote } from 'electron';
 
 export default {
     name: 'set-account-dialog',
@@ -117,6 +121,19 @@ export default {
     methods:{
         handleCancel() {
             this.close()
+        },
+
+        //添加文件
+        handleSelectFile(targetKey) {
+            const t = this;
+            const dialog = remote.dialog;
+            dialog.showOpenDialog({
+                properties: ['openFile']
+            }, (filePath) => {
+                if(!filePath || !filePath[0]) return;
+                t.$set(t.postForm, targetKey, filePath[0]);
+                t.$refs.accountForm.validate() //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+            })
         },
 
         //提交，同时更新accounts
@@ -200,5 +217,9 @@ export default {
 
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
+
+.path-selection-in-dialog.account-setting-path {
+    width: 240px;
+}
 
 </style>

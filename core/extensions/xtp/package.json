@@ -88,6 +88,16 @@
                     "tip": "请填写 buffer size（mb）",
                     "validator": ["intValidator"],                    
                     "required": false
+                },
+                {
+                    "key": "testfloat",
+                    "name": "testfloat",
+                    "type": "float"
+                },
+                {
+                    "key": "testFile",
+                    "name": "testFile",
+                    "type": "file"
                 }
             ]
         }

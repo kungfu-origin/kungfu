@@ -106,7 +106,7 @@
                 { required: true, message: '请选择策略入口文件路径', trigger: 'blur' },
             ]"
             >
-                <span class="strategy-path-selection-in-dialog text-overflow" :title="setStrategyForm.strategyPath">{{setStrategyForm.strategyPath}}</span>
+                <span class="path-selection-in-dialog text-overflow" :title="setStrategyForm.strategyPath">{{setStrategyForm.strategyPath}}</span>
                 <el-button size="mini" icon="el-icon-more" @click="handleBindStrategyFolder"></el-button>
             </el-form-item>
         </el-form>
@@ -347,13 +347,6 @@ export default {
     height: 23px;
     line-height: 23px;
     padding: 0;
-}
-
-.strategy-path-selection-in-dialog{
-    color: $icon;
-    max-width: 164px;
-    display: inline-block;
-    vertical-align: bottom;
 }
 
 </style>
