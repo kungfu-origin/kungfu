@@ -1,4 +1,20 @@
-const path = require('path')
+const path = require('path');
+const colors = require('colors');
+
+
+declare global {
+    interface Console {
+        success: Function
+    }
+}
+
+console.success = (log: string) => {
+    console.log(`${colors.green('success')}: ${log}`)
+}
+
+console.error = (log: string) => {
+    console.log(`${colors.red('error')}: ${log}`)
+}
 
 if (process.env.NODE_ENV === 'production') {
     global.__resources = path.join(path.dirname(process.execPath), 'resources').replace(/\\/g, '\\\\')
@@ -13,7 +29,6 @@ const { existsSync, addFile } = require('__gUtils/fileUtils');
 
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
-
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

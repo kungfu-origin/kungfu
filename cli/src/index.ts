@@ -2,10 +2,11 @@
 import { initDB } from '@/base';
 //@ts-ignore
 import { version } from '../package.json';
-import { addAccountStrategy } from '@/commanders/add';
+import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
 import { removeAccountStrategy } from '@/commanders/remove';
 import { updateAccountStrategy } from '@/commanders/update';
+import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
 import { delaySeconds } from '__gUtils/busiUtils';
@@ -16,6 +17,7 @@ import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pa
 
 const CFonts = require('cfonts');
 const colors = require('colors');
+
 
 startMaster(false)
     .catch(() => {})
@@ -44,11 +46,13 @@ const program = require('commander');
 
 program
     .version(version)
-    .option('-l --list', 'list detail');
+    .option('-l --list', 'list detail')
+    .option('-a --add', 'add')
+    .option('-r --remove', 'remove');
 
 program
-    .command('monit [-l]')
-    .description('monitor all process with merged logs OR monitor one trading process')
+    .command('monit [options]')
+    .description('monitor all process with merged logs OR monitor one trading process (with -l)')
     .action((type: any, commander: any) => {
         const list = commander.parent.list
         return monitPrompt(!!list)
@@ -60,17 +64,24 @@ program
     .description('list accounts and strategies')
     .action(() => {
         return listAccountsStrategys()
-            .catch((err: Error) => console.error(err))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0));
     })
 
 //add
 program
-    .command('add <account|strategy>')
+    .command('add')
     .description('add a account or strategy')
-    .action((type: string) => {
-        return addAccountStrategy(type)
-            .catch((err: Error) => console.error(err))
+    .action(() => {
+        return selectAccountOrStrategy()
+            .then((type: string) => addAccountStrategy(type))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0));
     })
 
@@ -80,7 +91,10 @@ program
     .description('update a account or strategy')
     .action(() => {
         return updateAccountStrategy()
-            .catch((err: Error) => console.error(err))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0));
     })
 
@@ -90,7 +104,10 @@ program
     .description('remove a account or strategy')
     .action(() => {
         return removeAccountStrategy()
-            .catch((err: Error) => console.error(err))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0));
     })
 
@@ -99,8 +116,36 @@ program
     .description('switch md source')
     .action(() => {
         return switchMdSource()
-            .catch((err: Error) => console.error(err))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0));
+    })
+
+program
+    .command('ext [options]')
+    .description('list or add or remove extension')
+    .action(async (type: any, commander: any) => {
+        const list = commander.parent.list
+        const add = commander.parent.add
+        const remove = commander.parent.remove
+
+        if(!list && !add && !remove) {
+            console.error("Missing required options argument '-l|-a|-r'")
+            process.exit(1)
+        }
+
+        try {
+            if(list) await listExtension()
+            else if(add) await addExtension()
+            else if(remove) await removeExtension()
+            process.exit(0)
+        } catch (err) {
+            console.error(err)
+            process.exit(1)
+        }
+        
     })
 
 program
@@ -111,9 +156,10 @@ program
             await killKfc();
             await killGodDaemon();
             await killExtra();
-            console.log('Shutdown kungfu successfully!')
+            console.success(`Shutdown kungfu`)
         } catch (err) {
-            console.log(err)
+            console.error(err)
+            process.exit(1)
         }
         
         process.exit(0)
@@ -124,8 +170,11 @@ program
     .description('clear all logs (should do it often)')
     .action(() => {
         return removeFilesInFolder(LOG_DIR)
-            .then(() => console.log('Clear all logs successfully!'))
-            .catch((err: Error) => console.error(err))
+            .then(() => console.success('Clear all logs'))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
             .finally(() => process.exit(0))
     })
 

@@ -11,6 +11,24 @@ const { PathPrompt } = require('inquirer-path');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 
+export const selectAccountOrStrategy = async() => {
+    const answers = await inquirer.prompt([
+        {
+            type: 'autocomplete',
+            name: 'type',
+            message: 'Select targeted account / strategy to add    ',
+            source: async () => {
+                return [colors.cyan('account'), colors.yellow('strategy')]
+            }
+        }
+    ])
+
+    const type = answers.type;
+    if(type.indexOf('account') !== -1) return 'account';
+    else if(type.indexOf('strategy') !== -1) return 'strategy'
+    else return ''
+}
+
 // ======================= add account start ============================
 const selectSourcePrompt = (accountSource: Sources) => inquirer.prompt([
     {
@@ -53,10 +71,10 @@ export const addUpdateAccountByPrompt = async (source: string, key: string, conf
     try {
         if(updateModule) {
             await updateAccountConfig(accountId, JSON.stringify(config))
-            console.log(`Update ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')} successfully!`)   
+            console.success(`Update ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }else{
             await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
-            console.log(`Add ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')} successfully!`)   
+            console.success(`Add ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }
     }catch(err){
         throw err
