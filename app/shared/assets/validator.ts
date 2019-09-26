@@ -120,12 +120,12 @@ export const intValidator = (rule: any, value: any, callback: Function): void =>
 
 //必填
 export const requiredValidator = (rule: any, value: any, callback: Function): void => {
-    if(!!(value + '') && (value != NaN)) {
-        callback()
-    } else {
+    if(!(value + '') || (value.toString().trim() === 'NaN')) {
         callback(new Error(
             isEnglish
             ? 'Required!'
             : '不能为空！'))
+    } else {
+        callback()       
     }
 }
