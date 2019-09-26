@@ -142,10 +142,10 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
         if(updateModule) {
             const strategyId = strategyData.strategy_id;
             await updateStrategyPath(strategyId, strategy_path)
-            console.log(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path} sucess!`)
+            console.success(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path}`)
         } else {
             await addStrategy(strategy_id, strategy_path)
-            console.log(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path} sucess!`)
+            console.success(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path}`)
         }
        
     }catch(err) {

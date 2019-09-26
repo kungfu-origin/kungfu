@@ -125,14 +125,14 @@ program
 
 program
     .command('ext [options]')
-    .description('list or add or remove extension')
+    .description('list or add or remove extension (with -l|-a|-r)')
     .action(async (type: any, commander: any) => {
         const list = commander.parent.list
         const add = commander.parent.add
         const remove = commander.parent.remove
 
         if(!list && !add && !remove) {
-            console.error("Missing required options argument '-l|-a|-r'")
+            console.error("Missing required options argument -l|-a|-r")
             process.exit(1)
         }
 
@@ -145,7 +145,6 @@ program
             console.error(err)
             process.exit(1)
         }
-        
     })
 
 program
@@ -157,12 +156,11 @@ program
             await killGodDaemon();
             await killExtra();
             console.success(`Shutdown kungfu`)
+            process.exit(0)
         } catch (err) {
             console.error(err)
             process.exit(1)
         }
-        
-        process.exit(0)
     })
 
 program
@@ -203,7 +201,6 @@ program
     .on('command:*', function () {
         console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
         process.exit(1);
-        
     });
 
 
