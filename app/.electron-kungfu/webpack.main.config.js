@@ -8,6 +8,7 @@ const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
 var fs = require("fs")
+console.log(__dirname, '..', '..', '.git', 'HEAD')
 var gitHEAD = fs.readFileSync(path.join(__dirname, '..', '..', '.git', 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
 var ref = gitHEAD.split(': ')[1] // refs/heads/develop
 var develop = gitHEAD.split('/')[2] // 环境：develop
