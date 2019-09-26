@@ -189,26 +189,26 @@ namespace kungfu
                     std::string get_source_id() const
                     { return std::string(source_id); }
 
-                    void set_source_id(const std::string & source_id_)
-                    {strncpy(source_id, source_id_.c_str(), SOURCE_ID_LEN);}
+                    void set_source_id(const std::string& source_id)
+                    {strncpy(this->source_id, source_id.c_str(), SOURCE_ID_LEN);}
 
                     std::string get_trading_day() const
                     { return std::string(trading_day); }
 
-                    void set_trading_day(const std::string & trading_day_)
-                    {strncpy(trading_day, trading_day_.c_str(), DATE_LEN);}
+                    void set_trading_day(const std::string& trading_day)
+                    {strncpy(this->trading_day, trading_day.c_str(), DATE_LEN);}
 
                     std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    void set_instrument_id(const std::string & instrument_id_)
-                    { strncpy(instrument_id, instrument_id_.c_str(), INSTRUMENT_ID_LEN);}
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN);}
 
                     std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
-                    void set_exchange_id(const std::string & exchange_id_)
-                    {strncpy(exchange_id, exchange_id_.c_str(), EXCHANGE_ID_LEN);}
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN);}
 
                     std::vector<double> get_bid_price() const
                     { return std::vector<double>(bid_price, bid_price + 10); }
@@ -242,10 +242,10 @@ namespace kungfu
 
                 inline void to_json(nlohmann::json &j, const Quote &quote)
                 {
-                    j["trading_day"] = std::string(quote.trading_day);
+                    j["trading_day"] = quote.get_trading_day();
                     j["data_time"] = quote.data_time;
-                    j["instrument_id"] = std::string(quote.instrument_id);
-                    j["exchange_id"] = std::string(quote.exchange_id);
+                    j["instrument_id"] = quote.get_instrument_id();
+                    j["exchange_id"] = quote.get_exchange_id();
                     j["instrument_type"] = quote.instrument_type;
 
                     j["pre_close_price"] = quote.pre_close_price;
@@ -327,18 +327,29 @@ namespace kungfu
                     int64_t main_seq;                           //主序号
                     int64_t seq;                                //子序号
 
-                    std::string get_source_id()
+                    const std::string get_source_id() const
                     { return std::string(source_id); }
 
-                    std::string get_trading_day()
+                    void set_source_id(const std::string& source_id)
+                    {strncpy(this->source_id, source_id.c_str(), SOURCE_ID_LEN);}
+
+                    const std::string get_trading_day() const
                     { return std::string(trading_day); }
 
-                    std::string get_instrument_id()
+                    void set_trading_day(const std::string& trading_day)
+                    {strncpy(this->trading_day, trading_day.c_str(), DATE_LEN);}
+
+                    const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    std::string get_exchange_id()
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN);}
+
+                    const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN);}
 #ifndef _WIN32
                 } __attribute__((packed));
 #else
@@ -386,17 +397,29 @@ namespace kungfu
                     int64_t main_seq;                               //主序号
                     int64_t seq;                                    //子序号
 
-                    std::string get_source_id()
+                    const std::string get_source_id() const
                     { return std::string(source_id); }
 
-                    std::string get_trading_day()
+                    void set_source_id(const std::string& source_id)
+                    {strncpy(this->source_id, source_id.c_str(), SOURCE_ID_LEN);}
+
+                    const std::string get_trading_day() const
                     { return std::string(trading_day); }
 
-                    std::string get_instrument_id()
+                    void set_trading_day(const std::string& trading_day)
+                    {strncpy(this->trading_day, trading_day.c_str(), DATE_LEN);}
+
+                    const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    std::string get_exchange_id()
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN);}
+
+                    const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
+
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN);}
 
 #ifndef _WIN32
                 } __attribute__((packed));
@@ -526,32 +549,25 @@ namespace kungfu
 
                     uint64_t parent_id;                      //母订单ID
 
-                    std::string get_instrument_id()
+                    const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    void set_instrument_id(const std::string &inst)
-                    {
-                        strcpy(instrument_id, inst.c_str());
-                    }
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN);}
 
-                    std::string get_exchange_id()
+                    const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
-                    void set_exchange_id(const std::string &exch)
-                    {
-                        strcpy(exchange_id, exch.c_str());
-                    }
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN);}
 
-                    std::string get_account_id()
+                    const std::string get_account_id() const
                     { return std::string(account_id); }
 
-                    void set_account_id(const std::string &account)
-                    {
-                        strcpy(account_id, account.c_str());
-                    }
+                    void set_account_id(const std::string &account_id)
+                    { strncpy(this->account_id, account_id.c_str(), ACCOUNT_ID_LEN);}
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
 #endif
@@ -666,24 +682,41 @@ namespace kungfu
                     VolumeCondition volume_condition;        //成交量类型
                     TimeCondition time_condition;            //成交时间类型
 
-                    std::string get_trading_day()
+                    const std::string get_trading_day() const
                     { return std::string(trading_day); }
 
-                    std::string get_instrument_id()
+                    void set_trading_day(const std::string& trading_day)
+                    { strncpy(this->trading_day, trading_day.c_str(), DATE_LEN);}
+
+                    const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
-                    std::string get_exchange_id()
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN); }
+
+                    const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
 
-                    std::string get_account_id()
+                    void set_exchange_id(const std::string& exchange_id)
+                    { strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN); }
+
+                    const std::string get_account_id() const
                     { return std::string(account_id); }
 
-                    std::string get_client_id()
+                    void set_account_id(const std::string& account_id)
+                    { strncpy(this->account_id, account_id.c_str(), ACCOUNT_ID_LEN); }
+
+                    const std::string get_client_id() const
                     { return std::string(client_id); }
 
-                    std::string get_error_msg()
+                    void set_client_id(const std::string& client_id)
+                    { strncpy(this->client_id, client_id.c_str(), CLIENT_ID_LEN); }
+
+                    const std::string get_error_msg() const
                     { return std::string(error_msg); }
 
+                    void set_error_msg(const std::string& error_msg)
+                    { strncpy(this->error_msg, error_msg.c_str(), ERROR_MSG_LEN); }
 #ifndef _WIN32
                 } __attribute__((packed));
 
@@ -737,32 +770,23 @@ namespace kungfu
                     order.order_id = j["order_id"];
                     order.insert_time = j["insert_time"];
                     order.update_time = j["update_time"];
-                    strncpy(order.trading_day, j["trading_day"].get<std::string>().c_str(), DATE_LEN);
-                    strncpy(order.instrument_id, j["instrument_id"].get<std::string>().c_str(), INSTRUMENT_ID_LEN);
-                    strncpy(order.exchange_id, j["exchange_id"].get<std::string>().c_str(), EXCHANGE_ID_LEN);
-
-                    strncpy(order.account_id, j["account_id"].get<std::string>().c_str(), ACCOUNT_ID_LEN);
-                    strncpy(order.client_id, j["client_id"].get<std::string>().c_str(), CLIENT_ID_LEN);
-
+                    order.set_trading_day(j["trading_day"].get<std::string>());
+                    order.set_instrument_id(j["instrument_id"].get<std::string>());
+                    order.set_exchange_id(j["exchange_id"].get<std::string>());
+                    order.set_account_id(j["account_id"].get<std::string>());
+                    order.set_client_id(j["client_id"].get<std::string>());
                     order.instrument_type = j["instrument_type"];
-
                     order.limit_price = j["limit_price"].get<double>();
                     order.frozen_price = j["frozen_price"].get<double>();
-
                     order.volume = j["volume"];
                     order.volume_traded = j["volume_traded"];
                     order.volume_left = j["volume_left"];
-
                     order.tax = j["tax"].get<double>();
                     order.commission = j["commission"].get<double>();
-
                     order.error_id = j["error_id"];
-                    strncpy(order.error_msg, j["error_msg"].get<std::string>().c_str(), ERROR_MSG_LEN);
-
+                    order.set_error_msg(j["error_msg"].get<std::string>());
                     order.status = j["status"];
-
                     order.parent_id = j["parent_id"];
-
                     order.side = j["side"];
                     order.offset = j["offset"];
                     order.price_type = j["price_type"];
@@ -792,7 +816,6 @@ namespace kungfu
                     order.price_type = input.price_type;
                     order.volume_condition = input.volume_condition;
                     order.time_condition = input.time_condition;
-
                 }
 
                 //成交信息
@@ -835,12 +858,25 @@ namespace kungfu
                     { return std::string(client_id); }
 
                     const std::string get_trading_day() const
-                    {
-                        return std::string(trading_day);
-                    }
+                    {return std::string(trading_day);}
+
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN); }
+
+                    void set_exchange_id(const std::string& exchange_id)
+                    { strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN); }
+
+                    void set_account_id(const std::string& account_id)
+                    { strncpy(this->account_id, account_id.c_str(), ACCOUNT_ID_LEN); }
+
+                    void set_client_id(const std::string& client_id)
+                    { strncpy(this->client_id, client_id.c_str(), CLIENT_ID_LEN); }
+
+                    void set_trading_day(const std::string& trading_day)
+                    { strncpy(this->trading_day, trading_day.c_str(), DATE_LEN); }
+
 #ifndef _WIN32
                 } __attribute__((packed));
-
 #else
                 };
 #endif

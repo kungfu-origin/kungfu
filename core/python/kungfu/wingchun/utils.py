@@ -30,6 +30,13 @@ def get_position_effect(instrument_type, side, offset):
     else:
         raise ValueError('could not find position effect for instrument_type {}, side {}, offset {}'.format(instrument_type, side, offset))
 
+def min_order_volume(instrument_id, exchange_id):
+    instrument_type = get_instrument_type(instrument_id, exchange_id)
+    if instrument_type in InstrumentTypeInStock:
+        return 100
+    else:
+        return 1
+
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price
 get_symbol_id = pywingchun.utils.get_symbol_id
@@ -41,6 +48,10 @@ def get_class_from_msg_type(msg_type):
         return pywingchun.Order
     elif msg_type == pywingchun.constants.MsgType.Trade:
         return pywingchun.Trade
+    elif msg_type == pywingchun.constants.MsgType.Transaction:
+        return pywingchun.Transaction
+    elif msg_type == pywingchun.constants.MsgType.Entrust:
+        return pywingchun.Entrust
     else:
         raise ValueError("invalid msg_type {}".fromat(msg_type))
 
@@ -58,27 +69,35 @@ def get_msg_type(name):
     else:
         raise ValueError("invalid msg name {}".fromat(name))
 
-def get_data(frame):
-    if frame.msg_type == pywingchun.constants.MsgType.Quote:
-        return pywingchun.utils.get_quote(frame)
-    elif frame.msg_type == pywingchun.constants.MsgType.Order:
-        return pywingchun.utils.get_order(frame)
-    elif frame.msg_type == pywingchun.constants.MsgType.Trade:
-        return pywingchun.utils.get_trade(frame)
-    elif frame.msg_type == pywingchun.constants.MsgType.Entrust:
-        return pywingchun.utils.get_entrust(frame)
-    elif frame.msg_type == pywingchun.constants.MsgType.Transaction:
-        return pywingchun.utils.get_transaction(frame)
+def get_data(event):
+    if event.msg_type == pywingchun.constants.MsgType.Quote:
+        return pywingchun.utils.get_quote(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Entrust:
+        return pywingchun.utils.get_entrust(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Transaction:
+        return pywingchun.utils.get_transaction(event)
+    elif event.msg_type == pywingchun.constants.MsgType.OrderInput:
+        return pywingchun.utils.get_order_input(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Order:
+        return pywingchun.utils.get_order(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Trade:
+        return pywingchun.utils.get_trade(event)
     else:
         return None
 
 def write_data(writer, trigger_time, data):
     if type(data) is pywingchun.Quote:
-        return pywingchun.write_quote(writer, trigger_time, data)
+        return pywingchun.utils.write_quote(writer, trigger_time, data)
     elif type(data) is pywingchun.Entrust:
-        return pywingchun.write_entrust(writer, trigger_time, data)
+        return pywingchun.utils.write_entrust(writer, trigger_time, data)
     elif type(data) is pywingchun.Transaction:
-        return pywingchun.write_transaction(writer, trigger_time, data)
+        return pywingchun.utils.write_transaction(writer, trigger_time, data)
+    elif type(data) is pywingchun.Order:
+        return pywingchun.utils.write_order(writer, trigger_time, data)
+    elif type(data) is pywingchun.OrderInput:
+        return pywingchun.utils.write_order_input(writer, trigger_time, data)
+    elif type(data) is pywingchun.Trade:
+        return pywingchun.utils.write_trade(writer, trigger_time, data)
     else:
         raise ValueError("invalid data type {}".fromat(type(data)))
 

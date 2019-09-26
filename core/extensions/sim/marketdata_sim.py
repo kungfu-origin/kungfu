@@ -5,8 +5,9 @@ from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
 import kungfu.yijinjing.time as kft
 import pyyjj
+import kungfu.wingchun.utils as wc_utils
 
-pyyjj.writer.write_quote = lambda self, quote : pywingchun.utils.write_quote(self, 0, quote)
+pyyjj.writer.write_data = wc_utils.write_data
 
 MakerConfig = namedtuple("MakerConfig", ["base", "bound", "samples", "variation", "randseed"])
 
@@ -53,7 +54,7 @@ class MarketDataSim(pywingchun.MarketData):
                         order.qty *= 100
                     trades = book.order(order)
             quote = self.quote_from_orderbook(book)
-            self.get_writer(0).write_quote(quote)
+            self.get_writer(0).write_data(0, quote)
 
     def subscribe(self, instruments):
         for inst in instruments:
