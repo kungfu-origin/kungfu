@@ -16,13 +16,14 @@ try {
   } else {
     var ref = gitHEAD.split(': ')[1] // refs/heads/develop
     var develop = gitHEAD.split('/')[2] // 环境：develop
-    console.log(ref, develop)
     var gitVersion = fs.readFileSync(path.join(__dirname, '..', '..', '.git', ref), 'utf-8').trim() // git版本号，例如：6ceb0ab5059d01fd444cf4e78467cc2dd1184a66
     gitCommitVersion = '"' + develop + ': ' + gitVersion + '"'  
   }
 } catch (err) {
   console.error(err)
 }
+
+console.log(gitCommitVersion)
 
 let whiteListedModules = [
   'vue', 
