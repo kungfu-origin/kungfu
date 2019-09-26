@@ -124,7 +124,8 @@ class LedgerDB(SessionFactoryHolder):
 
     def drop(self, session, book_tags):
         for cls in [Asset, Position, PositionDetail]:
-            session.query(cls).filter(cls.source_id==book_tags.source_id, cls.account_id == book_tags.account_id, cls.client_id == book_tags.client_id,cls.ledger_category == int(book_tags.ledger_category)).delete()
+            session.query(cls).filter(cls.source_id==book_tags.source_id, cls.account_id == book_tags.account_id,
+                                      cls.client_id == book_tags.client_id,cls.ledger_category == int(book_tags.ledger_category)).delete()
 
     def load(self, ctx, book_tags):
         with session_scope(self.session_factory) as session:
