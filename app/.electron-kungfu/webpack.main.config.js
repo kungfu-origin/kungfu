@@ -11,7 +11,7 @@ var fs = require("fs");
 var gitCommitVersion = '';
 try {
   var gitHEAD = fs.readFileSync(path.join(__dirname, '..', '..', '.git', 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
-  if(gitHEAD.split[': '].length <= 1) {
+  if((gitHEAD || '').split(': ').length <= 1) {
     gitCommitVersion = gitHEAD
   } else {
     var ref = gitHEAD.split(': ')[1] // refs/heads/develop
