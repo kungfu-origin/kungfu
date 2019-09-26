@@ -85,6 +85,10 @@ class Order(Base):
     time_condition = Column(Integer)
     parent_id = Column(String)
 
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                setattr(self, attr, kwargs[attr])
 
 class Trade(Base):
     __tablename__ = 'trades'
