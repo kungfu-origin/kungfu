@@ -283,6 +283,17 @@ PYBIND11_MODULE(pywingchun, m)
                 }
             );
 
+    py::enum_<kungfu::wingchun::BsFlag>(m_constants, "BsFlag", py::arithmetic())
+            .value("Unknown", kungfu::wingchun::BsFlag::Unknown)
+            .value("Buy", kungfu::wingchun::BsFlag::Buy)
+            .value("Sell", kungfu::wingchun::BsFlag::Sell)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::BsFlag &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                });
+
     py::enum_<kungfu::wingchun::OrderStatus>(m_constants, "OrderStatus", py::arithmetic())
             .value("Unknown", kungfu::wingchun::OrderStatus::Unknown)
             .value("Submitted", kungfu::wingchun::OrderStatus::Submitted)
@@ -443,39 +454,42 @@ PYBIND11_MODULE(pywingchun, m)
                  });
 
     py::class_<Entrust>(m, "Entrust")
-            .def_property_readonly("source_id", &Entrust::get_source_id)
-            .def_property_readonly("trading_day", &Entrust::get_trading_day)
-            .def_readonly("data_time", &Entrust::data_time)
-            .def_property_readonly("instrument_id", &Entrust::get_instrument_id)
-            .def_property_readonly("exchange_id", &Entrust::get_exchange_id)
-            .def_readonly("instrument_type", &Entrust::instrument_type)
-            .def_readonly("price", &Entrust::price)
-            .def_readonly("volume", &Entrust::volume)
-            .def_readonly("side", &Entrust::side)
-            .def_readonly("price_type", &Entrust::price_type)
-            .def_readonly("main_seq", &Entrust::main_seq)
-            .def_readonly("seq", &Entrust::seq)
+            .def(py::init<>())
+            .def_property("source_id", &Entrust::get_source_id, &Entrust::set_source_id)
+            .def_property("trading_day", &Entrust::get_trading_day,  &Entrust::set_trading_day)
+            .def_readwrite("data_time", &Entrust::data_time)
+            .def_property("instrument_id", &Entrust::get_instrument_id, &Entrust::set_instrument_id)
+            .def_property("exchange_id", &Entrust::get_exchange_id, &Entrust::set_exchange_id)
+            .def_readwrite("instrument_type", &Entrust::instrument_type)
+            .def_readwrite("price", &Entrust::price)
+            .def_readwrite("volume", &Entrust::volume)
+            .def_readwrite("side", &Entrust::side)
+            .def_readwrite("price_type", &Entrust::price_type)
+            .def_readwrite("main_seq", &Entrust::main_seq)
+            .def_readwrite("seq", &Entrust::seq)
             .def("__repr__",
                  [](const Entrust &a)
                  {
                      return to_string(a);
                  }
             );
+
     py::class_<Transaction>(m, "Transaction")
-            .def_property_readonly("source_id", &Transaction::get_source_id)
-            .def_property_readonly("trading_day", &Transaction::get_trading_day)
-            .def_readonly("data_time", &Transaction::data_time)
-            .def_property_readonly("instrument_id", &Transaction::get_instrument_id)
-            .def_property_readonly("exchange_id", &Transaction::get_exchange_id)
-            .def_readonly("instrument_type", &Transaction::instrument_type)
-            .def_readonly("price", &Transaction::price)
-            .def_readonly("volume", &Transaction::volume)
-            .def_readonly("bid_no", &Transaction::bid_no)
-            .def_readonly("ask_no", &Transaction::ask_no)
-            .def_readonly("exec_type", &Transaction::exec_type)
-            .def_readonly("bs_flag", &Transaction::bs_flag)
-            .def_readonly("main_seq", &Transaction::main_seq)
-            .def_readonly("seq", &Transaction::seq)
+            .def(py::init<>())
+            .def_property("source_id", &Transaction::get_source_id, &Transaction::set_source_id)
+            .def_property("trading_day", &Transaction::get_trading_day, &Transaction::set_trading_day)
+            .def_readwrite("data_time", &Transaction::data_time)
+            .def_property("instrument_id", &Transaction::get_instrument_id, &Transaction::set_instrument_id)
+            .def_property("exchange_id", &Transaction::get_exchange_id, &Transaction::set_exchange_id)
+            .def_readwrite("instrument_type", &Transaction::instrument_type)
+            .def_readwrite("price", &Transaction::price)
+            .def_readwrite("volume", &Transaction::volume)
+            .def_readwrite("bid_no", &Transaction::bid_no)
+            .def_readwrite("ask_no", &Transaction::ask_no)
+            .def_readwrite("exec_type", &Transaction::exec_type)
+            .def_readwrite("bs_flag", &Transaction::bs_flag)
+            .def_readwrite("main_seq", &Transaction::main_seq)
+            .def_readwrite("seq", &Transaction::seq)
             .def("__repr__",
                  [](const Transaction &a)
                  {

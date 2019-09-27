@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 const isEnglish = process.env.LANG_ENV === 'en';
 
 //大于零
@@ -120,12 +122,21 @@ export const intValidator = (rule: any, value: any, callback: Function): void =>
 
 //必填
 export const requiredValidator = (rule: any, value: any, callback: Function): void => {
-    if(!!(value + '') && (value != NaN)) {
-        callback()
-    } else {
+    if(!(value + '') || (value.toString().trim() === 'NaN')) {
         callback(new Error(
             isEnglish
             ? 'Required!'
             : '不能为空！'))
+    } else {
+        callback()       
+    }
+}
+
+export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Function): void => {
+    if(moment(value.toString(), 'YYMMDD').format('YYMMDD') === 'Invalid date') {
+        callback(new Error(
+            isEnglish
+            ? 'Date format should be YYMMDD '
+            : '日期格式YYMMDD！'))
     }
 }

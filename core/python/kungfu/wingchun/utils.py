@@ -7,7 +7,7 @@ def object_as_dict(obj):
     for attr in dir(obj):
         if not attr.startswith('__'):
             value = getattr(obj, attr)
-            if type(value) in [InstrumentType, Side, Offset, OrderStatus, Direction, PriceType, VolumeCondition, TimeCondition, LedgerCategory]:
+            if type(value) in WINGCHUN_ENUM_TYPES:
                 d[attr] = int(value)
             else:
                 d[attr] = value
