@@ -104,8 +104,6 @@ let mainConfig = {
 
 const gitCommitVersion = getCommitVersion()
 
-console.log(gitCommitVersion, '-------------')
-
 
 /**
  * Adjust mainConfig for development settings
@@ -122,8 +120,6 @@ if (process.env.NODE_ENV !== 'production') {
   )
 }
 
-console.log(1111)
-
 /**
  * Adjust mainConfig for production settings
  */
@@ -138,6 +134,5 @@ if (process.env.NODE_ENV === 'production') {
     })
   )
 }
-console.log(2222)
 
 module.exports = mainConfig
