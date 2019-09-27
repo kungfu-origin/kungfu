@@ -28,9 +28,7 @@ build_macosx:
     - macosx
   script:
     - yarn install
-    # - yarn build
-    - cd app
-    - yarn run build
+    - yarn build
   artifacts:
     expire_in: 1 day
     paths:
