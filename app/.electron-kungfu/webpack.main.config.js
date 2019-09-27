@@ -23,7 +23,8 @@ try {
   console.error(err)
 }
 
-console.log(gitCommitVersion)
+
+console.log(gitCommitVersion, '-------------')
 
 let whiteListedModules = [
   'vue', 
