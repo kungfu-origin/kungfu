@@ -179,10 +179,14 @@ function getType(originType: string) {
             return 'input';
         case 'int':
             return 'number';
+        case 'float':
+            return 'number';
         case 'select':
             return 'list';
         case 'bool':
             return 'confirm';
+        case 'file':
+            return 'path';
         default:
             return 'input'
     }
@@ -208,6 +212,7 @@ function paresAccountQuestion({
     return {
         type: targetType,
         name: key,
+        default: os.homedir(),
         choices: targetType === 'list' ? (configItem.data || []).map(item => item.value) : [],
         message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
         validate: async (value: string | number) => {

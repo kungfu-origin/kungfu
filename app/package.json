@@ -78,6 +78,18 @@
           "default/*",
           "config/*"
         ]
+      },
+      {
+        "from": "../cli/build/cli",
+        "to": "kungfu-cli",
+        "filter": [
+          "default/*",
+          "config/*",
+          "*/node_nanomsg.node",
+          "*/node_sqlite3.node",
+          "*/libnanomsg.*",
+          "*/nanomsg.*"
+        ]
       }
     ],
     "asar": true,
