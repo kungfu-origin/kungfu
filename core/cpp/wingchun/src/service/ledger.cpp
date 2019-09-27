@@ -88,6 +88,7 @@ namespace kungfu
                         request_write_to(trigger_time, app_location->uid);
                         update_broker_state(trigger_time, app_location, BrokerState::Connected);
                         on_trader_started(trigger_time, app_location);
+                        monitor_trader(app_location->uid);
                         break;
                     }
                     case category::STRATEGY:
@@ -208,78 +209,6 @@ namespace kungfu
                       }
                   });
 
-                events_ | is(msg::type::Instrument) |
-                $([&](event_ptr event)
-                  {
-                      auto &instrument_buffer = instrument_buffer_[event->source()];
-                      instrument_buffer.push_back(event->data<Instrument>());
-                  });
-
-                events_ | is(msg::type::InstrumentEnd) |
-                $([&](event_ptr event)
-                  {
-                      auto &instrument_buffer = instrument_buffer_[event->source()];
-                      try
-                      { on_instruments(instrument_buffer); }
-                      catch (const std::exception &e)
-                      {
-                          SPDLOG_ERROR("Unexpected exception {}", e.what());
-                      }
-                      instrument_buffer.clear();
-                  });
-
-                events_ | is(msg::type::Asset) |
-                $([&](event_ptr event)
-                  {
-                      asset_info_[event->source()] = event->data<Asset>();
-                  });
-
-                events_ | is(msg::type::Position) |
-                $([&](event_ptr event)
-                  {
-                      auto &position_buffer = position_buffer_[event->source()];
-                      position_buffer.push_back(event->data<Position>());
-                  });
-
-                events_ | is(msg::type::PositionDetail) |
-                $([&](event_ptr event)
-                  {
-                      auto &buffer = position_detail_buffer_[event->source()];
-                      buffer.push_back(event->data<PositionDetail>());
-                  });
-
-                events_ | is(msg::type::PositionEnd) |
-                $([&](event_ptr event)
-                  {
-                      auto &asset_info = asset_info_[event->source()];
-                      auto &position_buffer = position_buffer_[event->source()];
-                      request_subscribe(event->source(), convert_to_instruments(position_buffer));
-                      try
-                      { on_stock_account(asset_info, position_buffer); }
-                      catch (const std::exception &e)
-                      {
-                          SPDLOG_ERROR("Unexpected exception {}", e.what());
-                      }
-                      position_buffer.clear();
-                      memset(&asset_info, 0, sizeof(asset_info));
-                  });
-
-                events_ | is(msg::type::PositionDetailEnd) |
-                $([&](event_ptr event)
-                  {
-                      auto &asset_info = asset_info_[event->source()];
-                      auto &buffer = position_detail_buffer_[event->source()];
-                      request_subscribe(event->source(), convert_to_instruments(buffer));
-                      try
-                      { on_future_account(asset_info, buffer); }
-                      catch (const std::exception &e)
-                      {
-                          SPDLOG_ERROR("Unexpected exception {}", e.what());
-                      }
-                      buffer.clear();
-                      memset(&asset_info, 0, sizeof(asset_info));
-                  });
-
                 /**
                  * process active query from clients
                  */
@@ -334,6 +263,60 @@ namespace kungfu
                 auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
                 reader_->join(master_cmd_location, app_location->uid, trigger_time);
                 reader_->join(app_location, 0, trigger_time);
+            }
+
+            void Ledger::monitor_trader(uint32_t td_location_uid)
+            {
+                auto insts = events_| from(td_location_uid) | take_while([&](event_ptr event) { return event->msg_type() != msg::type::InstrumentEnd;}) |
+                             is(msg::type::Instrument) |
+                             reduce(std::vector<Instrument>(),
+                                    [](std::vector<Instrument> res, event_ptr event)
+                                    {
+                                        res.push_back(event->data<msg::data::Instrument>());
+                                        return res;
+                                    }) | as_dynamic();
+
+                insts.subscribe([&](std::vector<Instrument> res)
+                {
+                    on_instruments(res);
+                });
+
+                auto asset = events_ | from(td_location_uid) | is(msg::type::Asset) | first();
+
+                auto positions = events_ | from(td_location_uid) |
+                        take_while([&](event_ptr event) { return event->msg_type() != msg::type::PositionEnd;}) |
+                        is(msg::type::Position) | as_dynamic();
+
+                auto position_details = events_ | from(td_location_uid) | take_while([&](event_ptr event) { return event->msg_type() != msg::type::PositionDetailEnd;}) |
+                        is(msg::type::PositionDetail) | as_dynamic();
+
+                asset.merge(positions).reduce(std::make_pair(Asset(), std::vector<Position>({})),
+                        [](std::pair<Asset, std::vector<Position>> res, event_ptr event)
+                        {
+                            if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
+                            else if(event->msg_type() == msg::type::Position) { res.second.push_back(event->data<Position>()); }
+                            return res;
+                        }).subscribe(
+                                [&, td_location_uid](std::pair<Asset, std::vector<Position>> res)
+                                {
+                                    on_stock_account(res.first, res.second);
+                                    request_subscribe(td_location_uid, convert_to_instruments(res.second));
+                                    monitor_trader(td_location_uid);
+                                });
+
+                asset.merge(position_details).reduce(std::make_pair(Asset(), std::vector<PositionDetail>({})),
+                                              [](std::pair<Asset, std::vector<PositionDetail>> res, event_ptr event)
+                                              {
+                                                  if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
+                                                  else if(event->msg_type() == msg::type::Position) { res.second.push_back(event->data<PositionDetail>()); }
+                                                  return res;
+                                              }).subscribe(
+                        [&, td_location_uid](std::pair<Asset, std::vector<PositionDetail>> res)
+                        {
+                            on_future_account(res.first, res.second);
+                            request_subscribe(td_location_uid, convert_to_instruments(res.second));
+                            monitor_trader(td_location_uid);
+                        });
             }
 
             void Ledger::monitor_market_data(int64_t trigger_time, uint32_t md_location_uid)
