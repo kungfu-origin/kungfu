@@ -7,6 +7,8 @@ build_win:
   script:
     - yarn install
     - yarn build
+  only:
+    - dev
   artifacts:
     expire_in: 1 day
     paths:
@@ -22,6 +24,8 @@ build_centos:
   script:
     - yarn install
     - yarn build
+  only:
+    - dev
 build_macosx:
   stage: build
   tags:
@@ -29,6 +33,8 @@ build_macosx:
   script:
     - yarn install
     - yarn build
+  only:
+    - dev
   artifacts:
     expire_in: 1 day
     paths:
