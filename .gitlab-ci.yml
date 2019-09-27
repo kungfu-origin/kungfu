@@ -21,7 +21,9 @@ build_centos:
       - app/build/app/*.rpm
   script:
     - yarn install
-    - yarn build
+    # - yarn build
+    - cd app
+    - yarn run build
 build_macosx:
   stage: build
   tags:
