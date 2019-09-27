@@ -276,10 +276,16 @@ namespace kungfu
                                         return res;
                                     }) | as_dynamic();
 
-                insts.subscribe([&](std::vector<Instrument> res)
-                {
-                    on_instruments(res);
-                });
+                insts.subscribe(
+                        [&](std::vector<Instrument> res)
+                        {
+                            try
+                            { on_instruments(res); }
+                            catch (const std::exception &e)
+                            {
+                                SPDLOG_ERROR("Unexpected exception {}", e.what());
+                            }
+                        });
 
                 auto asset = events_ | from(td_location_uid) | is(msg::type::Asset) | first();
 
@@ -299,9 +305,11 @@ namespace kungfu
                         }).subscribe(
                                 [&, td_location_uid](std::pair<Asset, std::vector<Position>> res)
                                 {
-                                    on_stock_account(res.first, res.second);
+                                    try
+                                    { on_stock_account(res.first, res.second);}
+                                    catch (const std::exception &e)
+                                    { SPDLOG_ERROR("Unexpected exception {}", e.what());}
                                     request_subscribe(td_location_uid, convert_to_instruments(res.second));
-                                    monitor_trader(td_location_uid);
                                 });
 
                 asset.merge(position_details).reduce(std::make_pair(Asset(), std::vector<PositionDetail>({})),
@@ -313,9 +321,11 @@ namespace kungfu
                                               }).subscribe(
                         [&, td_location_uid](std::pair<Asset, std::vector<PositionDetail>> res)
                         {
-                            on_future_account(res.first, res.second);
+                            try
+                            { on_future_account(res.first, res.second);}
+                            catch (const std::exception &e)
+                            { SPDLOG_ERROR("Unexpected exception {}", e.what());}
                             request_subscribe(td_location_uid, convert_to_instruments(res.second));
-                            monitor_trader(td_location_uid);
                         });
             }
 
