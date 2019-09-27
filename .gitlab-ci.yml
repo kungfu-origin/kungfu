@@ -21,16 +21,16 @@ build_centos:
       - app/build/app/*.rpm
   script:
     - yarn install
-    # - yarn build
-    - cd app
-    - yarn run build
+    - yarn build
 build_macosx:
   stage: build
   tags:
     - macosx
   script:
     - yarn install
-    - yarn build
+    # - yarn build
+    - cd app
+    - yarn run build
   artifacts:
     expire_in: 1 day
     paths:
