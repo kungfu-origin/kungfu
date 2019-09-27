@@ -30,28 +30,28 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
         case 'main':
             if (proc.processId === 'master') {
                 switchMaster(!status)
-                .then(() => messageBoard.log(`${startOrStopMaster} Master process sucessfully!`, 2))
+                .then(() => messageBoard.log(`${startOrStopMaster} Master process success!`, 2))
                 .catch((err: Error) => logger.error(err))
             }
             else if(proc.processId === 'ledger') {
                 switchLedger(!status)
-                .then(() => messageBoard.log(`${startOrStop} Ledger process sucessfully!`, 2))
+                .then(() => messageBoard.log(`${startOrStop} Ledger process success!`, 2))
                 .catch((err: Error) => logger.error(err))
             } 
             break
         case 'md':
             switchMd(proc, !status)
-            .then(() => messageBoard.log(`${startOrStop} MD process sucessfully!`, 2))
+            .then(() => messageBoard.log(`${startOrStop} MD process success!`, 2))
             .catch((err: Error) => logger.error(err))
             break
         case 'td':
             switchTd(proc, !status)
-            .then(() => messageBoard.log(`${startOrStop} TD process sucessfully!`, 2))
+            .then(() => messageBoard.log(`${startOrStop} TD process success!`, 2))
             .catch((err: Error) => logger.error(err))
             break;
         case 'strategy':
             switchStrategy(proc.processId, !status)
-            .then(() => {messageBoard.log(`${startOrStop} Strategy process sucessfully!`, 2)})
+            .then(() => {messageBoard.log(`${startOrStop} Strategy process success!`, 2)})
             .catch((err: Error) => logger.error(err))
             break;
     }

@@ -1,7 +1,6 @@
 const path = require('path');
 const colors = require('colors');
 
-
 declare global {
     interface Console {
         success: Function
@@ -19,8 +18,6 @@ console.error = (log: string) => {
 if (process.env.NODE_ENV === 'production') {
     //@ts-ignore
     process.resourcesPath =  path.join(path.dirname(process.execPath), '..').replace(/\\/g, '\\\\')
-    //@ts-ignore
-    console.log(path.resolve(process.resourcesPath))
 }
 
 const initGlobalDB = require('__gConfig/initGlobalDB.json')
