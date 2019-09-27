@@ -83,6 +83,7 @@
         "from": "../cli/build/cli",
         "to": "kungfu-cli",
         "filter": [
+          "kungfu-cli*",
           "default/*",
           "config/*",
           "*/node_nanomsg.node",
