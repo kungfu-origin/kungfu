@@ -19,6 +19,7 @@ console.error = (log: string) => {
 if (process.env.NODE_ENV === 'production') {
     //@ts-ignore
     process.resourcesPath =  path.join(path.dirname(process.execPath), '..').replace(/\\/g, '\\\\')
+    //@ts-ignore
     console.log(path.resolve(process.resourcesPath))
 }
 
