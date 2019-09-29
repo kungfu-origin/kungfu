@@ -6,7 +6,9 @@ build_win:
     - windows
   script:
     - yarn install
-    - yarn build
+    # - yarn build
+    - cd app  
+    - yarn run build
   only:
     - dev
   artifacts:
@@ -32,8 +34,6 @@ build_macosx:
     - macosx
   script:
     - yarn install
-    # - yarn build
-    - cd app 
     - yarn build
   only:
     - dev
