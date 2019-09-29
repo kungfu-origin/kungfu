@@ -103,7 +103,7 @@ let mainConfig = {
 
 
 const gitCommitVersion = getCommitVersion()
-
+console.log(gitCommitVersion)
 
 /**
  * Adjust mainConfig for development settings
