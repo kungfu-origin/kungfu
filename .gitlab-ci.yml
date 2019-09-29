@@ -6,9 +6,7 @@ build_win:
     - windows
   script:
     - yarn install
-    # - yarn build
-    - cd app  
-    - yarn run build
+    - yarn build
   only:
     - dev
   artifacts:
