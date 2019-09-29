@@ -6,7 +6,6 @@ const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
-const { getCommitVersion } = require('./utils');
 
 let whiteListedModules = [
   'vue', 
@@ -101,7 +100,7 @@ let mainConfig = {
   target: 'electron-main'
 }
 
-
+const { getCommitVersion } = require('./utils');
 const gitCommitVersion = getCommitVersion() || 'latest'
 console.log('-------------', gitCommitVersion, '-------------')
 
@@ -112,7 +111,7 @@ if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
       'git_commit_version': `${gitCommitVersion}`,
-      'process.env.NODE_ENV': '"development"',
+      'process.env.NODE_ENV': '"development"'
     }),
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
@@ -120,10 +119,12 @@ if (process.env.NODE_ENV !== 'production') {
   )
 }
 
+
 /**
  * Adjust mainConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
+
   mainConfig.plugins.push(
     new OptimizeJsPlugin({
       sourceMap: false
