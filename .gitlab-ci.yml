@@ -32,6 +32,8 @@ build_macosx:
     - macosx
   script:
     - yarn install
+    # - yarn build
+    - cd app 
     - yarn build
   only:
     - dev
