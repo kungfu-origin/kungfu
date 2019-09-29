@@ -102,8 +102,7 @@ let mainConfig = {
 }
 
 
-// const gitCommitVersion = getCommitVersion() || ''
-const gitCommitVersion = ''
+const gitCommitVersion = getCommitVersion() || 'latest'
 console.log('-------------', gitCommitVersion, '-------------')
 
 /**
