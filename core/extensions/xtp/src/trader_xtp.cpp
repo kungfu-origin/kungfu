@@ -89,7 +89,7 @@ namespace kungfu
 
                     XTPRI *error_info = api_->GetApiLastError();
                     order.error_id = error_info->error_id;
-                    strcpy(order.error_msg, error_info->error_msg);
+                    strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
                     order.status = OrderStatus::Error;
 
                     writer->close_data();
