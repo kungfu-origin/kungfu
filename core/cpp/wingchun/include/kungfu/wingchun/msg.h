@@ -647,7 +647,6 @@ namespace kungfu
                 {
                     uint64_t parent_id;                      //母订单ID
                     uint64_t order_id;                       //订单ID
-                    uint64_t external_id;
 
                     int64_t insert_time;                     //订单写入时间
                     int64_t update_time;                     //订单更新时间

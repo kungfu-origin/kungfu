@@ -81,19 +81,16 @@ namespace kungfu
                 auto writer = get_writer(event->source());
                 msg::data::Order &order = writer->open_data<msg::data::Order>(event->gen_time(), msg::type::Order);
                 order_from_input(input, order);
+                strcpy(order.trading_day, trading_day_.c_str());
+                order.insert_time = nano;
+                order.update_time = nano;
                 if (xtp_order_id == 0)
                 {
-                    order.insert_time = nano;
-                    order.update_time = nano;
-                    strcpy(order.trading_day, trading_day_.c_str());
-
                     XTPRI *error_info = api_->GetApiLastError();
                     order.error_id = error_info->error_id;
                     strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
                     order.status = OrderStatus::Error;
-
                     writer->close_data();
-
                     INSERT_ORDER_ERROR(
                             fmt::format("(input){}(ErrorId){}, (ErrorMsg){}", to_string(xtp_input), error_info->error_id, error_info->error_msg));
                     return false;
