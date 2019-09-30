@@ -3,11 +3,7 @@
 //
 
 #include <utility>
-#include <fmt/format.h>
-#include <kungfu/wingchun/macro.h>
-
 #include <kungfu/yijinjing/log/setup.h>
-
 #include "marketdata_xtp.h"
 #include "serialize_xtp.h"
 #include "type_convert_xtp.h"
@@ -53,19 +49,18 @@ namespace kungfu
                 if (res == 0)
                 {
                     publish_state(BrokerState::LoggedIn);
-                    LOGIN_INFO(fmt::format("login success! (user_id) {}", config_.user_id));
+                    SPDLOG_INFO("login success! (user_id) {}", config_.user_id);
                 } else
                 {
                     publish_state(BrokerState::LoggedInFailed);
                     XTPRI *error_info = api_->GetApiLastError();
-                    LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
+                    SPDLOG_ERROR("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg);
                 }
             }
 
             bool MarketDataXTP::subscribe(const std::vector<Instrument> &instruments)
             {
-                SUBSCRIBE_TRACE(fmt::format("(size) {}", instruments.size()));
-
+                SPDLOG_INFO("size: {}", instruments.size());
                 std::vector<std::string> sse_tickers;
                 std::vector<std::string> sze_tickers;
                 for (const auto &inst: instruments)
@@ -105,25 +100,25 @@ namespace kungfu
                 int rtn = api_->SubscribeMarketData(insts.data(), size, exchange);
                 if (rtn == 0)
                 {
-                    SUBSCRIBE_INFO(fmt::format("subscribe request success, (size) {} (exchange_id) {}", size, exchange_id));
+                    SPDLOG_INFO("subscribe request success, (size) {} (exchange_id) {}", size, exchange_id);
                 } else
                 {
-                    SUBSCRIBE_ERROR("failed to subscribe");
+                    SPDLOG_ERROR("failed to subscribe");
                 }
                 int level2_rtn = api_->SubscribeTickByTick(insts.data(), size, exchange);
                 if (level2_rtn == 0)
                 {
-                    SUBSCRIBE_INFO(fmt::format("subscribe tick by tick request success, (size) {} (exchange_id) {}", size, exchange_id));
+                    SPDLOG_INFO("subscribe tick by tick request success, (size) {} (exchange_id) {}", size, exchange_id);
                 } else
                 {
-                    SUBSCRIBE_ERROR("failed to subscribe tick by tick");
+                    SPDLOG_ERROR("failed to subscribe tick by tick");
                 }
                 return level2_rtn == 0 && rtn == 0;
             }
 
             void MarketDataXTP::OnDisconnected(int reason)
             {
-                DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
+                SPDLOG_ERROR("(reason) {}", reason);
                 publish_state(BrokerState::DisConnected);
             }
 
@@ -131,10 +126,10 @@ namespace kungfu
             {
                 if (error_info != nullptr && error_info->error_id != 0)
                 {
-                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} {error_msg} {} (is_last) {}", error_info->error_id, error_info->error_msg, is_last));
+                    SPDLOG_ERROR("(error_id) {} {error_msg} {} (is_last) {}", error_info->error_id, error_info->error_msg, is_last);
                 } else
                 {
-                    SUBSCRIBE_INFO(fmt::format("(ticker) {} (is_last) {}", ticker->ticker, is_last));
+                    SPDLOG_INFO("(ticker) {} (is_last) {}", ticker->ticker, is_last);
                 }
             }
 
@@ -142,10 +137,10 @@ namespace kungfu
             {
                 if (error_info != nullptr && error_info->error_id != 0)
                 {
-                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} {error_msg} {} (is_last) {}", error_info->error_id, error_info->error_msg, is_last));
+                    SPDLOG_ERROR("(error_id) {} {error_msg} {} (is_last) {}", error_info->error_id, error_info->error_msg, is_last);
                 } else
                 {
-                    SUBSCRIBE_INFO(fmt::format("(ticker) {} (is_last) {}", ticker->ticker, is_last));
+                    SPDLOG_INFO("(ticker) {} (is_last) {}", ticker->ticker, is_last);
                 }
             }
 
@@ -153,10 +148,10 @@ namespace kungfu
             {
                 if (error_info != nullptr && error_info->error_id != 0)
                 {
-                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} {error_msg} {}", error_info->error_id, error_info->error_msg));
+                    SPDLOG_ERROR("(error_id) {} {error_msg} {}", error_info->error_id, error_info->error_msg);
                 } else
                 {
-                    SUBSCRIBE_INFO(fmt::format("subscribe all tick by tick success, exchange: {}", exchange_id_from_xtp(exchange_id)));
+                    SPDLOG_INFO("subscribe all tick by tick success, exchange: {}", exchange_id_from_xtp(exchange_id));
                 }
             }
 
@@ -164,7 +159,7 @@ namespace kungfu
                                                   int32_t max_bid1_count, int64_t *ask1_qty, int32_t ask1_count,
                                                   int32_t max_ask1_count)
             {
-                QUOTE_TRACE(to_string(*market_data));
+                SPDLOG_TRACE(to_string(*market_data));
                 msg::data::Quote &quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
                 from_xtp(*market_data, quote);
                 get_writer(0)->close_data();
@@ -174,15 +169,14 @@ namespace kungfu
             {
                 if (tbt_data->type == XTP_TBT_ENTRUST)
                 {
-                    ENTRUST_TRACE(to_string(*tbt_data));
-
+                    SPDLOG_TRACE(to_string(*tbt_data));
                     msg::data::Entrust &entrust = get_writer(0)->open_data<msg::data::Entrust>(0, msg::type::Entrust);
                     from_xtp(*tbt_data, entrust);
                     get_writer(0)->close_data();
-                } else if (tbt_data->type == XTP_TBT_TRADE)
+                }
+                else if (tbt_data->type == XTP_TBT_TRADE)
                 {
-                    TRANSACTION_TRACE(to_string(*tbt_data));
-
+                    SPDLOG_TRACE(to_string(*tbt_data));
                     msg::data::Transaction &transaction = get_writer(0)->open_data<msg::data::Transaction>(0, msg::type::Transaction);
                     from_xtp(*tbt_data, transaction);
                     get_writer(0)->close_data();

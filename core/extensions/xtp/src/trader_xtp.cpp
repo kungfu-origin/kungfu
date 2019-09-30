@@ -4,10 +4,6 @@
 
 #include <utility>
 #include <algorithm>
-#include <fmt/format.h>
-
-#include <kungfu/wingchun/macro.h>
-
 #include "trader_xtp.h"
 #include "type_convert_xtp.h"
 #include "serialize_xtp.h"
@@ -55,13 +51,13 @@ namespace kungfu
                 if (session_id_ > 0)
                 {
                     publish_state(BrokerState::Ready);
-                    LOGIN_INFO("login success");
+                    SPDLOG_INFO("login success");
                     req_account();
                 } else
                 {
                     publish_state(BrokerState::LoggedInFailed);
                     XTPRI *error_info = api_->GetApiLastError();
-                    LOGIN_ERROR(fmt::format("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg));
+                    SPDLOG_ERROR("login failed, error_id: {}, error_msg: {}", error_info->error_id, error_info->error_msg);
                 }
             }
 
@@ -74,7 +70,7 @@ namespace kungfu
                 // TODO for test only!!!
                 xtp_input.order_client_id = 2;
 
-                INSERT_ORDER_TRACE(to_string(xtp_input));
+                SPDLOG_TRACE(to_string(xtp_input));
 
                 uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
                 int64_t nano = kungfu::yijinjing::time::now_in_nano();
@@ -91,8 +87,7 @@ namespace kungfu
                     strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
                     order.status = OrderStatus::Error;
                     writer->close_data();
-                    INSERT_ORDER_ERROR(
-                            fmt::format("(input){}(ErrorId){}, (ErrorMsg){}", to_string(xtp_input), error_info->error_id, error_info->error_msg));
+                    SPDLOG_ERROR("(input){} (ErrorId){}, (ErrorMsg){}", to_string(xtp_input), error_info->error_id, error_info->error_msg);
                     return false;
                 } else
                 {
@@ -106,8 +101,7 @@ namespace kungfu
                     info.insert_time = nano;
                     strcpy(info.trading_day, trading_day_.c_str());
                     order_mapper_->add_order(info);
-
-                    INSERT_ORDER_TRACE(fmt::format("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id));
+                    SPDLOG_TRACE("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id);
                     return true;
                 }
             }
@@ -122,19 +116,18 @@ namespace kungfu
                     if (xtp_action_id == 0)
                     {
                         XTPRI *error_info = api_->GetApiLastError();
-                        CANCEL_ORDER_ERROR(fmt::format("(order_xtp_id) {} (session_id) {} (error_id) {} (error_msg) {}", xtp_order_id, session_id_,
-                                                       error_info->error_id, error_info->error_msg));
+                        SPDLOG_ERROR("failed to cancel order {}, order_xtp_id: {} session_id: {} error_id: {} error_msg: {}",
+                                action.order_id, xtp_order_id, session_id_, error_info->error_id, error_info->error_msg);
                         return false;
                     } else
                     {
-                        CANCEL_ORDER_TRACE(
-                                fmt::format("success to request cancel order, (order_id){}, (xtp_order_id){}, (xtp_action_id){}", action.order_id,
-                                            xtp_order_id, xtp_action_id));
+                        SPDLOG_TRACE("success to request cancel order {}, xtp_order_id: {}, xtp_action_id: {}", action.order_id, xtp_order_id, xtp_action_id);
                         return true;
                     }
-                } else
+                }
+                else
                 {
-                    CANCEL_ORDER_TRACE(fmt::format("fail to cancel order, can't find related xtp order id of order_id {}", action.order_id));
+                    SPDLOG_ERROR("fail to cancel order {}, can't find related xtp order id", action.order_id);
                     return false;
                 }
             }
@@ -162,7 +155,7 @@ namespace kungfu
                 if (session_id == session_id_)
                 {
                     publish_state(BrokerState::DisConnected);
-                    DISCONNECTED_ERROR(fmt::format("(reason) {}", reason));
+                    SPDLOG_ERROR("disconnected, reason: {}", reason);
                 }
             }
 
@@ -170,16 +163,16 @@ namespace kungfu
             {
                 if (order_info != nullptr)
                 {
-                    ORDER_TRACE(fmt::format("(xtp_order_info) {} (session_id){}", to_string(*order_info), session_id));
+                    SPDLOG_TRACE("xtp_order_info: {} session_id: {}", to_string(*order_info), session_id);
                 }
                 if (error_info != nullptr && error_info->error_id !=0)
                 {
-                    ORDER_ERROR(fmt::format("(error_id){} (error_msg){} (session_id)", error_info->error_id, error_info->error_msg, session_id));
+                    SPDLOG_ERROR("error_id: {} error_msg: {} session_id: {}", error_info->error_id, error_info->error_msg, session_id);
                 }
                 XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), order_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    ORDER_ERROR(fmt::format("unrecognized xtp_order_id: {} @ trading_day: {}", order_info->order_xtp_id, trading_day_));
+                    SPDLOG_ERROR("unrecognized xtp_order_id {}@{}", order_info->order_xtp_id, trading_day_);
                 }
                 else
                 {
@@ -205,11 +198,11 @@ namespace kungfu
 
             void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
             {
-                TRADE_TRACE(fmt::format("(trade_info) {}", to_string(*trade_info)));
+                SPDLOG_TRACE("trade_info: {}", to_string(*trade_info));
                 XtpOrder xtp_order = order_mapper_->get_order_by_xtp_order_id(trading_day_.c_str(), trade_info->order_xtp_id);
                 if (xtp_order.internal_order_id == 0)
                 {
-                    TRADE_ERROR(fmt::format("unrecognized xtp_order_id {} @trading_day: {}", trade_info->order_xtp_id, trading_day_));
+                    SPDLOG_ERROR("unrecognized xtp_order_id {}@{}", trade_info->order_xtp_id, trading_day_);
                 } else
                 {
                     auto writer = get_writer(xtp_order.source);
@@ -228,19 +221,19 @@ namespace kungfu
 
             void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id)
             {
-                CANCEL_ORDER_ERROR(fmt::format("(cancel_info){}, (error_id){}, (error_msg){}, (session_id){}", to_string(*cancel_info),
-                        error_info->error_id, error_info->error_msg, session_id));
+                SPDLOG_ERROR("cancel order error, cancel_info: {}, error_id: {}, error_msg: {}, session_id: {}",
+                        to_string(*cancel_info), error_info->error_id, error_info->error_msg, session_id);
             }
 
             void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
             {
                 if (position != nullptr)
                 {
-                    POSITION_TRACE(fmt::format("(position){} (request_id) {} (last) {}", to_string(*position), request_id, is_last));
+                    SPDLOG_TRACE("position:{}, request_id: {}, last: {}", to_string(*position), request_id, is_last);
                 }
                 if (error_info != nullptr && error_info->error_id != 0)
                 {
-                    POSITION_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
+                    SPDLOG_ERROR("error_id:{}, error_msg: {}, request_id: {}, last: {}", error_info->error_id, error_info->error_msg, request_id, is_last);
                 }
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {
@@ -256,7 +249,6 @@ namespace kungfu
                     strcpy(stock_pos.trading_day, this->trading_day_.c_str());
                     stock_pos.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
-
                     if (is_last)
                     {
                         writer->mark(0, msg::type::PositionEnd);
@@ -268,11 +260,11 @@ namespace kungfu
             {
                 if (asset != nullptr)
                 {
-                    ACCOUNT_TRACE(fmt::format("(asset){} (request_id){} (last){}", to_string(*asset), request_id, is_last));
+                    SPDLOG_TRACE("asset: {}, request_id: {}, last: {}", to_string(*asset), request_id, is_last);
                 }
                 if (error_info != nullptr && error_info->error_id !=0)
                 {
-                    ACCOUNT_TRACE(fmt::format("(error_id){} (error_msg) {} (request_id) {} (last) {}", error_info->error_id, error_info->error_msg, request_id, is_last));
+                    SPDLOG_ERROR("error_id: {}, error_msg: {}, request_id: {}, last: {}", error_info->error_id, error_info->error_msg, request_id, is_last);
                 }
                 if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
                 {

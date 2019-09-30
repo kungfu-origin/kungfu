@@ -191,28 +191,108 @@ PYBIND11_MODULE(pywingchun, m)
             {
                 writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Transaction, transaction);
             });
+    m_utils.def("write_bar",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Bar& bar)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Bar, bar);
+            });
+    m_utils.def("write_bar_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Bar& bar)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Bar, bar);
+            });
     m_utils.def("write_order_input",
             [](const journal::writer_ptr writer, int64_t trigger_time, const OrderInput& order_input)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::OrderInput, order_input);
+            });
+    m_utils.def("write_order_input_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const OrderInput& order_input)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::OrderInput, order_input);
+            });
+    m_utils.def("write_order_action",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const OrderAction& order_action)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::OrderAction, order_action);
+            });
+    m_utils.def("write_order_action_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const OrderAction& order_action)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::OrderAction, order_action);
             });
     m_utils.def("write_order",
             [](const journal::writer_ptr writer, int64_t trigger_time, const Order& order)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Order, order);
             });
+    m_utils.def("write_order_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Order& order)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Order, order);
+            });
     m_utils.def("write_trade",
             [](const journal::writer_ptr writer, int64_t trigger_time, const Trade& trade)
             {
                 writer->write(trigger_time, kungfu::wingchun::msg::type::Trade, trade);
             });
-
+    m_utils.def("write_trade_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Trade& trade)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Trade, trade);
+            });
+    m_utils.def("write_position",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Position& position)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Position, position);
+            });
+    m_utils.def("write_position_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Position& position)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Position, position);
+            });
+    m_utils.def("write_asset",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Asset& asset)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Asset, asset);
+            });
+    m_utils.def("write_asset_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Asset& asset)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Asset, asset);
+            });
+    m_utils.def("write_position_detail",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const PositionDetail& detail)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::PositionDetail, detail);
+            });
+    m_utils.def("write_position_detail_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const PositionDetail& detail)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::PositionDetail, detail);
+            });
+    m_utils.def("write_instrument",
+            [](const journal::writer_ptr writer, int64_t trigger_time, const Instrument& instrument)
+            {
+                writer->write(trigger_time, kungfu::wingchun::msg::type::Instrument, instrument);
+            });
+    m_utils.def("write_instrument_with_time",
+            [](const journal::writer_ptr writer, int64_t gen_time, const Instrument& instrument)
+            {
+                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Instrument, instrument);
+            });
     m_utils.def("get_quote", [](kungfu::yijinjing::event_ptr event) { return event->data<Quote>();});
     m_utils.def("get_entrust", [](kungfu::yijinjing::event_ptr event) { return event->data<Entrust>();});
     m_utils.def("get_transaction", [](kungfu::yijinjing::event_ptr event) { return event->data<Transaction>();});
+    m_utils.def("get_bar", [](kungfu::yijinjing::event_ptr event) {return event->data<Bar>();});
     m_utils.def("get_order", [](kungfu::yijinjing::event_ptr event) { return event->data<Order>();});
     m_utils.def("get_trade", [](kungfu::yijinjing::event_ptr event) { return event->data<Trade>();});
     m_utils.def("get_order_input", [](kungfu::yijinjing::event_ptr event) { return event->data<OrderInput>();});
+    m_utils.def("get_order_action", [](kungfu::yijinjing::event_ptr event) { return event->data<OrderAction>();});
+    m_utils.def("get_position", [](kungfu::yijinjing::event_ptr event) { return event->data<Position>();});
+    m_utils.def("get_position_detail", [](kungfu::yijinjing::event_ptr event) { return event->data<PositionDetail>();});
+    m_utils.def("get_asset", [](kungfu::yijinjing::event_ptr event) { return event->data<Asset>();});
+    m_utils.def("get_instrument", [](kungfu::yijinjing::event_ptr event) { return event->data<Instrument>();});
 
     auto m_constants = m.def_submodule("constants");
 
@@ -363,10 +443,10 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
-            .value("Error", kungfu::wingchun::msg::type::MsgType::Error)
             .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
             .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
             .value("Transaction", kungfu::wingchun::msg::type::MsgType::Transaction)
+            .value("Bar", kungfu::wingchun::msg::type::MsgType::Bar)
             .value("OrderInput", kungfu::wingchun::msg::type::MsgType::OrderInput)
             .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
             .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
@@ -375,6 +455,7 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Asset", kungfu::wingchun::msg::type::MsgType::Asset)
             .value("AssetSnapshot", kungfu::wingchun::msg::type::AssetSnapshot)
             .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
+            .value("Instrument", kungfu::wingchun::msg::type::MsgType::Instrument)
             .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
             .value("BrokerState", kungfu::wingchun::msg::type::MsgType::BrokerState)
             .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
@@ -388,20 +469,21 @@ PYBIND11_MODULE(pywingchun, m)
             );
 
     py::class_<Instrument>(m, "Instrument")
-            .def_readonly("instrument_type", &Instrument::instrument_type)
-            .def_property_readonly("instrument_id", &Instrument::get_instrument_id)
-            .def_property_readonly("exchange_id", &Instrument::get_exchange_id)
-            .def_readonly("contract_multiplier", &Instrument::contract_multiplier)
-            .def_readonly("price_tick", &Instrument::price_tick)
-            .def_readonly("delivery_year", &Instrument::delivery_year)
-            .def_readonly("delivery_month", &Instrument::delivery_month)
-            .def_readonly("is_trading", &Instrument::is_trading)
-            .def_readonly("long_margin_ratio", &Instrument::long_margin_ratio)
-            .def_readonly("short_margin_ratio", &Instrument::short_margin_ratio)
-            .def_property_readonly("product_id", &Instrument::get_product_id)
-            .def_property_readonly("open_date", &Instrument::get_open_date)
-            .def_property_readonly("create_date", &Instrument::get_create_date)
-            .def_property_readonly("expire_date", &Instrument::get_expire_date)            
+            .def(py::init<>())
+            .def_readwrite("instrument_type", &Instrument::instrument_type)
+            .def_property("instrument_id", &Instrument::get_instrument_id, &Instrument::set_instrument_id)
+            .def_property("exchange_id", &Instrument::get_exchange_id, &Instrument::set_exchange_id)
+            .def_readwrite("contract_multiplier", &Instrument::contract_multiplier)
+            .def_readwrite("price_tick", &Instrument::price_tick)
+            .def_readwrite("delivery_year", &Instrument::delivery_year)
+            .def_readwrite("delivery_month", &Instrument::delivery_month)
+            .def_readwrite("is_trading", &Instrument::is_trading)
+            .def_readwrite("long_margin_ratio", &Instrument::long_margin_ratio)
+            .def_readwrite("short_margin_ratio", &Instrument::short_margin_ratio)
+            .def_property("product_id", &Instrument::get_product_id, &Instrument::set_product_id)
+            .def_property("open_date", &Instrument::get_open_date, &Instrument::set_open_date)
+            .def_property("create_date", &Instrument::get_create_date, &Instrument::set_create_date)
+            .def_property("expire_date", &Instrument::get_expire_date, &Instrument::set_expire_date)
             .def("__hash__",
                  [](const Instrument &a)
                  {
@@ -496,6 +578,26 @@ PYBIND11_MODULE(pywingchun, m)
                      return to_string(a);
                  }
             );
+
+    py::class_<Bar>(m, "Bar")
+            .def(py::init<>())
+            .def_property("trading_day", &Bar::get_trading_day, &Bar::set_trading_day)
+            .def_property("instrument_id", &Bar::get_instrument_id, &Bar::set_instrument_id)
+            .def_property("exchange_id", &Bar::get_exchange_id, &Bar::set_exchange_id)
+            .def_readwrite("start_time", &Bar::start_time)
+            .def_readwrite("end_time", &Bar::end_time)
+            .def_readwrite("open", &Bar::open)
+            .def_readwrite("close", &Bar::close)
+            .def_readwrite("high", &Bar::high)
+            .def_readwrite("low", &Bar::low)
+            .def_readwrite("volume", &Bar::volume)
+            .def_readwrite("start_volume", &Bar::start_volume)
+            .def_readwrite("tick_count", &Bar::tick_count)
+            .def("__repr__",
+                    [](const Bar &a)
+                    {
+                        return to_string(a);
+                    });
 
     py::class_<OrderInput>(m, "OrderInput")
             .def(py::init<>())
