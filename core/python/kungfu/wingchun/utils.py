@@ -6,7 +6,10 @@ def object_as_dict(obj):
     d = {}
     for attr in dir(obj):
         if not attr.startswith('__'):
-            value = getattr(obj, attr)
+            try:
+                value = getattr(obj, attr)
+            except UnicodeDecodeError:
+                continue
             if type(value) in WINGCHUN_ENUM_TYPES:
                 d[attr] = int(value)
             else:
