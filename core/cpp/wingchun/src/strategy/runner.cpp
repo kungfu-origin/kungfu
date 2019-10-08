@@ -73,7 +73,7 @@ namespace kungfu
                       }
                   });
 
-                events_ | is(msg::type::Order) |
+                events_ | is(msg::type::Order) | to(context_->app_.get_home_uid()) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -82,7 +82,7 @@ namespace kungfu
                       }
                   });
 
-                events_ | is(msg::type::Trade) |
+                events_ | is(msg::type::Trade) | to(context_->app_.get_home_uid()) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
