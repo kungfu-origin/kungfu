@@ -43,6 +43,7 @@ class Strategy(pywingchun.Strategy):
         self._pre_stop = getattr(impl, 'pre_stop', lambda ctx: None)
         self._post_stop = getattr(impl, 'post_stop', lambda ctx: None)
         self._on_trading_day = getattr(impl, "on_trading_day", lambda ctx, trading_day: None)
+        self._on_bar = getattr(impl, "on_bar", lambda ctx, bar: None)
         self._on_quote = getattr(impl, 'on_quote', lambda ctx, quote: None)
         self._on_entrust = getattr(impl, 'on_entrust', lambda ctx, entrust: None)
         self._on_transaction = getattr(impl, "on_transaction", lambda ctx, transaction: None)
@@ -89,6 +90,9 @@ class Strategy(pywingchun.Strategy):
     def on_quote(self, wc_context, quote):
         self._on_quote(self.ctx, quote)
         self.ctx.book.apply_quote(quote)
+
+    def on_bar(self, wc_context, bar):
+        self._on_bar(self.ctx, bar)
 
     def on_entrust(self, wc_context, entrust):
         self._on_entrust(self.ctx, entrust)

@@ -64,6 +64,15 @@ namespace kungfu
                       }
                   });
 
+                events_ | is(msg::type::Bar) |
+                $([&](event_ptr event)
+                  {
+                      for (const auto &strategy : strategies_)
+                      {
+                          strategy->on_bar(context_, event->data<Bar>());
+                      }
+                  });
+
                 events_ | is(msg::type::Order) |
                 $([&](event_ptr event)
                   {

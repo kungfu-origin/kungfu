@@ -50,6 +50,11 @@ namespace kungfu
                 virtual void on_quote(Context_ptr context, const msg::data::Quote &quote)
                 {};
 
+                //bar 数据更新回调
+                //@param bar               bar 数据
+                virtual void on_bar(Context_ptr context, const msg::data::Bar &bar)
+                {};
+
                 //逐笔委托更新回调
                 //@param entrust           逐笔委托数据
                 virtual void on_entrust(Context_ptr context, const msg::data::Entrust &entrust)

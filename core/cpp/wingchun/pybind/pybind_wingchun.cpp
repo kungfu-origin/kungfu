@@ -133,6 +133,9 @@ public:
     void on_quote(strategy::Context_ptr context, const Quote &quote) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote); }
 
+    void on_bar(strategy::Context_ptr context, const Bar &bar) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar); }
+
     void on_entrust(strategy::Context_ptr context, const Entrust &entrust) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust); }
 
@@ -856,6 +859,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("post_stop", &strategy::Strategy::post_stop)
             .def("on_trading_day", &strategy::Strategy::on_trading_day)
             .def("on_quote", &strategy::Strategy::on_quote)
+            .def("on_bar", &strategy::Strategy::on_bar)
             .def("on_entrust", &strategy::Strategy::on_entrust)
             .def("on_transaction", &strategy::Strategy::on_transaction)
             .def("on_order", &strategy::Strategy::on_order)
