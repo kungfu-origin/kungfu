@@ -407,11 +407,11 @@ class OrderBook(object):
 
     def offer_price(self, at_level):
         """Get price at sepcific level"""
-        return OrderBookUtils.price(self.offer, -at_level)
+        return OrderBookUtils.price(self.offer, at_level)
 
     def offer_qty(self, at_level):
         """Get qty at sepcific level"""
-        return OrderBookUtils.qty(self.offer, -at_level)
+        return OrderBookUtils.qty(self.offer, at_level)
 
     def aggregate_bid_qty(self, trade_price):
         """Sum of qty that would match a price"""
