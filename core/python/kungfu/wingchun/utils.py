@@ -24,7 +24,7 @@ def is_final_status(order_status):
     return int(order_status) in AllFinalOrderStatus
 
 def get_position_effect(instrument_type, side, offset):
-    if instrument_type == InstrumentType.Stock:
+    if instrument_type in InstrumentTypeInStockAccount:
         return Direction.Long
     elif side == Side.Buy and offset == Offset.Open:
         return Direction.Long
@@ -39,7 +39,7 @@ def get_position_effect(instrument_type, side, offset):
 
 def min_order_volume(instrument_id, exchange_id):
     instrument_type = get_instrument_type(instrument_id, exchange_id)
-    return 100 if instrument_type in InstrumentTypeInStock else 1
+    return 100 if instrument_type in InstrumentTypeInStockAccount else 1
 
 def get_class_from_msg_type(msg_type):
     if msg_type == pywingchun.constants.MsgType.Quote:

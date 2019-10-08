@@ -295,6 +295,7 @@ PYBIND11_MODULE(pyyjj, m)
 
     py::class_<writer, writer_ptr>(m, "writer")
             .def("write_raw", &writer::write_raw)
+            .def("current_frame_uid", &writer::current_frame_uid)
             .def("mark_with_time", &writer::mark_with_time);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");

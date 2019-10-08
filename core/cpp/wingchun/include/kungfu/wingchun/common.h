@@ -45,15 +45,15 @@ namespace kungfu
 
         enum class InstrumentType: int8_t
         {
-            Unknown,
-            Stock,
-            Future,
-            Bond,
-            StockOption,
-            Fund,
-            TechStock,
-            Index,
-            Repo
+            Unknown,       //未知
+            Stock,         //普通股票
+            Future,        //期货
+            Bond,          //债券
+            StockOption,   //股票期权
+            Fund,          //基金
+            TechStock,     //科创板股票
+            Index,         //指数
+            Repo           //回购
         };
 
         enum class ExecType: int8_t
@@ -396,6 +396,10 @@ namespace kungfu
                 else if(startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18"))
                 {
                     return InstrumentType::Fund;
+                }
+                else if(startswith(instrument_id, "13"))
+                {
+                    return InstrumentType::Repo;
                 }
                 else if(startswith(instrument_id, "1"))
                 {

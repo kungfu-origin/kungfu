@@ -272,6 +272,14 @@ namespace kungfu
                           });
         };
 
+        inline auto to = [](uint32_t dest)
+        {
+            return filter([=](yijinjing::event_ptr e)
+                          {
+                              return e->dest() == dest;
+                          });
+        };
+
         inline auto trace = []()
         {
             return map([=](yijinjing::event_ptr e)

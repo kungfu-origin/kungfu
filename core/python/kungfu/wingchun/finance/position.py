@@ -108,7 +108,7 @@ class Position:
         raise NotImplementationError
 
 class StockPosition(Position):
-    _INSTRUMENT_TYPES = InstrumentTypeInStock
+    _INSTRUMENT_TYPES = InstrumentTypeInStockAccount
     def __init__(self, ctx, book, **kwargs):
         super(StockPosition, self).__init__(ctx, book, **kwargs)
         self._last_price = kwargs.pop("last_price", 0.0)
