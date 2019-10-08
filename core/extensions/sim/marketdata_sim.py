@@ -23,6 +23,7 @@ class MarketDataSim(pywingchun.MarketData):
         pywingchun.MarketData.on_start(self)
 
     def quote_from_orderbook(self, ob):
+        # ob.display()
         quote = pywingchun.Quote()
         instrument_id, exchange_id = ob.security.split(".")
         quote.data_time = self.now()
@@ -30,10 +31,9 @@ class MarketDataSim(pywingchun.MarketData):
         quote.exchange_id = exchange_id
         quote.ask_price = [ob.offer_price(i) for i in range(0, min(10, ob.depth_offers()))]
         quote.ask_volume = [ob.offer_qty(i) for i in range(0, min(10, ob.depth_offers()))]
-        quote.bid_price = [ob.bid_price(i) for i in range(ob.depth_bids()-1, max(-1,ob.depth_bids()-11), -1)]
-        quote.bid_volume = [ob.bid_qty(i) for i in range(ob.depth_bids()-1, max(-1,ob.depth_bids()-11), -1)]
-        #quote.last_price = ob.last_price
-        quote.last_price = ob.ask_price
+        quote.bid_price = [ob.bid_price(i) for i in range(0, min(10, ob.depth_bids()))]
+        quote.bid_volume = [ob.bid_qty(i) for i in range(0, min(10, ob.depth_bids()))]
+        # print(quote)
         return quote
 
     def init_order_book(self, instrument_id, exchange_id):
@@ -47,7 +47,7 @@ class MarketDataSim(pywingchun.MarketData):
         self.orderbooks[symbol_id] = book
 
     def update_orderbooks(self):
-        self.logger.info("*************************update_orderbooks**********************")
+        # self.logger.info("*************************update_orderbooks**********************")
         for book in self.orderbooks.values():
             order_generator = book.gen_orders(self.config)
             for orders, mid in order_generator:
