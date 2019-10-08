@@ -115,11 +115,6 @@ namespace kungfu
                 strcpy(req.BrokerID, config_.broker_id.c_str());
                 strcpy(req.InvestorID, config_.account_id.c_str());
                 int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
-                if (rtn != 0)
-                {
-                    SPDLOG_ERROR("failed to req position detail");
-                }
-
                 return rtn == 0;
             }
 

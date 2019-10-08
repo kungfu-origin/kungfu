@@ -76,6 +76,7 @@ class AccountBook:
             "msg_type": int(MsgType.Asset),
             "data": {
                 "trading_day": self.trading_day.strftime(DATE_FORMAT),
+                "update_time": self._ctx.now(),
                 "avail": self.avail,
                 "margin": self.margin,
                 "market_value": self.market_value,

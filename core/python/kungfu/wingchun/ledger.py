@@ -48,6 +48,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.orders = {}
         self.ctx.trading_day = None
         self.ctx.books = {}
+        self.ctx.now = self.now
         self.ctx.get_inst_info = self.get_inst_info
 
     def pre_start(self):
