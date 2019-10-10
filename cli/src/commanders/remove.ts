@@ -15,7 +15,8 @@ export const removeAccountStrategy = async () => {
             type: 'autocomplete',
             name: 'process',
             message: 'Select targeted account / strategy to remove    ',
-            source: async (answersSoFar: any, input = '') => {
+            source: async (answersSoFar: any, input: string) => {
+                input = input || '';
                 return accountStrategyList
                     .filter((s: string) => s.indexOf(input) !== -1)
             }

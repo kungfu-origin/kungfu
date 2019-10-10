@@ -41,8 +41,8 @@ export const orderStatus: NumberToStringObject = {
     3: isEnglish ? 'Cancelled' : '已撤单',
     4: isEnglish ? 'Error' : '错误',
     5: isEnglish ? 'Filled' : '已成交',
-    6: isEnglish ? 'PartialFilledNotActive' : '部分撤单',
-    7: isEnglish ? 'PartialFilledActive' : '正在交易',
+    6: isEnglish ? 'PartialCancel' : '部分撤单',
+    7: isEnglish ? 'Trading' : '正在交易',
 }
 
 //     DirectionLong = '0'

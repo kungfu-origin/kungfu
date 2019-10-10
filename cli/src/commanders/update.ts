@@ -11,7 +11,8 @@ export const updateAccountStrategy = async () => {
             type: 'autocomplete',
             name: 'process',
             message: 'Select targeted account / strategy to update    ',
-            source: async (answersSoFar: any, input = '') => {
+            source: async (answersSoFar: any, input: string) => {
+                input = input || '';
                 return accountStrategyList
                     .filter((s: string): boolean => s.indexOf(input) !== -1)
             }

@@ -14,9 +14,10 @@ export const monitPrompt = async (list: boolean) => {
             type: 'autocomplete',
             name: 'processName',
             message: 'Select target account / strategy process to monit    ',
-            source: async (answersSoFar: any, input = '') => {
+            source: async (answersSoFar: any, input: string) => {
+                input = input || '';
                 return accountStrategyList
-                    .filter((s: string) => s.indexOf(input) !== -1)
+                    .filter((s: string) => s.indexOf(input.trim()) !== -1)
             }
         }
     ]);
