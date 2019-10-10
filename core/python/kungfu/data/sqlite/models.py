@@ -113,6 +113,7 @@ class AssetMixin:
     trading_day = Column(String)
     update_time = Column(Integer)
     ledger_category = Column(Integer)
+    future_position_valuation_method = Column(Integer)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)

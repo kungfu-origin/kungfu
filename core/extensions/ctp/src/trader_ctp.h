@@ -23,6 +23,8 @@ namespace kungfu
         {
             typedef std::shared_ptr<OrderMapper> OrderMapperPtr;
             typedef std::shared_ptr<TradeMapper> TradeMapperPtr;
+            typedef std::unordered_map<std::string, msg::data::Position> PositionMap;
+            typedef std::unordered_map<std::string, msg::data::Instrument> InstrumentMap;
 
             class TraderCTP : public CThostFtdcTraderSpi, public broker::Trader
             {
@@ -98,6 +100,11 @@ namespace kungfu
 
                 OrderMapperPtr order_mapper_;
                 TradeMapperPtr trade_mapper_;
+
+                PositionMap long_position_map_;
+                PositionMap short_position_map_;
+
+                InstrumentMap instrument_map_;
 
                 bool login();
 

@@ -85,11 +85,11 @@ public:
     void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_trade, event, trade) }
 
-    void on_stock_account(const Asset &asset_info, const std::vector<Position> &positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_stock_account, asset_info, positions) }
+    void on_account_with_positions(const Asset &asset_info, const std::vector<Position> &positions) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_account_with_positions, asset_info, positions) }
 
-    void on_future_account(const Asset &asset_info, const std::vector<PositionDetail> &position_details) override
-    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_future_account, asset_info, position_details) }
+    void on_account_with_position_details(const Asset &asset_info, const std::vector<PositionDetail> &position_details) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_account_with_position_details, asset_info, position_details) }
 
     void on_instruments(const std::vector<Instrument> &instruments) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_instruments, instruments) }
@@ -822,8 +822,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_quote", &Ledger::on_quote)
             .def("on_order", &Ledger::on_order)
             .def("on_trade", &Ledger::on_trade)
-            .def("on_stock_account", &Ledger::on_stock_account)
-            .def("on_future_account", &Ledger::on_future_account)
+            .def("on_account_with_positions", &Ledger::on_account_with_positions)
+            .def("on_account_with_position_details", &Ledger::on_account_with_position_details)
             .def("on_instruments", &Ledger::on_instruments)
             .def("set_begin_time", &Ledger::set_begin_time)
             .def("set_end_time", &Ledger::set_end_time)

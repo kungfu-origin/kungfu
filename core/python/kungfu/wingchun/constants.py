@@ -1,5 +1,6 @@
 
 import pywingchun
+from enum import IntEnum
 
 class Source:
     CTP = "ctp"
@@ -18,6 +19,12 @@ class Exchange:
 class Region:
     CN = 'CN'
     HK = 'HK'
+
+
+class ValuationMethod(IntEnum):
+    FIFO = 0
+    LIFO = 1
+    AverageCost = 2
 
 LedgerCategory = pywingchun.constants.LedgerCategory
 InstrumentType = pywingchun.constants.InstrumentType
@@ -72,6 +79,4 @@ MSG_TYPES = {
     "position_detail": MsgType.PositionDetail,
     "instrument": MsgType.Instrument
 }
-
-
 

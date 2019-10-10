@@ -305,56 +305,48 @@ namespace kungfu
                         }).subscribe(
                                 [&, td_location_uid](std::pair<Asset, std::vector<Position>> res)
                                 {
+                                    if(!is_live()) { return;}
                                     try
                                     {
-                                        on_stock_account(res.first, res.second);
+                                        on_account_with_positions(res.first, res.second);
                                         request_subscribe(td_location_uid, convert_to_instruments(res.second));
                                     }
                                     catch (const std::exception &e)
                                     {
                                         SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                    };
-                                },
+                                    };},
                                 [&](std::exception_ptr e)
                                 {
                                     try { std::rethrow_exception(e); }
-                                    catch (const rx::empty_error &ex) {
-                                        SPDLOG_WARN("{}", ex.what());
-                                    }
-                                    catch (const std::exception &ex) {
-                                        SPDLOG_WARN("Unexpected exception {}", ex.what());
-                                    }
+                                    catch (const rx::empty_error &ex) { SPDLOG_WARN("{}", ex.what());}
+                                    catch (const std::exception &ex) {SPDLOG_WARN("Unexpected exception {}", ex.what());}
                                 });
 
                 asset.merge(position_details).reduce(std::make_pair(Asset(), std::vector<PositionDetail>({})),
-                                              [](std::pair<Asset, std::vector<PositionDetail>> res, event_ptr event)
-                                              {
-                                                  if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
-                                                  else if(event->msg_type() == msg::type::PositionDetail) { res.second.push_back(event->data<PositionDetail>()); }
-                                                  return res;
-                                              }).subscribe(
-                        [&, td_location_uid](std::pair<Asset, std::vector<PositionDetail>> res)
+                        [](std::pair<Asset, std::vector<PositionDetail>> res, event_ptr event)
                         {
-                            try
-                            {
-                                on_future_account(res.first, res.second);
-                                request_subscribe(td_location_uid, convert_to_instruments(res.second));
-                            }
-                            catch (const std::exception &e)
-                            {
-                                SPDLOG_ERROR("Unexpected exception {}", e.what());
-                            }
-                        },
-                        [&](std::exception_ptr e)
-                        {
-                            try { std::rethrow_exception(e); }
-                            catch (const rx::empty_error &ex) {
-                                SPDLOG_WARN("{}", ex.what());
-                            }
-                            catch (const std::exception &ex) {
-                                SPDLOG_WARN("Unexpected exception {}", ex.what());
-                            }
-                        });
+                            if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
+                            else if(event->msg_type() == msg::type::PositionDetail) { res.second.push_back(event->data<PositionDetail>()); }
+                            return res;
+                        }).subscribe(
+                                [&, td_location_uid](std::pair<Asset, std::vector<PositionDetail>> res)
+                                {
+                                    if(!is_live()) { return;}
+                                    try
+                                    {
+                                        on_account_with_position_details(res.first, res.second);
+                                        request_subscribe(td_location_uid, convert_to_instruments(res.second));
+                                    }
+                                    catch (const std::exception &e)
+                                    {
+                                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                                    }},
+                                 [&](std::exception_ptr e)
+                                 {
+                                     try { std::rethrow_exception(e); }
+                                     catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
+                                     catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}
+                                 });
             }
 
             void Ledger::monitor_market_data(int64_t trigger_time, uint32_t md_location_uid)

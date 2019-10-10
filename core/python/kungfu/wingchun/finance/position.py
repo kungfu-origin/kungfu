@@ -32,7 +32,9 @@ class Position:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         for inst_type in cls._INSTRUMENT_TYPES:
-            cls.registry[inst_type] = cls
+            if inst_type not in cls.registry:
+                cls.registry[inst_type] = {}
+            cls.registry[inst_type][cls._VALUATION_METHOD] = cls
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.message["data"])
@@ -40,7 +42,8 @@ class Position:
     @classmethod
     def factory(cls, ctx, book, **kwargs):
         instrument_type = get_instrument_type(kwargs["instrument_id"], kwargs["exchange_id"])
-        return cls.registry[instrument_type](ctx, book, **kwargs)
+        valuation_method = book.future_position_valuation_method if instrument_type == InstrumentType.Future else ValuationMethod.AverageCost
+        return cls.registry[instrument_type][valuation_method](ctx, book, **kwargs)
 
     @property
     def trading_day(self):
@@ -113,6 +116,7 @@ class Position:
 
 class StockPosition(Position):
     _INSTRUMENT_TYPES = InstrumentTypeInStockAccount
+    _VALUATION_METHOD = ValuationMethod.AverageCost
     def __init__(self, ctx, book, **kwargs):
         super(StockPosition, self).__init__(ctx, book, **kwargs)
         self._last_price = kwargs.pop("last_price", 0.0)
@@ -449,6 +453,7 @@ class FuturePositionDetail:
 
 class FuturePosition(Position):
     _INSTRUMENT_TYPES = [InstrumentType.Future]
+    _VALUATION_METHOD = ValuationMethod.FIFO
     def __init__(self, ctx, book, **kwargs):
         super(FuturePosition, self).__init__(ctx, book, **kwargs)
         details = kwargs.pop("details", [])
@@ -629,4 +634,163 @@ class FuturePosition(Position):
         self._last_price = last_price
         for detail in self.details:
             detail.update_last_price(last_price)
+        self.book.dispatch([self.book.message, self.message])
+
+class FuturePositionWithAverageCostMethod(Position):
+    _INSTRUMENT_TYPES = [InstrumentType.Future]
+    _VALUATION_METHOD = ValuationMethod.AverageCost
+    def __init__(self, ctx, book, **kwargs):
+        super(FuturePositionWithAverageCostMethod, self).__init__(ctx, book, **kwargs)
+        self._contract_multiplier = kwargs.pop("contract_multiplier", None)
+        self._margin_ratio = kwargs.pop("margin_ratio", None)
+        if not self._contract_multiplier or not self._margin_ratio:
+            inst_info = self._ctx.get_inst_info(self.instrument_id)
+            self._contract_multiplier = inst_info["contract_multiplier"]
+            self._margin_ratio = inst_info["long_margin_ratio"] if self._direction == Direction.Long else inst_info["short_margin_ratio"]
+        self._pre_settlement_price = kwargs.pop("pre_settlement_price", 0.0)
+        self._settlement_price = kwargs.pop("settlement_price", 0.0)
+        self._last_price = kwargs.pop("last_price", 0.0)
+        self._avg_open_price = kwargs.pop("avg_open_price", 0.0)
+        self._position_cost_price = kwargs.pop("position_cost_price", 0.0)
+        self._volume = kwargs.pop("volume")
+        self._yesterday_volume = kwargs.pop("yesterday_volume")
+        self._margin = kwargs.pop("margin", 0.0)
+        self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+        self.apply_trading_day(ctx.trading_day)
+
+    @property
+    def message(self):
+        return {
+            "msg_type": int(MsgType.Position),
+            "data": {
+                "trading_day": self._trading_day.strftime(DATE_FORMAT),
+                "update_time": self._ctx.now(),
+                "instrument_id": self._instrument_id,
+                "exchange_id": self._exchange_id,
+                "instrument_type": int(InstrumentType.Future),
+                "direction": int(self.direction),
+                "volume": self.volume,
+                "yesterday_volume": self.yesterday_volume,
+                "last_price": self.last_price,
+                "avg_open_price": self.avg_open_price,
+                "position_cost_price": self.position_cost_price,
+                "settlement_price": self._settlement_price,
+                "pre_settlement_price": self._pre_settlement_price,
+                "unrealized_pnl": self.unrealized_pnl,
+                "position_pnl": self.position_pnl,
+                "realized_pnl": self.realized_pnl,
+                "margin": self.margin,
+                "margin_ratio": self._margin_ratio,
+                "contract_multiplier": self._contract_multiplier
+            }
+        }
+
+    @property
+    def last_price(self):
+        return self._last_price
+
+    @property
+    def avg_open_price(self):
+        return self._avg_open_price
+
+    @property
+    def position_cost_price(self):
+        return self._position_cost_price
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @property
+    def yesterday_volume(self):
+        return self._yesterday_volume
+
+    @property
+    def unrealized_pnl(self):
+        if is_valid_price(self.last_price):
+            return (self.last_price - self._avg_open_price) * self._volume * \
+                   self._contract_multiplier * (1 if self._direction == Direction.Long else -1)
+        else:
+            return 0.0
+
+    @property
+    def realized_pnl(self):
+        return self._realized_pnl
+
+    @realized_pnl.setter
+    def realized_pnl(self, value):
+        self._realized_pnl = value
+
+    @property
+    def margin(self):
+        return self._margin
+
+    @property
+    def position_pnl(self):
+        #TODO
+        return 0.0
+
+    def merge(self, position):
+        self._ctx.logger.info("merge {} with {}".format(self, position))
+        self._avg_open_price = position.avg_open_price
+        self._margin = position.margin
+        self._yesterday_volume = position.yesterday_volume
+        self._volume = position.volume
+        self._ctx.logger.info("merged {}".format(self))
+        return self
+
+    def apply_trade(self, trade):
+        if trade.offset == Offset.Open:
+            self._apply_open(trade)
+        elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday or trade.offset == Offset.CloseYesterday:
+            self._apply_close(trade)
+        self.book.dispatch([self.book.message, self.message])
+
+    def apply_quote(self, quote):
+        if is_valid_price(quote.settlement_price):
+            self._apply_settlement(quote.settlement_price)
+        elif is_valid_price(quote.last_price):
+            self._update_last_price(quote.last_price)
+
+    def apply_trading_day(self, trading_day):
+        if not self.trading_day == trading_day:
+            self._ctx.logger.info("{} apply trading day, switch from {} to {}".format(self.uname, self.trading_day, trading_day))
+            if not is_valid_price(self._settlement_price):
+                self._apply_settlement(self._last_price)
+            self._pre_settlement_price = self._settlement_price
+            self._settlement_price = 0.0
+        self.trading_day = trading_day
+
+    def _apply_close(self, trade):
+        self._ctx.logger.debug("{} close {}, volume {} price {}".format(self.instrument_id, "long" if trade.side == Side.Sell else "short", trade.volume, trade.price))
+        margin_release = self._contract_multiplier * trade.price * trade.volume * self._margin_ratio
+        self._margin -= margin_release
+        self.book.avail += margin_release
+        self._volume -= trade.volume
+        if self._yesterday_volume > 0 and trade.offset != Offset.CloseYesterday:
+            self._yesterday_volume = 0 if self._yesterday_volume <= trade.volume else \
+                self._yesterday_volume - trade.volume
+        self._realized_pnl += (trade.price - self.avg_open_price) * trade.volume * \
+                              self._contract_multiplier * (1 if self.direction == Direction.Long else -1)
+
+    def _apply_open(self, trade):
+        self._ctx.logger.debug("{} open volume: {} price: {}".format(self._uname, trade.volume, trade.price))
+        margin = self._contract_multiplier * trade.price * trade.volume * self._margin_ratio
+        self._margin += margin
+        self.book.avail -= margin
+        self._avg_open_price = (self._avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
+        self._volume += trade.volume
+
+    def _apply_settlement(self, settlement_price):
+        self._ctx.logger.debug("{} apply settlement with price {}".format(self._uname, settlement_price))
+        self._settlement_price = settlement_price
+        if is_valid_price(self._settlement_price):
+            pre_margin = self._margin
+            self._margin = self._contract_multiplier * self._settlement_price * self._volume * self._margin_ratio
+            self.book.avail -= (self._margin - pre_margin)
+        self.book.dispatch([self.book.message, self.message])
+
+    def _update_last_price(self, last_price):
+        self._ctx.logger.debug("update {} last price from {} to {}".format(self.instrument_id, self.last_price, last_price))
+        self._last_price = last_price
         self.book.dispatch([self.book.message, self.message])
