@@ -40,13 +40,13 @@ namespace kungfu
                       quotes_[id].last_price = quote.last_price;
                   });
 
-                events_ | is(msg::type::Order) |
+                events_ | is(msg::type::Order) | to(app_.get_home_uid()) |
                 $([&](event_ptr event)
                   {
                       auto order = event->data<Order>();
                   });
 
-                events_ | is(msg::type::Trade) |
+                events_ | is(msg::type::Trade) | to(app_.get_home_uid()) |
                 $([&](event_ptr event)
                   {
                       auto trade = event->data<Trade>();
@@ -173,7 +173,7 @@ namespace kungfu
                                                  double limit_price, int64_t volume, PriceType type, Side side, Offset offset)
             {
                 auto inst_type = get_instrument_type(symbol, exchange);
-                if (inst_type != InstrumentType::Stock && inst_type != InstrumentType::Future)
+                if (inst_type == InstrumentType::Unknown || inst_type == InstrumentType::Repo)
                 {
                     SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(inst_type), symbol, exchange);
                     return 0;

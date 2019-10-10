@@ -48,9 +48,9 @@ class AccountsDB(SessionFactoryHolder):
                 filter(Account.receive_md).first()
             return json.dumps(object_as_dict(account)['config'])
 
-    def reset_receive_md(self):
+    def reset_receive_md(self, source_name):
         with session_scope(self.session_factory) as session:
-            for obj in session.query(Account):
+            for obj in session.query(Account).filter(Account.source_name == source_name):
                 obj.receive_md = False
                 session.merge(obj)
 

@@ -23,8 +23,6 @@ namespace kungfu
             {
                 enum MsgType
                 {
-                    Error = 0,
-
                     Quote = 101,
                     Entrust = 102,
                     Transaction = 103,
@@ -100,20 +98,38 @@ namespace kungfu
                     const std::string get_instrument_id() const
                     { return std::string(instrument_id); }
 
+                    void set_instrument_id(const std::string& instrument_id)
+                    {strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN); }
+
                     const std::string get_exchange_id() const
                     { return std::string(exchange_id); }
+
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN); }
 
                     const std::string get_product_id() const
                     { return std::string(product_id); }
 
+                    void set_product_id(const std::string& product_id)
+                    {strncpy(this->product_id, product_id.c_str(), PRODUCT_ID_LEN);}
+
                     const std::string get_open_date() const
                     { return std::string(open_date); }
+
+                    void set_open_date(const std::string& open_date)
+                    {strncpy(this->open_date, open_date.c_str(), DATE_LEN);}
 
                     const std::string get_create_date() const
                     { return std::string(create_date); }
 
+                    void set_create_date(const std::string& create_date)
+                    {strncpy(this->create_date, create_date.c_str(), DATE_LEN);}
+
                     const std::string get_expire_date() const
                     { return std::string(expire_date); }
+
+                    void set_expire_date(const std::string& expire_date)
+                    {strncpy(this->expire_date, expire_date.c_str(), DATE_LEN);}
 
                     bool operator ==(const Instrument & obj) const
                     {
@@ -463,6 +479,24 @@ namespace kungfu
                     int64_t start_volume;                  //初始总交易量
 
                     int32_t tick_count;                    //区间有效tick数
+
+                    const std::string get_trading_day() const
+                    { return std::string(trading_day); }
+
+                    void set_trading_day(const std::string& trading_day)
+                    { strncpy(this->trading_day, trading_day.c_str(), DATE_LEN); }
+
+                    const std::string get_instrument_id() const
+                    { return std::string(instrument_id); }
+
+                    void set_instrument_id(const std::string& instrument_id)
+                    { strncpy(this->instrument_id, instrument_id.c_str(), INSTRUMENT_ID_LEN);}
+
+                    const std::string get_exchange_id() const
+                    { return std::string(exchange_id); }
+
+                    void set_exchange_id(const std::string& exchange_id)
+                    {strncpy(this->exchange_id, exchange_id.c_str(), EXCHANGE_ID_LEN);}
 #ifndef _WIN32
                 } __attribute__((packed));
 #else
@@ -647,7 +681,6 @@ namespace kungfu
                 {
                     uint64_t parent_id;                      //母订单ID
                     uint64_t order_id;                       //订单ID
-                    uint64_t external_id;
 
                     int64_t insert_time;                     //订单写入时间
                     int64_t update_time;                     //订单更新时间

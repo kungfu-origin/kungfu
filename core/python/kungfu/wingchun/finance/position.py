@@ -59,6 +59,10 @@ class Position:
         return self._exchange_id
 
     @property
+    def instrument_type(self):
+        return get_instrument_type(self.instrument_id, self.exchange_id)
+
+    @property
     def direction(self):
         return self._direction
 
@@ -108,7 +112,7 @@ class Position:
         raise NotImplementationError
 
 class StockPosition(Position):
-    _INSTRUMENT_TYPES = InstrumentTypeInStock
+    _INSTRUMENT_TYPES = InstrumentTypeInStockAccount
     def __init__(self, ctx, book, **kwargs):
         super(StockPosition, self).__init__(ctx, book, **kwargs)
         self._last_price = kwargs.pop("last_price", 0.0)
@@ -133,9 +137,10 @@ class StockPosition(Position):
             "data":  {          
                 "instrument_id": self.instrument_id,
                 "exchange_id":self.exchange_id,
-                "instrument_type": int(InstrumentType.Stock),
+                "instrument_type": int(self.instrument_type),
                 "direction": int(self.direction),
                 "trading_day": self.trading_day.strftime(DATE_FORMAT),
+                "update_time": self._ctx.now(),
                 "volume":self.volume,
                 "yesterday_volume": self.yesterday_volume,
                 "last_price": self.last_price,
@@ -289,6 +294,7 @@ class FuturePositionDetail:
             "msg_type": int(MsgType.PositionDetail),
             "data": {
                 "trading_day": self._trading_day.strftime(DATE_FORMAT),
+                "update_time": self._ctx.now(),
                 "instrument_id": self._instrument_id,
                 "exchange_id": self._exchange_id,              
                 "direction": int(self.direction),
@@ -476,6 +482,7 @@ class FuturePosition(Position):
             "msg_type": int(MsgType.Position),
             "data": {
                 "trading_day": self._trading_day.strftime(DATE_FORMAT),
+                "update_time": self._ctx.now(),
                 "instrument_id": self._instrument_id,
                 "exchange_id": self._exchange_id,
                 "instrument_type": int(InstrumentType.Future),

@@ -72,7 +72,15 @@ class TraderSim(pywingchun.Trader):
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - order.volume_traded
+            trade = pywingchun.Trade()
+            trade.order_id = order.order_id
+            trade.volume = order.volume_traded
+            trade.price = order.limit_price
+            trade.instrument_id = order.instrument_id
+            trade.exchange_id = order.exchange_id
+            trade.trade_id = self.get_writer(event.source).current_frame_uid()
             self.get_writer(event.source).write_data(0, order)
+            self.get_writer(event.source).write_data(0, trade)
             if order.active:
                 self.ctx.orders[order.order_id] = OrderRecord(source= event.source, dest = event.dest, order = order)
             return True

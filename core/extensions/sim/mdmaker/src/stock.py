@@ -399,19 +399,19 @@ class OrderBook(object):
 
     def bid_price(self, at_level):
         """Get price at sepcific level"""
-        return OrderBookUtils.price(self.bid, at_level)
+        return OrderBookUtils.price(self.bid, -(at_level+1))
 
     def bid_qty(self, at_level):
         """Get qty at sepcific level"""
-        return OrderBookUtils.qty(self.bid, at_level)
+        return OrderBookUtils.qty(self.bid, -(at_level+1))
 
     def offer_price(self, at_level):
         """Get price at sepcific level"""
-        return OrderBookUtils.price(self.offer, -at_level)
+        return OrderBookUtils.price(self.offer, at_level)
 
     def offer_qty(self, at_level):
         """Get qty at sepcific level"""
-        return OrderBookUtils.qty(self.offer, -at_level)
+        return OrderBookUtils.qty(self.offer, at_level)
 
     def aggregate_bid_qty(self, trade_price):
         """Sum of qty that would match a price"""
@@ -431,7 +431,7 @@ class OrderBook(object):
                 # print("Running qty = {}".format(qty))
         return qty
 
-    def print(self):
+    def display(self):
         """
             Prints the order book
         """

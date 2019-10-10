@@ -2,12 +2,19 @@
 import pywingchun
 from kungfu.wingchun.constants import *
 
+get_instrument_type = pywingchun.utils.get_instrument_type
+is_valid_price = pywingchun.utils.is_valid_price
+get_symbol_id = pywingchun.utils.get_symbol_id
+
 def object_as_dict(obj):
     d = {}
     for attr in dir(obj):
         if not attr.startswith('__'):
-            value = getattr(obj, attr)
-            if type(value) in WINGCHUN_ENUM_TYPES:
+            try:
+                value = getattr(obj, attr)
+            except UnicodeDecodeError:
+                continue
+            if type(value) in ENUM_TYPES:
                 d[attr] = int(value)
             else:
                 d[attr] = value
@@ -17,7 +24,7 @@ def is_final_status(order_status):
     return int(order_status) in AllFinalOrderStatus
 
 def get_position_effect(instrument_type, side, offset):
-    if instrument_type == InstrumentType.Stock:
+    if instrument_type in InstrumentTypeInStockAccount:
         return Direction.Long
     elif side == Side.Buy and offset == Offset.Open:
         return Direction.Long
@@ -32,42 +39,33 @@ def get_position_effect(instrument_type, side, offset):
 
 def min_order_volume(instrument_id, exchange_id):
     instrument_type = get_instrument_type(instrument_id, exchange_id)
-    if instrument_type in InstrumentTypeInStock:
-        return 100
-    else:
-        return 1
-
-get_instrument_type = pywingchun.utils.get_instrument_type
-is_valid_price = pywingchun.utils.is_valid_price
-get_symbol_id = pywingchun.utils.get_symbol_id
+    return 100 if instrument_type in InstrumentTypeInStockAccount else 1
 
 def get_class_from_msg_type(msg_type):
     if msg_type == pywingchun.constants.MsgType.Quote:
         return pywingchun.Quote
-    elif msg_type == pywingchun.constants.MsgType.Order:
-        return pywingchun.Order
-    elif msg_type == pywingchun.constants.MsgType.Trade:
-        return pywingchun.Trade
     elif msg_type == pywingchun.constants.MsgType.Transaction:
         return pywingchun.Transaction
     elif msg_type == pywingchun.constants.MsgType.Entrust:
         return pywingchun.Entrust
+    elif msg_type == pywingchun.constants.MsgType.OrderInput:
+        return pywingchun.OrderInput
+    elif msg_type == pywingchun.constants.MsgType.OrderAction:
+        return pywingchun.OrderAction
+    elif msg_type == pywingchun.constants.MsgType.Order:
+        return pywingchun.Order
+    elif msg_type == pywingchun.constants.MsgType.Trade:
+        return pywingchun.Trade
+    elif msg_type == pywingchun.constants.MsgType.Position:
+        return pywingchun.Position
+    elif msg_type == pywingchun.constants.MsgType.Asset:
+        return pywingchun.Asset
+    elif msg_type == pywingchun.constants.MsgType.PositionDetail:
+        return pywingchun.PositionDetail
+    elif msg_type == pywingchun.constants.MsgType.Instrument:
+        return pywingchun.Instrument
     else:
         raise ValueError("invalid msg_type {}".format(msg_type))
-
-def get_msg_type(name):
-    if name.lower() == "quote":
-        return pywingchun.constants.MsgType.Quote
-    elif name.lower() == "order":
-        return pywingchun.constants.MsgType.Order
-    elif name.lower() == "trade":
-        return pywingchun.constants.MsgType.Trade
-    elif name.lower() == "entrust":
-        return pywingchun.constants.MsgType.Entrust
-    elif name.lower() == "transaction":
-        return pywingchun.constants.MsgType.Transaction
-    else:
-        raise ValueError("invalid msg name {}".format(name))
 
 def get_data(event):
     if event.msg_type == pywingchun.constants.MsgType.Quote:
@@ -76,12 +74,22 @@ def get_data(event):
         return pywingchun.utils.get_entrust(event)
     elif event.msg_type == pywingchun.constants.MsgType.Transaction:
         return pywingchun.utils.get_transaction(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Bar:
+        return pywingchun.utils.get_bar(event)
     elif event.msg_type == pywingchun.constants.MsgType.OrderInput:
         return pywingchun.utils.get_order_input(event)
+    elif event.msg_type == pywingchun.constants.MsgType.OrderAction:
+        return pywingchun.utils.get_order_action(event)
     elif event.msg_type == pywingchun.constants.MsgType.Order:
         return pywingchun.utils.get_order(event)
     elif event.msg_type == pywingchun.constants.MsgType.Trade:
         return pywingchun.utils.get_trade(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Position:
+        return pywingchun.utils.get_position(event)
+    elif event.msg_type == pywingchun.constants.MsgType.PositionDetail:
+        return pywingchun.utils.get_position_detail(event)
+    elif event.msg_type == pywingchun.constants.MsgType.Asset:
+        return pywingchun.utils.get_asset(event)
     else:
         return None
 
@@ -92,22 +100,52 @@ def write_data(writer, trigger_time, data):
         return pywingchun.utils.write_entrust(writer, trigger_time, data)
     elif type(data) is pywingchun.Transaction:
         return pywingchun.utils.write_transaction(writer, trigger_time, data)
-    elif type(data) is pywingchun.Order:
-        return pywingchun.utils.write_order(writer, trigger_time, data)
+    elif type(data) is pywingchun.Bar:
+        return pywingchun.utils.write_bar(writer, trigger_time, data)
     elif type(data) is pywingchun.OrderInput:
         return pywingchun.utils.write_order_input(writer, trigger_time, data)
+    elif type(data) is pywingchun.OrderAction:
+        return pywingchun.utils.write_order_action(writer, trigger_time, data)
+    elif type(data) is pywingchun.Order:
+        return pywingchun.utils.write_order(writer, trigger_time, data)
     elif type(data) is pywingchun.Trade:
         return pywingchun.utils.write_trade(writer, trigger_time, data)
+    elif type(data) is pywingchun.Position:
+        return pywingchun.utils.write_position(writer, trigger_time, data)
+    elif type(data) is pywingchun.Asset:
+        return pywingchun.utils.write_asset(writer, trigger_time, data)
+    elif type(data) is pywingchun.PositionDetail:
+        return pywingchun.utils.write_position_detail(writer, trigger_time, data)
+    elif type(data) is pywingchun.Instrument:
+        return pywingchun.utils.write_instrument(writer, trigger_time, data)
     else:
         raise ValueError("invalid data type {}".format(type(data)))
 
 def write_data_with_time(writer, gen_time, data):
     if type(data) is pywingchun.Quote:
-        return pywingchun.write_quote_with_time(writer, gen_time, data)
+        return pywingchun.utils.write_quote_with_time(writer, gen_time, data)
     elif type(data) is pywingchun.Entrust:
-        return pywingchun.write_entrust_with_time(writer, gen_time, data)
+        return pywingchun.utils.write_entrust_with_time(writer, gen_time, data)
     elif type(data) is pywingchun.Transaction:
-        return pywingchun.write_transaction_with_time(writer, gen_time, data)
+        return pywingchun.utils.write_transaction_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Bar:
+        return pywingchun.utils.write_bar_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.OrderInput:
+        return pywingchun.utils.write_order_input_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.OrderAction:
+        return pywingchun.utils.write_order_action_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Order:
+        return pywingchun.utils.write_order_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Trade:
+        return pywingchun.utils.write_trade_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Position:
+        return pywingchun.utils.write_position_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Asset:
+        return pywingchun.utils.write_asset_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.PositionDetail:
+        return pywingchun.utils.write_position_detail_with_time(writer, gen_time, data)
+    elif type(data) is pywingchun.Instrument:
+        return pywingchun.utils.write_instrument_with_time(writer, gen_time, data)
     else:
         raise ValueError("invalid data type {}".format(type(data)))
 

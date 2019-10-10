@@ -32,11 +32,46 @@ VolumeCondition = pywingchun.constants.VolumeCondition
 TimeCondition = pywingchun.constants.TimeCondition
 MsgType = pywingchun.constants.MsgType
 
-WINGCHUN_ENUM_TYPES = [LedgerCategory, InstrumentType, ExecType, Side, Offset, BsFlag, OrderStatus,
-                       Direction, PriceType, VolumeCondition, TimeCondition, MsgType]
-InstrumentTypeInStock = [InstrumentType.Stock, InstrumentType.Fund, InstrumentType.TechStock]
-AllFinalOrderStatus = [int(OrderStatus.Filled), int(OrderStatus.Error), int(OrderStatus.PartialFilledNotActive), int(OrderStatus.Cancelled)]
+AllFinalOrderStatus = [int(OrderStatus.Filled),
+                       int(OrderStatus.Error),
+                       int(OrderStatus.PartialFilledNotActive),
+                       int(OrderStatus.Cancelled)]
 
+InstrumentTypeInStockAccount = [InstrumentType.Stock,
+                                InstrumentType.Bond,
+                                InstrumentType.Fund,
+                                InstrumentType.StockOption,
+                                InstrumentType.TechStock,
+                                InstrumentType.Index,
+                                InstrumentType.Repo]
+
+ENUM_TYPES = [LedgerCategory,
+              InstrumentType,
+              ExecType,
+              Side,
+              Offset,
+              BsFlag,
+              OrderStatus,
+              Direction,
+              PriceType,
+              VolumeCondition,
+              TimeCondition,
+              MsgType]
+
+MSG_TYPES = {
+    "quote": MsgType.Quote,
+    "entrust": MsgType.Entrust,
+    "transaction": MsgType.Transaction,
+    "bar": MsgType.Bar,
+    "order_input": MsgType.OrderInput,
+    "order_action": MsgType.OrderAction,
+    "order": MsgType.Order,
+    "trade": MsgType.Trade,
+    "position": MsgType.Position,
+    "asset": MsgType.Asset,
+    "position_detail": MsgType.PositionDetail,
+    "instrument": MsgType.Instrument
+}
 
 
 

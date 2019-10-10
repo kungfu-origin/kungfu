@@ -7,7 +7,7 @@
   "main": "node/index.js",
   "config": {
     "buildtype": "Release",
-    "loglevel": "info",
+    "loglevel": "trace",
     "arch": "x64",
     "runtime": "node",
     "node": "10.16.0"

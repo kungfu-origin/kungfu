@@ -2,15 +2,7 @@
 // Created by qlu on 2019/1/10.
 //
 
-#include "assert.h"
-#include <iostream>
-#include <stdio.h>
-#include <cstring>
-#include <fmt/format.h>
-
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/wingchun/macro.h>
-
 #include "marketdata_ctp.h"
 #include "type_convert_ctp.h"
 #include "serialize_ctp.h"
@@ -82,7 +74,7 @@ namespace kungfu
             {
                 if (api_ == nullptr)
                 {
-                    SUBSCRIBE_ERROR("api is not initialized");
+                    SPDLOG_ERROR("api is not initialized");
                     return false;
                 }
 
@@ -108,14 +100,14 @@ namespace kungfu
 
             void MarketDataCTP::OnFrontConnected()
             {
-                CONNECT_INFO();
+                SPDLOG_INFO("connected");
                 login();
             }
 
             void MarketDataCTP::OnFrontDisconnected(int nReason)
             {
                 publish_state(BrokerState::DisConnected);
-                DISCONNECTED_ERROR(fmt::format("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason)));
+                SPDLOG_ERROR("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason));
             }
 
             void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
@@ -124,12 +116,12 @@ namespace kungfu
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
                     publish_state(BrokerState::LoggedInFailed);
-                    LOGIN_ERROR(fmt::format("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
                 }
                 else
                 {
                     publish_state(BrokerState::LoggedIn);
-                    LOGIN_INFO(fmt::format("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->TradingDay));
+                    SPDLOG_INFO("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->TradingDay);
                 }
             }
 
@@ -142,11 +134,10 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    SUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
                 } else
                 {
-                    SUBSCRIBE_INFO(fmt::format("(Inst) {} (bIsLast) {}",
-                                               pSpecificInstrument->InstrumentID == nullptr ? "" : pSpecificInstrument->InstrumentID, bIsLast));
+                    SPDLOG_INFO("(Inst) {} (bIsLast) {}", pSpecificInstrument->InstrumentID == nullptr ? "" : pSpecificInstrument->InstrumentID, bIsLast);
                 }
             }
 
@@ -155,10 +146,10 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    UNSUBSCRIBE_ERROR(fmt::format("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+                    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
                 } else
                 {
-                    UNSUBSCRIBE_INFO(fmt::format("(Inst) {} (bIsLast) {}", pSpecificInstrument->InstrumentID, bIsLast));
+                    SPDLOG_INFO("(Inst) {} (bIsLast) {}", pSpecificInstrument->InstrumentID, bIsLast);
                 }
             }
 
@@ -166,7 +157,7 @@ namespace kungfu
             {
                 if (pDepthMarketData != nullptr)
                 {
-                    QUOTE_TRACE(to_string(*pDepthMarketData));
+                    SPDLOG_TRACE(to_string(*pDepthMarketData));
                     msg::data::Quote &quote = get_writer(0)->open_data<msg::data::Quote>(0, msg::type::Quote);
                     from_ctp(*pDepthMarketData, quote);
                     get_writer(0)->close_data();

@@ -16,12 +16,14 @@ class MarketDataSim(pywingchun.MarketData):
         pywingchun.MarketData.__init__(self, low_latency, locator, "sim")
         self.config = MakerConfig(base=200.0, bound=1000, samples=1000,variation=4, randseed=6)
         self.orderbooks = {}
+        self.logger = create_logger("sim_md", "info", pyyjj.location( pyyjj.mode.LIVE, pyyjj.category.MD, "sim", "sim", locator))
 
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())
         pywingchun.MarketData.on_start(self)
 
     def quote_from_orderbook(self, ob):
+        # ob.display()
         quote = pywingchun.Quote()
         instrument_id, exchange_id = ob.security.split(".")
         quote.data_time = self.now()
@@ -31,7 +33,7 @@ class MarketDataSim(pywingchun.MarketData):
         quote.ask_volume = [ob.offer_qty(i) for i in range(0, min(10, ob.depth_offers()))]
         quote.bid_price = [ob.bid_price(i) for i in range(0, min(10, ob.depth_bids()))]
         quote.bid_volume = [ob.bid_qty(i) for i in range(0, min(10, ob.depth_bids()))]
-        quote.last_price = ob.last_price
+        # print(quote)
         return quote
 
     def init_order_book(self, instrument_id, exchange_id):
@@ -45,6 +47,7 @@ class MarketDataSim(pywingchun.MarketData):
         self.orderbooks[symbol_id] = book
 
     def update_orderbooks(self):
+        # self.logger.info("*************************update_orderbooks**********************")
         for book in self.orderbooks.values():
             order_generator = book.gen_orders(self.config)
             for orders, mid in order_generator:
