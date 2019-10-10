@@ -401,6 +401,7 @@ namespace kungfu
                         position.yesterday_volume = pInvestorPosition->Position - pInvestorPosition->TodayPosition;
                     }
                     position.volume += pInvestorPosition->Position;
+                    position.margin += pInvestorPosition->ExchangeMargin;
                     if (position.volume > 0)
                     {
                         double cost = position.avg_open_price * (position.volume - pInvestorPosition->Position)* inst_info.contract_multiplier + pInvestorPosition->OpenCost;

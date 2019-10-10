@@ -138,6 +138,9 @@ class Ledger(pywingchun.Ledger):
         self.ctx.db.dump(book)
 
     def on_account_with_position_details(self, asset, position_details):
+        self.ctx.logger.info("asset: {}".format(asset))
+        for detail in position_details:
+            self.ctx.logger.info("pos detail: {}".format(detail))
         positions = []
         key_func = lambda e: kwf.position.get_uid(e.instrument_id, e.exchange_id, e.direction)
         sorted_position_details = sorted(position_details, key=key_func)

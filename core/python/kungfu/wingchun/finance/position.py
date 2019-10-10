@@ -708,7 +708,8 @@ class FuturePositionWithAverageCostMethod(Position):
     @property
     def unrealized_pnl(self):
         if is_valid_price(self.last_price):
-            return (self.last_price - self._avg_open_price) * self._volume * self._contract_multiplier * (1 if self._direction == Direction.Long else -1)
+            return (self.last_price - self._avg_open_price) * self._volume * \
+                   self._contract_multiplier * (1 if self._direction == Direction.Long else -1)
         else:
             return 0.0
 
@@ -731,6 +732,11 @@ class FuturePositionWithAverageCostMethod(Position):
 
     def merge(self, position):
         self._ctx.logger.info("merge {} with {}".format(self, position))
+        self._avg_open_price = position.avg_open_price
+        self._margin = position.margin
+        self._yesterday_volume = position.yesterday_volume
+        self._volume = position.volume
+        self._ctx.logger.info("merged {}".format(self))
         return self
 
     def apply_trade(self, trade):
@@ -738,6 +744,7 @@ class FuturePositionWithAverageCostMethod(Position):
             self._apply_open(trade)
         elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday or trade.offset == Offset.CloseYesterday:
             self._apply_close(trade)
+        self.book.dispatch([self.book.message, self.message])
 
     def apply_quote(self, quote):
         if is_valid_price(quote.settlement_price):
@@ -757,9 +764,14 @@ class FuturePositionWithAverageCostMethod(Position):
     def _apply_close(self, trade):
         self._ctx.logger.debug("{} close {}, volume {} price {}".format(self.instrument_id, "long" if trade.side == Side.Sell else "short", trade.volume, trade.price))
         margin_release = self._contract_multiplier * trade.price * trade.volume * self._margin_ratio
-        self.margin -= margin_release
+        self._margin -= margin_release
         self.book.avail += margin_release
-        self.book.dispatch([self.book.message, self.message])
+        self._volume -= trade.volume
+        if self._yesterday_volume > 0 and trade.offset != Offset.CloseYesterday:
+            self._yesterday_volume = 0 if self._yesterday_volume <= trade.volume else \
+                self._yesterday_volume - trade.volume
+        self._realized_pnl += (trade.price - self.avg_open_price) * trade.volume * \
+                              self._contract_multiplier * (1 if self.direction == Direction.Long else -1)
 
     def _apply_open(self, trade):
         self._ctx.logger.debug("{} open volume: {} price: {}".format(self._uname, trade.volume, trade.price))
@@ -767,7 +779,7 @@ class FuturePositionWithAverageCostMethod(Position):
         self._margin += margin
         self.book.avail -= margin
         self._avg_open_price = (self._avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
-        self.book.dispatch([self.book.message, self.message])
+        self._volume += trade.volume
 
     def _apply_settlement(self, settlement_price):
         self._ctx.logger.debug("{} apply settlement with price {}".format(self._uname, settlement_price))
