@@ -3,7 +3,7 @@
 yarn clean
 cd ./core
 npm config set kungfu-core:runtime node
-yarn run build:cpp
+yarn run build
 cd ../cli
 yarn run build
 # cd ../core
