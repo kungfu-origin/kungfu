@@ -102,6 +102,8 @@ namespace kungfu
 
             bool TraderCTP::req_position()
             {
+                long_position_map_.clear();
+                short_position_map_.clear();
                 CThostFtdcQryInvestorPositionField req = {};
                 strcpy(req.BrokerID, config_.broker_id.c_str());
                 strcpy(req.InvestorID, config_.account_id.c_str());
@@ -363,12 +365,70 @@ namespace kungfu
                     writer->close_data();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                     req_position_detail();
+//                    req_position();
                 }
             }
 
             void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
                                                      CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
-            {}
+            {
+                if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
+                {
+                    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+                }
+                else
+                {
+                    SPDLOG_TRACE(to_string(*pInvestorPosition));
+                    auto& position_map = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? long_position_map_ : short_position_map_;
+                    if(position_map.find(pInvestorPosition->InstrumentID) == position_map.end())
+                    {
+                        msg::data::Position position = {};
+                        strncpy(position.trading_day, pInvestorPosition->TradingDay, DATE_LEN);
+                        strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
+                        strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
+                        strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
+                        position.direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
+                        position_map[pInvestorPosition->InstrumentID] = position;
+                    }
+                    auto& position = position_map[pInvestorPosition->InstrumentID];
+                    auto& inst_info = instrument_map_[pInvestorPosition->InstrumentID];
+                    if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0 && pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0)
+                    {
+                        position.yesterday_volume = pInvestorPosition->Position;
+                    }
+                    else
+                    {
+                        position.yesterday_volume = pInvestorPosition->Position - pInvestorPosition->TodayPosition;
+                    }
+                    position.volume += pInvestorPosition->Position;
+                    if (position.volume > 0)
+                    {
+                        double cost = position.avg_open_price * (position.volume - pInvestorPosition->Position)* inst_info.contract_multiplier + pInvestorPosition->OpenCost;
+                        position.avg_open_price = cost / (position.volume * inst_info.contract_multiplier);
+                    }
+                }
+                if (bIsLast)
+                {
+                    SPDLOG_TRACE("RequestID {}", nRequestID);
+                    auto writer = get_writer(0);
+                    for (const auto& kv: long_position_map_)
+                    {
+                        const auto& position = kv.second;
+                        SPDLOG_TRACE(kungfu::wingchun::msg::data::to_string(position));
+                        writer->write(0, msg::type::Position, position);
+                    }
+                    for(const auto& kv: short_position_map_)
+                    {
+                        const auto& position = kv.second;
+                        SPDLOG_TRACE(kungfu::wingchun::msg::data::to_string(position));
+                        writer->write(0, msg::type::Position, position);
+                    }
+                    writer->mark(0, msg::type::PositionEnd);
+                    short_position_map_.clear();
+                    long_position_map_.clear();
+                }
+
+            }
 
             void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail,
                                                            CThostFtdcRspInfoField *pRspInfo, int nRequestID,
@@ -420,6 +480,7 @@ namespace kungfu
                     {
                         msg::data::Instrument &instrument = writer->open_data<msg::data::Instrument>(0, msg::type::Instrument);
                         from_ctp(*pInstrument, instrument);
+                        instrument_map_[pInstrument->InstrumentID] = instrument;
                         writer->close_data();
                     }
                     if (bIsLast)

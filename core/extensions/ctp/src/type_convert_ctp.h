@@ -338,11 +338,6 @@ namespace kungfu
                 strcpy(des.trading_day, ori.TradeDate);
             }
 
-            inline void from_ctp(const CThostFtdcInvestorPositionField &ori, Position &des)
-            {
-               //TODO
-            }
-
             inline void from_ctp(const CThostFtdcInstrumentField &ori,Instrument &des)
             {
                 strcpy(des.instrument_id, ori.InstrumentID);

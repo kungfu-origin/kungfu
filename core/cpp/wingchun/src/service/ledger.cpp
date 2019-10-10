@@ -307,7 +307,7 @@ namespace kungfu
                                 {
                                     try
                                     {
-                                        on_stock_account(res.first, res.second);
+                                        on_account_with_positions(res.first, res.second);
                                         request_subscribe(td_location_uid, convert_to_instruments(res.second));
                                     }
                                     catch (const std::exception &e)
@@ -337,7 +337,7 @@ namespace kungfu
                         {
                             try
                             {
-                                on_future_account(res.first, res.second);
+                                on_account_with_position_details(res.first, res.second);
                                 request_subscribe(td_location_uid, convert_to_instruments(res.second));
                             }
                             catch (const std::exception &e)

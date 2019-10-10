@@ -13,7 +13,7 @@ from kungfu.data.sqlite.data_proxy import LedgerDB
 from kungfu.wingchun import msg
 import kungfu.wingchun.finance as kwf
 from kungfu.wingchun.calendar import Calendar
-from kungfu.wingchun.constants import OrderStatus, MsgType, LedgerCategory
+from kungfu.wingchun.constants import OrderStatus, MsgType, LedgerCategory, ValuationMethod
 import kungfu.wingchun.utils as wc_utils
 
 DEFAULT_INIT_CASH = 1e7
@@ -125,17 +125,19 @@ class Ledger(pywingchun.Ledger):
             self.ctx.db.set_instruments([wc_utils.object_as_dict(inst) for inst in inst_list])
             self.ctx.inst_infos = {inst.instrument_id: wc_utils.object_as_dict(inst) for inst in inst_list}
 
-    def on_stock_account(self, asset, positions):
+    def on_account_with_positions(self, asset, positions):
         self.ctx.logger.info("asset: {}".format(asset))
         for pos in positions:
             self.ctx.logger.info("pos: {}".format(pos))
         book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
-        account = kwf.book.AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,positions=[wc_utils.object_as_dict(pos) for pos in positions])
+        account = kwf.book.AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,
+                                       future_position_valuation_method = ValuationMethod.AverageCost,
+                                       positions=[wc_utils.object_as_dict(pos) for pos in positions])
         book = self._get_book(book_tags).merge(account)
         self.publish(json.dumps(book.message))
         self.ctx.db.dump(book)
 
-    def on_future_account(self, asset, position_details):
+    def on_account_with_position_details(self, asset, position_details):
         positions = []
         key_func = lambda e: kwf.position.get_uid(e.instrument_id, e.exchange_id, e.direction)
         sorted_position_details = sorted(position_details, key=key_func)

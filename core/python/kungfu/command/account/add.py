@@ -15,5 +15,5 @@ def add(ctx, receive_md):
     else:
         receive_md = receive_md or not ctx.db.list_source_accounts(ctx.source)
         if receive_md:
-            ctx.db.reset_receive_md()
+            ctx.db.reset_receive_md(ctx.source)
         ctx.db.add_account(account_id=account_id, source_name=ctx.source, receive_md=receive_md, config=answers)

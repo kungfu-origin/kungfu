@@ -40,9 +40,9 @@ namespace kungfu
 
                 virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
 
-                virtual void on_stock_account(const msg::data::Asset &asset, const std::vector<msg::data::Position> &positions) = 0;
+                virtual void on_account_with_positions(const msg::data::Asset &asset, const std::vector<msg::data::Position> &positions) = 0;
 
-                virtual void on_future_account(const msg::data::Asset &asset, const std::vector<msg::data::PositionDetail> &position_details) = 0;
+                virtual void on_account_with_position_details(const msg::data::Asset &asset, const std::vector<msg::data::PositionDetail> &position_details) = 0;
 
                 virtual void on_instruments(const std::vector<msg::data::Instrument> &instruments) = 0;
 

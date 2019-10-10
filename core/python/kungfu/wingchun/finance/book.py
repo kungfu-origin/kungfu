@@ -41,6 +41,7 @@ class AccountBook:
         self._static_equity = kwargs.pop("static_equity", 0.0)
         self._avail = kwargs.pop("avail", 0.0)
         self._realized_pnl = kwargs.pop("realized_pnl", 0.0)
+        self._future_position_valuation_method = kwargs.pop("future_position_valuation_method", ValuationMethod.FIFO)
         self._positions = {}
         positions = kwargs.pop("positions", [])
         for pos in positions:
@@ -71,6 +72,10 @@ class AccountBook:
         return self._trading_day
 
     @property
+    def future_position_valuation_method(self):
+        return self._future_position_valuation_method
+
+    @property
     def message(self):
         message = {
             "msg_type": int(MsgType.Asset),
@@ -84,7 +89,8 @@ class AccountBook:
                 "dynamic_equity": self.dynamic_equity,
                 "static_equity": self.static_equity,
                 "realized_pnl": self.realized_pnl,
-                "unrealized_pnl": self.unrealized_pnl
+                "unrealized_pnl": self.unrealized_pnl,
+                "future_position_valuation_method": int(self.future_position_valuation_method)
             }
         }
         self.fill_msg_tag(message)
@@ -180,6 +186,7 @@ class AccountBook:
             self._static_equity = book.static_equity
         if self._initial_equity == DEFAULT_CASH:
             self._initial_equity = book.initial_equity
+        self._future_position_valuation_method = book.future_position_valuation_method
         self.avail = book.avail
         for symbol in set(self._positions.keys()).union(set(book._positions.keys())):
             l_pos = self._positions.pop(symbol, None)
