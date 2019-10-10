@@ -99,8 +99,44 @@ const addAccountPrompt = (accountSource: Sources) => {
 
 // ======================= add strategy start ============================
 export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?: boolean): Promise<any> => {
-    const { strategy_id, strategy_path } = await inquirer.prompt([
-        !updateModule ? {
+    const { strategy_id, strategy_path } = await inquirer.prompt(buildStrategyQuestion(strategyData, updateModule).filter(q => !!q))
+
+    try {
+        if(updateModule) {
+            const strategyId = strategyData.strategy_id;
+            await updateStrategyPath(strategyId, strategy_path)
+            console.success(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path}`)
+        } else {
+            await addStrategy(strategy_id, strategy_path)
+            console.success(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path}`)
+        }
+    }catch(err) {
+        throw err;
+    }
+}
+
+// ======================= add strategy end ============================
+
+
+
+function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefined) {
+    if(updateModule) {
+        return [{
+            type: 'path',
+            name: 'strategy_path',
+            default: strategyData.strategy_path || os.homedir(),
+            message: `Update strategy_path (absolute path)`,
+            validate: (value: string) => {
+                let hasError = null;
+                !updateModule && requiredValidator(null, value, (err: Error) => hasError = err)
+                if(hasError) return hasError
+                else return true;
+            }
+        }]
+    }
+
+    return [
+        {
             type: 'input',
             name: 'strategy_id',
             message: 'Enter strategy_id',
@@ -124,11 +160,10 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
                 if(hasError) return hasError
                 else return true;
             }
-        } : null , {
+        }, {
             type: 'path',
             name: 'strategy_path',
-            default: os.homedir(),
-            message: `${updateModule ? 'Update' : 'Enter'} strategy_path (absolute path) ${ updateModule ? `(${strategyData.strategy_path})` : '' }`,
+            message: `Enter strategy_path (absolute path)`,
             validate: (value: string) => {
                 let hasError = null;
                 !updateModule && requiredValidator(null, value, (err: Error) => hasError = err)
@@ -136,24 +171,8 @@ export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?:
                 else return true;
             }
         }
-    ].filter(q => !!q))
-
-    try {
-        if(updateModule) {
-            const strategyId = strategyData.strategy_id;
-            await updateStrategyPath(strategyId, strategy_path)
-            console.success(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path}`)
-        } else {
-            await addStrategy(strategy_id, strategy_path)
-            console.success(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path}`)
-        }
-    }catch(err) {
-        throw err;
-    }
+    ]
 }
-
-// ======================= add strategy end ============================
-
 
 export const addAccountStrategy = async (type: string): Promise<any> => {
     if(type === 'account') {
@@ -192,44 +211,45 @@ function getType(originType: string) {
     }
 }
 
+function getDefaultValue(updateModule: boolean | undefined, existedValue: any, targetType: string, defaultValue?: any) {
+    if(updateModule) {
+        if((targetType === 'path') && !existedValue) {
+            return os.homedir();
+        }
+        return existedValue
+    } else {
+        if(defaultValue !== undefined) return defaultValue;
+        if(targetType === 'path') return os.homedir();
+        else if(targetType === 'number') return 0
+    }
+}
+
 function renderSelect(configItem: AccountSettingItem) {
     if(configItem.type === 'select') return `(${(configItem.data || []).map(item => item.value || "").join('|')})`
     else return ''
 }
 
-function paresAccountQuestion({
-    idKey, configItem, updateModule, accountData
-}: {
-    idKey: string,
-    configItem: AccountSettingItem,
-    updateModule?: boolean,
-    accountData?: any
-}) {
-    const { validator, required, key } = configItem 
-    const existedValue = (accountData || {})[key] || '';
+function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: { idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }) {
+    const { validator, required, key } = configItem;
     const targetType = getType(configItem.type);
-
-    return {
+    const existedValue = (accountData || {})[key] || '';
+    let questions = {
         type: targetType,
         name: key,
-        default: os.homedir(),
         choices: targetType === 'list' ? (configItem.data || []).map(item => item.value) : [],
-        message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)} ${updateModule ? '(' + (existedValue || 'null') + ')' : ''}`,
+        message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)}`,
         validate: async (value: string | number) => {
             let hasError: Error | null = null; 
-            const validatorList: Array<any>  = [
-                ...(validator || []),
-                (required && !updateModule) ? requiredValidator : null
-            ]
-
+            const validatorList: Array<any>  = [...(validator || []), (required && !updateModule) ? requiredValidator : null]
             validatorList
-            .filter((v: Function | null): boolean => !!v)
-            .forEach((v: Function) => {
-                v(null, value, (err: Error) => {
-                    if(err) hasError = err;
+                .filter((v: Function | null): boolean => !!v)
+                .forEach((v: Function) => {
+                    v(null, value, (err: Error) => {
+                        if(err) hasError = err;
+                    })
                 })
-            })
 
+            //判断是否关键字重复
             if(idKey === key) {
                 const existedAccountError = await existedAccountIdValidator(value)
                 if(existedAccountError) hasError = existedAccountError;
@@ -239,6 +259,14 @@ function paresAccountQuestion({
             else return true;
         }
     }
+    
+    const defaultValue = getDefaultValue(updateModule, existedValue, targetType, configItem.default)
+    if(!!defaultValue) {
+        //@ts-ignore
+        questions.default = defaultValue;
+    }
+
+    return questions;
 }
 
 async function existedAccountIdValidator(value: any):Promise<any> {
