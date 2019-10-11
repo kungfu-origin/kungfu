@@ -54,7 +54,7 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
 
     start_time = pyyjj.now_in_nano() if not from_beginning else session["begin_time"]
     msg_count = 0
-
+    msg_type_to_read = None if msg == "all" else kungfu.msg.Registry.meta_from_name(msg)["id"]
     if output:
         if msg not in kungfu.msg.Registry.type_names():
             raise ValueError("invalid msg {}, please choose from {}".format(kungfu.msg.Registry.type_names()))
@@ -91,7 +91,7 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
             if frame.msg_type == yjj_msg.SessionEnd:
                 ctx.logger.info("session reach end at %s", kft.strftime(frame.gen_time))
                 break
-            elif frame.gen_time >= start_time and (msg == "all" or kungfu.msg.Registry.meta_from_name(msg)["type_id"] ==  frame.msg_type):
+            elif frame.gen_time >= start_time and (msg == "all" or msg_type_to_read ==  frame.msg_type):
                 try:
                     frame_handler(frame.as_dict())
                 except Exception as e:

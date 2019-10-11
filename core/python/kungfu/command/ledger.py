@@ -2,7 +2,7 @@ import pyyjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
-from kungfu.wingchun.ledger import Ledger
+from kungfu.wingchun.service.ledger import Ledger
 
 
 @kfc.command(help_priority=5)

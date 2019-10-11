@@ -87,13 +87,12 @@ namespace kungfu
                         watch(trigger_time, app_location);
                         request_write_to(trigger_time, app_location->uid);
                         update_broker_state(trigger_time, app_location, BrokerState::Connected);
-                        on_trader_started(trigger_time, app_location);
-                        monitor_trader(app_location->uid);
                         break;
                     }
                     case category::STRATEGY:
                     {
                         watch(trigger_time, app_location);
+                        request_write_to(trigger_time, app_location->uid);
                         break;
                     }
                     default:
@@ -101,6 +100,7 @@ namespace kungfu
                         break;
                     }
                 }
+                on_app_location(trigger_time, app_location);
             }
 
             void Ledger::deregister_location(int64_t trigger_time, uint32_t location_uid)
@@ -151,7 +151,7 @@ namespace kungfu
                 ss >> dest_id;
                 auto dest_location = get_location(dest_id);
 
-                if (source_location->uid == get_master_commands_uid())
+                if (source_location->uid == get_master_commands_uid() or event->dest() == get_live_home_uid())
                 {
                     apprentice::on_read_from(event);
                     return;
@@ -164,11 +164,42 @@ namespace kungfu
                 }
             }
 
+            void Ledger::monitor_instruments()
+            {
+                auto insts = events_ | take_while([&](event_ptr event) { return event->msg_type() != msg::type::InstrumentEnd;}) |
+                             is(msg::type::Instrument) |
+                             reduce(std::vector<Instrument>(),
+                                    [](std::vector<Instrument> res, event_ptr event)
+                                    {
+                                        res.push_back(event->data<msg::data::Instrument>());
+                                        return res;
+                                    }) | as_dynamic();
+                insts.subscribe(
+                        [&](std::vector<Instrument> res)
+                        {
+                            this->instruments_ = res;
+                            this->on_instruments(res);
+                            this->monitor_instruments();
+                        });
+            }
+
+            book::BookContext_ptr Ledger::get_book_context()
+            {
+                if (book_context_ == nullptr)
+                {
+                    book_context_ = std::make_shared<book::BookContext>(*this, events_);
+                }
+                return book_context_;
+            }
+
             void Ledger::on_start()
             {
+
                 apprentice::on_start();
 
                 pre_start();
+
+                monitor_instruments();
 
                 events_ | is(msg::type::BrokerState) |
                 $([&](event_ptr event)
@@ -213,6 +244,42 @@ namespace kungfu
                       }
                   });
 
+                events_ | is(msg::type::QryAsset) |
+                $([&](event_ptr event)
+                {
+                    try
+                    {
+                        const char *buffer = &(event->data<char>());
+                        std::string json_str{};
+                        json_str.assign(buffer, event->data_length());
+                        nlohmann::json location_json = nlohmann::json::parse(json_str);
+                        auto app_location = std::make_shared<location>(
+                                static_cast<mode>(location_json["mode"]),
+                                static_cast<category>(location_json["category"]),
+                                location_json["group"], location_json["name"],
+                                get_io_device()->get_home()->locator
+                        );
+                        SPDLOG_INFO("asset for {}[{:08x}] requested", app_location->uname, app_location->uid);
+                        handle_asset_request(event, app_location);
+                    }
+                    catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }
+                });
+
+                events_ | is(msg::type::InstrumentRequest) |
+                $([&](event_ptr event)
+                {
+                    try {
+                        handle_instrument_request(event);
+                    }
+                    catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }
+                });
+
                 /**
                  * process active query from clients
                  */
@@ -236,6 +303,7 @@ namespace kungfu
                           SPDLOG_ERROR("Unexpected exception {}", e.what());
                       }
                   });
+
             }
 
             void Ledger::publish_broker_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
@@ -267,90 +335,6 @@ namespace kungfu
                 auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
                 reader_->join(master_cmd_location, app_location->uid, trigger_time);
                 reader_->join(app_location, 0, trigger_time);
-            }
-
-            void Ledger::monitor_trader(uint32_t td_location_uid)
-            {
-                auto insts = events_| from(td_location_uid) | take_while([&](event_ptr event) { return event->msg_type() != msg::type::InstrumentEnd;}) |
-                             is(msg::type::Instrument) |
-                             reduce(std::vector<Instrument>(),
-                                    [](std::vector<Instrument> res, event_ptr event)
-                                    {
-                                        res.push_back(event->data<msg::data::Instrument>());
-                                        return res;
-                                    }) | as_dynamic();
-
-                insts.subscribe(
-                        [&](std::vector<Instrument> res)
-                        {
-                            try
-                            { on_instruments(res); }
-                            catch (const std::exception &e)
-                            {
-                                SPDLOG_ERROR("Unexpected exception {}", e.what());
-                            }
-                        });
-
-                auto asset = events_ | from(td_location_uid) | is(msg::type::Asset) | first();
-
-                auto positions = events_ | from(td_location_uid) |
-                        take_while([&](event_ptr event) { return event->msg_type() != msg::type::PositionEnd;}) |
-                        is(msg::type::Position) | as_dynamic();
-
-                auto position_details = events_ | from(td_location_uid) | take_while([&](event_ptr event) { return event->msg_type() != msg::type::PositionDetailEnd;}) |
-                        is(msg::type::PositionDetail) | as_dynamic();
-
-                asset.merge(positions).reduce(std::make_pair(Asset(), std::vector<Position>({})),
-                        [](std::pair<Asset, std::vector<Position>> res, event_ptr event)
-                        {
-                            if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
-                            else if(event->msg_type() == msg::type::Position) { res.second.push_back(event->data<Position>()); }
-                            return res;
-                        }).subscribe(
-                                [&, td_location_uid](std::pair<Asset, std::vector<Position>> res)
-                                {
-                                    if(!is_live()) { return;}
-                                    try
-                                    {
-                                        on_account_with_positions(res.first, res.second);
-                                        request_subscribe(td_location_uid, convert_to_instruments(res.second));
-                                    }
-                                    catch (const std::exception &e)
-                                    {
-                                        SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                    };},
-                                [&](std::exception_ptr e)
-                                {
-                                    try { std::rethrow_exception(e); }
-                                    catch (const rx::empty_error &ex) { SPDLOG_WARN("{}", ex.what());}
-                                    catch (const std::exception &ex) {SPDLOG_WARN("Unexpected exception {}", ex.what());}
-                                });
-
-                asset.merge(position_details).reduce(std::make_pair(Asset(), std::vector<PositionDetail>({})),
-                        [](std::pair<Asset, std::vector<PositionDetail>> res, event_ptr event)
-                        {
-                            if (event->msg_type() == msg::type::Asset) { res.first = event->data<Asset>(); }
-                            else if(event->msg_type() == msg::type::PositionDetail) { res.second.push_back(event->data<PositionDetail>()); }
-                            return res;
-                        }).subscribe(
-                                [&, td_location_uid](std::pair<Asset, std::vector<PositionDetail>> res)
-                                {
-                                    if(!is_live()) { return;}
-                                    try
-                                    {
-                                        on_account_with_position_details(res.first, res.second);
-                                        request_subscribe(td_location_uid, convert_to_instruments(res.second));
-                                    }
-                                    catch (const std::exception &e)
-                                    {
-                                        SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                    }},
-                                 [&](std::exception_ptr e)
-                                 {
-                                     try { std::rethrow_exception(e); }
-                                     catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
-                                     catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}
-                                 });
             }
 
             void Ledger::monitor_market_data(int64_t trigger_time, uint32_t md_location_uid)
@@ -395,6 +379,7 @@ namespace kungfu
                       }
                   });
             }
+
 
             void Ledger::new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input)
             {}

@@ -29,6 +29,11 @@ namespace kungfu
             writers_[0]->mark(time::now_in_nano(), msg::type::SessionStart);
         }
 
+        void master::on_exit()
+        {
+            writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
+        }
+
         void master::on_notify()
         {
             get_io_device()->get_publisher()->notify();
@@ -74,6 +79,8 @@ namespace kungfu
                 writers_[0]->close_frame(msg.length());
             }
 
+            writer->mark(e->gen_time(), msg::type::SessionStart);
+
             reader_->join(app_location, 0, now);
             require_write_to(app_location->uid, e->gen_time(), 0);
             reader_->join(app_location, master_location->uid, now);
@@ -93,6 +100,11 @@ namespace kungfu
                 writer->close_frame(msg.length());
             }
 
+            for(const auto& item: channels_)
+            {
+                writer->write(e->gen_time(), msg::type::Channel, item.second);
+            }
+
             on_register(e, app_location);
 
             writer->mark(e->gen_time(), msg::type::RequestStart);
@@ -109,6 +121,10 @@ namespace kungfu
             location_desc["uname"] = location->uname;
             location_desc["uid"] = app_location_uid;
 
+            writers_[app_location_uid]->mark(trigger_time, msg::type::SessionEnd);
+
+            deregister_channel_by_source(app_location_uid);
+
             deregister_location(trigger_time, app_location_uid);
             reader_->disjoin(app_location_uid);
             writers_.erase(app_location_uid);
@@ -118,6 +134,7 @@ namespace kungfu
             auto &&frame = writers_[0]->open_frame(trigger_time, msg::type::Deregister, msg.length());
             memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
             writers_[0]->close_frame(msg.length());
+
         }
 
         void master::publish_time(int32_t msg_type, int64_t nanotime)
@@ -134,6 +151,12 @@ namespace kungfu
             {
                 SPDLOG_ERROR("Can not send time to {:08x}", dest);
             }
+        }
+
+        void master::register_channel(int64_t trigger_time, const yijinjing::msg::data::Channel &channel)
+        {
+            hero::register_channel(trigger_time, channel);
+            writers_[0]->write(trigger_time, msg::type::Channel, channel);
         }
 
         bool master::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)
@@ -186,6 +209,11 @@ namespace kungfu
                   const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
                   if (has_location(request.dest_id))
                   {
+                      msg::data::Channel channel = {};
+                      channel.source_id = e->source();
+                      channel.dest_id = request.dest_id;
+                      register_channel(e->gen_time(), channel);
+
                       reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
                       require_write_to(e->source(), e->gen_time(), request.dest_id);
                       require_read_from(request.dest_id, e->gen_time(), e->source(), false);
@@ -201,6 +229,11 @@ namespace kungfu
                   const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
                   if (has_location(request.source_id))
                   {
+                      msg::data::Channel channel = {};
+                      channel.source_id = request.source_id;
+                      channel.dest_id = e->source();
+                      register_channel(e->gen_time(), channel);
+
                       reader_->join(get_location(request.source_id), e->source(), e->gen_time());
                       require_write_to(request.source_id, e->gen_time(), e->source());
                       require_read_from(e->source(), e->gen_time(), request.source_id, false);

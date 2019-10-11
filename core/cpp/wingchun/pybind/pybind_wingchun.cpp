@@ -26,9 +26,10 @@
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
+#include <kungfu/wingchun/book/book.h>
 
 namespace py = pybind11;
-
+namespace kwb = kungfu::wingchun::book;
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::broker;
@@ -65,6 +66,22 @@ public:
     {PYBIND11_OVERLOAD(void, Trader, on_start, );}
 };
 
+class PyBook: public kwb::Book
+{
+public:
+    using kwb::Book::Book;
+    void on_quote(event_ptr event, const Quote &quote) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
+    void on_trade(event_ptr event, const Trade &trade) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trade, event, trade); }
+    void on_positions(const std::vector<Position>& positions) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_positions, positions); }
+    void on_position_details(const std::vector<PositionDetail>& position_details) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_position_details, position_details); }
+    virtual void on_asset(event_ptr event, const Asset& asset) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_asset, event, asset); }
+};
+
 class PyLedger : public Ledger
 {
 public:
@@ -73,8 +90,14 @@ public:
     std::string handle_request(const event_ptr &event, const std::string &msg) override
     {PYBIND11_OVERLOAD_PURE(std::string, Ledger, handle_request, event, msg) }
 
-    void on_trader_started(int64_t trigger_time, const kungfu::yijinjing::data::location_ptr &app_location) override
-    { PYBIND11_OVERLOAD_PURE(void, Ledger, on_trader_started, trigger_time, app_location) }
+    void handle_instrument_request(const event_ptr &event) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, handle_instrument_request, event) }
+
+    void handle_asset_request(const event_ptr &event, const data::location_ptr &app_location) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, handle_asset_request, event, app_location) }
+
+    void on_app_location(int64_t trigger_time, const data::location_ptr &app_location) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_app_location, trigger_time, app_location) }
 
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_quote, event, quote) }
@@ -84,12 +107,6 @@ public:
 
     void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_trade, event, trade) }
-
-    void on_account_with_positions(const Asset &asset_info, const std::vector<Position> &positions) override
-    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_account_with_positions, asset_info, positions) }
-
-    void on_account_with_position_details(const Asset &asset_info, const std::vector<PositionDetail> &position_details) override
-    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_account_with_position_details, asset_info, position_details) }
 
     void on_instruments(const std::vector<Instrument> &instruments) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_instruments, instruments) }
@@ -157,160 +174,8 @@ PYBIND11_MODULE(pywingchun, m)
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
     m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
-    m_utils.def("order_from_input",
-            [](const kungfu::wingchun::msg::data::OrderInput& input)
-            {
-                kungfu::wingchun::msg::data::Order order = {};
-                kungfu::wingchun::msg::data::order_from_input(input, order);
-                return order;
-            });
-    m_utils.def("write_quote",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Quote& quote)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Quote, quote);
-            });
-    m_utils.def("write_quote_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Quote& quote)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Quote, quote);
-            });
-    m_utils.def("write_entrust",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Entrust& entrust)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Entrust, entrust);
-            });
-    m_utils.def("write_entrust_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Entrust& entrust)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Entrust, entrust);
-            });
-    m_utils.def("write_transaction",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Transaction& transaction)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Transaction, transaction);
-            });
-    m_utils.def("write_transaction_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Transaction& transaction)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Transaction, transaction);
-            });
-    m_utils.def("write_bar",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Bar& bar)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Bar, bar);
-            });
-    m_utils.def("write_bar_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Bar& bar)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Bar, bar);
-            });
-    m_utils.def("write_order_input",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const OrderInput& order_input)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::OrderInput, order_input);
-            });
-    m_utils.def("write_order_input_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const OrderInput& order_input)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::OrderInput, order_input);
-            });
-    m_utils.def("write_order_action",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const OrderAction& order_action)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::OrderAction, order_action);
-            });
-    m_utils.def("write_order_action_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const OrderAction& order_action)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::OrderAction, order_action);
-            });
-    m_utils.def("write_order",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Order& order)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Order, order);
-            });
-    m_utils.def("write_order_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Order& order)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Order, order);
-            });
-    m_utils.def("write_trade",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Trade& trade)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Trade, trade);
-            });
-    m_utils.def("write_trade_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Trade& trade)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Trade, trade);
-            });
-    m_utils.def("write_position",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Position& position)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Position, position);
-            });
-    m_utils.def("write_position_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Position& position)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Position, position);
-            });
-    m_utils.def("write_asset",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Asset& asset)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Asset, asset);
-            });
-    m_utils.def("write_asset_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Asset& asset)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Asset, asset);
-            });
-    m_utils.def("write_position_detail",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const PositionDetail& detail)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::PositionDetail, detail);
-            });
-    m_utils.def("write_position_detail_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const PositionDetail& detail)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::PositionDetail, detail);
-            });
-    m_utils.def("write_instrument",
-            [](const journal::writer_ptr writer, int64_t trigger_time, const Instrument& instrument)
-            {
-                writer->write(trigger_time, kungfu::wingchun::msg::type::Instrument, instrument);
-            });
-    m_utils.def("write_instrument_with_time",
-            [](const journal::writer_ptr writer, int64_t gen_time, const Instrument& instrument)
-            {
-                writer->write_with_time(gen_time, kungfu::wingchun::msg::type::Instrument, instrument);
-            });
-    m_utils.def("get_quote", [](kungfu::yijinjing::event_ptr event) { return event->data<Quote>();});
-    m_utils.def("get_entrust", [](kungfu::yijinjing::event_ptr event) { return event->data<Entrust>();});
-    m_utils.def("get_transaction", [](kungfu::yijinjing::event_ptr event) { return event->data<Transaction>();});
-    m_utils.def("get_bar", [](kungfu::yijinjing::event_ptr event) {return event->data<Bar>();});
-    m_utils.def("get_order", [](kungfu::yijinjing::event_ptr event) { return event->data<Order>();});
-    m_utils.def("get_trade", [](kungfu::yijinjing::event_ptr event) { return event->data<Trade>();});
-    m_utils.def("get_order_input", [](kungfu::yijinjing::event_ptr event) { return event->data<OrderInput>();});
-    m_utils.def("get_order_action", [](kungfu::yijinjing::event_ptr event) { return event->data<OrderAction>();});
-    m_utils.def("get_position", [](kungfu::yijinjing::event_ptr event) { return event->data<Position>();});
-    m_utils.def("get_position_detail", [](kungfu::yijinjing::event_ptr event) { return event->data<PositionDetail>();});
-    m_utils.def("get_asset", [](kungfu::yijinjing::event_ptr event) { return event->data<Asset>();});
-    m_utils.def("get_instrument", [](kungfu::yijinjing::event_ptr event) { return event->data<Instrument>();});
 
     auto m_constants = m.def_submodule("constants");
-
-    py::enum_<kungfu::wingchun::LedgerCategory>(m_constants, "LedgerCategory", py::arithmetic())
-            .value("Account", kungfu::wingchun::LedgerCategory::Account)
-            .value("Portfolio", kungfu::wingchun::LedgerCategory::Portfolio)
-            .value("SubPortfolio", kungfu::wingchun::LedgerCategory::SubPortfolio)
-            .value("Unknown", kungfu::wingchun::LedgerCategory::Unknown)            
-            .export_values()
-            .def("__eq__",
-                [](const kungfu::wingchun::LedgerCategory &a, int b)
-                {
-                    return static_cast<int>(a) == b;
-                }
-            );
 
     py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
             .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
@@ -454,31 +319,15 @@ PYBIND11_MODULE(pywingchun, m)
                     return static_cast<int>(a) == b;
                 });
 
-    py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
-            .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
-            .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
-            .value("Transaction", kungfu::wingchun::msg::type::MsgType::Transaction)
-            .value("Bar", kungfu::wingchun::msg::type::MsgType::Bar)
-            .value("OrderInput", kungfu::wingchun::msg::type::MsgType::OrderInput)
-            .value("OrderAction", kungfu::wingchun::msg::type::MsgType::OrderAction)
-            .value("Order", kungfu::wingchun::msg::type::MsgType::Order)
-            .value("Trade", kungfu::wingchun::msg::type::MsgType::Trade)
-            .value("Position", kungfu::wingchun::msg::type::MsgType::Position)
-            .value("Asset", kungfu::wingchun::msg::type::MsgType::Asset)
-            .value("AssetSnapshot", kungfu::wingchun::msg::type::AssetSnapshot)
-            .value("PositionDetail", kungfu::wingchun::msg::type::MsgType::PositionDetail)
-            .value("Instrument", kungfu::wingchun::msg::type::MsgType::Instrument)
-            .value("Subscribe", kungfu::wingchun::msg::type::MsgType::Subscribe)
-            .value("BrokerState", kungfu::wingchun::msg::type::MsgType::BrokerState)
-            .value("PositionEnd", kungfu::wingchun::msg::type::MsgType::PositionEnd)
-            .value("PositionDetailEnd", kungfu::wingchun::msg::type::MsgType::PositionDetailEnd)
+    py::enum_<kungfu::wingchun::LedgerCategory>(m_constants, "LedgerCategory", py::arithmetic())
+            .value("Account", kungfu::wingchun::LedgerCategory::Account)
+            .value("Strategy", kungfu::wingchun::LedgerCategory::Strategy)
             .export_values()
             .def("__eq__",
-                [](const kungfu::wingchun::msg::type::MsgType &a, int b)
+                [](const kungfu::wingchun::LedgerCategory &a, int b)
                 {
                     return static_cast<int>(a) == b;
-                }
-            );
+                });
 
     py::class_<Instrument>(m, "Instrument")
             .def(py::init<>())
@@ -496,24 +345,12 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("open_date", &Instrument::get_open_date, &Instrument::set_open_date)
             .def_property("create_date", &Instrument::get_create_date, &Instrument::set_create_date)
             .def_property("expire_date", &Instrument::get_expire_date, &Instrument::set_expire_date)
-            .def("__hash__",
-                 [](const Instrument &a)
-                 {
-                     return get_symbol_id(a.get_instrument_id(), a.get_exchange_id());
-                 }
-            )
-            .def("__eq__",
-                [](const Instrument &a, const Instrument &b)
-                {
-                    return strcmp(a.instrument_id, b.instrument_id) == 0 && strcmp(a.exchange_id, b.exchange_id) == 0;
-                }
-            )
-            .def("__repr__",
-                 [](const Instrument &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const Instrument &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Instrument*>(addr); })
+            .def("__sizeof__", [](const Instrument &a) { return sizeof(a); })
+            .def("__hash__", [](const Instrument &a) { return get_symbol_id(a.get_instrument_id(), a.get_exchange_id());})
+            .def("__eq__",[](const Instrument &a, const Instrument &b){ return strcmp(a.instrument_id, b.instrument_id) == 0 && strcmp(a.exchange_id, b.exchange_id) == 0;})
+            .def("__repr__",[](const Instrument &a){return to_string(a);});
 
     py::class_<Quote>(m, "Quote")
             .def(py::init<>())
@@ -541,11 +378,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("ask_price", &Quote::get_ask_price, &Quote::set_ask_price)
             .def_property("bid_volume", &Quote::get_bid_volume, &Quote::set_bid_volume)
             .def_property("ask_volume", &Quote::get_ask_volume, &Quote::set_ask_volume)
-            .def("__repr__",
-                 [](const Quote &a)
-                 {
-                     return to_string(a);
-                 });
+            .def_property_readonly("raw_address", [](const Quote &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Quote*>(addr); })
+            .def("__sizeof__", [](const Instrument &a) { return sizeof(a); })
+            .def("__repr__",[](const Quote &a){return to_string(a);});
 
     py::class_<Entrust>(m, "Entrust")
             .def(py::init<>())
@@ -561,12 +397,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("price_type", &Entrust::price_type)
             .def_readwrite("main_seq", &Entrust::main_seq)
             .def_readwrite("seq", &Entrust::seq)
-            .def("__repr__",
-                 [](const Entrust &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const Entrust &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Entrust*>(addr); })
+            .def("__sizeof__", [](const Entrust &a) { return sizeof(a); })
+            .def("__repr__",[](const Entrust &a){return to_string(a);});
 
     py::class_<Transaction>(m, "Transaction")
             .def(py::init<>())
@@ -584,12 +418,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("bs_flag", &Transaction::bs_flag)
             .def_readwrite("main_seq", &Transaction::main_seq)
             .def_readwrite("seq", &Transaction::seq)
-            .def("__repr__",
-                 [](const Transaction &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const Transaction &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Transaction*>(addr); })
+            .def("__sizeof__", [](const Transaction &a) { return sizeof(a); })
+            .def("__repr__",[](const Transaction &a){return to_string(a);});
 
     py::class_<Bar>(m, "Bar")
             .def(py::init<>())
@@ -605,11 +437,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("volume", &Bar::volume)
             .def_readwrite("start_volume", &Bar::start_volume)
             .def_readwrite("tick_count", &Bar::tick_count)
-            .def("__repr__",
-                    [](const Bar &a)
-                    {
-                        return to_string(a);
-                    });
+            .def_property_readonly("raw_address", [](const Bar &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Bar*>(addr); })
+            .def("__sizeof__", [](const Bar &a) { return sizeof(a); })
+            .def("__repr__",[](const Bar &a){return to_string(a);});
 
     py::class_<OrderInput>(m, "OrderInput")
             .def(py::init<>())
@@ -627,12 +458,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("instrument_id", &OrderInput::get_instrument_id, &OrderInput::set_instrument_id)
             .def_property("exchange_id", &OrderInput::get_exchange_id, &OrderInput::set_exchange_id)
             .def_property("account_id", &OrderInput::get_account_id, &OrderInput::set_account_id)
-            .def("__repr__",
-                 [](const OrderInput &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const OrderInput &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<OrderInput*>(addr); })
+            .def("__sizeof__", [](const OrderInput &a) { return sizeof(a); })
+            .def("__repr__",[](const OrderInput &a){return to_string(a);});
 
     py::class_<Order>(m, "Order")
             .def(py::init<>())
@@ -662,12 +491,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("client_id", &Order::get_client_id, &Order::set_client_id)
             .def_property("error_msg", &Order::get_error_msg, &Order::set_error_msg)
             .def_property_readonly("active", [](const Order& o) { return not is_final_status(o.status); })
-            .def("__repr__",
-                 [](const Order &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const Order &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Order*>(addr); })
+            .def("__sizeof__", [](const Order &a) { return sizeof(a); })
+            .def("__repr__",[](const Order &a){return to_string(a);});
 
     py::class_<OrderAction>(m, "OrderAction")
             .def(py::init<>())
@@ -676,12 +503,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("action_flag", &OrderAction::action_flag)
             .def_readwrite("price", &OrderAction::price)
             .def_readwrite("volume", &OrderAction::volume)
-            .def("__repr__",
-                 [](const OrderAction &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const OrderAction &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<OrderAction*>(addr); })
+            .def("__sizeof__", [](const OrderAction &a) { return sizeof(a); })
+            .def("__repr__",[](const OrderAction &a){return to_string(a);});
 
     py::class_<Trade>(m, "Trade")
             .def(py::init<>())
@@ -701,97 +526,129 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("exchange_id", &Trade::get_exchange_id, &Trade::set_exchange_id)
             .def_property("account_id", &Trade::get_account_id, &Trade::set_account_id)
             .def_property("client_id", &Trade::get_client_id, &Trade::set_client_id)
-            .def("__repr__",
-                 [](const Trade &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def_property_readonly("raw_address", [](const Trade &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Trade*>(addr); })
+            .def("__sizeof__", [](const Trade &a) { return sizeof(a); })
+            .def("__repr__",[](const Trade &a){return to_string(a);});
 
     py::class_<Asset>(m, "Asset")
-            .def_readonly("update_time", &Asset::update_time)
-            .def_readonly("initial_equity", &Asset::initial_equity)
-            .def_readonly("static_equity", &Asset::static_equity)
-            .def_readonly("dynamic_equity", &Asset::dynamic_equity)
-            .def_readonly("realized_pnl", &Asset::realized_pnl)
-            .def_readonly("unrealized_pnl", &Asset::unrealized_pnl)
-            .def_readonly("avail", &Asset::avail)
-            .def_readonly("market_value", &Asset::market_value)
-            .def_readonly("margin", &Asset::margin)
-            .def_readonly("accumulated_fee", &Asset::accumulated_fee)
-            .def_readonly("intraday_fee", &Asset::intraday_fee)
-            .def_readonly("frozen_cash", &Asset::frozen_cash)
-            .def_readonly("frozen_margin", &Asset::frozen_margin)
-            .def_readonly("frozen_fee", &Asset::frozen_fee)
-            .def_readonly("position_pnl", &Asset::position_pnl)
-            .def_readonly("close_pnl", &Asset::close_pnl)
-            .def_property_readonly("trading_day", &Asset::get_trading_day)
-            .def_property_readonly("account_id", &Asset::get_account_id)
-            .def_property_readonly("broker_id", &Asset::get_broker_id)
-            .def_property_readonly("source_id", &Asset::get_source_id)
-            .def("__repr__",
-                 [](const Asset &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def(py::init<>())
+            .def_readwrite("update_time", &Asset::update_time)
+            .def_readwrite("initial_equity", &Asset::initial_equity)
+            .def_readwrite("static_equity", &Asset::static_equity)
+            .def_readwrite("dynamic_equity", &Asset::dynamic_equity)
+            .def_readwrite("realized_pnl", &Asset::realized_pnl)
+            .def_readwrite("unrealized_pnl", &Asset::unrealized_pnl)
+            .def_readwrite("avail", &Asset::avail)
+            .def_readwrite("market_value", &Asset::market_value)
+            .def_readwrite("margin", &Asset::margin)
+            .def_readwrite("accumulated_fee", &Asset::accumulated_fee)
+            .def_readwrite("intraday_fee", &Asset::intraday_fee)
+            .def_readwrite("frozen_cash", &Asset::frozen_cash)
+            .def_readwrite("frozen_margin", &Asset::frozen_margin)
+            .def_readwrite("frozen_fee", &Asset::frozen_fee)
+            .def_readwrite("position_pnl", &Asset::position_pnl)
+            .def_readwrite("close_pnl", &Asset::close_pnl)
+            .def_readwrite("holder_uid", &Asset::holder_uid)
+            .def_readwrite("ledger_category", &Asset::ledger_category)
+            .def_property("trading_day", &Asset::get_trading_day, &Asset::set_trading_day)
+            .def_property("account_id", &Asset::get_account_id, &Asset::set_account_id)
+            .def_property("source_id", &Asset::get_source_id, &Asset::set_source_id)
+            .def_property("client_id", &Asset::get_client_id, &Asset::set_client_id)
+            .def_property_readonly("raw_address", [](const Asset &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Asset*>(addr); })
+            .def("__sizeof__", [](const Asset &a) { return sizeof(a); })
+            .def("__repr__",[](const Asset &a){return to_string(a);});
 
     py::class_<Position>(m, "Position")
-            .def_readonly("update_time", &Position::update_time)
-            .def_readonly("instrument_type", &Position::instrument_type)
-            .def_readonly("direction", &Position::direction)
-            .def_readonly("volume", &Position::volume)
-            .def_readonly("yesterday_volume", &Position::yesterday_volume)
-            .def_readonly("frozen_total", &Position::frozen_total)
-            .def_readonly("frozen_yesterday", &Position::frozen_yesterday)
-            .def_readonly("last_price", &Position::last_price)
-            .def_readonly("avg_open_price", &Position::avg_open_price)
-            .def_readonly("position_cost_price", &Position::position_cost_price)
-            .def_readonly("close_price", &Position::close_price)
-            .def_readonly("pre_close_price", &Position::pre_close_price)
-            .def_readonly("settlement_price", &Position::settlement_price)
-            .def_readonly("pre_settlement_price", &Position::pre_settlement_price)
-            .def_readonly("margin", &Position::margin)
-            .def_readonly("position_pnl", &Position::position_pnl)
-            .def_readonly("close_pnl", &Position::close_pnl)
-            .def_readonly("realized_pnl", &Position::realized_pnl)
-            .def_readonly("unrealized_pnl", &Position::unrealized_pnl)
-            .def_property_readonly("trading_day", &Position::get_trading_day)
-            .def_property_readonly("instrument_id", &Position::get_instrument_id)
-            .def_property_readonly("exchange_id", &Position::get_exchange_id)
-            .def_property_readonly("account_id", &Position::get_account_id)
-            .def_property_readonly("client_id", &Position::get_client_id)
-            .def("__repr__",
-                 [](const Position &a)
-                 {
-                     return to_string(a);
-                 }
-            );
+            .def(py::init<>())
+            .def_readwrite("update_time", &Position::update_time)
+            .def_readwrite("instrument_type", &Position::instrument_type)
+            .def_readwrite("direction", &Position::direction)
+            .def_readwrite("volume", &Position::volume)
+            .def_readwrite("yesterday_volume", &Position::yesterday_volume)
+            .def_readwrite("frozen_total", &Position::frozen_total)
+            .def_readwrite("frozen_yesterday", &Position::frozen_yesterday)
+            .def_readwrite("last_price", &Position::last_price)
+            .def_readwrite("avg_open_price", &Position::avg_open_price)
+            .def_readwrite("position_cost_price", &Position::position_cost_price)
+            .def_readwrite("close_price", &Position::close_price)
+            .def_readwrite("pre_close_price", &Position::pre_close_price)
+            .def_readwrite("settlement_price", &Position::settlement_price)
+            .def_readwrite("pre_settlement_price", &Position::pre_settlement_price)
+            .def_readwrite("margin", &Position::margin)
+            .def_readwrite("position_pnl", &Position::position_pnl)
+            .def_readwrite("close_pnl", &Position::close_pnl)
+            .def_readwrite("realized_pnl", &Position::realized_pnl)
+            .def_readwrite("unrealized_pnl", &Position::unrealized_pnl)
+            .def_readwrite("holder_uid", &Position::holder_uid)
+            .def_readwrite("ledger_category", &Position::ledger_category)
+            .def_property("trading_day", &Position::get_trading_day, &Position::set_trading_day)
+            .def_property("instrument_id", &Position::get_instrument_id, &Position::set_instrument_id)
+            .def_property("exchange_id", &Position::get_exchange_id, &Position::set_exchange_id)
+            .def_property("source_id", &Position::get_source_id, &Position::set_source_id)
+            .def_property("account_id", &Position::get_account_id, &Position::set_account_id)
+            .def_property("client_id", &Position::get_client_id, &Position::set_client_id)
+            .def_property_readonly("raw_address", [](const Position &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Position*>(addr); })
+            .def("__sizeof__", [](const Position &a) { return sizeof(a); })
+            .def("__repr__",[](const Position &a){return to_string(a);});
 
     py::class_<PositionDetail>(m, "PositionDetail")
-            .def_readonly("update_time", &PositionDetail::update_time)
-            .def_readonly("instrument_type", &PositionDetail::instrument_type)
-            .def_readonly("direction", &PositionDetail::direction)
-            .def_readonly("volume", &PositionDetail::volume)
-            .def_readonly("frozen_volume", &PositionDetail::frozen_volume)
-            .def_readonly("last_price", &PositionDetail::last_price)
-            .def_readonly("open_price", &PositionDetail::open_price)
-            .def_readonly("settlement_price", &PositionDetail::settlement_price)
-            .def_readonly("pre_settlement_price", &PositionDetail::pre_settlement_price)
-            .def_readonly("trade_id", &PositionDetail::trade_id)
-            .def_readonly("trade_time", &PositionDetail::trade_time)
-            .def_property_readonly("trading_day", &PositionDetail::get_trading_day)
-            .def_property_readonly("instrument_id", &PositionDetail::get_instrument_id)
-            .def_property_readonly("exchange_id", &PositionDetail::get_exchange_id)
-            .def_property_readonly("account_id", &PositionDetail::get_account_id)
-            .def_property_readonly("client_id", &PositionDetail::get_client_id)
-            .def_property_readonly("open_date", &PositionDetail::get_open_date)
-            .def("__repr__",
-            [](const PositionDetail &a)
-            {
-                return to_string(a);
-            }
-            );
+            .def(py::init<>())
+            .def_readwrite("update_time", &PositionDetail::update_time)
+            .def_readwrite("instrument_type", &PositionDetail::instrument_type)
+            .def_readwrite("direction", &PositionDetail::direction)
+            .def_readwrite("volume", &PositionDetail::volume)
+            .def_readwrite("frozen_volume", &PositionDetail::frozen_volume)
+            .def_readwrite("last_price", &PositionDetail::last_price)
+            .def_readwrite("open_price", &PositionDetail::open_price)
+            .def_readwrite("settlement_price", &PositionDetail::settlement_price)
+            .def_readwrite("pre_settlement_price", &PositionDetail::pre_settlement_price)
+            .def_readwrite("trade_id", &PositionDetail::trade_id)
+            .def_readwrite("trade_time", &PositionDetail::trade_time)
+            .def_readwrite("holder_uid", &PositionDetail::holder_uid)
+            .def_property("trading_day", &PositionDetail::get_trading_day, &PositionDetail::set_trading_day)
+            .def_property("instrument_id", &PositionDetail::get_instrument_id, &PositionDetail::set_instrument_id)
+            .def_property("exchange_id", &PositionDetail::get_exchange_id, &PositionDetail::set_exchange_id)
+            .def_property("source_id", &PositionDetail::get_source_id, &PositionDetail::set_source_id)
+            .def_property("account_id", &PositionDetail::get_account_id, &PositionDetail::set_account_id)
+            .def_property("client_id", &PositionDetail::get_client_id, &PositionDetail::set_client_id)
+            .def_property("open_date", &PositionDetail::get_open_date, &PositionDetail::set_open_date)
+            .def_property_readonly("raw_address", [](const PositionDetail &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<PositionDetail*>(addr); })
+            .def("__sizeof__", [](const PositionDetail &a) { return sizeof(a); })
+            .def("__repr__",[](const PositionDetail &a){return to_string(a);});
+
+    py::class_<PositionEnd>(m, "PositionEnd")
+            .def(py::init<>())
+            .def(py::init<uint32_t>())
+            .def_readwrite("holder_uid", &PositionEnd::holder_uid)
+            .def_property_readonly("raw_address", [](const PositionEnd &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<PositionEnd*>(addr); })
+            .def("__sizeof__", [](const PositionEnd &a) { return sizeof(a); });
+
+    py::class_<PositionDetailEnd>(m, "PositionDetailEnd")
+            .def(py::init<>())
+            .def(py::init<uint32_t>())
+            .def_readwrite("holder_uid", &PositionDetailEnd::holder_uid)
+            .def_property_readonly("raw_address", [](const PositionDetailEnd &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<PositionDetailEnd*>(addr); })
+            .def("__sizeof__", [](const PositionDetailEnd &a) { return sizeof(a); });
+
+    py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
+            .def(py::init())
+            .def("on_quote", &kwb::Book::on_quote)
+            .def("on_trade", &kwb::Book::on_trade)
+            .def("on_positions", &kwb::Book::on_positions)
+            .def("on_position_details", &kwb::Book::on_position_details)
+            .def("on_asset", &kwb::Book::on_asset)
+            ;
+
+    py::class_<kwb::BookContext, std::shared_ptr<kwb::BookContext>>(m, "BookContext")
+            .def("add_book", &kwb::BookContext::add_book)
+            .def("get_inst_info", &kwb::BookContext::get_inst_info)
+            ;
 
     py::class_<MarketData, PyMarketData, kungfu::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
             .def(py::init<bool, data::locator_ptr, const std::string&>())
@@ -818,21 +675,23 @@ PYBIND11_MODULE(pywingchun, m)
     py::class_<Ledger, PyLedger, kungfu::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("io_device", &Ledger::get_io_device)
+            .def_property_readonly("book_context", &Ledger::get_book_context)
             .def("now", &Ledger::now)
             .def("has_location", &Ledger::has_location)
             .def("get_location", &Ledger::get_location)
+            .def("get_writer", &Ledger::get_writer)
             .def("publish", &Ledger::publish)
             .def("publish_broker_states", &Ledger::publish_broker_states)
             .def("new_order_single", &Ledger::new_order_single)
             .def("cancel_order", &Ledger::cancel_order)
             .def("handle_request", &Ledger::handle_request)
+            .def("handle_instrument_request", &Ledger::handle_instrument_request)
+            .def("handle_asset_request", &Ledger::handle_asset_request)
             .def("on_trading_day", &Ledger::on_trading_day)
-            .def("on_trader_started", &Ledger::on_trader_started)
+            .def("on_app_location", &Ledger::on_app_location)
             .def("on_quote", &Ledger::on_quote)
             .def("on_order", &Ledger::on_order)
             .def("on_trade", &Ledger::on_trade)
-            .def("on_account_with_positions", &Ledger::on_account_with_positions)
-            .def("on_account_with_position_details", &Ledger::on_account_with_position_details)
             .def("on_instruments", &Ledger::on_instruments)
             .def("set_begin_time", &Ledger::set_begin_time)
             .def("set_end_time", &Ledger::set_end_time)
@@ -850,6 +709,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("add_strategy", &strategy::Runner::add_strategy);
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
+            .def_property_readonly("book_context", &strategy::Context::get_book_context)
             .def("now", &strategy::Context::now)
             .def("add_timer", &strategy::Context::add_timer)
             .def("add_time_interval", &strategy::Context::add_time_interval)
@@ -858,7 +718,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
             .def("subscribe", &strategy::Context::subscribe)
             .def("insert_order", &strategy::Context::insert_order)
-            .def("cancel_order", &strategy::Context::cancel_order);
+            .def("cancel_order", &strategy::Context::cancel_order)
+            ;
 
     py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
             .def(py::init())

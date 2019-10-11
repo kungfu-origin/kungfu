@@ -51,6 +51,9 @@ class EnumTypeDecorator(TypeDecorator):
         TypeDecorator.__init__(self)
         self.enum_type = enum_type
 
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
+
     def process_bind_param(self, value, dialect):
         return int(value)
 
@@ -94,3 +97,25 @@ class Direction(EnumTypeDecorator):
 class PriceType(EnumTypeDecorator):
     def __init__(self):
         super(PriceType, self).__init__(wc_constants.PriceType)
+
+class LedgerCategory(EnumTypeDecorator):
+    def __init__(self):
+        super(LedgerCategory, self).__init__(wc_constants.LedgerCategory)
+
+class UINT64(TypeDecorator):
+    impl = types.String
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
+
+    def process_bind_param(self, value, dialect):
+        return str(value)
+
+    def process_literal_param(self, value, dialect):
+        return value
+
+    def process_result_value(self, value, dialect):
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return None

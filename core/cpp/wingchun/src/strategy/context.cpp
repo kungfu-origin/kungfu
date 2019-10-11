@@ -24,10 +24,11 @@ namespace kungfu
         namespace strategy
         {
             Context::Context(practice::apprentice &app, const rx::connectable_observable<yijinjing::event_ptr> &events) :
-                    app_(app), events_(events)
+                app_(app), events_(events)
             {
                 auto home = app.get_io_device()->get_home();
                 log::copy_log_settings(home, home->name);
+                book_context_ = std::make_shared<book::BookContext>(app, events);
             }
 
             void Context::react()
@@ -63,6 +64,13 @@ namespace kungfu
                   {
                       auto transaction = event->data<Transaction>();
                   });
+
+                subscribe_instruments();
+
+                auto home = app_.get_io_device()->get_home();
+                auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
+                app_.request_write_to(app_.now(), ledger_location->uid);
+                app_.request_read_from(app_.now(), ledger_location->uid);
             }
 
             int64_t Context::now() const
@@ -100,7 +108,6 @@ namespace kungfu
                 account_location_ids_[account_id] = account_location->uid;
 
                 app_.request_write_to(app_.now(), account_location->uid);
-                app_.request_read_from(app_.now(), account_location->uid, true);
                 app_.request_read_from(app_.now(), account_location->uid);
 
                 SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
@@ -124,6 +131,36 @@ namespace kungfu
                     throw wingchun_error(fmt::format("invalid account {}", account));
                 }
                 return account_cash_limits_[account_id];
+            }
+
+            void Context::subscribe_instruments()
+            {
+                auto home = app_.get_io_device()->get_home();
+                auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
+                if (home->mode == mode::LIVE and not app_.has_location(ledger_location->uid))
+                {
+                    throw wingchun_error("has no location for ledger service");
+                }
+                if (not app_.has_writer(ledger_location->uid))
+                {
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    filter([=](yijinjing::event_ptr e)
+                           {
+                               const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                               return data.dest_id == ledger_location->uid;
+                           }) | first() |
+                           $([=](event_ptr e)
+                           {
+                               auto writer = app_.get_writer(ledger_location->uid);
+                               writer->mark(0, msg::type::InstrumentRequest);
+                               SPDLOG_INFO("instrument requested");
+                           });
+                } else
+                {
+                    auto writer = app_.get_writer(ledger_location->uid);
+                    writer->mark(0, msg::type::InstrumentRequest);
+                    SPDLOG_INFO("instrument requested");
+                }
             }
 
             void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)

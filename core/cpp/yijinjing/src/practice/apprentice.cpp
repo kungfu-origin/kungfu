@@ -162,6 +162,13 @@ namespace kungfu
                   register_location_from_event(e);
               });
 
+            events_ | is(msg::type::Channel) |
+            $([&](event_ptr e)
+              {
+                    auto& channel = e->data<msg::data::Channel>();
+                    register_channel(e->gen_time(), channel);
+              });
+
             events_ | is(msg::type::Register) |
             $([&](event_ptr e)
               {
@@ -234,10 +241,6 @@ namespace kungfu
             if (writers_.find(request.dest_id) == writers_.end())
             {
                 writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
-                if (request.dest_id == 0)
-                {
-                    writers_[request.dest_id]->mark(event->trigger_time(), msg::type::SessionStart);
-                }
             } else
             {
                 SPDLOG_INFO("writer from {} [{:08x}] to {} [{:08x}] already existed",
@@ -308,7 +311,9 @@ namespace kungfu
             nlohmann::json location_json = nlohmann::json::parse(json_str);
             uint32_t location_uid = location_json["uid"];
             reader_->disjoin(location_uid);
+            deregister_channel_by_source(location_uid);
             deregister_location(event->trigger_time(), location_uid);
         }
+
     }
 }

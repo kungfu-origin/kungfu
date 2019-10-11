@@ -149,9 +149,7 @@ namespace kungfu
         enum class LedgerCategory: int8_t
         {
             Account,
-            Portfolio,
-            SubPortfolio,
-            Unknown
+            Strategy,
         };
 
         class wingchun_error : public std::runtime_error

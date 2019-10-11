@@ -375,8 +375,8 @@ namespace kungfu
                     account.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
-                    req_position_detail();
-//                    req_position();
+//                    req_position_detail();
+                    req_position();
                 }
             }
 
@@ -398,6 +398,7 @@ namespace kungfu
                         strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
                         strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
                         strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
+                        position.holder_uid = get_io_device()->get_home()->uid;
                         position.direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
                         position_map[pInvestorPosition->InstrumentID] = position;
                     }
@@ -435,11 +436,12 @@ namespace kungfu
                         SPDLOG_TRACE(kungfu::wingchun::msg::data::to_string(position));
                         writer->write(0, msg::type::Position, position);
                     }
-                    writer->mark(0, msg::type::PositionEnd);
+                    msg::data::PositionEnd &end = writer->open_data<msg::data::PositionEnd>(0, msg::type::PositionEnd);
+                    end.holder_uid = get_io_device()->get_home()->uid;
+                    writer->close_data();
                     short_position_map_.clear();
                     long_position_map_.clear();
                 }
-
             }
 
             void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail,
