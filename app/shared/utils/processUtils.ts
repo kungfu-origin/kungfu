@@ -11,25 +11,35 @@ const taskkill = require('taskkill');
 export const pm2 = require('pm2');
 
 //=========================== task kill =========================================
-
-const winKill = (tasks: string[]): any => {
+export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
     let pIdList: number[] = [];
     return getProcesses().then(processes => {
         processes.forEach(p => {
             const rawCommandLine = p.rawCommandLine
             tasks.forEach((task: string): void => {
-                if(rawCommandLine.indexOf(task) !== -1) pIdList.push(p.pid)
+                if(rawCommandLine.indexOf(task) !== -1) {
+                    pIdList.push(p.pid)
+                }
             })
         })
+        return pIdList
+    }) 
+}
+
+const winKill = async (tasks: string[]): Promise<any> => {
+    try {
+        const pIdList: any = await findProcessByKeywords(tasks);
         if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
         return taskkill(pIdList, {
             force: true,
             tree: platform === 'win' 
-        })
-    })
+        })      
+    } catch (err) {
+        throw err
+    }
 }
 
-const unixKill = (tasks: string[]): any => {
+const macKill = (tasks: string[]): any => {
     return fkill(tasks, {
         force: true,
         silent: true,
@@ -37,8 +47,23 @@ const unixKill = (tasks: string[]): any => {
     })
 }
 
+const linuxKill = async (tasks: string[]): Promise<any> => {
+    try {
+        const pIdList: any = await findProcessByKeywords(tasks);
+        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        return fkill(pIdList, {
+            force: true,
+            silent: true,
+            ignoreCase: true
+        })    
+    } catch (err) {
+        throw err
+    }
+}
+
 export const kfKill = (tasks: string[]): any => {
-    if(platform !== 'win') return unixKill(tasks)
+    if(platform === 'mac') return macKill(tasks)
+    else if(platform === 'linux') return linuxKill(tasks)
     else return winKill(tasks)
 }
 

@@ -9,7 +9,7 @@ import { updateAccountStrategy } from '@/commanders/update';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
-import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
+import { killExtra, killGodDaemon, findProcessByKeywords, killKfc, kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
@@ -145,7 +145,6 @@ program
             await killKfc();
             await killGodDaemon();
             await kfKill(['pm2']);
-            await kfKill(['.pm2']);
             await killExtra();
             console.success(`Shutdown kungfu`)
             process.exit(0)
