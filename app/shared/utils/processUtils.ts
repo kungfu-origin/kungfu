@@ -32,11 +32,12 @@ const winKill = (tasks: string[]): any => {
 const unixKill = (tasks: string[]): any => {
     return fkill(tasks, {
         force: true,
-        silent: true 
+        silent: true,
+        ignoreCase: true
     })
 }
 
-const kfKill = (tasks: string[]): any => {
+export const kfKill = (tasks: string[]): any => {
     if(platform !== 'win') return unixKill(tasks)
     else return winKill(tasks)
 }

@@ -9,23 +9,13 @@ import { updateAccountStrategy } from '@/commanders/update';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
-import { delaySeconds } from '__gUtils/busiUtils';
-import { startLedger, startMaster, killExtra, killGodDaemon, killKfc } from '__gUtils/processUtils';
+import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
 const CFonts = require('cfonts');
 const colors = require('colors');
-
-
-startMaster(false)
-    .catch(() => {})
-    .finally(() => {   
-        delaySeconds(1000)
-        .then(() => startLedger(false))
-        .catch(() => {})
-    })
 
 if(process.argv.length === 2 || process.argv[2] === '-h') {
     console.log(colors.green('Welcome to kungfu trader system'))
@@ -154,6 +144,8 @@ program
         try {
             await killKfc();
             await killGodDaemon();
+            await kfKill(['pm2']);
+            await kfKill(['.pm2']);
             await killExtra();
             console.success(`Shutdown kungfu`)
             process.exit(0)

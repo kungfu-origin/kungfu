@@ -9,8 +9,6 @@ const moment = require('moment');
 const WIDTH_LEFT_PANEL = 45;
 
 
-
-
 export class MonitorDashboard extends Dashboard {
     screen: any;
 

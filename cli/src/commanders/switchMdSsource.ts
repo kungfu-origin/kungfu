@@ -5,25 +5,22 @@ const colors = require('colors');
 const inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
+interface OldSourceAccount {
+    [ propName: string ]: { 
+        accountId: string, 
+        sourceName: string
+    }
+}
+
 export const switchMdSource = async () => {
     const accountList: Account[] = await getAccountList()
-
     const mdAccountData = accountList
         .filter((a: Account) => a.receive_md)
         .map((a: Account) => `${a.source_name} (${a.account_id.toAccountId()})`)
 
     if(!mdAccountData.length) throw new Error('No account in KungFu system!')
 
-    const oldSourceAccount: {
-        [ propName: string ]: { 
-            accountId: string, 
-            sourceName: string
-        }
-    } = [
-        {}, 
-        ...accountList
-            .filter((a: Account) => a.receive_md) 
-    ]
+    const oldSourceAccount: OldSourceAccount = [{}, ...accountList.filter((a: Account) => a.receive_md)]
         .reduce((a: any, b: any): any => {
             const mdAccountId = `${b.source_name} (${b.account_id.toAccountId()})`;
             a[mdAccountId] = {
@@ -76,8 +73,11 @@ export const switchMdSource = async () => {
         }
     ])
 
+
     const newAccountIdResolved = `${selectedSource}_${newAccountId}`;
-    await changeAccountMd(oldAccountId, false);
-    await changeAccountMd(newAccountIdResolved, true);
+    if(newAccountIdResolved.indexOf(oldAccountId) === -1) {
+        await changeAccountMd(oldAccountId, false);
+        await changeAccountMd(newAccountIdResolved, true);
+    }
     console.log(`Change market data receiver account for ${selectedSource} from ${oldAccountId.toAccountId()} to ${newAccountIdResolved.toAccountId()} success!`)
 }
