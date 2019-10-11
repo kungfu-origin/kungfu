@@ -1,5 +1,6 @@
 
 import re
+import inspect
 
 def object_as_dict(obj):
     d = {}
@@ -7,9 +8,10 @@ def object_as_dict(obj):
         if not attr.startswith('__'):
             try:
                 value = getattr(obj, attr)
+                if not inspect.ismethod(value):
+                    d[attr] = value
             except UnicodeDecodeError:
                 continue
-            d[attr] = value
     return d
 
 def flatten_json(y):

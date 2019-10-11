@@ -29,5 +29,3 @@ class WCEncoder(json.JSONEncoder):
         if type(obj) in ENUM_TYPES:
             return int(obj)
         return json.JSONEncoder.default(self, obj)
-
-

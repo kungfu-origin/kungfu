@@ -8,6 +8,7 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
+#include <kungfu/wingchun/book/book.h>
 
 namespace kungfu
 {
@@ -22,6 +23,8 @@ namespace kungfu
 
                 virtual ~Ledger() = default;
 
+                book::BookContext_ptr get_book_context();
+
                 void publish(const std::string &msg);
 
                 void publish_broker_states(int64_t trigger_time);
@@ -32,17 +35,17 @@ namespace kungfu
 
                 virtual std::string handle_request(const yijinjing::event_ptr &event, const std::string &msg) = 0;
 
-                virtual void on_trader_started(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
+                virtual void handle_instrument_request(const yijinjing::event_ptr &event) = 0;
+
+                virtual void handle_asset_request(const yijinjing::event_ptr &event, const yijinjing::data::location_ptr &app_location) = 0;
+
+                virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
 
                 virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
 
                 virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
 
                 virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;
-
-                virtual void on_account_with_positions(const msg::data::Asset &asset, const std::vector<msg::data::Position> &positions) = 0;
-
-                virtual void on_account_with_position_details(const msg::data::Asset &asset, const std::vector<msg::data::PositionDetail> &position_details) = 0;
 
                 virtual void on_instruments(const std::vector<msg::data::Instrument> &instruments) = 0;
 
@@ -66,15 +69,20 @@ namespace kungfu
 
             private:
                 yijinjing::nanomsg::socket_ptr pub_sock_;
+
+                book::BookContext_ptr book_context_;
+
                 std::unordered_map<uint32_t, msg::data::BrokerState> broker_states_;
+
+                std::vector<msg::data::Instrument> instruments_;
+
+                void monitor_instruments();
 
                 msg::data::BrokerState get_broker_state(uint32_t broker_location) const;
 
                 void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 
                 void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);
-
-                void monitor_trader(uint32_t td_location_uid);
 
                 void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
 

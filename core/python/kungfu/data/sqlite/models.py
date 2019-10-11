@@ -6,6 +6,11 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+class ModelMixin(object):
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                setattr(self, attr, kwargs[attr])
 
 class Account(Base):
     __tablename__ = 'account_config'
@@ -14,20 +19,18 @@ class Account(Base):
     receive_md = Column(Boolean)
     config = Column(Json, nullable=False)
 
-
 class Holiday(Base):
     __tablename__ = "holidays"
     __table_args__ = (PrimaryKeyConstraint('region', 'holiday'),)
     region = Column(String)
     holiday = Column(Date)
 
-
-class FutureInstrument(Base):
+class FutureInstrument(ModelMixin, Base):
     __tablename__ = 'future_instrument'
     __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id'),)
     instrument_id = Column(String)
     exchange_id = Column(String)
-    instrument_type = Column(Integer)
+    instrument_type = Column(InstrumentType)
     product_id = Column(String)
     contract_multiplier  = Column(Integer)
     price_tick = Column(Float)
@@ -46,7 +49,7 @@ class Commission(Base):
     __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id', 'instrument_type'),)
     instrument_id = Column(String)
     exchange_id = Column(String)
-    instrument_type = Column(Integer)
+    instrument_type = Column(InstrumentType)
     account_id = Column(String)
     broker_id = Column(String)
     mode = Column(Integer)
@@ -55,15 +58,15 @@ class Commission(Base):
     close_today_ratio = Column(Float)
     min_commission = Column(Float)
 
-
-class Order(Base):
+class Order(ModelMixin, Base):
     __tablename__ = 'orders'
-    order_id = Column(String, primary_key = True)
+    order_id = Column(UINT64, primary_key = True)
     insert_time = Column(Integer)
     update_time = Column(Integer)
     trading_day = Column(String)
     instrument_id = Column(String)
     exchange_id = Column(String)
+    source_id = Column(String)
     account_id = Column(String)
     client_id = Column(String)
     instrument_type = Column(InstrumentType)
@@ -82,22 +85,18 @@ class Order(Base):
     price_type = Column(PriceType)
     volume_condition = Column(VolumeCondition)
     time_condition = Column(VolumeCondition)
-    parent_id = Column(String)
+    parent_id = Column(UINT64)
 
-    def __init__(self, **kwargs):
-        for attr in self.__mapper__.columns.keys():
-            if attr in kwargs:
-                setattr(self, attr, kwargs[attr])
-
-class Trade(Base):
+class Trade(ModelMixin, Base):
     __tablename__ = 'trades'
-    trade_id = Column(String, primary_key = True)
-    order_id = Column(String, nullable = False)
-    parent_order_id = Column(String)
+    trade_id = Column(UINT64, primary_key = True)
+    order_id = Column(UINT64, nullable = False)
+    parent_order_id = Column(UINT64)
     trade_time = Column(Integer)
     trading_day = Column(String)
     instrument_id = Column(String)
     exchange_id = Column(String)
+    source_id = Column(String)
     account_id = Column(String)
     client_id = Column(String)
     instrument_type = Column(InstrumentType)
@@ -107,16 +106,12 @@ class Trade(Base):
     volume = Column(Integer)
     tax = Column(Float)
     commission = Column(Float)
-    def __init__(self, **kwargs):
-        for attr in self.__mapper__.columns.keys():
-            if attr in kwargs:
-                setattr(self, attr, kwargs[attr])
 
-class AssetMixin:
+class AssetMixin(ModelMixin):
     trading_day = Column(String)
     update_time = Column(Integer)
-    ledger_category = Column(Integer)
-    future_position_valuation_method = Column(Integer)
+    holder_uid = Column(Integer)
+    ledger_category = Column(LedgerCategory)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
@@ -136,37 +131,31 @@ class AssetMixin:
     position_pnl = Column(Float)
     close_pnl = Column(Float)
 
-    def __init__(self, **kwargs):
-        for attr in self.__mapper__.columns.keys():
-            if attr in kwargs:
-                setattr(self, attr, kwargs[attr])
-
 class Asset(AssetMixin, Base):
     __tablename__ = "asset"
-    __table_args__ = (PrimaryKeyConstraint('account_id','client_id', 'ledger_category'),)
-
+    __table_args__ = (PrimaryKeyConstraint('holder_uid'),)
 
 class AssetSnapshot(AssetMixin, Base):
     __tablename__ = "asset_snapshot"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id', 'ledger_category', 'update_time'),)
+    __table_args__ = (PrimaryKeyConstraint("holder_uid", 'update_time'),)
 
-
-class Position(Base):
+class Position(ModelMixin, Base):
     __tablename__ = "position"
-    __table_args__ = (PrimaryKeyConstraint('account_id', 'client_id', 'ledger_category', 'instrument_id', 'exchange_id', 'direction'),)
-
+    id = Column(UINT64, primary_key = True)
     update_time = Column(Integer)
     trading_day = Column(String)
 
     instrument_id = Column(String)
-    instrument_type = Column(Integer)
+    instrument_type = Column(InstrumentType)
     exchange_id = Column(String)
 
+    holder_uid = Column(Integer)
+    ledger_category = Column(LedgerCategory)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
 
-    direction = Column(Integer)
+    direction = Column(Direction)
     volume = Column(Integer)
     yesterday_volume = Column(Integer)
     frozen_total = Column(Integer)
@@ -192,17 +181,13 @@ class Position(Base):
     margin_ratio = Column(Float)
     contract_multiplier = Column(Integer)
 
-    ledger_category = Column(Integer)
-
     def __init__(self, **kwargs):
-        for attr in self.__mapper__.columns.keys():
-            if attr in kwargs:
-                setattr(self, attr, kwargs[attr])
+        super(Position, self).__init__(**kwargs)
+        self.id = self.holder_uid << 32 ^ pyyjj.hash_str_32("{}.{}.{}".format(self.instrument_id, self.exchange_id, self.direction))
 
-
-class PositionDetail(Base):
+class PositionDetail(ModelMixin, Base):
     __tablename__ = "position_detail"
-    __table_args__ = (PrimaryKeyConstraint('ledger_category', 'trade_id'),)
+    __table_args__ = (PrimaryKeyConstraint('holder_uid', 'trade_id'),)
 
     update_time = Column(Integer)
     trading_day = Column(String)
@@ -211,11 +196,12 @@ class PositionDetail(Base):
     instrument_type = Column(String)
     exchange_id = Column(String)
 
+    holder_uid = Column(Integer)
     account_id = Column(String)
     source_id = Column(String)
     client_id = Column(String)
 
-    direction = Column(Integer)
+    direction = Column(Direction)
 
     volume = Column(Integer)
     frozen_volume = Column(Integer)
@@ -228,21 +214,11 @@ class PositionDetail(Base):
 
     open_date = Column(String)
 
-    trade_id = Column(String)
+    trade_id = Column(UINT64)
     trade_time = Column(Integer)
 
     margin_ratio = Column(Float)
     contract_multiplier = Column(Integer)
-
-    ledger_category = Column(Integer)
-
-    def __init__(self, **kwargs):
-        for attr in self.__mapper__.columns.keys():
-            if attr in kwargs:
-                value = kwargs[attr]
-                if attr == "trade_id":
-                    value = str(value)
-                setattr(self, attr, value)
 
 class Location(Base):
     __tablename__ = "location"

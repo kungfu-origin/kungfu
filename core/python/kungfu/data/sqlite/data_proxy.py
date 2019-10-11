@@ -1,15 +1,19 @@
 
 import json
 from .models import *
+from . import object_as_dict
+from . import make_url
 from itertools import groupby
+import pyyjj
 from kungfu.yijinjing.journal import make_location_from_dict
-import kungfu.wingchun.finance as kwf
-from kungfu.wingchun.constants import *
+import kungfu.wingchun.utils as wc_utils
+import kungfu.wingchun.msg as wc_msg
+import kungfu.wingchun.constants as wc_constants
+import kungfu.wingchun.book as kwb
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import not_
-from . import object_as_dict
-from . import make_url
+
 
 class SessionFactoryHolder:
     def __init__(self, location, filename):
@@ -68,7 +72,7 @@ class CalendarDB(SessionFactoryHolder):
     def __init__(self, location, filename):
         super(CalendarDB, self).__init__(location, filename)
 
-    def get_holidays(self, region=Region.CN):
+    def get_holidays(self, region=wc_constants.Region.CN):
         with session_scope(self.session_factory) as session:
             return [obj.holiday for obj in session.query(Holiday).filter(Holiday.region == region).all()]
 
@@ -87,15 +91,15 @@ class LedgerDB(SessionFactoryHolder):
     def add_location(self, location):
         with session_scope(self.session_factory) as session:
             if not session.query(Location).get(location.uid):
-                loc_obj = Location(location.uid, {"uid": location.uid, "uname": location.uname, "mode": location.mode,
-                                        "category": location.category, "group": location.group, "name": location.name})
+                info = {"uid": location.uid, "uname": location.uname, "mode": pyyjj.get_mode_name(location.mode),"category":  pyyjj.get_category_name(location.category), "group": location.group, "name": location.name}
+                loc_obj = Location(uid = location.uid, info = info)
                 session.add(loc_obj)
 
-    def on_messages(self, messages):
+    def on_book_event(self, event):
         with session_scope(self.session_factory) as session:
-            for message in messages:
-                obj = self.object_from_msg(message)
-                session.merge(obj)
+            cls = self.get_model_cls(event["msg_type"])
+            obj = cls(**event["data"])
+            session.merge(obj)
 
     def add_trade(self, **kwargs):
         with session_scope(self.session_factory) as session:
@@ -112,10 +116,13 @@ class LedgerDB(SessionFactoryHolder):
 
     def mark_orders_status_unknown(self, source_id, account_id):
         with session_scope(self.session_factory) as session:
-            pending_orders = session.query(Order).filter(Order.account_id == account_id, not_(Order.status.in_(AllFinalOrderStatus))).all()
-            for order in pending_orders:
-                order.status = int(OrderStatus.Unknown)
-            return [object_as_dict(order) for order in pending_orders]
+            orders = session.query(Order).filter(Order.account_id == account_id).all()
+            pending_orders = []
+            for order in orders:
+                if order.status not in wc_constants.AllFinalOrderStatus:
+                    order.status = wc_constants.OrderStatus.Unknown
+                    pending_orders.append(order)
+        return [object_as_dict(order) for order in pending_orders]
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass
@@ -136,59 +143,46 @@ class LedgerDB(SessionFactoryHolder):
             objs = session.query(FutureInstrument).all()
             return [object_as_dict(obj) for obj in objs]
 
-    def drop(self, session, book_tags):
+    def _drop_book(self, session, uid):
         for cls in [Asset, Position, PositionDetail]:
-            session.query(cls).filter(cls.source_id==book_tags.source_id, cls.account_id == book_tags.account_id,
-                                      cls.client_id == book_tags.client_id,cls.ledger_category == int(book_tags.ledger_category)).delete()
+            session.query(cls).filter(cls.holder_uid==uid).delete()
 
-    def load(self, ctx, book_tags):
+    def load_book(self, ctx, location):
         with session_scope(self.session_factory) as session:
-            asset_obj = session.query(Asset).filter(Asset.source_id==book_tags.source_id,
-                                                    Asset.account_id==book_tags.account_id,
-                                                    Asset.client_id ==book_tags.client_id,
-                                                    Asset.ledger_category==int(book_tags.ledger_category)).first()
+            asset_obj = session.query(Asset).get(location.uid)
             if not asset_obj:
                 return None
             else:
                 args = object_as_dict(asset_obj)
-                pos_objs = session.query(Position).filter(Position.source_id==book_tags.source_id,
-                                                          Position.account_id==book_tags.account_id,
-                                                          Position.client_id==book_tags.client_id,
-                                                          Position.ledger_category==int(book_tags.ledger_category)).all()
-                detail_objs = session.query(PositionDetail).filter(PositionDetail.source_id==book_tags.source_id,
-                                                                   PositionDetail.account_id==book_tags.account_id,
-                                                                   PositionDetail.client_id==book_tags.client_id,
-                                                                   PositionDetail.ledger_category==int(book_tags.ledger_category)).all()
-                detail_dicts = [ object_as_dict(detail) for detail in detail_objs]
-                pos_dicts = [object_as_dict(pos) for pos in pos_objs]
-                for pos in pos_dicts:
-                    pos.update({"details": detail_dicts})
-                args.update({"positions": pos_dicts, "tags": book_tags})
-                return kwf.book.AccountBook(ctx=ctx, **args)
+                pos_objs = session.query(Position).filter(Position.holder_uid == location.uid).all()
+                args.update({"positions": [object_as_dict(pos) for pos in pos_objs]})
+                book = kwb.book.AccountBook(ctx=ctx, location = location, **args)
+                return book
 
-    def dump(self, book):
+    def dump_book(self, book):
         with session_scope(self.session_factory) as session:
-            self.drop(session, book.tags)
-            messages = book.detail_messages
-            objects = [self.object_from_msg(message) for message in messages]
+            self._drop_book(session, book.location.uid)
+            events = [book.event] + [ position.event for position in book.positions]
+            objects = []
+            for e in events:
+                e_dict = e.as_dict()
+                cls = self.get_model_cls(e_dict["msg_type"])
+                obj = cls(**e_dict["data"])
+                objects.append(obj)
             session.bulk_save_objects(objects)
 
-    def remove(self,book_tags):
+    def remove_book(self, uid):
         with session_scope(self.session_factory) as session:
-            self.drop(session, book_tags)
+            self._drop_book(session, uid)
 
     def get_model_cls(self, msg_type):
-        if msg_type == MsgType.Asset:
+        if msg_type == wc_msg.Asset:
             return Asset
-        elif msg_type == MsgType.Position:
+        elif msg_type == wc_msg.Position:
             return Position
-        elif msg_type == MsgType.PositionDetail:
+        elif msg_type == wc_msg.PositionDetail:
             return PositionDetail
-        elif msg_type == MsgType.AssetSnapshot:
+        elif msg_type == wc_msg.AssetSnapshot:
             return AssetSnapshot
         else:
             raise ValueError('could not find class for msg_type {}'.format(msg_type))
-
-    def object_from_msg(self, message):
-        cls =  self.get_model_cls(message["msg_type"])
-        return cls(**message["data"])

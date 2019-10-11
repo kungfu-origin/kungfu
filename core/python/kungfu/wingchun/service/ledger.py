@@ -1,24 +1,24 @@
 import pywingchun
+import pyyjj
 import json
 import http
 import functools
 import sys
 import traceback
-from itertools import groupby
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.msg as yjj_msg
 from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import LedgerDB
-import kungfu.wingchun.finance as kwf
+import kungfu.wingchun.book as kwb
 from kungfu.wingchun.calendar import Calendar
-from kungfu.wingchun.constants import OrderStatus, MsgType, LedgerCategory, ValuationMethod
+from kungfu.wingchun.constants import OrderStatus
 import kungfu.wingchun.utils as wc_utils
 import kungfu.msg.utils as msg_utils
+import kungfu.wingchun.constants as wc_constants
 
 DEFAULT_INIT_CASH = 1e7
-
 HANDLERS = dict()
 
 def on(msg_type):
@@ -37,7 +37,6 @@ def handle(msg_type, *args, **kwargs):
         args[0].logger.error("invalid msg_type %s", msg_type)
     return HANDLERS[msg_type](*args, **kwargs)
 
-
 class Ledger(pywingchun.Ledger):
     def __init__(self, ctx):
         pywingchun.Ledger.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
@@ -46,7 +45,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
-        self.ctx.inst_infos = {}
+        self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.db.all_instrument_infos()}
         self.ctx.orders = {}
         self.ctx.trading_day = None
         self.ctx.books = {}
@@ -62,13 +61,44 @@ class Ledger(pywingchun.Ledger):
         location = kfj.get_location_from_json(self.ctx, data)
         return json.dumps(handle(req['msg_type'], self.ctx, event, location, data))
 
-    def on_trader_started(self, trigger_time, location):
-        self.ctx.logger.info("on trader started, trigger_time:{}, uname:{}".format(trigger_time, location.uname))
-        account_id = location.name
-        source_id = location.group
-        orders = self.ctx.db.mark_orders_status_unknown(source_id, account_id)
-        for order in orders:
-            self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls = wc_utils.WCEncoder))
+    def handle_instrument_request(self, event):
+        self.ctx.logger.info("handle instrument request from [{:08x}]".format(event.source))
+        writer = self.get_writer(event.source)
+        for inst_dict in self.ctx.inst_infos.values():
+            inst = pywingchun.Instrument()
+            for attr, value in inst_dict.items():
+                if hasattr(inst, attr) and attr != "raw_address":
+                    setattr(inst,attr, value)
+            writer.write_data(0, msg.Instrument, inst)
+        writer.mark(0, msg.InstrumentEnd)
+
+    def handle_asset_request(self, event, location):
+        self.ctx.logger.info("handle asset request for {} [{:08x}] from [{:08x}] ".format(location.uname, location.uid, event.source))
+        book = self._get_book(location)
+        writer = self.get_writer(event.source)
+        writer.write_data(0, book.event.msg_type, book.event.data)
+        for position in book.positions:
+            event = position.event
+            writer.write_data(0, event.msg_type, event.data)
+        position_end = pywingchun.PositionEnd(book.location.uid)
+        writer.write_data(0, msg.PositionEnd, position_end)
+
+    def on_app_location(self, trigger_time, location):
+        self.ctx.logger.info("{} {} [{:08x}]".format(kft.strftime(trigger_time), location.uname, location.uid))
+        if location.category == pyyjj.category.TD:
+            tags = kwb.book.AccountBookTags.make_from_location(location)
+            self.ctx.logger.info("mark orders status unknown for {}[{:08x}] with tags: {}".format(location.uname, location.uid, tags))
+            orders = self.ctx.db.mark_orders_status_unknown(tags.source_id, tags.account_id)
+            for order in orders:
+                self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls = wc_utils.WCEncoder))
+            book = self._get_book(location)
+            book.subject.subscribe(self.on_book_event)
+            self.book_context.add_book(location, book)
+        elif location.category == pyyjj.category.STRATEGY:
+            book = self._get_book(location)
+            book.subject.subscribe(self.on_book_event)
+            self.book_context.add_book(location, book)
+        self.ctx.db.add_location(location)
 
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
@@ -78,18 +108,22 @@ class Ledger(pywingchun.Ledger):
         self.ctx.trading_day = trading_day
         for book in self.ctx.books.values():
             book.apply_trading_day(trading_day)
-            self.ctx.db.dump(book)
+            self.ctx.db.dump_book(book)
 
     def on_quote(self, event, quote):
-        self.ctx.logger.debug('on quote')
-        for book in self.ctx.books.values():
-            book.apply_quote(quote)
+        pass
 
     def get_location(self, location_uid):
         if self.has_location(location_uid):
             return pywingchun.Ledger.get_location(self, location_uid)
         else:
             return self.ctx.db.get_location(self.ctx, location_uid)
+
+    def on_book_event(self, event):
+        self.ctx.logger.debug("book event received: {}".format(event))
+        event = event.as_dict()
+        self.ctx.db.on_book_event(event)
+        self.publish(json.dumps(event, cls= wc_utils.WCEncoder))
 
     def on_order(self, event, order):
         self.ctx.logger.debug('on order %s', order)
@@ -128,16 +162,13 @@ class Ledger(pywingchun.Ledger):
             if not wc_utils.is_final_status(order["status"]):
                 order["volume_left"] = order["volume_left"]- trade.volume
                 order["volume_traded"] = order["volume_traded"]+ trade.volume
-                order["status"] = int(OrderStatus.PartialFilledActive) if order["volume_left"] > 0 else int(OrderStatus.PartialFilledNotActive)
+                order["status"] = OrderStatus.PartialFilledActive if order["volume_left"] > 0 else OrderStatus.PartialFilledNotActive
                 self.ctx.db.add_order(**order)
                 self.publish(json.dumps(order_record, cls = wc_utils.WCEncoder))
             else:
                 self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
         self.ctx.db.add_trade(**frame_as_dict["data"])
         self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
-        
-        self._get_book(book_tags= kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id)).apply_trade(trade)
-        self._get_book(book_tags=kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=client_id)).apply_trade(trade)
 
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
@@ -146,48 +177,16 @@ class Ledger(pywingchun.Ledger):
             self.ctx.db.set_instruments(dicts)
             self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in dicts}
 
-    def on_account_with_positions(self, asset, positions):
-        self.ctx.logger.info("asset: {}".format(asset))
-        for pos in positions:
-            self.ctx.logger.info("pos: {}".format(pos))
-        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
-        account = kwf.book.AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,
-                                       future_position_valuation_method = ValuationMethod.AverageCost,
-                                       positions=[msg_utils.object_as_dict(pos) for pos in positions])
-        book = self._get_book(book_tags).merge(account)
-        self.publish(json.dumps(book.message))
-        self.ctx.db.dump(book)
-
-    def on_account_with_position_details(self, asset, position_details):
-        self.ctx.logger.info("asset: {}".format(asset))
-        for detail in position_details:
-            self.ctx.logger.info("pos detail: {}".format(detail))
-        positions = []
-        key_func = lambda e: kwf.position.get_uid(e.instrument_id, e.exchange_id, e.direction)
-        sorted_position_details = sorted(position_details, key=key_func)
-        for uid, detail_group in groupby(sorted_position_details, key=key_func):
-            detail_list = list(detail_group)
-            direction = detail_list[0].direction
-            instrument_id = detail_list[0].instrument_id
-            exchange_id = detail_list[0].exchange_id
-            pos_dict = {"instrument_id": instrument_id, "exchange_id": exchange_id, "direction": direction, "details": [msg_utils.object_as_dict(detail) for detail in detail_list]}
-            positions.append(pos_dict)
-        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
-        account_book = kwf.book.AccountBook(ctx=self.ctx, avail=asset.avail,tags = book_tags, positions= positions)
-        book = self._get_book(book_tags).merge(account_book)
-        self.publish(json.dumps(book.message))
-        self.ctx.db.dump(book)
 
     def _dump_snapshot(self, data_frequency="minute"):
         messages = []
         for book in self.ctx.books.values():
-            message = book.message
-            message["msg_type"] = int(MsgType.AssetSnapshot)
+            event = book.event.as_dict()
+            event["msg_type"] = msg.AssetSnapshot
             tags = {"update_time": self.now(), "data_frequency": data_frequency}
-            message["data"].update(tags)
-            self.publish(json.dumps(message))
-            messages.append(message)
-        self.ctx.db.on_messages(messages)
+            event["data"].update(tags)
+            self.ctx.db.on_book_event(event)
+            self.publish(json.dumps(event, cls = wc_utils.WCEncoder))
 
     def _switch_day(self):
         self.publish(json.dumps({
@@ -195,23 +194,22 @@ class Ledger(pywingchun.Ledger):
             'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
         self._dump_snapshot(data_frequency="daily")
 
-    def has_book(self, book_tags):
-        return book_tags in self.ctx.books
+    def has_book(self, uid):
+        return uid in self.ctx.books
 
-    def pop_book(self, book_tags):
-        return self.ctx.books.pop(book_tags, None)
+    def pop_book(self, uid):
+        return self.ctx.books.pop(uid, None)
 
-    def _get_book(self, book_tags):
-        if book_tags not in self.ctx.books:
-            book = self.ctx.db.load(ctx = self.ctx,book_tags=book_tags)
+    def _get_book(self, location):
+        if location.uid not in self.ctx.books:
+            book_tags = kwb.book.AccountBookTags.make_from_location(location)
+            book = self.ctx.db.load_book(ctx = self.ctx, location=location)
             if not book:
-                self.ctx.logger.info("failed to load book from sqlite, tags: {}".format(book_tags))
-                book = kwf.book.AccountBook(self.ctx, tags = book_tags, avail=DEFAULT_INIT_CASH)
-            book.register_callback(lambda messages: [self.publish(json.dumps(message)) for message in messages])
-            book.register_callback(self.ctx.db.on_messages)
-            self.ctx.books[book_tags] = book
-            self.ctx.logger.info("success to init ledger, tags: {}".format(book_tags))
-        return self.ctx.books[book_tags]
+                self.ctx.logger.info("failed to load book from sqlite for {} [{:08x}]".format(location.uname, location.uid))
+                book = kwb.book.AccountBook(self.ctx, location = location, avail=DEFAULT_INIT_CASH)
+            self.ctx.books[location.uid] = book
+            self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
+        return self.ctx.books[location.uid]
 
     def get_inst_info(self, instrument_id):
         if not instrument_id in self.ctx.inst_infos:
@@ -292,7 +290,7 @@ def cancel_all_order(ctx, event, location, data):
 @on(msg.QryAsset)
 def qry_asset(ctx, event, location, data):
     ctx.logger.info("qry asset, input: {}".format(data))
-    book_tags = kwf.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
+    book_tags = kwb.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
     if book_tags in ctx.books:
         message = ctx.books[book_tags].message
         message.update({'status': http.HTTPStatus.OK, 'msg_type': msg.QryAsset})
@@ -328,7 +326,7 @@ def remove_strategy(ctx, event, location, data):
             'msg_type': msg.RemoveStrategy
         }
     else:
-        book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=data["name"])
+        book_tags = kwb.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=data["name"])
         ctx.ledger.pop_book(book_tags=book_tags)
         ctx.db.remove(book_tags=book_tags)
         return {

@@ -66,12 +66,14 @@ class Master(pyyjj.master):
         self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
 
     def on_exit(self):
+        pyyjj.master.on_exit(self)
         self.ctx.logger.info('master checking on exit')
 
         for pid in self.ctx.apprentices:
             apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
                 self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
+                self.deregister_app(pyyjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
                 apprentice.terminate()
 
         count = 0

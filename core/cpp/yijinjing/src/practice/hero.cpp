@@ -52,6 +52,20 @@ namespace kungfu
             }
         }
 
+        bool hero::has_channel(uint64_t hash) const
+        {
+            return channels_.find(hash) != channels_.end();
+        }
+
+        const yijinjing::msg::data::Channel& hero::get_channel(uint64_t hash) const
+        {
+            if(not this->has_channel(hash))
+            {
+                throw yijinjing_error(fmt::format("has no channel for [{:08x}]", hash));
+            }
+            return channels_.at(hash);
+        }
+
         bool hero::has_writer(uint32_t dest_id)
         {
             return writers_.find(dest_id) != writers_.end();
@@ -110,21 +124,6 @@ namespace kungfu
                             SPDLOG_ERROR("Unexpected exception: {}", ex.what());
                             return observable<>::error<event_ptr>(ex);
                         }
-                    }) | finally(
-                    [&]()
-                    {
-                        try
-                        {
-                            if (writers_.find(0) != writers_.end())
-                            {
-                                writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
-                            }
-                        }
-                        catch (const std::exception &ex)
-                        {
-                            SPDLOG_ERROR("Unexpected exception when closing journal session: {}", ex.what());
-                        }
-
                     }) | publish();
 
             react();
@@ -151,6 +150,48 @@ namespace kungfu
             } else
             {
                 SPDLOG_ERROR("location [{:08x}] not exists", location_uid);
+            }
+        }
+
+        void hero::register_channel(int64_t trigger_time, const yijinjing::msg::data::Channel &channel)
+        {
+            uint64_t channel_uid = uint64_t(channel.source_id) << 32 | channel.dest_id;
+            channels_[channel_uid] = channel;
+            SPDLOG_INFO("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
+                    has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
+                    has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
+        }
+
+        void hero::deregister_channel(int64_t trigger_time, uint64_t channel_uid)
+        {
+            if (has_channel(channel_uid))
+            {
+                channels_.erase(channel_uid);
+                SPDLOG_INFO("deregister-ed channel [{:08x}]", channel_uid);
+            } else
+            {
+                SPDLOG_ERROR("channel [{:08x}] not exists", channel_uid);
+            }
+        }
+
+        void hero::deregister_channel_by_source(uint32_t source_id)
+        {
+            auto channel_it = channels_.begin();
+            while (channel_it != channels_.end())
+            {
+                if (channel_it->second.source_id == source_id)
+                {
+                    const auto& channel_uid = channel_it->first;
+                    const auto& channel = channel_it->second;
+                    SPDLOG_INFO("deregister-ed channel [{:08x}] from {} [{:08x}] to {} [{:08x}]", channel_uid,
+                                has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
+                                has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
+                    channel_it = channels_.erase(channel_it);
+                }
+                else
+                {
+                    channel_it++;
+                }
             }
         }
 

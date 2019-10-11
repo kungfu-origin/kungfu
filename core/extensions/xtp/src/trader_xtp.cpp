@@ -240,19 +240,23 @@ namespace kungfu
                 {
                     auto writer = get_writer(0);
                     msg::data::Position &stock_pos = writer->open_data<msg::data::Position>(0, msg::type::Position);
-                    strcpy(stock_pos.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
                         from_xtp(*position, stock_pos);
                     }
+                    strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+                    strncpy(stock_pos.source_id , SOURCE_XTP, SOURCE_ID_LEN);
+                    stock_pos.holder_uid = get_io_device()->get_home()->uid;
                     stock_pos.instrument_type = get_instrument_type(stock_pos.instrument_id, stock_pos.exchange_id);
                     stock_pos.direction = Direction::Long;
-                    strcpy(stock_pos.trading_day, this->trading_day_.c_str());
+                    strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
                     stock_pos.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
                     if (is_last)
                     {
-                        writer->mark(0, msg::type::PositionEnd);
+                        msg::data::PositionEnd &end = writer->open_data<msg::data::PositionEnd>(0, msg::type::PositionEnd);
+                        end.holder_uid = get_io_device()->get_home()->uid;
+                        writer->close_data();
                     }
                 }
             }
@@ -271,11 +275,14 @@ namespace kungfu
                 {
                     auto writer = get_writer(0);
                     msg::data::Asset &account = writer->open_data<msg::data::Asset>(0, msg::type::Asset);
-                    strcpy(account.account_id, get_account_id().c_str());
                     if (error_info == nullptr || error_info->error_id == 0)
                     {
                         from_xtp(*asset, account);
                     }
+                    strncpy(account.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+                    strncpy(account.source_id , SOURCE_XTP, SOURCE_ID_LEN);
+                    strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
+                    account.holder_uid = get_io_device()->get_home()->uid;
                     account.update_time = kungfu::yijinjing::time::now_in_nano();
                     writer->close_data();
                     req_position();
