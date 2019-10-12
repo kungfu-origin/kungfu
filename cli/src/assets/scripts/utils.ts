@@ -152,8 +152,8 @@ export const parseAccountList = (target: any, accountList: Account[]) => {
 export const dealStatus = (status: string) => {
 	status = status || '--'
 	if(status === 'online') return colors.green(status);
-	else if(status === 'error') return colors.red(status);
-	else return colors.grey(status)
+	else if(status.indexOf('error') !== -1) return colors.red(status);
+	else return status
 }
 
 export const dealNum = (num: number, percentage?: boolean) => {
@@ -180,7 +180,7 @@ export const dealLog = (item: LogData) => {
 
 export const buildTargetDateRange = () => {
 	const momentDay = moment();
-	const startDate = momentDay.add(-1, 'd').format('YYYYMMDD')
+	const startDate = momentDay.add(-3, 'd').format('YYYYMMDD')
 	const endDate = momentDay.add(2,'d').format('YYYYMMDD')
 	return [startDate, endDate]
 }

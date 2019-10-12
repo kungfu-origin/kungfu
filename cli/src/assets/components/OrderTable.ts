@@ -1,7 +1,7 @@
 import Table from '@/assets/components/Table';
 import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
 
-const colors = require('colors');
+const colors = require('colors/safe');
 
 interface OrdersData {
 	[propName: string]: OrderData
@@ -46,7 +46,7 @@ class OrderTable extends Table {
 			let statusName = o.statusName
 			if([3, 5, 6].indexOf(+o.status) !== -1) statusName = colors.green(statusName);
 			else if(+o.status === 4) statusName = colors.red(statusName);
-			else statusName = colors.grey(statusName);
+			else statusName = statusName;
 
 			let last = o.clientId;
 			if(t.type === 'strategy') {
