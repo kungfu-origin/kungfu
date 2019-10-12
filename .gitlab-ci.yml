@@ -26,6 +26,7 @@ build_centos:
     - yarn build
   only:
     - dev
+    - cli2_dev
 build_macosx:
   stage: build
   tags:
