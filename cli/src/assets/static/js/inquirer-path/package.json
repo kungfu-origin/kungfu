@@ -1,0 +1,50 @@
+{
+  "name": "inquirer-path",
+  "description": "An Inquirer extension to support path questions",
+  "author": "Alexandre Massonneau <aam229@cornell.edu> (http://github.com/aam229)",
+  "license": "MIT",
+  "version": "1.0.0-beta4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aam229/inquirer-path.git"
+  },
+  "homepage": "https://github.com/aam229/inquirer-path",
+  "main": "lib/index.js",
+  "scripts": {
+    "compile": "babel src/ --out-dir lib/",
+    "compile-watch": "babel src/ --out-dir lib/ --watch",
+    "lint": "eslint -c .eslintrc src bin",
+    "fix-lint": "eslint --fix -c .eslintrc src bin",
+    "docs": "documentation build -c documentation.yml -f html -o docs src/**",
+    "docs-watch": "documentation serve --watch -c documentation.yml -f html src/**",
+    "docs-md": "documentation build -c documentation.yml -f md -o DOCUMENTATION.md src/**",
+    "prepublish": "npm run compile && npm run lint"
+  },
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "inquirer": "^3.1.0",
+    "run-async": "^2.3.0"
+  },
+  "devDependencies": {
+    "babel-cli": "6.24.1",
+    "babel-eslint": "7.2.3",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-flow": "6.23.0",
+    "babel-preset-stage-0": "6.24.1",
+    "eslint": "3.19.0",
+    "eslint-config-airbnb": "15.0.1",
+    "eslint-loader": "1.7.1",
+    "eslint-plugin-flowtype": "2.34.0",
+    "eslint-plugin-import": "2.3.0",
+    "eslint-plugin-jsx-a11y": "5.0.3",
+    "eslint-plugin-react": "7.0.1",
+    "flow-bin": "0.47.0"
+  },
+  "engines": {
+    "node": ">=4.1.1",
+    "npm": ">=3.3.12"
+  },
+  "bugs": {
+    "url": "https://github.com/aam229/inquirer-path/issues"
+  }
+}

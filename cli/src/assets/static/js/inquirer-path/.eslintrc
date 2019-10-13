@@ -1,0 +1,24 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "eslint-config-airbnb",
+    "plugin:flowtype/recommended"
+  ],
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "no-confusing-arrow": "off"
+  },
+  "plugins": [
+    "import",
+    "flowtype"
+  ],
+  "settings": {
+    "import/parser": "babel-eslint",
+    "import/resolve": {
+      "moduleDirectory": ["node_modules", "src"]
+    }
+  },
+  "globals": {}
+}
