@@ -7,7 +7,7 @@ import { parseSources } from '@/assets/scripts/utils';
 const os = require('os');
 const colors = require('colors');
 const inquirer = require( 'inquirer' );
-const { PathPrompt } = require('inquirer-path');
+const { PathPrompt } = require('__gStatic/inquirer-path');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 
