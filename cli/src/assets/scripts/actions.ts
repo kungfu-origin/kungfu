@@ -381,11 +381,10 @@ export const tradingDataNanoObservable = (type: string, id: string) => {
             const tradingData = d.data;
             const { account_id, client_id } = tradingData; 
             const ledgerCategory = tradingData.ledger_category;
-            let targetId: string = '';
-            if(type === 'account') targetId = account_id
-            else if (type === 'stratgy') targetId = client_id
-            
-            if(targetId !== id.toAccountId()) return;
+            const targetId = type === 'account' ? account_id : client_id;
+            const currentId = type === 'account' ? id.toAccountId() : id;
+
+            if(targetId !== currentId) return;
             switch (+msgType) {
                 case MSG_TYPE.order:
                     observer.next(['order', dealOrder(tradingData)]);

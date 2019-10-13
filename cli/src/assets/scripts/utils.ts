@@ -180,8 +180,8 @@ export const dealLog = (item: LogData) => {
 
 export const buildTargetDateRange = () => {
 	const momentDay = moment();
-	const startDate = momentDay.add(-3, 'd').format('YYYYMMDD')
-	const endDate = momentDay.add(2,'d').format('YYYYMMDD')
+	const startDate = momentDay.add(-2, 'd').format('YYYYMMDD')
+	const endDate = momentDay.add(3,'d').format('YYYYMMDD')
 	return [startDate, endDate]
 }
 
