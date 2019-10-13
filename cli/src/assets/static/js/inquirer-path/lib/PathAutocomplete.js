@@ -34,7 +34,7 @@ var PathAutocomplete = function () {
     _classCallCheck(this, PathAutocomplete);
 
     this.cwd = new _Path2.default(cwd);
-    if (!this.cwd.isExistingDirectory()) {
+    if (!this.cwd.isExistingDirectory() && directoryOnly) {
       throw new Error('The provided working directory ' + cwd + ' does not exist or is not a directory.');
     }
     this.path = this.cwd;

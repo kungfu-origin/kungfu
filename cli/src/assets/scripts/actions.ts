@@ -221,20 +221,23 @@ const dealLogMessage = (line: string, processId: string) => {
     }
     let messages = lineData.message.split('\n').filter((m: string) => m !== '');
     return messages.map((message: string) => {
-        message = message.split('\n[')
-            .join('[')
+        message = message.split('\n[').join('[')
+
+        if(message.split('[').length < 4) {
+            const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000000000');
+            const type = 'error'.indexOf(lineData.type) !== -1 ? 'error' : lineData.type;
+            message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
+        }
+
+        message = message
             .replace(/\[  info  \]/g, `[ ${colors[logColor.info]('info')}    ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[ trace  \]/g, `[ trace   ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[ error  \]/g, `[ ${colors[logColor.error]('error')}   ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[warning \]/g, `[ ${colors[logColor.warning]('warning')} ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[ debug  \]/g, `[ ${colors[logColor.debug]('debug')}   ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] [${renderColoredProcessName(processId)}]`)
-        if(
-            message.indexOf('Failed') !== -1 ||
-            message.indexOf('Traceback') !== -1 ||
-            message.indexOf('critical') !== -1 ||
-            message.indexOf('uncaught exception') !== -1
-        ) message = `${colors[logColor.critical](message)}`
+    
+        if(message.indexOf('critical') !== -1) message = `${colors[logColor.critical](message)}`
         
         return { 
             message,
