@@ -23,13 +23,13 @@ export const updateAccountStrategy = async () => {
     const splits = processes.split(" ");
     const targetType = splits[0].trim();
     const targetId = splits[splits.length - 1].trim();
-    const type = targetType.indexOf('strategy') !== -1 
-    ? 'strategy' 
-    : targetType.indexOf('account') !== -1 
-        ? 'account' 
-        : undefined;
-    
-    if(type === 'account') {
+    const type = targetType.indexOf('strategy') !== -1
+        ? 'strategy'
+        : targetType.indexOf('account') !== -1
+            ? 'account'
+            : undefined;
+
+    if (type === 'account') {
         const targetAccount = accounts.filter((a: Account) => a.account_id === targetId)
         const source = targetId.split('_')[0];
         const accountData = JSON.parse(targetAccount[0].config || "{}");
@@ -39,7 +39,7 @@ export const updateAccountStrategy = async () => {
 
         Object.keys(config || {}).forEach(k => {
             const str = config[k].toString().trim();
-            if(str === '' || str === 'NaN') {
+            if (str === '' || str === 'NaN') {
                 config[k] = null
                 delete config[k]
             }
@@ -48,14 +48,19 @@ export const updateAccountStrategy = async () => {
         console.log('Diff: ', config)
 
         try {
-            await addUpdateAccountByPrompt(source, key, {
-                ...accountData,
-                ...config
-            }, true)
+            await addUpdateAccountByPrompt(
+                source, 
+                key, 
+                {
+                    ...accountData,
+                    ...config
+                }, 
+                true
+            )
         } catch (err) {
             console.error(err)
         }
-    } else if(type === 'strategy') {
+    } else if (type === 'strategy') {
         const targetStrategy = strategys.filter((s: Strategy) => s.strategy_id === targetId)
         const strategyData = targetStrategy[0] || {}
         try {

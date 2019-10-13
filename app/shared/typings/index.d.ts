@@ -185,7 +185,7 @@ interface AccountSettingItem {
     required?: boolean,
     validator?: any[],
     tip?: string,
-    data? : any[],
+    data?: any[],
     default?: any
 }
 
