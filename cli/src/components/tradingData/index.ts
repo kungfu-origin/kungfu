@@ -113,10 +113,10 @@ class TradingDataDashboard extends Dashboard {
 			mouse: true,
 			border: 'line',
 			style: {
-				fg: 'white',
+				fg: 'grey',
 				bg: 'red',
 				border: {
-					fg: 'white',
+					fg: 'grey',
 				},
 				focus: {
 					border: {

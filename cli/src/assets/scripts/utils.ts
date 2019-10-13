@@ -66,7 +66,7 @@ export const TABLE_BASE_OPTIONS = {
 	},
 	border: {
 		type: 'line',
-		fg: 'white'
+		fg: 'grey'
 	},
 	keys: true,
 	align: 'left',
@@ -85,7 +85,7 @@ export const TABLE_BASE_OPTIONS = {
 		},
 		item: {
 			border: {
-				fg: 'white',
+				fg: 'grey',
 			}
 		},
 		scrollbar: {
