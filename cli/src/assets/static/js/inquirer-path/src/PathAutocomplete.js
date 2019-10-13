@@ -18,7 +18,7 @@ export default class PathAutocomplete {
 
   constructor(cwd: string, directoryOnly: boolean = false) {
     this.cwd = new Path(cwd);
-    if (!this.cwd.isExistingDirectory()) {
+    if (!this.cwd.isExistingDirectory() && directoryOnly) {
       throw new Error(`The provided working directory ${cwd} does not exist or is not a directory.`);
     }
     this.path = this.cwd;
