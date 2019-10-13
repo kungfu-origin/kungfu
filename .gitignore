@@ -36,3 +36,7 @@ package-lock.json
 # OS files
 .DS_Store
 *.log
+
+#js third part
+*/inquirer-path/lib/*
+*/inquirer-path/node_modules/*

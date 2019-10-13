@@ -65,7 +65,6 @@ let cliConfig = {
     alias: {
       '@': path.join(__dirname, '../src'),
       '__gUtils': path.join(__dirname, '../../app/shared/utils'),
-      '__gStatic': path.join(__dirname, '../../app/shared/static'),
       '__gConfig': path.join(__dirname, '../../app/shared/config'),
       '__io': path.join(__dirname, '../../app/shared/io'),
       '__assets': path.join(__dirname, '../../app/shared/assets'),
