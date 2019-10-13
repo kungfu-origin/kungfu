@@ -126,7 +126,6 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
             name: 'strategy_path',
             default: strategyData.strategy_path || os.homedir(),
             message: `Update strategy_path (absolute path)`,
-            directoryOnly: true,
             validate: (value: string) => {
                 let hasError = null;
                 !updateModule && requiredValidator(null, value, (err: Error) => hasError = err)
