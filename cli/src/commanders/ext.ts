@@ -7,7 +7,7 @@ const colors = require('colors');
 const os = require('os');
 const { execFile } = require('child_process');
 const inquirer = require( 'inquirer' );
-const { PathPrompt } = require('__gStatic/inquirer-path');
+const { PathPrompt } = require('__gStatic/inquirer-path/lib');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 
