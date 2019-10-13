@@ -45,12 +45,12 @@ class Table {
 			content: colors.bold(content),
 			border: {
 				type: 'line',
-				fg: 'grey'
+				fg: 'white'
 			},
 			interactive: false,
 			mouse: false,
 			style: {
-				fg: 'grey'
+				fg: 'white'
 			},
 			padding: {
 				top: 1
@@ -94,7 +94,7 @@ class Table {
 		})
 	
 		list.on('blur', () => {
-			box.style.border.fg = 'grey'
+			box.style.border.fg = 'white'
 		})
 	}	
 }

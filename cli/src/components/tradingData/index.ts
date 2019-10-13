@@ -116,7 +116,7 @@ class TradingDataDashboard extends Dashboard {
 				fg: 'white',
 				bg: 'red',
 				border: {
-					fg: 'grey',
+					fg: 'white',
 				},
 				focus: {
 					border: {

@@ -66,7 +66,7 @@ export const TABLE_BASE_OPTIONS = {
 	},
 	border: {
 		type: 'line',
-		fg: 'grey'
+		fg: 'white'
 	},
 	keys: true,
 	align: 'left',
