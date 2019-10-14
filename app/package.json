@@ -141,7 +141,7 @@
     "@babel/polyfill": "^7.2.5",
     "bindings": "^1.5.0",
     "electron-updater": "^4.0.6",
-    "kungfu-core": "2.0.0",
+    "kungfu-core": "2.1.0",
     "fkill": "^6.1.0",
     "fs-extra": "^7.0.1",
     "gaze": "^1.1.3",
