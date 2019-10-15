@@ -27,6 +27,10 @@ interface StringToFunctionObject {
     [propName: string]: Function;
 }
 
+interface NormalObject {
+    [propName: string]: any;
+}
+
 interface Account {
     account_id: string;
     source_name: string;

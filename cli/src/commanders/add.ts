@@ -64,7 +64,7 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
 }
 
 export const addUpdateAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
-    if(!key) throw new Error('something wrong with the key!')
+    if(!key) throw new Error('Something wrong with the key!')
     const accountId = `${source}_${config[key]}`
     const accountsBySource = await getAccountBySource(source)
 
@@ -90,6 +90,7 @@ const addAccountPrompt = (accountSource: Sources) => {
         return accountConfigPrompt(accountSetting)
     })
     .then(({ source, key, config }: { source: string, key: string, config: any}) => {
+        config = filterAccountConfig(config);
         return addUpdateAccountByPrompt(source, key, config)
     })
 }
@@ -261,7 +262,9 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
     }
     
     const defaultValue = getDefaultValue(updateModule, existedValue, targetType, configItem.default)
-    if(!!defaultValue) {
+
+    //如果default value 为 NaN 0 undefined 则不填
+    if(!!defaultValue && (defaultValue !== false)) {
         //@ts-ignore
         questions.default = defaultValue;
     }
@@ -273,4 +276,13 @@ async function existedAccountIdValidator(value: any):Promise<any> {
     const accountList = await getAccountList()
     const existedIds = accountList.map((a: Account) => a.account_id.toAccountId());
     if (existedIds.indexOf(value) !== -1) return new Error('AccountId has existed!');
+}
+
+function filterAccountConfig(config: NormalObject) {
+    Object.keys(config || {}).map(key => {
+        if(config[key].toString() === 'NaN') {
+            delete config[key]
+        }
+    })
+    return config
 }
