@@ -124,7 +124,7 @@
     },
     "linux": {
       "icon": "./resources/logo/icn.icns",
-      "target": ["App"]
+      "target": ["rpm", "AppImage"]
     },
     "nsis": {
       "oneClick": false,
