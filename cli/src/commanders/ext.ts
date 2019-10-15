@@ -36,6 +36,7 @@ const inquirerRemoveByName = async (extList: string[]) => {
 }
 
 const execKfcOfArgs = (args: string[]): Promise<string> => {
+    console.log(path.join(KUNGFU_ENGINE_PATH, 'kfc'))
     return new Promise((resolve, reject) => {
         const kfcName = platform === 'win' ? 'kfc.exe' : 'kfc'
         execFile(
@@ -51,15 +52,15 @@ const execKfcOfArgs = (args: string[]): Promise<string> => {
 }
 
 const execAddExtension = (extPath: string): Promise<string> => {
-    return execKfcOfArgs([`ext install -f ${extPath}`])
+    return execKfcOfArgs([` ext install -f ${extPath}`])
 }
 
 const execListExtension = (): Promise<string> => {
-    return execKfcOfArgs([`ext list`])
+    return execKfcOfArgs([` ext list`])
 }
 
 const execRemoveExtension = (targetName: string): Promise<string> => {
-    return execKfcOfArgs([`ext uninstall -n ${targetName}`])
+    return execKfcOfArgs([` ext uninstall -n ${targetName}`])
 
 }
 
