@@ -263,8 +263,8 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
     
     const defaultValue = getDefaultValue(updateModule, existedValue, targetType, configItem.default)
 
-    //如果default value 为 NaN 0 undefined 则不填
-    if(!!defaultValue && (defaultValue !== false)) {
+    //如果default value 为 NaN 0 undefined 则没有d efaultvalue
+    if(!!defaultValue && (defaultValue !== false) && (defaultValue !== 0)) {
         //@ts-ignore
         questions.default = defaultValue;
     }
