@@ -4,7 +4,6 @@ const getCommitVersion = () => {
   var gitCommitVersion = 'latest'
   try {
     var gitHEAD = fs.readFileSync(path.join(__dirname, '..', '..', '.git', 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
-    console.log(gitHEAD,'---')
     if((gitHEAD || '').split(': ').length <= 1) {
       gitCommitVersion = gitHEAD
     } else {
@@ -16,7 +15,7 @@ const getCommitVersion = () => {
   } catch (err) {
     console.error(err)
   }
-  return gitCommitVersion
+  return gitCommitVersion.toString();
 }
 
 exports.getCommitVersion = getCommitVersion;
