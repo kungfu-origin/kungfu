@@ -1,42 +1,38 @@
 stages:
   - build
-# build_win:
-#   stage: build
-#   tags:
-#     - windows
-#   script:
-#     - yarn install
-#     # - yarn build
-#     - cd app
-#     - yarn run build
-#   only:
-#     - dev
-#   artifacts:
-#     expire_in: 1 day
-#     paths:
-#       - app\\build\\app\\*exe
-# build_centos:
-#   stage: build
-#   tags:
-#     - centos
-#   artifacts:
-#     expire_in: 1 day
-#     paths:
-#       - app/build/app/*.rpm
-#   script:
-#     - yarn install
-#     - yarn build
-#   only:
-#     - dev
+build_win:
+  stage: build
+  tags:
+    - windows
+  script:
+    - yarn install
+    - yarn build
+  only:
+    - dev
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - app\\build\\app\\*exe
+build_centos:
+  stage: build
+  tags:
+    - centos
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - app/build/app/*.rpm
+  script:
+    - yarn install
+    - yarn build
+  only:
+    - dev
 build_macosx:
   stage: build
   tags:
     - macosx
   script:
     - yarn install
-    # - yarn build
-    - cd app
-    - yarn run build
+    - yarn build
   only:
     - dev
   artifacts:
