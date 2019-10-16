@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require('path');
 const getCommitVersion = () => {
-var gitCommitVersion = 'latest'
+  var gitCommitVersion = 'latest'
   try {
     var gitHEAD = fs.readFileSync(path.join(__dirname, '..', '..', '.git', 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
     if((gitHEAD || '').split(': ').length <= 1) {
@@ -15,7 +15,7 @@ var gitCommitVersion = 'latest'
   } catch (err) {
     console.error(err)
   }
-  return gitCommitVersion
+  return gitCommitVersion.toString();
 }
 
 exports.getCommitVersion = getCommitVersion;
