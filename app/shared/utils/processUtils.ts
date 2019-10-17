@@ -32,7 +32,7 @@ const winKill = async (tasks: string[]): Promise<any> => {
         if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
         return taskkill(pIdList, {
             force: true,
-            tree: platform === 'win' 
+            tree: true
         })      
     } catch (err) {
         throw err

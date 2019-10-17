@@ -128,7 +128,7 @@ app.on('ready', () => {
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('finish kill extra')
 killExtra()
-.catch(err => console.error(err))
+.catch(err => logger.error(err))
 .finally(() => {
 	killExtraFinished = true;
 	if(appReady && killExtraFinished) createWindow()
