@@ -12,6 +12,7 @@ class OrderTable extends Table {
 	headers: string[];
 	ordersData: OrdersData;
 	ordersList: OrderData[];
+	columnWidth: number[];
 	constructor(type: string) {
 		super();
 		this.type = type;
@@ -23,11 +24,14 @@ class OrderTable extends Table {
 		this.ordersList = []
 	}
 
-	setItems(orderData: OrderData) {
-		this.ordersData[orderData.id] = orderData;
+	setItems(orderDataList: OrderData[]) {
+		orderDataList.forEach((orderData: OrderData) => {
+			this.ordersData[orderData.id] = orderData;			
+		})
 		this.ordersList = Object.values(this.ordersData || {}).sort((a: OrderData, b: OrderData) => {
 			return  b.updateTimeNum - a.updateTimeNum
 		})
+		this.ordersList = this.ordersList.slice(0, 500)
 		this.refresh();
 	}
 	/**
@@ -73,6 +77,7 @@ class OrderTable extends Table {
 			t.table.childList.select(0);
 			t.table.childList.setScrollPerc(0);
 		}
+		t.table.render();
 	}
 }
 
