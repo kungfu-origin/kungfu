@@ -231,10 +231,8 @@ class TradingDataDashboard extends Dashboard {
 
 			switch (type) {
 				case 'order':
-					console.log(111)
 					orderThrottle(data).then((dataList: OrderData[]) => {
 						if(!dataList.length) return;
-						console.log(dataList.length, '---------')
 						t.boards.orderTable.setItems(dataList)
 					})
 					break;
