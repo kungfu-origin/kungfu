@@ -330,11 +330,14 @@ export const getOrdersObservable = (type: string, id: string) => {
     const getOrderMethod = getOrderMethods[type]
     return new Observable(observer => {
         const dateRange = buildTargetDateRange();
-        getOrderMethod(id,  { dateRange }).then((orders: OrderInputData[]) => {
-            orders.forEach((order: OrderInputData) => {
-                observer.next(['order', dealOrder(order)])
+        getOrderMethod(id,  { dateRange })
+            .then((orders: OrderInputData[]) => {
+                orders.forEach((order: OrderInputData) => {
+                    observer.next(['order', dealOrder(order)])
+                })
             })
-        }).finally(() => observer.complete())
+            .catch((err: Error) => logger.error(err))
+            .finally(() => observer.complete())
     })
 }
 
@@ -346,11 +349,14 @@ export const getTradesObservable = (type: string, id: string) => {
     const getTradeMethod = getTradeMethods[type]
     return new Observable(observer => {
         const dateRange = buildTargetDateRange();
-        getTradeMethod(id,  { dateRange }).then((trades: TradeInputData[]) => {
-            trades.reverse().forEach((trade: TradeInputData) => {
-                observer.next(['trade', dealTrade(trade)])
+        getTradeMethod(id,  { dateRange })
+            .then((trades: TradeInputData[]) => {
+                trades.reverse().forEach((trade: TradeInputData) => {
+                    observer.next(['trade', dealTrade(trade)])
+                })
             })
-        }).finally(() => observer.complete())
+            .catch((err: Error) => logger.error(err))            
+            .finally(() => observer.complete())
     })
 }
 
@@ -361,11 +367,14 @@ export const getPosObservable = (type: string, id: string) => {
     }
     const getPosMethod = getPosMethods[type]
     return new Observable(observer => {
-        getPosMethod(id,  {}).then((positions: PosInputData[]) => {
-            positions.forEach((pos: PosInputData) => {
-                observer.next(['pos', dealPos(pos)]);
+        getPosMethod(id,  {})
+            .then((positions: PosInputData[]) => {
+                positions.forEach((pos: PosInputData) => {
+                    observer.next(['pos', dealPos(pos)]);
+                })
             })
-        }).finally(() => observer.complete())
+            .catch((err: Error) => logger.error(err))
+            .finally(() => observer.complete())
     })
 }
 

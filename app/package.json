@@ -92,7 +92,7 @@
         ]
       }
     ],
-    "asar": true,
+    "asar": false,
     "dmg": {
       "contents": [
         {
@@ -177,7 +177,7 @@
     "css-loader": "^2.1.1",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "5.0.10",
+    "electron": "4.2.11",
     "electron-builder": "^20.38.5",
     "electron-chromedriver": "^5.0.1",
     "electron-debug": "^1.4.0",

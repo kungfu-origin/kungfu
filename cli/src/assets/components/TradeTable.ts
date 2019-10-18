@@ -19,8 +19,11 @@ class TradeTable extends Table {
 		this.tradeList = [];
 	}
 
-	setItems(tradeData: TradeData) {
-		this.tradeList.unshift(tradeData)
+	setItems(tradeDataList: TradeData[]) {
+		tradeDataList.forEach((tradeData: TradeData) => {
+			this.tradeList.unshift(tradeData)			
+		})
+		this.tradeList = this.tradeList.slice(0, 500)
 		this.refresh()
 	}
 		/**
@@ -57,6 +60,7 @@ class TradeTable extends Table {
 			t.table.childList.select(0);
 			t.table.childList.setScrollPerc(0);
 		}
+		t.table.render();
 	}
 
 }

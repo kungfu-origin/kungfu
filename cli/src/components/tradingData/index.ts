@@ -7,6 +7,7 @@ import MessageBox from '@/assets/components/MessageBox';
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale, processListObservable, switchProcess } from '@/assets/scripts/actions';
 import { nanoCancelAllOrder } from '__io/nano/nanoReq';
+import { throttleInsert } from '__gUtils/busiUtils';
 
 const blessed = require('blessed');
 
@@ -221,17 +222,27 @@ class TradingDataDashboard extends Dashboard {
 
 	bindData() {
 		const t = this;
-		console.log(t.type, t.targetId)
+		const orderThrottle = throttleInsert(1000);
+		const tradeThrottle = throttleInsert(1000);
+		const posThrottle = throttleInsert(1000);
 		tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
 			const type = tradingData[0];
 			const data = tradingData[1];
 
 			switch (type) {
 				case 'order':
-					t.boards.orderTable.setItems(data);
+					console.log(111)
+					orderThrottle(data).then((dataList: OrderData[]) => {
+						if(!dataList.length) return;
+						console.log(dataList.length, '---------')
+						t.boards.orderTable.setItems(dataList)
+					})
 					break;
 				case 'trade':
-					t.boards.tradeTable.setItems(data);
+					tradeThrottle(data).then((dataList: TradeData[]) => {
+						if(!dataList.length) return;
+						t.boards.tradeTable.setItems(dataList)
+					})
 					break;
 				case 'pos':
 					t.boards.posTable.setItems(data);
@@ -254,7 +265,6 @@ class TradingDataDashboard extends Dashboard {
 					t.boards.assetTable.setItems(assetData)
 					break
 			}
-			t.screen.render()
 		})
 
 		processListObservable().subscribe((processList: any) => {
