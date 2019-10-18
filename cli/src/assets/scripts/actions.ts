@@ -427,7 +427,9 @@ export const getAssetObservable = (type: string, id: string) => {
                 else if(type === 'strategy') delete assetData['accountId']
                 observer.next(['asset', assetData])
             })
-        }).finally(() => observer.complete())
+        })
+        .catch((err: Error) => logger.error(err))        
+        .finally(() => observer.complete())
     })
 }
 
