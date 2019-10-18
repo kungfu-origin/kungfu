@@ -85,15 +85,14 @@ class TradingDataDashboard extends Dashboard {
             padding: DEFAULT_PADDING,
             top: 0,
             left: 45,
-            interactive: false,
-			mouse: false,			
+            interactive: true,
+			mouse: true,			
             width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
             height: '40%-3',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
 					bold: true,
-					bg: 'blue',
                 }
             }
         })
@@ -231,24 +230,29 @@ class TradingDataDashboard extends Dashboard {
 			switch (type) {
 				case 'orderList':
 					t.boards.orderTable.setItems(data)
+					t.screen.render();
 					break;
 				case 'order':
 					orderThrottle(data).then((dataList: OrderData[]) => {
 						if(!dataList.length) return;
 						t.boards.orderTable.setItems(dataList)
+						t.screen.render();
 					})
 					break;
 				case 'tradeList':
 					t.boards.tradeTable.setItems(data)
+					t.screen.render();
 					break;
 				case 'trade':
 					tradeThrottle(data).then((dataList: TradeData[]) => {
 						if(!dataList.length) return;
 						t.boards.tradeTable.setItems(dataList)
+						t.screen.render();					
 					})
 					break;
 				case 'pos':
 					t.boards.posTable.setItems(data);
+					t.screen.render();
 					break;
 				case 'asset':
 					const assetData = Object.entries(data)
@@ -266,6 +270,7 @@ class TradingDataDashboard extends Dashboard {
 							)
 						})
 					t.boards.assetTable.setItems(assetData)
+					t.screen.render();
 					break
 			}
 		})

@@ -332,7 +332,7 @@ export const getOrdersObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getOrderMethod(id,  { dateRange })
             .then((orders: OrderInputData[]) => {
-                const ordersResolve = orders.map((order: OrderInputData) => {
+                const ordersResolve = orders.slice(0, 1000).map((order: OrderInputData) => {
                     return dealOrder(order)
                 })
                 observer.next(['orderList', ordersResolve])
@@ -352,7 +352,7 @@ export const getTradesObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getTradeMethod(id,  { dateRange })
             .then((trades: TradeInputData[]) => {
-                const tradesResolve = trades.reverse().map((trade: TradeInputData) => {
+                const tradesResolve = trades.reverse().slice(0, 1000).map((trade: TradeInputData) => {
                     return dealTrade(trade)
                 })
                 observer.next(['tradeList', tradesResolve])

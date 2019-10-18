@@ -31,7 +31,7 @@ class OrderTable extends Table {
 		this.ordersList = Object.values(this.ordersData || {}).sort((a: OrderData, b: OrderData) => {
 			return  b.updateTimeNum - a.updateTimeNum
 		})
-		this.ordersList = this.ordersList.slice(0, 500)
+		this.ordersList = this.ordersList.slice(0, 1000)
 		this.refresh();
 	}
 	/**
@@ -77,7 +77,6 @@ class OrderTable extends Table {
 			t.table.childList.select(0);
 			t.table.childList.setScrollPerc(0);
 		}
-		t.table.render();
 	}
 }
 
