@@ -224,19 +224,22 @@ class TradingDataDashboard extends Dashboard {
 		const t = this;
 		const orderThrottle = throttleInsert(1000);
 		const tradeThrottle = throttleInsert(1000);
-		const posThrottle = throttleInsert(1000);
 		tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
 			const type = tradingData[0];
 			const data = tradingData[1];
 
 			switch (type) {
+				case 'orderList':
+					t.boards.orderTable.setItems(data)
+					break;
 				case 'order':
-					console.log(111)
 					orderThrottle(data).then((dataList: OrderData[]) => {
 						if(!dataList.length) return;
-						console.log(dataList.length, '---------')
 						t.boards.orderTable.setItems(dataList)
 					})
+					break;
+				case 'tradeList':
+					t.boards.tradeTable.setItems(data)
 					break;
 				case 'trade':
 					tradeThrottle(data).then((dataList: TradeData[]) => {

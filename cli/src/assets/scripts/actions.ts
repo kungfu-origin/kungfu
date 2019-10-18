@@ -332,9 +332,10 @@ export const getOrdersObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getOrderMethod(id,  { dateRange })
             .then((orders: OrderInputData[]) => {
-                orders.forEach((order: OrderInputData) => {
-                    observer.next(['order', dealOrder(order)])
+                const ordersResolve = orders.map((order: OrderInputData) => {
+                    return dealOrder(order)
                 })
+                observer.next(['orderList', ordersResolve])
             })
             .catch((err: Error) => logger.error(err))
             .finally(() => observer.complete())
@@ -351,9 +352,10 @@ export const getTradesObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getTradeMethod(id,  { dateRange })
             .then((trades: TradeInputData[]) => {
-                trades.reverse().forEach((trade: TradeInputData) => {
-                    observer.next(['trade', dealTrade(trade)])
+                const tradesResolve = trades.reverse().map((trade: TradeInputData) => {
+                    return dealTrade(trade)
                 })
+                observer.next(['tradeList', tradesResolve])
             })
             .catch((err: Error) => logger.error(err))            
             .finally(() => observer.complete())

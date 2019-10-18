@@ -179,10 +179,12 @@ export class MonitorDashboard extends Dashboard {
     _getLogs(processList: ProcessListItem[]){
         const t = this;
         const processIds = processList.map((p: ProcessListItem) => p.processId)
-        const throttleInsertLogs = throttleInsert(300);
+        const throttleInsertLogs = throttleInsert(1000);
         t.boards.loader.load('Loading the logs, please wait...')
         LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
             t.boards.loader.stop()
+
+            //obserable
             if(typeof l === 'string') {
                 throttleInsertLogs(l).then((logList: string[] | boolean) => {
                     if(!logList) return;
@@ -198,9 +200,9 @@ export class MonitorDashboard extends Dashboard {
                 return
             }
 
+            //get 
             t.globalData.logList = l;
             t.boards.mergedLogs.setItems(t.globalData.logList)
-            t.screen.render()
         })
     }
 
