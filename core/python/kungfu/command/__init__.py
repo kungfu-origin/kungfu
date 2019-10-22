@@ -123,6 +123,13 @@ def pass_ctx_from_parent(ctx):
     ctx.bundle_dir = ctx.parent.bundle_dir
     ctx.package_path = ctx.parent.package_path
 
+@kfc.command()
+@click.pass_context
+def version(ctx):
+    pass_ctx_from_parent(ctx)
+    from kungfu import __version__
+    click.echo(__version__)
+
 def execute():
     kfc(auto_envvar_prefix='KF')
 

@@ -4,7 +4,8 @@ import tarfile
 import extensions
 import click
 from kungfu.command.ext import ext as kfext, pass_ctx_from_parent
-
+from runpy import run_path
+from kungfu import __version__ as kf_version
 
 @kfext.command(help='install extension')
 @click.option("-f", "--file", required=True, help="KungFu extension file (tgz)")
@@ -25,6 +26,15 @@ def install(ctx, file):
         else:
             ctx.logger.info('extracting extension file %s to %s', file, ext_cache_dir)
             extfile.extractall(ext_cache_dir)
+            config_file = os.path.join(ext_cache_dir, "package", "_config.py")
+            if os.path.exists(config_file):
+                required_sdk_version = run_path(config_file)["KF_SDK_VERSION"]
+                if not kf_version == required_sdk_version:
+                    ctx.logger.error("KF_SDK_VERSION {} required but {} provided".format(required_sdk_version, kf_version))
+                    shutil.rmtree(ext_cache_dir)
+                    raise click.Abort()
+            else:
+                ctx.logger.warn("no required KF_SDK_VERSION info found")
             if os.path.exists(install_path):
                 ctx.logger.info('Overwriting extension %s', ext_name)
                 shutil.rmtree(install_path)
