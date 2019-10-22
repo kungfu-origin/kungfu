@@ -1,7 +1,8 @@
-import colors from 'colors';
-import moment from 'moment';
 import { toDecimal } from '__gUtils/busiUtils';
 import { logger } from '__gUtils/logUtils';
+
+const colors = require('colors')
+const moment = require('moment')
 
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')

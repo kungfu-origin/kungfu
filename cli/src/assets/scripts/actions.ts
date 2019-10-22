@@ -15,11 +15,11 @@ import { map } from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
 import { logger } from '__gUtils/logUtils';
 
-import moment from 'moment';
-
 const colors = require('colors');
 const path = require('path');
 const { Tail } = require('tail');
+const moment = require('moment');
+const pidusage = require('pidusage');
 
 
 export const switchProcess = (proc: any, messageBoard: any) =>{
@@ -128,6 +128,7 @@ export const processListObservable = () => combineLatest(
     accountListObservable(),
     strategyListObservable(),
     (processStatus: StringToStringObject, accountList: Account[], strategyList: Strategy[]) => {
+        logger.info(processStatus)
         const mdList = accountList.filter((a: Account) => !!a.receive_md)
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
