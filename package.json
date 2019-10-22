@@ -8,7 +8,7 @@
   "workspaces": ["core", "cli", "app"],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
-    "build": "yarn wsrun clean && npm config set kungfu-core:runtime node && yarn wsrun --serial --fast-exit build",
+    "build": "yarn wsrun clean && yarn wsrun --serial --fast-exit build",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {

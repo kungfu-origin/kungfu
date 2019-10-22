@@ -187,14 +187,17 @@ export class MonitorDashboard extends Dashboard {
 
     _getLogs(processItem: ProcessListItem) {
         const t = this;
-        if (t.oldLogObservable) t.oldLogObservable.unsubscribe(); //unsubscribe the old
-        t.boards.mergedLogs.setItems([]) //clear
         const processId = processItem.processId;
         const processIds = [processId];
-        const throttleInsertLogs = throttleInsert(1000);
+        const throttleInsertLogs = throttleInsert(800);
+
+        if (t.oldLogObservable) t.oldLogObservable.unsubscribe(); //unsubscribe the old
+        t.boards.mergedLogs.setItems([]) //clear
         t.boards.mergedLogs.setLabel(` Logs (${processId}) `)
         t.boards.loader.load('Loading the logs, please wait...')
+
         t.oldLogObservable = LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
+            
             t.boards.loader.stop()
 
             //obserable
