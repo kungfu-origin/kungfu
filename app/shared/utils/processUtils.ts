@@ -168,10 +168,10 @@ export const describeProcess = (name: string): Promise<any> => {
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const trace: string = kfConfig.log || '';
+    const logLevel: string = kfConfig.log || '';
     options = {
         ...options,
-        "args": trace + options.args,
+        "args": [logLevel, options.args].join(' '),
         "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",

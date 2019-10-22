@@ -13,3 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+
+import sys
+if getattr(sys, 'frozen', False):
+    from ._version import __version__
+else:
+    from .version import get_version
+    __version__ = get_version()
