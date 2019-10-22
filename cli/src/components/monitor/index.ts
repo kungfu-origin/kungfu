@@ -4,10 +4,9 @@ import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scr
 import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
-const moment = require('moment');
+const colors = require('colors');
 
-const WIDTH_LEFT_PANEL = 45;
-
+const WIDTH_LEFT_PANEL = 70;
 
 export class MonitorDashboard extends Dashboard {
     screen: any;
@@ -143,8 +142,10 @@ export class MonitorDashboard extends Dashboard {
                 .map((proc: ProcessListItem) => parseToString([
                     proc.typeName,
                     proc.processName,
-                    proc.statusName
-                ], [5, 15, 8]))
+                    `Mem: ${proc.monit.memory} M`,
+                    `CPU: ${proc.monit.cpu} %`,
+                    proc.statusName,
+                ], [5, 15, 12, 12, 8]))
             t.boards.processList.setItems(processListResolve);
             t.screen.render();
 

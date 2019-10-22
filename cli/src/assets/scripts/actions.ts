@@ -1,7 +1,7 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset, delaySeconds } from '__gUtils/busiUtils';
 import { addFile } from '__gUtils/fileUtils';
-import { listProcessStatus } from '__gUtils/processUtils';
+import { listProcessStatusWithDetail } from '__gUtils/processUtils';
 import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
 import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
@@ -19,7 +19,6 @@ const colors = require('colors');
 const path = require('path');
 const { Tail } = require('tail');
 const moment = require('moment');
-const pidusage = require('pidusage');
 
 
 export const switchProcess = (proc: any, messageBoard: any) =>{
@@ -89,12 +88,12 @@ export const processStatusObservable = () => {
     return new Observable(observer => {
         observer.next({})
         setTimerPromiseTask(() => {
-            return listProcessStatus()
-                .then((processStatus: StringToStringObject) => {
+            return listProcessStatusWithDetail()
+                .then((processStatus: StringToProcessStatusDetail) => {
                     observer.next(processStatus)
                 })
                 .catch((err: Error) => logger.error(err))
-        }, 2000)    
+        }, 1000)    
     })
 }
 
@@ -127,8 +126,7 @@ export const processListObservable = () => combineLatest(
     processStatusObservable(),
     accountListObservable(),
     strategyListObservable(),
-    (processStatus: StringToStringObject, accountList: Account[], strategyList: Strategy[]) => {
-        logger.info(processStatus)
+    (processStatus: StringToProcessStatusDetail, accountList: Account[], strategyList: Strategy[]) => {
         const mdList = accountList.filter((a: Account) => !!a.receive_md)
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
@@ -138,8 +136,9 @@ export const processListObservable = () => combineLatest(
                 processId: mdProcessId,
                 typeName: colors.yellow('MD'),
                 type: 'md',
-                statusName: dealStatus(processStatus[mdProcessId]),
-                status: processStatus[mdProcessId]
+                statusName: dealStatus(buildStatusDefault(processStatus[mdProcessId]).status),
+                status: buildStatusDefault(processStatus[mdProcessId]).status,
+                monit: buildStatusDefault(processStatus[mdProcessId]).monit
             };
             return a;
         })
@@ -151,8 +150,9 @@ export const processListObservable = () => combineLatest(
                 processId: tdProcessId,
                 typeName: colors.cyan('TD'),
                 type: 'td',
-                statusName: dealStatus(processStatus[tdProcessId]),
-                status: processStatus[tdProcessId]
+                statusName: dealStatus(buildStatusDefault(processStatus[tdProcessId]).status),
+                status: buildStatusDefault(processStatus[tdProcessId]).status,
+                monit: buildStatusDefault(processStatus[tdProcessId]).monit
             };
             return a;
         })
@@ -164,8 +164,9 @@ export const processListObservable = () => combineLatest(
                 processId: strategyProcessId,
                 typeName: colors.blue('Strat'),
                 type: 'strategy',
-                statusName: dealStatus(processStatus[strategyProcessId]),
-                status: processStatus[strategyProcessId]
+                statusName: dealStatus(buildStatusDefault(processStatus[strategyProcessId]).status),
+                status: buildStatusDefault(processStatus[strategyProcessId]).status,
+                monit: buildStatusDefault(processStatus[strategyProcessId]).monit
             };
             return a;
         })
@@ -176,16 +177,18 @@ export const processListObservable = () => combineLatest(
                 processName: colors.bold('MASTER'),
                 typeName: colors.bgMagenta('Main'),
                 type: 'main',
-                statusName: dealStatus(processStatus['master']),
-                status: processStatus['master']
+                statusName: dealStatus(buildStatusDefault(processStatus['master']).status),
+                status: buildStatusDefault(processStatus['master']).status,
+                monit: buildStatusDefault(processStatus['master']).monit
             },
             {
                 processId: 'ledger',
                 processName: colors.bold('LEDGER'),
                 typeName: colors.bgMagenta('Main'),
                 type: 'main',
-                statusName: dealStatus(processStatus['ledger']),
-                status: processStatus['ledger']
+                statusName: dealStatus(buildStatusDefault(processStatus['ledger']).status),
+                status: buildStatusDefault(processStatus['ledger']).status,
+                monit: buildStatusDefault(processStatus['ledger']).monit
             },
             ...Object.values(mdData),
             ...Object.values(tdData),
@@ -194,6 +197,25 @@ export const processListObservable = () => combineLatest(
     }
 )
 
+function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
+    if(!processStatus) return {
+        status: '--',
+        monit: {
+            cpu: 0,
+            memory: 0,
+        }
+    }
+
+    const memory = Number(BigInt((processStatus.monit || {}).memory || 0) / BigInt(1024 * 1024));
+    const cpu =  (processStatus.monit || {}).cpu || 0
+    return {
+        status: processStatus.status,
+        monit: {
+            cpu: cpu == 0 ? cpu : colors.green(cpu),
+            memory: memory == Number(0) ? memory : colors.green(memory)
+        }
+    }
+}
 
 
 // =============================== logs start ==================================================

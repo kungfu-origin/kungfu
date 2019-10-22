@@ -108,9 +108,19 @@ export const TABLE_BASE_OPTIONS = {
 export const parseToString = (targetList: any[], columnWidth: any[], pad = 2) => {
 	return targetList.map((item: string, i: number) => {
 		item = (item || '').toString();
-		const r = /m([^]+)\u001b/
-		//@ts-ignore
-		const lw: any = item.match(r) === null ? item : item.match(r)[1];
+
+		const lw = item
+		.replace(/\u001b\[1m/g, '')
+		.replace(/\u001b\[22m/g, '')
+		.replace(/\u001b\[32m/g, '')
+		.replace(/\u001b\[33m/g, '')		
+		.replace(/\u001b\[34m/g, '')
+		.replace(/\u001b\[36m/g, '')
+		.replace(/\u001b\[39m/g, '')
+		.replace(/\u001b\[45m/g, '')
+		.replace(/\u001b\[49m/g, '')
+		// console.log(lw.match(''), lw)
+
 		const len = lw.length;
 		const colWidth: number | string = columnWidth[i] || 0;
 		if(colWidth === 'auto') return item;
