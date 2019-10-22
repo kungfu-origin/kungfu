@@ -1,8 +1,8 @@
 import Dashboard from '@/assets/components/Dashboard';
 import MessageBox from '@/assets/components/MessageBox';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString} from '@/assets/scripts/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scripts/utils';
 import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
-import { throttleInsert } from '__gUtils/busiUtils';
+import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
 const moment = require('moment');
 
@@ -18,10 +18,10 @@ export class MonitorDashboard extends Dashboard {
         processList: any[],
         logList: any[]
     }
-  
-    logWatchers: any[];
-    
-    constructor(){
+
+    oldLogObservable: any;
+
+    constructor() {
         super()
         this.screen.title = 'Processes Dashboard';
 
@@ -37,12 +37,12 @@ export class MonitorDashboard extends Dashboard {
             logList: []
         }
 
-        this.logWatchers = [];
+        this.oldLogObservable = null;
 
         this.init();
     }
 
-    init(){
+    init() {
         const t = this;
         t.initProcessList();
         t.initLog();
@@ -56,7 +56,7 @@ export class MonitorDashboard extends Dashboard {
     }
 
 
-    initProcessList(){
+    initProcessList() {
         this.boards.processList = blessed.list({
             ...TABLE_BASE_OPTIONS,
             label: ' Processes ',
@@ -65,41 +65,41 @@ export class MonitorDashboard extends Dashboard {
             top: '0',
             left: '0',
             interactive: true,
-			mouse: false,			
+            mouse: false,
             width: WIDTH_LEFT_PANEL,
             height: '95%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
-					bold: true,
-					bg: 'blue',
+                    bold: true,
+                    bg: 'blue',
                 }
             }
         })
         this.boards.processList.focus()
     }
 
-    initLog(){
+    initLog() {
         this.boards.mergedLogs = blessed.list({
             ...TABLE_BASE_OPTIONS,
-            label: ' Merged Logs ',
+            label: ' Logs ',
             parent: this.screen,
             top: '0',
             left: WIDTH_LEFT_PANEL + 1,
             width: `100%-${WIDTH_LEFT_PANEL + 1}`,
             height: '95%',
             padding: DEFAULT_PADDING,
-			mouse: true,
+            mouse: true,
             style: {
                 ...TABLE_BASE_OPTIONS.style,
                 selected: {
-					bold: true,
+                    bold: true,
                 }
             }
         })
     }
 
-    initMessage(){
+    initMessage() {
         const t = this;
         t.boards.message = MessageBox(t.screen)
     }
@@ -121,25 +121,22 @@ export class MonitorDashboard extends Dashboard {
     }
 
     initBoxInfo() {
-		const t = this;
-		t.boards.boxInfo = blessed.text({
-			content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: start/stop process',
-			parent: t.screen,		
-			left: '0%',
-			top: '95%',
-			width: '100%',
-			height: '6%',
-			valign: 'middle',
-			tags: true
-		});	
-	}
+        const t = this;
+        t.boards.boxInfo = blessed.text({
+            content: ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: start/stop process',
+            parent: t.screen,
+            left: '0%',
+            top: '95%',
+            width: '100%',
+            height: '6%',
+            valign: 'middle',
+            tags: true
+        });
+    }
 
     bindData() {
         const t = this;
         processListObservable().subscribe((processList: any) => {
-            //log the first time get Log
-            if(!t.globalData.processList || !t.globalData.processList.length) t._getLogs(processList)
-
             //processList
             t.globalData.processList = processList;
             const processListResolve = processList
@@ -150,10 +147,15 @@ export class MonitorDashboard extends Dashboard {
                 ], [5, 15, 8]))
             t.boards.processList.setItems(processListResolve);
             t.screen.render();
+
+            if (t.oldLogObservable === null) {
+                const curProcessItem = processList[0]
+                t._getLogs(curProcessItem)
+            }
         })
     }
 
-    bindEvent(){
+    bindEvent() {
         const t = this;
         let i: number = 0;
         let boards = ['processList', 'mergedLogs'];
@@ -164,35 +166,46 @@ export class MonitorDashboard extends Dashboard {
             const nameKey: string = boards[i];
             t.boards[nameKey].focus();
         });
-    
+
         t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: string) => {
             t.screen.destroy();
             process.exit(0);
-        });	
+        });
 
         t.boards.processList.key(['enter'], () => {
             const selectedIndex: number = t.boards.processList.selected;
-            switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
+            const curProcessItem = t.globalData.processList[selectedIndex];
+            switchProcess(curProcessItem, t.boards.message)
         })
+
+        t.boards.processList.key(['up', 'down'], debounce(() => {
+            const selectedIndex: number = t.boards.processList.selected;
+            const curProcessItem = t.globalData.processList[selectedIndex];
+            t._getLogs(curProcessItem)
+        }, 1000))
     }
- 
-    _getLogs(processList: ProcessListItem[]){
+
+    _getLogs(processItem: ProcessListItem) {
         const t = this;
-        const processIds = processList.map((p: ProcessListItem) => p.processId)
-        const throttleInsertLogs = throttleInsert(1600);
+        if (t.oldLogObservable) t.oldLogObservable.unsubscribe(); //unsubscribe the old
+        t.boards.mergedLogs.setItems([]) //clear
+        const processId = processItem.processId;
+        const processIds = [processId];
+        const throttleInsertLogs = throttleInsert(1000);
+        t.boards.mergedLogs.setLabel(` Logs (${processId}) `)
         t.boards.loader.load('Loading the logs, please wait...')
-        LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
+        t.oldLogObservable = LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
             t.boards.loader.stop()
 
             //obserable
-            if(typeof l === 'string') {
+            if (typeof l === 'string') {
                 throttleInsertLogs(l).then((logList: string[] | boolean) => {
-                    if(!logList) return;
+                    if (!logList) return;
                     t.globalData.logList = t.globalData.logList.concat(logList)
                     const len = t.globalData.logList.length;
                     t.globalData.logList = t.globalData.logList.slice(len < 2000 ? 0 : (len - 2000))
                     t.boards.mergedLogs.setItems(t.globalData.logList)
-                    if(!t.boards.mergedLogs.focused) {
+                    if (!t.boards.mergedLogs.focused) {
                         t.boards.mergedLogs.select(t.globalData.logList.length - 1)
                         t.boards.mergedLogs.setScrollPerc(100)
                     }

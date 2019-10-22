@@ -231,6 +231,7 @@ const dealLogMessage = (line: string, processId: string) => {
 
         message = message
             .replace(/\[  info  \]/g, `[ ${colors[logColor.info]('info')}    ] [${renderColoredProcessName(processId)}]`)
+            .replace(/\[ out  \]/g,    `[ out     ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[ trace  \]/g, `[ trace   ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[ error  \]/g, `[ ${colors[logColor.error]('error')}   ] [${renderColoredProcessName(processId)}]`)
             .replace(/\[warning \]/g, `[ ${colors[logColor.warning]('warning')} ] [${renderColoredProcessName(processId)}]`)
