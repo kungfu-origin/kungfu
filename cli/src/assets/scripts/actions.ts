@@ -333,7 +333,7 @@ export const getOrdersObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getOrderMethod(id,  { dateRange })
             .then((orders: OrderInputData[]) => {
-                logger.info(111,'orders')
+                logger.info('orders ', orders.length)
                 const ordersResolve = orders.slice(0, 1000).map((order: OrderInputData) => {
                     return dealOrder(order)
                 })
@@ -354,7 +354,7 @@ export const getTradesObservable = (type: string, id: string) => {
         const dateRange = buildTargetDateRange();
         getTradeMethod(id,  { dateRange })
             .then((trades: TradeInputData[]) => {
-                logger.info(2222,'trades')
+                logger.info('trades ', trades.length)
                 const tradesResolve = trades.reverse().slice(0, 1000).map((trade: TradeInputData) => {
                     return dealTrade(trade)
                 })
@@ -374,7 +374,7 @@ export const getPosObservable = (type: string, id: string) => {
     return new Observable(observer => {
         getPosMethod(id,  {})
             .then((positions: PosInputData[]) => {
-                logger.info(333,'pos')
+                logger.info('pos ', positions.length)
                 positions.forEach((pos: PosInputData) => {
                     observer.next(['pos', dealPos(pos)]);
                 })
@@ -425,7 +425,7 @@ export const getAssetObservable = (type: string, id: string) => {
     const getAssetMethod = getAssetMethods[type]
     return new Observable(observer => {
         getAssetMethod(id).then((assets: AssetInputData[]) => {
-            logger.info(444,'asset')
+            logger.info('asset ', assets.length)
             assets.forEach((asset: AssetInputData) => {
                 const assetData = dealAsset(asset);
                 if(type === 'account') delete assetData['clientId']

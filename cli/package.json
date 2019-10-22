@@ -90,6 +90,7 @@
     "devtron": "^1.4.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
+    "flow": "^0.2.3",
     "html-webpack-plugin": "^2.30.1",
     "inject-loader": "^3.0.0",
     "jquery": "^3.4.1",
