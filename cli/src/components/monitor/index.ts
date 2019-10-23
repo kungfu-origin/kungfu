@@ -6,7 +6,7 @@ import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
 const colors = require('colors');
 
-const WIDTH_LEFT_PANEL = 70;
+const WIDTH_LEFT_PANEL = 68;
 
 export class MonitorDashboard extends Dashboard {
     screen: any;
@@ -145,7 +145,7 @@ export class MonitorDashboard extends Dashboard {
                     `Mem: ${proc.monit.memory} M`,
                     `CPU: ${proc.monit.cpu} %`,
                     proc.statusName,
-                ], [5, 15, 12, 12, 8]))
+                ], [5, 15, 11, 11, 8]))
             t.boards.processList.setItems(processListResolve);
             t.screen.render();
 
