@@ -62,11 +62,12 @@ namespace kungfu
             bool MarketDataXTP::subscribe(const std::vector<Instrument> &instruments)
             {
                 SPDLOG_INFO("size: {}", instruments.size());
+                bool res = true;
                 std::vector<std::string> sse_tickers;
                 std::vector<std::string> sze_tickers;
                 for (const auto &inst: instruments)
                 {
-                    if (inst.instrument_id.compare("*") == 0)
+                    if (strncmp(inst.instrument_id, "*", 1) == 0)
                     {
                         res = api_->SubscribeAllMarketData();
                         SPDLOG_INFO("subscribe all");
@@ -81,7 +82,6 @@ namespace kungfu
                         sze_tickers.push_back(ticker);
                     }
                 }
-                bool res = true;
                 if (!sse_tickers.empty())
                 {
                     res = res && subscribe(sse_tickers, EXCHANGE_SSE);
