@@ -27,6 +27,22 @@ interface StringToFunctionObject {
     [propName: string]: Function;
 }
 
+interface NormalObject {
+    [propName: string]: any;
+}
+
+interface ProcessStatusDetail {
+    status: string;
+    monit: {
+        memory: bigint;
+        cpu: number;
+    }
+}
+
+interface StringToProcessStatusDetail {
+    [propName: string]: ProcessStatusDetail
+}
+
 interface Account {
     account_id: string;
     source_name: string;

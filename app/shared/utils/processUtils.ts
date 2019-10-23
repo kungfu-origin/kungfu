@@ -281,6 +281,23 @@ export const listProcessStatus = () => {
     })
 }
 
+export const listProcessStatusWithDetail = () => {
+    return pm2List().then((pList: any[]): StringToProcessStatusDetail => {
+        let processStatus: any = {}
+        Object.freeze(pList).forEach(p => {
+            const { monit, pid, name, pm2_env } = p;
+            const status = pm2_env.status
+            processStatus[name] = {
+                status,
+                monit,
+                pid,
+                name
+            }
+        })
+        return processStatus
+    })
+}
+
 //删除进程
 export const deleteProcess = (processName: string) => {
     return new Promise(async(resolve, reject) => {
