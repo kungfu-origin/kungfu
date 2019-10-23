@@ -3,7 +3,7 @@ import sys
 import subprocess
 import platform
 import click
-
+from kungfu.version import get_version
 
 @click.group(invoke_without_command=True)
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
@@ -43,6 +43,10 @@ def make(ctx):
 @build.command()
 @click.pass_context
 def package(ctx):
+    version_file = os.path.join(os.path.dirname(__file__), "kungfu", "_version.py")
+    with open(version_file, 'w') as f:
+        f.write("__version__ = \"{}\"\n".format(get_version()))
+
     os.environ['CMAKE_BUILD_TYPE'] = ctx.parent.build_type
 
     osname = platform.system()

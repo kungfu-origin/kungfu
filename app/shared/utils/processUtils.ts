@@ -168,10 +168,10 @@ export const describeProcess = (name: string): Promise<any> => {
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const trace: string = kfConfig.log || '';
+    const logLevel: string = kfConfig.log || '';
     options = {
         ...options,
-        "args": trace + options.args,
+        "args": [logLevel, options.args].join(' '),
         "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",
@@ -276,6 +276,23 @@ export const listProcessStatus = () => {
             const name = p.name;
             const status = p.pm2_env.status
             processStatus[name] = status
+        })
+        return processStatus
+    })
+}
+
+export const listProcessStatusWithDetail = () => {
+    return pm2List().then((pList: any[]): StringToProcessStatusDetail => {
+        let processStatus: any = {}
+        Object.freeze(pList).forEach(p => {
+            const { monit, pid, name, pm2_env } = p;
+            const status = pm2_env.status
+            processStatus[name] = {
+                status,
+                monit,
+                pid,
+                name
+            }
         })
         return processStatus
     })
