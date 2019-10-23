@@ -66,6 +66,12 @@ namespace kungfu
                 std::vector<std::string> sze_tickers;
                 for (const auto &inst: instruments)
                 {
+                    if (inst.instrument_id.compare("*") == 0)
+                    {
+                        res = api_->SubscribeAllMarketData();
+                        SPDLOG_INFO("subscribe all");
+                        return res;
+                    }
                     std::string ticker = inst.instrument_id;
                     if (strcmp(inst.exchange_id, EXCHANGE_SSE) == 0)
                     {
