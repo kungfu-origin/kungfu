@@ -44,7 +44,10 @@ const execKfcOfArgs = (args: string[]): Promise<string> => {
             args,
             { shell: true },
             (error: Error, stdout: string, stderr: string) => {
-                if(error) throw error
+                if(error) {
+                    reject(error)
+                    return;                    
+                }
                 resolve(stdout)
             }
         )
