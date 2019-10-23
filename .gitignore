@@ -36,3 +36,4 @@ package-lock.json
 *.log
 
 cli/*
+*/_version.py
