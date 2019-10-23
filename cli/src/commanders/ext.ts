@@ -45,7 +45,7 @@ const execKfcOfArgs = (args: string[]): Promise<string> => {
             { shell: true },
             (error: Error, stdout: string, stderr: string) => {
                 if(error) {
-                    reject(error)
+                    reject(new Error([error.message, stdout].join('\n')))
                     return;                    
                 }
                 resolve(stdout)
