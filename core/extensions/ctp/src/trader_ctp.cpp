@@ -240,12 +240,13 @@ namespace kungfu
                     SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
                 } else
                 {
-                    SPDLOG_INFO("(Bid) {} (Uid) {} (SName) {} (TradingDay) {} (FrontID) {} (SessionID) {}",
+                    SPDLOG_INFO("(Bid) {} (Uid) {} (SName) {} (TradingDay) {} (FrontID) {} (SessionID) {} (TradingDay) {}",
                             pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->SystemName, pRspUserLogin->TradingDay,
-                            pRspUserLogin->FrontID, pRspUserLogin->SessionID);
+                            pRspUserLogin->FrontID, pRspUserLogin->SessionID, pRspUserLogin->TradingDay);
                     session_id_ = pRspUserLogin->SessionID;
                     front_id_ = pRspUserLogin->FrontID;
                     order_ref_ = atoi(pRspUserLogin->MaxOrderRef);
+                    trading_day_ = pRspUserLogin->TradingDay;
                     req_settlement_confirm();
                 }
             }
@@ -282,10 +283,20 @@ namespace kungfu
                         order.order_id = order_info.internal_order_id;
                         order.parent_id = order_info.parent_id;
                         order.insert_time = order_info.insert_time;
-                        order.error_id = pRspInfo->ErrorID;
                         order.update_time = kungfu::yijinjing::time::now_in_nano();
-                        strcpy(order.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str());
+                        strcpy(order.trading_day, trading_day_.c_str());
+                        strcpy(order.instrument_id, pInputOrder->InstrumentID);
+                        strcpy(order.exchange_id, pInputOrder->ExchangeID);
+                        strcpy(order.account_id, pInputOrder->InvestorID);
+                        order.instrument_type = InstrumentType::Future;
+                        order.limit_price = pInputOrder->LimitPrice;
+                        order.volume = pInputOrder->VolumeTotalOriginal;
                         order.status = OrderStatus::Error;
+                        order.error_id = pRspInfo->ErrorID;
+                        strcpy(order.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str());
+                        from_ctp_direction(pInputOrder->Direction, order.side);
+                        from_ctp_comb_offset(pInputOrder->CombOffsetFlag, order.offset);
+                        from_ctp_price_type(pInputOrder->OrderPriceType, pInputOrder->VolumeCondition, pInputOrder->TimeCondition, order.price_type);
                         writer->close_data();
                     }
                     SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder));
