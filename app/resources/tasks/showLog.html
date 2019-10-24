@@ -205,7 +205,6 @@
         try{
             lineData = JSON.parse(line);
         }catch(err){
-            console.error(err)
             return false;
         }
         let messages = lineData.message.split('\n').filter(m => m !== '');

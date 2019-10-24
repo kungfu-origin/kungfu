@@ -58,7 +58,7 @@ export default {
             {
                 label: '时间',
                 prop: 'updateTime',
-                width: '230px'
+                width: '200px'
             },
             {
                 label: '类型',
