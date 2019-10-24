@@ -116,6 +116,7 @@ if(!gotTheLock) {
 
 
 
+
 var appReady = false, killExtraFinished = false;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

@@ -40,3 +40,4 @@ package-lock.json
 #js third part
 */inquirer-path/lib/*
 */inquirer-path/node_modules/*
+*/_version.py

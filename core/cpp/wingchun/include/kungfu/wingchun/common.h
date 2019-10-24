@@ -490,21 +490,23 @@ namespace kungfu
             std::string product = instrument_id.substr(0, found);
             std::transform(product.begin(), product.end(), product.begin(), ::tolower);
             if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
-                product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "l" || product == "v" ||
-                product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg")
+                product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "rr" || product == "l" ||
+                product == "v" || product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg" ||
+                product == "eb")
             {
                 return EXCHANGE_DCE;
-            } else if (product == "sr" || product == "cf" || product == "pm" || product == "wh" || product == "ri" || product == "lr" ||
-                       product == "jr" || product == "rm" || product == "rs" || product == "rs" || product == "rm" || product == "oi" ||
-                       product == "cy" || product == "ta" || product == "ma" || product == "fg" || product == "sf" || product == "sm")
+            } else if (product == "wh" || product == "pm" || product == "cf" || product == "sr" || product == "oi" || product == "ri" ||
+                       product == "rs" || product == "rm" || product == "jr" || product == "lr" || product == "cy" || product == "ap" ||
+                       product == "cj" || product == "ta" || product == "ma" || product == "zc" || product == "sf" || product == "sm" ||
+                       product == "ur")
             {
                 return EXCHANGE_CZCE;
             } else if (product == "cu" || product == "al" || product == "zn" || product == "pb" || product == "ni" || product == "sn" ||
-                       product == "au" || product == "ag" || product == "rb" || product == "wr" || product == "hc" || product == "fu" ||
-                       product == "bu" || product == "ru" || product == "sp")
+                       product == "au" || product == "ag" || product == "rb" || product == "wr" || product == "hc" || product == "ss" ||
+                       product == "fu" || product == "bu" || product == "ru" || product == "nr" || product == "sp")
             {
                 return EXCHANGE_SHFE;
-            } else if (product == "if" || product == "ic" || product == "ih" || product == "tf" || product == "tf" || product == "t")
+            } else if (product == "if" || product == "ic" || product == "ih" || product == "ts" || product == "tf" || product == "t")
             {
                 return EXCHANGE_CFFEX;
             } else if (product == "sc")

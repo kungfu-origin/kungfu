@@ -68,7 +68,7 @@ export default {
         width: 100%;
         height: 40px;
         line-height: 30px;
-        font-size: 18px;
+        font-size: 14px;
         padding: 5px 10px;
         color: $font;
         box-sizing: border-box;
