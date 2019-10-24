@@ -88,8 +88,11 @@ class Strategy(pywingchun.Strategy):
         self._post_stop(self.ctx)
 
     def on_quote(self, wc_context, quote):
-        self._on_quote(self.ctx, quote)
-        self.ctx.book.apply_quote(quote)
+        try:
+            self._on_quote(self.ctx, quote)
+            self.ctx.book.apply_quote(quote)
+        except Exception as e:
+            self.ctx.log.info('error on_quote ' + str(e))
 
     def on_bar(self, wc_context, bar):
         self._on_bar(self.ctx, bar)
@@ -104,8 +107,11 @@ class Strategy(pywingchun.Strategy):
         self._on_order(self.ctx, order)
 
     def on_trade(self, wc_context, trade):
-        self._on_trade(self.ctx, trade)
-        self.ctx.book.apply_trade(trade)
+        try:
+            self._on_trade(self.ctx, trade)
+            self.ctx.book.apply_trade(trade)
+        except Exception as e:
+            self.ctx.log.info('error on_trade ' + str(e))
 
     def on_trading_day(self, wc_context, daytime):
         trading_day = kft.to_datetime(daytime)
