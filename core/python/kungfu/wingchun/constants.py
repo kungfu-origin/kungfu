@@ -38,6 +38,7 @@ PriceType = pywingchun.constants.PriceType
 VolumeCondition = pywingchun.constants.VolumeCondition
 TimeCondition = pywingchun.constants.TimeCondition
 MsgType = pywingchun.constants.MsgType
+OrderActionFlag = pywingchun.constants.OrderActionFlag
 
 AllFinalOrderStatus = [int(OrderStatus.Filled),
                        int(OrderStatus.Error),
@@ -63,6 +64,7 @@ ENUM_TYPES = [LedgerCategory,
               PriceType,
               VolumeCondition,
               TimeCondition,
+              OrderActionFlag,
               MsgType]
 
 MSG_TYPES = {

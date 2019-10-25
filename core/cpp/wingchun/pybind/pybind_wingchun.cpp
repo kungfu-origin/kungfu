@@ -445,6 +445,15 @@ PYBIND11_MODULE(pywingchun, m)
                 }
             );
 
+    py::enum_<kungfu::wingchun::OrderActionFlag>(m_constants, "OrderActionFlag", py::arithmetic())
+            .value("Cancel", kungfu::wingchun::OrderActionFlag::Cancel)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::OrderActionFlag &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                });
+
     py::enum_<kungfu::wingchun::msg::type::MsgType>(m_constants, "MsgType", py::arithmetic())
             .value("Quote", kungfu::wingchun::msg::type::MsgType::Quote)
             .value("Entrust", kungfu::wingchun::msg::type::MsgType::Entrust)
