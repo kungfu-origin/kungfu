@@ -1,0 +1,3 @@
+[console_scripts]
+kfc = kungfu.__main__:main
+
