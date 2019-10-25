@@ -5,6 +5,7 @@ import json
 import click
 import kungfu.yijinjing.journal as kfj
 import pyyjj
+from kungfu import __version__
 
 DEFAULT_CMD_PRIORITY = 100
 
@@ -60,6 +61,7 @@ class SpecialHelpOrder(click.Group):
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('-n', '--name', type=str, help='name for the process, defaults to command if not set')
+@click.version_option(__version__, '--version', '-v', message = 'version {}'.format(__version__))
 @click.pass_context
 def kfc(ctx, home, log_level, name):
     if not home:
@@ -103,13 +105,6 @@ def pass_ctx_from_parent(ctx):
     ctx.locator = ctx.parent.locator
     ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name
-
-@kfc.command()
-@click.pass_context
-def version(ctx):
-    pass_ctx_from_parent(ctx)
-    from kungfu import __version__
-    click.echo(__version__)
 
 def execute():
     kfc(auto_envvar_prefix='KF')
