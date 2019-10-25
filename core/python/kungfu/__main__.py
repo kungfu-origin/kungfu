@@ -4,7 +4,11 @@
 #   KF_NO_EXT - disable extensions if set
 
 
-import extensions
 import kungfu.command as kfc
 from kungfu.command import __all__
-kfc.execute()
+
+def main():
+    kfc.execute()
+
+if __name__ == "__main__":
+    main()
