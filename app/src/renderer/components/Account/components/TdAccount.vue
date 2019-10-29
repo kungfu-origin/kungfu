@@ -21,6 +21,7 @@
                     prop="account_id"
                     label="账户"
                     show-overflow-tooltip
+                    min-width="80"
                 >
                     <template slot-scope="props">
                         <span :class="props.row.account_id">{{props.row.account_id.toAccountId()}}</span> 
@@ -29,6 +30,7 @@
                 <el-table-column
                     prop="source_name"
                     label="柜台"
+                    min-width="80"
                     >
                     <template slot-scope="props">
                         <el-tag
@@ -42,6 +44,7 @@
                 <el-table-column
                     label="状态"
                     show-overflow-tooltip
+                    min-width="70"
                     >
                     <template slot-scope="props">
                         <tr-status 
@@ -53,6 +56,7 @@
                     
                 <el-table-column
                     label="连接"
+                    min-width="60"
                     >
                     <template slot-scope="props">
                         <span @click.stop>
@@ -66,9 +70,13 @@
                     label="实现盈亏"
                     show-overflow-tooltip
                     align="right"
+                    min-width="100"
                     >
                     <template slot-scope="props">
                         <span :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'realized_pnl') > 0,
                             'color-green': calcCash(props.row, 'realized_pnl') < 0,
                         }">
@@ -80,9 +88,13 @@
                     label="浮动盈亏"
                     show-overflow-tooltip
                     align="right"
+                    min-width="110"
                     >
                     <template slot-scope="props">
                         <span :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'unrealized_pnl') > 0,
                             'color-green': calcCash(props.row, 'unrealized_pnl') < 0,
                         }">
@@ -94,21 +106,24 @@
                     label="市值/保证金"
                     show-overflow-tooltip
                     align="right"
+                    min-width="120"
                     >
                     <template slot-scope="props" >
                         <template v-if="(accountSource[props.row.source_name] || {}).typeName == 'future'">
-                            {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).margin) + '' || '--'}}
+                            {{$utils.toDecimal((accountsAsset[props.row.account_id] 
+                            || {}).margin) + '' || '--'}}
                         </template>
                         <!-- market_value -->
-                         <template v-else>
+                        <template v-else>
                             {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).market_value) + '' || '--'}}
-                        </template>
+                        </template>                 
                     </template>
                 </el-table-column>
                 <el-table-column
                     label="可用资金"
                     show-overflow-tooltip
                     align="right"
+                    min-width="120"
                     >
                         <template slot-scope="props">
                         {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).avail) + '' || '--'}}
@@ -117,7 +132,7 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="140"
+                    min-width="120"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>

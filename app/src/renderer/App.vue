@@ -111,8 +111,11 @@ export default {
                 const { account_id, source_id, ledger_category } = data;
                 const accountId = `${source_id}_${account_id}`;                  
                 if(ledger_category !== 0) return;
-                // console.log('[CASH] sub', accountId, data)
-                t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze(data) })
+                // console.log('[CASH] sub',  accountId, data)
+                t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze({
+                    ...data,
+                    nano: true
+                })})
             })
         },
 

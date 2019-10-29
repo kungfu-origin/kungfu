@@ -360,7 +360,10 @@ export default {
                 t.orderDataByKey[order_id] = null;
                 delete t.orderDataByKey[order_id]
             }else {
-                t.orderDataByKey[order_id] = dealOrder(data)
+                t.orderDataByKey[order_id] = {
+                    ...dealOrder(data),
+                    nano: true
+                }
             }
             //更新数据, 根据ID来排序
             const sortOrderList = Object.values(t.orderDataByKey).sort((a, b) =>{

@@ -19,12 +19,12 @@
         <div class="tr-table-body" ref="tr-table-body" >
             <RecycleScroller
             ref="tr-scroller-table"
-            v-if="scrollerType !== 'dynamic' && data && data.length "
+            v-if="scrollerType !== 'dynamic' && show "
             class="tr-table-scroller"
             :items="data"
             :item-size="20"
             key-field="id"
-            :buffer="10"
+            :buffer="100"
             >
                 <template v-slot="{item}">
                     <ul class="tr-table-row">
@@ -34,11 +34,12 @@
                             renderCellClass(column.prop, item),                        
                             'tr-table-cell', 
                             'text-overflow',
+                            item.nano ? 'nano' : '',
                             column.type === 'number' ? 'number' : '',
                             column.type === 'operation' ? 'oper' : ''
                         ]"
                         v-for="column in schema" 
-                        :key="column.prop"       
+                        :key="`${column.prop}_${item.id}`"       
                         :style="{                             
                                 'max-width': headerWidth[column.prop] || column.width,
                         }">
@@ -123,12 +124,6 @@ export default {
             type: [Object, Array]
         },
 
-
-        //  type: "",
-        //  label: String
-        //  prop: String,
-        //  width: String
-        //  flex: Number
         schema: {
             type: Array,
             default: []
@@ -262,6 +257,7 @@ export default {
             font-size: 14px;
         }
     }
+
     .tr-table-row:hover{
         background: $bg_light;
     }
@@ -294,7 +290,16 @@ export default {
     .tr-table-cell.gray{
         color: $font;
     }
-    
+    .tr-table-cell.nano{
+        animation: nanoBlink 0.5s 1;
+    }
+    .tr-table-cell.nano.number.red{
+        animation: nanoRedBlink 0.5s 1;
+    }
+    .tr-table-cell.nano.number.green{
+        animation: nanoGreenBlink 0.5s 1;
+    }
+
 
     .tr-table-body .tr-table-dynamic-scroller{
         .tr-table-row{

@@ -262,7 +262,10 @@ export default {
             //如果存在筛选，则推送的数据也需要满足筛选条件
             if(!data.instrument_id.includes(t.filter.instrumentId)) return
             const poskey = t.getKey(data)
-            t.posDataByKey[poskey] = { ...dealPos(data) }
+            t.posDataByKey[poskey] = { 
+                ...dealPos(data),
+                nano: true
+            }
             //更新数据, 根据ID来排序
             const sortPosList = Object.values(t.posDataByKey).sort((a, b) =>{
                 return a.instrumentId - b.instrumentId
