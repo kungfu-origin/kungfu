@@ -397,7 +397,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-        limitPrice: toDecimal(item.limit_price) || '--',
+        limitPrice: toDecimal(item.limit_price, 3) || '--',
         volumeTraded: item.volume_traded + "/" + (item.volume),
         statusName: orderStatus[item.status],
         status: item.status,
@@ -417,7 +417,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],
-        price: toDecimal(+item.price),
+        price: toDecimal(+item.price, 3),
         volume: toDecimal(+item.volume, 0),
         clientId: item.client_id,
         accountId: item.account_id
@@ -434,8 +434,8 @@ export const dealPos = (item: PosInputData): PosData => {
         yesterdayVolume: toDecimal(item.yesterday_volume, 0),
         todayVolume: toDecimal(item.volume - item.yesterday_volume, 0),
         totalVolume: toDecimal(item.volume, 0),
-        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price) || '--',
-        lastPrice: toDecimal(item.last_price) || '--',
+        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
+        lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
 }

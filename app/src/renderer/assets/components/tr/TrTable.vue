@@ -54,7 +54,7 @@
             </RecycleScroller>
             <DynamicScroller 
             ref="tr-dynamic-scroller-table"
-            v-else-if="scrollerType === 'dynamic' && data && data.length "
+            v-else-if="scrollerType === 'dynamic' && show "
             class="tr-table-scroller tr-table-dynamic-scroller"            
             :items="data"
             :min-item-size="500"
@@ -145,6 +145,18 @@ export default {
     data(){
         return {
             bodyWidth: 0,
+            show: false
+        }
+    },
+
+    watch: {
+        data(newVal=[], oldVal=[]) {
+            const t = this;
+            if((oldVal.length == 0) && (newVal.length !== 0)) {
+                t.$nextTick().then(() => {
+                    t.show = true;
+                })
+            }
         }
     },
 
