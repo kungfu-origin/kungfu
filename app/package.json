@@ -114,7 +114,7 @@
     },
     "linux": {
       "icon": "./resources/logo/icn.icns",
-      "target": ["rpm"]
+      "target": ["rpm", "appimage"]
     },
     "nsis": {
       "oneClick": false,
