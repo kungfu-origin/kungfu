@@ -12,6 +12,8 @@ import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.constants as wc_constants
 import csv
 import pprint
+import importlib
+import os
 
 pyyjj.frame.data = property(wc_utils.get_data)
 
@@ -23,8 +25,9 @@ pyyjj.frame.data = property(wc_utils.get_data)
 @click.option('--msg', type=click.Choice(['all'] + list(wc_constants.MSG_TYPES.keys())), default='all',help="msg type to read")
 @click.option("--continuous", is_flag=True, help="reader not to stop when no data avail util the session end")
 @click.option("-o", "--output", type=str,help="file path where you want to store the exported csv file")
+@click.option('--script', type=str, required=False, help="python script to process every frame data")
 @click.pass_context
-def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuous, output):
+def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuous, output, script):
     pass_ctx_from_parent(ctx)
     session = kfj.find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
@@ -61,7 +64,20 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
         fieldnames = wc_utils.get_csv_header(wc_constants.MSG_TYPES[msg])
         csv_writer = csv.DictWriter(open(output, "w"), fieldnames = fieldnames)
         csv_writer.writeheader()
-    pp = pprint.PrettyPrinter(indent=4)
+        def handle(frame):
+            data_as_dict = frame["data"]
+            dict_row = wc_utils.flatten_json(data_as_dict)
+            csv_writer.writerow(dict_row)
+        frame_handler = handle
+    elif script:
+        dir = os.path.dirname(script)
+        name_no_ext = os.path.split(os.path.basename(script))
+        sys.path.append(os.path.relpath(dir))
+        impl = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
+        frame_handler = getattr(impl, 'on_frame', lambda frame: None)
+    else:
+        pp = pprint.PrettyPrinter(indent=4)
+        frame_handler = pp.pprint
 
     while True:
         if reader.data_available() and msg_count < max_messages:
@@ -78,13 +94,9 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
                 break
             elif frame.gen_time >= start_time and (msg == "all" or wc_constants.MSG_TYPES[msg] == frame.msg_type):
                 data_as_dict = wc_utils.object_as_dict(frame.data)
-                if output:
-                    dict_row = wc_utils.flatten_json(data_as_dict)
-                    csv_writer.writerow(dict_row)
-                else:
-                    frame_as_dict = {"source": frame.source, "dest": frame.dest, "trigger_time": frame.trigger_time, "gen_time":
-                        frame.gen_time, "msg_type": frame.msg_type, "data": data_as_dict}
-                    pp.pprint(frame_as_dict)
+                frame_as_dict = {"source": frame.source, "dest": frame.dest, "trigger_time": frame.trigger_time, "gen_time":
+                    frame.gen_time, "msg_type": frame.msg_type, "data": data_as_dict}
+                frame_handler(frame_as_dict)
                 msg_count +=1
             reader.next()
         elif msg_count >= max_messages:
