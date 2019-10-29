@@ -152,7 +152,10 @@
 
 }
 
-
+.tr-table-cell{
+    display: inline-block;
+    width: 100%;
+}
 
 .tr-table-cell.nano{
     animation: nanoBlink 0.5s 1;

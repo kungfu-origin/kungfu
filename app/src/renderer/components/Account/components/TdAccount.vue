@@ -79,7 +79,9 @@
                             'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'realized_pnl') > 0,
                             'color-green': calcCash(props.row, 'realized_pnl') < 0,
-                        }">
+                        }"
+                        :key="`realized_pnl_${props.row.account_id, calcCash(props.row, 'realized_pnl')}`"
+                        >
                         {{calcCash(props.row, 'realized_pnl') || '--'}}
                         </span> 
                     </template>
@@ -97,7 +99,9 @@
                             'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'unrealized_pnl') > 0,
                             'color-green': calcCash(props.row, 'unrealized_pnl') < 0,
-                        }">
+                        }"
+                        :key="`unrealized_pnl_${props.row.account_id, calcCash(props.row, 'realized_pnl')}`"                        
+                        >
                         {{calcCash(props.row, 'unrealized_pnl') || '--'}}
                         </span> 
                     </template>
