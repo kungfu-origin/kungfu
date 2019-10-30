@@ -39,7 +39,7 @@
                             column.type === 'operation' ? 'oper' : ''
                         ]"
                         v-for="column in schema" 
-                        :key="`${column.prop}_${item.id}`"       
+                        :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
                         :style="{                             
                                 'max-width': headerWidth[column.prop] || column.width,
                         }">
@@ -58,8 +58,9 @@
             v-else-if="scrollerType === 'dynamic' && show "
             class="tr-table-scroller tr-table-dynamic-scroller"            
             :items="data"
-            :min-item-size="500"
+            :min-item-size="50"
             key-field="id"
+            :buffer="100"
             >
                 <template v-slot="{ item, index, active }">
                     <DynamicScrollerItem
@@ -72,12 +73,12 @@
                             <li 
                             :class="[
                                 renderCellClass(column.prop, item),
-                                'tr-table-cell',
+                                'tr-table-cell', 
                                 column.width ? 'text-overflow' : ''
                             ]"
                             :title="item[column.prop] || ''"
                             v-for="column in schema" 
-                            :key="column.prop"       
+                            :key="`${column.prop}`"       
                             :style="{                             
                                 'max-width': headerWidth[column.prop] || column.width
                             }">
@@ -193,7 +194,7 @@ export default {
     },
 
     methods: {
-        triggerToBottom(){
+        triggerToBottom() {
             const t = this;
             t.$nextTick().then(() => {
                 const $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
@@ -201,16 +202,13 @@ export default {
             })
         },
 
-        calcBodyWidth(){
+        calcBodyWidth() {
             const t = this;
             const $target = t.$refs['tr-table-body']
             if(!$target) return;
             t.bodyWidth = $target.clientWidth;
-        },  
+        }
     }
-
-    
-    
 }
 </script>
 <style lang="scss">

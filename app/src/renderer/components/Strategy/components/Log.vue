@@ -245,6 +245,7 @@ export default {
                 if(!item || !item.message) return;
                 tableData.push(Object.freeze({
                     ...item,
+                    nano: true,
                     id: t.logCount
                 }))
             }) 

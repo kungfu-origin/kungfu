@@ -155,6 +155,7 @@
 .tr-table-cell{
     display: inline-block;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .tr-table-cell.nano{
