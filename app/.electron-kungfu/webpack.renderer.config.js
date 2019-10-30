@@ -10,6 +10,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
 
 let whiteListedModules = [
   'vue', 
@@ -137,7 +139,8 @@ let rendererConfig = {
     new webpack.NoEmitOnErrorsPlugin(),
     new PreloadWebpackPlugin({
       rel: 'preload',
-    })
+    }),
+    new MonacoWebpackPlugin()
   ],
   output: {
     filename: '[name].js',
@@ -170,7 +173,7 @@ if (process.env.NODE_ENV !== 'production') {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development')
-    })
+    }),
   )
 }
 

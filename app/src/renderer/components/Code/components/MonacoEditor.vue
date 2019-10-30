@@ -5,7 +5,7 @@
   </div>
 </template>
 <script>
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
 import { mapState } from "vuex";
@@ -13,8 +13,10 @@ import * as CODE_UTILS from "__gUtils/fileUtils";
 
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from "../config/Monokai.json";
+
 monaco.editor.defineTheme("monokai", themeData);
 monaco.editor.setTheme("monokai");
+
 
 export default {
     data() {
@@ -82,6 +84,7 @@ export default {
 
         //如果不存在editor，新建
         createEditor(file, codeText) {
+
             if (document.getElementById("editor-content")) {
                     document.querySelector("#editor-content").innerHTML = "";
                     const fileLanguage = languageJSON[file.ext] || 'plaintext';
@@ -92,7 +95,7 @@ export default {
                             language: fileLanguage,
                             fontSize: "14",
                             tabSize: '4',
-                            autoIndent:true,
+                            autoIndent: true,
                             automaticLayout: true,
                             extraKeys: {
                                 "Tab": function(cm){
@@ -122,12 +125,12 @@ export default {
         bindBlur(editor, file){
             const t = this;
             editor !== null && editor.onDidBlurEditorText(e => {
-                const value = editor.getValue();
                 t.writeFile(editor, file)
             });
         },
 
         writeFile(editor, file){
+            const value = editor.getValue();
             CODE_UTILS.writeFile(file.filePath, value);
         },
 

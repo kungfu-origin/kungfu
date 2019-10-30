@@ -88,7 +88,6 @@ if(currentPath.indexOf('/code') === -1) {
     })
 }
 
-
 new Vue({
     router,
     store,
@@ -97,15 +96,7 @@ new Vue({
 
 
 // debug export
-
 window.fileId = 0;
-
-window.setTradingDay = (targetDay) => {
-    store.dispatch('setTradingDay', targetDay)
-}
-
-window.getTradingDay = () => {
-    return store.state.BASE.tradingDay
-}
-
+window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay)
+window.getTradingDay = () => store.state.BASE.tradingDay
 window.store = store
