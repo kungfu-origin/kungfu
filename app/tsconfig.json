@@ -1,7 +1,7 @@
 {
     "include": [
         "shared/**/*",
-        "src/**/*"
+        "src/**/*", "resources/keywords/resolveAPIMd.js", "resources/keywords"
     ],
     "typeRoots": [
         "shared/typings",

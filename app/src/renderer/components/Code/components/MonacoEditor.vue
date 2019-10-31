@@ -8,6 +8,7 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
+import { keywordsList, kungfuFunctions, kungfuProperties, kungfuKeywords, pythonKeywords } from "../hint/monaco.python.hint";
 import { mapState } from "vuex";
 import * as CODE_UTILS from "__gUtils/fileUtils";
 
@@ -16,6 +17,57 @@ import themeData from "../config/Monokai.json";
 
 monaco.editor.defineTheme("monokai", themeData);
 monaco.editor.setTheme("monokai");
+
+monaco.languages.registerCompletionItemProvider('python', {
+    provideCompletionItems: (model, position, context, token) => {
+        const lastChars = model.getValueInRange({
+            startLineNumber: position.lineNumber,
+            startColumn: 0,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column
+        })
+
+        const charSplitSpace = lastChars.split(' ');
+        const ifFunction = (charSplitSpace.length >= 2) && charSplitSpace[charSplitSpace.length - 2]
+        if(ifFunction === 'def') return { suggestions: kungfuFunctions }
+
+        const charSplitPoint = lastChars.split('.');
+        const ifProperty = (charSplitPoint.length > 1) && charSplitPoint[charSplitPoint.length - 1].indexOf(' ') === -1;
+        if(ifProperty) return { suggestions: kungfuProperties }
+
+
+        const allChars = model.getValueInRange({
+            startLineNumber: 0,
+            startColumn: 0,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column
+        })
+
+        const allCharList = allChars
+            .split('\n')
+            .map(char => char.split('.'))
+            .filter(char => char !== '')
+            .map(charList => charList.join(' '))
+            .reduce((a, b) => {
+                if (typeof a === 'string') {
+                    return a.split(' ').concat(b.split(' '))
+                } else {
+                    return a.concat(b.split(' '))
+                }
+            })
+            .removeRepeat()
+            .filter(char => (char !== '') && (keywordsList.indexOf(char) == -1))
+            .map(char => {
+                return {
+                    label: char,
+                    kind: monaco.languages.CompletionItemKind.Text,
+                    documentation: "",
+                    insertText: char,
+                }
+            })
+        return { suggestions: [...pythonKeywords, ...kungfuKeywords, ...allCharList] }
+    }
+})
 
 
 export default {

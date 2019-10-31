@@ -47,6 +47,10 @@ declare global {
         toAccountId(): string;
         parseSourceAccountId(): SourceAccountId;
     }
+
+    interface Array<T> {
+        removeRepeat(): any;
+    }
 }
 
 export {}
@@ -68,6 +72,10 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
             id: parseList[1] 
         }
     }
+}
+
+Array.prototype.removeRepeat = function(): any{
+    return Array.from(new Set(this))
 }
 
 export const delaySeconds = (seconds: number): Promise<void> => {

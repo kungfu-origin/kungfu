@@ -30,15 +30,16 @@ export default {
 
     mounted(){
         //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
-        if(window.location.hash.indexOf('code') !== -1) return;
-        if(document.getElementById('loading')) document.getElementById('loading').remove();
-        //解除回车带来的一些不好的影响
-        //比如页面重新刷新的问题
-        document.body.addEventListener('keydown', (event) => {
-            if(event.keyCode == 13) {
-                event.preventDefault()
-            }
-        })
+        if(window.location.hash.indexOf('code') === -1) {
+            if(document.getElementById('loading')) document.getElementById('loading').remove();
+            //解除回车带来的一些不好的影响
+            //比如页面重新刷新的问题
+            document.body.addEventListener('keydown', (event) => {
+                if(event.keyCode == 13) {
+                    event.preventDefault()
+                }
+            })
+        }
     },
 
     created() {
@@ -46,7 +47,7 @@ export default {
         this.$store.dispatch('getAccountSourceConfig')
         this.$store.dispatch('getStrategyList')
         this.$store.dispatch('getAccountList')
-        .then(accountList => t.getAccountsCash(accountList))
+            .then(accountList => t.getAccountsCash(accountList))
 
         this.subGatewayState();
         this.subAccountCash();

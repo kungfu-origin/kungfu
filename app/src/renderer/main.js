@@ -5,20 +5,20 @@ import router from './routers';
 import store from './store';
 import Components from './assets/components'
 import * as utils from '__gUtils/busiUtils'
-import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip} from 'element-ui';
+import { Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip } from 'element-ui';
 import moment from 'moment';
 import App from './App.vue';
 import { listProcessStatus, startMaster, startLedger } from '__gUtils/processUtils';
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
+Vue.use(Input)
+Vue.use(InputNumber)
 Vue.use(Tag)
 Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Col)
 Vue.use(Row)
-Vue.use(Input)
-Vue.use(InputNumber)
 Vue.use(DatePicker)
 Vue.use(Select)
 Vue.use(Option)
