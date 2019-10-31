@@ -19,54 +19,7 @@ monaco.editor.defineTheme("monokai", themeData);
 monaco.editor.setTheme("monokai");
 
 monaco.languages.registerCompletionItemProvider('python', {
-    provideCompletionItems: (model, position, context, token) => {
-        const lastChars = model.getValueInRange({
-            startLineNumber: position.lineNumber,
-            startColumn: 0,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column
-        })
-
-        const charSplitSpace = lastChars.split(' ');
-        const ifFunction = (charSplitSpace.length >= 2) && charSplitSpace[charSplitSpace.length - 2]
-        if(ifFunction === 'def') return { suggestions: kungfuFunctions }
-
-        const charSplitPoint = lastChars.split('.');
-        const ifProperty = (charSplitPoint.length > 1) && charSplitPoint[charSplitPoint.length - 1].indexOf(' ') === -1;
-        if(ifProperty) return { suggestions: kungfuProperties }
-
-
-        const allChars = model.getValueInRange({
-            startLineNumber: 0,
-            startColumn: 0,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column
-        })
-
-        const allCharList = allChars
-            .split('\n')
-            .map(char => char.split('.'))
-            .filter(char => char !== '')
-            .map(charList => charList.join(' '))
-            .reduce((a, b) => {
-                if (typeof a === 'string') {
-                    return a.split(' ').concat(b.split(' '))
-                } else {
-                    return a.concat(b.split(' '))
-                }
-            })
-            .removeRepeat()
-            .filter(char => (char !== '') && (keywordsList.indexOf(char) == -1))
-            .map(char => {
-                return {
-                    label: char,
-                    kind: monaco.languages.CompletionItemKind.Text,
-                    documentation: "",
-                    insertText: char,
-                }
-            })
-        return { suggestions: [...pythonKeywords, ...kungfuKeywords, ...allCharList] }
-    }
+    provideCompletionItems: pythonProvideCompletionItems
 })
 
 
@@ -100,6 +53,15 @@ export default {
                         // t.codeText = res;
                         t.editor = t.createEditor(t.file, codeText);
                         t.editor = t.buildEditor(t.editor, t.file, codeText)
+                        t.editor.addAction(function() {
+                            return {
+                                id: "OPEN_MODAL_WINDOW",
+                                label: "Open model window",
+                                run: (ed) => {
+                                    this.setState({showPopup: true})
+                                }
+                            }
+                        })
                         setTimeout(() => {
                             t.bindBlur(t.editor, t.file);
                         }, 300)
@@ -193,6 +155,57 @@ export default {
         }
     }
 };
+
+function pythonProvideCompletionItems (model, position, context, token) {
+
+    const lastChars = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 0,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column
+    })
+
+    const charSplitSpace = lastChars.split(' ');
+    const ifFunction = (charSplitSpace.length >= 2) && charSplitSpace[charSplitSpace.length - 2]
+    if(ifFunction === 'def') return { suggestions: kungfuFunctions }
+
+    const charSplitPoint = lastChars.split('.');
+    const ifProperty = (charSplitPoint.length > 1) && charSplitPoint[charSplitPoint.length - 1].indexOf(' ') === -1;
+    if(ifProperty) return { suggestions: kungfuProperties }
+
+
+    const allChars = model.getValueInRange({
+        startLineNumber: 0,
+        startColumn: 0,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column
+    })
+
+    const allCharList = allChars
+        .replace(/\./g, ' ')
+        .replace(/@/g,  ' ')
+        .replace(/"/g,  ' ')
+        .replace(/'/g,  ' ')
+        .replace(/:/g,  ' ')
+        .replace(/\//g, ' ')
+        .replace(/,/g,  ' ')
+        .split('\n')
+        .join(' ')
+        .split(' ')
+        .filter(char => (char !== '') && isNaN(char))
+        .removeRepeat()
+        .filter(char => keywordsList.indexOf(char) == -1)
+        .map(char => {
+            return {
+                label: char,
+                kind: monaco.languages.CompletionItemKind.Text,
+                documentation: "",
+                insertText: char,
+            }
+        })
+    return { suggestions: [...pythonKeywords, ...kungfuKeywords, ...allCharList] }
+}
+
 </script>
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
