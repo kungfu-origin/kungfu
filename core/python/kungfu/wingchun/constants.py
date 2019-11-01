@@ -64,21 +64,5 @@ ENUM_TYPES = [LedgerCategory,
               PriceType,
               VolumeCondition,
               TimeCondition,
-              OrderActionFlag,
-              MsgType]
-
-MSG_TYPES = {
-    "quote": MsgType.Quote,
-    "entrust": MsgType.Entrust,
-    "transaction": MsgType.Transaction,
-    "bar": MsgType.Bar,
-    "order_input": MsgType.OrderInput,
-    "order_action": MsgType.OrderAction,
-    "order": MsgType.Order,
-    "trade": MsgType.Trade,
-    "position": MsgType.Position,
-    "asset": MsgType.Asset,
-    "position_detail": MsgType.PositionDetail,
-    "instrument": MsgType.Instrument
-}
+              OrderActionFlag]
 

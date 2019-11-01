@@ -8,15 +8,17 @@ from itertools import groupby
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.msg as yjj_msg
+from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import LedgerDB
-from kungfu.wingchun import msg
 import kungfu.wingchun.finance as kwf
 from kungfu.wingchun.calendar import Calendar
 from kungfu.wingchun.constants import OrderStatus, MsgType, LedgerCategory, ValuationMethod
 import kungfu.wingchun.utils as wc_utils
+import kungfu.msg.utils as msg_utils
 
 DEFAULT_INIT_CASH = 1e7
+
 HANDLERS = dict()
 
 def on(msg_type):
@@ -66,7 +68,7 @@ class Ledger(pywingchun.Ledger):
         source_id = location.group
         orders = self.ctx.db.mark_orders_status_unknown(source_id, account_id)
         for order in orders:
-            self.publish(json.dumps({"msg_type": int(MsgType.Order), "data": order}))
+            self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls = wc_utils.WCEncoder))
 
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
@@ -83,38 +85,54 @@ class Ledger(pywingchun.Ledger):
         for book in self.ctx.books.values():
             book.apply_quote(quote)
 
+    def get_location(self, location_uid):
+        if self.has_location(location_uid):
+            return pywingchun.Ledger.get_location(self, location_uid)
+        else:
+            return self.ctx.db.get_location(self.ctx, location_uid)
+
     def on_order(self, event, order):
         self.ctx.logger.debug('on order %s', order)
-        message = self._message_from_order_event(event, order)
-        order_record = {
-            'source': event.source,
-            'dest': event.dest,
-            'order': order
-        }
-        self.ctx.orders[order.order_id] = order_record
-        self.ctx.db.add_order(**message["data"])
-        self.publish(json.dumps(message))
+        frame_as_dict = event.as_dict()
+        source_location = self.get_location(event.source) # account location which send order report event
+        dest_location = self.get_location(event.dest) # strategy location which receive order report event
+
+        frame_as_dict["data"]["source_id"] = source_location.group
+        frame_as_dict["data"]["account_id"] = source_location.name
+        frame_as_dict["data"]["client_id"] = dest_location.name
+        frame_as_dict["data"]["order_id"] = str(order.order_id)
+        frame_as_dict["data"]["parent_id"] = str(order.parent_id)
+
+        self.ctx.orders[order.order_id] = frame_as_dict
+
+        self.ctx.db.add_order(**frame_as_dict["data"])
+        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug('on trade %s', trade)
-        source_id = self.get_location(event.source).group
-        message = self._message_from_trade_event(event, trade)
-        client_id = message["data"]["client_id"]
+        frame_as_dict = event.as_dict()
+        source_location = self.get_location(event.source) # account location which send trade report event
+        dest_location = self.get_location(event.dest) # strategy location which receive trade report event
+        source_id = source_location.group
+        account_id = dest_location.name
+        client_id = dest_location.name
+        frame_as_dict["data"]["source_id"] = source_id
+        frame_as_dict["data"]["account_id"] = account_id
+        frame_as_dict["data"]["client_id"] = client_id
         if source_id == "xtp" and trade.order_id in self.ctx.orders:
             self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
             order_record = self.ctx.orders[trade.order_id]
-            order = order_record["order"]
-            if not wc_utils.is_final_status(order.status):
-                order_message = self._message_from_order_event(event, order)
-                order_message["data"]["volume_left"] = order.volume_left - trade.volume
-                order_message["data"]["volume_traded"] = order.volume_traded + trade.volume
-                order_message["data"]["status"] = int(OrderStatus.PartialFilledActive) if order_message["data"]["volume_left"] > 0 else int(OrderStatus.PartialFilledNotActive)
-                self.ctx.db.add_order(**order_message["data"])
-                self.publish(json.dumps(order_message))
+            order = order_record["data"]
+            if not wc_utils.is_final_status(order["status"]):
+                order["volume_left"] = order["volume_left"]- trade.volume
+                order["volume_traded"] = order["volume_traded"]+ trade.volume
+                order["status"] = int(OrderStatus.PartialFilledActive) if order["volume_left"] > 0 else int(OrderStatus.PartialFilledNotActive)
+                self.ctx.db.add_order(**order)
+                self.publish(json.dumps(order_record))
             else:
-                self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order.status))
-        self.ctx.db.add_trade(**message["data"])
-        self.publish(json.dumps(message))
+                self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
+        self.ctx.db.add_trade(frame_as_dict["data"])
+        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
         
         self._get_book(book_tags= kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id)).apply_trade(trade)
         self._get_book(book_tags=kwf.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=client_id)).apply_trade(trade)
@@ -122,8 +140,9 @@ class Ledger(pywingchun.Ledger):
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
         if inst_list:
-            self.ctx.db.set_instruments([wc_utils.object_as_dict(inst) for inst in inst_list])
-            self.ctx.inst_infos = {inst.instrument_id: wc_utils.object_as_dict(inst) for inst in inst_list}
+            dicts = [msg_utils.object_as_dict(inst) for inst in inst_list]
+            self.ctx.db.set_instruments(dicts)
+            self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in dicts}
 
     def on_account_with_positions(self, asset, positions):
         self.ctx.logger.info("asset: {}".format(asset))
@@ -132,7 +151,7 @@ class Ledger(pywingchun.Ledger):
         book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
         account = kwf.book.AccountBook(ctx=self.ctx,tags = book_tags,avail = asset.avail,
                                        future_position_valuation_method = ValuationMethod.AverageCost,
-                                       positions=[wc_utils.object_as_dict(pos) for pos in positions])
+                                       positions=[msg_utils.object_as_dict(pos) for pos in positions])
         book = self._get_book(book_tags).merge(account)
         self.publish(json.dumps(book.message))
         self.ctx.db.dump(book)
@@ -149,43 +168,13 @@ class Ledger(pywingchun.Ledger):
             direction = detail_list[0].direction
             instrument_id = detail_list[0].instrument_id
             exchange_id = detail_list[0].exchange_id
-            pos_dict = {"instrument_id": instrument_id, "exchange_id": exchange_id, "direction": direction, "details": [wc_utils.object_as_dict(detail) for detail in detail_list]}
+            pos_dict = {"instrument_id": instrument_id, "exchange_id": exchange_id, "direction": direction, "details": [msg_utils.object_as_dict(detail) for detail in detail_list]}
             positions.append(pos_dict)
         book_tags = kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account,account_id=asset.account_id, source_id=asset.source_id)
         account_book = kwf.book.AccountBook(ctx=self.ctx, avail=asset.avail,tags = book_tags, positions= positions)
         book = self._get_book(book_tags).merge(account_book)
         self.publish(json.dumps(book.message))
         self.ctx.db.dump(book)
-
-    def _message_from_order_event(self, event, order):
-        order_dict = wc_utils.object_as_dict(order)
-        order_dict["order_id"] = str(order.order_id)
-        order_dict["parent_id"] = str(order.parent_id)
-        if self.has_location(event.dest):
-            order_dict["client_id"] = self.get_location(event.dest).name
-        else:
-            order_info = self.ctx.db.get_order(order.order_id)
-            if not order_info:
-                raise ValueError("failed to find order dest location info, dest uid: {}, order {}".format(event.dest, order))
-            else:
-                order_dict["client_id"] = order_info["client_id"]
-        return {"msg_type": int(MsgType.Order), "data": order_dict}
-
-    def _message_from_trade_event(self, event, trade):
-        if self.has_location(event.dest):
-            client_id = self.get_location(event.dest).name
-        else:
-            order_info = self.ctx.db.get_order(order.order_id)
-            if not order_info:
-                raise ValueError("failed to find order dest location info, dest uid: {}, order {}".format(event.dest, order))
-            else:
-                client_id = order_info["client_id"]
-        trade_dict = wc_utils.object_as_dict(trade)
-        trade_dict["order_id"] = str(trade.order_id)
-        trade_dict["parent_order_id"] = str(trade.parent_order_id)
-        trade_dict["trade_id"] = str(trade.trade_id)
-        trade_dict["client_id"] = client_id
-        return {"msg_type": int(MsgType.Trade), "data": trade_dict}
 
     def _dump_snapshot(self, data_frequency="minute"):
         messages = []

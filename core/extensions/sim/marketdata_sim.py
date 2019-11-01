@@ -5,9 +5,6 @@ from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
 import kungfu.yijinjing.time as kft
 import pyyjj
-import kungfu.wingchun.utils as wc_utils
-
-pyyjj.writer.write_data = wc_utils.write_data
 
 MakerConfig = namedtuple("MakerConfig", ["base", "bound", "samples", "variation", "randseed"])
 
@@ -23,7 +20,6 @@ class MarketDataSim(pywingchun.MarketData):
         pywingchun.MarketData.on_start(self)
 
     def quote_from_orderbook(self, ob):
-        # ob.display()
         quote = pywingchun.Quote()
         instrument_id, exchange_id = ob.security.split(".")
         quote.data_time = self.now()
@@ -33,7 +29,6 @@ class MarketDataSim(pywingchun.MarketData):
         quote.ask_volume = [ob.offer_qty(i) for i in range(0, min(10, ob.depth_offers()))]
         quote.bid_price = [ob.bid_price(i) for i in range(0, min(10, ob.depth_bids()))]
         quote.bid_volume = [ob.bid_qty(i) for i in range(0, min(10, ob.depth_bids()))]
-        # print(quote)
         return quote
 
     def init_order_book(self, instrument_id, exchange_id):
@@ -47,7 +42,6 @@ class MarketDataSim(pywingchun.MarketData):
         self.orderbooks[symbol_id] = book
 
     def update_orderbooks(self):
-        # self.logger.info("*************************update_orderbooks**********************")
         for book in self.orderbooks.values():
             order_generator = book.gen_orders(self.config)
             for orders, mid in order_generator:

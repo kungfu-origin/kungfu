@@ -9,9 +9,6 @@ import importlib
 from dotted_dict import DottedDict
 from collections import namedtuple
 
-pyyjj.frame.data = property(wc_utils.get_data)
-pyyjj.writer.write_data = wc_utils.write_data
-
 class MatchMode:
     Reject = "reject"
     Pend = "pend"

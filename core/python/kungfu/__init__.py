@@ -16,6 +16,8 @@ limitations under the License.
 
 from .env import setup_environment_variables
 setup_environment_variables()
+from .msg import monkey_patch
+monkey_patch()
 
 try:
     from ._version import __version__

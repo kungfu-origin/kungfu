@@ -66,7 +66,7 @@ class Order(Base):
     exchange_id = Column(String)
     account_id = Column(String)
     client_id = Column(String)
-    instrument_type = Column(Integer)
+    instrument_type = Column(InstrumentType)
     limit_price = Column(Float)
     frozen_price = Column(Float)
     volume = Column(Integer)
@@ -74,14 +74,14 @@ class Order(Base):
     volume_left = Column(Integer)
     tax = Column(Float)
     commission = Column(Float)
-    status = Column(Integer)
+    status = Column(OrderStatus)
     error_id = Column(Integer)
     error_msg = Column(String)
-    side = Column(Integer)
-    offset = Column(Integer)
-    price_type = Column(Integer)
-    volume_condition = Column(Integer)
-    time_condition = Column(Integer)
+    side = Column(Side)
+    offset = Column(Offset)
+    price_type = Column(PriceType)
+    volume_condition = Column(VolumeCondition)
+    time_condition = Column(VolumeCondition)
     parent_id = Column(String)
 
     def __init__(self, **kwargs):
@@ -240,4 +240,9 @@ class PositionDetail(Base):
                 if attr == "trade_id":
                     value = str(value)
                 setattr(self, attr, value)
+
+class Location(Base):
+    __tablename__ = "location"
+    uid = Column(Integer, primary_key = True)
+    info = Column(Json)
 

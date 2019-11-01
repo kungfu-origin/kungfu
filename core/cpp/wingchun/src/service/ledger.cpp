@@ -105,6 +105,10 @@ namespace kungfu
 
             void Ledger::deregister_location(int64_t trigger_time, uint32_t location_uid)
             {
+                if (not has_location(location_uid))
+                {
+                    return;
+                }
                 auto app_location = get_location(location_uid);
                 switch (app_location->category)
                 {
@@ -440,29 +444,48 @@ namespace kungfu
                     }
                 };
 
-                msg::data::BrokerState state = this->get_broker_state(md_location->uid);
-                switch (state)
+                auto sub_util_broker_ready = [=](){
+                        msg::data::BrokerState state = this->get_broker_state(md_location->uid);
+                        switch (state)
+                        {
+                            case msg::data::BrokerState::LoggedIn:
+                            case msg::data::BrokerState::Ready:
+                            {
+                                write_sub_msg();
+                                break;
+                            }
+                            default:
+                            {
+                                events_ | is(msg::type::BrokerState) | from(md_location->uid) |
+                                filter([=](yijinjing::event_ptr e)
+                                       {
+                                           const msg::data::BrokerState &data = e->data<msg::data::BrokerState>();
+                                           return data == msg::data::BrokerState::LoggedIn or data == msg::data::BrokerState::Ready;
+                                       }) | first() |
+                                $([=](event_ptr e)
+                                  {
+                                      write_sub_msg();
+                                  });
+                                break;
+                            }
+                        }
+                };
+
+                if (not has_writer(md_location->uid))
                 {
-                    case msg::data::BrokerState::LoggedIn:
-                    case msg::data::BrokerState::Ready:
-                    {
-                        write_sub_msg();
-                        break;
-                    }
-                    default:
-                    {
-                        events_ | is(msg::type::BrokerState) | from(md_location->uid) |
-                        filter([=](yijinjing::event_ptr e)
-                               {
-                                   const msg::data::BrokerState &data = e->data<msg::data::BrokerState>();
-                                   return data == msg::data::BrokerState::LoggedIn or data == msg::data::BrokerState::Ready;
-                               }) | first() |
-                        $([=](event_ptr e)
-                          {
-                              write_sub_msg();
-                          });
-                        break;
-                    }
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    filter([=](yijinjing::event_ptr e)
+                           {
+                               const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                               return data.dest_id == md_location->uid;
+                           }) | first() |
+                    $([=](event_ptr e)
+                      {
+                            sub_util_broker_ready();
+                      });
+                } else
+                {
+                    sub_util_broker_ready();
                 }
             }
         }

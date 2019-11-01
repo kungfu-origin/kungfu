@@ -2,6 +2,7 @@
 import json
 from .models import *
 from itertools import groupby
+from kungfu.yijinjing.journal import make_location_from_dict
 import kungfu.wingchun.finance as kwf
 from kungfu.wingchun.constants import *
 from sqlalchemy import create_engine
@@ -76,6 +77,19 @@ class LedgerDB(SessionFactoryHolder):
     def __init__(self, location, filename):
         super(LedgerDB, self).__init__(location, filename)
         Base.metadata.create_all(self.engine)
+
+    def get_location(self, ctx, uid):
+        with session_scope(self.session_factory) as session:
+            info = session.query(Location).get(uid)
+            location = make_location_from_dict(info)
+            return location
+
+    def add_location(self, location):
+        with session_scope(self.session_factory) as session:
+            if not session.query(Location).get(location.uid):
+                loc_obj = Location(location.uid, {"uid": location.uid, "uname": location.uname, "mode": location.mode,
+                                        "category": location.category, "group": location.group, "name": location.name})
+                session.add(loc_obj)
 
     def on_messages(self, messages):
         with session_scope(self.session_factory) as session:
@@ -178,4 +192,3 @@ class LedgerDB(SessionFactoryHolder):
     def object_from_msg(self, message):
         cls =  self.get_model_cls(message["msg_type"])
         return cls(**message["data"])
-
