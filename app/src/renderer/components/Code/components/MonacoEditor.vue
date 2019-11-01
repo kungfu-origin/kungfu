@@ -11,6 +11,7 @@ import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 import { keywordsList, kungfuFunctions, kungfuProperties, kungfuKeywords, pythonKeywords } from "../hint/monaco.python.hint";
 import { mapState } from "vuex";
 import * as CODE_UTILS from "__gUtils/fileUtils";
+import { delayMiliSeconds } from '__gUtils/busiUtils';
 
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from "../config/Monokai.json";
@@ -37,37 +38,28 @@ export default {
     computed: {
         ...mapState({
             currentFile: state => state.STRATEGY.currentFile,
-            fileTree: state => state.STRATEGY.fileTree
+            fileTree: state => state.STRATEGY.fileTree,
+            codeSpaceTab: state => state.BASE.kfConfig.codeSpaceTab
         })
     },
 
     watch: {
-        currentFile(newVal) {
+        async currentFile(newFile) {
             const t = this;
-            const filePath = newVal.filePath;
-            if (!t.currentFile.isDir) {
-                t.clearState(); // 清空状态
-                t.file = newVal;
-                CODE_UTILS.getCodeText(filePath).then(codeText => {
-                    t.$nextTick().then(() => {
-                        // t.codeText = res;
-                        t.editor = t.createEditor(t.file, codeText);
-                        t.editor = t.buildEditor(t.editor, t.file, codeText)
-                        t.editor.addAction(function() {
-                            return {
-                                id: "OPEN_MODAL_WINDOW",
-                                label: "Open model window",
-                                run: (ed) => {
-                                    this.setState({showPopup: true})
-                                }
-                            }
-                        })
-                        setTimeout(() => {
-                            t.bindBlur(t.editor, t.file);
-                        }, 300)
-                    });
-                });
-            }
+            const filePath = newFile.filePath;
+            
+            if (t.currentFile.isDir) return; 
+
+            t.clearState(); // 清空状态
+            t.file = newFile;
+            const codeText = await CODE_UTILS.getCodeText(filePath);
+            
+            await t.$nextTick();
+            t.editor = t.buildEditor(t.editor, t.file, codeText);
+            window.editor = t.editor
+
+            await delayMiliSeconds(300)
+            t.bindBlur(t.editor, t.file)
         },
 
         fileTree(newTree, oldTree) {
@@ -82,6 +74,11 @@ export default {
                 t.file = null;
                 t.editor = null;
             }
+        },
+
+        codeSpaceTab(spaceTabSetting) {
+            const t = this;
+            t.updateSpaceTab(spaceTabSetting)
         }
     },
 
@@ -98,7 +95,7 @@ export default {
 
         //如果不存在editor，新建
         createEditor(file, codeText) {
-
+            const t = this;
             if (document.getElementById("editor-content")) {
                     document.querySelector("#editor-content").innerHTML = "";
                     const fileLanguage = languageJSON[file.ext] || 'plaintext';
@@ -107,17 +104,19 @@ export default {
                         {
                             value: codeText || "",
                             language: fileLanguage,
-                            fontSize: "14",
-                            tabSize: '4',
+
+                            insertSpaces: t.codeSpaceTab.type === 'Spaces',
+                            indentSize: t.codeSpaceTab.size,
+                            tabSize: t.codeSpaceTab.size,
+                            
                             autoIndent: true,
+                            formatOnPaste: true,
+                            formatOnType: true,
+
+                            fontSize: "14",                            
                             automaticLayout: true,
-                            extraKeys: {
-                                "Tab": function(cm){
-                                    cm.replaceSelection("   " , "end");
-                                }
-                            }
                         }
-                    );                
+                    );     
                 return editor;
             }
             return null;
@@ -152,6 +151,29 @@ export default {
             const t = this;
             t.editor = null;
             t.file = null;
+        },
+
+        updateSpaceTab(spaceTabSetting) {
+            const t = this;
+            const type = spaceTabSetting.type || 'Spaces';
+            const size = spaceTabSetting.size || 4;
+            
+            if(!t.editor) return;
+            
+            const model = t.editor.getModel()
+            if(type.toLowerCase() === 'spaces') {
+                model.updateOptions({
+                    insertSpaces: true,
+                    indentSize: t.codeSpaceTab.size,
+                    tabSize: t.codeSpaceTab.size,
+                })
+            } else if (type.toLowerCase() === 'tabs') {
+                model.updateOptions({
+                    insertSpaces: false,
+                    indentSize: t.codeSpaceTab.size,
+                    tabSize: t.codeSpaceTab.size,
+                })
+            }
         }
     }
 };

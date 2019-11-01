@@ -82,7 +82,7 @@ if(currentPath.indexOf('/code') === -1) {
     .catch(err => console.error(err))
     .finally(() => {
         startGetProcessStatus();
-        utils.delaySeconds(1000)
+        utils.delayMiliSeconds(1000)
         .then(() => startLedger(false))
         .catch(err => console.error(err))
     })

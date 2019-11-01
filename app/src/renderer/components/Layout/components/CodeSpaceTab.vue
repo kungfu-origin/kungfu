@@ -41,16 +41,16 @@ export default {
             t.currentSettingInfoList = [
                  {
                     name: 'Indent Using Spaces',
-                    tip: type === 'spaces' ? 'change view' : '',
-                    key: 'spaces',
-                    active: type === 'spaces'
+                    tip: type === 'Spaces' ? 'change view' : '',
+                    key: 'Spaces',
+                    active: type === 'Spaces'
                 },
                 {
                     name: 'Indent Using Tabs',
                     bottomLine: true,
-                    tip: type === 'tabs' ? 'change view' : '',
-                    key: 'tabs',
-                    active: type === 'tabs'
+                    tip: type === 'Tabs' ? 'change view' : '',
+                    key: 'Tabs',
+                    active: type === 'Tabs'
                 }
             ]
             t.openSettingDashboard()

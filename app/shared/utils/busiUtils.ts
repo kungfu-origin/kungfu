@@ -78,12 +78,12 @@ Array.prototype.removeRepeat = function(): any{
     return Array.from(new Set(this))
 }
 
-export const delaySeconds = (seconds: number): Promise<void> => {
+export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
     return new Promise(resolve => {
         let timer = setTimeout(() => {
             resolve()
             clearTimeout(timer)
-        }, seconds)
+        }, miliSeconds)
     })
 }
 

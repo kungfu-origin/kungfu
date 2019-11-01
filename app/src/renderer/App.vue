@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
-import { deepClone, delaySeconds, debounce } from '__gUtils/busiUtils';
+import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { getAccountAsset } from '__io/db/account';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
@@ -96,7 +96,7 @@ export default {
                 const stateData = data[1];
                 //if state is 2 means disconnect, kill process, delay 3s; 
                 if(+stateData.state === 5) {
-                    delaySeconds(1000)
+                    delayMiliSeconds(1000)
                     .then(() => deleteProcess(processId))
                 } else { 
                     // console.log('[GATEWAY STATE] sub', processId, stateData)
@@ -153,7 +153,7 @@ export default {
         reqCalendar() {
             const t = this
             //先主动获取
-            delaySeconds(3000)//需要等ledger起来
+            delayMiliSeconds(3000)//需要等ledger起来
             .then(() => nanoReqCalendar())
             .then(calendar => {
                 if(calendar && calendar.trading_day) {
@@ -166,13 +166,13 @@ export default {
 
         //获取gatewayState（req后会从subGatewayState中获取）
         reqGatewayState(){
-            delaySeconds(3000)//需要等ledger起来
+            delayMiliSeconds(3000)//需要等ledger起来
             .then(() => nanoReqGatewayState())
         },
 
         //获取资金信息
         reqCash() {
-            delaySeconds(3000)//需要等ledger起来
+            delayMiliSeconds(3000)//需要等ledger起来
             .then(() => nanoReqCash())
         }
     }
