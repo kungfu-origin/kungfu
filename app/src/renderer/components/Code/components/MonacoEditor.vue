@@ -56,9 +56,9 @@ export default {
             
             await t.$nextTick();
             t.editor = t.buildEditor(t.editor, t.file, codeText);
-            window.editor = t.editor
 
-            await delayMiliSeconds(300)
+            await t.$nextTick();
+            t.updateSpaceTab(t.codeSpaceTab)
             t.bindBlur(t.editor, t.file)
         },
 
@@ -105,10 +105,6 @@ export default {
                             value: codeText || "",
                             language: fileLanguage,
 
-                            insertSpaces: t.codeSpaceTab.type === 'Spaces',
-                            indentSize: t.codeSpaceTab.size,
-                            tabSize: t.codeSpaceTab.size,
-                            
                             autoIndent: true,
                             formatOnPaste: true,
                             formatOnType: true,
