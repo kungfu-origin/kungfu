@@ -131,7 +131,7 @@ class Ledger(pywingchun.Ledger):
                 self.publish(json.dumps(order_record, cls = wc_utils.WCEncoder))
             else:
                 self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
-        self.ctx.db.add_trade(frame_as_dict["data"])
+        self.ctx.db.add_trade(**frame_as_dict["data"])
         self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
         
         self._get_book(book_tags= kwf.book.AccountBookTags(ledger_category=LedgerCategory.Account, source_id=source_id,account_id=trade.account_id)).apply_trade(trade)
