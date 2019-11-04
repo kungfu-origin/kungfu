@@ -114,7 +114,7 @@ class Ledger(pywingchun.Ledger):
         source_location = self.get_location(event.source) # account location which send trade report event
         dest_location = self.get_location(event.dest) # strategy location which receive trade report event
         source_id = source_location.group
-        account_id = dest_location.name
+        account_id = source_location.name
         client_id = dest_location.name
         frame_as_dict["data"]["source_id"] = source_id
         frame_as_dict["data"]["account_id"] = account_id
