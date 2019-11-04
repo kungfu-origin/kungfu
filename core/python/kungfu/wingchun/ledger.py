@@ -119,6 +119,8 @@ class Ledger(pywingchun.Ledger):
         frame_as_dict["data"]["source_id"] = source_id
         frame_as_dict["data"]["account_id"] = account_id
         frame_as_dict["data"]["client_id"] = client_id
+        frame_as_dict["data"]["order_id"] = str(order.order_id)
+        frame_as_dict["data"]["trade_id"] = str(order.trade_id)
         if source_id == "xtp" and trade.order_id in self.ctx.orders:
             self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
             order_record = self.ctx.orders[trade.order_id]
