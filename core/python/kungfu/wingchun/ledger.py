@@ -128,7 +128,7 @@ class Ledger(pywingchun.Ledger):
                 order["volume_traded"] = order["volume_traded"]+ trade.volume
                 order["status"] = int(OrderStatus.PartialFilledActive) if order["volume_left"] > 0 else int(OrderStatus.PartialFilledNotActive)
                 self.ctx.db.add_order(**order)
-                self.publish(json.dumps(order_record))
+                self.publish(json.dumps(order_record, cls = wc_utils.WCEncoder))
             else:
                 self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
         self.ctx.db.add_trade(frame_as_dict["data"])
