@@ -193,6 +193,7 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
         },
     });
     win.loadURL(modalPath)
+    // win.webContents.openDevTools()
     win.show()
     win.on('close', () => win = null)
 }

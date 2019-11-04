@@ -1,11 +1,10 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { KEYWORDS_DIR } from '__gConfig/pathConfig'
+import { logger } from '__gUtils/logUtils'
 
 const fs = require('fs');
 const path = require('path');
 
-
-export const kungfuFunctions = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuFunctions'))
+export const kungfuFunctions = fs.readFileSync(path.join(__resources, 'keywords', 'kungfuFunctions'))
     .toString()
     .split('\n')
     .map(k => (
@@ -17,7 +16,7 @@ export const kungfuFunctions = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuFu
         }
     ))
 
-export const kungfuProperties = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuProperties'))
+export const kungfuProperties = fs.readFileSync(path.join(__resources, 'keywords', 'kungfuProperties'))
     .toString()
     .split('\n')
     .map(k => (
@@ -29,7 +28,7 @@ export const kungfuProperties = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuP
         }
     ))
 
-export const kungfuKeywords = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuKeywords'))
+export const kungfuKeywords = fs.readFileSync(path.join(__resources, 'keywords', 'kungfuKeywords'))
     .toString()
     .split('\n')
     .map(k => (
@@ -42,7 +41,7 @@ export const kungfuKeywords = fs.readFileSync(path.join(KEYWORDS_DIR, 'kungfuKey
     ))
 
 
-export const pythonKeywords = fs.readFileSync(path.join(KEYWORDS_DIR, 'pythonKeywords'))
+export const pythonKeywords = fs.readFileSync(path.join(__resources, 'keywords', 'pythonKeywords'))
     .toString()
     .split('\n')
     .map(k => (
