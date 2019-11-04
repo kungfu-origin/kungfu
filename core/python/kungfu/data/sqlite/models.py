@@ -107,7 +107,10 @@ class Trade(Base):
     volume = Column(Integer)
     tax = Column(Float)
     commission = Column(Float)
-
+    def __init__(self, **kwargs):
+        for attr in self.__mapper__.columns.keys():
+            if attr in kwargs:
+                setattr(self, attr, kwargs[attr])
 
 class AssetMixin:
     trading_day = Column(String)
