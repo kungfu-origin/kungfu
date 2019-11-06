@@ -1,13 +1,12 @@
 <template>
     <el-container class="tr-container">
         <!-- 头部 -->
-        <el-header height="50px">
-            <MainHeader/>
-        </el-header>
-
         <el-container>
             <!-- 左侧边栏 -->
             <el-aside :width="'64px'" class="tr-aside" v-if="ifSideBar">
+                <div class="container-logo">
+                    <img width="64" height="50" src="@/assets/img/LOGO.svg"/>
+                </div>
                 <tr-menu>
                     <tr-menu-item
                     route="/"
@@ -21,12 +20,6 @@
                         <i class="el-icon-s-order" ></i>
                         <template slot="title">策略</template>
                     </tr-menu-item>
-                     <!-- <tr-menu-item
-                    route="/extension"
-                    >
-                        <i class="el-icon-box" ></i>
-                        <template slot="title">插件</template>
-                    </tr-menu-item> -->
                 </tr-menu>
             </el-aside>
             <el-main class="tr-main">
@@ -55,12 +48,11 @@
 </template>
 
 <script>
-import {deepClone} from '__gUtils/busiUtils';
-import {mapState, mapGetters} from 'vuex';
+import { deepClone } from '__gUtils/busiUtils';
+import { mapState, mapGetters } from 'vuex';
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
 import CodeSpaceTab from './components/CodeSpaceTab';
-import MainHeader from './components/MainHeader';
 
 export default {
     name: 'main-content',
@@ -85,7 +77,6 @@ export default {
 
     components: {
         EngineStatus,
-        MainHeader,
 		CoreStatus,
 		CodeSpaceTab
     },
@@ -107,6 +98,19 @@ export default {
 
 .kf-footer-popover{
     box-shadow: 0px 0px 30px $bg
+}
+
+.container-logo{
+        height: 50px;
+        width: 64px;
+        line-height: 50px;
+        text-align: center;
+        float: left;
+        background: $vi;
+        i{
+            font-size: 50px;
+            color: white;
+        }
 }
 </style>
 
