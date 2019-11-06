@@ -225,3 +225,11 @@ class Location(Base):
     uid = Column(Integer, primary_key = True)
     info = Column(Json)
 
+class AlgoOrder(Base):
+    __tablename__ = "algo_order"
+    order_id = Column(UINT64, primary_key=True)
+    algo_type = Column(String)
+    source = Column(Integer)
+    update_time = Column(Integer)
+    params = Column(Json)
+    status = Column(Json)

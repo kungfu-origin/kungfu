@@ -16,6 +16,8 @@ Asset = 206
 AssetSnapshot = 207
 PositionDetail = 208
 Instrument = 209
+AlgoOrderInput = 210
+AlgoOrderStatus = 211
 Subscribe = 302
 NewOrderSingle = 353
 CancelOrder = 354
@@ -43,7 +45,7 @@ Registry.register(Asset, underscore(pywingchun.Asset.__name__), pywingchun.Asset
 Registry.register(PositionDetail, underscore(pywingchun.PositionDetail.__name__), pywingchun.PositionDetail)
 Registry.register(Instrument, underscore(pywingchun.Instrument.__name__), pywingchun.Instrument)
 Registry.register(PositionEnd,underscore(pywingchun.PositionEnd.__name__), pywingchun.PositionEnd)
-
+Registry.register(AlgoOrderInput, "algo_order_input", str)
 
 
 

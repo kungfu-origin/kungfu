@@ -76,6 +76,13 @@ class CalendarDB(SessionFactoryHolder):
         with session_scope(self.session_factory) as session:
             return [obj.holiday for obj in session.query(Holiday).filter(Holiday.region == region).all()]
 
+class AlgoDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(AlgoDB, self).__init__(location, filename)
+        AlgoOrder.metadata.create_all(self.engine)
+
+    def add_order(self, **kwargs):
+        pass
 
 class LedgerDB(SessionFactoryHolder):
     def __init__(self, location, filename):
@@ -122,7 +129,7 @@ class LedgerDB(SessionFactoryHolder):
                 if order.status not in wc_constants.AllFinalOrderStatus:
                     order.status = wc_constants.OrderStatus.Unknown
                     pending_orders.append(order)
-        return [object_as_dict(order) for order in pending_orders]
+            return [object_as_dict(order) for order in pending_orders]
 
     def get_commission(self, account_id, instrument_id, exchange_id):
         pass

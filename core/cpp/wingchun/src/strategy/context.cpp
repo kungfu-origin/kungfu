@@ -29,6 +29,7 @@ namespace kungfu
                 auto home = app.get_io_device()->get_home();
                 log::copy_log_settings(home, home->name);
                 book_context_ = std::make_shared<book::BookContext>(app, events);
+                algo_context_ = std::make_shared<algo::AlgoContext>(app, events);
             }
 
             void Context::react()

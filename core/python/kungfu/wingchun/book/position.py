@@ -49,13 +49,13 @@ class Position:
         return get_instrument_type(self.instrument_id, self.exchange_id)
 
     def apply_trade(self, trade):
-        raise NotImplementationError
+        raise NotImplementedError
 
     def apply_quote(self, quote):
-        raise NotImplementationError
+        raise NotImplementedError
 
     def apply_trading_day(self, trading_day):
-        raise NotImplementationError
+        raise NotImplementedError
 
 class StockPosition(Position):
     _INSTRUMENT_TYPES = InstrumentTypeInStockAccount
