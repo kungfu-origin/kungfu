@@ -1,4 +1,3 @@
-
 from pyyjj import hash_str_32
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import *
@@ -250,7 +249,7 @@ class FuturePosition(Position):
         self.margin -= margin
         self.book.avail += margin
         self.volume -= trade.volume
-        if self.yesterday_volume > 0 and trade.offset != Offset.CloseYesterday:
+        if self.yesterday_volume > 0 and trade.offset != Offset.CloseToday:
             self.yesterday_volume = 0 if self.yesterday_volume <= trade.volume else \
                 self.yesterday_volume - trade.volume
         realized_pnl = (trade.price - self.avg_open_price) * trade.volume * \
