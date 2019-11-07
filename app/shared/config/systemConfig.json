@@ -2,7 +2,7 @@
     "log": {
         "key": "log",
         "name": "日志",
-        "values": [
+        "config": [
             {
                 "key": "level",
                 "name": "级别",
@@ -23,7 +23,7 @@
     "code": {
         "key": "code",
         "name": "编辑器",
-        "values": [
+        "config": [
             {
                 "key": "tabSpaceType",
                 "name": "缩进类别",

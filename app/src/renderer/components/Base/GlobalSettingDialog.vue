@@ -28,7 +28,7 @@
                         <li class="setting-item" v-for="item in Object.values(setting.config || {})" :key="item.key">
                             <p class="setting-item__header">{{item.name}}</p>
 
-                            <div class="setting-sub-item__item" v-for="config in item.values" :key="config.key">
+                            <div class="setting-sub-item__item" v-for="config in item.config" :key="config.key">
                                 <p class="setting-sub-item__header">{{config.name}}</p>                                
                                 <p class="setting-sub-item__tip">{{config.tip}}</p>
                                 <div class="setting-sub-item__input-content">
