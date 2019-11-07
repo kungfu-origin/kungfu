@@ -1,7 +1,7 @@
 {
   "kungfuConfig":
   {
-    "type": "source",
+    "type": "market_data",
     "config": {
       "name": "bar",
       "key": "source",

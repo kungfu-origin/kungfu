@@ -56,7 +56,7 @@ export default {
 .tr-setting-dashboard {
     position: fixed;
     width: 500px;
-    top: 50px;
+    top: 0px;
     left: 50%;
     transform: translateX(-50%);
     height: auto;

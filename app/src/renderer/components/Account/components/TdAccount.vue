@@ -176,6 +176,8 @@
             :visible.sync="visiblity.selectSource"
             id="select-source-dialog"
             @keyup.enter.native="handleSelectSource"
+            :close-on-click-modal="false"
+            :close-on-press-escape="true"
             >
                     <el-radio-group v-model.trim="selectedSource" style="width: 100%">
                         <el-row>

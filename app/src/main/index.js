@@ -11,37 +11,16 @@ const packageJSON = require('__root/package.json');
 const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
 
 
+//create db
+initDB()
+setMenu()
+
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
 var allowQuit = false;
 function createWindow () {
-	//添加快捷键
-	let applicationOptions = [
-		{ label: "About Kungfu", click: showKungfuInfo},
-		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
-	]
-
-	if(platform === 'mac') {
-		applicationOptions.push(
-			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
-		)
-	}
-
-	const template = [
-	{
-		label: "Kungfu",
-		submenu: applicationOptions
-	}, 
-	{
-		label: "Edit",
-		submenu: [
-			{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-			{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-		]
-	}];
-	Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-
 	// Create the browser window.
 	const electronScreen = electron.screen;    
 	const { width,height } = electronScreen.getPrimaryDisplay().size
@@ -93,10 +72,6 @@ function createWindow () {
 		mainWindow.show();
 		mainWindow.focus();
 	});
-
-	//create db
-	initDB()
-	// if(platform === 'win') updateHandler(mainWindow)
 }
 
 
@@ -117,23 +92,21 @@ if(!gotTheLock) {
 
 
 
-var appReady = false, killExtraFinished = false;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+var appReady = false, killExtraFinished = false;
 app.on('ready', () => {
 	appReady = true;
 	if(appReady && killExtraFinished) createWindow()
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
-console.time('finish kill extra')
 killExtra()
 .catch(err => logger.error(err))
 .finally(() => {
 	killExtraFinished = true;
 	if(appReady && killExtraFinished) createWindow()
-	console.timeEnd('finish kill extra')
 })
 
 // Quit when all windows are closed.
@@ -166,11 +139,39 @@ app.on('will-quit', async (e) => {
 	e.preventDefault()
 })
 
-
-
-
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+function setMenu() {
+    //添加快捷键
+	let applicationOptions = [
+		{ label: "About Kungfu", click: showKungfuInfo},
+		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: openSettingDialog },
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
+	]
+
+	if(platform === 'mac') {
+		applicationOptions.push(
+			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
+		)
+	}
+
+	const template = [
+	{
+		label: "Kungfu",
+		submenu: applicationOptions
+	}, 
+	{
+		label: "Edit",
+		submenu: [
+			{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+			{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+		]
+	}];
+	
+	Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
+
 function showKungfuInfo() {
 	const version = packageJSON.version;
 	const electronVersion = packageJSON.devDependencies.electron;
@@ -188,6 +189,12 @@ function showKungfuInfo() {
 		buttons: ['好的'],
 		icon: path.join(__resources, 'icon', 'icon.png')
 	})
+}
+
+//开启发送renderprocess 打开设置弹窗
+function openSettingDialog() {
+	mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
+	mainWindow.focus()
 }
 
 //退出提示
@@ -238,70 +245,4 @@ function KillAll(){
 			})
 		})
 	})
-}
-
-
-
-
-// 注意这个autoUpdater不是electron中的autoUpdater
-const { autoUpdater } = require("electron-updater");
-const { uploadUrl } = require('__gConfig/updateConfig');
-
-// 检测更新，在你想要检查更新的时候执行，renderer事件触发后的操作自行编写
-function updateHandler(mainWindow){
-    let message = {
-        error: '检查更新出错！',
-        checking: '正在检查更新...',
-        updateAva: '检测到新版本，正在下载...',
-		updateNotAva: '当前为最新版本！',
-		downloaded: '下载已完成！'
-	};
-
-	autoUpdater.autoInstallOnAppQuit = false;
-	autoUpdater.setFeedURL(uploadUrl);
-    autoUpdater.on('error', (error) => {
-		sendUpdateMessage(mainWindow, message.error)
-		return new Error(error)		
-	});
-    autoUpdater.on('checking-for-update', () => {
-        sendUpdateMessage(mainWindow, message.checking)
-    });
-    autoUpdater.on('update-available', (info) => {
-        sendUpdateMessage(mainWindow, message.updateAva)
-    });
-    autoUpdater.on('update-not-available', (info) => {
-        sendUpdateMessage(mainWindow, message.updateNotAva)
-    });
-
-    // 更新下载进度事件
-    autoUpdater.on('download-progress', (progressObj) => {
-        mainWindow.webContents.send('downloadProgress', progressObj)
-    })
-    autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) => {
-        dialog.showMessageBox({
-            type: 'question',
-            title: '提示',
-            defaultId: 0,
-            cancelId: 1,
-            message: "检测到新版本，更新会退出应用，是否立即更新？",
-            buttons: ['立即更新', '否'],
-            icon: path.join(__resources, 'icon', 'icon.png')
-        }, (index) => {
-            if(index === 0){
-				KillAll().then(() => {
-					setImmediate(() => {
-						autoUpdater.quitAndInstall(); 
-						app.quit()
-					})
-				})
-            }
-        })
-	});
-	
-	ipcMain.on('checkForUpdate', () => autoUpdater.checkForUpdates().catch(err => console.error(err)))
-}
-
-// 通过main进程发送事件给renderer进程，提示更新信息
-function sendUpdateMessage(mainWindow, text) {
-    mainWindow.webContents.send('message', text)
 }

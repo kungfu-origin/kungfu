@@ -168,7 +168,7 @@ export const describeProcess = (name: string): Promise<any> => {
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const logLevel: string = kfConfig.log || '';
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
     options = {
         ...options,
         "args": [logLevel, options.args].join(' '),

@@ -4,6 +4,7 @@
     :title="`${moduleType === 'strategy' ? '策略' : '账户'} ${currentId} 下单`"
     :visible="visible" 
     :close-on-click-modal="false"
+    :close-on-press-escape="true"
     @close="handleClose"
     class="make-order-dialog"
     >

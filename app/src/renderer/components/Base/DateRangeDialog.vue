@@ -5,6 +5,7 @@
     v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
+    :close-on-press-escape="true"
     @close="handleClose"
     @keyup.enter.native="handleSubmitSetting"
     >

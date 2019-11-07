@@ -100,3 +100,5 @@ window.fileId = 0;
 window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay)
 window.getTradingDay = () => store.state.BASE.tradingDay
 window.store = store
+
+

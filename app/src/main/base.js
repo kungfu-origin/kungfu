@@ -2,6 +2,7 @@ import initGlobalDB from '__gConfig/initGlobalDB.json'
 import { BASE_DB_DIR, DEFUALT_DB_DIR } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
 import { existsSync, addFile } from '__gUtils/fileUtils';
+
 const path = require('path')
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();

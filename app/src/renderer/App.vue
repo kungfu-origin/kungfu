@@ -1,12 +1,19 @@
 <template>
     <div id="app">
         <router-view></router-view>
+        <GlobalSettingDialog
+            :visible.sync="globalSettingDialogVisiblity"
+        >
+        </GlobalSettingDialog>
     </div>
 </template>
 <script>
 import path from 'path';
 import { mapState } from 'vuex';
 import moment from 'moment';
+import { ipcRenderer } from 'electron';
+
+import GlobalSettingDialog from './components/Base/GlobalSettingDialog';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
@@ -25,39 +32,53 @@ export default {
         this.gatewayStatePipe = null;
         this.cashPipe = null;
         this.tradingDayPipe = null;
-        return {}
+        return {
+            globalSettingDialogVisiblity: false
+        }
+    },
+
+    components: {
+        GlobalSettingDialog
     },
 
     mounted(){
+        const t = this;
         //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
-        if(window.location.hash.indexOf('code') === -1) {
-            if(document.getElementById('loading')) document.getElementById('loading').remove();
-            //解除回车带来的一些不好的影响
-            //比如页面重新刷新的问题
-            document.body.addEventListener('keydown', (event) => {
-                if(event.keyCode == 13) {
-                    event.preventDefault()
-                }
-            })
-        }
+        if(window.location.hash.indexOf('code') !== -1) return 
+
+        //remove loading mask
+        if(document.getElementById('loading')) document.getElementById('loading').remove();
+        
+        //解除回车带来的一些不好的影响
+        //比如页面重新刷新的问题
+        document.body.addEventListener('keydown', (event) => {
+            if(event.keyCode == 13) {
+                event.preventDefault()
+            }
+        })
+
+        //ipc event
+        ipcRenderer.removeAllListeners('main-process-messages')
+        t.bindMainProcessEvent()
+
     },
 
     created() {
         const t = this;
-        this.$store.dispatch('getAccountSourceConfig')
-        this.$store.dispatch('getStrategyList')
-        this.$store.dispatch('getAccountList')
+        t.$store.dispatch('getAccountSourceConfig')
+        t.$store.dispatch('getStrategyList')
+        t.$store.dispatch('getAccountList')
             .then(accountList => t.getAccountsCash(accountList))
 
-        this.subGatewayState();
-        this.subAccountCash();
-        this.subTradingDay();
+        t.subGatewayState();
+        t.subAccountCash();
+        t.subTradingDay();
       
-        this.reqCalendar();
-        this.reqCash();
-        this.reqGatewayState();
+        t.reqCalendar();
+        t.reqCash();
+        t.reqGatewayState();
 
-        this.$store.dispatch('getKungfuConfig')
+        t.$store.dispatch('getKungfuConfig')
     },
 
     destroyed() {
@@ -65,6 +86,8 @@ export default {
         t.gatewayStatePipe.unsubscribe();
         t.cashPipe.unsubscribe();
         t.tradingDayPipe.unsubscribe();
+
+        ipcRenderer.removeAllListeners('main-process-messages')        
     },
 
     computed: {
@@ -146,6 +169,17 @@ export default {
                     return cash
                 })
                 t.$store.dispatch('setAccountsAsset', cashData)
+            })
+        },
+
+        bindMainProcessEvent() {
+            const t = this;
+            ipcRenderer.on('main-process-messages', (event, args) => {
+                switch (args) {
+                    case 'open-setting-dialog':
+                        t.globalSettingDialogVisiblity = true;
+                        break
+                }
             })
         },
         
