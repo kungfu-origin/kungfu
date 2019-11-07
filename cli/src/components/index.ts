@@ -1,19 +1,10 @@
 import tradingData from '@/components/tradingData/index'
 import monitor from '@/components/monitor/index';
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
-import { delaySeconds } from '__gUtils/busiUtils';
-import { startLedger, startMaster } from '__gUtils/processUtils';
 const inquirer = require('inquirer');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 export const monitPrompt = async (list: boolean) => {  
-    // startMaster(false)
-    // .catch(() => {})
-    // .finally(() => {   
-    //     delaySeconds(1000)
-    //     .then(() => startLedger(false))
-    //     .catch(() => {})
-    // })
 
     if(!list) return monitor();
     

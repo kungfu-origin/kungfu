@@ -1,5 +1,5 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
-import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset, delaySeconds } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
 import { addFile } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail } from '__gUtils/processUtils';
 import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
