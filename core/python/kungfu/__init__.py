@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-import sys
-if getattr(sys, 'frozen', False):
+from .env import setup_environment_variables
+setup_environment_variables()
+from .msg import monkey_patch
+monkey_patch()
+
+try:
     from ._version import __version__
-else:
+except:
     from .version import get_version
     __version__ = get_version()

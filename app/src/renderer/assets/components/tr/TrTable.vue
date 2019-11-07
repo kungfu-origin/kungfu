@@ -19,12 +19,12 @@
         <div class="tr-table-body" ref="tr-table-body" >
             <RecycleScroller
             ref="tr-scroller-table"
-            v-if="scrollerType !== 'dynamic' && data && data.length "
+            v-if="scrollerType !== 'dynamic' && show "
             class="tr-table-scroller"
             :items="data"
             :item-size="20"
             key-field="id"
-            :buffer="10"
+            :buffer="100"
             >
                 <template v-slot="{item}">
                     <ul class="tr-table-row">
@@ -34,11 +34,12 @@
                             renderCellClass(column.prop, item),                        
                             'tr-table-cell', 
                             'text-overflow',
+                            item.nano ? 'nano' : '',
                             column.type === 'number' ? 'number' : '',
                             column.type === 'operation' ? 'oper' : ''
                         ]"
                         v-for="column in schema" 
-                        :key="column.prop"       
+                        :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
                         :style="{                             
                                 'max-width': headerWidth[column.prop] || column.width,
                         }">
@@ -54,11 +55,12 @@
             </RecycleScroller>
             <DynamicScroller 
             ref="tr-dynamic-scroller-table"
-            v-else-if="scrollerType === 'dynamic' && data && data.length "
+            v-else-if="scrollerType === 'dynamic' && show "
             class="tr-table-scroller tr-table-dynamic-scroller"            
             :items="data"
-            :min-item-size="500"
+            :min-item-size="50"
             key-field="id"
+            :buffer="100"
             >
                 <template v-slot="{ item, index, active }">
                     <DynamicScrollerItem
@@ -71,12 +73,12 @@
                             <li 
                             :class="[
                                 renderCellClass(column.prop, item),
-                                'tr-table-cell',
+                                'tr-table-cell', 
                                 column.width ? 'text-overflow' : ''
                             ]"
                             :title="item[column.prop] || ''"
                             v-for="column in schema" 
-                            :key="column.prop"       
+                            :key="`${column.prop}`"       
                             :style="{                             
                                 'max-width': headerWidth[column.prop] || column.width
                             }">
@@ -123,12 +125,6 @@ export default {
             type: [Object, Array]
         },
 
-
-        //  type: "",
-        //  label: String
-        //  prop: String,
-        //  width: String
-        //  flex: Number
         schema: {
             type: Array,
             default: []
@@ -145,6 +141,18 @@ export default {
     data(){
         return {
             bodyWidth: 0,
+            show: false
+        }
+    },
+
+    watch: {
+        data(newVal=[], oldVal=[]) {
+            const t = this;
+            if((oldVal.length == 0) && (newVal.length !== 0)) {
+                t.$nextTick().then(() => {
+                    t.show = true;
+                })
+            }
         }
     },
 
@@ -186,7 +194,7 @@ export default {
     },
 
     methods: {
-        triggerToBottom(){
+        triggerToBottom() {
             const t = this;
             t.$nextTick().then(() => {
                 const $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
@@ -194,16 +202,13 @@ export default {
             })
         },
 
-        calcBodyWidth(){
+        calcBodyWidth() {
             const t = this;
             const $target = t.$refs['tr-table-body']
             if(!$target) return;
             t.bodyWidth = $target.clientWidth;
-        },  
+        }
     }
-
-    
-    
 }
 </script>
 <style lang="scss">
@@ -250,6 +255,7 @@ export default {
             font-size: 14px;
         }
     }
+
     .tr-table-row:hover{
         background: $bg_light;
     }
@@ -282,7 +288,16 @@ export default {
     .tr-table-cell.gray{
         color: $font;
     }
-    
+    .tr-table-cell.nano{
+        animation: nanoBlink 0.5s 1;
+    }
+    .tr-table-cell.nano.number.red{
+        animation: nanoRedBlink 0.5s 1;
+    }
+    .tr-table-cell.nano.number.green{
+        animation: nanoGreenBlink 0.5s 1;
+    }
+
 
     .tr-table-body .tr-table-dynamic-scroller{
         .tr-table-row{

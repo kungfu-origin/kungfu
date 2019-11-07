@@ -9,10 +9,9 @@
 <script>
 import * as STRATEGY_API from '__io/db/strategy';
 import FileTree from './components/FileTree';
-import Editor from './components/CodeEditor';
+import Editor from './components/MonacoEditor';
 import { setTimeout } from 'timers';
 const {dialog} = require('electron').remote;
-// import DebugBoard from './components/DebugBoard';
 export default {
     data(){
         return {
@@ -23,13 +22,14 @@ export default {
 
     components: {
         FileTree, Editor, 
-        // DebugBoard
     },
 
     mounted(){
+        if(document.getElementById('loading')) document.getElementById('loading').remove();
+
         const t = this;
         const locationHash = window.location.hash.toString().split('/');
-        const strategyId = locationHash[locationHash.length - 1]
+        const strategyId = locationHash[locationHash.length - 1];
         if(!strategyId) {
             console.error('没有ID！')
             return

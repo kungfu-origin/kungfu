@@ -70,6 +70,7 @@ namespace kungfu
                     if (strncmp(inst.instrument_id, "*", 1) == 0)
                     {
                         res = api_->SubscribeAllMarketData();
+                        res = res && api_->SubscribeAllTickByTick();
                         SPDLOG_INFO("subscribe all");
                         return res;
                     }

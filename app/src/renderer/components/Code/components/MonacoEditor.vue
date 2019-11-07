@@ -5,16 +5,24 @@
   </div>
 </template>
 <script>
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
+import { keywordsList, kungfuFunctions, kungfuProperties, kungfuKeywords, pythonKeywords } from "../hint/monaco.python.hint";
 import { mapState } from "vuex";
 import * as CODE_UTILS from "__gUtils/fileUtils";
+import { delayMiliSeconds } from '__gUtils/busiUtils';
 
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from "../config/Monokai.json";
+
 monaco.editor.defineTheme("monokai", themeData);
 monaco.editor.setTheme("monokai");
+
+monaco.languages.registerCompletionItemProvider('python', {
+    provideCompletionItems: pythonProvideCompletionItems
+})
+
 
 export default {
     data() {
@@ -30,28 +38,28 @@ export default {
     computed: {
         ...mapState({
             currentFile: state => state.STRATEGY.currentFile,
-            fileTree: state => state.STRATEGY.fileTree
+            fileTree: state => state.STRATEGY.fileTree,
+            codeSpaceTab: state => state.BASE.kfConfig.codeSpaceTab
         })
     },
 
     watch: {
-        currentFile(newVal) {
+        async currentFile(newFile) {
             const t = this;
-            const filePath = newVal.filePath;
-            if (!t.currentFile.isDir) {
-                t.clearState(); // 清空状态
-                t.file = newVal;
-                CODE_UTILS.getCodeText(filePath).then(codeText => {
-                    t.$nextTick().then(() => {
-                        // t.codeText = res;
-                        t.editor = t.createEditor(t.file, codeText);
-                        t.editor = t.buildEditor(t.editor, t.file, codeText)
-                        setTimeout(() => {
-                            t.bindBlur(t.editor, t.file);
-                        }, 300)
-                    });
-                });
-            }
+            const filePath = newFile.filePath;
+            
+            if (t.currentFile.isDir) return; 
+
+            t.clearState(); // 清空状态
+            t.file = newFile;
+            const codeText = await CODE_UTILS.getCodeText(filePath);
+            
+            await t.$nextTick();
+            t.editor = t.buildEditor(t.editor, t.file, codeText);
+
+            await t.$nextTick();
+            t.updateSpaceTab(t.codeSpaceTab)
+            t.bindBlur(t.editor, t.file)
         },
 
         fileTree(newTree, oldTree) {
@@ -66,6 +74,11 @@ export default {
                 t.file = null;
                 t.editor = null;
             }
+        },
+
+        codeSpaceTab(spaceTabSetting) {
+            const t = this;
+            t.updateSpaceTab(spaceTabSetting)
         }
     },
 
@@ -82,6 +95,7 @@ export default {
 
         //如果不存在editor，新建
         createEditor(file, codeText) {
+            const t = this;
             if (document.getElementById("editor-content")) {
                     document.querySelector("#editor-content").innerHTML = "";
                     const fileLanguage = languageJSON[file.ext] || 'plaintext';
@@ -90,17 +104,15 @@ export default {
                         {
                             value: codeText || "",
                             language: fileLanguage,
-                            fontSize: "14",
-                            tabSize: '4',
-                            autoIndent:true,
+
+                            autoIndent: true,
+                            formatOnPaste: true,
+                            formatOnType: true,
+
+                            fontSize: "14",                            
                             automaticLayout: true,
-                            extraKeys: {
-                                "Tab": function(cm){
-                                    cm.replaceSelection("   " , "end");
-                                }
-                            }
                         }
-                    );                
+                    );     
                 return editor;
             }
             return null;
@@ -122,12 +134,12 @@ export default {
         bindBlur(editor, file){
             const t = this;
             editor !== null && editor.onDidBlurEditorText(e => {
-                const value = editor.getValue();
                 t.writeFile(editor, file)
             });
         },
 
         writeFile(editor, file){
+            const value = editor.getValue();
             CODE_UTILS.writeFile(file.filePath, value);
         },
 
@@ -135,9 +147,83 @@ export default {
             const t = this;
             t.editor = null;
             t.file = null;
+        },
+
+        updateSpaceTab(spaceTabSetting) {
+            const t = this;
+            const type = spaceTabSetting.type || 'Spaces';
+            const size = spaceTabSetting.size || 4;
+            
+            if(!t.editor) return;
+            
+            const model = t.editor.getModel()
+            if(type.toLowerCase() === 'spaces') {
+                model.updateOptions({
+                    insertSpaces: true,
+                    indentSize: t.codeSpaceTab.size,
+                    tabSize: t.codeSpaceTab.size,
+                })
+            } else if (type.toLowerCase() === 'tabs') {
+                model.updateOptions({
+                    insertSpaces: false,
+                    indentSize: t.codeSpaceTab.size,
+                    tabSize: t.codeSpaceTab.size,
+                })
+            }
         }
     }
 };
+
+function pythonProvideCompletionItems (model, position, context, token) {
+
+    const lastChars = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 0,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column
+    })
+
+    const charSplitSpace = lastChars.split(' ');
+    const ifFunction = (charSplitSpace.length >= 2) && charSplitSpace[charSplitSpace.length - 2]
+    if(ifFunction === 'def') return { suggestions: kungfuFunctions }
+
+    const charSplitPoint = lastChars.split('.');
+    const ifProperty = (charSplitPoint.length > 1) && charSplitPoint[charSplitPoint.length - 1].indexOf(' ') === -1;
+    if(ifProperty) return { suggestions: kungfuProperties }
+
+
+    const allChars = model.getValueInRange({
+        startLineNumber: 0,
+        startColumn: 0,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column
+    })
+
+    const allCharList = allChars
+        .replace(/\./g, ' ')
+        .replace(/@/g,  ' ')
+        .replace(/"/g,  ' ')
+        .replace(/'/g,  ' ')
+        .replace(/:/g,  ' ')
+        .replace(/\//g, ' ')
+        .replace(/,/g,  ' ')
+        .split('\n')
+        .join(' ')
+        .split(' ')
+        .filter(char => (char !== '') && isNaN(char))
+        .removeRepeat()
+        .filter(char => keywordsList.indexOf(char) == -1)
+        .map(char => {
+            return {
+                label: char,
+                kind: monaco.languages.CompletionItemKind.Text,
+                documentation: "",
+                insertText: char,
+            }
+        })
+    return { suggestions: [...pythonKeywords, ...kungfuKeywords, ...allCharList] }
+}
+
 </script>
 <style lang="scss">
 @import "@/assets/scss/skin.scss";

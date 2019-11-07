@@ -1,6 +1,5 @@
 
 import pywingchun
-from enum import IntEnum
 
 class Source:
     CTP = "ctp"
@@ -20,13 +19,6 @@ class Region:
     CN = 'CN'
     HK = 'HK'
 
-
-class ValuationMethod(IntEnum):
-    FIFO = 0
-    LIFO = 1
-    AverageCost = 2
-
-LedgerCategory = pywingchun.constants.LedgerCategory
 InstrumentType = pywingchun.constants.InstrumentType
 ExecType = pywingchun.constants.ExecType
 Side = pywingchun.constants.Side
@@ -37,12 +29,10 @@ Direction = pywingchun.constants.Direction
 PriceType = pywingchun.constants.PriceType
 VolumeCondition = pywingchun.constants.VolumeCondition
 TimeCondition = pywingchun.constants.TimeCondition
-MsgType = pywingchun.constants.MsgType
+OrderActionFlag = pywingchun.constants.OrderActionFlag
+LedgerCategory = pywingchun.constants.LedgerCategory
 
-AllFinalOrderStatus = [int(OrderStatus.Filled),
-                       int(OrderStatus.Error),
-                       int(OrderStatus.PartialFilledNotActive),
-                       int(OrderStatus.Cancelled)]
+AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
 InstrumentTypeInStockAccount = [InstrumentType.Stock,
                                 InstrumentType.Bond,
@@ -52,8 +42,7 @@ InstrumentTypeInStockAccount = [InstrumentType.Stock,
                                 InstrumentType.Index,
                                 InstrumentType.Repo]
 
-ENUM_TYPES = [LedgerCategory,
-              InstrumentType,
+ENUM_TYPES = [InstrumentType,
               ExecType,
               Side,
               Offset,
@@ -63,20 +52,5 @@ ENUM_TYPES = [LedgerCategory,
               PriceType,
               VolumeCondition,
               TimeCondition,
-              MsgType]
-
-MSG_TYPES = {
-    "quote": MsgType.Quote,
-    "entrust": MsgType.Entrust,
-    "transaction": MsgType.Transaction,
-    "bar": MsgType.Bar,
-    "order_input": MsgType.OrderInput,
-    "order_action": MsgType.OrderAction,
-    "order": MsgType.Order,
-    "trade": MsgType.Trade,
-    "position": MsgType.Position,
-    "asset": MsgType.Asset,
-    "position_detail": MsgType.PositionDetail,
-    "instrument": MsgType.Instrument
-}
-
+              OrderActionFlag,
+              LedgerCategory]

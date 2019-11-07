@@ -125,22 +125,6 @@ export const getStrategyPos = async (strategyId: string, { instrumentId }: Tradi
         ` AND update_time > ${strategyAddTime}` + 
         ` ORDER BY instrument_id`
     )
-    .then((pos: PosInputData[]): any => {
-        let posList: any = {}
-        //策略的pos是一条一条成交记录？
-        pos.map((item: PosInputData): void => {
-            let key = item.instrument_id + item.direction
-            if(posList[key]) {
-                posList[key].yesterday_volume = posList[key].yesterday_volume + item.yesterday_volume
-                posList[key].volume = posList[key].volume + item.volume
-                posList[key].last_price = posList[key].last_price + item.last_price
-                posList[key].margin = posList[key].margin + item.margin
-            }else{
-                posList[key] = item
-            }
-        })
-        return Object.values(posList);
-    })
 }
 
 /**

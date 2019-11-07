@@ -109,9 +109,8 @@ console.log('-------------', gitCommitVersion, '-------------')
  */
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
-    new webpack.DefinePlugin({ 
-      'git_commit_version': '" ' + `${gitCommitVersion.toString()}` + ' "',
-      // 'git_commit_version': '"latest"',
+    new webpack.DefinePlugin({
+      'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'process.env.NODE_ENV': '"development"'
     }),
     new webpack.DefinePlugin({
@@ -131,8 +130,7 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: false
     }),
     new webpack.DefinePlugin({
-      'git_commit_version': '" ' + `${gitCommitVersion.toString()}` + ' "',
-      // 'git_commit_version': '"latest"',
+      'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'process.env.NODE_ENV': '"production"',
     })
   )

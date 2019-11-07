@@ -9,9 +9,6 @@ import importlib
 from dotted_dict import DottedDict
 from collections import namedtuple
 
-pyyjj.frame.data = property(wc_utils.get_data)
-pyyjj.writer.write_data = wc_utils.write_data
-
 class MatchMode:
     Reject = "reject"
     Pend = "pend"
@@ -28,8 +25,10 @@ class TraderSim(pywingchun.Trader):
         pywingchun.Trader.__init__(self, low_latency, locator, "sim", account_id)
         config = json.loads(json_config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
+
         self.ctx = DottedDict()
         self.ctx.orders = {}
+
         if self.match_mode == MatchMode.Custom:
             path = config.get("path")
             simulator_dir = os.path.dirname(path)
@@ -72,15 +71,17 @@ class TraderSim(pywingchun.Trader):
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - order.volume_traded
-            trade = pywingchun.Trade()
-            trade.order_id = order.order_id
-            trade.volume = order.volume_traded
-            trade.price = order.limit_price
-            trade.instrument_id = order.instrument_id
-            trade.exchange_id = order.exchange_id
-            trade.trade_id = self.get_writer(event.source).current_frame_uid()
             self.get_writer(event.source).write_data(0, order)
-            self.get_writer(event.source).write_data(0, trade)
+            if order.volume_traded > 0:
+                trade = pywingchun.Trade()
+                trade.account_id = self.io_device.home.name
+                trade.order_id = order.order_id
+                trade.volume = order.volume_traded
+                trade.price = order.limit_price
+                trade.instrument_id = order.instrument_id
+                trade.exchange_id = order.exchange_id
+                trade.trade_id = self.get_writer(event.source).current_frame_uid()
+                self.get_writer(event.source).write_data(0, trade)
             if order.active:
                 self.ctx.orders[order.order_id] = OrderRecord(source= event.source, dest = event.dest, order = order)
             return True

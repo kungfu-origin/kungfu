@@ -1,11 +1,9 @@
 const fs = require('fs')
-const path = require('path')
+const apiContent = fs.readFileSync('./strategy.md').toString();
 
-const apiContent = fs.readFileSync('./strategyApi.md').toString();
-
-var taurusDefKeywords = [];
-var taurusKeywords = [];
-var tarusPropertyKeywords = [];
+var kungfuFunctions = [];
+var kungfuKeywords = [];
+var kungfuProperties = [];
 
 
 const functionsAndProperties = apiContent.split('## 函数定义')[1];
@@ -13,12 +11,11 @@ const functionsMD = functionsAndProperties.split('## 常量定义')[0];
 const propertiesMD = functionsAndProperties.split('## 常量定义')[1];
 
 
-taurusDefKeywords = functionsMD
+kungfuFunctions = functionsMD
     .split('####')
     .filter(f => f.split('>')[0].indexOf('###') === -1)
     .map(f => f.split('>')[0].trim())
     .filter(name => name.indexOf('.') === -1)
-    .map(n => `"${n}"`)
 
 taurusKeywordsTmp = propertiesMD
     .split('###')
@@ -28,9 +25,8 @@ taurusKeywordsTmp = propertiesMD
     })
     .filter(n => !!n)
     .map(n => n[0].split(' ')[0].slice(1))
-    .map(n => `"${n}"`)
 
-taurusKeywords = propertiesMD
+kungfuKeywords = propertiesMD
     .split('\n')
     .filter(l => l.indexOf('|') !== -1)
     .filter(l => l.indexOf('---') === -1)
@@ -39,25 +35,34 @@ taurusKeywords = propertiesMD
         const re = /.*[\u4e00-\u9fa5]+.*/;
         return !re.test(l)
     })
-    .map(n => `"${n}"`)
 
 tarusPropertyKeywordsTmp = functionsMD
     .split('####')
     .filter(f => f.split('>')[0].indexOf('###') === -1)
     .map(f => f.split('>')[0].trim())
     .filter(name => name.indexOf('.') !== -1)
-    .map(n => `"${n}"`)
+    .map(n => {
+        return n.split('.').slice(1)
+    })
+    .reduce((a, b) => {
+        return a.concat(b)
+    })
+
     
-tarusPropertyKeywords = tarusPropertyKeywordsTmp.concat(taurusKeywords)
-taurusKeywords = tarusPropertyKeywords.concat(taurusKeywordsTmp)
+kungfuProperties = tarusPropertyKeywordsTmp.concat(kungfuKeywords)
+kungfuKeywords = kungfuProperties.concat(taurusKeywordsTmp)
 
 
-fs.writeFile('./taurusDefKeywords.js', '', () => {})
-fs.writeFile('./taurusKeywords.js', '', () => {})
-fs.writeFile('./tarusPropertyKeywords.js', '', () => {})
+fs.writeFile('./kungfuFunctions', '', () => {})
+fs.writeFile('./kungfuKeywords', '', () => {})
+fs.writeFile('./kungfuPropertys', '', () => {})
 
-fs.appendFile('./taurusDefKeywords.js', taurusDefKeywords.join(',\n'), () => {})
-fs.appendFile('./taurusKeywords.js', taurusKeywords.join(',\n'), () => {})
-fs.appendFile('./tarusPropertyKeywords.js', tarusPropertyKeywords.join(',\n'), () => {})
+kungfuFunctions = Array.from(new Set(kungfuFunctions));
+kungfuKeywords = Array.from(new Set(kungfuKeywords));
+kungfuProperties = Array.from(new Set(kungfuProperties));
+
+fs.appendFile('./kungfuFunctions', Array.from(new Set(kungfuFunctions)).join('\n'), () => {})
+fs.appendFile('./kungfuKeywords', Array.from(new Set(kungfuKeywords)).join('\n'), () => {})
+fs.appendFile('./kungfuProperties', Array.from(new Set(kungfuProperties)).join('\n'), () => {})
 
 

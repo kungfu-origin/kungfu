@@ -78,8 +78,10 @@ namespace kungfu
 
             void reader::next()
             {
-                assert(current_ != nullptr);
-                current_->next();
+                if(current_ != nullptr)
+                {
+                    current_->next();
+                }
                 sort();
             }
 

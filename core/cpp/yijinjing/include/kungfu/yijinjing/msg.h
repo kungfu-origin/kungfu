@@ -31,6 +31,7 @@ namespace kungfu
                     RequestStart = 10025,
                     Location = 10026,
                     TradingDay = 10027,
+                    Channel = 10028
                 };
             }
 
@@ -74,10 +75,22 @@ namespace kungfu
                 };
 #endif
 
+
+            struct Channel
+            {
+                uint32_t source_id;
+                uint32_t dest_id;
+#ifndef _WIN32
+            } __attribute__((packed));
+#else
+            };
+#endif
+
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
             }
+
         }
     }
 }

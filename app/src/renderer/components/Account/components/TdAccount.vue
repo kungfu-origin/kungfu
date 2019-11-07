@@ -21,6 +21,7 @@
                     prop="account_id"
                     label="账户"
                     show-overflow-tooltip
+                    min-width="80"
                 >
                     <template slot-scope="props">
                         <span :class="props.row.account_id">{{props.row.account_id.toAccountId()}}</span> 
@@ -29,6 +30,7 @@
                 <el-table-column
                     prop="source_name"
                     label="柜台"
+                    min-width="80"
                     >
                     <template slot-scope="props">
                         <el-tag
@@ -42,6 +44,7 @@
                 <el-table-column
                     label="状态"
                     show-overflow-tooltip
+                    min-width="70"
                     >
                     <template slot-scope="props">
                         <tr-status 
@@ -53,6 +56,7 @@
                     
                 <el-table-column
                     label="连接"
+                    min-width="60"
                     >
                     <template slot-scope="props">
                         <span @click.stop>
@@ -63,61 +67,99 @@
                     </template>
                 </el-table-column>
                 <el-table-column
+                    class-name="blink-cell"
                     label="实现盈亏"
                     show-overflow-tooltip
                     align="right"
+                    min-width="100"
                     >
                     <template slot-scope="props">
-                        <span :class="{
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'realized_pnl') > 0,
                             'color-green': calcCash(props.row, 'realized_pnl') < 0,
-                        }">
+                        }"
+                        :key="`realized_pnl_${props.row.account_id}_${calcCash(props.row, 'realized_pnl')}`"                        
+                        >
                         {{calcCash(props.row, 'realized_pnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
                 <el-table-column
+                    class-name="blink-cell"
                     label="浮动盈亏"
                     show-overflow-tooltip
                     align="right"
+                    min-width="110"
                     >
                     <template slot-scope="props">
-                        <span :class="{
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                             'color-red': calcCash(props.row, 'unrealized_pnl') > 0,
                             'color-green': calcCash(props.row, 'unrealized_pnl') < 0,
-                        }">
+                        }"
+                        :key="`unrealized_pnl_${props.row.account_id}_${calcCash(props.row, 'unrealized_pnl')}`"                        
+                        >
                         {{calcCash(props.row, 'unrealized_pnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
                 <el-table-column
+                    class-name="blink-cell"
                     label="市值/保证金"
                     show-overflow-tooltip
                     align="right"
+                    min-width="120"
                     >
                     <template slot-scope="props" >
-                        <template v-if="(accountSource[props.row.source_name] || {}).typeName == 'future'">
-                            {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).margin) + '' || '--'}}
-                        </template>
-                        <!-- market_value -->
-                         <template v-else>
-                            {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).market_value) + '' || '--'}}
-                        </template>
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                        }"
+                        :key="`${props.row.account_id}_${calcCash(props.row, (isFuture(props.row) ? 'margin' : 'market_value'))}`"                        
+
+                        >
+                            <template v-if="isFuture(props.row)">
+                                {{calcCash(props.row, 'margin') || '--'}}
+                            </template>
+                            <template v-else>
+                                {{calcCash(props.row, 'market_value') || '--'}}
+                            </template>  
+                        </span>          
                     </template>
                 </el-table-column>
                 <el-table-column
+                    class-name="blink-cell"
                     label="可用资金"
                     show-overflow-tooltip
                     align="right"
+                    min-width="120"
                     >
                         <template slot-scope="props">
-                        {{$utils.toDecimal((accountsAsset[props.row.account_id] || {}).avail) + '' || '--'}}
+                            <span
+                            :class="{
+                                'tr-table-cell': true,
+                                'number': true,
+                                'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                            }"
+                            :key="`${props.row.account_id}_${calcCash(props.row, 'avail')}`"                        
+                            >
+                                {{calcCash(props.row, 'avail') || '--'}}                            
+                            </span>
                     </template>
                 </el-table-column>
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="140"
+                    min-width="120"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
@@ -410,6 +452,11 @@ export default {
         refreshData() {
             const t = this
             t.selectedSource = ''
+        },
+
+        //是否为期货
+        isFuture(row) {
+            return (this.accountSource[row.source_name] || {}).typeName == 'future'
         },
 
         //计算持仓盈亏

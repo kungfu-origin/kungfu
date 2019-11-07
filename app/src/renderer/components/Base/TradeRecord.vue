@@ -233,10 +233,13 @@ export default {
             const { id, dateRange } = t.filter
             const { trade_time } = data
             if(!((data.instrument_id.includes(id) || data.client_id.includes(id)) )) return
-            const tradeData = dealTrade(data)
+            const tradeData = {
+                ...dealTrade(data),
+                nano: true
+            }
             t.throttleInsertTrade(tradeData).then(tradeList => {
                 if(!tradeList) return;
-                let oldTableData = t.tableData.slice(0, 500);
+                let oldTableData = t.tableData;
                 oldTableData = [...tradeList, ...oldTableData]
                 //更新数据
                 t.tableData = Object.freeze(oldTableData)

@@ -47,6 +47,10 @@ declare global {
         toAccountId(): string;
         parseSourceAccountId(): SourceAccountId;
     }
+
+    interface Array<T> {
+        removeRepeat(): any;
+    }
 }
 
 export {}
@@ -70,12 +74,16 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
     }
 }
 
-export const delaySeconds = (seconds: number): Promise<void> => {
+Array.prototype.removeRepeat = function(): any{
+    return Array.from(new Set(this))
+}
+
+export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
     return new Promise(resolve => {
         let timer = setTimeout(() => {
             resolve()
             clearTimeout(timer)
-        }, seconds)
+        }, miliSeconds)
     })
 }
 
@@ -185,6 +193,7 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
         },
     });
     win.loadURL(modalPath)
+    // win.webContents.openDevTools()
     win.show()
     win.on('close', () => win = null)
 }
@@ -397,7 +406,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-        limitPrice: toDecimal(item.limit_price) || '--',
+        limitPrice: toDecimal(item.limit_price, 3) || '--',
         volumeTraded: item.volume_traded + "/" + (item.volume),
         statusName: orderStatus[item.status],
         status: item.status,
@@ -417,7 +426,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],
-        price: toDecimal(+item.price),
+        price: toDecimal(+item.price, 3),
         volume: toDecimal(+item.volume, 0),
         clientId: item.client_id,
         accountId: item.account_id
@@ -434,8 +443,8 @@ export const dealPos = (item: PosInputData): PosData => {
         yesterdayVolume: toDecimal(item.yesterday_volume, 0),
         todayVolume: toDecimal(item.volume - item.yesterday_volume, 0),
         totalVolume: toDecimal(item.volume, 0),
-        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price) || '--',
-        lastPrice: toDecimal(item.last_price) || '--',
+        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
+        lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
     })
 }

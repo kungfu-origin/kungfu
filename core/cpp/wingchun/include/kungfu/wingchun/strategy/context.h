@@ -8,6 +8,7 @@
 #include <kungfu/practice/apprentice.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/strategy/strategy.h>
+#include <kungfu/wingchun/book/book.h>
 
 namespace kungfu
 {
@@ -70,6 +71,8 @@ namespace kungfu
                 //@return              撤单操作ID
                 virtual uint64_t cancel_order(uint64_t order_id);
 
+                virtual book::BookContext_ptr get_book_context() { return book_context_; };
+
             protected:
                 virtual void react();
 
@@ -78,7 +81,11 @@ namespace kungfu
                 const rx::connectable_observable<yijinjing::event_ptr> &events_;
 
             private:
+                book::BookContext_ptr book_context_;
+
                 uint32_t lookup_account_location_id(const std::string &account);
+
+                void subscribe_instruments();
 
                 void request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange);
 

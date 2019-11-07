@@ -1,11 +1,11 @@
 import os
 import sys
 import importlib
-import pywingchun
 import pyyjj
-from kungfu.data.sqlite.data_proxy import LedgerDB
-from kungfu.wingchun.finance.book import *
+import pywingchun
+from kungfu.wingchun.book.book import AccountBook
 from kungfu.wingchun.constants import *
+import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
 
 class Strategy(pywingchun.Strategy):
@@ -17,21 +17,23 @@ class Strategy(pywingchun.Strategy):
         ctx.inst_infos = {}
         self.ctx = ctx
         self.ctx.book = None
+        self.ctx.books = {}
         self.__init_strategy(ctx.path)
 
-    def __init_ledger(self):
-        ledger_location = pyyjj.location(pyyjj.get_mode_by_name(self.ctx.mode), pyyjj.category.SYSTEM, 'service', 'ledger', self.ctx.locator)
-        self.ctx.ledger_db = LedgerDB(ledger_location, "ledger")
-        self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.ledger_db.all_instrument_infos()}
-        book_tags = AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=self.ctx.name)
-        self.ctx.book = self.ctx.ledger_db.load(ctx=self.ctx, book_tags=book_tags)
-        if self.ctx.book is None:
-            self.ctx.book = AccountBook(self.ctx,tags=book_tags, avail=1e7)
+    def __add_account(self, source, account, cash_limit):
+        self.wc_context.add_account(source, account, cash_limit)
+        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
+        book = AccountBook(self.ctx, location)
+        self.ctx.books[location.uid] = book
+        self.book_context.add_book(location, book)
+        self.ctx.logger.info("added book {}@{}".format(account, source))
+
+    def __get_account_book(self, source, account):
+        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
+        return self.ctx.books[location.uid]
 
     def __get_inst_info(self, instrument_id):
-        if instrument_id not in self.ctx.inst_infos:
-            self.ctx.inst_infos[instrument_id] = self.ctx.ledger_db.get_instrument_info(instrument_id)
-        return self.ctx.inst_infos[instrument_id]
+        return msg_utils.object_as_dict(self.book_context.get_inst_info(instrument_id))
 
     def __init_strategy(self, path):
         strategy_dir = os.path.dirname(path)
@@ -50,6 +52,11 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
 
+    def __init__book(self):
+        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
+        self.ctx.book = AccountBook(self.ctx, location)
+        self.book_context.add_book(location, self.ctx.book)
+
     def __add_timer(self, nanotime, callback):
         def wrap_callback(event):
             callback(self.ctx, event)
@@ -63,17 +70,20 @@ class Strategy(pywingchun.Strategy):
     def pre_start(self, wc_context):
         self.ctx.logger.info("pre start")
         self.wc_context = wc_context
+        self.book_context = wc_context.book_context
         self.ctx.now = wc_context.now
         self.ctx.add_timer = self.__add_timer
         self.ctx.add_time_interval = self.__add_time_interval
-        self.ctx.get_inst_info = self.__get_inst_info
         self.ctx.subscribe = wc_context.subscribe
-        self.ctx.add_account = wc_context.add_account
+        self.ctx.add_account = self.__add_account
         self.ctx.list_accounts = wc_context.list_accounts
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
-        self.__init_ledger()
+        self.ctx.get_account_book = self.__get_account_book
+        self.ctx.get_inst_info = self.__get_inst_info
+        self.__init__book()
+
         self._pre_start(self.ctx)
         self.ctx.log.info('strategy prepare to run')
 
@@ -89,7 +99,6 @@ class Strategy(pywingchun.Strategy):
 
     def on_quote(self, wc_context, quote):
         self._on_quote(self.ctx, quote)
-        self.ctx.book.apply_quote(quote)
 
     def on_bar(self, wc_context, bar):
         self._on_bar(self.ctx, bar)
@@ -105,13 +114,9 @@ class Strategy(pywingchun.Strategy):
 
     def on_trade(self, wc_context, trade):
         self._on_trade(self.ctx, trade)
-        self.ctx.book.apply_trade(trade)
 
     def on_trading_day(self, wc_context, daytime):
         trading_day = kft.to_datetime(daytime)
-        self.ctx.logger.info("on trading day {}".format(trading_day))
-        if self.ctx.book:
-            self.ctx.book.apply_trading_day(trading_day)
         self.ctx.trading_day = trading_day
         self.ctx.logger.info("assign trading day {} for ctx".format(trading_day))
         self._on_trading_day(self.ctx, daytime)

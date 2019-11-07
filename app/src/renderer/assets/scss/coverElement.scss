@@ -326,6 +326,12 @@ p.el-select-dropdown__empty{
         line-height: 25px;
         font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     }
+    .blink-cell .cell{
+        padding: 0;
+        .tr-table-cell {
+            padding: 0 10px;
+        }
+    }
     th{
         background: $tab_header; //头部的颜色
         color: $font;

@@ -145,8 +145,8 @@ namespace kungfu
                 j["bid"] = std::vector<double>(md.bid, std::end(md.bid));
                 j["ask"] = std::vector<double>(md.ask, std::end(md.ask));
 
-                j["bid_qty"] = std::vector<double>(md.bid_qty, std::end(md.bid_qty));
-                j["ask_qty"] = std::vector<double>(md.ask_qty, std::end(md.ask_qty));
+                j["bid_qty"] = std::vector<int64_t>(md.bid_qty, std::end(md.bid_qty));
+                j["ask_qty"] = std::vector<int64_t>(md.ask_qty, std::end(md.ask_qty));
 
                 j["trades_count"] = md.trades_count;
                 j["ticker_status"] = std::string(md.ticker_status);

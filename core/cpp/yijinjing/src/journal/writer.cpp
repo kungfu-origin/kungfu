@@ -115,10 +115,10 @@ namespace kungfu
                 journal_->next();
             }
 
-            void writer::write_raw(int64_t trigger_time, int32_t msg_type, char *data, uint32_t length)
+            void writer::write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length)
             {
                 auto frame = open_frame(trigger_time, msg_type, length);
-                memcpy(const_cast<void*>(frame->data_address()), data, length);
+                memcpy(const_cast<void*>(frame->data_address()), reinterpret_cast<void*>(data), length);
                 close_frame(length);
             }
 

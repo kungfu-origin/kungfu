@@ -1,0 +1,26 @@
+{
+  "kungfuConfig":
+  {
+    "type": "source",
+    "config": {
+      "name": "bar",
+      "key": "source",
+      "config": [
+        {
+          "key": "source",
+          "name": "source",
+          "type": "str",
+          "errMsg": "请填写 source name",
+          "required": true
+        },
+        {
+          "key": "time_interval",
+          "name": "time interval",
+          "type": "str",
+          "errMsg": "请填写 time interval",
+          "required": false
+        }
+      ]
+    }
+  }
+}

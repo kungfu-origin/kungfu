@@ -5,22 +5,20 @@ import router from './routers';
 import store from './store';
 import Components from './assets/components'
 import * as utils from '__gUtils/busiUtils'
-import {Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip} from 'element-ui';
+import { Tag, Table, TableColumn, Col, Row, Input, InputNumber, DatePicker, Select, Option, Button, Tabs, TabPane, Card, Container, Header, Aside, Main, Footer, Dropdown, DropdownMenu, DropdownItem, Switch, MessageBox, Popover, Dialog, Loading, Radio, RadioGroup, Form, FormItem, Notification, Checkbox, Tooltip } from 'element-ui';
 import moment from 'moment';
 import App from './App.vue';
 import { listProcessStatus, startMaster, startLedger } from '__gUtils/processUtils';
-import { ipcRenderer } from 'electron'
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
-//element
+Vue.use(Input)
+Vue.use(InputNumber)
 Vue.use(Tag)
 Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Col)
 Vue.use(Row)
-Vue.use(Input)
-Vue.use(InputNumber)
 Vue.use(DatePicker)
 Vue.use(Select)
 Vue.use(Option)
@@ -62,34 +60,34 @@ Vue.filter('moment', function (value, formatString) {
     return moment(value).format(formatString); // value可以是普通日期 20170723
 }); 
 
+const currentPath = window.location.hash;
+if(currentPath.indexOf('/code') === -1) {
+    //循环获取processStatus
+    var listProcessTimer;
+    const startGetProcessStatus = () => {
+        clearTimeout(listProcessTimer)
+        listProcessStatus()
+        .then(res => {
+            const processStatus = Object.freeze(res);
+            processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
+        })
+        .catch(err => console.error(err))
+        .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
+    }
 
-//循环获取processStatus
-var listProcessTimer;
-export const startGetProcessStatus = () => {
-    clearTimeout(listProcessTimer)
-    listProcessStatus()
-    .then(res => {
-        const processStatus = Object.freeze(res);
-        processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
-    })
+    //start pm2 kungfu master
+    process.env.ELECTRON_RUN_AS_NODE = true;
+
+    startMaster(false)
     .catch(err => console.error(err))
-    .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
+    .finally(() => {
+        startGetProcessStatus();
+        utils.delayMiliSeconds(1000)
+        .then(() => startLedger(false))
+        .catch(err => console.error(err))
+    })
 }
 
-//start pm2 kungfu master
-process.env.ELECTRON_RUN_AS_NODE = true;
-
-startMaster(false)
-.catch(err => console.error(err))
-.finally(() => {
-    startGetProcessStatus();
-    utils.delaySeconds(1000)
-    .then(() => startLedger(false))
-    .catch(err => console.error(err))
-})
-
-
-/* eslint-disable no-new */
 new Vue({
     router,
     store,
@@ -97,27 +95,8 @@ new Vue({
 }).$mount('#app', true)
 
 
-
-//自动更新逻辑
-// startAutoUpdate()
-
-function startAutoUpdate(){
-    if(window.location.href.split('#')[1].indexOf('code') !== -1) return;
-    //remove只能移除单个事件，单独封装removeAll移除所有事件
-    ipcRenderer.removeAllListeners('message')
-    ipcRenderer.send('checkForUpdate')
-    ipcRenderer.on("message", (event, text) => console.log(text));
-    //注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
-}
-
+// debug export
 window.fileId = 0;
-
-window.setTradingDay = (targetDay) => {
-    store.dispatch('setTradingDay', targetDay)
-}
-
-window.getTradingDay = () => {
-    return store.state.BASE.tradingDay
-}
-
+window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay)
+window.getTradingDay = () => store.state.BASE.tradingDay
 window.store = store

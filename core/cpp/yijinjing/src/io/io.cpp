@@ -109,6 +109,7 @@ namespace kungfu
             void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) override
             {
                 s.connect(url_factory->make_path_connect(location, s.get_protocol()));
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
         };
 

@@ -41,3 +41,22 @@ package-lock.json
 */inquirer-path/lib/*
 */inquirer-path/node_modules/*
 */_version.py
+
+# Python Distribution / packaging
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Byte-compiled / optimized / DLL files
+__pycache__/

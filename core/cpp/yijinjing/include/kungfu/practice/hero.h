@@ -58,6 +58,9 @@ namespace kungfu
             int64_t now()
             { return now_; }
 
+            yijinjing::journal::reader_ptr get_reader() const
+            { return reader_; }
+
             bool has_location(uint32_t hash);
 
             yijinjing::data::location_ptr get_location(uint32_t hash);
@@ -66,8 +69,16 @@ namespace kungfu
 
             yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
+            bool has_channel(uint64_t hash) const ;
+
+            const yijinjing::msg::data::Channel& get_channel(uint64_t hash) const ;
+
+            std::unordered_map<uint64_t, yijinjing::msg::data::Channel>& get_channels() { return channels_; }
+
         protected:
+            std::unordered_map<uint64_t, yijinjing::msg::data::Channel> channels_;
             std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
+
             yijinjing::journal::reader_ptr reader_;
             std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
             int64_t begin_time_;
@@ -78,6 +89,12 @@ namespace kungfu
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
             virtual void deregister_location(int64_t trigger_time, uint32_t location_uid);
+
+            virtual void register_channel(int64_t trigger_time, const yijinjing::msg::data::Channel &channel);
+
+            virtual void deregister_channel(int64_t trigger_time, uint64_t channel_uid);
+
+            void deregister_channel_by_source(uint32_t source_id);
 
             void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
 
