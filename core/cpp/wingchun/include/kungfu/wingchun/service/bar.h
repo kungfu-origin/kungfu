@@ -4,6 +4,7 @@
 #include <kungfu/practice/apprentice.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
+#include <unordered_set>
 
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::wingchun::msg::data;
@@ -26,6 +27,7 @@ namespace kungfu
                 location_ptr source_location_;
                 int64_t time_interval_;
                 void request_subscribe(int64_t start_time, int64_t end_time, const Instrument& instrument);
+                std::unordered_set<uint32_t> subscribed_insts_;
             };
         }
     }

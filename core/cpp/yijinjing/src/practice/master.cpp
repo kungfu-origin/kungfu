@@ -209,14 +209,13 @@ namespace kungfu
                   const msg::data::RequestWriteTo &request = e->data<msg::data::RequestWriteTo>();
                   if (has_location(request.dest_id))
                   {
+                      reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
+                      require_write_to(e->source(), e->gen_time(), request.dest_id);
+                      require_read_from(request.dest_id, e->gen_time(), e->source(), false);
                       msg::data::Channel channel = {};
                       channel.source_id = e->source();
                       channel.dest_id = request.dest_id;
                       register_channel(e->gen_time(), channel);
-
-                      reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-                      require_write_to(e->source(), e->gen_time(), request.dest_id);
-                      require_read_from(request.dest_id, e->gen_time(), e->source(), false);
                   } else
                   {
                       SPDLOG_ERROR("Request write to unknown location {:08x}", request.dest_id);
@@ -229,14 +228,13 @@ namespace kungfu
                   const msg::data::RequestReadFrom &request = e->data<msg::data::RequestReadFrom>();
                   if (has_location(request.source_id))
                   {
+                      reader_->join(get_location(request.source_id), e->source(), e->gen_time());
+                      require_write_to(request.source_id, e->gen_time(), e->source());
+                      require_read_from(e->source(), e->gen_time(), request.source_id, false);
                       msg::data::Channel channel = {};
                       channel.source_id = request.source_id;
                       channel.dest_id = e->source();
                       register_channel(e->gen_time(), channel);
-
-                      reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-                      require_write_to(request.source_id, e->gen_time(), e->source());
-                      require_read_from(e->source(), e->gen_time(), request.source_id, false);
                   } else
                   {
                       SPDLOG_ERROR("Request read from unknown location {:08x}", request.source_id);

@@ -411,7 +411,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("ask_volume", &Quote::get_ask_volume, &Quote::set_ask_volume)
             .def_property_readonly("raw_address", [](const Quote &a) { return reinterpret_cast<uintptr_t>(&a);})
             .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<Quote*>(addr); })
-            .def("__sizeof__", [](const Instrument &a) { return sizeof(a); })
+            .def("__sizeof__", [](const Quote &a) { return sizeof(a); })
             .def("__repr__",[](const Quote &a){return to_string(a);});
 
     py::class_<Entrust>(m, "Entrust")
@@ -784,10 +784,11 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("algo_context", &service::Algo::get_algo_context)
             .def_property_readonly("io_device", &service::Algo::get_io_device)
+            .def("run", &service::Algo::run)
             .def("add_order", &service::Algo::add_order)
             .def("insert_order", &service::Algo::insert_order);
 
     py::class_<BarGenerator, kungfu::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
             .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())
-            .def("run", &service::Algo::run);
+            .def("run", &service::BarGenerator::run);
 }
