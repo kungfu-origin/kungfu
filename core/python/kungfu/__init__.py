@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-from .env import setup_environment_variables
-setup_environment_variables()
-from .msg import monkey_patch
-monkey_patch()
-
 try:
+    from .env import setup_environment_variables
+    setup_environment_variables()
+    from .msg import monkey_patch
+    monkey_patch()
     from ._version import __version__
 except:
     from .version import get_version

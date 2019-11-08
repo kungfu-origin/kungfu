@@ -75,22 +75,32 @@ namespace kungfu
                       {
                           for (const auto& inst: instruments)
                           {
-                              write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
-                              auto now_in_nano = now();
-                              auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
-                              SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
-                              request_subscribe(start_time, start_time + time_interval_, inst);
+                              auto symbol_id = get_symbol_id(inst.get_instrument_id(), inst.get_exchange_id());
+                              if(subscribed_insts_.find(symbol_id) ==  subscribed_insts_.end())
+                              {
+                                  write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
+                                  auto now_in_nano = now();
+                                  auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
+                                  SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
+                                  request_subscribe(start_time, start_time + time_interval_, inst);
+                                  subscribed_insts_.insert(symbol_id);
+                              }
                           }
                       });
                 } else
                 {
                     for (const auto& inst: instruments)
                     {
-                        write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
-                        auto now_in_nano = now();
-                        auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
-                        SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
-                        request_subscribe(start_time, start_time + time_interval_, inst);
+                        auto symbol_id = get_symbol_id(inst.get_instrument_id(), inst.get_exchange_id());
+                        if(subscribed_insts_.find(symbol_id) ==  subscribed_insts_.end())
+                        {
+                            write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
+                            auto now_in_nano = now();
+                            auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
+                            SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
+                            request_subscribe(start_time, start_time + time_interval_, inst);
+                            subscribed_insts_.insert(symbol_id);
+                        }
                     }
                 }
                 return true;
@@ -146,12 +156,16 @@ namespace kungfu
 
             void BarGenerator::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
             {
+                if (has_location(location->uid))
+                {
+                    return;
+                }
                 apprentice::register_location(trigger_time, location);
-                if (not has_location(source_location_->uid) and location->uid == source_location_->uid)
+                if (location->uid == source_location_->uid)
                 {
                     request_read_from(now(), source_location_->uid, true);
                     request_write_to(now(), source_location_->uid);
-                    SPDLOG_INFO("added md {} [{:08x}]", source_location_->name, source_location_->uid);
+                    SPDLOG_INFO("added md {} [{:08x}]", source_location_->uname, source_location_->uid);
                 }
             }
 
