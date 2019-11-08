@@ -8,7 +8,6 @@
     :close-on-click-modal="false"
     :close-on-press-escape="true"
     @close="handleCancel"
-    @keyup.enter.native="handleSubmitSetting"
 >
 
     <div class="global-setting-content">
@@ -32,12 +31,12 @@
                                 <p class="setting-sub-item__header">{{config.name}}</p>                                
                                 <p class="setting-sub-item__tip">{{config.tip}}</p>
                                 <div class="setting-sub-item__input-content">
-                                    <!-- <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" :value="kfSystemConfig[item.key]" ></el-input>
-                                    <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input>
-                                    <el-switch :class="item.key" v-if="item.type === 'bool'" :value="kfSystemConfig[item.key]"></el-switch>
-                                    <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number>
-                                    <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
-                                    <el-select :class="config.key" size="small" v-if="config.type === 'select'" :multiple="config.multiple" collapse-tags  :value="kfSystemConfig[item.key][config.key]" @input="e => handleIuput(item.key, config.key, e)">
+                                    <!-- <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" :value="kfSystemConfig[item.key]" ></el-input> -->
+                                    <!-- <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input> -->
+                                    <el-switch :class="item.key" v-if="config.type === 'bool'" :value="!!getValue(setting, item, config)"></el-switch>
+                                    <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
+                                    <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
+                                    <el-select :class="config.key" size="small" v-if="config.type === 'select'" :multiple="config.multiple" collapse-tags  :value="getValue(setting, item, config)" @input="e => handleIuput(item.key, config.key, e)">
                                         <el-option
                                             v-for="option in config.data"
                                             :key="option.value"
@@ -60,10 +59,11 @@
 
 <script>
 import Vue from 'vue'
+import { mapGetters } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
 import { readJsonSync, outputJson } from '__gUtils/fileUtils';
 import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
-
+import { getExtensionConfigs } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 
 const kfConfig = require(`${__resources}/config/kfConfig.json`) || {}
@@ -96,17 +96,20 @@ export default {
 
     mounted() {
         const t = this;
-        t.settingConfig
+        t.setExtensionsConfig();
+    },
+
+    computed: {
+        ...mapGetters({
+            sourceList: 'getSourceList'
+        })
     },
 
     methods: {
-
         handleCancel() {
             const t = this;
             t.close();
         },
-
-        handleSubmitSetting() {},
 
         handleIuput(key, subKey, value) {
             const t = this;
@@ -116,6 +119,48 @@ export default {
             .then(kfConfig => t.kfSystemConfig = kfConfig)
         },
 
+        getValue(setting, item, config) {
+            const t = this;
+            const valueData = t.settingConfig[setting.key].value
+            if(!valueData) return ''
+            else return (valueData[item.key] || {})[config.key] || ''
+        },
+
+        async setExtensionsConfig() {
+            const t = this;
+            const extensions = await getExtensionConfigs();
+            const extensionsResolve = extensions.filter(ext => (ext.type !== 'source'))
+            const extensionsConfig = [{}, ...extensionsResolve].reduce((a, b) => {
+                const config = b.config;
+                config.config.forEach(async item => {
+                    //针对不同插件参数需要的数据进行配置
+                    if(item.type === 'select' && item.data === 'sources') {
+                        const sourceList = await t.getSourceList();
+                        item.data = sourceList
+                    }
+                })
+                a[config.key] = config
+                return a
+            })
+
+            t.settingConfig.trading.config = extensionsConfig
+            const tradingConfig = t.settingConfig.trading;
+            tradingConfig.config = extensionsConfig;
+            t.$set(t.settingConfig, 'trading', tradingConfig)
+        },
+
+        async getSourceList() {
+            const t = this;
+            const accountList = await t.$store.dispatch('getAccountList');
+            const sourceList = accountList
+                .filter(a => !!a.receive_md)
+                .map(s => ({
+                    value: s.source_name,
+                    name: s.source_name
+                }))
+            return sourceList;
+
+        },
 
         close() {
             this.$emit('update:visible', false)
@@ -158,6 +203,7 @@ export default {
             width: calc(100% - 300px);
             height: calc(100% - 55px);
             margin-left: 30px;
+            overflow: auto;
 
             .setting-type-item {
                 padding-bottom: 30px;

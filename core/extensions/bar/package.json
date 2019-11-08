@@ -7,8 +7,15 @@
       "key": "bar",
       "config": [
         {
+          "key": "open",
+          "name": "是否开启",
+          "tip": "开启Bar功能会单独开启计算Bar数据进程，选择是否开启",
+          "type": "bool"
+        },
+        {
           "key": "source",
           "name": "支持柜台",
+          "tip": "选择期望支持订阅Bar功能的柜台",
           "type": "select",
           "multiple": true,
           "data": "sources"
@@ -16,13 +23,14 @@
         },
         {
           "key": "time_interval",
-          "name": "间隔",
+          "name": "周期",
+          "tip": "Bar的周期",
           "type": "select",
           "data": [
-            {"value": 60, "name": "1min"},
-            {"value": 5, "name": "1min"},
-            {"value": 15, "name": "1min"},
-            {"value": 30, "name": "1min"}
+            {"value": 5, "name": "5s"},
+            {"value": 15, "name": "15s"},
+            {"value": 30, "name": "30s"},
+            {"value": 60, "name": "1min"}
           ]
         }
       ]
