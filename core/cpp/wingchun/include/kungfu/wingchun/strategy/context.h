@@ -9,6 +9,7 @@
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/strategy/strategy.h>
 #include <kungfu/wingchun/book/book.h>
+#include <kungfu/wingchun/algo/algo.h>
 
 namespace kungfu
 {
@@ -65,13 +66,14 @@ namespace kungfu
                 virtual uint64_t insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                               double limit_price, int64_t volume, PriceType type, Side side, Offset offset = Offset::Open);
 
-
                 //撤单
                 //@param order_id      订单ID
                 //@return              撤单操作ID
                 virtual uint64_t cancel_order(uint64_t order_id);
 
-                virtual book::BookContext_ptr get_book_context() { return book_context_; };
+                virtual book::BookContext_ptr get_book_context() const { return book_context_; };
+
+                virtual algo::AlgoContext_ptr get_algo_context() const { return algo_context_; }
 
             protected:
                 virtual void react();
@@ -82,6 +84,7 @@ namespace kungfu
 
             private:
                 book::BookContext_ptr book_context_;
+                algo::AlgoContext_ptr algo_context_;
 
                 uint32_t lookup_account_location_id(const std::string &account);
 

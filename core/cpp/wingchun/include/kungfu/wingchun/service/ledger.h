@@ -74,8 +74,6 @@ namespace kungfu
 
                 std::unordered_map<uint32_t, msg::data::BrokerState> broker_states_;
 
-                std::vector<msg::data::Instrument> instruments_;
-
                 void monitor_instruments();
 
                 msg::data::BrokerState get_broker_state(uint32_t broker_location) const;

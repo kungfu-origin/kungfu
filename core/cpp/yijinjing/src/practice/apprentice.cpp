@@ -46,6 +46,7 @@ namespace kungfu
             master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
             master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
             config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
+            locations_[master_commands_location_->uid] = master_commands_location_;
         }
 
         void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)

@@ -9,6 +9,7 @@ import kungfu.yijinjing.time as kft
 import time
 import sys
 import csv
+import traceback
 import pprint
 import importlib
 import os
@@ -95,7 +96,8 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
                 try:
                     frame_handler(frame.as_dict())
                 except Exception as e:
-                    ctx.logger.warn(e)
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    ctx.logger.error('error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
                 msg_count +=1
             reader.next()
         elif msg_count >= max_messages:

@@ -24,9 +24,11 @@
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/ledger.h>
+#include <kungfu/wingchun/service/algo.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/wingchun/book/book.h>
+#include <kungfu/wingchun/algo/algo.h>
 
 namespace py = pybind11;
 namespace kwb = kungfu::wingchun::book;
@@ -80,6 +82,34 @@ public:
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_position_details, position_details); }
     virtual void on_asset(event_ptr event, const Asset& asset) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_asset, event, asset); }
+};
+
+class PyAlgoOrder: public algo::AlgoOrder
+{
+    using algo::AlgoOrder::AlgoOrder;
+
+    const std::string dumps() const override
+    {PYBIND11_OVERLOAD_PURE(const std::string, algo::AlgoOrder, dumps); }
+
+    void on_start(algo::AlgoContext_ptr context) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_start, context); }
+
+    void on_child_order(algo::AlgoContext_ptr context, const Order& order) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_order, context, order); }
+
+    void on_child_trade(algo::AlgoContext_ptr context, const Trade& trade) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_trade, context, trade); }
+
+
+};
+
+
+class PyAlgoService: public service::Algo
+{
+    using service::Algo::Algo;
+    void insert_order(const event_ptr &event, const std::string& msg) override
+    {PYBIND11_OVERLOAD_PURE(void, service::Algo, insert_order, event, msg) }
+
 };
 
 class PyLedger : public Ledger
@@ -458,6 +488,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property("instrument_id", &OrderInput::get_instrument_id, &OrderInput::set_instrument_id)
             .def_property("exchange_id", &OrderInput::get_exchange_id, &OrderInput::set_exchange_id)
             .def_property("account_id", &OrderInput::get_account_id, &OrderInput::set_account_id)
+            .def_property("source_id", &OrderInput::get_source_id, &OrderInput::set_source_id)
             .def_property_readonly("raw_address", [](const OrderInput &a) { return reinterpret_cast<uintptr_t>(&a);})
             .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<OrderInput*>(addr); })
             .def("__sizeof__", [](const OrderInput &a) { return sizeof(a); })
@@ -710,6 +741,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
             .def_property_readonly("book_context", &strategy::Context::get_book_context)
+            .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
             .def("now", &strategy::Context::now)
             .def("add_timer", &strategy::Context::add_timer)
             .def("add_time_interval", &strategy::Context::add_time_interval)
@@ -735,4 +767,23 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_order", &strategy::Strategy::on_order)
             .def("on_trade", &strategy::Strategy::on_trade);
 
+    py::class_<algo::AlgoOrder, PyAlgoOrder, algo::AlgoOrder_ptr>(m, "AlgoOrder")
+            .def(py::init<uint64_t>())
+            .def_property_readonly("order_id", &algo::AlgoOrder::get_order_id)
+            .def("dumps", &algo::AlgoOrder::dumps)
+            .def("on_quote", &algo::AlgoOrder::on_quote);
+
+    py::class_<algo::AlgoContext, std::shared_ptr<algo::AlgoContext>>(m, "AlgoContext")
+            .def("insert_child_order", &algo::AlgoContext::insert_order)
+            .def("now", &algo::AlgoContext::now)
+            .def("add_timer", &algo::AlgoContext::add_timer)
+            .def("add_order", &algo::AlgoContext::add_order);
+
+    py::class_<service::Algo, PyAlgoService, service::Algo_ptr>(m, "AlgoService")
+            .def(py::init<data::locator_ptr, data::mode, bool>())
+            .def_property_readonly("algo_context", &service::Algo::get_algo_context)
+            .def_property_readonly("io_device", &service::Algo::get_io_device)
+            .def("run", &service::Algo::run)
+            .def("add_order", &service::Algo::add_order)
+            .def("insert_order", &service::Algo::insert_order);
 }

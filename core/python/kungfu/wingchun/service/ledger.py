@@ -179,7 +179,6 @@ class Ledger(pywingchun.Ledger):
 
 
     def _dump_snapshot(self, data_frequency="minute"):
-        messages = []
         for book in self.ctx.books.values():
             event = book.event.as_dict()
             event["msg_type"] = msg.AssetSnapshot
@@ -305,11 +304,9 @@ def qry_asset(ctx, event, location, data):
 def publish_all_asset(ctx, event, location, data):
     ctx.logger.info("req publish all recorded asset info")
     for book in ctx.books.values():
-        ctx.ledger.publish(json.dumps(book.message))
-    return {
-        'status': http.HTTPStatus.OK,
-        'msg_type': msg.PublishAllAssetInfo
-    }
+        event = book.event.as_dict()
+        ctx.ledger.publish(json.dumps(event, cls = wc_utils.WCEncoder))
+    return {'status': http.HTTPStatus.OK, 'msg_type': msg.PublishAllAssetInfo}
 
 @on(msg.RemoveStrategy)
 def remove_strategy(ctx, event, location, data):
@@ -326,9 +323,8 @@ def remove_strategy(ctx, event, location, data):
             'msg_type': msg.RemoveStrategy
         }
     else:
-        book_tags = kwb.book.AccountBookTags(ledger_category=LedgerCategory.Portfolio, client_id=data["name"])
-        ctx.ledger.pop_book(book_tags=book_tags)
-        ctx.db.remove(book_tags=book_tags)
+        ctx.ledger.pop_book(uid=location.uid)
+        ctx.db.remove_book(uid=location.uid)
         return {
             'status': http.HTTPStatus.OK,
             'msg_type': msg.RemoveStrategy
