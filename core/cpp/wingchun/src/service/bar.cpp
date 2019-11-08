@@ -1,7 +1,8 @@
 
-#include "bar.h"
+#include <kungfu/wingchun/service/bar.h>
 #include <regex>
 #include <kungfu/wingchun/utils.h>
+#include <kungfu/yijinjing/log/setup.h>
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -11,7 +12,7 @@ namespace kungfu
 {
     namespace wingchun
     {
-        namespace bar
+        namespace service
         {
             static int64_t parse_time_interval(const std::string& s)
             {
@@ -45,8 +46,9 @@ namespace kungfu
                 }
             }
 
-            BarGenerator::BarGenerator(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config):
-                broker::MarketData(low_latency, std::move(locator), "bar"), time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE)
+            BarGenerator::BarGenerator(locator_ptr locator, mode m, bool low_latency, const std::string &json_config):
+                practice::apprentice(location::make(m, category::SYSTEM, "service", "bar", std::move(locator)), low_latency),
+                time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE)
             {
                 log::copy_log_settings(get_io_device()->get_home(), "bar");
                 auto config = nlohmann::json::parse(json_config);
@@ -105,10 +107,8 @@ namespace kungfu
                             const auto& quote = event->data<Quote>();
                             bool res = strcmp(quote.instrument_id, instrument.instrument_id) == 0 && strcmp(quote.exchange_id, instrument.exchange_id) == 0;
                             return res;
-                        }) | skip_while([start_time](event_ptr event)
-                                {
-                                    return event->data<Quote>().data_time < start_time;
-                                }) | take_while([end_time](event_ptr event)
+                        }) | skip_while([start_time](event_ptr event) { return event->data<Quote>().data_time < start_time; })
+                                | take_while([end_time](event_ptr event)
                                         {
                                             return event->data<Quote>().data_time < end_time;
                                         });
@@ -116,9 +116,6 @@ namespace kungfu
                 auto bar = quotes.reduce(Bar(), [](Bar res, event_ptr event)
                 {
                     const auto& quote = event->data<Quote>();
-                    strcpy(res.instrument_id, quote.instrument_id);
-                    strcpy(res.exchange_id, quote.exchange_id);
-                    strcpy(res.trading_day, quote.trading_day);
                     if(res.tick_count == 0)
                     {
                         res.high = quote.last_price;
@@ -138,6 +135,8 @@ namespace kungfu
                             {
                                 res.start_time = start_time;
                                 res.end_time = end_time;
+                                strcpy(res.instrument_id, instrument.instrument_id);
+                                strcpy(res.exchange_id, instrument.exchange_id);
                                 SPDLOG_INFO("{}.{} [o:{},c:{},h:{},l:{}] from {} to {}",res.instrument_id, res.exchange_id,
                                         res.open, res.close, res.high, res.low, time::strftime(res.start_time), time::strftime(res.end_time));
                                 this->get_writer(0)->write(0, msg::type::Bar, res);
@@ -145,17 +144,62 @@ namespace kungfu
                             });
             }
 
+            void BarGenerator::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
+            {
+                apprentice::register_location(trigger_time, location);
+                if (not has_location(source_location_->uid) and location->uid == source_location_->uid)
+                {
+                    request_read_from(now(), source_location_->uid, true);
+                    request_write_to(now(), source_location_->uid);
+                    SPDLOG_INFO("added md {} [{:08x}]", source_location_->name, source_location_->uid);
+                }
+            }
+
             void BarGenerator::on_start()
             {
-                broker::MarketData::on_start();
-                if (not has_location(source_location_->uid))
-                {
-                    throw wingchun_error(fmt::format("invalid md {}", source_location_->name));
-                }
-                request_read_from(now(), source_location_->uid, true);
-                request_write_to(now(), source_location_->uid);
-                SPDLOG_INFO("added md {} [{:08x}]", source_location_->name, source_location_->uid);
+                apprentice::on_start();
+
+                events_ | is(msg::type::Subscribe) |
+                $([&](event_ptr event)
+                  {
+                      SPDLOG_INFO("subscribe request");
+                      std::vector<Instrument> symbols;
+                      const char *buffer = &(event->data<char>());
+                      hffix::message_reader reader(buffer, buffer + event->data_length());
+                      for (; reader.is_complete(); reader = reader.next_message_reader())
+                      {
+                          if (reader.is_valid())
+                          {
+                              auto group_mdentry_begin = std::find_if(reader.begin(), reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+                              hffix::message_reader::const_iterator group_mdentry_end;
+                              for (; group_mdentry_begin != reader.end(); group_mdentry_begin = group_mdentry_end)
+                              {
+                                  group_mdentry_end = std::find_if(group_mdentry_begin + 1, reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+
+                                  auto group_instrument_begin = std::find_if(group_mdentry_begin, group_mdentry_end,
+                                                                             hffix::tag_equal(hffix::tag::Symbol));
+                                  hffix::message_reader::const_iterator group_instrument_end;
+
+                                  for (; group_instrument_begin != group_mdentry_end; group_instrument_begin = group_instrument_end)
+                                  {
+                                      group_instrument_end = std::find_if(group_instrument_begin + 1, group_mdentry_end,
+                                                                          hffix::tag_equal(hffix::tag::Symbol));
+                                      hffix::message_reader::const_iterator symbol = group_instrument_begin;
+                                      hffix::message_reader::const_iterator exchange = group_instrument_begin;
+                                      reader.find_with_hint(hffix::tag::SecurityExchange, exchange);
+
+                                      Instrument instrument{};
+                                      strcpy(instrument.instrument_id, symbol->value().as_string().c_str());
+                                      strcpy(instrument.exchange_id, exchange->value().as_string().c_str());
+                                      symbols.push_back(instrument);
+                                  }
+                              }
+                          }
+                      }
+                      subscribe(symbols);
+                  });
             }
+
         }
     }
 }
