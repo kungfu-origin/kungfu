@@ -12,45 +12,51 @@
 
     <div class="global-setting-content">
         <div class="dir-list">
-            <el-collapse v-model="activeSettingTypes">
+            <el-collapse v-model="activeSettingTypes" >
                 <el-collapse-item :title="item.name" :name="item.key" v-for="item in settingConfig" :key="item.key">
                     <ul>
-                        <li v-for="set in item.config" :key="set.key">{{set.name}}</li>
+                        <li 
+                        v-for="set in item.config" 
+                        :key="set.key" 
+                        :class="{'active': activeSettingItem === `${item.key}-${set.key}`}" 
+                        @click="handleClickSettingType(item.key, set.key)">{{set.name}}</li>
                     </ul>
                 </el-collapse-item>
             </el-collapse>
         </div>
         <div class="setting-content">
-                <div class="setting-type-item" v-for="setting in settingConfig" :key="setting.key">
-                    <p class="setting-type-item__header" >{{setting.name}}</p>
-                    <ul class="setting-type-item__content">
-                        <li class="setting-item" v-for="item in Object.values(setting.config || {})" :key="item.key">
-                            <p class="setting-item__header">{{item.name}}</p>
+            <div class="setting-type-item" v-for="setting in settingConfig" :key="setting.key">
+                <p class="setting-type-item__header" >{{setting.name}}</p>
+                <ul class="setting-type-item__content">
+                    <li class="setting-item" 
+                        v-for="item in Object.values(setting.config || {})" 
+                        :key="item.key"
+                        :id="`setting-item-${setting.key}-${item.key}`"
+                    >
+                        <p class="setting-item__header">{{item.name}}</p>
 
-                            <div class="setting-sub-item__item" v-for="config in item.config" :key="config.key">
-                                <p class="setting-sub-item__header">{{config.name}}</p>                                
-                                <p class="setting-sub-item__tip">{{config.tip}}</p>
-                                <div class="setting-sub-item__input-content">
-                                    <!-- <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" :value="kfSystemConfig[item.key]" ></el-input> -->
-                                    <!-- <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input> -->
-                                    <el-switch :class="item.key" v-if="config.type === 'bool'" :value="!!getValue(setting, item, config)"></el-switch>
-                                    <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
-                                    <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
-                                    <el-select :class="config.key" size="small" v-if="config.type === 'select'" :multiple="config.multiple" collapse-tags  :value="getValue(setting, item, config)" @input="e => handleIuput(item.key, config.key, e)">
-                                        <el-option
-                                            v-for="option in config.data"
-                                            :key="option.value"
-                                            :label="option.name"
-                                            :value="option.value">
-                                        </el-option>
-                                    </el-select>
-                                </div>
+                        <div class="setting-sub-item__item" v-for="config in item.config" :key="config.key">
+                            <p class="setting-sub-item__header">{{config.name}}</p>                                
+                            <p class="setting-sub-item__tip">{{config.tip}}</p>
+                            <div class="setting-sub-item__input-content">
+                                <!-- <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" :value="kfSystemConfig[item.key]" ></el-input> -->
+                                <!-- <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input> -->
+                                <el-switch :class="item.key" v-if="config.type === 'bool'" :value="!!getValue(setting, item, config)"></el-switch>
+                                <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
+                                <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
+                                <el-select :class="config.key" size="small" v-if="config.type === 'select'" :multiple="config.multiple" collapse-tags  :value="getValue(setting, item, config)" @input="e => handleIuput(setting.key, item.key, config.key, e)">
+                                    <el-option
+                                        v-for="option in config.data"
+                                        :key="option.value"
+                                        :label="option.name"
+                                        :value="option.value">
+                                    </el-option>
+                                </el-select>
                             </div>
-                            
-                        </li>
-                    </ul>    
-                </div> 
-
+                        </div>
+                    </li>
+                </ul>    
+            </div> 
         </div>
     </div>
 
@@ -84,11 +90,25 @@ export default {
     data() {
         const t = this;
         return {
-            kfSystemConfig: kfConfig,
             activeSettingTypes: ['system', 'trading'],
+            activeSettingItem: '',
             settingConfig: {
-                'system': { key: "system", name: '系统设置', config: systemConfig, value: kfConfig },
-                'trading': { key: "trading", name: '交易设置', config: null, value: null }
+                'system': { 
+                    key: "system", 
+                    name: '系统设置', 
+                    config: systemConfig, 
+                    value: kfConfig,
+                    outputPath: KF_CONFIG_PATH,
+                    type: 'json'
+                },
+                'trading': { 
+                    key: "trading", 
+                    name: '交易设置', 
+                    config: null, 
+                    value: null,
+                    outputPath: false,
+                    type: ''
+                }
             }
                 
         }
@@ -106,17 +126,33 @@ export default {
     },
 
     methods: {
+        handleClickSettingType(typeKey, itemKey) {
+            const t = this;
+            t.activeSettingItem = `${typeKey}-${itemKey}`;
+            console.log(t.activeSettingItem)
+            document.querySelector(`#setting-item-${t.activeSettingItem}`).scrollIntoView();
+        },
+
         handleCancel() {
             const t = this;
             t.close();
         },
 
-        handleIuput(key, subKey, value) {
+        handleIuput(type, key, subKey, value) {
             const t = this;
-            t.kfSystemConfig[key][subKey] = value;
-            outputJson(KF_CONFIG_PATH, Object.freeze(t.kfSystemConfig || {}))
-            .then(() => readJsonSync(KF_CONFIG_PATH))
-            .then(kfConfig => t.kfSystemConfig = kfConfig)
+            const settingData = t.settingConfig[type];
+            const outputType = settingData.type;
+
+            if(outputType === 'json') {
+                const outputData = settingData.value || {};
+                const outputPath = settingData.outputPath || '';
+                outputData[key][subKey] = value;
+                outputJson(outputPath, Object.freeze(outputData || {}))
+                .then(() => readJsonSync(outputPath))
+                .then(kfConfig => {
+                    t.$set(settingData, value, kfConfig)
+                }) 
+            }
         },
 
         getValue(setting, item, config) {
@@ -193,8 +229,14 @@ export default {
                     background: $bg_card;
                     cursor: pointer;
                 }
+                li.active {
+                    color: $vi;
+                }
                 li:hover {
                     color: $font_5
+                }
+                li:active {
+                    color: $vi;
                 }
             }
         }
@@ -203,6 +245,8 @@ export default {
             width: calc(100% - 300px);
             height: calc(100% - 55px);
             margin-left: 30px;
+            padding-bottom: 300px;
+            box-sizing: border-box;
             overflow: auto;
 
             .setting-type-item {

@@ -27,7 +27,7 @@
             {
                 "key": "tabSpaceType",
                 "name": "缩进类别",
-                "tip": "kungfu编辑器缩进类别",
+                "tip": "kungfu 编辑器缩进类别",
                 "type": "select",
                 "data": [
                     {"value": "Spaces", "name": "Spaces"},
@@ -37,7 +37,7 @@
             {
                 "key": "tabSpaceSize",
                 "name": "缩进大小",
-                "tip": "kungfu编辑器缩进大小（空格）",
+                "tip": "kungfu 编辑器缩进大小（空格）",
                 "type": "select",
                 "data": [
                     {"value": 2, "name": 2},
