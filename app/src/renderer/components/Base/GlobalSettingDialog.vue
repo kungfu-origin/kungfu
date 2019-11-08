@@ -52,6 +52,11 @@
                                 :value="processStatus[config.target] === 'online'"
                                 @change="e => handleSwitchProcess(e, config, settingConfig[setting.key].value[item.key])"
                                 ></el-switch>
+                                <span 
+                                class="tr-oper" 
+                                v-if="config.type === 'process'"                                 
+                                @click.stop="handleOpenLogFile(config)"><i class="el-icon-document mouse-over"></i> 打开日志 </span>
+                                
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
                                 <el-select 
@@ -83,12 +88,13 @@ import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
 import { readJsonSync, outputJson } from '__gUtils/fileUtils';
-import { KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
+import { LOG_DIR, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 import tradingConfig from '__gConfig/tradingConfig.json';
 import * as processUtils from '__gUtils/processUtils';
 
+const path = require('path');
 const kfSystemConfig = require(`${__resources}/config/kfConfig.json`) || {}
 const kfTradingConfig = require(`${__resources}/config/kfTradingConfig.json`) || {}
 
@@ -183,6 +189,12 @@ export default {
             }
         },
 
+        //打开日志
+        handleOpenLogFile(config){
+            const logPath = path.join(LOG_DIR, `${config.log_path}.log`);
+            this.$showLog(logPath)
+        },
+
         close() {
             this.$emit('update:visible', false)
         },
@@ -265,6 +277,13 @@ export default {
                 }
             }
             
+            .tr-oper {
+                padding-left: 20px;
+                vertical-align: middle;
+                i {
+                    font-size: 14px !important;
+                }
+            }
         }
     }
 </style>
