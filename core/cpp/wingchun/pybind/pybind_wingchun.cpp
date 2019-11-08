@@ -25,6 +25,7 @@
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/service/algo.h>
+#include <kungfu/wingchun/service/bar.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/wingchun/book/book.h>
@@ -783,7 +784,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("algo_context", &service::Algo::get_algo_context)
             .def_property_readonly("io_device", &service::Algo::get_io_device)
-            .def("run", &service::Algo::run)
             .def("add_order", &service::Algo::add_order)
             .def("insert_order", &service::Algo::insert_order);
+
+    py::class_<BarGenerator, kungfu::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
+            .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())
+            .def("run", &service::Algo::run);
 }

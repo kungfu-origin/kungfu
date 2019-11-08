@@ -38,13 +38,27 @@
                         <div class="setting-sub-item__item" v-for="config in item.config" :key="config.key">
                             <p class="setting-sub-item__header">{{config.name}}</p>                                
                             <p class="setting-sub-item__tip">{{config.tip}}</p>
-                            <div class="setting-sub-item__input-content">
-                                <!-- <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" :value="kfSystemConfig[item.key]" ></el-input> -->
+                            <div class="setting-sub-item__input-content" v-if="settingConfig[setting.key].value">
+                                <el-input 
+                                :class="item.key" 
+                                v-if="config.type === 'str'" 
+                                :type="item.key" 
+                                v-model="settingConfig[setting.key].value[item.key][config.key]" 
+                                @blur="handleIuput(setting.key)" ></el-input>
                                 <!-- <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input> -->
-                                <el-switch :class="item.key" v-if="config.type === 'bool'" :value="!!getValue(setting, item, config)"></el-switch>
+                                <el-switch 
+                                :class="item.key" 
+                                v-if="config.type === 'bool'" 
+                                v-model="settingConfig[setting.key].value[item.key][config.key]"
+                                ></el-switch>
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
-                                <el-select :class="config.key" size="small" v-if="config.type === 'select'" :multiple="config.multiple" collapse-tags  :value="getValue(setting, item, config)" @input="e => handleIuput(setting.key, item.key, config.key, e)">
+                                <el-select 
+                                :class="config.key" 
+                                v-if="config.type === 'select'" 
+                                :multiple="config.multiple" collapse-tags  
+                                v-model="settingConfig[setting.key].value[item.key][config.key]" 
+                                @change="handleIuput(setting.key)" size="small">
                                     <el-option
                                         v-for="option in config.data"
                                         :key="option.value"
@@ -68,12 +82,13 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
 import { readJsonSync, outputJson } from '__gUtils/fileUtils';
-import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
+import { KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
+import tradingConfig from '__gConfig/tradingConfig.json';
 
-const kfConfig = require(`${__resources}/config/kfConfig.json`) || {}
-const path = require('path');
+const kfSystemConfig = require(`${__resources}/config/kfConfig.json`) || {}
+const kfTradingConfig = require(`${__resources}/config/kfTradingConfig.json`) || {}
 
 Vue.use(Collapse)
 Vue.use(CollapseItem)
@@ -97,26 +112,21 @@ export default {
                     key: "system", 
                     name: '系统设置', 
                     config: systemConfig, 
-                    value: kfConfig,
+                    value: kfSystemConfig,
                     outputPath: KF_CONFIG_PATH,
                     type: 'json'
                 },
-                // 'trading': { 
-                //     key: "trading", 
-                //     name: '交易设置', 
-                //     config: null, 
-                //     value: null,
-                //     outputPath: false,
-                //     type: ''
-                // }
+                'trading': { 
+                    key: "trading", 
+                    name: '交易设置', 
+                    config: tradingConfig, 
+                    value: kfTradingConfig,
+                    outputPath: KF_TARADING_CONFIG_PATH,
+                    type: 'json'
+                }
             }
                 
         }
-    },
-
-    mounted() {
-        const t = this;
-        t.setExtensionsConfig();
     },
 
     computed: {
@@ -129,7 +139,6 @@ export default {
         handleClickSettingType(typeKey, itemKey) {
             const t = this;
             t.activeSettingItem = `${typeKey}-${itemKey}`;
-            console.log(t.activeSettingItem)
             document.querySelector(`#setting-item-${t.activeSettingItem}`).scrollIntoView();
         },
 
@@ -138,64 +147,17 @@ export default {
             t.close();
         },
 
-        handleIuput(type, key, subKey, value) {
+        handleIuput(settingKey) {
             const t = this;
-            const settingData = t.settingConfig[type];
-            const outputType = settingData.type;
-
-            if(outputType === 'json') {
-                const outputData = settingData.value || {};
-                const outputPath = settingData.outputPath || '';
-                outputData[key][subKey] = value;
-                outputJson(outputPath, Object.freeze(outputData || {}))
-                .then(() => readJsonSync(outputPath))
-                .then(kfConfig => {
-                    t.$set(settingData, value, kfConfig)
-                }) 
-            }
-        },
-
-        getValue(setting, item, config) {
-            const t = this;
-            const valueData = t.settingConfig[setting.key].value
-            if(!valueData) return ''
-            else return (valueData[item.key] || {})[config.key] || ''
-        },
-
-        async setExtensionsConfig() {
-            const t = this;
-            const extensions = await getExtensionConfigs();
-            const extensionsResolve = extensions.filter(ext => (ext.type !== 'source'))
-            const extensionsConfig = [{}, ...extensionsResolve].reduce((a, b) => {
-                const config = b.config;
-                config.config.forEach(async item => {
-                    //针对不同插件参数需要的数据进行配置
-                    if(item.type === 'select' && item.data === 'sources') {
-                        const sourceList = await t.getSourceList();
-                        item.data = sourceList
-                    }
-                })
-                a[config.key] = config
-                return a
+            const settingData = t.settingConfig[settingKey].value;
+            const outputPath = t.settingConfig[settingKey].outputPath;
+            t.$nextTick()
+            .then(() => outputJson(outputPath, settingData || {}))
+            .then(() => readJsonSync(outputPath))
+            .then(config => {
+                if(!config) return;
+                t.$set(t.settingConfig[settingKey], 'value', config)
             })
-
-            t.settingConfig.trading.config = extensionsConfig
-            const tradingConfig = t.settingConfig.trading;
-            tradingConfig.config = extensionsConfig;
-            t.$set(t.settingConfig, 'trading', tradingConfig)
-        },
-
-        async getSourceList() {
-            const t = this;
-            const accountList = await t.$store.dispatch('getAccountList');
-            const sourceList = accountList
-                .filter(a => !!a.receive_md)
-                .map(s => ({
-                    value: s.source_name,
-                    name: s.source_name
-                }))
-            return sourceList;
-
         },
 
         close() {

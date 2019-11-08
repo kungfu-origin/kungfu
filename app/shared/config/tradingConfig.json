@@ -1,0 +1,35 @@
+{
+    "BAR": {
+        "key": "BAR",
+        "name": "BAR",
+        "config": [
+          {
+            "key": "open",
+            "name": "是否开启",
+            "tip": "开启Bar功能会单独开启计算Bar数据进程，选择是否开启",
+            "type": "bool"
+          },
+          {
+            "key": "source",
+            "name": "支持柜台",
+            "tip": "填写期望支持订阅Bar功能的柜台名称，如：xtp（仅小写，且仅支持单个柜台名称）",
+            "type": "str"
+          },
+          {
+            "key": "time_interval",
+            "name": "周期",
+            "tip": "Bar的周期",
+            "type": "select",
+            "data": [
+              {"value": "30s", "name": "30s"},
+              {"value": "1m", "name": "1min"},
+              {"value": "3m", "name": "3min"},
+              {"value": "5m", "name": "5min"},
+              {"value": "10m", "name": "10min"},
+              {"value": "15m", "name": "15min"}
+            ]
+          }
+        ]
+    }
+}
+  

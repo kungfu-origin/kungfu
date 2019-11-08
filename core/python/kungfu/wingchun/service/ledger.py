@@ -251,7 +251,7 @@ def cancel_order(ctx, event, location, data):
         order_record = ctx.orders[order_id]
         dest = order_record["dest"]
         source = order_record["source"]
-        ctx.logger.info('cancel account order dest: %s, source: %s, order: %s', order_record["dest"], order_record["source"], order_record['order'])
+        ctx.logger.info('cancel account order dest: %s, source: %s, order: %s', order_record["dest"], order_record["source"], order_record['data'])
         try:
             ctx.ledger.cancel_order(event, source, order_id)
             return {'status': http.HTTPStatus.OK,'msg_type': msg.CancelOrder}
@@ -272,12 +272,12 @@ def cancel_all_order(ctx, event, location, data):
     for order_id in ctx.orders:
         order_record = ctx.orders[order_id]
         if order_record['source'] == location.uid:
-            ctx.logger.info('cancel account order %s', order_record['order'])
+            ctx.logger.info('cancel account order %s', order_record['data'])
             ctx.ledger.cancel_order(event, location.uid, order_id)
         if order_record['dest'] == location.uid:
             source = order_record["source"]
             if ctx.ledger.has_location(source):
-                ctx.logger.info('cancel strategy order %s', order_record['order'])
+                ctx.logger.info('cancel strategy order %s', order_record['data'])
                 ctx.ledger.cancel_order(event, source, order_id)
             else:
                 ctx.logger.warn("failed to find location {}".format(source))

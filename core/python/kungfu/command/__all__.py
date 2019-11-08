@@ -9,6 +9,7 @@ from . import strategy
 from . import ledger
 from . import msg
 from . import algo
+from . import bar
 from kungfu.command.account import __all__
 from kungfu.command.journal import __all__
 from kungfu.command.ext import __all__

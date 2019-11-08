@@ -208,6 +208,17 @@ namespace kungfu
                       update_broker_state(event->gen_time(), broker_location, static_cast<BrokerState>(event->data<int32_t>()));
                   });
 
+                events_ | is(msg::type::Position) | filter([&](event_ptr event) {
+                    auto source = event->source();
+                    return this->has_location(source) && this->get_location(source)->category == category::TD;
+                }) |
+                $([&](event_ptr event)
+                {
+                    const auto& position = event->data<msg::data::Position>();
+                    auto insts = convert_to_instruments(std::vector<msg::data::Position>({position}));
+                    request_subscribe(event->source(), insts);
+                });
+
                 /**
                  * process trade events
                  */
@@ -408,7 +419,7 @@ namespace kungfu
                 }
             }
 
-            void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &&instruments)
+            void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &instruments)
             {
                 if (!has_location(account_location_id))
                 {
