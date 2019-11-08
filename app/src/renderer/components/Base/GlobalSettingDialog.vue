@@ -101,14 +101,14 @@ export default {
                     outputPath: KF_CONFIG_PATH,
                     type: 'json'
                 },
-                'trading': { 
-                    key: "trading", 
-                    name: '交易设置', 
-                    config: null, 
-                    value: null,
-                    outputPath: false,
-                    type: ''
-                }
+                // 'trading': { 
+                //     key: "trading", 
+                //     name: '交易设置', 
+                //     config: null, 
+                //     value: null,
+                //     outputPath: false,
+                //     type: ''
+                // }
             }
                 
         }
