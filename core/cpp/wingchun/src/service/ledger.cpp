@@ -177,7 +177,7 @@ namespace kungfu
                 insts.subscribe(
                         [&](std::vector<Instrument> res)
                         {
-                            this->instruments_ = res;
+                            if (! this->is_live()) { return;}
                             this->on_instruments(res);
                             this->monitor_instruments();
                         });
