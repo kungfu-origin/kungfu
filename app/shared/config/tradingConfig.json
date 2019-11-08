@@ -7,7 +7,10 @@
             "key": "open",
             "name": "是否开启",
             "tip": "开启Bar功能会单独开启计算Bar数据进程，选择是否开启",
-            "type": "bool"
+            "type": "process",
+            "target": "bar",
+            "start": "startBar",
+            "args": ["source", "time_interval"]
           },
           {
             "key": "source",

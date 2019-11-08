@@ -48,8 +48,9 @@
                                 <!-- <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="kfSystemConfig[item.key]" show-password></el-input> -->
                                 <el-switch 
                                 :class="item.key" 
-                                v-if="config.type === 'bool'" 
-                                v-model="settingConfig[setting.key].value[item.key][config.key]"
+                                v-if="config.type === 'process'" 
+                                :value="processStatus[config.target] === 'online'"
+                                @change="e => handleSwitchProcess(e, config, settingConfig[setting.key].value[item.key])"
                                 ></el-switch>
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
@@ -79,13 +80,14 @@
 
 <script>
 import Vue from 'vue'
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
 import { readJsonSync, outputJson } from '__gUtils/fileUtils';
 import { KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 import tradingConfig from '__gConfig/tradingConfig.json';
+import * as processUtils from '__gUtils/processUtils';
 
 const kfSystemConfig = require(`${__resources}/config/kfConfig.json`) || {}
 const kfTradingConfig = require(`${__resources}/config/kfTradingConfig.json`) || {}
@@ -132,6 +134,10 @@ export default {
     computed: {
         ...mapGetters({
             sourceList: 'getSourceList'
+        }),
+        
+        ...mapState({
+            processStatus: state => state.BASE.processStatus || {}
         })
     },
 
@@ -158,6 +164,23 @@ export default {
                 if(!config) return;
                 t.$set(t.settingConfig[settingKey], 'value', config)
             })
+        },
+
+        handleSwitchProcess(value, config, settingData) {
+            const t = this;
+            
+            //开启
+            if(value) {
+                const startFn = processUtils[config.start];
+                if (!(startFn instanceof Function)) return 
+                const args = config.args;
+                const params = args.map(arg => {
+                    return settingData[arg]
+                })
+                startFn(config.target, ...params)
+            } else {
+                processUtils.deleteProcess(config.target)
+            }
         },
 
         close() {

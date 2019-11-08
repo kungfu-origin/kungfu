@@ -7,7 +7,7 @@
   "private": true,
   "workspaces": ["core", "app"],
   "scripts": {
-    "postinstall": "yarn wsrun --serial install-deps",
+    "postinstall": "yarn wsrun --serial install-deps && npm config set kungfu-core:runtime electron",
     "build": "yarn wsrun --serial --fast-exit build",
     "clean": "yarn wsrun clean"
   },

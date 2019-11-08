@@ -268,6 +268,13 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     }).catch(err => logger.error(err))
 }
 
+export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
+    return startProcess({
+        "name": targetName,
+        "args": `bar -s ${source} --time-interval ${timeInterval}`
+    })
+}
+
 //列出所有进程
 export const listProcessStatus = () => {
     return pm2List().then((pList: any[]): StringToStringObject => {
