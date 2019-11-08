@@ -4,7 +4,6 @@ import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scr
 import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
-const colors = require('colors');
 
 const WIDTH_LEFT_PANEL = 68;
 
