@@ -95,8 +95,6 @@ import tradingConfig from '__gConfig/tradingConfig.json';
 import * as processUtils from '__gUtils/processUtils';
 
 const path = require('path');
-const kfSystemConfig = require(`${__resources}/config/kfConfig.json`) || {}
-const kfTradingConfig = require(`${__resources}/config/kfTradingConfig.json`) || {}
 
 Vue.use(Collapse)
 Vue.use(CollapseItem)
@@ -112,6 +110,8 @@ export default {
 
     data() {
         const t = this;
+        const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {}
+        const kfTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {}
         return {
             activeSettingTypes: ['system', 'trading'],
             activeSettingItem: '',

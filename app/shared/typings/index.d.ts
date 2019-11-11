@@ -4,7 +4,14 @@ declare module NodeJS {
     interface Global {
         __resources: string
     }
+     
+    interface Process {
+        resourcesPath: string
+    }
+
 }
+
+
 
 declare module "*.json" {
     const value: any;
