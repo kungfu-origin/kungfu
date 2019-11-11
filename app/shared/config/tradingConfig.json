@@ -16,13 +16,13 @@
           {
             "key": "source",
             "name": "支持柜台",
-            "tip": "选择支持订阅Bar功能的柜台名称",
+            "tip": "选择支持订阅Bar功能的柜台名称，不能为空",
             "type": "sources"
           },
           {
             "key": "time_interval",
-            "name": "周期",
-            "tip": "Bar的周期",
+            "name": "频率",
+            "tip": "选择Bar的频率，不能为空",
             "type": "select",
             "data": [
               {"value": "30s", "name": "30s"},
