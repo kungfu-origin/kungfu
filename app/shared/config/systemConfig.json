@@ -14,7 +14,7 @@
                     { "value": "-l info", "name": "INFO" },
                     { "value": "-l warning", "name": "WARN" },
                     { "value":"-l error", "name": "ERROR" },
-                    { "value":"-l fatal", "name": "FATAL" }
+                    { "value":"-l critical", "name": "CRITICAL" }
                 ]
             }
         ]
