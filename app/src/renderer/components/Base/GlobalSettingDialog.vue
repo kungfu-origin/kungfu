@@ -72,6 +72,22 @@
                                         :value="option.value">
                                     </el-option>
                                 </el-select>
+
+                                <el-select 
+                                :class="config.key" 
+                                v-if="config.type === 'sources'" 
+                                :multiple="config.multiple" collapse-tags  
+                                v-model="settingConfig[setting.key].value[item.key][config.key]" 
+                                @change="handleIuput(setting.key)" size="small">
+                                    <el-option
+                                        v-for="option in sourceList"
+                                        :key="option.value"
+                                        :label="option.name"
+                                        :value="option.value">
+                                    </el-option>
+                                </el-select>
+
+                                
                             </div>
                         </div>
                     </li>
@@ -89,7 +105,7 @@ import { mapGetters, mapState } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
 import { readJsonSync, outputJson } from '__gUtils/fileUtils';
 import { LOG_DIR, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
-import { getExtensionConfigs } from '__gUtils/busiUtils';
+import { getExtensionConfigs, getExtensions } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 import tradingConfig from '__gConfig/tradingConfig.json';
 import * as processUtils from '__gUtils/processUtils';
@@ -132,16 +148,19 @@ export default {
                     outputPath: KF_TARADING_CONFIG_PATH,
                     type: 'json'
                 }
-            }
+            },
+
+            sourceList: [],
                 
         }
     },
 
+    beforeMount() {
+        const t = this;
+        t.getSourceListOptions();
+    },
+
     computed: {
-        ...mapGetters({
-            sourceList: 'getSourceList'
-        }),
-        
         ...mapState({
             processStatus: state => state.BASE.processStatus || {}
         })
@@ -193,6 +212,19 @@ export default {
         handleOpenLogFile(config){
             const logPath = path.join(LOG_DIR, `${config.log_path}.log`);
             this.$showLog(logPath)
+        },
+
+        getSourceListOptions() {
+            const t = this;
+            getExtensionConfigs()
+            .then((extList) => {
+                return extList
+                    .filter(e => e.type === 'source')
+                    .map(e => ((e.config || {}).name || ''))
+                    .filter(e => !!e)
+                    .map(e => ({ name: e, value: e }))
+            })
+            .then(extOptions => t.sourceList = extOptions)
         },
 
         close() {
