@@ -12,7 +12,7 @@
                     { "value": "-l trace", "name": "TRACE" },
                     { "value": "-l debug", "name": "DEBUG" },
                     { "value": "-l info", "name": "INFO" },
-                    { "value": "-l warn", "name": "WARN" },
+                    { "value": "-l warning", "name": "WARN" },
                     { "value":"-l error", "name": "ERROR" },
                     { "value":"-l fatal", "name": "FATAL" }
                 ]
