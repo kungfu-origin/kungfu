@@ -76,14 +76,18 @@ namespace kungfu
                           for (const auto& inst: instruments)
                           {
                               auto symbol_id = get_symbol_id(inst.get_instrument_id(), inst.get_exchange_id());
-                              if(subscribed_insts_.find(symbol_id) ==  subscribed_insts_.end())
+                              if(bars_.find(symbol_id) ==  bars_.end())
                               {
                                   write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
                                   auto now_in_nano = now();
                                   auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
                                   SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
-                                  request_subscribe(start_time, start_time + time_interval_, inst);
-                                  subscribed_insts_.insert(symbol_id);
+                                  Bar bar = {};
+                                  strncpy(bar.instrument_id, inst.instrument_id, INSTRUMENT_ID_LEN);
+                                  strncpy(bar.exchange_id, inst.exchange_id, EXCHANGE_ID_LEN);
+                                  bar.start_time = start_time;
+                                  bar.end_time = start_time + time_interval_;
+                                  bars_[symbol_id] = bar;
                               }
                           }
                       });
@@ -92,66 +96,22 @@ namespace kungfu
                     for (const auto& inst: instruments)
                     {
                         auto symbol_id = get_symbol_id(inst.get_instrument_id(), inst.get_exchange_id());
-                        if(subscribed_insts_.find(symbol_id) ==  subscribed_insts_.end())
+                        if(bars_.find(symbol_id) ==  bars_.end())
                         {
                             write_subscribe_msg(get_writer(source_location_->uid), 0, inst.get_exchange_id(), inst.get_instrument_id());
                             auto now_in_nano = now();
                             auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
                             SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
-                            request_subscribe(start_time, start_time + time_interval_, inst);
-                            subscribed_insts_.insert(symbol_id);
+                            Bar bar = {};
+                            strncpy(bar.instrument_id, inst.instrument_id, INSTRUMENT_ID_LEN);
+                            strncpy(bar.exchange_id, inst.exchange_id, EXCHANGE_ID_LEN);
+                            bar.start_time = start_time;
+                            bar.end_time = start_time + time_interval_;
+                            bars_[symbol_id] = bar;
                         }
                     }
                 }
                 return true;
-            }
-
-            void BarGenerator::request_subscribe(int64_t start_time, int64_t end_time, const Instrument& instrument)
-            {
-                if (not is_live())
-                {
-                    return;
-                }
-                auto quotes = events_ | from(source_location_->uid) | is(msg::type::Quote) | filter([instrument](event_ptr event)
-                        {
-                            const auto& quote = event->data<Quote>();
-                            bool res = strcmp(quote.instrument_id, instrument.instrument_id) == 0 && strcmp(quote.exchange_id, instrument.exchange_id) == 0;
-                            return res;
-                        }) | skip_while([start_time](event_ptr event) { return event->data<Quote>().data_time < start_time; })
-                                | take_while([end_time](event_ptr event)
-                                        {
-                                            return event->data<Quote>().data_time < end_time;
-                                        });
-
-                auto bar = quotes.reduce(Bar(), [](Bar res, event_ptr event)
-                {
-                    const auto& quote = event->data<Quote>();
-                    if(res.tick_count == 0)
-                    {
-                        res.high = quote.last_price;
-                        res.low = quote.last_price;
-                        res.open = quote.last_price;
-                        res.close = quote.last_price;
-                        res.start_volume = quote.volume;
-                    }
-                    res.tick_count ++;
-                    res.volume = quote.volume - res.start_volume;
-                    res.high = std::max(res.high, quote.last_price);
-                    res.low = std::min(res.low, quote.last_price);
-                    res.close = quote.last_price;
-                    return res;
-                }).subscribe(
-                        [&, start_time, end_time, instrument](Bar res)
-                            {
-                                res.start_time = start_time;
-                                res.end_time = end_time;
-                                strcpy(res.instrument_id, instrument.instrument_id);
-                                strcpy(res.exchange_id, instrument.exchange_id);
-                                SPDLOG_INFO("{}.{} [o:{},c:{},h:{},l:{}] from {} to {}",res.instrument_id, res.exchange_id,
-                                        res.open, res.close, res.high, res.low, time::strftime(res.start_time), time::strftime(res.end_time));
-                                this->get_writer(0)->write(0, msg::type::Bar, res);
-                                request_subscribe(end_time, end_time + time_interval_, instrument);
-                            });
             }
 
             void BarGenerator::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
@@ -173,45 +133,105 @@ namespace kungfu
             {
                 apprentice::on_start();
 
+                events_ | is(msg::type::Quote) |
+                $([&](event_ptr event)
+                {
+                    const auto& quote = event->data<Quote>();
+                    auto symbol_id = get_symbol_id(quote.get_instrument_id(), quote.get_exchange_id());
+                    if (bars_.find(symbol_id) != bars_.end())
+                    {
+                        SPDLOG_TRACE("{}.{} at {} vol {} price {}", quote.instrument_id, quote.exchange_id, time::strftime(quote.data_time), quote.volume, quote.last_price);
+                        auto& bar = bars_[symbol_id];
+                        if (quote.data_time >= bar.start_time && quote.data_time <= bar.end_time)
+                        {
+                            if(bar.tick_count == 0)
+                            {
+                                bar.high = quote.last_price;
+                                bar.low = quote.last_price;
+                                bar.open = quote.last_price;
+                                bar.close = quote.last_price;
+                                bar.start_volume = quote.volume;
+                            }
+                            bar.tick_count ++;
+                            bar.volume = quote.volume - bar.start_volume;
+                            bar.high = std::max(bar.high, quote.last_price);
+                            bar.low = std::min(bar.low, quote.last_price);
+                            bar.close = quote.last_price;
+                        }
+                        if (quote.data_time >= bar.end_time)
+                        {
+                            this->get_writer(0)->write(0, msg::type::Bar, bar);
+                            SPDLOG_INFO("{}.{} [o:{},c:{},h:{},l:{}] from {} to {}",bar.instrument_id, bar.exchange_id,
+                                    bar.open, bar.close, bar.high, bar.low, time::strftime(bar.start_time), time::strftime(bar.end_time));
+                            bar.start_time = bar.end_time;
+                            while(bar.start_time < quote.data_time)
+                            {
+                                bar.start_time += time_interval_;
+                            }
+                            bar.end_time = bar.start_time + time_interval_;
+                            if (bar.start_time == quote.data_time)
+                            {
+                                bar.tick_count = 1;
+                                bar.start_volume = quote.volume;
+                                bar.volume = 0;
+                                bar.high = quote.last_price;
+                                bar.low = quote.last_price;
+                                bar.open = quote.last_price;
+                                bar.close = quote.last_price;
+                            }
+                            else
+                            {
+                                bar.tick_count = 0;
+                                bar.start_volume = bar.start_volume + bar.volume;
+                                bar.volume = 0;
+                                bar.high = 0;
+                                bar.low = 0;
+                                bar.open = 0;
+                                bar.close = 0;
+                            }
+                        }
+                    }
+                });
+
                 events_ | is(msg::type::Subscribe) |
                 $([&](event_ptr event)
-                  {
-                      SPDLOG_INFO("subscribe request");
-                      std::vector<Instrument> symbols;
-                      const char *buffer = &(event->data<char>());
-                      hffix::message_reader reader(buffer, buffer + event->data_length());
-                      for (; reader.is_complete(); reader = reader.next_message_reader())
-                      {
-                          if (reader.is_valid())
-                          {
-                              auto group_mdentry_begin = std::find_if(reader.begin(), reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
-                              hffix::message_reader::const_iterator group_mdentry_end;
-                              for (; group_mdentry_begin != reader.end(); group_mdentry_begin = group_mdentry_end)
-                              {
-                                  group_mdentry_end = std::find_if(group_mdentry_begin + 1, reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+                {
+                    SPDLOG_INFO("subscribe request");
+                    std::vector<Instrument> symbols;
+                    const char *buffer = &(event->data<char>());
+                    hffix::message_reader reader(buffer, buffer + event->data_length());
+                    for (; reader.is_complete(); reader = reader.next_message_reader())
+                    {
+                        if (reader.is_valid())
+                        {
+                            auto group_mdentry_begin = std::find_if(reader.begin(), reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
+                            hffix::message_reader::const_iterator group_mdentry_end;
+                            for (; group_mdentry_begin != reader.end(); group_mdentry_begin = group_mdentry_end)
+                            {
+                                group_mdentry_end = std::find_if(group_mdentry_begin + 1, reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
 
-                                  auto group_instrument_begin = std::find_if(group_mdentry_begin, group_mdentry_end,
+                                auto group_instrument_begin = std::find_if(group_mdentry_begin, group_mdentry_end,
                                                                              hffix::tag_equal(hffix::tag::Symbol));
-                                  hffix::message_reader::const_iterator group_instrument_end;
+                                hffix::message_reader::const_iterator group_instrument_end;
 
-                                  for (; group_instrument_begin != group_mdentry_end; group_instrument_begin = group_instrument_end)
-                                  {
-                                      group_instrument_end = std::find_if(group_instrument_begin + 1, group_mdentry_end,
+                                for (; group_instrument_begin != group_mdentry_end; group_instrument_begin = group_instrument_end)
+                                {
+                                    group_instrument_end = std::find_if(group_instrument_begin + 1, group_mdentry_end,
                                                                           hffix::tag_equal(hffix::tag::Symbol));
-                                      hffix::message_reader::const_iterator symbol = group_instrument_begin;
-                                      hffix::message_reader::const_iterator exchange = group_instrument_begin;
-                                      reader.find_with_hint(hffix::tag::SecurityExchange, exchange);
+                                    hffix::message_reader::const_iterator symbol = group_instrument_begin;
+                                    hffix::message_reader::const_iterator exchange = group_instrument_begin;
+                                    reader.find_with_hint(hffix::tag::SecurityExchange, exchange);
 
-                                      Instrument instrument{};
-                                      strcpy(instrument.instrument_id, symbol->value().as_string().c_str());
-                                      strcpy(instrument.exchange_id, exchange->value().as_string().c_str());
-                                      symbols.push_back(instrument);
-                                  }
-                              }
-                          }
-                      }
-                      subscribe(symbols);
-                  });
+                                    Instrument instrument{};
+                                    strcpy(instrument.instrument_id, symbol->value().as_string().c_str());
+                                    strcpy(instrument.exchange_id, exchange->value().as_string().c_str());
+                                    symbols.push_back(instrument);
+                                }
+                            }
+                        }
+                    }
+                    subscribe(symbols);
+                });
             }
 
         }
