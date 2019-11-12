@@ -2,6 +2,7 @@
     <div id="app">
         <router-view></router-view>
         <GlobalSettingDialog
+            v-if="globalSettingDialogVisiblity"
             :visible.sync="globalSettingDialogVisiblity"
         >
         </GlobalSettingDialog>
