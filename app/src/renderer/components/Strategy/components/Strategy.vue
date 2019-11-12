@@ -76,6 +76,7 @@
     v-if="setStrategyDialogVisiblity"
     :visible.sync="setStrategyDialogVisiblity" 
     :close-on-click-modal="false"
+    :close-on-press-escape="true"
     @close="handleClearAddStrategyDialog"
     @keyup.enter.native="handleConfirmAddEditorStrategy"
     >

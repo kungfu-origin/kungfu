@@ -103,7 +103,7 @@
     .tr-main{
         background: $bg;
         height: 100%;
-        padding: 0px 8px 0 8px;
+        padding: 8px 8px 0 8px;
         overflow-x: hidden;
         >div{
             width: 100%;
@@ -111,7 +111,6 @@
         }
     }
     .pop-main{
-        // padding: 0px 8px 8px 8px;
         padding: 0px 0px 0px 0px;
         height: 100%;
         .top{

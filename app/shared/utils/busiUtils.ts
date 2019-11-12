@@ -500,7 +500,6 @@ export const getExtensionPaths = (): Promise<any> => {
     })
 }
 
-
 export const getExtensionConfigs = async (): Promise<any> => {
     try {
         const packageJSONPaths: string[] = await getExtensionPaths()

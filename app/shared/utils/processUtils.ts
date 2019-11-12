@@ -168,7 +168,7 @@ export const describeProcess = (name: string): Promise<any> => {
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const logLevel: string = kfConfig.log || '';
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
     options = {
         ...options,
         "args": [logLevel, options.args].join(' '),
@@ -266,6 +266,13 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
         "name": strategyId,
         "args": `strategy -n ${strategyId} -p ${strategyPath}`,
     }).catch(err => logger.error(err))
+}
+
+export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
+    return startProcess({
+        "name": targetName,
+        "args": `bar -s ${source} --time-interval ${timeInterval}`
+    })
 }
 
 //列出所有进程

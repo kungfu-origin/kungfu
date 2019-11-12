@@ -71,6 +71,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.logger.info("pre start")
         self.wc_context = wc_context
         self.book_context = wc_context.book_context
+        self.algo_context = wc_context.algo_context
         self.ctx.now = wc_context.now
         self.ctx.add_timer = self.__add_timer
         self.ctx.add_time_interval = self.__add_time_interval
@@ -82,6 +83,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
+        self.ctx.insert_algo_order = self.algo_context.add_order
         self.__init__book()
 
         self._pre_start(self.ctx)

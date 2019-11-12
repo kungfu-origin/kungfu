@@ -121,6 +121,11 @@ namespace kungfu
                 memcpy(const_cast<void*>(frame->data_address()), reinterpret_cast<void*>(data), length);
                 close_frame(length);
             }
+            template<>
+            void writer::write(int64_t trigger_time, int32_t msg_type, const std::string &data)
+            {
+                write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
+            }
 
             void writer::close_page(int64_t trigger_time)
             {

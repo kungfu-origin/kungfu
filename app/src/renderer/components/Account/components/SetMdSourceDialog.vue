@@ -5,6 +5,7 @@
     :title="`切换${currentMdSourceAccount.source_name}行情源`"  
     :visible="visible" 
     :close-on-click-modal="false"
+    :close-on-press-escape="true"
     @close="handleClose"
     @keyup.enter.native="handleSubmitSetting"
     >

@@ -38,6 +38,8 @@ namespace kungfu
                     AssetSnapshot = 207,
                     PositionDetail = 208,
                     Instrument = 209,
+                    AlgoOrderInput = 210,
+                    AlgoOrderStatus = 211,
 
                     Subscribe = 302,
                     NewOrderSingle = 353,

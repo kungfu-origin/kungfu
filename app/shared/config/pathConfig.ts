@@ -109,16 +109,16 @@ export const getKfEnginePath = () => {
 
 //@ts-ignore
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
-    //@ts-ignore
     ? process.resourcesPath
     : path.join(__dirname, '..', '..', '..', 'core', 'build')
 
 const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
-    //@ts-ignore
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
 
 export const KF_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
+
+export const KF_TARADING_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
 
 export const DEFUALT_DB_DIR = path.join(KUNGFU_RESOURCES_DIR, 'default')
 

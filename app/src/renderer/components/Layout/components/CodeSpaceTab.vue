@@ -1,7 +1,7 @@
 <template>
     <div class="code-space-tab">
         <span class="code-space-tab-name" @click="handleClick">
-            {{[codeSpaceTab.type, codeSpaceTab.size].join(': ')}}
+            {{[code.tabSpaceType, code.tabSpaceSize].join(': ')}}
         </span>
         <tr-setting-dashboard
             v-if="spaceTabSettingVisiblity"
@@ -28,7 +28,7 @@ export default {
     
     computed: {
         ...mapState({
-            codeSpaceTab: state => state.BASE.kfConfig.codeSpaceTab   
+            code: state => state.BASE.kfConfig.code   
         })
     },
 
@@ -36,7 +36,8 @@ export default {
         //点击选择缩进
         handleClick() {
             const t = this;
-            const type = t.codeSpaceTab.type.toLowerCase();
+            const type = t.code.tabSpaceType.toLowerCase();
+            t.$store.dispatch('getKungfuConfig')
             t.clearState()
             t.currentSettingInfoList = [
                  {
@@ -59,7 +60,7 @@ export default {
         //选择后下一步
         handleSelected(item) {
             const t = this;
-            const size = t.codeSpaceTab.size;
+            const size = t.code.tabSpaceSize;
             const type = item.key;
             t.codeSpaceSetting.push(item)
             t.currentSettingInfoList = [
@@ -81,9 +82,9 @@ export default {
                 const type = t.codeSpaceSetting[0].key;
                 const size = t.codeSpaceSetting[1].key;
                 t.$store.dispatch('setKungfuConfigByKeys', {
-                    codeSpaceTab: {
-                        type,
-                        size
+                    code: {
+                        tabSpaceType: type,
+                        tabSpaceSize: size
                     }
                 })
                 t.clearState()

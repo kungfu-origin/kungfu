@@ -39,7 +39,7 @@ export default {
         ...mapState({
             currentFile: state => state.STRATEGY.currentFile,
             fileTree: state => state.STRATEGY.fileTree,
-            codeSpaceTab: state => state.BASE.kfConfig.codeSpaceTab
+            code: state => state.BASE.kfConfig.code
         })
     },
 
@@ -58,7 +58,7 @@ export default {
             t.editor = t.buildEditor(t.editor, t.file, codeText);
 
             await t.$nextTick();
-            t.updateSpaceTab(t.codeSpaceTab)
+            t.updateSpaceTab(t.code)
             t.bindBlur(t.editor, t.file)
         },
 
@@ -76,7 +76,7 @@ export default {
             }
         },
 
-        codeSpaceTab(spaceTabSetting) {
+        code(spaceTabSetting) {
             const t = this;
             t.updateSpaceTab(spaceTabSetting)
         }
@@ -151,8 +151,8 @@ export default {
 
         updateSpaceTab(spaceTabSetting) {
             const t = this;
-            const type = spaceTabSetting.type || 'Spaces';
-            const size = spaceTabSetting.size || 4;
+            const type = spaceTabSetting.tabSpaceType || 'spaces';
+            const size = spaceTabSetting.tabSpaceSize || 4;
             
             if(!t.editor) return;
             
@@ -160,14 +160,14 @@ export default {
             if(type.toLowerCase() === 'spaces') {
                 model.updateOptions({
                     insertSpaces: true,
-                    indentSize: t.codeSpaceTab.size,
-                    tabSize: t.codeSpaceTab.size,
+                    indentSize: t.code.tabSpaceSize,
+                    tabSize: t.code.tabSpaceSize,
                 })
             } else if (type.toLowerCase() === 'tabs') {
                 model.updateOptions({
                     insertSpaces: false,
-                    indentSize: t.codeSpaceTab.size,
-                    tabSize: t.codeSpaceTab.size,
+                    indentSize: t.code.tabSpaceSize,
+                    tabSize: t.code.tabSpaceSize,
                 })
             }
         }

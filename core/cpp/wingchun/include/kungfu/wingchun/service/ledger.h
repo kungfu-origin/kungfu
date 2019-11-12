@@ -74,8 +74,6 @@ namespace kungfu
 
                 std::unordered_map<uint32_t, msg::data::BrokerState> broker_states_;
 
-                std::vector<msg::data::Instrument> instruments_;
-
                 void monitor_instruments();
 
                 msg::data::BrokerState get_broker_state(uint32_t broker_location) const;
@@ -86,7 +84,7 @@ namespace kungfu
 
                 void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
 
-                void request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &&instruments);
+                void request_subscribe(uint32_t account_location_id, const std::vector<msg::data::Instrument> &instruments);
 
                 template <class T> std::vector<msg::data::Instrument> convert_to_instruments(const std::vector<T>& data)
                 {

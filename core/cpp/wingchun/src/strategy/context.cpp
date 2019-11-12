@@ -29,6 +29,7 @@ namespace kungfu
                 auto home = app.get_io_device()->get_home();
                 log::copy_log_settings(home, home->name);
                 book_context_ = std::make_shared<book::BookContext>(app, events);
+                algo_context_ = std::make_shared<algo::AlgoContext>(app, events);
             }
 
             void Context::react()
@@ -168,7 +169,8 @@ namespace kungfu
                 if (market_data_.find(source) == market_data_.end())
                 {
                     auto home = app_.get_io_device()->get_home();
-                    auto md_location = location::make(mode::LIVE, category::MD, source, source, home->locator);
+                    auto md_location = source == "bar" ? location::make(mode::LIVE, category::SYSTEM, "service", source, home->locator) :
+                            location::make(mode::LIVE, category::MD, source, source, home->locator);
                     if (not app_.has_location(md_location->uid))
                     {
                         throw wingchun_error(fmt::format("invalid md {}", source));
