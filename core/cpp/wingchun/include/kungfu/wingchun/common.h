@@ -73,7 +73,10 @@ namespace kungfu
         enum class Side: int8_t
         {
             Buy,
-            Sell
+            Sell,
+            Lock,
+            Unlock,
+            Exec
         };
 
         enum class Offset: int8_t
