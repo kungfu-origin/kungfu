@@ -174,7 +174,7 @@ export default {
             }).finally(() => {
                 t.startWatchingTail(processId, logPath, searchKeyword)
             })
-        }),
+        }, 100),
 
         getLogByTask(logPath, searchKeyword){
             const t = this;
