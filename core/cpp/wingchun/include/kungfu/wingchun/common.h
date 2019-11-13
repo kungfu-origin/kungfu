@@ -76,7 +76,8 @@ namespace kungfu
             Sell,
             Lock,
             Unlock,
-            Exec
+            Exec,
+            Drop
         };
 
         enum class Offset: int8_t

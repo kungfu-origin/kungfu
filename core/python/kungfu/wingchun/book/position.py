@@ -113,7 +113,7 @@ class StockPosition(Position):
         elif trade.side == Side.Sell:
             self._apply_sell(trade.price, trade.volume)
         else:
-            # ignore stock options lock/unlock/exec operations
+            # ignore stock options lock/unlock/exec/drop operations
             pass
         self.book.subject.on_next(self.event)
 

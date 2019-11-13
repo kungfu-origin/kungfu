@@ -253,6 +253,7 @@ PYBIND11_MODULE(pywingchun, m)
             .value("Lock", kungfu::wingchun::Side::Lock)
             .value("Unlock", kungfu::wingchun::Side::Unlock)
             .value("Exec", kungfu::wingchun::Side::Exec)
+            .value("Drop", kungfu::wingchun::Side::Drop)
             .export_values()
             .def("__eq__",
                 [](const kungfu::wingchun::Side &a, int b)
