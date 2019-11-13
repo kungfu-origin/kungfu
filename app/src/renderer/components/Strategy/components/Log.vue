@@ -99,7 +99,7 @@ export default {
             t.processId && t.init(t.processId, t.logPath, t.searchKeyword)
         }),
 
-        processId(val){
+        processId: debounce(function(val){
             const t = this;
             t.resetData();
             if(!val) return;
@@ -108,11 +108,11 @@ export default {
                 t.rendererTable = true;
                 t.init(t.processId, t.logPath)
             })
-        },
+        }, 100),
 
         ifScrollToBottom(val){
             const t = this;
-            if(t.ifScrollToBottom) t.scrollToBottom()
+            if(val) t.scrollToBottom()
         }
     },
 
