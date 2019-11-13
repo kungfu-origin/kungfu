@@ -25,6 +25,10 @@ namespace kungfu
 
                 virtual void insert_order(const yijinjing::event_ptr& e, const std::string& msg) = 0;
 
+                virtual void cancel_order(const yijinjing::event_ptr& e, const msg::data::OrderAction& action) = 0;
+
+                virtual void modify_order(const yijinjing::event_ptr& e, const std::string& msg) = 0;
+
                 void on_start() override ;
 
                 void add_order(const algo::AlgoOrder_ptr& order) { context_->add_order(order); }

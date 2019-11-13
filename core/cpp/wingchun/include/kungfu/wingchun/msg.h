@@ -39,7 +39,8 @@ namespace kungfu
                     PositionDetail = 208,
                     Instrument = 209,
                     AlgoOrderInput = 210,
-                    AlgoOrderStatus = 211,
+                    AlgoOrderReport = 211,
+                    AlgoOrderModify = 212,
 
                     Subscribe = 302,
                     NewOrderSingle = 353,

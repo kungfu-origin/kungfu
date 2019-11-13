@@ -40,6 +40,18 @@ namespace kungfu
                         insert_order(event, event->data_as_string());
                     });
 
+                    events_ | is(msg::type::OrderAction) |
+                    $([&](event_ptr event)
+                    {
+                        cancel_order(event, event->data<msg::data::OrderAction>());
+                    });
+
+                    events_ | is(msg::type::AlgoOrderModify) |
+                    $([&](event_ptr event)
+                    {
+                        modify_order(event, event->data_as_string());
+                    });
+
                     apprentice::on_start();
                 }
 

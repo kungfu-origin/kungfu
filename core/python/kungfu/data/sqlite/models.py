@@ -229,7 +229,8 @@ class AlgoOrder(Base):
     __tablename__ = "algo_order"
     order_id = Column(UINT64, primary_key=True)
     algo_type = Column(String)
-    source = Column(Integer)
+    sender_uid = Column(Integer)
     update_time = Column(Integer)
     params = Column(Json)
     status = Column(Json)
+    active = Column(Boolean)

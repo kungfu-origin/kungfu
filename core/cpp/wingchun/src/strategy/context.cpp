@@ -34,6 +34,8 @@ namespace kungfu
 
             void Context::react()
             {
+                algo_context_->react();
+
                 events_ | is(msg::type::Quote) |
                 $([&](event_ptr event)
                   {

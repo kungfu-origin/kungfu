@@ -296,9 +296,9 @@ PYBIND11_MODULE(pyyjj, m)
     py::class_<writer, writer_ptr>(m, "writer")
             .def("write_raw", &writer::write_raw)
             .def("write_str",
-                    [](const writer_ptr& w, uint64_t trigger_time, int32_t msg_type, const std::string &data)
+                    [](const writer_ptr& w, int64_t trigger_time, int32_t msg_type, const std::string &data)
                     {
-                        w->write<std::string>(trigger_time, msg_type, data);
+                        w->write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
                     })
             .def("current_frame_uid", &writer::current_frame_uid)
             .def("mark", &writer::mark)

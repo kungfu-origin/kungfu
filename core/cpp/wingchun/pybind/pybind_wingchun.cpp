@@ -97,22 +97,29 @@ class PyAlgoOrder: public algo::AlgoOrder
     void on_start(algo::AlgoContext_ptr context) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_start, context); }
 
+    void on_stop(algo::AlgoContext_ptr context) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_stop, context); }
+
     void on_child_order(algo::AlgoContext_ptr context, const Order& order) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_order, context, order); }
 
     void on_child_trade(algo::AlgoContext_ptr context, const Trade& trade) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_trade, context, trade); }
 
+    void on_order_report(algo::AlgoContext_ptr context, const std::string& report_msg) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_order_report, context, report_msg); }
 
 };
-
 
 class PyAlgoService: public service::Algo
 {
     using service::Algo::Algo;
     void insert_order(const event_ptr &event, const std::string& msg) override
     {PYBIND11_OVERLOAD_PURE(void, service::Algo, insert_order, event, msg) }
-
+    void cancel_order(const event_ptr &event, const OrderAction& action) override
+    {PYBIND11_OVERLOAD_PURE(void, service::Algo, cancel_order, event, action) }
+    void modify_order(const event_ptr &event, const std::string& msg) override
+    {PYBIND11_OVERLOAD_PURE(void, service::Algo, modify_order, event, msg) }
 };
 
 class PyLedger : public Ledger
@@ -775,7 +782,13 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<uint64_t>())
             .def_property_readonly("order_id", &algo::AlgoOrder::get_order_id)
             .def("dumps", &algo::AlgoOrder::dumps)
-            .def("on_quote", &algo::AlgoOrder::on_quote);
+            .def("on_start", &algo::AlgoOrder::on_start)
+            .def("on_stop", &algo::AlgoOrder::on_stop)
+            .def("on_quote", &algo::AlgoOrder::on_quote)
+            .def("on_child_order", &algo::AlgoOrder::on_child_order)
+            .def("on_child_trade", &algo::AlgoOrder::on_child_trade)
+            .def("on_order_report", &algo::AlgoOrder::on_order_report)
+            ;
 
     py::class_<algo::AlgoContext, std::shared_ptr<algo::AlgoContext>>(m, "AlgoContext")
             .def("insert_child_order", &algo::AlgoContext::insert_order)
@@ -787,9 +800,17 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("algo_context", &service::Algo::get_algo_context)
             .def_property_readonly("io_device", &service::Algo::get_io_device)
+            .def("now", &service::Algo::now)
+            .def("get_location", &service::Algo::get_location)
+            .def("get_writer", &service::Algo::get_writer)
+            .def("has_location", &service::Algo::has_location)
+            .def("has_writer", &service::Algo::has_writer)
             .def("run", &service::Algo::run)
             .def("add_order", &service::Algo::add_order)
-            .def("insert_order", &service::Algo::insert_order);
+            .def("insert_order", &service::Algo::insert_order)
+            .def("cancel_order", &service::Algo::cancel_order)
+            .def("modify_order", &service::Algo::modify_order)
+            ;
 
     py::class_<BarGenerator, kungfu::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
             .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())

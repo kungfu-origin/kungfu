@@ -29,13 +29,15 @@ namespace kungfu
 
                 virtual void on_start(AlgoContext_ptr context) {};
 
+                virtual void on_stop(AlgoContext_ptr context) {};
+
                 virtual void on_child_order(AlgoContext_ptr context, const msg::data::Order& order) {};
 
                 virtual void on_child_trade(AlgoContext_ptr context, const msg::data::Trade& trade) {};
 
                 virtual void on_quote(AlgoContext_ptr context, const msg::data::Quote& quote) {};
 
-                virtual void on_order_status(AlgoContext_ptr context, const std::string& status_msg) {};
+                virtual void on_order_report(AlgoContext_ptr context, const std::string& report_msg) {};
 
             private:
                 uint64_t order_id_;
