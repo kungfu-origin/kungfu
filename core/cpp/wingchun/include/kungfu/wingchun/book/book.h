@@ -29,6 +29,8 @@ namespace kungfu
 
                 virtual void on_asset(yijinjing::event_ptr event, const msg::data::Asset& asset) = 0;
 
+                virtual void on_trading_day(yijinjing::event_ptr event, int64_t daytime) = 0;
+
                 virtual ~Book() = default;
             };
 

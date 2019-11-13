@@ -73,6 +73,8 @@ class PyBook: public kwb::Book
 {
 public:
     using kwb::Book::Book;
+    void on_trading_day(event_ptr event, int64_t daytime) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
     void on_trade(event_ptr event, const Trade &trade) override
@@ -670,6 +672,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
             .def(py::init())
+            .def("on_trading_day", &kwb::Book::on_trading_day)
             .def("on_quote", &kwb::Book::on_quote)
             .def("on_trade", &kwb::Book::on_trade)
             .def("on_positions", &kwb::Book::on_positions)

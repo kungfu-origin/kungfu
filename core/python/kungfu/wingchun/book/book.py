@@ -13,6 +13,7 @@ import pywingchun
 from rx.subject import Subject
 import json
 import kungfu.msg.utils as msg_utils
+import kungfu.yijinjing.time as kft
 
 DATE_FORMAT = "%Y%m%d"
 DEFAULT_CASH = 1e7
@@ -75,6 +76,10 @@ class AccountBook(pywingchun.Book):
             self.trading_day = self.ctx.trading_day
         elif isinstance(self.trading_day, str):
             self.trading_day = datetime.datetime.strptime(self.trading_day, DATE_FORMAT)
+
+    def on_trading_day(self, event, daytime):
+        trading_day = kft.to_datetime(daytime)
+        self.apply_trading_day(trading_day)
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug("{} received trade event: {}".format(self.location.uname, trade))
@@ -192,6 +197,7 @@ class AccountBook(pywingchun.Book):
             self.ctx.logger.info("{} [{:08x}] apply trading day, switch from {} to {}".format(self.location.uname, self.location.uid, self.trading_day, trading_day))
             self.trading_day = trading_day
             self.static_equity = self.dynamic_equity
+            self.subject.on_next(self.event)
         else:
             self.ctx.logger.debug("{} [{:08x}] receive duplicate trading_day message {}".format(self.location.uname, self.location.uid, trading_day))
 

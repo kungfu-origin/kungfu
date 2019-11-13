@@ -104,11 +104,8 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)
         if self.ctx.trading_day is not None and self.ctx.trading_day != trading_day:
-            self._switch_day()
+            self.publish(json.dumps({'msg_type': msg.Calendar,'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
         self.ctx.trading_day = trading_day
-        for book in self.ctx.books.values():
-            book.apply_trading_day(trading_day)
-            self.ctx.db.dump_book(book)
 
     def on_quote(self, event, quote):
         pass
@@ -177,7 +174,6 @@ class Ledger(pywingchun.Ledger):
             self.ctx.db.set_instruments(dicts)
             self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in dicts}
 
-
     def _dump_snapshot(self, data_frequency="minute"):
         for book in self.ctx.books.values():
             event = book.event.as_dict()
@@ -186,12 +182,6 @@ class Ledger(pywingchun.Ledger):
             event["data"].update(tags)
             self.ctx.db.on_book_event(event)
             self.publish(json.dumps(event, cls = wc_utils.WCEncoder))
-
-    def _switch_day(self):
-        self.publish(json.dumps({
-            'msg_type': msg.Calendar,
-            'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
-        self._dump_snapshot(data_frequency="daily")
 
     def has_book(self, uid):
         return uid in self.ctx.books

@@ -220,6 +220,17 @@ namespace kungfu
                     }
                 });
 
+                events_ | is(yijinjing::msg::type::TradingDay) |
+                $([=](event_ptr event)
+                {
+                    try {
+                        book->on_trading_day(event, event->data<int64_t>());
+                    }
+                    catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }
+                });
 
                 auto home = app_.get_io_device()->get_home();
                 if (home->name != "ledger")
