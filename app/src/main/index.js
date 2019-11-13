@@ -1,5 +1,11 @@
+
 // Modules to control application life and create native browser window
 const path = require('path');
+
+if (process.env.NODE_ENV !== 'development') {
+    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
+}
+
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const electron = require('electron');
 //base setting, init db

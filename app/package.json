@@ -76,8 +76,7 @@
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
-          "default/*",
-          "config/*"
+          "default/*"
         ]
       }
     ],
