@@ -23,6 +23,7 @@ recordclass = "==0.12.0.1"
 dotted_dict = "==1.1.2"
 schema="==0.7.1"
 rx = "==3.0.1"
+
 [dev-packages]
 pytest = "*"
 mock ="*"
