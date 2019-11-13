@@ -98,8 +98,8 @@ class LedgerDB(SessionFactoryHolder):
 
     def get_location(self, ctx, uid):
         with session_scope(self.session_factory) as session:
-            info = session.query(Location).get(uid)
-            location = make_location_from_dict(info)
+            info = session.query(Location).get(uid).info
+            location = make_location_from_dict(ctx, info)
             return location
 
     def add_location(self, location):
