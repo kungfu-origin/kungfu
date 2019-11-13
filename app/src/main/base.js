@@ -1,7 +1,16 @@
 import initGlobalDB from '__gConfig/initGlobalDB.json'
-import { BASE_DB_DIR, DEFUALT_DB_DIR } from '__gConfig/pathConfig';
+import { BASE_DB_DIR, DEFUALT_DB_DIR, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
-import { existsSync, addFile } from '__gUtils/fileUtils';
+import { existsSync, addFile, readJsonSync, outputJson } from '__gUtils/fileUtils';
+
+// export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
+
+// export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
+
+// export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
+
+// export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
+
 
 const path = require('path')
 const fse = require('fs-extra');
@@ -44,4 +53,19 @@ export const initDB = () => {
     .catch(err => {
         if(err) logger.error(err);
     })
+}
+
+
+export const initConfig = () => {
+    if(!existsSync(KF_CONFIG_PATH)) {
+        addFile('', KF_CONFIG_PATH, 'file')
+        const kfConfigJSON = readJsonSync(KF_CONFIG_DEFAULT_PATH);
+        outputJson(KF_CONFIG_PATH, kfConfigJSON)
+    }
+
+    if(!existsSync(KF_TARADING_CONFIG_PATH)) {
+        addFile('', KF_TARADING_CONFIG_PATH, 'file')
+        const kfTradingConfigJSON = readJsonSync(KF_TARADING_CONFIG_DEFAULT_PATH);
+        outputJson(KF_TARADING_CONFIG_PATH, kfTradingConfigJSON)
+    }
 }

@@ -3,7 +3,7 @@ const path = require('path');
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const electron = require('electron');
 //base setting, init db
-const { initDB } = require('./base');
+const { initDB, initConfig } = require('./base');
 const { killGodDaemon,  killExtra, killKfc, killKungfu } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
@@ -12,8 +12,9 @@ const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
 
 
 //create db
-initDB()
-setMenu()
+initDB();
+initConfig();
+setMenu();
 
 
 // Keep a global reference of the window object, if you don't, the window will
