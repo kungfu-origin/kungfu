@@ -110,8 +110,11 @@ class StockPosition(Position):
     def apply_trade(self, trade):
         if trade.side == Side.Buy:
             self._apply_buy(trade.price, trade.volume)
-        else:
+        elif trade.side == Side.Sell:
             self._apply_sell(trade.price, trade.volume)
+        else:
+            # ignore stock options lock/unlock/exec operations
+            pass
         self.book.subject.on_next(self.event)
 
     def apply_quote(self, quote):
