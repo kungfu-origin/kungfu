@@ -205,13 +205,14 @@ export default {
         //开始监听日志尾部
         startWatchingTail(processId, logPath, searchKeyword){
             const t = this;
+            t.clearTailWatcher();
             let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
                     const len = t.tableData.length
                     if(len > 1000) t.tableData = t.tableData.slice(len - 1000, len)
                 }, 60000);
-                
+            
             t.tailObserver = new Tail(logPath, {
                 flushAtEOF: true,
                 useWatchFile: true,
@@ -220,7 +221,7 @@ export default {
             t.tailObserver.watch();  
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
-                if(curProcId !== processId) return;
+                if(curProcId !== t.processId) return;
                 const logData = dealLogMessage(line, t.searchKeyword);
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
