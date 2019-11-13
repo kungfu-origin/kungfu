@@ -26,7 +26,6 @@ a = Analysis(['kungfu/__main__.py'],
         ('../deps/hffix-b67d404f/include', 'include'),
         ('../deps/SQLiteCpp-2.3.0/include', 'include'),
         ('../deps/pybind11-2.2.4', 'pybind11'),
-        ("kungfu/_version.py", "."),
         (os.path.join(tushare.__path__[0], 'VERSION.txt'), 'tushare'),
         (os.path.join(plotly.__path__[0], 'package_data'), 'plotly/package_data')
      ],
