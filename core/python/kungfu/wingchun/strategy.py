@@ -62,12 +62,12 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
 
-    def __init__book(self):
+    def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
         self.ctx.book = AccountBook(self.ctx, location)
         self.book_context.add_book(location, self.ctx.book)
 
-    def __init__algo(self):
+    def __init_algo(self):
         class AlgoOrderContext:
             def __init__(self, wc_ctx):
                 self._wc_ctx = wc_ctx
@@ -106,8 +106,8 @@ class Strategy(pywingchun.Strategy):
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
-        self.__init__book()
-        self.__init__algo()
+        self.__init_book()
+        self.__init_algo()
         self._pre_start(self.ctx)
         self.ctx.log.info('strategy prepare to run')
 
