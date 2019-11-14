@@ -275,6 +275,19 @@ PYBIND11_MODULE(pywingchun, m)
                 }
             );
 
+    py::enum_<kungfu::wingchun::HedgeFlag>(m_constants, "HedgeFlag", py::arithmetic())
+            .value("Speculation", kungfu::wingchun::HedgeFlag::Speculation)
+            .value("Arbitrage", kungfu::wingchun::HedgeFlag::Arbitrage)
+            .value("Hedge", kungfu::wingchun::HedgeFlag::Hedge)
+            .value("Covered", kungfu::wingchun::HedgeFlag::Covered)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::HedgeFlag &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
+
     py::enum_<kungfu::wingchun::BsFlag>(m_constants, "BsFlag", py::arithmetic())
             .value("Unknown", kungfu::wingchun::BsFlag::Unknown)
             .value("Buy", kungfu::wingchun::BsFlag::Buy)
@@ -495,6 +508,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("volume", &OrderInput::volume)
             .def_readwrite("side", &OrderInput::side)
             .def_readwrite("offset", &OrderInput::offset)
+            .def_readwrite("hedge_flag", &OrderInput::hedge_flag)
             .def_readwrite("price_type", &OrderInput::price_type)
             .def_readwrite("volume_condition", &OrderInput::volume_condition)
             .def_readwrite("time_condition", &OrderInput::time_condition)
@@ -525,6 +539,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("error_id", &Order::error_id)
             .def_readwrite("side", &Order::side)
             .def_readwrite("offset", &Order::offset)
+            .def_readwrite("hedge_flag", &Order::hedge_flag)
             .def_readwrite("price_type", &Order::price_type)
             .def_readwrite("volume_condition", &Order::volume_condition)
             .def_readwrite("time_condition", &Order::time_condition)
@@ -563,6 +578,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("side", &Trade::side)
             .def_readwrite("offset", &Trade::offset)
             .def_readwrite("price", &Trade::price)
+            .def_readwrite("hedge_flag", &Trade::hedge_flag)
             .def_readwrite("volume", &Trade::volume)
             .def_readwrite("tax", &Trade::tax)
             .def_readwrite("commission", &Trade::commission)

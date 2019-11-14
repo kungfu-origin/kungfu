@@ -211,7 +211,7 @@ namespace kungfu
             }
 
             uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                                 double limit_price, int64_t volume, PriceType type, Side side, Offset offset)
+                                                 double limit_price, int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag)
             {
                 auto inst_type = get_instrument_type(symbol, exchange);
                 if (inst_type == InstrumentType::Unknown || inst_type == InstrumentType::Repo)

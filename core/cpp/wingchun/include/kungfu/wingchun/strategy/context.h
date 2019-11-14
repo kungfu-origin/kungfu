@@ -64,7 +64,8 @@ namespace kungfu
                 //@param offset        开平方向
                 //@return              订单ID
                 virtual uint64_t insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                              double limit_price, int64_t volume, PriceType type, Side side, Offset offset = Offset::Open);
+                                              double limit_price, int64_t volume, PriceType type, Side side, Offset offset = Offset::Open,
+                                              HedgeFlag hedge_flag = HedgeFlag::Speculation);
 
                 //撤单
                 //@param order_id      订单ID

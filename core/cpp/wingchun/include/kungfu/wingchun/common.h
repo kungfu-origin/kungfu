@@ -88,6 +88,14 @@ namespace kungfu
             CloseYesterday
         };
 
+        enum class HedgeFlag: int8_t
+        {
+            Speculation,
+            Arbitrage,
+            Hedge,
+            Covered
+        };
+
         enum class OrderActionFlag: int8_t
         {
             Cancel,

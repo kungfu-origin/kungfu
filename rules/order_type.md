@@ -16,5 +16,5 @@
 | Fok |Limit|IOC|All|
 | Fak |Limit|IOC|Any|
 
-order_id = context.insert_order(ticker, exchange, account, price, volume, type , side, offset = Offset.Open)
+order_id = context.insert_order(ticker, exchange, account, price, volume, type , side, offset = Offset.Open, hedge_flag = HedgeFlag.Speculation)
 
