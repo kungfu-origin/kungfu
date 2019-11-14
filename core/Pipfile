@@ -1,5 +1,5 @@
 [[source]]
-url = "https://mirrors.ustc.edu.cn/pypi/web/simple"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
 verify_ssl = true
 name = "pypi"
 

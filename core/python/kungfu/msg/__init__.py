@@ -39,7 +39,10 @@ class Registry:
         return None
 
 def monkey_patch():
-    import pyyjj
+    try:
+        import pyyjj
+    except:
+        return
     def get_data(event):
         cls = Registry.get_cls(event.msg_type)
         if cls is None:
