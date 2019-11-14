@@ -45,6 +45,8 @@ namespace kungfu
 
                 void add_book(const yijinjing::data::location_ptr& location, const Book_ptr& book);
 
+                void pop_book(uint32_t location_uid);
+
                 void monitor_instruments();
 
                 const msg::data::Instrument& get_inst_info(const std::string& instrument_id) const;

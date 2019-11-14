@@ -693,6 +693,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<kwb::BookContext, std::shared_ptr<kwb::BookContext>>(m, "BookContext")
             .def("add_book", &kwb::BookContext::add_book)
+            .def("pop_book", &kwb::BookContext::pop_book)
             .def("get_inst_info", &kwb::BookContext::get_inst_info)
             ;
 

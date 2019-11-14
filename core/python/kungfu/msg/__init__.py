@@ -41,7 +41,7 @@ class Registry:
 def monkey_patch():
     try:
         import pyyjj
-    except:
+    except ImportError as err:
         return
     def get_data(event):
         cls = Registry.get_cls(event.msg_type)

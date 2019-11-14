@@ -64,13 +64,6 @@ def freeze(ctx):
         sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait())
 
 
-@build.command()
-@click.pass_context
-def package(ctx):
-    os.chdir("python")
-    sys.exit(subprocess.Popen(["python", "setup.py", "bdist_wheel"]).wait())
-
-
 def find(tool):
     tool_path = tool
     if platform.system() == 'Windows':

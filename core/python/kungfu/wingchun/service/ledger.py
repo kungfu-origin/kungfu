@@ -187,6 +187,7 @@ class Ledger(pywingchun.Ledger):
         return uid in self.ctx.books
 
     def pop_book(self, uid):
+        #self.book_context.pop_book(uid)
         return self.ctx.books.pop(uid, None)
 
     def _get_book(self, location):

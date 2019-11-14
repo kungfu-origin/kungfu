@@ -126,6 +126,11 @@ namespace kungfu
                                     });
             }
 
+            void BookContext::pop_book(uint32_t location_uid)
+            {
+                books_.erase(location_uid);
+            }
+
             void BookContext::add_book(const yijinjing::data::location_ptr& location, const Book_ptr& book)
             {
                 if(books_.find(location->uid) != books_.end())
@@ -167,16 +172,16 @@ namespace kungfu
 
                 events_ | is(msg::type::Quote) |
                 $([=](event_ptr event)
-                  {
-                      try
-                      {
-                          book->on_quote(event, event->data<msg::data::Quote>());
-                      }
-                      catch (const std::exception &e)
-                      {
-                          SPDLOG_ERROR("Unexpected exception {}", e.what());
-                      }
-                  });
+                {
+                    try
+                    {
+                        book->on_quote(event, event->data<msg::data::Quote>());
+                    }
+                    catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }
+                });
 
                 events_ | is(msg::type::Trade) | filter([=](yijinjing::event_ptr e)
                 {
@@ -193,16 +198,16 @@ namespace kungfu
                     }
                 }) |
                 $([=](event_ptr event)
-                  {
-                      try
-                      {
-                          book->on_trade(event, event->data<Trade>());
-                      }
-                      catch (const std::exception &e)
-                      {
-                          SPDLOG_ERROR("Unexpected exception {}", e.what());
-                      }
-                  });
+                {
+                    try
+                    {
+                        book->on_trade(event, event->data<Trade>());
+                    }
+                    catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }
+                });
 
                 events_ | is(msg::type::Asset) | filter([=](yijinjing::event_ptr e)
                 {
