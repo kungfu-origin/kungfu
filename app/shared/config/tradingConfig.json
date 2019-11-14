@@ -27,7 +27,9 @@
             "data": [
               {"value": "30s", "name": "30s"},
               {"value": "1m", "name": "1min"},
+              {"value": "2m", "name": "2min"},
               {"value": "3m", "name": "3min"},
+              {"value": "4m", "name": "4min"},
               {"value": "5m", "name": "5min"},
               {"value": "10m", "name": "10min"},
               {"value": "15m", "name": "15min"}
