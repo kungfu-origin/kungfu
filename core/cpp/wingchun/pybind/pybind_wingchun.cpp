@@ -781,7 +781,8 @@ PYBIND11_MODULE(pywingchun, m)
             .def("list_accounts", &strategy::Context::list_accounts)
             .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
             .def("subscribe", &strategy::Context::subscribe)
-            .def("insert_order", &strategy::Context::insert_order)
+            .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),py::arg("limit_price"),
+                    py::arg("volume"), py::arg("type"), py::arg("side"),py::arg("offset") =Offset::Open, py::arg("hedge_flag")= HedgeFlag::Speculation)
             .def("cancel_order", &strategy::Context::cancel_order)
             ;
 

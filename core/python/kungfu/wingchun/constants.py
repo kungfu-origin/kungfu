@@ -54,4 +54,5 @@ ENUM_TYPES = [InstrumentType,
               VolumeCondition,
               TimeCondition,
               OrderActionFlag,
-              LedgerCategory]
+              LedgerCategory,
+              HedgeFlag]
