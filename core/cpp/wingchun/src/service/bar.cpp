@@ -164,12 +164,12 @@ namespace kungfu
                             SPDLOG_INFO("{}.{} [o:{},c:{},h:{},l:{}] from {} to {}",bar.instrument_id, bar.exchange_id,
                                     bar.open, bar.close, bar.high, bar.low, time::strftime(bar.start_time), time::strftime(bar.end_time));
                             bar.start_time = bar.end_time;
-                            while(bar.start_time < quote.data_time)
+                            while(bar.start_time + time_interval_ < quote.data_time)
                             {
                                 bar.start_time += time_interval_;
                             }
                             bar.end_time = bar.start_time + time_interval_;
-                            if (bar.start_time == quote.data_time)
+                            if (bar.start_time <= quote.data_time)
                             {
                                 bar.tick_count = 1;
                                 bar.start_volume = quote.volume;
@@ -182,7 +182,7 @@ namespace kungfu
                             else
                             {
                                 bar.tick_count = 0;
-                                bar.start_volume = bar.start_volume + bar.volume;
+                                bar.start_volume = 0;
                                 bar.volume = 0;
                                 bar.high = 0;
                                 bar.low = 0;
