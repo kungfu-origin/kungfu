@@ -73,8 +73,11 @@
         ]
       },
       {
-        "from": "../core/python/dist/kungfu-2.0.dev*-py3-none-any.whl",
-        "to": "kungfu-resources/tools"
+        "from": "../core/python/dist",
+        "to": "kungfu-resources/python",
+        "filter": [
+          "kungfu-2.0.dev*-py3-none-any.whl"
+        ]
       },
       {
         "from": "./resources",
