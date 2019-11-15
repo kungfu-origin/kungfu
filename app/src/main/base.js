@@ -55,5 +55,4 @@ export const initConfig = () => {
         const kfTradingConfigJSON = readJsonSync(KF_TARADING_CONFIG_DEFAULT_PATH);
         outputJson(KF_TARADING_CONFIG_PATH, kfTradingConfigJSON)
     }
-    
 }

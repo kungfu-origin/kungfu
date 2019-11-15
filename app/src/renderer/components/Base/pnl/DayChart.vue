@@ -2,7 +2,7 @@
 <template>
     <div class="day-chart">
         <div class="day-current pnl-statis">
-            <div>累计收益率：<span :class="{'text-overflow': true, 'color-green': accumulatedPnlRatio < 0, 'color-red': accumulatedPnlRatio > 0}" :title="accumulatedPnlRatio + '%'">{{accumulatedPnlRatio + '%'}}</span> </div>
+            <!-- <div>累计收益率：<span :class="{'text-overflow': true, 'color-green': accumulatedPnlRatio < 0, 'color-red': accumulatedPnlRatio > 0}" :title="accumulatedPnlRatio + '%'">{{accumulatedPnlRatio + '%'}}</span> </div> -->
             <div>累计收益：<span :class="{'text-overflow': true, 'color-green': accumulatedPnl < 0, 'color-red': accumulatedPnl > 0}" :title="accumulatedPnl">{{accumulatedPnl}}</span></div>
         </div>
         <tr-no-data v-if="dayPnlData.length == 0" />
@@ -83,18 +83,18 @@ export default {
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
         }),
 
-        accumulatedPnlRatio(){
-            const t = this;
-            if(!t.dayPnlData.length) return '--'
-            const len =  t.dayPnlData.length;
-            return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1], t.dayPnlData[0])
-        },
+        // accumulatedPnlRatio(){
+        //     const t = this;
+        //     if(!t.dayPnlData.length) return '--'
+        //     const len =  t.dayPnlData.length;
+        //     return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1], t.dayPnlData[0])
+        // },
 
         accumulatedPnl(){
             const t = this;
             if(!t.dayPnlData.length) return '--'
             const len =  t.dayPnlData.length;
-            return t.calcuAccumlatedPnl(t.dayPnlData[len - 1], t.dayPnlData[0])
+            return t.calcuAccumlatedPnl(t.dayPnlData[len - 1])
         }
     },
 
@@ -148,7 +148,7 @@ export default {
                     t.dayGroupKey[tradingDay] = item
                     xAxisData.push(tradingDay)
                     const fistCashData = serirsData[0] || null
-                    serirsData.push(t.calcuAccumlatedPnl(item, fistCashData))
+                    serirsData.push(t.calcuAccumlatedPnl(item))
                 })
                 t.dayData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
                 t.dayPnlData = Object.freeze(data || [])
@@ -171,7 +171,7 @@ export default {
             if(timeLength && t.dayData[0][timeLength - 1] === tradingDay) {
                 let tmpDayData1 = t.dayData[1].slice();
                 tmpDayData1.pop()
-                tmpDayData1.push(t.calcuAccumlatedPnl(data, tmpDayData1[0]))
+                tmpDayData1.push(t.calcuAccumlatedPnl(data))
                 t.dayData[1] = Object.freeze(tmpDayData1);
 
                 let tmpDayPnlData = t.dayPnlData.slice();
@@ -182,7 +182,7 @@ export default {
                 let tmpDayData0 = t.dayData[0].slice();
                 tmpDayData0.push(tradingDay);       
                 let tmpDayData1 = t.dayData[1].slice()
-                tmpDayData1.push(t.calcuAccumlatedPnl(data, tmpDayData1[0]))
+                tmpDayData1.push(t.calcuAccumlatedPnl(data))
                 t.dayData = [Object.freeze(tmpDayData0), Object.freeze(tmpDayData1)]
 
                 let tmpDayPnlData = t.dayPnlData.slice();
@@ -191,15 +191,17 @@ export default {
             }
         },
 
-        calcuAccumlatedPnl(pnlData, firstPnlData) {
-            if(!firstPnlData) firstPnlData = {}
-            return toDecimal((pnlData.dynamic_equity || 0) - (firstPnlData.static_equity || 0), 2)
+        calcuAccumlatedPnl(pnlData) {
+            return toDecimal((pnlData.unrealized_pnl || 0) + (pnlData.realized_pnl || 0), 2)
         },
 
-        calcuAccumlatedPnlRatio(pnlData, firstPnlData) {
-            if(!firstPnlData) firstPnlData = {}
-            return toDecimal(((pnlData.dynamic_equity || 0) - (firstPnlData.static_equity || 0)) / firstPnlData.static_equity, 4, 2)
-        },
+        // calcuAccumlatedPnlRatio(pnlData, firstPnlData) {
+        //     firstPnlData = firstPnlData || {}
+        //     const latestPnl = +toDecimal((pnlData.unrealized_pnl || 0) + (pnlData.realized_pnl || 0), 2)
+        //     const firstPnl = +toDecimal((firstPnlData.unrealized_pnl || 0) + (firstPnlData.realized_pnl || 0), 2)
+        //     console.log(firstPnlData.initial_equity , '---')
+        //     return (latestPnl - firstPnl ) / firstPnl
+        // },
 
         dealNanomsg(nanomsg) {
             const t = this

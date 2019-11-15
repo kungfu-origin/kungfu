@@ -2,7 +2,7 @@
 <template>
     <div class="min-chart">
         <div class="min-current pnl-statis">
-            <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div>
+            <!-- <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div> -->
             <div>日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
         </div>
         <tr-no-data v-if="minPnlData.length == 0 && rendererPnl"/>
@@ -76,12 +76,12 @@ export default {
             return t.calcuIntradayPnl(t.minPnlData[t.minPnlData.length - 1])
         },
 
-        intradayPnlRatio(){
-            const t = this;
-            if(!t.minPnlData.length) return '--'
-            const firstEquityDaily = toDecimal(t.minPnlData[0].static_equity, 2)
-            return toDecimal(t.intradayPnl / firstEquityDaily , 4, 2)
-        },
+        // intradayPnlRatio(){
+        //     const t = this;
+        //     if(!t.minPnlData.length) return '--'
+        //     const firstEquityDaily = toDecimal(t.minPnlData[0].static_equity, 2)
+        //     return toDecimal(t.intradayPnl / firstEquityDaily , 4, 2)
+        // },
     },
 
     
@@ -179,7 +179,7 @@ export default {
         },
 
         calcuIntradayPnl(pnlData) {
-            return toDecimal(pnlData.dynamic_equity - pnlData.static_equity)
+            return toDecimal(pnlData.unrealized_pnl + pnlData.realized_pnl)
         },
 
         updateChart() {

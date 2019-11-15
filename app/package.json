@@ -73,6 +73,10 @@
         ]
       },
       {
+        "from": "../core/python/dist/kungfu-2.0.dev*-py3-none-any.whl",
+        "to": "kfc",
+      },
+      {
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
