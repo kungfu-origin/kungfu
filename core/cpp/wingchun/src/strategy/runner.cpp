@@ -55,16 +55,16 @@ namespace kungfu
                     strategy->pre_start(context_);
                 }
 
-                events_ | is(msg::type::Quote) |
+                events_ | is(msg::type::Quote) | filter([=](event_ptr event) { return context_->is_subscribed(event->data<Quote>());}) |
                 $([&](event_ptr event)
-                  {
-                      for (const auto &strategy : strategies_)
-                      {
-                          strategy->on_quote(context_, event->data<Quote>());
-                      }
-                  });
+                {
+                    for (const auto &strategy : strategies_)
+                    {
+                        strategy->on_quote(context_, event->data<Quote>());
+                    }
+                });
 
-                events_ | is(msg::type::Bar) |
+                events_ | is(msg::type::Bar) | filter([=](event_ptr event) { return context_->is_subscribed(event->data<Bar>());}) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -91,7 +91,7 @@ namespace kungfu
                       }
                   });
 
-                events_ | is(msg::type::Entrust) |
+                events_ | is(msg::type::Entrust) | filter([=](event_ptr event) { return context_->is_subscribed(event->data<Entrust>());}) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)
@@ -100,7 +100,7 @@ namespace kungfu
                       }
                   });
 
-                events_ | is(msg::type::Transaction) |
+                events_ | is(msg::type::Transaction) | filter([=](event_ptr event) { return context_->is_subscribed(event->data<Transaction>());}) |
                 $([&](event_ptr event)
                   {
                       for (const auto &strategy : strategies_)

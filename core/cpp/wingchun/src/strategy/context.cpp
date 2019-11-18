@@ -24,7 +24,7 @@ namespace kungfu
         namespace strategy
         {
             Context::Context(practice::apprentice &app, const rx::connectable_observable<yijinjing::event_ptr> &events) :
-                app_(app), events_(events)
+                app_(app), events_(events), subscribe_all_(false)
             {
                 auto home = app.get_io_device()->get_home();
                 log::copy_log_settings(home, home->name);
@@ -166,13 +166,13 @@ namespace kungfu
                 }
             }
 
-            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
+            uint32_t Context::add_marketdata(const std::string &source)
             {
                 if (market_data_.find(source) == market_data_.end())
                 {
                     auto home = app_.get_io_device()->get_home();
                     auto md_location = source == "bar" ? location::make(mode::LIVE, category::SYSTEM, "service", source, home->locator) :
-                            location::make(mode::LIVE, category::MD, source, source, home->locator);
+                                       location::make(mode::LIVE, category::MD, source, source, home->locator);
                     if (not app_.has_location(md_location->uid))
                     {
                         throw wingchun_error(fmt::format("invalid md {}", source));
@@ -182,7 +182,43 @@ namespace kungfu
                     market_data_[source] = md_location->uid;
                     SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);
                 }
-                uint32_t md_source = market_data_[source];
+                return market_data_[source];
+            }
+
+            void Context::subscribe_all(const std::string &source)
+            {
+                subscribe_all_ = true;
+                auto md_source = add_marketdata(source);
+                SPDLOG_INFO("strategy subscribe all from {} [{:08x}]", source, md_source);
+                if (not app_.has_writer(md_source))
+                {
+                    events_ | is(yijinjing::msg::type::RequestWriteTo) |
+                    filter([=](yijinjing::event_ptr e)
+                           {
+                               const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
+                               return data.dest_id == md_source;
+                           }) | first() |
+                    $([=](event_ptr e)
+                      {
+                            auto writer = app_.get_writer(md_source);
+                            writer->mark(0, msg::type::SubscribeAll);
+                      });
+                } else
+                {
+                    auto writer = app_.get_writer(md_source);
+                    writer->mark(0, msg::type::SubscribeAll);
+                }
+            }
+
+            void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
+            {
+                for (const auto& symbol: symbols)
+                {
+                    auto symbol_id = get_symbol_id(symbol, exchange);
+                    subscribed_symbols_[symbol_id] = symbol_id;
+                }
+
+                auto md_source = add_marketdata(source);
                 SPDLOG_INFO("strategy subscribe from {} [{:08x}]", source, md_source);
                 if (not app_.has_writer(md_source))
                 {

@@ -67,13 +67,6 @@ namespace kungfu
                 std::vector<std::string> sze_tickers;
                 for (const auto &inst: instruments)
                 {
-                    if (strncmp(inst.instrument_id, "*", 1) == 0)
-                    {
-                        res = api_->SubscribeAllMarketData();
-                        res = res && api_->SubscribeAllTickByTick();
-                        SPDLOG_INFO("subscribe all");
-                        return res;
-                    }
                     std::string ticker = inst.instrument_id;
                     if (strcmp(inst.exchange_id, EXCHANGE_SSE) == 0)
                     {
@@ -122,6 +115,13 @@ namespace kungfu
                     SPDLOG_ERROR("failed to subscribe tick by tick");
                 }
                 return level2_rtn == 0 && rtn == 0;
+            }
+
+            bool MarketDataXTP::subscribe_all()
+            {
+                auto res = api_->SubscribeAllMarketData() && api_->SubscribeAllTickByTick();
+                SPDLOG_INFO("subscribe all");
+                return res;
             }
 
             void MarketDataXTP::OnDisconnected(int reason)

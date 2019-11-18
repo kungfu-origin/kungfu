@@ -99,6 +99,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.add_timer = self.__add_timer
         self.ctx.add_time_interval = self.__add_time_interval
         self.ctx.subscribe = wc_context.subscribe
+        self.ctx.subscribe_all = wc_context.subscribe_all
         self.ctx.add_account = self.__add_account
         self.ctx.list_accounts = wc_context.list_accounts
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
