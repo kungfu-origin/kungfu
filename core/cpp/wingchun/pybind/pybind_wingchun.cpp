@@ -699,6 +699,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
             .def(py::init())
+            .def_property_readonly("ready", &kwb::Book::is_ready)
             .def("on_trading_day", &kwb::Book::on_trading_day)
             .def("on_quote", &kwb::Book::on_quote)
             .def("on_trade", &kwb::Book::on_trade)
