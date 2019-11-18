@@ -14,6 +14,7 @@ def ledger(ctx, low_latency, replay, session_id):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency if not replay else True
     ctx.replay = replay
+    ctx.category = pyyjj.category.SYSTEM
     ctx.mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
     ctx.session_id = session_id
     ledger_instance = Ledger(ctx)
