@@ -275,15 +275,23 @@ namespace kungfu
             {
                 uint32_t account_location_id = (order_id >> 32) ^ app_.get_home_uid();
                 SPDLOG_INFO("{:08x} cancel order {:016x} with account location {:08x}", app_.get_home_uid(), order_id, account_location_id);
-                auto writer = app_.get_writer(account_location_id);
-                msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
+                if (app_.has_writer(account_location_id))
+                {
+                    auto writer = app_.get_writer(account_location_id);
+                    msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(0, msg::type::OrderAction);
 
-                action.order_action_id = writer->current_frame_uid();
-                action.order_id = order_id;
-                action.action_flag = OrderActionFlag::Cancel;
+                    action.order_action_id = writer->current_frame_uid();
+                    action.order_id = order_id;
+                    action.action_flag = OrderActionFlag::Cancel;
 
-                writer->close_data();
-                return action.order_action_id;
+                    writer->close_data();
+                    return action.order_action_id;
+                }
+                else
+                {
+                    SPDLOG_ERROR("has no writer for {}", account_location_id);
+                    return 0;
+                }
             }
 
             uint32_t Context::lookup_account_location_id(const std::string &account)
