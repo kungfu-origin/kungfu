@@ -19,6 +19,8 @@ namespace kungfu
             class Book
             {
             public:
+                Book(): ready_(false) {}
+
                 virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
 
                 virtual void on_trade(yijinjing::event_ptr event, const msg::data::Trade &trade) = 0;

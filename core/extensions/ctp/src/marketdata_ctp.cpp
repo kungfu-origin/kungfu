@@ -62,8 +62,7 @@ namespace kungfu
 
             bool MarketDataCTP::subscribe_all()
             {
-                char* insts[] = {};
-                return api_->SubscribeMarketData(insts, 0);
+                return false;
             }
 
             bool MarketDataCTP::unsubscribe(const std::vector<msg::data::Instrument> &instruments)
