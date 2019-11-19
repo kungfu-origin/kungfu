@@ -11,9 +11,10 @@ yarn run install
 yarn run install-deps
 yarn run build:cli
 
+cd ../
 sudo npm config set kungfu-core:runtime electron
 sudo yarn install
-cd ../core
+cd .core
 yarn run build
 cd ../app
 yarn run build
