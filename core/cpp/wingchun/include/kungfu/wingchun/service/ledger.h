@@ -74,7 +74,7 @@ namespace kungfu
 
                 std::unordered_map<uint32_t, msg::data::BrokerState> broker_states_;
 
-                void monitor_instruments();
+                void monitor_instruments(uint32_t broker_location);
 
                 msg::data::BrokerState get_broker_state(uint32_t broker_location) const;
 
