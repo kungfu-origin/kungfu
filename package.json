@@ -5,11 +5,11 @@
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": ["core", "app"],
+  "workspaces": ["core", "cli", "app"],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "npm run clean && yarn wsrun --serial --fast-exit build",
-    "build:cli": "sh ./build.sh",
+    "build:cli": "sh ./build:cli.sh",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {

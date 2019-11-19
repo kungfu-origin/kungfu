@@ -9,7 +9,7 @@
     "buildtype": "Release",
     "loglevel": "trace",
     "arch": "x64",
-    "runtime": "node",
+    "runtime": "electron",
     "node": "10.16.0",
     "electron": "4.2.11"
   },
