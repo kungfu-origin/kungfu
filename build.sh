@@ -7,6 +7,8 @@ sudo yarn install
 cd ./core
 yarn run build
 cd ../cli
+yarn run install 
+yarn run install-deps
 yarn run build:cli
 
 sudo npm config set kungfu-core:runtime electron
