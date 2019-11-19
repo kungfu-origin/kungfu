@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 yarn workspace kungfu-core run clean
 yarn clean
-sudo npm config set kungfu-core:runtime node
-sudo yarn install
+npm config set kungfu-core:runtime node
+yarn install
 
 cd ./core
 yarn run build
@@ -12,8 +12,8 @@ yarn run install-deps
 yarn run build:cli
 
 cd ../
-sudo npm config set kungfu-core:runtime electron
-sudo yarn install
+npm config set kungfu-core:runtime electron
+yarn install
 cd .core
 yarn run build
 cd ../app
