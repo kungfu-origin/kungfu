@@ -5,6 +5,7 @@ import platform
 import click
 from kungfu.version import get_version
 
+
 @click.group(invoke_without_command=True)
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
@@ -43,11 +44,10 @@ def make(ctx):
 @build.command()
 @click.pass_context
 def freeze(ctx):
-    version_file = os.path.join(os.path.dirname(__file__), "kungfu", "_version.py")
-    with open(version_file, 'w') as f:
-        f.write("__version__ = \"{}\"\n".format(get_version()))
-
     os.environ['CMAKE_BUILD_TYPE'] = ctx.parent.build_type
+
+    with open(os.path.join(os.getcwd(), "build", ctx.parent.build_type, "version.info"), 'w') as version_file:
+        version_file.write(f"{get_version()}")
 
     osname = platform.system()
 
@@ -63,11 +63,6 @@ def freeze(ctx):
     if osname == 'Windows':
         sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait())
 
-@build.command()
-@click.pass_context
-def package(ctx):
-    os.chdir("python")
-    sys.exit(subprocess.Popen(["python", "setup.py", "bdist_wheel"]).wait())
 
 def find(tool):
     tool_path = tool

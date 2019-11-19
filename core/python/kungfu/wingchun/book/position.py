@@ -110,8 +110,11 @@ class StockPosition(Position):
     def apply_trade(self, trade):
         if trade.side == Side.Buy:
             self._apply_buy(trade.price, trade.volume)
-        else:
+        elif trade.side == Side.Sell:
             self._apply_sell(trade.price, trade.volume)
+        else:
+            # ignore stock options lock/unlock/exec/drop operations
+            pass
         self.book.subject.on_next(self.event)
 
     def apply_quote(self, quote):
@@ -136,6 +139,8 @@ class StockPosition(Position):
             self.book.subject.on_next(self.event)
 
     def _apply_sell(self, price, volume):
+        if self.yesterday_volume < volume:
+            raise Exception("{} current yesterday volume is {}, {} to sell".format(self.uname, self.yesterday_volume, volume))
         realized_pnl = self._calculate_realized_pnl(price, volume)
         self.yesterday_volume -= volume
         self.volume -= volume
@@ -245,6 +250,10 @@ class FuturePosition(Position):
             self.trading_day = trading_day
 
     def _apply_close(self, trade):
+        if self.volume < trade.volume:
+            raise Exception("{} over close position, current volume is {}, {} to close".format(self.uname, self.volume, trade.volume))
+        if trade.offset == Offset.CloseToday and self.volume - self.yesterday_volume < trade.volume:
+            raise Exception("{} over close today position, current volume is {}, {} to close".format(self.uname, self.volume - self.yesterday_volume, trade.volume))
         margin = self.contract_multiplier * trade.price * trade.volume * self.margin_ratio
         self.margin -= margin
         self.book.avail += margin

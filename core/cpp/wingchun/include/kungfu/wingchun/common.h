@@ -73,7 +73,11 @@ namespace kungfu
         enum class Side: int8_t
         {
             Buy,
-            Sell
+            Sell,
+            Lock,
+            Unlock,
+            Exec,
+            Drop
         };
 
         enum class Offset: int8_t
@@ -82,6 +86,14 @@ namespace kungfu
             Close,
             CloseToday,
             CloseYesterday
+        };
+
+        enum class HedgeFlag: int8_t
+        {
+            Speculation,
+            Arbitrage,
+            Hedge,
+            Covered
         };
 
         enum class OrderActionFlag: int8_t

@@ -26,8 +26,7 @@ namespace kungfu
             private:
                 location_ptr source_location_;
                 int64_t time_interval_;
-                void request_subscribe(int64_t start_time, int64_t end_time, const Instrument& instrument);
-                std::unordered_set<uint32_t> subscribed_insts_;
+                std::unordered_map<uint32_t, Bar> bars_;
             };
         }
     }

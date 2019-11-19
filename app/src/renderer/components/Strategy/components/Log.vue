@@ -99,7 +99,7 @@ export default {
             t.processId && t.init(t.processId, t.logPath, t.searchKeyword)
         }),
 
-        processId(val){
+        processId: debounce(function(val){
             const t = this;
             t.resetData();
             if(!val) return;
@@ -108,11 +108,11 @@ export default {
                 t.rendererTable = true;
                 t.init(t.processId, t.logPath)
             })
-        },
+        }, 100),
 
         ifScrollToBottom(val){
             const t = this;
-            if(t.ifScrollToBottom) t.scrollToBottom()
+            if(val) t.scrollToBottom()
         }
     },
 
@@ -174,7 +174,7 @@ export default {
             }).finally(() => {
                 t.startWatchingTail(processId, logPath, searchKeyword)
             })
-        }),
+        }, 100),
 
         getLogByTask(logPath, searchKeyword){
             const t = this;
@@ -205,13 +205,14 @@ export default {
         //开始监听日志尾部
         startWatchingTail(processId, logPath, searchKeyword){
             const t = this;
+            t.clearTailWatcher();
             let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
                     const len = t.tableData.length
                     if(len > 1000) t.tableData = t.tableData.slice(len - 1000, len)
                 }, 60000);
-                
+            
             t.tailObserver = new Tail(logPath, {
                 flushAtEOF: true,
                 useWatchFile: true,
@@ -220,7 +221,7 @@ export default {
             t.tailObserver.watch();  
             t.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
-                if(curProcId !== processId) return;
+                if(curProcId !== t.processId) return;
                 const logData = dealLogMessage(line, t.searchKeyword);
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;

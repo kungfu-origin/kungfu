@@ -82,7 +82,14 @@ class AlgoDB(SessionFactoryHolder):
         AlgoOrder.metadata.create_all(self.engine)
 
     def add_order(self, **kwargs):
-        pass
+        with session_scope(self.session_factory) as session:
+            order = AlgoOrder(**kwargs)
+            session.merge(order)
+
+    def all_active_orders(self):
+        with session_scope(self.session_factory) as session:
+            orders = session.query(AlgoOrder).filter(AlgoOrder.active == True).all()
+            return [ object_as_dict(order) for order in orders]
 
 class LedgerDB(SessionFactoryHolder):
     def __init__(self, location, filename):
@@ -91,8 +98,8 @@ class LedgerDB(SessionFactoryHolder):
 
     def get_location(self, ctx, uid):
         with session_scope(self.session_factory) as session:
-            info = session.query(Location).get(uid)
-            location = make_location_from_dict(info)
+            info = session.query(Location).get(uid).info
+            location = make_location_from_dict(ctx, info)
             return location
 
     def add_location(self, location):

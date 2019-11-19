@@ -373,9 +373,9 @@ namespace kungfu
                     strcpy(account.account_id, get_account_id().c_str());
                     from_ctp(*pTradingAccount, account);
                     account.update_time = kungfu::yijinjing::time::now_in_nano();
+                    account.holder_uid = get_io_device()->get_home()->uid;
                     writer->close_data();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
-//                    req_position_detail();
                     req_position();
                 }
             }
@@ -387,7 +387,7 @@ namespace kungfu
                 {
                     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
                 }
-                else
+                else if(pInvestorPosition != nullptr)
                 {
                     SPDLOG_TRACE(to_string(*pInvestorPosition));
                     auto& position_map = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? long_position_map_ : short_position_map_;

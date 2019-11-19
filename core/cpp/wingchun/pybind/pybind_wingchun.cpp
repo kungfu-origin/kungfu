@@ -45,6 +45,8 @@ public:
     using MarketData::MarketData;
     bool subscribe(const std::vector<Instrument> &instruments) override
     { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments); }
+    bool subscribe_all() override
+    { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe_all); }
     bool unsubscribe(const std::vector<Instrument> &instruments) override
     { PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe,instruments); }
     void on_start() override
@@ -73,6 +75,8 @@ class PyBook: public kwb::Book
 {
 public:
     using kwb::Book::Book;
+    void on_trading_day(event_ptr event, int64_t daytime) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
     void on_trade(event_ptr event, const Trade &trade) override
@@ -95,22 +99,29 @@ class PyAlgoOrder: public algo::AlgoOrder
     void on_start(algo::AlgoContext_ptr context) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_start, context); }
 
+    void on_stop(algo::AlgoContext_ptr context) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_stop, context); }
+
     void on_child_order(algo::AlgoContext_ptr context, const Order& order) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_order, context, order); }
 
     void on_child_trade(algo::AlgoContext_ptr context, const Trade& trade) override
     {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_trade, context, trade); }
 
+    void on_order_report(algo::AlgoContext_ptr context, const std::string& report_msg) override
+    {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_order_report, context, report_msg); }
 
 };
-
 
 class PyAlgoService: public service::Algo
 {
     using service::Algo::Algo;
     void insert_order(const event_ptr &event, const std::string& msg) override
     {PYBIND11_OVERLOAD_PURE(void, service::Algo, insert_order, event, msg) }
-
+    void cancel_order(const event_ptr &event, const OrderAction& action) override
+    {PYBIND11_OVERLOAD_PURE(void, service::Algo, cancel_order, event, action) }
+    void modify_order(const event_ptr &event, const std::string& msg) override
+    {PYBIND11_OVERLOAD_PURE(void, service::Algo, modify_order, event, msg) }
 };
 
 class PyLedger : public Ledger
@@ -241,6 +252,10 @@ PYBIND11_MODULE(pywingchun, m)
     py::enum_<kungfu::wingchun::Side>(m_constants, "Side", py::arithmetic())
             .value("Buy", kungfu::wingchun::Side::Buy)
             .value("Sell", kungfu::wingchun::Side::Sell)
+            .value("Lock", kungfu::wingchun::Side::Lock)
+            .value("Unlock", kungfu::wingchun::Side::Unlock)
+            .value("Exec", kungfu::wingchun::Side::Exec)
+            .value("Drop", kungfu::wingchun::Side::Drop)
             .export_values()
             .def("__eq__",
                 [](const kungfu::wingchun::Side &a, int b)
@@ -257,6 +272,19 @@ PYBIND11_MODULE(pywingchun, m)
             .export_values()
             .def("__eq__",
                 [](const kungfu::wingchun::Offset &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                }
+            );
+
+    py::enum_<kungfu::wingchun::HedgeFlag>(m_constants, "HedgeFlag", py::arithmetic())
+            .value("Speculation", kungfu::wingchun::HedgeFlag::Speculation)
+            .value("Arbitrage", kungfu::wingchun::HedgeFlag::Arbitrage)
+            .value("Hedge", kungfu::wingchun::HedgeFlag::Hedge)
+            .value("Covered", kungfu::wingchun::HedgeFlag::Covered)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::HedgeFlag &a, int b)
                 {
                     return static_cast<int>(a) == b;
                 }
@@ -482,6 +510,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("volume", &OrderInput::volume)
             .def_readwrite("side", &OrderInput::side)
             .def_readwrite("offset", &OrderInput::offset)
+            .def_readwrite("hedge_flag", &OrderInput::hedge_flag)
             .def_readwrite("price_type", &OrderInput::price_type)
             .def_readwrite("volume_condition", &OrderInput::volume_condition)
             .def_readwrite("time_condition", &OrderInput::time_condition)
@@ -512,6 +541,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("error_id", &Order::error_id)
             .def_readwrite("side", &Order::side)
             .def_readwrite("offset", &Order::offset)
+            .def_readwrite("hedge_flag", &Order::hedge_flag)
             .def_readwrite("price_type", &Order::price_type)
             .def_readwrite("volume_condition", &Order::volume_condition)
             .def_readwrite("time_condition", &Order::time_condition)
@@ -550,6 +580,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("side", &Trade::side)
             .def_readwrite("offset", &Trade::offset)
             .def_readwrite("price", &Trade::price)
+            .def_readwrite("hedge_flag", &Trade::hedge_flag)
             .def_readwrite("volume", &Trade::volume)
             .def_readwrite("tax", &Trade::tax)
             .def_readwrite("commission", &Trade::commission)
@@ -670,6 +701,8 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
             .def(py::init())
+            .def_property_readonly("ready", &kwb::Book::is_ready)
+            .def("on_trading_day", &kwb::Book::on_trading_day)
             .def("on_quote", &kwb::Book::on_quote)
             .def("on_trade", &kwb::Book::on_trade)
             .def("on_positions", &kwb::Book::on_positions)
@@ -679,6 +712,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<kwb::BookContext, std::shared_ptr<kwb::BookContext>>(m, "BookContext")
             .def("add_book", &kwb::BookContext::add_book)
+            .def("pop_book", &kwb::BookContext::pop_book)
             .def("get_inst_info", &kwb::BookContext::get_inst_info)
             ;
 
@@ -686,6 +720,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<bool, data::locator_ptr, const std::string&>())
             .def_property_readonly("io_device", &MarketData::get_io_device)
             .def("subscribe", &MarketData::subscribe)
+            .def("subscribe_all", &MarketData::subscribe_all)
             .def("unsubscribe", &MarketData::unsubscribe)
             .def("on_start", &MarketData::on_start)
             .def("add_time_interval", &MarketData::add_time_interval)
@@ -750,7 +785,9 @@ PYBIND11_MODULE(pywingchun, m)
             .def("list_accounts", &strategy::Context::list_accounts)
             .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
             .def("subscribe", &strategy::Context::subscribe)
-            .def("insert_order", &strategy::Context::insert_order)
+            .def("subscribe_all", &strategy::Context::subscribe_all)
+            .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),py::arg("limit_price"),
+                    py::arg("volume"), py::arg("type"), py::arg("side"),py::arg("offset") =Offset::Open, py::arg("hedge_flag")= HedgeFlag::Speculation)
             .def("cancel_order", &strategy::Context::cancel_order)
             ;
 
@@ -772,7 +809,13 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<uint64_t>())
             .def_property_readonly("order_id", &algo::AlgoOrder::get_order_id)
             .def("dumps", &algo::AlgoOrder::dumps)
-            .def("on_quote", &algo::AlgoOrder::on_quote);
+            .def("on_start", &algo::AlgoOrder::on_start)
+            .def("on_stop", &algo::AlgoOrder::on_stop)
+            .def("on_quote", &algo::AlgoOrder::on_quote)
+            .def("on_child_order", &algo::AlgoOrder::on_child_order)
+            .def("on_child_trade", &algo::AlgoOrder::on_child_trade)
+            .def("on_order_report", &algo::AlgoOrder::on_order_report)
+            ;
 
     py::class_<algo::AlgoContext, std::shared_ptr<algo::AlgoContext>>(m, "AlgoContext")
             .def("insert_child_order", &algo::AlgoContext::insert_order)
@@ -784,9 +827,17 @@ PYBIND11_MODULE(pywingchun, m)
             .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("algo_context", &service::Algo::get_algo_context)
             .def_property_readonly("io_device", &service::Algo::get_io_device)
+            .def("now", &service::Algo::now)
+            .def("get_location", &service::Algo::get_location)
+            .def("get_writer", &service::Algo::get_writer)
+            .def("has_location", &service::Algo::has_location)
+            .def("has_writer", &service::Algo::has_writer)
             .def("run", &service::Algo::run)
             .def("add_order", &service::Algo::add_order)
-            .def("insert_order", &service::Algo::insert_order);
+            .def("insert_order", &service::Algo::insert_order)
+            .def("cancel_order", &service::Algo::cancel_order)
+            .def("modify_order", &service::Algo::modify_order)
+            ;
 
     py::class_<BarGenerator, kungfu::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
             .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())

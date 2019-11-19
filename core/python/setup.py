@@ -6,6 +6,8 @@ from kungfu.version import get_version
 setup(
     name="kungfu",
     version= get_version(),
+    author="taurus.ai",
+    license="Apache-2.0",
     packages=find_packages(exclude=["hooks", "test", "extensions"]),
     include_package_data=True,
     install_requires=[
@@ -17,6 +19,7 @@ setup(
         "tabulate==0.8.3",
         "PyInquirer==1.0.3",
         "prompt_toolkit==1.0.14",
+        "rx==3.0.1"
     ],
     entry_points={"console_scripts": ["kfc = kungfu.__main__:main"]},
 )

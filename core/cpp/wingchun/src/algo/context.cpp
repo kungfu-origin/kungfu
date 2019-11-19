@@ -48,14 +48,38 @@ namespace kungfu
 
                 events_ | is(msg::type::Trade) |
                 $([&](event_ptr event)
-                  {
-                      const auto& trade = event->data<Trade>();
-                      auto order_id = trade.parent_order_id;
-                      if (has_order(order_id))
-                      {
-                          orders_[order_id]->on_child_trade(shared_from_this(), trade);
-                      }
-                  });
+                {
+                    const auto& trade = event->data<Trade>();
+                    auto order_id = trade.parent_order_id;
+                    if (has_order(order_id))
+                    {
+                        orders_[order_id]->on_child_trade(shared_from_this(), trade);
+                    }
+                });
+
+                events_ | is(msg::type::AlgoOrderReport) |
+                $([&](event_ptr event)
+                {
+                    try
+                    {
+                        auto json_str = event->data_as_string();
+                        SPDLOG_TRACE("rcv algo order report {}", json_str);
+                        nlohmann::json report_json = nlohmann::json::parse(json_str);
+                        uint64_t order_id = report_json["order_id"];
+                        if (has_order(order_id))
+                        {
+                            orders_[order_id]->on_order_report(shared_from_this(), json_str);
+                        }
+                        else
+                        {
+                            SPDLOG_WARN("has no order {}", order_id);
+                        }
+                    }
+                    catch (const std::exception &ex)
+                    {
+                        SPDLOG_ERROR("Unexpected exception: {}", ex.what());
+                    }
+                });
             }
 
             uint64_t AlgoContext::add_order(const AlgoOrder_ptr& order)

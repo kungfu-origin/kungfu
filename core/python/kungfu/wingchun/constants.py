@@ -31,6 +31,7 @@ VolumeCondition = pywingchun.constants.VolumeCondition
 TimeCondition = pywingchun.constants.TimeCondition
 OrderActionFlag = pywingchun.constants.OrderActionFlag
 LedgerCategory = pywingchun.constants.LedgerCategory
+HedgeFlag = pywingchun.constants.HedgeFlag
 
 AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
@@ -53,4 +54,5 @@ ENUM_TYPES = [InstrumentType,
               VolumeCondition,
               TimeCondition,
               OrderActionFlag,
-              LedgerCategory]
+              LedgerCategory,
+              HedgeFlag]

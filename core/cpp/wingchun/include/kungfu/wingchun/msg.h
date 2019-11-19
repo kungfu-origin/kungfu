@@ -39,9 +39,12 @@ namespace kungfu
                     PositionDetail = 208,
                     Instrument = 209,
                     AlgoOrderInput = 210,
-                    AlgoOrderStatus = 211,
+                    AlgoOrderReport = 211,
+                    AlgoOrderModify = 212,
 
                     Subscribe = 302,
+                    SubscribeAll = 303,
+
                     NewOrderSingle = 353,
                     CancelOrder = 354,
                     CancelAllOrder = 355,
@@ -582,6 +585,7 @@ namespace kungfu
 
                     Side side;                               //买卖方向
                     Offset offset;                           //开平方向
+                    HedgeFlag hedge_flag;                    //投机套保标识
                     PriceType price_type;                    //价格类型
                     VolumeCondition volume_condition;        //成交量类型
                     TimeCondition time_condition;            //成交时间类型
@@ -630,6 +634,7 @@ namespace kungfu
                     j["frozen_price"] =  input.frozen_price;
                     j["side"] = input.side;
                     j["offset"] = input.offset;
+                    j["hedge_flag"] = input.hedge_flag;
                     j["price_type"] = input.price_type;
                     j["volume_condition"] = input.volume_condition;
                     j["time_condition"] = input.time_condition;
@@ -649,6 +654,7 @@ namespace kungfu
                     input.volume = j["volume"].get<int64_t>();
                     input.side = j["side"];
                     input.offset = j["offset"];
+                    input.hedge_flag = j["hedge_flag"];
                     input.price_type = j["price_type"];
                     input.volume_condition = j["volume_condition"];
                     input.time_condition = j["time_condition"];
@@ -726,6 +732,7 @@ namespace kungfu
 
                     Side side;                               //买卖方向
                     Offset offset;                           //开平方向
+                    HedgeFlag hedge_flag;                    //投机套保标识
                     PriceType price_type;                    //价格类型
                     VolumeCondition volume_condition;        //成交量类型
                     TimeCondition time_condition;            //成交时间类型
@@ -814,6 +821,7 @@ namespace kungfu
 
                     j["side"] = order.side;
                     j["offset"] = order.offset;
+                    j["hedge_flag"] = order.hedge_flag;
                     j["price_type"] = order.price_type;
                     j["volume_condition"] = order.volume_condition;
                     j["time_condition"] = order.time_condition;
@@ -845,6 +853,7 @@ namespace kungfu
                     order.parent_id = j["parent_id"];
                     order.side = j["side"];
                     order.offset = j["offset"];
+                    order.hedge_flag = j["hedge_flag"];
                     order.price_type = j["price_type"];
                     order.volume_condition = j["volume_condition"];
                     order.time_condition = j["time_condition"];
@@ -869,6 +878,7 @@ namespace kungfu
 
                     order.side = input.side;
                     order.offset = input.offset;
+                    order.hedge_flag = input.hedge_flag;
 
                     order.price_type = input.price_type;
                     order.volume_condition = input.volume_condition;
@@ -896,6 +906,7 @@ namespace kungfu
 
                     Side side;                               //买卖方向
                     Offset offset;                           //开平方向
+                    HedgeFlag hedge_flag;                    //投机套保标识
 
                     double price;                            //成交价格
                     int64_t volume;                          //成交量
@@ -962,6 +973,7 @@ namespace kungfu
 
                     j["side"] = trade.side;
                     j["offset"] = trade.offset;
+                    j["hedge_flag"] = trade.hedge_flag;
 
                     j["price"] = trade.price;
                     j["volume"] = trade.volume;
@@ -987,6 +999,7 @@ namespace kungfu
 
                     trade.side = j["side"];
                     trade.offset = j["offset"];
+                    trade.hedge_flag = j["hedge_flag"];
 
                     trade.price = j["price"].get<double>();
                     trade.volume = j["volume"];

@@ -1,7 +1,7 @@
-
 import os
 import sys
 import platform
+
 
 def default_sdk_home():
     osname = platform.system()
@@ -11,6 +11,7 @@ def default_sdk_home():
         return "/Applications/Kungfu.app/Contents/Resources/kfc"
     elif osname == 'Windows':
         return "C:\\Program Files\\Kungfu\\resources\\kfc"
+
 
 def setup_environment_variables():
     if not getattr(sys, 'frozen', False):

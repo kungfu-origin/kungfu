@@ -18,7 +18,7 @@ def pre_start(context):
 
 def on_quote(context, quote):
     context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
-    order_id = context.insert_order(quote.instrument_id, exchange, "15040900", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open)
+    order_id = context.insert_order(quote.instrument_id, exchange, "15040900", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open, HedgeFlag.Speculation)
     context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
 
 def on_transaction(context, transaction):

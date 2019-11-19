@@ -3,7 +3,8 @@ import os
 import datetime
 import subprocess
 
-VERSION = (2, 0, 0, 'alpha', 0)
+VERSION = (2, 1, 0, 'final', 0)
+
 
 def get_version():
     main = get_main_version(VERSION)
@@ -17,9 +18,11 @@ def get_version():
         sub = mapping[VERSION[3]] + str(VERSION[4])
     return main + sub
 
+
 def get_main_version(version):
     parts = 2 if version[2] == 0 else 3
     return '.'.join(str(x) for x in version[:parts])
+
 
 def get_git_changeset():
     repo_dir = os.path.dirname(os.path.dirname(os.path.realpath('__file__')))

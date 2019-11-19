@@ -70,6 +70,10 @@ namespace kungfu
 
             auto master_location = get_location(app_locations_[app_location->uid]);
             writers_[app_location->uid] = get_io_device()->open_writer_at(master_location, app_location->uid);
+
+            reader_->join(app_location, 0, now);
+            reader_->join(app_location, master_location->uid, now);
+                
             auto &writer = writers_[app_location->uid];
 
             {
@@ -81,9 +85,7 @@ namespace kungfu
 
             writer->mark(e->gen_time(), msg::type::SessionStart);
 
-            reader_->join(app_location, 0, now);
             require_write_to(app_location->uid, e->gen_time(), 0);
-            reader_->join(app_location, master_location->uid, now);
             require_write_to(app_location->uid, e->gen_time(), master_location->uid);
 
             for (const auto &item : locations_)

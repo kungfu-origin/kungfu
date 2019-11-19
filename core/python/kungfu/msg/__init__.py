@@ -39,11 +39,14 @@ class Registry:
         return None
 
 def monkey_patch():
-    import pyyjj
+    try:
+        import pyyjj
+    except ImportError as err:
+        return
     def get_data(event):
         cls = Registry.get_cls(event.msg_type)
         if cls is None:
-            raise Exception("failed to find type info of msg type {}".format(event.msg_type))
+            return None
         if cls == str:
             return event.data_as_string
         else:
@@ -60,7 +63,7 @@ def monkey_patch():
         data = get_data(frame)
         if isinstance(data, str):
             data = json.loads(data)
-        else:
+        elif data is not None:
 	        data = object_as_dict(data)
         return {"source": frame.source,
                 "dest": frame.dest,

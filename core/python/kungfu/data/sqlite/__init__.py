@@ -90,6 +90,10 @@ class Offset(EnumTypeDecorator):
     def __init__(self):
         super(Offset, self).__init__(wc_constants.Offset)
 
+class HedgeFlag(EnumTypeDecorator):
+    def __init__(self):
+        super(HedgeFlag, self).__init__(wc_constants.HedgeFlag)
+
 class Direction(EnumTypeDecorator):
     def __init__(self):
         super(Direction, self).__init__(wc_constants.Direction)

@@ -8,6 +8,16 @@ from kungfu.wingchun.constants import *
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
 
+class AlgoOrderContext:
+    def __init__(self, wc_ctx):
+        self._wc_ctx = wc_ctx
+        self.orders = {}
+
+    def insert_algo_order(self, order):
+        order_id = self._wc_ctx.add_order(order)
+        if order_id > 0:
+            self.orders[order_id] = order
+
 class Strategy(pywingchun.Strategy):
     def __init__(self, ctx):
         pywingchun.Strategy.__init__(self)
@@ -52,10 +62,23 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
 
-    def __init__book(self):
+    def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
         self.ctx.book = AccountBook(self.ctx, location)
         self.book_context.add_book(location, self.ctx.book)
+
+    def __init_algo(self):
+        class AlgoOrderContext:
+            def __init__(self, wc_ctx):
+                self._wc_ctx = wc_ctx
+                self.orders = {}
+
+            def insert_algo_order(self, order):
+                order_id = self._wc_ctx.add_order(order)
+                if order_id > 0:
+                    self.orders[order_id] = order
+        self.algo_context = AlgoOrderContext(self.algo_context)
+        self.ctx.insert_algo_order = self.algo_context.insert_algo_order
 
     def __add_timer(self, nanotime, callback):
         def wrap_callback(event):
@@ -76,6 +99,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.add_timer = self.__add_timer
         self.ctx.add_time_interval = self.__add_time_interval
         self.ctx.subscribe = wc_context.subscribe
+        self.ctx.subscribe_all = wc_context.subscribe_all
         self.ctx.add_account = self.__add_account
         self.ctx.list_accounts = wc_context.list_accounts
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
@@ -83,9 +107,8 @@ class Strategy(pywingchun.Strategy):
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
-        self.ctx.insert_algo_order = self.algo_context.add_order
-        self.__init__book()
-
+        self.__init_book()
+        self.__init_algo()
         self._pre_start(self.ctx)
         self.ctx.log.info('strategy prepare to run')
 

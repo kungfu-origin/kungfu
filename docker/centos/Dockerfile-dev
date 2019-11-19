@@ -14,7 +14,7 @@ RUN yum -y install git sudo rpm-build && yum -y install make && yum -y install c
 
 RUN  yum install -y kde-l10n-Chinese && yum reinstall -y glibc-common && localedef -c -f GB18030 -i zh_CN zh_CN.GB18030
 RUN yum install -y http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm && yum -y install cmake3
-RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple pipenv
+RUN pip3 install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/ pipenv
 
 ENV PATH=/opt/rh/devtoolset-8/root/usr/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV LANG=en_US.UTF-8

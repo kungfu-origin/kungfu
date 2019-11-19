@@ -73,11 +73,17 @@
         ]
       },
       {
+        "from": "../core/python/dist",
+        "to": "kungfu-resources/python",
+        "filter": [
+          "kungfu-2.0.dev*-py3-none-any.whl"
+        ]
+      },
+      {
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
-          "default/*",
-          "config/*"
+          "default/*"
         ]
       },
       {
@@ -186,7 +192,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "4.2.11",
-    "electron-builder": "^20.38.5",
+    "electron-builder": "^21.2.0",
     "electron-chromedriver": "^5.0.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",

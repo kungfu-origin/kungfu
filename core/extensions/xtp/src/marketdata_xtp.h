@@ -27,6 +27,8 @@ namespace kungfu
 
                 bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
 
+                bool subscribe_all() override ;
+
                 bool unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override
                 { return false; };
 
