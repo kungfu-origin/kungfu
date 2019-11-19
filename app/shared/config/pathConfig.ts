@@ -1,7 +1,9 @@
-import { addFile } from '__gUtils/fileUtils';
-
 const path = require('path');
 
+if (process.env.NODE_ENV !== 'development') {
+    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
+}
+const { addFile } = require('__gUtils/fileUtils');
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
