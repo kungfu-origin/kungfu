@@ -19,7 +19,6 @@
   "scripts": {
     "install-deps": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
     "clean": "rimraf ./dist/* ./build/*",
-    "build": "sh ./build.sh && yarn run cp",
     "build:linux": " yarn run dist && pkg . -t=node10.15.3-linux-x64 --out-path=build/cli",
     "build:mac": " yarn run dist && pkg . -t=node10.15.3-macos-x64 --out-path=build/cli",
     "dev": "node .config/dev-cli.js",
