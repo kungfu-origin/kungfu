@@ -387,7 +387,7 @@ namespace kungfu
                 {
                     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
                 }
-                else
+                else if(pInvestorPosition != nullptr)
                 {
                     SPDLOG_TRACE(to_string(*pInvestorPosition));
                     auto& position_map = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? long_position_map_ : short_position_map_;
