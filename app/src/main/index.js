@@ -167,12 +167,19 @@ function setMenu() {
 	{
 		label: "Kungfu",
 		submenu: applicationOptions
-	}, 
-	{
+	},{
 		label: "Edit",
 		submenu: [
 			{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
 			{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+		]
+	},{
+		label: "Help",
+		submenu: [
+			{ label: "官网", accelerator: "", click: () => openUrl("https://www.taurusai.com/") },
+			{ label: "用户手册", accelerator: "", click: () => openUrl("https://www.taurusai.com/manual/")},
+			{ label: "策略API文档", accelerator: "", click: () => openUrl("https://www.taurusai.com/api-doc/") },
+			{ label: "Kungfu 论坛", accelerator: "", click: () => openUrl("https://www.taurusai.com/community/") }
 		]
 	}];
 	
@@ -252,4 +259,9 @@ function KillAll(){
 			})
 		})
 	})
+}
+
+
+function openUrl(url) {
+	electron.shell.openExternal(url)
 }
