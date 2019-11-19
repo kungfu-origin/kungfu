@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+yarn workspace kungfu-core run clean
 yarn clean
 sudo npm config set kungfu-core:runtime node
 sudo yarn install
