@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 yarn clean
-cd ./core
 npm config set kungfu-core:runtime node
+
+cd ./core
 yarn run build
 cd ../cli
 yarn run build
-# cd ../core
-# pwd
+
 # npm config set kungfu-core:runtime electron
+
+# cd ../core
 # yarn run build
 # cd ../app
-# pwd
 # yarn run build
