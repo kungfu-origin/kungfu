@@ -9,10 +9,9 @@ yarn run build
 cd ../cli
 yarn run build
 
-
-# sudo npm config set kungfu-core:runtime electron
-# sudo yarn install
-# cd ../core
-# yarn run build
-# cd ../app
-# yarn run build
+sudo npm config set kungfu-core:runtime electron
+sudo yarn install
+cd ../core
+yarn run build
+cd ../app
+yarn run build
