@@ -4,6 +4,11 @@ if(WIN32)
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 endif()
 
+if(UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -w")
+endif()
+
 ############################################################
 
 INCLUDE_DIRECTORIES(${CMAKE_JS_INC})

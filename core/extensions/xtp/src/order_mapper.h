@@ -7,6 +7,7 @@
 
 #include <string>
 #include <spdlog/spdlog.h>
+#include <sqlite3.h>
 #include <SQLiteCpp/SQLiteCpp.h>
 
 namespace kungfu
@@ -28,7 +29,7 @@ namespace kungfu
             class OrderMapper
             {
             public:
-                OrderMapper(const std::string &file_name) : db_(file_name.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE)
+                OrderMapper(const std::string &file_name) : db_(file_name.c_str(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
                 {
                     create_table_if_not_exist();
                 }

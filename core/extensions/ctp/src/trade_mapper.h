@@ -5,7 +5,9 @@
 #ifndef CTP_EXT_TRADE_MAPPER_H
 #define CTP_EXT_TRADE_MAPPER_H
 
+#include <sqlite3.h>
 #include <SQLiteCpp/SQLiteCpp.h>
+
 namespace kungfu
 {
     namespace wingchun
@@ -25,7 +27,7 @@ namespace kungfu
             class TradeMapper
             {
             public:
-                TradeMapper(const std::string &file_name) : db_(file_name.c_str(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE)
+                TradeMapper(const std::string &file_name) : db_(file_name.c_str(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
                 {
                     create_table_if_not_exist();
                 }

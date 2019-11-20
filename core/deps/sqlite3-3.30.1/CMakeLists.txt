@@ -1,0 +1,18 @@
+# CMake file for compiling the sqlite3 static library under Windows (for ease of use)
+#
+# Copyright (c) 2012-2016 Sebastien Rombauts (sebastien.rombauts@gmail.com)
+#
+# Distributed under the MIT License (MIT) (See accompanying file LICENSE.txt
+# or copy at http://opensource.org/licenses/MIT)
+
+ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_COLUMN_METADATA)
+ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_JSON1)
+ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_SESSION)
+ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_PREUPDATE_HOOK)
+ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_DBSTAT_VTAB)
+
+ADD_LIBRARY(sqlite3 SHARED sqlite3.h sqlite3ext.h sqlite3.c shell.c)
+
+IF (UNIX AND (CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
+    SET_TARGET_PROPERTIES(sqlite3 PROPERTIES COMPILE_FLAGS "-fPIC")
+ENDIF (UNIX AND (CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
