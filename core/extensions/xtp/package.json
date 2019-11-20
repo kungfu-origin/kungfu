@@ -9,53 +9,60 @@
                     "key": "user_id",
                     "name": "user_id",
                     "type": "str",
-                    "errMsg": "请填写账户 user_id",
-                    "required": true
+                    "errMsg": "请填写账户",
+                    "required": true,
+                    "tip": "请填写账户，例如:1504091"
                 },
                 {
                     "key": "password",
                     "name": "password",
                     "type": "password",
-                    "errMsg": "请填写密码 password",
+                    "errMsg": "请填写密码",
                     "required": true,
-                    "validator": ["blankValidator"]
+                    "validator": ["blankValidator"],
+                    "tip": "请填写密码，例如:123456"
                 },
                 {
                     "key": "software_key",
                     "name": "software_key",
                     "type": "str",
-                    "errMsg": "请填写 software_key",
-                    "required": true
+                    "errMsg": "请填写",
+                    "required": true,
+                    "tip": "请填写，例如:b8aa7173bba3470e390d787219b2112"
                 },
                 {
                     "key": "md_ip",
                     "name": "md_ip",
                     "type": "str",
-                    "errMsg": "请填写行情IP md_ip",
-                    "required": true
+                    "errMsg": "请填写行情IP",
+                    "required": true,
+                    "tip": "请填写行情IP，例如:61.152.102.110"
                 },
                 {
                     "key": "md_port",
                     "name": "md_port",
                     "type": "int",
-                    "errMsg": "请填写行情端口 md_port",
+                    "errMsg": "请填写行情端口",
                     "validator": ["intValidator"],
-                    "required": true
+                    "required": true,
+                    "tip": "请填写行情端口，例如:8602"
                 },
                 {
                     "key": "td_ip",
                     "name": "td_ip",
                     "type": "str",
-                    "errMsg": "请填写交易IP td_ip",
-                    "required": true
+                    "errMsg": "请填写交易IP",
+                    "required": true,
+                    "tip": "请填写交易IP，例如:61.152.102.111"
                 },
                 {
                     "key": "td_port",
                     "name": "td_port",
                     "type": "int",
-                    "errMsg": "请填写交易端口 td_port",
+                    "errMsg": "请填写交易端口",
                     "validator": ["intValidator"],
-                    "required": true
+                    "required": true,
+                    "tip": "请填写交易端口，例如:8601"
                 },
                 {
                     "key": "client_id",
@@ -64,7 +71,7 @@
                     "errMsg": "请填写自定义多点登录ID 1-99整数",
                     "required": true,
                     "validator": ["o99Validator", "intValidator"],
-                    "tip": "自定义多点登陆ID，需是 1～99内整数"
+                    "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
                 },
                 {
                     "key": "protocol",
@@ -86,7 +93,7 @@
                     "name": "buffer_size",
                     "type": "int",
                     "tip": "请填写 buffer size（mb）",
-                    "errMsg": "请填写 buffer size（mb）",
+                    "errMsg": "请填写 buffer size（mb），例如:1024",
                     "validator": ["intValidator"],                    
                     "required": false
                 }
