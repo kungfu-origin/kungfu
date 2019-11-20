@@ -98,7 +98,7 @@ export const tcpUriValidator = (rule: any, value: any, callback: Function): void
 
 //0-99
 export const o99Validator = (rule: any, value: any, callback: Function): void => {
-    if(value && (value < 1 || value > 99)) {
+    if(!value || (value < 1 || value > 99)) {
         callback(new Error(
             isEnglish
             ? 'Should be integer between 1 and 99!'
