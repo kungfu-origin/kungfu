@@ -113,7 +113,7 @@ class AccountBook(pywingchun.Book):
             self.realized_pnl = asset.realized_pnl
 
     def on_positions(self, positions):
-        self.ctx.logger.info("{} [{:08x}] position report received, size: {}".
+        self.ctx.logger.debug("{} [{:08x}] position report received, size: {}".
                              format(self.location.uname, self.location.uid, len(positions)))
         for pos in positions:
             self.ctx.logger.info(pos)
@@ -132,7 +132,7 @@ class AccountBook(pywingchun.Book):
                 self._positions[pos.uid] = pos
             else:
                 raise TypeError("Position object required, but {} provided".format(type(pos)))
-        if self.ctx.name == "ledger":
+        if self.ctx.mode == pyyjj.mode.LIVE and self.ctx.category == pyyjj.category.SYSTEM and self.ctx.group == "service" and self.ctx.name == "ledger":
             self.ctx.db.dump_book(self)
             self.ctx.logger.info("book {} [{:08x}] saved in database".format(self.location.uname, self.location.uid))
 
@@ -194,7 +194,7 @@ class AccountBook(pywingchun.Book):
         for pos in self._positions.values():
             pos.apply_trading_day(trading_day)
         if not self.trading_day == trading_day:
-            self.ctx.logger.info("{} [{:08x}] apply trading day, switch from {} to {}".format(self.location.uname, self.location.uid, self.trading_day, trading_day))
+            self.ctx.logger.debug("{} [{:08x}] apply trading day, switch from {} to {}".format(self.location.uname, self.location.uid, self.trading_day, trading_day))
             self.trading_day = trading_day
             self.static_equity = self.dynamic_equity
             self.subject.on_next(self.event)

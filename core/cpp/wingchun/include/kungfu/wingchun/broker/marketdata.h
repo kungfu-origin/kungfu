@@ -27,6 +27,8 @@ namespace kungfu
 
                 virtual bool subscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
+                virtual bool subscribe_all() = 0;
+
                 virtual bool unsubscribe(const std::vector<msg::data::Instrument> &instruments) = 0;
 
             protected:

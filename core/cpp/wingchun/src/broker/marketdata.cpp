@@ -30,6 +30,13 @@ namespace kungfu
             {
                 apprentice::on_start();
 
+                events_ | is(msg::type::SubscribeAll) |
+                $([&](event_ptr event)
+                {
+                    SPDLOG_INFO("subscribe all request");
+                    subscribe_all();
+                });
+
                 events_ | is(msg::type::Subscribe) |
                 $([&](event_ptr event)
                   {

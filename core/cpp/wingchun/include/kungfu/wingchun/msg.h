@@ -43,6 +43,8 @@ namespace kungfu
                     AlgoOrderModify = 212,
 
                     Subscribe = 302,
+                    SubscribeAll = 303,
+
                     NewOrderSingle = 353,
                     CancelOrder = 354,
                     CancelAllOrder = 355,

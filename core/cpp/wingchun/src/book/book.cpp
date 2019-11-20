@@ -23,6 +23,7 @@ namespace kungfu
                 auto home = app.get_io_device()->get_home();
                 log::copy_log_settings(home, home->name);
                 this->monitor_instruments();
+                service_location_ = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", app.get_io_device()->get_home()->locator);
             }
 
             const msg::data::Instrument& BookContext::get_inst_info(const std::string& instrument_id) const
@@ -46,14 +47,13 @@ namespace kungfu
             {
                 auto insts = events_ | to(app_.get_live_home_uid()) | take_while([&](event_ptr event) {
                     return event->msg_type() != msg::type::InstrumentEnd;
-                }) |
-                             is(msg::type::Instrument) |
-                             reduce(std::vector<Instrument>(),
-                                    [](std::vector<Instrument> res, event_ptr event)
-                                    {
-                                        res.push_back(event->data<msg::data::Instrument>());
-                                        return res;
-                                    }) | as_dynamic();
+                }) | is(msg::type::Instrument) | reduce(std::vector<Instrument>(),
+                        [](std::vector<Instrument> res, event_ptr event)
+                        {
+                            res.push_back(event->data<msg::data::Instrument>());
+                            return res;
+                        }) | as_dynamic();
+
                 insts.subscribe([&](std::vector<Instrument> res)
                 {
                     if (! this->app_.is_live()) { return;}
@@ -73,8 +73,8 @@ namespace kungfu
                 auto positions = events_ | take_while([=](event_ptr event)
                         {
                             return event->msg_type() != msg::type::PositionEnd or event->data<PositionEnd>().holder_uid != location->uid;
-                        })
-                        | is(msg::type::Position) | reduce(std::vector<Position>(), [=](std::vector<Position> res, event_ptr event)
+                        }) | is(msg::type::Position) |
+                                reduce(std::vector<Position>(), [=](std::vector<Position> res, event_ptr event)
                                 {
                                     const auto& position = event->data<Position>();
                                     if (position.holder_uid == location->uid)
@@ -83,20 +83,22 @@ namespace kungfu
                                     }
                                     return res;
                                 }) | as_dynamic();
-                positions.subscribe([=](std::vector<Position> res) {
+
+                positions.subscribe([=](std::vector<Position> res)
+                {
                     if (!this->app_.is_live()) { return;}
                     try {
                         book->on_positions(res);
                         this->monitor_positions(location, book);
-                    } catch (const std::exception &e)
+                    }
+                    catch (const std::exception &e)
                     {
-                        SPDLOG_ERROR("Unexpected exception {}", e.what());
-                    }},
-                            [=](std::exception_ptr e){
-                                try { std::rethrow_exception(e); }
-                                catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
-                                catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}
-                });
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());}
+                    },
+                    [=](std::exception_ptr e){
+                        try { std::rethrow_exception(e); }
+                        catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
+                        catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}});
             }
 
             void BookContext::monitor_position_details(const location_ptr& location, const Book_ptr& book)
@@ -110,20 +112,22 @@ namespace kungfu
                                     res.push_back(event->data<PositionDetail>());
                                     return res;
                                 }) | as_dynamic();
-                positions.subscribe([=](std::vector<PositionDetail> res) {
-                                        if (!this->app_.is_live()) { return;}
-                                        try {
-                                            book->on_position_details(res);
-                                            this->monitor_position_details(location, book);
-                                        } catch (const std::exception &e)
-                                        {
-                                            SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                        }},
-                                    [=](std::exception_ptr e){
-                                        try { std::rethrow_exception(e); }
-                                        catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
-                                        catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}
-                                    });
+
+                positions.subscribe([=](std::vector<PositionDetail> res)
+                {
+                    if (!this->app_.is_live()) { return;}
+                    try {
+                        book->on_position_details(res);
+                        this->monitor_position_details(location, book);
+                    } catch (const std::exception &e)
+                    {
+                        SPDLOG_ERROR("Unexpected exception {}", e.what());
+                    }},
+                    [=](std::exception_ptr e){
+                        try { std::rethrow_exception(e); }
+                        catch (const rx::empty_error &ex) {SPDLOG_WARN("{}", ex.what());}
+                        catch (const std::exception &ex) { SPDLOG_WARN("Unexpected exception {}", ex.what());}
+                });
             }
 
             void BookContext::pop_book(uint32_t location_uid)
@@ -169,6 +173,12 @@ namespace kungfu
                         app_.get_reader()->join(location, channel.dest_id, event->gen_time());
                     });
                 }
+
+                events_ | filter([=](event_ptr event) { return event->msg_type() == msg::type::PositionEnd and event->data<PositionEnd>().holder_uid == location->uid;}) |
+                first() | $([=](event_ptr event) { book->ready_ = true; });
+
+                events_ | filter([=](event_ptr event) { return event->msg_type() == msg::type::PositionDetailEnd and event->data<PositionDetailEnd>().holder_uid == location->uid;}) |
+                first() | $([=](event_ptr event) { book->ready_ = true; });
 
                 events_ | is(msg::type::Quote) |
                 $([=](event_ptr event)
@@ -238,21 +248,20 @@ namespace kungfu
                 });
 
                 auto home = app_.get_io_device()->get_home();
-                if (home->name != "ledger")
+                if (home->uid != service_location_->uid)
                 {
-                    auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
-                    if (home->mode == mode::LIVE and not app_.has_location(ledger_location->uid))
+                    if (home->mode == mode::LIVE and not app_.has_location(service_location_->uid))
                     {
                         throw wingchun_error("has no location for ledger service");
                     }
 
-                    if (not app_.has_writer(ledger_location->uid))
+                    if (not app_.has_writer(service_location_->uid))
                     {
                         events_ | is(yijinjing::msg::type::RequestWriteTo) |
                         filter([=](yijinjing::event_ptr e)
                                {
                                    const yijinjing::msg::data::RequestWriteTo &data = e->data<yijinjing::msg::data::RequestWriteTo>();
-                                   return data.dest_id == ledger_location->uid;
+                                   return data.dest_id == service_location_->uid;
                                }) | first() |
                         $([=](event_ptr e)
                           {
@@ -264,7 +273,7 @@ namespace kungfu
                               location_desc["uname"] = location->uname;
                               location_desc["uid"] = location->uid;
                               auto msg = location_desc.dump();
-                              auto writer = app_.get_writer(ledger_location->uid);
+                              auto writer = app_.get_writer(service_location_->uid);
                               auto &&frame = writer->open_frame(0, msg::type::QryAsset, msg.length());
                               memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
                               writer->close_frame(msg.length());
@@ -280,15 +289,15 @@ namespace kungfu
                         location_desc["uname"] = location->uname;
                         location_desc["uid"] = location->uid;
                         auto msg = location_desc.dump();
-                        auto writer = app_.get_writer(ledger_location->uid);
+                        auto writer = app_.get_writer(service_location_->uid);
                         auto &&frame = writer->open_frame(0, msg::type::QryAsset, msg.length());
                         memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
                         writer->close_frame(msg.length());
                         SPDLOG_INFO("{}[{:08x}] asset requested", location->uname, location->uid);
                     }
 
-                    app_.request_write_to(app_.now(), ledger_location->uid);
-                    app_.request_read_from(app_.now(), ledger_location->uid);
+                    app_.request_write_to(app_.now(), service_location_->uid);
+                    app_.request_read_from(app_.now(), service_location_->uid);
                 }
             }
         }

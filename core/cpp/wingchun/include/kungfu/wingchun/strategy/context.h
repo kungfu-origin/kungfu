@@ -53,6 +53,8 @@ namespace kungfu
                 //@param exchange_id 交易所ID
                 virtual void subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange = "");
 
+                virtual void subscribe_all(const std::string &source);
+
                 //报单
                 //@param instrument_id 合约ID
                 //@param exchange_id   交易所ID
@@ -91,13 +93,24 @@ namespace kungfu
 
                 void subscribe_instruments();
 
+                uint32_t add_marketdata(const std::string &source);
+
                 void request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange);
+
+                template <class T> bool is_subscribed(const T& data)
+                {
+                    return subscribe_all_ or subscribed_symbols_.find(get_symbol_id(data.instrument_id, data.exchange_id)) != subscribed_symbols_.end();
+                }
 
             private:
                 std::unordered_map<uint32_t, uint32_t> account_location_ids_;
                 std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
                 std::unordered_map<uint32_t, double> account_cash_limits_;
                 std::unordered_map<std::string, uint32_t> market_data_;
+
+                bool subscribe_all_;
+
+                std::unordered_map<uint32_t, uint32_t> subscribed_symbols_;
 
                 friend class Runner;
             };
