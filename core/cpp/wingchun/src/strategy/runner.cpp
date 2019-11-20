@@ -50,6 +50,37 @@ namespace kungfu
                 context_ = make_context();
                 context_->react();
 
+                events_ | timer(now() + yijinjing::time_unit::NANOSECONDS_PER_SECOND * 2) |
+                $([&](event_ptr e)
+                {
+                    auto book_ctx = context_->get_book_context();
+                    auto books = book_ctx->get_books();
+                    bool ready = std::all_of(books.begin(), books.end(), [](book::Book_ptr book) { return book->is_ready(); });
+                    if (ready)
+                    {
+                        for (const auto &strategy : strategies_)
+                        {
+                            strategy->post_start(context_);
+                        }
+                    } else
+                    {
+                        SPDLOG_WARN("failed to initialize books");
+                        signal_stop();
+                    }},
+                    [&](std::exception_ptr e)
+                    {
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const rx::empty_error &ex)
+                      {
+                          SPDLOG_WARN("{}", ex.what());
+                      }
+                      catch (const std::exception &ex)
+                      {
+                          SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
+                      }
+                  });
+
                 for (const auto &strategy : strategies_)
                 {
                     strategy->pre_start(context_);
@@ -111,10 +142,6 @@ namespace kungfu
 
                 apprentice::on_start();
 
-                for (const auto &strategy : strategies_)
-                {
-                    strategy->post_start(context_);
-                }
             }
 
             void Runner::on_exit()

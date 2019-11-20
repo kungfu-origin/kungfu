@@ -33,7 +33,6 @@ namespace kungfu
 
                 void on_exit() override ;
 
-
                 virtual Context_ptr make_context();
 
             private:

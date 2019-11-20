@@ -62,6 +62,16 @@ namespace kungfu
 
                 std::vector<msg::data::Instrument> all_inst_info() const;
 
+                std::vector<Book_ptr> get_books()
+                {
+                    std::vector<Book_ptr> book_vec;
+                    for(const auto& item: books_)
+                    {
+                        book_vec.push_back(item.second);
+                    }
+                    return book_vec;
+                };
+
             private:
                 void monitor_positions(const yijinjing::data::location_ptr& location, const Book_ptr& book);
 
