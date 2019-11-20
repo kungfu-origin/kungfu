@@ -7,6 +7,8 @@ declare global {
     }
 }
 
+export {}
+
 console.success = (log: string) => {
     console.log(`${colors.green('SUCCESS')} ${log}`)
 }

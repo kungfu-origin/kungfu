@@ -1,5 +1,6 @@
 
 
+import './base';
 //@ts-ignore
 import { version } from '../package.json';
 import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
@@ -14,7 +15,6 @@ import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
-require('./base');
 
 const CFonts = require('cfonts');
 const colors = require('colors');
