@@ -68,6 +68,7 @@ let cliConfig = {
       '__gConfig': path.join(__dirname, '../../app/shared/config'),
       '__io': path.join(__dirname, '../../app/shared/io'),
       '__assets': path.join(__dirname, '../../app/shared/assets'),
+      '__app': path.join(__dirname, '../../app'),
     },
     extensions: ['.ts', '.js', '.json', '.node']
   },
