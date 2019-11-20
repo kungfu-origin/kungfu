@@ -19,6 +19,10 @@ namespace kungfu
             {
                 yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
                 config_ = nlohmann::json::parse(json_config);
+                if(config_.client_id < 1 or config_.client_id > 99)
+                {
+                    throw wingchun_error("client_id must between 1 and 99");
+                }
             }
 
             MarketDataXTP::~MarketDataXTP()
