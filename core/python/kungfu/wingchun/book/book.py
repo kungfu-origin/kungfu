@@ -132,7 +132,7 @@ class AccountBook(pywingchun.Book):
                 self._positions[pos.uid] = pos
             else:
                 raise TypeError("Position object required, but {} provided".format(type(pos)))
-        if self.ctx.mode == pyyjj.mode.LIVE and self.ctx.category == pyyjj.category.SYSTEM and self.ctx.group == "service" and self.ctx.name == "ledger":
+        if self.ctx.name == "ledger":
             self.ctx.db.dump_book(self)
             self.ctx.logger.info("book {} [{:08x}] saved in database".format(self.location.uname, self.location.uid))
 
