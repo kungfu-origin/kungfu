@@ -1,5 +1,5 @@
 
-import { initDB } from '@/base';
+import { initDB, initConfig } from '@/base';
 //@ts-ignore
 import { version } from '../package.json';
 import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
@@ -13,6 +13,10 @@ import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
+
+
+initDB()
+initConfig()
 
 const CFonts = require('cfonts');
 const colors = require('colors');
@@ -198,7 +202,4 @@ program
 
 program.parse(process.argv)
 
-
-
-initDB()
 
