@@ -41,7 +41,7 @@ namespace kungfu
         const int EXEC_ID_LEN = 32;
         const int SOURCE_ID_LEN = 16;
         const int BROKER_ID_LEN = 32;
-        const int ERROR_MSG_LEN = 32;
+        const int ERROR_MSG_LEN = 128;
 
         enum class InstrumentType: int8_t
         {

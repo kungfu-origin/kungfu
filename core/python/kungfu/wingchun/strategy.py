@@ -61,6 +61,7 @@ class Strategy(pywingchun.Strategy):
         self._on_transaction = getattr(impl, "on_transaction", lambda ctx, transaction: None)
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
+        self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
 
     def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
@@ -136,6 +137,10 @@ class Strategy(pywingchun.Strategy):
 
     def on_order(self, wc_context, order):
         self._on_order(self.ctx, order)
+
+
+    def on_order_action_error(self, wc_context, error):
+        self._on_order_action_error(self.ctx, error)
 
     def on_trade(self, wc_context, trade):
         self._on_trade(self.ctx, trade)

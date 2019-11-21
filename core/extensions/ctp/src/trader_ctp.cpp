@@ -182,6 +182,12 @@ namespace kungfu
                 CtpOrder order_record = order_mapper_->get_order_info(action.order_id);
                 if (order_record.internal_order_id == 0)
                 {
+                    auto writer = get_writer(event->source());
+                    msg::data::OrderActionError& error = writer->open_data<msg::data::OrderActionError>(event->gen_time(), msg::type::OrderActionError);
+                    strncpy(error.error_msg, "failed to find order info", ERROR_MSG_LEN);
+                    error.order_id = action.order_id;
+                    error.order_action_id = action.order_action_id;
+                    writer->close_data();
                     SPDLOG_ERROR("failed to find order info for {}", action.order_id);
                     return false;
                 }
@@ -199,9 +205,17 @@ namespace kungfu
                 int error_id = api_->ReqOrderAction(&ctp_action, ++request_id_);
                 if (error_id == 0)
                 {
+                    action_event_map_[request_id_] = action;
+                    SPDLOG_TRACE("success to req cancel order {}, order action id {}, request id {}", action.order_id, action.order_action_id, request_id_);
                     return true;
                 } else
                 {
+                    auto writer = get_writer(event->source());
+                    msg::data::OrderActionError& error = writer->open_data<msg::data::OrderActionError>(event->gen_time(), msg::type::OrderActionError);
+                    error.error_id = error_id;
+                    error.order_id = action.order_id;
+                    error.order_action_id = action.order_action_id;
+                    writer->close_data();
                     SPDLOG_ERROR("failed to cancel order {}, error_id: {}", action.order_id, error_id);
                     return false;
                 }
@@ -308,7 +322,28 @@ namespace kungfu
             {
                 if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
                 {
-                    SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {} (InputOrderAction) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction));
+                    auto it = action_event_map_.find(nRequestID);
+                    if(it != action_event_map_.end())
+                    {
+                        const auto& action = it->second;
+                        uint32_t source = (action.order_action_id >> 32) ^ get_home_uid();
+                        if(has_writer(source))
+                        {
+                            auto writer = get_writer(source);
+                            msg::data::OrderActionError& error = writer->open_data<msg::data::OrderActionError>(0, msg::type::OrderActionError);
+                            error.error_id = pRspInfo->ErrorID;
+                            strncpy(error.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
+                            error.order_id = action.order_id;
+                            error.order_action_id = action.order_action_id;
+                            writer->close_data();
+                        }
+                        else
+                        {
+                            SPDLOG_ERROR("has no writer for [{:08x}]", source);
+                        }
+                    }
+                    SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {} (InputOrderAction) {} (nRequestID) {} (bIsLast) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg),
+                            pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction), nRequestID, bIsLast);
                 }
             }
 
