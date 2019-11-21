@@ -172,7 +172,7 @@
         </div>
          <!-- 选择柜台 -->
             <el-dialog title="选择柜台" 
-            width="400px" 
+            width="440px" 
             :visible.sync="visiblity.selectSource"
             id="select-source-dialog"
             @keyup.enter.native="handleSelectSource"
@@ -188,7 +188,7 @@
                                     v-if="item.typeName"
                                     :type="item.type" 
                                     >
-                                        {{item.typeName === 'future' ? '期货' : '股票'}}
+                                        {{(sourceTypeConfig[item.typeName] || {}).name || ''}}
                                     </el-tag>
                                 </el-radio>
                             </el-col>
@@ -234,6 +234,7 @@ import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
 import { deleteAccount, switchTd } from '__io/actions/account';
+import { sourceTypeConfig } from '__gConfig/tradingConfig';
 
 import path from 'path'
 export default {
@@ -241,6 +242,7 @@ export default {
 
     data() {
         return {
+            sourceTypeConfig: sourceTypeConfig,
             accountIdKey: '',
             selectedExecutor: '',
             accountIdSearchKeyDebounce: '',
@@ -479,25 +481,34 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
 .table-list{
-    .source-name{
-        span.name{
+    .source-name {
+        span.name {
             color: #fff;
         }
     }
-    .fr .el-switch, .fr .tr-dot-content{
+    .fr .el-switch, .fr .tr-dot-content {
         margin-left: 10px;
     }
 }
 
-.account-source{
+.account-source {
     line-height: 30px;
     padding-left: 10px;
-    >div{
+    >div {
         display: inline-block;
         margin-right: 8px;
         span:first-child{
             padding-right: 4px;
         }
+    }
+}
+
+#select-source-dialog {
+    .el-col {
+        padding-right: 20px;
+    } 
+    .el-tag {
+        vertical-align: bottom
     }
 }
 </style>

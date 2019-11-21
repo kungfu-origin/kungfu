@@ -1,5 +1,7 @@
 <template>
     <el-container class="tr-container">
+        <title-bar></title-bar>
+
         <!-- 头部 -->
         <el-container>
             <!-- 左侧边栏 -->
@@ -33,23 +35,23 @@
                 <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
                     <CoreStatus></CoreStatus>
                 </tr-footer-item>
-             
+            
                 <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
 
-				<tr-footer-item class="fr" v-if="currentRouter === 'code'">
-					<CodeSpaceTab></CodeSpaceTab>
-				</tr-footer-item>
+                <tr-footer-item class="fr" v-if="currentRouter === 'code'">
+                    <CodeSpaceTab></CodeSpaceTab>
+                </tr-footer-item>
             </div>
         </el-footer>
-
     </el-container>
 </template>
 
 <script>
 import { deepClone } from '__gUtils/busiUtils';
 import { mapState, mapGetters } from 'vuex';
+import TitleBar from './components/TitleBar';
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
 import CodeSpaceTab from './components/CodeSpaceTab';
@@ -78,7 +80,8 @@ export default {
     components: {
         EngineStatus,
 		CoreStatus,
-		CodeSpaceTab
+        CodeSpaceTab,
+        TitleBar
     },
 
     computed:{

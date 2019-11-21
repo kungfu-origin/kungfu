@@ -50,6 +50,14 @@ interface StringToProcessStatusDetail {
     [propName: string]: ProcessStatusDetail
 }
 
+interface SourceType {
+    [propName: string]: {
+        name: string,
+        kfId: number,
+        color: string
+    }
+}
+
 interface Account {
     account_id: string;
     source_name: string;

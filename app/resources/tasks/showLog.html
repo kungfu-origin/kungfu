@@ -62,10 +62,27 @@
                 padding: 0;
             }
 
+            #title-bar {
+                width: 100%;
+                height: 30px;
+                line-height: 30px;
+                padding: 0 100px;
+                text-align: center;
+                background: #101425;
+                color: #7D89B8;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: 12px;
+                box-sizing: border-box;
+                
+            }
+
             #content {
-                height: 100%;
+                height: calc(100% - 30px);
                 padding: 10px;
                 position: relative;
+                box-sizing: border-box;
             }
 
             .header-item{
@@ -80,7 +97,7 @@
                 color: #c7cce6;
                 background: #0C0F1C;
                 overflow: auto;
-                height: calc(100% - 50px);
+                height: calc(100% - 80px);
                 width: 100%;
                 padding: 10px 10px; 
                 box-sizing: border-box;
@@ -153,10 +170,11 @@
             ::-webkit-scrollbar-corner {
                 background: transparent; 
             }
-
+         
         </style>
     </head>
     <body>
+        <div id="title-bar"></div>
         <div id="content">
             <div class="header-content">
                     <div class="header-item fr">
@@ -250,9 +268,13 @@
 
     ipc.on('show-log', function(event, { winId, logPath }){
         ipc.removeAllListeners('show-log')
-        document.title = logPath;
-        getGlobalData.logPath = logPath
-        showLogs(logPath, dealMessage).then(() => scrollToBottom())
+        document.getElementById('title-bar').innerHTML = logPath
+        getGlobalData.logPath = logPath;
+
+        showLogs(logPath, dealMessage)
+            .then(() => scrollToBottom())
+            .catch(err => console.error(err))
+        
         gaze(logPath, (err, watcher) => {
             const watched = watcher.watched();
             watcher.on('changed', debounce((...args) => {

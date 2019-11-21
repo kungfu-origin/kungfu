@@ -28,12 +28,12 @@ export const feeTemplate = (type) => {
             }
         },
         open_ratio: {
-            label: type === 'stock' ? '买入费率' : '开仓费率',
+            label: type !== 'future' ? '买入费率' : '开仓费率',
             type: 'number',
             ratio: true,
         },
         close_ratio: {
-            label: type === 'stock' ? '卖出费率' : '平仓费率',
+            label: type !== 'future' ? '卖出费率' : '平仓费率',
             type: 'number',
             ratio: true,
         },

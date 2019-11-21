@@ -51,3 +51,26 @@ export const posDirection: NumberToStringObject = {
     0: isEnglish ? 'Long' : '多',
     1: isEnglish ? 'Short' : '空' 
 }
+
+
+
+
+export const sourceTypeConfig: SourceType = {
+    'stock': {
+        name: isEnglish ? 'stock' : '股票',
+        kfId: 1,
+        color: ''
+    },
+
+    'future': {
+        name: isEnglish ? 'future': '期货',
+        kfId: 2,
+        color: 'danger'
+    },
+
+    'option': {
+        name: isEnglish ? 'option' : '期权',
+        kfId: 3,
+        color: 'success'
+    }
+}

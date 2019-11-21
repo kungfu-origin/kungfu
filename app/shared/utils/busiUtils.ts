@@ -188,6 +188,7 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
         width: 1080, 
         height: 766,
         backgroundColor: '#161B2E',
+		titleBarStyle: 'hidden',
         webPreferences: {
             nodeIntegration: true
         },
@@ -218,6 +219,7 @@ export const buildTask = (
                 nodeIntegration: true
             },
             ...debugOptions,
+            titleBarStyle: 'hidden',
 		    backgroundColor: '#161B2E',
         })
 

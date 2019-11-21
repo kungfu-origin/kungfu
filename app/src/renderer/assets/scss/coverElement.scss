@@ -602,9 +602,13 @@ p.el-select-dropdown__empty{
 /* Tag
 -------------------------- */
 .el-tag{
+    max-width: 65px;
     height: 18px; 
     line-height: 18px; 
     font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 // notify
