@@ -11,7 +11,7 @@ export const runInsertUpdateDeleteDB = (dbPath: string, sql: string, args?: any)
                 throw new Error(`${dbPath} 不存在！`)
             }
             const db = new sqlite3.Database(dbPath)
-            db.configure('busyTimeout', 5000)
+            db.configure('busyTimeout', 10000)
             db.serialize(() => {
                 db.run(sql, args, (err: Error, res: any) => {
                     if(err) reject(err)
@@ -28,7 +28,7 @@ export const runBatchInsertDB = (dbPath: string, sql: string, batchList: any[]):
             throw new Error(`${dbPath} 不存在！`)
         }
         const db = new sqlite3.Database(dbPath)
-        db.configure('busyTimeout', 5000)
+        db.configure('busyTimeout', 10000)
         const stmt = db.prepare(sql);
         batchList.forEach((l: any): void => {
             stmt.run(l)
@@ -51,7 +51,7 @@ export const runClearDB = (dbPath: string, tableName: string): Promise<any> => {
             throw new Error(`${dbPath} 不存在！`)
         }
         const db = new sqlite3.Database(dbPath)
-        db.configure('busyTimeout', 5000)
+        db.configure('busyTimeout', 10000)
         db.serialize(() => {
             db.run(`DELETE FROM ${tableName};`, (err: Error, res: any): void => {
                 if(err) reject(err)
@@ -77,7 +77,7 @@ export const runSelectDB = (dbPath: string, sql: string, args?: any): Promise<an
             return;
         }
         const db = new sqlite3.Database(dbPath)
-        db.configure('busyTimeout', 5000)
+        db.configure('busyTimeout', 10000)
         db.serialize(() => {
             db.all(sql, args, (err: Error, res: any) => {
                 if(err) reject(err)    
