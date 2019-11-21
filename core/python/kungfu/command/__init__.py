@@ -54,6 +54,13 @@ class SpecialHelpOrder(click.Group):
 
         return decorator
 
+def recursive_help(cmd, parent=None):
+    ctx = click.core.Context(cmd, info_name=cmd.name, parent=parent)
+    print(cmd.get_help(ctx))
+    print()
+    commands = getattr(cmd, 'commands', {})
+    for sub in commands.values():
+        recursive_help(sub, ctx)
 
 @click.group(invoke_without_command=True, cls=SpecialHelpOrder)
 @click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
