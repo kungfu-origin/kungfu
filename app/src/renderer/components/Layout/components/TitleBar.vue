@@ -15,8 +15,8 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
 #title-bar {
-    height: 30px;
-    line-height: 30px;
+    height: 25px;
+    line-height: 25px;
     text-align: center;
     background: $bg_dark;
 }
