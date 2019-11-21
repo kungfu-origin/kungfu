@@ -1,4 +1,6 @@
 import { existsSync } from '__gUtils/fileUtils';
+import { logger } from '__gUtils/logUtils';
+
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 /**
  * @param  {String} dbPath
@@ -14,7 +16,10 @@ export const runInsertUpdateDeleteDB = (dbPath: string, sql: string, args?: any)
             db.configure('busyTimeout', 10000)
             db.serialize(() => {
                 db.run(sql, args, (err: Error, res: any) => {
-                    if(err) reject(err)
+                    if(err) {
+                        logger.error('runInsertUpdateDeleteDB', dbPath, sql, args, err);
+                        reject(err)
+                    }
                     else resolve(res)
                     db.close();
                 })
@@ -34,7 +39,10 @@ export const runBatchInsertDB = (dbPath: string, sql: string, batchList: any[]):
             stmt.run(l)
         })
         stmt.finalize((err: Error): void => {
-            if(err) reject(err)
+            if(err) {
+                logger.error('runBatchInsertDB', dbPath, sql, batchList, err);
+                reject(err)
+            }
             else resolve()
             db.close();
         })
@@ -54,7 +62,10 @@ export const runClearDB = (dbPath: string, tableName: string): Promise<any> => {
         db.configure('busyTimeout', 10000)
         db.serialize(() => {
             db.run(`DELETE FROM ${tableName};`, (err: Error, res: any): void => {
-                if(err) reject(err)
+                if(err) {
+                    logger.error('runClearDB', dbPath, tableName, err);
+                    reject(err)
+                }
                 else resolve(res)
                 db.close();
             })
@@ -80,7 +91,10 @@ export const runSelectDB = (dbPath: string, sql: string, args?: any): Promise<an
         db.configure('busyTimeout', 10000)
         db.serialize(() => {
             db.all(sql, args, (err: Error, res: any) => {
-                if(err) reject(err)    
+                if(err) {
+                    logger.error('runSelectDB', dbPath, sql, args, err);
+                    reject(err)
+                } 
                 else resolve(res)
                 db.close();
             })
