@@ -404,9 +404,12 @@ namespace kungfu
                     }
                     auto& position = position_map[pInvestorPosition->InstrumentID];
                     auto& inst_info = instrument_map_[pInvestorPosition->InstrumentID];
-                    if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0 && pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0)
+                    if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0)
                     {
-                        position.yesterday_volume = pInvestorPosition->Position;
+                        if(pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0)
+                        {
+                            position.yesterday_volume = pInvestorPosition->Position;
+                        }
                     }
                     else
                     {
