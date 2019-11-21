@@ -18,6 +18,8 @@ PositionDetail = 208
 Instrument = 209
 AlgoOrderInput = 210
 AlgoOrderReport = 211
+AlgoOrderModify = 212
+OrderActionError = 213
 Subscribe = 302
 NewOrderSingle = 353
 CancelOrder = 354
@@ -38,6 +40,7 @@ Registry.register(Transaction, underscore(pywingchun.Transaction.__name__), pywi
 Registry.register(Bar, underscore(pywingchun.Bar.__name__), pywingchun.Bar)
 Registry.register(OrderInput, underscore(pywingchun.OrderInput.__name__), pywingchun.OrderInput)
 Registry.register(OrderAction, underscore(pywingchun.OrderAction.__name__), pywingchun.OrderAction)
+Registry.register(OrderActionError, underscore(pywingchun.OrderActionError.__name__), pywingchun.OrderActionError)
 Registry.register(Order, underscore(pywingchun.Order.__name__), pywingchun.Order)
 Registry.register(Trade, underscore(pywingchun.Trade.__name__), pywingchun.Trade)
 Registry.register(Position, underscore(pywingchun.Position.__name__), pywingchun.Position)

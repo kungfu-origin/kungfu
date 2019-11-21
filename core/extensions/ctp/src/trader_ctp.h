@@ -106,6 +106,8 @@ namespace kungfu
 
                 InstrumentMap instrument_map_;
 
+                std::unordered_map<int, msg::data::OrderAction> action_event_map_;
+
                 std::string trading_day_;
 
                 bool login();

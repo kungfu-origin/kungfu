@@ -41,6 +41,7 @@ namespace kungfu
                     AlgoOrderInput = 210,
                     AlgoOrderReport = 211,
                     AlgoOrderModify = 212,
+                    OrderActionError = 213,
 
                     Subscribe = 302,
                     SubscribeAll = 303,
@@ -695,6 +696,38 @@ namespace kungfu
                     action.volume = j["volume"].get<int64_t>();
                 }
 
+                //订单操作
+                struct OrderActionError
+                {
+                    uint64_t order_id;                       //订单ID
+                    uint64_t order_action_id;                //订单操作ID
+                    int32_t error_id;                        //错误ID
+                    char error_msg[ERROR_MSG_LEN];           //错误信息
+
+                    const std::string get_error_msg() const { return std::string(error_msg); }
+                    void set_error_msg(const std::string &msg) { strncpy(this->error_msg, msg.c_str(), ERROR_MSG_LEN); }
+#ifndef _WIN32
+                } __attribute__((packed));
+#else
+                };
+#endif
+
+                inline void to_json(nlohmann::json &j, const OrderActionError &error)
+                {
+                    j["order_id"] = error.order_id;
+                    j["order_action_id"] = error.order_action_id;
+                    j["error_id"] = error.error_id;
+                    j["error_msg"] = error.error_msg;
+                }
+
+                inline void from_json(const nlohmann::json &j, OrderActionError &error)
+                {
+                    error.order_id = j["order_id"].get<uint64_t>();
+                    error.order_action_id = j["order_action_id"].get<uint64_t>();
+                    error.error_id = j["error_id"];
+                    error.set_error_msg(j["error_msg"].get<std::string>());
+                }
+
                 //订单消息
                 struct Order
                 {
@@ -727,7 +760,7 @@ namespace kungfu
 
                     OrderStatus status;                      //订单状态
 
-                    int error_id;                            //错误ID
+                    int32_t error_id;                        //错误ID
                     char error_msg[ERROR_MSG_LEN];           //错误信息
 
                     Side side;                               //买卖方向

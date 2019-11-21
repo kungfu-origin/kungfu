@@ -204,6 +204,9 @@ public:
     void on_order(strategy::Context_ptr context, const Order &order) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order); }
 
+    void on_order_action_error(strategy::Context_ptr context, const OrderActionError &error) override
+    {PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error); }
+
     void on_trade(strategy::Context_ptr context, const Trade &trade) override
     {PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade); }
 
@@ -569,6 +572,17 @@ PYBIND11_MODULE(pywingchun, m)
             .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<OrderAction*>(addr); })
             .def("__sizeof__", [](const OrderAction &a) { return sizeof(a); })
             .def("__repr__",[](const OrderAction &a){return to_string(a);});
+
+    py::class_<OrderActionError>(m, "OrderActionError")
+            .def(py::init<>())
+            .def_readwrite("order_id", &OrderActionError::order_id)
+            .def_readwrite("order_action_id", &OrderActionError::order_action_id)
+            .def_readwrite("error_id", &OrderActionError::error_id)
+            .def_property("error_msg", &OrderActionError::get_error_msg, &OrderActionError::set_error_msg)
+            .def_property_readonly("raw_address", [](const OrderActionError &a) { return reinterpret_cast<uintptr_t>(&a);})
+            .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<OrderActionError*>(addr); })
+            .def("__sizeof__", [](const OrderActionError &a) { return sizeof(a); })
+            .def("__repr__",[](const OrderActionError &a){return to_string(a);});
 
     py::class_<Trade>(m, "Trade")
             .def(py::init<>())

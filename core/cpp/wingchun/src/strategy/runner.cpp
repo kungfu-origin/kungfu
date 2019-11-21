@@ -82,6 +82,15 @@ namespace kungfu
                       }
                   });
 
+                events_ | is(msg::type::OrderActionError) | to(context_->app_.get_home_uid()) |
+                $([&](event_ptr event)
+                  {
+                      for (const auto &strategy : strategies_)
+                      {
+                          strategy->on_order_action_error(context_, event->data<OrderActionError>());
+                      }
+                  });
+
                 events_ | is(msg::type::Trade) | to(context_->app_.get_home_uid()) |
                 $([&](event_ptr event)
                   {

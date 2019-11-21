@@ -70,6 +70,11 @@ namespace kungfu
                 virtual void on_order(Context_ptr context, const msg::data::Order &order)
                 {};
 
+                //订单操作错误回调
+                //@param order             订单信息数据
+                virtual void on_order_action_error(Context_ptr context, const msg::data::OrderActionError &error)
+                {};
+
                 //订单成交回报回调
                 //@param trade             订单成交数据
                 virtual void on_trade(Context_ptr context, const msg::data::Trade &trade)
