@@ -69,6 +69,13 @@ class AccountBook(pywingchun.Book):
                 self._positions[pos.uid] = pos
             else:
                 raise TypeError("Position object required, but {} provided".format(type(pos)))
+        self._active_orders = {}
+        self._last_check = 0
+
+    def _on_interval_check(self, now):
+        if self._last_check + int(1e9) * 30 < now:
+            self.subject.on_next(self.event)
+            self._last_check = now
 
     def setup_trading_day(self, trading_day):
         self.trading_day = trading_day
@@ -80,6 +87,13 @@ class AccountBook(pywingchun.Book):
     def on_trading_day(self, event, daytime):
         trading_day = kft.to_datetime(daytime)
         self.apply_trading_day(trading_day)
+
+    def on_order(self, event, order):
+        self.ctx.logger.debug("{} received order event: {}".format(self.location.uname, order))
+        if order.active:
+            self._active_orders[order.order_id] = order
+        elif order.order_id in self._active_orders:
+            self._active_orders.pop(order.order_id)
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug("{} received trade event: {}".format(self.location.uname, trade))
@@ -102,8 +116,7 @@ class AccountBook(pywingchun.Book):
         if short_pos_uid in self._positions:
             position = self._positions[short_pos_uid]
             position.apply_quote(quote)
-        if long_pos_uid in self._positions or short_pos_uid in self._positions:
-            self.subject.on_next(self.event)
+        self._on_interval_check(event.gen_time)
 
     def on_asset(self, event, asset):
         self.ctx.logger.info("{} [{:08x}] asset report received, msg_type: {}, data: {}".
@@ -142,6 +155,10 @@ class AccountBook(pywingchun.Book):
     @property
     def positions(self):
         return list(self._positions.values())
+
+    @property
+    def active_orders(self):
+        return list(self._active_orders.values())
 
     @property
     def margin(self):

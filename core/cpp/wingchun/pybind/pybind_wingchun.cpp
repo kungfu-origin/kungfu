@@ -79,6 +79,8 @@ public:
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
+    void on_order(event_ptr event, const Order &order) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order, event, order); }
     void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trade, event, trade); }
     void on_positions(const std::vector<Position>& positions) override
@@ -718,6 +720,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("ready", &kwb::Book::is_ready)
             .def("on_trading_day", &kwb::Book::on_trading_day)
             .def("on_quote", &kwb::Book::on_quote)
+            .def("on_order", &kwb::Book::on_order)
             .def("on_trade", &kwb::Book::on_trade)
             .def("on_positions", &kwb::Book::on_positions)
             .def("on_position_details", &kwb::Book::on_position_details)
