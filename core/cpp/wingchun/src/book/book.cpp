@@ -219,6 +219,33 @@ namespace kungfu
                     }
                 });
 
+                events_ | is(msg::type::Order) | filter([=](yijinjing::event_ptr e)
+                {
+                    if (location->category == category::TD)
+                    {
+                        return location->uid == e->source();
+                    }
+                    else if(location->category == category::STRATEGY)
+                    {
+                        return location->uid == e->dest();
+                    }
+                    else {
+                        throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
+                    }
+                }) |
+                $([=](event_ptr event)
+                  {
+                      try
+                      {
+                          const auto& data = event->data<Order>();
+                          book->on_order(event, event->data<Order>());
+                      }
+                      catch (const std::exception &e)
+                      {
+                          SPDLOG_ERROR("Unexpected exception {}", e.what());
+                      }
+                  });
+
                 events_ | is(msg::type::Asset) | filter([=](yijinjing::event_ptr e)
                 {
                     const auto& asset = e->data<Asset>();

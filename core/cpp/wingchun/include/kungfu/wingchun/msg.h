@@ -696,7 +696,7 @@ namespace kungfu
                     action.volume = j["volume"].get<int64_t>();
                 }
 
-                //订单操作
+                //订单操作错误
                 struct OrderActionError
                 {
                     uint64_t order_id;                       //订单ID

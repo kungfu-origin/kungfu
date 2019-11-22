@@ -30,6 +30,7 @@ class Position:
             self.trading_day = self.ctx.trading_day
         elif isinstance(self.trading_day, str):
             self.trading_day = datetime.datetime.strptime(self.trading_day, DATE_FORMAT)
+        self._last_check = 0
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -39,6 +40,11 @@ class Position:
     def __repr__(self):
         return self.event.data.__repr__()
 
+    def _on_interval_check(self, now):
+        if self._last_check + int(1e9) * 30 < now:
+            self.subject.on_next(self.event)
+            self._last_check = now
+
     @classmethod
     def factory(cls, ctx, book, **kwargs):
         instrument_type = get_instrument_type(kwargs["instrument_id"], kwargs["exchange_id"])
@@ -47,6 +53,10 @@ class Position:
     @property
     def instrument_type(self):
         return get_instrument_type(self.instrument_id, self.exchange_id)
+
+    @property
+    def subject(self):
+        return self.book.subject
 
     def apply_trade(self, trade):
         raise NotImplementedError
@@ -124,7 +134,7 @@ class StockPosition(Position):
             self.last_price = quote.last_price
         if is_valid_price(quote.pre_close_price):
             self.pre_close_price = quote.pre_close_price
-        self.book.subject.on_next(self.event)
+        self._on_interval_check(self.ctx.now())
 
     def apply_trading_day(self, trading_day):
         if not self.trading_day == trading_day:
@@ -227,7 +237,7 @@ class FuturePosition(Position):
             self.last_price = quote.last_price
         elif is_valid_price(quote.pre_settlement_price):
             self.pre_settlement_price = quote.pre_settlement_price
-        self.book.subject.on_next(self.event)
+        self._on_interval_check(self.ctx.now())
 
     def apply_trading_day(self, trading_day):
         if not self.trading_day == trading_day:
