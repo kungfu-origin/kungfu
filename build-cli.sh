@@ -7,7 +7,7 @@ cd ./core
 yarn run build
 cd ../cli
 yarn run install-deps
-yarn run build:cli
+yarn run build-cli
 
 cd ../
 npm config set kungfu-core:runtime electron

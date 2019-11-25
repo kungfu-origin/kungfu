@@ -9,7 +9,7 @@
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "npm run clean && yarn wsrun --serial --fast-exit build",
-    "build:cli": "sh ./build-cli.sh",
+    "build-cli": "sh ./build-cli.sh",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {
