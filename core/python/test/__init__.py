@@ -1,9 +1,8 @@
+
 import os
 import platform
 import click
-import extensions
 import kungfu.yijinjing.journal as kfj
-
 
 @click.group(invoke_without_command=True)
 @click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "

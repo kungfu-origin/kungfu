@@ -27,6 +27,8 @@ namespace kungfu
 
                 virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
 
+                virtual void on_order_input(yijinjing::event_ptr event, const msg::data::OrderInput &input) = 0;
+
                 virtual void on_positions(const std::vector<msg::data::Position>& positions) = 0;
 
                 virtual void on_position_details(const std::vector<msg::data::PositionDetail>& position_details) = 0;

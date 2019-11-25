@@ -3,20 +3,12 @@ import sys
 import importlib
 import pyyjj
 import pywingchun
+from kungfu.data.sqlite.data_proxy import CommissionDB
 from kungfu.wingchun.book.book import AccountBook
 from kungfu.wingchun.constants import *
+from kungfu.wingchun.utils import get_product_id
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
-
-class AlgoOrderContext:
-    def __init__(self, wc_ctx):
-        self._wc_ctx = wc_ctx
-        self.orders = {}
-
-    def insert_algo_order(self, order):
-        order_id = self._wc_ctx.add_order(order)
-        if order_id > 0:
-            self.orders[order_id] = order
 
 class Strategy(pywingchun.Strategy):
     def __init__(self, ctx):
@@ -45,6 +37,10 @@ class Strategy(pywingchun.Strategy):
     def __get_inst_info(self, instrument_id):
         return msg_utils.object_as_dict(self.book_context.get_inst_info(instrument_id))
 
+    def __get_commission_info(self, instrument_id):
+        product_id = get_product_id(instrument_id).upper()
+        return self.ctx.commission_infos[product_id]
+
     def __init_strategy(self, path):
         strategy_dir = os.path.dirname(path)
         name_no_ext = os.path.split(os.path.basename(path))
@@ -62,6 +58,10 @@ class Strategy(pywingchun.Strategy):
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
         self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
+
+    def __init_commission_info(self):
+        config_location = self.ctx.config_location
+        self.ctx.commission_infos = {commission["product_id"]: commission for commission in CommissionDB(config_location, "commission").all_commission_info()}
 
     def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
@@ -106,8 +106,11 @@ class Strategy(pywingchun.Strategy):
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
+        self.ctx.config_location = wc_context.config_location
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
+        self.ctx.get_commission_info = self.__get_commission_info
+        self.__init_commission_info()
         self.__init_book()
         self.__init_algo()
         self._pre_start(self.ctx)

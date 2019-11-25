@@ -49,6 +49,8 @@ namespace kungfu
                 return config_location_->locator->layout_file(config_location_, yijinjing::data::layout::SQLITE, name);
             }
 
+            yijinjing::data::location_ptr get_config_location() const { return  config_location_; }
+
             std::string get_app_db_file(const std::string &name, bool default_to_system = false)
             {
                 auto home = get_io_device()->get_home();

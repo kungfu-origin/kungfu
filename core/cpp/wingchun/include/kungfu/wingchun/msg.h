@@ -921,7 +921,7 @@ namespace kungfu
                 //成交信息
                 struct Trade
                 {
-                    uint64_t trade_id;                             //成交ID
+                    uint64_t trade_id;                       //成交ID
 
                     uint64_t order_id;                       //订单ID
                     uint64_t parent_order_id;                //母订单ID
@@ -943,6 +943,7 @@ namespace kungfu
 
                     double price;                            //成交价格
                     int64_t volume;                          //成交量
+                    int64_t close_today_volume;              //平今日仓量(期货)
 
                     double tax;                              //税
                     double commission;                       //手续费
@@ -1010,6 +1011,7 @@ namespace kungfu
 
                     j["price"] = trade.price;
                     j["volume"] = trade.volume;
+                    j["close_today_volume"] = trade.close_today_volume;
 
                     j["tax"] = trade.tax;
                     j["commission"] = trade.commission;

@@ -20,7 +20,6 @@
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
-#include <kungfu/wingchun/commander.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/ledger.h>
@@ -79,6 +78,8 @@ public:
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
     void on_quote(event_ptr event, const Quote &quote) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
+    void on_order_input(event_ptr event, const OrderInput &input) override
+    {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order_input, event, input); }
     void on_order(event_ptr event, const Order &order) override
     {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order, event, order); }
     void on_trade(event_ptr event, const Trade &trade) override
@@ -148,6 +149,9 @@ public:
 
     void on_order(event_ptr event, const Order &order) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_order, event, order) }
+
+    void on_order_action_error(event_ptr event, const OrderActionError &error) override
+    {PYBIND11_OVERLOAD_PURE(void, Ledger, on_order_action_error, event, error) }
 
     void on_trade(event_ptr event, const Trade &trade) override
     {PYBIND11_OVERLOAD_PURE(void, Ledger, on_trade, event, trade) }
@@ -221,6 +225,12 @@ PYBIND11_MODULE(pywingchun, m)
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
     m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
+    m_utils.def("order_from_input", [](const kungfu::wingchun::msg::data::OrderInput &input)
+    {
+        kungfu::wingchun::msg::data::Order order = {};
+        kungfu::wingchun::msg::data::order_from_input(input, order);
+        return order;
+    });
 
     auto m_constants = m.def_submodule("constants");
 
@@ -241,6 +251,16 @@ PYBIND11_MODULE(pywingchun, m)
                     return static_cast<int>(a) == b;
                 }
             );
+
+    py::enum_<kungfu::wingchun::CommissionRateMode>(m_constants, "CommissionRateMode", py::arithmetic())
+            .value("ByAmount", kungfu::wingchun::CommissionRateMode::ByAmount)
+            .value("ByVolume", kungfu::wingchun::CommissionRateMode::ByVolume)
+            .export_values()
+            .def("__eq__",
+                [](const kungfu::wingchun::CommissionRateMode &a, int b)
+                {
+                    return static_cast<int>(a) == b;
+                });
 
     py::enum_<kungfu::wingchun::ExecType>(m_constants, "ExecType", py::arithmetic())
             .value("Unknown", kungfu::wingchun::ExecType::Unknown)
@@ -508,7 +528,7 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<OrderInput>(m, "OrderInput")
             .def(py::init<>())
-            .def_readonly("order_id", &OrderInput::order_id)
+            .def_readwrite("order_id", &OrderInput::order_id)
             .def_readwrite("instrument_type", &OrderInput::instrument_type)
             .def_readwrite("limit_price", &OrderInput::limit_price)
             .def_readwrite("frozen_price", &OrderInput::frozen_price)
@@ -595,9 +615,10 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("instrument_type", &Trade::instrument_type)
             .def_readwrite("side", &Trade::side)
             .def_readwrite("offset", &Trade::offset)
-            .def_readwrite("price", &Trade::price)
             .def_readwrite("hedge_flag", &Trade::hedge_flag)
+            .def_readwrite("price", &Trade::price)
             .def_readwrite("volume", &Trade::volume)
+            .def_readwrite("close_today_volume", &Trade::close_today_volume)
             .def_readwrite("tax", &Trade::tax)
             .def_readwrite("commission", &Trade::commission)
             .def_property("trading_day", &Trade::get_trading_day, &Trade::set_trading_day)
@@ -720,6 +741,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_property_readonly("ready", &kwb::Book::is_ready)
             .def("on_trading_day", &kwb::Book::on_trading_day)
             .def("on_quote", &kwb::Book::on_quote)
+            .def("on_order_input", &kwb::Book::on_order_input)
             .def("on_order", &kwb::Book::on_order)
             .def("on_trade", &kwb::Book::on_trade)
             .def("on_positions", &kwb::Book::on_positions)
@@ -758,15 +780,16 @@ PYBIND11_MODULE(pywingchun, m)
 
     py::class_<Ledger, PyLedger, kungfu::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
             .def(py::init<data::locator_ptr, data::mode, bool>())
+            .def_property_readonly("config_location", &Ledger::get_config_location)
             .def_property_readonly("io_device", &Ledger::get_io_device)
             .def_property_readonly("book_context", &Ledger::get_book_context)
             .def("now", &Ledger::now)
             .def("has_location", &Ledger::has_location)
             .def("get_location", &Ledger::get_location)
+            .def("has_writer", &Ledger::has_writer)
             .def("get_writer", &Ledger::get_writer)
             .def("publish", &Ledger::publish)
             .def("publish_broker_states", &Ledger::publish_broker_states)
-            .def("new_order_single", &Ledger::new_order_single)
             .def("cancel_order", &Ledger::cancel_order)
             .def("handle_request", &Ledger::handle_request)
             .def("handle_instrument_request", &Ledger::handle_instrument_request)
@@ -775,6 +798,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("on_app_location", &Ledger::on_app_location)
             .def("on_quote", &Ledger::on_quote)
             .def("on_order", &Ledger::on_order)
+            .def("on_order_action_error", &Ledger::on_order_action_error)
             .def("on_trade", &Ledger::on_trade)
             .def("on_instruments", &Ledger::on_instruments)
             .def("set_begin_time", &Ledger::set_begin_time)
@@ -793,6 +817,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("add_strategy", &strategy::Runner::add_strategy);
 
     py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
+            .def_property_readonly("config_location", &strategy::Context::get_config_location)
             .def_property_readonly("book_context", &strategy::Context::get_book_context)
             .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
             .def("now", &strategy::Context::now)

@@ -137,42 +137,79 @@ namespace kungfu
 
             void BookContext::add_book(const yijinjing::data::location_ptr& location, const Book_ptr& book)
             {
+
                 if(books_.find(location->uid) != books_.end())
                 {
                     return;
                 }
+                if(location->category != category::TD and location->category != category::STRATEGY)
+                {
+                    throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
+                }
+
                 books_[location->uid] = book;
 
                 this->monitor_positions(location, book);
                 this->monitor_position_details(location, book);
 
-                if (location->category == category::TD)
+                for(const auto& item: app_.get_channels())
                 {
-                    for(const auto& item: app_.get_channels())
+                    const auto &channel = item.second;
+                    if (channel.source_id == location->uid)
                     {
-                        const auto& channel = item.second;
-                        if (channel.source_id == location->uid)
+                        std::string dest_uname = app_.has_location(channel.dest_id) ? app_.get_location(
+                                channel.dest_id)->uname : "unknown";
+                        app_.get_reader()->join(location, channel.dest_id, app_.now());
+                        SPDLOG_INFO("book {} [{:08x}] read {} from {} [{:08x}] to {} [{:08x}]",
+                                    location->uname, location->uid, location->category == category::TD ? "order/trades": "input",
+                                    location->uname, location->uid, dest_uname, channel.dest_id);
+                    }
+                    else if(channel.dest_id == location->uid)
+                    {
+                        if (app_.has_location(channel.source_id))
                         {
-                            std::string dest_uname = app_.has_location(channel.dest_id) ? app_.get_location(channel.dest_id)->uname : "unknown";
-                            SPDLOG_INFO("book {} [{:08x}] read order/trades from {} [{:08x}] to {} [{:08x}]",
-                                    location->uname, location->uid, location->uname, location->uid, dest_uname, channel.dest_id);
-                            app_.get_reader()->join(location, channel.dest_id, app_.now());
+                            auto src_location = app_.get_location(channel.source_id);
+                            app_.get_reader()->join(src_location, channel.dest_id, app_.now());
+                            SPDLOG_INFO("book {} [{:08x}] read {} from {} [{:08x}] to {} [{:08x}]",
+                                        location->uname, location->uid, location->category == category::TD ? "input": "order/trades",
+                                        src_location->uname,src_location->uid, location->uname, location->uid);
+                        }
+                        else
+                        {
+                            SPDLOG_WARN("location {} not exist", channel.source_id);
                         }
                     }
-
-                    events_ | is(yijinjing::msg::type::Channel) | filter([=](event_ptr event)
-                     {
-                        return event->data<yijinjing::msg::data::Channel>().source_id == location->uid;
-                    }) |
-                    $([=](event_ptr event)
-                    {
-                        const auto& channel = event->data<yijinjing::msg::data::Channel>();
-                        std::string dest_uname = app_.has_location(channel.dest_id) ? app_.get_location(channel.dest_id)->uname : "unknown";
-                        SPDLOG_INFO("book {} [{:08x}] read order/trades from {} [{:08x}] to {} [{:08x}]",
-                                    location->uname, location->uid, location->uname, location->uid, dest_uname, channel.dest_id);
-                        app_.get_reader()->join(location, channel.dest_id, event->gen_time());
-                    });
                 }
+
+                events_ | is(yijinjing::msg::type::Channel) |
+                $([=](event_ptr event)
+                {
+                    const auto& channel = event->data<yijinjing::msg::data::Channel>();
+                    if (channel.source_id == location->uid)
+                    {
+                        std::string dest_uname = app_.has_location(channel.dest_id) ? app_.get_location(
+                                channel.dest_id)->uname : "unknown";
+                        app_.get_reader()->join(location, channel.dest_id, app_.now());
+                        SPDLOG_INFO("book {} [{:08x}] read {} from {} [{:08x}] to {} [{:08x}]",
+                                    location->uname, location->uid, location->category == category::TD ? "order/trades": "input",
+                                    location->uname, location->uid, dest_uname,channel.dest_id);
+                    }
+                    else if(channel.dest_id == location->uid)
+                    {
+                        if (app_.has_location(channel.source_id))
+                        {
+                            auto src_location = app_.get_location(channel.source_id);
+                            app_.get_reader()->join(src_location, channel.dest_id, app_.now());
+                            SPDLOG_INFO("book {} [{:08x}] read {} from {} [{:08x}] to {} [{:08x}]",
+                                        location->uname, location->uid, location->category == category::TD ? "input": "order/trades",
+                                        src_location->uname, src_location->uid, location->uname, location->uid);
+                        }
+                        else
+                        {
+                            SPDLOG_WARN("location {} not exist", channel.source_id);
+                        }
+                    }
+                });
 
                 events_ | filter([=](event_ptr event) { return event->msg_type() == msg::type::PositionEnd and event->data<PositionEnd>().holder_uid == location->uid;}) |
                 first() | $([=](event_ptr event) { book->ready_ = true; });
@@ -195,17 +232,7 @@ namespace kungfu
 
                 events_ | is(msg::type::Trade) | filter([=](yijinjing::event_ptr e)
                 {
-                    if (location->category == category::TD)
-                    {
-                        return location->uid == e->source();
-                    }
-                    else if(location->category == category::STRATEGY)
-                    {
-                        return location->uid == e->dest();
-                    }
-                    else {
-                        throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
-                    }
+                    return location->category == category::TD ? location->uid == e->source() : location->uid == e->dest();
                 }) |
                 $([=](event_ptr event)
                 {
@@ -221,17 +248,7 @@ namespace kungfu
 
                 events_ | is(msg::type::Order) | filter([=](yijinjing::event_ptr e)
                 {
-                    if (location->category == category::TD)
-                    {
-                        return location->uid == e->source();
-                    }
-                    else if(location->category == category::STRATEGY)
-                    {
-                        return location->uid == e->dest();
-                    }
-                    else {
-                        throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
-                    }
+                    return location->category == category::TD ? location->uid == e->source() : location->uid == e->dest();
                 }) |
                 $([=](event_ptr event)
                   {
@@ -239,6 +256,23 @@ namespace kungfu
                       {
                           const auto& data = event->data<Order>();
                           book->on_order(event, event->data<Order>());
+                      }
+                      catch (const std::exception &e)
+                      {
+                          SPDLOG_ERROR("Unexpected exception {}", e.what());
+                      }
+                  });
+
+                events_ | is(msg::type::OrderInput) | filter([=](yijinjing::event_ptr e)
+                {
+                    return location->category == category::TD ? location->uid == e->dest() : location->uid == e->source();
+                }) |
+                $([=](event_ptr event)
+                  {
+                      try
+                      {
+                          const auto& data = event->data<OrderInput>();
+                          book->on_order_input(event, event->data<OrderInput>());
                       }
                       catch (const std::exception &e)
                       {

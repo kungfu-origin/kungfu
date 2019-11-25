@@ -7,7 +7,7 @@ from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.constants import Source, Exchange
 from kungfu.wingchun.strategy import Strategy
 from kungfu.wingchun import Runner, replay_setup
-from mock import patch
+#from mock import patch
 
 @test.group()
 @click.option('-g', '--group', type=str, default='default', help='group')

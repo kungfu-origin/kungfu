@@ -257,6 +257,17 @@ namespace kungfu
                       }
                   });
 
+                events_ | is(msg::type::OrderActionError) | 
+                $([&](event_ptr event)
+                  {
+                      try
+                      { on_order_action_error(event, event->data<OrderActionError>()); }
+                      catch (const std::exception &e)
+                      {
+                          SPDLOG_ERROR("Unexpected exception {}", e.what());
+                      }
+                  });
+
                 events_ | is(msg::type::QryAsset) |
                 $([&](event_ptr event)
                 {
@@ -393,11 +404,7 @@ namespace kungfu
                   });
             }
 
-
-            void Ledger::new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input)
-            {}
-
-            void Ledger::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
+            uint64_t Ledger::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
             {
                 SPDLOG_INFO("cancel order {}", order_id);
                 if (has_writer(account_location_uid))
@@ -408,6 +415,7 @@ namespace kungfu
                     action.order_id = order_id;
                     action.action_flag = OrderActionFlag::Cancel;
                     writer->close_data();
+                    return action.order_action_id;
                 } else
                 {
                     if (has_location(account_location_uid))
@@ -418,6 +426,7 @@ namespace kungfu
                     {
                         SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);
                     }
+                    return 0;
                 }
             }
 

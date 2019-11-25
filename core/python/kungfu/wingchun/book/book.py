@@ -52,8 +52,16 @@ class AccountBook(pywingchun.Book):
         self.initial_equity = kwargs.pop("initial_equity", 0.0)
         self.static_equity = kwargs.pop("static_equity", 0.0)
         self.avail = kwargs.pop("avail", 0.0)
+        self.frozen_cash = kwargs.pop("frozen_cash", 0.0)
+        self.frozen_margin = kwargs.pop("frozen_margin", 0.0)
+        self.intraday_fee = kwargs.pop("intraday_fee", 0.0)
+        self.accumulated_fee = kwargs.pop("accumulated_fee", 0.0)
         self.realized_pnl = kwargs.pop("realized_pnl", 0.0)
+
+        self._orders = {}
+        self._tickers = {}
         self._positions = {}
+
         positions = kwargs.pop("positions", [])
         for pos in positions:
             if isinstance(pos, pywingchun.Position):
@@ -69,11 +77,15 @@ class AccountBook(pywingchun.Book):
                 self._positions[pos.uid] = pos
             else:
                 raise TypeError("Position object required, but {} provided".format(type(pos)))
-        self._active_orders = {}
+
         self._last_check = 0
 
     def _on_interval_check(self, now):
         if self._last_check + int(1e9) * 30 < now:
+            for order in self.active_orders:
+                if order.status == wc_constants.OrderStatus.Submitted and now - order.insert_time >= int(1e9) * 5:
+                    order.status = wc_constants.OrderStatus.Unknown
+                    self.apply_order(order)
             self.subject.on_next(self.event)
             self._last_check = now
 
@@ -88,12 +100,34 @@ class AccountBook(pywingchun.Book):
         trading_day = kft.to_datetime(daytime)
         self.apply_trading_day(trading_day)
 
+    def on_order_input(self, event, input):
+        self.ctx.logger.debug("{} received order input event: {}".format(self.location.uname, input))
+        input.frozen_price = input.limit_price if input.price_type == wc_constants.PriceType.Limit\
+            else self.get_last_price(input.instrument_id, input.exchange_id)
+        order = pywingchun.utils.order_from_input(input)
+        order.insert_time = event.gen_time
+        self._orders[order.order_id] = order
+        instrument_type = wc_utils.get_instrument_type(input.instrument_id, input.exchange_id)
+        direction = wc_utils.get_position_effect(instrument_type, input.side, input.offset)
+        position = self._get_position(input.instrument_id, input.exchange_id, direction)
+        try:
+            position.apply_order_input(input)
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self.ctx.logger.error('apply order input error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+
     def on_order(self, event, order):
         self.ctx.logger.debug("{} received order event: {}".format(self.location.uname, order))
-        if order.active:
-            self._active_orders[order.order_id] = order
-        elif order.order_id in self._active_orders:
-            self._active_orders.pop(order.order_id)
+        order.frozen_price = self.get_frozen_price(order.order_id)
+        self._orders[order.order_id] = order
+        instrument_type = wc_utils.get_instrument_type(order.instrument_id, order.exchange_id)
+        direction = wc_utils.get_position_effect(instrument_type, order.side, order.offset)
+        position = self._get_position(order.instrument_id, order.exchange_id, direction)
+        try:
+            position.apply_order(order)
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self.ctx.logger.error('apply order error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug("{} received trade event: {}".format(self.location.uname, trade))
@@ -108,6 +142,8 @@ class AccountBook(pywingchun.Book):
 
     def on_quote(self, event, quote):
         self.ctx.logger.debug('{} received quote event: {}'.format(self.location.uname, quote))
+        symbol_id = pyyjj.hash_str_32("{}.{}".format(quote.instrument_id, quote.exchange_id))
+        self._tickers[symbol_id] = quote
         long_pos_uid = get_position_uid(quote.instrument_id, quote.exchange_id, wc_constants.Direction.Long)
         short_pos_uid = get_position_uid(quote.instrument_id, quote.exchange_id, wc_constants.Direction.Short)
         if long_pos_uid in self._positions:
@@ -158,7 +194,11 @@ class AccountBook(pywingchun.Book):
 
     @property
     def active_orders(self):
-        return list(self._active_orders.values())
+        return list([order for order in self._orders.values() if order.active])
+
+    @property
+    def total_cash(self):
+        return self.avail + self.frozen_cash
 
     @property
     def margin(self):
@@ -188,6 +228,10 @@ class AccountBook(pywingchun.Book):
         data.avail = self.avail
         data.margin = self.margin
         data.market_value = self.market_value
+        data.frozen_cash = self.frozen_cash
+        data.frozen_margin = self.frozen_margin
+        data.intraday_fee = self.intraday_fee
+        data.accumulated_fee = self.accumulated_fee
         data.unrealized_pnl = self.unrealized_pnl
         data.realized_pnl = self.realized_pnl
         return self.make_event(wc_msg.Asset, data)
@@ -217,6 +261,23 @@ class AccountBook(pywingchun.Book):
             self.subject.on_next(self.event)
         else:
             self.ctx.logger.debug("{} [{:08x}] receive duplicate trading_day message {}".format(self.location.uname, self.location.uid, trading_day))
+
+    def get_ticker(self, instrument_id, exchange_id):
+        symbol_id = pyyjj.hash_str_32("{}.{}".format(instrument_id, exchange_id))
+        return self._tickers.get(symbol_id, None)
+
+    def get_frozen_price(self, order_id):
+        if order_id in self._orders:
+            return self._orders[order_id].frozen_price
+        else:
+            return 0.0
+
+    def get_last_price(self, instrument_id, exchange_id):
+        ticker = self.get_ticker(instrument_id, exchange_id)
+        if ticker and wc_utils.is_valid_price(ticker.last_price):
+            return ticker.last_price
+        else:
+            return 0.0
 
     def _get_position(self, instrument_id, exchange_id, direction = wc_constants.Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)

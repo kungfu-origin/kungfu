@@ -44,19 +44,14 @@ class FutureInstrument(ModelMixin, Base):
     short_margin_ratio = Column(Float)
 
 
-class Commission(Base):
+class FutureCommission(Base):
     __tablename__ = 'commission'
-    __table_args__ = (PrimaryKeyConstraint('instrument_id', 'exchange_id', 'instrument_type'),)
-    instrument_id = Column(String)
+    product_id = Column(String, primary_key = True)
     exchange_id = Column(String)
-    instrument_type = Column(InstrumentType)
-    account_id = Column(String)
-    broker_id = Column(String)
     mode = Column(Integer)
     open_ratio = Column(Float)
     close_ratio = Column(Float)
     close_today_ratio = Column(Float)
-    min_commission = Column(Float)
 
 class Order(ModelMixin, Base):
     __tablename__ = 'orders'

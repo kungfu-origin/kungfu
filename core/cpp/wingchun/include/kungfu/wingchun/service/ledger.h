@@ -29,9 +29,7 @@ namespace kungfu
 
                 void publish_broker_states(int64_t trigger_time);
 
-                void new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input);
-
-                void cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
+                uint64_t cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
 
                 virtual std::string handle_request(const yijinjing::event_ptr &event, const std::string &msg) = 0;
 
@@ -42,6 +40,8 @@ namespace kungfu
                 virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
 
                 virtual void on_quote(yijinjing::event_ptr event, const msg::data::Quote &quote) = 0;
+
+                virtual void on_order_action_error(yijinjing::event_ptr event, const msg::data::OrderActionError &error) = 0;
 
                 virtual void on_order(yijinjing::event_ptr event, const msg::data::Order &order) = 0;
 

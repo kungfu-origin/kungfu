@@ -17,6 +17,7 @@ from sqlalchemy import not_
 
 class SessionFactoryHolder:
     def __init__(self, location, filename):
+        self.db_file = location.locator.layout_file(location, pyyjj.layout.SQLITE, filename)
         self.engine = create_engine(make_url(location, filename))
         self.session_factory = sessionmaker(bind=self.engine)
 
@@ -75,6 +76,22 @@ class CalendarDB(SessionFactoryHolder):
     def get_holidays(self, region=wc_constants.Region.CN):
         with session_scope(self.session_factory) as session:
             return [obj.holiday for obj in session.query(Holiday).filter(Holiday.region == region).all()]
+
+class CommissionDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(CommissionDB, self).__init__(location, filename)
+        FutureCommission.metadata.create_all(self.engine)
+
+    def get_commission_info(self, instrument_id):
+        product_id = wc_utils.get_product_id(instrument_id)
+        with session_scope(self.session_factory) as session:
+            commission_info = session.query(FutureCommission).get(product_id)
+            return commission_info
+
+    def all_commission_info(self):
+        with session_scope(self.session_factory) as session:
+            objs = session.query(FutureCommission).all()
+            return [object_as_dict(obj) for obj in objs]
 
 class AlgoDB(SessionFactoryHolder):
     def __init__(self, location, filename):
@@ -137,9 +154,6 @@ class LedgerDB(SessionFactoryHolder):
                     order.status = wc_constants.OrderStatus.Unknown
                     pending_orders.append(order)
             return [object_as_dict(order) for order in pending_orders]
-
-    def get_commission(self, account_id, instrument_id, exchange_id):
-        pass
 
     def set_instruments(self, instruments):
         with session_scope(self.session_factory) as session:

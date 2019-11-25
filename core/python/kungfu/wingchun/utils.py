@@ -2,6 +2,7 @@
 import pywingchun
 from kungfu.wingchun.constants import *
 import json
+import re
 
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price
@@ -23,6 +24,10 @@ def get_position_effect(instrument_type, side, offset):
         return Direction.Short
     else:
         raise ValueError('could not find position effect for instrument_type {}, side {}, offset {}'.format(instrument_type, side, offset))
+
+def get_product_id(instrument_id):
+    p = re.compile("([a-zA-Z]+)\d+")
+    return p.findall(instrument_id)[0]
 
 class WCEncoder(json.JSONEncoder):
     def default(self, obj):

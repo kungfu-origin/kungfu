@@ -10,7 +10,7 @@ import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.msg as yjj_msg
 from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
-from kungfu.data.sqlite.data_proxy import LedgerDB
+from kungfu.data.sqlite.data_proxy import LedgerDB, CommissionDB
 import kungfu.wingchun.book as kwb
 from kungfu.wingchun.calendar import Calendar
 from kungfu.wingchun.constants import OrderStatus
@@ -42,15 +42,18 @@ class Ledger(pywingchun.Ledger):
         pywingchun.Ledger.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
         self.ctx = ctx
         self.ctx.ledger = self
+        self.ctx.config_location = self.config_location
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
         self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.db.all_instrument_infos()}
+        self.ctx.commission_infos = {commission["product_id"]: commission for commission in CommissionDB(self.ctx.config_location, "commission").all_commission_info()}
         self.ctx.orders = {}
         self.ctx.trading_day = None
         self.ctx.books = {}
         self.ctx.now = self.now
         self.ctx.get_inst_info = self.get_inst_info
+        self.ctx.get_commission_info = self.get_commission_info
 
     def pre_start(self):
         self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
@@ -139,6 +142,15 @@ class Ledger(pywingchun.Ledger):
         self.ctx.db.add_order(**frame_as_dict["data"])
         self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
 
+    def on_order_action_error(self, event, error):
+        self.ctx.logger.debug("on order action error %s", error)
+        frame_as_dict = event.as_dict()
+        source_location = self.get_location(event.source) # account location which send trade report event
+        dest_location = self.get_location(event.dest) # strategy location which receive event
+        frame_as_dict["data"]["order_id"] = str(error.order_id)
+        frame_as_dict["data"]["order_action_id"] = str(error.order_action_id)
+        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
+
     def on_trade(self, event, trade):
         self.ctx.logger.debug('on trade %s', trade)
         frame_as_dict = event.as_dict()
@@ -187,7 +199,7 @@ class Ledger(pywingchun.Ledger):
         return uid in self.ctx.books
 
     def pop_book(self, uid):
-        #self.book_context.pop_book(uid)
+        self.book_context.pop_book(uid)
         return self.ctx.books.pop(uid, None)
 
     def _get_book(self, location):
@@ -205,6 +217,10 @@ class Ledger(pywingchun.Ledger):
         if not instrument_id in self.ctx.inst_infos:
             self.ctx.inst_infos[instrument_id] = self.ctx.db.get_instrument_info(instrument_id)
         return self.ctx.inst_infos[instrument_id]
+
+    def get_commission_info(self, instrument_id):
+        product_id = wc_utils.get_product_id(instrument_id).upper()
+        return self.ctx.commission_infos[product_id]
 
 @on(msg.Calendar)
 def calendar_request(ctx, event, location, data):
@@ -228,11 +244,39 @@ def broker_state_refresh(ctx, event, location, data):
 
 @on(msg.NewOrderSingle)
 def new_order_single(ctx, event, location, data):
-    # ctx.ledger.new_order_single(event, location.uid)
-    return {
-        'status': http.HTTPStatus.OK,
-        'msg_type': msg.NewOrderSingle
-    }
+    if ctx.ledger.has_writer(location.uid):
+        try:
+            input = pywingchun.OrderInput()
+            input.instrument_id = data.get("instrument_id")
+            input.exchange_id = data.get("exchange_id")
+            input.limit_price = data.get("limit_price", 0.0)
+            input.volume = data.get("volume")
+            side = data.get("side", wc_constants.Side.Buy)
+            input.side = side = wc_constants.Side(side) if isinstance(side, int) else side
+            offset = data.get("offset", wc_constants.Offset.Open)
+            input.offset = wc_constants.Offset(offset) if isinstance(offset, int) else offset
+            hedge_flag = data.get("hedge_flag", wc_constants.HedgeFlag.Speculation)
+            input.hedge_flag = wc_constants.HedgeFlag(hedge_flag) if isinstance(hedge_flag, int) else hedge_flag
+            price_type = data.get("price_type", wc_constants.PriceType.Limit)
+            input.price_type = wc_constants.PriceType(price_type) if isinstance(price_type, int) else price_type
+            writer = ctx.ledger.get_writer(location.uid)
+            input.order_id = writer.current_frame_uid()
+            writer.write_data(0, msg.OrderInput, input)
+            return {
+                'status': http.HTTPStatus.OK,
+                'msg_type': msg.NewOrderSingle,
+                "order_id": str(input.order_id)
+            }
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            ctx.logger.error('failed to insert order, error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+            return {'status': http.HTTPStatus.NOT_FOUND,'msg_type': msg.NewOrderSingle}
+    else:
+        ctx.logger.error("can not insert order to {} [{:08x}]".format(location.uname, location.uid))
+        return {
+            "status": http.HTTPStatus.NOT_FOUND,
+            'msg_type': msg.NewOrderSingle,
+        }
 
 @on(msg.CancelOrder)
 def cancel_order(ctx, event, location, data):

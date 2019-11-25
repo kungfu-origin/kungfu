@@ -30,6 +30,8 @@ namespace kungfu
                 //@return            当前纳秒时间
                 int64_t now() const;
 
+                yijinjing::data::location_ptr get_config_location() const { return  app_.get_config_location(); }
+
                 virtual void add_timer(int64_t nanotime, const std::function<void(yijinjing::event_ptr)> &callback);
 
                 virtual void add_time_interval(int64_t duration, const std::function<void(yijinjing::event_ptr)> &callback);
