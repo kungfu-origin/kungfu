@@ -8,7 +8,8 @@
     "node": true
   },
   "rules": {
-    "no-confusing-arrow": "off"
+    "no-confusing-arrow": "off",
+    "linebreak-style": 0
   },
   "plugins": [
     "import",
