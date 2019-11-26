@@ -88,6 +88,10 @@ class AccountBook(pywingchun.Book):
         trading_day = kft.to_datetime(daytime)
         self.apply_trading_day(trading_day)
 
+    def on_order_input(self, event, input):
+        self.ctx.logger.debug("{} received order input event: {}".format(self.location.uname, input))
+        self._active_orders[input.order_id] = pywingchun.utils.order_from_input(input)
+
     def on_order(self, event, order):
         self.ctx.logger.debug("{} received order event: {}".format(self.location.uname, order))
         if order.active:
