@@ -83,7 +83,8 @@
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
-          "default/*"
+          "default/*",
+          "config/*"
         ]
       },
       {
