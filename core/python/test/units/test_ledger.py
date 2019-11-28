@@ -3,14 +3,40 @@ import pyyjj
 import json
 from kungfu.wingchun import msg
 import kungfu.yijinjing.msg as yjj_msg
+import kungfu.yijinjing.journal as kfj
 import datetime
 import time
+import unittest
+import os
+import platform
+import http
+import traceback
+import sys
+from kungfu.wingchun.constants import *
 
 class LedgerClient:
-    def __init__(self, locator, name="ledger_client"):
-        self.commander_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'service', 'ledger', locator)
+    def __init__(self, name="tester"):
+        osname = platform.system()
+        user_home = os.path.expanduser('~')
+        if osname == 'Linux':
+            xdg_config_home = os.getenv('XDG_CONFIG_HOME')
+            home = xdg_config_home if xdg_config_home else os.path.join(user_home, '.config')
+        if osname == 'Darwin':
+            home = os.path.join(user_home, 'Library', 'Application Support')
+        if osname == 'Windows':
+            home = os.getenv('APPDATA')
+        home = os.path.join(home, 'kungfu', 'app')
+        self.locator = kfj.Locator(home)
+        self.commander_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'service', 'ledger', self.locator)
         io_device = pyyjj.io_device(self.commander_location)
         self.cmd_sock = io_device.connect_socket(self.commander_location, pyyjj.protocol.REQUEST, 10000)
+
+    def insert_order(self, source_name, account_id, instrument_id, exchange_id, limit_price, volume,
+                     price_type = PriceType.Limit, side = Side.Buy, offset = Offset.Open, hedge_flag = HedgeFlag.Speculation):
+        data = {"mode": "live", "category": "td", "group": source_name, "name": account_id}
+        data.update({"instrument_id": instrument_id, "exchange_id": exchange_id, "limit_price": limit_price, "volume": volume,
+                     "price_type": int(price_type), "side": int(side), "offset": int(offset), "hedge_flag": int(hedge_flag)})
+        return self._request(msg.NewOrderSingle, data)
 
     def cancel_order(self, order_id):
         return self._request(msg.CancelOrder, {'mode': 'live','order_id': order_id})
@@ -58,4 +84,11 @@ class LedgerClient:
     def _request(self, msg_type, data = {}):
         self.cmd_sock.send(json.dumps({"msg_type": msg_type, "dest": self.commander_location.uid, "data": data}))
         self.cmd_sock.recv()
-        return self.cmd_sock.last_message()
+        return json.loads(self.cmd_sock.last_message())
+
+class TestNewOrderSingle(unittest.TestCase):
+    def test_buy(self):
+        client = LedgerClient()
+        rsp = client.insert_order("xtp", "15040900", "6000000","SSE", 16.0, 100)
+        self.assertEqual(rsp["status"], http.HTTPStatus.OK)
+        self.assertGreater(int(rsp["order_id"]), 0)
