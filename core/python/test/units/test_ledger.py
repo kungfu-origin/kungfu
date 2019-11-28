@@ -92,3 +92,9 @@ class TestNewOrderSingle(unittest.TestCase):
         rsp = client.insert_order("xtp", "15040900", "6000000","SSE", 16.0, 100)
         self.assertEqual(rsp["status"], http.HTTPStatus.OK)
         self.assertGreater(int(rsp["order_id"]), 0)
+
+class TestRemoveStrategy(unittest.TestCase):
+    def test_remove_strategy(self):
+        client = LedgerClient()
+        rsp = client.remove_strategy("test")
+        self.assertEqual(rsp["status"], http.HTTPStatus.OK)
