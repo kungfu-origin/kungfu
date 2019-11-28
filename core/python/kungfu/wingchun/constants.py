@@ -32,7 +32,7 @@ TimeCondition = pywingchun.constants.TimeCondition
 OrderActionFlag = pywingchun.constants.OrderActionFlag
 LedgerCategory = pywingchun.constants.LedgerCategory
 HedgeFlag = pywingchun.constants.HedgeFlag
-
+CommissionRateMode = pywingchun.constants.CommissionRateMode
 AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
 InstrumentTypeInStockAccount = [InstrumentType.Stock,

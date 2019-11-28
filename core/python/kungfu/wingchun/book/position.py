@@ -367,29 +367,24 @@ class FuturePosition(Position):
         self.book.subject.on_next(self.event)
 
     def apply_order(self, order):
-        if not order.active:
-            vol_cancelled = order.volume - order.volume_traded
-            if vol_cancelled <= 0:
-                return
+        if not order.active and order.volume_left > 0:
             if order.offset == Offset.Open:
                 frozen_margin = self.contract_multiplier * order.frozen_price * order.volume * self.margin_ratio
                 self.book.avail += frozen_margin
                 self.book.frozen_cash -= frozen_margin
                 self.book.frozen_margin -= frozen_margin
             elif order.offset == Offset.Close or order.offset == Offset.CloseYesterday:
-                if self.frozen_total < vol_cancelled:
+                if self.frozen_total < order.volume_left:
                     raise ValueError("{} to release for order {}, but frozen is {} for {} {}".
-                                     format(vol_cancelled, order.order_id, self.volume_available, self.book.location.uname, self.uname))
-                self.frozen_total -= vol_cancelled
-                if self.frozen_yesterday > vol_cancelled:
-                    self.frozen_yesterday -= vol_cancelled
-                else:
-                    self.frozen_yesterday = 0
+                                     format(order.volume_left, order.order_id, self.volume_available, self.book.location.uname, self.uname))
+                self.frozen_total -= order.volume_left
+                self.frozen_yesterday = self.frozen_yesterday - order.volume_left if\
+                    self.frozen_yesterday > order.volume_left else 0
             elif order.offset == Offset.CloseToday:
-                if self.frozen_today < vol_cancelled:
+                if self.frozen_today < order.volume_left:
                     raise ValueError("{} to release for order {}, but frozen is {} for {} {}".
-                                     format(vol_cancelled, order.order_id, self.frozen_today, self.book.location.uname, self.uname))
-                self.frozen_total -= vol_cancelled
+                                     format(order.volume_left, order.order_id, self.frozen_today, self.book.location.uname, self.uname))
+                self.frozen_total -= order.volume_left
             self.book.subject.on_next(self.event)
 
     def apply_trade(self, trade):
@@ -439,11 +434,10 @@ class FuturePosition(Position):
             raise ValueError("{} {} over close today position, current frozen volume is {}, {} to close".
                              format(self.book.location.uname, self.uname, self.volume - self.yesterday_volume, trade.volume))
         margin = self.contract_multiplier * trade.price * trade.volume * self.margin_ratio
-        self.margin -= margin
-        self.book.avail += margin
-
+        delta_margin = margin if self.margin > margin else self.margin
+        self.margin -= delta_margin
+        self.book.avail += delta_margin
         self.pre_today_vol = self.today_volume
-
         self.volume -= trade.volume
         self.frozen_total -= trade.volume
         if trade.offset != Offset.CloseToday:
@@ -451,12 +445,11 @@ class FuturePosition(Position):
                 self.yesterday_volume - trade.volume
             self.frozen_yesterday = 0 if self.frozen_yesterday <= trade.volume else \
                 self.frozen_yesterday - trade.volume
-
         trade.close_today_volume = self.today_volume - self.pre_today_vol
-
-        commission = self.get_commission(trade)
+        commission = self._calculate_commission(trade)
         realized_pnl = (trade.price - self.avg_open_price) * trade.volume * \
                        self.contract_multiplier * (1 if self.direction == Direction.Long else -1)
+        trade.commission = commission
         self.realized_pnl += realized_pnl
         self.book.realized_pnl += realized_pnl
         self.book.avail -= commission
@@ -465,7 +458,8 @@ class FuturePosition(Position):
 
     def _apply_open(self, trade):
         margin = self.contract_multiplier * trade.price * trade.volume * self.margin_ratio
-        commission = self.get_commission(trade)
+        commission = self._calculate_commission(trade)
+        trade.commission = commission
         self.margin += margin
         frozen_margin = self.contract_multiplier * self.book.get_frozen_price(trade.order_id) * trade.volume * self.margin_ratio
         self.book.frozen_cash -= frozen_margin
@@ -476,7 +470,7 @@ class FuturePosition(Position):
         self.avg_open_price = (self.avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
         self.volume += trade.volume
 
-    def get_commission(self, trade):
+    def _calculate_commission(self, trade):
         if self.commission_mode == CommissionRateMode.ByAmount:
             if trade.offset == Offset.Open:
                 return trade.price * trade.volume * self.contract_multiplier * self.open_commission_ratio

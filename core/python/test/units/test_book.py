@@ -9,6 +9,9 @@ from kungfu.wingchun.book.book import AccountBook
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.time as kft
 from kungfu.yijinjing.log import create_logger
+from kungfu.data.sqlite.data_proxy import CommissionDB, LedgerDB
+import kungfu.wingchun.utils as wc_utils
+from kungfu.wingchun.constants import *
 
 class TestStockPosition(unittest.TestCase):
     def setUp(self):
@@ -266,17 +269,316 @@ class TestStockPosition(unittest.TestCase):
 
 
 class TestFuturePosition(unittest.TestCase):
+    def setUp(self):
+        self.ctx = DottedDict()
+        osname = platform.system()
+        user_home = os.path.expanduser('~')
+        if osname == 'Linux':
+            xdg_config_home = os.getenv('XDG_CONFIG_HOME')
+            home = xdg_config_home if xdg_config_home else os.path.join(user_home, '.config')
+        if osname == 'Darwin':
+            home = os.path.join(user_home, 'Library', 'Application Support')
+        if osname == 'Windows':
+            home = os.getenv('APPDATA')
+        home = os.path.join(home, 'kungfu', 'app')
+        self.ctx.locator = kfj.Locator(home)
+        self.ctx.name = "tester"
+        self.ctx.log_level = "info"
+        self.ctx.now = pyyjj.now_in_nano
+        self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
+        self.ctx.util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
+        self.ctx.config_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "etc", "kungfu", self.ctx.locator)
+        self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
+        self.ctx.get_inst_info = lambda instrument_id: {"contract_multiplier": 10, "long_margin_ratio": 0.1, "short_margin_ratio": 0.1}
+        self.ctx.get_commission_info = lambda instrument_id: {"mode": 0, "open_ratio": 0.000045, "close_ratio": 0.000045, "close_today_ratio": 0.0}
+
     def test_open_long(self):
-        pass
+        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        book = AccountBook(self.ctx, location, avail = 10000)
+        dt = datetime.datetime.now()
+        try:
+            dt = dt.replace(month=dt.month+1)
+        except ValueError:
+            if dt.month == 12:
+                dt = dt.replace(year=dt.year+1, month=1)
+        instrument_id = "rb" + dt.strftime("%y%m")
+        exchange_id = "SHFE"
+        event = DottedDict()
+        event.gen_time = pyyjj.now_in_nano()
+        input = pywingchun.OrderInput()
+        input.order_id = 100
+        input.instrument_id = instrument_id
+        input.exchange_id = exchange_id
+        input.volume = 1
+        input.limit_price = 3990.0
+        input.side = pywingchun.constants.Side.Buy
+        input.offset = pywingchun.constants.Offset.Open
+        input.price_type = pywingchun.constants.PriceType.Limit
+        book.on_order_input(event, input)
+
+        margin_ratio = 0.1
+        contract_multiplier = 10
+        open_commission_ratio = 0.000045
+        close_commission_ratio = 0.000045
+        close_today_commission_ratio = 0.0
+
+        margin = margin_ratio * contract_multiplier * input.volume * input.limit_price
+        self.assertEqual(book.frozen_margin, margin)
+        self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
+        self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
+
+        event.gen_time = pyyjj.now_in_nano()
+        order = pywingchun.Order()
+        order.order_id = 100
+        order.instrument_id = instrument_id
+        order.exchange_id = exchange_id
+        order.volume = 1
+        order.volume_traded = 1
+        order.limit_price = 3990.0
+        order.side = pywingchun.constants.Side.Buy
+        order.offset = pywingchun.constants.Offset.Open
+        order.price_type = pywingchun.constants.PriceType.Limit
+        order.status = pywingchun.constants.OrderStatus.Filled
+        book.on_order(event, order)
+
+        event.gen_time = pyyjj.now_in_nano()
+        trade = pywingchun.Trade()
+        trade.order_id = 100
+        trade.instrument_id = instrument_id
+        trade.exchange_id = exchange_id
+        trade.volume = 1
+        trade.price = 3990.0
+        trade.side = pywingchun.constants.Side.Buy
+        trade.offset = pywingchun.constants.Offset.Open
+        book.on_trade(event, trade)
+        commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        tax = 0.0
+        self.assertEqual(trade.tax, tax)
+        self.assertEqual(trade.commission, commission)
+        self.assertEqual(book.frozen_margin, 0.0)
+        self.assertEqual(book.frozen_cash,  0.0, 'incorrect frozen cash')
+        self.assertEqual(book.intraday_fee, tax + commission)
+        self.assertEqual(book.accumulated_fee, tax + commission)
+        self.assertEqual(book.avail,10000 - margin - tax - commission, "incorrect avail")
 
     def test_close_long(self):
-        pass
+        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        dt = datetime.datetime.now()
+        try:
+            dt = dt.replace(month=dt.month+1)
+        except ValueError:
+            if dt.month == 12:
+                dt = dt.replace(year=dt.year+1, month=1)
+        instrument_id = "rb" + dt.strftime("%y%m")
+        exchange_id = "SHFE"
+
+        margin_ratio = 0.1
+        contract_multiplier = 10
+        open_commission_ratio = 0.000045
+        close_commission_ratio = 0.000045
+        close_today_commission_ratio = 0.0
+
+        dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
+               "direction": pywingchun.constants.Direction.Long, "margin": margin_ratio *contract_multiplier * 2 * 3980.0}
+        book = AccountBook(self.ctx, location, avail = 10000, positions= [dct])
+
+        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
+
+        event = DottedDict()
+        event.gen_time = pyyjj.now_in_nano()
+        input = pywingchun.OrderInput()
+        input.order_id = 100
+        input.instrument_id = instrument_id
+        input.exchange_id = exchange_id
+        input.volume = 1
+        input.limit_price = 3990.0
+        input.side = pywingchun.constants.Side.Sell
+        input.offset = pywingchun.constants.Offset.Close
+        input.price_type = pywingchun.constants.PriceType.Limit
+        book.on_order_input(event, input)
+
+        position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Long)
+        self.assertEqual(position.frozen_total, 1)
+        self.assertEqual(position.frozen_yesterday, 1)
+
+
+        event.gen_time = pyyjj.now_in_nano()
+        order = pywingchun.Order()
+        order.order_id = 100
+        order.instrument_id = instrument_id
+        order.exchange_id = exchange_id
+        order.volume = 1
+        order.volume_traded = 1
+        order.limit_price = 3990.0
+        order.side = pywingchun.constants.Side.Sell
+        order.offset = pywingchun.constants.Offset.Close
+        order.price_type = pywingchun.constants.PriceType.Limit
+        order.status = pywingchun.constants.OrderStatus.Filled
+        book.on_order(event, order)
+
+        event.gen_time = pyyjj.now_in_nano()
+        trade = pywingchun.Trade()
+        trade.order_id = 100
+        trade.instrument_id = instrument_id
+        trade.exchange_id = exchange_id
+        trade.volume = 1
+        trade.price = 3990.0
+        trade.side = pywingchun.constants.Side.Sell
+        trade.offset = pywingchun.constants.Offset.Close
+        book.on_trade(event, trade)
+        margin = trade.price * trade.volume * contract_multiplier * margin_ratio
+        commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        tax = 0.0
+        self.assertEqual(trade.tax, tax)
+        self.assertEqual(trade.commission, commission)
+        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0  - margin)
+        self.assertEqual(book.intraday_fee, tax + commission)
+        self.assertEqual(book.accumulated_fee, tax + commission)
+        self.assertEqual(book.avail,10000 + margin - tax - commission, "incorrect avail")
 
     def test_open_short(self):
-        pass
+        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        book = AccountBook(self.ctx, location, avail = 10000)
+        dt = datetime.datetime.now()
+        try:
+            dt = dt.replace(month=dt.month+1)
+        except ValueError:
+            if dt.month == 12:
+                dt = dt.replace(year=dt.year+1, month=1)
+        instrument_id = "rb" + dt.strftime("%y%m")
+        exchange_id = "SHFE"
+        event = DottedDict()
+        event.gen_time = pyyjj.now_in_nano()
+        input = pywingchun.OrderInput()
+        input.order_id = 100
+        input.instrument_id = instrument_id
+        input.exchange_id = exchange_id
+        input.volume = 1
+        input.limit_price = 3990.0
+        input.side = pywingchun.constants.Side.Sell
+        input.offset = pywingchun.constants.Offset.Open
+        input.price_type = pywingchun.constants.PriceType.Limit
+        book.on_order_input(event, input)
+
+        margin_ratio = 0.1
+        contract_multiplier = 10
+        open_commission_ratio = 0.000045
+        close_commission_ratio = 0.000045
+        close_today_commission_ratio = 0.0
+
+        margin = margin_ratio * contract_multiplier * input.volume * input.limit_price
+        self.assertEqual(book.frozen_margin, margin)
+        self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
+        self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
+
+        event.gen_time = pyyjj.now_in_nano()
+        order = pywingchun.Order()
+        order.order_id = 100
+        order.instrument_id = instrument_id
+        order.exchange_id = exchange_id
+        order.volume = 1
+        order.volume_traded = 1
+        order.limit_price = 3990.0
+        order.side = pywingchun.constants.Side.Sell
+        order.offset = pywingchun.constants.Offset.Open
+        order.price_type = pywingchun.constants.PriceType.Limit
+        order.status = pywingchun.constants.OrderStatus.Filled
+        book.on_order(event, order)
+
+        event.gen_time = pyyjj.now_in_nano()
+        trade = pywingchun.Trade()
+        trade.order_id = 100
+        trade.instrument_id = instrument_id
+        trade.exchange_id = exchange_id
+        trade.volume = 1
+        trade.price = 3990.0
+        trade.side = pywingchun.constants.Side.Sell
+        trade.offset = pywingchun.constants.Offset.Open
+        book.on_trade(event, trade)
+        commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        tax = 0.0
+        self.assertEqual(trade.tax, tax)
+        self.assertEqual(trade.commission, commission)
+        self.assertEqual(book.frozen_margin, 0.0)
+        self.assertEqual(book.frozen_cash,  0.0, 'incorrect frozen cash')
+        self.assertEqual(book.intraday_fee, tax + commission)
+        self.assertEqual(book.accumulated_fee, tax + commission)
+        self.assertEqual(book.avail,10000 - margin - tax - commission, "incorrect avail")
 
     def test_close_short(self):
-        pass
+        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        dt = datetime.datetime.now()
+        try:
+            dt = dt.replace(month=dt.month+1)
+        except ValueError:
+            if dt.month == 12:
+                dt = dt.replace(year=dt.year+1, month=1)
+        instrument_id = "rb" + dt.strftime("%y%m")
+        exchange_id = "SHFE"
+
+        margin_ratio = 0.1
+        contract_multiplier = 10
+        open_commission_ratio = 0.000045
+        close_commission_ratio = 0.000045
+        close_today_commission_ratio = 0.0
+
+        dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
+               "direction": pywingchun.constants.Direction.Short, "margin": margin_ratio *contract_multiplier * 2 * 3980.0}
+        book = AccountBook(self.ctx, location, avail = 10000, positions= [dct])
+
+        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
+
+        event = DottedDict()
+        event.gen_time = pyyjj.now_in_nano()
+        input = pywingchun.OrderInput()
+        input.order_id = 100
+        input.instrument_id = instrument_id
+        input.exchange_id = exchange_id
+        input.volume = 1
+        input.limit_price = 3990.0
+        input.side = pywingchun.constants.Side.Buy
+        input.offset = pywingchun.constants.Offset.Close
+        input.price_type = pywingchun.constants.PriceType.Limit
+        book.on_order_input(event, input)
+
+        position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Short)
+        self.assertEqual(position.frozen_total, 1)
+        self.assertEqual(position.frozen_yesterday, 1)
+
+
+        event.gen_time = pyyjj.now_in_nano()
+        order = pywingchun.Order()
+        order.order_id = 100
+        order.instrument_id = instrument_id
+        order.exchange_id = exchange_id
+        order.volume = 1
+        order.volume_traded = 1
+        order.limit_price = 3990.0
+        order.side = pywingchun.constants.Side.Buy
+        order.offset = pywingchun.constants.Offset.Close
+        order.price_type = pywingchun.constants.PriceType.Limit
+        order.status = pywingchun.constants.OrderStatus.Filled
+        book.on_order(event, order)
+
+        event.gen_time = pyyjj.now_in_nano()
+        trade = pywingchun.Trade()
+        trade.order_id = 100
+        trade.instrument_id = instrument_id
+        trade.exchange_id = exchange_id
+        trade.volume = 1
+        trade.price = 3990.0
+        trade.side = pywingchun.constants.Side.Buy
+        trade.offset = pywingchun.constants.Offset.Close
+        book.on_trade(event, trade)
+        margin = trade.price * trade.volume * contract_multiplier * margin_ratio
+        commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        tax = 0.0
+        self.assertEqual(trade.tax, tax)
+        self.assertEqual(trade.commission, commission)
+        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0  - margin)
+        self.assertEqual(book.intraday_fee, tax + commission)
+        self.assertEqual(book.accumulated_fee, tax + commission)
+        self.assertEqual(book.avail,10000 + margin - tax - commission, "incorrect avail")
 
 if __name__ == '__main__':
     unittest.main()
