@@ -150,6 +150,9 @@ class AccountBook(pywingchun.Book):
             else:
                 raise TypeError("Position object required, but {} provided".format(type(pos)))
         if self.ctx.name == "ledger":
+            self.subject.on_next(self.event)
+            for pos in self.positions:
+                self.subject.on_next(pos.event)
             self.ctx.db.dump_book(self)
             self.ctx.logger.info("book {} [{:08x}] saved in database".format(self.location.uname, self.location.uid))
 
