@@ -100,7 +100,6 @@ export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'l
 
 //================== others end ===================================
 
-
 export const getKfEnginePath = () => {
     if(process.env.NODE_ENV === 'production') {
         if(process.env.APP_TYPE === 'test'){
