@@ -1,7 +1,7 @@
 import readline from 'readline';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
-import { EXTENSION_DIR } from '__gConfig/pathConfig';
-import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
+import { EXTENSION_DIR, STRATEGYS_DB, ACCOUNTS_DB } from '__gConfig/pathConfig';
+import { listDir, statSync, readJsonSync, existsSync } from '__gUtils/fileUtils';
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -535,3 +535,10 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     }
     timerPromiseTask(fn, interval)
 } 
+
+export const ifAccountStrategyDBExisted = () => {
+    const isExistedAccountDB = existsSync(ACCOUNTS_DB)
+    const isExistedStrategyDB = existsSync(STRATEGYS_DB)
+    if(isExistedAccountDB && isExistedStrategyDB) return true
+    else return false
+}

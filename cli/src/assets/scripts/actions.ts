@@ -190,9 +190,9 @@ export const processListObservable = () => combineLatest(
                 status: buildStatusDefault(processStatus['ledger']).status,
                 monit: buildStatusDefault(processStatus['ledger']).monit
             },
-            ...Object.values(mdData),
-            ...Object.values(tdData),
-            ...Object.values(strategyData)
+            ...Object.values(mdData || {}),
+            ...Object.values(tdData || {}),
+            ...Object.values(strategyData || {})
         ]
     }
 )

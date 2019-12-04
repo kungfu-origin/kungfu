@@ -323,5 +323,4 @@ export const readJsonSync = (jsonPath: string): {} => {
 
 export const outputJsonSync = (jsonPath: string, json: {}): void => {
     return fse.outputJsonSync(jsonPath, json)
-    .catch((err: Error) => console.error(err))
 }
