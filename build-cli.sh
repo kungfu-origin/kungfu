@@ -6,7 +6,6 @@ npm config set kungfu-core:runtime node
 cd ./core
 yarn run build
 cd ../cli
-yarn run install-deps
 yarn run build-cli
 
 cd ../
