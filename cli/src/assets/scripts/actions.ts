@@ -1,6 +1,6 @@
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
-import { addFile } from '__gUtils/fileUtils';
+import { addFileSync } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail } from '__gUtils/processUtils';
 import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
@@ -313,7 +313,7 @@ export const getMergedLogsObservable = (processIds: string[]) => {
 const watchLogObservable = (processId: string) => {
     return new Observable(observer => {
         const logPath = path.join(LOG_DIR, `${processId}.log`);
-        addFile('', logPath, 'file');
+        addFileSync('', logPath, 'file');
         const watcher = new Tail(logPath, {
             useWatchFile: true
         });

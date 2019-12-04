@@ -1,5 +1,5 @@
 import { getAccountSource } from '__gConfig/accountConfig';
-import { readJsonSync, outputJson } from '__gUtils/fileUtils';
+import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
 
 export const setProcessStatus = ({ commit }, processStatus) => {
@@ -23,7 +23,7 @@ export const setKungfuConfig = ({ commit }, kfConfig) => {
 //部分更新kfConfig
 export const setKungfuConfigByKeys = ({ commit, state }, kfConfig) => {
     commit('SET_KF_CONFIG', kfConfig)  
-    outputJson(KF_CONFIG_PATH, 
+    outputJsonSync(KF_CONFIG_PATH, 
         {
             ...state.kfConfig,
             ...kfConfig

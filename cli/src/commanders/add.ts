@@ -1,5 +1,5 @@
 import { getAccountSource } from '__gConfig/accountConfig';
-import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, chineseValidator } from '__assets/validator';
+import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noAllAsKeyword, chineseValidator } from '__assets/validator';
 import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '__io/db/account';
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
@@ -148,6 +148,7 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
                     specialStrValidator, 
                     blankValidator, 
                     noZeroAtFirstValidator, 
+                    noAllAsKeyword,
                     chineseValidator
                 ].forEach(validator => {
                     if(hasError) return;

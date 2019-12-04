@@ -36,7 +36,7 @@ import moment from 'moment'
 import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
-import { clearFileContent, addFile, existsSync } from '__gUtils/fileUtils';
+import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
 const BrowserWindow = require('electron').remote.BrowserWindow;
@@ -163,7 +163,7 @@ export default {
             //文件不存在则创建
             if(!existsSync(logPath)){
                 t.tableData = Object.freeze([])
-                addFile('', logPath, 'file')
+                addFileSync('', logPath, 'file')
             }
 
             t.getLogByTask(logPath, searchKeyword).then(logList => {

@@ -157,7 +157,7 @@ export default {
             //添加文件
             try{
                 const targetPath = t.fileTree[parentId].filePath;
-                CODE_UTILS.addFile(targetPath, filename, t.type)
+                CODE_UTILS.addFileSync(targetPath, filename, t.type)
                 t.$store.dispatch('removeFileFolderPending', {id: t.fileNode.parentId, type: t.type})
                 t.reloadFolder(parentId, filename)
             }catch(err){

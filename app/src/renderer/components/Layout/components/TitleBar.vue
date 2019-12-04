@@ -7,7 +7,7 @@ export default {
     props: {
         title: {
             type: String,
-            default: ''
+            default: 'Kungfu.Trader'
         }
     }
 }
@@ -19,5 +19,6 @@ export default {
     line-height: 25px;
     text-align: center;
     background: $bg_dark;
+    color: $input_bg;
 }
 </style>

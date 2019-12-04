@@ -24,5 +24,5 @@ if (process.env.NODE_ENV === 'production') {
 
 const { initDB, initConfig } = require('__app/src/main/base')
 
-initDB();
 initConfig();
+initDB();

@@ -103,7 +103,7 @@
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex';
 import { Collapse, CollapseItem } from 'element-ui';
-import { readJsonSync, outputJson } from '__gUtils/fileUtils';
+import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 import { LOG_DIR, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { getExtensionConfigs, getExtensions } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
@@ -183,7 +183,7 @@ export default {
             const settingData = t.settingConfig[settingKey].value;
             const outputPath = t.settingConfig[settingKey].outputPath;
             t.$nextTick()
-            .then(() => outputJson(outputPath, settingData || {}))
+            .then(() => outputJsonSync(outputPath, settingData || {}))
             .then(() => readJsonSync(outputPath))
             .then(config => {
                 if(!config) return;

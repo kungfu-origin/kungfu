@@ -136,7 +136,20 @@ export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Funct
     if(moment(value.toString(), 'YYMMDD').format('YYMMDD') === 'Invalid date') {
         callback(new Error(
             isEnglish
-            ? 'Date format should be YYMMDD '
+            ? 'Date format should be YYMMDD!'
             : '日期格式YYMMDD！'))
+    } else {
+        callback()       
+    }
+}
+
+//不能以“all”做关键字
+export const noAllAsKeyword = (rule: any, value: any, callback: Function): void => {
+    if(value === 'all') {
+        callback(new Error(
+            isEnglish
+            ? "'all' is not allowed!"
+            : "不能以 ‘all’ 命名！"
+        ))
     }
 }

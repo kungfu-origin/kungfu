@@ -196,7 +196,7 @@ export const openFolder = (store: any, folder: FileData, oldFileTree: any, openS
 }
 
 //添加文件
-export const addFile = (parentDir = "", filename: string, type: string): void => {
+export const addFileSync = (parentDir = "", filename: string, type: string): void => {
     let targetPath: string;
     if(!parentDir) targetPath = filename;
     else targetPath = path.join(parentDir, filename)
@@ -321,7 +321,7 @@ export const readJsonSync = (jsonPath: string): {} => {
     return fse.readJsonSync(jsonPath)
 }
 
-export const outputJson = (jsonPath: string, json: {}): void => {
-    return fse.outputJson(jsonPath, json)
-    .catch((err: Error) => console.error(err))
+export const outputJsonSync = (jsonPath: string, json: {}): void => {
+    return fse.outputJsonSync(jsonPath, json)
+        .catch((err: Error) => console.error(err))
 }

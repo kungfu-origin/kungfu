@@ -3,7 +3,7 @@ const path = require('path');
 if (process.env.NODE_ENV !== 'development') {
     global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
 }
-const { addFile } = require('__gUtils/fileUtils');
+const { addFileSync } = require('__gUtils/fileUtils');
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
@@ -13,40 +13,40 @@ const KF_HOME_BASE_DIR_RESOLVE = (() => {
      }
 })()
 
-addFile('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
+addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
 //BASE
 export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'app')
-addFile('', KF_HOME, 'folder')
+addFileSync('', KF_HOME, 'folder')
 
 //system
 export const SYSTEM_DIR = path.join(KF_HOME, 'system');
-addFile('', SYSTEM_DIR, 'folder')
+addFileSync('', SYSTEM_DIR, 'folder')
 
 //runtime
 export const RUNTIME_DIR = path.join(KF_HOME, 'runtime');
-addFile('', RUNTIME_DIR, 'folder')
+addFileSync('', RUNTIME_DIR, 'folder')
 
 //strategy
 export const STRATEGY_DIR = path.join(KF_HOME, 'strategy');
-addFile('', STRATEGY_DIR, 'folder')
+addFileSync('', STRATEGY_DIR, 'folder')
 
 //td
 export const TD_DIR = path.join(KF_HOME, 'td');
-addFile('', TD_DIR, 'folder')
+addFileSync('', TD_DIR, 'folder')
 
 //md
 export const MD_DIR = path.join(KF_HOME, 'md');
-addFile('', MD_DIR, 'folder')
+addFileSync('', MD_DIR, 'folder')
 
 //ledger 
 export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
-addFile('', LEDGER_DIR, 'folder')
+addFileSync('', LEDGER_DIR, 'folder')
 
 //log
 export const LOG_DIR = path.join(KF_HOME, 'log');
-addFile('', LOG_DIR, 'folder')
+addFileSync('', LOG_DIR, 'folder')
 
 
 //================= global db start ==============================
