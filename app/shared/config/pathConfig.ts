@@ -1,8 +1,5 @@
 const path = require('path');
 
-if (process.env.NODE_ENV !== 'development') {
-    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
-}
 const { addFileSync } = require('__gUtils/fileUtils');
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {

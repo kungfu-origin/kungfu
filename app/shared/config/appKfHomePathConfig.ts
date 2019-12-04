@@ -4,6 +4,10 @@ const path = require('path')
 const mainProcess = require('electron').app;
 const renderProcess = (require('electron').remote || {}).app;
 
+if (process.env.NODE_ENV !== 'development') {
+    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
+}
+
 if(mainProcess) {
     const appName = 'kungfu'
     mainProcess.setName('kungfu')
