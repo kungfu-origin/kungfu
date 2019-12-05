@@ -15,8 +15,8 @@ export const feeTemplate = (type) => {
             options: {
                 1: '股票',
                 2: '期货',
-                // 3: '债券',
-                // 4: '股票期权'
+                3: '债券',
+                4: '股票期权'
             }
         },
         mode: {

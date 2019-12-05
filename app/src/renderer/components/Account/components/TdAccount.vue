@@ -159,11 +159,11 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="120"
+                    min-width="150"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
-                        <!-- <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="el-icon-money mouse-over" title="费率设置"></i></span> -->
+                        <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="el-icon-money mouse-over" title="费率设置"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
                         <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
                     </template>
