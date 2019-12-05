@@ -75,7 +75,7 @@ export default {
         return {
             rendererTable: false,
             tableData: Object.freeze([]),
-            ifScrollToBottom: false,
+            ifScrollToBottom: true,
             searchKeyword: '',
             logCount: 10000,
         }
@@ -260,7 +260,7 @@ export default {
             !ifSearchKeyword && (t.searchKeyword = '');
             t.clearTailWatcher();
             t.tableData = Object.freeze([]);
-            t.ifScrollToBottom = false;
+            t.ifScrollToBottom = true;
         },
 
         clearTailWatcher(){
