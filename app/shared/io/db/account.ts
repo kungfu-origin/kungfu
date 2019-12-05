@@ -1,6 +1,6 @@
 import { buildDateRange } from '__gUtils/busiUtils';
 import { runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB } from '__gUtils/dbUtils';
-import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, GLOBAL_COMMISSION_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
+import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
 import { copySync, existsSync } from '__gUtils/fileUtils';
 import moment from "moment"
 
@@ -186,17 +186,5 @@ export const setFeeSettingData = (accountId: string, feeSettingData: any) => {
         .then(() => resolve(true))
         .catch((err: Error): void => reject(err))
     })
-}
-
-export const getFeeSettingData = (accountId: string) => {
-    const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
-    if(!existsSync(COMMISSION_DB)) {
-        try{
-            copySync(GLOBAL_COMMISSION_DB, COMMISSION_DB)
-        }catch(err){
-            throw err
-        }
-    }
-    return runSelectDB(COMMISSION_DB,`SELECT * FROM commission`)
 }
 

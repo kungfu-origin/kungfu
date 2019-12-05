@@ -265,7 +265,10 @@ export default {
         //确认添加/编辑策略
         handleConfirmAddEditorStrategy(){
             const t = this;
+            console.log(111)
             t.$refs['setStrategyForm'].validate(valid => {
+                        console.log(123123, valid)
+
                 if(valid){
                     const strategy = t.setStrategyForm.strategyId.toString();
                     const strategyPath = t.setStrategyForm.strategyPath;

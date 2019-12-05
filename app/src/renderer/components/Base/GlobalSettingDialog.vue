@@ -38,7 +38,8 @@
                         <div class="setting-sub-item__item" v-for="config in item.config" :key="config.key">
                             <p class="setting-sub-item__header">{{config.name}}</p>                                
                             <p class="setting-sub-item__tip">{{config.tip}}</p>
-                            <div class="setting-sub-item__input-content" v-if="settingConfig[setting.key].value">
+                            <!-- 普通类型 -->
+                            <div class="setting-sub-item__input-content" v-if="settingConfig[setting.key].value && (config.type !== 'table')">
                                 <el-input 
                                 :class="item.key" 
                                 v-if="config.type === 'str'" 
@@ -55,7 +56,7 @@
                                 <span 
                                 class="tr-oper" 
                                 v-if="config.type === 'process'"                                 
-                                @click.stop="handleOpenLogFile(config)"><i class="el-icon-document mouse-over"></i> 打开日志 </span>
+                                @click.stop="handleOpenLogFile(config)"><i class="el-icon-document mouse-over"></i> Bar日志 </span>
                                 
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
                                 <!-- <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" :value="kfSystemConfig[item.key]"></el-input-number> -->
@@ -86,8 +87,43 @@
                                         :value="option.value">
                                     </el-option>
                                 </el-select>
+                            </div>
 
-                                
+                            <!-- table类型 -->
+                            <div class="setting-sub-item__table-content" v-else>
+                                <ul class="table-content">
+                                    <li class="table-header">
+                                        <el-col :span="3" v-for="cell in config.row" :key="cell.unique_key">
+                                            <div class="cell-name">{{cell.name}}</div>
+                                        </el-col>
+                                    </li>
+                                    <li class="table-rows" v-for="row in tables[config.target]" :key="row.rowid">
+                                        <el-col :span="3" v-for="cell in config.row" :key="cell.unique_key">
+                                            <el-input size="mini" :class="cell.key" v-if="cell.type === 'str'" v-model="row[cell.key]"></el-input>
+                                            <el-input-number size="mini" :class="cell.key" v-if="cell.type === 'int'" :controls="false"  v-model="row[cell.key]"></el-input-number>
+                                            <el-input-number size="mini" :class="cell.key" v-if="cell.type === 'float'" :controls="false"  v-model="row[cell.key]"></el-input-number>
+                                            <el-select 
+                                            :class="cell.key" 
+                                            v-if="cell.type === 'select'" 
+                                            :multiple="cell.multiple" collapse-tags  
+                                            v-model="row[cell.key]"
+                                            size="mini">
+                                                <el-option
+                                                    v-for="option in cell.data"
+                                                    :key="option.value"
+                                                    :label="option.name"
+                                                    :value="option.value">
+                                                </el-option>
+                                            </el-select>
+                                        </el-col>
+                                        <el-col :span="1">
+                                            <i class="el-icon-circle-plus"></i>
+                                        </el-col>
+                                         <el-col :span="1">
+                                            <i class="el-icon-remove"></i>
+                                        </el-col>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </li>
@@ -109,6 +145,7 @@ import { getExtensionConfigs, getExtensions } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 import tradingConfig from '__gConfig/tradingConfig.json';
 import * as processUtils from '__gUtils/processUtils';
+import { getFeeSettingData } from '__io/db/base';
 
 const path = require('path');
 
@@ -151,13 +188,18 @@ export default {
             },
 
             sourceList: [],
-                
+            tables: {
+                commission: []
+            }   
         }
     },
 
-    beforeMount() {
+    async beforeMount() {
         const t = this;
         t.getSourceListOptions();
+
+        //获取
+        t.tables.commission = await getFeeSettingData();
     },
 
     computed: {
@@ -238,7 +280,7 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
     .global-setting-dialog {
-        height: 90%;
+        height: 88%;
         .el-dialog__body {
             height: calc(100% - 55px);
             box-sizing: border-box;
@@ -315,6 +357,30 @@ export default {
                 i {
                     font-size: 14px !important;
                 }
+            }
+        }
+    }
+    .setting-sub-item__table-content {
+        .table-header {
+            height: 35px;
+            .el-col {
+                font-size: 12px;
+                padding: 8px 8px;
+                box-sizing: border-box;
+            }
+        }
+        .table-rows {
+            height: 45px;
+            padding-bottom: 4px;
+            box-sizing: border-box;
+            .el-col {
+                padding: 8px 8px;
+                box-sizing: border-box;
+            }
+            .cell-name {
+                font-size: 12px;
+                padding-bottom: 3px;
+                box-sizing: border-box;
             }
         }
     }

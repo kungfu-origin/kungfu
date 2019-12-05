@@ -62,24 +62,8 @@
                 padding: 0;
             }
 
-            #title-bar {
-                width: 100%;
-                height: 25px;
-                line-height: 25px;
-                padding: 0 100px;
-                text-align: center;
-                background: #101425;
-                color: #7D89B8;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                font-size: 12px;
-                box-sizing: border-box;
-                
-            }
-
             #content {
-                height: calc(100% - 25px);
+                height: calc(100% - 15px);
                 padding: 10px;
                 position: relative;
                 box-sizing: border-box;
@@ -174,7 +158,7 @@
         </style>
     </head>
     <body>
-        <div id="title-bar"></div>
+        <!-- <div id="title-bar"></div> -->
         <div id="content">
             <div class="header-content">
                     <div class="header-item fr">
@@ -268,7 +252,7 @@
 
     ipc.on('show-log', function(event, { winId, logPath }){
         ipc.removeAllListeners('show-log')
-        document.getElementById('title-bar').innerHTML = logPath
+        document.title = logPath
         getGlobalData.logPath = logPath;
 
         showLogs(logPath, dealMessage)

@@ -151,5 +151,7 @@ export const noAllAsKeyword = (rule: any, value: any, callback: Function): void 
             ? "'all' is not allowed!"
             : "不能以 ‘all’ 命名！"
         ))
+    } else {
+        callback()
     }
 }

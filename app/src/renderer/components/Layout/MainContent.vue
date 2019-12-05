@@ -1,7 +1,5 @@
 <template>
     <el-container class="tr-container">
-        <title-bar></title-bar>
-
         <!-- 头部 -->
         <el-container>
             <!-- 左侧边栏 -->
@@ -51,7 +49,6 @@
 <script>
 import { deepClone } from '__gUtils/busiUtils';
 import { mapState, mapGetters } from 'vuex';
-import TitleBar from './components/TitleBar';
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
 import CodeSpaceTab from './components/CodeSpaceTab';
@@ -81,7 +78,6 @@ export default {
         EngineStatus,
 		CoreStatus,
         CodeSpaceTab,
-        TitleBar
     },
 
     computed:{

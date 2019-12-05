@@ -159,11 +159,10 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="150"
+                    min-width="120"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenFeeSettingDialog(props.row)"><i class="el-icon-money mouse-over" title="费率设置"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
                         <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
                     </template>
@@ -212,15 +211,6 @@
             :firstAccount="sourceFirstAccount"
             :accountList="accountList"
             />
-
-            <SetFeeDialog
-            v-if="visiblity.setFee"
-            :visible.sync="visiblity.setFee"
-            :accountType="(accountSource[feeAccount.source_name] || {}).typeName"
-            :accountId="feeAccount.account_id"
-            :setFeeSettingData="setFeeSettingData"
-            :getFeeSettingData="getFeeSettingData"
-            ></SetFeeDialog>
     </tr-dashboard>
 </template>
 
@@ -229,7 +219,6 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import SetAccountDialog from './SetAccountDialog';
-import SetFeeDialog from './SetFeeDialog';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
@@ -252,21 +241,15 @@ export default {
             visiblity: {
                 selectSource: false,
                 setAccount: false,
-                setFee: false,
             },
             sourceFirstAccount: false, //来标记是否是某柜台下添加的第一个账户
             taskList: [], //存放kungfu_task数据表内容
             renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
-            // processStatus: Object.freeze({}),
-            setFeeSettingData: ACCOUNT_API.setFeeSettingData,
-            getFeeSettingData: ACCOUNT_API.getFeeSettingData,
-            feeAccount: null
         }
     },
 
     components: {
-        SetAccountDialog,
-        SetFeeDialog
+        SetAccountDialog
     },
 
     computed:{
@@ -357,7 +340,6 @@ export default {
         handleOpenFeeSettingDialog(row){
             const t = this;
             t.visiblity.setFee = true;
-            t.feeAccount = row;
         },
 
         //选择柜台
