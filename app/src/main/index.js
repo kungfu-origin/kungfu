@@ -26,11 +26,14 @@ function createWindow () {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
 	const { width,height } = electronScreen.getPrimaryDisplay().size
+
+	console.log(platform)
+
 	mainWindow = new BrowserWindow({
 		show: false,
 		width,
 		height,
-		frame: false,
+		// frame: false,
 		useContentSize: true,
 		titleBarStyle: 'hidden',
 		webPreferences: {
