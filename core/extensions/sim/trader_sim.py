@@ -3,6 +3,7 @@ import pywingchun
 import pyyjj
 import json
 import kungfu.wingchun.utils as wc_utils
+import kungfu.wingchun.msg as wc_msg
 import os
 import sys
 import importlib
@@ -49,7 +50,7 @@ class TraderSim(pywingchun.Trader):
         else:
             order_input = event.data
             order = pywingchun.utils.order_from_input(order_input)
-            min_vol = wc_utils.min_order_volume(order.instrument_id, order.exchange_id)
+            min_vol = 100 if wc_utils.get_instrument_type(order_input.instrument_id, order_input.exchange_id) == pywingchun.constants.InstrumentType.Stock else 1
             if order_input.volume < min_vol:
                 order.status = pywingchun.constants.OrderStatus.Error
             elif self.match_mode == MatchMode.Reject:
@@ -71,7 +72,7 @@ class TraderSim(pywingchun.Trader):
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - order.volume_traded
-            self.get_writer(event.source).write_data(0, order)
+            self.get_writer(event.source).write_data(0, wc_msg.Order, order)
             if order.volume_traded > 0:
                 trade = pywingchun.Trade()
                 trade.account_id = self.io_device.home.name
@@ -81,7 +82,7 @@ class TraderSim(pywingchun.Trader):
                 trade.instrument_id = order.instrument_id
                 trade.exchange_id = order.exchange_id
                 trade.trade_id = self.get_writer(event.source).current_frame_uid()
-                self.get_writer(event.source).write_data(0, trade)
+                self.get_writer(event.source).write_data(0, wc_msg.Trade, trade)
             if order.active:
                 self.ctx.orders[order.order_id] = OrderRecord(source= event.source, dest = event.dest, order = order)
             return True
@@ -96,7 +97,7 @@ class TraderSim(pywingchun.Trader):
                 order = record.order
                 order.status = pywingchun.constants.OrderStatus.Cancelled if order.volume_traded == 0 \
                     else pywingchun.constants.OrderStatus.PartialFilledNotActive
-                self.get_writer(event.source).write_data(0, order)
+                self.get_writer(event.source).write_data(0, wc_msg.Order, order)
             return True
 
     def re_account(self):
