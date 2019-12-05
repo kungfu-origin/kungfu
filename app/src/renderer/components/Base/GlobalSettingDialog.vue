@@ -97,7 +97,7 @@
                                             <div class="cell-name">{{cell.name}}</div>
                                         </el-col>
                                     </li>
-                                    <li class="table-rows" v-for="row in tables[config.target]" :key="row.rowid">
+                                    <li class="table-rows" v-for="(row, index) in tables[config.target]" :key="row.rowid">
                                         <el-col :span="3" v-for="cell in config.row" :key="cell.unique_key">
                                             <el-input size="mini" :class="cell.key" v-if="cell.type === 'str'" v-model="row[cell.key]"></el-input>
                                             <el-input-number size="mini" :class="cell.key" v-if="cell.type === 'int'" :controls="false"  v-model="row[cell.key]"></el-input-number>
@@ -117,10 +117,10 @@
                                             </el-select>
                                         </el-col>
                                         <el-col :span="1">
-                                            <i class="el-icon-circle-plus"></i>
+                                            <i class="el-icon-circle-plus mouse-over" @click="handleAddRow(config.target, config.row, index)"></i>
                                         </el-col>
                                          <el-col :span="1">
-                                            <i class="el-icon-remove"></i>
+                                            <i class="el-icon-remove mouse-over" @click="handleRemoveRow(config.target, index)"></i>
                                         </el-col>
                                     </li>
                                 </ul>
@@ -145,7 +145,7 @@ import { getExtensionConfigs, getExtensions } from '__gUtils/busiUtils';
 import systemConfig from '__gConfig/systemConfig.json';
 import tradingConfig from '__gConfig/tradingConfig.json';
 import * as processUtils from '__gUtils/processUtils';
-import { getFeeSettingData } from '__io/db/base';
+import { getFeeSettingData, setFeeSettingData } from '__io/db/base';
 
 const path = require('path');
 
@@ -190,6 +190,12 @@ export default {
             sourceList: [],
             tables: {
                 commission: []
+            },
+            tablesSaveMethods: {
+                commission: {
+                    filters: ['product_id', 'mode', 'exchange_id'], //必填，且唯一
+                    method: setFeeSettingData
+                }
             }   
         }
     },
@@ -206,6 +212,11 @@ export default {
         ...mapState({
             processStatus: state => state.BASE.processStatus || {}
         })
+    },
+
+    beforeDestroy() {
+        const t = this;
+        t.saveTables();
     },
 
     methods: {
@@ -256,6 +267,26 @@ export default {
             this.$showLog(logPath)
         },
 
+        //table 添加row
+        handleAddRow(target, row, index) {
+            const t = this;
+            const tmp = [{}, ...row].reduce((a, b) => {
+                a[b.key] = b.default
+                return a;
+            })
+            t.tables[target].splice(index + 1, 0, {
+                ...tmp, 
+                rowid: `tmp_${+new Date().getTime()}`    
+            });
+        },
+
+        //table remove row
+        handleRemoveRow(target, index) {
+            const t = this;
+            t.tables[target].splice(index, 1)
+            
+        },
+
         getSourceListOptions() {
             const t = this;
             getExtensionConfigs()
@@ -267,6 +298,34 @@ export default {
                     .map(e => ({ name: e, value: e }))
             })
             .then(extOptions => t.sourceList = extOptions)
+        },
+
+        saveTables() {
+            const t = this;
+            Object.keys(t.tablesSaveMethods || {}).forEach(key => {
+                const filters = t.tablesSaveMethods[key].filters;
+                const saveMethod = t.tablesSaveMethods[key].method;
+                //去重
+                const targetDataResolve = [{}, ...t.tables[key]].reduce((a, b) => {
+                    const rowKey = filters.map(key => b[key] || '').join('_')
+                    a[rowKey] = b;
+                    return a;
+                })
+
+                //去掉无效的key
+                const targetData = Object.values(targetDataResolve || {})
+                    .filter(row => {
+                        delete row.rowid;
+                        let i, len = filters.length;
+                        for(i = 0; i < len; i++) {
+                            const key = filters[i];
+                            if(row[key].toString() === '') return false
+                        }
+                        return true
+                    })
+                
+                saveMethod(targetData)
+            })
         },
 
         close() {
@@ -365,7 +424,7 @@ export default {
             height: 35px;
             .el-col {
                 font-size: 12px;
-                padding: 8px 8px;
+                padding: 8px 8px 0px 8px;
                 box-sizing: border-box;
             }
         }
@@ -374,8 +433,12 @@ export default {
             padding-bottom: 4px;
             box-sizing: border-box;
             .el-col {
-                padding: 8px 8px;
+                padding: 8px 8px 0px 8px;
                 box-sizing: border-box;
+                i{
+                    cursor: pointer;
+                    vertical-align: sub;
+                }
             }
             .cell-name {
                 font-size: 12px;

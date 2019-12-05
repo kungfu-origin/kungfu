@@ -1,7 +1,6 @@
 import { buildDateRange } from '__gUtils/busiUtils';
-import { runSelectDB, runBatchInsertDB, runInsertUpdateDeleteDB, runClearDB } from '__gUtils/dbUtils';
-import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB, buildAccountCommissionDBPath } from '__gConfig/pathConfig';
-import { copySync, existsSync } from '__gUtils/fileUtils';
+import { runSelectDB, runInsertUpdateDeleteDB } from '__gUtils/dbUtils';
+import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB } from '__gConfig/pathConfig';
 import moment from "moment"
 
 /**
@@ -174,17 +173,4 @@ export const getAccountPnlDay = (accountId: string) => {
 }
 
 
-export const setFeeSettingData = (accountId: string, feeSettingData: any) => {
-    if(feeSettingData.length < 1) throw new Error('fees length is 0')
-    const COMMISSION_DB = buildAccountCommissionDBPath(accountId)
-    if(!existsSync(COMMISSION_DB)) throw new Error('commission.db is not exist!')
-    return new Promise((resolve, reject) => {
-        const keys = Object.keys(feeSettingData[0] || {})
-        const q = [...keys].fill("?")
-        runClearDB(COMMISSION_DB, 'commission')
-        .then(() => runBatchInsertDB(COMMISSION_DB, `INSERT INTO commission(${keys.join(", ")}) VALUES (${q.join(", ")})`, feeSettingData.map((f: any): any[] => [...Object.values(f)])))
-        .then(() => resolve(true))
-        .catch((err: Error): void => reject(err))
-    })
-}
 

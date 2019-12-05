@@ -53,17 +53,21 @@
             {
               "key": "product_id",
               "name": "产品",
-              "type": "str"
+              "type": "str",
+              "default": ""
             },
             {
               "key": "exchange_id",
               "name": "交易所",
-              "type": "str"
+              "type": "str",
+              "default": ""
+
             },
             {
               "key": "mode",
               "name": "类型",
               "type": "select",
+              "default": "",
               "data": [
                 { "value": "0", "name": "按金额" },
                 { "value": "1", "name": "按手数" }
@@ -72,17 +76,20 @@
             {
               "key": "open_ratio",
               "name": "开仓手续费",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "key": "close_ratio",
               "name": "平仓手续费",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "key": "close_today_ratio",
               "name": "平今手续费",
-              "type": "float"
+              "type": "float",
+              "default": 0
             }
           ]
         }
