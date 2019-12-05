@@ -60,3 +60,6 @@ MANIFEST
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+#inquirer-path
+*/inquirer-path/lib/
