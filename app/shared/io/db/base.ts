@@ -4,7 +4,7 @@ import { GLOBAL_COMMISSION_DB } from '__gConfig/pathConfig';
 import { runSelectDB, runBatchInsertDB, runClearDB } from '__gUtils/dbUtils';
 
 export const getFeeSettingData = () => {
-    return runSelectDB(GLOBAL_COMMISSION_DB,`SELECT rowid, * FROM commission`)
+    return runSelectDB(GLOBAL_COMMISSION_DB,`SELECT rowid, * FROM commission ORDER BY product_id`)
 }
 
 export const setFeeSettingData = (feeSettingData: any, ) => {
