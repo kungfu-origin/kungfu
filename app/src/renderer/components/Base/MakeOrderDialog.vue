@@ -31,22 +31,8 @@
                         :label="account.account_id.toAccountId()"
                         :value="account.account_id">
                         <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                        <el-tag :type="getAccountType(account.source_name).type">{{getAccountType(account.source_name).typeName === 'future' ? '期货' : '股票'}}</el-tag>
+                        <el-tag :type="getAccountType(account.source_name).type">{{sourceTypeConfig[getAccountType(account.source_name).typeName].name}}</el-tag>
                         <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item
-            v-if="moduleType === 'account'"
-            label="策略"
-            prop="client_id"
-            >
-                <el-select v-model.trime="makeOrderForm.client_id" clearable>
-                    <el-option
-                        v-for="strategy in strategyList"
-                        :key="strategy.strategy_id"
-                        :label="strategy.strategy_id"
-                        :value="strategy.strategy_id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -57,8 +43,7 @@
                 { required: true, message: '不能为空！', trigger: 'blur' },
             ]">
                 <el-radio-group size="mini" v-model="makeOrderForm.price_type">
-                    <el-radio size="mini" :label="0">市价</el-radio>
-                    <el-radio size="mini" :label="3">限价</el-radio>
+                    <el-radio size="mini" v-for="key in Object.keys(priceType || {})" :label="+key" :key="key">{{ priceType[key] }}</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -95,11 +80,24 @@
                 { required: true, message: '不能为空！', trigger: 'blur' },
             ]">
                 <el-radio-group size="mini" v-model="makeOrderForm.offset">
-                    <el-radio size="mini" :label="0">开</el-radio>
-                    <el-radio size="mini" :label="1">平</el-radio>
-                    <el-radio size="mini" :label="2">平今</el-radio>
-                    <el-radio size="mini" :label="3">平昨</el-radio>
+                    <el-radio size="mini" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
                 </el-radio-group>
+            </el-form-item>
+            <el-form-item
+            v-if="accountType === 'future'"
+            label="套保"
+            prop="hedge_flag"
+            :rules="[
+                { required: true, message: '不能为空！', trigger: 'blur' },
+            ]">
+                <el-select v-model.trim="makeOrderForm.hedge_flag">
+                    <el-option
+                        v-for="key in Object.keys(hedgeFlag || {})"
+                        :key="key"
+                        :label="hedgeFlag[key]"
+                        :value="key">
+                    </el-option>
+                </el-select>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer make-order-footer">
@@ -114,7 +112,8 @@
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { nanoMakeOrder } from '__io/nano/nanoReq';
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
+import { sourceTypeConfig, offsetName, priceType, hedgeFlag } from '__gConfig/tradingConfig';
 
 export default {
     name: 'make-order-dialog',
@@ -137,36 +136,29 @@ export default {
     },
 
     data(){
-        // instrument_id; //合约代码
-        // account_id; //账号ID
-        // client_id; //Client ID
-        // limit_price; //价格
-        // volume; //数量
-        // side; //买卖方向 '0': 买, '1': 卖
-        // offset; //开平方向 '0': 开, '1': 平, '2': 平今, '3': 平昨
-        // price_type; //价格类型 '0': 市价(任意价), '3': 限价 先提供这两选项吧，别的不一定是交易所通用的
+
+        this.sourceTypeConfig = sourceTypeConfig;
+        this.offsetName = offsetName;
+        this.priceType = priceType;
+        this.hedgeFlag = hedgeFlag;
+
+        this.biggerThanZeroValidator = biggerThanZeroValidator;
 
         return {
             makeOrderForm: {
+                category: '',
+                group: '', //source_name
+                name: '', // account_id
                 instrument_id: '',
-                account_id: '',
-                client_id: '',
+                exchange_id: '',
                 limit_price: 0,
                 volume: 0,
                 side: 0,
                 offset: 0,
-                price_type: 3
+                price_type: 3,
+                hedge_flag: 0,
             },
-
-            // volumeRate: 0,
-            biggerThanZeroValidator
         }
-    },
-
-    mounted(){
-        const t = this;
-        //附值 account_id
-        if(t.moduleType === 'account') t.makeOrderForm.account_id = t.getSourceName(t.currentId) + '_' + t.currentId;
     },
 
     computed: {
@@ -180,8 +172,8 @@ export default {
 
         accountType(){
             const t = this;
-            const targetAccountId = t.makeOrderForm.account_id;
-            const targetAccount = t.accountList.filter(a => a.account_id === targetAccountId)
+            const targetAccountId = t.makeOrderForm.name;
+            const targetAccount = t.accountList.filter(a => a.name === targetAccountId)
             if(!targetAccount.length) return 'stock'
             const sourceName = targetAccount[0].source_name;
             return t.accountSource[sourceName].typeName
@@ -213,19 +205,21 @@ export default {
             t.$refs['make-order-form'].validate(valid => {
                 if(valid) {
                     //需要对account_id再处理
-                    const makeOrderForm = deepClone(t.makeOrderForm)
-                    const sourceAccountId = makeOrderForm.account_id;
-                    const gatewayName = `td_${sourceAccountId}`
-                    makeOrderForm.account_id = makeOrderForm.account_id.toAccountId()
-                    makeOrderForm.price_type = makeOrderForm.price_type.toString()
-                    makeOrderForm.side = makeOrderForm.side.toString()
-                    makeOrderForm.offset = makeOrderForm.offset.toString()
-                    if((t.processStatus || {})[gatewayName] !== 'online'){
-                        t.$message.warning(`需要先启动 ${sourceAccountId} 交易进程！`)
+                    const makeOrderForm = deepClone(t.makeOrderForm);
+                    console.log(makeOrderForm)
+                    const sourceAccountId = makeOrderForm.name;
+                    const gatewayName = `td_${makeOrderForm.name}`;
+                    makeOrderForm.category = 'td';
+                    makeOrderForm.group = t.currentId.toSourceName();
+                    makeOrderForm.name = t.currentId.toAccountId();
+                    if(!ifProcessRunning(gatewayName)){
+                        t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
                     t.$message.info('正在发送订单指令...')
-                    nanoMakeOrder(gatewayName, makeOrderForm).then(() => t.$message.success('下单指令已发送！'))
+                    nanoMakeOrder(makeOrderForm)
+                        .then(() => t.$message.success('下单指令已发送！'))
+                        .catch(err => t.$message.error(err))
                 }
             })
         },
@@ -269,11 +263,11 @@ export default {
 </script>
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
+
     .make-order-footer{
         display: flex;
         .el-button{
             width: 50%;
         }
-
     }
 </style>

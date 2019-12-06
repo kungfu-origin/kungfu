@@ -6,8 +6,8 @@ const isEnglish = process.env.LANG_ENV === 'en';
 // close_today = '2',
 // close_yesterday = '3'
 export const offsetName: NumberToStringObject = {
-    0: isEnglish ? 'Open' : '开仓',
-    1: isEnglish ? 'Close' : '平仓',
+    0: isEnglish ? 'Open' : '开',
+    1: isEnglish ? 'Close' : '平',
     2: isEnglish ? 'CloseToday' : '平今',
     3: isEnglish ? 'CloseYest' : '平昨'
 }
@@ -15,6 +15,16 @@ export const offsetName: NumberToStringObject = {
 export const sideName: NumberToStringObject = {
     0: isEnglish ? 'Buy' : '买',
     1: isEnglish ? 'Sell' : '卖'
+}
+
+export const posDirection: NumberToStringObject = {
+    0: isEnglish ? 'Long' : '多',
+    1: isEnglish ? 'Short' : '空' 
+}
+
+export const priceType: NumberToStringObject = {
+    0: isEnglish ? 'Limit' : '市价',
+    3: isEnglish ? 'Market' : '限价'
 }
 
 export const statusName: StringToStringObject = {
@@ -45,16 +55,6 @@ export const orderStatus: NumberToStringObject = {
     7: isEnglish ? 'Trading' : '正在交易',
 }
 
-//     DirectionLong = '0'
-//    DirectionShort = '1'
-export const posDirection: NumberToStringObject = {
-    0: isEnglish ? 'Long' : '多',
-    1: isEnglish ? 'Short' : '空' 
-}
-
-
-
-
 export const sourceTypeConfig: SourceType = {
     'stock': {
         name: isEnglish ? 'stock' : '股票',
@@ -73,4 +73,11 @@ export const sourceTypeConfig: SourceType = {
         kfId: 3,
         color: 'success'
     }
+}
+
+export const hedgeFlag: NumberToStringObject = {
+    0: isEnglish ? 'Speculation': '投机',
+    1: isEnglish ? 'Arbitrage': '套利',
+    2: isEnglish ? 'Hedge': '套保',
+    3: isEnglish ? 'Covered': '备兑'
 }

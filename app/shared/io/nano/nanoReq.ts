@@ -129,16 +129,26 @@ function buildCancalAllOrderPostData(type: string, accountOrStrategyId: string) 
 
 
 interface MakeOrderData {
-    account_id: string,
-    price_type: string | number,
-    side: string,
-    offset: string
+    category: string | 'td',
+    group: string, // source_name
+    name: string, // account_id
+    intrument_id: string,
+    exchange_id: string,
+    limit_price: number,
+    volume: number,
+    price_type: number,
+    side: number,
+    offset: number,
+    hedge_flag: number
 }
 
 export const nanoMakeOrder = (makeOrderData: MakeOrderData) => {
     const reqMsg = JSON.stringify({
-        req: 303,
-        data: makeOrderData
+        req: msgType.makeOrder,
+        data: {
+            mode: 'live',
+            ...makeOrderData
+        }
     })
     return buildRequest(reqMsg, msgType.makeOrder, '下单失败！') 
 }

@@ -125,6 +125,12 @@ p.el-select-dropdown__empty{
     color: $font;
 }
 
+.el-select-dropdown__item {
+    .el-tag {
+        vertical-align: middle;
+    }
+}
+
 .el-select{
     width: 100%;
     .el-select__tags{

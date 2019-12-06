@@ -46,6 +46,7 @@ declare global {
     interface String {
         toAccountId(): string;
         parseSourceAccountId(): SourceAccountId;
+        toSourceName(): string;
     }
 
     interface Array<T> {
@@ -60,6 +61,12 @@ String.prototype.toAccountId = function(): string{
     if(this.indexOf('_') === -1) return this.toString();
     return this.split('_').slice(1).join('_')
 }
+
+String.prototype.toSourceName = function(): string {
+    if(this.indexOf('_') === -1) return this.toString();
+    return this.split('_')[0];
+}
+
 
 String.prototype.parseSourceAccountId = function(): SourceAccountId {
     const parseList = this.toString().split('_');

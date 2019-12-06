@@ -171,7 +171,7 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     options = {
         ...options,
-        "args": [logLevel, options.args].join(' '),
+        "args": [logLevel, `"${options.args}"`].join(' '),
         "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",
