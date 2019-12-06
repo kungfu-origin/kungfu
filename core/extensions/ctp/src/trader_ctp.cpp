@@ -382,6 +382,7 @@ namespace kungfu
                     auto writer = get_writer(order_info.source);
                     msg::data::Trade &trade = writer->open_data<msg::data::Trade>(0, msg::type::Trade);
                     from_ctp(*pTrade, trade);
+                    strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
                     uint64_t trade_id = writer->current_frame_uid();
                     trade.trade_id = trade_id;
                     trade.order_id = order_info.internal_order_id;

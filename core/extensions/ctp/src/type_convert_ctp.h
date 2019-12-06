@@ -335,7 +335,6 @@ namespace kungfu
                 from_ctp_offset(ori.OffsetFlag, des.offset);
                 from_ctp_direction(ori.Direction, des.side);
                 des.trade_time = nsec_from_ctp_time(ori.TradeDate, ori.TradeTime);
-                strcpy(des.trading_day, ori.TradeDate);
             }
 
             inline void from_ctp(const CThostFtdcInstrumentField &ori,Instrument &des)
