@@ -400,9 +400,9 @@ class FuturePosition(Position):
             pre_margin = self.margin
             self.margin = self.contract_multiplier * self.settlement_price * self.volume * self.margin_ratio
             self.book.avail -= (self.margin - pre_margin)
-        elif is_valid_price(quote.last_price):
+        if is_valid_price(quote.last_price):
             self.last_price = quote.last_price
-        elif is_valid_price(quote.pre_settlement_price):
+        if is_valid_price(quote.pre_settlement_price):
             self.pre_settlement_price = quote.pre_settlement_price
         self._on_interval_check(self.ctx.now())
 
