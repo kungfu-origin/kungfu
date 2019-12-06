@@ -2,8 +2,8 @@
 // Created by qlu on 2019/1/14.
 //
 
-#ifndef WC_2_ORDER_MAPPER_H
-#define WC_2_ORDER_MAPPER_H
+#ifndef KF_EXT_XTP_ORDER_MAPPER_H
+#define KF_EXT_XTP_ORDER_MAPPER_H
 
 #include <string>
 #include <spdlog/spdlog.h>
@@ -134,4 +134,4 @@ namespace kungfu
         }
     }
 }
-#endif //WC_2_ORDER_MAPPER_H
+#endif //KF_EXT_XTP_ORDER_MAPPER_H
