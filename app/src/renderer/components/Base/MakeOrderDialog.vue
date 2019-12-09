@@ -8,7 +8,7 @@
     @close="handleClose"
     class="make-order-dialog"
     >
-        <el-form ref="make-order-form" label-width="52px" :model="makeOrderForm">
+        <el-form ref="make-order-form" label-width="67px" :model="makeOrderForm">
             <el-form-item
             label="代码"
             prop="instrument_id"
@@ -23,11 +23,11 @@
             <el-form-item
             v-if="moduleType === 'strategy'"
             label="账户"
-            prop="account_id"
+            prop="name"
             :rules="[
                 { required: true, message: '不能为空！', trigger: 'blur' },
             ]">
-                <el-select v-model.trime="makeOrderForm.account_id">
+                <el-select v-model.trim="makeOrderForm.name" @change="handleSelectAccount">
                     <el-option
                         v-for="account in accountList"
                         :key="account.account_id.toAccountId()"
@@ -36,6 +36,21 @@
                         <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
                         <el-tag :type="getAccountType(account.source_name).type">{{sourceTypeConfig[getAccountType(account.source_name).typeName].name}}</el-tag>
                         <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item
+            label="交易所"
+            prop="exchange_id"
+            :rules="[
+                { required: true, message: '不能为空！', trigger: 'blur' },
+            ]">
+                <el-select v-model.trim="makeOrderForm.exchange_id">
+                    <el-option
+                        v-for="exchangeId in Object.keys(exchangeIds)"
+                        :key="exchangeId"
+                        :label="exchangeIds[exchangeId]"
+                        :value="exchangeId">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -117,7 +132,7 @@ import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { nanoMakeOrder } from '__io/nano/nanoReq';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
-import { sourceTypeConfig, offsetName, priceType, hedgeFlag } from '__gConfig/tradingConfig';
+import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds } from '__gConfig/tradingConfig';
 import { Autocomplete } from 'element-ui';
 
 const ls = require('local-storage');
@@ -150,10 +165,12 @@ export default {
         this.offsetName = offsetName;
         this.priceType = priceType;
         this.hedgeFlag = hedgeFlag;
+        this.exchangeIds = exchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 
         return {
+            currentAccount: '', //only strategy
             makeOrderForm: {
                 category: '',
                 group: '', //source_name
@@ -181,9 +198,28 @@ export default {
 
         accountType(){
             const t = this;
-            const sourceName = t.currentId.toSourceName();
+            const sourceName = t.currentSourceName;
+            if(!sourceName) return 'stock'
             return t.accountSource[sourceName].typeName
         },
+
+        currentAccountId() {
+            const t = this;
+            if(t.moduleType === 'account') {
+                return t.currentId.toAccountId();
+            } else if(t.moduleType === 'strategy') {
+                return t.currentAccount.toAccountId();
+            }
+        },
+
+        currentSourceName() {
+            const t = this;
+            if(t.moduleType === 'account') {
+                return t.currentId.toSourceName()
+            } else if(t.moduleType === 'strategy') {
+                return t.currentAccount.toSourceName();
+            }
+        }
     },
 
     methods: {
@@ -206,6 +242,11 @@ export default {
             t.submit()
         },
 
+        handleSelectAccount(account) {
+            const t = this;
+            t.currentAccount = account;
+        },
+
         submit(){
             const t = this;
             t.$refs['make-order-form'].validate(valid => {
@@ -213,15 +254,16 @@ export default {
                     //需要对account_id再处理
                     const makeOrderForm = deepClone(t.makeOrderForm);
                     makeOrderForm.category = 'td';
-                    makeOrderForm.group = t.currentId.toSourceName();
-                    makeOrderForm.name = t.currentId.toAccountId();
+                    makeOrderForm.group = t.currentSourceName;
+                    makeOrderForm.name = t.currentAccountId;
                     const gatewayName = `td_${makeOrderForm.group}_${makeOrderForm.name}`;
 
                     if(!ifProcessRunning(gatewayName, t.processStatus)){
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
-                    t.$message.info('正在发送订单指令...')
+                    t.$message.info('正在发送订单指令...');
+                    console.log(makeOrderForm, '---')
                     nanoMakeOrder(makeOrderForm)
                         .then(() => t.$message.success('下单指令已发送！'))
                         .catch(err => t.$message.error(err))
@@ -276,6 +318,7 @@ export default {
             const t = this;
             t.$emit('update:visible', false)
             t.volumeRate = 0;
+            t.currentAccount = '';
             t.makeOrderForm = {
                 instrument_id: '',
                 account_id: '',
