@@ -38,7 +38,7 @@ import { ipcRenderer } from 'electron'
 import { writeCSV } from '__gUtils/fileUtils';
 import MakeOrderDialog from './MakeOrderDialog';
 
-
+const ls = require('local-storage');
 
 export default {
     name: 'positions',
@@ -243,14 +243,27 @@ export default {
                         return;
                     }
                     let tableData = []
+                    let instrumentIds = {}
                     res.map(item => {
                         const dealItem = dealPos(item)
                         tableData.push(dealItem)
                         const key = t.getKey(item)//key并非ticker
                         t.posDataByKey[key] = dealItem
+
+                        // saving to localstorage for make order input
+                        const instrumentId = item.instrument_id;
+                        instrumentIds[instrumentId] = 1
                     })
                     t.tableData = Object.freeze(tableData) 
                     resolve(t.posDataByKey)
+
+                    // saving to localstorage for make order input
+                    const instrumentIdsList = ls.get('instrument_ids_list');
+                    ls.set('instrument_ids_list', {
+                        ...instrumentIdsList,
+                        ...instrumentIds
+                    })
+
                 }).finally(() => {
                     t.getDataLock = false
                 })

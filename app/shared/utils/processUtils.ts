@@ -171,7 +171,7 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     options = {
         ...options,
-        "args": [logLevel, `"${options.args}"`].join(' '),
+        "args": [logLevel, options.args].join(' '),
         "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "script": `kfc${extensionName}`,
         "log_type": "json",
@@ -246,7 +246,7 @@ export const startLedger = async(force: boolean): Promise<void> => {
 export const startMd = (source: string): Promise<void> => {
     return startProcess({
         "name": `md_${source}`,
-        "args": `md -s ${source}`,
+        "args": `md -s "${source}"`,
     }).catch(err => logger.error(err))
 }
 
@@ -255,7 +255,7 @@ export const startTd = (accountId: string): Promise<void> => {
     const { source, id } = accountId.parseSourceAccountId();
     return startProcess({
         "name": `td_${accountId}`,
-        "args": `td -s ${source} -a ${id}`,
+        "args": `td -s "${source}" -a "${id}"`,
     }).catch(err => logger.error(err))
 }
 
@@ -264,7 +264,7 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     strategyPath = dealSpaceInPath(strategyPath)
     return startProcess({
         "name": strategyId,
-        "args": `strategy -n ${strategyId} -p ${strategyPath}`,
+        "args": `strategy -n "${strategyId}" -p "${strategyPath}"`,
     }).catch(err => logger.error(err))
 }
 

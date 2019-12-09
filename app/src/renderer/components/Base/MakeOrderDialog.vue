@@ -13,9 +13,12 @@
             label="代码"
             prop="instrument_id"
             :rules="[
-                { required: true, message: '不能为空！', trigger: 'blur' },
+                { required: true, message: '不能为空！'},
             ]">
-                <el-input v-model.trim="makeOrderForm.instrument_id"></el-input>
+                <el-autocomplete 
+                v-model.trim="makeOrderForm.instrument_id"
+                :fetch-suggestions="querySearch"
+                ></el-autocomplete>
             </el-form-item>
             <el-form-item
             v-if="moduleType === 'strategy'"
@@ -109,11 +112,17 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { nanoMakeOrder } from '__io/nano/nanoReq';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
 import { sourceTypeConfig, offsetName, priceType, hedgeFlag } from '__gConfig/tradingConfig';
+import { Autocomplete } from 'element-ui';
+
+const ls = require('local-storage');
+
+Vue.use(Autocomplete)
 
 export default {
     name: 'make-order-dialog',
@@ -206,13 +215,12 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     const makeOrderForm = deepClone(t.makeOrderForm);
-                    console.log(makeOrderForm)
-                    const sourceAccountId = makeOrderForm.name;
-                    const gatewayName = `td_${makeOrderForm.name}`;
                     makeOrderForm.category = 'td';
                     makeOrderForm.group = t.currentId.toSourceName();
                     makeOrderForm.name = t.currentId.toAccountId();
-                    if(!ifProcessRunning(gatewayName)){
+                    const gatewayName = `td_${makeOrderForm.group}_${makeOrderForm.name}`;
+
+                    if(!ifProcessRunning(gatewayName, t.processStatus)){
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
@@ -220,8 +228,34 @@ export default {
                     nanoMakeOrder(makeOrderForm)
                         .then(() => t.$message.success('下单指令已发送！'))
                         .catch(err => t.$message.error(err))
+                    
+                    //save instrumentid to ls
+                    const instrumentIdsList = ls.get('instrument_ids_list');
+                    ls.set('instrument_ids_list', {
+                        ...instrumentIdsList,
+                        [makeOrderForm.instrument_id]: +new Date().getTime()
+                    })
                 }
             })
+        },
+
+        querySearch(queryString, cb) {
+            const t = this;
+            const instrumentIdsList = ls.get('instrument_ids_list') || {};
+            const instrumentIdsListResolve = Object.keys(instrumentIdsList)
+                .map(key => ({value: key, insertTime: instrumentIdsList[key]}))
+                .sort((a, b) => {
+                    if(a.insertTime > b.insertTime) return -1
+                    else if(b.insertTime > a.insertTime) return 1
+                    else return 0
+                })
+
+            const results = (queryString.trim() 
+            ? instrumentIdsListResolve.filter(instrumentId => (instrumentId.value.indexOf(queryString) !== -1)) 
+            : instrumentIdsListResolve)
+
+            console.log(results)
+            cb(results)
         },
 
         getAvailCash(accountId){

@@ -654,3 +654,28 @@ p.el-select-dropdown__empty{
         }
     }
 }
+
+.el-autocomplete-suggestion{
+    border: none;
+    li {
+        line-height: 24px;
+        padding: 0 8px;
+    }
+    li:hover {
+        background: $input_bg;
+        color: $vi;
+    }
+
+    li.highlighted {
+        color: $vi;
+        background: $input_bg;
+    }
+}
+
+.el-autocomplete {
+    width: 100%;
+    .el-input {
+        width: 100%;
+    }
+}
+
