@@ -235,6 +235,16 @@ const renderColoredProcessName = (processId: string) => {
     }
 }
 
+const dealUpdateTime = (updateTime: string): any => {
+    const updateTimeLength = updateTime.length;
+    if(updateTimeLength === 24) return updateTime.slice(0, 18)
+    else if(updateTime.split('-').length > 1) {
+        const newUpdateTime = updateTime.split('-').slice(1).join('/');
+        return dealUpdateTime(newUpdateTime)
+    }
+    else return updateTime
+}
+
 const dealLogMessage = (line: string, processId: string) => {
     let lineData: LogDataOrigin;
     try{
@@ -247,19 +257,33 @@ const dealLogMessage = (line: string, processId: string) => {
         message = message.split('\n[').join('[')
 
         if(message.split('[').length < 4) {
-            const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000000000');
+            const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000');
             const type = 'error'.indexOf(lineData.type) !== -1 ? 'error' : lineData.type;
             message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
         }
 
-        message = message
-            .replace(/\[  info  \]/g, `[ ${colors[logColor.info]('info')}    ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[ out  \]/g,    `[ out     ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[ trace  \]/g, `[ trace   ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[ error  \]/g, `[ ${colors[logColor.error]('error')}   ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[warning \]/g, `[ ${colors[logColor.warning]('warning')} ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[ debug  \]/g, `[ ${colors[logColor.debug]('debug')}   ] [${renderColoredProcessName(processId)}]`)
-            .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] [${renderColoredProcessName(processId)}]`)
+        const msgList = message.split(']');
+        const updateTime = msgList[0].slice(1)
+        const updateTimeResolve = dealUpdateTime(updateTime)
+        const typeResolve = `[${msgList[1].trim().slice(1).trim()}]`;
+        
+        let lastInfo = ''
+        if(msgList.length >= 4) {
+            lastInfo = msgList.slice(4).join(']')
+        } else {
+            lastInfo = msgList.slice(2).join(']')
+        }
+
+        const messageResolve = `[${updateTimeResolve}]${typeResolve}${lastInfo}`
+
+        message = messageResolve
+            .replace(/\[info\]/g, `[ ${colors[logColor.info]('info')}    ] `)
+            .replace(/\[out\]/g,    `[ out     ] `)
+            .replace(/\[trace\]/g, `[ trace   ] `)
+            .replace(/\[error\]/g, `[ ${colors[logColor.error]('error')}   ] `)
+            .replace(/\[warning\]/g, `[ ${colors[logColor.warning]('warning')} ] `)
+            .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
+            .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
     
         if(message.indexOf('critical') !== -1) message = `${colors[logColor.critical](message)}`
         

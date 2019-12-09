@@ -5,7 +5,7 @@ import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } 
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
 
-const WIDTH_LEFT_PANEL = 68;
+const WIDTH_LEFT_PANEL = 41;
 
 export class MonitorDashboard extends Dashboard {
     screen: any;
@@ -141,10 +141,8 @@ export class MonitorDashboard extends Dashboard {
                 .map((proc: ProcessListItem) => parseToString([
                     proc.typeName,
                     proc.processName,
-                    `Mem: ${proc.monit.memory} M`,
-                    `CPU: ${proc.monit.cpu} %`,
                     proc.statusName,
-                ], [5, 15, 11, 11, 8]))
+                ], [5, 15, 8]))
             t.boards.processList.setItems(processListResolve);
             t.screen.render();
 
