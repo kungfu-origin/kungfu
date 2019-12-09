@@ -181,10 +181,7 @@ export default {
 
         accountType(){
             const t = this;
-            const targetAccountId = t.makeOrderForm.name;
-            const targetAccount = t.accountList.filter(a => a.name === targetAccountId)
-            if(!targetAccount.length) return 'stock'
-            const sourceName = targetAccount[0].source_name;
+            const sourceName = t.currentId.toSourceName();
             return t.accountSource[sourceName].typeName
         },
     },
@@ -253,8 +250,6 @@ export default {
             const results = (queryString.trim() 
             ? instrumentIdsListResolve.filter(instrumentId => (instrumentId.value.indexOf(queryString) !== -1)) 
             : instrumentIdsListResolve)
-
-            console.log(results)
             cb(results)
         },
 
