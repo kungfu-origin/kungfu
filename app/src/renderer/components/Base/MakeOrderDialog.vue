@@ -65,7 +65,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item
-            v-if="makeOrderForm.price_type === 3"
+            v-if="makeOrderForm.price_type === 0"
             label="价格"
             prop="limit_price"
             :rules="[
@@ -181,7 +181,7 @@ export default {
                 volume: 0,
                 side: 0,
                 offset: 0,
-                price_type: 3,
+                price_type: 0,
                 hedge_flag: 0,
             },
         }
