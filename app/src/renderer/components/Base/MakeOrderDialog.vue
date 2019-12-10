@@ -69,7 +69,7 @@
             label="价格"
             prop="limit_price"
             :rules="[
-                { required: true, message: '不能为空！', trigger: 'blur' },
+                { required: true, message: '不能为空！' },
                 { validator: biggerThanZeroValidator, trigger: 'blur'}
             ]">
                 <el-input-number
@@ -82,7 +82,7 @@
             prop="volume"
             class="make-order-volume"
             :rules="[
-                { required: true, message: '不能为空！', trigger: 'blur' },
+                { required: true, message: '不能为空！' },
                 { validator: biggerThanZeroValidator, trigger: 'blur'}
             ]">
                 <el-input-number 
@@ -199,7 +199,7 @@ export default {
         accountType(){
             const t = this;
             const sourceName = t.currentSourceName;
-            if(!sourceName) return 'stock'
+            if(!sourceName) return 'stock';
             return t.accountSource[sourceName].typeName
         },
 

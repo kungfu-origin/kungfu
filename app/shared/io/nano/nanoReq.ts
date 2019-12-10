@@ -10,11 +10,14 @@ interface RepData {
 
 const buildRequest = (reqMsg: string, msgTypeVal: number, errMsg: string): Promise<any> => {
     return new Promise((resolve, reject) => {
+        console.time('buildRep')
         const req = buildRepNmsg();
+        console.timeEnd('buildRep')
         req.send(reqMsg)
         req.on('data', (buf: string) => {
+            console.log(buf.toString())
             req.close();
-            const data: RepData = JSON.parse(String(buf));
+            const data: RepData = JSON.parse(buf.toString());
             if(data.msg_type === msgTypeVal ) {
                 if(data.status === 200) {
                     resolve(data.data || {})
