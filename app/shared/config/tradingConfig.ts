@@ -23,8 +23,8 @@ export const posDirection: NumberToStringObject = {
 }
 
 export const priceType: NumberToStringObject = {
-    0: isEnglish ? 'Limit' : '市价',
-    3: isEnglish ? 'Market' : '限价'
+    1: isEnglish ? 'Limit' : '市价',
+    0: isEnglish ? 'Market' : '限价'
 }
 
 export const statusName: StringToStringObject = {
