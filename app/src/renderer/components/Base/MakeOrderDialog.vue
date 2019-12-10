@@ -263,7 +263,7 @@ export default {
                         return;
                     }
                     t.$message.info('正在发送订单指令...');
-                    console.log(makeOrderForm, '---')
+
                     nanoMakeOrder(makeOrderForm)
                         .then(() => t.$message.success('下单指令已发送！'))
                         .catch(err => t.$message.error(err))
