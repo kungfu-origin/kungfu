@@ -147,7 +147,7 @@ interface MakeOrderData {
 
 export const nanoMakeOrder = (makeOrderData: MakeOrderData) => {
     const reqMsg = JSON.stringify({
-        req: msgType.makeOrder,
+        msg_type: msgType.makeOrder,
         data: {
             mode: 'live',
             ...makeOrderData
