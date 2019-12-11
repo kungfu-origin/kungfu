@@ -308,7 +308,7 @@ export const listProcessStatusWithDetail = () => {
 //删除进程
 export const deleteProcess = (processName: string) => {
     return new Promise(async(resolve, reject) => {
-        let processes = [];
+        var processes = [];
         try{
             processes = await describeProcess(processName)
         }catch(err){
@@ -320,24 +320,26 @@ export const deleteProcess = (processName: string) => {
             resolve(true)
             return;
         }
-        const pids = processes
-        .map((prc: any): number => prc.pid)
-        .filter((pid: number): boolean => !!pid)
 
         pm2Delete(processName)
         .then(() => resolve(true))
         .catch(err => reject(err))
-        .finally(() => {
-        //    if(pids && pids.length) { 
-        //        logger.info('[KILL PROCESS] by pids', pids)
-        //        kfKill(pids)
-        //        .then(() => { 
-        //            logger.info('[KILL PROCESS] by pids success', pids)
-        //        })
-        //        .catch((err: Error) => {
-        //            logger.error(['[kfKill pm2Delete]'], err)
-        //        })
-        //    }
+        .finally(async () => {
+            const processes = await describeProcess(processName)
+            const pids = processes
+                .map((prc: any): number => prc.pid)
+                .filter((pid: number): boolean => !!pid)
+
+           if(pids && pids.length) { 
+               logger.info('[KILL PROCESS] by pids', pids)
+               kfKill(pids)
+               .then(() => { 
+                   logger.info('[KILL PROCESS] by pids success', pids)
+               })
+               .catch((err: Error) => {
+                   logger.error(['[kfKill pm2Delete]'], err)
+               })
+           }
         })
     })
 }
