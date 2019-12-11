@@ -102,7 +102,7 @@ export default {
                     type: 'text',
                     label: '代码',
                     prop: 'instrumentId',
-                    width: '90px'
+                    width: '80px'
                 },{
                     type: 'text',
                     label: '多空',

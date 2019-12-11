@@ -115,7 +115,7 @@ export default {
                 type: "text",
                 label: "代码",
                 prop: "instrumentId",
-                width: '70px'
+                width: '80px'
             },{
                 type: "text",
                 label: "买卖",
