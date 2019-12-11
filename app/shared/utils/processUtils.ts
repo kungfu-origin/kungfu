@@ -7,7 +7,10 @@ import { getProcesses } from 'getprocesses';
 
 const path = require('path');
 const fkill = require('fkill');
-const taskkill = require('taskkill');
+// const taskkill = require('taskkill');
+const windowskill = require('windows-kill')({
+    warmUp: true
+})
 export const pm2 = require('pm2');
 
 //=========================== task kill =========================================
@@ -30,10 +33,12 @@ const winKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
         if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
-        return taskkill(pIdList, {
-            force: true,
-            tree: true
-        })      
+        pIdList.forEach((pid: number) => windowskill(pid, 'SIGINT'))
+        return Promise.resolve()
+        // return taskkill(pIdList, {
+        //     force: true,
+        //     tree: true
+        // })      
     } catch (err) {
         throw err
     }

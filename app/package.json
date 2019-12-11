@@ -166,7 +166,8 @@
     "monaco-editor": "^0.18.1",
     "pm2": "^3.5.0",
     "tail": "^2.0.2",
-    "taskkill": "^2.0.0"
+    "taskkill": "^2.0.0",
+    "windows-kill": "^0.3.3"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",
