@@ -102,7 +102,7 @@ export default {
                     type: 'text',
                     label: '代码',
                     prop: 'instrumentId',
-                    width: '70px'
+                    width: '90px'
                 },{
                     type: 'text',
                     label: '多空',
@@ -127,17 +127,17 @@ export default {
                     type: 'number',
                     label: '开/持仓均价',
                     prop: 'avgPrice',
-                    flex: 1.5
+                    flex: 1.2
                 },{
                     type: 'number',
                     label: '最新价',
                     prop: 'lastPrice',
-                    flex: 1
+                    flex: 1.2
                 },{
                     type: 'number',
                     label: '浮动盈亏',
                     prop: 'unRealizedPnl',
-                    flex: 1.2
+                    flex: 1.5
                 }
             ]
         }
