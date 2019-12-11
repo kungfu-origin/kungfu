@@ -123,7 +123,6 @@ class StockPosition(Position):
         elif trade.side == Side.Sell:
             self._apply_sell(trade.price, trade.volume)
         else:
-            # ignore stock options lock/unlock/exec/drop operations
             pass
         self.book.subject.on_next(self.event)
 
@@ -288,9 +287,6 @@ class StockOptionPosition(Position):
     _INSTRUMENT_TYPES = [InstrumentType.StockOption]
     def __init__(self, ctx, book, **kwargs):
         super(StockOptionPosition, self).__init__(ctx, book, **kwargs)
-        inst_info = self.ctx.get_inst_info(self.instrument_id)
-        self.contract_multiplier = inst_info["contract_multiplier"]
-        self.margin_ratio = inst_info["long_margin_ratio"] if self.direction == Direction.Long else inst_info["short_margin_ratio"]
         self.pre_settlement_price = kwargs.pop("pre_settlement_price", 0.0)
         self.settlement_price = kwargs.pop("settlement_price", 0.0)
         self.last_price = kwargs.pop("last_price", 0.0)
@@ -310,11 +306,11 @@ class StockOptionPosition(Position):
             return 0.0
         else:
             return (self.last_price - self.avg_open_price) * self.volume * \
-                   self.contract_multiplier * (1 if self.direction == Direction.Long else -1)
+                   10000 * (1 if self.direction == Direction.Long else -1)
     @property
     def position_pnl(self):
         if is_valid_price(self.last_price):
-            return self.contract_multiplier * self.last_price * self.volume * self.margin_ratio - self.margin
+            return 10000 * self.last_price * self.volume  - self.margin
         else:
             return 0.0
 
@@ -339,17 +335,22 @@ class StockOptionPosition(Position):
         return self.book.make_event(wc_msg.Position, data)
 
     def apply_trade(self, trade):
-        if trade.offset == Offset.Open:
-            self._apply_open(trade)
-        elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday or trade.offset == Offset.CloseYesterday:
-            self._apply_close(trade)
+        # 只处理期权普通买卖，不处理锁仓行权等
+        if trade.side == Side.Buy or trade.side == Side.Sell:
+            if trade.offset == Offset.Open:
+                self._apply_open(trade)
+            elif trade.offset == Offset.Close or trade.offset == Offset.CloseToday or trade.offset == Offset.CloseYesterday:
+                self._apply_close(trade)
+        else:
+            # 暂不处理锁仓行权
+            pass
         self.book.subject.on_next(self.event)
 
     def apply_quote(self, quote):
         if is_valid_price(quote.settlement_price):
             self.settlement_price = quote.settlement_price
             pre_margin = self.margin
-            self.margin = self.contract_multiplier * self.settlement_price * self.volume * self.margin_ratio
+            self.margin = 10000 * self.settlement_price * self.volume
             self.book.avail -= (self.margin - pre_margin)
         if is_valid_price(quote.last_price):
             self.last_price = quote.last_price
@@ -368,7 +369,7 @@ class StockOptionPosition(Position):
                     self.ctx.logger.warn("{} no valid settlement price found, use avg open price {} instead".format(self.uname, self.avg_open_price))
                     self.settlement_price = self.avg_open_price
             pre_margin = self.margin
-            self.margin = self.contract_multiplier * self.settlement_price * self.volume * self.margin_ratio
+            self.margin = 10000 * self.settlement_price * self.volume
             self.book.avail -= (self.margin - pre_margin)
             self.pre_settlement_price = self.settlement_price
             self.last_price = self.settlement_price
@@ -382,22 +383,24 @@ class StockOptionPosition(Position):
             raise Exception("{} over close position, current volume is {}, {} to close".format(self.uname, self.volume, trade.volume))
         if trade.offset == Offset.CloseToday and self.volume - self.yesterday_volume < trade.volume:
             raise Exception("{} over close today position, current volume is {}, {} to close".format(self.uname, self.volume - self.yesterday_volume, trade.volume))
-        margin = self.contract_multiplier * trade.price * trade.volume * self.margin_ratio
-        self.margin -= margin
-        self.book.avail += margin
+        amount = trade.price * trade.volume * 10000
+        if trade.side == Side.Buy:
+            self.margin -= amount
+        self.book.avail += amount
         self.volume -= trade.volume
         if self.yesterday_volume > 0 and trade.offset != Offset.CloseToday:
             self.yesterday_volume = 0 if self.yesterday_volume <= trade.volume else \
                 self.yesterday_volume - trade.volume
         realized_pnl = (trade.price - self.avg_open_price) * trade.volume * \
-                       self.contract_multiplier * (1 if self.direction == Direction.Long else -1)
+                       10000 * (1 if self.direction == Direction.Long else -1)
         self.realized_pnl += realized_pnl
         self.book.realized_pnl += realized_pnl
 
     def _apply_open(self, trade):
-        margin = self.contract_multiplier * trade.price * trade.volume * self.margin_ratio
-        self.margin += margin
-        self.book.avail -= margin
+        amount = trade.price * trade.volume * 10000;
+        if trade.side == Side.Sell:
+            self.margin += amount
+        self.book.avail -= amount
         self.avg_open_price = (self.avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
         self.volume += trade.volume
 
