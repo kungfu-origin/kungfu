@@ -372,7 +372,11 @@ namespace kungfu
         {
             if (string_equals(exchange_id, EXCHANGE_SSE))
             {
-                if(startswith(instrument_id, "00"))
+                if (instrument_id.size() == 8)
+                {
+                    return InstrumentType::StockOption;
+                }
+                else if(startswith(instrument_id, "00"))
                 {
                     return InstrumentType::Index;
                 }
@@ -399,7 +403,11 @@ namespace kungfu
             }
             else if(string_equals(exchange_id, EXCHANGE_SZE))
             {
-                if (startswith(instrument_id, "0"))
+                if (instrument_id.size() == 8)
+                {
+                    return InstrumentType::StockOption;
+                }
+                else if (startswith(instrument_id, "0"))
                 {
                     return InstrumentType::Stock;
                 }

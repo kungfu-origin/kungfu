@@ -38,7 +38,6 @@ AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.Partia
 InstrumentTypeInStockAccount = [InstrumentType.Stock,
                                 InstrumentType.Bond,
                                 InstrumentType.Fund,
-                                InstrumentType.StockOption,
                                 InstrumentType.TechStock,
                                 InstrumentType.Index,
                                 InstrumentType.Repo]
