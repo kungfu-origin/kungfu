@@ -92,7 +92,8 @@
                 { validator: chineseValidator, trigger: 'blur' },
                 { validator: specialStrValidator, trigger: 'blur' },
                 { validator: noZeroAtFirstValidator, trigger: 'blur' },
-                { validator: noAllAsKeyword, trigger: 'blur' }
+                { validator: noKeywordValidatorBuilder('all'), trigger: 'blur' },
+                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' }
                 ]"
             >
                 <el-input 
@@ -129,7 +130,7 @@ import { deleteProcess } from '__gUtils/processUtils';
 import * as STRATEGY_API from '__io/db/strategy';
 import { switchStrategy } from '__io/actions/strategy';
 import { debounce } from '__gUtils/busiUtils';
-import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noAllAsKeyword } from '__assets/validator';
+import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 
 
 const BrowserWindow = require('electron').remote.BrowserWindow
@@ -139,7 +140,7 @@ export default {
         this.chineseValidator = chineseValidator;
         this.specialStrValidator = specialStrValidator;
         this.noZeroAtFirstValidator = noZeroAtFirstValidator;
-        this.noAllAsKeyword = noAllAsKeyword;
+        this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
         return {
             searchKeyword: '',
             searchKeywordDebounce: '',

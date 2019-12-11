@@ -417,7 +417,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded + "/" + (item.volume),
         statusName: orderStatus[item.status],
         status: item.status,
-        clientId: item.client_id,
+        clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id,
         orderId: item.order_id,
         exchangeId: item.exchange_id
@@ -435,7 +435,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         offset: offsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: toDecimal(+item.volume, 0),
-        clientId: item.client_id,
+        clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id
     }     
 }

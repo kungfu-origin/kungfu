@@ -299,16 +299,16 @@ export default {
                     else if(item.direction === '空') return 'green'
                     break
                 case 'realizedPnl':
-                    if(item.realizedPnl > 0) return 'red'
-                    else if(item.realizedPnl < 0) return 'green'
+                    if(+item.realizedPnl > 0) return 'red'
+                    else if(+item.realizedPnl < 0) return 'green'
                     break
                 case 'unRealizedPnl':
-                    if(item.unRealizedPnl > 0) return 'red'
-                    else if(item.unRealizedPnl < 0) return 'green'
+                    if(+item.unRealizedPnl > 0) return 'red'
+                    else if(+item.unRealizedPnl < 0) return 'green'
                     break
                 case 'lastPrice':
-                    if(item.lastPrice > item.avgPrice) return 'red'
-                    else if(item.lastPrice < item.avgPrice) return 'green'
+                    if(+item.lastPrice > +item.avgPrice) return 'red'
+                    else if(+item.lastPrice < +item.avgPrice) return 'green'
                     break;
             }
         }

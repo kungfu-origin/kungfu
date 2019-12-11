@@ -86,7 +86,7 @@ const pm2Connect = (): Promise<void> => {
             pm2.connect(noDaemon, (err: Error): void => {
                 if(err) {
                     process.exit(2);
-                    logger.error(err);
+                    logger.error('[pm2Connect]', err);
                     pm2.disconnect();
                     reject(err);
                     return;
@@ -95,7 +95,7 @@ const pm2Connect = (): Promise<void> => {
             })
         }catch(err){
             pm2.disconnect()
-            logger.error(err)
+            logger.error('[TC pm2Connect]', err)
             reject(err)
         }  
     })
@@ -106,14 +106,14 @@ const pm2List = (): Promise<any[]> => {
         try{
             pm2.list((err: Error, pList: any[]): void => {
                 if(err){
-                    logger.error(err)
+                    logger.error('[pm2List]', err)
                     reject(err)
                     return;
                 }
                 resolve(pList)
             })
         }catch(err){
-            logger.error(err)
+            logger.error('[TC pm2List]', err)
             reject(err)
         }
     })
@@ -125,14 +125,14 @@ const pm2Delete = async (target: string): Promise<void> => {
             try{
                 pm2.delete(target, (err: Error): void => {
                     if(err) {
-                        logger.error(err)
+                        logger.error('[pm2Delete]', err)
                         reject(err)
                         return;
                     }
                     resolve()         
                 })
             }catch(err){
-                logger.error(err)
+                logger.error('[TC pm2Delete]', err)
                 reject(err)
             }
         }).catch(err => reject(err))
@@ -151,14 +151,14 @@ export const describeProcess = (name: string): Promise<any> => {
             try{
                 pm2.describe(name, (err: Error, res: object): void => {
                     if(err){
-                        logger.error(err)
+                        logger.error('[describeProcess]', err)
                         reject(err);
                         return;
                     }
                     resolve(res)
                 })
             }catch(err){
-                logger.error(err)
+                logger.error('[TC describeProcess]', err)
                 reject(err)
             }
         }).catch(err => reject(err))
@@ -196,14 +196,14 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
             try{
                 pm2.start(options, (err: Error, apps: object): void => { 
                     if(err) {
-                        logger.error(err)
+                        logger.error('[startProcess]', JSON.stringify(options), err)
                         reject(err);
                         return;
                     };
                     resolve(apps);
                 })
             }catch(err){
-                logger.error(err)
+                logger.error('[TC startProcess]', JSON.stringify(options), err)
                 reject(err)
             }
         }).catch(err => reject(err))
@@ -220,12 +220,12 @@ export const startMaster = async(force: boolean): Promise<void> => {
     try{ 
         await killKfc()
     } catch (err) {
-        logger.error(err)
+        logger.error('[TC killKfc startMaster]', err)
     }
     return startProcess({
         "name": processName,
         "args": "master"
-    }, true).catch(err => logger.error(err))
+    }, true).catch(err => logger.error('[startMaster]', err))
 }
 
 //启动ledger
@@ -238,7 +238,7 @@ export const startLedger = async(force: boolean): Promise<void> => {
     return startProcess({
         'name': processName,
         'args': 'ledger'
-    }).catch(err => logger.error(err))
+    }).catch(err => logger.error('[startLedger]', err))
 }
 
 
@@ -247,7 +247,7 @@ export const startMd = (source: string): Promise<void> => {
     return startProcess({
         "name": `md_${source}`,
         "args": `md -s "${source}"`,
-    }).catch(err => logger.error(err))
+    }).catch(err => logger.error('[startMd]', err))
 }
 
 //启动td
@@ -256,7 +256,7 @@ export const startTd = (accountId: string): Promise<void> => {
     return startProcess({
         "name": `td_${accountId}`,
         "args": `td -s "${source}" -a "${id}"`,
-    }).catch(err => logger.error(err))
+    }).catch(err => logger.error('[startTd]', err))
 }
 
 //启动strategy
@@ -265,14 +265,14 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     return startProcess({
         "name": strategyId,
         "args": `strategy -n "${strategyId}" -p "${strategyPath}"`,
-    }).catch(err => logger.error(err))
+    }).catch(err => logger.error('[startStrategy]', err))
 }
 
 export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
     return startProcess({
         "name": targetName,
         "args": `bar -s ${source} --time-interval ${timeInterval}`
-    })
+    }).catch(err => logger.error('[startBar]', err))
 }
 
 //列出所有进程
@@ -312,7 +312,7 @@ export const deleteProcess = (processName: string) => {
         try{
             processes = await describeProcess(processName)
         }catch(err){
-            logger.error(err)
+            logger.error('[TC describeProcess deleteProcess]', err)
         }
 
         //如果進程不存在，會跳過刪除步驟
@@ -335,8 +335,7 @@ export const deleteProcess = (processName: string) => {
                     logger.info('[KILL PROCESS] by pids success', pids)
                 })
                 .catch((err: Error) => {
-                    logger.error(err)
-                    logger.error(err)
+                    logger.error(['[kfKill pm2Delete]'], err)
                 })
             }
         })

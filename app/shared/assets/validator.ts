@@ -143,15 +143,16 @@ export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Funct
     }
 }
 
-//不能以“all”做关键字
-export const noAllAsKeyword = (rule: any, value: any, callback: Function): void => {
-    if(value === 'all') {
-        callback(new Error(
-            isEnglish
-            ? "'all' is not allowed!"
-            : "不能以 ‘all’ 命名！"
-        ))
-    } else {
-        callback()
+export const noKeywordValidatorBuilder = (keyword: string) => {
+    return (rule: any, value: any, callback: Function): void => {
+        if(value.trim() === keyword) {
+            callback(new Error(
+                isEnglish
+                    ?  `"${keyword}" is not allowed!`
+                    : `不能以 "${keyword}" 命名`
+            ))
+        } else {
+            callback();
+        }
     }
 }

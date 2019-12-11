@@ -6,16 +6,20 @@ const nano = require('kungfu-core').nanomsg;
  * **/
 
 export const buildSubNmsg = () => {
+    console.time('buildSubNmsg')
     const sub = nano.socket('sub');
     const addr = `ipc://${NMSG_PUB_FILE}`;
     sub.connect(addr)
+    console.timeEnd('buildSubNmsg')
     return sub
 }
 
 export const buildRepNmsg = () => {
+    console.time('buildRepNmsg')
     const req = nano.socket('req');
     const addr = `ipc://${NMSG_REP_FILE}`;
     req.connect(addr)
+    console.timeEnd('buildRepNmsg')
     return req
 }
 
