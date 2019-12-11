@@ -7,10 +7,7 @@ import { getProcesses } from 'getprocesses';
 
 const path = require('path');
 const fkill = require('fkill');
-// const taskkill = require('taskkill');
-const windowskill = require('windows-kill')({
-    warmUp: true
-})
+const taskkill = require('taskkill')
 export const pm2 = require('pm2');
 
 //=========================== task kill =========================================
@@ -33,12 +30,15 @@ const winKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
         if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
-        pIdList.forEach((pid: number) => windowskill(pid, 'SIGINT'))
-        return Promise.resolve()
-        // return taskkill(pIdList, {
-        //     force: true,
-        //     tree: true
-        // })      
+        //const windowskill = require('windows-kill')({
+        //    warmUp: true
+        //})
+        //pIdList.forEach((pid: number) => windowskill(pid, 'SIGINT'))
+        //return Promise.resolve()
+        return taskkill(pIdList, {
+            force: true,
+            tree: true
+        })      
     } catch (err) {
         throw err
     }
@@ -333,16 +333,16 @@ export const deleteProcess = (processName: string) => {
         .then(() => resolve(true))
         .catch(err => reject(err))
         .finally(() => {
-            if(pids && pids.length) { 
-                logger.info('[KILL PROCESS] by pids', pids)
-                kfKill(pids)
-                .then(() => { 
-                    logger.info('[KILL PROCESS] by pids success', pids)
-                })
-                .catch((err: Error) => {
-                    logger.error(['[kfKill pm2Delete]'], err)
-                })
-            }
+        //    if(pids && pids.length) { 
+        //        logger.info('[KILL PROCESS] by pids', pids)
+        //        kfKill(pids)
+        //        .then(() => { 
+        //            logger.info('[KILL PROCESS] by pids success', pids)
+        //        })
+        //        .catch((err: Error) => {
+        //            logger.error(['[kfKill pm2Delete]'], err)
+        //        })
+        //    }
         })
     })
 }
