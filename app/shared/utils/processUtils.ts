@@ -30,11 +30,6 @@ const winKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
         if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
-        //const windowskill = require('windows-kill')({
-        //    warmUp: true
-        //})
-        //pIdList.forEach((pid: number) => windowskill(pid, 'SIGINT'))
-        //return Promise.resolve()
         return taskkill(pIdList, {
             force: true,
             tree: true
