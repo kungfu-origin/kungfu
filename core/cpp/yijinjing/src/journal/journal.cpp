@@ -58,10 +58,6 @@ namespace kungfu
                              time::strftime(current_page_->begin_time(), "%F %T"), time::strftime(current_page_->end_time(), "%F %T"));
                 while (current_page_->is_full() && current_page_->end_time() <= nanotime)
                 {
-                    while (frame_->has_data())
-                    {
-                        frame_->move_to_next();
-                    }
                     load_next_page();
                 }
                 while (frame_->has_data() && frame_->gen_time() <= nanotime)
