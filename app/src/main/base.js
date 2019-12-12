@@ -47,14 +47,12 @@ export const initConfig = () => {
     if(!existsSync(KF_CONFIG_PATH)) {
         addFileSync('', KF_CONFIG_PATH, 'file')
         const kfConfigJSON = readJsonSync(KF_CONFIG_DEFAULT_PATH);
-        logger.info('kfConfigJSON', kfConfigJSON)
         outputJsonSync(KF_CONFIG_PATH, kfConfigJSON)
     }
 
     if(!existsSync(KF_TARADING_CONFIG_PATH)) {
         addFileSync('', KF_TARADING_CONFIG_PATH, 'file')
         const kfTradingConfigJSON = readJsonSync(KF_TARADING_CONFIG_DEFAULT_PATH);
-        logger.info('kfTradingConfigJSON', kfTradingConfigJSON)
         outputJsonSync(KF_TARADING_CONFIG_PATH, kfTradingConfigJSON)
     }
 }

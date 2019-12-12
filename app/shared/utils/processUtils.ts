@@ -7,7 +7,8 @@ import { getProcesses } from 'getprocesses';
 
 const path = require('path');
 const fkill = require('fkill');
-const taskkill = require('taskkill')
+const taskkill = require('taskkill');
+//const windowsKill = require('windows-kill');
 export const pm2 = require('pm2');
 
 //=========================== task kill =========================================
@@ -330,17 +331,12 @@ export const deleteProcess = (processName: string) => {
                 .map((prc: any): number => prc.pid)
                 .filter((pid: number): boolean => !!pid)
 
-           if(pids && pids.length) { 
-               logger.info('[KILL PROCESS] by pids', pids)
-               kfKill(pids)
-               .then(() => { 
-                   logger.info('[KILL PROCESS] by pids success', pids)
-               })
-               .catch((err: Error) => {
-                   logger.error(['[kfKill pm2Delete]'], err)
-               })
-           }
-        })
+            if(!pids || !pids.length) return  
+            logger.info('[KILL PROCESS] by pids', pids)
+            kfKill(pids)
+            .then(() => logger.info('[KILL PROCESS] by pids success', pids)
+            .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
+        )})
     })
 }
 
