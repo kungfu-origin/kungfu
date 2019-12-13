@@ -247,3 +247,16 @@ interface NumList {
     num: number;
     insert: Function;
 }
+
+
+interface MdTdState {
+    processId?: string;
+    category: number;
+    group: string;
+    name: string;
+    state: number
+}
+
+interface StringToMdTdState {
+    [processName: string]: MdTdState
+}

@@ -1,4 +1,5 @@
 import { toDecimal } from '__gUtils/busiUtils';
+import { statusConfig } from '__gConfig/statusConfig';
 import { logger } from '__gUtils/logUtils';
 
 const colors = require('colors')
@@ -164,10 +165,13 @@ export const parseAccountList = (target: any, accountList: Account[]) => {
 	return target
 }
 
-export const dealStatus = (status: string) => {
-	status = status || '--'
-	if(status === 'online') return colors.green(status);
-	else if(status.indexOf('error') !== -1) return colors.red(status);
+export const dealStatus = (status: string | number) => {
+	if (status === '--') return status;
+	const name: string = statusConfig[status].name || '';
+	const level: number = statusConfig[status].level || 0;
+	if(level == 1) return colors.green(name);
+	else if(level == 0) return colors.white(name);
+	else if (level == -1) return colors.red(name);
 	else return status
 }
 

@@ -4,14 +4,15 @@ import { addFileSync } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail } from '__gUtils/processUtils';
 import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
-import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
+import { buildTradingDataPipe, buildCashPipe, buildGatewayStatePipe } from '__io/nano/nanoSub';
+import { nanoReqGatewayState } from '__io/nano/nanoReq';
 import { switchMaster, switchLedger } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
 import { parseToString, dealStatus, buildTargetDateRange } from '@/assets/scripts/utils';
 import { Observable, combineLatest, forkJoin, merge, concat } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, combineAll } from 'rxjs/operators';
 import logColor from '__gConfig/logColorConfig';
 import { logger } from '__gUtils/logUtils';
 
@@ -84,6 +85,19 @@ export const accountStrategyListStringify = (accounts: Account[], strategys: Str
     ]
 }
 
+const mdTdStateObservable = () => {
+    nanoReqGatewayState();
+    let mdTdStateData: StringToMdTdState = {};
+    return new Observable(observer => {
+        observer.next({})
+        buildGatewayStatePipe().subscribe((data: any[] | undefined): void => {
+            data = data || []
+            mdTdStateData[data[0]] = data[1]
+            observer.next(mdTdStateData)
+        })
+    })
+}
+
 export const processStatusObservable = () => {
     return new Observable(observer => {
         observer.next({})
@@ -121,12 +135,19 @@ export const strategyListObservable = () => {
     })
 }
 
+
 //系统所有进程列表
 export const processListObservable = () => combineLatest(
     processStatusObservable(),
+    mdTdStateObservable(),
     accountListObservable(),
     strategyListObservable(),
-    (processStatus: StringToProcessStatusDetail, accountList: Account[], strategyList: Strategy[]) => {
+    (
+        processStatus: StringToProcessStatusDetail, 
+        mdTdState: StringToMdTdState, 
+        accountList: Account[], 
+        strategyList: Strategy[]
+    ) => {
         const mdList = accountList.filter((a: Account) => !!a.receive_md)
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
@@ -136,7 +157,7 @@ export const processListObservable = () => combineLatest(
                 processId: mdProcessId,
                 typeName: colors.yellow('MD'),
                 type: 'md',
-                statusName: dealStatus(buildStatusDefault(processStatus[mdProcessId]).status),
+                statusName: dealStatus(buildTdMdStatus(mdProcessId, mdTdState, buildStatusDefault(processStatus[mdProcessId]).status)),
                 status: buildStatusDefault(processStatus[mdProcessId]).status,
                 monit: buildStatusDefault(processStatus[mdProcessId]).monit
             };
@@ -150,7 +171,7 @@ export const processListObservable = () => combineLatest(
                 processId: tdProcessId,
                 typeName: colors.cyan('TD'),
                 type: 'td',
-                statusName: dealStatus(buildStatusDefault(processStatus[tdProcessId]).status),
+                statusName: dealStatus(buildTdMdStatus(tdProcessId, mdTdState, buildStatusDefault(processStatus[tdProcessId]).status)),
                 status: buildStatusDefault(processStatus[tdProcessId]).status,
                 monit: buildStatusDefault(processStatus[tdProcessId]).monit
             };
@@ -196,6 +217,12 @@ export const processListObservable = () => combineLatest(
         ]
     }
 )
+
+function buildTdMdStatus(processId: string, stringMdTddState: StringToMdTdState, processStatus: string): string | number {
+    if(!stringMdTddState[processId]) return processStatus
+    else if(processStatus === 'online') return stringMdTddState[processId].state
+    else return processStatus
+}
 
 function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
     if(!processStatus) return {
@@ -299,12 +326,8 @@ const getLogObservable = (pid: string) => {
     const logPath = path.join(LOG_DIR, `${pid}.log`);
     return new Observable(observer => {
         getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
-        .then((logList: NumList) => {
-            observer.next(logList)
-        })
-        .catch((err: Error) => observer.next({
-            list: []
-        }))
+        .then((logList: NumList) => observer.next(logList))
+        .catch(() => observer.next({ list: [] }))
         .finally(() => observer.complete())
     })
 }
@@ -344,13 +367,9 @@ const watchLogObservable = (processId: string) => {
         watcher.watch();
         watcher.on('line', (line: string) => {
             const logList: any = dealLogMessage(line, processId);
-            logList.forEach((l: any) => {
-                observer.next(l.message || '')
-            })
+            logList.forEach((l: any) => observer.next(l.message || ''))
         })
-        watcher.on('error', (err: Error) => {
-            watcher.unwatch();
-        })
+        watcher.on('error', () => watcher.unwatch())
     })
     
 }
