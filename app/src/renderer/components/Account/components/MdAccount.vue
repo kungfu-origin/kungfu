@@ -1,5 +1,10 @@
 <template>
       <tr-dashboard title="行情源">
+        <div slot="dashboard-header">
+            <tr-dashboard-header-item>
+                <el-button size="mini" @click="handleAddMd" title="添加" id="add-account-btn">添加</el-button>
+            </tr-dashboard-header-item>
+        </div>
         <div class="md-source">
             <el-table
             size="small"
@@ -114,6 +119,11 @@ export default {
     },
 
     methods: {
+        handleAddMd() {
+
+        },
+
+        
         //切换行情源
         handleUpdateMdSource(mdSourceAccount){
             const t = this;
