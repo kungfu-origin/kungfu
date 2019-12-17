@@ -6,7 +6,8 @@ export default {
     state: {
         mdTdState: {},
         accountsAsset: {},
-        accountList: [],
+        tdList: [],
+        mdList: [],
         currentAccount: {},
     },
     actions,

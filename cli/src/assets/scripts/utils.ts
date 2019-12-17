@@ -146,25 +146,6 @@ export const calcuHeaderWidth = (target: string[], wish: any[]) => {
 	})
 }
 
-export const parseAccountList = (target: any, accountList: Account[]) => {
-	if(!target || !Object.keys(target || {}).length) target = {};
-	//td
-	accountList.forEach((item: Account) => {
-		const accountId = item.account_id.toAccountId();
-		if(target.accountData && target.accountData[accountId]) target.accountData[accountId] = {...target.accountData[accountId], ...item}
-		else target.accountData[accountId] = {...item, status: '--', accumulated_pnl : '--', accumulated_pnl_ratio: '--', 'total': '--', 'avail': '--'}
-	});
-	//md
-	accountList
-	.filter((item: Account) => !!item.receive_md)
-	.forEach((item: Account) => {
-		const source = item.source_name;
-		if(target.mdData[source]) target.mdData[source] = {...target.mdData[source], ...item}
-		else target.mdData[source] = {...item, status: '--'}
-	})
-	return target
-}
-
 export const dealStatus = (status: string | number) => {
 	if (status === '--') return status;
 	const name: string = statusConfig[status].name || '';

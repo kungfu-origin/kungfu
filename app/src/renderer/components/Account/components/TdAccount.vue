@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleAddTd" title="添加" id="add-account-btn">添加</el-button>
+                <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="table-body accounts-table">
@@ -34,8 +34,8 @@
                     >
                     <template slot-scope="props">
                         <el-tag
-                        v-if="(accountSource[props.row.source_name] || {}).typeName"
-                        :type="accountSource[props.row.source_name].type" 
+                        v-if="(tdAccountSource[props.row.source_name] || {}).typeName"
+                        :type="tdAccountSource[props.row.source_name].type" 
                         >
                             {{props.row.source_name}}
                         </el-tag>
@@ -163,54 +163,32 @@
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
-                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteAccount(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="TD 设置"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteTd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
          <!-- 选择柜台 -->
-            <el-dialog title="选择柜台" 
-            width="440px" 
-            :visible.sync="visiblity.selectSource"
-            id="select-source-dialog"
-            @keyup.enter.native="handleSelectSource"
-            :close-on-click-modal="false"
-            :close-on-press-escape="true"
-            >
-                    <el-radio-group v-model.trim="selectedSource" style="width: 100%">
-                        <el-row>
-                            <el-col :span="12" v-for="item of Object.values(accountSource || {})" :key="item.source" :class="`source-${item.source}`">
-                                <el-radio :label="item.source">
-                                    {{item.source.toUpperCase()}}
-                                    <el-tag
-                                    v-if="item.typeName"
-                                    :type="item.type" 
-                                    >
-                                        {{(sourceTypeConfig[item.typeName] || {}).name || ''}}
-                                    </el-tag>
-                                </el-radio>
-                            </el-col>
-                        </el-row>
-                    </el-radio-group>
-                <div slot="footer" class="dialog-footer">
-                    <el-button @click="handleCloseSelectSource" size="mini">取 消</el-button>
-                    <el-button type="primary" size="mini" @click="handleSelectSource" id="confirm-select-source-btn">确 定</el-button>
-                </div>
-            </el-dialog>
+        <SetSourceDialog
+        :visible.sync="visiblity.selectSource"
+        :accountSource="tdAccountSource"
+        @confirm="handleSelectSource"
+        />
 
-            <!-- 设置账户 -->
-            <SetAccountDialog
-            v-model.trim="accountForm"
-            v-if="visiblity.setAccount"
-            :visible.sync="visiblity.setAccount"
-            :method="method" 
-            :source="selectedSource"
-            @successSubmitSetting="successSubmitSetting"
-            @refreshData="refreshData"
-            :firstAccount="sourceFirstAccount"
-            :accountList="accountList"
-            />
+        <!-- 设置账户 -->
+        <SetAccountDialog
+        :value="accountForm"
+        v-if="visiblity.setAccount"
+        :visible.sync="visiblity.setAccount"
+        :method="method" 
+        :source="selectedSource"
+        :accountSource="tdAccountSource"
+        @successSubmitSetting="successSubmitSetting"
+        @refreshData="refreshData"
+        :mdTdList="tdList"
+        type="td"
+        />
     </tr-dashboard>
 </template>
 
@@ -219,45 +197,39 @@ import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 import * as ACCOUNT_API from '__io/db/account';
 import SetAccountDialog from './SetAccountDialog';
+import SetSourceDialog from './SetSourceDialog';
+
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
-import { deleteAccount, switchTd } from '__io/actions/account';
-import { sourceTypeConfig } from '__gConfig/tradingConfig';
+import { deleteTd, switchTd } from '__io/actions/account';
+
+import mdTdMixin from '../js/mdTdMixin';
 
 import path from 'path'
 export default {
     name: 'account',
 
+    mixins: [ mdTdMixin ],
+
     data() {
         return {
-            sourceTypeConfig: sourceTypeConfig,
             accountIdKey: '',
-            selectedExecutor: '',
             accountIdSearchKeyDebounce: '',
-            method: 'add',
-            accountForm: {},
-            selectedSource: '',
-            visiblity: {
-                selectSource: false,
-                setAccount: false,
-            },
-            sourceFirstAccount: false, //来标记是否是某柜台下添加的第一个账户
-            taskList: [], //存放kungfu_task数据表内容
-            renderTable: false, //table等到mounted后再渲染，不然会导致table高度获取不到，页面卡死
         }
     },
 
     components: {
-        SetAccountDialog
+        SetAccountDialog,
+        SetSourceDialog
     },
 
     computed:{
         ...mapState({
-            accountSource: state => state.BASE.accountSource || {},
+            tdAccountSource: state => state.BASE.tdAccountSource || {},
             mdTdState: state => state.ACCOUNT.mdTdState,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-            accountList: state => state.ACCOUNT.accountList, 
+            tdList: state => state.ACCOUNT.tdList, 
             currentAccount: state => state.ACCOUNT.currentAccount,
             currentId: state => (state.ACCOUNT.currentAccount || {}).account_id,
             processStatus: state => state.BASE.processStatus
@@ -267,8 +239,8 @@ export default {
         accountFilter() {
             const t = this
             let accounts = []
-            if(!t.accountIdSearchKeyDebounce) return t.accountList;
-            return t.accountList.filter(a => (a.account_id.indexOf(t.accountIdSearchKeyDebounce) !== -1));
+            if(!t.accountIdSearchKeyDebounce) return t.tdList;
+            return t.tdList.filter(a => (a.account_id.indexOf(t.accountIdSearchKeyDebounce) !== -1));
         },
     },
     watch: {
@@ -278,54 +250,27 @@ export default {
         }),
     },
 
-    beforeMount(){
-        const t = this;
-        t.getAccountList();
-    },
-
-    mounted() {
-        const t = this;
-        t.renderTable = true
-    },
-
     methods:{
-        //添加账户，打开选择柜台弹窗
-        handleAddTd(){
-            this.visiblity.selectSource = true;
-            this.$store.dispatch('getAccountSourceConfig')
-     
-        },
-
-        //编辑账户
-        handleOpenUpdateAccountDialog(row) {
-            const t = this
-            t.method = 'update'
-            t.accountForm = JSON.parse(row.config) 
-            t.selectedSource = row.source_name
-            t.visiblity.setAccount = true
-        },
-
         //删除账户信息
-        handleDeleteAccount(row) {
+        handleDeleteTd(row) {
             const t = this
             if(!t.judgeCondition(row)) return;
-            const { account_id, source_name, receive_md } = row
+            const { account_id } = row
             //查看该账户下是否存在task中的td任务
             const tdProcessId = `td_${account_id}`
-            const mdProcessId = `md_${source_name}`
             const accountId = account_id.toAccountId()
             t.$confirm(`删除账户${accountId}会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => deleteAccount(row, t.accountList))
-            .then(() => t.getAccountList())
+            .then(() => deleteTd(row, t.tdList))
+            .then(() => t.getTableList())
             .then(() => {
                 //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
                 if(t.currentId == row.account_id) {
-                    const currentAccount = t.accountList.length ? t.accountList[0] : {}
+                    const currentAccount = t.tdList.length ? t.tdList[0] : {}
                     t.$store.dispatch('setCurrentAccount', currentAccount)
-                }else if(!t.accountList.length){
+                }else if(!t.tdList.length){
                     t.$store.dispatch('setCurrentAccount', {})
                 }
             })
@@ -334,39 +279,6 @@ export default {
                 if(err == 'cancel') return
                 t.$message.error(err.message || '操作失败！')
             })
-        },
-
-        //费率设置
-        handleOpenFeeSettingDialog(row){
-            const t = this;
-            t.visiblity.setFee = true;
-        },
-
-        //选择柜台
-        handleSelectSource() {
-            const t = this
-            t.method = 'add';
-            if(!t.selectedSource) {
-                t.$message.warning('还没有选择柜台！')
-                return;
-            };
-            //是否是该柜台下的第一个账户记住，行情自动选中
-            t.sourceFirstAccount = -1 === t.accountList.findIndex(item => (item.source_name == t.selectedSource))
-            // 加上某些参数的默认值
-            t.accountSource[t.selectedSource].config.map(item => {
-                if(item.default !== undefined) {
-                    t.accountForm[item.key] = item.default
-                }
-            })
-            t.visiblity.selectSource = false
-            t.visiblity.setAccount = true
-        },
-
-        //关闭选择柜台弹窗
-        handleCloseSelectSource() {
-            const t = this
-            t.visiblity.selectSource = false
-            t.refreshData()
         },
 
         //选中行的背景颜色
@@ -396,14 +308,13 @@ export default {
         },
 
         //获取账户列表
-        getAccountList() {
+        getTableList() {
             const t = this
             return new Promise(resolve => {
-                t.$store.dispatch('getAccountList').then(accountList => {
-                    resolve(accountList)
-                    if(!t.currentId){
-                        t.$store.dispatch('setCurrentAccount', accountList[0] || {})
-                    }
+                t.$store.dispatch('getTdList')
+                .then(tdList => {
+                    if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
+                    resolve(tdList)
                 })
             })   
         },
@@ -411,38 +322,18 @@ export default {
         //删除前进行一些判断
         judgeCondition(row) {
             const t = this
-            const {account_id, source_name, receive_md} = row
-
+            const { account_id } = row
             //判断td是否开启，开启则无法删除
             if(t.$utils.ifProcessRunning('td_' + account_id, t.processStatus)) {
                 t.$message.warning('需先停止交易运行！')
                 return false
             }
-
-            //判断是否是md行情源,是则看md是否是开启状态，开启则需要先删除
-            if(receive_md && t.$utils.ifProcessRunning('md_' + source_name, t.processStatus)) {
-                t.$message.warning('当前账户为柜台行情源，需先停止柜台行情运行！')
-                return false
-            }
             return true
-        },
-
-        //添加或修改账户详情后的操作
-        successSubmitSetting() {
-            const t = this
-            t.getAccountList()
-            t.refreshData()
-        },
-
-        //清空数据
-        refreshData() {
-            const t = this
-            t.selectedSource = ''
         },
 
         //是否为期货
         isFuture(row) {
-            return (this.accountSource[row.source_name] || {}).typeName == 'future'
+            return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 
         //计算持仓盈亏

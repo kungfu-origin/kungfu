@@ -5,7 +5,7 @@
             "name": "xtp",
             "type": "stock",
             "key": "user_id",
-            "config": [{
+            "td_config": [{
                     "key": "user_id",
                     "name": "user_id",
                     "type": "str",
@@ -29,23 +29,6 @@
                     "errMsg": "请填写",
                     "required": true,
                     "tip": "请填写，例如:b8aa7173bba3470e390d787219b2112"
-                },
-                {
-                    "key": "md_ip",
-                    "name": "md_ip",
-                    "type": "str",
-                    "errMsg": "请填写行情IP",
-                    "required": true,
-                    "tip": "请填写行情IP，例如:61.152.102.110"
-                },
-                {
-                    "key": "md_port",
-                    "name": "md_port",
-                    "type": "int",
-                    "errMsg": "请填写行情端口",
-                    "validator": ["intValidator"],
-                    "required": true,
-                    "tip": "请填写行情端口，例如:8602"
                 },
                 {
                     "key": "td_ip",
@@ -96,6 +79,25 @@
                     "errMsg": "请填写 buffer size（mb），例如:1024",
                     "validator": ["intValidator"],                    
                     "required": false
+                }
+            ],
+            "md_config": [
+                {
+                    "key": "md_ip",
+                    "name": "md_ip",
+                    "type": "str",
+                    "errMsg": "请填写行情IP",
+                    "required": true,
+                    "tip": "请填写行情IP，例如:61.152.102.110"
+                },
+                {
+                    "key": "md_port",
+                    "name": "md_port",
+                    "type": "int",
+                    "errMsg": "请填写行情端口",
+                    "validator": ["intValidator"],
+                    "required": true,
+                    "tip": "请填写行情端口，例如:8602"
                 }
             ]
         }

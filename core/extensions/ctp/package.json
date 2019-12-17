@@ -5,7 +5,7 @@
             "name": "ctp",
             "type": "future",
             "key": "account_id",
-            "config": [
+            "td_config": [
                 {
                     "key": "account_id",
                     "name": "account_id",
@@ -56,15 +56,6 @@
                     "tip": "请填写客户端识别号，例如:simnow_client_test"
                 },
                 {
-                    "key": "md_uri",
-                    "name": "md_uri",
-                    "type": "str",
-                    "errMsg": "请填写行情地址",
-                    "required": true,
-                    "validator": ["tcpUriValidator"],
-                    "tip": "请填写行情地址，例如: tcp://180.168.146.187:10111"
-                },
-                {
                     "key": "td_uri",
                     "name": "td_uri",
                     "type": "str",
@@ -72,6 +63,17 @@
                     "required": true,
                     "validator": ["tcpUriValidator"],
                     "tip": "请填写交易地址，例如: tcp://180.168.146.187:10101"
+                }
+            ],
+            "md_config": [
+                {
+                    "key": "md_uri",
+                    "name": "md_uri",
+                    "type": "str",
+                    "errMsg": "请填写行情地址",
+                    "required": true,
+                    "validator": ["tcpUriValidator"],
+                    "tip": "请填写行情地址，例如: tcp://180.168.146.187:10111"
                 }
             ]
         }

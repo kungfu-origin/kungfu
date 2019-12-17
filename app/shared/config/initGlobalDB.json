@@ -8,7 +8,11 @@
     "accounts": [
         {
             "table": "accounts",
-            "sql": "create table if not exists account_config(account_id char(50) PRIMARY KEY, source_name char(50), receive_md bool, config);"
+            "sql": "create table if not exists td_config(account_id char(50) PRIMARY KEY, source_name char(50), config);"
+        },
+        {
+            "table": "accounts",
+            "sql": "create table if not exists md_config(source_name char(50) PRIMARY KEY, config);"
         }
     ],
 

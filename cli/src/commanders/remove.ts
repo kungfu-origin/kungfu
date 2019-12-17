@@ -1,6 +1,6 @@
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
 import { parseToString } from '@/assets/scripts/utils';
-import { deleteAccount } from '__io/actions/account';
+import { deleteTd } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';
 
 const colors = require('colors');
@@ -43,7 +43,7 @@ export const removeAccountStrategy = async () => {
     }
     else if(type === 'account') {
         try{
-            await deleteAccount(targetAccount[0], accounts)
+            await deleteTd(targetAccount[0], accounts)
             console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
         }catch(err){
             console.error(err)

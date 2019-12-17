@@ -12,7 +12,8 @@ export default {
         },
         tradingDay: moment().format('YYYYMMDD'),
         processStatus: null,
-        accountSource: {}, //账户柜台信息
+        tdAccountSource: {}, //账户柜台信息
+        mdAccountSource: {}, //账户柜台信息
         kfConfig: {} // kf 配置
     },
     actions,

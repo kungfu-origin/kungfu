@@ -1,11 +1,20 @@
-// import { blankValidator, tcpUriValidator, o99Validator, intValidator } from '__assets/validator'
 import * as VALIDATOR from '__assets/validator'
-import { platform } from '__gConfig/platformConfig';
-import { getExtensionConfigs } from '__gUtils/busiUtils';
+import { getExtensionConfigs, deepClone } from '__gUtils/busiUtils';
 import { sourceTypeConfig } from '__gConfig/tradingConfig';
 
-export const getAccountSource = async (): Promise<Sources> => {
-    let sources: Sources = {}
+const dealValidator = (accountConfigItems: AccountSettingItem[]) => {
+    return accountConfigItems.map((item: AccountSettingItem): AccountSettingItem => {
+        if(!item['validator']) return item;
+        const validators: any = VALIDATOR;
+        item['validator'] = (item['validator'] || []).map((validatorName: string): any => validators[validatorName])
+        return item
+    })    
+}
+
+
+export const getAccountSource = async (): Promise<StringToSource> => {
+    let tdSources: Sources = {};
+    let mdSources: Sources = {};
     try {
         const configs = await getExtensionConfigs();
         configs.forEach((c: any): void => {
@@ -14,25 +23,41 @@ export const getAccountSource = async (): Promise<Sources> => {
                 const source: string = config.name;
                 const typeName: string = config.type;
                 const type: string = (sourceTypeConfig[typeName] || {}).color || '';
-                const itemConfig: AccountSettingItem[] = config.config;
-                itemConfig.forEach((item: AccountSettingItem): void => {
-                    if(!item['validator']) return;
-                    const validators: any = VALIDATOR;
-                    item['validator'] = (item['validator'] || []).map((validatorName: string): any => validators[validatorName])
-                })
-                const accountSetting: AccountSetting = {
+        
+                let tdItemConfig: AccountSettingItem[] = deepClone(config.td_config || []); //不可以为 []
+                let mdItemConfig: AccountSettingItem[] = deepClone(config.md_config || []); //可以为 []
+                tdItemConfig = dealValidator(tdItemConfig);
+                mdItemConfig = dealValidator(mdItemConfig);
+
+                const tdAccountSetting: AccountSetting = {
                     ...config,
                     source,
                     type,
                     typeName,
                     key: config.key,
-                    config: itemConfig
+                    config: tdItemConfig
                 }
-                sources[source] = accountSetting
+
+                const mdAccoutSetting: AccountSetting = {
+                    ...config,
+                    source,
+                    type,
+                    typeName,
+                    key: config.key,
+                    config: mdItemConfig
+                }
+
+
+                if(config.td_config !== undefined) tdSources[source] = tdAccountSetting;
+                if(config.md_config !== undefined) mdSources[source] = mdAccoutSetting;
             }
         })
     } catch (err) {
-        sources = {}
+        tdSources = {}
+        mdSources = {}
     }
-    return sources
+    return {
+        td: tdSources,
+        md: mdSources
+    }
 }

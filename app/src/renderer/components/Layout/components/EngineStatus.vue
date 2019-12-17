@@ -8,11 +8,11 @@
         <div class="account-status-content">
             <div class="account-item" >
                 <div class="type-name">行情</div>
-                <div class="account-status" v-for="accountItem in sourceList" :key="accountItem.account_id">
+                <div class="account-status" v-for="accountItem in mdList" :key="accountItem.account_id">
                     <span class="account-process-item source-name">
                         <el-tag
-                        v-if="(accountSource[accountItem.source_name]||{}).typeName"
-                        :type="accountSource[accountItem.source_name].type" 
+                        v-if="(mdAccountSource[accountItem.source_name]||{}).typeName"
+                        :type="mdAccountSource[accountItem.source_name].type" 
                         >
                             {{accountItem.source_name}}
                         </el-tag> 
@@ -33,11 +33,11 @@
             </div>
             <div class="account-item" >
                 <div class="type-name">交易</div>
-                <div class="account-status" v-for="accountItem in accountList" :key="accountItem.account_id">
+                <div class="account-status" v-for="accountItem in tdList" :key="accountItem.account_id">
                     <span class="account-process-item source-name">
                         <el-tag
-                        v-if="(accountSource[accountItem.source_name]||{}).typeName"
-                        :type="accountSource[accountItem.source_name].type" 
+                        v-if="(tdAccountSource[accountItem.source_name]||{}).typeName"
+                        :type="tdAccountSource[accountItem.source_name].type" 
                         >
                             {{accountItem.source_name}}
                         </el-tag> 
@@ -65,7 +65,7 @@
     </el-popover>
 </template>
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 
@@ -81,16 +81,13 @@ export default {
     },
 
     computed: {
-        ...mapGetters({
-            sourceList: 'getSourceList',
-            
-        }),
-
         ...mapState({
-            accountList: state => state.ACCOUNT.accountList,
+            tdList: state => state.ACCOUNT.tdList,
+            mdList: state => state.ACCOUNT.mdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus,
-            accountSource: state => (state.BASE.accountSource || {})
+            tdAccountSource: state => (state.BASE.tdAccountSource || {}),
+            mdAccountSource: state => (state.BASE.mdAccountSource || {})
         }),
 
         //展示最坏的情况
@@ -106,7 +103,7 @@ export default {
             let tdStatusReady = 0;
             let mdStatusReady = 0;
 
-            t.accountList.map(a => {
+            t.tdList.map(a => {
                 const tdProcessStatus = t.$utils.ifProcessRunning('td_' + a.account_id, t.processStatus)
                 if(tdProcessStatus) tdProcessReady = true;
                 const tdStatus = t.buildTdState(a)
@@ -116,7 +113,7 @@ export default {
                     (level < tdStatusReady) && (tdStatusReady = level);
                 }
 
-                if(!!a.receive_md){
+                if(true){
                     const mdProcessStatus = t.$utils.ifProcessRunning('md_' + a.source_name, t.processStatus)                                       
                     if (mdProcessStatus) mdProcessReady = true;  
                     const mdStatus = t.buildMdState(a)

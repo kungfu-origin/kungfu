@@ -25,16 +25,38 @@ export const setAccountAssetById = ({ commit },  { accountId, accountsAsset }) =
     commit('SET_ACCOUNT_ASSET',  { accountId, accountsAsset })
 }
 
-export const setAccountList = ({ commit }, accountList) => {
-    commit('SET_ACCOUNT_LIST', accountList)
+export const setTdList = ({ commit }, tdList) => {
+    commit('SET_TD_LIST', tdList)
 }
 
-//获取 accountList
-export const getAccountList = ({ dispatch }) => {
+export const setMdList = ({ commit }, mdList) => {
+    commit('SET_MD_LIST', mdList)
+}
+
+//获取 tdList
+export const getTdList = ({ dispatch }) => {
     return new Promise((resolve, reject) => {
-        ACCOUNT_API.getAccountList().then(res => {
-            dispatch('setAccountList', res);
+        ACCOUNT_API.getTdList()
+        .then(res => {
+            dispatch('setTdList', res);
             resolve(res)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    })
+}
+
+//获取 mdList
+export const getMdList = ({ dispatch }) => {
+    return new Promise((resolve, reject) => {
+        ACCOUNT_API.getMdList()
+        .then(res => {
+            dispatch('setMdList', res);
+            resolve(res)
+        })
+        .catch(err => {
+            console.error(err)
         })
     })
 }

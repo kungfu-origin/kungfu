@@ -8,22 +8,15 @@ const path = require('path')
 //删除账户需要将所关联的数据库以及进程都关掉
 //判断task表和进程中是否存在，有则删除
 //TODO
-export const deleteAccount = (row: Account, accountList = []): Promise<any> => {
-    const { account_id, source_name, receive_md } = row
+export const deleteTd = (row: Account): Promise<any> => {
+    const { account_id } = row
     //查看该账户下是否存在task中的td任务
     const tdProcessId: string = `td_${account_id}`
-    const mdProcessId: string = `md_${source_name}`
-    const leftAccounts: Account[] = accountList.filter((a: Account): boolean => {
-        return (a.source_name === source_name) && (!!a.receive_md === false) && (a.account_id !== account_id)
-    })
     //删除td
     return removeFileFolder(path.join(TD_DIR, account_id.toAccountId()))
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
     .then(() => deleteProcess('td_' + row.account_id))
-    .then(() => {if(receive_md) return removeFileFolder(buildGatewayPath(mdProcessId))})
-    .then(() => {if(receive_md) return deleteProcess('md_' + row.source_name)})                     
-    .then(() => ACCOUNT_API.deleteAccount(account_id))//删除账户表中的数据    
-    .then(() => {if(receive_md && leftAccounts.length) return ACCOUNT_API.changeAccountMd(leftAccounts[0].account_id, true)})
+    .then(() => ACCOUNT_API.deleteTd(account_id))//删除账户表中的数据    
 }
 
 //起停td

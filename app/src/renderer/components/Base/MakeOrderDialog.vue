@@ -189,9 +189,9 @@ export default {
 
     computed: {
         ...mapState({
-            accountSource: state => state.BASE.accountSource,
+            tdAccountSource: state => state.BASE.tdAccountSource,
             strategyList: state => state.STRATEGY.strategyList,
-            accountList: state => state.ACCOUNT.accountList,
+            tdList: state => state.ACCOUNT.tdList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             processStatus: state => state.BASE.processStatus
         }),
@@ -200,7 +200,7 @@ export default {
             const t = this;
             const sourceName = t.currentSourceName;
             if(!sourceName) return 'stock';
-            return t.accountSource[sourceName].typeName
+            return t.tdAccountSource[sourceName].typeName
         },
 
         currentAccountId() {
@@ -311,7 +311,7 @@ export default {
         },
 
         getAccountType(sourceName){
-            return this.accountSource[sourceName]
+            return this.tdAccountSource[sourceName]
         },
         
         clearData(){

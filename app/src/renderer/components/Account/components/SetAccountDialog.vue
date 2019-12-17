@@ -62,17 +62,13 @@ import { remote } from 'electron';
 export default {
     name: 'set-account-dialog',
     props: {
-        
         value: {},
+
         visible: {
             type: Boolean,
             default: false
         },
-        //是该柜台下的第一个账户，则行情自动选中
-        firstAccount: {
-            type: Boolean,
-            default: false
-        },
+
         //属于哪个柜台的
         source: {
             type: String,
@@ -84,20 +80,22 @@ export default {
             default: 'add'
         },
         //选中柜台下的所有账户，字段用于弹窗检查account_id或者user_id是否重名的
-        accountList: {
+        mdTdList: {
             type: Array,
             default: () => []
+        },
+
+        accountSource: {
+            type: Object,
+            default: () => ({})
+        },
+
+        type: {
+            type: String,
+            default: 'td'
         }
     },
     data() {
-        //存放初始数据格式
-        this.initData = {
-            resolve_mode: 'auto',
-            strategy_pnl_check: false,
-            need_auth: false,
-            need_settlement_confirm: false,
-        }
-
         return {
             postForm: deepClone(this.value)
         }
@@ -111,12 +109,6 @@ export default {
         postForm(){
             this.initPostForm();
         }
-    },
-
-    computed: {
-        ...mapState({
-            accountSource: state => state.BASE.accountSource
-        })
     },
 
     methods:{
@@ -146,9 +138,9 @@ export default {
                     const formValue = t.postForm
                     let changeAccount 
                     if(t.method == 'add') { //添加账户
-                        changeAccount = ACCOUNT_API.addAccount(account_id, t.source, t.firstAccount, JSON.stringify(formValue))
+                        changeAccount = ACCOUNT_API.addTd(account_id, t.source, JSON.stringify(formValue))
                     } else{ //编辑账户
-                        changeAccount = ACCOUNT_API.updateAccountConfig(account_id, JSON.stringify(formValue))
+                        changeAccount = ACCOUNT_API.updateTdConfig(account_id, JSON.stringify(formValue))
                     }
 
                     changeAccount.then(() => {
@@ -202,7 +194,7 @@ export default {
         //检查account_id或者user_id是否重复
         validateAccountId(rule, value, callback) {
             const t = this
-            const index = t.accountList.findIndex(a => {
+            const index = t.mdTdList.findIndex(a => {
                const account_id = a.account_id.toAccountId();
                return account_id == value
             })

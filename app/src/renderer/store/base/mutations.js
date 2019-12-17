@@ -12,8 +12,12 @@ export const SET_PROCESS_STATUS = (state, processStatus) => {
     state.processStatus = processStatus
 }
 
-export const SET_ACCOUNT_SOURCE = (state, accountSource) => {
-    state.accountSource = accountSource
+export const SET_TD_ACCOUNT_SOURCE = (state, tdAccountSource) => {
+    state.tdAccountSource = tdAccountSource
+}
+
+export const SET_MD_ACCOUNT_SOURCE = (state, mdAccountSource) => {
+    state.mdAccountSource = mdAccountSource
 }
 
 export const SET_KF_CONFIG = (state, kfConfig) => {

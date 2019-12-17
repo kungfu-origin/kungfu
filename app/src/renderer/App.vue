@@ -24,7 +24,6 @@ import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
-import { getAccountSource } from '__gConfig/accountConfig';
 import { nanoReqGatewayState, nanoReqCash, nanoReqCalendar } from '__io/nano/nanoReq';
 
 export default {
@@ -68,8 +67,8 @@ export default {
         const t = this;
         t.$store.dispatch('getAccountSourceConfig')
         t.$store.dispatch('getStrategyList')
-        t.$store.dispatch('getAccountList')
-            .then(accountList => t.getAccountsCash(accountList))
+        t.$store.dispatch('getTdList')
+            .then(tdList => t.getAccountsCash(tdList))
 
         t.subGatewayState();
         t.subAccountCash();

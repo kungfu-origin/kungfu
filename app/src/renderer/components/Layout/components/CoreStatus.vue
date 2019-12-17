@@ -67,13 +67,9 @@ export default {
     },
 
     computed: {
-        ...mapGetters({
-            sourceList: 'getSourceList',
-            
-        }),
 
         ...mapState({
-            accountList: state => state.ACCOUNT.accountList,
+            tdList: state => state.ACCOUNT.tdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus
         }),

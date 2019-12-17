@@ -93,7 +93,7 @@ export default {
 
     computed: {
         ...mapState({
-            accountList: state => state.ACCOUNT.accountList,
+            tdList: state => state.ACCOUNT.tdList,
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             processStatus: state => state.BASE.processStatus
         }),
@@ -241,7 +241,7 @@ export default {
 
         handleCancelAllOrders(){
             const t = this;
-            if(!t.accountList.length) return;
+            if(!t.tdList.length) return;
 
             //先判断对应进程是否启动
             if(t.moduleType === 'account'){
@@ -390,7 +390,7 @@ export default {
 
         getSourceNameByAccountId(accountId){
             const t = this;
-            return t.accountList.filter(a => a.account_id.indexOf(accountId) !== -1).map(a => a.account_id)
+            return t.tdList.filter(a => a.account_id.indexOf(accountId) !== -1).map(a => a.account_id)
         },
 
         updateProcessStatus(res){

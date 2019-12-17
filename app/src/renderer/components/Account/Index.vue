@@ -98,7 +98,7 @@ export default {
     computed:{
         ...mapState({
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
-            accountSource: state => (state.BASE.accountSource || {})
+            tdAccountSource: state => (state.BASE.tdAccountSource || {})
         }),
 
         //账户的类型，根据是哪个柜台的，可以判断是是期货还是股票还是证券
@@ -106,7 +106,7 @@ export default {
             const t = this;
             const source_name = t.currentAccount.source_name
             if(!source_name) return
-            return (t.accountSource[source_name] || {}).typeName || ''
+            return (t.tdAccountSource[source_name] || {}).typeName || ''
         },
 
         currentId() {

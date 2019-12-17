@@ -2,7 +2,7 @@ import { LOG_DIR } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
 import { addFileSync } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail } from '__gUtils/processUtils';
-import { getAccountList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
+import { getTdList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
 import { buildTradingDataPipe, buildCashPipe, buildGatewayStatePipe } from '__io/nano/nanoSub';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
@@ -58,7 +58,7 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
 }
 
 export const getAccountsStrategys = async (): Promise<any> => {
-    const getAccounts = getAccountList();
+    const getAccounts = getTdList();
     const getStrategys = getStrategyList();
     const accounts = await getAccounts;
     const strategys = await getStrategys;
@@ -114,9 +114,9 @@ export const processStatusObservable = () => {
 export const accountListObservable = () => {
     return new Observable(observer => {
         setTimerPromiseTask(() => {
-            return getAccountList()
-                .then((accountList: Account[]) => {
-                    observer.next(accountList)
+            return getTdList()
+                .then((tdList: Account[]) => {
+                    observer.next(tdList)
                 })
                 .catch((err: Error) => logger.error(err))
         }, 5000)

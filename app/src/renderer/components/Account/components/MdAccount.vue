@@ -2,13 +2,13 @@
       <tr-dashboard title="行情源">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleAddMd" title="添加" id="add-account-btn">添加</el-button>
+                <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="md-source">
             <el-table
             size="small"
-            :data="sourceList"
+            :data="mdList"
             height="100%"
             v-if="renderTable"
             >
@@ -19,8 +19,8 @@
                 >
                     <template slot-scope="props">
                         <el-tag
-                        v-if="(accountSource[props.row.source_name] || {}).typeName"
-                        :type="accountSource[props.row.source_name].type" 
+                        v-if="(mdAccountSource[props.row.source_name] || {}).typeName"
+                        :type="mdAccountSource[props.row.source_name].type" 
                         >
                             {{props.row.source_name}}
                         </el-tag>
@@ -63,18 +63,33 @@
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>
-                        <span class="tr-oper" @click.stop="handleUpdateMdSource(props.row)" title="切换行情源"><i class="el-icon-s-data mouse-over"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="MD 设置"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 MD"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
-        <SetMdSourceDialog 
-        v-if="setMdSourceDialogVisiblity"
-        :visible.sync="setMdSourceDialogVisiblity"
-        :currentMdSourceAccount="currentMdSourceAccount"
-        :accountsFromSameSource="accountList.filter(a => (a.source_name === (currentMdSourceAccount || {}).source_name))"
-        @afterSetting="getAccountList"
-        ></SetMdSourceDialog>
+
+        <!-- 选择柜台 -->
+        <SetSourceDialog
+        :visible.sync="visiblity.selectSource"
+        :accountSource="mdAccountSource"
+        @confirm="handleSelectSource"
+        />
+
+        <!-- 设置账户 -->
+        <SetAccountDialog
+        :value="accountForm"
+        v-if="visiblity.setAccount"
+        :visible.sync="visiblity.setAccount"
+        :method="method" 
+        :source="selectedSource"
+        :accountSource="mdAccountSource"
+        @successSubmitSetting="successSubmitSetting"
+        @refreshData="refreshData"
+        :mdTdList="mdList"
+        type="md"
+        />
     </tr-dashboard>
 </template>
 
@@ -85,57 +100,46 @@ import { mapState, mapGetters } from 'vuex';
 import * as ACCOUNT_API from '__io/db/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd } from '__io/actions/account';
-import SetMdSourceDialog from './SetMdSourceDialog';
+
+import SetAccountDialog from './SetAccountDialog';
+import SetSourceDialog from './SetSourceDialog';
+
+import mdTdMixin from '../js/mdTdMixin';
 
 export default {
+    mixins: [ mdTdMixin ],
+
     data(){
         return {
-            setMdSourceDialogVisiblity: false,
-            currentMdSourceAccount: null,
+            method: 'add',
+            accountForm: {},
+            selectedSource: '',
+            visiblity: {
+                selectSource: false,
+                setAccount: false,
+            },
             renderTable: false
         }
     },
 
     computed: {
         ...mapState({
-            accountSource: state => state.BASE.accountSource || {},
-            accountList: state => state.ACCOUNT.accountList,
+            mdAccountSource: state => state.BASE.mdAccountSource || {},
+            mdList: state => state.ACCOUNT.mdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus
-        }),
-
-        ...mapGetters({
-            sourceList: 'getSourceList'
-        }) 
+        })
     },
 
     components: {
-        SetMdSourceDialog
-    },
-
-    mounted(){
-        const t = this;
-        t.renderTable = true;
+        SetAccountDialog,
+        SetSourceDialog
     },
 
     methods: {
-        handleAddMd() {
 
-        },
+        handleDeleteMd() {},
 
-        
-        //切换行情源
-        handleUpdateMdSource(mdSourceAccount){
-            const t = this;
-            if(t.$utils.ifProcessRunning('md_' + mdSourceAccount.source_name, t.processStatus)){
-                t.$message.warning("需先停止当前行情运行！")
-            }else{
-                t.currentMdSourceAccount = mdSourceAccount;
-                t.setMdSourceDialogVisiblity = true;
-            }
-        },
-
-        //行情开关
         handleMdSwitch(value, account) {
             const t = this
             switchMd(account, value).then(({ type, message }) => t.$message[type](message))  
@@ -147,11 +151,11 @@ export default {
         },
 
         //获取账户列表
-        getAccountList() {
+        getTableList() {
             const t = this;
-            ACCOUNT_API.getAccountList().then(res => {
+            ACCOUNT_API.getMdList().then(res => {
                 if(!res) return;
-                t.$store.dispatch('setAccountList', res)
+                t.$store.dispatch('setMdList', res)
             }).catch(err => {
                 t.$message.error(err.message || '操作失败！')
             })

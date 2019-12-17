@@ -3,50 +3,39 @@ import { runSelectDB, runInsertUpdateDeleteDB } from '__gUtils/dbUtils';
 import { ACCOUNTS_DB, LIVE_TRADING_DATA_DB } from '__gConfig/pathConfig';
 import moment from "moment"
 
-/**
- * 获取账户列表
- */
-export const getAccountList = () => {
-    return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config ORDER BY account_id')
+
+export const getTdList = () => {
+    return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM td_config ORDER BY account_id')
 }
 
-export const getAccountBySource = (sourceName: string) => {
-    return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM account_config WHERE source_name = ?', sourceName)
+export const getMdList = () => {
+    return runSelectDB(ACCOUNTS_DB, 'SELECT * FROM md_config ORDER BY source_name')
 }
 
-/**
- * 新建账户
- * @param {String} account_id 账户id
- */
-
-export const addAccount = (account_id: string, source_name: string, receive_md: boolean, config: any) => {
-    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO account_config(account_id, source_name,receive_md, config) VALUES (?, ?, ?, ?)', [account_id, source_name, receive_md, config])
+export const addTd = (accountId: string, sourceName: string, config: any) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO td_config(account_id, source_name, config) VALUES (?, ?, ?)', [accountId, sourceName, config])
 }
 
-/**
- * 更改账户配置
- * @param  {} account_id
- */
-export const updateAccountConfig = (account_id: string, config: any) => {
-    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE account_config SET config = ? WHERE account_id = ?', [config, account_id])
+export const addMd = (sourceName: string, config: any) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO md_config(source_name, config) VALUES (?, ?, ?)', [sourceName, config])
 }
 
-/**
- * 删除账户
- * @param  {} account_id 账户id
- */
-export const deleteAccount = (account_id: string) => {
-    return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM account_config WHERE account_id = ?", account_id)
+export const updateTdConfig = (accountId: string, config: any) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE td_config SET config = ? WHERE account_id = ?', [config, accountId])
 }
 
-/**
- * 改变账户行情
- * @param  {} account_id 账户id
- * @param  {} receive_md 是否接受行情
- */
-export const changeAccountMd = (account_id: string, receive_md: boolean) => {
-    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE account_config SET receive_md = ? WHERE account_id = ?', [receive_md, account_id])
+export const updateMdConfig = (sourceName: string, config: any) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'UPDATE md_config SET config = ? WHERE source_name = ?', [config, sourceName])
 }
+
+export const deleteTd = (accountId: string) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM td_config WHERE account_id = ?", accountId)
+}
+
+export const deleteMd = (sourceName: string) => {
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM md_config WHERE source_name = ?", sourceName)
+}
+
 
 /**
  * 获取账户资金情况

@@ -254,7 +254,7 @@ export const getCodeText = (targetPath: string): Promise<string> => {
     if(!targetPath) throw new Error('文件路径不存在！')
     targetPath = path.normalize(targetPath)
     return new Promise((resolve, reject): void => {
-        fse.readFile(targetPath, (err: Error, data: any) => {
+        fse.readFile(targetPath, 'utf-8', (err: Error, data: any) => {
             if(err){
                 console.error(err)
                 reject(err)

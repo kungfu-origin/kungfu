@@ -6,8 +6,12 @@ export const setProcessStatus = ({ commit }, processStatus) => {
     commit('SET_PROCESS_STATUS', processStatus)
 }
 
-export const setAccountSource = ({ commit }, accountSource) => {
-    commit('SET_ACCOUNT_SOURCE', accountSource)
+export const setTdAccountSource = ({ commit }, tdAccountSource) => {
+    commit('SET_TD_ACCOUNT_SOURCE', tdAccountSource)
+}
+
+export const setMdAccountSource = ({ commit }, mdAccountSource) => {
+    commit('SET_MD_ACCOUNT_SOURCE', mdAccountSource)
 }
 
 export const setTradingDay = ({ commit }, tradingDay) => {
@@ -32,8 +36,9 @@ export const setKungfuConfigByKeys = ({ commit, state }, kfConfig) => {
 }
 
 export const getAccountSourceConfig = ({ dispatch }) => {
-    return getAccountSource().then(res => {
-        dispatch('setAccountSource', res)
+    return getAccountSource().then(accountSource => {
+        dispatch('setTdAccountSource', accountSource.td)
+        dispatch('setMdAccountSource', accountSource.md)
     })
 }
 

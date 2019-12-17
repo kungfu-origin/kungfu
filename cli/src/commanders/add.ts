@@ -1,6 +1,6 @@
 import { getAccountSource } from '__gConfig/accountConfig';
 import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '__assets/validator';
-import { getAccountList, getAccountBySource, addAccount, updateAccountConfig } from '__io/db/account';
+import { getTdList, addTd, updateTdConfig } from '__io/db/account';
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
 
@@ -66,14 +66,12 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
 export const addUpdateAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
     if(!key) throw new Error('Something wrong with the key!')
     const accountId = `${source}_${config[key]}`
-    const accountsBySource = await getAccountBySource(source)
-
     try {
         if(updateModule) {
-            await updateAccountConfig(accountId, JSON.stringify(config))
+            await updateTdConfig(accountId, JSON.stringify(config))
             console.success(`Update ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }else{
-            await addAccount(accountId, source, !accountsBySource.length, JSON.stringify(config))
+            await addTd(accountId, source, JSON.stringify(config))
             console.success(`Add ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }
     }catch(err){
@@ -275,7 +273,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
 }
 
 async function existedAccountIdValidator(value: any):Promise<any> {
-    const accountList = await getAccountList()
+    const accountList = await getTdList()
     const existedIds = accountList.map((a: Account) => a.account_id.toAccountId());
     if (existedIds.indexOf(value) !== -1) return new Error('AccountId has existed!');
 }

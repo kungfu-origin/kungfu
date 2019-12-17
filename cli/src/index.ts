@@ -7,7 +7,6 @@ import { listAccountsStrategys } from '@/commanders/list';
 import { removeAccountStrategy } from '@/commanders/remove';
 import { updateAccountStrategy } from '@/commanders/update';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
-import { switchMdSource } from '@/commanders/switchMdSsource';
 import { monitPrompt } from '@/components/index';
 import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
@@ -107,12 +106,7 @@ program
     .command('switchmd')
     .description('switch md source')
     .action(() => {
-        return switchMdSource()
-            .catch((err: Error) => {
-                console.error(err)
-                process.exit(1)
-            })
-            .finally(() => process.exit(0));
+        return new Error('not finished')
     })
 
 program

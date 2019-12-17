@@ -61,7 +61,6 @@ interface SourceType {
 interface Account {
     account_id: string;
     source_name: string;
-    receive_md: boolean;
     config?: any;
     [propName: string]: any;
 }
@@ -224,7 +223,8 @@ interface AccountSettingOrigin {
     name: string,
     type: string,
     key: string,
-    config: AccountSettingItem[]
+    td_config: AccountSettingItem[],
+    md_config: AccountSettingItem[],
 }
 
 interface AccountSetting {
@@ -238,6 +238,10 @@ interface AccountSetting {
 
 interface Sources {
     [propName: string]: AccountSetting
+}
+
+interface StringToSource {
+    [propName: string]: Sources
 }
 
 

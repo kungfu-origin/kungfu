@@ -16,10 +16,13 @@ export const SET_ACCOUNT_ASSET = (state, { accountId, accountsAsset }) => {
     Vue.set(state.accountsAsset, accountId, accountsAsset)
 }
 
-export const SET_ACCOUNT_LIST = (state, accountList) => {
-    state.accountList = accountList
+export const SET_TD_LIST = (state, tdList) => {
+    state.tdList = tdList
 }
 
+export const SET_MD_LIST = (state, mdList) => {
+    state.mdList = mdList
+}
 
 export const SET_CURRENT_ACCOUNT = (state, account) => {
     state.currentAccount = account;
