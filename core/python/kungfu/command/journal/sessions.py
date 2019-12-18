@@ -31,3 +31,23 @@ def sessions(ctx, sortby, ascending, tablefmt, pager):
         click.echo_via_pager(table)
     else:
         click.echo(table)
+
+
+@journal.command()
+@click.pass_context
+def rebuild_index(ctx):
+    pass_ctx_from_parent(ctx)
+    io_device = pyyjj.io_device_master(ctx.journal_util_location, False)
+    click.echo("rebuild sqlite db")
+    io_device.rebuild_index_db()
+    click.echo("done")
+
+
+@journal.command()
+@click.pass_context
+def sql(ctx):
+    pass_ctx_from_parent(ctx)
+    io_device = pyyjj.io_device(ctx.journal_util_location)
+    click.echo("read from sqlite")
+    res = io_device.find_sessions()
+    click.echo(res)

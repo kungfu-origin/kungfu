@@ -10,7 +10,16 @@ import kungfu.yijinjing.msg as yjj_msg
 
 
 os_sep = re.escape(os.sep)
-JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
+JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}'.format(
+    r'(.*)', os_sep,  # category
+    r'(.*)', os_sep,  # group
+    r'(.*)', os_sep,  # name
+    r'journal', os_sep,  # mode
+    r'(.*)'
+)
+JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
+
+JOURNAL_PAGE_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
     r'(.*)', os_sep,  # category
     r'(.*)', os_sep,  # group
     r'(.*)', os_sep,  # name
@@ -18,7 +27,10 @@ JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
     r'(.*)', os_sep,  # mode
     r'(\w+).(\d+).journal',  # hash + page_id
 )
-JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
+JOURNAL_PAGE_PATTERN = re.compile(JOURNAL_PAGE_REGEX)
+
+LOCATION_UNAME_REGEX = r'(.*)/(.*)/(.*)/(.*)'
+LOCATION_PATTERN = re.compile(LOCATION_UNAME_REGEX)
 
 MODES = {
     'live': pyyjj.mode.LIVE,
@@ -97,20 +109,54 @@ class Locator(pyyjj.locator):
     def list_page_id(self, location, dest_id):
         page_ids = []
         for journal in glob.glob(os.path.join(self.layout_dir(location, pyyjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
-            match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
+            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(6)
                 page_ids.append(int(page_id))
         return page_ids
 
+    def list_locations(self, category, group, name, mode):
+        search_path = os.path.join(self._home, category, group, name, 'journal', mode)
+        locations = []
+        for journal in glob.glob(search_path):
+            match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1:])
+            if match:
+                category = match.group(1)
+                group = match.group(2)
+                name = match.group(3)
+                mode = match.group(4)
+                location = pyyjj.location(MODES[mode], CATEGORIES[category], group, name, self)
+                locations.append(location)
+        return locations
+
+    def list_location_dest(self, location):
+        search_path = os.path.join(self._home, pyyjj.get_category_name(location.category),
+                                   location.group, location.name, 'journal',
+                                   pyyjj.get_mode_name(location.mode), '*.journal')
+        readers = {}
+        for journal in glob.glob(search_path):
+            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])
+            if match:
+                category = match.group(1)
+                group = match.group(2)
+                name = match.group(3)
+                mode = match.group(4)
+                dest = match.group(5)
+                page_id = match.group(6)
+                uname = '{}/{}/{}/{}'.format(category, group, name, mode)
+                uid = pyyjj.hash_str_32(uname)
+                if dest in readers:
+                    readers[int(dest, 16)].append(page_id)
+                else:
+                    readers[int(dest, 16)] = [page_id]
+        return list(readers.keys())
+
 
 def collect_journal_locations(ctx):
-
     search_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
-
     locations = {}
     for journal in glob.glob(search_path):
-        match = JOURNAL_LOCATION_PATTERN.match(journal[len(ctx.home) + 1:])
+        match = JOURNAL_PAGE_PATTERN.match(journal[len(ctx.home) + 1:])
         if match:
             category = match.group(1)
             group = match.group(2)
@@ -139,80 +185,30 @@ def collect_journal_locations(ctx):
                 }
             ctx.logger.debug('found journal %s %s %s %s', MODES[mode], CATEGORIES[category], group, name)
         else:
-            ctx.logger.warn('unable to match journal file %s to pattern %s', journal, JOURNAL_LOCATION_REGEX)
-
+            ctx.logger.warn('unable to match journal file %s to pattern %s', journal, JOURNAL_PAGE_REGEX)
     return locations
 
 
 def find_sessions(ctx):
     io_device = pyyjj.io_device(ctx.journal_util_location)
-
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
-    locations = collect_journal_locations(ctx)
-    dest_pub = '{:08x}'.format(0)
-    for key in locations:
-        record = locations[key]
-        if record["mode"] == "live" and record["group"] != "master":
-            master_command_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "master", '{:08x}'.format(key), ctx.locator)
-            reader = io_device.open_reader_to_subscribe()
-            reader.join(master_command_location, key, 0)
-            find_sessions_from_reader(ctx, sessions_df, reader, record['mode'], record['category'], record['group'], record['name'])
-        else:
-            location = pyyjj.location(MODES[record['mode']], CATEGORIES[record['category']], record['group'], record['name'], ctx.locator)
-            if dest_pub in record['readers']:
-                reader = io_device.open_reader_to_subscribe()
-                reader.join(location, int(dest_pub, 16), 0)
-                find_sessions_from_reader(ctx, sessions_df, reader, record['mode'], record['category'], record['group'], record['name'])
-
+    for raw_session in io_device.find_sessions():
+        session = json.loads(raw_session)
+        match = LOCATION_PATTERN.match(session['location'])
+        sessions_df.loc[len(sessions_df)] = [
+            len(sessions_df) + 1, match.group(4), match.group(1), match.group(2), match.group(3),
+            session['begin_time'], session['end_time'], session['end_time'] > 0,
+            session['end_time'] - session['begin_time']
+        ]
     return sessions_df
 
 
 def find_session(ctx, session_id):
     all_sessions = find_sessions(ctx)
     return all_sessions[all_sessions['id'] == session_id].iloc[0]
-
-
-def find_sessions_from_reader(ctx, sessions_df, reader, mode, category, group, name):
-    session_start_time = -1
-    last_frame_time = 0
-
-    while reader.data_available():
-        frame = reader.current_frame()
-        if frame.msg_type == yjj_msg.SessionStart:
-            if session_start_time > 0:
-                sessions_df.loc[len(sessions_df)] = [
-                    ctx.session_count, mode, category, group, name,
-                    session_start_time, last_frame_time, False,
-                    last_frame_time - session_start_time
-                ]
-                session_start_time = frame.trigger_time
-                ctx.session_count = ctx.session_count + 1
-            else:
-                session_start_time = frame.trigger_time
-            frame_count = 1
-        elif frame.msg_type == yjj_msg.SessionEnd:
-            if session_start_time > 0:
-                sessions_df.loc[len(sessions_df)] = [
-                    ctx.session_count, mode, category, group, name,
-                    session_start_time, frame.gen_time, True,
-                    frame.gen_time - session_start_time
-                ]
-                session_start_time = -1
-                frame_count = 0
-                ctx.session_count = ctx.session_count + 1
-        last_frame_time = frame.gen_time
-        reader.next()
-
-    if session_start_time > 0:
-        sessions_df.loc[len(sessions_df)] = [
-            ctx.session_count, mode, category, group, name,
-            session_start_time, last_frame_time, False,
-            last_frame_time - session_start_time
-        ]
-        ctx.session_count = ctx.session_count + 1
 
 
 def make_location_from_dict(ctx, location):

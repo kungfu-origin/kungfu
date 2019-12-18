@@ -45,14 +45,14 @@ namespace kungfu
 
             uint64_t writer::current_frame_uid()
             {
-                uint32_t page_part = (journal_->current_page_->page_id_ << 16) & PAGE_ID_TRANC;
+                uint32_t page_part = (journal_->page_->page_id_ << 16) & PAGE_ID_TRANC;
                 uint32_t frame_part = journal_->page_frame_nb_ & FRAME_ID_TRANC;
                 return frame_id_base_ | (page_part | frame_part);
             }
 
             frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length)
             {
-                assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_->current_page_->get_page_size());
+                assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_->page_->get_page_size());
                 int64_t t = time::now_in_nano();
                 while (not writer_mtx_.try_lock())
                 {
@@ -61,7 +61,7 @@ namespace kungfu
                         throw journal_error("Can not lock writer for " + journal_->location_->uname);
                     }
                 }
-                if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->current_page_->address_border())
+                if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->page_->address_border())
                 {
                     close_page(trigger_time);
                 }
@@ -78,11 +78,11 @@ namespace kungfu
             {
                 auto frame = journal_->current_frame();
                 auto next_frame_address = frame->address() + frame->header_length() + data_length;
-                assert(next_frame_address < journal_->current_page_->address_border());
+                assert(next_frame_address < journal_->page_->address_border());
                 memset(reinterpret_cast<void *>(next_frame_address), 0, sizeof(frame_header));
                 frame->set_gen_time(time::now_in_nano());
                 frame->set_data_length(data_length);
-                journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
                 journal_->next();
                 writer_mtx_.unlock();
                 publisher_->notify();
@@ -96,8 +96,8 @@ namespace kungfu
 
             void writer::mark_with_time(int64_t gen_time, int32_t msg_type)
             {
-                assert(sizeof(frame_header) + sizeof(frame_header) <= journal_->current_page_->get_page_size());
-                if (journal_->current_frame()->address() + sizeof(frame_header) > journal_->current_page_->address_border())
+                assert(sizeof(frame_header) + sizeof(frame_header) <= journal_->page_->get_page_size());
+                if (journal_->current_frame()->address() + sizeof(frame_header) > journal_->page_->address_border())
                 {
                     mark(gen_time, msg::type::PageEnd);
                     journal_->load_next_page();
@@ -111,7 +111,7 @@ namespace kungfu
                 memset(reinterpret_cast<void *>(frame->address() + frame->header_length()), 0, sizeof(frame_header));
                 frame->set_gen_time(gen_time);
                 frame->set_data_length(0);
-                journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
                 journal_->next();
             }
 
@@ -129,7 +129,7 @@ namespace kungfu
 
             void writer::close_page(int64_t trigger_time)
             {
-                page_ptr last_page = journal_->current_page_;
+                page_ptr last_page = journal_->page_;
                 journal_->load_next_page();
 
                 frame last_page_frame;

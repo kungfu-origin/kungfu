@@ -9,8 +9,6 @@
 
 #include <kungfu/yijinjing/msg.h>
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/log/setup.h>
-#include <kungfu/yijinjing/util/os.h>
 
 #include <kungfu/practice/master.h>
 
@@ -25,13 +23,19 @@ namespace kungfu
 
         master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency)), last_check_(0)
         {
-            writers_[0] = get_io_device()->open_writer(0);
-            writers_[0]->mark(time::now_in_nano(), msg::type::SessionStart);
+            auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+            auto now = time::now_in_nano();
+            io_device->open_session(io_device->get_home(), now);
+            writers_[0] = io_device->open_writer(0);
+            writers_[0]->mark(now, msg::type::SessionStart);
         }
 
         void master::on_exit()
         {
-            writers_[0]->mark(time::now_in_nano(), msg::type::SessionEnd);
+            auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+            auto now = time::now_in_nano();
+            io_device->close_session(io_device->get_home(), now);
+            writers_[0]->mark(now, msg::type::SessionEnd);
         }
 
         void master::on_notify()
@@ -41,12 +45,15 @@ namespace kungfu
 
         void master::register_app(const event_ptr &e)
         {
+            auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+            auto home = io_device->get_home();
+
             auto request_loc = e->data<nlohmann::json>();
             auto app_location = std::make_shared<location>(
                     static_cast<mode>(request_loc["mode"]),
                     static_cast<category>(request_loc["category"]),
                     request_loc["group"], request_loc["name"],
-                    get_io_device()->get_home()->locator
+                    home->locator
             );
 
             if (has_location(app_location->uid))
@@ -57,7 +64,6 @@ namespace kungfu
 
             auto now = time::now_in_nano();
             auto uid_str = fmt::format("{:08x}", app_location->uid);
-            auto home = get_io_device()->get_home();
 
             if (app_locations_.find(app_location->uid) == app_locations_.end())
             {
@@ -83,6 +89,7 @@ namespace kungfu
                 writers_[0]->close_frame(msg.length());
             }
 
+            io_device->open_session(app_location, e->gen_time());
             writer->mark(e->gen_time(), msg::type::SessionStart);
 
             require_write_to(app_location->uid, e->gen_time(), 0);
@@ -114,6 +121,7 @@ namespace kungfu
 
         void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
         {
+            auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
             auto location = get_location(app_location_uid);
             nlohmann::json location_desc{};
             location_desc["mode"] = location->mode;
@@ -124,6 +132,7 @@ namespace kungfu
             location_desc["uid"] = app_location_uid;
 
             writers_[app_location_uid]->mark(trigger_time, msg::type::SessionEnd);
+            io_device->close_session(location, trigger_time);
 
             deregister_channel_by_source(app_location_uid);
 
@@ -199,6 +208,17 @@ namespace kungfu
 
         void master::react()
         {
+            events_ |
+            filter([&](event_ptr event)
+                   {
+                       return dynamic_cast<journal::frame *>(event.get()) != nullptr;
+                   }) |
+            $([&](event_ptr e)
+              {
+                  auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+                  io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
+              });
+
             events_ | is(msg::type::Register) |
             $([&](event_ptr e)
               {

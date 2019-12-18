@@ -95,10 +95,10 @@ namespace kungfu
                 [[nodiscard]] const char *data_as_bytes() const override
                 { return reinterpret_cast<char *>(address() + header_length()); }
 
-                [[nodiscard]] const std::string data_as_string() const override
+                [[nodiscard]] std::string data_as_string() const override
                 { return std::string(data_as_bytes()); }
 
-                [[nodiscard]] const std::string to_string() const override
+                [[nodiscard]] std::string to_string() const override
                 { return std::string(reinterpret_cast<char *>(address())); }
 
                 template<typename T>
@@ -117,7 +117,7 @@ namespace kungfu
 
                 /** address with type,
                  * will keep moving forward until change page */
-                frame_header *header_;
+                frame_header *header_ = nullptr;
 
                 frame() = default;
 

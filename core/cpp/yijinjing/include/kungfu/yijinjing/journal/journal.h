@@ -50,8 +50,11 @@ namespace kungfu
 
                 ~journal();
 
-                frame_ptr current_frame()
+                [[nodiscard]] frame_ptr current_frame() const
                 { return frame_; }
+
+                [[nodiscard]] page_ptr current_page() const
+                { return page_; }
 
                 /**
                  * move current frame to the next available one
@@ -70,7 +73,7 @@ namespace kungfu
                 const uint32_t dest_id_;
                 const bool is_writing_;
                 const bool lazy_;
-                page_ptr current_page_;
+                page_ptr page_;
                 frame_ptr frame_;
                 int page_frame_nb_;
 
@@ -102,8 +105,11 @@ namespace kungfu
 
                 void disjoin(uint32_t location_uid);
 
-                frame_ptr current_frame()
+                [[nodiscard]] frame_ptr current_frame() const
                 { return current_->current_frame(); }
+
+                [[nodiscard]] page_ptr current_page() const
+                { return current_->current_page(); }
 
                 bool data_available();
 
@@ -126,10 +132,10 @@ namespace kungfu
             public:
                 writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher);
 
-                const data::location_ptr &get_location() const
+                [[nodiscard]] const data::location_ptr &get_location() const
                 { return journal_->location_; }
 
-                uint32_t get_dest() const
+                [[nodiscard]] uint32_t get_dest() const
                 { return journal_->dest_id_; }
 
                 uint64_t current_frame_uid();
@@ -174,8 +180,8 @@ namespace kungfu
                 template<typename T>
                 void write_with_time(int64_t gen_time, int32_t msg_type, const T &data)
                 {
-                    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->current_page_->get_page_size());
-                    if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->current_page_->address_border())
+                    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->page_->get_page_size());
+                    if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->page_->address_border())
                     {
                         mark(gen_time, msg::type::PageEnd);
                         journal_->load_next_page();
@@ -190,7 +196,7 @@ namespace kungfu
                     frame->copy_data<T>(data);
                     frame->set_gen_time(gen_time);
                     frame->set_data_length(sizeof(T));
-                    journal_->current_page_->set_last_frame_position(frame->address() - journal_->current_page_->address());
+                    journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
                     journal_->next();
                 }
 

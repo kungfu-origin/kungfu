@@ -40,61 +40,72 @@ class PyLocator : public data::locator
 {
     using data::locator::locator;
 
-    bool has_env(const std::string &name) const override
+    [[nodiscard]] bool has_env(const std::string &name) const override
     {
         PYBIND11_OVERLOAD_PURE(bool, data::locator, has_env, name)
     }
 
-    const std::string get_env(const std::string &name) const override
+    [[nodiscard]] std::string get_env(const std::string &name) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, get_env, name)
+        PYBIND11_OVERLOAD_PURE(std::string, data::locator, get_env, name)
     }
 
-    const std::string layout_dir(data::location_ptr location, data::layout l) const override
+    [[nodiscard]] std::string layout_dir(data::location_ptr location, data::layout l) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, layout_dir, location, l)
+        PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_dir, location, l)
     }
 
-    const std::string layout_file(data::location_ptr location, data::layout l, const std::string &name) const override
+    [[nodiscard]] std::string layout_file(data::location_ptr location, data::layout l, const std::string &name) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, layout_file, location, l, name)
+        PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_file, location, l, name)
     }
 
-    const std::string default_to_system_db(data::location_ptr location, const std::string &name) const override
+    [[nodiscard]] std::string default_to_system_db(data::location_ptr location, const std::string &name) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::string, data::locator, default_to_system_db, location, name)
+        PYBIND11_OVERLOAD_PURE(std::string, data::locator, default_to_system_db, location, name)
     }
 
-    const std::vector<int> list_page_id(data::location_ptr location, uint32_t dest_id) const override
+    [[nodiscard]] std::vector<int> list_page_id(data::location_ptr location, uint32_t dest_id) const override
     {
-        PYBIND11_OVERLOAD_PURE(const std::vector<int>, data::locator, list_page_id, location, dest_id)
+        PYBIND11_OVERLOAD_PURE(std::vector<int>, data::locator, list_page_id, location, dest_id)
+    }
+
+
+    [[nodiscard]] std::vector<data::location_ptr> list_locations(const std::string &category = "*", const std::string &group = "*", const std::string &name = "*", const std::string &mode = "*") const override
+    {
+        PYBIND11_OVERLOAD_PURE(std::vector<data::location_ptr>, data::locator, list_locations, category, group, name, mode)
+    }
+
+    [[nodiscard]] std::vector<uint32_t> list_location_dest(data::location_ptr location) const override
+    {
+        PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, data::locator, list_location_dest, location)
     }
 };
 
 class PyEvent : public event
 {
 public:
-    int64_t gen_time() const override
+    [[nodiscard]] int64_t gen_time() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time,)
     }
 
-    int64_t trigger_time() const override
+    [[nodiscard]] int64_t trigger_time() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time,)
     }
 
-    int32_t msg_type() const override
+    [[nodiscard]] int32_t msg_type() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type,)
     }
 
-    uint32_t source() const override
+    [[nodiscard]] uint32_t source() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, source,)
     }
 
-    uint32_t dest() const override
+    [[nodiscard]] uint32_t dest() const override
     {
         PYBIND11_OVERLOAD_PURE(int64_t, event, dest,)
     }
@@ -252,7 +263,9 @@ PYBIND11_MODULE(pyyjj, m)
             .def("get_env", &data::locator::get_env)
             .def("layout_dir", &data::locator::layout_dir)
             .def("layout_file", &data::locator::layout_file)
-            .def("list_page_id", &data::locator::list_page_id);
+            .def("list_page_id", &data::locator::list_page_id)
+            .def("list_locations", &data::locator::list_locations, py::arg("category") = "*", py::arg("group") = "*", py::arg("name") = "*", py::arg("mode") = "*")
+            .def("list_location_dest", &data::locator::list_location_dest);
 
     py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
             .value("REPLY", nanomsg::protocol::REPLY)
@@ -313,13 +326,15 @@ PYBIND11_MODULE(pyyjj, m)
             .def("open_reader", &io_device::open_reader)
             .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
             .def("open_writer", &io_device::open_writer)
-            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0);
+            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
+            .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0, py::arg("to") = INT64_MAX);
 
     py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
     io_device_with_reply.def(py::init<data::location_ptr, bool, bool>());
 
     py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
-            .def(py::init<data::location_ptr, bool>());
+            .def(py::init<data::location_ptr, bool>())
+            .def("rebuild_index_db", &io_device_master::rebuild_index_db);
 
     py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
             .def(py::init<data::location_ptr, bool>());

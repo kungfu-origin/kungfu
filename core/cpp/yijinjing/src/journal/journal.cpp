@@ -30,15 +30,15 @@ namespace kungfu
 
             journal::~journal()
             {
-                if (current_page_.get() != nullptr)
+                if (page_.get() != nullptr)
                 {
-                    current_page_.reset();
+                    page_.reset();
                 }
             }
 
             void journal::next()
             {
-                assert(current_page_.get() != nullptr);
+                assert(page_.get() != nullptr);
                 if (frame_->msg_type() == msg::type::PageEnd)
                 {
                     load_next_page();
@@ -55,8 +55,8 @@ namespace kungfu
                 load_page(page_id);
                 SPDLOG_TRACE("{} in page [{}] [{} - {}]",
                              nanotime > 0 ? time::strftime(nanotime) : "beginning", page_id,
-                             time::strftime(current_page_->begin_time(), "%F %T"), time::strftime(current_page_->end_time(), "%F %T"));
-                while (current_page_->is_full() && current_page_->end_time() <= nanotime)
+                             time::strftime(page_->begin_time(), "%F %T"), time::strftime(page_->end_time(), "%F %T"));
+                while (page_->is_full() && page_->end_time() <= nanotime)
                 {
                     load_next_page();
                 }
@@ -68,17 +68,17 @@ namespace kungfu
 
             void journal::load_page(int page_id)
             {
-                if (current_page_.get() == nullptr or current_page_->get_page_id() != page_id)
+                if (page_.get() == nullptr or page_->get_page_id() != page_id)
                 {
-                    current_page_ = page::load(location_, dest_id_, page_id, is_writing_, lazy_);
-                    frame_->set_address(current_page_->first_frame_address());
+                    page_ = page::load(location_, dest_id_, page_id, is_writing_, lazy_);
+                    frame_->set_address(page_->first_frame_address());
                     page_frame_nb_ = 0;
                 }
             }
 
             void journal::load_next_page()
             {
-                load_page(current_page_->get_page_id() + 1);
+                load_page(page_->get_page_id() + 1);
             }
         }
     }

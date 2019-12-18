@@ -38,7 +38,7 @@ namespace kungfu
                 SUBSCRIBE = NN_SUB
             };
 
-            inline const std::string get_protocol_name(protocol p)
+            inline std::string get_protocol_name(protocol p)
             {
                 switch (p)
                 {
@@ -59,7 +59,7 @@ namespace kungfu
                 }
             }
 
-            inline const protocol get_opposite_protol(protocol p)
+            inline protocol get_opposite_protol(protocol p)
             {
                 switch (p)
                 {
@@ -83,9 +83,9 @@ namespace kungfu
             class url_factory
             {
             public:
-                virtual const std::string make_path_bind(const data::location_ptr location, protocol p) const = 0;
+                [[nodiscard]] virtual const std::string make_path_bind(data::location_ptr location, protocol p) const = 0;
 
-                virtual const std::string make_path_connect(const data::location_ptr location, protocol p) const = 0;
+                [[nodiscard]] virtual const std::string make_path_connect(data::location_ptr location, protocol p) const = 0;
             };
 
             DECLARE_PTR(url_factory)
@@ -100,9 +100,9 @@ namespace kungfu
                 nn_exception() : errno_(nn_errno())
                 {}
 
-                virtual const char *what() const throw();
+                [[nodiscard]] virtual const char *what() const throw();
 
-                int num() const;
+                [[nodiscard]] int num() const;
 
             private:
                 int errno_;
@@ -153,13 +153,13 @@ namespace kungfu
 
                 const std::string &request(const std::string &json_message);
 
-                const protocol get_protocol() const
+                [[nodiscard]] protocol get_protocol() const
                 { return protocol_; };
 
-                const std::string &get_url() const
+                [[nodiscard]] const std::string &get_url() const
                 { return url_; };
 
-                const std::string &last_message() const
+                [[nodiscard]] const std::string &last_message() const
                 { return message_; };
 
             private:
@@ -183,35 +183,35 @@ namespace kungfu
                 nanomsg_json(const std::string &msg) : binding_(nlohmann::json::parse(msg)), msg_(msg)
                 {};
 
-                int64_t gen_time() const override
+                [[nodiscard]] int64_t gen_time() const override
                 { return get_meta<int64_t>("gen_time", 0); }
 
-                int64_t trigger_time() const override
+                [[nodiscard]] int64_t trigger_time() const override
                 { return get_meta<int64_t>("trigger_time", 0); }
 
-                int32_t msg_type() const override
+                [[nodiscard]] int32_t msg_type() const override
                 { return get_meta<int32_t>("msg_type", 0); }
 
-                uint32_t source() const override
+                [[nodiscard]] uint32_t source() const override
                 { return get_meta<uint32_t>("source", 0); }
 
-                uint32_t dest() const override
+                [[nodiscard]] uint32_t dest() const override
                 { return get_meta<uint32_t>("dest", 0); }
 
-                uint32_t data_length() const override
+                [[nodiscard]] uint32_t data_length() const override
                 { return binding_.size(); }
 
-                const char *data_as_bytes() const override
+                [[nodiscard]] const char *data_as_bytes() const override
                 { return msg_.c_str(); }
 
-                const std::string data_as_string() const override
+                [[nodiscard]] std::string data_as_string() const override
                 { return binding_["data"].dump(); }
 
-                const std::string to_string() const override
+                [[nodiscard]] std::string to_string() const override
                 { return msg_; }
 
             protected:
-                const void *data_address() const override
+                [[nodiscard]] const void *data_address() const override
                 { return &binding_["data"]; }
 
             private:
@@ -219,7 +219,7 @@ namespace kungfu
                 const std::string msg_;
 
                 template<typename T>
-                T get_meta(const std::string &name, T default_value) const
+                [[nodiscard]] T get_meta(const std::string &name, T default_value) const
                 {
                     if (binding_.find(name) == binding_.end())
                     {
