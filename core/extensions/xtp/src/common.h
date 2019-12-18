@@ -35,18 +35,22 @@ namespace kungfu
 
             struct MDConfiguration
             {
+                int client_id;
                 std::string user_id;
                 std::string md_ip;
                 int md_port;
+                std::string password;
                 std::string protocol;
                 int buffer_size;
             };
 
             inline void from_json(const nlohmann::json& j, MDConfiguration& c)
             {
+                j.at("client_id").get_to(c.client_id);
                 j.at("user_id").get_to(c.user_id);
                 j.at("md_ip").get_to(c.md_ip);
                 j.at("md_port").get_to(c.md_port);
+                j.at("password").get_to(c.password);
                 c.protocol = j.value("protocol", "tcp");
                 if (c.protocol != "udp")
                 {
