@@ -2,7 +2,6 @@
     <el-dialog 
     width="540px" 
     :title=" (method == 'add' ? '添加' : '设置') + source + '柜台账户'"  
-    v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -102,7 +101,7 @@ export default {
     },
 
     mounted(){
-       this.initPostForm();
+        this.initPostForm();
     },
 
     watch: {
@@ -134,32 +133,75 @@ export default {
             const t = this
             t.$refs.accountForm.validate(valid => {
                 if(valid) {
-                    let account_id = `${t.source}_${t.postForm[t.accountSource[t.source].key]}`
-                    const formValue = t.postForm
-                    let changeAccount 
-                    if(t.method == 'add') { //添加账户
-                        changeAccount = ACCOUNT_API.addTd(account_id, t.source, JSON.stringify(formValue))
-                    } else{ //编辑账户
-                        changeAccount = ACCOUNT_API.updateTdConfig(account_id, JSON.stringify(formValue))
-                    }
 
-                    changeAccount.then(() => {
-                        t.$emit('successSubmitSetting')
-                        t.$message.success('操作成功！')
-                    })
-                    .catch((err) => {
-                        t.$message.error(err.message || '操作失败！')
-                    })
-                    .finally(() => {
-                        t.close()
-                    })
+                    let changeAccount;
+                    if(t.type === 'td') changeAccount = t.addUpdateTd();
+                    else if(t.type === 'md') changeAccount = t.addUpdateMd();
+
+                    t.addSuccess(changeAccount)
                 }
             })
         },
 
+        addUpdateTd() {
+            const t = this;
+            const accountId = `${t.source}_${t.postForm[t.accountSource[t.source].key]}`;
+            const formValue = t.postForm || {};
+
+            if(t.method == 'add') { //添加账户
+                return ACCOUNT_API.addTd(accountId, t.source, JSON.stringify(formValue))
+            } else{ //编辑账户
+                return ACCOUNT_API.updateTdConfig(accountId, JSON.stringify(formValue))
+            }
+        },
+
+        addUpdateMd() {
+            const t = this;
+            const sourceName = t.accountSource[t.source].source;
+            const formValue = t.postForm || {};
+            
+            if(t.method == 'add') { //添加账户
+                return ACCOUNT_API.addMd(sourceName, JSON.stringify(formValue))
+            } else{ //编辑账户
+                return ACCOUNT_API.updateMdConfig(sourceName, JSON.stringify(formValue))
+            }
+        },
+
+        addSuccess(thePromise) {
+            const t = this;
+            return thePromise
+            .then(() => {
+                t.$emit('successSubmitSetting')
+                t.$message.success('操作成功！')
+            })
+            .catch((err) => {
+                t.$message.error(err.message || '操作失败！')
+            })
+            .finally(() => {
+                t.close()
+            })
+        },
+
         initPostForm() {
-             const t = this;
-            (t.accountSource[t.source].config || []).forEach(item => {
+            const t = this;
+            const configItemList = (t.accountSource[t.source].config || []);
+
+            if(configItemList.length === 0) {
+                if(t.type === 'td') {
+                    t.$message.$error('账户配置出错！');
+                    t.close();
+                } else if(t.type === 'md') {
+                    if(t.method === 'add') {
+                        t.addSuccess(t.addUpdateMd())
+                    } else {
+                        t.$message.success('该行情源无需配置！')
+                        t.close();
+                    }
+                }
+                return;
+            }
+
+            configItemList.forEach(item => {
                 const key = item.key;
                 if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
                     if(item.default) {
@@ -171,10 +213,10 @@ export default {
 
         buildValidators(item) {
             const t = this;
-            if(t.method == 'add' && t.accountSource[t.source].key == item.key){
+            if((t.method == 'add') && (t.type === 'td') && (t.accountSource[t.source].key == item.key)){
                 return [
-                    {validator: t.validateAccountId, trigger: 'blur'},
-                    {required: true, message: item.errMsg, trigger: 'blur'}
+                    { validator: t.validateAccountId, trigger: 'blur' },
+                    { required: true, message: item.errMsg, trigger: 'blur' }
                 ] 
             }else{
                 let validators = [];

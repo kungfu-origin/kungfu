@@ -25,17 +25,7 @@
                             {{props.row.source_name}}
                         </el-tag>
                     </template>
-                </el-table-column>
-                <el-table-column
-                    prop="account_id"
-                    label="账户"
-                    show-overflow-tooltip
-                >
-                    <template slot-scope="props">
-                        {{props.row.account_id.toAccountId()}}
-                    </template>
-                </el-table-column>
-                
+                </el-table-column>                
                 <el-table-column
                     label="状态"
                     show-overflow-tooltip
@@ -64,7 +54,7 @@
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="MD 设置"></i></span>
-                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 MD"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.source_name}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 MD"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -72,9 +62,12 @@
 
         <!-- 选择柜台 -->
         <SetSourceDialog
+        v-if="visiblity.selectSource"
         :visible.sync="visiblity.selectSource"
         :accountSource="mdAccountSource"
         @confirm="handleSelectSource"
+        @noAvailSources="handleNoAvailSource"
+        :existMdList="mdList"
         />
 
         <!-- 设置账户 -->
@@ -99,7 +92,7 @@ import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
 import * as ACCOUNT_API from '__io/db/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
-import { switchMd } from '__io/actions/account';
+import { switchMd, deleteMd } from '__io/actions/account';
 
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
@@ -108,19 +101,6 @@ import mdTdMixin from '../js/mdTdMixin';
 
 export default {
     mixins: [ mdTdMixin ],
-
-    data(){
-        return {
-            method: 'add',
-            accountForm: {},
-            selectedSource: '',
-            visiblity: {
-                selectSource: false,
-                setAccount: false,
-            },
-            renderTable: false
-        }
-    },
 
     computed: {
         ...mapState({
@@ -138,7 +118,25 @@ export default {
 
     methods: {
 
-        handleDeleteMd() {},
+        //删除账户信息
+        handleDeleteMd(row) {
+            const t = this
+            if(!t.judgeCondition(row)) return;
+            const { source_name } = row
+            //查看该账户下是否存在task中的td任务
+            const mdProcessId = `md_${source_name}`
+            t.$confirm(`删除行情源${source_name}会删除所有相关信息，确认删除吗？`, '提示', {
+                confirmButtonText: '确 定',
+                cancelButtonText: '取 消',
+            })
+            .then(() => deleteMd(row, t.tdList))
+            .then(() => t.getTableList())
+            .then(() => t.$message.success('操作成功！'))
+            .catch((err) => {
+                if(err == 'cancel') return
+                t.$message.error(err.message || '操作失败！')
+            })
+        },
 
         handleMdSwitch(value, account) {
             const t = this
@@ -148,6 +146,25 @@ export default {
         handleOpenLogFile(row){
             const logPath = path.join(LOG_DIR, `md_${row.source_name}.log`);
             this.$showLog(logPath)
+        },
+
+        handleNoAvailSource(bool) {
+            const t = this;
+            if(bool) {
+                t.$message.warning('行情源都已添加！')
+            }
+        },
+
+         //删除前进行一些判断
+        judgeCondition(row) {
+            const t = this
+            const { source_name } = row
+            //判断td是否开启，开启则无法删除
+            if(t.$utils.ifProcessRunning(`md_${source_name}`, t.processStatus)) {
+                t.$message.warning('需先停止行情源进程！')
+                return false
+            }
+            return true
         },
 
         //获取账户列表

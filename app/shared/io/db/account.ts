@@ -17,7 +17,7 @@ export const addTd = (accountId: string, sourceName: string, config: any) => {
 }
 
 export const addMd = (sourceName: string, config: any) => {
-    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO md_config(source_name, config) VALUES (?, ?, ?)', [sourceName, config])
+    return runInsertUpdateDeleteDB(ACCOUNTS_DB, 'INSERT INTO md_config(source_name, config) VALUES (?, ?)', [sourceName, config])
 }
 
 export const updateTdConfig = (accountId: string, config: any) => {

@@ -1,5 +1,5 @@
 import * as ACCOUNT_API from '__io/db/account';
-import { TD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
+import { TD_DIR, MD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
 
@@ -7,21 +7,29 @@ const path = require('path')
 
 //删除账户需要将所关联的数据库以及进程都关掉
 //判断task表和进程中是否存在，有则删除
-//TODO
 export const deleteTd = (row: Account): Promise<any> => {
-    const { account_id } = row
-    //查看该账户下是否存在task中的td任务
-    const tdProcessId: string = `td_${account_id}`
-    //删除td
+    const { account_id } = row;
+    const tdProcessId: string = `td_${account_id}`;
+    
     return removeFileFolder(path.join(TD_DIR, account_id.toAccountId()))
     .then(() => removeFileFolder(buildGatewayPath(tdProcessId)))
-    .then(() => deleteProcess('td_' + row.account_id))
-    .then(() => ACCOUNT_API.deleteTd(account_id))//删除账户表中的数据    
+    .then(() => deleteProcess(tdProcessId))
+    .then(() => ACCOUNT_API.deleteTd(account_id)) 
+}
+
+export const deleteMd = (row: Account): Promise<any> => {
+    const { source_name } = row;
+    const mdProcessId: string = `md_${source_name}`;
+
+    return removeFileFolder(path.join(MD_DIR, source_name))
+    .then(() => removeFileFolder(buildGatewayPath(mdProcessId)))
+    .then(() => deleteProcess(mdProcessId))
+    .then(() => ACCOUNT_API.deleteMd(source_name))
 }
 
 //起停td
 export const switchTd = (account: Account, value: boolean): Promise<any> => {
-    const { account_id, config } = account
+    const { account_id } = account
     const tdProcessId: string = `td_${account_id}`
     if(!value){
         return deleteProcess(tdProcessId)
@@ -37,7 +45,7 @@ export const switchTd = (account: Account, value: boolean): Promise<any> => {
 
 //起停md
 export const switchMd = (account: Account, value: boolean) => {
-    const { source_name, config } = account;
+    const { source_name } = account;
     const mdProcessId: string = `md_${source_name}`
     if(!value){
         return deleteProcess(mdProcessId)

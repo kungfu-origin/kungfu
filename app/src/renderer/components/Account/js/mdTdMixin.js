@@ -48,7 +48,7 @@ export default {
 
         //添加或修改账户详情后的操作
         successSubmitSetting() {
-            const t = this
+            const t = this;
             t.getTableList();
             t.refreshData();
         },

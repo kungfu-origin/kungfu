@@ -324,8 +324,8 @@ export default {
             const t = this
             const { account_id } = row
             //判断td是否开启，开启则无法删除
-            if(t.$utils.ifProcessRunning('td_' + account_id, t.processStatus)) {
-                t.$message.warning('需先停止交易运行！')
+            if(t.$utils.ifProcessRunning(`td_${account_id}`, t.processStatus)) {
+                t.$message.warning('需先停止交易进程！')
                 return false
             }
             return true

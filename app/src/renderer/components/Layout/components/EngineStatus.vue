@@ -17,9 +17,7 @@
                             {{accountItem.source_name}}
                         </el-tag> 
                     </span>
-                    <span class="account-process-item text-overflow" :title="accountItem.account_id.toAccountId()">
-                        {{accountItem.account_id.toAccountId()}}
-                    </span>
+                    <span class="account-process-item text-overflow"></span>
                     <span  class="account-process-item text-overflow" style="width: 81px;">
                         <tr-status 
                         v-if="$utils.ifProcessRunning('md_' + accountItem.source_name, processStatus)"

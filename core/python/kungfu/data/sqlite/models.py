@@ -13,10 +13,15 @@ class ModelMixin(object):
                 setattr(self, attr, kwargs[attr])
 
 class Account(Base):
-    __tablename__ = 'account_config'
+    __tablename__ = 'td_config'
     account_id = Column(String, nullable=False, primary_key=True)
     source_name = Column(String)
     receive_md = Column(Boolean)
+    config = Column(Json, nullable=False)
+
+class MarketAccount(Base):
+    __tablename__ = 'md_config'
+    source_name = Column(String, nullable=False, primary_key=True)
     config = Column(Json, nullable=False)
 
 class Holiday(Base):
