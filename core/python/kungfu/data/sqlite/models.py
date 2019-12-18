@@ -16,7 +16,6 @@ class Account(Base):
     __tablename__ = 'td_config'
     account_id = Column(String, nullable=False, primary_key=True)
     source_name = Column(String)
-    receive_md = Column(Boolean)
     config = Column(Json, nullable=False)
 
 class MarketAccount(Base):
