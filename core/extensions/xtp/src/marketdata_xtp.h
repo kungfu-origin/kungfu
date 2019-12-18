@@ -214,7 +214,7 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                Configuration config_;
+                MDConfiguration config_;
                 XTP::API::QuoteApi *api_;
                 std::string get_runtime_folder() const;
                 bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);

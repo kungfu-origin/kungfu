@@ -55,51 +55,62 @@
                     "required": true,
                     "validator": ["o99Validator", "intValidator"],
                     "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
-                },
-                {
-                    "key": "protocol",
-                    "name": "protocol",
-                    "type": "select",
-                    "data": [{
-                        "value": "tcp",
-                        "name": "tcp"
-                    }, {
-                        "value": "udp",
-                        "name": "udp"
-                    }],
-                    "errMsg": "请填写 protocol",
-                    "required": false,
-                    "tip": "请选择 protocol, tcp or udp"
-                },
-                {
-                    "key": "buffer_size",
-                    "name": "buffer_size",
-                    "type": "int",
-                    "tip": "请填写 buffer size（mb）",
-                    "errMsg": "请填写 buffer size（mb），例如:1024",
-                    "validator": ["intValidator"],                    
-                    "required": false
                 }
             ],
-            "md_config": [
+          "md_config": [
+            {
+              "key": "user_id",
+              "name": "user_id",
+              "type": "str",
+              "errMsg": "请填写账户",
+              "required": true,
+              "tip": "请填写账户，例如:1504091"
+            },
+            {
+              "key": "md_ip",
+              "name": "md_ip",
+              "type": "str",
+              "errMsg": "请填写行情IP",
+              "required": true,
+              "tip": "请填写行情IP，例如:61.152.102.110"
+            },
+            {
+              "key": "md_port",
+              "name": "md_port",
+              "type": "int",
+              "errMsg": "请填写行情端口",
+              "validator": [ "intValidator" ],
+              "required": true,
+              "tip": "请填写行情端口，例如:8602"
+            },
+            {
+              "key": "protocol",
+              "name": "protocol",
+              "type": "select",
+              "data": [
                 {
-                    "key": "md_ip",
-                    "name": "md_ip",
-                    "type": "str",
-                    "errMsg": "请填写行情IP",
-                    "required": true,
-                    "tip": "请填写行情IP，例如:61.152.102.110"
+                  "value": "tcp",
+                  "name": "tcp"
                 },
                 {
-                    "key": "md_port",
-                    "name": "md_port",
-                    "type": "int",
-                    "errMsg": "请填写行情端口",
-                    "validator": ["intValidator"],
-                    "required": true,
-                    "tip": "请填写行情端口，例如:8602"
+                  "value": "udp",
+                  "name": "udp"
                 }
-            ]
+              ],
+              "errMsg": "请填写 protocol",
+              "required": false,
+              "tip": "请选择 protocol, tcp or udp"
+            },
+            {
+              "key": "buffer_size",
+              "name": "buffer_size",
+              "type": "int",
+              "tip": "请填写 buffer size（mb）",
+              "errMsg": "请填写 buffer size（mb），例如:1024",
+              "validator": [ "intValidator" ],
+              "required": false
+            }
+          ]
         }
     }
 }

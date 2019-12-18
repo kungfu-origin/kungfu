@@ -172,7 +172,7 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                Configuration config_;
+                TDConfiguration config_;
                 XTP::API::TraderApi *api_;
                 uint64_t session_id_;
                 int request_id_;
