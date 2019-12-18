@@ -67,6 +67,15 @@
               "tip": "请填写账户，例如:1504091"
             },
             {
+                "key": "password",
+                "name": "password",
+                "type": "password",
+                "errMsg": "请填写密码",
+                "required": true,
+                "validator": ["blankValidator"],
+                "tip": "请填写密码，例如:123456"
+            },
+            {
               "key": "md_ip",
               "name": "md_ip",
               "type": "str",
@@ -100,6 +109,15 @@
               "errMsg": "请填写 protocol",
               "required": false,
               "tip": "请选择 protocol, tcp or udp"
+            },
+            {
+                "key": "client_id",
+                "name": "client_id",
+                "type": "int",
+                "errMsg": "请填写自定义多点登录ID 1-99整数",
+                "required": true,
+                "validator": ["o99Validator", "intValidator"],
+                "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
             },
             {
               "key": "buffer_size",
