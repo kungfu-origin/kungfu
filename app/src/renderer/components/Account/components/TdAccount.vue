@@ -44,7 +44,7 @@
                 <el-table-column
                     label="状态"
                     show-overflow-tooltip
-                    min-width="70"
+                    min-width="80"
                     >
                     <template slot-scope="props">
                         <tr-status 

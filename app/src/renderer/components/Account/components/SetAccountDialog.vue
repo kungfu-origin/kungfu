@@ -194,7 +194,7 @@ export default {
                     if(t.method === 'add') {
                         t.addSuccess(t.addUpdateMd())
                     } else {
-                        t.$message.success('该行情源无需配置！')
+                        t.$message.info('该行情源无需配置！')
                         t.close();
                     }
                 }
