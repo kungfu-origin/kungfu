@@ -482,7 +482,7 @@ export default {
     height: 35px;
     .el-col {
       font-size: 12px;
-      padding: 8px 8px 0px 8px;
+      padding: 8px 8px 0px 0px;
       box-sizing: border-box;
     }
   }
@@ -495,7 +495,7 @@ export default {
     padding-bottom: 4px;
     box-sizing: border-box;
     .el-col {
-      padding: 8px 8px 0px 8px;
+      padding: 8px 8px 0px 0px;
       box-sizing: border-box;
       i {
         cursor: pointer;

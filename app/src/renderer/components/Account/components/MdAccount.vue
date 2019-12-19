@@ -151,7 +151,7 @@ export default {
         handleNoAvailSource(bool) {
             const t = this;
             if(bool) {
-                t.$message.warning('行情源都已添加！')
+                t.$message.info('行情源都已添加！')
             }
         },
 

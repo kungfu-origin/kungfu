@@ -19,7 +19,7 @@ export const statusConfig: StatusConfig = {
     '1':   { name: isEnglish ? 'NoData' : '无数据', color: 'bg-gray', level: 0 },
     '2':   { name: isEnglish ? 'Disconnected' : '断开', color: 'bg-red', level: -1 },
     '3':   { name: isEnglish ? 'Connecting' : '连接中', color: 'tr-dot-wave', level: 0 },
-    '4':   { name: isEnglish ? 'Ready' : '登录就绪', color: 'bg-green', level: 1 },
+    '4':   { name: isEnglish ? 'Ready' : '就绪', color: 'bg-green', level: 1 },
     '5':   { name: isEnglish ? 'LoginFailed' : '登录失败', color: 'bg-red', level: -1 },
     '6':   { name: isEnglish ? 'AccConfirmed' : '结算确认', color: 'bg-green', level: 0 },
     '7':   { name: isEnglish ? 'AccFailed' : '结算失败', color: 'bg-red', level: -1 },
