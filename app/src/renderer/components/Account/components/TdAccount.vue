@@ -112,7 +112,7 @@
                 </el-table-column>
                 <el-table-column
                     class-name="blink-cell"
-                    label="市值/保证金"
+                    label="市值(保证金)"
                     show-overflow-tooltip
                     align="right"
                     min-width="120"

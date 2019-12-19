@@ -21,6 +21,18 @@ class SessionFactoryHolder:
         self.engine = create_engine(make_url(location, filename))
         self.session_factory = sessionmaker(bind=self.engine)
 
+class MarketAccountsDB(SessionFactoryHolder):
+    def __init__(self, location, filename):
+        super(MarketAccountsDB, self).__init__(location, filename)
+        MarketAccount.metadata.create_all(self.engine)
+    
+    def get_md_account_config(self, source_name):
+        with session_scope(self.session_factory) as session:
+            md = session.query(MarketAccount).\
+                filter(MarketAccount.source_name == source_name).first()
+            return json.dumps(object_as_dict(md)['config'])
+
+
 class AccountsDB(SessionFactoryHolder):
     def __init__(self, location, filename):
         super(AccountsDB, self).__init__(location, filename)
@@ -47,17 +59,9 @@ class AccountsDB(SessionFactoryHolder):
                 filter(Account.account_id == account_id).first()
             return json.dumps(object_as_dict(account)['config'])
 
-    def get_md_account_config(self, source_name):
-        with session_scope(self.session_factory) as session:
-            account = session.query(Account).\
-                filter(Account.source_name == source_name).\
-                filter(Account.receive_md).first()
-            return json.dumps(object_as_dict(account)['config'])
-
     def reset_receive_md(self, source_name):
         with session_scope(self.session_factory) as session:
             for obj in session.query(Account).filter(Account.source_name == source_name):
-                obj.receive_md = False
                 session.merge(obj)
 
     def add_account(self, **kwargs):

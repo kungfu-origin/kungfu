@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard title="交易日志">
+<tr-dashboard :title="`交易日志 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <el-checkbox v-model="ifScrollToBottom">跟踪至底部</el-checkbox>
@@ -85,6 +85,10 @@ export default {
         ...mapState({
             processId: state => state.STRATEGY.currentStrategy.strategy_id
         }),
+
+        currentTitle() {
+            return this.processId ? `${this.processId}` : ''
+        },
 
         logPath(){
             const t = this;

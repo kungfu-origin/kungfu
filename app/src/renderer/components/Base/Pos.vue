@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard title="持仓">
+<tr-dashboard :title="`持仓 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -96,6 +96,10 @@ export default {
     },
 
     computed:{
+        currentTitle() {
+            return this.currentId ? `${this.currentId}` : ''
+        },
+
         schema() {
             const t = this
             return [{
@@ -125,7 +129,7 @@ export default {
                     flex: 1
                 },{
                     type: 'number',
-                    label: '开/持仓均价',
+                    label: '开(持)仓均价',
                     prop: 'avgPrice',
                     flex: 1.2
                 },{

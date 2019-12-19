@@ -1,5 +1,5 @@
 <template>
-  <tr-dashboard :title="todayFinish ? '当日委托':'未完成委托'">
+  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -97,6 +97,10 @@ export default {
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             processStatus: state => state.BASE.processStatus
         }),
+
+        currentTitle() {
+            return this.currentId ? `${this.currentId}` : ''
+        },
 
         schema(){
             return  [

@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="filter.dateRange ? '历史成交' : '当日成交'">
+<tr-dashboard :title="filter.dateRange ? `历史成交 ${currentTitle}` : `当日成交 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -77,6 +77,10 @@ export default {
         ...mapState({
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
         }),
+
+        currentTitle() {
+            return this.currentId ? `${this.currentId}` : ''
+        },
 
         schema(){
             return [{
