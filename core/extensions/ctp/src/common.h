@@ -14,9 +14,8 @@ namespace kungfu
     {
         namespace ctp
         {
-            struct Configuration
+            struct TDConfiguration
             {
-                std::string md_uri;
                 std::string td_uri;
                 std::string account_id;
                 std::string broker_id;
@@ -26,9 +25,8 @@ namespace kungfu
                 std::string app_id;
             };
 
-            inline void from_json(const nlohmann::json& j, kungfu::wingchun::ctp::Configuration& c)
+            inline void from_json(const nlohmann::json& j, kungfu::wingchun::ctp::TDConfiguration& c)
             {
-                j.at("md_uri").get_to(c.md_uri);
                 j.at("td_uri").get_to(c.td_uri);
                 j.at("account_id").get_to(c.account_id);
                 j.at("broker_id").get_to(c.broker_id);
@@ -36,6 +34,22 @@ namespace kungfu
                 j.at("auth_code").get_to(c.auth_code);
                 j.at("app_id").get_to(c.app_id);
                 c.product_info = j.value("product_info", "");
+            }
+
+            struct MDConfiguration
+            {
+                std::string md_uri;
+                std::string account_id;
+                std::string broker_id;
+                std::string password;
+            };
+
+            inline void from_json(const nlohmann::json& j, kungfu::wingchun::ctp::MDConfiguration& c)
+            {
+                j.at("md_uri").get_to(c.md_uri);
+                j.at("account_id").get_to(c.account_id);
+                j.at("broker_id").get_to(c.broker_id);
+                j.at("password").get_to(c.password);
             }
 
             inline std::string disconnected_reason(int reason)

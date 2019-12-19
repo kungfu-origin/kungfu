@@ -88,7 +88,7 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                Configuration config_;
+                TDConfiguration config_;
 
                 int front_id_;
                 int session_id_;

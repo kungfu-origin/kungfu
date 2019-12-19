@@ -76,7 +76,7 @@ namespace kungfu
                 void on_start() override;
 
             private:
-                Configuration config_;
+                MDConfiguration config_;
                 int request_id_;
                 CThostFtdcMdApi *api_;
             };
