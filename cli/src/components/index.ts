@@ -8,8 +8,8 @@ export const monitPrompt = async (list: boolean) => {
 
     if(!list) return monitor();
     
-    const { accounts, strategys } = await getAccountsStrategys();
-    const accountStrategyList = accountStrategyListStringify(accounts, strategys);
+    const { mds, tds, strategys } = await getAccountsStrategys();
+    const accountStrategyList = accountStrategyListStringify(mds, tds, strategys);
     let answers = await inquirer.prompt([
         {
             type: 'autocomplete',
@@ -18,6 +18,7 @@ export const monitPrompt = async (list: boolean) => {
             source: async (answersSoFar: any, input: string) => {
                 input = input || '';
                 return accountStrategyList
+                    .filter((s: string) => s.toLowerCase().indexOf('md') == -1)
                     .filter((s: string) => s.indexOf(input.trim()) !== -1)
             }
         }

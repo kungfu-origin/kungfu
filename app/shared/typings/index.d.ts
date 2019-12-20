@@ -65,6 +65,11 @@ interface Account {
     [propName: string]: any;
 }
 
+interface Md {
+    source_name: string;
+    config: any
+}
+
 interface Strategy {
     strategy_id: string;
     strategy_path: string;

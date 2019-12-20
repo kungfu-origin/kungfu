@@ -1,8 +1,9 @@
 import { getAccountSource } from '__gConfig/accountConfig';
 import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '__assets/validator';
-import { getTdList, addTd, updateTdConfig } from '__io/db/account';
+import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '__io/db/account';
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
 import { parseSources } from '@/assets/scripts/utils';
+import { getKungfuTypeFromString } from '@/assets/scripts/actions';
 
 const os = require('os');
 const colors = require('colors');
@@ -16,28 +17,40 @@ export const selectAccountOrStrategy = async() => {
         {
             type: 'autocomplete',
             name: 'type',
-            message: 'Select targeted account / strategy to add    ',
+            message: 'Select targeted md, td or strategy to add    ',
             source: async () => {
-                return [colors.cyan('account'), colors.yellow('strategy')]
+                return [
+                    colors.yellow('md'), 
+                    colors.cyan('td'), 
+                    colors.blue('strategy')
+                ]
             }
         }
     ])
 
-    const type = answers.type;
-    if(type.indexOf('account') !== -1) return 'account';
-    else if(type.indexOf('strategy') !== -1) return 'strategy'
-    else return ''
+    return getKungfuTypeFromString(answers.type)
 }
 
 // ======================= add account start ============================
-const selectSourcePrompt = (accountSource: Sources) => inquirer.prompt([
+const selectSourcePrompt = (accountSource: Sources, existedSource: string[]) => inquirer.prompt([
     {
         type: 'autocomplete',
         name: 'source',
         message: 'Select one type of source    ',
         source: async (answersSoFar: any, input = '') => {
-            return parseSources(accountSource)
-            .filter((s: string) => s.indexOf(input) !== -1);
+            const availSources = parseSources(accountSource)
+                .filter((s: string) => {
+                    const ifExisted = existedSource
+                        .filter((es: string) => s.toLocaleLowerCase().indexOf(es.toLocaleLowerCase()) === -1).length;
+                    if(ifExisted) return false;
+                    else return true;
+                })
+                .filter((s: string) => s.indexOf(input) !== -1);
+                
+            if(!availSources.length) {
+                console.log('No available sources!')
+            }
+            return availSources
         }
     }
 ])
@@ -63,24 +76,38 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
         }))
 }
 
-export const addUpdateAccountByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
+export const addUpdateTdByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
     if(!key) throw new Error('Something wrong with the key!')
     const accountId = `${source}_${config[key]}`
     try {
         if(updateModule) {
             await updateTdConfig(accountId, JSON.stringify(config))
-            console.success(`Update ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
-        }else{
+            console.success(`Update ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
+        } else {
             await addTd(accountId, source, JSON.stringify(config))
-            console.success(`Add ${colors.cyan('account')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
+            console.success(`Add ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }
-    }catch(err){
+    } catch(err) {
         throw err
     }
 }
 
-const addAccountPrompt = (accountSource: Sources) => {
-    return selectSourcePrompt(accountSource)
+export const addUpdateMdByPrompt = async (source: string, config: any, updateModule = false) => {
+    try {
+        if(updateModule) {
+            await updateMdConfig(source, JSON.stringify(config))
+            console.success(`Update ${colors.yellow('md')} ${colors.bold(source)} ${JSON.stringify(config, null , '')}`)   
+        } else {
+            await addMd(source, JSON.stringify(config))
+            console.success(`Add ${colors.yellow('md')} ${colors.bold(source)} ${JSON.stringify(config, null , '')}`)   
+        }
+    } catch (err) {
+        throw err
+    }
+}
+
+const addTdPrompt = (accountSource: Sources) => {
+    return selectSourcePrompt(accountSource, [])
     .then(({ source }: { source: string }) => source.split(' ')[0])
     .then((source: string) => {
         const accountSetting: AccountSetting = accountSource[source];
@@ -89,10 +116,24 @@ const addAccountPrompt = (accountSource: Sources) => {
     })
     .then(({ source, key, config }: { source: string, key: string, config: any}) => {
         config = filterAccountConfig(config);
-        return addUpdateAccountByPrompt(source, key, config)
+        return addUpdateTdByPrompt(source, key, config)
     })
 }
 
+const addMdPrompt = (accountSource: Sources) => {
+    return getExistedMdSources()
+    .then((sourcesList: string[]) => selectSourcePrompt(accountSource, sourcesList))
+    .then(({ source }: { source: string }) => source.split(' ')[0]) 
+    .then((source: string) => {
+        const accountSetting: AccountSetting = accountSource[source];
+        if(!accountSetting) throw new Error(`No ${source} config information!`)
+        return accountConfigPrompt(accountSetting)
+    })
+    .then(({ source, key, config }: { source: string, key: string, config: any}) => {
+        config = filterAccountConfig(config);
+        return addUpdateMdByPrompt(source, config)
+    })
+}
 
 // ======================= add account end ============================
 
@@ -176,21 +217,32 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
 }
 
 export const addAccountStrategy = async (type: string): Promise<any> => {
-    if(type === 'account') {
-        try {
-            const accountSource = await getAccountSource()
-            await addAccountPrompt(accountSource)
-        } catch (err) {
-            throw err
-        }
+    switch (type) {
+        case 'md':
+            try {
+                const { md } = await getAccountSource()
+                await addMdPrompt(md) 
+            } catch (err) {
+                throw err
+            }
+        
+            break;
+        case 'td':
+            try {
+                const { td } = await getAccountSource()
+                await addTdPrompt(td) 
+            } catch (err) {
+                throw err
+            }
+            break;
+        case 'strategy':
+            try {
+                await addUpdateStrategyPrompt()
+            } catch (err) {
+                throw err
+            }
+            break;
     }
-    else if(type === 'strategy') {
-        try {
-            await addUpdateStrategyPrompt()
-        } catch (err) {
-            throw err
-        }
-    } 
 }
 
 function getType(originType: string) {

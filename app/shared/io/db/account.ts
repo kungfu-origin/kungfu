@@ -36,6 +36,10 @@ export const deleteMd = (sourceName: string) => {
     return runInsertUpdateDeleteDB(ACCOUNTS_DB, "DELETE FROM md_config WHERE source_name = ?", sourceName)
 }
 
+export const getExistedMdSources = () => getMdList()
+    .then((mdList: Md[]) => {
+        return mdList.map(m => m.source_name)
+    })
 
 /**
  * 获取账户资金情况

@@ -2,7 +2,7 @@ import { LOG_DIR } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, getLog, dealOrder, dealTrade, dealPos, dealAsset } from '__gUtils/busiUtils';
 import { addFileSync } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail } from '__gUtils/processUtils';
-import { getTdList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
+import { getTdList, getMdList, getAccountOrder, getAccountTrade, getAccountPos, getAccountAssetById } from '__io/db/account';
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
 import { buildTradingDataPipe, buildCashPipe, buildGatewayStatePipe } from '__io/nano/nanoSub';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
@@ -58,21 +58,41 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
 }
 
 export const getAccountsStrategys = async (): Promise<any> => {
-    const getAccounts = getTdList();
+    const getTds = getTdList();
+    const getMds = getMdList();
     const getStrategys = getStrategyList();
-    const accounts = await getAccounts;
+    const tds = await getTds;
+    const mds = await getMds;
     const strategys = await getStrategys;
     return {
-        accounts,
+        mds,
+        tds,
         strategys
     }
 }
 
-export const accountStrategyListStringify = (accounts: Account[], strategys: Strategy[], isTd?: boolean) => {
+
+export const getKungfuTypeFromString = (typeString: string) => {
+    const isTd = typeString.toLocaleLowerCase().indexOf('td')
+    const isMd = typeString.toLocaleLowerCase().indexOf('md')
+    const isStrategy = typeString.toLocaleLowerCase().indexOf('strategy')
+    
+    if(isTd !== -1) return 'td';
+    else if(isMd !== -1) return 'md';
+    else if(isStrategy !== -1) return 'strategy'
+    else return ''
+}
+
+
+export const accountStrategyListStringify = (mds: Md[], tds: Account[], strategys: Strategy[]) => {
     return [
-        ...accounts.map((a: Account): string => parseToString(
-            [colors.cyan(isTd ? 'td' : 'account'), 
-            isTd ? `td_${a.account_id}` : a.account_id],
+        ...mds.map((m: Md): string => parseToString(
+            [colors.yellow('md'), m.source_name],
+            [8, 'auto'],
+            1
+        )),
+        ...tds.map((a: Account): string => parseToString(
+            [colors.cyan('td'), a.account_id],
             [8, 'auto'],
             1
         )),
@@ -111,7 +131,19 @@ export const processStatusObservable = () => {
     })
 }
 
-export const accountListObservable = () => {
+export const mdListObservable = () => {
+    return new Observable(observer => {
+        setTimerPromiseTask(() => {
+            return getMdList()
+                .then((mdList: Md[]) => {
+                    observer.next(mdList)
+                })
+                .catch((err: Error) => logger.error(err))
+        }, 5000)
+    })
+}
+
+export const tdListObservable = () => {
     return new Observable(observer => {
         setTimerPromiseTask(() => {
             return getTdList()
@@ -140,15 +172,16 @@ export const strategyListObservable = () => {
 export const processListObservable = () => combineLatest(
     processStatusObservable(),
     mdTdStateObservable(),
-    accountListObservable(),
+    mdListObservable(),
+    tdListObservable(),
     strategyListObservable(),
     (
         processStatus: StringToProcessStatusDetail, 
         mdTdState: StringToMdTdState, 
+        mdList: Md[],
         accountList: Account[], 
         strategyList: Strategy[]
     ) => {
-        const mdList = accountList.filter((a: Account) => !!a.receive_md)
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
             a[mdProcessId] = {
@@ -246,21 +279,6 @@ function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
 
 
 // =============================== logs start ==================================================
-
-const renderColoredProcessName = (processId: string) => {
-    if(processId === 'master' || processId === 'ledger') {
-        return colors.bold.underline.bgMagenta(processId)
-    } 
-    else if(processId.indexOf('td') !== -1) {
-        return colors.bold.underline.cyan(processId)
-    }
-    else if(processId.indexOf('md') !== -1) {
-        return colors.bold.underline.yellow(processId)
-    }
-    else {
-        return colors.bold.underline.blue(processId)
-    }
-}
 
 const dealUpdateTime = (updateTime: string): any => {
     const updateTimeLength = updateTime.length;

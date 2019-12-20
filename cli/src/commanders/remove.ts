@@ -8,8 +8,8 @@ const inquirer = require( 'inquirer' );
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 export const removeAccountStrategy = async () => {
-    const { accounts, strategys } = await getAccountsStrategys()
-    const accountStrategyList = accountStrategyListStringify(accounts, strategys)
+    const { mds, tds, strategys } = await getAccountsStrategys()
+    const accountStrategyList = accountStrategyListStringify(mds, tds, strategys)
     let answers = await inquirer.prompt([
         {
             type: 'autocomplete',
@@ -26,7 +26,7 @@ export const removeAccountStrategy = async () => {
     const splits = answers.split(" ");
     const targetType = splits[0].trim();
     const targetId = splits[splits.length - 1].trim();
-    const targetAccount = accounts.filter((a: Account) => a.account_id === targetId)
+    const targetAccount = tds.filter((a: Account) => a.account_id === targetId)
     const type = targetType.indexOf('strategy') !== -1 
         ? 'strategy' 
         : targetType.indexOf('account') !== -1 
@@ -43,7 +43,7 @@ export const removeAccountStrategy = async () => {
     }
     else if(type === 'account') {
         try{
-            await deleteTd(targetAccount[0], accounts)
+            await deleteTd(targetAccount[0])
             console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
         }catch(err){
             console.error(err)
