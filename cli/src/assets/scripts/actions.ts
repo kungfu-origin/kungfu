@@ -63,11 +63,11 @@ export const getAccountsStrategys = async (): Promise<any> => {
     const getStrategys = getStrategyList();
     const tds = await getTds;
     const mds = await getMds;
-    const strategys = await getStrategys;
+    const strategies = await getStrategys;
     return {
         mds,
         tds,
-        strategys
+        strategies
     }
 }
 
@@ -84,7 +84,7 @@ export const getKungfuTypeFromString = (typeString: string) => {
 }
 
 
-export const accountStrategyListStringify = (mds: Md[], tds: Account[], strategys: Strategy[]) => {
+export const accountStrategyListStringify = (mds: Md[], tds: Account[], strategies: Strategy[]) => {
     return [
         ...mds.map((m: Md): string => parseToString(
             [colors.yellow('md'), m.source_name],
@@ -96,7 +96,7 @@ export const accountStrategyListStringify = (mds: Md[], tds: Account[], strategy
             [8, 'auto'],
             1
         )),
-        ...strategys.map((s: Strategy): string => parseToString(
+        ...strategies.map((s: Strategy): string => parseToString(
             [colors.blue('strategy'), 
             s.strategy_id],
             [8, 'auto'],

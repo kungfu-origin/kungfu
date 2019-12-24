@@ -3,7 +3,7 @@ import { parseToString } from '@/assets/scripts/utils';
 const colors = require('colors');
 
 export const listAccountsStrategys = async (): Promise<any> => {
-    const { mds, tds, strategys } = await getAccountsStrategys();
+    const { mds, tds, strategies } = await getAccountsStrategys();
 
     const mdList = mds.map((m: Md): string => {
         return parseToString(
@@ -20,7 +20,7 @@ export const listAccountsStrategys = async (): Promise<any> => {
             1
         )
     })
-    const strategyList = strategys.map((s: Strategy): string => {
+    const strategyList = strategies.map((s: Strategy): string => {
         return parseToString(
             [colors.blue('strategy'), colors.bold(s.strategy_id), s.strategy_path],
             [10, 15, 'auto'],

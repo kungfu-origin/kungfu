@@ -8,8 +8,8 @@ export const monitPrompt = async (list: boolean) => {
 
     if(!list) return monitor();
     
-    const { mds, tds, strategys } = await getAccountsStrategys();
-    const accountStrategyList = accountStrategyListStringify(mds, tds, strategys);
+    const { mds, tds, strategies } = await getAccountsStrategys();
+    const accountStrategyList = accountStrategyListStringify(mds, tds, strategies);
     let answers = await inquirer.prompt([
         {
             type: 'autocomplete',

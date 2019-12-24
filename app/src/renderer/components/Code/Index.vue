@@ -68,8 +68,8 @@ export default {
         //更新strategy
         async updateStrategy(strategyId){
             const t = this;
-            const strategys = await STRATEGY_API.getStrategyById(strategyId)
-            t.strategy = strategys[0]
+            const strategies = await STRATEGY_API.getStrategyById(strategyId)
+            t.strategy = strategies[0]
         }
     }
 

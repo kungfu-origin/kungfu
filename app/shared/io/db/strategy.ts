@@ -60,9 +60,9 @@ export const getStrategyAssetById = (strategyId: string) => {
 
 const getStrategyAddTime = async (strategyId: string): Promise<number | undefined> => {
     //新建与之前重名策略，防止get之前的数据
-    const strategys = await getStrategyById(strategyId)
-    if(!strategys[0]) throw new Error('找不到该策略！');
-    return strategys[0].add_time;
+    const strategies = await getStrategyById(strategyId)
+    if(!strategies[0]) throw new Error('找不到该策略！');
+    return strategies[0].add_time;
 }
 
 /**

@@ -32,28 +32,39 @@ export const selectAccountOrStrategy = async() => {
 }
 
 // ======================= add account start ============================
-const selectSourcePrompt = (accountSource: Sources, existedSource: string[]) => inquirer.prompt([
-    {
-        type: 'autocomplete',
-        name: 'source',
-        message: 'Select one type of source    ',
-        source: async (answersSoFar: any, input = '') => {
-            const availSources = parseSources(accountSource)
-                .filter((s: string) => {
-                    const ifExisted = existedSource
-                        .filter((es: string) => s.toLocaleLowerCase().indexOf(es.toLocaleLowerCase()) === -1).length;
-                    if(ifExisted) return false;
-                    else return true;
-                })
-                .filter((s: string) => s.indexOf(input) !== -1);
-                
-            if(!availSources.length) {
-                console.log('No available sources!')
-            }
-            return availSources
-        }
+
+const getAvailableSources = (accountSource: Sources, existedSource: string[]) => {
+    const availSources = parseSources(accountSource)
+        .filter((s: string) => {
+            const ifExisted = existedSource
+                .filter((es: string) => s.toLocaleLowerCase().indexOf(es.toLocaleLowerCase()) === -1).length;
+            if(ifExisted) return false;
+            else return true;
+        })
+    return availSources;
+}
+
+const selectSourcePrompt = async (accountSource: Sources, existedSource: string[]) => {
+    const availSources =  getAvailableSources(accountSource, existedSource);
+    
+    if(!availSources.length) {
+        console.log('No available sources, all the sources has been used!')
+        process.exit(0)
     }
-])
+
+    return inquirer.prompt([
+        {
+            type: 'autocomplete',
+            name: 'source',
+            message: 'Select one type of source    ',
+            source: async (answersSoFar: any, input = '') => {
+                return availSources
+                    .filter((s: string) => s.indexOf(input) !== -1);
+            }
+        }
+    ])
+    
+} 
 
 export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule?: boolean, accountData?: any ): Promise<any> => {
     const idKey = accountSetting.key;
@@ -330,9 +341,11 @@ async function existedAccountIdValidator(value: any):Promise<any> {
     if (existedIds.indexOf(value) !== -1) return new Error('AccountId has existed!');
 }
 
-function filterAccountConfig(config: NormalObject) {
-    Object.keys(config || {}).map(key => {
-        if(config[key].toString() === 'NaN') {
+export function filterAccountConfig(config: NormalObject) {
+    Object.keys(config || {}).forEach(key => {
+        const str = config[key].toString().trim();
+        if((str === '') || (str === 'NaN')) {
+            config[key] = null
             delete config[key]
         }
     })

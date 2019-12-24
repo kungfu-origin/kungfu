@@ -4,8 +4,9 @@ import './base';
 import { version } from '../package.json';
 import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
+import { updateAccountStrategy } from '@/commanders/update';
+
 // import { removeAccountStrategy } from '@/commanders/remove';
-// import { updateAccountStrategy } from '@/commanders/update';
 // import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { monitPrompt } from '@/components/index';
 // import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
@@ -76,18 +77,18 @@ program
             .finally(() => process.exit(0));
     })
 
-// //update
-// program
-//     .command('update')
-//     .description('update a account or strategy')
-//     .action(() => {
-//         return updateAccountStrategy()
-//             .catch((err: Error) => {
-//                 console.error(err)
-//                 process.exit(1)
-//             })
-//             .finally(() => process.exit(0));
-//     })
+//update
+program
+    .command('update')
+    .description('update a account or strategy')
+    .action(() => {
+        return updateAccountStrategy()
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0));
+    })
 
 // //remove
 // program

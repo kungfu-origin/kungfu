@@ -15,8 +15,11 @@ const dealValidator = (accountConfigItems: AccountSettingItem[]) => {
 export const getAccountSource = async (): Promise<StringToSource> => {
     let tdSources: Sources = {};
     let mdSources: Sources = {};
+    console.log(111)
     try {
+        console.log(222)
         const configs = await getExtensionConfigs();
+        console.log(configs, 333, '---')
         configs.forEach((c: any): void => {
             if(c.type === 'source') {
                 const config: AccountSettingOrigin = c.config;
@@ -53,6 +56,7 @@ export const getAccountSource = async (): Promise<StringToSource> => {
             }
         })
     } catch (err) {
+        console.log(err)
         tdSources = {}
         mdSources = {}
     }
