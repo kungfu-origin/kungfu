@@ -1,6 +1,5 @@
-import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions';
-import { parseToString } from '@/assets/scripts/utils';
-import { deleteTd } from '__io/actions/account';
+import { getAccountsStrategys, accountStrategyListStringify, getKungfuTypeFromString } from '@/assets/scripts/actions';
+import { deleteMd, deleteTd } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';
 
 const colors = require('colors');
@@ -24,31 +23,30 @@ export const removeAccountStrategy = async () => {
     ])
     answers = answers.process;
     const splits = answers.split(" ");
-    const targetType = splits[0].trim();
     const targetId = splits[splits.length - 1].trim();
-    const targetAccount = tds.filter((a: Account) => a.account_id === targetId)
-    const type = targetType.indexOf('strategy') !== -1 
-        ? 'strategy' 
-        : targetType.indexOf('account') !== -1 
-            ? 'account' 
-            : undefined
-            
-    if(type === 'strategy') {
-        try{
-            await deleteStrat(targetId)
-            console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
-        }catch(err){
-            console.error(err)
+    const targetType = splits[0].trim();
+    const type = getKungfuTypeFromString(targetType)
+
+    try {
+        switch (type) {
+            case 'md':
+                const targetMd = mds.filter((m: Md) => m.source_name === targetId)[0] || {}
+                await deleteMd(targetMd)
+                console.success(`Delete ${colors.yellow(type)} ${colors.bold(targetId)}`)
+                break;
+            case 'td':
+                const targetTd = tds.filter((a: Account) => a.account_id === targetId)[0] || {}
+                await deleteTd(targetTd)
+                console.success(`Delete ${colors.cyan(type)} ${colors.bold(targetId)}`)
+                break;
+            case 'strategy':
+                await deleteStrat(targetId)
+                console.success(`Delete ${colors.blue(type)} ${colors.bold(targetId)}`)
+                break;
         }
+    } catch (err) {
+        throw err
     }
-    else if(type === 'account') {
-        try{
-            await deleteTd(targetAccount[0])
-            console.success(`Delete ${targetType} ${colors.bold(targetId)}`)
-        }catch(err){
-            console.error(err)
-        }
-    } 
 
 } 
 

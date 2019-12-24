@@ -227,32 +227,24 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
 }
 
 export const addAccountStrategy = async (type: string): Promise<any> => {
-    switch (type) {
-        case 'md':
-            try {
+    try {
+        switch (type) {
+            case 'md':
                 const { md } = await getAccountSource()
                 await addMdPrompt(md) 
-            } catch (err) {
-                throw err
-            }
-        
-            break;
-        case 'td':
-            try {
+                break;
+            case 'td':
                 const { td } = await getAccountSource()
                 await addTdPrompt(td) 
-            } catch (err) {
-                throw err
-            }
-            break;
-        case 'strategy':
-            try {
+                break;
+            case 'strategy':
                 await addUpdateStrategyPrompt()
-            } catch (err) {
-                throw err
-            }
-            break;
+                break;
+        }
+    } catch (err) {
+        throw err
     }
+    
 }
 
 function getType(originType: string) {

@@ -26,16 +26,20 @@ export const updateAccountStrategy = async () => {
     const targetId = splits[splits.length - 1].trim();
     const type = getKungfuTypeFromString(targetType)
 
-    switch (type) {
-        case 'td':
-            await updateTd(targetId, tds)
-            break;
-        case 'md':
-            await updateMd(targetId, mds)
-            break;
-        case 'strategy':
-            await updateStrategy(targetId, strategies)
-            break;    
+    try {
+        switch (type) {
+            case 'td':
+                await updateTd(targetId, tds)
+                break;
+            case 'md':
+                await updateMd(targetId, mds)
+                break;
+            case 'strategy':
+                await updateStrategy(targetId, strategies)
+                break;    
+        }
+    } catch (err) {
+        throw err
     }
 }
 
@@ -45,11 +49,11 @@ async function updateMd(targetSource: string, mds: Md[]) {
     const { md } = await getAccountSource();
     const accountSetting = md[targetSource];
     const { source, config } = await accountConfigPrompt(accountSetting, true, mdConfig, 'md');
+    
     const configResolve = filterAccountConfig(config)
-
     console.log('Diff: ', configResolve)
 
-    return addUpdateMdByPrompt(
+    return await addUpdateMdByPrompt(
         source, 
         {
         ...mdConfig,
@@ -68,30 +72,21 @@ async function updateTd(targetId: string, tds: Account[]) {
     const { key, config } = await accountConfigPrompt(accountSetting, true, tdConfig);
 
     const configResolve = filterAccountConfig(config)
-
     console.log('Diff: ', configResolve)
 
-    try {
-        await addUpdateTdByPrompt(
-            source, 
-            key, 
-            {
-                ...tdConfig,
-                ...config
-            }, 
-            true
-        )
-    } catch (err) {
-        console.error(err)
-    }
+    return await addUpdateTdByPrompt(
+        source, 
+        key, 
+        {
+            ...tdConfig,
+            ...config
+        }, 
+        true
+    )
 }
 
 async function updateStrategy(targetId: string, strategies: Strategy[]) {
     const targetStrategy = strategies.filter((s: Strategy) => s.strategy_id === targetId)
     const strategyData = targetStrategy[0] || {}
-    try {
-        await addUpdateStrategyPrompt(strategyData, true)
-    } catch (err) {
-        console.error(err)
-    }
+    return await addUpdateStrategyPrompt(strategyData, true)
 }
