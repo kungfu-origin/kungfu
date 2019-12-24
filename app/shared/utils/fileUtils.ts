@@ -41,11 +41,8 @@ interface FileInputData extends FileData {
 
 
 export const listDir = (filePath: string): Promise<any[]> => {
-    console.log(7777)
     return new Promise((resolve, reject) => {
-        console.log(9999)
         fse.readdir(filePath, (err: Error, files: any[]) => {
-            console.log(files, '-------=====')
             if(err) {
                 reject(err)
                 return;

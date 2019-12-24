@@ -63,21 +63,20 @@ const selectSourcePrompt = async (accountSource: Sources, existedSource: string[
             }
         }
     ])
-    
 } 
 
-export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule?: boolean, accountData?: any ): Promise<any> => {
+export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule?: boolean, accountData?: any, type?: string): Promise<any> => {
     const idKey = accountSetting.key;
-    const accountOptions = accountSetting.config;
+    const accountOptions: AccountSettingItem[] = accountSetting.config;
     const source = accountSetting.name;
     const questions = accountOptions
-    .filter((a: AccountSettingItem) => !(updateModule && a.key === idKey))
+    .filter((a: AccountSettingItem) => (type === 'md') || !(updateModule && a.key === idKey))
     .map((a: AccountSettingItem) => paresAccountQuestion({
         idKey,
         configItem: a,
         updateModule,
         accountData
-    }))
+    }, type))
 
     return inquirer.prompt(questions)
         .then((answers: any) => ({
@@ -293,7 +292,7 @@ function renderSelect(configItem: AccountSettingItem) {
     else return ''
 }
 
-function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: { idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }) {
+function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: { idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }, type?: string) {
     const { validator, required, key } = configItem;
     const targetType = getType(configItem.type);
     const existedValue = (accountData || {})[key] || '';
@@ -314,7 +313,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
                 })
 
             //判断是否关键字重复
-            if(idKey === key) {
+            if((idKey === key) && (type !== 'md')) {
                 const existedAccountError = await existedAccountIdValidator(value)
                 if(existedAccountError) hasError = existedAccountError;
             }

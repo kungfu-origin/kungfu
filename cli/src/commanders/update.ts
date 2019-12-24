@@ -28,13 +28,13 @@ export const updateAccountStrategy = async () => {
 
     switch (type) {
         case 'td':
-            updateTd(targetId, tds)
+            await updateTd(targetId, tds)
             break;
         case 'md':
-            updateMd(targetId, mds)
+            await updateMd(targetId, mds)
             break;
         case 'strategy':
-            updateStrategy(targetId, strategies)
+            await updateStrategy(targetId, strategies)
             break;    
     }
 }
@@ -44,9 +44,19 @@ async function updateMd(targetSource: string, mds: Md[]) {
     const mdConfig = JSON.parse(targetMd.config || "{}")
     const { md } = await getAccountSource();
     const accountSetting = md[targetSource];
-    const { source, config } = await accountConfigPrompt(accountSetting, true, mdConfig);
+    const { source, config } = await accountConfigPrompt(accountSetting, true, mdConfig, 'md');
     const configResolve = filterAccountConfig(config)
-    return addUpdateMdByPrompt(source, configResolve)
+
+    console.log('Diff: ', configResolve)
+
+    return addUpdateMdByPrompt(
+        source, 
+        {
+        ...mdConfig,
+        ...configResolve
+        }, 
+        true
+    )
 }
 
 async function updateTd(targetId: string, tds: Account[]) {
@@ -56,7 +66,7 @@ async function updateTd(targetId: string, tds: Account[]) {
     const { td } = await getAccountSource();
     const accountSetting = td[source];
     const { key, config } = await accountConfigPrompt(accountSetting, true, tdConfig);
-    
+
     const configResolve = filterAccountConfig(config)
 
     console.log('Diff: ', configResolve)

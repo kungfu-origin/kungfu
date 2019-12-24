@@ -479,16 +479,8 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 
 
 export const getExtensions = (): Promise<any> => {
-    console.log(5555)
-
-    console.log(EXTENSION_DIR, listDir(EXTENSION_DIR).then((files: string[]) => {
-        console.log(files, 666)
-    }))
-
     return listDir(EXTENSION_DIR)
     .then(async (files: string[]) => {
-        console.log(files, '~~~')
-
         const promises = files.map(fp => {
             fp = path.join(EXTENSION_DIR, fp);
             const stat: any = statSync(fp);
@@ -521,12 +513,8 @@ export const getExtensionPaths = (): Promise<any> => {
 
 export const getExtensionConfigs = async (): Promise<any> => {
     try {
-        console.log(333)
         const packageJSONPaths: string[] = await getExtensionPaths()
-        console.log(444, packageJSONPaths)
         return packageJSONPaths.map((p: string) => {
-            console.log(p)
-
             const packageJSON: any = readJsonSync(p)
             const kungfuConfig: ExtensionJSON = packageJSON[KUNGFU_KEY_IN_PACKAGEJSON];
             if(kungfuConfig) {
