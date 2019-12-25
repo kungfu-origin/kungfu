@@ -140,7 +140,6 @@ export default {
                 case MSG_TYPE.portfolio:
                     if(accountId !== currentId) return;
                     if(ledgerCategory !== 0) return;
-                    // console.log('[PNL] sub', tradingData)
                     t.minPnlFromNmsg = Object.freeze(tradingData);     
             }
         })

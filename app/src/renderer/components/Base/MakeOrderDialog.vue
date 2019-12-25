@@ -29,7 +29,7 @@
             ]">
                 <el-select v-model.trim="makeOrderForm.name" @change="handleSelectAccount">
                     <el-option
-                        v-for="account in accountList"
+                        v-for="account in tdList"
                         :key="account.account_id.toAccountId()"
                         :label="account.account_id.toAccountId()"
                         :value="account.account_id">
@@ -305,7 +305,7 @@ export default {
 
         getSourceName(accountId){
             const t = this;
-            const targetAccount = t.accountList.filter(a => a.account_id.indexOf(accountId) !== -1)
+            const targetAccount = t.tdList.filter(a => a.account_id.indexOf(accountId) !== -1)
             if(!targetAccount.length) return ''
             return targetAccount[0].source_name;
         },
