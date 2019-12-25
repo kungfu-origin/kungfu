@@ -10,6 +10,8 @@
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "npm run clean && yarn wsrun --serial --fast-exit build",
     "build-cli": "sh ./build-cli.sh",
+    "env-cli": "npm config set kungfu-core:runtime node",
+    "env-electron": "npm config set kungfu-core:runtime electron",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {
