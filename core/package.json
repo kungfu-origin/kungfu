@@ -1,7 +1,7 @@
 {
   "name": "kungfu-core",
   "author": "taurus.ai",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "KungFu Trader Core",
   "license": "Apache-2.0",
   "main": "node/index.js",
@@ -14,7 +14,7 @@
     "electron": "4.2.11"
   },
   "scripts": {
-    "install-deps": "pipenv --three install",
+    "install-deps": "cross-env PIPENV_TIMEOUT=600 pipenv --three install",
     "build": "yarn run build:cpp && yarn run build:pyi && yarn run freeze",
     "build:cpp": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron make",
     "build:pyi": "cd python && rimraf dist/* && cross-var pipenv run python setup.py clean --all && cross-var pipenv run python setup.py bdist_wheel",
