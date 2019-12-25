@@ -31,7 +31,7 @@ dist/
 .clang-format
 .project
 package-lock.json
-*.lock
+Pipfile.lock
 
 # OS files
 .DS_Store
