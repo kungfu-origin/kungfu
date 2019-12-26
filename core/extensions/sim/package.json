@@ -3,7 +3,7 @@
 		"type": "source",
 		"config": {
 			"name": "sim",
-			"type": "stock",
+			"type": "sim",
 			"key": "user_id",
 			"td_config": [
 				{
