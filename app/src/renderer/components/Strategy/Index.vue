@@ -66,7 +66,7 @@ import Pnl from '../Base/pnl/Index';
 import { mapState, mapGetters } from 'vuex';
 import * as STRATEGY_API from '__io/db/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
-import { buildCashPipe, buildTradingDataPipe } from '__io/nano/nanoSub';
+import { buildTradingDataPipe } from '__io/nano/nanoSub';
 
 
 export default {
