@@ -19,7 +19,7 @@ namespace kungfu {
         namespace log {
             spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);
 
-            const std::string& setup_log(data::location_ptr location, const std::string &name);
+            const std::string& setup_log(const data::location_ptr& location, const std::string &name);
 
             std::shared_ptr<spdlog::logger> get_main_logger();
 

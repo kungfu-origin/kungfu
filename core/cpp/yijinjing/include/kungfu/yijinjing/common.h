@@ -174,6 +174,18 @@ namespace kungfu
                 }
             }
 
+            inline category get_category_by_name(const std::string& name)
+            {
+                if(name == "md")
+                    return category::MD;
+                else if(name == "td")
+                    return category::TD;
+                else if(name == "strategy")
+                    return category::STRATEGY;
+                else
+                    return category::SYSTEM;
+            }
+
             enum class layout : int8_t
             {
                 JOURNAL,

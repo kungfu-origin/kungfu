@@ -33,6 +33,7 @@ namespace kungfu
                 log::setup_log(io_device_->get_home(), io_device_->get_home()->name);
             }
             os::handle_os_signals(this);
+            io_device::init_sqlite();
             reader_ = io_device_->open_reader_to_subscribe();
         }
 

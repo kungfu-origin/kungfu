@@ -14,6 +14,9 @@ import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
+const yjj = require('kungfu-core').yjj;
+const io = yjj.io_device(yjj.locator(KF_HOME), "live", "system", "master", "master");
+console.log("reader:", io.openReader().toString())
 
 const CFonts = require('cfonts');
 const colors = require('colors');

@@ -77,6 +77,8 @@ namespace kungfu
 
             [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;
 
+            static void init_sqlite();
+
         protected:
             data::location_ptr home_;
             data::location_ptr db_home_;

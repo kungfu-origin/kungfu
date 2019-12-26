@@ -218,6 +218,7 @@ namespace kungfu
         {
             if (SQLITE_OK != rc)
             {
+                SPDLOG_ERROR("sqlite3 rc {}", rc);
                 throw yijinjing_error(error_tip);
             }
         }
@@ -236,16 +237,8 @@ namespace kungfu
             url_factory_ = std::make_shared<ipc_url_factory>();
 
             auto index_db_file = home_->locator->layout_file(db_home_, layout::SQLITE, "index");
-            int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, NULL);
-            handle_sql_error(rc, "failed to config sqlite3 log");
 
-            rc = sqlite3_config(SQLITE_CONFIG_MMAP_SIZE, 1048577);
-            handle_sql_error(rc, "failed to config sqlite3");
-
-            sqlite3_initialize();
-            SPDLOG_INFO("sqlite initialized");
-
-            rc = sqlite3_open_v2(index_db_file.c_str(), &db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+            int rc = sqlite3_open_v2(index_db_file.c_str(), &db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
             handle_sql_error(rc, "failed to open index db");
 
             exec_sql(
@@ -367,6 +360,18 @@ and json_extract(session.data, '$.end_time') <= ?4;
                 SPDLOG_ERROR("error occurred when query sessions: {}", sqlite3_errmsg(db_));
             }
             return result;
+        }
+
+        void io_device::init_sqlite()
+        {
+            int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, NULL);
+            handle_sql_error(rc, "failed to config sqlite3 log");
+
+            rc = sqlite3_config(SQLITE_CONFIG_MMAP_SIZE, 1048577);
+            handle_sql_error(rc, "failed to config sqlite3");
+
+            sqlite3_initialize();
+            SPDLOG_INFO("sqlite initialized");
         }
 
         io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :

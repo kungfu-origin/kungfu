@@ -3,11 +3,14 @@ import { BASE_DB_DIR, DEFUALT_DB_DIR, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF
 import { logger } from '__gUtils/logUtils'
 import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 
-const path = require('path')
+const path = require('path');
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
+const yjj = require('kungfu-core').yjj;
 
 export const initDB = () => {
+    yjj._bindings.init_sqlite();
+
     //检测是否有数据库目录，没有则创建
     if(!existsSync(BASE_DB_DIR)) addFileSync('', BASE_DB_DIR, 'folder');
 
@@ -19,9 +22,9 @@ export const initDB = () => {
             tables.forEach((table) => {
                 db.run(table.sql)
             })
-        })	
+        });
         db.close();
-    })
+    });
 
     //commission.db
     fse.copy(
@@ -30,7 +33,7 @@ export const initDB = () => {
     )
     .catch(err => {
         if(err) logger.error(err);
-    })
+    });
 
     //holidays.db
     fse.copy(
@@ -40,19 +43,19 @@ export const initDB = () => {
     .catch(err => {
         if(err) logger.error(err);
     })
-}
+};
 
 
 export const initConfig = () => {
     if(!existsSync(KF_CONFIG_PATH)) {
-        addFileSync('', KF_CONFIG_PATH, 'file')
+        addFileSync('', KF_CONFIG_PATH, 'file');
         const kfConfigJSON = readJsonSync(KF_CONFIG_DEFAULT_PATH);
         outputJsonSync(KF_CONFIG_PATH, kfConfigJSON)
     }
 
     if(!existsSync(KF_TARADING_CONFIG_PATH)) {
-        addFileSync('', KF_TARADING_CONFIG_PATH, 'file')
+        addFileSync('', KF_TARADING_CONFIG_PATH, 'file');
         const kfTradingConfigJSON = readJsonSync(KF_TARADING_CONFIG_DEFAULT_PATH);
         outputJsonSync(KF_TARADING_CONFIG_PATH, kfTradingConfigJSON)
     }
-}
+};

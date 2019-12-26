@@ -25,7 +25,7 @@ namespace kungfu {
                 return spdlog::default_logger();
             }
 
-            const std::string& setup_log(data::location_ptr location, const std::string &name) {
+            const std::string& setup_log(const data::location_ptr& location, const std::string &name) {
                 if (spdlog::default_logger()->name().empty()) {
                     auto locator = location->locator;
                     std::string log_file = locator->layout_file(location, data::layout::LOG, name);
