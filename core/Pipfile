@@ -1,10 +1,10 @@
 [[source]]
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-verify_ssl = true
+url = "http://mirrors.aliyun.com/pypi/simple/"
+verify_ssl = false
 name = "pypi"
 
 [packages]
-pywin32 = {version = "==225",sys_platform = "== 'win32'"}
+pywin32 = {version = "==227",sys_platform = "== 'win32'"}
 pyinstaller = "==3.5"
 sqlalchemy = "==1.3.8"
 psutil = "==5.6.2"
