@@ -71,6 +71,12 @@ export const sourceTypeConfig: SourceType = {
     'option': {
         name: isEnglish ? 'option' : '期权',
         kfId: 3,
+        color: ''
+    },
+
+    'sim': {
+        name: isEnglish ? 'simulation' : '模拟',
+        kfId: 4,
         color: 'success'
     }
 }
