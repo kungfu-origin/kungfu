@@ -34,7 +34,7 @@
 		<p class="setting-type-item__header">{{setting.name}}</p>
 		<ul class="setting-type-item__content">
 			<li
-			class="setting-item"
+			class="setting-item global-setting-item"
 			v-for="item in Object.values(setting.config || {})"
 			:key="item.key"
 			:id="`setting-item-${setting.key}-${item.key}`"
@@ -205,7 +205,7 @@ import { mapGetters, mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 import { LOG_DIR, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
-import { getExtensionConfigs, getExtensions } from "__gUtils/busiUtils";
+import { getExtensionConfigs, getExtensions, debounce, throttle } from "__gUtils/busiUtils";
 import { getSystemConfig } from "__gConfig/systemConfig";
 import { getSystemTradingConfig } from "__gConfig/systemTradingConfig";
 import * as processUtils from "__gUtils/processUtils";
@@ -273,6 +273,21 @@ async beforeMount() {
 
 	//获取
 	t.tables.commission = await getFeeSettingData();
+},
+
+mounted() {
+	const t = this;
+	//设置高亮
+	const firstKeyOfSystemConfig = Object.keys(t.settingConfig.system.config || {})[0] || ''
+	t.activeSettingItem = `system-${firstKeyOfSystemConfig}`
+
+	//滚动
+	t.$nextTick()
+	.then(() => {
+		const $settingContent = document.querySelectorAll('.setting-content')[0]
+		$settingContent.addEventListener('scroll', throttle(t.setActiveMenu))	
+	})
+
 },
 
 computed: {
@@ -358,6 +373,21 @@ methods: {
 	handleRemoveRow(target, index) {
 		const t = this;
 		t.tables[target].splice(index, 1);
+	},
+
+	setActiveMenu() {
+		const t = this;
+		const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
+		const visibleItems = $settingItems.filter(settingItem => {
+			const visibleData = settingItem.getBoundingClientRect();
+			const top = visibleData.top - 150;
+			if(top > 0) return true;
+			else return false;
+		})
+		if(visibleItems[0]) {
+			const idVal = visibleItems[0].getAttribute('id')
+			t.activeSettingItem = idVal.split('setting-item-')[1]
+		}
 	},
 
 	getSourceListOptions() {

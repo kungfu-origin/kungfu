@@ -1,5 +1,5 @@
 export const getSystemConfig = (pythonVersion: string) => ({
-    "python": {
+    "strategy": {
         "key": "strategy",
         "name": "策略",
         "config": [

@@ -139,6 +139,21 @@ export const debounce = (fn: Function, interval = 300): Function => {
     }
 }
 
+export const throttle = (fn: Function, interval = 300): Function => {
+    let timer: NodeJS.Timer | null;
+    return function(){
+        if(timer) return 
+        //@ts-ignore
+        const t: any = this;
+        const args: any = arguments;
+        timer = setTimeout(() => {
+            fn.apply(t, args);
+            timer && clearTimeout(timer)
+            timer = null
+        }, interval)
+    }
+}
+
 export const throttleInsert = (interval = 300, type = 'push'): Function => {
     let streamList: any = [];
     let timer: NodeJS.Timer | null;
@@ -164,22 +179,6 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
         })
     }
 }
-
-export const throttle = (fn: Function, interval = 300): Function => {
-    let timer: NodeJS.Timer | null;
-    return function(){
-        if(timer) return 
-        //@ts-ignore
-        const t: any = this;
-        const args: any = arguments;
-        timer = setTimeout(() => {
-            fn.apply(t, args);
-            timer && clearTimeout(timer)
-            timer = null
-        }, interval)
-    }
-}
-
 
 /**
  * 新建窗口
