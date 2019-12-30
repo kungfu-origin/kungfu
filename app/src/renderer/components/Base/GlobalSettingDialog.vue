@@ -380,7 +380,7 @@ methods: {
 		const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
 		const visibleItems = $settingItems.filter(settingItem => {
 			const visibleData = settingItem.getBoundingClientRect();
-			const top = visibleData.top - 150;
+			const top = visibleData.top - 145;
 			if(top > 0) return true;
 			else return false;
 		})
@@ -476,7 +476,7 @@ height: 88%;
 	width: calc(100% - 300px);
 	height: calc(100% - 55px);
 	margin-left: 30px;
-	padding-bottom: 300px;
+	padding-bottom: 150px;
 	box-sizing: border-box;
 	overflow: auto;
 
