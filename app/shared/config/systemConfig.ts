@@ -1,4 +1,17 @@
-{
+export const getSystemConfig = (pythonVersion: string) => ({
+    "python": {
+        "key": "strategy",
+        "name": "策略",
+        "config": [
+            {
+                "key": "python",
+                "name": "使用本地python",
+                "tip": `使用本地python启动策略，需要 pip3 install kungfu*.whl，本地 python3 版本需为 ${pythonVersion}，开启后需重启策略`,
+                "type": "bool"
+            }
+        ]
+    },
+
     "log": {
         "key": "log",
         "name": "日志",
@@ -46,4 +59,4 @@
             }
         ]
     }
-}
+})

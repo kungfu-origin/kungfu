@@ -307,6 +307,8 @@ export default {
             this.$showLog(logPath)
         },
 
+        handleFeeSetting() {},
+
         //获取账户列表
         getTableList() {
             const t = this

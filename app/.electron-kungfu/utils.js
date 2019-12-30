@@ -18,4 +18,18 @@ const getCommitVersion = () => {
   return gitCommitVersion.toString();
 }
 
+
+const getPythonVersion = () => {
+  var pyVersion = "3";
+  try {
+    var pyV = fs.readFileSync(path.join(__dirname, '..', '.pythonVersion'), 'utf-8')
+    pyV = pyV.toLowerCase().split('python')[1].trim();
+    pyVersion = pyV || "3"
+  } catch (err) {
+    console.error(err)
+  }
+  return pyVersion
+}
+
 exports.getCommitVersion = getCommitVersion;
+exports.getPythonVersion = getPythonVersion;

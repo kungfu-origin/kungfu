@@ -186,9 +186,11 @@ function showKungfuInfo() {
 	const electronVersion = packageJSON.devDependencies.electron;
 	const info = `Version: ${version}\n`
 	+ `electron: ${electronVersion} \n`
+	+ `python: ${python_version}\n`
 	+ `platform: ${platform} \n`
-	+ `kfHome: ${KF_HOME} \n`
-	+ `kungfuEngine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \n`
+	+ `kungfu_home: ${KF_HOME} \n`
+	+ `kungfu_engine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \n`
+	+ `kungfu_resources: ${path.resolve(KUNGFU_ENGINE_PATH)} \n`
 	+ `commit: ${git_commit_version}`
 	dialog.showMessageBox({
 		type: 'info',

@@ -100,9 +100,12 @@ let mainConfig = {
   target: 'electron-main'
 }
 
-const { getCommitVersion } = require('./utils');
+const { getCommitVersion, getPythonVersion } = require('./utils');
 const gitCommitVersion = getCommitVersion() || 'latest'
-console.log('-------------', gitCommitVersion, '-------------')
+const pyVersion = getPythonVersion() || '3'
+console.log(gitCommitVersion)
+console.log('python version:', pyVersion)
+
 
 /**
  * Adjust mainConfig for development settings
@@ -111,6 +114,7 @@ if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
+      '__python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"development"'
     }),
     new webpack.DefinePlugin({
@@ -131,6 +135,7 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.DefinePlugin({
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
+      'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"production"',
     })
   )

@@ -161,6 +161,8 @@ let rendererConfig = {
   target: 'electron-renderer'
 }
 
+const { getPythonVersion } = require('./utils');
+const pyVersion = getPythonVersion() || '3'
 
 /**
  * Adjust rendererConfig for development settings
@@ -169,9 +171,8 @@ if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`
-    }),
-    new webpack.DefinePlugin({
+      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
+      'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': JSON.stringify('development')
     }),
   )
@@ -187,6 +188,7 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: false
     }),
     new webpack.DefinePlugin({
+      'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': JSON.stringify('production')
     }),
   )

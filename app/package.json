@@ -17,10 +17,10 @@
   },
   "main": "./dist/app/main.js",
   "engines": {
-    "node": ">=8.0.0 <11.0.0"
+    "node": "10.16.0"
   },
   "scripts": {
-    "install-deps": "electron-builder install-app-deps",
+    "install-deps": "electron-builder install-app-deps && node ./.electron-kungfu/getPyVersion.js",
     "clean": "rimraf ./dist/* ./build/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
@@ -76,7 +76,7 @@
         "from": "../core/python/dist",
         "to": "kungfu-resources/python",
         "filter": [
-          "kungfu-2.0.dev*-py3-none-any.whl"
+          "kungfu-2*-py3-*.whl"
         ]
       },
       {

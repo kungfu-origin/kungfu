@@ -1,6 +1,6 @@
-{
-    "BAR": {
-        "key": "BAR",
+export const getSystemTradingConfig = () => ({
+    "bar": {
+        "key": "bar",
         "name": "BAR",
         "config": [
           {
@@ -45,7 +45,7 @@
         {
           "key": "future",
           "name": "期货",
-          "tip": "仅为期权手续费设置，股票手续费会自动读取，无需设置",
+          "tip": "仅为期货手续费设置，股票手续费会自动读取，无需设置",
           "type": "table",
           "target": "commission",
           "unique_key": "row_id",
@@ -95,5 +95,5 @@
         }
       ]
     }
-}
+})
   

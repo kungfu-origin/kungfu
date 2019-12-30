@@ -1,1 +1,1 @@
-{"log":{"level":"-l info"},"code":{"tabSpaceType":"Tabs","tabSpaceSize":4}}
+{"strategy": {"python": false}, "log":{"level":"-l info"},"code":{"tabSpaceType":"Tabs","tabSpaceSize":4}}

@@ -1,4 +1,4 @@
-import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
@@ -86,11 +86,10 @@ const pm2Connect = (): Promise<void> => {
             if(process.env.NODE_ENV !== 'production') noDaemon = false;
             pm2.connect(noDaemon, (err: Error): void => {
                 if(err) {
-                    process.exit(2);
                     logger.error('[pm2Connect]', err);
                     pm2.disconnect();
                     reject(err);
-                    return;
+                    process.exit(2);
                 }
                 resolve()
             })
@@ -166,15 +165,17 @@ export const describeProcess = (name: string): Promise<any> => {
     })
 }
 
-export const startProcess = async (options: any, no_ext = false): Promise<object> => {
+export const startProcess = async (options: any, no_ext=false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const logLevel: string = ((kfConfig.log || {}).level) || '';
+    const args = [logLevel, options.args].join(' ')
+
     options = {
         ...options,
-        "args": [logLevel, options.args].join(' '),
-        "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
-        "script": `kfc${extensionName}`,
+        "args":             args,
+        "script":           `kfc${extensionName}`,
+        "cwd":              path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "log_type": "json",
         "out_file": buildProcessLogPath(options.name),
         "err_file": buildProcessLogPath(options.name),
@@ -185,13 +186,56 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         "watch": false,
         "force": options.force === undefined ? true : options.force,
         "exec_mode" : "fork",
-        "interpreterArgs": ["~harmony"],
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
         }
     };
 
-    if(no_ext) options['env']['KF_NO_EXT'] = 'on'
+    if(no_ext) options['env']['KF_NO_EXT'] = 'on';
+
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try{
+                pm2.start(options, (err: Error, apps: object): void => { 
+                    if(err) {
+                        logger.error('[startProcess]', JSON.stringify(options), err)
+                        reject(err);
+                        return;
+                    };
+                    resolve(apps);
+                })
+            }catch(err){
+                logger.error('[TC startProcess]', JSON.stringify(options), err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
+    })
+}
+
+export const startStrategyProcess = async (name: string, strategyPath: string): Promise<object> => {
+    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
+    const args = [logLevel, 'strategy', '-n', name, '-p'].join(' ')
+
+    const options = {
+        "name": name,
+        "interpreter":      'kfc',
+        "interpreterArgs":  args,
+        "script":           strategyPath,
+        "log_type": "json",
+        "out_file": buildProcessLogPath(name),
+        "err_file": buildProcessLogPath(name),
+        "merge_logs": true,
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "autorestart": false,
+        "max_restarts": 1,
+        "watch": false,
+        "exec_mode" : "fork",
+        "env": {
+            "KF_HOME": dealSpaceInPath(KF_HOME),
+        }
+    };
+
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{
@@ -263,10 +307,18 @@ export const startTd = (accountId: string): Promise<void> => {
 //启动strategy
 export const startStrategy = (strategyId: string, strategyPath: string): Promise<void> => {
     strategyPath = dealSpaceInPath(strategyPath)
-    return startProcess({
-        "name": strategyId,
-        "args": `strategy -n "${strategyId}" -p "${strategyPath}"`,
-    }).catch(err => logger.error('[startStrategy]', err))
+    const kfSystemConfig:any = readJsonSync(KF_CONFIG_PATH)
+    const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
+
+    if (ifLocalPython) {
+        return startStrategyProcess(strategyId, strategyPath)
+            .catch(err => logger.error('[startStrategy local]', err))
+    } else {
+        return startProcess({
+            "name": strategyId,
+            "args": `strategy -n "${strategyId}" -p "${strategyPath}"`,
+        }, false).catch(err => logger.error('[startStrategy]', err))
+    }
 }
 
 export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
