@@ -150,7 +150,7 @@ namespace kungfu::node
 
     Napi::Value IODevice::OpenReader(const Napi::CallbackInfo &info)
     {
-        return Reader::NewInstance();
+        return Reader::NewInstance(info.This());
     }
 
     location_ptr IODevice::GetLocation(const Napi::CallbackInfo &info)

@@ -16,6 +16,7 @@ namespace kungfu::node
     Napi::Object InitAll(Napi::Env env, Napi::Object exports)
     {
         exports.Set(Napi::String::New(env, "init_sqlite"), Napi::Function::New(env,InitSqlite));
+        Frame::Init(env, exports);
         Reader::Init(env, exports);
         Locator::Init(env, exports);
         IODevice::Init(env, exports);

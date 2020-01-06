@@ -31,6 +31,6 @@ exports.locator = function(home) {
     });
 };
 
-exports.io_device = function(home, mode, category, group, name) {
-    return new bindings.IODevice(mode, category, group, name, home);
+exports.io_device = function(mode, category, group, name, locator) {
+    return new bindings.IODevice(mode, category, group, name, locator);
 };
