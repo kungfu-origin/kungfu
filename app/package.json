@@ -17,7 +17,7 @@
   },
   "main": "./dist/app/main.js",
   "engines": {
-    "node": "10.16.0"
+    "node": ">=10.16.0 <11.0.0"
   },
   "scripts": {
     "install-deps": "electron-builder install-app-deps && node ./.electron-kungfu/getPyVersion.js",
