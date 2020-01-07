@@ -137,7 +137,7 @@ const addMdPrompt = (accountSource: Sources) => {
     .then((source: string) => {
         const accountSetting: AccountSetting = accountSource[source];
         if(!accountSetting) throw new Error(`No ${source} config information!`)
-        return accountConfigPrompt(accountSetting)
+        return accountConfigPrompt(accountSetting, false, null, 'md')
     })
     .then(({ source, key, config }: { source: string, key: string, config: any}) => {
         config = filterAccountConfig(config);
