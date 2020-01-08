@@ -369,13 +369,13 @@ and json_extract(session.data, '$.end_time') <= ?4;
             handle_sql_error(rc, "failed to config sqlite3");
 
             sqlite3_initialize();
-            SPDLOG_INFO("sqlite initialized");
+            SPDLOG_TRACE("sqlite initialized");
         }
 
         void io_device::shutdown_sqlite()
         {
             sqlite3_shutdown();
-            SPDLOG_INFO("sqlite shutdown");
+            SPDLOG_TRACE("sqlite shutdown");
         }
 
         io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :

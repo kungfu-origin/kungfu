@@ -64,7 +64,6 @@ export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {
             "group": "default"
         }
     })
-    // console.log('[REQ DELETE POS]', reqMsg)
     return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, isEnglish ? 'Req delete strategy position failed' : '删除策略持仓失败！') 
 }
 
