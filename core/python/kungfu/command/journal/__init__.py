@@ -23,8 +23,6 @@ def journal(ctx, mode, category, group, name):
     ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'journal', ctx.locator)
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
     pyyjj.setup_log(ctx.journal_util_location, 'journal')
-    pyyjj.init_sqlite()
-    atexit.register(pyyjj.shutdown_sqlite)
 
 
 def pass_ctx_from_parent(ctx):
