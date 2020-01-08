@@ -14,8 +14,8 @@ import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
-const yjj = require('kungfu-core').yjj;
-const io = yjj.io_device("live", "system", "master", "master", yjj.locator(KF_HOME));
+// const yjj = require('kungfu-core').yjj;
+// const io = yjj.io_device("live", "system", "master", "master", yjj.locator(KF_HOME));
 // console.log(io.findSessions());
 // const reader = io.openReader();
 // reader.join("system", "master", "master", "live", 0, BigInt(0));
