@@ -190,6 +190,7 @@ PYBIND11_MODULE(pyyjj, m)
 
     m.def("setup_log", &kungfu::yijinjing::log::setup_log);
     m.def("init_sqlite", &kungfu::yijinjing::io_device::init_sqlite);
+    m.def("shutdown_sqlite", &kungfu::yijinjing::io_device::shutdown_sqlite);
 
     m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
     m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);

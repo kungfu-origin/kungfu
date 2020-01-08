@@ -289,8 +289,6 @@ and json_extract(session.data, '$.end_time') <= ?4;
             sqlite3session_delete(db_session_);
             sqlite3_close_v2(db_);
             SPDLOG_TRACE("index db closed");
-            sqlite3_shutdown();
-            SPDLOG_INFO("sqlite shutdown");
         }
 
         reader_ptr io_device::open_reader_to_subscribe()
@@ -372,6 +370,12 @@ and json_extract(session.data, '$.end_time') <= ?4;
 
             sqlite3_initialize();
             SPDLOG_INFO("sqlite initialized");
+        }
+
+        void io_device::shutdown_sqlite()
+        {
+            sqlite3_shutdown();
+            SPDLOG_INFO("sqlite shutdown");
         }
 
         io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :

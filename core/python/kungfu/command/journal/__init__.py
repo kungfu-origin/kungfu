@@ -1,6 +1,7 @@
 import pyyjj
 import kungfu.yijinjing.journal as kfj
 import click
+import atexit
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
 
@@ -23,6 +24,7 @@ def journal(ctx, mode, category, group, name):
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
     pyyjj.setup_log(ctx.journal_util_location, 'journal')
     pyyjj.init_sqlite()
+    atexit.register(pyyjj.shutdown_sqlite)
 
 
 def pass_ctx_from_parent(ctx):

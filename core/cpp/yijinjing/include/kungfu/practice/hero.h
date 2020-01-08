@@ -20,8 +20,7 @@ namespace kungfu
         public:
             explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
-            virtual ~hero()
-            {}
+            virtual ~hero();
 
             virtual void on_notify()
             {}

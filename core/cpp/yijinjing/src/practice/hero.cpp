@@ -37,6 +37,11 @@ namespace kungfu
             reader_ = io_device_->open_reader_to_subscribe();
         }
 
+        hero::~hero()
+        {
+            io_device::shutdown_sqlite();
+        }
+
         bool hero::has_location(uint32_t hash)
         {
             return locations_.find(hash) != locations_.end();

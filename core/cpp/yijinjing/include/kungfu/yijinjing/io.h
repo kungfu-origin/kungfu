@@ -79,6 +79,8 @@ namespace kungfu
 
             static void init_sqlite();
 
+            static void shutdown_sqlite();
+
         protected:
             data::location_ptr home_;
             data::location_ptr db_home_;
