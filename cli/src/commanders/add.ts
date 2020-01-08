@@ -34,19 +34,18 @@ export const selectAccountOrStrategy = async() => {
 // ======================= add account start ============================
 
 const getAvailableSources = (accountSource: Sources, existedSource: string[]) => {
+    // 需要过滤含有 existedSource 的柜台
+    existedSource.forEach((es: string) => {
+        if(accountSource[es] !== undefined) {
+            delete accountSource[es]
+        }
+    })
     const availSources = parseSources(accountSource)
-        .filter((s: string) => {
-            const ifExisted = existedSource
-                .filter((es: string) => s.toLocaleLowerCase().indexOf(es.toLocaleLowerCase()) === -1).length;
-            if(ifExisted) return false;
-            else return true;
-        })
     return availSources;
 }
 
 const selectSourcePrompt = async (accountSource: Sources, existedSource: string[]) => {
     const availSources =  getAvailableSources(accountSource, existedSource);
-    
     if(!availSources.length) {
         console.log('No available sources, all the sources has been used!')
         process.exit(0)
