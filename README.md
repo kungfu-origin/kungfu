@@ -64,6 +64,15 @@ npm install -g yarn electron-builder
 pip install pipenv
 ```
 
+安装过程中如果遇到 Python 崩溃的问题，可能是由于 libssl 版本不兼容的问题，请尝试参照以下[方法](https://forums.developer.apple.com/thread/119429)：
+
+```
+brew update & brew upgrade & brew install openssl
+cd /usr/local/lib
+sudo ln -s /usr/local/Cellar/openssl/1.0.2s/lib/libssl.1.0.0.dylib libssl.dylib
+sudo ln -s /usr/local/Cellar/openssl/1.0.2s/lib/libcrypto.1.0.0.dylib libcrypto.dylib
+```
+
 #### Windows
 
 开发组在 Visual Studio 2017 15.9.14 环境下进行工作，安装时需要勾选 VC140（Visual Studio 2015) toolset。
