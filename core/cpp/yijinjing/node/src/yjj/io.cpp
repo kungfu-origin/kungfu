@@ -23,7 +23,7 @@ namespace kungfu::node
             Napi::TypeError::New(env, "Object expected").ThrowAsJavaScriptException();
             return;
         }
-        locator_ = Napi::Reference<Napi::Object>::New(info[0].As<Napi::Object>());
+        locator_ = Napi::Reference<Napi::Object>::New(info[0].As<Napi::Object>(), 1);
     }
 
     bool Locator::has_env(const std::string &name) const
@@ -126,7 +126,7 @@ namespace kungfu::node
 
     Napi::FunctionReference IODevice::constructor;
 
-    IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device_client(GetLocation(info), false)
+    IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true, false)
     {
         Napi::Env env = info.Env();
         Napi::HandleScope scope(env);

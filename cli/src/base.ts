@@ -7,8 +7,6 @@ declare global {
     }
 }
 
-export {}
-
 console.success = (log: string) => {
     console.log(`${colors.green('SUCCESS')} ${log}`)
 }
@@ -22,7 +20,7 @@ if (process.env.NODE_ENV === 'production') {
     process.resourcesPath =  path.join(path.dirname(process.execPath), '..').replace(/\\/g, '\\\\')
 }
 
-const { initDB, initConfig } = require('__app/src/main/base')
+export const { app, initDB, initConfig } = require('__app/src/main/base')
 
 initConfig();
 initDB();

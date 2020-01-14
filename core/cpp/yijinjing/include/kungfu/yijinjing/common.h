@@ -47,23 +47,23 @@ namespace kungfu
 
             virtual ~event() = default;
 
-            virtual int64_t gen_time() const = 0;
+            [[nodiscard]] virtual int64_t gen_time() const = 0;
 
-            virtual int64_t trigger_time() const = 0;
+            [[nodiscard]] virtual int64_t trigger_time() const = 0;
 
-            virtual int32_t msg_type() const = 0;
+            [[nodiscard]] virtual int32_t msg_type() const = 0;
 
-            virtual uint32_t source() const = 0;
+            [[nodiscard]] virtual uint32_t source() const = 0;
 
-            virtual uint32_t dest() const = 0;
+            [[nodiscard]] virtual uint32_t dest() const = 0;
 
-            virtual uint32_t data_length() const = 0;
+            [[nodiscard]] virtual uint32_t data_length() const = 0;
 
-            virtual const char *data_as_bytes() const = 0;
+            [[nodiscard]] virtual const char *data_as_bytes() const = 0;
 
-            virtual std::string data_as_string() const = 0;
+            [[nodiscard]] virtual std::string data_as_string() const = 0;
 
-            virtual std::string to_string() const = 0;
+            [[nodiscard]] virtual std::string to_string() const = 0;
 
             /**
              * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
@@ -135,15 +135,15 @@ namespace kungfu
                 }
             }
 
-            inline mode get_mode_by_name(const std::string& name)
+            inline mode get_mode_by_name(const std::string &name)
             {
-                if(name == "live")
+                if (name == "live")
                     return mode::LIVE;
-                else if(name == "data")
+                else if (name == "data")
                     return mode::DATA;
-                else if(name == "replay")
+                else if (name == "replay")
                     return mode::REPLAY;
-                else if(name == "backtest")
+                else if (name == "backtest")
                     return mode::BACKTEST;
                 else
                     return mode::LIVE;
@@ -174,13 +174,13 @@ namespace kungfu
                 }
             }
 
-            inline category get_category_by_name(const std::string& name)
+            inline category get_category_by_name(const std::string &name)
             {
-                if(name == "md")
+                if (name == "md")
                     return category::MD;
-                else if(name == "td")
+                else if (name == "td")
                     return category::TD;
-                else if(name == "strategy")
+                else if (name == "strategy")
                     return category::STRATEGY;
                 else
                     return category::SYSTEM;
@@ -196,7 +196,7 @@ namespace kungfu
 
             inline std::string get_layout_name(layout l)
             {
-                switch(l)
+                switch (l)
                 {
                     case layout::JOURNAL:
                         return "journal";
@@ -234,7 +234,9 @@ namespace kungfu
 
                 [[nodiscard]] virtual std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
 
-                [[nodiscard]] virtual std::vector<location_ptr> list_locations(const std::string &category = "*", const std::string &group = "*", const std::string &name = "*", const std::string &mode = "*") const = 0;
+                [[nodiscard]] virtual std::vector<location_ptr>
+                list_locations(const std::string &category = "*", const std::string &group = "*", const std::string &name = "*",
+                               const std::string &mode = "*") const = 0;
 
                 [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(location_ptr location) const = 0;
             };
@@ -326,6 +328,77 @@ namespace kungfu
         inline auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
         {
             return subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...);
+        }
+
+        template<class T, class Observable, class Subject>
+        struct steppable : public operator_base<T>
+        {
+            typedef decay_t<Observable> source_type;
+            typedef decay_t<Subject> subject_type;
+
+            struct steppable_state : public std::enable_shared_from_this<steppable_state>
+            {
+                steppable_state(source_type o, subject_type sub)
+                        : source(std::move(o)), subject_value(std::move(sub))
+                {
+                }
+
+                source_type source;
+                subject_type subject_value;
+                rxu::detail::maybe<typename composite_subscription::weak_subscription> connection;
+            };
+
+            std::shared_ptr<steppable_state> state;
+
+            steppable(source_type o, subject_type sub) : state(std::make_shared<steppable_state>(std::move(o), std::move(sub)))
+            {}
+
+            template<class Subscriber>
+            void on_subscribe(Subscriber &&o) const
+            {
+                state->subject_value.get_observable().subscribe(std::forward<Subscriber>(o));
+            }
+
+            void on_connect(composite_subscription cs) const
+            {
+                auto destination = state->subject_value.get_subscriber();
+                if (state->connection.empty())
+                {
+
+                    // the lifetime of each connect is nested in the subject lifetime
+                    state->connection.reset(destination.add(cs));
+
+                    auto localState = state;
+
+                    // when the connection is finished it should shutdown the connection
+                    cs.add(
+                            [destination, localState]()
+                            {
+                                if (!localState->connection.empty())
+                                {
+                                    destination.remove(localState->connection.get());
+                                    localState->connection.reset();
+                                }
+                            });
+                }
+                // use cs not destination for lifetime of subscribe.
+                state->source.subscribe(cs, destination);
+            }
+        };
+
+        template<
+                class Observable = rx::observable <yijinjing::event_ptr>,
+                class SourceValue = rx::util::value_type_t <Observable>,
+                class Subject = rx::subjects::subject <SourceValue>,
+                class Steppable = rx::steppable <SourceValue, rx::util::decay_t<Observable>, Subject>,
+                class Result = rx::connectable_observable <SourceValue, Steppable>
+        >
+        std::function<Result(Observable)> holdon()
+        {
+            return [&](Observable ob)
+            {
+                return Result(Steppable(ob, Subject(rx::composite_subscription())));
+            };
         }
     }
 }

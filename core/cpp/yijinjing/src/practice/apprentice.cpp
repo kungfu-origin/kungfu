@@ -139,7 +139,13 @@ namespace kungfu
                   },
                   [&](std::exception_ptr e)
                   {
-                      SPDLOG_ERROR("Register failed");
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const std::exception &ex)
+                      {
+                          SPDLOG_ERROR("Register failed: {}", ex.what());
+                          hero::signal_stop();
+                      }
                   });
             } else if (get_io_device()->get_home()->mode == mode::REPLAY)
             {

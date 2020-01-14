@@ -39,7 +39,7 @@ namespace kungfu
         {
         public:
 
-            io_device(data::location_ptr home, bool low_latency, bool lazy);
+            io_device(data::location_ptr home, bool low_latency, bool lazy, bool unique = true);
 
             virtual ~io_device();
 
@@ -87,6 +87,7 @@ namespace kungfu
             data::location_ptr live_home_;
             const bool low_latency_;
             const bool lazy_;
+            const bool unique_;
             nanomsg::url_factory_ptr url_factory_;
             publisher_ptr publisher_;
             observer_ptr observer_;

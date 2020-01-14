@@ -28,10 +28,6 @@ namespace kungfu
         hero::hero(yijinjing::io_device_with_reply_ptr io_device) :
                 io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
         {
-            if (spdlog::default_logger()->name().empty())
-            {
-                log::setup_log(io_device_->get_home(), io_device_->get_home()->name);
-            }
             os::handle_os_signals(this);
             reader_ = io_device_->open_reader_to_subscribe();
         }
@@ -86,16 +82,15 @@ namespace kungfu
             return writers_[dest_id];
         }
 
-        void hero::run()
+        void hero::setup()
         {
-            SPDLOG_INFO("{} [{:08x}] running", get_home_uname(), get_home_uid());
-            SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
-
             events_ = observable<>::create<event_ptr>(
                     [&, this](subscriber<event_ptr> sb)
                     {
                         delegate_produce(this, sb);
-                    }) | on_error_resume_next(
+                    }) | holdon();
+
+            events_ | on_error_resume_next(
                     [&](std::exception_ptr e) -> observable<event_ptr>
                     {
                         SPDLOG_ERROR("on error resume next");
@@ -124,12 +119,25 @@ namespace kungfu
                             SPDLOG_ERROR("Unexpected exception: {}", ex.what());
                             return observable<>::error<event_ptr>(ex);
                         }
-                    }) | publish();
+                    });
 
             react();
+            live_ = true;
+        }
 
-            events_.connect();
+        void hero::step()
+        {
+            continual_ = false;
+            events_.connect(cs_);
+        }
 
+        void hero::run()
+        {
+            SPDLOG_INFO("{} [{:08x}] running", get_home_uname(), get_home_uid());
+            SPDLOG_INFO("from {} until {}", time::strftime(begin_time_), end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
+            setup();
+            continual_ = true;
+            events_.connect(cs_);
             on_exit();
             SPDLOG_INFO("{} finished", get_home_uname());
         }
@@ -233,15 +241,19 @@ namespace kungfu
         {
             try
             {
-                while (live_)
+                do
                 {
                     live_ = produce_one(sb) && live_;
-                }
+                } while (continual_ and live_);
             } catch (...)
             {
+                live_ = false;
                 sb.on_error(std::current_exception());
             }
-            sb.on_completed();
+            if (not live_)
+            {
+                sb.on_completed();
+            }
         }
 
         bool hero::produce_one(const rx::subscriber<yijinjing::event_ptr> &sb)

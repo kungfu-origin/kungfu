@@ -1,5 +1,4 @@
-
-import './base';
+import {app} from './base';
 //@ts-ignore
 import { version } from '../package.json';
 import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
@@ -14,16 +13,28 @@ import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 
+// app.setup();
+// setInterval(() => {
+//     if (app.isLive()) {
+//         app.step();
+//     } else {
+//         process.exit();
+//     }
+// }, 1000);
+
 // const yjj = require('kungfu-core').yjj;
-// const io = yjj.io_device("live", "system", "master", "master", yjj.locator(KF_HOME));
-// console.log(io.findSessions());
-// const reader = io.openReader();
-// reader.join("system", "master", "master", "live", 0, BigInt(0));
-// while (reader.dataAvailable()) {
-//     const frame = reader.currentFrame();
-//     console.log("", frame.genTime(), " [", frame.source(), "->", frame.dest(), "]: ", frame.dataLength(), ", msg type:", frame.msgType());
-//     reader.next();
-// }
+// const locator = yjj.locator(KF_HOME);
+// (() => {
+//     let io = yjj.io_device("live", "system", "master", "master", locator);
+//     console.log(io.findSessions());
+//     let reader = io.openReader();
+//     reader.join("system", "master", "master", "live", 0, BigInt(0));
+//     while (reader.dataAvailable()) {
+//         const frame = reader.currentFrame();
+//         console.log("", frame.genTime(), " [", frame.source(), "->", frame.dest(), "]: ", frame.dataLength(), ", msg type:", frame.msgType());
+//         reader.next();
+//     }
+// })();
 
 const CFonts = require('cfonts');
 const colors = require('colors');
@@ -40,7 +51,7 @@ if(process.argv.length === 2 || process.argv[2] === '-h') {
         space: true,                // define if the output text should have empty lines on top and on the bottom
         maxLength: '0',             // define how many character can be on one line
     });
-    if( process.argv.length === 2 ) process.exit(0)
+    // if( process.argv.length === 2 ) process.exit(0)
 }
 
 const program = require('commander');

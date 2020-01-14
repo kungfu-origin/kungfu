@@ -24,6 +24,7 @@
 
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/util/os.h>
+#include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/time.h>
 
@@ -229,9 +230,38 @@ namespace kungfu
             handle_sql_error(rc, error_tip);
         }
 
-        io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy) : home_(std::move(home)), low_latency_(low_latency),
-                                                                                                 lazy_(lazy)
+        void io_device::init_sqlite()
         {
+            int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, NULL);
+            handle_sql_error(rc, "failed to config sqlite3 log");
+
+            rc = sqlite3_config(SQLITE_CONFIG_MMAP_SIZE, 1048577);
+            handle_sql_error(rc, "failed to config sqlite3");
+
+            sqlite3_initialize();
+            SPDLOG_TRACE("sqlite initialized");
+        }
+
+        void io_device::shutdown_sqlite()
+        {
+            sqlite3_shutdown();
+            SPDLOG_TRACE("sqlite shutdown");
+        }
+
+        io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy, bool unique) : home_(std::move(home)),
+                                                                                                              low_latency_(low_latency),
+                                                                                                              lazy_(lazy), unique_(unique)
+        {
+            if (spdlog::default_logger()->name().empty())
+            {
+                yijinjing::log::setup_log(home_, home_->name);
+            }
+
+            if (unique_)
+            {
+                init_sqlite();
+            }
+
             db_home_ = location::make(mode::LIVE, category::SYSTEM, "journal", "index", home_->locator);
             live_home_ = location::make(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
             url_factory_ = std::make_shared<ipc_url_factory>();
@@ -289,6 +319,11 @@ and json_extract(session.data, '$.end_time') <= ?4;
             sqlite3session_delete(db_session_);
             sqlite3_close_v2(db_);
             SPDLOG_TRACE("index db closed");
+
+            if (unique_)
+            {
+                shutdown_sqlite();
+            }
         }
 
         reader_ptr io_device::open_reader_to_subscribe()
@@ -358,24 +393,6 @@ and json_extract(session.data, '$.end_time') <= ?4;
                 SPDLOG_ERROR("error occurred when query sessions: {}", sqlite3_errmsg(db_));
             }
             return result;
-        }
-
-        void io_device::init_sqlite()
-        {
-            int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, NULL);
-            handle_sql_error(rc, "failed to config sqlite3 log");
-
-            rc = sqlite3_config(SQLITE_CONFIG_MMAP_SIZE, 1048577);
-            handle_sql_error(rc, "failed to config sqlite3");
-
-            sqlite3_initialize();
-            SPDLOG_TRACE("sqlite initialized");
-        }
-
-        void io_device::shutdown_sqlite()
-        {
-            sqlite3_shutdown();
-            SPDLOG_TRACE("sqlite shutdown");
         }
 
         io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :
@@ -470,7 +487,7 @@ where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$
             std::unordered_map<uint32_t, location_ptr> locations;
             std::unordered_set<uint32_t> master_cmd_uids;
             auto reader = open_reader_to_subscribe();
-            for (const auto& location: home_->locator->list_locations())
+            for (const auto &location: home_->locator->list_locations())
             {
                 SPDLOG_TRACE("investigating location {}", location->uname);
                 locations[location->uid] = location;

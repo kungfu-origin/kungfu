@@ -189,8 +189,6 @@ PYBIND11_MODULE(pyyjj, m)
     m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
     m.def("setup_log", &kungfu::yijinjing::log::setup_log);
-    m.def("init_sqlite", &kungfu::yijinjing::io_device::init_sqlite);
-    m.def("shutdown_sqlite", &kungfu::yijinjing::io_device::shutdown_sqlite);
 
     m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
     m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
@@ -320,7 +318,7 @@ PYBIND11_MODULE(pyyjj, m)
             .def("mark_with_time", &writer::mark_with_time);
 
     py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-    io_device.def(py::init<data::location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)
+    io_device.def(py::init<data::location_ptr, bool, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true, py::arg("unique") = false)
             .def_property_readonly("publisher", &io_device::get_publisher)
             .def_property_readonly("observer", &io_device::get_observer)
             .def_property_readonly("home", &io_device::get_home)

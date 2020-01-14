@@ -8,9 +8,10 @@ const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 const yjj = require('kungfu-core').yjj;
 
-export const initDB = () => {
-    yjj._bindings.init_sqlite();
+export const locator = yjj.locator(KF_HOME);
+export const app = yjj.app("live", "system", "node", "cli", locator);
 
+export const initDB = () => {
     //检测是否有数据库目录，没有则创建
     if(!existsSync(BASE_DB_DIR)) addFileSync('', BASE_DB_DIR, 'folder');
 

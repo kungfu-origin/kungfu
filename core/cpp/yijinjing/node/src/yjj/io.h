@@ -44,7 +44,7 @@ namespace kungfu::node
         static Napi::FunctionReference constructor;
     };
 
-    class IODevice : public Napi::ObjectWrap<IODevice>, public yijinjing::io_device_client
+    class IODevice : public Napi::ObjectWrap<IODevice>, public yijinjing::io_device
     {
     public:
         explicit IODevice(const Napi::CallbackInfo &info);

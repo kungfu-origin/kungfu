@@ -20,8 +20,7 @@ namespace kungfu
         public:
             explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
-            virtual ~hero()
-            {}
+            virtual ~hero() = default;
 
             virtual void on_notify()
             {}
@@ -34,6 +33,10 @@ namespace kungfu
 
             void set_end_time(int64_t end_time)
             { end_time_ = end_time; }
+
+            void setup();
+
+            void step();
 
             void run();
 
@@ -69,11 +72,12 @@ namespace kungfu
 
             yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
 
-            bool has_channel(uint64_t hash) const ;
+            bool has_channel(uint64_t hash) const;
 
-            const yijinjing::msg::data::Channel& get_channel(uint64_t hash) const ;
+            const yijinjing::msg::data::Channel &get_channel(uint64_t hash) const;
 
-            std::unordered_map<uint64_t, yijinjing::msg::data::Channel>& get_channels() { return channels_; }
+            std::unordered_map<uint64_t, yijinjing::msg::data::Channel> &get_channels()
+            { return channels_; }
 
         protected:
             std::unordered_map<uint64_t, yijinjing::msg::data::Channel> channels_;
@@ -84,7 +88,8 @@ namespace kungfu
             int64_t begin_time_;
             int64_t end_time_;
             int64_t now_;
-            rx::connectable_observable<yijinjing::event_ptr> events_;
+            rx::connectable_observable <yijinjing::event_ptr> events_;
+            rx::composite_subscription cs_;
 
             virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
@@ -100,17 +105,18 @@ namespace kungfu
 
             void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub);
 
-            void produce(const rx::subscriber<yijinjing::event_ptr> &sb);
+            void produce(const rx::subscriber <yijinjing::event_ptr> &sb);
 
-            virtual bool produce_one(const rx::subscriber<yijinjing::event_ptr> &sb);
+            virtual bool produce_one(const rx::subscriber <yijinjing::event_ptr> &sb);
 
             virtual void react() = 0;
 
         private:
             yijinjing::io_device_with_reply_ptr io_device_;
+            volatile bool continual_ = true;
             volatile bool live_ = true;
 
-            static void delegate_produce(hero *instance, const rx::subscriber<yijinjing::event_ptr> &sb);
+            static void delegate_produce(hero *instance, const rx::subscriber <yijinjing::event_ptr> &sb);
         };
     }
 }

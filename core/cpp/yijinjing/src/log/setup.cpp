@@ -27,15 +27,22 @@ namespace kungfu {
 
             const std::string& setup_log(const data::location_ptr& location, const std::string &name) {
                 if (spdlog::default_logger()->name().empty()) {
-                    auto locator = location->locator;
-                    std::string log_file = locator->layout_file(location, data::layout::LOG, name);
-
-                    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+                    std::shared_ptr<spdlog::logger> logger;
+                    std::string log_file = location->locator->layout_file(location, data::layout::LOG, name);
                     auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_file, 0, 0);
-                    spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
-                    auto logger = std::make_shared<spdlog::logger>(name, log_sinks);
+
+                    if (location->group != "node")
+                    {
+                        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+                        spdlog::sinks_init_list log_sinks = {console_sink, daily_sink};
+                        logger = std::make_shared<spdlog::logger>(name, log_sinks);
+                    } else
+                    {
+                        logger = std::make_shared<spdlog::logger>(name, daily_sink);
+                    }
+
                     logger->set_pattern(DEFAULT_LOG_PATTERN);
-                    spdlog::level::level_enum env_log_level = get_env_log_level(locator);
+                    spdlog::level::level_enum env_log_level = get_env_log_level(location->locator);
                     logger->set_level(env_log_level);
                     spdlog::set_default_logger(logger);
                 } else {

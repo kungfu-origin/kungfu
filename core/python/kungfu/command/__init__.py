@@ -102,8 +102,6 @@ def kfc(ctx, home, log_level, name):
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:
-        pyyjj.init_sqlite()
-        atexit.register(pyyjj.shutdown_sqlite)
         ctx.name = name if name else ctx.invoked_subcommand
     pass
 
