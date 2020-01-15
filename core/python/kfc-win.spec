@@ -35,6 +35,7 @@ a = Analysis(['kungfu\\__main__.py'],
         (os.path.join(plotly.__path__[0], 'package_data'), 'plotly/package_data')
      ],
      hiddenimports=[
+          'pkg_resources.py2_warn',
           'numpy',
           'pandas',
           'tushare',
