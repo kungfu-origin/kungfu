@@ -11,7 +11,6 @@ if(UNIX)
 endif()
 
 ############################################################
-
 INCLUDE_DIRECTORIES(${CMAKE_JS_INC})
 
 ADD_COMPILE_DEFINITIONS(NAPI_VERSION=3)
@@ -24,6 +23,8 @@ EXECUTE_PROCESS(COMMAND node -p "require('node-addon-api').include"
 STRING(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 STRING(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 INCLUDE_DIRECTORIES(${NODE_ADDON_API_DIR})
+
+MESSAGE("-- Include node-js headers from ${CMAKE_JS_INC}")
 MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 
 ############################################################
