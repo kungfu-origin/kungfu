@@ -1,4 +1,17 @@
 export const getSystemConfig = (pythonVersion: string) => ({
+    "performance": {
+        "key": "performance",
+        "name": "性能",
+        "config": [
+            {
+                "key": "rocket",
+                "name": "开启极速模式",
+                "tip": "开启极速模式会使 CPU 达到100%，开启后请重启 Kungfu",
+                "default": false,
+                "type": "bool"
+            }
+        ]
+    },
     "strategy": {
         "key": "strategy",
         "name": "策略",
@@ -7,6 +20,7 @@ export const getSystemConfig = (pythonVersion: string) => ({
                 "key": "python",
                 "name": "使用本地python",
                 "tip": `使用本地python启动策略，需要 pip3 install kungfu*.whl，本地 python3 版本需为 ${pythonVersion}，开启后需重启策略`,
+                "default": false,
                 "type": "bool"
             }
         ]
