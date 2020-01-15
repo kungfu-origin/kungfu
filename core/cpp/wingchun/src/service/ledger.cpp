@@ -92,8 +92,8 @@ namespace kungfu
                     }
                     case category::STRATEGY:
                     {
-                        watch(trigger_time, app_location);
                         request_write_to(trigger_time, app_location->uid);
+                        watch(trigger_time, app_location);
                         break;
                     }
                     default:
@@ -346,6 +346,7 @@ namespace kungfu
             {
                 auto app_uid_str = fmt::format("{:08x}", app_location->uid);
                 auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
+                apprentice::register_location(trigger_time, master_cmd_location);                
                 reader_->join(master_cmd_location, app_location->uid, trigger_time);
                 reader_->join(app_location, 0, trigger_time);
             }
