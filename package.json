@@ -9,10 +9,13 @@
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "npm run clean && yarn wsrun --serial --fast-exit build",
-    "build-cli": "sh ./build-cli.sh",
+    "build-core": "cd ./core && yarn run build",
+    "build-app": "cd app && yarn run build",
+    "build-cli": "yarn run clean && yarn run env-cli && yarn run build-core && cd ./cli && yarn run build-cli && cd ../ && yarn run build-app",
     "env-cli": "npm config set kungfu-core:runtime node",
     "env-electron": "npm config set kungfu-core:runtime electron",
-    "clean": "yarn wsrun clean"
+    "clean": "yarn wsrun clean",
+    "workspace-clean": "yarn workspace kungfu-core run clean"
   },
   "dependencies": {
     "wsrun": "^5.0.0",
