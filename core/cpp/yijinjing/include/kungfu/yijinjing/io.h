@@ -92,12 +92,12 @@ namespace kungfu
             publisher_ptr publisher_;
             observer_ptr observer_;
 
-            sqlite3 *db_;
-            char *db_error_msg_ = 0;
-            sqlite3_session *db_session_;
-            int db_changeset_nb_;
-            void *db_changeset_ptr_;
-            sqlite3_stmt *stmt_find_sessions_;
+            sqlite3 *db_ = nullptr;
+            char *db_error_msg_ = nullptr;
+            sqlite3_session *db_session_ = nullptr;
+            int db_changeset_nb_ = 0;
+            void *db_changeset_ptr_ = nullptr;
+            sqlite3_stmt *stmt_find_sessions_ = nullptr;
         };
 
         DECLARE_PTR(io_device)

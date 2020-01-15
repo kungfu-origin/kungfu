@@ -287,7 +287,7 @@ namespace kungfu
             rc = sqlite3session_create(db_, "main", &db_session_);
             handle_sql_error(rc, "failed to create index db session");
 
-            rc = sqlite3session_attach(db_session_, NULL);
+            rc = sqlite3session_attach(db_session_, nullptr);
             handle_sql_error(rc, "failed to attach index db session");
 
             sqlite3_prepare_v2(
@@ -300,7 +300,7 @@ and json_extract(session.data, '$.end_time') <= ?4;
 )",
                     -1,
                     &stmt_find_sessions_,
-                    NULL
+                    nullptr
             );
         }
 
