@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
+    "fs-extra": "^8.1.0",
     "nan": "^2.14.0",
     "node-addon-api": "^2.0.0"
   },

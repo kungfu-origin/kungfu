@@ -32,7 +32,6 @@ dist/
 .project
 package-lock.json
 Pipfile.lock
-.pythonVersion
 
 # OS files
 .DS_Store

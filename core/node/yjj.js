@@ -1,5 +1,5 @@
 const bindings = exports._bindings = require('bindings')('node_yjj.node');
-const fs = require("fs");
+const fse = require("fs-extra");
 const path = require("path");
 const glob = require("glob");
 
@@ -10,8 +10,8 @@ const hex = function(n){
 
 const layout_dir_from_home = function(home, category, group, name, mode, layout) {
     const dir = path.join(home, category, group, name, layout, mode);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+    if (!fse.existsSync(dir)) {
+        fse.ensureDirSync(dir)
     }
     return dir;
 };
