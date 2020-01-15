@@ -285,7 +285,7 @@ namespace kungfu
             {
                 case OrderStatus::Submitted:
                 case OrderStatus::Pending:
-                case OrderStatus::PartialFilledNotActive:
+                case OrderStatus::PartialFilledActive:
                 case OrderStatus::Unknown:
                     return false;
                 default:
