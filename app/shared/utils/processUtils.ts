@@ -168,8 +168,10 @@ export const describeProcess = (name: string): Promise<any> => {
 export const startProcess = async (options: any, no_ext=false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const args = [logLevel, options.args].join(' ')
+    const rocket = ifRocket ? '-x' : '';
+    const args = [logLevel, options.args, rocket].join(' ')
 
     options = {
         ...options,
@@ -214,8 +216,10 @@ export const startProcess = async (options: any, no_ext=false): Promise<object> 
 
 export const startStrategyProcess = async (name: string, strategyPath: string): Promise<object> => {
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const args = [logLevel, 'strategy', '-n', name, '-p'].join(' ')
+    const rocket = ifRocket ? '-x' : '';
+    const args = [logLevel, 'strategy', rocket, '-n', name, '-p'].join(' ')
 
     const options = {
         "name": name,
