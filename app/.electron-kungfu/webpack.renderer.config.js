@@ -11,6 +11,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const PreloadWebpackPlugin = require('preload-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 
 let whiteListedModules = [
@@ -140,7 +141,11 @@ let rendererConfig = {
     new PreloadWebpackPlugin({
       rel: 'preload',
     }),
-    new MonacoWebpackPlugin()
+    new MonacoWebpackPlugin({
+      languages: [
+        'python', 'cpp', 'shell', 'json', 'yaml'
+      ]
+    })
   ],
   output: {
     filename: '[name].js',
@@ -191,6 +196,9 @@ if (process.env.NODE_ENV === 'production') {
       'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': JSON.stringify('production')
     }),
+    // new BundleAnalyzerPlugin({
+    //   analyzerMode: 'static',
+    // }),
   )
 }
 

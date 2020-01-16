@@ -128,7 +128,7 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust mainConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-
+  mainConfig.devtool = ''
   mainConfig.plugins.push(
     new OptimizeJsPlugin({
       sourceMap: false

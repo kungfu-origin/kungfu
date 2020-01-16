@@ -2,6 +2,7 @@ export const getSystemTradingConfig = () => ({
     "bar": {
         "key": "bar",
         "name": "BAR",
+        "cli": true,
         "config": [
           {
             "key": "open",
@@ -16,12 +17,14 @@ export const getSystemTradingConfig = () => ({
           {
             "key": "source",
             "name": "支持柜台",
+            "cli": true,
             "tip": "选择支持订阅Bar功能的柜台名称，不能为空",
             "type": "sources"
           },
           {
             "key": "time_interval",
             "name": "频率",
+            "cli": true,
             "tip": "选择Bar的频率，不能为空",
             "type": "select",
             "data": [
@@ -41,6 +44,7 @@ export const getSystemTradingConfig = () => ({
     "comission": {
       "key": "commission_setting",
       "name": "手续费",
+      "cli": false,
       "config": [
         {
           "key": "future",
