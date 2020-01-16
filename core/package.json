@@ -18,6 +18,7 @@
     "build": "yarn run build:cpp && yarn run build:pyi && yarn run freeze",
     "build:cpp": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron make",
     "build:pyi": "cd python && rimraf dist/* && cross-var pipenv run python setup.py clean --all && cross-var pipenv run python setup.py bdist_wheel",
+    "build-cli": "yarn run build",
     "freeze": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron freeze",
     "configure": "cross-var pipenv run python python/build.py --build_type $npm_package_config_buildtype -l $npm_package_config_loglevel --arch $npm_package_config_arch --runtime $npm_package_config_runtime --node_version $npm_package_config_node --electron_version $npm_package_config_electron configure",
     "clean": "cmake-js clean",
