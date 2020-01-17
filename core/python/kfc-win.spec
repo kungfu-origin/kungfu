@@ -44,7 +44,7 @@ a = Analysis(['kungfu\\__main__.py'],
           "sortedcontainers",
           "dotted_dict"
           ],
-     hookspath=["python/hooks"],
+     hookspath=[],
      runtime_hooks=None,
      excludes=['extensions'],
      cipher=block_cipher)
