@@ -256,7 +256,7 @@ namespace kungfu
                     return 0;
                 }
                 auto writer = app_.get_writer(lookup_account_location_id(account));
-                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(0, msg::type::OrderInput);
+                msg::data::OrderInput &input = writer->open_data<msg::data::OrderInput>(app_.now(), msg::type::OrderInput);
                 input.order_id = writer->current_frame_uid();
                 strcpy(input.instrument_id, symbol.c_str());
                 strcpy(input.exchange_id, exchange.c_str());
