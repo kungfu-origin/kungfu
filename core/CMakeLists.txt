@@ -125,6 +125,7 @@ INCLUDE_DIRECTORIES(deps/SQLiteCpp-2.3.0/include)
 INCLUDE_DIRECTORIES(deps/fmt-5.3.0/include)
 INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1)
 INCLUDE_DIRECTORIES(deps/rxcpp-4.1.0/include)
+INCLUDE_DIRECTORIES(deps/hana-1.6.0/include)
 INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
 INCLUDE_DIRECTORIES(deps/googletest-1.9.0/include)
 
