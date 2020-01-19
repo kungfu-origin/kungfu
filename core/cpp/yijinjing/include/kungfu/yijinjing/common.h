@@ -18,13 +18,26 @@
 
 #include <utility>
 #include <typeinfo>
-#include <signal.h>
+#include <csignal>
+
+#include <boost/hana.hpp>
+#include <rxcpp/rx.hpp>
+#include <nlohmann/json.hpp>
+
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
-#include <rxcpp/rx.hpp>
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
+
+#ifndef _WIN32
+#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } __attribute__((packed));
+#else
+#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) \
+#pragma pack(push, 1) \
+struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); };\
+#pragma pack(pop)
+#endif
 
 namespace kungfu
 {
@@ -265,6 +278,21 @@ namespace kungfu
                     return std::make_shared<location>(m, c, g, n, l);
                 }
             };
+        }
+    }
+
+    namespace hana
+    {
+        using namespace boost::hana;
+
+        template<typename T>
+        nlohmann::json to_json(T& obj)
+        {
+            nlohmann::json j{};
+            hana::for_each(hana::accessors<T>(), [&](auto t) {
+                j[hana::first(t).c_str()] = hana::second(t)(obj);
+            });
+            return j;
         }
     }
 

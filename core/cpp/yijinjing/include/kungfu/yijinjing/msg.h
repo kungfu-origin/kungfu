@@ -37,60 +37,30 @@ namespace kungfu
 
             namespace data
             {
-#ifdef _WIN32
-#pragma  pack(push, 1)
-#endif
-                struct TimeRequest
-                {
-                    int32_t id;
-                    int64_t duration;
-                    int64_t repeat;
-#ifndef _WIN32
-                } __attribute__((packed));
+                YJJ_DEFINE_DATA_STRUCT(
+                        TimeRequest,
+                        (int32_t, id),
+                        (int64_t, duration),
+                        (int64_t, repeat)
+                )
 
-#else
-                };
-#endif
+                YJJ_DEFINE_DATA_STRUCT(
+                        RequestReadFrom,
+                        (uint32_t, source_id),
+                        (int64_t, from_time)
+                )
 
-                struct RequestReadFrom
-                {
-                    uint32_t source_id;
-                    int64_t from_time;
+                YJJ_DEFINE_DATA_STRUCT(
+                        RequestWriteTo,
+                        (uint32_t, dest_id)
+                )
 
-#ifndef _WIN32
-                } __attribute__((packed));
-
-#else
-                };
-#endif
-
-                struct RequestWriteTo
-                {
-                    uint32_t dest_id;
-
-#ifndef _WIN32
-                } __attribute__((packed));
-
-#else
-                };
-#endif
-
-
-            struct Channel
-            {
-                uint32_t source_id;
-                uint32_t dest_id;
-#ifndef _WIN32
-            } __attribute__((packed));
-#else
-            };
-#endif
-
-#ifdef _WIN32
-#pragma pack(pop)
-#endif
+                YJJ_DEFINE_DATA_STRUCT(
+                        Channel,
+                        (uint32_t, source_id),
+                        (uint32_t, dest_id)
+                )
             }
-
         }
     }
 }
