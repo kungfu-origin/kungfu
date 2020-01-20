@@ -26,31 +26,24 @@ namespace kungfu
 
         namespace journal
         {
-#ifdef _WIN32
-#pragma  pack(push, 1)
-#endif
-            struct frame_header
-            {
-                /** total frame length (including header and data body) */
-                volatile uint32_t length;
-                /** header length */
-                uint32_t header_length;
-                /** generate time of the frame data */
-                int64_t gen_time;
-                /** trigger time for this frame, use for latency stats */
-                int64_t trigger_time;
-                /** msg type of the data in frame */
-                volatile int32_t msg_type;
-                /** source of this frame */
-                uint32_t source;
-                /** dest of this frame */
-                uint32_t dest;
-#ifndef _WIN32
-            } __attribute__((packed));
-#else
-            };
-#pragma pack(pop)
-#endif
+
+            YJJ_DEFINE_DATA_STRUCT(
+                    frame_header,
+            /** total frame length (including header and data body) */
+                    (volatile uint32_t, length),
+            /** header length */
+                    (uint32_t, header_length),
+            /** generate time of the frame data */
+                    (int64_t, gen_time),
+            /** trigger time for this frame, use for latency stats */
+                    (int64_t, trigger_time),
+            /** msg type of the data in frame */
+                    (volatile int32_t, msg_type),
+            /** source of this frame */
+                    (uint32_t, source),
+            /** dest of this frame */
+                    (uint32_t, dest)
+            )
 
             /**
              * Basic memory unit,
@@ -102,7 +95,7 @@ namespace kungfu
                 { return std::string(reinterpret_cast<char *>(address())); }
 
                 template<typename T>
-                size_t copy_data(const T& data)
+                size_t copy_data(const T &data)
                 {
                     size_t length = sizeof(T);
                     memcpy(const_cast<void *>(data_address()), &data, length);
