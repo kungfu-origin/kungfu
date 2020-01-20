@@ -51,17 +51,13 @@ def freeze(ctx):
 
     osname = platform.system()
 
-    if osname == 'Linux':
-        sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait())
+    rc = subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc.spec']).wait()
     if osname == 'Darwin':
-        rc = subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-unix.spec']).wait()
         os.chdir('build/kfc')
         if os.path.exists('.Python'):
             os.rename('.Python', 'Python')
             os.symlink('Python', '.Python')
-        sys.exit(rc)
-    if osname == 'Windows':
-        sys.exit(subprocess.Popen(['pyinstaller', '--clean', '-y', r'--distpath=build', r'python\kfc-win.spec']).wait())
+    sys.exit(rc)
 
 
 def find(tool):

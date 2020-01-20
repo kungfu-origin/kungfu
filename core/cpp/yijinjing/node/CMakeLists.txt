@@ -29,8 +29,8 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 
 ############################################################
 
-AUX_SOURCE_DIRECTORY(src/yjj SOURCE_FILES_NANOMSG)
-ADD_LIBRARY(node_yjj SHARED ${SOURCE_FILES_NANOMSG})
+AUX_SOURCE_DIRECTORY(src/yjj SOURCE_FILES_YJJ)
+ADD_LIBRARY(node_yjj SHARED ${SOURCE_FILES_YJJ})
 SET_TARGET_PROPERTIES(node_yjj PROPERTIES PREFIX "" SUFFIX ".node")
 TARGET_LINK_LIBRARIES(node_yjj yijinjing ${CMAKE_JS_LIB})
 
