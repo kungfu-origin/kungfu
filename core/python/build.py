@@ -46,17 +46,16 @@ def make(ctx):
 def freeze(ctx):
     os.environ['CMAKE_BUILD_TYPE'] = ctx.parent.build_type
 
-    with open(os.path.join(os.getcwd(), "build", ctx.parent.build_type, "version.info"), 'w') as version_file:
-        version_file.write(f"{get_version()}")
+    with open(os.path.join(os.getcwd(), 'build', ctx.parent.build_type, 'version.info'), 'w') as version_file:
+        version_file.write(f'{get_version()}')
 
     osname = platform.system()
 
-    rc = subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc.spec']).wait()
-    if osname == 'Darwin':
+    rc = subprocess.Popen(['pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
+    if osname == 'Darwin' and os.path.exists('build/kfc/.Python'):
         os.chdir('build/kfc')
-        if os.path.exists('.Python'):
-            os.rename('.Python', 'Python')
-            os.symlink('Python', '.Python')
+        os.rename('.Python', 'Python')
+        os.symlink('Python', '.Python')
     sys.exit(rc)
 
 
@@ -71,7 +70,7 @@ def find(tool):
 
 
 def build_cmake_js_cmd(ctx, cmd):
-    python_path = subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE).stdout.read().decode().strip()
+    python_path = subprocess.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
 
     spdlog_levels = {
         'trace':        'SPDLOG_LEVEL_TRACE',
