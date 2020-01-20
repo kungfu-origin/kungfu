@@ -114,7 +114,7 @@ if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
-      '__python_version': `"${pyVersion.toString()}"`,
+      'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"development"'
     }),
     new webpack.DefinePlugin({

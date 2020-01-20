@@ -8,19 +8,24 @@ const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 const yjj = require('kungfu-core').yjj;
 
+interface SqlTable {
+    table: string;
+    sql: string;
+};
+
 export const locator = yjj.locator(KF_HOME);
-export const app = yjj.app("live", "system", "node", "cli", locator);
+export const yjjapp = yjj.app("live", "system", "node", "main", locator);
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
     if(!existsSync(BASE_DB_DIR)) addFileSync('', BASE_DB_DIR, 'folder');
 
     //循环建立表
-    Object.keys(initGlobalDB).forEach((dbName) => {
+    Object.keys(initGlobalDB).forEach((dbName: string) => {
         const db = new sqlite3.Database(path.join(BASE_DB_DIR, `${dbName}.db`));
         const tables = initGlobalDB[dbName];
         db.parallelize(() => {
-            tables.forEach((table) => {
+            tables.forEach((table: SqlTable) => {
                 db.run(table.sql)
             })
         });
@@ -32,7 +37,7 @@ export const initDB = () => {
         path.join(DEFUALT_DB_DIR, 'commission.db'), 
         path.join(BASE_DB_DIR, 'commission.db')
     )
-    .catch(err => {
+    .catch((err: Error) => {
         if(err) logger.error(err);
     });
 
@@ -41,7 +46,7 @@ export const initDB = () => {
         path.join(DEFUALT_DB_DIR, 'holidays.db'), 
         path.join(BASE_DB_DIR, 'holidays.db')
     )
-    .catch(err => {
+    .catch((err: Error) => {
         if(err) logger.error(err);
     })
 };

@@ -20,7 +20,7 @@ if (process.env.NODE_ENV === 'production') {
     process.resourcesPath =  path.join(path.dirname(process.execPath), '..').replace(/\\/g, '\\\\')
 }
 
-export const { app, initDB, initConfig } = require('__app/src/main/base')
 
+export const { app, initDB, initConfig } = require('__assets/base')
 initConfig();
 initDB();

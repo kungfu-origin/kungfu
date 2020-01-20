@@ -1,5 +1,7 @@
 declare var __resources: string;
 
+declare var python_version: string;
+
 declare module NodeJS {
     interface Global {
         __resources: string

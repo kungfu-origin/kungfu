@@ -6,7 +6,7 @@ import { getTdList, getMdList, getAccountOrder, getAccountTrade, getAccountPos, 
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
 import { buildTradingDataPipe, buildCashPipe, buildGatewayStatePipe } from '__io/nano/nanoSub';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
-import { switchMaster, switchLedger } from '__io/actions/base';
+import { switchMaster, switchLedger, switchBar } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
@@ -26,6 +26,7 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
     const status = proc.status === 'online';
     const startOrStop = !!status ? 'Stop' : 'Start';
     const startOrStopMaster = !!status ? 'Restart' : 'Start';
+    console.log(proc, '--')
     switch(proc.type) {
         case 'main':
             if (proc.processId === 'master') {
@@ -38,6 +39,11 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
                 .then(() => messageBoard.log(`${startOrStop} Ledger process success!`, 2))
                 .catch((err: Error) => logger.error(err))
             } 
+            break
+        case 'calc':
+            switchBar(proc, !status)
+            .then(() => messageBoard.log(`${startOrStop} BAR process success!`, 2))
+            .catch((err: Error) => logger.error(err))
             break
         case 'md':
             switchMd(proc, !status)
@@ -243,6 +249,15 @@ export const processListObservable = () => combineLatest(
                 statusName: dealStatus(buildStatusDefault(processStatus['ledger']).status),
                 status: buildStatusDefault(processStatus['ledger']).status,
                 monit: buildStatusDefault(processStatus['ledger']).monit
+            },
+            {
+                processId: 'bar',
+                processName: colors.bold('BAR'),
+                typeName: colors.green('Calc'),
+                type: 'calc',
+                statusName: dealStatus(buildStatusDefault(processStatus['bar']).status),
+                status: buildStatusDefault(processStatus['bar']).status,
+                monit: buildStatusDefault(processStatus['bar']).monit
             },
             ...Object.values(mdData || {}),
             ...Object.values(tdData || {}),

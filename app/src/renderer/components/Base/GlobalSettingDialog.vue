@@ -204,11 +204,10 @@ import Vue from "vue";
 import { mapGetters, mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
-import { LOG_DIR, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
+import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getExtensionConfigs, getExtensions, debounce, throttle } from "__gUtils/busiUtils";
-import { getSystemConfig } from "__gConfig/systemConfig";
-import { getSystemTradingConfig } from "__gConfig/systemTradingConfig";
-import * as processUtils from "__gUtils/processUtils";
+import { buildSystemConfig } from "__gConfig/systemConfig";
+import { switchCustomProcess } from "__io/actions/base";
 import { getFeeSettingData, setFeeSettingData } from "__io/db/base";
 
 
@@ -229,30 +228,11 @@ props: {
 
 data() {
 	const t = this;
-	const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-	const kfTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
-
+	console.log(buildSystemConfig())
 	return {
 		activeSettingTypes: ["system", "trading"],
 		activeSettingItem: "",
-		settingConfig: {
-			system: {
-				key: "system",
-				name: "系统设置",
-				config: getSystemConfig(python_version),
-				value: kfSystemConfig,
-				outputPath: KF_CONFIG_PATH,
-				type: "json"
-			},
-			trading: {
-				key: "trading",
-				name: "交易设置",
-				config: getSystemTradingConfig(),
-				value: kfTradingConfig,
-				outputPath: KF_TARADING_CONFIG_PATH,
-				type: "json"
-			}
-		},
+		settingConfig: buildSystemConfig(),
 
 		sourceList: [],
 		tables: {
@@ -333,15 +313,15 @@ methods: {
 
 		//开启
 		if (value) {
-			const startFn = processUtils[config.start];
-			if (!(startFn instanceof Function)) return;
 			const args = config.args;
 			const params = args.map(arg => {
-				return settingData[arg];
+				const key = arg.key;
+				const valueKey = arg.value;
+				return `${key} ${settingData[valueKey]}`;
 			});
-			startFn(config.target, ...params);
+			switchCustomProcess(status, config.target, params.join(' '));
 		} else {
-			processUtils.deleteProcess(config.target);
+			switchCustomProcess(status, config.target);
 		}
 	},
 
@@ -353,6 +333,7 @@ methods: {
 
 	//打开文件夹 
 	handleOpenWhlFolder() {
+		console.log(path.join(KUNGFU_RESOURCES_DIR, 'kungfu-resources', 'python'))
 		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'kungfu-resources', 'python'));
 	},
 

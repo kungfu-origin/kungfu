@@ -1,17 +1,18 @@
-import {app} from './base';
+import './base';
 //@ts-ignore
 import { version } from '../package.json';
 import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
 import { listAccountsStrategys } from '@/commanders/list';
 import { updateAccountStrategy } from '@/commanders/update';
-
 import { removeAccountStrategy } from '@/commanders/remove';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
+import { setSystemConfig } from '@/commanders/config';
+
 import { monitPrompt } from '@/components/index';
 import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
-import { logger } from '__gUtils/logUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
+import { logger } from '__gUtils/logUtils';
 
 // app.setup();
 // setInterval(() => {
@@ -42,7 +43,7 @@ const colors = require('colors');
 if(process.argv.length === 2 || process.argv[2] === '-h') {
     console.log(colors.green('Welcome to kungfu trader system'))
     CFonts.say('KungFu', {
-        font: '3d',              // define the font face
+        font: 'block',              // define the font face
         align: 'left',              // define text alignment
         colors: ['yellow'],         // define all colors
         background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
@@ -51,7 +52,7 @@ if(process.argv.length === 2 || process.argv[2] === '-h') {
         space: true,                // define if the output text should have empty lines on top and on the bottom
         maxLength: '0',             // define how many character can be on one line
     });
-    // if( process.argv.length === 2 ) process.exit(0)
+    if( process.argv.length === 2 ) process.exit(0)
 }
 
 const program = require('commander');
@@ -140,6 +141,19 @@ program
             if(list) await listExtension()
             else if(add) await addExtension()
             else if(remove) await removeExtension()
+            process.exit(0)
+        } catch (err) {
+            console.error(err)
+            process.exit(1)
+        }
+    })
+
+program
+    .command('config')
+    .description('set system config of kungfu')
+    .action(async (type: any, commander: any) => {
+        try {
+            await setSystemConfig()
             process.exit(0)
         } catch (err) {
             console.error(err)

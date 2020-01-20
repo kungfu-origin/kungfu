@@ -332,6 +332,14 @@ export const startBar = (targetName: string, source: string, timeInterval: strin
     }).catch(err => logger.error('[startBar]', err))
 }
 
+export const startCustomProcess = (targetName: string, params: string) => {
+    console.log(params)
+    return startProcess({
+        "name": targetName,
+        "args": `${targetName} ${params}`
+    }).catch(err => logger.error(`[start${targetName}]`, err))
+}
+
 //列出所有进程
 export const listProcessStatus = () => {
     return pm2List().then((pList: any[]): StringToStringObject => {

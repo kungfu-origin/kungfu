@@ -303,7 +303,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
                     })
                 })
 
-            //判断是否关键字重复
+            //判断是否关键字重复, 仅td
             if((idKey === key) && (type !== 'md')) {
                 const existedAccountError = await existedAccountIdValidator(value)
                 if(existedAccountError) hasError = existedAccountError;
