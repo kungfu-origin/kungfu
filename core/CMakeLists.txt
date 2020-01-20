@@ -49,7 +49,6 @@ if(WIN32)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
     ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
-#    ADD_COMPILE_DEFINITIONS(_WIN32_WINNT=0x0A00) # Target Windows 10 https://docs.microsoft.com/en-us/cpp/porting/modifying-winver-and-win32-winnt?view=vs-2019
 endif()
 
 ############################################################
@@ -127,7 +126,6 @@ INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1)
 INCLUDE_DIRECTORIES(deps/rxcpp-4.1.0/include)
 INCLUDE_DIRECTORIES(deps/hana-1.6.0/include)
 INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
-INCLUDE_DIRECTORIES(deps/googletest-1.9.0/include)
 
 ############################################################
 

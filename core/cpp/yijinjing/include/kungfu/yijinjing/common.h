@@ -33,7 +33,7 @@
 #ifndef _WIN32
 #define YJJ_DEFINE_DATA_STRUCT(NAME, ...) struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } __attribute__((packed));
 #else
-#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) struct __declspec(align(1)) NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); };
+#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) __pragma(pack(push, 1)) struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } __pragma(pack(pop));
 #endif
 
 namespace kungfu
