@@ -31,10 +31,17 @@
 #include <kungfu/yijinjing/util/util.h>
 
 #ifndef _WIN32
-#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } __attribute__((packed));
+#define YJJ_DATA_STRUCT_BEGIN
+#define YJJ_DATA_STRUCT_END __attribute__((packed))
 #else
-#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) __pragma(pack(push, 1)) struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } __pragma(pack(pop));
+#define YJJ_DATA_STRUCT_BEGIN __pragma(pack(push, 1))
+#define YJJ_DATA_STRUCT_END __pragma(pack(pop))
 #endif
+
+#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) \
+YJJ_DATA_STRUCT_BEGIN \
+struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } \
+YJJ_DATA_STRUCT_END
 
 namespace kungfu
 {

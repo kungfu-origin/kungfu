@@ -42,24 +42,24 @@ namespace kungfu
                         (int32_t, id),
                         (int64_t, duration),
                         (int64_t, repeat)
-                )
+                );
 
                 YJJ_DEFINE_DATA_STRUCT(
                         RequestReadFrom,
                         (uint32_t, source_id),
                         (int64_t, from_time)
-                )
+                );
 
                 YJJ_DEFINE_DATA_STRUCT(
                         RequestWriteTo,
                         (uint32_t, dest_id)
-                )
+                );
 
                 YJJ_DEFINE_DATA_STRUCT(
                         Channel,
                         (uint32_t, source_id),
                         (uint32_t, dest_id)
-                )
+                );
             }
         }
     }

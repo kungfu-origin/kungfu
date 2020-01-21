@@ -43,7 +43,7 @@ namespace kungfu
                     (uint32_t, source),
             /** dest of this frame */
                     (uint32_t, dest)
-            )
+            );
 
             /**
              * Basic memory unit,
