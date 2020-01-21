@@ -271,3 +271,13 @@ interface MdTdState {
 interface StringToMdTdState {
     [processName: string]: MdTdState
 }
+
+interface SystemConfigChildArgsItemData {
+    key: string;
+    value: string;
+}
+
+interface SystemConfigChildSelectItemData {
+    value: string | number;
+    name: string | number;
+}

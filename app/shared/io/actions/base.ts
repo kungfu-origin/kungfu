@@ -1,6 +1,7 @@
 import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startBar } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
-import { KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
+import { buildCustomProcessConfig } from '__gConfig/systemConfig';
+import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { readJsonSync } from "__gUtils/fileUtils";
 
 export const switchMaster = async (status: boolean): Promise<any> => {
@@ -26,7 +27,27 @@ export const switchLedger = (status: boolean): Promise<any> => {
     return startLedger(false)
 }
 
-export const switchCustomProcess = (status: boolean, targetName: string, params = ''): Promise<any> => {
+export const switchCustomProcess = (status: boolean, targetName: string) => {
+    const customProcessConfig = buildCustomProcessConfig();
+    const targetProcessConfig = customProcessConfig[targetName];
+    if(!targetProcessConfig) throw new Error(`No ${targetName} in systemConfig systemTradingConfig or extensionConfig`)
+    const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
+    const kfTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const systemConfigValData: any = {
+        ...kfSystemConfig,
+        ...kfTradingConfig
+    }
+    const args = targetProcessConfig.args;
+    const parentKey = targetProcessConfig.parentKey;
+    const processValData = systemConfigValData[parentKey];
+
+    const params = args
+        .map((arg: SystemConfigChildArgsItemData): string => {
+            const key = arg.key;
+            const valueKey = arg.value;
+            return `${key} ${processValData[valueKey]}`;
+        })
+
     if(!status) return deleteProcess(targetName)
-    return startCustomProcess(targetName, params)
+    return startCustomProcess(targetName, params.join(' '))
 }

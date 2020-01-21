@@ -332,8 +332,7 @@ export const startBar = (targetName: string, source: string, timeInterval: strin
     }).catch(err => logger.error('[startBar]', err))
 }
 
-export const startCustomProcess = (targetName: string, params: string) => {
-    console.log(params)
+export const startCustomProcess = (targetName: string, params: string): Promise<void> => {
     return startProcess({
         "name": targetName,
         "args": `${targetName} ${params}`

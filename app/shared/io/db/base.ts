@@ -8,7 +8,7 @@ export const getFeeSettingData = () => {
 }
 
 export const setFeeSettingData = (feeSettingData: any, ) => {
-    if(feeSettingData.length < 1) throw new Error('fees length is 0')
+    if(feeSettingData.length < 1) throw new Error('No data in commission.db!')
     if(!existsSync(GLOBAL_COMMISSION_DB)) throw new Error('commission.db is not exist!')
     return new Promise((resolve, reject) => {
         const keys = Object.keys(feeSettingData[0] || {})

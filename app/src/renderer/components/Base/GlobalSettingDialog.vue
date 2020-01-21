@@ -228,7 +228,6 @@ props: {
 
 data() {
 	const t = this;
-	console.log(buildSystemConfig())
 	return {
 		activeSettingTypes: ["system", "trading"],
 		activeSettingItem: "",
@@ -310,24 +309,17 @@ methods: {
 
 	handleSwitchProcess(value, config, settingData) {
 		const t = this;
-
 		//开启
 		if (value) {
-			const args = config.args;
-			const params = args.map(arg => {
-				const key = arg.key;
-				const valueKey = arg.value;
-				return `${key} ${settingData[valueKey]}`;
-			});
-			switchCustomProcess(status, config.target, params.join(' '));
+			switchCustomProcess(value, config.target);
 		} else {
-			switchCustomProcess(status, config.target);
+			switchCustomProcess(value, config.target);
 		}
 	},
 
 	//打开日志
 	handleOpenLogFile(config) {
-		const logPath = path.join(LOG_DIR, `${config.log_path}.log`);
+		const logPath = path.join(LOG_DIR, `${config.target}.log`);
 		this.$showLog(logPath);
 	},
 
@@ -407,7 +399,9 @@ methods: {
 				}
 				return true;
 			});
-			saveMethod(targetData);
+			
+			saveMethod(targetData)
+				.catch(err => console.error(err));
 		});
 	},
 

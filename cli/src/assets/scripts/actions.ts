@@ -6,7 +6,7 @@ import { getTdList, getMdList, getAccountOrder, getAccountTrade, getAccountPos, 
 import { getStrategyList, getStrategyOrder, getStrategyTrade, getStrategyPos, getStrategyAssetById } from '__io/db/strategy';
 import { buildTradingDataPipe, buildCashPipe, buildGatewayStatePipe } from '__io/nano/nanoSub';
 import { nanoReqGatewayState } from '__io/nano/nanoReq';
-import { switchMaster, switchLedger, switchBar } from '__io/actions/base';
+import { switchMaster, switchLedger, switchCustomProcess } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';
@@ -40,11 +40,6 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
                 .catch((err: Error) => logger.error(err))
             } 
             break
-        case 'calc':
-            switchBar(proc, !status)
-            .then(() => messageBoard.log(`${startOrStop} BAR process success!`, 2))
-            .catch((err: Error) => logger.error(err))
-            break
         case 'md':
             switchMd(proc, !status)
             .then(() => messageBoard.log(`${startOrStop} MD process success!`, 2))
@@ -60,6 +55,10 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
             .then(() => {messageBoard.log(`${startOrStop} Strategy process success!`, 2)})
             .catch((err: Error) => logger.error(err))
             break;
+        default:
+            switchCustomProcess(!status, proc)
+            .then(() => messageBoard.log(`${startOrStop} ${proc.toUpperCase()} process success!`, 2))
+            .catch((err: Error) => logger.error(err))
     }
 }
 
