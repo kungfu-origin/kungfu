@@ -67,7 +67,7 @@ LINK_DIRECTORIES("${KF_SDK_HOME}")
 ############################################################
 
 # Use pybind11
-ADD_SUBDIRECTORY(../../core/deps/pybind11-2.2.4 "${PROJECT_BINARY_DIR}/pybind11")
+ADD_SUBDIRECTORY(../../core/deps/pybind11-2.4.3 "${PROJECT_BINARY_DIR}/pybind11")
 
 ############################################################
 
