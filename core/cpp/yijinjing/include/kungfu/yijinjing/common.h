@@ -38,9 +38,9 @@
 #define YJJ_DATA_STRUCT_END __pragma(pack(pop))
 #endif
 
-#define YJJ_DEFINE_DATA_STRUCT(NAME, ...) \
+#define YJJ_DEFINE_DATA_STRUCT(NAME, TYPE, ...) \
 YJJ_DATA_STRUCT_BEGIN \
-struct NAME { BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } \
+struct NAME : public kungfu::yijinjing::reflectable { constexpr static int type = TYPE; BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } \
 YJJ_DATA_STRUCT_END
 
 namespace kungfu
@@ -57,6 +57,8 @@ namespace kungfu
             explicit yijinjing_error(const std::string &message) : runtime_error(message)
             {}
         };
+
+        struct reflectable {};
 
         class event
         {

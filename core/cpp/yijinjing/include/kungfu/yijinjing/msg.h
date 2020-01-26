@@ -38,29 +38,42 @@ namespace kungfu
             namespace data
             {
                 YJJ_DEFINE_DATA_STRUCT(
-                        TimeRequest,
+                        TimeRequest, 10004,
                         (int32_t, id),
                         (int64_t, duration),
                         (int64_t, repeat)
                 );
 
                 YJJ_DEFINE_DATA_STRUCT(
-                        RequestReadFrom,
+                        RequestReadFrom, 10021,
                         (uint32_t, source_id),
                         (int64_t, from_time)
                 );
 
                 YJJ_DEFINE_DATA_STRUCT(
-                        RequestWriteTo,
+                        RequestReadFromPublic, 10022,
+                        (uint32_t, source_id),
+                        (int64_t, from_time)
+                );
+
+                YJJ_DEFINE_DATA_STRUCT(
+                        RequestWriteTo, 10023,
                         (uint32_t, dest_id)
                 );
 
                 YJJ_DEFINE_DATA_STRUCT(
-                        Channel,
+                        Channel, 10028,
                         (uint32_t, source_id),
                         (uint32_t, dest_id)
                 );
             }
+
+            constexpr auto DATA_TYPE_MAP = hana::make_map(
+                    hana::make_pair(hana::int_c<data::TimeRequest::type>, hana::type_c<data::TimeRequest>),
+                    hana::make_pair(hana::int_c<data::RequestReadFrom::type>, hana::type_c<data::RequestReadFrom>),
+                    hana::make_pair(hana::int_c<data::RequestWriteTo::type>, hana::type_c<data::RequestWriteTo>),
+                    hana::make_pair(hana::int_c<data::Channel::type>, hana::type_c<data::Channel>)
+            );
         }
     }
 }

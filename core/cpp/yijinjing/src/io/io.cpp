@@ -268,30 +268,30 @@ namespace kungfu
 
             auto index_db_file = home_->locator->layout_file(db_home_, layout::SQLITE, "index");
 
-            int rc = sqlite3_open_v2(index_db_file.c_str(), &db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+            int rc = sqlite3_open_v2(index_db_file.c_str(), &index_db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
             handle_sql_error(rc, "failed to open index db");
 
             exec_sql(
-                    db_,
+                    index_db_,
                     &db_error_msg_,
                     "PRAGMA journal_mode=WAL;",
                     "failed to set index db to WAL"
             );
             exec_sql(
-                    db_,
+                    index_db_,
                     &db_error_msg_,
                     "create table if not exists session (id INTEGER PRIMARY KEY, data JSON);",
                     "failed to create tables"
             );
 
-            rc = sqlite3session_create(db_, "main", &db_session_);
+            rc = sqlite3session_create(index_db_, "main", &db_session_);
             handle_sql_error(rc, "failed to create index db session");
 
             rc = sqlite3session_attach(db_session_, nullptr);
             handle_sql_error(rc, "failed to attach index db session");
 
             sqlite3_prepare_v2(
-                    db_,
+                    index_db_,
                     R"(
 select data from session
 where json_extract(session.data, '$.uid') between ?1 and ?2
@@ -310,14 +310,14 @@ and json_extract(session.data, '$.end_time') <= ?4;
             handle_sql_error(rc, "failed to collect index db session changeset");
             SPDLOG_TRACE("index db changeset nb={}", db_changeset_nb_);
 //            sqlite3changeset_apply(
-//                    db_,
+//                    index_db_,
 //                    db_changeset_nb_, db_changeset_ptr_,
 //                    0, xConflict,
 //                    (void*)1
 //            );
             sqlite3_finalize(stmt_find_sessions_);
             sqlite3session_delete(db_session_);
-            sqlite3_close_v2(db_);
+            sqlite3_close_v2(index_db_);
             SPDLOG_TRACE("index db closed");
 
             if (unique_)
@@ -390,7 +390,7 @@ and json_extract(session.data, '$.end_time') <= ?4;
             }
             if (SQLITE_ERROR == rc)
             {
-                SPDLOG_ERROR("error occurred when query sessions: {}", sqlite3_errmsg(db_));
+                SPDLOG_ERROR("error occurred when query sessions: {}", sqlite3_errmsg(index_db_));
             }
             return result;
         }
@@ -412,21 +412,21 @@ and json_extract(session.data, '$.end_time') <= ?4;
             observer_ = observer;
 
             sqlite3_prepare_v2(
-                    db_,
+                    index_db_,
                     R"(delete from session;)",
                     -1,
                     &stmt_clean_sessions_,
                     NULL
             );
             sqlite3_prepare_v2(
-                    db_,
+                    index_db_,
                     R"(insert into session (data) values (json_set('{}', '$.uid', ?1, '$.location', ?2, '$.begin_time', ?3, '$.end_time', 0));)",
                     -1,
                     &stmt_open_session_,
                     NULL
             );
             sqlite3_prepare_v2(
-                    db_,
+                    index_db_,
                     R"(
 update session set data = json_set(session.data, '$.end_time', ?3, '$.frame_count', ?4, '$.data_size', ?5)
 where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$.begin_time') = ?2;

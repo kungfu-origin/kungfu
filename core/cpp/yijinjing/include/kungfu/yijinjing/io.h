@@ -92,7 +92,7 @@ namespace kungfu
             publisher_ptr publisher_;
             observer_ptr observer_;
 
-            sqlite3 *db_ = nullptr;
+            sqlite3 *index_db_ = nullptr;
             char *db_error_msg_ = nullptr;
             sqlite3_session *db_session_ = nullptr;
             int db_changeset_nb_ = 0;

@@ -28,7 +28,7 @@ namespace kungfu
         {
 
             YJJ_DEFINE_DATA_STRUCT(
-                    frame_header,
+                    frame_header, 0,
             /** total frame length (including header and data body) */
                     (volatile uint32_t, length),
             /** header length */
