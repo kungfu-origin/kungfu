@@ -28,6 +28,8 @@ export const switchLedger = (status: boolean): Promise<any> => {
 }
 
 export const switchCustomProcess = (status: boolean, targetName: string) => {
+    if(!status) return deleteProcess(targetName)
+
     const customProcessConfig = buildCustomProcessConfig();
     const targetProcessConfig = customProcessConfig[targetName];
     if(!targetProcessConfig) throw new Error(`No ${targetName} in systemConfig systemTradingConfig or extensionConfig`)
@@ -46,8 +48,6 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
             const key = arg.key;
             const valueKey = arg.value;
             return `${key} ${processValData[valueKey]}`;
-        })
-
-    if(!status) return deleteProcess(targetName)
+        });
     return startCustomProcess(targetName, params.join(' '))
 }
