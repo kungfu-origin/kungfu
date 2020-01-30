@@ -57,7 +57,7 @@ namespace kungfu
             apprentice::deregister_location(trigger_time, location_uid);
         }
 
-        void Commander::on_write_to(const yijinjing::event_ptr &event)
+        void Commander::on_write_to(const event_ptr &event)
         {
             if (event->source() == get_master_commands_uid())
             {
@@ -65,7 +65,7 @@ namespace kungfu
             }
         }
 
-        void Commander::on_read_from(const yijinjing::event_ptr &event)
+        void Commander::on_read_from(const event_ptr &event)
         {
             const yijinjing::msg::data::RequestReadFrom &request = event->data<yijinjing::msg::data::RequestReadFrom>();
             auto source_location = get_location(request.source_id);
@@ -95,7 +95,7 @@ namespace kungfu
             apprentice::on_start();
 
             events_ | is(msg::type::Order) |
-            $([&](event_ptr event)
+            $([&](const event_ptr &event)
               {
                   try
                   { on_order(event, event->data<Order>()); }
@@ -109,11 +109,11 @@ namespace kungfu
              * process active query from clients
              */
             events_ |
-            filter([&](event_ptr event)
+            filter([&](const event_ptr &event)
                    {
                        return dynamic_cast<nanomsg::nanomsg_json *>(event.get()) != nullptr and event->source() == 0;
                    }) |
-            $([&](event_ptr event)
+            $([&](const event_ptr &event)
               {
                   // let python do the actual job, we just operate the I/O part
                   try
@@ -138,10 +138,10 @@ namespace kungfu
             reader_->join(app_location, 0, trigger_time);
         }
 
-        void Commander::new_order_single(const yijinjing::event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input)
+        void Commander::new_order_single(const event_ptr &event, uint32_t account_location_uid, msg::data::OrderInput &order_input)
         {}
 
-        void Commander::cancel_order(const yijinjing::event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
+        void Commander::cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
         {
             auto writer = get_writer(account_location_uid);
             msg::data::OrderAction &action = writer->open_data<msg::data::OrderAction>(event->gen_time(), msg::type::OrderAction);

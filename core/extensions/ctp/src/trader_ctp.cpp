@@ -127,7 +127,7 @@ namespace kungfu
                 return rtn == 0;
             }
 
-            bool TraderCTP::insert_order(const yijinjing::event_ptr& event)
+            bool TraderCTP::insert_order(const event_ptr& event)
             {
                 const OrderInput &input = event->data<OrderInput>();
 
@@ -176,7 +176,7 @@ namespace kungfu
                 }
             }
 
-            bool TraderCTP::cancel_order(const yijinjing::event_ptr& event)
+            bool TraderCTP::cancel_order(const event_ptr& event)
             {
                 const OrderAction &action = event->data<OrderAction>();
                 CtpOrder order_record = order_mapper_->get_order_info(action.order_id);

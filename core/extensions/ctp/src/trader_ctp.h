@@ -36,9 +36,9 @@ namespace kungfu
                 const AccountType get_account_type() const override
                 { return AccountType::Future; }
 
-                bool insert_order(const yijinjing::event_ptr& event) override;
+                bool insert_order(const event_ptr& event) override;
 
-                bool cancel_order(const yijinjing::event_ptr& event) override;
+                bool cancel_order(const event_ptr& event) override;
 
                 bool req_position() override;
 

@@ -23,13 +23,12 @@
 #include <fmt/format.h>
 #include <hffix.hpp>
 
-#include <kungfu/yijinjing/msg.h>
-#include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>
 
 #include <kungfu/practice/apprentice.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace std::chrono;
@@ -68,7 +67,7 @@ namespace kungfu
         void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback)
         {
             events_ | timer(nanotime) |
-            $([&, callback](event_ptr e)
+            $([&, callback](const event_ptr &e)
               {
                   try
                   { callback(e); }
@@ -95,7 +94,7 @@ namespace kungfu
         void apprentice::add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback)
         {
             events_ | time_interval(std::chrono::nanoseconds(duration)) |
-            $([&, callback](event_ptr e)
+            $([&, callback](const event_ptr &e)
               {
                   try
                   { callback(e); }
@@ -110,9 +109,9 @@ namespace kungfu
         {
             if (get_io_device()->get_home()->mode == mode::LIVE)
             {
-                events_ | skip_until(events_ | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
+                events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first() |
                 rx::timeout(seconds(10), observe_on_new_thread()) |
-                $([&](event_ptr e)
+                $([&](const event_ptr &e)
                   {
                       // timeout happens on new thread, can not subscribe journal reader here
                       // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
@@ -132,8 +131,8 @@ namespace kungfu
                       // once registered this subscriber finished, no worry for performance.
                   });
 
-                events_ | skip_until(events_ | is(msg::type::Register) | from(master_home_location_->uid)) | first() |
-                $([&](event_ptr e)
+                events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first() |
+                $([&](const event_ptr &e)
                   {
                       reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
                   },
@@ -158,63 +157,63 @@ namespace kungfu
             }
 
             events_ |
-            $([&](event_ptr event)
+            $([&](const event_ptr &event)
               {
                   now_ = event->gen_time();
               });
 
-            events_ | is(msg::type::Location) |
-            $([&](event_ptr e)
+            events_ | is(Location::tag) |
+            $([&](const event_ptr &e)
               {
                   register_location_from_event(e);
               });
 
-            events_ | is(msg::type::Channel) |
-            $([&](event_ptr e)
+            events_ | is(Channel::tag) |
+            $([&](const event_ptr &e)
               {
-                    auto& channel = e->data<msg::data::Channel>();
+                    auto& channel = e->data<Channel>();
                     register_channel(e->gen_time(), channel);
               });
 
-            events_ | is(msg::type::Register) |
-            $([&](event_ptr e)
+            events_ | is(Register::tag) |
+            $([&](const event_ptr &e)
               {
                   register_location_from_event(e);
               });
 
-            events_ | is(msg::type::Deregister) |
-            $([&](event_ptr e)
+            events_ | is(Deregister::tag) |
+            $([&](const event_ptr &e)
               {
                   deregister_location_from_event(e);
               });
 
-            events_ | is(msg::type::RequestWriteTo) |
-            $([&](event_ptr e)
+            events_ | is(RequestWriteTo::tag) |
+            $([&](const event_ptr &e)
               {
                   on_write_to(e);
               });
 
-            events_ | filter([&](event_ptr e)
+            events_ | filter([&](const event_ptr &e)
                              {
-                                 return e->msg_type() == msg::type::RequestReadFromPublic or e->msg_type() == msg::type::RequestReadFrom;
+                                 return e->msg_type() == RequestReadFromPublic::tag or e->msg_type() == RequestReadFrom::tag;
                              }) |
-            $([&](event_ptr e)
+            $([&](const event_ptr &e)
               {
                   on_read_from(e);
               });
 
-            events_ | is(msg::type::TradingDay) |
-            $([&](event_ptr e)
+            events_ | is(TradingDay::tag) |
+            $([&](const event_ptr &e)
               {
-                  on_trading_day(e, e->data<int64_t>());
+                  on_trading_day(e, e->data<TradingDay>().timestamp);
               });
 
 
             if (get_io_device()->get_home()->mode != mode::BACKTEST)
             {
                 reader_->join(master_home_location_, 0, begin_time_);
-                events_ | is(msg::type::RequestStart) | first() |
-                $([&](event_ptr e)
+                events_ | is(RequestStart::tag) | first() |
+                $([&](const event_ptr &e)
                   {
                       on_start();
                   },
@@ -242,9 +241,9 @@ namespace kungfu
             }
         }
 
-        void apprentice::on_write_to(const yijinjing::event_ptr &event)
+        void apprentice::on_write_to(const event_ptr &event)
         {
-            const msg::data::RequestWriteTo &request = event->data<msg::data::RequestWriteTo>();
+            const RequestWriteTo &request = event->data<RequestWriteTo>();
             if (writers_.find(request.dest_id) == writers_.end())
             {
                 writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
@@ -256,13 +255,13 @@ namespace kungfu
             }
         }
 
-        void apprentice::on_read_from(const yijinjing::event_ptr &event)
+        void apprentice::on_read_from(const event_ptr &event)
         {
-            const msg::data::RequestReadFrom &request = event->data<msg::data::RequestReadFrom>();
+            const RequestReadFrom &request = event->data<RequestReadFrom>();
             SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
                         get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
                         time::strftime(request.from_time));
-            uint32_t dest_id = event->msg_type() == msg::type::RequestReadFromPublic ? 0 : get_live_home_uid();
+            uint32_t dest_id = event->msg_type() == RequestReadFromPublic::tag ? 0 : get_live_home_uid();
             reader_->join(get_location(request.source_id), dest_id, request.from_time);
         }
 
@@ -270,7 +269,7 @@ namespace kungfu
         {
             auto now = time::now_in_nano();
             nlohmann::json request;
-            request["msg_type"] = msg::type::Register;
+            request["msg_type"] = Register::tag;
             request["gen_time"] = now;
             request["trigger_time"] = now;
             request["source"] = get_home_uid();
@@ -295,7 +294,7 @@ namespace kungfu
             get_io_device()->get_publisher()->publish(request.dump());
         }
 
-        void apprentice::register_location_from_event(const yijinjing::event_ptr &event)
+        void apprentice::register_location_from_event(const event_ptr &event)
         {
             const char *buffer = &(event->data<char>());
             std::string json_str{};
@@ -310,7 +309,7 @@ namespace kungfu
             register_location(event->trigger_time(), app_location);
         }
 
-        void apprentice::deregister_location_from_event(const yijinjing::event_ptr &event)
+        void apprentice::deregister_location_from_event(const event_ptr &event)
         {
             const char *buffer = &(event->data<char>());
             std::string json_str{};

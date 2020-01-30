@@ -15,21 +15,22 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/functional.h>
 
+#include <kungfu/longfist.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
-#include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/practice/master.h>
 #include <kungfu/practice/apprentice.h>
 
 namespace py = pybind11;
 
+using namespace kungfu;
+using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
@@ -171,9 +172,9 @@ public:
     }
 };
 
-msg::data::RequestReadFrom get_RequestReadFrom(const frame_ptr& f)
+RequestReadFrom get_RequestReadFrom(const frame_ptr& f)
 {
-    return f->data<msg::data::RequestReadFrom>();
+    return f->data<RequestReadFrom>();
 }
 
 PYBIND11_MODULE(pyyjj, m)
@@ -360,8 +361,8 @@ PYBIND11_MODULE(pyyjj, m)
             .def("run", &apprentice::run);
 
 
-    py::class_<msg::data::RequestReadFrom, std::shared_ptr<msg::data::RequestReadFrom>>(m, "RequestReadFrom")
-            .def_readonly("source_id", &msg::data::RequestReadFrom::source_id)
-            .def_readonly("from_time", &msg::data::RequestReadFrom::from_time);
-    m.def("get_RequestReadFrom", &get_RequestReadFrom);
+//    py::class_<msg::data::RequestReadFrom, std::shared_ptr<msg::data::RequestReadFrom>>(m, "RequestReadFrom")
+//            .def_readonly("source_id", &msg::data::RequestReadFrom::source_id)
+//            .def_readonly("from_time", &msg::data::RequestReadFrom::from_time);
+//    m.def("get_RequestReadFrom", &get_RequestReadFrom);
 }

@@ -9,33 +9,25 @@
 
 #define __JOURNAL_VERSION__ 4
 
-namespace kungfu
+namespace kungfu::yijinjing::journal
 {
 
-    namespace yijinjing
+    FORWARD_DECLARE_PTR(frame)
+
+    FORWARD_DECLARE_PTR(page)
+
+    FORWARD_DECLARE_PTR(journal)
+
+    FORWARD_DECLARE_PTR(reader)
+
+    FORWARD_DECLARE_PTR(writer)
+
+    class journal_error : public std::runtime_error
     {
-
-        namespace journal
-        {
-
-            FORWARD_DECLARE_PTR(frame)
-
-            FORWARD_DECLARE_PTR(page)
-
-            FORWARD_DECLARE_PTR(journal)
-
-            FORWARD_DECLARE_PTR(reader)
-
-            FORWARD_DECLARE_PTR(writer)
-
-            class journal_error : public std::runtime_error
-            {
-            public:
-                journal_error(const std::string &message) : runtime_error(message)
-                {}
-            };
-        }
-    }
+    public:
+        journal_error(const std::string &message) : runtime_error(message)
+        {}
+    };
 }
 
 #endif //KUNGFU_YIJINJING_JOURNAL_COMMON_H

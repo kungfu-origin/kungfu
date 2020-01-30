@@ -20,83 +20,75 @@
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
-namespace kungfu
+namespace kungfu::yijinjing::journal
 {
-
-    namespace yijinjing
+    reader::~reader()
     {
+        journals_.clear();
+    }
 
-        namespace journal
+    void
+    reader::join(const data::location_ptr &location, uint32_t dest_id, const int64_t from_time)
+    {
+        for (const auto &journal : journals_)
         {
-            reader::~reader()
+            if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
             {
-                journals_.clear();
+                SPDLOG_WARN("reader can not join journal {}/{} more than once", location->uname, dest_id);
+                return;
             }
+        }
+        journals_.push_back(std::make_shared<journal>(location, dest_id, false, lazy_));
+        journals_.back()->seek_to_time(from_time);
+        if (current_ == nullptr)
+        {
+            sort(); // do not sort if current_ is set (because we could be in process of reading)
+        }
+    }
 
-            void
-            reader::join(const data::location_ptr &location, uint32_t dest_id, const int64_t from_time)
-            {
-                for (const auto &journal : journals_)
-                {
-                    if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
-                    {
-                        SPDLOG_WARN("reader can not join journal {}/{} more than once", location->uname, dest_id);
-                        return;
-                    }
-                }
-                journals_.push_back(std::make_shared<journal>(location, dest_id, false, lazy_));
-                journals_.back()->seek_to_time(from_time);
-                if (current_ == nullptr)
-                {
-                    sort(); // do not sort if current_ is set (because we could be in process of reading)
-                }
-            }
+    void reader::disjoin(const uint32_t location_uid)
+    {
+        journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
+                                       [&](journal_ptr j)
+                                       { return j->location_->uid == location_uid; }), journals_.end());
+        current_ = nullptr;
+        sort();
+    }
 
-            void reader::disjoin(const uint32_t location_uid)
-            {
-                journals_.erase(std::remove_if(journals_.begin(), journals_.end(),
-                                               [&](journal_ptr j)
-                                               { return j->location_->uid == location_uid; }), journals_.end());
-                current_ = nullptr;
-                sort();
-            }
+    bool reader::data_available()
+    {
+        sort();
+        return current_ != nullptr && current_frame()->has_data();
+    }
 
-            bool reader::data_available()
-            {
-                sort();
-                return current_ != nullptr && current_frame()->has_data();
-            }
+    void reader::seek_to_time(int64_t nanotime)
+    {
+        for (const auto &journal : journals_)
+        {
+            journal->seek_to_time(nanotime);
+        }
+        sort();
+    }
 
-            void reader::seek_to_time(int64_t nanotime)
-            {
-                for (const auto &journal : journals_)
-                {
-                    journal->seek_to_time(nanotime);
-                }
-                sort();
-            }
+    void reader::next()
+    {
+        if (current_ != nullptr)
+        {
+            current_->next();
+        }
+        sort();
+    }
 
-            void reader::next()
+    void reader::sort()
+    {
+        int64_t min_time = time::now_in_nano();
+        for (const auto &journal : journals_)
+        {
+            const auto &&frame = journal->current_frame();
+            if (frame->has_data() && frame->gen_time() <= min_time)
             {
-                if(current_ != nullptr)
-                {
-                    current_->next();
-                }
-                sort();
-            }
-
-            void reader::sort()
-            {
-                int64_t min_time = time::now_in_nano();
-                for (const auto &journal : journals_)
-                {
-                    const auto &&frame = journal->current_frame();
-                    if (frame->has_data() && frame->gen_time() <= min_time)
-                    {
-                        min_time = frame->gen_time();
-                        current_ = journal.get();
-                    }
-                }
+                min_time = frame->gen_time();
+                current_ = journal.get();
             }
         }
     }

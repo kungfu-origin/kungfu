@@ -4,8 +4,8 @@
 #include <string>
 #include <map>
 
+#include <kungfu/longfist.h>
 #include <kungfu/yijinjing/common.h>
-#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 
 namespace kungfu
@@ -24,9 +24,9 @@ namespace kungfu
 
                 void on_start() override;
 
-                bool subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
+                bool subscribe(const std::vector<longfist::types::Instrument> &instruments) override;
 
-                bool unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments) override;
+                bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) override;
             };
         }
     }

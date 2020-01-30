@@ -28,9 +28,9 @@ namespace kungfu
 
                 void on_start() override;
 
-                bool insert_order(const yijinjing::event_ptr &event) override;
+                bool insert_order(const event_ptr &event) override;
 
-                bool cancel_order(const yijinjing::event_ptr &event) override;
+                bool cancel_order(const event_ptr &event) override;
 
                 bool req_position() override;
 

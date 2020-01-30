@@ -17,8 +17,8 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
+#include <kungfu/longfist.h>
 #include <kungfu/yijinjing/common.h>
-#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
@@ -32,11 +32,14 @@
 
 namespace py = pybind11;
 namespace kwb = kungfu::wingchun::book;
+
+using namespace kungfu;
+using namespace kungfu::longfist;
+using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::broker;
 using namespace kungfu::wingchun::service;
-using namespace kungfu::wingchun::msg::data;
 
 class PyMarketData: public MarketData
 {
@@ -58,9 +61,9 @@ public:
     using Trader::Trader;
     const AccountType get_account_type() const override
     { PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type,); }
-    bool insert_order(const kungfu::yijinjing::event_ptr &event) override
+    bool insert_order(const kungfu::event_ptr &event) override
     { PYBIND11_OVERLOAD_PURE(bool, Trader, insert_order, event); }
-    bool cancel_order(const kungfu::yijinjing::event_ptr &event) override
+    bool cancel_order(const kungfu::event_ptr &event) override
     { PYBIND11_OVERLOAD_PURE(bool, Trader, cancel_order, event); }
     bool req_position() override
     { PYBIND11_OVERLOAD_PURE(bool, Trader, req_position,); }
@@ -221,19 +224,19 @@ public:
 PYBIND11_MODULE(pywingchun, m)
 {
     auto m_utils = m.def_submodule("utils");
-    m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
+//    m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
     m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
     m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
     m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);
-    m_utils.def("order_from_input", [](const kungfu::wingchun::msg::data::OrderInput &input)
+    m_utils.def("order_from_input", [](const OrderInput &input)
     {
-        kungfu::wingchun::msg::data::Order order = {};
-        kungfu::wingchun::msg::data::order_from_input(input, order);
+        Order order = {};
+        order_from_input(input, order);
         return order;
     });
 
     auto m_constants = m.def_submodule("constants");
-
+/*
     py::enum_<kungfu::wingchun::InstrumentType>(m_constants, "InstrumentType", py::arithmetic())
             .value("Unknown", kungfu::wingchun::InstrumentType::Unknown)
             .value("Stock", kungfu::wingchun::InstrumentType::Stock)
@@ -734,7 +737,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def_readwrite("holder_uid", &PositionDetailEnd::holder_uid)
             .def_property_readonly("raw_address", [](const PositionDetailEnd &a) { return reinterpret_cast<uintptr_t>(&a);})
             .def("from_raw_address",[](uintptr_t addr) { return * reinterpret_cast<PositionDetailEnd*>(addr); })
-            .def("__sizeof__", [](const PositionDetailEnd &a) { return sizeof(a); });
+            .def("__sizeof__", [](const PositionDetailEnd &a) { return sizeof(a); });*/
 
     py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
             .def(py::init())
@@ -866,7 +869,7 @@ PYBIND11_MODULE(pywingchun, m)
             .def("add_order", &algo::AlgoContext::add_order);
 
     py::class_<service::Algo, PyAlgoService, service::Algo_ptr>(m, "AlgoService")
-            .def(py::init<data::locator_ptr, data::mode, bool>())
+//            .def(py::init<data::locator_ptr, data::mode, bool>())
             .def_property_readonly("algo_context", &service::Algo::get_algo_context)
             .def_property_readonly("io_device", &service::Algo::get_io_device)
             .def("now", &service::Algo::now)

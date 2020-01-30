@@ -88,7 +88,7 @@ set (NN_SOURCES
     utils/list.h
     utils/list.c
     utils/msg.h
-    utils/msg.c
+        utils/message.c
     utils/condvar.h
     utils/condvar.c
     utils/mutex.h

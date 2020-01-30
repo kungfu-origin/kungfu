@@ -69,12 +69,12 @@ namespace kungfu
                 writers_[dest_id]->write(trigger_time, msg_type, data);
             }
 
-            virtual void on_trading_day(const yijinjing::event_ptr &event, int64_t daytime)
+            virtual void on_trading_day(const event_ptr &event, int64_t daytime)
             {}
 
-            void add_timer(int64_t nanotime, const std::function<void(yijinjing::event_ptr)> &callback);
+            void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
-            void add_time_interval(int64_t nanotime, const std::function<void(yijinjing::event_ptr)> &callback);
+            void add_time_interval(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
         protected:
             yijinjing::data::location_ptr config_location_;
@@ -84,56 +84,55 @@ namespace kungfu
             virtual void on_start()
             {}
 
-            virtual void on_write_to(const yijinjing::event_ptr &event);
+            virtual void on_write_to(const event_ptr &event);
 
-            virtual void on_read_from(const yijinjing::event_ptr &event);
+            virtual void on_read_from(const event_ptr &event);
 
-            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> timer(int64_t nanotime)
+            std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime)
             {
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
                 int64_t duration_ns = nanotime - now_;
-                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
+                longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
                 r.id = timer_usage_count;
                 r.duration = duration_ns;
                 r.repeat = 1;
                 writer->close_data();
                 timer_checkpoints_[timer_usage_count] = now_;
                 timer_usage_count_++;
-                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
+                return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
                 {
-                    return events_ | rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                    return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e)
                                                 {
-                                                    return (e->msg_type() == yijinjing::msg::type::Time &&
+                                                    return (e->msg_type() == longfist::types::Time::tag &&
                                                             e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns);
                                                 }) | rx::first();
                 };
             }
 
             template<typename Duration, typename Enabled = rx::is_duration<Duration>>
-            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> time_interval(Duration &&d)
+            std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> time_interval(Duration &&d)
             {
                 auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
+                longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
                 r.id = timer_usage_count;
                 r.duration = duration_ns;
                 r.repeat = 1;
                 writer->close_data();
                 timer_checkpoints_[timer_usage_count] = now_;
                 timer_usage_count_++;
-                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
+                return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
                 {
                     return events_ |
-                           rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                           rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e)
                                       {
-                                          if (e->msg_type() == yijinjing::msg::type::Time &&
+                                          if (e->msg_type() == longfist::types::Time::tag &&
                                               e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
                                           {
                                               auto writer = writers_[master_commands_location_->uid];
-                                              yijinjing::msg::data::TimeRequest &r = writer->open_data
-                                                      <yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
+                                              longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
                                               r.id = timer_usage_count;
                                               r.duration = duration_ns;
                                               r.repeat = 1;
@@ -149,27 +148,27 @@ namespace kungfu
             }
 
             template<typename Duration, typename Enabled = rx::is_duration<Duration>>
-            std::function<rx::observable<yijinjing::event_ptr>(rx::observable<yijinjing::event_ptr>)> timeout(Duration &&d)
+            std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timeout(Duration &&d)
             {
                 auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
                 auto writer = writers_[master_commands_location_->uid];
                 int32_t timer_usage_count = timer_usage_count_;
-                yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0, yijinjing::msg::type::TimeRequest);
+                longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
                 r.id = timer_usage_count;
                 r.duration = duration_ns;
                 r.repeat = 1;
                 writer->close_data();
                 timer_checkpoints_[timer_usage_count] = now_;
                 timer_usage_count_++;
-                return [&, duration_ns, timer_usage_count](rx::observable<yijinjing::event_ptr> src)
+                return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
                 {
-                    return (src | rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                    return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e)
                                              {
-                                                 if (e->msg_type() != yijinjing::msg::type::Time)
+                                                 if (e->msg_type() != longfist::types::Time::tag)
                                                  {
                                                      auto writer = writers_[master_commands_location_->uid];
-                                                     yijinjing::msg::data::TimeRequest &r = writer->open_data<yijinjing::msg::data::TimeRequest>(0,
-                                                                                                                                                 yijinjing::msg::type::TimeRequest);
+                                                     longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0,
+                                                                                                                                       longfist::types::TimeRequest::tag);
                                                      r.id = timer_usage_count;
                                                      r.duration = duration_ns;
                                                      r.repeat = 1;
@@ -180,7 +179,7 @@ namespace kungfu
                                                  {
                                                      return false;
                                                  }
-                                             })).merge(events_ | rx::filter([&, duration_ns, timer_usage_count](yijinjing::event_ptr e)
+                                             })).merge(events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e)
                                                                             {
                                                                                 if (e->gen_time() >
                                                                                     timer_checkpoints_[timer_usage_count] + duration_ns)
@@ -200,8 +199,8 @@ namespace kungfu
 
             void checkin();
 
-            void register_location_from_event(const yijinjing::event_ptr &event);
-            void deregister_location_from_event(const yijinjing::event_ptr &event);
+            void register_location_from_event(const event_ptr &event);
+            void deregister_location_from_event(const event_ptr &event);
         };
 
         DECLARE_PTR(apprentice)

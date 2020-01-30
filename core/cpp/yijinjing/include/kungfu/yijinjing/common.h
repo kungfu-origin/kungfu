@@ -30,19 +30,6 @@
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#ifndef _WIN32
-#define YJJ_DATA_STRUCT_BEGIN
-#define YJJ_DATA_STRUCT_END __attribute__((packed))
-#else
-#define YJJ_DATA_STRUCT_BEGIN __pragma(pack(push, 1))
-#define YJJ_DATA_STRUCT_END __pragma(pack(pop))
-#endif
-
-#define YJJ_DEFINE_DATA_STRUCT(NAME, TYPE, ...) \
-YJJ_DATA_STRUCT_BEGIN \
-struct NAME : public kungfu::yijinjing::reflectable { constexpr static int type = TYPE; BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } \
-YJJ_DATA_STRUCT_END
-
 namespace kungfu
 {
     namespace yijinjing
@@ -59,47 +46,6 @@ namespace kungfu
         };
 
         struct reflectable {};
-
-        class event
-        {
-        public:
-
-            virtual ~event() = default;
-
-            [[nodiscard]] virtual int64_t gen_time() const = 0;
-
-            [[nodiscard]] virtual int64_t trigger_time() const = 0;
-
-            [[nodiscard]] virtual int32_t msg_type() const = 0;
-
-            [[nodiscard]] virtual uint32_t source() const = 0;
-
-            [[nodiscard]] virtual uint32_t dest() const = 0;
-
-            [[nodiscard]] virtual uint32_t data_length() const = 0;
-
-            [[nodiscard]] virtual const char *data_as_bytes() const = 0;
-
-            [[nodiscard]] virtual std::string data_as_string() const = 0;
-
-            [[nodiscard]] virtual std::string to_string() const = 0;
-
-            /**
-             * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
-             * @tparam T
-             * @return a casted reference to the underlying memory address
-             */
-            template<typename T>
-            inline const T &data() const
-            {
-                return *(reinterpret_cast<const T *>(data_address()));
-            }
-
-        protected:
-            virtual const void *data_address() const = 0;
-        };
-
-        DECLARE_PTR(event)
 
         class publisher
         {
@@ -310,7 +256,7 @@ namespace kungfu
 
         inline auto is = [](int32_t msg_type)
         {
-            return filter([=](yijinjing::event_ptr e)
+            return filter([=](const event_ptr &e)
                           {
                               return e->msg_type() == msg_type;
                           });
@@ -318,7 +264,7 @@ namespace kungfu
 
         inline auto from = [](uint32_t source)
         {
-            return filter([=](yijinjing::event_ptr e)
+            return filter([=](const event_ptr &e)
                           {
                               return e->source() == source;
                           });
@@ -326,7 +272,7 @@ namespace kungfu
 
         inline auto to = [](uint32_t dest)
         {
-            return filter([=](yijinjing::event_ptr e)
+            return filter([=](const event_ptr &e)
                           {
                               return e->dest() == dest;
                           });
@@ -334,7 +280,7 @@ namespace kungfu
 
         inline auto trace = []()
         {
-            return map([=](yijinjing::event_ptr e)
+            return map([=](const event_ptr &e)
                        {
                            printf("coming event %d\n", e->msg_type());
                            return e;
@@ -353,15 +299,15 @@ namespace kungfu
         }
 
         template<class Arg>
-        inline auto $(Arg an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<Arg>(an), interrupt_on_error))
+        inline auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error))
         {
-            return subscribe<yijinjing::event_ptr>(std::forward<Arg>(an), interrupt_on_error);
+            return subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error);
         }
 
         template<class... ArgN>
-        inline auto $(ArgN &&... an) -> decltype(subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...))
+        inline auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...))
         {
-            return subscribe<yijinjing::event_ptr>(std::forward<ArgN>(an)...);
+            return subscribe<event_ptr>(std::forward<ArgN>(an)...);
         }
 
         template<class T, class Observable, class Subject>
@@ -421,7 +367,7 @@ namespace kungfu
         };
 
         template<
-                class Observable = rx::observable <yijinjing::event_ptr>,
+                class Observable = rx::observable <event_ptr>,
                 class SourceValue = rx::util::value_type_t <Observable>,
                 class Subject = rx::subjects::subject <SourceValue>,
                 class Steppable = rx::steppable <SourceValue, rx::util::decay_t<Observable>, Subject>,

@@ -21,12 +21,12 @@ namespace kungfu
                 SPDLOG_INFO("Start kfext demo TD");
             }
 
-            bool TraderDemo::insert_order(const yijinjing::event_ptr &event)
+            bool TraderDemo::insert_order(const event_ptr &event)
             {
                 return false;
             }
 
-            bool TraderDemo::cancel_order(const yijinjing::event_ptr &event)
+            bool TraderDemo::cancel_order(const event_ptr &event)
             {
                 return false;
             }

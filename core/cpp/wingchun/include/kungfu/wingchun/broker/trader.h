@@ -5,56 +5,50 @@
 #ifndef WINGCHUN_TRADER_H
 #define WINGCHUN_TRADER_H
 
+#include <kungfu/longfist.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/apprentice.h>
-#include <kungfu/wingchun/msg.h>
 
-namespace kungfu
+namespace kungfu::wingchun::broker
 {
-    namespace wingchun
+    class Trader : public practice::apprentice
     {
-        namespace broker
+    public:
+        explicit Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source, const std::string &account_id);
+
+        virtual ~Trader() = default;
+
+        const std::string &get_account_id() const
+        { return account_id_; }
+
+        const std::string &get_source() const
+        { return source_; }
+
+        virtual const longfist::AccountType get_account_type() const = 0;
+
+        virtual bool insert_order(const event_ptr &event) = 0;
+
+        virtual bool cancel_order(const event_ptr &event) = 0;
+
+        virtual bool req_position() = 0;
+
+        virtual bool req_account() = 0;
+
+        virtual void on_start() override;
+
+    protected:
+
+        void publish_state(longfist::BrokerState state)
         {
-            class Trader : public practice::apprentice
-            {
-            public:
-                explicit Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source, const std::string &account_id);
-
-                virtual ~Trader() = default;
-
-                const std::string &get_account_id() const
-                { return account_id_; }
-
-                const std::string &get_source() const
-                { return source_; }
-
-                virtual const AccountType get_account_type() const = 0;
-
-                virtual bool insert_order(const yijinjing::event_ptr &event) = 0;
-
-                virtual bool cancel_order(const yijinjing::event_ptr &event) = 0;
-
-                virtual bool req_position() = 0;
-
-                virtual bool req_account() = 0;
-
-                virtual void on_start() override;
-
-            protected:
-
-                void publish_state(msg::data::BrokerState state)
-                {
-                    auto s = static_cast<int32_t>(state);
-                    write_to(0, msg::type::BrokerState, s);
-                }
-
-            private:
-                std::string source_;
-                std::string account_id_;
-            };
+            auto s = static_cast<int32_t>(state);
+            write_to(0, longfist::types::BrokerStateUpdate::tag, s);
         }
-    }
+
+    private:
+        std::string source_;
+        std::string account_id_;
+    };
 }
 
 #endif //WINGCHUN_TRADER_H

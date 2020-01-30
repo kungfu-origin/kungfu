@@ -27,147 +27,143 @@
 
 #include <utility>
 
-namespace kungfu
+namespace kungfu::yijinjing
 {
 
-    namespace yijinjing
+    FORWARD_DECLARE_PTR(session)
+
+    class io_device
     {
+    public:
 
-        FORWARD_DECLARE_PTR(session)
+        io_device(data::location_ptr home, bool low_latency, bool lazy, bool unique = true);
 
-        class io_device
-        {
-        public:
+        virtual ~io_device();
 
-            io_device(data::location_ptr home, bool low_latency, bool lazy, bool unique = true);
+        [[nodiscard]] data::location_ptr get_home() const
+        { return home_; }
 
-            virtual ~io_device();
+        [[nodiscard]] data::location_ptr get_live_home() const
+        { return live_home_; }
 
-            [[nodiscard]] data::location_ptr get_home() const
-            { return home_; }
+        bool is_low_latency()
+        { return low_latency_; }
 
-            [[nodiscard]] data::location_ptr get_live_home() const
-            { return live_home_; }
+        journal::reader_ptr open_reader_to_subscribe();
 
-            bool is_low_latency()
-            { return low_latency_; }
+        journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
 
-            journal::reader_ptr open_reader_to_subscribe();
+        journal::writer_ptr open_writer(uint32_t dest_id);
 
-            journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
+        journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
 
-            journal::writer_ptr open_writer(uint32_t dest_id);
+        nanomsg::socket_ptr
+        connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
 
-            journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
+        nanomsg::socket_ptr
+        bind_socket(const nanomsg::protocol &p, int timeout = 0);
 
-            nanomsg::socket_ptr
-            connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
+        [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const
+        { return url_factory_; }
 
-            nanomsg::socket_ptr
-            bind_socket(const nanomsg::protocol &p, int timeout = 0);
+        publisher_ptr get_publisher()
+        { return publisher_; }
 
-            [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const
-            { return url_factory_; }
+        observer_ptr get_observer()
+        { return observer_; }
 
-            publisher_ptr get_publisher()
-            { return publisher_; }
+        [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;
 
-            observer_ptr get_observer()
-            { return observer_; }
+        static void init_sqlite();
 
-            [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;
+        static void shutdown_sqlite();
 
-            static void init_sqlite();
+    protected:
+        data::location_ptr home_;
+        data::location_ptr db_home_;
+        data::location_ptr live_home_;
+        const bool low_latency_;
+        const bool lazy_;
+        const bool unique_;
+        nanomsg::url_factory_ptr url_factory_;
+        publisher_ptr publisher_;
+        observer_ptr observer_;
 
-            static void shutdown_sqlite();
+        sqlite3 *index_db_ = nullptr;
+        char *db_error_msg_ = nullptr;
+        sqlite3_session *db_session_ = nullptr;
+        int db_changeset_nb_ = 0;
+        void *db_changeset_ptr_ = nullptr;
+        sqlite3_stmt *stmt_find_sessions_ = nullptr;
+    };
 
-        protected:
-            data::location_ptr home_;
-            data::location_ptr db_home_;
-            data::location_ptr live_home_;
-            const bool low_latency_;
-            const bool lazy_;
-            const bool unique_;
-            nanomsg::url_factory_ptr url_factory_;
-            publisher_ptr publisher_;
-            observer_ptr observer_;
+    DECLARE_PTR(io_device)
 
-            sqlite3 *index_db_ = nullptr;
-            char *db_error_msg_ = nullptr;
-            sqlite3_session *db_session_ = nullptr;
-            int db_changeset_nb_ = 0;
-            void *db_changeset_ptr_ = nullptr;
-            sqlite3_stmt *stmt_find_sessions_ = nullptr;
-        };
+    class io_device_with_reply : public io_device
+    {
+    public:
 
-        DECLARE_PTR(io_device)
+        io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
 
-        class io_device_with_reply : public io_device
-        {
-        public:
+        [[nodiscard]] nanomsg::socket_ptr get_rep_sock() const
+        { return rep_sock_; }
 
-            io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
+    protected:
+        nanomsg::socket_ptr rep_sock_;
+    };
 
-            [[nodiscard]] nanomsg::socket_ptr get_rep_sock() const
-            { return rep_sock_; }
+    DECLARE_PTR(io_device_with_reply)
 
-        protected:
-            nanomsg::socket_ptr rep_sock_;
-        };
+    class io_device_master : public io_device_with_reply
+    {
+    public:
+        io_device_master(data::location_ptr home, bool low_latency);
 
-        DECLARE_PTR(io_device_with_reply)
+        void open_session(const data::location_ptr &location, int64_t time);
 
-        class io_device_master : public io_device_with_reply
-        {
-        public:
-            io_device_master(data::location_ptr home, bool low_latency);
+        void update_session(const journal::frame_ptr &frame);
 
-            void open_session(const data::location_ptr &location, int64_t time);
+        void close_session(const data::location_ptr &location, int64_t time);
 
-            void update_session(const journal::frame_ptr &frame);
+        void rebuild_index_db();
 
-            void close_session(const data::location_ptr &location, int64_t time);
+    private:
+        std::unordered_map<uint32_t, session_ptr> sessions_;
+        sqlite3_stmt *stmt_clean_sessions_;
+        sqlite3_stmt *stmt_open_session_;
+        sqlite3_stmt *stmt_close_session_;
+    };
 
-            void rebuild_index_db();
+    DECLARE_PTR(io_device_master)
 
-        private:
-            std::unordered_map<uint32_t, session_ptr> sessions_;
-            sqlite3_stmt *stmt_clean_sessions_;
-            sqlite3_stmt *stmt_open_session_;
-            sqlite3_stmt *stmt_close_session_;
-        };
+    class io_device_client : public io_device_with_reply
+    {
+    public:
+        io_device_client(data::location_ptr home, bool low_latency);
+    };
 
-        DECLARE_PTR(io_device_master)
+    DECLARE_PTR(io_device_client)
 
-        class io_device_client : public io_device_with_reply
-        {
-        public:
-            io_device_client(data::location_ptr home, bool low_latency);
-        };
+    class session
+    {
+    public:
+        explicit session(data::location_ptr location) : location_(std::move(location))
+        {}
 
-        DECLARE_PTR(io_device_client)
+        ~session() = default;
 
-        class session
-        {
-        public:
-            explicit session(data::location_ptr location): location_(std::move(location))
-            {}
+        void update(const journal::frame_ptr &frame);
 
-            ~session() = default;
+    private:
+        const data::location_ptr location_;
+        int64_t begin_time_ = 0;
+        int64_t end_time_ = -1;
+        int frame_count_ = 0;
+        uint64_t data_size_ = 0;
+        std::vector<uint32_t> write_to_;
+        std::vector<uint32_t> read_from_;
 
-            void update(const journal::frame_ptr &frame);
-
-        private:
-            const data::location_ptr location_;
-            int64_t begin_time_ = 0;
-            int64_t end_time_ = -1;
-            int frame_count_ = 0;
-            uint64_t data_size_ = 0;
-            std::vector<uint32_t> write_to_;
-            std::vector<uint32_t> read_from_;
-
-            friend io_device_master;
-        };
-    }
+        friend io_device_master;
+    };
 }
 #endif //KUNGFU_IO_H

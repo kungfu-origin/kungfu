@@ -11,17 +11,18 @@
 #include <Psapi.h>
 #endif // _WINDOWS
 
-namespace kungfu {
-    namespace yijinjing {
-        namespace util {
+namespace kungfu::yijinjing::util
+{
 
 #ifdef _WINDOWS
-            DWORD print_stack_trace(EXCEPTION_POINTERS *ep);
+
+    DWORD print_stack_trace(EXCEPTION_POINTERS *ep);
+
 #else
-            void print_stack_trace(FILE *out = stderr);
+
+    void print_stack_trace(FILE *out = stderr);
+
 #endif // _WINDOWS
-        }
-    }
 }
 
 #endif //KUNGFU_STACKTRACE_H
