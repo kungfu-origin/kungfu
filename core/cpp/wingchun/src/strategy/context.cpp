@@ -209,7 +209,7 @@ namespace kungfu::wingchun::strategy
     {
         for (const auto &symbol: symbols)
         {
-            auto symbol_id = get_symbol_id(symbol, exchange);
+            auto symbol_id = get_symbol_id(symbol.c_str(), exchange.c_str());
             subscribed_symbols_[symbol_id] = symbol_id;
         }
 

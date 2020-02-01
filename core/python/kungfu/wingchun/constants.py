@@ -1,10 +1,11 @@
+from pykungfu import longfist as pylongfist
 
-import pywingchun
 
 class Source:
     CTP = "ctp"
     XTP = "xtp"
     OES = "oes"
+
 
 class Exchange:
     SSE = "SSE"
@@ -15,24 +16,26 @@ class Exchange:
     CFFEX = "CFFEX"
     INE = "INE"
 
+
 class Region:
     CN = 'CN'
     HK = 'HK'
 
-InstrumentType = pywingchun.constants.InstrumentType
-ExecType = pywingchun.constants.ExecType
-Side = pywingchun.constants.Side
-Offset = pywingchun.constants.Offset
-BsFlag = pywingchun.constants.BsFlag
-OrderStatus = pywingchun.constants.OrderStatus
-Direction = pywingchun.constants.Direction
-PriceType = pywingchun.constants.PriceType
-VolumeCondition = pywingchun.constants.VolumeCondition
-TimeCondition = pywingchun.constants.TimeCondition
-OrderActionFlag = pywingchun.constants.OrderActionFlag
-LedgerCategory = pywingchun.constants.LedgerCategory
-HedgeFlag = pywingchun.constants.HedgeFlag
-CommissionRateMode = pywingchun.constants.CommissionRateMode
+
+InstrumentType = pylongfist.enum.InstrumentType
+ExecType = pylongfist.enum.ExecType
+Side = pylongfist.enum.Side
+Offset = pylongfist.enum.Offset
+BsFlag = pylongfist.enum.BsFlag
+OrderStatus = pylongfist.enum.OrderStatus
+Direction = pylongfist.enum.Direction
+PriceType = pylongfist.enum.PriceType
+VolumeCondition = pylongfist.enum.VolumeCondition
+TimeCondition = pylongfist.enum.TimeCondition
+OrderActionFlag = pylongfist.enum.OrderActionFlag
+LedgerCategory = pylongfist.enum.LedgerCategory
+HedgeFlag = pylongfist.enum.HedgeFlag
+CommissionRateMode = pylongfist.enum.CommissionRateMode
 AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
 InstrumentTypeInStockAccount = [InstrumentType.Stock,

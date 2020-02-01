@@ -12,6 +12,8 @@
 #include <kungfu/longfist/enum.h>
 #include <kungfu/longfist/types.h>
 
+#define TYPE_PAIR(T) boost::hana::make_pair(BOOST_HANA_STRING(#T), boost::hana::type_c<T>)
+
 namespace kungfu::longfist
 {
 
@@ -24,37 +26,38 @@ namespace kungfu::longfist
 
     namespace types
     {
-        static constexpr auto ALL = boost::hana::make_tuple(
-                boost::hana::type_c<TimeRequest>,
-                boost::hana::type_c<RequestReadFrom>,
-                boost::hana::type_c<RequestWriteTo>,
-                boost::hana::type_c<Channel>,
-                boost::hana::type_c<Instrument>,
-                boost::hana::type_c<Quote>,
-                boost::hana::type_c<Entrust>,
-                boost::hana::type_c<Transaction>,
-                boost::hana::type_c<Bar>,
-                boost::hana::type_c<OrderInput>,
-                boost::hana::type_c<OrderAction>,
-                boost::hana::type_c<OrderActionError>,
-                boost::hana::type_c<Order>,
-                boost::hana::type_c<Trade>,
-                boost::hana::type_c<Position>,
-                boost::hana::type_c<PositionEnd>,
-                boost::hana::type_c<PositionDetail>,
-                boost::hana::type_c<PositionDetailEnd>,
-                boost::hana::type_c<Report>
+        using namespace boost::hana::literals;
+        static constexpr auto DATA_STRUCTS = boost::hana::make_map(
+                TYPE_PAIR(TimeRequest),
+                TYPE_PAIR(RequestReadFrom),
+                TYPE_PAIR(RequestWriteTo),
+                TYPE_PAIR(Channel),
+                TYPE_PAIR(Instrument),
+                TYPE_PAIR(Quote),
+                TYPE_PAIR(Entrust),
+                TYPE_PAIR(Transaction),
+                TYPE_PAIR(Bar),
+                TYPE_PAIR(OrderInput),
+                TYPE_PAIR(OrderAction),
+                TYPE_PAIR(OrderActionError),
+                TYPE_PAIR(Order),
+                TYPE_PAIR(Trade),
+                TYPE_PAIR(Position),
+                TYPE_PAIR(PositionEnd),
+                TYPE_PAIR(PositionDetail),
+                TYPE_PAIR(PositionDetailEnd),
+                TYPE_PAIR(Report)
         );
     }
 
     static constexpr auto cast_invoke = [](const event_ptr &event, auto handler)
     {
-        boost::hana::for_each(types::ALL, [&](auto type)
+        boost::hana::for_each(types::DATA_STRUCTS, [&](auto it)
         {
-            using T = typename decltype(+type)::type;
+            using T = typename decltype(+boost::hana::second(it))::type;
             if (T::tag == event->msg_type())
             {
-                handler(type, event);
+                handler(boost::hana::second(it), event);
                 return;
             }
         });

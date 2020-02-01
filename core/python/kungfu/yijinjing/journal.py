@@ -3,11 +3,11 @@ import shutil
 import glob
 import re
 import json
-import pyyjj
+import pykungfu
+from pykungfu import yijinjing as pyyjj
 import pandas as pd
 import errno
 import kungfu.yijinjing.msg as yjj_msg
-
 
 os_sep = re.escape(os.sep)
 JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}'.format(
@@ -260,7 +260,8 @@ def trace_journal(ctx, session_id, io_type):
             try:
                 reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)
             except Exception as err:
-                ctx.logger.error("failed to join journal {}/{}, exception: {}".format(source_location.uname, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0), err)
+                ctx.logger.error("failed to join journal {}/{}, exception: {}".format(source_location.uname, location[
+                    'uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0), err)
         if frame.dest == home.uid and frame.msg_type == yjj_msg.Deregister:
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc['uid'])

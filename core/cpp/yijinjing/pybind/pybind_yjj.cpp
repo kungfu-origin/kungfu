@@ -179,186 +179,186 @@ RequestReadFrom get_RequestReadFrom(const frame_ptr& f)
 
 PYBIND11_MODULE(pyyjj, m)
 {
-    m.def("thread_id", &spdlog::details::os::thread_id);
-    m.def("in_color_terminal", &in_color_terminal);
-    m.def("color_print", &color_print);
-
-    // nanosecond-time related
-    m.def("now_in_nano", &time::now_in_nano);
-    m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
-    m.def("strptime", &time::strptime, py::arg("timestr"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
-    m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
-
-    m.def("setup_log", &kungfu::yijinjing::log::setup_log);
-
-    m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
-    m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
-    m.def("get_page_path", &page::get_page_path);
-
-    py::enum_<data::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
-            .value("LIVE", data::mode::LIVE)
-            .value("DATA", data::mode::DATA)
-            .value("REPLAY", data::mode::REPLAY)
-            .value("BACKTEST", data::mode::BACKTEST)
-            .export_values();
-    m.def("get_mode_name", &data::get_mode_name);
-    m.def("get_mode_by_name", &data::get_mode_by_name);
-
-    py::enum_<data::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
-            .value("MD", data::category::MD)
-            .value("TD", data::category::TD)
-            .value("STRATEGY", data::category::STRATEGY)
-            .value("SYSTEM", data::category::SYSTEM)
-            .export_values();
-    m.def("get_category_name", &data::get_category_name);
-
-    py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
-            .value("JOURNAL", data::layout::JOURNAL)
-            .value("SQLITE", data::layout::SQLITE)
-            .value("NANOMSG", data::layout::NANOMSG)
-            .value("LOG", data::layout::LOG)
-            .export_values();
-    m.def("get_layout_name", &data::get_layout_name);
-
-    py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
-            .def_property_readonly("gen_time", &event::gen_time)
-            .def_property_readonly("trigger_time", &event::trigger_time)
-            .def_property_readonly("source", &event::source)
-            .def_property_readonly("dest", &event::dest)
-            .def_property_readonly("msg_type", &event::msg_type)
-            .def_property_readonly("data_length", &event::data_length)
-            .def_property_readonly("data_as_bytes", &event::data_as_bytes)
-            .def_property_readonly("data_as_string", &event::data_as_string)
-            .def("to_string", &event::to_string)
-            ;
-
-    py::class_<frame, event, frame_ptr>(m, "frame")
-            .def_property_readonly("gen_time", &frame::gen_time)
-            .def_property_readonly("trigger_time", &frame::trigger_time)
-            .def_property_readonly("source", &frame::source)
-            .def_property_readonly("dest", &frame::dest)
-            .def_property_readonly("msg_type", &frame::msg_type)
-            .def_property_readonly("frame_length", &frame::frame_length)
-            .def_property_readonly("header_length", &frame::header_length)
-            .def_property_readonly("data_length", &frame::data_length)
-            .def_property_readonly("address", &frame::address)
-            .def_property_readonly("data_as_bytes", &frame::data_as_bytes)
-            .def_property_readonly("data_as_string", &frame::data_as_string)
-            .def("has_data", &frame::has_data)
-            .def_property_readonly("data_address", [](const frame &f) {return f.address() + f.header_length();})
-            ;
-
-    py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
-            .def(py::init<data::mode, data::category, const std::string &, const std::string &, data::locator_ptr>())
-            .def_readonly("mode", &data::location::mode)
-            .def_readonly("category", &data::location::category)
-            .def_readonly("group", &data::location::group)
-            .def_readonly("name", &data::location::name)
-            .def_readonly("uname", &data::location::uname)
-            .def_readonly("uid", &data::location::uid)
-            .def_readonly("locator", &data::location::locator);
-
-    py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
-            .def(py::init())
-            .def("has_env", &data::locator::has_env)
-            .def("get_env", &data::locator::get_env)
-            .def("layout_dir", &data::locator::layout_dir)
-            .def("layout_file", &data::locator::layout_file)
-            .def("list_page_id", &data::locator::list_page_id)
-            .def("list_locations", &data::locator::list_locations, py::arg("category") = "*", py::arg("group") = "*", py::arg("name") = "*", py::arg("mode") = "*")
-            .def("list_location_dest", &data::locator::list_location_dest);
-
-    py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
-            .value("REPLY", nanomsg::protocol::REPLY)
-            .value("REQUEST", nanomsg::protocol::REQUEST)
-            .value("PUSH", nanomsg::protocol::PUSH)
-            .value("PULL", nanomsg::protocol::PULL)
-            .value("PUBLISH", nanomsg::protocol::PUBLISH)
-            .value("SUBSCRIBE", nanomsg::protocol::SUBSCRIBE)
-            .export_values();
-
-    py::class_<socket, socket_ptr>(m, "socket")
-            .def(py::init<protocol>(), py::arg("protocol"))
-            .def("setsockopt", &socket::setsockopt_str, py::arg("level"), py::arg("option"), py::arg("value"))
-            .def("setsockopt", &socket::setsockopt_int, py::arg("level"), py::arg("option"), py::arg("value"))
-            .def("getsockopt", &socket::getsockopt_int, py::arg("level"), py::arg("option"))
-            .def("bind", &socket::bind, py::arg("url"))
-            .def("connect", &socket::connect, py::arg("url"))
-            .def("shutdown", &socket::shutdown, py::arg("how") = 0)
-            .def("close", &socket::close)
-            .def("send", &socket::send, py::arg("msg"), py::arg("flags") = 0)
-            .def("recv", &socket::recv_msg, py::arg("flags") = 0)
-            .def("last_message", &socket::last_message);
-
-    py::class_<publisher, PyPublisher, publisher_ptr>(m, "publisher")
-            .def("publish", &publisher::publish)
-            .def("notify", &publisher::notify);
-
-    py::class_<observer, PyObserver, observer_ptr>(m, "observer")
-            .def("wait", &observer::wait)
-            .def("get_notice", &observer::get_notice);
-
-    py::class_<reader, reader_ptr>(m, "reader")
-            .def("subscribe", &reader::join)
-            .def("current_frame", &reader::current_frame)
-            .def("seek_to_time", &reader::seek_to_time)
-            .def("data_available", &reader::data_available)
-            .def("next", &reader::next)
-            .def("join", &reader::join)
-            .def("disjoin", &reader::disjoin);
-
-    py::class_<writer, writer_ptr>(m, "writer")
-            .def("write_raw", &writer::write_raw)
-            .def("write_str",
-                    [](const writer_ptr& w, int64_t trigger_time, int32_t msg_type, const std::string &data)
-                    {
-                        w->write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
-                    })
-            .def("current_frame_uid", &writer::current_frame_uid)
-            .def("mark", &writer::mark)
-            .def("mark_with_time", &writer::mark_with_time);
-
-    py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-    io_device.def(py::init<data::location_ptr, bool, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true, py::arg("unique") = false)
-            .def_property_readonly("publisher", &io_device::get_publisher)
-            .def_property_readonly("observer", &io_device::get_observer)
-            .def_property_readonly("home", &io_device::get_home)
-            .def_property_readonly("live_home", &io_device::get_live_home)
-            .def("open_reader", &io_device::open_reader)
-            .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
-            .def("open_writer", &io_device::open_writer)
-            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
-            .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0, py::arg("to") = INT64_MAX);
-
-    py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
-    io_device_with_reply.def(py::init<data::location_ptr, bool, bool>());
-
-    py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
-            .def(py::init<data::location_ptr, bool>())
-            .def("rebuild_index_db", &io_device_master::rebuild_index_db);
-
-    py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
-            .def(py::init<data::location_ptr, bool>());
-
-    py::class_<master, PyMaster>(m, "master")
-            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-            .def_property_readonly("io_device", &master::get_io_device)
-            .def("run", &master::run)
-            .def("publish_time", &master::publish_time)
-            .def("send_time", &master::send_time)
-            .def("on_register", &master::on_register)
-            .def("on_interval_check", &master::on_interval_check)
-            .def("on_exit", &master::on_exit)
-            .def("deregister_app", &master::deregister_app)
-            ;
-
-    py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
-            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-            .def_property_readonly("io_device", &apprentice::get_io_device)
-            .def("set_begin_time", &apprentice::set_begin_time)
-            .def("set_end_time", &apprentice::set_end_time)
-            .def("on_trading_day", &apprentice::on_trading_day)
-            .def("run", &apprentice::run);
+//    m.def("thread_id", &spdlog::details::os::thread_id);
+//    m.def("in_color_terminal", &in_color_terminal);
+//    m.def("color_print", &color_print);
+//
+//    // nanosecond-time related
+//    m.def("now_in_nano", &time::now_in_nano);
+//    m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+//    m.def("strptime", &time::strptime, py::arg("timestr"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+//    m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+//
+//    m.def("setup_log", &kungfu::yijinjing::log::setup_log);
+//
+//    m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
+//    m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
+//    m.def("get_page_path", &page::get_page_path);
+//
+//    py::enum_<data::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
+//            .value("LIVE", data::mode::LIVE)
+//            .value("DATA", data::mode::DATA)
+//            .value("REPLAY", data::mode::REPLAY)
+//            .value("BACKTEST", data::mode::BACKTEST)
+//            .export_values();
+//    m.def("get_mode_name", &data::get_mode_name);
+//    m.def("get_mode_by_name", &data::get_mode_by_name);
+//
+//    py::enum_<data::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
+//            .value("MD", data::category::MD)
+//            .value("TD", data::category::TD)
+//            .value("STRATEGY", data::category::STRATEGY)
+//            .value("SYSTEM", data::category::SYSTEM)
+//            .export_values();
+//    m.def("get_category_name", &data::get_category_name);
+//
+//    py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
+//            .value("JOURNAL", data::layout::JOURNAL)
+//            .value("SQLITE", data::layout::SQLITE)
+//            .value("NANOMSG", data::layout::NANOMSG)
+//            .value("LOG", data::layout::LOG)
+//            .export_values();
+//    m.def("get_layout_name", &data::get_layout_name);
+//
+//    py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
+//            .def_property_readonly("gen_time", &event::gen_time)
+//            .def_property_readonly("trigger_time", &event::trigger_time)
+//            .def_property_readonly("source", &event::source)
+//            .def_property_readonly("dest", &event::dest)
+//            .def_property_readonly("msg_type", &event::msg_type)
+//            .def_property_readonly("data_length", &event::data_length)
+//            .def_property_readonly("data_as_bytes", &event::data_as_bytes)
+//            .def_property_readonly("data_as_string", &event::data_as_string)
+//            .def("to_string", &event::to_string)
+//            ;
+//
+//    py::class_<frame, event, frame_ptr>(m, "frame")
+//            .def_property_readonly("gen_time", &frame::gen_time)
+//            .def_property_readonly("trigger_time", &frame::trigger_time)
+//            .def_property_readonly("source", &frame::source)
+//            .def_property_readonly("dest", &frame::dest)
+//            .def_property_readonly("msg_type", &frame::msg_type)
+//            .def_property_readonly("frame_length", &frame::frame_length)
+//            .def_property_readonly("header_length", &frame::header_length)
+//            .def_property_readonly("data_length", &frame::data_length)
+//            .def_property_readonly("address", &frame::address)
+//            .def_property_readonly("data_as_bytes", &frame::data_as_bytes)
+//            .def_property_readonly("data_as_string", &frame::data_as_string)
+//            .def("has_data", &frame::has_data)
+//            .def_property_readonly("data_address", [](const frame &f) {return f.address() + f.header_length();})
+//            ;
+//
+//    py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
+//            .def(py::init<data::mode, data::category, const std::string &, const std::string &, data::locator_ptr>())
+//            .def_readonly("mode", &data::location::mode)
+//            .def_readonly("category", &data::location::category)
+//            .def_readonly("group", &data::location::group)
+//            .def_readonly("name", &data::location::name)
+//            .def_readonly("uname", &data::location::uname)
+//            .def_readonly("uid", &data::location::uid)
+//            .def_readonly("locator", &data::location::locator);
+//
+//    py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
+//            .def(py::init())
+//            .def("has_env", &data::locator::has_env)
+//            .def("get_env", &data::locator::get_env)
+//            .def("layout_dir", &data::locator::layout_dir)
+//            .def("layout_file", &data::locator::layout_file)
+//            .def("list_page_id", &data::locator::list_page_id)
+//            .def("list_locations", &data::locator::list_locations, py::arg("category") = "*", py::arg("group") = "*", py::arg("name") = "*", py::arg("mode") = "*")
+//            .def("list_location_dest", &data::locator::list_location_dest);
+//
+//    py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
+//            .value("REPLY", nanomsg::protocol::REPLY)
+//            .value("REQUEST", nanomsg::protocol::REQUEST)
+//            .value("PUSH", nanomsg::protocol::PUSH)
+//            .value("PULL", nanomsg::protocol::PULL)
+//            .value("PUBLISH", nanomsg::protocol::PUBLISH)
+//            .value("SUBSCRIBE", nanomsg::protocol::SUBSCRIBE)
+//            .export_values();
+//
+//    py::class_<socket, socket_ptr>(m, "socket")
+//            .def(py::init<protocol>(), py::arg("protocol"))
+//            .def("setsockopt", &socket::setsockopt_str, py::arg("level"), py::arg("option"), py::arg("value"))
+//            .def("setsockopt", &socket::setsockopt_int, py::arg("level"), py::arg("option"), py::arg("value"))
+//            .def("getsockopt", &socket::getsockopt_int, py::arg("level"), py::arg("option"))
+//            .def("bind", &socket::bind, py::arg("url"))
+//            .def("connect", &socket::connect, py::arg("url"))
+//            .def("shutdown", &socket::shutdown, py::arg("how") = 0)
+//            .def("close", &socket::close)
+//            .def("send", &socket::send, py::arg("msg"), py::arg("flags") = 0)
+//            .def("recv", &socket::recv_msg, py::arg("flags") = 0)
+//            .def("last_message", &socket::last_message);
+//
+//    py::class_<publisher, PyPublisher, publisher_ptr>(m, "publisher")
+//            .def("publish", &publisher::publish)
+//            .def("notify", &publisher::notify);
+//
+//    py::class_<observer, PyObserver, observer_ptr>(m, "observer")
+//            .def("wait", &observer::wait)
+//            .def("get_notice", &observer::get_notice);
+//
+//    py::class_<reader, reader_ptr>(m, "reader")
+//            .def("subscribe", &reader::join)
+//            .def("current_frame", &reader::current_frame)
+//            .def("seek_to_time", &reader::seek_to_time)
+//            .def("data_available", &reader::data_available)
+//            .def("next", &reader::next)
+//            .def("join", &reader::join)
+//            .def("disjoin", &reader::disjoin);
+//
+//    py::class_<writer, writer_ptr>(m, "writer")
+//            .def("write_raw", &writer::write_raw)
+//            .def("write_str",
+//                    [](const writer_ptr& w, int64_t trigger_time, int32_t msg_type, const std::string &data)
+//                    {
+//                        w->write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
+//                    })
+//            .def("current_frame_uid", &writer::current_frame_uid)
+//            .def("mark", &writer::mark)
+//            .def("mark_with_time", &writer::mark_with_time);
+//
+//    py::class_<io_device, io_device_ptr> io_device(m, "io_device");
+//    io_device.def(py::init<data::location_ptr, bool, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true, py::arg("unique") = false)
+//            .def_property_readonly("publisher", &io_device::get_publisher)
+//            .def_property_readonly("observer", &io_device::get_observer)
+//            .def_property_readonly("home", &io_device::get_home)
+//            .def_property_readonly("live_home", &io_device::get_live_home)
+//            .def("open_reader", &io_device::open_reader)
+//            .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
+//            .def("open_writer", &io_device::open_writer)
+//            .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"), py::arg("timeout") = 0)
+//            .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0, py::arg("to") = INT64_MAX);
+//
+//    py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
+//    io_device_with_reply.def(py::init<data::location_ptr, bool, bool>());
+//
+//    py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
+//            .def(py::init<data::location_ptr, bool>())
+//            .def("rebuild_index_db", &io_device_master::rebuild_index_db);
+//
+//    py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
+//            .def(py::init<data::location_ptr, bool>());
+//
+//    py::class_<master, PyMaster>(m, "master")
+//            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+//            .def_property_readonly("io_device", &master::get_io_device)
+//            .def("run", &master::run)
+//            .def("publish_time", &master::publish_time)
+//            .def("send_time", &master::send_time)
+//            .def("on_register", &master::on_register)
+//            .def("on_interval_check", &master::on_interval_check)
+//            .def("on_exit", &master::on_exit)
+//            .def("deregister_app", &master::deregister_app)
+//            ;
+//
+//    py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
+//            .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+//            .def_property_readonly("io_device", &apprentice::get_io_device)
+//            .def("set_begin_time", &apprentice::set_begin_time)
+//            .def("set_end_time", &apprentice::set_end_time)
+//            .def("on_trading_day", &apprentice::on_trading_day)
+//            .def("run", &apprentice::run);
 
 
 //    py::class_<msg::data::RequestReadFrom, std::shared_ptr<msg::data::RequestReadFrom>>(m, "RequestReadFrom")

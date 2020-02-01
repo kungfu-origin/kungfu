@@ -4,7 +4,7 @@ import json
 import time
 import psutil
 import functools
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.msg as yjj_msg
 import kungfu.yijinjing.journal as kfj
@@ -21,6 +21,7 @@ def task(func):
     @functools.wraps(func)
     def task_wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     TASKS[func.__name__] = task_wrapper
     return task_wrapper
 

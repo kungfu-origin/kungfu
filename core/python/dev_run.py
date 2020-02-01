@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -9,5 +8,5 @@ if __name__ == '__main__':
     sys.path.append(py_dir)
     sys.kf_sdk_home = kfc_dir
     from kungfu.__main__ import main
-    main()
 
+    main()

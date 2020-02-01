@@ -1,6 +1,6 @@
 
-import pyyjj
-import pywingchun
+from pykungfu import yijinjing as pyyjj
+from pykungfu import wingchun as pywingchun
 import click
 from kungfu.command.journal import journal, pass_ctx_from_parent
 import kungfu.yijinjing.msg as yjj_msg

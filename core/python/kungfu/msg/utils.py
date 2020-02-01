@@ -1,6 +1,6 @@
-
 import re
 import inspect
+
 
 def object_as_dict(obj):
     d = {}
@@ -14,8 +14,10 @@ def object_as_dict(obj):
                 continue
     return d
 
+
 def flatten_json(y):
     out = {}
+
     def flatten(x, name=''):
         if type(x) is dict:
             for a in x:
@@ -27,8 +29,10 @@ def flatten_json(y):
                 i += 1
         else:
             out[name[:-1]] = x
+
     flatten(y)
     return out
+
 
 def underscore(word):
     word = re.sub(r"([A-Z]+)([A-Z][a-z])", r'\1_\2', word)

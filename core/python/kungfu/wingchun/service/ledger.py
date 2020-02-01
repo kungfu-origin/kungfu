@@ -1,5 +1,5 @@
-import pywingchun
-import pyyjj
+from pykungfu import wingchun as pywingchun
+from pykungfu import yijinjing as pyyjj
 import json
 import http
 import functools
@@ -21,6 +21,7 @@ import kungfu.wingchun.constants as wc_constants
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
 
+
 def on(msg_type):
     def register_handler(func):
         @functools.wraps(func)
@@ -32,10 +33,12 @@ def on(msg_type):
 
     return register_handler
 
+
 def handle(msg_type, *args, **kwargs):
     if msg_type not in HANDLERS:
         args[0].logger.error("invalid msg_type %s", msg_type)
     return HANDLERS[msg_type](*args, **kwargs)
+
 
 class Ledger(pywingchun.Ledger):
     def __init__(self, ctx):
@@ -47,7 +50,8 @@ class Ledger(pywingchun.Ledger):
         self.ctx.calendar = Calendar(ctx)
         self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
         self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.db.all_instrument_infos()}
-        self.ctx.commission_infos = {commission["product_id"]: commission for commission in CommissionDB(self.ctx.config_location, "commission").all_commission_info()}
+        self.ctx.commission_infos = {commission["product_id"]: commission for commission in
+                                     CommissionDB(self.ctx.config_location, "commission").all_commission_info()}
         self.ctx.orders = {}
         self.ctx.trading_day = None
         self.ctx.books = {}
@@ -71,7 +75,7 @@ class Ledger(pywingchun.Ledger):
             inst = pywingchun.Instrument()
             for attr, value in inst_dict.items():
                 if hasattr(inst, attr) and attr != "raw_address":
-                    setattr(inst,attr, value)
+                    setattr(inst, attr, value)
             writer.write_data(0, msg.Instrument, inst)
         writer.mark(0, msg.InstrumentEnd)
 
@@ -93,7 +97,7 @@ class Ledger(pywingchun.Ledger):
             self.ctx.logger.info("mark orders status unknown for {}[{:08x}] with tags: {}".format(location.uname, location.uid, tags))
             orders = self.ctx.db.mark_orders_status_unknown(tags.source_id, tags.account_id)
             for order in orders:
-                self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls = wc_utils.WCEncoder))
+                self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls=wc_utils.WCEncoder))
             book = self._get_book(location)
             book.subject.subscribe(self.on_book_event)
             self.book_context.add_book(location, book)
@@ -107,7 +111,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
         trading_day = kft.to_datetime(daytime)
         if self.ctx.trading_day is not None and self.ctx.trading_day != trading_day:
-            self.publish(json.dumps({'msg_type': msg.Calendar,'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
+            self.publish(json.dumps({'msg_type': msg.Calendar, 'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
         self.ctx.trading_day = trading_day
 
     def on_quote(self, event, quote):
@@ -123,13 +127,13 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.debug("book event received: {}".format(event))
         event = event.as_dict()
         self.ctx.db.on_book_event(event)
-        self.publish(json.dumps(event, cls= wc_utils.WCEncoder))
+        self.publish(json.dumps(event, cls=wc_utils.WCEncoder))
 
     def on_order(self, event, order):
         self.ctx.logger.debug('on order %s', order)
         frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source) # account location which send order report event
-        dest_location = self.get_location(event.dest) # strategy location which receive order report event
+        source_location = self.get_location(event.source)  # account location which send order report event
+        dest_location = self.get_location(event.dest)  # strategy location which receive order report event
 
         frame_as_dict["data"]["source_id"] = source_location.group
         frame_as_dict["data"]["account_id"] = source_location.name
@@ -140,22 +144,22 @@ class Ledger(pywingchun.Ledger):
         self.ctx.orders[order.order_id] = frame_as_dict
 
         self.ctx.db.add_order(**frame_as_dict["data"])
-        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
+        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
 
     def on_order_action_error(self, event, error):
         self.ctx.logger.debug("on order action error %s", error)
         frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source) # account location which send trade report event
-        dest_location = self.get_location(event.dest) # strategy location which receive event
+        source_location = self.get_location(event.source)  # account location which send trade report event
+        dest_location = self.get_location(event.dest)  # strategy location which receive event
         frame_as_dict["data"]["order_id"] = str(error.order_id)
         frame_as_dict["data"]["order_action_id"] = str(error.order_action_id)
-        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
+        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug('on trade %s', trade)
         frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source) # account location which send trade report event
-        dest_location = self.get_location(event.dest) # strategy location which receive trade report event
+        source_location = self.get_location(event.source)  # account location which send trade report event
+        dest_location = self.get_location(event.dest)  # strategy location which receive trade report event
         source_id = source_location.group
         account_id = source_location.name
         client_id = dest_location.name
@@ -169,15 +173,15 @@ class Ledger(pywingchun.Ledger):
             order_record = self.ctx.orders[trade.order_id]
             order = order_record["data"]
             if not wc_utils.is_final_status(order["status"]):
-                order["volume_left"] = order["volume_left"]- trade.volume
-                order["volume_traded"] = order["volume_traded"]+ trade.volume
+                order["volume_left"] = order["volume_left"] - trade.volume
+                order["volume_traded"] = order["volume_traded"] + trade.volume
                 order["status"] = OrderStatus.PartialFilledActive if order["volume_left"] > 0 else OrderStatus.PartialFilledNotActive
                 self.ctx.db.add_order(**order)
-                self.publish(json.dumps(order_record, cls = wc_utils.WCEncoder))
+                self.publish(json.dumps(order_record, cls=wc_utils.WCEncoder))
             else:
                 self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
         self.ctx.db.add_trade(**frame_as_dict["data"])
-        self.publish(json.dumps(frame_as_dict, cls = wc_utils.WCEncoder))
+        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
 
     def on_instruments(self, instruments):
         inst_list = list(set(instruments))
@@ -193,7 +197,7 @@ class Ledger(pywingchun.Ledger):
             tags = {"update_time": self.now(), "data_frequency": data_frequency}
             event["data"].update(tags)
             self.ctx.db.on_book_event(event)
-            self.publish(json.dumps(event, cls = wc_utils.WCEncoder))
+            self.publish(json.dumps(event, cls=wc_utils.WCEncoder))
 
     def has_book(self, uid):
         return uid in self.ctx.books
@@ -205,10 +209,10 @@ class Ledger(pywingchun.Ledger):
     def _get_book(self, location):
         if location.uid not in self.ctx.books:
             book_tags = kwb.book.AccountBookTags.make_from_location(location)
-            book = self.ctx.db.load_book(ctx = self.ctx, location=location)
+            book = self.ctx.db.load_book(ctx=self.ctx, location=location)
             if not book:
                 self.ctx.logger.info("failed to load book from sqlite for {} [{:08x}]".format(location.uname, location.uid))
-                book = kwb.book.AccountBook(self.ctx, location = location, avail=DEFAULT_INIT_CASH)
+                book = kwb.book.AccountBook(self.ctx, location=location, avail=DEFAULT_INIT_CASH)
             self.ctx.books[location.uid] = book
             self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
         return self.ctx.books[location.uid]
@@ -222,6 +226,7 @@ class Ledger(pywingchun.Ledger):
         product_id = wc_utils.get_product_id(instrument_id).upper()
         return self.ctx.commission_infos[product_id]
 
+
 @on(msg.Calendar)
 def calendar_request(ctx, event, location, data):
     message = {
@@ -234,6 +239,7 @@ def calendar_request(ctx, event, location, data):
     message.update({'status': http.HTTPStatus.OK})
     return message
 
+
 @on(msg.BrokerStateRefresh)
 def broker_state_refresh(ctx, event, location, data):
     ctx.ledger.publish_broker_states(event.gen_time)
@@ -241,6 +247,7 @@ def broker_state_refresh(ctx, event, location, data):
         'status': http.HTTPStatus.OK,
         'msg_type': msg.BrokerStateRefresh
     }
+
 
 @on(msg.NewOrderSingle)
 def new_order_single(ctx, event, location, data):
@@ -270,13 +277,14 @@ def new_order_single(ctx, event, location, data):
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             ctx.logger.error('failed to insert order, error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-            return {'status': http.HTTPStatus.NOT_FOUND,'msg_type': msg.NewOrderSingle}
+            return {'status': http.HTTPStatus.NOT_FOUND, 'msg_type': msg.NewOrderSingle}
     else:
         ctx.logger.error("can not insert order to {} [{:08x}]".format(location.uname, location.uid))
         return {
             "status": http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.NewOrderSingle,
         }
+
 
 @on(msg.CancelOrder)
 def cancel_order(ctx, event, location, data):
@@ -289,17 +297,18 @@ def cancel_order(ctx, event, location, data):
         ctx.logger.info('cancel account order dest: %s, source: %s, order: %s', order_record["dest"], order_record["source"], order_record['data'])
         try:
             ctx.ledger.cancel_order(event, source, order_id)
-            return {'status': http.HTTPStatus.OK,'msg_type': msg.CancelOrder}
+            return {'status': http.HTTPStatus.OK, 'msg_type': msg.CancelOrder}
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             ctx.logger.error('failed to cancel order %s, error [%s] %s', order_id, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-            return {'status': http.HTTPStatus.NOT_FOUND,'msg_type': msg.CancelOrder}
+            return {'status': http.HTTPStatus.NOT_FOUND, 'msg_type': msg.CancelOrder}
     else:
         ctx.logger.error('can not cancel order %s from orders %s', order_id, list(ctx.orders.keys()))
         return {
             'status': http.HTTPStatus.NOT_FOUND,
             'msg_type': msg.CancelOrder
         }
+
 
 @on(msg.CancelAllOrder)
 def cancel_all_order(ctx, event, location, data):
@@ -321,10 +330,12 @@ def cancel_all_order(ctx, event, location, data):
         'msg_type': msg.CancelAllOrder
     }
 
+
 @on(msg.QryAsset)
 def qry_asset(ctx, event, location, data):
     ctx.logger.info("qry asset, input: {}".format(data))
-    book_tags = kwb.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"],account_id=data["account_id"],client_id=data["client_id"])
+    book_tags = kwb.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"], account_id=data["account_id"],
+                                         client_id=data["client_id"])
     if book_tags in ctx.books:
         message = ctx.books[book_tags].message
         message.update({'status': http.HTTPStatus.OK, 'msg_type': msg.QryAsset})
@@ -335,13 +346,15 @@ def qry_asset(ctx, event, location, data):
             'msg_type': msg.QryAsset
         }
 
+
 @on(msg.PublishAllAssetInfo)
 def publish_all_asset(ctx, event, location, data):
     ctx.logger.info("req publish all recorded asset info")
     for book in ctx.books.values():
         event = book.event.as_dict()
-        ctx.ledger.publish(json.dumps(event, cls = wc_utils.WCEncoder))
+        ctx.ledger.publish(json.dumps(event, cls=wc_utils.WCEncoder))
     return {'status': http.HTTPStatus.OK, 'msg_type': msg.PublishAllAssetInfo}
+
 
 @on(msg.RemoveStrategy)
 def remove_strategy(ctx, event, location, data):
@@ -364,6 +377,7 @@ def remove_strategy(ctx, event, location, data):
             'status': http.HTTPStatus.OK,
             'msg_type': msg.RemoveStrategy
         }
+
 
 @on(yjj_msg.TradingDay)
 def update_trading_day(ctx, event, location, data):

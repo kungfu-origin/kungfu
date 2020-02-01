@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import sys
 import click
 import kungfu.yijinjing.time as kft

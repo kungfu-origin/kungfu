@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import shutil
 from tabulate import tabulate
 

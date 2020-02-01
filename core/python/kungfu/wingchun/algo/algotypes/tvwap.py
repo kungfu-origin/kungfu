@@ -2,7 +2,7 @@
 from kungfu.wingchun.algo import AlgoOrder
 import json
 from schema import Schema
-import pywingchun
+from pykungfu import wingchun as pywingchun
 import sys
 import traceback
 

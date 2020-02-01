@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import pkgutil
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import traceback
 import kungfu.yijinjing.journal as kfj
 from kungfu.yijinjing.log import create_logger

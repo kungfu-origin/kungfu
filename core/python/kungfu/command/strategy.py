@@ -1,5 +1,5 @@
 import os
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import click
 from importlib import util
 from kungfu.command import kfc, pass_ctx_from_parent
@@ -45,4 +45,3 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
         replay_setup.setup(ctx, session_id, strategy, runner)
 
     runner.run()
-

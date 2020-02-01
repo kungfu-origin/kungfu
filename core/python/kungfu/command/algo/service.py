@@ -2,7 +2,7 @@
 import click
 from kungfu.command.algo import algo
 from kungfu.command import pass_ctx_from_parent
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 
 @algo.command()
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')

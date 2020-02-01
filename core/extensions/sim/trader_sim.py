@@ -1,6 +1,6 @@
-
-import pywingchun
-import pyyjj
+from pykungfu import longfist as pylongfist
+from pykungfu import yijinjing as pyyjj
+from pykungfu import wingchun as pywingchun
 import json
 import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.msg as wc_msg
@@ -9,6 +9,7 @@ import sys
 import importlib
 from dotted_dict import DottedDict
 from collections import namedtuple
+
 
 class MatchMode:
     Reject = "reject"
@@ -19,7 +20,9 @@ class MatchMode:
     Fill = "fill"
     Custom = "custom"
 
+
 OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
+
 
 class TraderSim(pywingchun.Trader):
     def __init__(self, low_latency, locator, account_id, json_config):
@@ -50,23 +53,24 @@ class TraderSim(pywingchun.Trader):
         else:
             order_input = event.data
             order = pywingchun.utils.order_from_input(order_input)
-            min_vol = 100 if wc_utils.get_instrument_type(order_input.instrument_id, order_input.exchange_id) == pywingchun.constants.InstrumentType.Stock else 1
+            min_vol = 100 if wc_utils.get_instrument_type(order_input.instrument_id,
+                                                          order_input.exchange_id) == pylongfist.enum.InstrumentType.Stock else 1
             if order_input.volume < min_vol:
-                order.status = pywingchun.constants.OrderStatus.Error
+                order.status = pylongfist.enum.OrderStatus.Error
             elif self.match_mode == MatchMode.Reject:
-                order.status = pywingchun.constants.OrderStatus.Error
+                order.status = pylongfist.enum.OrderStatus.Error
             elif self.match_mode == MatchMode.Pend:
-                order.status = pywingchun.constants.OrderStatus.Pending
+                order.status = pylongfist.enum.OrderStatus.Pending
             elif self.match_mode == MatchMode.Cancel:
-                order.status = pywingchun.constants.OrderStatus.Cancelled
+                order.status = pylongfist.enum.OrderStatus.Cancelled
             elif self.match_mode == MatchMode.PartialFillAndCancel:
                 order.volume_traded = min_vol
-                order.status = pywingchun.constants.OrderStatus.Filled if order.volume_traded == order.volume \
-                    else pywingchun.constants.OrderStatus.PartialFilledNotActive
+                order.status = pylongfist.enum.OrderStatus.Filled if order.volume_traded == order.volume \
+                    else pylongfist.enum.OrderStatus.PartialFilledNotActive
             elif self.match_mode == MatchMode.PartialFill:
                 order.volume_traded = min_vol
-                order.status = pywingchun.constants.OrderStatus.Filled if order.volume_traded == order.volume \
-                    else pywingchun.constants.OrderStatus.PartialFilledActive
+                order.status = pylongfist.enum.OrderStatus.Filled if order.volume_traded == order.volume \
+                    else pylongfist.enum.OrderStatus.PartialFilledActive
             elif self.match_mode == MatchMode.Fill:
                 order.volume_traded = order_input.volume
             else:
@@ -84,7 +88,7 @@ class TraderSim(pywingchun.Trader):
                 trade.trade_id = self.get_writer(event.source).current_frame_uid()
                 self.get_writer(event.source).write_data(0, wc_msg.Trade, trade)
             if order.active:
-                self.ctx.orders[order.order_id] = OrderRecord(source= event.source, dest = event.dest, order = order)
+                self.ctx.orders[order.order_id] = OrderRecord(source=event.source, dest=event.dest, order=order)
             return True
 
     def cancel_order(self, event):
@@ -95,8 +99,8 @@ class TraderSim(pywingchun.Trader):
             if order_action.order_id in self.ctx.orders:
                 record = self.ctx.orders.pop(order_action.order_id)
                 order = record.order
-                order.status = pywingchun.constants.OrderStatus.Cancelled if order.volume_traded == 0 \
-                    else pywingchun.constants.OrderStatus.PartialFilledNotActive
+                order.status = pylongfist.enum.OrderStatus.Cancelled if order.volume_traded == 0 \
+                    else pylongfist.enum.OrderStatus.PartialFilledNotActive
                 self.get_writer(event.source).write_data(0, wc_msg.Order, order)
             return True
 

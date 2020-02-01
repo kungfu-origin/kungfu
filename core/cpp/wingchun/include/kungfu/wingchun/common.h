@@ -420,10 +420,10 @@ namespace kungfu::wingchun
         }
     }
 
-    inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
-    {
-        return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
-    }
+//    inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
+//    {
+//        return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
+//    }
 
     inline uint32_t get_symbol_id(const char *symbol, const char *exchange)
     {

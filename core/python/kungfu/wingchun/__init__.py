@@ -1,4 +1,4 @@
-import pywingchun
+from pykungfu import wingchun as pywingchun
 import kungfu.yijinjing.time as kft
 
 

@@ -1,6 +1,6 @@
 import logging
 import os, sys, platform
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 from kungfu.yijinjing.time import *
 
 LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'

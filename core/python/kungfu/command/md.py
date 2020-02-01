@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from extensions import EXTENSION_REGISTRY_MD
@@ -15,4 +15,3 @@ def md(ctx, source, low_latency):
     account_config = ctx.db.get_md_account_config(source)
     ext = EXTENSION_REGISTRY_MD.get_extension(source)(low_latency, ctx.locator, account_config)
     ext.run()
-

@@ -1,5 +1,5 @@
 
-import pywingchun
+from pykungfu import wingchun as pywingchun
 from rx.subject import Subject
 import json
 

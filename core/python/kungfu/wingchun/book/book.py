@@ -1,15 +1,14 @@
-
 from .position import StockPosition, FuturePosition, Position
 from .position import get_uid as get_position_uid
 import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.constants as wc_constants
 import kungfu.wingchun.msg as wc_msg
 import datetime
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import sys
 import traceback
 from collections import namedtuple
-import pywingchun
+from pykungfu import wingchun as pywingchun
 from rx.subject import Subject
 import json
 import kungfu.msg.utils as msg_utils
@@ -18,17 +17,21 @@ import kungfu.yijinjing.time as kft
 DATE_FORMAT = "%Y%m%d"
 DEFAULT_CASH = 1e7
 
+
 class AccountBookTags(namedtuple('AccountBookTags', 'holder_uid ledger_category source_id account_id client_id')):
     def __new__(cls, holder_uid, ledger_category, source_id="", account_id="", client_id=""):
         return super(AccountBookTags, cls).__new__(cls, holder_uid, ledger_category, source_id, account_id, client_id)
+
     @classmethod
     def make_from_location(cls, location):
         if location.category == pyyjj.category.TD:
-            return cls(**{"holder_uid": location.uid,  "source_id": location.group, "account_id": location.name, "ledger_category": wc_constants.LedgerCategory.Account})
+            return cls(**{"holder_uid": location.uid, "source_id": location.group, "account_id": location.name,
+                          "ledger_category": wc_constants.LedgerCategory.Account})
         elif location.category == pyyjj.category.STRATEGY:
-            return cls(**{"holder_uid": location.uid , "client_id": location.name, "ledger_category": wc_constants.LedgerCategory.Strategy})
+            return cls(**{"holder_uid": location.uid, "client_id": location.name, "ledger_category": wc_constants.LedgerCategory.Strategy})
         else:
             raise ValueError('invalid location category {}'.format(location.category))
+
 
 class BookEvent:
     def __init__(self, msg_type, data):
@@ -40,6 +43,7 @@ class BookEvent:
 
     def __repr__(self):
         return str(self.as_dict())
+
 
 class AccountBook(pywingchun.Book):
     def __init__(self, ctx, location, **kwargs):
@@ -71,7 +75,8 @@ class AccountBook(pywingchun.Book):
                     pos = Position.factory(ctx=self.ctx, book=self, **pos)
                 except Exception as err:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
-                    self.ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+                    self.ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type,
+                                          traceback.format_exception(exc_type, exc_obj, exc_tb))
                     continue
             if isinstance(pos, Position):
                 self._positions[pos.uid] = pos
@@ -102,7 +107,7 @@ class AccountBook(pywingchun.Book):
 
     def on_order_input(self, event, input):
         self.ctx.logger.debug("{} received order input event: {}".format(self.location.uname, input))
-        input.frozen_price = input.limit_price if input.price_type == wc_constants.PriceType.Limit\
+        input.frozen_price = input.limit_price if input.price_type == wc_constants.PriceType.Limit \
             else self.get_last_price(input.instrument_id, input.exchange_id)
         order = pywingchun.utils.order_from_input(input)
         order.insert_time = event.gen_time
@@ -163,7 +168,7 @@ class AccountBook(pywingchun.Book):
 
     def on_positions(self, positions):
         self.ctx.logger.debug("{} [{:08x}] position report received, size: {}".
-                             format(self.location.uname, self.location.uid, len(positions)))
+                              format(self.location.uname, self.location.uid, len(positions)))
         for pos in positions:
             self.ctx.logger.info(pos)
         self._positions = {}
@@ -175,7 +180,8 @@ class AccountBook(pywingchun.Book):
                     pos = Position.factory(ctx=self.ctx, book=self, **pos)
                 except Exception as err:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
-                    self.ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+                    self.ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type,
+                                          traceback.format_exception(exc_type, exc_obj, exc_tb))
                     continue
             if isinstance(pos, Position):
                 self._positions[pos.uid] = pos
@@ -242,7 +248,7 @@ class AccountBook(pywingchun.Book):
     def make_event(self, msg_type, data):
         data.trading_day = self.trading_day.strftime(DATE_FORMAT)
         data.update_time = self.ctx.now()
-        data.source_id  = self.tags.source_id
+        data.source_id = self.tags.source_id
         data.client_id = self.tags.client_id
         data.account_id = self.tags.account_id
         data.holder_uid = self.tags.holder_uid
@@ -250,7 +256,7 @@ class AccountBook(pywingchun.Book):
         event = BookEvent(msg_type, data)
         return event
 
-    def get_position(self, instrument_id, exchange_id, direction = wc_constants.Direction.Long):
+    def get_position(self, instrument_id, exchange_id, direction=wc_constants.Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)
         return self._positions.get(uid, None)
 
@@ -258,7 +264,8 @@ class AccountBook(pywingchun.Book):
         for pos in self._positions.values():
             pos.apply_trading_day(trading_day)
         if not self.trading_day == trading_day:
-            self.ctx.logger.debug("{} [{:08x}] apply trading day, switch from {} to {}".format(self.location.uname, self.location.uid, self.trading_day, trading_day))
+            self.ctx.logger.debug(
+                "{} [{:08x}] apply trading day, switch from {} to {}".format(self.location.uname, self.location.uid, self.trading_day, trading_day))
             self.trading_day = trading_day
             self.static_equity = self.dynamic_equity
             self.subject.on_next(self.event)
@@ -282,10 +289,9 @@ class AccountBook(pywingchun.Book):
         else:
             return 0.0
 
-    def _get_position(self, instrument_id, exchange_id, direction = wc_constants.Direction.Long):
+    def _get_position(self, instrument_id, exchange_id, direction=wc_constants.Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)
         if uid not in self._positions:
-            position = Position.factory(ctx = self.ctx, book = self, instrument_id = instrument_id, exchange_id = exchange_id, direction = direction)
+            position = Position.factory(ctx=self.ctx, book=self, instrument_id=instrument_id, exchange_id=exchange_id, direction=direction)
             self._positions[uid] = position
         return self._positions[uid]
-

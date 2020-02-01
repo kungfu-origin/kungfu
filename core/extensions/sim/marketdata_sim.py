@@ -1,10 +1,10 @@
 
-import pywingchun
+from pykungfu import wingchun as pywingchun
 from . import mdmaker
 from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
 import kungfu.yijinjing.time as kft
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import kungfu.wingchun.msg as wc_msg
 
 MakerConfig = namedtuple("MakerConfig", ["base", "bound", "samples", "variation", "randseed"])

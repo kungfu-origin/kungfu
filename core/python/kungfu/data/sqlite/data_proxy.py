@@ -4,7 +4,7 @@ from .models import *
 from . import object_as_dict
 from . import make_url
 from itertools import groupby
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 from kungfu.yijinjing.journal import make_location_from_dict
 import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.msg as wc_msg

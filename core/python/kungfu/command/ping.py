@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import json
 import numpy
 import click

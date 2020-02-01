@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import json
 from contextlib import contextmanager
 from sqlalchemy import inspect, types, TypeDecorator

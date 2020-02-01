@@ -1,4 +1,4 @@
-from pyyjj import hash_str_32
+from pykungfu.yijinjing import hash_str_32
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import *
 import datetime
@@ -6,15 +6,19 @@ import kungfu.wingchun.msg as wc_msg
 
 DATE_FORMAT = "%Y%m%d"
 
+
 def get_uname(instrument_id, exchange_id, direction):
     return "{}.{}.{}".format(instrument_id, exchange_id, int(direction))
+
 
 def get_uid(instrument_id, exchange_id, direction):
     uname = get_uname(instrument_id, exchange_id, direction)
     return hash_str_32(uname)
 
+
 class Position:
     registry = {}
+
     def __init__(self, ctx, book, **kwargs):
         self.ctx = ctx
         self.book = book
@@ -72,6 +76,7 @@ class Position:
 
     def apply_trading_day(self, trading_day):
         raise NotImplementedError
+
 
 class StockPosition(Position):
     _INSTRUMENT_TYPES = InstrumentTypeInStockAccount
@@ -236,7 +241,7 @@ class StockPosition(Position):
             self._commission_map[order_id] = self.min_commission
         commission = self._commission_map[order_id]
         amt = trade.price * trade.volume * self.commission_ratio
-        if commission == self.min_commission: # first trade
+        if commission == self.min_commission:  # first trade
             if amt > commission:
                 self._commission_map[order_id] = 0.0
                 return amt
@@ -251,8 +256,10 @@ class StockPosition(Position):
                 self._commission_map[order_id] -= amt
                 return 0.0
 
+
 class FuturePosition(Position):
     _INSTRUMENT_TYPES = [InstrumentType.Future]
+
     def __init__(self, ctx, book, **kwargs):
         super(FuturePosition, self).__init__(ctx, book, **kwargs)
 
@@ -291,6 +298,7 @@ class FuturePosition(Position):
         else:
             return (self.last_price - self.avg_open_price) * self.volume * \
                    self.contract_multiplier * (1 if self.direction == Direction.Long else -1)
+
     @property
     def position_pnl(self):
         if is_valid_price(self.last_price):
@@ -378,7 +386,7 @@ class FuturePosition(Position):
                     raise ValueError("{} to release for order {}, but frozen is {} for {} {}".
                                      format(order.volume_left, order.order_id, self.volume_available, self.book.location.uname, self.uname))
                 self.frozen_total -= order.volume_left
-                self.frozen_yesterday = self.frozen_yesterday - order.volume_left if\
+                self.frozen_yesterday = self.frozen_yesterday - order.volume_left if \
                     self.frozen_yesterday > order.volume_left else 0
             elif order.offset == Offset.CloseToday:
                 if self.frozen_today < order.volume_left:
@@ -465,7 +473,7 @@ class FuturePosition(Position):
         self.book.frozen_cash -= frozen_margin
         self.book.frozen_margin -= frozen_margin
         self.book.avail -= commission
-        self.book.accumulated_fee +=commission
+        self.book.accumulated_fee += commission
         self.book.intraday_fee += commission
         self.avg_open_price = (self.avg_open_price * self.volume + trade.volume * trade.price) / (self.volume + trade.volume)
         self.volume += trade.volume
@@ -475,7 +483,7 @@ class FuturePosition(Position):
             if trade.offset == Offset.Open:
                 return trade.price * trade.volume * self.contract_multiplier * self.open_commission_ratio
             else:
-                return trade.price * (trade.volume - trade.close_today_volume ) *\
+                return trade.price * (trade.volume - trade.close_today_volume) * \
                        self.contract_multiplier * self.close_commission_ratio \
                        + trade.price * trade.close_today_volume * self.contract_multiplier * self.close_today_commission_ratio
         else:

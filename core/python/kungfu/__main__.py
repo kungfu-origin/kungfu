@@ -7,8 +7,10 @@
 import kungfu.command as kfc
 from kungfu.command import __all__
 
+
 def main():
     kfc.execute()
+
 
 if __name__ == "__main__":
     main()

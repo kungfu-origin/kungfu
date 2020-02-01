@@ -1,5 +1,4 @@
-
-import pywingchun
+from pykungfu import wingchun as pywingchun
 import json
 import traceback
 import sys
@@ -8,6 +7,7 @@ from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.algo import AlgoOrder
 from kungfu.wingchun.algo.algotypes import *
 from kungfu.data.sqlite.data_proxy import AlgoDB
+
 
 class Algo(pywingchun.AlgoService):
     def __init__(self, ctx):
@@ -77,12 +77,10 @@ class Algo(pywingchun.AlgoService):
                 self.ctx.logger.error("has no writer for {}[{:08x}]".format(location.uname, location.uid))
             else:
                 self.ctx.logger.error("has no writer for {}[{:08x}]".format("unknown", order.sender_uid))
-        self.ctx.db.add_order(order_id = order.order_id,
-                              sender_uid = order.sender_uid,
-                              algo_type = order.type,
-                              update_time = self.now(),
-                              params = order.params,
-                              status = order.status,
-                              active = order.active)
-
-
+        self.ctx.db.add_order(order_id=order.order_id,
+                              sender_uid=order.sender_uid,
+                              algo_type=order.type,
+                              update_time=self.now(),
+                              params=order.params,
+                              status=order.status,
+                              active=order.active)

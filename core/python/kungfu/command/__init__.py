@@ -4,10 +4,12 @@ import platform
 import json
 import click
 import kungfu.yijinjing.journal as kfj
-import pyyjj
+from pykungfu import longfist as pylongfist
+from pykungfu import yijinjing as pyyjj
 from kungfu import __version__
 
 DEFAULT_CMD_PRIORITY = 100
+
 
 class SpecialHelpOrder(click.Group):
 
@@ -54,6 +56,7 @@ class SpecialHelpOrder(click.Group):
 
         return decorator
 
+
 def recursive_help(cmd, parent=None):
     ctx = click.core.Context(cmd, info_name=cmd.name, parent=parent)
     print(cmd.get_help(ctx))
@@ -62,13 +65,14 @@ def recursive_help(cmd, parent=None):
     for sub in commands.values():
         recursive_help(sub, ctx)
 
+
 @click.group(invoke_without_command=True, cls=SpecialHelpOrder)
 @click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
                                              "~/.config or $XDG_CONFIG_HOME (if set) on linux, ~/Library/Application Support on mac")
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('-n', '--name', type=str, help='name for the process, defaults to command if not set')
-@click.version_option(__version__, '--version', '-v', message = 'version {}'.format(__version__))
+@click.version_option(__version__, '--version', '-v', message='version {}'.format(__version__))
 @click.pass_context
 def kfc(ctx, home, log_level, name):
     if not home:
@@ -105,6 +109,7 @@ def kfc(ctx, home, log_level, name):
         ctx.name = name if name else ctx.invoked_subcommand
     pass
 
+
 def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
     ctx.log_level = ctx.parent.log_level
@@ -113,6 +118,6 @@ def pass_ctx_from_parent(ctx):
     ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name
 
+
 def execute():
     kfc(auto_envvar_prefix='KF')
-

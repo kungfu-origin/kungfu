@@ -11,4 +11,3 @@ def master(ctx, low_latency):
     ctx.low_latency = low_latency
     server = Master(ctx)
     server.run()
-

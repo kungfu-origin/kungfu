@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import re
-import pyyjj
-
+from pykungfu import yijinjing as pyyjj
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%N'
 NANO_PER_SECOND = 1000000000
@@ -10,14 +9,13 @@ NANO_PER_MINUTE = NANO_PER_SECOND * SECOND_PER_MINUTE
 
 EPOCH = datetime.fromtimestamp(0)
 
-
 SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 DURATION_FORMAT = '%H:%M:%S.%N'
 DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
 
 
 def to_datetime(nanotime):
-    return EPOCH + timedelta(microseconds=nanotime/1000)
+    return EPOCH + timedelta(microseconds=nanotime / 1000)
 
 
 def strftime(nanotime, format=DATETIME_FORMAT):

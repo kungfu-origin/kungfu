@@ -73,12 +73,12 @@ def build_cmake_js_cmd(ctx, cmd):
     python_path = subprocess.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
 
     spdlog_levels = {
-        'trace':        'SPDLOG_LEVEL_TRACE',
-        'debug':        'SPDLOG_LEVEL_DEBUG',
-        'info':         'SPDLOG_LEVEL_INFO',
-        'warning':      'SPDLOG_LEVEL_WARN',
-        'error':        'SPDLOG_LEVEL_ERROR',
-        'critical':     'SPDLOG_LEVEL_CRITICAL'
+        'trace': 'SPDLOG_LEVEL_TRACE',
+        'debug': 'SPDLOG_LEVEL_DEBUG',
+        'info': 'SPDLOG_LEVEL_INFO',
+        'warning': 'SPDLOG_LEVEL_WARN',
+        'error': 'SPDLOG_LEVEL_ERROR',
+        'critical': 'SPDLOG_LEVEL_CRITICAL'
     }
     loglevel = spdlog_levels[ctx.parent.log_level]
 

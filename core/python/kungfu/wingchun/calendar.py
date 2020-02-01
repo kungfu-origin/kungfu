@@ -4,6 +4,7 @@ import kungfu.yijinjing.time as kft
 from kungfu.data.sqlite.data_proxy import CalendarDB, make_url
 from kungfu.wingchun.constants import *
 
+
 class Calendar:
     def __init__(self, ctx):
         self.holidays = CalendarDB(ctx.system_config_location, "holidays").get_holidays()

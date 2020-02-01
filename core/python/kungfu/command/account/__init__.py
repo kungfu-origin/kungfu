@@ -1,4 +1,4 @@
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import codecs
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root

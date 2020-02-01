@@ -1,14 +1,15 @@
 import os
 import sys
 import importlib
-import pyyjj
-import pywingchun
+from pykungfu import yijinjing as pyyjj
+from pykungfu import wingchun as pywingchun
 from kungfu.data.sqlite.data_proxy import CommissionDB
 from kungfu.wingchun.book.book import AccountBook
 from kungfu.wingchun.constants import *
 from kungfu.wingchun.utils import get_product_id
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
+
 
 class Strategy(pywingchun.Strategy):
     def __init__(self, ctx):
@@ -61,7 +62,8 @@ class Strategy(pywingchun.Strategy):
 
     def __init_commission_info(self):
         config_location = self.ctx.config_location
-        self.ctx.commission_infos = {commission["product_id"]: commission for commission in CommissionDB(config_location, "commission").all_commission_info()}
+        self.ctx.commission_infos = {commission["product_id"]: commission for commission in
+                                     CommissionDB(config_location, "commission").all_commission_info()}
 
     def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
@@ -78,17 +80,20 @@ class Strategy(pywingchun.Strategy):
                 order_id = self._wc_ctx.add_order(order)
                 if order_id > 0:
                     self.orders[order_id] = order
+
         self.algo_context = AlgoOrderContext(self.algo_context)
         self.ctx.insert_algo_order = self.algo_context.insert_algo_order
 
     def __add_timer(self, nanotime, callback):
         def wrap_callback(event):
             callback(self.ctx, event)
+
         self.wc_context.add_timer(nanotime, wrap_callback)
 
     def __add_time_interval(self, duration, callback):
         def wrap_callback(event):
             callback(self.ctx, event)
+
         self.wc_context.add_time_interval(duration, wrap_callback)
 
     def pre_start(self, wc_context):
@@ -140,7 +145,6 @@ class Strategy(pywingchun.Strategy):
 
     def on_order(self, wc_context, order):
         self._on_order(self.ctx, order)
-
 
     def on_order_action_error(self, wc_context, error):
         self._on_order_action_error(self.ctx, error)

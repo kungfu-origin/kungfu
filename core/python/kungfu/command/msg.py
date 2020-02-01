@@ -1,13 +1,14 @@
-
 import click
 from tabulate import tabulate
 from kungfu.command import kfc
 from kungfu.msg import Registry
 
+
 @kfc.group()
 @click.pass_context
 def msg(ctx):
     pass
+
 
 @msg.command(help='list msg types')
 @click.option('-f', '--tablefmt', default='simple',

@@ -1,4 +1,9 @@
 INCLUDE_DIRECTORIES(longfist/include)
+INCLUDE_DIRECTORIES(yijinjing/include)
+INCLUDE_DIRECTORIES(wingchun/include)
 
 ADD_SUBDIRECTORY(yijinjing)
 ADD_SUBDIRECTORY(wingchun)
+
+ADD_SUBDIRECTORY(pybind)
+ADD_SUBDIRECTORY(node)

@@ -1,5 +1,5 @@
 
-import pyyjj
+from pykungfu import yijinjing as pyyjj
 import json
 from kungfu.wingchun import msg
 import kungfu.yijinjing.msg as yjj_msg
