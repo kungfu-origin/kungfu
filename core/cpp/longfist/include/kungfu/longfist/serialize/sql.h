@@ -65,4 +65,73 @@ namespace kungfu::longfist::sqlite
     constexpr auto write = Writer{};
 }
 
+namespace sqlite_orm
+{
+    template<>
+    struct type_printer<char *, void> : public text_printer {};
+
+    template<>
+    struct type_printer<int8_t *, void> : public blob_printer {};
+
+    template<>
+    struct type_printer<int16_t *, void> : public blob_printer {};
+
+    template<>
+    struct type_printer<int32_t *, void> : public blob_printer {};
+
+    template<>
+    struct type_printer<int64_t *, void> : public blob_printer {};
+
+    template<>
+    struct type_printer<double *, void> : public blob_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::InstrumentType, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::ExecType, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::BsFlag, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::Side, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::Offset, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::HedgeFlag, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::OrderActionFlag, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::PriceType, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::VolumeCondition, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::TimeCondition, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::OrderStatus, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::Direction, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::AccountType, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::CommissionRateMode, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::LedgerCategory, void> : public integer_printer {};
+
+    template<>
+    struct type_printer<kungfu::longfist::BrokerState, void> : public integer_printer {};
+}
+
 #endif //KUNGFU_LONGFIST_SQL_H

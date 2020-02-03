@@ -5938,7 +5938,7 @@ namespace sqlite_orm {
                     table_info i{
                         -1,
                         col.name,
-                        type_printer<field_type>().print(),
+                        type_printer<std::decay_t<field_type>>().print(),
                         col.not_null(),
                         dft,
                         col.template has<constraints::primary_key_t<>>(),
@@ -8882,7 +8882,7 @@ namespace sqlite_orm {
                 using column_type = typename std::decay<decltype(c)>::type;
                 using field_type = typename column_type::field_type;
                 using constraints_type = typename column_type::constraints_type;
-                ss << type_printer<field_type>().print() << " ";
+                ss << type_printer<std::decay_t<field_type>>().print() << " ";
                 {
                     std::vector<std::string> constraintsStrings;
                     constexpr const size_t constraintsCount = std::tuple_size<constraints_type>::value;

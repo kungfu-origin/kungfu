@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 
 #include <kungfu/longfist.h>
-#include <kungfu/longfist/sql.h>
+#include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/practice/master.h>
 
@@ -115,9 +115,9 @@ namespace kungfu::practice
 
         on_register(e, app_location);
 
-        auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state.db");
-        app_storages_.emplace(app_location->uid, longfist::sqlite::make_storage(state_db_file));
-//        app_storages_[app_location->uid].sync_schema();
+        auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state");
+        app_storages_[app_location->uid] = std::make_shared<StorageType>(longfist::sqlite::make_storage(state_db_file));
+        app_storages_[app_location->uid]->sync_schema();
 
         writer->mark(e->gen_time(), RequestStart::tag);
     }

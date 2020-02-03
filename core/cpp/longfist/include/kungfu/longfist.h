@@ -6,6 +6,7 @@
 #define KUNGFU_LONGFIST_H
 
 #include <boost/hana.hpp>
+#include <spdlog/spdlog.h>
 #include <fmt/format.h>
 
 #include <kungfu/common.h>
@@ -29,6 +30,7 @@ namespace kungfu::longfist
         using namespace boost::hana::literals;
         static constexpr auto DATA_STRUCTS = boost::hana::make_map(
                 TYPE_PAIR(TimeRequest),
+                TYPE_PAIR(TradingDay),
                 TYPE_PAIR(RequestReadFrom),
                 TYPE_PAIR(RequestWriteTo),
                 TYPE_PAIR(Channel),
@@ -57,11 +59,9 @@ namespace kungfu::longfist
             using T = typename decltype(+boost::hana::second(it))::type;
             if (T::tag == event->msg_type())
             {
-                handler(boost::hana::second(it), event);
-                return;
+                handler(boost::hana::first(it).c_str(), boost::hana::second(it), event);
             }
         });
-        throw longfist_error(fmt::format("Invalid message type {}", event->msg_type()));
     };
 };
 
