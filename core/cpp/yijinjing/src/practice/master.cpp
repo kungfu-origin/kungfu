@@ -115,6 +115,10 @@ namespace kungfu::practice
 
         on_register(e, app_location);
 
+        auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state.db");
+        app_storages_.emplace(app_location->uid, longfist::sqlite::make_storage(state_db_file));
+//        app_storages_[app_location->uid].sync_schema();
+
         writer->mark(e->gen_time(), RequestStart::tag);
     }
 
@@ -299,7 +303,7 @@ namespace kungfu::practice
         events_ | to(0) |
         $([&](const event_ptr &e)
           {
-              longfist::cast_invoke(e, longfist::to_sql);
+              longfist::cast_invoke(e, longfist::sqlite::write);
           });
     }
 }

@@ -7,11 +7,14 @@
 
 #include <unordered_map>
 
+#include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/practice/hero.h>
 
 namespace kungfu::practice
 {
+    using StorageType = decltype(longfist::sqlite::make_storage(""));
+
     struct timer_task
     {
         int64_t checkpoint;
@@ -54,6 +57,7 @@ namespace kungfu::practice
     private:
         int64_t last_check_;
         std::unordered_map<uint32_t, uint32_t> app_locations_;
+        std::unordered_map<uint32_t, StorageType> app_storages_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
     };
 }

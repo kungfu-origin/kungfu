@@ -20,7 +20,7 @@ from .msg import monkey_patch
 from .version import get_version
 
 setup_environment_variables()
-# monkey_patch()
+monkey_patch()
 
 version_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "version.info"))
 if os.path.exists(version_file_path):
