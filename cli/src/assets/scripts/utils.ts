@@ -198,5 +198,28 @@ export const getStatus = (processId: string, processStatus: any) => {
 }
 
 
+export const getQuestionInputType = (originType: string) => {
+    switch(originType) {
+        case 'str':
+            return 'input';
+        case 'int':
+            return 'number';
+        case 'float':
+            return 'number';
+        case 'select':
+			return 'list';
+		case 'sources':
+            return 'list';
+        case 'bool':
+            return 'confirm';
+        case 'file':
+			return 'path';
+        default:
+            return 'input'
+    }
+}
 
-
+export const renderSelect = (configItem: AccountSettingItem) => {
+    if(configItem.type === 'select') return `(${(configItem.data || []).map(item => item.value || "").join('|')})`
+    else return ''
+}

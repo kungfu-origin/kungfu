@@ -36,6 +36,10 @@ interface StringToFunctionObject {
     [propName: string]: Function;
 }
 
+interface StringToAny {
+    [propName: string]: any
+}
+
 interface NormalObject {
     [propName: string]: any;
 }

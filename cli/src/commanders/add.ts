@@ -2,7 +2,7 @@ import { getAccountSource } from '__gConfig/accountConfig';
 import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '__assets/validator';
 import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '__io/db/account';
 import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
-import { parseSources } from '@/assets/scripts/utils';
+import { parseSources, renderSelect, getQuestionInputType } from '@/assets/scripts/utils';
 import { getKungfuTypeFromString } from '@/assets/scripts/actions';
 
 const os = require('os');
@@ -33,7 +33,7 @@ export const selectAccountOrStrategy = async() => {
 
 // ======================= add account start ============================
 
-const getAvailableSources = (accountSource: Sources, existedSource: string[]) => {
+const getAvailableSources = (accountSource: Sources, existedSource: string[]): string[] => {
     // 需要过滤含有 existedSource 的柜台
     existedSource.forEach((es: string) => {
         if(accountSource[es] !== undefined) {
@@ -45,7 +45,7 @@ const getAvailableSources = (accountSource: Sources, existedSource: string[]) =>
 }
 
 const selectSourcePrompt = async (accountSource: Sources, existedSource: string[]) => {
-    const availSources =  getAvailableSources(accountSource, existedSource);
+    const availSources = getAvailableSources(accountSource, existedSource);
     if(!availSources.length) {
         console.log('No available sources, all the sources has been used!')
         process.exit(0)
@@ -246,25 +246,6 @@ export const addAccountStrategy = async (type: string): Promise<any> => {
     
 }
 
-function getType(originType: string) {
-    switch(originType) {
-        case 'str':
-            return 'input';
-        case 'int':
-            return 'number';
-        case 'float':
-            return 'number';
-        case 'select':
-            return 'list';
-        case 'bool':
-            return 'confirm';
-        case 'file':
-            return 'path';
-        default:
-            return 'input'
-    }
-}
-
 function getDefaultValue(updateModule: boolean | undefined, existedValue: any, targetType: string, defaultValue?: any) {
     if(updateModule) {
         if((targetType === 'path') && !existedValue) {
@@ -278,14 +259,11 @@ function getDefaultValue(updateModule: boolean | undefined, existedValue: any, t
     }
 }
 
-function renderSelect(configItem: AccountSettingItem) {
-    if(configItem.type === 'select') return `(${(configItem.data || []).map(item => item.value || "").join('|')})`
-    else return ''
-}
+
 
 function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: { idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }, type?: string) {
     const { validator, required, key } = configItem;
-    const targetType = getType(configItem.type);
+    const targetType = getQuestionInputType(configItem.type);
     const existedValue = (accountData || {})[key] || '';
     let questions = {
         type: targetType,
@@ -294,7 +272,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
         message: `${updateModule ? 'Update' : 'Enter'} ${key} ${renderSelect(configItem)}`,
         validate: async (value: string | number) => {
             let hasError: Error | null = null; 
-            const validatorList: Array<any>  = [...(validator || []), (required && !updateModule) ? requiredValidator : null]
+            const validatorList: Array<any> = [...(validator || []), (required && !updateModule) ? requiredValidator : null]
             validatorList
                 .filter((v: Function | null): boolean => !!v)
                 .forEach((v: Function) => {

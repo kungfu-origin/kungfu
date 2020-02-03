@@ -6,7 +6,6 @@ const path = require('path')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const { dependencies } = require('../package.json');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 
 const nodeModules = {};
@@ -74,14 +73,19 @@ let cliConfig = {
   },
   target: 'node'
 }
-console.log(path.join(__dirname, '../src'))
+
+
+const { getPythonVersion } = require('../../app/.electron-kungfu/utils');
+const pyVersion = getPythonVersion() || '3'
+
 /**
  * Adjust cliConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   cliConfig.plugins.push(
     new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../../app/resources').replace(/\\/g, '\\\\')}"`
+      '__resources': `"${path.join(__dirname, '../../app/resources').replace(/\\/g, '\\\\')}"`,
+      'python_version': `"${pyVersion.toString()}"`,
     })
   )
 }
@@ -95,6 +99,7 @@ if (process.env.NODE_ENV === 'production') {
       'process.env.NODE_ENV': '"production"',
       'process.env.LANG_ENV': '"en"',
       'process.env.APP_TYPE': '"cli"',
+      'python_version': `"${pyVersion.toString()}"`,
     }),
     new OptimizeJsPlugin({
       sourceMap: false

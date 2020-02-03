@@ -1,5 +1,5 @@
 import { KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
-import { readJsonSync } from "__gUtils/fileUtils";
+import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 
 const isEnglish = process.env.LANG_ENV === 'en';
 
@@ -16,15 +16,21 @@ const enum SystemConfigChildItemTypeEnum {
     Table = 'Table',
 }
 
-interface SystemConfigItem {
+const enum SystemConfigTypeEnum {
+    SystemConfig = 'systemConfig',
+    SystemTradingConfig = 'systemTradingConfig'
+}
+
+export interface SystemConfigItem {
     key: string;
     name: string;
     config: Array<SystemConfigChildNormalItem>;
     cli?: Boolean;
     process?: Boolean;
+    configType?: string;
 }
 
-interface SystemConfigChildNormalItem {
+export interface SystemConfigChildNormalItem {
     key: string;
     name: string;
     tip: string;
@@ -69,7 +75,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": "rocket",
                 "name": isEnglish ? "Open Rocket Model" : "开启极速模式",
                 "cli": true,
-                "tip": isEnglish ? "Use CPU 100%, restart after open" : "开启极速模式会使 CPU 达到100%，开启后请重启 Kungfu",
+                "tip": isEnglish ? "Use CPU 100%, restart is required" : "开启极速模式会使 CPU 达到100%，开启后请重启 Kungfu",
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
@@ -103,6 +109,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "name": isEnglish ? "Log level" : "级别",
                 "tip": isEnglish ? "For all log" : "对系统内所有日志级别的设置",
                 "type": SystemConfigChildItemTypeEnum.Select,
+                "cli": true,
                 "data": [
                     { "value": "-l trace", "name": "TRACE" },
                     { "value": "-l debug", "name": "DEBUG" },
@@ -191,8 +198,8 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
         ]
     },
     
-    "comission": {
-      "key": "commission_setting",
+    "commission": {
+      "key": "commission",
       "name": "手续费",
       "cli": false,
       "config": [
@@ -294,7 +301,7 @@ export const buildCustomProcessConfig = (): CustomProcessData => {
 
 export const buildSystemConfig = () => {
     const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-    const kfTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
 
     return {
         system: {
@@ -309,10 +316,60 @@ export const buildSystemConfig = () => {
             key: "trading",
             name: "交易设置",
             config: getSystemTradingConfig(),
-            value: kfTradingConfig,
+            value: kfSystemTradingConfig,
             outputPath: KF_TARADING_CONFIG_PATH,
             type: "json"
         }
     }
 }
+
+export const mergeSystemConfigTogether = () => {
+    let systemConfig = getSystemConfig();
+    let systemTradingConfig = getSystemTradingConfig();
+
+    Object.values(systemConfig).forEach((systemConfigItem: SystemConfigItem) => {
+        if(!systemConfigItem.cli) delete systemConfig[systemConfigItem.key]
+        systemConfigItem.configType = SystemConfigTypeEnum.SystemConfig
+    });
+    Object.values(systemTradingConfig).forEach((systemConfigItem: SystemConfigItem) => {
+        if(!systemConfigItem.cli) delete systemTradingConfig[systemConfigItem.key]
+        systemConfigItem.configType = SystemConfigTypeEnum.SystemTradingConfig
+    });
+
+    return {
+        ...systemConfig,
+        ...systemTradingConfig
+    }
+}
+
+export const getValueByConfigItem = (configType: string, configItemKey: string) => {
+    const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfConfigData: { [propName: string]: { [propName: string]: SystemConfigItem }}= {
+        'systemConfig': kfSystemConfig,
+        'systemTradingConfig': kfSystemTradingConfig
+    }
+    const targetConfigData = ((kfConfigData[configType] || {})[configItemKey] || {})
+    if(Object.keys(targetConfigData).length === 0) throw new Error('Target value has not been initialized!')
+    return targetConfigData
+}
+
+export const setValueByConfigItem = (configType: string, configItemKey: string, configChildItemData: StringToAny) => {
+    if(configType === 'systemConfig') {
+        let kfSystemConfig: StringToAny = readJsonSync(KF_CONFIG_PATH) || {};
+        kfSystemConfig[configItemKey] = {
+            ...kfSystemConfig[configItemKey],
+            ...configChildItemData
+        }
+        outputJsonSync(KF_CONFIG_PATH, kfSystemConfig)
+    } else if(configType === 'systemTradingConfig') {
+        const kfSystemTradingConfig: StringToAny = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+        kfSystemTradingConfig[configItemKey] = {
+            ...kfSystemTradingConfig[configItemKey],
+            ...configChildItemData
+        }
+        outputJsonSync(KF_TARADING_CONFIG_PATH, kfSystemTradingConfig)
+    }
+}
+
   

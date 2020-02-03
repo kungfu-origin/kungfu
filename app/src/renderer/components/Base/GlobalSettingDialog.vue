@@ -205,7 +205,7 @@ import { mapGetters, mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
-import { getExtensionConfigs, getExtensions, debounce, throttle } from "__gUtils/busiUtils";
+import { getExtensionConfigs, getExtensions, getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getFeeSettingData, setFeeSettingData } from "__io/db/base";
@@ -365,15 +365,7 @@ methods: {
 
 	getSourceListOptions() {
 		const t = this;
-		getExtensionConfigs()
-			.then(extList => {
-			return extList
-				.filter(e => e.type === "source")
-				.map(e => (e.config || {}).name || "")
-				.filter(e => !!e)
-				.map(e => ({ name: e, value: e }));
-			})
-			.then(extOptions => (t.sourceList = extOptions));
+		getSourceList().then(sourceList => (t.sourceList = sourceList));
 	},
 
 	saveTables() {

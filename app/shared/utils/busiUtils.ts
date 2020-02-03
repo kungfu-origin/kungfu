@@ -530,6 +530,17 @@ export const getExtensionConfigs = async (): Promise<any> => {
     }
 }
 
+export const getSourceList = () => getExtensionConfigs()
+    .then(extList => {
+        const sourceList = extList
+        .filter((e: any) => e.type === "source")
+        .map((e: any) => (e.config || {}).name || "")
+        .filter((e: any) => !!e)
+        .map((e: any) => ({ name: e, value: e }));
+        return sourceList
+    })
+
+
 export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     var taskTimer: NodeJS.Timer | null = null;
     function timerPromiseTask (fn: Function, interval = 500) {

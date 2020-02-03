@@ -34,10 +34,10 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
     const targetProcessConfig = customProcessConfig[targetName];
     if(!targetProcessConfig) throw new Error(`No ${targetName} in systemConfig systemTradingConfig or extensionConfig`)
     const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-    const kfTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
     const systemConfigValData: any = {
         ...kfSystemConfig,
-        ...kfTradingConfig
+        ...kfSystemTradingConfig
     }
     const args = targetProcessConfig.args;
     const parentKey = targetProcessConfig.parentKey;
