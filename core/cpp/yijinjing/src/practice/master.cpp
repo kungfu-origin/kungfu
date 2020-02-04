@@ -149,6 +149,7 @@ namespace kungfu::practice
         memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
         writers_[0]->close_frame(msg.length());
 
+        app_storages_.erase(app_location_uid);
     }
 
     void master::publish_time(int32_t msg_type, int64_t nanotime)

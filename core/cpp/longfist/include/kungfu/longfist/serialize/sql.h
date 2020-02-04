@@ -52,7 +52,7 @@ namespace kungfu::longfist::sqlite
         return boost::hana::unpack(tables, named_storage(state_db_file));
     };
 
-    using StorageType = decltype(make_storage(""));
+    using StorageType = decltype(make_storage(std::string()));
     DECLARE_PTR(StorageType)
 
     struct Writer
