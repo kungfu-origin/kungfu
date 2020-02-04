@@ -52,7 +52,7 @@ namespace kungfu::longfist
         );
     }
 
-    static constexpr auto cast_invoke = [](const event_ptr &event, auto handler)
+    static constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
     {
         boost::hana::for_each(types::DATA_STRUCTS, [&](auto it)
         {

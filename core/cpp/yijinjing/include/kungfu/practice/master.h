@@ -31,7 +31,7 @@ namespace kungfu::practice
 
         void on_notify() override;
 
-        virtual void on_register(const event_ptr &event, yijinjing::data::location_ptr app_location)
+        virtual void on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location)
         {}
 
         virtual void on_interval_check(int64_t nanotime)
@@ -56,7 +56,7 @@ namespace kungfu::practice
     private:
         int64_t last_check_;
         std::unordered_map<uint32_t, uint32_t> app_locations_;
-        std::unordered_map<uint32_t, longfist::sqlite::StorageType_ptr> app_storages_;
+        std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
     };
 }

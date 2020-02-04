@@ -140,7 +140,7 @@ namespace kungfu::yijinjing
     public:
         using master::master;
 
-        void on_register(const event_ptr &event, data::location_ptr app_location) override
+        void on_register(const event_ptr &event, const data::location_ptr &app_location) override
         {
             PYBIND11_OVERLOAD(void, master, on_register, event, app_location);
         }

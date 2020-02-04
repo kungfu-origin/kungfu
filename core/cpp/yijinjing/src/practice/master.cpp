@@ -14,6 +14,7 @@
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::sqlite;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
@@ -116,8 +117,8 @@ namespace kungfu::practice
         on_register(e, app_location);
 
         auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state");
-        app_storages_[app_location->uid] = std::make_shared<longfist::sqlite::StorageType>(longfist::sqlite::make_storage(state_db_file));
-        app_storages_[app_location->uid]->sync_schema();
+        app_sqlizers_[app_location->uid] = std::make_shared<sqlizer>(state_db_file);
+        app_sqlizers_[app_location->uid]->storage.sync_schema();
 
         writer->mark(e->gen_time(), RequestStart::tag);
     }
@@ -149,7 +150,7 @@ namespace kungfu::practice
         memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
         writers_[0]->close_frame(msg.length());
 
-        app_storages_.erase(app_location_uid);
+        app_sqlizers_.erase(app_location_uid);
     }
 
     void master::publish_time(int32_t msg_type, int64_t nanotime)
@@ -304,7 +305,7 @@ namespace kungfu::practice
         events_ | to(0) |
         $([&](const event_ptr &e)
           {
-              longfist::cast_invoke(e, longfist::sqlite::write(app_storages_[e->source()]));
+              longfist::cast_invoke(e, *app_sqlizers_[e->source()]);
           });
     }
 }

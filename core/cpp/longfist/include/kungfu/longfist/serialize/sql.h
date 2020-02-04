@@ -53,27 +53,21 @@ namespace kungfu::longfist::sqlite
     };
 
     using StorageType = decltype(make_storage(std::string()));
-    DECLARE_PTR(StorageType)
 
-    struct Writer
+    struct sqlizer
     {
-        StorageType_ptr storage;
+        StorageType storage;
 
-        explicit Writer(StorageType_ptr _storage) : storage(std::move(_storage))
+        explicit sqlizer(const std::string &state_db_file) : storage(longfist::sqlite::make_storage(state_db_file))
         {}
 
         template<typename DataType>
-        void operator()(const char *type_name, boost::hana::basic_type<DataType> type, const event_ptr &event) const
+        void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
-            auto data = event->data<DataType>();
-            storage->insert(event->data<DataType>());
+            storage.insert(event->data<DataType>());
         }
     };
-
-    constexpr auto write = [](auto storage)
-    {
-        return Writer{storage};
-    };
+    DECLARE_PTR(sqlizer)
 }
 
 namespace sqlite_orm
