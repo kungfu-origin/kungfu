@@ -13,8 +13,6 @@
 
 namespace kungfu::practice
 {
-    using StorageType = decltype(longfist::sqlite::make_storage(""));
-    DECLARE_PTR(StorageType)
 
     struct timer_task
     {
@@ -58,7 +56,7 @@ namespace kungfu::practice
     private:
         int64_t last_check_;
         std::unordered_map<uint32_t, uint32_t> app_locations_;
-        std::unordered_map<uint32_t, StorageType_ptr> app_storages_;
+        std::unordered_map<uint32_t, longfist::sqlite::StorageType_ptr> app_storages_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
     };
 }
