@@ -8,7 +8,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
@@ -16,8 +16,8 @@
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/util/util.h>
-#include <kungfu/practice/master.h>
-#include <kungfu/practice/apprentice.h>
+#include <kungfu/yijinjing/practice/master.h>
+#include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::yijinjing
 {
@@ -29,7 +29,7 @@ namespace kungfu::yijinjing
     using namespace kungfu::yijinjing::journal;
     using namespace kungfu::yijinjing::nanomsg;
     using namespace kungfu::yijinjing::util;
-    using namespace kungfu::practice;
+    using namespace kungfu::yijinjing::practice;
 
     class PyLocator : public data::locator
     {

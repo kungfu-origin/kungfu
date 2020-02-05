@@ -9,7 +9,7 @@
 #include <pybind11/stl.h>
 #include <nlohmann/json.hpp>
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 
 namespace kungfu::longfist
 {

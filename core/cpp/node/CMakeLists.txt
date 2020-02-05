@@ -32,7 +32,7 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 AUX_SOURCE_DIRECTORY(src/kungfu SOURCE_FILES_KUNGFU)
 ADD_LIBRARY(node_kungfu SHARED ${SOURCE_FILES_KUNGFU})
 SET_TARGET_PROPERTIES(node_kungfu PROPERTIES PREFIX "" SUFFIX ".node")
-TARGET_LINK_LIBRARIES(node_kungfu yijinjing wingchun ${CMAKE_JS_LIB})
+TARGET_LINK_LIBRARIES(node_kungfu kungfu ${CMAKE_JS_LIB})
 
 ############################################################
 

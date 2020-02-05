@@ -11,7 +11,7 @@
 
 #include "xtp_api_struct.h"
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::wingchun::xtp

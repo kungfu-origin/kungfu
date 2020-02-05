@@ -17,11 +17,11 @@ using namespace kungfu::wingchun::xtp;
 
 PYBIND11_MODULE(kfext_xtp, m)
 {
-    py::class_<MarketDataXTP, kungfu::practice::apprentice, std::shared_ptr<MarketDataXTP>>(m, "MD")
+    py::class_<MarketDataXTP, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketDataXTP>>(m, "MD")
             .def(py::init<bool, locator_ptr, const std::string &>())
             .def("run", &MarketDataXTP::run, py::call_guard<py::gil_scoped_release>());
 
-    py::class_<TraderXTP, kungfu::practice::apprentice, std::shared_ptr<TraderXTP>>(m, "TD")
+    py::class_<TraderXTP, kungfu::yijinjing::practice::apprentice, std::shared_ptr<TraderXTP>>(m, "TD")
             .def(py::init<bool, locator_ptr, const std::string &, const std::string &>())
             .def("run", &TraderXTP::run, py::call_guard<py::gil_scoped_release>());
 }

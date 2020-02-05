@@ -17,7 +17,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/broker/marketdata.h>
@@ -758,7 +758,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("get_inst_info", &kwb::BookContext::get_inst_info)
 //            ;
 //
-//    py::class_<MarketData, PyMarketData, kungfu::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
+//    py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
 //            .def(py::init<bool, data::locator_ptr, const std::string&>())
 //            .def_property_readonly("io_device", &MarketData::get_io_device)
 //            .def("subscribe", &MarketData::subscribe)
@@ -770,7 +770,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("now", &MarketData::now)
 //            .def("run", &MarketData::run);
 //
-//    py::class_<Trader, PyTrader, kungfu::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
+//    py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
 //            .def(py::init<bool, data::locator_ptr, const std::string&, const std::string&>())
 //            .def_property_readonly("io_device", &Trader::get_io_device)
 //            .def("on_start", &Trader::on_start)
@@ -781,7 +781,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("now", &Trader::now)
 //            .def("run", &Trader::run);
 //
-//    py::class_<Ledger, PyLedger, kungfu::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
+//    py::class_<Ledger, PyLedger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
 //            .def(py::init<data::locator_ptr, data::mode, bool>())
 //            .def_property_readonly("config_location", &Ledger::get_config_location)
 //            .def_property_readonly("io_device", &Ledger::get_io_device)
@@ -811,7 +811,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("add_time_interval", &Ledger::add_time_interval)
 //            .def("run", &Ledger::run);
 //
-//    py::class_<strategy::Runner, PyRunner, kungfu::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
+//    py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
 //            .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
 //            .def("set_begin_time", &strategy::Runner::set_begin_time)
 //            .def("set_end_time", &strategy::Runner::set_end_time)
@@ -884,7 +884,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("modify_order", &service::Algo::modify_order)
 //            ;
 //
-//    py::class_<BarGenerator, kungfu::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
+//    py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
 //            .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())
 //            .def("run", &service::BarGenerator::run);
 }

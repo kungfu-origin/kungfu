@@ -5,7 +5,7 @@
 #ifndef KUNGFU_CTP_EXT_MARKETDATA_H
 #define KUNGFU_CTP_EXT_MARKETDATA_H
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 

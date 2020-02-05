@@ -9,7 +9,7 @@
 #include <cstring>
 #include "ThostFtdcUserApiStruct.h"
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/common.h>
 

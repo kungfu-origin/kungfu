@@ -7,13 +7,13 @@
 
 #include <napi.h>
 
-#include <kungfu/practice/apprentice.h>
+#include <kungfu/yijinjing/practice/apprentice.h>
 #include "journal.h"
 
 namespace kungfu::node
 {
 
-    class Apprentice : public Napi::ObjectWrap<Apprentice>, public practice::apprentice
+    class Apprentice : public Napi::ObjectWrap<Apprentice>, public yijinjing::practice::apprentice
     {
     public:
         explicit Apprentice(const Napi::CallbackInfo &info);

@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include <kungfu/longfist.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 
