@@ -43,7 +43,7 @@ namespace kungfu
     template <template<typename MemberPtr, MemberPtr ptr> typename T, typename MemberPtr, MemberPtr ptr>
     struct member_pointer_trait<T<MemberPtr, ptr>>
     {
-        static constexpr decltype(auto) pointer()
+        static constexpr MemberPtr pointer()
         {
             return ptr;
         }

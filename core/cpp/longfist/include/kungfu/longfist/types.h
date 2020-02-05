@@ -8,8 +8,7 @@
 #include <kungfu/common.h>
 #include <kungfu/longfist/enum.h>
 
-namespace kungfu::longfist::types
-{
+namespace kungfu::longfist::types {
 
     static constexpr int INSTRUMENT_ID_LEN = 32;
     static constexpr int PRODUCT_ID_LEN = 32;
@@ -450,8 +449,27 @@ namespace kungfu::longfist::types
             (uint32_t, holder_uid)
     );
 
-    inline void order_from_input(const OrderInput &input, Order &order)
-    {
+    KF_DEFINE_DATA_STRUCT(
+            InstrumentCommissionRate, 214,
+            (CArray<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
+            (CArray<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
+
+
+            (InstrumentType, instrument_type),         //合约类型
+
+            (CArray<char, ACCOUNT_ID_LEN>, account_id),        //账户ID
+            (CArray<char, BROKER_ID_LEN>, broker_id),          //Broker ID
+
+            (CommissionRateMode, mode),                //手续费模式(按照交易额或者交易量)
+
+            (double, open_ratio),                      //开仓费率
+            (double, close_ratio),                     //平仓费率
+            (double, close_today_ratio),               //平今费率
+
+            (double, min_commission)                  //最小手续费
+    );
+
+    inline void order_from_input(const OrderInput &input, Order &order) {
         order.parent_id = input.parent_id;
         order.order_id = input.order_id;
         strcpy(order.instrument_id, input.instrument_id);

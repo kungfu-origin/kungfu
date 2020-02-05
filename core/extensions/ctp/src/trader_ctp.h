@@ -5,8 +5,8 @@
 #ifndef KUNGFU_CTP_EXT_TRADER_H
 #define KUNGFU_CTP_EXT_TRADER_H
 
+#include <kungfu/longfist.h>
 #include <kungfu/yijinjing/common.h>
-#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/trader.h>
 
 #include "common.h"
@@ -15,111 +15,118 @@
 
 #include "ThostFtdcTraderApi.h"
 
-namespace kungfu
-{
-    namespace wingchun
-    {
-        namespace ctp
-        {
-            typedef std::shared_ptr<OrderMapper> OrderMapperPtr;
-            typedef std::shared_ptr<TradeMapper> TradeMapperPtr;
-            typedef std::unordered_map<std::string, msg::data::Position> PositionMap;
-            typedef std::unordered_map<std::string, msg::data::Instrument> InstrumentMap;
+namespace kungfu::wingchun::ctp {
+    typedef std::shared_ptr<OrderMapper> OrderMapperPtr;
+    typedef std::shared_ptr<TradeMapper> TradeMapperPtr;
+    typedef std::unordered_map<std::string, longfist::types::Position> PositionMap;
+    typedef std::unordered_map<std::string, longfist::types::Instrument> InstrumentMap;
 
-            class TraderCTP : public CThostFtdcTraderSpi, public broker::Trader
-            {
-            public:
-                TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id, const std::string &json_config);
+    class TraderCTP : public CThostFtdcTraderSpi, public broker::Trader {
+    public:
+        TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
+                  const std::string &json_config);
 
-                ~TraderCTP() {};
+        ~TraderCTP() {};
 
-                const AccountType get_account_type() const override
-                { return AccountType::Future; }
+        const longfist::AccountType get_account_type() const override { return longfist::AccountType::Future; }
 
-                bool insert_order(const event_ptr& event) override;
+        bool insert_order(const event_ptr &event) override;
 
-                bool cancel_order(const event_ptr& event) override;
+        bool cancel_order(const event_ptr &event) override;
 
-                bool req_position() override;
+        bool req_position() override;
 
-                bool req_account() override;
+        bool req_account() override;
 
-                virtual bool req_position_detail() ;
+        virtual bool req_position_detail();
 
-                virtual void OnFrontConnected();
+        virtual void OnFrontConnected();
 
-                virtual void OnFrontDisconnected(int nReason);
+        virtual void OnFrontDisconnected(int nReason);
 
-                virtual void OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo,
+                          int nRequestID, bool bIsLast);
 
-                virtual void
-                OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                       bool bIsLast);
 
-                virtual void OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                        bool bIsLast);
 
-                virtual void OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                         bool bIsLast);
 
-                virtual void
-                OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo,
+                         int nRequestID, bool bIsLast);
 
-                virtual void OnRtnOrder(CThostFtdcOrderField *pOrder);
+        virtual void OnRtnOrder(CThostFtdcOrderField *pOrder);
 
-                virtual void OnRtnTrade(CThostFtdcTradeField *pTrade);
+        virtual void OnRtnTrade(CThostFtdcTradeField *pTrade);
 
-                virtual void
-                OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
-                                         bool bIsLast);
+        virtual void
+        OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo,
+                                 int nRequestID,
+                                 bool bIsLast);
 
-                virtual void
-                OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail, CThostFtdcRspInfoField *pRspInfo,
-                                               int nRequestID, bool bIsLast);
+        virtual void
+        OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail,
+                                       CThostFtdcRspInfoField *pRspInfo,
+                                       int nRequestID, bool bIsLast);
 
-                virtual void OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
-                                                    bool bIsLast);
+        virtual void
+        OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo,
+                               int nRequestID,
+                               bool bIsLast);
 
-                virtual void
-                OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+        virtual void
+        OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                           bool bIsLast);
 
-                virtual void
-                OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo,
-                                           int nRequestID, bool bIsLast);
-            protected:
+        virtual void
+        OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm,
+                                   CThostFtdcRspInfoField *pRspInfo,
+                                   int nRequestID, bool bIsLast);
 
-                void on_start() override;
+    protected:
 
-            private:
-                TDConfiguration config_;
+        void on_start() override;
 
-                int front_id_;
-                int session_id_;
+    private:
+        TDConfiguration config_;
 
-                int order_ref_;
-                int request_id_;
+        int front_id_;
+        int session_id_;
 
-                CThostFtdcTraderApi *api_;
+        int order_ref_;
+        int request_id_;
 
-                OrderMapperPtr order_mapper_;
-                TradeMapperPtr trade_mapper_;
+        CThostFtdcTraderApi *api_;
 
-                PositionMap long_position_map_;
-                PositionMap short_position_map_;
+        OrderMapperPtr order_mapper_;
+        TradeMapperPtr trade_mapper_;
 
-                InstrumentMap instrument_map_;
+        PositionMap long_position_map_;
+        PositionMap short_position_map_;
 
-                std::unordered_map<int, msg::data::OrderAction> action_event_map_;
+        InstrumentMap instrument_map_;
 
-                std::string trading_day_;
+        std::unordered_map<int, longfist::types::OrderAction> action_event_map_;
 
-                bool login();
+        std::string trading_day_;
 
-                bool req_settlement_confirm();
+        bool login();
 
-                bool req_auth();
+        bool req_settlement_confirm();
 
-                bool req_qry_instrument();
+        bool req_auth();
 
-            };
-        }
-    }
+        bool req_qry_instrument();
+
+    };
 }
 #endif //KUNGFU_CTP_EXT_TRADER_H

@@ -26,7 +26,8 @@ namespace kungfu::longfist::sqlite
                 {
                     auto name = boost::hana::first(it);
                     auto accessor = boost::hana::second(it);
-                    return sqlite_orm::make_column(name.c_str(), member_pointer_trait<decltype(accessor)>::pointer());
+                    // MSVC bug: can not use static call
+                    return sqlite_orm::make_column(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
                 });
 
                 constexpr auto named_table = [](const std::string &table_name)
