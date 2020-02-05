@@ -20,7 +20,7 @@ namespace kungfu::yijinjing::util
 
     uint32_t hash_str_32(const std::string &key, uint32_t seed = KUNGFU_HASH_SEED);
 
-    void color_print(std::string level, std::string log);
+    void color_print(const std::string &level, const std::string &log);
 
     bool in_color_terminal();
 }
