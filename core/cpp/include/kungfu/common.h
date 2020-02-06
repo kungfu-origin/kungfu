@@ -21,10 +21,10 @@
 
 #ifndef _WIN32
 #define KF_DATA_STRUCT_BEGIN
-#define KF_DATA_STRUCT_END __attribute__((packed))
+#define KF_DATA_STRUCT_END __attribute__((packed));
 #else
 #define KF_DATA_STRUCT_BEGIN __pragma(pack(push, 1))
-#define KF_DATA_STRUCT_END __pragma(pack(pop))
+#define KF_DATA_STRUCT_END __pragma(pack(pop));
 #endif
 
 #define KF_DEFINE_DATA_STRUCT(NAME, TAG, PRIMARY_KEYS, ...) \
@@ -42,11 +42,9 @@ struct NAME : public kungfu::type<NAME> { \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
 }
 
-template<typename T, size_t N>
-using CArray = T[N];
-
 namespace kungfu
 {
+    uint32_t hash(const unsigned char *key, int32_t length);
 
     template<typename DataType>
     struct type
@@ -61,14 +59,16 @@ namespace kungfu
                 });
                 auto accessor = boost::hana::second(*just);
                 auto value = accessor(*(reinterpret_cast<const DataType *>(this)));
-                using RawType = decltype(value);
-                using AttrType = std::decay_t<RawType>;
-                if constexpr (std::is_integral<RawType>::value)
+                using ValueType = decltype(value);
+                if constexpr (std::is_integral<ValueType>::value and not std::is_pointer<ValueType>::value)
                 {
                     return value;
+                } else if constexpr (std::is_pointer<ValueType>::value)
+                {
+                    return hash(reinterpret_cast<const unsigned char *>(value), sizeof(value));
                 } else
                 {
-                    return std::hash<AttrType>{}(value);
+                    return hash(reinterpret_cast<const unsigned char *>(value.value), sizeof(value.value));
                 }
             });
             return boost::hana::fold(primary_keys, std::bit_xor());
@@ -127,6 +127,47 @@ namespace kungfu
     };
 
     DECLARE_PTR(event)
+
+    KF_DATA_STRUCT_BEGIN
+    template<typename T, size_t N>
+    struct CArray
+    {
+        using type = T[N];
+        type value;
+
+        operator T *()
+        {
+            return static_cast<T *>(value);
+        }
+
+        operator const T *() const
+        {
+            return static_cast<const T *>(value);
+        }
+
+        operator std::string() const
+        {
+            if constexpr (std::is_same<T, char>::value)
+            {
+                return std::string(value);
+            } else
+            {
+                return std::string(typeid(T).name()) + "[]";
+            }
+        }
+
+        T operator[](int i) const
+        {
+            return value[i];
+        }
+
+        CArray<T, N> &operator=(const CArray<T, N> &v)
+        {
+            memcpy(value, v.value, sizeof(value));
+            return *this;
+        }
+    }
+    KF_DATA_STRUCT_END
 }
 
 #endif //KUNGFU_COMMON_H

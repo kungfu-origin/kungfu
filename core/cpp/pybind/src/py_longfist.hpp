@@ -201,7 +201,7 @@ namespace kungfu::longfist
 
         auto m_types = m.def_submodule("types");
 
-        hana::for_each(types::DATA_STRUCTS, [&](auto type)
+        hana::for_each(DataTypes, [&](auto type)
         {
             using DataType = typename decltype(+hana::second(type))::type;
 

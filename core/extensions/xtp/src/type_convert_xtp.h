@@ -243,13 +243,10 @@ namespace kungfu::wingchun::xtp
         des.upper_limit_price = ori.upper_limit_price;
         des.lower_limit_price = ori.lower_limit_price;
 
-        for (int i = 0; i < 10; i++)
-        {
-            des.ask_price[i] = ori.ask[i];
-            des.ask_volume[i] = ori.ask_qty[i];
-            des.bid_price[i] = ori.bid[i];
-            des.bid_volume[i] = ori.bid_qty[i];
-        }
+        memcpy(des.ask_price, ori.ask, sizeof(des.ask_price));
+        memcpy(des.ask_volume, ori.ask_qty, sizeof(des.ask_price));
+        memcpy(des.bid_price, ori.bid, sizeof(des.ask_price));
+        memcpy(des.bid_volume, ori.bid_qty, sizeof(des.ask_price));
     }
 
     inline void to_xtp(XTPOrderInsertInfo &des, const OrderInput &ori)

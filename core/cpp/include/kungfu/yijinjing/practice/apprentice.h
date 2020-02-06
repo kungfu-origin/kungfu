@@ -39,7 +39,7 @@ namespace kungfu::yijinjing::practice
         return boost::hana::unpack(maps, boost::hana::make_map);
     };
 
-    using StateMapType = decltype(build_state_map(longfist::types::DATA_STRUCTS));
+    using StateMapType = decltype(build_state_map(longfist::DataTypes));
     DECLARE_PTR(StateMapType)
 
     class recover

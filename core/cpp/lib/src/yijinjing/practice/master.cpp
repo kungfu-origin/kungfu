@@ -119,6 +119,7 @@ namespace kungfu::yijinjing::practice
         auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state");
         app_sqlizers_[app_location->uid] = std::make_shared<sqlizer>(state_db_file);
         app_sqlizers_[app_location->uid]->storage.sync_schema();
+        app_sqlizers_[app_location->uid]->restore(writer);
 
         writer->mark(e->gen_time(), RequestStart::tag);
     }

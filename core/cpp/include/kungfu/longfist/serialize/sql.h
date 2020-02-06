@@ -8,14 +8,15 @@
 #include <sqlite_orm/sqlite_orm.h>
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::longfist::sqlite
 {
-    constexpr auto make_storage = [](const std::string &state_db_file)
+    constexpr auto make_storage = [](const std::string &state_db_file, const auto &types)
     {
-        constexpr auto make_table = [](auto types)
+        constexpr auto make_table = [](const auto &types)
         {
-            return [=](auto key)
+            return [&](auto key)
             {
                 auto value = types[key];
                 using DataType = typename decltype(+value)::type;
@@ -50,7 +51,7 @@ namespace kungfu::longfist::sqlite
             };
         };
 
-        auto tables = boost::hana::transform(boost::hana::keys(types::DATA_STRUCTS), make_table(types::DATA_STRUCTS));
+        auto tables = boost::hana::transform(boost::hana::keys(types), make_table(types));
 
         constexpr auto named_storage = [](const std::string &state_db_file)
         {
@@ -62,19 +63,32 @@ namespace kungfu::longfist::sqlite
         return boost::hana::unpack(tables, named_storage(state_db_file));
     };
 
-    using StorageType = decltype(make_storage(std::string()));
+    using StorageType = decltype(make_storage(std::string(), DataTypes));
 
     struct sqlizer
     {
+        const DataTypesT &types;
         StorageType storage;
 
-        explicit sqlizer(const std::string &state_db_file) : storage(longfist::sqlite::make_storage(state_db_file))
+        explicit sqlizer(const std::string &state_db_file) : types(DataTypes), storage(longfist::sqlite::make_storage(state_db_file, DataTypes))
         {}
+
+        void restore(const yijinjing::journal::writer_ptr &writer)
+        {
+            boost::hana::for_each(types, [&](auto it)
+            {
+                using DataType = typename decltype(+boost::hana::second(it))::type;
+                for (auto &data : storage.get_all<DataType>())
+                {
+                    writer->write(0, DataType::tag, data);
+                }
+            });
+        }
 
         template<typename DataType>
         void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
-            storage.insert(event->data<DataType>());
+            storage.replace(event->data<DataType>());
         }
     };
 
@@ -89,16 +103,15 @@ namespace sqlite_orm
     {
     };
 
-    template<typename T>
-    struct type_printer<T, std::enable_if_t<std::is_array<T>::value && std::is_same<std::decay_t<T>, char *>::value>> : public text_printer
+    template<size_t N>
+    struct type_printer<kungfu::CArray<char, N>> : public text_printer
     {
     };
 
-    template<typename T>
-    struct type_printer<T, std::enable_if_t<std::is_array<T>::value && !std::is_same<std::decay_t<T>, char *>::value>> : public blob_printer
+    template<typename T, size_t N>
+    struct type_printer<kungfu::CArray<T, N>> : public blob_printer
     {
     };
-
 }
 
 namespace sqlite_orm
@@ -112,21 +125,66 @@ namespace sqlite_orm
         }
     };
 
-    template<typename V>
-    struct statement_binder<V, std::enable_if_t<std::is_array<V>::value && std::is_same<std::decay_t<V>, char *>::value>>
+    template<size_t N>
+    struct statement_binder<kungfu::CArray<char, N>>
     {
-        int bind(sqlite3_stmt *stmt, int index, const V &value)
+        int bind(sqlite3_stmt *stmt, int index, const kungfu::CArray<char, N> &value)
         {
-            return sqlite3_bind_text(stmt, index, static_cast<const char *>(value), -1, SQLITE_TRANSIENT);
+            return sqlite3_bind_text(stmt, index, static_cast<const char *>(value.value), -1, SQLITE_TRANSIENT);
         }
     };
 
-    template<typename V>
-    struct statement_binder<V, std::enable_if_t<std::is_array<V>::value && !std::is_same<std::decay_t<V>, char *>::value>>
+    template<typename V, size_t N>
+    struct statement_binder<kungfu::CArray<V, N>>
     {
-        int bind(sqlite3_stmt *stmt, int index, const V &value)
+        int bind(sqlite3_stmt *stmt, int index, const kungfu::CArray<V, N> &value)
         {
-            return sqlite3_bind_blob(stmt, index, static_cast<const void *>(value), sizeof(V), SQLITE_TRANSIENT);
+            return sqlite3_bind_blob(stmt, index, static_cast<const void *>(value.value), sizeof(value.value), SQLITE_TRANSIENT);
+        }
+    };
+}
+
+namespace sqlite_orm
+{
+    template<typename V>
+    struct row_extractor<V, std::enable_if_t<std::is_enum<V>::value && !std::is_convertible<V, int>::value && !std::is_same<V, journal_mode>::value>>
+    {
+        V extract(const char *row_value)
+        {
+            return static_cast<V>(atoi(row_value));
+        }
+
+        V extract(sqlite3_stmt *stmt, int columnIndex)
+        {
+            return static_cast<V>(sqlite3_column_int(stmt, columnIndex));
+        }
+    };
+
+    template<size_t N>
+    struct row_extractor<kungfu::CArray<char, N>>
+    {
+        kungfu::CArray<char, N> extract(const char *row_value)
+        {
+            return {};
+        }
+
+        kungfu::CArray<char, N> extract(sqlite3_stmt *stmt, int columnIndex)
+        {
+            return {};
+        }
+    };
+
+    template<typename V, size_t N>
+    struct row_extractor<kungfu::CArray<V, N>>
+    {
+        kungfu::CArray<V, N> extract(const char *row_value)
+        {
+            return {};
+        }
+
+        kungfu::CArray<V, N> extract(sqlite3_stmt *stmt, int columnIndex)
+        {
+            return {};
         }
     };
 }
