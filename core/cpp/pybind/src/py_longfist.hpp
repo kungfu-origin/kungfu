@@ -235,6 +235,14 @@ namespace kungfu::longfist
                 py_class.def_property(name.c_str(), getter, setter);
             });
 
+            py_class.def_property_readonly("uid", &DataType::uid);
+            py_class.def("__hash__", &DataType::uid);
+
+            py_class.def("__eq__", [&](DataType &a, DataType &b)
+            {
+                return a.uid() == b.uid();
+            });
+
             py_class.def("__repr__", [&](DataType &target)
             {
                 nlohmann::json j{};
