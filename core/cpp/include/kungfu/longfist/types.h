@@ -43,6 +43,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             TimeRequest, 10004,
+            PK(id),
             (int32_t, id),
             (int64_t, duration),
             (int64_t, repeat)
@@ -50,34 +51,40 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             RequestReadFrom, 10021,
+            PK(source_id),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
     KF_DEFINE_DATA_STRUCT(
             RequestReadFromPublic, 10022,
+            PK(source_id),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
     KF_DEFINE_DATA_STRUCT(
             RequestWriteTo, 10023,
+            PK(dest_id),
             (uint32_t, dest_id)
     );
 
     KF_DEFINE_DATA_STRUCT(
             TradingDay, 10027,
+            PK(timestamp),
             (int64_t, timestamp)
     );
 
     KF_DEFINE_DATA_STRUCT(
             Channel, 10028,
+            PK(source_id, dest_id),
             (uint32_t, source_id),
             (uint32_t, dest_id)
     );
 
     KF_DEFINE_DATA_STRUCT(
             Report, 10086,
+            PK(source_id, dest_id),
             (uint32_t, source_id),
             (uint32_t, dest_id),
             (int64_t, timestamp)
@@ -85,6 +92,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Instrument, 209,
+            PK(instrument_id, exchange_id),
             (CArray<char, INSTRUMENT_ID_LEN>, instrument_id),     //合约ID
             (CArray<char, EXCHANGE_ID_LEN>, exchange_id),         //交易所ID
             (InstrumentType, instrument_type),            //合约类型
@@ -109,6 +117,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Quote, 101,
+            PK(instrument_id, exchange_id),
             (CArray<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (CArray<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -147,6 +156,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Entrust, 102,
+            PK(instrument_id, exchange_id),
             (CArray<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (CArray<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -168,6 +178,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Transaction, 103,
+            PK(instrument_id, exchange_id),
             (CArray<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (CArray<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -193,6 +204,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Bar, 110,
+            PK(instrument_id, exchange_id),
             (CArray<char, DATE_LEN>, trading_day),            //交易日
             (CArray<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
             (CArray<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
@@ -213,6 +225,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             OrderInput, 201,
+            PK(order_id),
             (uint64_t, order_id),                       //订单ID
 
             (CArray<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约代码
@@ -240,6 +253,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             OrderAction, 202,
+            PK(order_action_id),
             (uint64_t, order_id),                       //订单ID
             (uint64_t, order_action_id),                //订单操作ID
 
@@ -251,6 +265,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             OrderActionError, 202,
+            PK(order_action_id),
             (uint64_t, order_id),                       //订单ID
             (uint64_t, order_action_id),                //订单操作ID
             (int32_t, error_id),                        //错误ID
@@ -259,6 +274,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Order, 203,
+            PK(order_id),
             (uint64_t, parent_id),                      //母订单ID
             (uint64_t, order_id),                       //订单ID
 
@@ -301,6 +317,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Trade, 204,
+            PK(order_id),
             (uint64_t, trade_id),                       //成交ID
 
             (uint64_t, order_id),                       //订单ID
@@ -331,6 +348,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             Position, 205,
+            PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
             (CArray<char, DATE_LEN>, trading_day),              //交易日
 
@@ -373,11 +391,13 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             PositionEnd, 800,
+            PK(holder_uid),
             (uint32_t, holder_uid)
     );
 
     KF_DEFINE_DATA_STRUCT(
             Asset, 206,
+            PK(holder_uid),
             (int64_t, update_time),               //更新时间
             (CArray<char, DATE_LEN>, trading_day),        //交易日
 
@@ -414,6 +434,7 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             PositionDetail, 208,
+            PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
             (CArray<char, DATE_LEN>, trading_day),              //交易日
 
@@ -446,11 +467,13 @@ namespace kungfu::longfist::types {
 
     KF_DEFINE_DATA_STRUCT(
             PositionDetailEnd, 801,
+            PK(holder_uid),
             (uint32_t, holder_uid)
     );
 
     KF_DEFINE_DATA_STRUCT(
             InstrumentCommissionRate, 214,
+            PK(instrument_id, exchange_id),
             (CArray<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
             (CArray<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 

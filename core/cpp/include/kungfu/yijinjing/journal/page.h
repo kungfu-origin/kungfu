@@ -24,6 +24,7 @@ namespace kungfu::yijinjing::journal
 
     KF_DEFINE_DATA_STRUCT(
             page_header, 1,
+            PK(version),
             (uint32_t, version),
             (uint32_t, page_header_length),
             (uint32_t, page_size),

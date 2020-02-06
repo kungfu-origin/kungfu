@@ -12,6 +12,13 @@
 #define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
+#define PK(...) boost::hana::make_tuple(MAKE_PK(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
+#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__)
+#define MAKE_PK_IMPL_1(k) BOOST_HANA_STRING(#k)
+#define MAKE_PK_IMPL_2(k1, k2) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2)
+#define MAKE_PK_IMPL_3(k1, k2, k3) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2), BOOST_HANA_STRING(#k3)
+#define MAKE_PK_IMPL_4(k1, k2, k3, k4) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2), BOOST_HANA_STRING(#k3), BOOST_HANA_STRING(#k4)
+
 #ifndef _WIN32
 #define KF_DATA_STRUCT_BEGIN
 #define KF_DATA_STRUCT_END __attribute__((packed))
@@ -20,9 +27,13 @@
 #define KF_DATA_STRUCT_END __pragma(pack(pop))
 #endif
 
-#define KF_DEFINE_DATA_STRUCT(NAME, TAG, ...) \
+#define KF_DEFINE_DATA_STRUCT(NAME, TAG, PRIMARY_KEYS, ...) \
 KF_DATA_STRUCT_BEGIN \
-struct NAME : public kungfu::type { static constexpr int32_t tag = TAG; BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); } \
+struct NAME : public kungfu::type { \
+    static constexpr int32_t tag = TAG; \
+    static constexpr auto primary_keys = PRIMARY_KEYS; \
+    BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
+} \
 KF_DATA_STRUCT_END
 
 #define KF_DEFINE_MARK_STRUCT(NAME, TAG) struct NAME : public kungfu::type { static constexpr int32_t tag = TAG; }
@@ -35,6 +46,10 @@ namespace kungfu
 
     struct type
     {
+//        static constexpr decltype(auto) extract_primary_keys(auto ...args)
+//        {
+//            return BOOST_HANA_STRING("");
+//        }
     };
 
     template <typename>

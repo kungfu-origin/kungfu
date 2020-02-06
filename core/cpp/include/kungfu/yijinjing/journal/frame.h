@@ -23,6 +23,7 @@ namespace kungfu::yijinjing::journal
 
     KF_DEFINE_DATA_STRUCT(
             frame_header, 0,
+            PK(gen_time),
     /** total frame length (including header and data body) */
             (volatile uint32_t, length),
     /** header length */

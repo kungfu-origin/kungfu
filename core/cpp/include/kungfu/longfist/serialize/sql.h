@@ -22,19 +22,31 @@ namespace kungfu::longfist::sqlite
             {
                 auto value = types[key];
                 using DataType = typename decltype(+value)::type;
-                auto columns = boost::hana::transform(boost::hana::accessors<DataType>(), [](auto it) -> decltype(auto)
+                auto columns = boost::hana::transform(boost::hana::accessors<DataType>(), [](auto it)
                 {
                     auto name = boost::hana::first(it);
                     auto accessor = boost::hana::second(it);
                     // MSVC bug: can not use static call
                     return sqlite_orm::make_column(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
                 });
-
                 constexpr auto named_table = [](const std::string &table_name)
                 {
                     return [&](auto ...columns)
                     {
-                        return sqlite_orm::make_table(table_name, columns...);
+                        auto pk_members = boost::hana::transform(DataType::primary_keys, [](auto pk)
+                        {
+                            auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [&](auto it)
+                            {
+                                return pk == boost::hana::first(it);
+                            });
+                            auto accessor = boost::hana::second(*just);
+                            return member_pointer_trait<decltype(accessor)>().pointer();
+                        });
+                        auto primary_keys = boost::hana::unpack(pk_members, [](auto ... keys)
+                        {
+                            return sqlite_orm::primary_key(keys...);
+                        });
+                        return sqlite_orm::make_table(table_name, columns..., primary_keys);
                     };
                 };
                 return boost::hana::unpack(columns, named_table(key.c_str()));
@@ -68,6 +80,7 @@ namespace kungfu::longfist::sqlite
             storage.insert(event->data<DataType>());
         }
     };
+
     DECLARE_PTR(sqlizer)
 }
 
