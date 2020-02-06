@@ -52,7 +52,7 @@ namespace kungfu::yijinjing::practice
         void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
             auto data = event->data<DataType>();
-            state_map_[boost::hana::type_c<DataType>][0] = data;
+            state_map_[boost::hana::type_c<DataType>][data.uid()] = data;
         }
     private:
         StateMapType &state_map_;

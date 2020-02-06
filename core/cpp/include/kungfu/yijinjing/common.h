@@ -20,7 +20,6 @@
 #include <typeinfo>
 #include <csignal>
 
-#include <boost/hana.hpp>
 #include <rxcpp/rx.hpp>
 #include <nlohmann/json.hpp>
 

@@ -29,14 +29,18 @@
 
 #define KF_DEFINE_DATA_STRUCT(NAME, TAG, PRIMARY_KEYS, ...) \
 KF_DATA_STRUCT_BEGIN \
-struct NAME : public kungfu::type { \
+struct NAME : public kungfu::type<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
 } \
 KF_DATA_STRUCT_END
 
-#define KF_DEFINE_MARK_STRUCT(NAME, TAG) struct NAME : public kungfu::type { static constexpr int32_t tag = TAG; }
+#define KF_DEFINE_MARK_STRUCT(NAME, TAG) \
+struct NAME : public kungfu::type<NAME> { \
+    static constexpr int32_t tag = TAG; \
+    static constexpr auto primary_keys = boost::hana::make_tuple(); \
+}
 
 template<typename T, size_t N>
 using CArray = T[N];
@@ -44,18 +48,37 @@ using CArray = T[N];
 namespace kungfu
 {
 
+    template<typename DataType>
     struct type
     {
-//        static constexpr decltype(auto) extract_primary_keys(auto ...args)
-//        {
-//            return BOOST_HANA_STRING("");
-//        }
+        uint64_t uid() const
+        {
+            auto primary_keys = boost::hana::transform(DataType::primary_keys, [this](auto pk)
+            {
+                auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [&](auto it)
+                {
+                    return pk == boost::hana::first(it);
+                });
+                auto accessor = boost::hana::second(*just);
+                auto value = accessor(*(reinterpret_cast<const DataType *>(this)));
+                using RawType = decltype(value);
+                using AttrType = std::decay_t<RawType>;
+                if constexpr (std::is_integral<RawType>::value)
+                {
+                    return value;
+                } else
+                {
+                    return std::hash<AttrType>{}(value);
+                }
+            });
+            return boost::hana::fold(primary_keys, std::bit_xor());
+        }
     };
 
-    template <typename>
+    template<typename>
     struct member_pointer_trait;
 
-    template <template<typename MemberPtr, MemberPtr ptr> typename T, typename MemberPtr, MemberPtr ptr>
+    template<template<typename MemberPtr, MemberPtr ptr> typename T, typename MemberPtr, MemberPtr ptr>
     struct member_pointer_trait<T<MemberPtr, ptr>>
     {
         static constexpr MemberPtr pointer()

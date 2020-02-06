@@ -5,15 +5,12 @@
 #ifndef KUNGFU_LONGFIST_SQL_H
 #define KUNGFU_LONGFIST_SQL_H
 
-#include <spdlog/spdlog.h>
-#include <boost/hana.hpp>
 #include <sqlite_orm/sqlite_orm.h>
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 
 namespace kungfu::longfist::sqlite
 {
-
     constexpr auto make_storage = [](const std::string &state_db_file)
     {
         constexpr auto make_table = [](auto types)

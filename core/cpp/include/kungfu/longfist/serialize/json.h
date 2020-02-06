@@ -5,7 +5,6 @@
 #ifndef KUNGFU_LONGFIST_JSON_H
 #define KUNGFU_LONGFIST_JSON_H
 
-#include <boost/hana.hpp>
 #include <kungfu/common.h>
 
 namespace kungfu::longfist

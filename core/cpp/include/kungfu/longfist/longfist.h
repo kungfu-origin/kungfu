@@ -5,7 +5,6 @@
 #ifndef KUNGFU_LONGFIST_H
 #define KUNGFU_LONGFIST_H
 
-#include <boost/hana.hpp>
 #include <spdlog/spdlog.h>
 #include <fmt/format.h>
 
