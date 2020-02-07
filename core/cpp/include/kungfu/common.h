@@ -24,10 +24,10 @@
 
 #ifndef _WIN32
 #define KF_DATA_TYPE_BEGIN
-#define KF_DATA_TYPE_END __attribute__((packed));
+#define KF_DATA_TYPE_END __attribute__((packed))
 #else
 #define KF_DATA_TYPE_BEGIN __pragma(pack(push, 1))
-#define KF_DATA_TYPE_END __pragma(pack(pop));
+#define KF_DATA_TYPE_END __pragma(pack(pop))
 #endif
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
@@ -90,27 +90,27 @@ namespace kungfu
             memset(value, 0, sizeof(type));
         }
 
-        array(const T *t)
+        explicit array(const T *t)
         {
             memcpy(value, t, sizeof(value));
         }
 
-        array(const unsigned char *t)
+        explicit array(const unsigned char *t)
         {
             memcpy(value, t, sizeof(value));
         }
 
-        operator T *()
+        explicit operator T *()
         {
             return static_cast<T *>(value);
         }
 
-        operator const T *() const
+        explicit operator const T *() const
         {
             return static_cast<const T *>(value);
         }
 
-        operator std::string() const
+        explicit operator std::string() const
         {
             return array_to_string<T, N>{}(value);
         }
@@ -209,7 +209,7 @@ namespace kungfu
     {
         uint64_t operator()(const std::string &value)
         {
-            return hash_32(reinterpret_cast<const unsigned char *>(value.c_str()), sizeof(value));
+            return hash_32(reinterpret_cast<const unsigned char *>(value.c_str()), value.length());
         }
     };
 
@@ -242,7 +242,7 @@ namespace kungfu
             });
         }
 
-        std::string to_string() const
+        [[nodiscard]] std::string to_string() const
         {
             nlohmann::json j{};
             boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
@@ -255,12 +255,12 @@ namespace kungfu
             return j.dump();
         }
 
-        operator std::string() const
+        explicit operator std::string() const
         {
             return to_string();
         }
 
-        uint64_t uid() const
+        [[nodiscard]] uint64_t uid() const
         {
             auto primary_keys = boost::hana::transform(DataType::primary_keys, [this](auto pk)
             {
