@@ -135,10 +135,10 @@ namespace kungfu::wingchun
         void handle_instrument_request(const event_ptr &event) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, handle_instrument_request, event) }
 
-        void handle_asset_request(const event_ptr &event, const data::location_ptr &app_location) override
+        void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, handle_asset_request, event, app_location) }
 
-        void on_app_location(int64_t trigger_time, const data::location_ptr &app_location) override
+        void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, on_app_location, trigger_time, app_location) }
 
         void on_quote(event_ptr event, const Quote &quote) override
@@ -249,7 +249,7 @@ namespace kungfu::wingchun
                 ;
 
         py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
-                .def(py::init<bool, data::locator_ptr, const std::string&>())
+                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string&>())
                 .def_property_readonly("io_device", &MarketData::get_io_device)
                 .def("subscribe", &MarketData::subscribe)
                 .def("subscribe_all", &MarketData::subscribe_all)
@@ -261,7 +261,7 @@ namespace kungfu::wingchun
                 .def("run", &MarketData::run);
 
         py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
-                .def(py::init<bool, data::locator_ptr, const std::string&, const std::string&>())
+                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string&, const std::string&>())
                 .def_property_readonly("io_device", &Trader::get_io_device)
                 .def("on_start", &Trader::on_start)
                 .def("get_writer", &Trader::get_writer)
@@ -272,7 +272,7 @@ namespace kungfu::wingchun
                 .def("run", &Trader::run);
 
         py::class_<Ledger, PyLedger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
-                .def(py::init<data::locator_ptr, data::mode, bool>())
+                .def(py::init<yijinjing::data::locator_ptr, yijinjing::data::mode, bool>())
                 .def_property_readonly("config_location", &Ledger::get_config_location)
                 .def_property_readonly("io_device", &Ledger::get_io_device)
                 .def_property_readonly("book_context", &Ledger::get_book_context)
@@ -302,7 +302,7 @@ namespace kungfu::wingchun
                 .def("run", &Ledger::run);
 
         py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
-                .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
+                .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, yijinjing::data::mode, bool>())
                 .def("set_begin_time", &strategy::Runner::set_begin_time)
                 .def("set_end_time", &strategy::Runner::set_end_time)
                 .def("run", &strategy::Runner::run)
@@ -359,7 +359,7 @@ namespace kungfu::wingchun
                 .def("add_order", &algo::AlgoContext::add_order);
 
         py::class_<service::Algo, PyAlgoService, service::Algo_ptr>(m, "AlgoService")
-//            .def(py::init<data::locator_ptr, data::mode, bool>())
+//            .def(py::init<yijinjing::data::locator_ptr, yijinjing::data::mode, bool>())
                 .def_property_readonly("algo_context", &service::Algo::get_algo_context)
                 .def_property_readonly("io_device", &service::Algo::get_io_device)
                 .def("now", &service::Algo::now)
@@ -375,7 +375,7 @@ namespace kungfu::wingchun
                 ;
 
         py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
-                .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())
+                .def(py::init<yijinjing::data::locator_ptr, yijinjing::data::mode, bool, std::string&>())
                 .def("run", &service::BarGenerator::run);
     }
 }

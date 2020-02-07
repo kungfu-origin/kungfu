@@ -173,9 +173,8 @@ namespace kungfu::yijinjing::nanomsg
 
     DECLARE_PTR(socket)
 
-    class nanomsg_json : public event
+    struct nanomsg_json : event
     {
-    public:
         nanomsg_json(const std::string &msg) : binding_(nlohmann::json::parse(msg)), msg_(msg)
         {};
 
@@ -197,6 +196,9 @@ namespace kungfu::yijinjing::nanomsg
         [[nodiscard]] uint32_t data_length() const override
         { return binding_.size(); }
 
+        [[nodiscard]] const void *data_address() const override
+        { return &binding_["data"]; }
+
         [[nodiscard]] const char *data_as_bytes() const override
         { return msg_.c_str(); }
 
@@ -205,10 +207,6 @@ namespace kungfu::yijinjing::nanomsg
 
         [[nodiscard]] std::string to_string() const override
         { return msg_; }
-
-    protected:
-        [[nodiscard]] const void *data_address() const override
-        { return &binding_["data"]; }
 
     private:
         const nlohmann::json binding_;

@@ -32,24 +32,23 @@
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
 KF_DATA_TYPE_BEGIN \
-struct NAME : public kungfu::type<NAME> { \
+struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     NAME() {}; \
-    explicit NAME(const char *address) : kungfu::type<NAME>(address) {}; \
+    explicit NAME(const char *address) : kungfu::data<NAME>(address) {}; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
 } \
 KF_DATA_TYPE_END
 
 #define KF_DEFINE_MARK_TYPE(NAME, TAG) \
-struct NAME : public kungfu::type<NAME> { \
+struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
 }
 
 namespace kungfu
 {
-
     uint32_t hash_32(const unsigned char *key, int32_t length);
 
     template<typename V, size_t N, typename = void>
@@ -224,14 +223,14 @@ namespace kungfu
     };
 
     template<typename DataType>
-    struct type
+    struct data
     {
         static constexpr bool reflect = true;
 
-        type()
+        data()
         {}
 
-        explicit type(const char *address)
+        explicit data(const char *address)
         {
             nlohmann::json j = nlohmann::json::parse(address);
             boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
@@ -289,10 +288,8 @@ namespace kungfu
         }
     };
 
-    class event
+    struct event
     {
-    public:
-
         virtual ~event() = default;
 
         [[nodiscard]] virtual int64_t gen_time() const = 0;
@@ -306,6 +303,8 @@ namespace kungfu
         [[nodiscard]] virtual uint32_t dest() const = 0;
 
         [[nodiscard]] virtual uint32_t data_length() const = 0;
+
+        [[nodiscard]] virtual const void *data_address() const = 0;
 
         [[nodiscard]] virtual const char *data_as_bytes() const = 0;
 
@@ -329,9 +328,6 @@ namespace kungfu
         {
             return T(data_as_bytes());
         }
-
-    protected:
-        virtual const void *data_address() const = 0;
     };
 
     DECLARE_PTR(event)

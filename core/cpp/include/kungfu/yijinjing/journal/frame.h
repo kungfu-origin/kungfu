@@ -44,10 +44,8 @@ namespace kungfu::yijinjing::journal
      * Basic memory unit,
      * holds header / data / errorMsg (if needs)
      */
-    class frame : public event
+    struct frame : event
     {
-    public:
-
         ~frame() override = default;
 
         [[nodiscard]] bool has_data() const
@@ -80,6 +78,9 @@ namespace kungfu::yijinjing::journal
         [[nodiscard]] uint32_t dest() const override
         { return header_->dest; }
 
+        [[nodiscard]] const void *data_address() const override
+        { return reinterpret_cast<void *>(address() + header_length()); }
+
         [[nodiscard]] const char *data_as_bytes() const override
         { return reinterpret_cast<char *>(address() + header_length()); }
 
@@ -96,10 +97,6 @@ namespace kungfu::yijinjing::journal
             memcpy(const_cast<void *>(data_address()), &data, length);
             return length;
         }
-
-    protected:
-        [[nodiscard]] const void *data_address() const override
-        { return reinterpret_cast<void *>(address() + header_length()); }
 
     private:
 
