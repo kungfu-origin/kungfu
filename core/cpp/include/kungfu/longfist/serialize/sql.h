@@ -86,9 +86,11 @@ namespace kungfu::longfist::sqlite
         }
 
         template<typename DataType>
-        void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
+        std::enable_if_t<DataType::reflect, void> operator()(const std::string &name,
+                                                             boost::hana::basic_type<DataType> type,
+                                                             const event_ptr &event)
         {
-            storage.replace(event->data<DataType>());;;;;;;;;;;;;;;;;;
+            storage.replace(event->data<DataType>());
         }
     };
 
@@ -99,7 +101,7 @@ namespace sqlite_orm
 {
 
     template<typename T>
-    struct type_printer<T, std::enable_if_t<std::is_enum<T>::value && !std::is_convertible<T, int>::value>> : public integer_printer
+    struct type_printer<T, std::enable_if_t<std::is_enum_v<T> and not std::is_convertible_v<T, int>>> : public integer_printer
     {
     };
 
@@ -112,12 +114,17 @@ namespace sqlite_orm
     struct type_printer<kungfu::array<T, N>> : public blob_printer
     {
     };
+
+    template<typename T>
+    struct type_printer<std::vector<T>> : public blob_printer
+    {
+    };
 }
 
 namespace sqlite_orm
 {
     template<typename V>
-    struct statement_binder<V, std::enable_if_t<std::is_enum<V>::value && !std::is_convertible<V, int>::value>>
+    struct statement_binder<V, std::enable_if_t<std::is_enum_v<V> and not std::is_convertible_v<V, int>>>
     {
         int bind(sqlite3_stmt *stmt, int index, const V &value)
         {
@@ -142,12 +149,27 @@ namespace sqlite_orm
             return sqlite3_bind_blob(stmt, index, static_cast<const void *>(value.value), sizeof(value.value), SQLITE_TRANSIENT);
         }
     };
+
+    template<typename V>
+    struct statement_binder<std::vector<V>, std::enable_if_t<not std::is_same_v<V, char>>>
+    {
+        int bind(sqlite3_stmt *stmt, int index, const std::vector<V> &value)
+        {
+            if (value.size())
+            {
+                return sqlite3_bind_blob(stmt, index, (const void *) &value.front(), int(value.size() * sizeof(V)), SQLITE_TRANSIENT);
+            } else
+            {
+                return sqlite3_bind_blob(stmt, index, "", 0, SQLITE_TRANSIENT);
+            }
+        }
+    };
 }
 
 namespace sqlite_orm
 {
     template<typename V>
-    struct row_extractor<V, std::enable_if_t<std::is_enum<V>::value && !std::is_convertible<V, int>::value && !std::is_same<V, journal_mode>::value>>
+    struct row_extractor<V, std::enable_if_t<std::is_enum_v<V> and not std::is_convertible_v<V, int> and not std::is_same_v<V, journal_mode>>>
     {
         V extract(const char *row_value)
         {
@@ -185,6 +207,44 @@ namespace sqlite_orm
         kungfu::array<V, N> extract(sqlite3_stmt *stmt, int columnIndex)
         {
             return kungfu::array<V, N>{sqlite3_column_text(stmt, columnIndex)};
+        }
+    };
+
+    template<typename V>
+    struct row_extractor<std::vector<V>>
+    {
+        std::vector<V> extract(const char *row_value)
+        {
+            if (row_value)
+            {
+                auto len = ::strlen(row_value);
+                return this->go(row_value, len);
+            } else
+            {
+                return {};
+            }
+        }
+
+        std::vector<V> extract(sqlite3_stmt *stmt, int columnIndex)
+        {
+            auto bytes = static_cast<const char *>(sqlite3_column_blob(stmt, columnIndex));
+            auto len = sqlite3_column_bytes(stmt, columnIndex);
+            return this->go(bytes, len);
+        }
+
+    protected:
+        std::vector<V> go(const char *bytes, size_t len)
+        {
+            if (len)
+            {
+                std::vector<V> res;
+                res.reserve(len / sizeof(V));
+                std::copy(bytes, bytes + len, std::back_inserter(res));
+                return res;
+            } else
+            {
+                return {};
+            }
         }
     };
 }

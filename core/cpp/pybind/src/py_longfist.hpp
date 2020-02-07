@@ -7,7 +7,6 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <nlohmann/json.hpp>
 
 #include <kungfu/longfist/longfist.h>
 
@@ -235,24 +234,14 @@ namespace kungfu::longfist
                 py_class.def_property(name.c_str(), getter, setter);
             });
 
+            py_class.def("__repr__", &DataType::to_string);
+
             py_class.def_property_readonly("uid", &DataType::uid);
             py_class.def("__hash__", &DataType::uid);
 
             py_class.def("__eq__", [&](DataType &a, DataType &b)
             {
                 return a.uid() == b.uid();
-            });
-
-            py_class.def("__repr__", [&](DataType &target)
-            {
-                nlohmann::json j{};
-                hana::for_each(hana::accessors<DataType>(), [&](auto it)
-                {
-                    auto name = hana::first(it);
-                    auto accessor = hana::second(it);
-                    j[name.c_str()] = accessor(target);
-                });
-                return j.dump();
             });
 
             py_class.def("__sizeof__", [&](DataType &target)

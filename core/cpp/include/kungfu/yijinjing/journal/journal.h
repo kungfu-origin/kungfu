@@ -150,11 +150,11 @@ namespace kungfu::yijinjing::journal
          * @return a casted reference to the underlying memory address in mmap file
          */
         template<typename T>
-        T &open_data(int64_t trigger_time, int32_t msg_type)
+        std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time)
         {
-            auto frame = open_frame(trigger_time, msg_type, sizeof(T));
             size_to_write_ = sizeof(T);
-            return const_cast<T &>(frame->data<T>());
+            auto frame = open_frame(trigger_time, T::tag, size_to_write_);
+            return const_cast<T &>(frame->template data<T>());
         }
 
         void close_data()
@@ -165,14 +165,33 @@ namespace kungfu::yijinjing::journal
         }
 
         template<typename T>
-        void write(int64_t trigger_time, int32_t msg_type, const T &data)
+        std::enable_if_t<kungfu::size_fixed_v<T>, void> write(int64_t trigger_time, const T &data)
         {
-            auto frame = open_frame(trigger_time, msg_type, sizeof(T));
-            close_frame(frame->copy_data<T>(data));
+            auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+            auto size = frame->copy_data(data);
+            close_frame(size);
         }
 
         template<typename T>
-        void write_with_time(int64_t gen_time, int32_t msg_type, const T &data)
+        std::enable_if_t<not kungfu::size_fixed_v<T>, void> write(int64_t trigger_time, const T &data)
+        {
+            auto s = data.to_string();
+            auto size = s.length();
+            auto frame = open_frame(trigger_time, T::tag, s.length());
+            memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
+            close_frame(size);
+        }
+
+        template<typename T>
+        void write(int64_t trigger_time, int32_t msg_type, const T &data)
+        {
+            auto frame = open_frame(trigger_time, msg_type, sizeof(T));
+            auto size = frame->copy_data(data);
+            close_frame(size);
+        }
+
+        template<typename T>
+        std::enable_if_t<not kungfu::size_fixed_v<T>, void> write_with_time(int64_t gen_time, const T &data)
         {
             assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->page_->get_page_size());
             if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->page_->address_border())
@@ -183,11 +202,11 @@ namespace kungfu::yijinjing::journal
             auto frame = journal_->current_frame();
             frame->set_header_length();
             frame->set_trigger_time(0);
-            frame->set_msg_type(msg_type);
+            frame->set_msg_type(T::tag);
             frame->set_source(journal_->location_->uid);
             frame->set_dest(journal_->dest_id_);
 
-            frame->copy_data<T>(data);
+            frame->copy_data(data);
             frame->set_gen_time(gen_time);
             frame->set_data_length(sizeof(T));
             journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());

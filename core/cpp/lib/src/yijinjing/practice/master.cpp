@@ -111,7 +111,7 @@ namespace kungfu::yijinjing::practice
 
         for (const auto &item: channels_)
         {
-            writer->write(e->gen_time(), Channel::tag, item.second);
+            writer->write(e->gen_time(), item.second);
         }
 
         on_register(e, app_location);
@@ -173,7 +173,7 @@ namespace kungfu::yijinjing::practice
     void master::register_channel(int64_t trigger_time, const Channel &channel)
     {
         hero::register_channel(trigger_time, channel);
-        writers_[0]->write(trigger_time, Channel::tag, channel);
+        writers_[0]->write(trigger_time, channel);
     }
 
     bool master::produce_one(const rx::subscriber<event_ptr> &sb)

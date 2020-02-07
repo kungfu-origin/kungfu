@@ -50,6 +50,13 @@ namespace kungfu::longfist::types
     );
 
     KF_DEFINE_DATA_TYPE(
+            Config, 10005,
+            PK(name),
+            (std::string, name),
+            (std::string, value)
+    );
+
+    KF_DEFINE_DATA_TYPE(
             RequestReadFrom, 10021,
             PK(source_id),
             (uint32_t, source_id),
@@ -496,7 +503,9 @@ namespace kungfu::longfist::types
             OrderTime, 215,
             PK(order_id),
             (uint64_t, order_id),
-            (kungfu::array<int64_t, 10>, timestamps)
+            (int64_t, insert_time),
+            (int64_t, update_time),
+            (std::vector<int64_t>, timestamps)
     );
 }
 

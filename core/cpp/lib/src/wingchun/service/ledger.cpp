@@ -417,7 +417,7 @@ namespace kungfu::wingchun::service
         if (has_writer(account_location_uid))
         {
             auto writer = get_writer(account_location_uid);
-            OrderAction &action = writer->open_data<OrderAction>(event->gen_time(), OrderAction::tag);
+            OrderAction &action = writer->open_data<OrderAction>(event->gen_time());
             action.order_action_id = writer->current_frame_uid();
             action.order_id = order_id;
             action.action_flag = OrderActionFlag::Cancel;
@@ -427,8 +427,7 @@ namespace kungfu::wingchun::service
         {
             if (has_location(account_location_uid))
             {
-                auto location = get_location(account_location_uid);
-                SPDLOG_ERROR("writer to {} [{:08x}] not exists", location->uname, account_location_uid);
+                SPDLOG_ERROR("writer to {} [{:08x}] not exists", get_location(account_location_uid)->uname, account_location_uid);
             } else
             {
                 SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);

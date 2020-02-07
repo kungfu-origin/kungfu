@@ -205,7 +205,7 @@ namespace kungfu::yijinjing::practice
         if (has_location(source_id))
         {
             auto writer = get_writer(source_id);
-            RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time, RequestWriteTo::tag);
+            RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time);
             msg.dest_id = dest_id;
             writer->close_data();
             SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
@@ -216,16 +216,27 @@ namespace kungfu::yijinjing::practice
         }
     }
 
+    template<typename T>
+    std::enable_if_t<T::reflect, void> request_read_from(writer_ptr &writer, int64_t trigger_time, uint32_t source_id)
+    {
+        T &msg = writer->template open_data<T>(trigger_time);
+        msg.source_id = source_id;
+        msg.from_time = trigger_time;
+        writer->close_data();
+    }
+
     void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub)
     {
         if (has_location(dest_id))
         {
             auto writer = get_writer(dest_id);
-            auto msg_type = pub ? RequestReadFromPublic::tag : RequestReadFrom::tag;
-            RequestReadFrom &msg = writer->open_data<RequestReadFrom>(trigger_time, msg_type);
-            msg.source_id = source_id;
-            msg.from_time = trigger_time;
-            writer->close_data();
+            if (pub)
+            {
+                request_read_from<RequestReadFromPublic>(writer, trigger_time, source_id);
+            } else
+            {
+                request_read_from<RequestReadFrom>(writer, trigger_time, source_id);
+            }
             SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
                         get_location(source_id)->uname, source_id);
         } else

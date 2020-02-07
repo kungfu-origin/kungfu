@@ -133,7 +133,7 @@ namespace kungfu::wingchun::ctp {
     void MarketDataCTP::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
         if (pDepthMarketData != nullptr) {
             SPDLOG_TRACE(to_string(*pDepthMarketData));
-            longfist::types::Quote &quote = get_writer(0)->open_data<longfist::types::Quote>(0, Quote::tag);
+            longfist::types::Quote &quote = get_writer(0)->open_data<longfist::types::Quote>(0);
             from_ctp(*pDepthMarketData, quote);
             get_writer(0)->close_data();
         }

@@ -251,7 +251,7 @@ namespace kungfu::wingchun::strategy
             return 0;
         }
         auto writer = app_.get_writer(lookup_account_location_id(account));
-        OrderInput &input = writer->open_data<OrderInput>(app_.now(), OrderInput::tag);
+        OrderInput &input = writer->open_data<OrderInput>(app_.now());
         input.order_id = writer->current_frame_uid();
         strcpy(input.instrument_id, symbol.c_str());
         strcpy(input.exchange_id, exchange.c_str());
@@ -273,7 +273,7 @@ namespace kungfu::wingchun::strategy
         if (app_.has_writer(account_location_id))
         {
             auto writer = app_.get_writer(account_location_id);
-            OrderAction &action = writer->open_data<OrderAction>(0, OrderAction::tag);
+            OrderAction &action = writer->open_data<OrderAction>(0);
 
             action.order_action_id = writer->current_frame_uid();
             action.order_id = order_id;

@@ -19,6 +19,7 @@ namespace kungfu::longfist
     using namespace boost::hana::literals;
     static constexpr auto DataTypes = boost::hana::make_map(
             TYPE_PAIR(TimeRequest),
+            TYPE_PAIR(Config),
             TYPE_PAIR(TradingDay),
             TYPE_PAIR(RequestReadFrom),
             TYPE_PAIR(RequestWriteTo),
@@ -37,7 +38,7 @@ namespace kungfu::longfist
             TYPE_PAIR(PositionEnd),
             TYPE_PAIR(PositionDetail),
             TYPE_PAIR(PositionDetailEnd),
-//            TYPE_PAIR(OrderTime),
+            TYPE_PAIR(OrderTime),
             TYPE_PAIR(Report)
     );
     using DataTypesT = decltype(DataTypes);

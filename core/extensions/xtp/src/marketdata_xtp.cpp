@@ -171,7 +171,7 @@ namespace kungfu::wingchun::xtp
                                           int32_t max_ask1_count)
     {
         SPDLOG_TRACE(to_string(*market_data));
-        Quote &quote = get_writer(0)->open_data<Quote>(0, Quote::tag);
+        Quote &quote = get_writer(0)->open_data<Quote>(0);
         from_xtp(*market_data, quote);
         get_writer(0)->close_data();
     }
@@ -181,13 +181,13 @@ namespace kungfu::wingchun::xtp
         if (tbt_data->type == XTP_TBT_ENTRUST)
         {
             SPDLOG_TRACE(to_string(*tbt_data));
-            Entrust &entrust = get_writer(0)->open_data<Entrust>(0, Entrust::tag);
+            Entrust &entrust = get_writer(0)->open_data<Entrust>(0);
             from_xtp(*tbt_data, entrust);
             get_writer(0)->close_data();
         } else if (tbt_data->type == XTP_TBT_TRADE)
         {
             SPDLOG_TRACE(to_string(*tbt_data));
-            Transaction &transaction = get_writer(0)->open_data<Transaction>(0, Transaction::tag);
+            Transaction &transaction = get_writer(0)->open_data<Transaction>(0);
             from_xtp(*tbt_data, transaction);
             get_writer(0)->close_data();
         }

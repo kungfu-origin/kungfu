@@ -129,7 +129,7 @@ namespace kungfu::wingchun::ctp {
         int64_t nano = kungfu::yijinjing::time::now_in_nano();
         if (error_id != 0) {
             auto writer = get_writer(event->source());
-            Order &order = writer->open_data<Order>(event->gen_time(), Order::tag);
+            Order &order = writer->open_data<Order>(event->gen_time());
             order_from_input(input, order);
             order.insert_time = nano;
             order.update_time = nano;
@@ -162,8 +162,7 @@ namespace kungfu::wingchun::ctp {
         CtpOrder order_record = order_mapper_->get_order_info(action.order_id);
         if (order_record.internal_order_id == 0) {
             auto writer = get_writer(event->source());
-            OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time(),
-                                                                          OrderActionError::tag);
+            OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time());
             strncpy(error.error_msg, "failed to find order info", ERROR_MSG_LEN);
             error.order_id = action.order_id;
             error.order_action_id = action.order_action_id;
@@ -191,8 +190,7 @@ namespace kungfu::wingchun::ctp {
             return true;
         } else {
             auto writer = get_writer(event->source());
-            OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time(),
-                                                                          OrderActionError::tag);
+            OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time());
             error.error_id = error_id;
             error.order_id = action.order_id;
             error.order_action_id = action.order_action_id;
@@ -261,7 +259,7 @@ namespace kungfu::wingchun::ctp {
                                                                          pInputOrder->OrderRef);
             if (order_info.internal_order_id != 0) {
                 auto writer = get_writer(order_info.source);
-                Order &order = writer->open_data<Order>(0, Order::tag);
+                Order &order = writer->open_data<Order>(0);
                 order.order_id = order_info.internal_order_id;
                 order.parent_id = order_info.parent_id;
                 order.insert_time = order_info.insert_time;
@@ -296,7 +294,7 @@ namespace kungfu::wingchun::ctp {
                 uint32_t source = (action.order_action_id >> 32) ^get_home_uid();
                 if (has_writer(source)) {
                     auto writer = get_writer(source);
-                    OrderActionError &error = writer->open_data<OrderActionError>(0, OrderActionError::tag);
+                    OrderActionError &error = writer->open_data<OrderActionError>(0);
                     error.error_id = pRspInfo->ErrorID;
                     strncpy(error.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
                     error.order_id = action.order_id;
@@ -323,7 +321,7 @@ namespace kungfu::wingchun::ctp {
                          pOrder->OrderRef);
         } else {
             auto writer = get_writer(order_info.source);
-            Order &order = writer->open_data<Order>(0, Order::tag);
+            Order &order = writer->open_data<Order>(0);
             from_ctp(*pOrder, order);
             order.order_id = order_info.internal_order_id;
             order.parent_id = order_info.parent_id;
@@ -340,7 +338,7 @@ namespace kungfu::wingchun::ctp {
             SPDLOG_ERROR("can't find ExchangeID {} and OrderSysID {}", pTrade->ExchangeID, pTrade->OrderSysID);
         } else {
             auto writer = get_writer(order_info.source);
-            Trade &trade = writer->open_data<Trade>(0, Trade::tag);
+            Trade &trade = writer->open_data<Trade>(0);
             from_ctp(*pTrade, trade);
             strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
             uint64_t trade_id = writer->current_frame_uid();
@@ -362,7 +360,7 @@ namespace kungfu::wingchun::ctp {
         } else {
             SPDLOG_TRACE(to_string(*pTradingAccount));
             auto writer = get_writer(0);
-            Asset &account = writer->open_data<Asset>(0, Asset::tag);
+            Asset &account = writer->open_data<Asset>(0);
             strcpy(account.account_id, get_account_id().c_str());
             from_ctp(*pTradingAccount, account);
             account.update_time = kungfu::yijinjing::time::now_in_nano();
@@ -420,7 +418,7 @@ namespace kungfu::wingchun::ctp {
                 const auto &position = kv.second;
                 writer->write(0, Position::tag, position);
             }
-            PositionEnd &end = writer->open_data<PositionEnd>(0, PositionEnd::tag);
+            PositionEnd &end = writer->open_data<PositionEnd>(0);
             end.holder_uid = get_io_device()->get_home()->uid;
             writer->close_data();
             short_position_map_.clear();
@@ -437,7 +435,7 @@ namespace kungfu::wingchun::ctp {
             auto writer = get_writer(0);
             if (pInvestorPositionDetail != nullptr) {
                 SPDLOG_TRACE(to_string(*pInvestorPositionDetail));
-                PositionDetail &pos_detail = writer->open_data<PositionDetail>(0, PositionDetail::tag);
+                PositionDetail &pos_detail = writer->open_data<PositionDetail>(0);
                 from_ctp(*pInvestorPositionDetail, pos_detail);
                 pos_detail.update_time = kungfu::yijinjing::time::now_in_nano();
                 CtpTrade trade_info = trade_mapper_->get(pInvestorPositionDetail->OpenDate,
@@ -466,7 +464,7 @@ namespace kungfu::wingchun::ctp {
             SPDLOG_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
             auto writer = get_writer(0);
             if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
-                Instrument &instrument = writer->open_data<Instrument>(0, Instrument::tag);
+                Instrument &instrument = writer->open_data<Instrument>(0);
                 from_ctp(*pInstrument, instrument);
                 instrument_map_[pInstrument->InstrumentID] = instrument;
                 writer->close_data();

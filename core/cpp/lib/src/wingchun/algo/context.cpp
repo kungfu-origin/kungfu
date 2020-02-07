@@ -107,7 +107,7 @@ namespace kungfu::wingchun::algo
         if (app_.get_io_device()->get_home()->uid != service_location_->uid)
         {
             auto writer = app_.get_writer(service_location_->uid);
-            OrderAction &action = writer->open_data<OrderAction>(0, OrderAction::tag);
+            OrderAction &action = writer->open_data<OrderAction>(0);
             action.order_action_id = writer->current_frame_uid();
             action.order_id = order->order_id_;
             action.action_flag = OrderActionFlag::Cancel;
@@ -137,7 +137,7 @@ namespace kungfu::wingchun::algo
         }
         auto account_location = location::make(mode::LIVE, category::TD, order.source_id, order.account_id, home->locator);
         auto writer = app_.get_writer(account_location->uid);
-        OrderInput &input = writer->open_data<OrderInput>(0, OrderInput::tag);
+        OrderInput &input = writer->open_data<OrderInput>(0);
         memcpy(&input, &order, sizeof(OrderInput));
         input.order_id = writer->current_frame_uid();
         writer->close_data();
@@ -151,9 +151,9 @@ namespace kungfu::wingchun::algo
         {
             return 0;
         }
-        uint32_t account_location_id = (order_id >> 32) ^app_.get_home_uid();
+        uint32_t account_location_id = (order_id >> 32) ^ app_.get_home_uid();
         auto writer = app_.get_writer(account_location_id);
-        OrderAction &action = writer->open_data<OrderAction>(0, OrderAction::tag);
+        OrderAction &action = writer->open_data<OrderAction>(0);
         action.order_action_id = writer->current_frame_uid();
         action.order_id = order_id;
         action.action_flag = OrderActionFlag::Cancel;

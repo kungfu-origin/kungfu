@@ -123,7 +123,7 @@ namespace kungfu::yijinjing::practice
             auto writer = writers_[master_commands_location_->uid];
             int32_t timer_usage_count = timer_usage_count_;
             int64_t duration_ns = nanotime - now_;
-            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
+            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
             r.duration = duration_ns;
             r.repeat = 1;
@@ -146,7 +146,7 @@ namespace kungfu::yijinjing::practice
             auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
             auto writer = writers_[master_commands_location_->uid];
             int32_t timer_usage_count = timer_usage_count_;
-            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
+            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
             r.duration = duration_ns;
             r.repeat = 1;
@@ -162,8 +162,7 @@ namespace kungfu::yijinjing::practice
                                           e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
                                       {
                                           auto writer = writers_[master_commands_location_->uid];
-                                          longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0,
-                                                                                                                            longfist::types::TimeRequest::tag);
+                                          longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                                           r.id = timer_usage_count;
                                           r.duration = duration_ns;
                                           r.repeat = 1;
@@ -184,7 +183,7 @@ namespace kungfu::yijinjing::practice
             auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
             auto writer = writers_[master_commands_location_->uid];
             int32_t timer_usage_count = timer_usage_count_;
-            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0, longfist::types::TimeRequest::tag);
+            longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
             r.duration = duration_ns;
             r.repeat = 1;
@@ -198,8 +197,7 @@ namespace kungfu::yijinjing::practice
                                              if (e->msg_type() != longfist::types::Time::tag)
                                              {
                                                  auto writer = writers_[master_commands_location_->uid];
-                                                 longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0,
-                                                                                                                                   longfist::types::TimeRequest::tag);
+                                                 longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                                                  r.id = timer_usage_count;
                                                  r.duration = duration_ns;
                                                  r.repeat = 1;

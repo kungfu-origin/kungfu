@@ -9,7 +9,7 @@
 
 namespace kungfu
 {
-    uint32_t hash(const unsigned char *key, int32_t length)
+    uint32_t hash_32(const unsigned char *key, int32_t length)
     {
         return kungfu::yijinjing::util::hash_32(key, length);
     }

@@ -75,7 +75,7 @@ namespace kungfu::wingchun::xtp
         uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
         int64_t nano = kungfu::yijinjing::time::now_in_nano();
         auto writer = get_writer(event->source());
-        Order &order = writer->open_data<Order>(event->gen_time(), Order::tag);
+        Order &order = writer->open_data<Order>(event->gen_time());
         order_from_input(input, order);
         strcpy(order.trading_day, trading_day_.c_str());
         order.insert_time = nano;
@@ -175,7 +175,7 @@ namespace kungfu::wingchun::xtp
         } else
         {
             auto writer = get_writer(xtp_order.source);
-            Order &order = writer->open_data<Order>(0, Order::tag);
+            Order &order = writer->open_data<Order>(0);
 
             from_xtp(*order_info, order);
             order.order_id = xtp_order.internal_order_id;
@@ -204,7 +204,7 @@ namespace kungfu::wingchun::xtp
         } else
         {
             auto writer = get_writer(xtp_order.source);
-            Trade &trade = writer->open_data<Trade>(0, Trade::tag);
+            Trade &trade = writer->open_data<Trade>(0);
             from_xtp(*trade_info, trade);
             trade.trade_id = writer->current_frame_uid();
             trade.order_id = xtp_order.internal_order_id;
@@ -236,7 +236,7 @@ namespace kungfu::wingchun::xtp
         if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
         {
             auto writer = get_writer(0);
-            Position &stock_pos = writer->open_data<Position>(0, Position::tag);
+            Position &stock_pos = writer->open_data<Position>(0);
             if (error_info == nullptr || error_info->error_id == 0)
             {
                 from_xtp(*position, stock_pos);
@@ -251,7 +251,7 @@ namespace kungfu::wingchun::xtp
             writer->close_data();
             if (is_last)
             {
-                PositionEnd &end = writer->open_data<PositionEnd>(0, PositionEnd::tag);
+                PositionEnd &end = writer->open_data<PositionEnd>(0);
                 end.holder_uid = get_io_device()->get_home()->uid;
                 writer->close_data();
             }
@@ -271,7 +271,7 @@ namespace kungfu::wingchun::xtp
         if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350)
         {
             auto writer = get_writer(0);
-            Asset &account = writer->open_data<Asset>(0, Asset::tag);
+            Asset &account = writer->open_data<Asset>(0);
             if (error_info == nullptr || error_info->error_id == 0)
             {
                 from_xtp(*asset, account);
