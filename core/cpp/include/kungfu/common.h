@@ -20,23 +20,23 @@
 #define MAKE_PK_IMPL_4(k1, k2, k3, k4) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2), BOOST_HANA_STRING(#k3), BOOST_HANA_STRING(#k4)
 
 #ifndef _WIN32
-#define KF_DATA_STRUCT_BEGIN
-#define KF_DATA_STRUCT_END __attribute__((packed));
+#define KF_DATA_TYPE_BEGIN
+#define KF_DATA_TYPE_END __attribute__((packed));
 #else
-#define KF_DATA_STRUCT_BEGIN __pragma(pack(push, 1))
-#define KF_DATA_STRUCT_END __pragma(pack(pop));
+#define KF_DATA_TYPE_BEGIN __pragma(pack(push, 1))
+#define KF_DATA_TYPE_END __pragma(pack(pop));
 #endif
 
-#define KF_DEFINE_DATA_STRUCT(NAME, TAG, PRIMARY_KEYS, ...) \
-KF_DATA_STRUCT_BEGIN \
+#define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
+KF_DATA_TYPE_BEGIN \
 struct NAME : public kungfu::type<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
 } \
-KF_DATA_STRUCT_END
+KF_DATA_TYPE_END
 
-#define KF_DEFINE_MARK_STRUCT(NAME, TAG) \
+#define KF_DEFINE_MARK_TYPE(NAME, TAG) \
 struct NAME : public kungfu::type<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
@@ -128,12 +128,24 @@ namespace kungfu
 
     DECLARE_PTR(event)
 
-    KF_DATA_STRUCT_BEGIN
     template<typename T, size_t N>
-    struct CArray
+    struct array
     {
         using type = T[N];
         type value;
+
+        array()
+        {}
+
+        array(const T* t)
+        {
+            memcpy(value, t, sizeof(value));
+        }
+
+        array(const unsigned char* t)
+        {
+            memcpy(value, t, sizeof(value));
+        }
 
         operator T *()
         {
@@ -161,13 +173,12 @@ namespace kungfu
             return value[i];
         }
 
-        CArray<T, N> &operator=(const CArray<T, N> &v)
+        array<T, N> &operator=(const array<T, N> &v)
         {
             memcpy(value, v.value, sizeof(value));
             return *this;
         }
-    }
-    KF_DATA_STRUCT_END
+    };
 }
 
 #endif //KUNGFU_COMMON_H

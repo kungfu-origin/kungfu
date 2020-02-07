@@ -420,14 +420,35 @@ namespace kungfu::wingchun
         }
     }
 
-//    inline uint32_t get_symbol_id(const std::string &symbol, const std::string &exchange)
-//    {
-//        return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
-//    }
-
     inline uint32_t get_symbol_id(const char *symbol, const char *exchange)
     {
         return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
+    }
+
+    inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order)
+    {
+        order.parent_id = input.parent_id;
+        order.order_id = input.order_id;
+        strcpy(order.instrument_id, input.instrument_id);
+        strcpy(order.exchange_id, input.exchange_id);
+        strcpy(order.source_id, input.source_id);
+        strcpy(order.account_id, input.account_id);
+
+        order.limit_price = input.limit_price;
+        order.frozen_price = input.frozen_price;
+
+        order.volume = input.volume;
+        order.volume_traded = 0;
+        order.volume_left = input.volume;
+        order.status = longfist::OrderStatus::Submitted;
+
+        order.side = input.side;
+        order.offset = input.offset;
+        order.hedge_flag = input.hedge_flag;
+
+        order.price_type = input.price_type;
+        order.volume_condition = input.volume_condition;
+        order.time_condition = input.time_condition;
     }
 }
 

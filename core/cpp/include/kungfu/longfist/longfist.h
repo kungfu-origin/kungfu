@@ -37,6 +37,7 @@ namespace kungfu::longfist
             TYPE_PAIR(PositionEnd),
             TYPE_PAIR(PositionDetail),
             TYPE_PAIR(PositionDetailEnd),
+//            TYPE_PAIR(OrderTime),
             TYPE_PAIR(Report)
     );
     using DataTypesT = decltype(DataTypes);

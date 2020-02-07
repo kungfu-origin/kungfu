@@ -88,7 +88,7 @@ namespace kungfu::longfist::sqlite
         template<typename DataType>
         void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
-            storage.replace(event->data<DataType>());
+            storage.replace(event->data<DataType>());;;;;;;;;;;;;;;;;;
         }
     };
 
@@ -104,12 +104,12 @@ namespace sqlite_orm
     };
 
     template<size_t N>
-    struct type_printer<kungfu::CArray<char, N>> : public text_printer
+    struct type_printer<kungfu::array<char, N>> : public text_printer
     {
     };
 
     template<typename T, size_t N>
-    struct type_printer<kungfu::CArray<T, N>> : public blob_printer
+    struct type_printer<kungfu::array<T, N>> : public blob_printer
     {
     };
 }
@@ -126,18 +126,18 @@ namespace sqlite_orm
     };
 
     template<size_t N>
-    struct statement_binder<kungfu::CArray<char, N>>
+    struct statement_binder<kungfu::array<char, N>>
     {
-        int bind(sqlite3_stmt *stmt, int index, const kungfu::CArray<char, N> &value)
+        int bind(sqlite3_stmt *stmt, int index, const kungfu::array<char, N> &value)
         {
             return sqlite3_bind_text(stmt, index, static_cast<const char *>(value.value), -1, SQLITE_TRANSIENT);
         }
     };
 
     template<typename V, size_t N>
-    struct statement_binder<kungfu::CArray<V, N>>
+    struct statement_binder<kungfu::array<V, N>>
     {
-        int bind(sqlite3_stmt *stmt, int index, const kungfu::CArray<V, N> &value)
+        int bind(sqlite3_stmt *stmt, int index, const kungfu::array<V, N> &value)
         {
             return sqlite3_bind_blob(stmt, index, static_cast<const void *>(value.value), sizeof(value.value), SQLITE_TRANSIENT);
         }
@@ -161,30 +161,30 @@ namespace sqlite_orm
     };
 
     template<size_t N>
-    struct row_extractor<kungfu::CArray<char, N>>
+    struct row_extractor<kungfu::array<char, N>>
     {
-        kungfu::CArray<char, N> extract(const char *row_value)
+        kungfu::array<char, N> extract(const char *row_value)
         {
-            return {};
+            return kungfu::array<char, N>{row_value};
         }
 
-        kungfu::CArray<char, N> extract(sqlite3_stmt *stmt, int columnIndex)
+        kungfu::array<char, N> extract(sqlite3_stmt *stmt, int columnIndex)
         {
-            return {};
+            return kungfu::array<char, N>{sqlite3_column_text(stmt, columnIndex)};
         }
     };
 
     template<typename V, size_t N>
-    struct row_extractor<kungfu::CArray<V, N>>
+    struct row_extractor<kungfu::array<V, N>>
     {
-        kungfu::CArray<V, N> extract(const char *row_value)
+        kungfu::array<V, N> extract(const char *row_value)
         {
-            return {};
+            return kungfu::array<V, N>{row_value};
         }
 
-        kungfu::CArray<V, N> extract(sqlite3_stmt *stmt, int columnIndex)
+        kungfu::array<V, N> extract(sqlite3_stmt *stmt, int columnIndex)
         {
-            return {};
+            return kungfu::array<V, N>{sqlite3_column_text(stmt, columnIndex)};
         }
     };
 }
