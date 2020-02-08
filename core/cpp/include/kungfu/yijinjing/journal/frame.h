@@ -21,7 +21,7 @@
 namespace kungfu::yijinjing::journal
 {
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             frame_header, 0,
             PK(gen_time),
     /** total frame length (including header and data body) */

@@ -109,13 +109,24 @@ yarn build
 
 #### Linux
 
-确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 5.0 以上：
+确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 8.x：
 
 ```
 yum install rpm-build
 yum -y install centos-release-scl
-yum -y install devtoolset-8-gcc devtoolset-8-gcc-c++ devtoolset-8-binutils
+yum -y install devtoolset-8
 echo "source /opt/rh/devtoolset-8/enable" >> /etc/profile
+source /etc/profile
+```
+
+或升级到 9.x：
+```
+yum install rpm-build
+yum -y install centos-release-scl
+yum-config-manager --enable centos-sclo-rh-testing
+yum-config-manager --enable centos-sclo-sclo-testing
+yum -y install devtoolset-9
+echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile
 source /etc/profile
 ```
 

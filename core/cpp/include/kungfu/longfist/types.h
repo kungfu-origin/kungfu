@@ -41,7 +41,7 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(AlgoOrderReport, 211);
     KF_DEFINE_MARK_TYPE(AlgoOrderModify, 212);
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             TimeRequest, 10004,
             PK(id),
             (int32_t, id),
@@ -49,47 +49,40 @@ namespace kungfu::longfist::types
             (int64_t, repeat)
     );
 
-    KF_DEFINE_DATA_TYPE(
-            Config, 10005,
-            PK(name),
-            (std::string, name),
-            (std::string, value)
-    );
-
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             RequestReadFrom, 10021,
             PK(source_id),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             RequestReadFromPublic, 10022,
             PK(source_id),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             RequestWriteTo, 10023,
             PK(dest_id),
             (uint32_t, dest_id)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             TradingDay, 10027,
             PK(timestamp),
             (int64_t, timestamp)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Channel, 10028,
             PK(source_id, dest_id),
             (uint32_t, source_id),
             (uint32_t, dest_id)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Report, 10086,
             PK(source_id, dest_id),
             (uint32_t, source_id),
@@ -97,7 +90,7 @@ namespace kungfu::longfist::types
             (int64_t, timestamp)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Instrument, 209,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),     //合约ID
@@ -122,7 +115,7 @@ namespace kungfu::longfist::types
             (double, short_margin_ratio)                 //空头保证金率
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Quote, 101,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
@@ -161,7 +154,7 @@ namespace kungfu::longfist::types
             (kungfu::array < int64_t, 10 >, ask_volume)                     //申卖量
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Entrust, 102,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
@@ -183,7 +176,7 @@ namespace kungfu::longfist::types
             (int64_t, seq)                                //子序号
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Transaction, 103,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
@@ -209,7 +202,7 @@ namespace kungfu::longfist::types
             (int64_t, seq)                                    //子序号
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Bar, 110,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, DATE_LEN >, trading_day),            //交易日
@@ -230,7 +223,7 @@ namespace kungfu::longfist::types
             (int32_t, tick_count)                    //区间有效tick数
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             OrderInput, 201,
             PK(order_id),
             (uint64_t, order_id),                       //订单ID
@@ -258,7 +251,7 @@ namespace kungfu::longfist::types
             (uint64_t, parent_id)                      //母订单ID
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             OrderAction, 202,
             PK(order_action_id),
             (uint64_t, order_id),                       //订单ID
@@ -270,7 +263,7 @@ namespace kungfu::longfist::types
             (int64_t, volume)                          //数量
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             OrderActionError, 202,
             PK(order_action_id),
             (uint64_t, order_id),                       //订单ID
@@ -279,7 +272,7 @@ namespace kungfu::longfist::types
             (kungfu::array < char, ERROR_MSG_LEN >, error_msg)           //错误信息
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Order, 203,
             PK(order_id),
             (uint64_t, parent_id),                      //母订单ID
@@ -322,7 +315,7 @@ namespace kungfu::longfist::types
             (TimeCondition, time_condition)            //成交时间类型
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Trade, 204,
             PK(order_id),
             (uint64_t, trade_id),                       //成交ID
@@ -353,7 +346,7 @@ namespace kungfu::longfist::types
             (double, commission)                       //手续费
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Position, 205,
             PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
@@ -396,13 +389,13 @@ namespace kungfu::longfist::types
             (double, unrealized_pnl)                   //未实现盈亏
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             PositionEnd, 800,
             PK(holder_uid),
             (uint32_t, holder_uid)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             Asset, 206,
             PK(holder_uid),
             (int64_t, update_time),               //更新时间
@@ -439,7 +432,7 @@ namespace kungfu::longfist::types
             (double, close_pnl)                  //平仓盈亏(期货)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             PositionDetail, 208,
             PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
@@ -472,13 +465,13 @@ namespace kungfu::longfist::types
             (int64_t, trade_time)                      //成交时间
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             PositionDetailEnd, 801,
             PK(holder_uid),
             (uint32_t, holder_uid)
     );
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             InstrumentCommissionRate, 214,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id), //合约代码
@@ -497,6 +490,13 @@ namespace kungfu::longfist::types
             (double, close_today_ratio),               //平今费率
 
             (double, min_commission)                  //最小手续费
+    );
+
+    KF_DEFINE_DATA_TYPE(
+            Config, 10005,
+            PK(name),
+            (std::string, name),
+            (std::string, value)
     );
 
     KF_DEFINE_DATA_TYPE(

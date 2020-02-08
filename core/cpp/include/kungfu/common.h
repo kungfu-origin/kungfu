@@ -12,40 +12,47 @@
 #include <boost/hana.hpp>
 #include <nlohmann/json.hpp>
 
+#ifdef BOOST_HANA_CONFIG_ENABLE_STRING_UDL
+using namespace boost::hana::literals;
+#define HANA_STR(STR) STR##_s
+#else
+#define HANA_STR(STR) BOOST_HANA_STRING(STR)
+#endif
+
 #define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
-#define PK(...) boost::hana::make_tuple(MAKE_PK(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
-#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__)
-#define MAKE_PK_IMPL_1(k) BOOST_HANA_STRING(#k)
-#define MAKE_PK_IMPL_2(k1, k2) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2)
-#define MAKE_PK_IMPL_3(k1, k2, k3) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2), BOOST_HANA_STRING(#k3)
-#define MAKE_PK_IMPL_4(k1, k2, k3, k4) BOOST_HANA_STRING(#k1), BOOST_HANA_STRING(#k2), BOOST_HANA_STRING(#k3), BOOST_HANA_STRING(#k4)
-
 #ifndef _WIN32
-#define KF_DATA_TYPE_BEGIN
-#define KF_DATA_TYPE_END __attribute__((packed))
+#define KF_PACK_TYPE_BEGIN
+#define KF_PACK_TYPE_END __attribute__((packed));
 #else
-#define KF_DATA_TYPE_BEGIN __pragma(pack(push, 1))
-#define KF_DATA_TYPE_END __pragma(pack(pop))
+#define KF_PACK_TYPE_BEGIN __pragma(pack(push, 1))
+#define KF_PACK_TYPE_END __pragma(pack(pop));
 #endif
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
-KF_DATA_TYPE_BEGIN \
 struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     NAME() {}; \
     explicit NAME(const char *address) : kungfu::data<NAME>(address) {}; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
-} \
-KF_DATA_TYPE_END
+}
+
+#define KF_DEFINE_PACK_TYPE(NAME, TAG, PRIMARY_KEYS, ...) KF_PACK_TYPE_BEGIN KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, __VA_ARGS__) KF_PACK_TYPE_END
 
 #define KF_DEFINE_MARK_TYPE(NAME, TAG) \
 struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
 }
+
+#define PK(...) boost::hana::make_tuple(MAKE_PK(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
+#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__)
+#define MAKE_PK_IMPL_1(k) HANA_STR(#k)
+#define MAKE_PK_IMPL_2(k1, k2) HANA_STR(#k1), HANA_STR(#k2)
+#define MAKE_PK_IMPL_3(k1, k2, k3) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3)
+#define MAKE_PK_IMPL_4(k1, k2, k3, k4) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3), HANA_STR(#k4)
 
 namespace kungfu
 {
@@ -79,6 +86,7 @@ namespace kungfu
         };
     };
 
+    KF_PACK_TYPE_BEGIN
     template<typename T, size_t N>
     struct array
     {
@@ -90,34 +98,34 @@ namespace kungfu
             memset(value, 0, sizeof(type));
         }
 
-        explicit array(const T *t)
+        array(const T *t)
         {
             memcpy(value, t, sizeof(value));
         }
 
-        explicit array(const unsigned char *t)
+        array(const unsigned char *t)
         {
             memcpy(value, t, sizeof(value));
         }
 
-        explicit operator T *()
+        operator T *()
         {
             return static_cast<T *>(value);
         }
 
-        explicit operator const T *() const
+        operator const T *() const
         {
             return static_cast<const T *>(value);
         }
 
-        explicit operator std::string() const
+        operator std::string() const
         {
             return array_to_string<T, N>{}(value);
         }
 
-        T operator[](int i) const
+        T &operator[](int i) const
         {
-            return value[i];
+            return const_cast<T &>(value[i]);
         }
 
         array<T, N> &operator=(const array<T, N> &v)
@@ -125,7 +133,8 @@ namespace kungfu
             memcpy(value, v.value, sizeof(value));
             return *this;
         }
-    };
+    }
+    KF_PACK_TYPE_END
 
     template<typename T, size_t N>
     void to_json(nlohmann::json &j, const array<T, N> &value)
@@ -232,13 +241,14 @@ namespace kungfu
 
         explicit data(const char *address)
         {
-            nlohmann::json j = nlohmann::json::parse(address);
+            nlohmann::json jobj = nlohmann::json::parse(address);
             boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
             {
                 auto name = boost::hana::first(it);
                 auto accessor = boost::hana::second(it);
-                using AttrType = std::decay_t<decltype(accessor(std::forward<DataType &>(DataType{})))>;
-                j[name.c_str()].get_to(accessor(*const_cast<DataType *>(reinterpret_cast<const DataType *>(this))));
+                auto &j = jobj[name.c_str()];
+                auto &v = accessor(*const_cast<DataType *>(reinterpret_cast<const DataType *>(this)));
+                restore_from_json(j, v);
             });
         }
 
@@ -273,6 +283,19 @@ namespace kungfu
                 return hash<decltype(value)>{}(value);
             });
             return boost::hana::fold(primary_keys, std::bit_xor());
+        }
+
+    private:
+        template<typename J, typename V>
+        std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        {
+            v = j;
+        }
+
+        template<typename J, typename V>
+        std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        {
+            j.get_to(v);
         }
     };
 

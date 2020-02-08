@@ -22,7 +22,7 @@
 namespace kungfu::yijinjing::journal
 {
 
-    KF_DEFINE_DATA_TYPE(
+    KF_DEFINE_PACK_TYPE(
             page_header, 1,
             PK(version),
             (uint32_t, version),

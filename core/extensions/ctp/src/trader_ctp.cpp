@@ -13,7 +13,7 @@ using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 
 namespace kungfu::wingchun::ctp {
-    TraderCTP::TraderCTP(bool low_latency, data::locator_ptr locator, const std::string &account_id,
+    TraderCTP::TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
                          const std::string &json_config) :
             Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1),
             order_ref_(-1), request_id_(0), api_(nullptr) {
@@ -143,7 +143,7 @@ namespace kungfu::wingchun::ctp {
             order_record.internal_order_id = input.order_id;
             order_record.broker_id = config_.broker_id;
             order_record.investor_id = config_.account_id;
-            order_record.exchange_id = input.exchange_id;
+            order_record.exchange_id = input.exchange_id.value;
             order_record.instrument_id = ctp_input.InstrumentID;
             order_record.order_ref = ctp_input.OrderRef;
             order_record.front_id = front_id_;

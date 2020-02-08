@@ -85,8 +85,7 @@ namespace kungfu::wingchun::service
         template<class T>
         std::vector<longfist::types::Instrument> convert_to_instruments(const std::vector<T> &data)
         {
-            using Instrument = typename longfist::types::Instrument;
-            std::vector<Instrument> instruments;
+            std::vector<longfist::types::Instrument> instruments;
             for (const auto &item: data)
             {
                 longfist::types::Instrument instrument = {};
@@ -94,14 +93,17 @@ namespace kungfu::wingchun::service
                 strcpy(instrument.exchange_id, item.exchange_id);
                 instruments.push_back(instrument);
             }
-            std::sort(instruments.begin(), instruments.end(), [](const Instrument &a1, const Instrument &a2) {
+            std::sort(instruments.begin(), instruments.end(), [](const longfist::types::Instrument &a1, const longfist::types::Instrument &a2)
+            {
                 auto a1_value = get_symbol_id(a1.instrument_id, a1.exchange_id);
                 auto a2_value = get_symbol_id(a2.instrument_id, a2.exchange_id);
                 return a1_value < a2_value;
             });
-            auto it = std::unique(instruments.begin(), instruments.end(), [](const Instrument &a1, const Instrument &a2) {
-                return strcmp(a1.instrument_id, a2.instrument_id) == 0 && strcmp(a1.exchange_id, a2.exchange_id) == 0;
-            });
+            auto it = std::unique(instruments.begin(), instruments.end(),
+                                  [](const longfist::types::Instrument &a1, const longfist::types::Instrument &a2)
+                                  {
+                                      return strcmp(a1.instrument_id, a2.instrument_id) == 0 && strcmp(a1.exchange_id, a2.exchange_id) == 0;
+                                  });
             instruments.erase(it, instruments.end());
             return instruments;
         }
