@@ -105,12 +105,12 @@ namespace kungfu
             memset(value, 0, sizeof(type));
         }
 
-        array(const T *t)
+        explicit array(const T *t)
         {
             memcpy(value, t, sizeof(value));
         }
 
-        array(const unsigned char *t)
+        explicit array(const unsigned char *t)
         {
             memcpy(value, t, sizeof(value));
         }
