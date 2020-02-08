@@ -27,7 +27,7 @@ using namespace boost::hana::literals;
 #define KF_PACK_TYPE_END __attribute__((packed));
 #else
 #define KF_PACK_TYPE_BEGIN __pragma(pack(push, 1))
-#define KF_PACK_TYPE_END __pragma(pack(pop));
+#define KF_PACK_TYPE_END ;__pragma(pack(pop))
 #endif
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
@@ -48,7 +48,14 @@ struct NAME : public kungfu::data<NAME> { \
 }
 
 #define PK(...) boost::hana::make_tuple(MAKE_PK(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
+
+#ifdef BOOST_HANA_WORKAROUND_MSVC_PREPROCESSOR_616033
+// refer to boost hana BOOST_HANA_DEFINE_STRUCT
+#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__),)
+#else
 #define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__)
+#endif
+
 #define MAKE_PK_IMPL_1(k) HANA_STR(#k)
 #define MAKE_PK_IMPL_2(k1, k2) HANA_STR(#k1), HANA_STR(#k2)
 #define MAKE_PK_IMPL_3(k1, k2, k3) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3)
