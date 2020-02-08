@@ -244,7 +244,14 @@ namespace kungfu
         static constexpr bool reflect = true;
 
         data()
-        {}
+        {
+            boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
+            {
+                auto accessor = boost::hana::second(it);
+                auto &v = accessor(*const_cast<DataType *>(reinterpret_cast<const DataType *>(this)));
+                init_member(v);
+            });
+        }
 
         explicit data(const char *address)
         {
@@ -293,14 +300,24 @@ namespace kungfu
         }
 
     private:
+        template<typename V>
+        static std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> init_member(V &v)
+        {
+            v = 0;
+        }
+
+        template<typename V>
+        static std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> init_member(V &v)
+        {}
+
         template<typename J, typename V>
-        std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        static std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
         {
             v = j;
         }
 
         template<typename J, typename V>
-        std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        static std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
         {
             j.get_to(v);
         }

@@ -12,18 +12,12 @@
 #include <kungfu/longfist/enum.h>
 #include <kungfu/longfist/types.h>
 
-#define TYPE_PAIR(DataType) boost::hana::make_pair(BOOST_HANA_STRING(#DataType), boost::hana::type_c<types::DataType>)
+#define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
 namespace kungfu::longfist
 {
-    using namespace boost::hana::literals;
-    static constexpr auto DataTypes = boost::hana::make_map(
-            TYPE_PAIR(TimeRequest),
+    static constexpr auto StateDataTypes = boost::hana::make_map(
             TYPE_PAIR(Config),
-            TYPE_PAIR(TradingDay),
-            TYPE_PAIR(RequestReadFrom),
-            TYPE_PAIR(RequestWriteTo),
-            TYPE_PAIR(Channel),
             TYPE_PAIR(Instrument),
             TYPE_PAIR(Quote),
             TYPE_PAIR(Entrust),
@@ -35,17 +29,14 @@ namespace kungfu::longfist
             TYPE_PAIR(Order),
             TYPE_PAIR(Trade),
             TYPE_PAIR(Position),
-            TYPE_PAIR(PositionEnd),
             TYPE_PAIR(PositionDetail),
-            TYPE_PAIR(PositionDetailEnd),
-            TYPE_PAIR(OrderTime),
-            TYPE_PAIR(Report)
+            TYPE_PAIR(OrderStat)
     );
-    using DataTypesT = decltype(DataTypes);
+    using StateDataTypesT = decltype(StateDataTypes);
 
     static constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
     {
-        boost::hana::for_each(DataTypes, [&](auto it)
+        boost::hana::for_each(StateDataTypes, [&](auto it)
         {
             using T = typename decltype(+boost::hana::second(it))::type;
             if (T::tag == event->msg_type())

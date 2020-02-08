@@ -63,14 +63,14 @@ namespace kungfu::longfist::sqlite
         return boost::hana::unpack(tables, named_storage(state_db_file));
     };
 
-    using StorageType = decltype(make_storage(std::string(), DataTypes));
+    using StorageType = decltype(make_storage(std::string(), StateDataTypes));
 
     struct sqlizer
     {
-        const DataTypesT &types;
+        const StateDataTypesT &types;
         StorageType storage;
 
-        explicit sqlizer(const std::string &state_db_file) : types(DataTypes), storage(longfist::sqlite::make_storage(state_db_file, DataTypes))
+        explicit sqlizer(const std::string &state_db_file) : types(StateDataTypes), storage(longfist::sqlite::make_storage(state_db_file, StateDataTypes))
         {}
 
         void restore(const yijinjing::journal::writer_ptr &writer)

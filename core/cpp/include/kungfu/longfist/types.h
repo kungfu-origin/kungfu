@@ -83,14 +83,6 @@ namespace kungfu::longfist::types
     );
 
     KF_DEFINE_PACK_TYPE(
-            Report, 10086,
-            PK(source_id, dest_id),
-            (uint32_t, source_id),
-            (uint32_t, dest_id),
-            (int64_t, timestamp)
-    );
-
-    KF_DEFINE_PACK_TYPE(
             Instrument, 209,
             PK(instrument_id, exchange_id),
             (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),     //合约ID
@@ -500,11 +492,12 @@ namespace kungfu::longfist::types
     );
 
     KF_DEFINE_DATA_TYPE(
-            OrderTime, 215,
+            OrderStat, 215,
             PK(order_id),
             (uint64_t, order_id),
+            (int64_t, md_time),
             (int64_t, insert_time),
-            (int64_t, update_time),
+            (int64_t, ack_time),
             (std::vector<int64_t>, timestamps)
     );
 }
