@@ -68,17 +68,18 @@ namespace kungfu::yijinjing::journal
 
         if (header->version != __JOURNAL_VERSION__)
         {
-            throw journal_error(fmt::format("version mismatch for page {}, required {}, found {}",
-                                            path, __JOURNAL_VERSION__, header->version));
+            uint32_t v = header->version;
+            throw journal_error(fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, v));
         }
         if (header->page_header_length != sizeof(page_header))
         {
-            throw journal_error(fmt::format("header length mismatch for page {}, required {}, found {}",
-                                            path, sizeof(page_header), header->page_header_length));
+            uint32_t l = header->page_header_length;
+            throw journal_error(fmt::format("header length mismatch for page {}, required {}, found {}", path, sizeof(page_header), l));
         }
         if (header->page_size != page_size)
         {
-            throw journal_error(fmt::format("page size mismatch, required {}, found {}", page_size, header->page_size));
+            uint32_t s = header->page_size;
+            throw journal_error(fmt::format("page size mismatch, required {}, found {}", page_size, s));
         }
 
         return std::shared_ptr<page>(new page(location, dest_id, page_id, page_size, lazy, address));

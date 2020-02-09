@@ -24,7 +24,6 @@
 #include <hffix.hpp>
 
 #include <kungfu/yijinjing/util/os.h>
-
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 using namespace kungfu::rx;
