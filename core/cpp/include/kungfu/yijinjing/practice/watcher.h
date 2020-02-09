@@ -18,9 +18,7 @@ namespace kungfu::yijinjing::practice
 
         virtual ~watcher() = default;
 
-        void publish(const std::string &msg);
-
-        void publish_broker_states(int64_t trigger_time);
+        virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
 
     protected:
 
@@ -34,12 +32,7 @@ namespace kungfu::yijinjing::practice
 
         void on_start() override;
 
-        void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::BrokerState state);
-
-        void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::BrokerState state);
-
-    private:
-        yijinjing::nanomsg::socket_ptr pub_sock_;
+        void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
     };
 }
 
