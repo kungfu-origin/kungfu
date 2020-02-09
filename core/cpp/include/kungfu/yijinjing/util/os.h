@@ -6,7 +6,12 @@
 #define KUNGFU_YIJINJING_OS_H
 
 #include <string>
-#include <initializer_list>
+
+#ifdef _WINDOWS
+#define GETPID _getpid
+#else
+#define GETPID getpid
+#endif
 
 namespace kungfu::yijinjing::os
 {

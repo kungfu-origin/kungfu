@@ -3,7 +3,6 @@
 //
 
 #include <utility>
-#include <sstream>
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/time.h>

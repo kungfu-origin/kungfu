@@ -224,7 +224,7 @@ namespace kungfu::yijinjing::practice
               {
                   on_start();
               },
-              [&](std::exception_ptr e)
+              [&](const std::exception_ptr &e)
               {
                   try
                   { std::rethrow_exception(e); }
@@ -289,11 +289,7 @@ namespace kungfu::yijinjing::practice
         data["group"] = home->group;
         data["name"] = home->name;
         data["uid"] = home->uid;
-#ifdef _WINDOWS
-        data["pid"] = _getpid();
-#else
-        data["pid"] = getpid();
-#endif
+        data["pid"] = GETPID();
 
         request["data"] = data;
 

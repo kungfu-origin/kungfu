@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2019-06-28.
 //
 
-#ifndef WINGCHUN_WATCHER_H
-#define WINGCHUN_WATCHER_H
+#ifndef KUNGFU_WINGCHUN_LEDGER_H
+#define KUNGFU_WINGCHUN_LEDGER_H
 
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
@@ -110,4 +110,4 @@ namespace kungfu::wingchun::service
     };
 }
 
-#endif //WINGCHUN_WATCHER_H
+#endif //KUNGFU_WINGCHUN_LEDGER_H
