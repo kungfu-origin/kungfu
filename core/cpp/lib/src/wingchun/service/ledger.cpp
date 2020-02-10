@@ -19,7 +19,8 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
-            apprentice(location::make(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency)
+            apprentice(location::make(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
+            publisher_(state_map_)
     {
         log::copy_log_settings(get_io_device()->get_home(), "ledger");
         if (m == mode::LIVE)
@@ -198,9 +199,6 @@ namespace kungfu::wingchun::service
 
     void Ledger::on_start()
     {
-
-        apprentice::on_start();
-
         pre_start();
 
         events_ | is(BrokerStateUpdate::tag) |
@@ -329,6 +327,10 @@ namespace kungfu::wingchun::service
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
           });
+
+        publisher_(writers_[0]);
+
+        apprentice::on_start();
 
     }
 

@@ -80,7 +80,7 @@ namespace kungfu::longfist::sqlite
                 using DataType = typename decltype(+boost::hana::second(it))::type;
                 for (auto &data : storage.get_all<DataType>())
                 {
-                    writer->write(0, DataType::tag, data);
+                    writer->write(0, data);
                 }
             });
         }

@@ -7,7 +7,7 @@
 
 #include <kungfu/common.h>
 
-namespace kungfu::longfist
+namespace kungfu::longfist::json
 {
     ;
 }

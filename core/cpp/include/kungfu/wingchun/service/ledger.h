@@ -5,6 +5,7 @@
 #ifndef KUNGFU_WINGCHUN_LEDGER_H
 #define KUNGFU_WINGCHUN_LEDGER_H
 
+#include <kungfu/longfist/serialize/journal.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
@@ -65,6 +66,7 @@ namespace kungfu::wingchun::service
 
     private:
         yijinjing::nanomsg::socket_ptr pub_sock_;
+        longfist::journal::publisher publisher_;
 
         book::BookContext_ptr book_context_;
 
