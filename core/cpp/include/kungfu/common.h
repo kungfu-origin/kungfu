@@ -365,13 +365,13 @@ namespace kungfu
          * @return a casted reference to the underlying memory address
          */
         template<typename T>
-        std::enable_if_t<size_fixed_v<T>, const T &> data() const
+        std::enable_if_t<size_fixed_v<T> or std::is_same_v<T, nlohmann::json>, const T &> data() const
         {
             return *(reinterpret_cast<const T *>(data_address()));
         }
 
         template<typename T>
-        std::enable_if_t<not size_fixed_v<T>, const T> data() const
+        std::enable_if_t<not size_fixed_v<T> and not std::is_same_v<T, nlohmann::json>, const T> data() const
         {
             return T(data_as_bytes());
         }
