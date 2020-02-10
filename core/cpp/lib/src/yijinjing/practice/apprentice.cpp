@@ -28,6 +28,7 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -161,12 +162,6 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &event)
           {
               longfist::cast_invoke(event, recover_);
-          });
-
-        events_ |
-        $([&](const event_ptr &event)
-          {
-              now_ = event->gen_time();
           });
 
         events_ | is(Location::tag) |

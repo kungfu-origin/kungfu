@@ -34,6 +34,18 @@ namespace kungfu::longfist
     );
     using StateDataTypesT = decltype(StateDataTypes);
 
+    constexpr auto build_state_map = [](auto types)
+    {
+        auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
+        {
+            using DataType = typename decltype(+value)::type;
+            return boost::hana::make_pair(value, std::unordered_map<int, DataType>());
+        });
+        return boost::hana::unpack(maps, boost::hana::make_map);
+    };
+    using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
+    DECLARE_PTR(StateMapType)
+
     static constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
@@ -44,6 +56,23 @@ namespace kungfu::longfist
                 handler(boost::hana::first(it).c_str(), boost::hana::second(it), event);
             }
         });
+    };
+
+    class recover
+    {
+    public:
+        explicit recover(StateMapType &state_map) : state_map_(state_map)
+        {}
+
+        template<typename DataType>
+        void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
+        {
+            auto data = event->data<DataType>();
+            state_map_[boost::hana::type_c<DataType>][data.uid()] = data;
+        }
+
+    private:
+        StateMapType &state_map_;
     };
 };
 

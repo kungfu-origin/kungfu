@@ -142,8 +142,13 @@ namespace kungfu::yijinjing::practice
 
     void hero::register_location(int64_t trigger_time, const location_ptr &location)
     {
-        locations_[location->uid] = location;
-        SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
+        if (not has_location(location->uid))
+        {
+            locations_[location->uid] = location;
+            SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
+            return;
+        }
+        SPDLOG_WARN("location [{:08x}] already exists", location->uid);
     }
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
@@ -152,11 +157,10 @@ namespace kungfu::yijinjing::practice
         {
             auto location = get_location(location_uid);
             locations_.erase(location_uid);
-            SPDLOG_INFO("deregister-ed location {} [{:08x}] {}", location->uname, location_uid, has_location(location_uid));
-        } else
-        {
-            SPDLOG_ERROR("location [{:08x}] not exists", location_uid);
+            SPDLOG_INFO("deregister-ed location {} [{:08x}]", location->uname, location_uid);
+            return;
         }
+        SPDLOG_WARN("location [{:08x}] does not exist", location_uid);
     }
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)
@@ -174,10 +178,9 @@ namespace kungfu::yijinjing::practice
         {
             channels_.erase(channel_uid);
             SPDLOG_INFO("deregister-ed channel [{:08x}]", channel_uid);
-        } else
-        {
-            SPDLOG_ERROR("channel [{:08x}] not exists", channel_uid);
+            return;
         }
+        SPDLOG_ERROR("channel [{:08x}] does not exist", channel_uid);
     }
 
     void hero::deregister_channel_by_source(uint32_t source_id)
@@ -216,15 +219,6 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    template<typename T>
-    std::enable_if_t<T::reflect, void> request_read_from(writer_ptr &writer, int64_t trigger_time, uint32_t source_id)
-    {
-        T &msg = writer->template open_data<T>(trigger_time);
-        msg.source_id = source_id;
-        msg.from_time = trigger_time;
-        writer->close_data();
-    }
-
     void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub)
     {
         if (has_location(dest_id))
@@ -237,12 +231,12 @@ namespace kungfu::yijinjing::practice
             {
                 request_read_from<RequestReadFrom>(writer, trigger_time, source_id);
             }
-            SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", get_location(dest_id)->uname, dest_id,
-                        get_location(source_id)->uname, source_id);
-        } else
-        {
-            SPDLOG_ERROR("location [{:08x}] not exists", dest_id);
+            auto &source = get_location(source_id)->uname;
+            auto &dest = get_location(dest_id)->uname;
+            SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", dest, dest_id, source, source_id);
+            return;
         }
+        SPDLOG_ERROR("location [{:08x}] does not exist", dest_id);
     }
 
     void hero::produce(const rx::subscriber<event_ptr> &sb)

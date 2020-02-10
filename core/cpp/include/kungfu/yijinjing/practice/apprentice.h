@@ -28,36 +28,6 @@
 
 namespace kungfu::yijinjing::practice
 {
-
-    constexpr auto build_state_map = [](auto types)
-    {
-        auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
-        {
-            using DataType = typename decltype(+value)::type;
-            return boost::hana::make_pair(value, std::unordered_map<int, DataType>());
-        });
-        return boost::hana::unpack(maps, boost::hana::make_map);
-    };
-
-    using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
-    DECLARE_PTR(StateMapType)
-
-    class recover
-    {
-    public:
-        explicit recover(StateMapType &state_map): state_map_(state_map)
-        {}
-
-        template<typename DataType>
-        void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
-        {
-            auto data = event->data<DataType>();
-            state_map_[boost::hana::type_c<DataType>][data.uid()] = data;
-        }
-    private:
-        StateMapType &state_map_;
-    };
-
     class apprentice : public hero
     {
     public:
@@ -106,7 +76,7 @@ namespace kungfu::yijinjing::practice
         void add_time_interval(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
     protected:
-        StateMapType state_map_;
+        longfist::StateMapType state_map_;
         yijinjing::data::location_ptr config_location_;
 
         void react() override;
@@ -122,13 +92,13 @@ namespace kungfu::yijinjing::practice
         {
             auto writer = writers_[master_commands_location_->uid];
             int32_t timer_usage_count = timer_usage_count_;
-            int64_t duration_ns = nanotime - now_;
+            int64_t duration_ns = nanotime - now();
             longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
             r.duration = duration_ns;
             r.repeat = 1;
             writer->close_data();
-            timer_checkpoints_[timer_usage_count] = now_;
+            timer_checkpoints_[timer_usage_count] = now();
             timer_usage_count_++;
             return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
             {
@@ -151,7 +121,7 @@ namespace kungfu::yijinjing::practice
             r.duration = duration_ns;
             r.repeat = 1;
             writer->close_data();
-            timer_checkpoints_[timer_usage_count] = now_;
+            timer_checkpoints_[timer_usage_count] = now();
             timer_usage_count_++;
             return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
             {
@@ -167,7 +137,7 @@ namespace kungfu::yijinjing::practice
                                           r.duration = duration_ns;
                                           r.repeat = 1;
                                           writer->close_data();
-                                          timer_checkpoints_[timer_usage_count] = now_;
+                                          timer_checkpoints_[timer_usage_count] = now();
                                           return true;
                                       } else
                                       {
@@ -188,7 +158,7 @@ namespace kungfu::yijinjing::practice
             r.duration = duration_ns;
             r.repeat = 1;
             writer->close_data();
-            timer_checkpoints_[timer_usage_count] = now_;
+            timer_checkpoints_[timer_usage_count] = now();
             timer_usage_count_++;
             return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src)
             {
@@ -202,7 +172,7 @@ namespace kungfu::yijinjing::practice
                                                  r.duration = duration_ns;
                                                  r.repeat = 1;
                                                  writer->close_data();
-                                                 timer_checkpoints_[timer_usage_count] = now_;
+                                                 timer_checkpoints_[timer_usage_count] = now();
                                                  return true;
                                              } else
                                              {
@@ -225,7 +195,7 @@ namespace kungfu::yijinjing::practice
         yijinjing::data::location_ptr master_commands_location_;
         std::unordered_map<int, int64_t> timer_checkpoints_;
         int32_t timer_usage_count_;
-        recover recover_;
+        longfist::recover recover_;
 
         void checkin();
 

@@ -78,16 +78,13 @@ namespace kungfu::yijinjing::practice
         { return channels_; }
 
     protected:
-        std::unordered_map<uint64_t, longfist::types::Channel> channels_;
-        std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
-
-        yijinjing::journal::reader_ptr reader_;
-        std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
         int64_t begin_time_;
         int64_t end_time_;
-        int64_t now_;
+        std::unordered_map<uint64_t, longfist::types::Channel> channels_;
+        std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
+        yijinjing::journal::reader_ptr reader_;
+        std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
         rx::connectable_observable<event_ptr> events_;
-        rx::composite_subscription cs_;
 
         virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
@@ -111,8 +108,19 @@ namespace kungfu::yijinjing::practice
 
     private:
         yijinjing::io_device_with_reply_ptr io_device_;
+        rx::composite_subscription cs_;
+        int64_t now_;
         volatile bool continual_ = true;
         volatile bool live_ = true;
+
+        template<typename T>
+        std::enable_if_t<T::reflect, void> request_read_from(yijinjing::journal::writer_ptr &writer, int64_t trigger_time, uint32_t source_id)
+        {
+            T &msg = writer->template open_data<T>(trigger_time);
+            msg.source_id = source_id;
+            msg.from_time = trigger_time;
+            writer->close_data();
+        }
 
         static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb);
     };

@@ -18,8 +18,6 @@ namespace kungfu::yijinjing::practice
 
         virtual ~watcher() = default;
 
-        virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
-
     protected:
 
         void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
@@ -29,8 +27,6 @@ namespace kungfu::yijinjing::practice
         void on_write_to(const event_ptr &event) override;
 
         void on_read_from(const event_ptr &event) override;
-
-        void on_start() override;
 
         void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
     };
