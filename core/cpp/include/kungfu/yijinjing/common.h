@@ -19,12 +19,12 @@
 #include <utility>
 #include <typeinfo>
 #include <csignal>
-
-#include <rxcpp/rx.hpp>
-#include <nlohmann/json.hpp>
+#include <cstdarg>
 
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
+#include <rxcpp/rx.hpp>
+#include <nlohmann/json.hpp>
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
@@ -253,7 +253,7 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
-        inline auto is = [](int32_t msg_type)
+        constexpr auto is = [](int32_t msg_type)
         {
             return filter([=](const event_ptr &e)
                           {
@@ -261,7 +261,7 @@ namespace kungfu
                           });
         };
 
-        inline auto from = [](uint32_t source)
+        constexpr auto from = [](uint32_t source)
         {
             return filter([=](const event_ptr &e)
                           {
@@ -269,7 +269,7 @@ namespace kungfu
                           });
         };
 
-        inline auto to = [](uint32_t dest)
+        constexpr auto to = [](uint32_t dest)
         {
             return filter([=](const event_ptr &e)
                           {
@@ -277,7 +277,7 @@ namespace kungfu
                           });
         };
 
-        inline auto trace = []()
+        constexpr auto trace = []()
         {
             return map([=](const event_ptr &e)
                        {
@@ -286,25 +286,23 @@ namespace kungfu
                        });
         };
 
-        inline auto interrupt_on_error(std::exception_ptr e)
+        constexpr auto interrupt_on_error = [](const std::exception_ptr &e)
         {
             try
             { std::rethrow_exception(e); }
             catch (const std::exception &ex)
-            {
-                SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
-            }
+            { SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what()); }
             raise(SIGINT);
-        }
+        };
 
         template<class Arg>
-        inline auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error))
+        constexpr auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error))
         {
             return subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error);
         }
 
         template<class... ArgN>
-        inline auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...))
+        constexpr auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...))
         {
             return subscribe<event_ptr>(std::forward<ArgN>(an)...);
         }
@@ -381,5 +379,7 @@ namespace kungfu
         }
     }
 }
+
+#define $$(f) $([&](const event_ptr &e) { f(e); })
 
 #endif //KUNGFU_YIJINJING_COMMON_H

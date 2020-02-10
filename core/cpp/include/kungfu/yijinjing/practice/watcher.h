@@ -26,8 +26,6 @@ namespace kungfu::yijinjing::practice
 
         void on_write_to(const event_ptr &event) override;
 
-        void on_read_from(const event_ptr &event) override;
-
         void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
     };
 }

@@ -33,9 +33,11 @@ namespace kungfu::yijinjing::practice
     public:
         explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-        void request_write_to(int64_t trigger_time, uint32_t dest_id);
+        void request_read_from(int64_t trigger_time, uint32_t source_id);
 
-        void request_read_from(int64_t trigger_time, uint32_t source_id, bool pub = false);
+        void request_read_from_public(int64_t trigger_time, uint32_t source_id);
+
+        void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
         uint32_t get_master_commands_uid()
         {
@@ -84,9 +86,11 @@ namespace kungfu::yijinjing::practice
         virtual void on_start()
         {}
 
-        virtual void on_write_to(const event_ptr &event);
-
         virtual void on_read_from(const event_ptr &event);
+
+        virtual void on_read_from_public(const event_ptr &event);
+
+        virtual void on_write_to(const event_ptr &event);
 
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime)
         {
@@ -202,6 +206,19 @@ namespace kungfu::yijinjing::practice
         void register_location_from_event(const event_ptr &event);
 
         void deregister_location_from_event(const event_ptr &event);
+
+        template <typename R>
+        inline void do_read_from(const event_ptr &event, uint32_t dest_id)
+        {
+            const R &request = event->data<R>();
+            SPDLOG_INFO("{} [{:08x}] requires {} [{:08x}] read from {} [{:08x}] from {}, {}",
+                        get_location(event->source())->uname, event->source(),
+                        event->dest() == 0 ? "public" : get_location(event->dest())->uname, event->dest(),
+                        get_location(request.source_id)->uname, request.source_id,
+                        time::strftime(request.from_time),
+                        typeid(R).name());
+            reader_->join(get_location(request.source_id), dest_id, request.from_time);
+        }
     };
 
     DECLARE_PTR(apprentice)

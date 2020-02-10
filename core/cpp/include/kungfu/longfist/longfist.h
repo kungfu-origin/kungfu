@@ -16,7 +16,7 @@
 
 namespace kungfu::longfist
 {
-    static constexpr auto StateDataTypes = boost::hana::make_map(
+    constexpr auto StateDataTypes = boost::hana::make_map(
             TYPE_PAIR(Config),
             TYPE_PAIR(Instrument),
             TYPE_PAIR(Quote),
@@ -46,18 +46,6 @@ namespace kungfu::longfist
     using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
     DECLARE_PTR(StateMapType)
 
-    static constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
-    {
-        boost::hana::for_each(StateDataTypes, [&](auto it)
-        {
-            using T = typename decltype(+boost::hana::second(it))::type;
-            if (T::tag == event->msg_type())
-            {
-                handler(boost::hana::first(it).c_str(), boost::hana::second(it), event);
-            }
-        });
-    };
-
     class recover
     {
     public:
@@ -73,6 +61,18 @@ namespace kungfu::longfist
 
     private:
         StateMapType &state_map_;
+    };
+
+    constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
+    {
+        boost::hana::for_each(StateDataTypes, [&](auto it)
+        {
+            using T = typename decltype(+boost::hana::second(it))::type;
+            if (T::tag == event->msg_type())
+            {
+                handler(boost::hana::first(it).c_str(), boost::hana::second(it), event);
+            }
+        });
     };
 };
 

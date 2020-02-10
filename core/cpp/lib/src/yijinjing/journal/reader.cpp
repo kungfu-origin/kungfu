@@ -27,14 +27,13 @@ namespace kungfu::yijinjing::journal
         journals_.clear();
     }
 
-    void
-    reader::join(const data::location_ptr &location, uint32_t dest_id, const int64_t from_time)
+    void reader::join(const data::location_ptr &location, uint32_t dest_id, const int64_t from_time)
     {
         for (const auto &journal : journals_)
         {
             if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
             {
-                SPDLOG_WARN("reader can not join journal {}/{} more than once", location->uname, dest_id);
+                SPDLOG_INFO("reader joins journal {}/{:08x} more than once", location->uname, dest_id);
                 return;
             }
         }

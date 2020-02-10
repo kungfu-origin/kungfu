@@ -225,61 +225,39 @@ namespace kungfu::yijinjing::practice
               io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
           });
 
-        events_ | is(Register::tag) |
-        $([&](const event_ptr &e)
-          {
-              register_app(e);
-          });
+        events_ | is(Register::tag) | $$(register_app);
 
         events_ | is(RequestWriteTo::tag) |
         $([&](const event_ptr &e)
           {
               const RequestWriteTo &request = e->data<RequestWriteTo>();
-              if (has_location(request.dest_id))
-              {
-                  reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-                  require_write_to(e->source(), e->gen_time(), request.dest_id);
-                  require_read_from(request.dest_id, e->gen_time(), e->source(), false);
-                  Channel channel = {};
-                  channel.source_id = e->source();
-                  channel.dest_id = request.dest_id;
-                  register_channel(e->gen_time(), channel);
-              } else
-              {
-                  SPDLOG_ERROR("Request write to unknown location {:08x}", request.dest_id);
-              }
+              reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
+              require_write_to(e->source(), e->gen_time(), request.dest_id);
+              require_read_from(request.dest_id, e->gen_time(), e->source());
+              Channel channel = {};
+              channel.source_id = e->source();
+              channel.dest_id = request.dest_id;
+              register_channel(e->gen_time(), channel);
           });
 
         events_ | is(RequestReadFrom::tag) |
         $([&](const event_ptr &e)
           {
               const RequestReadFrom &request = e->data<RequestReadFrom>();
-              if (has_location(request.source_id))
-              {
-                  reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-                  require_write_to(request.source_id, e->gen_time(), e->source());
-                  require_read_from(e->source(), e->gen_time(), request.source_id, false);
-                  Channel channel = {};
-                  channel.source_id = request.source_id;
-                  channel.dest_id = e->source();
-                  register_channel(e->gen_time(), channel);
-              } else
-              {
-                  SPDLOG_ERROR("Request read from unknown location {:08x}", request.source_id);
-              }
+              reader_->join(get_location(request.source_id), e->source(), e->gen_time());
+              require_write_to(request.source_id, e->gen_time(), e->source());
+              require_read_from(e->source(), e->gen_time(), request.source_id);
+              Channel channel = {};
+              channel.source_id = request.source_id;
+              channel.dest_id = e->source();
+              register_channel(e->gen_time(), channel);
           });
 
         events_ | is(RequestReadFromPublic::tag) |
         $([&](const event_ptr &e)
           {
               const RequestReadFrom &request = e->data<RequestReadFrom>();
-              if (has_location(request.source_id))
-              {
-                  require_read_from(e->source(), e->gen_time(), request.source_id, true);
-              } else
-              {
-                  SPDLOG_ERROR("Request read public from unknown location {:08x}", request.source_id);
-              }
+              require_read_from_public(e->source(), e->gen_time(), request.source_id);
           });
 
         events_ | is(TimeRequest::tag) |

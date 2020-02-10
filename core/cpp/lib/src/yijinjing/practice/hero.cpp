@@ -203,40 +203,25 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
+    void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
     {
-        if (has_location(source_id))
-        {
-            auto writer = get_writer(source_id);
-            RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time);
-            msg.dest_id = dest_id;
-            writer->close_data();
-            SPDLOG_INFO("request {} [{:08x}] publish to {} [{:08x}]", get_location(source_id)->uname, source_id,
-                        dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
-        } else
-        {
-            SPDLOG_ERROR("location [{:08x}] not exists", source_id);
-        }
+        do_require_read_from<RequestReadFrom>(get_writer(dest_id), trigger_time, dest_id, source_id);
     }
 
-    void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub)
+    void hero::require_read_from_public(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
     {
-        if (has_location(dest_id))
-        {
-            auto writer = get_writer(dest_id);
-            if (pub)
-            {
-                request_read_from<RequestReadFromPublic>(writer, trigger_time, source_id);
-            } else
-            {
-                request_read_from<RequestReadFrom>(writer, trigger_time, source_id);
-            }
-            auto &source = get_location(source_id)->uname;
-            auto &dest = get_location(dest_id)->uname;
-            SPDLOG_INFO("request {} [{:08x}] subscribe to {} [{:08x}]", dest, dest_id, source, source_id);
-            return;
-        }
-        SPDLOG_ERROR("location [{:08x}] does not exist", dest_id);
+        do_require_read_from<RequestReadFromPublic>(get_writer(dest_id), trigger_time, dest_id, source_id);
+    }
+
+    void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
+    {
+        if (not check_location(source_id, dest_id)) return;
+        auto writer = get_writer(source_id);
+        RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time);
+        msg.dest_id = dest_id;
+        writer->close_data();
+        SPDLOG_INFO("require {} [{:08x}] write to {} [{:08x}]",
+                    get_location(source_id)->uname, source_id, dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
     }
 
     void hero::produce(const rx::subscriber<event_ptr> &sb)

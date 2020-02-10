@@ -50,19 +50,27 @@ namespace kungfu::yijinjing::practice
         locations_[master_commands_location_->uid] = master_commands_location_;
     }
 
+    void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
+    {
+        if (get_io_device()->get_home()->mode == mode::LIVE)
+        {
+            require_read_from(master_commands_location_->uid, trigger_time, source_id);
+        }
+    }
+
+    void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_id)
+    {
+        if (get_io_device()->get_home()->mode == mode::LIVE)
+        {
+            require_read_from_public(master_commands_location_->uid, trigger_time, source_id);
+        }
+    }
+
     void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id)
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
         {
             require_write_to(master_commands_location_->uid, trigger_time, dest_id);
-        }
-    }
-
-    void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, bool pub)
-    {
-        if (get_io_device()->get_home()->mode == mode::LIVE)
-        {
-            require_read_from(master_commands_location_->uid, trigger_time, source_id, pub);
         }
     }
 
@@ -74,22 +82,16 @@ namespace kungfu::yijinjing::practice
               try
               { callback(e); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception by timer {}", e.what()); }
           },
           [&](std::exception_ptr e)
           {
               try
               { std::rethrow_exception(e); }
               catch (const rx::empty_error &ex)
-              {
-                  SPDLOG_WARN("{}", ex.what());
-              }
+              { SPDLOG_WARN("{}", ex.what()); }
               catch (const std::exception &ex)
-              {
-                  SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
-              }
+              { SPDLOG_WARN("Unexpected exception by timer{}", ex.what()); }
           });
     }
 
@@ -101,9 +103,7 @@ namespace kungfu::yijinjing::practice
               try
               { callback(e); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what()); }
           });
     }
 
@@ -158,50 +158,24 @@ namespace kungfu::yijinjing::practice
                                                      get_io_device()->get_home()->name, get_io_device()->get_home()->locator), 0, begin_time_);
         }
 
+        events_ | is(Location::tag) | $$(register_location_from_event);
+        events_ | is(Register::tag) | $$(register_location_from_event);
+        events_ | is(Deregister::tag) | $$(deregister_location_from_event);
+
+        events_ | is(RequestReadFrom::tag) | $$(on_read_from);
+        events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
+        events_ | is(RequestWriteTo::tag) | $$(on_write_to);
+
         events_ | take_until(events_ | is(RequestStart::tag)) |
         $([&](const event_ptr &event)
           {
               longfist::cast_invoke(event, recover_);
           });
 
-        events_ | is(Location::tag) |
-        $([&](const event_ptr &e)
-          {
-              register_location_from_event(e);
-          });
-
         events_ | is(Channel::tag) |
         $([&](const event_ptr &e)
           {
-              auto &channel = e->data<Channel>();
-              register_channel(e->gen_time(), channel);
-          });
-
-        events_ | is(Register::tag) |
-        $([&](const event_ptr &e)
-          {
-              register_location_from_event(e);
-          });
-
-        events_ | is(Deregister::tag) |
-        $([&](const event_ptr &e)
-          {
-              deregister_location_from_event(e);
-          });
-
-        events_ | is(RequestWriteTo::tag) |
-        $([&](const event_ptr &e)
-          {
-              on_write_to(e);
-          });
-
-        events_ | filter([&](const event_ptr &e)
-                         {
-                             return e->msg_type() == RequestReadFromPublic::tag or e->msg_type() == RequestReadFrom::tag;
-                         }) |
-        $([&](const event_ptr &e)
-          {
-              on_read_from(e);
+              register_channel(e->gen_time(), e->data<Channel>());
           });
 
         events_ | is(TradingDay::tag) |
@@ -224,13 +198,9 @@ namespace kungfu::yijinjing::practice
                   try
                   { std::rethrow_exception(e); }
                   catch (const rx::empty_error &ex)
-                  {
-                      SPDLOG_WARN("{}", ex.what());
-                  }
+                  { SPDLOG_WARN("{}", ex.what()); }
                   catch (const std::exception &ex)
-                  {
-                      SPDLOG_WARN("Unexpected exception before start {}", ex.what());
-                  }
+                  { SPDLOG_WARN("Unexpected exception before start {}", ex.what()); }
               });
         } else
         {
@@ -243,28 +213,27 @@ namespace kungfu::yijinjing::practice
         }
     }
 
+    void apprentice::on_read_from(const event_ptr &event)
+    {
+        do_read_from<RequestReadFrom>(event, get_live_home_uid());
+    }
+
+    void apprentice::on_read_from_public(const event_ptr &event)
+    {
+        do_read_from<RequestReadFromPublic>(event, 0);
+    }
+
     void apprentice::on_write_to(const event_ptr &event)
     {
         const RequestWriteTo &request = event->data<RequestWriteTo>();
         if (writers_.find(request.dest_id) == writers_.end())
         {
             writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
-        } else
-        {
-            SPDLOG_INFO("writer from {} [{:08x}] to {} [{:08x}] already existed",
-                        get_location(event->source())->uname, event->source(),
-                        get_location(request.dest_id)->uname, request.dest_id);
         }
-    }
-
-    void apprentice::on_read_from(const event_ptr &event)
-    {
-        const RequestReadFrom &request = event->data<RequestReadFrom>();
-        SPDLOG_INFO("{} [{:08x}] asks observe at {} [{:08x}] {} from {}", get_location(event->source())->uname, event->source(),
-                    get_location(request.source_id)->uname, request.source_id, time::strftime(event->gen_time()),
-                    time::strftime(request.from_time));
-        uint32_t dest_id = event->msg_type() == RequestReadFromPublic::tag ? 0 : get_live_home_uid();
-        reader_->join(get_location(request.source_id), dest_id, request.from_time);
+        SPDLOG_INFO("{} [{:08x}] requires {} [{:08x}] write to {} [{:08x}], {}",
+                    get_location(event->source())->uname, event->source(),
+                    get_location(event->dest())->uname, event->dest(),
+                    request.dest_id > 0 ? get_location(request.dest_id)->uname : "public", request.dest_id);
     }
 
     void apprentice::checkin()
@@ -285,10 +254,9 @@ namespace kungfu::yijinjing::practice
         data["name"] = home->name;
         data["uid"] = home->uid;
         data["pid"] = GETPID();
-
         request["data"] = data;
 
-        SPDLOG_DEBUG("request {}", request.dump());
+        SPDLOG_DEBUG("checkin request: {}", request.dump());
         get_io_device()->get_publisher()->publish(request.dump());
     }
 

@@ -172,7 +172,7 @@ namespace kungfu::wingchun::strategy
             {
                 throw wingchun_error(fmt::format("invalid md {}", source));
             }
-            app_.request_read_from(app_.now(), md_location->uid, true);
+            app_.request_read_from_public(app_.now(), md_location->uid);
             app_.request_write_to(app_.now(), md_location->uid);
             market_data_[source] = md_location->uid;
             SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);

@@ -62,7 +62,7 @@ namespace kungfu::wingchun::service
         {
             case category::MD:
             {
-                request_read_from(trigger_time, location->uid, true);
+                request_read_from_public(trigger_time, location->uid);
                 request_write_to(trigger_time, location->uid);
                 break;
             }

@@ -46,32 +46,6 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void watcher::on_read_from(const event_ptr &event)
-    {
-        const RequestReadFrom &request = event->data<RequestReadFrom>();
-        auto source_location = get_location(request.source_id);
-        auto master_cmd_location = get_location(event->source());
-
-        std::stringstream ss;
-        uint32_t dest_id;
-        ss << std::hex << master_cmd_location->name;
-        ss >> dest_id;
-        auto dest_location = get_location(dest_id);
-
-        if (source_location->uid == get_master_commands_uid() or event->dest() == get_live_home_uid())
-        {
-            apprentice::on_read_from(event);
-            return;
-        }
-        if (event->msg_type() == RequestReadFrom::tag &&
-            source_location->category == category::TD &&
-            dest_location->category == category::STRATEGY)
-        {
-            SPDLOG_INFO("watch events from {} to {}", source_location->uname, dest_location->uname);
-            reader_->join(source_location, dest_id, event->gen_time());
-        }
-    }
-
     void watcher::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
     {
         auto app_uid_str = fmt::format("{:08x}", app_location->uid);

@@ -96,9 +96,11 @@ namespace kungfu::yijinjing::practice
 
         void deregister_channel_by_source(uint32_t source_id);
 
-        void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
+        void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
 
-        void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id, bool pub);
+        void require_read_from_public(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
+
+        void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
 
         void produce(const rx::subscriber<event_ptr> &sb);
 
@@ -113,13 +115,35 @@ namespace kungfu::yijinjing::practice
         volatile bool continual_ = true;
         volatile bool live_ = true;
 
-        template<typename T>
-        std::enable_if_t<T::reflect, void> request_read_from(yijinjing::journal::writer_ptr &writer, int64_t trigger_time, uint32_t source_id)
+        inline bool check_location(uint32_t source_id, uint32_t dest_id)
         {
+            if (not has_location(source_id))
+            {
+                SPDLOG_ERROR("source location [{:08x}] not exists", source_id);
+                return false;
+            }
+            if (dest_id != 0 and not has_location(dest_id))
+            {
+                SPDLOG_ERROR("dest location [{:08x}] not exists", dest_id);
+                return false;
+            }
+            return true;
+        }
+
+        template<typename T>
+        std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer, int64_t trigger_time,
+                                                                uint32_t dest_id, uint32_t source_id)
+        {
+            if (not check_location(source_id, dest_id))
+            {
+                return;
+            }
             T &msg = writer->template open_data<T>(trigger_time);
             msg.source_id = source_id;
             msg.from_time = trigger_time;
             writer->close_data();
+            SPDLOG_INFO("require {} [{:08x}] read from {} [{:08x}]",
+                        get_location(dest_id)->uname, dest_id, get_location(source_id)->uname, source_id);
         }
 
         static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb);
