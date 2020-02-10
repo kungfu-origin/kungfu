@@ -4,7 +4,7 @@
 
 #include "journal.h"
 #include "io.h"
-#include "app.h"
+#include "watcher.h"
 
 namespace kungfu::node
 {
@@ -15,7 +15,7 @@ namespace kungfu::node
         Locator::Init(env, exports);
         IODevice::Init(env, exports);
         Session::Init(env, exports);
-        Apprentice::Init(env, exports);
+        Watcher::Init(env, exports);
         return exports;
     }
 

@@ -44,12 +44,12 @@ namespace kungfu::node
     {
         auto js_delegate = locator_.Get("layout_dir").As<Napi::Function>();
         auto v = js_delegate.Call({
-                                             Napi::String::New(locator_.Env(), get_category_name(location->category)),
-                                             Napi::String::New(locator_.Env(), location->group),
-                                             Napi::String::New(locator_.Env(), location->name),
-                                             Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
-                                             Napi::String::New(locator_.Env(), get_layout_name(l))
-                                     });
+                                          Napi::String::New(locator_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_.Env(), location->group),
+                                          Napi::String::New(locator_.Env(), location->name),
+                                          Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
+                                          Napi::String::New(locator_.Env(), get_layout_name(l))
+                                  });
         return v.As<Napi::String>().Utf8Value();
     }
 
@@ -57,13 +57,13 @@ namespace kungfu::node
     {
         auto js_delegate = locator_.Get("layout_file").As<Napi::Function>();
         auto v = js_delegate.Call({
-                                             Napi::String::New(locator_.Env(), get_category_name(location->category)),
-                                             Napi::String::New(locator_.Env(), location->group),
-                                             Napi::String::New(locator_.Env(), location->name),
-                                             Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
-                                             Napi::String::New(locator_.Env(), get_layout_name(l)),
-                                             Napi::String::New(locator_.Env(), name)
-                                     });
+                                          Napi::String::New(locator_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_.Env(), location->group),
+                                          Napi::String::New(locator_.Env(), location->name),
+                                          Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
+                                          Napi::String::New(locator_.Env(), get_layout_name(l)),
+                                          Napi::String::New(locator_.Env(), name)
+                                  });
         return v.As<Napi::String>().Utf8Value();
     }
 
@@ -153,14 +153,18 @@ namespace kungfu::node
         return Reader::NewInstance(info.This());
     }
 
+    locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index)
+    {
+        return locator_ptr{reinterpret_cast<Locator *>(Napi::ObjectWrap<Locator>::Unwrap(info[index].As<Napi::Object>()))};
+    }
+
     location_ptr IODevice::GetLocation(const Napi::CallbackInfo &info)
     {
         mode m = get_mode_by_name(info[0].As<Napi::String>().Utf8Value());
         category c = get_category_by_name(info[1].As<Napi::String>().Utf8Value());
         auto group = info[2].As<Napi::String>().Utf8Value();
         auto name = info[3].As<Napi::String>().Utf8Value();
-        locator_ptr lp(reinterpret_cast<Locator *>(Napi::ObjectWrap<Locator>::Unwrap(info[4].As<Napi::Object>())));
-        return std::make_shared<location>(m, c, group, name, lp);
+        return std::make_shared<location>(m, c, group, name, GetLocator(info, 4));
     }
 
     void IODevice::Init(Napi::Env env, Napi::Object exports)

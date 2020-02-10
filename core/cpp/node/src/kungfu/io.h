@@ -55,6 +55,8 @@ namespace kungfu::node
 
         Napi::Value OpenReader(const Napi::CallbackInfo &info);
 
+        static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);
+
         static yijinjing::data::location_ptr GetLocation(const Napi::CallbackInfo &info);
 
         static void Init(Napi::Env env, Napi::Object exports);

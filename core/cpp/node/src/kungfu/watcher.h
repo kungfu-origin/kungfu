@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2020/1/14.
 //
 
-#ifndef KUNGFU_NODE_APP_H
-#define KUNGFU_NODE_APP_H
+#ifndef KUNGFU_NODE_WATCHER_H
+#define KUNGFU_NODE_WATCHER_H
 
 #include <napi.h>
 
@@ -13,10 +13,10 @@
 namespace kungfu::node
 {
 
-    class Apprentice : public Napi::ObjectWrap<Apprentice>, public yijinjing::practice::apprentice
+    class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice
     {
     public:
-        explicit Apprentice(const Napi::CallbackInfo &info);
+        explicit Watcher(const Napi::CallbackInfo &info);
 
         Napi::Value IsLive(const Napi::CallbackInfo &info);
 
@@ -24,12 +24,17 @@ namespace kungfu::node
 
         Napi::Value Step(const Napi::CallbackInfo &info);
 
+        Napi::Value GetLedger(const Napi::CallbackInfo &info);
+
+        void SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value);
+
         static void Init(Napi::Env env, Napi::Object exports);
 
     private:
         static Napi::FunctionReference constructor;
+        Napi::ObjectReference ledger_;
     };
 }
 
 
-#endif //KUNGFU_NODE_APP_H
+#endif //KUNGFU_NODE_WATCHER_H

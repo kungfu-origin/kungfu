@@ -39,7 +39,7 @@ namespace kungfu::longfist
         auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
         {
             using DataType = typename decltype(+value)::type;
-            return boost::hana::make_pair(value, std::unordered_map<int, DataType>());
+            return boost::hana::make_pair(value, std::unordered_map<uint64_t, DataType>());
         });
         return boost::hana::unpack(maps, boost::hana::make_map);
     };

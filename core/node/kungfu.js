@@ -1,4 +1,4 @@
-const bindings = exports._bindings = require('bindings')('node_yjj.node');
+const bindings = exports._bindings = require('bindings')('node_kungfu.node');
 const fse = require("fs-extra");
 const path = require("path");
 const glob = require("glob");
@@ -50,6 +50,6 @@ exports.io_device = function(mode, category, group, name, locator) {
     return new bindings.IODevice(mode, category, group, name, locator);
 };
 
-exports.app = function(mode, category, group, name, locator) {
-    return new bindings.Apprentice(mode, category, group, name, locator);
+exports.watcher = function(locator) {
+    return new bindings.Watcher(locator);
 };

@@ -6,15 +6,21 @@ import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/
 const path = require('path');
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
-const yjj = require('kungfu-core').yjj;
+const kungfu = require('kungfu-core').kungfu;
 
 interface SqlTable {
     table: string;
     sql: string;
 };
 
-export const locator = yjj.locator(KF_HOME);
-export const yjjapp = yjj.app("live", "system", "node", "main", locator);
+export const locator = kungfu.locator(KF_HOME);
+export const watcher = kungfu.watcher(locator);
+
+console.log('kungfu setup');
+watcher.setup();
+watcher.step();
+console.log(watcher.ledger);
+console.log('kungfu done');
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
