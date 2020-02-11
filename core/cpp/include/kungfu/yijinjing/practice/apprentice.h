@@ -39,12 +39,17 @@ namespace kungfu::yijinjing::practice
 
         void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-        uint32_t get_master_commands_uid()
+        uint32_t get_master_commands_uid() const
         {
             return master_commands_location_->uid;
         }
 
-        std::string get_config_db_file(const std::string &name)
+        int64_t get_master_start_time() const
+        {
+            return master_start_time_;
+        }
+
+        std::string get_config_db_file(const std::string &name) const
         {
             return config_location_->locator->layout_file(config_location_, yijinjing::data::layout::SQLITE, name);
         }
@@ -197,6 +202,7 @@ namespace kungfu::yijinjing::practice
     private:
         yijinjing::data::location_ptr master_home_location_;
         yijinjing::data::location_ptr master_commands_location_;
+        int64_t master_start_time_;
         std::unordered_map<int, int64_t> timer_checkpoints_;
         int32_t timer_usage_count_;
         longfist::recover recover_;

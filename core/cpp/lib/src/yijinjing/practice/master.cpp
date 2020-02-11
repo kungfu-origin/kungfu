@@ -21,13 +21,14 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::yijinjing::practice
 {
 
-    master::master(location_ptr home, bool low_latency) : hero(std::make_shared<io_device_master>(home, low_latency)), last_check_(0)
+    master::master(location_ptr home, bool low_latency) :
+            hero(std::make_shared<io_device_master>(home, low_latency)),
+            start_time_ (time::now_in_nano()), last_check_(0)
     {
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
-        auto now = time::now_in_nano();
-        io_device->open_session(io_device->get_home(), now);
+        io_device->open_session(io_device->get_home(), start_time_);
         writers_[0] = io_device->open_writer(0);
-        writers_[0]->mark(now, SessionStart::tag);
+        writers_[0]->mark(start_time_, SessionStart::tag);
     }
 
     void master::on_exit()
@@ -121,7 +122,7 @@ namespace kungfu::yijinjing::practice
         app_sqlizers_[app_location->uid]->storage.sync_schema();
         app_sqlizers_[app_location->uid]->restore(writer);
 
-        writer->mark(e->gen_time(), RequestStart::tag);
+        writer->mark(start_time_, RequestStart::tag);
     }
 
     void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)

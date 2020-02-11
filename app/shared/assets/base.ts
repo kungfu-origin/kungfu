@@ -19,6 +19,7 @@ export const watcher = kungfu.watcher(locator);
 console.log('kungfu setup');
 watcher.setup();
 watcher.step();
+watcher.step();
 console.log(watcher.ledger);
 console.log('kungfu done');
 

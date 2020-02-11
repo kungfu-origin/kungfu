@@ -270,7 +270,11 @@ namespace kungfu::yijinjing::practice
         {
             if (reader_->current_frame()->gen_time() <= end_time_)
             {
-                now_ = reader_->current_frame()->gen_time();
+                int64_t frame_time = reader_->current_frame()->gen_time();
+                if (frame_time > now_)
+                {
+                    now_ = frame_time;
+                }
                 sb.on_next(reader_->current_frame());
                 reader_->next();
             } else

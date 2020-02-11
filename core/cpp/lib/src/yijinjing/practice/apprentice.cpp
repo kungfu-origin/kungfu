@@ -38,9 +38,8 @@ namespace kungfu::yijinjing::practice
 {
     apprentice::apprentice(location_ptr home, bool low_latency) :
             hero(std::make_shared<io_device_client>(home, low_latency)),
-            timer_usage_count_(0),
-            state_map_(build_state_map(longfist::StateDataTypes)),
-            recover_(state_map_)
+            master_start_time_(0), timer_usage_count_(0),
+            state_map_(build_state_map(longfist::StateDataTypes)), recover_(state_map_)
     {
         auto uid_str = fmt::format("{:08x}", get_live_home_uid());
         auto locator = get_io_device()->get_home()->locator;
@@ -191,6 +190,7 @@ namespace kungfu::yijinjing::practice
             events_ | is(RequestStart::tag) | first() |
             $([&](const event_ptr &e)
               {
+                  master_start_time_ = e->trigger_time();
                   on_start();
               },
               [&](const std::exception_ptr &e)

@@ -66,7 +66,7 @@ namespace kungfu::wingchun::service
 
     private:
         yijinjing::nanomsg::socket_ptr pub_sock_;
-        longfist::journal::publisher publisher_;
+        longfist::journal::publisher publish_state;
 
         book::BookContext_ptr book_context_;
 

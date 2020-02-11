@@ -54,6 +54,7 @@ namespace kungfu::yijinjing::practice
         void register_channel(int64_t trigger_time, const longfist::types::Channel &channel) override;
 
     private:
+        int64_t start_time_;
         int64_t last_check_;
         std::unordered_map<uint32_t, uint32_t> app_locations_;
         std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;

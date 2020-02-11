@@ -17,7 +17,7 @@ namespace kungfu::longfist::journal
         explicit publisher(const StateMapType &state_map) : types(StateDataTypes), state_map_(state_map)
         {}
 
-        void operator()(const yijinjing::journal::writer_ptr &writer)
+        void operator()(const yijinjing::journal::writer_ptr &writer, int64_t trigger_time)
         {
             boost::hana::for_each(types, [&](auto it)
             {
@@ -25,7 +25,7 @@ namespace kungfu::longfist::journal
                 using DataType = typename decltype(+type)::type;
                 for (auto element : state_map_[type])
                 {
-                    writer->write(0, element.second);
+                    writer->write(trigger_time, element.second);
                 }
             });
         }

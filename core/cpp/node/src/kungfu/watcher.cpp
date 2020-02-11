@@ -81,6 +81,6 @@ namespace kungfu::node
               longfist::cast_invoke(event, ledger_update_);
           });
 
-        request_read_from_public(now(), ledger_location_.uid, now());
+        request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
     }
 }

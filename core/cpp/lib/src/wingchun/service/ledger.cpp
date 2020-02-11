@@ -20,7 +20,7 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publisher_(state_map_)
+            publish_state(state_map_)
     {
         log::copy_log_settings(get_io_device()->get_home(), "ledger");
         if (m == mode::LIVE)
@@ -328,7 +328,7 @@ namespace kungfu::wingchun::service
               }
           });
 
-        publisher_(writers_[0]);
+        publish_state(writers_[0], now());
 
         apprentice::on_start();
 
