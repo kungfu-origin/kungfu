@@ -8,11 +8,11 @@
 #include <napi.h>
 
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include "serialize.h"
 #include "journal.h"
 
 namespace kungfu::node
 {
-
     class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice
     {
     public:
@@ -30,9 +30,14 @@ namespace kungfu::node
 
         static void Init(Napi::Env env, Napi::Object exports);
 
+    protected:
+        void on_start() override;
+
     private:
         static Napi::FunctionReference constructor;
+        yijinjing::data::location ledger_location_;
         Napi::ObjectReference ledger_;
+        serialize::UpdateOperator ledger_update_;
     };
 }
 

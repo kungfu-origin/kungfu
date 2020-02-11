@@ -203,17 +203,17 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void hero::require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
+    void hero::require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time)
     {
-        do_require_read_from<RequestReadFrom>(get_writer(dest_id), trigger_time, dest_id, source_id);
+        do_require_read_from<RequestReadFrom>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
     }
 
-    void hero::require_read_from_public(uint32_t dest_id, int64_t trigger_time, uint32_t source_id)
+    void hero::require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time)
     {
-        do_require_read_from<RequestReadFromPublic>(get_writer(dest_id), trigger_time, dest_id, source_id);
+        do_require_read_from<RequestReadFromPublic>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
     }
 
-    void hero::require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id)
+    void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id)
     {
         if (not check_location(source_id, dest_id)) return;
         auto writer = get_writer(source_id);

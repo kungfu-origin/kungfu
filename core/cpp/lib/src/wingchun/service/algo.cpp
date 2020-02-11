@@ -62,19 +62,19 @@ namespace kungfu::wingchun::service
         {
             case category::MD:
             {
-                request_read_from_public(trigger_time, location->uid);
+                request_read_from_public(trigger_time, location->uid, trigger_time);
                 request_write_to(trigger_time, location->uid);
                 break;
             }
             case category::TD:
             {
-                request_read_from(trigger_time, location->uid);
+                request_read_from(trigger_time, location->uid, trigger_time);
                 request_write_to(trigger_time, location->uid);
                 break;
             }
             case category::STRATEGY:
             {
-                request_read_from(trigger_time, location->uid);
+                request_read_from(trigger_time, location->uid, trigger_time);
                 request_write_to(trigger_time, location->uid);
                 break;
             }

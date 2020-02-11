@@ -33,9 +33,9 @@ namespace kungfu::yijinjing::practice
     public:
         explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-        void request_read_from(int64_t trigger_time, uint32_t source_id);
+        void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
-        void request_read_from_public(int64_t trigger_time, uint32_t source_id);
+        void request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
         void request_write_to(int64_t trigger_time, uint32_t dest_id);
 

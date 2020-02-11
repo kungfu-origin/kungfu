@@ -50,19 +50,19 @@ namespace kungfu::yijinjing::practice
         locations_[master_commands_location_->uid] = master_commands_location_;
     }
 
-    void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id)
+    void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time)
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
         {
-            require_read_from(master_commands_location_->uid, trigger_time, source_id);
+            require_read_from(trigger_time, master_commands_location_->uid, source_id, from_time);
         }
     }
 
-    void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_id)
+    void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time)
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
         {
-            require_read_from_public(master_commands_location_->uid, trigger_time, source_id);
+            require_read_from_public(trigger_time, master_commands_location_->uid, source_id, from_time);
         }
     }
 
@@ -70,7 +70,7 @@ namespace kungfu::yijinjing::practice
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
         {
-            require_write_to(master_commands_location_->uid, trigger_time, dest_id);
+            require_write_to(trigger_time, master_commands_location_->uid, dest_id);
         }
     }
 

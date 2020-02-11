@@ -116,7 +116,7 @@ namespace kungfu::wingchun::service
         apprentice::register_location(trigger_time, location);
         if (location->uid == source_location_->uid)
         {
-            request_read_from_public(now(), source_location_->uid);
+            request_read_from_public(now(), source_location_->uid, now());
             request_write_to(now(), source_location_->uid);
             SPDLOG_INFO("added md {} [{:08x}]", source_location_->uname, source_location_->uid);
         }

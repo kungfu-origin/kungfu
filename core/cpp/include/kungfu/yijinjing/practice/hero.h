@@ -84,7 +84,7 @@ namespace kungfu::yijinjing::practice
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
         yijinjing::journal::reader_ptr reader_;
         std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
-        rx::connectable_observable<event_ptr> events_;
+        rx::connectable_observable <event_ptr> events_;
 
         virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
@@ -96,15 +96,15 @@ namespace kungfu::yijinjing::practice
 
         void deregister_channel_by_source(uint32_t source_id);
 
-        void require_read_from(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
+        void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
-        void require_read_from_public(uint32_t dest_id, int64_t trigger_time, uint32_t source_id);
+        void require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
-        void require_write_to(uint32_t source_id, int64_t trigger_time, uint32_t dest_id);
+        void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
-        void produce(const rx::subscriber<event_ptr> &sb);
+        void produce(const rx::subscriber <event_ptr> &sb);
 
-        virtual bool produce_one(const rx::subscriber<event_ptr> &sb);
+        virtual bool produce_one(const rx::subscriber <event_ptr> &sb);
 
         virtual void react() = 0;
 
@@ -131,8 +131,10 @@ namespace kungfu::yijinjing::practice
         }
 
         template<typename T>
-        std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer, int64_t trigger_time,
-                                                                uint32_t dest_id, uint32_t source_id)
+        std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer,
+                                                                int64_t trigger_time,
+                                                                uint32_t dest_id, uint32_t source_id,
+                                                                int64_t from_time)
         {
             if (not check_location(source_id, dest_id))
             {
@@ -140,13 +142,13 @@ namespace kungfu::yijinjing::practice
             }
             T &msg = writer->template open_data<T>(trigger_time);
             msg.source_id = source_id;
-            msg.from_time = trigger_time;
+            msg.from_time = from_time;
             writer->close_data();
             SPDLOG_INFO("require {} [{:08x}] read from {} [{:08x}]",
                         get_location(dest_id)->uname, dest_id, get_location(source_id)->uname, source_id);
         }
 
-        static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb);
+        static void delegate_produce(hero *instance, const rx::subscriber <event_ptr> &sb);
     };
 }
 #endif //KUNGFU_HERO_H

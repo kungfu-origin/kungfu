@@ -92,8 +92,8 @@ namespace kungfu::yijinjing::practice
         io_device->open_session(app_location, e->gen_time());
         writer->mark(e->gen_time(), SessionStart::tag);
 
-        require_write_to(app_location->uid, e->gen_time(), 0);
-        require_write_to(app_location->uid, e->gen_time(), master_location->uid);
+        require_write_to(e->gen_time(), app_location->uid, 0);
+        require_write_to(e->gen_time(), app_location->uid, master_location->uid);
 
         for (const auto &item : locations_)
         {
@@ -232,8 +232,8 @@ namespace kungfu::yijinjing::practice
           {
               const RequestWriteTo &request = e->data<RequestWriteTo>();
               reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-              require_write_to(e->source(), e->gen_time(), request.dest_id);
-              require_read_from(request.dest_id, e->gen_time(), e->source());
+              require_write_to(e->gen_time(), e->source(), request.dest_id);
+              require_read_from(0, request.dest_id, e->source(), e->gen_time());
               Channel channel = {};
               channel.source_id = e->source();
               channel.dest_id = request.dest_id;
@@ -245,8 +245,8 @@ namespace kungfu::yijinjing::practice
           {
               const RequestReadFrom &request = e->data<RequestReadFrom>();
               reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-              require_write_to(request.source_id, e->gen_time(), e->source());
-              require_read_from(e->source(), e->gen_time(), request.source_id);
+              require_write_to(e->gen_time(), request.source_id, e->source());
+              require_read_from(0, e->source(), request.source_id, e->gen_time());
               Channel channel = {};
               channel.source_id = request.source_id;
               channel.dest_id = e->source();
@@ -256,8 +256,8 @@ namespace kungfu::yijinjing::practice
         events_ | is(RequestReadFromPublic::tag) |
         $([&](const event_ptr &e)
           {
-              const RequestReadFrom &request = e->data<RequestReadFrom>();
-              require_read_from_public(e->source(), e->gen_time(), request.source_id);
+              const RequestReadFromPublic &request = e->data<RequestReadFromPublic>();
+              require_read_from_public(0, e->source(), request.source_id, e->gen_time());
           });
 
         events_ | is(TimeRequest::tag) |

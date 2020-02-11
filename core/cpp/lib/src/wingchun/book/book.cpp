@@ -379,7 +379,7 @@ namespace kungfu::wingchun::book
             }
 
             app_.request_write_to(app_.now(), service_location_->uid);
-            app_.request_read_from(app_.now(), service_location_->uid);
+            app_.request_read_from(app_.now(), service_location_->uid, app_.now());
         }
     }
 }

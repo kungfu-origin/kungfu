@@ -68,7 +68,7 @@ namespace kungfu::wingchun::strategy
         auto home = app_.get_io_device()->get_home();
         auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
         app_.request_write_to(app_.now(), ledger_location->uid);
-        app_.request_read_from(app_.now(), ledger_location->uid);
+        app_.request_read_from(app_.now(), ledger_location->uid, app_.now());
     }
 
     int64_t Context::now() const
@@ -106,7 +106,7 @@ namespace kungfu::wingchun::strategy
         account_location_ids_[account_id] = account_location->uid;
 
         app_.request_write_to(app_.now(), account_location->uid);
-        app_.request_read_from(app_.now(), account_location->uid);
+        app_.request_read_from(app_.now(), account_location->uid, app_.now());
 
         SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
     }
@@ -172,7 +172,7 @@ namespace kungfu::wingchun::strategy
             {
                 throw wingchun_error(fmt::format("invalid md {}", source));
             }
-            app_.request_read_from_public(app_.now(), md_location->uid);
+            app_.request_read_from_public(app_.now(), md_location->uid, app_.now());
             app_.request_write_to(app_.now(), md_location->uid);
             market_data_[source] = md_location->uid;
             SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);

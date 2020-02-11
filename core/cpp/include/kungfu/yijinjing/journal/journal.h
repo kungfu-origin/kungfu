@@ -150,7 +150,7 @@ namespace kungfu::yijinjing::journal
          * @return a casted reference to the underlying memory address in mmap file
          */
         template<typename T>
-        std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time)
+        std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0)
         {
             size_to_write_ = sizeof(T);
             auto frame = open_frame(trigger_time, T::tag, size_to_write_);

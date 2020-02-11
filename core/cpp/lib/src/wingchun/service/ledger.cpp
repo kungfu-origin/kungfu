@@ -83,7 +83,7 @@ namespace kungfu::wingchun::service
             {
                 watch(trigger_time, app_location);
                 request_write_to(trigger_time, app_location->uid);
-                request_read_from(trigger_time, app_location->uid);
+                request_read_from(trigger_time, app_location->uid, trigger_time);
                 update_broker_state(trigger_time, app_location, BrokerState::Connected);
                 monitor_instruments(app_location->uid);
                 break;
