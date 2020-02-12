@@ -59,7 +59,13 @@ namespace kungfu::node::serialize
         }
 
         template<typename ValueType>
-        std::enable_if_t<kungfu::is_array_v<ValueType>, void> Set(Napi::Object &obj, const char *name, const ValueType &value)
+        std::enable_if_t<kungfu::is_array_of_v<ValueType, char>, void> Set(Napi::Object &obj, const char *name, const ValueType &value)
+        {
+            obj.Set(name, Napi::String::New(obj.Env(), value.value));
+        }
+
+        template<typename ValueType>
+        std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>, void> Set(Napi::Object &obj, const char *name, const ValueType &value)
         {
             auto buffer = Napi::ArrayBuffer::New(obj.Env(), ValueType::length);
             obj.Set(name, buffer);

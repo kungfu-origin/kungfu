@@ -98,12 +98,13 @@ namespace kungfu
     struct array
     {
         static constexpr size_t length = N;
+        using element_type = T;
         using type = T[N];
         type value;
 
         array()
         {
-            memset(value, 0, sizeof(type));
+            memset(value, 0, sizeof(value));
         }
 
         explicit array(const T *t)
@@ -178,23 +179,22 @@ namespace kungfu
     template<typename T>
     static constexpr bool is_array_v = is_array<T>::value;
 
-    template<typename V, typename T, typename = void>
+    template<typename V, typename T>
     struct is_array_of : public std::false_type
     {
     };
 
-    template<typename V, typename T>
-    struct is_array_of<V, T, std::enable_if_t<is_array_v<V> and std::is_same_v<T, V::type>>> : public std::true_type
+    template<typename V, size_t N, typename T>
+    struct is_array_of<array<V, N>, T>
     {
-    };
-
-    template<typename V, typename T>
-    struct is_array_of<V, T, std::enable_if_t<is_array_v<V> and not std::is_same_v<T, V::type>>> : public std::false_type
-    {
+        static constexpr bool value = std::is_same_v<V, T>;
     };
 
     template<typename V, typename T>
     static constexpr bool is_array_of_v = is_array_of<V, T>::value;
+
+    template<typename V, typename T>
+    static constexpr bool is_array_of_others_v = is_array_v<V> and not is_array_of_v<V, T>;
 
     template<typename T>
     struct is_vector : public std::false_type
