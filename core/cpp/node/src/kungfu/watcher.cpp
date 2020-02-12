@@ -81,6 +81,13 @@ namespace kungfu::node
               longfist::cast_invoke(event, update_ledger);
           });
 
-        request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
+        events_ | filter([&](const event_ptr &event)
+                         {
+                             return event->msg_type() == Register::tag or event->msg_type() == Location::tag;
+                         }) |
+        $([&](const event_ptr &event)
+          {
+              request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
+          });
     }
 }
