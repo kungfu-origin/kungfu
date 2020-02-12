@@ -17,7 +17,7 @@ namespace kungfu::node
 
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
-            apprentice(std::make_shared<location>(mode::LIVE, category::SYSTEM, "node0", "watcher", IODevice::GetLocator(info)), true),
+            apprentice(std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", "watcher", IODevice::GetLocator(info)), true),
             ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", IODevice::GetLocator(info)),
             ledger_(Napi::ObjectReference::New(Napi::Object::New(info.Env()))),
             update_ledger(ledger_)
