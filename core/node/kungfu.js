@@ -50,6 +50,6 @@ exports.io_device = function(mode, category, group, name, locator) {
     return new bindings.IODevice(mode, category, group, name, locator);
 };
 
-exports.watcher = function(locator) {
-    return new bindings.Watcher(locator);
+exports.watcher = function(locator, name) {
+    return new bindings.Watcher(locator, name);
 };

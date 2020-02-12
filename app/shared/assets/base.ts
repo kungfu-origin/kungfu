@@ -14,7 +14,7 @@ interface SqlTable {
 };
 
 export const locator = kungfu.locator(KF_HOME);
-export const watcher = kungfu.watcher(locator);
+export const watcher = kungfu.watcher(locator, "watcher");
 export const ledger = watcher.ledger;
 
 watcher.setup();
