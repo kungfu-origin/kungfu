@@ -205,7 +205,7 @@ namespace kungfu::yijinjing::practice
         int64_t master_start_time_;
         std::unordered_map<int, int64_t> timer_checkpoints_;
         int32_t timer_usage_count_;
-        longfist::recover recover_;
+        longfist::recover recover_state;
 
         void checkin();
 
@@ -217,12 +217,11 @@ namespace kungfu::yijinjing::practice
         inline void do_read_from(const event_ptr &event, uint32_t dest_id)
         {
             const R &request = event->data<R>();
-            SPDLOG_INFO("{} [{:08x}] requires {} [{:08x}] read from {} [{:08x}] from {}, {}",
-                        get_location(event->source())->uname, event->source(),
-                        event->dest() == 0 ? "public" : get_location(event->dest())->uname, event->dest(),
-                        get_location(request.source_id)->uname, request.source_id,
-                        time::strftime(request.from_time),
-                        typeid(R).name());
+            SPDLOG_INFO("{} requires {} read from {} from {}",
+                        get_location(event->source())->uname,
+                        get_location(event->dest())->uname,
+                        get_location(request.source_id)->uname,
+                        time::strftime(request.from_time));
             reader_->join(get_location(request.source_id), dest_id, request.from_time);
         }
     };

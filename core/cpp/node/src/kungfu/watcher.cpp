@@ -17,10 +17,10 @@ namespace kungfu::node
 
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
-            apprentice(std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", "watcher", IODevice::GetLocator(info)), true),
+            apprentice(std::make_shared<location>(mode::LIVE, category::SYSTEM, "node0", "watcher", IODevice::GetLocator(info)), true),
             ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", IODevice::GetLocator(info)),
             ledger_(Napi::ObjectReference::New(Napi::Object::New(info.Env()))),
-            ledger_update_(ledger_)
+            update_ledger(ledger_)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
         {
@@ -78,7 +78,7 @@ namespace kungfu::node
         events_ | from(ledger_location_.uid) | to(0) |
         $([&](const event_ptr &event)
           {
-              longfist::cast_invoke(event, ledger_update_);
+              longfist::cast_invoke(event, update_ledger);
           });
 
         request_read_from_public(now(), ledger_location_.uid, get_master_start_time());

@@ -52,7 +52,7 @@ if(process.argv.length === 2 || process.argv[2] === '-h') {
         space: true,                // define if the output text should have empty lines on top and on the bottom
         maxLength: '0',             // define how many character can be on one line
     });
-    if( process.argv.length === 2 ) process.exit(0)
+    // if( process.argv.length === 2 ) process.exit(0)
 }
 
 const program = require('commander');

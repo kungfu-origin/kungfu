@@ -8,7 +8,7 @@
 #include <napi.h>
 
 #include <kungfu/yijinjing/practice/apprentice.h>
-#include "serialize.h"
+#include "operators.h"
 #include "journal.h"
 
 namespace kungfu::node
@@ -37,7 +37,7 @@ namespace kungfu::node
         static Napi::FunctionReference constructor;
         yijinjing::data::location ledger_location_;
         Napi::ObjectReference ledger_;
-        serialize::UpdateOperator ledger_update_;
+        serialize::UpdateOperator update_ledger;
     };
 }
 

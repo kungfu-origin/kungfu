@@ -15,13 +15,18 @@ interface SqlTable {
 
 export const locator = kungfu.locator(KF_HOME);
 export const watcher = kungfu.watcher(locator);
+export const ledger = watcher.ledger;
 
-console.log('kungfu setup');
 watcher.setup();
-watcher.step();
-watcher.step();
-console.log(watcher.ledger);
-console.log('kungfu done');
+setInterval(() => {
+    if (watcher.isLive()) {
+        watcher.step();
+        console.log('ledger state: ', watcher.ledger);
+        console.log('ledger config: ', watcher.ledger.Config);
+    } else {
+        process.exit();
+    }
+}, 1000);
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

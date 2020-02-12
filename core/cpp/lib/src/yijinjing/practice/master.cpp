@@ -247,7 +247,7 @@ namespace kungfu::yijinjing::practice
               const RequestReadFrom &request = e->data<RequestReadFrom>();
               reader_->join(get_location(request.source_id), e->source(), e->gen_time());
               require_write_to(e->gen_time(), request.source_id, e->source());
-              require_read_from(0, e->source(), request.source_id, e->gen_time());
+              require_read_from(e->gen_time(), e->source(), request.source_id, request.from_time);
               Channel channel = {};
               channel.source_id = request.source_id;
               channel.dest_id = e->source();
@@ -258,7 +258,7 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               const RequestReadFromPublic &request = e->data<RequestReadFromPublic>();
-              require_read_from_public(0, e->source(), request.source_id, e->gen_time());
+              require_read_from_public(e->gen_time(), e->source(), request.source_id, request.from_time);
           });
 
         events_ | is(TimeRequest::tag) |

@@ -9,6 +9,7 @@
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::yijinjing::practice
@@ -144,8 +145,8 @@ namespace kungfu::yijinjing::practice
             msg.source_id = source_id;
             msg.from_time = from_time;
             writer->close_data();
-            SPDLOG_INFO("require {} [{:08x}] read from {} [{:08x}]",
-                        get_location(dest_id)->uname, dest_id, get_location(source_id)->uname, source_id);
+            SPDLOG_INFO("require {} read from {} from {}",
+                        get_location(dest_id)->uname, get_location(source_id)->uname, time::strftime(msg.from_time));
         }
 
         static void delegate_produce(hero *instance, const rx::subscriber <event_ptr> &sb);

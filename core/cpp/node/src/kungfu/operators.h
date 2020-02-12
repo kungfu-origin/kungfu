@@ -5,6 +5,10 @@
 #ifndef KUNGFU_NODE_SERIALIZE_H
 #define KUNGFU_NODE_SERIALIZE_H
 
+#include <napi.h>
+#include <kungfu/common.h>
+#include <kungfu/longfist/longfist.h>
+
 namespace kungfu::node::serialize
 {
     struct ToJs
@@ -12,12 +16,16 @@ namespace kungfu::node::serialize
         template<typename DataType>
         void operator()(const DataType &data, Napi::Value &value)
         {
+            SPDLOG_WARN("to obj");
             Napi::Object valueObj = value.ToObject();
+            SPDLOG_WARN("reflect");
             boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
             {
                 auto name = boost::hana::first(it);
                 auto accessor = boost::hana::second(it);
+                SPDLOG_WARN("decode {}", name.c_str());
                 Set(valueObj, name.c_str(), accessor(data));
+                SPDLOG_WARN("decoded {}", name.c_str());
             });
         }
 
