@@ -35,7 +35,7 @@ struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     NAME() {}; \
-    explicit NAME(const char *address) : kungfu::data<NAME>(address) {}; \
+    explicit NAME(const char *address, const uint32_t length) { parse(address, length); }; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
 }
 
@@ -263,9 +263,10 @@ namespace kungfu
             });
         }
 
-        explicit data(const char *address)
+        void parse(const char *address, const uint32_t length)
         {
-            nlohmann::json jobj = nlohmann::json::parse(address);
+            std::string content(address, length);
+            nlohmann::json jobj = nlohmann::json::parse(content);
             boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it)
             {
                 auto name = boost::hana::first(it);
@@ -283,7 +284,6 @@ namespace kungfu
             {
                 auto name = boost::hana::first(it);
                 auto accessor = boost::hana::second(it);
-                using AttrType = std::decay_t<decltype(accessor(std::forward<DataType &>(DataType{})))>;
                 j[name.c_str()] = accessor(*reinterpret_cast<const DataType *>(this));
             });
             return j.dump();
@@ -311,23 +311,25 @@ namespace kungfu
 
     private:
         template<typename V>
-        static std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> init_member(V &v)
+        static std::enable_if_t<std::is_arithmetic_v<V>, void> init_member(V &v)
         {
             v = 0;
         }
 
         template<typename V>
-        static std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> init_member(V &v)
+        static std::enable_if_t<not std::is_arithmetic_v<V>, void> init_member(V &v)
         {}
 
         template<typename J, typename V>
-        static std::enable_if_t<std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        static std::enable_if_t<std::is_arithmetic_v<V>, void>
+        restore_from_json(J &j, V &v)
         {
             v = j;
         }
 
         template<typename J, typename V>
-        static std::enable_if_t<not std::is_arithmetic_v<std::decay_t<V>>, void> restore_from_json(J &j, V &v)
+        static std::enable_if_t<not std::is_arithmetic_v<V>, void>
+        restore_from_json(J &j, V &v)
         {
             j.get_to(v);
         }
@@ -383,7 +385,7 @@ namespace kungfu
         template<typename T>
         std::enable_if_t<not size_fixed_v<T> and not std::is_same_v<T, nlohmann::json>, const T> data() const
         {
-            return T(data_as_bytes());
+            return T(data_as_bytes(), data_length());
         }
     };
 
