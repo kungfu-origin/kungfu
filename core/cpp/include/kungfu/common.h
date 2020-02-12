@@ -141,6 +141,12 @@ namespace kungfu
             memcpy(value, v.value, sizeof(value));
             return *this;
         }
+
+        array<T, N> &operator=(const T *v)
+        {
+            memcpy(value, v, sizeof(value));
+            return *this;
+        }
     }
     KF_PACK_TYPE_END
 
