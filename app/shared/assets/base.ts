@@ -1,32 +1,16 @@
 import initGlobalDB from '__gConfig/initGlobalDB.json'
-import { BASE_DB_DIR, DEFUALT_DB_DIR, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KF_HOME } from '__gConfig/pathConfig';
+import { BASE_DB_DIR, DEFUALT_DB_DIR, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
 import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 
 const path = require('path');
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
-const kungfu = require('kungfu-core').kungfu;
 
 interface SqlTable {
     table: string;
     sql: string;
 };
-
-export const locator = kungfu.locator(KF_HOME);
-export const watcher = kungfu.watcher(locator, "watcher");
-export const ledger = watcher.ledger;
-
-watcher.setup();
-setInterval(() => {
-    if (watcher.isLive()) {
-        watcher.step();
-        console.log('ledger state: ', watcher.ledger);
-        console.log('ledger config: ', watcher.ledger.Config);
-    } else {
-        process.exit();
-    }
-}, 1000);
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

@@ -95,10 +95,14 @@ new Vue({
 }).$mount('#app', true)
 
 
+
+
 // debug export
 window.fileId = 0;
-window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay)
-window.getTradingDay = () => store.state.BASE.tradingDay
-window.store = store
+window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay);
+window.getTradingDay = () => store.state.BASE.tradingDay;
+window.store = store;
+
+require('__io/journal/index');
 
 
