@@ -1,5 +1,6 @@
 
 /* eslint-disable */
+// import '__io/journal/index';
 import Vue from 'vue';
 import router from './routers';
 import store from './store';
@@ -62,6 +63,9 @@ Vue.filter('moment', function (value, formatString) {
 
 const currentPath = window.location.hash;
 if(currentPath.indexOf('/code') === -1) {
+    //start pm2 kungfu master
+    process.env.ELECTRON_RUN_AS_NODE = true;
+
     //循环获取processStatus
     var listProcessTimer;
     const startGetProcessStatus = () => {
@@ -74,9 +78,6 @@ if(currentPath.indexOf('/code') === -1) {
         .catch(err => console.error(err))
         .finally(() => listProcessTimer = setTimeout(startGetProcessStatus, 1000))
     }
-
-    //start pm2 kungfu master
-    process.env.ELECTRON_RUN_AS_NODE = true;
 
     startMaster(false)
     .catch(err => console.error(err))
@@ -103,6 +104,5 @@ window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay)
 window.getTradingDay = () => store.state.BASE.tradingDay;
 window.store = store;
 
-require('__io/journal/index');
 
 

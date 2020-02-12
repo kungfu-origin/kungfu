@@ -13,11 +13,14 @@ declare module NodeJS {
 
 }
 
-
-
 declare module "*.json" {
     const value: any;
     export default value;
+}
+
+interface SqlTable {
+    table: string;
+    sql: string;
 }
 
 interface NumberToStringObject {

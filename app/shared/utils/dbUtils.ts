@@ -1,7 +1,14 @@
 import { existsSync } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
+import { KF_HOME } from '__gConfig/pathConfig';
 
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
+const kungfu = require('kungfu-core').kungfu;
+
+const locator = kungfu.locator(KF_HOME);
+kungfu.watcher(locator);
+
+
 /**
  * @param  {String} dbPath
  * @param  {sql string} sql
