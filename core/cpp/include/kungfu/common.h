@@ -178,6 +178,37 @@ namespace kungfu
     template<typename T>
     static constexpr bool is_array_v = is_array<T>::value;
 
+    template<typename V, typename T, typename = void>
+    struct is_array_of : public std::false_type
+    {
+    };
+
+    template<typename V, typename T>
+    struct is_array_of<V, T, std::enable_if_t<is_array_v<V> and std::is_same_v<T, V::type>>> : public std::true_type
+    {
+    };
+
+    template<typename V, typename T>
+    struct is_array_of<V, T, std::enable_if_t<is_array_v<V> and not std::is_same_v<T, V::type>>> : public std::false_type
+    {
+    };
+
+    template<typename V, typename T>
+    static constexpr bool is_array_of_v = is_array_of<V, T>::value;
+
+    template<typename T>
+    struct is_vector : public std::false_type
+    {
+    };
+
+    template<typename T, typename A>
+    struct is_vector<std::vector<T, A>> : public std::true_type
+    {
+    };
+
+    template<typename DataType>
+    static constexpr bool is_vector_v = is_vector<DataType>::value;
+
     template<typename T, typename = void>
     struct size_fixed : public std::false_type
     {
@@ -201,19 +232,6 @@ namespace kungfu
 
     template<typename DataType>
     static constexpr bool size_fixed_v = size_fixed<DataType>::value;
-
-    template<typename T>
-    struct is_vector : public std::false_type
-    {
-    };
-
-    template<typename T, typename A>
-    struct is_vector<std::vector<T, A>> : public std::true_type
-    {
-    };
-
-    template<typename DataType>
-    static constexpr bool is_vector_v = is_vector<DataType>::value;
 
     template<typename, typename = void>
     struct hash;
