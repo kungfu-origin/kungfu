@@ -230,10 +230,10 @@ namespace kungfu::yijinjing::practice
         {
             writers_[request.dest_id] = get_io_device()->open_writer(request.dest_id);
         }
-        SPDLOG_INFO("{} [{:08x}] requires {} [{:08x}] write to {} [{:08x}], {}",
-                    get_location(event->source())->uname, event->source(),
-                    get_location(event->dest())->uname, event->dest(),
-                    request.dest_id > 0 ? get_location(request.dest_id)->uname : "public", request.dest_id);
+        SPDLOG_INFO("{} requires {} write to {}",
+                    get_location(event->source())->uname,
+                    get_location(event->dest())->uname,
+                    request.dest_id == 0 ? "public" : get_location(request.dest_id)->uname);
     }
 
     void apprentice::checkin()
