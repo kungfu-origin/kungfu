@@ -2,12 +2,14 @@ import { existsSync } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
 import { KF_HOME } from '__gConfig/pathConfig';
 
+console.log(1111111)
+
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
 const kungfu = require('kungfu-core').kungfu;
 
 const locator = kungfu.locator(KF_HOME);
 export const renderWatcher = kungfu.watcher(locator, 'watcher_render');
-
+console.log(renderWatcher, '---')
 
 /**
  * @param  {String} dbPath

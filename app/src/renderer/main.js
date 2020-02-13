@@ -18,8 +18,6 @@ Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
 Vue.utils = Vue.prototype.$utils = utils
 
-console.log(Vue.prototype.$notify)
-
 //tr 组件
 Vue.use(Components)
 
