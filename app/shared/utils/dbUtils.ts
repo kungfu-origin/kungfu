@@ -3,9 +3,7 @@ import { logger } from '__gUtils/logUtils';
 import { KF_HOME } from '__gConfig/pathConfig';
 
 const kungfu = require('kungfu-core').kungfu;
-const locator = kungfu.locator(KF_HOME);
-export const renderWatcher = kungfu.watcher(locator, 'watcher_render');
-renderWatcher.locator = locator;
+export const renderWatcher = kungfu.watcher(kungfu.locator(KF_HOME), 'watcher_render');
 
 export const sqlite3 = require('kungfu-core').sqlite3.verbose();
 

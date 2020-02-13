@@ -51,7 +51,5 @@ exports.io_device = function(mode, category, group, name, locator) {
 };
 
 exports.watcher = function(locator, name) {
-    const wb = new bindings.Watcher(locator, name);
-    wb.locator = locator;
-    return wb;
+    return new bindings.Watcher(locator, name);
 };

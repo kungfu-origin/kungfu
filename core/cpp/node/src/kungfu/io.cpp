@@ -23,46 +23,51 @@ namespace kungfu::node
             Napi::TypeError::New(env, "Object expected").ThrowAsJavaScriptException();
             return;
         }
-        locator_ = Napi::Reference<Napi::Object>::New(info[0].As<Napi::Object>(), 1);
+        locator_ref_ = Napi::ObjectReference::New(info[0].As<Napi::Object>(), 1);
+    }
+
+    Locator::~Locator()
+    {
+        locator_ref_.Unref();
     }
 
     bool Locator::has_env(const std::string &name) const
     {
-        auto js_delegate = locator_.Get("has_env").As<Napi::Function>();
-        auto v = js_delegate.Call({Napi::String::New(locator_.Env(), name)});
+        auto js_delegate = locator_ref_.Get("has_env").As<Napi::Function>();
+        auto v = js_delegate.Call({Napi::String::New(locator_ref_.Env(), name)});
         return v.As<Napi::Boolean>();
     }
 
     std::string Locator::get_env(const std::string &name) const
     {
-        auto js_delegate = locator_.Get("get_env").As<Napi::Function>();
-        auto v = js_delegate.Call({Napi::String::New(locator_.Env(), name)});
+        auto js_delegate = locator_ref_.Get("get_env").As<Napi::Function>();
+        auto v = js_delegate.Call({Napi::String::New(locator_ref_.Env(), name)});
         return v.As<Napi::String>().Utf8Value();
     }
 
     std::string Locator::layout_dir(location_ptr location, layout l) const
     {
-        auto js_delegate = locator_.Get("layout_dir").As<Napi::Function>();
+        auto js_delegate = locator_ref_.Get("layout_dir").As<Napi::Function>();
         auto v = js_delegate.Call({
-                                          Napi::String::New(locator_.Env(), get_category_name(location->category)),
-                                          Napi::String::New(locator_.Env(), location->group),
-                                          Napi::String::New(locator_.Env(), location->name),
-                                          Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
-                                          Napi::String::New(locator_.Env(), get_layout_name(l))
+                                          Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_ref_.Env(), location->group),
+                                          Napi::String::New(locator_ref_.Env(), location->name),
+                                          Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),
+                                          Napi::String::New(locator_ref_.Env(), get_layout_name(l))
                                   });
         return v.As<Napi::String>().Utf8Value();
     }
 
     std::string Locator::layout_file(location_ptr location, layout l, const std::string &name) const
     {
-        auto js_delegate = locator_.Get("layout_file").As<Napi::Function>();
+        auto js_delegate = locator_ref_.Get("layout_file").As<Napi::Function>();
         auto v = js_delegate.Call({
-                                          Napi::String::New(locator_.Env(), get_category_name(location->category)),
-                                          Napi::String::New(locator_.Env(), location->group),
-                                          Napi::String::New(locator_.Env(), location->name),
-                                          Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
-                                          Napi::String::New(locator_.Env(), get_layout_name(l)),
-                                          Napi::String::New(locator_.Env(), name)
+                                          Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_ref_.Env(), location->group),
+                                          Napi::String::New(locator_ref_.Env(), location->name),
+                                          Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),
+                                          Napi::String::New(locator_ref_.Env(), get_layout_name(l)),
+                                          Napi::String::New(locator_ref_.Env(), name)
                                   });
         return v.As<Napi::String>().Utf8Value();
     }
@@ -74,13 +79,13 @@ namespace kungfu::node
 
     std::vector<int> Locator::list_page_id(location_ptr location, uint32_t dest_id) const
     {
-        auto js_delegate = locator_.Get("list_page_id").As<Napi::Function>();
+        auto js_delegate = locator_ref_.Get("list_page_id").As<Napi::Function>();
         auto v = js_delegate.Call({
-                                          Napi::String::New(locator_.Env(), get_category_name(location->category)),
-                                          Napi::String::New(locator_.Env(), location->group),
-                                          Napi::String::New(locator_.Env(), location->name),
-                                          Napi::String::New(locator_.Env(), get_mode_name(location->mode)),
-                                          Napi::Number::New(locator_.Env(), dest_id)
+                                          Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_ref_.Env(), location->group),
+                                          Napi::String::New(locator_ref_.Env(), location->name),
+                                          Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),
+                                          Napi::Number::New(locator_ref_.Env(), dest_id)
                                   });
         Napi::Array r = v.As<Napi::Array>();
         std::vector<int> result;

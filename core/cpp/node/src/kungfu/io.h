@@ -17,6 +17,8 @@ namespace kungfu::node
     public:
         explicit Locator(const Napi::CallbackInfo &info);
 
+        ~Locator();
+
         Napi::Value ToString(const Napi::CallbackInfo &info);
 
         [[nodiscard]] bool has_env(const std::string &name) const override;
@@ -40,7 +42,7 @@ namespace kungfu::node
         static void Init(Napi::Env env, Napi::Object exports);
 
     private:
-        Napi::ObjectReference locator_;
+        Napi::ObjectReference locator_ref_;
         static Napi::FunctionReference constructor;
     };
 

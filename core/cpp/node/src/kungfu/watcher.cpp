@@ -25,17 +25,24 @@ namespace kungfu::node
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             apprentice(get_watcher_location(info), true),
+            locator_ref_(Napi::ObjectReference::New(info[0].ToObject(), 1)),
+            ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", IODevice::GetLocator(info)),
-            ledger_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
-            update_ledger(ledger_)
+            update_ledger(ledger_ref_)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
         {
             using DataType = typename decltype(+boost::hana::second(it))::type;
             auto name = std::string(boost::hana::first(it).c_str());
             auto states = Napi::Object::New(info.Env());
-            ledger_.Set(name, states);
+            ledger_ref_.Set(name, states);
         });
+    }
+
+    Watcher::~Watcher()
+    {
+        locator_ref_.Unref();
+        ledger_ref_.Unref();
     }
 
     Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info)
@@ -57,7 +64,7 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
     {
-        return ledger_.Value();
+        return ledger_ref_.Value();
     }
 
     void Watcher::SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value)

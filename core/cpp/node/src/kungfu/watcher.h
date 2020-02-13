@@ -17,6 +17,8 @@ namespace kungfu::node
     {
     public:
         explicit Watcher(const Napi::CallbackInfo &info);
+        
+        ~Watcher();
 
         Napi::Value IsLive(const Napi::CallbackInfo &info);
 
@@ -36,8 +38,9 @@ namespace kungfu::node
 
     private:
         static Napi::FunctionReference constructor;
+        Napi::ObjectReference locator_ref_;
+        Napi::ObjectReference ledger_ref_;
         yijinjing::data::location ledger_location_;
-        Napi::ObjectReference ledger_;
         serialize::UpdateOperator update_ledger;
     };
 }
