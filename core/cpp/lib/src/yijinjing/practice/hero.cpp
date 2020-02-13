@@ -148,7 +148,7 @@ namespace kungfu::yijinjing::practice
             SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
             return;
         }
-        SPDLOG_WARN("location [{:08x}] already exists", location->uid);
+        SPDLOG_WARN("location {} [{:08x}] already registered", location->uname, location->uid);
     }
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
@@ -160,7 +160,7 @@ namespace kungfu::yijinjing::practice
             SPDLOG_INFO("deregister-ed location {} [{:08x}]", location->uname, location_uid);
             return;
         }
-        SPDLOG_WARN("location [{:08x}] does not exist", location_uid);
+        SPDLOG_WARN("location [{:08x}] has not been registered", location_uid);
     }
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)

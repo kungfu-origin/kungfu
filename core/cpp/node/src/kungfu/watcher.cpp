@@ -26,7 +26,7 @@ namespace kungfu::node
             ObjectWrap(info),
             apprentice(get_watcher_location(info), true),
             ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", IODevice::GetLocator(info)),
-            ledger_(Napi::ObjectReference::New(Napi::Object::New(info.Env()))),
+            ledger_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_ledger(ledger_)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
