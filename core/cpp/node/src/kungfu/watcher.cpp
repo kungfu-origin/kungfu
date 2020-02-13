@@ -82,19 +82,14 @@ namespace kungfu::node
 
     void Watcher::on_start()
     {
-        events_ | from(ledger_location_.uid) | to(0) |
+        events_ | from(ledger_location_.uid) | to(location::PUBLIC) |
         $([&](const event_ptr &event)
           {
               longfist::cast_invoke(event, update_ledger);
           });
 
-        events_ | filter([&](const event_ptr &event)
-                         {
-                             return event->msg_type() == Register::tag or event->msg_type() == Location::tag;
-                         }) |
-        $([&](const event_ptr &event)
-          {
-              request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
-          });
+        events_ | is(Register::tag, Location::tag) | $$(watch_ledger);
+
+        apprentice::react();
     }
 }

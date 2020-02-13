@@ -38,6 +38,11 @@ namespace kungfu::node
         yijinjing::data::location ledger_location_;
         Napi::ObjectReference ledger_;
         serialize::UpdateOperator update_ledger;
+
+        void watch_ledger(const event_ptr &event)
+        {
+            request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
+        }
     };
 }
 

@@ -44,8 +44,6 @@ namespace kungfu
             {}
         };
 
-        struct reflectable {};
-
         class publisher
         {
         public:
@@ -205,16 +203,15 @@ namespace kungfu
                 [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(location_ptr location) const = 0;
             };
 
-            class location : public std::enable_shared_from_this<location>
+            struct location : public std::enable_shared_from_this<location>
             {
-            public:
+                static constexpr uint32_t PUBLIC = 0;
+
                 location(data::mode m, data::category c, std::string g, std::string n, locator_ptr l) :
                         mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(std::move(l)),
                         uname(fmt::format("{}/{}/{}/{}", data::get_category_name(category), group, name, data::get_mode_name(mode))),
                         uid(util::hash_str_32(uname))
                 {}
-
-                virtual ~location() = default;
 
                 const data::mode mode;
                 const data::category category;
@@ -237,10 +234,11 @@ namespace kungfu
         using namespace boost::hana;
 
         template<typename T>
-        nlohmann::json to_json(T& obj)
+        nlohmann::json to_json(T &obj)
         {
             nlohmann::json j{};
-            hana::for_each(hana::accessors<T>(), [&](auto t) {
+            hana::for_each(hana::accessors<T>(), [&](auto t)
+            {
                 j[hana::first(t).c_str()] = hana::second(t)(obj);
             });
             return j;
@@ -253,27 +251,71 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
-        constexpr auto is = [](int32_t msg_type)
+        template<typename T, typename... Ts>
+        constexpr auto event_filter = [](auto check, Ts... arg)
         {
+            type_check<T>(arg...);
+            auto args = boost::hana::make_tuple(arg...);
             return filter([=](const event_ptr &e)
                           {
-                              return e->msg_type() == msg_type;
+                              return boost::hana::fold(boost::hana::transform(args, check(e)), std::logical_or());
                           });
         };
 
-        constexpr auto from = [](uint32_t source)
+//        template<typename... Ts>
+//        constexpr decltype(auto) is(Ts... arg)
+//        {
+//            auto check = [](const event_ptr &e)
+//            {
+//                return [&](auto arg) {
+//                    return e->msg_type() == arg;
+//                };
+//            };
+//            return event_filter<int32_t>(check, arg...);
+//        };
+
+        template<typename... Ts>
+        constexpr decltype(auto) is(Ts... arg)
         {
+            type_check<int32_t>(arg...);
+            auto args = boost::hana::make_tuple(arg...);
             return filter([=](const event_ptr &e)
                           {
-                              return e->source() == source;
+                              auto check = [&](auto a)
+                              {
+                                  return e->msg_type() == a;
+                              };
+                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
                           });
         };
 
-        constexpr auto to = [](uint32_t dest)
+        template<typename... Ts>
+        constexpr decltype(auto) from(Ts... arg)
         {
+            type_check<uint32_t>(arg...);
+            auto args = boost::hana::make_tuple(arg...);
             return filter([=](const event_ptr &e)
                           {
-                              return e->dest() == dest;
+                              auto check = [&](auto a)
+                              {
+                                  return e->source() == a;
+                              };
+                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
+                          });
+        };
+
+        template<typename... Ts>
+        constexpr decltype(auto) to(Ts... arg)
+        {
+            type_check<uint32_t>(arg...);
+            auto args = boost::hana::make_tuple(arg...);
+            return filter([=](const event_ptr &e)
+                          {
+                              auto check = [&](auto a)
+                              {
+                                  return e->dest() == a;
+                              };
+                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
                           });
         };
 
@@ -281,7 +323,7 @@ namespace kungfu
         {
             return map([=](const event_ptr &e)
                        {
-                           printf("coming event %d\n", e->msg_type());
+                           SPDLOG_TRACE("rx event {}", e->msg_type());
                            return e;
                        });
         };
@@ -364,11 +406,11 @@ namespace kungfu
         };
 
         template<
-                class Observable = rx::observable <event_ptr>,
-                class SourceValue = rx::util::value_type_t <Observable>,
-                class Subject = rx::subjects::subject <SourceValue>,
-                class Steppable = rx::steppable <SourceValue, rx::util::decay_t<Observable>, Subject>,
-                class Result = rx::connectable_observable <SourceValue, Steppable>
+                class Observable = rx::observable<event_ptr>,
+                class SourceValue = rx::util::value_type_t<Observable>,
+                class Subject = rx::subjects::subject<SourceValue>,
+                class Steppable = rx::steppable<SourceValue, rx::util::decay_t<Observable>, Subject>,
+                class Result = rx::connectable_observable<SourceValue, Steppable>
         >
         std::function<Result(Observable)> holdon()
         {

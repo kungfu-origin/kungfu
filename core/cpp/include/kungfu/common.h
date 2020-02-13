@@ -414,6 +414,25 @@ namespace kungfu
     };
 
     DECLARE_PTR(event)
+
+    template<typename T, typename... Other>
+    struct TypeTuple
+    {
+        static constexpr auto value = boost::hana::flatten(boost::hana::make_tuple(TypeTuple<T>::value, TypeTuple<Other...>::value));
+    };
+
+    template<typename T>
+    struct TypeTuple<T>
+    {
+        static constexpr auto value = boost::hana::make_tuple(boost::hana::type_c<T>);
+    };
+
+    template<typename T, typename... Ts>
+    constexpr void type_check(Ts... arg)
+    {
+        constexpr auto check = boost::hana::transform(TypeTuple<Ts...>::value, [](auto t) {return t == boost::hana::type_c<T>;});
+        static_assert(boost::hana::fold(check, std::logical_and()), "type check of arguments failed");
+    }
 }
 
 #endif //KUNGFU_COMMON_H

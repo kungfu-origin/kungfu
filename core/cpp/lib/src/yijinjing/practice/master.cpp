@@ -23,7 +23,7 @@ namespace kungfu::yijinjing::practice
 
     master::master(location_ptr home, bool low_latency) :
             hero(std::make_shared<io_device_master>(home, low_latency)),
-            start_time_ (time::now_in_nano()), last_check_(0)
+            start_time_(time::now_in_nano()), last_check_(0)
     {
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);
@@ -282,7 +282,7 @@ namespace kungfu::yijinjing::practice
               SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
           });
 
-        events_ | to(0) |
+        events_ | to(location::PUBLIC) |
         $([&](const event_ptr &e)
           {
               longfist::cast_invoke(e, *app_sqlizers_[e->source()]);
