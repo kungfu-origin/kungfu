@@ -6,7 +6,7 @@ const sqlite3 = require('kungfu-core').sqlite3.verbose();
 const kungfu = require('kungfu-core').kungfu;
 
 const locator = kungfu.locator(KF_HOME);
-kungfu.watcher(locator);
+export const renderWatcher = kungfu.watcher(locator, 'watcher_render');
 
 
 /**

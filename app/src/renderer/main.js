@@ -1,6 +1,5 @@
 
 /* eslint-disable */
-// import '__io/journal/index';
 import Vue from 'vue';
 import router from './routers';
 import store from './store';
@@ -106,3 +105,4 @@ window.store = store;
 
 
 
+require('__io/journal/index');

@@ -1,19 +1,15 @@
-import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils'; 
+import { renderWatcher } from '__gUtils/dbUtils';
 
-const kungfu = require('kungfu-core').kungfu;
+renderWatcher.setup();
+setTimerPromiseTask(() => {
+    return new Promise((resolve) => {
+        if (renderWatcher.isLive()) {
+            renderWatcher.step();
+            console.log('ledger state: ', renderWatcher.ledger);
+            console.log('ledger config: ', renderWatcher.ledger.Config);
+        }
 
-export const locator = kungfu.locator(KF_HOME);
-export const watcher = kungfu.watcher(locator);
-// export const ledger = watcher.ledger;
-
-// watcher.setup();
-// setTimerPromiseTask(() => {
-//     if (watcher.isLive()) {
-//         watcher.step();
-//         console.log('ledger state: ', watcher.ledger);
-//         console.log('ledger config: ', watcher.ledger.Config);
-//     } else {
-//         process.exit();
-//     }
-// }, 1000);
+        resolve()
+    })
+}, 1000);
