@@ -6,10 +6,6 @@ import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/
 const path = require('path');
 const fse = require('fs-extra');
 const sqlite3 = require('kungfu-core').sqlite3.verbose();
-const kungfu = require('kungfu-core').kungfu;
-
-const locator = kungfu.locator(KF_HOME);
-export const mainWatcher = kungfu.watcher(locator, 'watcher_main');
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建

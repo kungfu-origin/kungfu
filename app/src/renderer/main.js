@@ -60,15 +60,16 @@ if(currentPath.indexOf('/code') === -1) {
     startMaster(false)
         .finally(() => {
             startGetProcessStatus();
-            utils.delayMiliSeconds(1000)
-            .then(() => startLedger(false))
+
+            utils.delayMiliSeconds(1000).then(() => {
+                require('__io/journal/index');
+            })
+
+            utils.delayMiliSeconds(1000).then(() => {
+                startLedger(false)
+            })
         })
 
-
-    utils.delayMiliSeconds(3000).then(() => {
-        require('__io/journal/index');
-    })
-    
 }
 
 
