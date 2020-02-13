@@ -2,10 +2,10 @@ import initGlobalDB from '__gConfig/initGlobalDB.json'
 import { BASE_DB_DIR, DEFUALT_DB_DIR, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils'
 import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
+import { sqlite3 } from '__gUtils/dbUtils';
 
 const path = require('path');
 const fse = require('fs-extra');
-const sqlite3 = require('kungfu-core').sqlite3.verbose();
 
 export const initDB = () => {
     //检测是否有数据库目录，没有则创建
