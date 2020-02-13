@@ -6,8 +6,7 @@ setTimerPromiseTask(() => {
     return new Promise((resolve) => {
         if (renderWatcher.isLive()) {
             renderWatcher.step();
-            console.log('ledger state: ', renderWatcher.ledger);
-            console.log('ledger config: ', renderWatcher.ledger.Config);
+            // console.log('ledger state: ', renderWatcher.ledger);
         }
 
         resolve()

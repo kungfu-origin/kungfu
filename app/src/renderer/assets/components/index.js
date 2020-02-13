@@ -89,7 +89,7 @@ export default function (Vue) {
     //message 换
     const Message = {
         error: function(message, duration){
-            Vue.notify({
+            Vue.prototype.$notify({
                 title: '错误',
                 message: message,
                 position: "bottom-right",
@@ -98,7 +98,7 @@ export default function (Vue) {
             })
         },
         warning: function(message){
-            Vue.notify({
+            Vue.prototype.$notify({
                 title: '警告',
                 message: message,
                 position: "bottom-right",
@@ -106,7 +106,7 @@ export default function (Vue) {
             })
         },
         success: function(message){
-            Vue.notify({
+            Vue.prototype.$notify({
                 title: '成功',
                 message: message,
                 position: "bottom-right",
@@ -114,7 +114,7 @@ export default function (Vue) {
             })
         },
         start: function(message){
-            Vue.notify({
+            Vue.prototype.$notify({
                 title: '启动中',
                 message: message,
                 position: "bottom-right",
@@ -122,7 +122,7 @@ export default function (Vue) {
             })
         },
         info: function(message){
-            Vue.notify({
+            Vue.prototype.$notify({
                 title: '消息',
                 message: message,
                 position: "bottom-right",
