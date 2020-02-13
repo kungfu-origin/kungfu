@@ -80,15 +80,23 @@ namespace kungfu::node
         exports.Set("Watcher", func);
     }
 
-    void Watcher::on_start()
+    void Watcher::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
+    {
+        apprentice::register_location(trigger_time, location);
+
+        if (location->uid == ledger_location_.uid)
+        {
+            request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
+        }
+    }
+
+    void Watcher::react()
     {
         events_ | from(ledger_location_.uid) | to(location::PUBLIC) |
         $([&](const event_ptr &event)
           {
               longfist::cast_invoke(event, update_ledger);
           });
-
-        events_ | is(Register::tag, Location::tag) | $$(watch_ledger);
 
         apprentice::react();
     }

@@ -31,18 +31,14 @@ namespace kungfu::node
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:
-        void on_start() override;
+        void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
+        void react() override;
 
     private:
         static Napi::FunctionReference constructor;
         yijinjing::data::location ledger_location_;
         Napi::ObjectReference ledger_;
         serialize::UpdateOperator update_ledger;
-
-        void watch_ledger(const event_ptr &event)
-        {
-            request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
-        }
     };
 }
 
