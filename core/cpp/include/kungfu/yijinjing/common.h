@@ -251,72 +251,38 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
-        template<typename T, typename... Ts>
-        constexpr auto event_filter = [](auto check, Ts... arg)
-        {
-            type_check<T>(arg...);
-            auto args = boost::hana::make_tuple(arg...);
-            return filter([=](const event_ptr &e)
-                          {
-                              return boost::hana::fold(boost::hana::transform(args, check(e)), std::logical_or());
-                          });
-        };
-
-//        template<typename... Ts>
-//        constexpr decltype(auto) is(Ts... arg)
-//        {
-//            auto check = [](const event_ptr &e)
-//            {
-//                return [&](auto arg) {
-//                    return e->msg_type() == arg;
-//                };
-//            };
-//            return event_filter<int32_t>(check, arg...);
-//        };
-
         template<typename... Ts>
-        constexpr decltype(auto) is(Ts... arg)
+        constexpr auto event_filter_any = [](auto member, Ts... arg)
         {
-            type_check<int32_t>(arg...);
+            using T = std::result_of_t<decltype(member)(event*)>;
+            type_check<T, Ts...>(arg...);
             auto args = boost::hana::make_tuple(arg...);
             return filter([=](const event_ptr &e)
                           {
                               auto check = [&](auto a)
                               {
-                                  return e->msg_type() == a;
+                                  return ((*e).*member)() == a;
                               };
                               return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
                           });
+        };
+
+        template<typename... Ts>
+        constexpr decltype(auto) is(Ts... arg)
+        {
+            return event_filter_any<Ts...>(&event::msg_type, arg...);
         };
 
         template<typename... Ts>
         constexpr decltype(auto) from(Ts... arg)
         {
-            type_check<uint32_t>(arg...);
-            auto args = boost::hana::make_tuple(arg...);
-            return filter([=](const event_ptr &e)
-                          {
-                              auto check = [&](auto a)
-                              {
-                                  return e->source() == a;
-                              };
-                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
-                          });
+            return event_filter_any<Ts...>(&event::source, arg...);
         };
 
         template<typename... Ts>
         constexpr decltype(auto) to(Ts... arg)
         {
-            type_check<uint32_t>(arg...);
-            auto args = boost::hana::make_tuple(arg...);
-            return filter([=](const event_ptr &e)
-                          {
-                              auto check = [&](auto a)
-                              {
-                                  return e->dest() == a;
-                              };
-                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
-                          });
+            return event_filter_any<Ts...>(&event::dest, arg...);
         };
 
         constexpr auto trace = []()
