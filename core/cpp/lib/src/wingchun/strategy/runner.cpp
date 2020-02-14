@@ -20,7 +20,7 @@ namespace kungfu::wingchun::strategy
 {
     Runner::Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, longfist::enums::mode m,
                    bool low_latency)
-            : apprentice(location::make(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
+            : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
     {}
 
     Context_ptr Runner::make_context()

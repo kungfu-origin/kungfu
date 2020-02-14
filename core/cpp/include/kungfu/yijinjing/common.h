@@ -27,7 +27,7 @@
 #include <nlohmann/json.hpp>
 
 #include <kungfu/common.h>
-#include <kungfu/longfist/enums.h>
+#include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/util/util.h>
 
 namespace kungfu
@@ -103,25 +103,44 @@ namespace kungfu
                 [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(location_ptr location) const = 0;
             };
 
-            struct location : public std::enable_shared_from_this<location>
+            struct location : public std::enable_shared_from_this<location>, public longfist::types::Location
             {
                 static constexpr uint32_t PUBLIC = 0;
 
-                location(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n, locator_ptr l) :
-                        mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(std::move(l)),
-                        uname(fmt::format("{}/{}/{}/{}", longfist::enums::get_category_name(category), group, name, longfist::enums::get_mode_name(mode))),
-                        uid(util::hash_str_32(uname))
-                {}
-
-                const longfist::enums::mode mode;
-                const longfist::enums::category category;
-                const std::string group;
-                const std::string name;
+                const locator_ptr locator;
                 const std::string uname;
                 const uint32_t uid;
-                const locator_ptr locator;
 
-                static inline location_ptr make(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n, locator_ptr l)
+                location(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n, locator_ptr l) :
+                        locator(std::move(l)),
+                        uname(fmt::format("{}/{}/{}/{}", longfist::enums::get_category_name(c), g, n, longfist::enums::get_mode_name(m))),
+                        uid(util::hash_str_32(uname))
+                {
+                    mode = m;
+                    category = c;
+                    group = std::move(g);
+                    name = std::move(n);
+                }
+
+                template<typename T>
+                inline T to()
+                {
+                    T t{};
+                    t.mode = mode;
+                    t.category = category;
+                    t.group = group;
+                    t.name = name;
+                    return t;
+                }
+
+                template<typename T>
+                static inline location_ptr make_shared(T msg, locator_ptr l)
+                {
+                    return std::make_shared<location>(msg.mode, msg.category, msg.group, msg.name, l);
+                }
+
+                static inline location_ptr make_shared(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n,
+                                                       locator_ptr l)
                 {
                     return std::make_shared<location>(m, c, g, n, l);
                 }
@@ -154,7 +173,7 @@ namespace kungfu
         template<typename... Ts>
         constexpr auto event_filter_any = [](auto member, Ts... arg)
         {
-            using T = std::result_of_t<decltype(member)(event*)>;
+            using T = std::result_of_t<decltype(member)(event *)>;
             type_check<T, Ts...>(arg...);
             auto args = boost::hana::make_tuple(arg...);
             return filter([=](const event_ptr &e)

@@ -66,7 +66,7 @@ namespace kungfu::wingchun::strategy
         subscribe_instruments();
 
         auto home = app_.get_io_device()->get_home();
-        auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
+        auto ledger_location = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
         app_.request_write_to(app_.now(), ledger_location->uid);
         app_.request_read_from(app_.now(), ledger_location->uid, app_.now());
     }
@@ -95,7 +95,7 @@ namespace kungfu::wingchun::strategy
         }
 
         auto home = app_.get_io_device()->get_home();
-        auto account_location = location::make(mode::LIVE, category::TD, source, account, home->locator);
+        auto account_location = location::make_shared(mode::LIVE, category::TD, source, account, home->locator);
         if (home->mode == mode::LIVE and not app_.has_location(account_location->uid))
         {
             throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
@@ -134,7 +134,7 @@ namespace kungfu::wingchun::strategy
     void Context::subscribe_instruments()
     {
         auto home = app_.get_io_device()->get_home();
-        auto ledger_location = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
+        auto ledger_location = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
         if (home->mode == mode::LIVE and not app_.has_location(ledger_location->uid))
         {
             throw wingchun_error("has no location for ledger service");
@@ -166,8 +166,8 @@ namespace kungfu::wingchun::strategy
         if (market_data_.find(source) == market_data_.end())
         {
             auto home = app_.get_io_device()->get_home();
-            auto md_location = source == "bar" ? location::make(mode::LIVE, category::SYSTEM, "service", source, home->locator) :
-                               location::make(mode::LIVE, category::MD, source, source, home->locator);
+            auto md_location = source == "bar" ? location::make_shared(mode::LIVE, category::SYSTEM, "service", source, home->locator) :
+                               location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
             if (not app_.has_location(md_location->uid))
             {
                 throw wingchun_error(fmt::format("invalid md {}", source));

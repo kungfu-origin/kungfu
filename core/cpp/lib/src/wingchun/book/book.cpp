@@ -20,7 +20,7 @@ namespace kungfu::wingchun::book
         auto home = app.get_io_device()->get_home();
         log::copy_log_settings(home, home->name);
         this->monitor_instruments();
-        service_location_ = location::make(mode::LIVE, category::SYSTEM, "service", "ledger", app.get_io_device()->get_home()->locator);
+        service_location_ = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app.get_io_device()->get_home()->locator);
     }
 
     const Instrument &BookContext::get_inst_info(const std::string &instrument_id) const

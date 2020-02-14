@@ -18,7 +18,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::service
 {
     Algo::Algo(locator_ptr locator, mode m, bool low_latency) :
-            apprentice(location::make(m, category::SYSTEM, "service", "algo", std::move(locator)), low_latency)
+            apprentice(location::make_shared(m, category::SYSTEM, "service", "algo", std::move(locator)), low_latency)
     {
         log::copy_log_settings(get_io_device()->get_home(), "algo");
     }

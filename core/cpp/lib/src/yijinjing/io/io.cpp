@@ -258,8 +258,8 @@ namespace kungfu::yijinjing
             init_sqlite();
         }
 
-        db_home_ = location::make(mode::LIVE, category::SYSTEM, "journal", "index", home_->locator);
-        live_home_ = location::make(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
+        db_home_ = location::make_shared(mode::LIVE, category::SYSTEM, "journal", "index", home_->locator);
+        live_home_ = location::make_shared(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
         url_factory_ = std::make_shared<ipc_url_factory>();
 
         auto index_db_file = home_->locator->layout_file(db_home_, layout::SQLITE, "index");

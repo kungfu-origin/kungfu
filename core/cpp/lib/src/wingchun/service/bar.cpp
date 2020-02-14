@@ -40,14 +40,14 @@ namespace kungfu::wingchun::service
     }
 
     BarGenerator::BarGenerator(locator_ptr locator, mode m, bool low_latency, const std::string &json_config) :
-            yijinjing::practice::apprentice(location::make(m, category::SYSTEM, "service", "bar", std::move(locator)), low_latency),
+            yijinjing::practice::apprentice(location::make_shared(m, category::SYSTEM, "service", "bar", std::move(locator)), low_latency),
             time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE)
     {
         log::copy_log_settings(get_io_device()->get_home(), "bar");
         auto config = nlohmann::json::parse(json_config);
         std::string source = config["source"];
         auto home = get_io_device()->get_home();
-        source_location_ = location::make(mode::LIVE, category::MD, source, source, home->locator);
+        source_location_ = location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
         if (config.find("time_interval") != config.end())
         {
             time_interval_ = parse_time_interval(config["time_interval"]);

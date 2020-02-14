@@ -157,8 +157,8 @@ namespace kungfu::yijinjing::practice
                                                      get_io_device()->get_home()->name, get_io_device()->get_home()->locator), 0, begin_time_);
         }
 
-        events_ | is(Location::tag) | $$(register_location_from_event);
-        events_ | is(Register::tag) | $$(register_location_from_event);
+        events_ | is(Location::tag) | $$(register_location_from_event<Location>);
+        events_ | is(Register::tag) | $$(register_location_from_event<Register>);
         events_ | is(Deregister::tag) | $$(deregister_location_from_event);
 
         events_ | is(RequestReadFrom::tag) | $$(on_read_from);
@@ -260,28 +260,9 @@ namespace kungfu::yijinjing::practice
         get_io_device()->get_publisher()->publish(request.dump());
     }
 
-    void apprentice::register_location_from_event(const event_ptr &event)
-    {
-        const char *buffer = &(event->data<char>());
-        std::string json_str{};
-        json_str.assign(buffer, event->data_length());
-        nlohmann::json location_json = nlohmann::json::parse(json_str);
-        auto app_location = std::make_shared<location>(
-                static_cast<mode>(location_json["mode"]),
-                static_cast<category>(location_json["category"]),
-                location_json["group"], location_json["name"],
-                get_io_device()->get_home()->locator
-        );
-        register_location(event->trigger_time(), app_location);
-    }
-
     void apprentice::deregister_location_from_event(const event_ptr &event)
     {
-        const char *buffer = &(event->data<char>());
-        std::string json_str{};
-        json_str.assign(buffer, event->data_length());
-        nlohmann::json location_json = nlohmann::json::parse(json_str);
-        uint32_t location_uid = location_json["uid"];
+        uint32_t location_uid = location::make_shared(event->data<Deregister>(), get_io_device()->get_home()->locator)->uid;
         reader_->disjoin(location_uid);
         deregister_channel_by_source(location_uid);
         deregister_location(event->trigger_time(), location_uid);

@@ -26,9 +26,6 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(SessionStart, 10001);
     KF_DEFINE_MARK_TYPE(SessionEnd, 10002);
     KF_DEFINE_MARK_TYPE(Time, 10003);
-    KF_DEFINE_MARK_TYPE(Register, 10011);
-    KF_DEFINE_MARK_TYPE(Location, 10026);
-    KF_DEFINE_MARK_TYPE(Deregister, 10012);
     KF_DEFINE_MARK_TYPE(RequestStart, 10025);
     KF_DEFINE_MARK_TYPE(Subscribe, 302);
     KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
@@ -42,6 +39,34 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(AlgoOrderInput, 210);
     KF_DEFINE_MARK_TYPE(AlgoOrderReport, 211);
     KF_DEFINE_MARK_TYPE(AlgoOrderModify, 212);
+
+    KF_DEFINE_DATA_TYPE(
+            Register, 10011,
+            PK(category, group, name, mode),
+            (enums::category, category),
+            (enums::mode, mode),
+            (std::string, group),
+            (std::string, name),
+            (int32_t, pid)
+    );
+
+    KF_DEFINE_DATA_TYPE(
+            Deregister, 10012,
+            PK(category, group, name, mode),
+            (enums::category, category),
+            (enums::mode, mode),
+            (std::string, group),
+            (std::string, name)
+    );
+
+    KF_DEFINE_DATA_TYPE(
+            Location, 10026,
+            PK(category, group, name, mode),
+            (enums::category, category),
+            (enums::mode, mode),
+            (std::string, group),
+            (std::string, name)
+    );
 
     KF_DEFINE_PACK_TYPE(
             TimeRequest, 10004,
@@ -87,18 +112,18 @@ namespace kungfu::longfist::types
     KF_DEFINE_PACK_TYPE(
             Instrument, 209,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),     //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),         //交易所ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),     //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         //交易所ID
             (InstrumentType, instrument_type),            //合约类型
 
-            (kungfu::array < char, PRODUCT_ID_LEN >, product_id),           //产品ID
+            (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           //产品ID
 
             (int32_t, contract_multiplier),                   //合约乘数
             (double, price_tick),                         //最小变动价位
 
-            (kungfu::array < char, DATE_LEN >, open_date),                  //上市日
-            (kungfu::array < char, DATE_LEN >, create_date),                //创建日
-            (kungfu::array < char, DATE_LEN >, expire_date),                //到期日
+            (kungfu::array<char, DATE_LEN>, open_date),                  //上市日
+            (kungfu::array<char, DATE_LEN>, create_date),                //创建日
+            (kungfu::array<char, DATE_LEN>, expire_date),                //到期日
 
             (int, delivery_year),                         //交割年份
             (int, delivery_month),                        //交割月
@@ -112,13 +137,13 @@ namespace kungfu::longfist::types
     KF_DEFINE_PACK_TYPE(
             Quote, 101,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
-            (kungfu::array < char, DATE_LEN >, trading_day),                 //交易日
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
+            (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
             (int64_t, data_time),                          //数据生成时间
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),      //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),          //交易所ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),      //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),          //交易所ID
 
             (InstrumentType, instrument_type),             //合约类型
 
@@ -142,22 +167,22 @@ namespace kungfu::longfist::types
             (double, close_price),                         //收盘价
             (double, settlement_price),                    //结算价
 
-            (kungfu::array < double, 10 >, bid_price),                       //申买价
-            (kungfu::array < double, 10 >, ask_price),                       //申卖价
-            (kungfu::array < int64_t, 10 >, bid_volume),                     //申买量
-            (kungfu::array < int64_t, 10 >, ask_volume)                     //申卖量
+            (kungfu::array<double, 10>, bid_price),                       //申买价
+            (kungfu::array<double, 10>, ask_price),                       //申卖价
+            (kungfu::array<int64_t, 10>, bid_volume),                     //申买量
+            (kungfu::array<int64_t, 10>, ask_volume)                     //申卖量
     );
 
     KF_DEFINE_PACK_TYPE(
             Entrust, 102,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
-            (kungfu::array < char, DATE_LEN >, trading_day),                 //交易日
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
+            (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
             (int64_t, data_time),                          //数据生成时间
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),      //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),          //交易所代码
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),      //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),          //交易所代码
 
             (InstrumentType, instrument_type),             //合约类型
 
@@ -173,13 +198,13 @@ namespace kungfu::longfist::types
     KF_DEFINE_PACK_TYPE(
             Transaction, 103,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),              //柜台ID
-            (kungfu::array < char, DATE_LEN >, trading_day),                 //交易日
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
+            (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
             (int64_t, data_time),                          //数据生成时间
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),      //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),          //交易所代码
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),      //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),          //交易所代码
 
             (InstrumentType, instrument_type),             //合约类型
 
@@ -199,9 +224,9 @@ namespace kungfu::longfist::types
     KF_DEFINE_PACK_TYPE(
             Bar, 110,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, DATE_LEN >, trading_day),            //交易日
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id), //合约代码
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),     //交易所代码
+            (kungfu::array<char, DATE_LEN>, trading_day),            //交易日
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 
             (int64_t, start_time),                    //开始时间
             (int64_t, end_time),                      //结束时间
@@ -222,11 +247,11 @@ namespace kungfu::longfist::types
             PK(order_id),
             (uint64_t, order_id),                       //订单ID
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),   //合约代码
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),       //交易所代码
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约代码
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),       //交易所代码
 
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),           //柜台ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),         //账号ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
 
             (InstrumentType, instrument_type),          //合约类型
 
@@ -263,7 +288,7 @@ namespace kungfu::longfist::types
             (uint64_t, order_id),                       //订单ID
             (uint64_t, order_action_id),                //订单操作ID
             (int32_t, error_id),                        //错误ID
-            (kungfu::array < char, ERROR_MSG_LEN >, error_msg)           //错误信息
+            (kungfu::array<char, ERROR_MSG_LEN>, error_msg)           //错误信息
     );
 
     KF_DEFINE_PACK_TYPE(
@@ -275,14 +300,14 @@ namespace kungfu::longfist::types
             (int64_t, insert_time),                     //订单写入时间
             (int64_t, update_time),                     //订单更新时间
 
-            (kungfu::array < char, DATE_LEN >, trading_day),              //交易日
+            (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),   //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),       //交易所ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),       //交易所ID
 
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),           //柜台ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),         //账号ID
-            (kungfu::array < char, CLIENT_ID_LEN >, client_id),           //Client ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
+            (kungfu::array<char, CLIENT_ID_LEN>, client_id),           //Client ID
 
             (InstrumentType, instrument_type),          //合约类型
 
@@ -299,7 +324,7 @@ namespace kungfu::longfist::types
             (OrderStatus, status),                      //订单状态
 
             (int32_t, error_id),                        //错误ID
-            (kungfu::array < char, ERROR_MSG_LEN >, error_msg),           //错误信息
+            (kungfu::array<char, ERROR_MSG_LEN>, error_msg),           //错误信息
 
             (Side, side),                               //买卖方向
             (Offset, offset),                           //开平方向
@@ -318,13 +343,13 @@ namespace kungfu::longfist::types
             (uint64_t, parent_order_id),                //母订单ID
 
             (int64_t, trade_time),                     //成交时间
-            (kungfu::array < char, DATE_LEN >, trading_day),              //交易日
+            (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),   //合约ID
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),       //交易所ID
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),           //柜台ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),         //账号ID
-            (kungfu::array < char, CLIENT_ID_LEN >, client_id),           //Client ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),       //交易所ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
+            (kungfu::array<char, CLIENT_ID_LEN>, client_id),           //Client ID
 
             (InstrumentType, instrument_type),          //合约类型
 
@@ -344,18 +369,18 @@ namespace kungfu::longfist::types
             Position, 205,
             PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
-            (kungfu::array < char, DATE_LEN >, trading_day),              //交易日
+            (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),   //合约ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约ID
             (InstrumentType, instrument_type),          //合约类型
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),       //交易所ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),       //交易所ID
 
             (uint32_t, holder_uid),
             (LedgerCategory, ledger_category),
 
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),           //柜台ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),         //账号ID
-            (kungfu::array < char, CLIENT_ID_LEN >, client_id),           //Client ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
+            (kungfu::array<char, CLIENT_ID_LEN>, client_id),           //Client ID
 
             (Direction, direction),                     //持仓方向
 
@@ -393,15 +418,15 @@ namespace kungfu::longfist::types
             Asset, 206,
             PK(holder_uid),
             (int64_t, update_time),               //更新时间
-            (kungfu::array < char, DATE_LEN >, trading_day),        //交易日
+            (kungfu::array<char, DATE_LEN>, trading_day),        //交易日
 
             (uint32_t, holder_uid),
             (LedgerCategory, ledger_category),
 
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),     //柜台ID
-            (kungfu::array < char, BROKER_ID_LEN >, broker_id),     //Broker ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),   //账号ID
-            (kungfu::array < char, CLIENT_ID_LEN >, client_id),     //client ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),     //柜台ID
+            (kungfu::array<char, BROKER_ID_LEN>, broker_id),     //Broker ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),   //账号ID
+            (kungfu::array<char, CLIENT_ID_LEN>, client_id),     //client ID
 
             (double, initial_equity),             //期初权益
             (double, static_equity),              //静态权益
@@ -430,17 +455,17 @@ namespace kungfu::longfist::types
             PositionDetail, 208,
             PK(instrument_id, exchange_id, source_id, account_id),
             (int64_t, update_time),                     //更新时间
-            (kungfu::array < char, DATE_LEN >, trading_day),              //交易日
+            (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id),   //合约ID
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约ID
             (InstrumentType, instrument_type),          //合约类型
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),       //交易所ID
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),       //交易所ID
 
             (uint32_t, holder_uid),
 
-            (kungfu::array < char, SOURCE_ID_LEN >, source_id),           //柜台ID
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),         //账号ID
-            (kungfu::array < char, CLIENT_ID_LEN >, client_id),           //Client ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
+            (kungfu::array<char, CLIENT_ID_LEN>, client_id),           //Client ID
 
             (Direction, direction),                     //持仓方向
 
@@ -453,7 +478,7 @@ namespace kungfu::longfist::types
             (double, settlement_price),                 //结算价(期货)
             (double, pre_settlement_price),             //昨结算(期货)
 
-            (kungfu::array < char, DATE_LEN >, open_date),                //开仓日(YYYYMMDD,仅期货明细和债券)
+            (kungfu::array<char, DATE_LEN>, open_date),                //开仓日(YYYYMMDD,仅期货明细和债券)
 
             (uint64_t, trade_id),                       //成交ID
             (int64_t, trade_time)                      //成交时间
@@ -468,14 +493,14 @@ namespace kungfu::longfist::types
     KF_DEFINE_PACK_TYPE(
             InstrumentCommissionRate, 214,
             PK(instrument_id, exchange_id),
-            (kungfu::array < char, INSTRUMENT_ID_LEN >, instrument_id), //合约代码
-            (kungfu::array < char, EXCHANGE_ID_LEN >, exchange_id),     //交易所代码
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 
 
             (InstrumentType, instrument_type),         //合约类型
 
-            (kungfu::array < char, ACCOUNT_ID_LEN >, account_id),        //账户ID
-            (kungfu::array < char, BROKER_ID_LEN >, broker_id),          //Broker ID
+            (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),        //账户ID
+            (kungfu::array<char, BROKER_ID_LEN>, broker_id),          //Broker ID
 
             (CommissionRateMode, mode),                //手续费模式(按照交易额或者交易量)
 

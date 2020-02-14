@@ -19,7 +19,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
-            apprentice(location::make(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
+            apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
             publish_state(state_map_)
     {
         log::copy_log_settings(get_io_device()->get_home(), "ledger");
@@ -360,7 +360,7 @@ namespace kungfu::wingchun::service
     void Ledger::watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
     {
         auto app_uid_str = fmt::format("{:08x}", app_location->uid);
-        auto master_cmd_location = location::make(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
+        auto master_cmd_location = location::make_shared(mode::LIVE, category::SYSTEM, "master", app_uid_str, app_location->locator);
         if (not has_location(master_cmd_location->uid))
         {
             register_location(trigger_time, master_cmd_location);
@@ -445,7 +445,7 @@ namespace kungfu::wingchun::service
             return;
         }
         auto location = get_location(account_location_id);
-        auto md_location = location::make(get_io_device()->get_home()->mode, category::MD, location->group, location->group,
+        auto md_location = location::make_shared(get_io_device()->get_home()->mode, category::MD, location->group, location->group,
                                           get_io_device()->get_home()->locator);
         SPDLOG_INFO("subscribe {} instruments for account {}@{} from {} [{:08x}]",
                     instruments.size(), location->name, location->group, md_location->uname, md_location->uid);

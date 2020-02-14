@@ -18,7 +18,7 @@ namespace kungfu::wingchun::algo
             app_(app), events_(events)
     {
         auto home = app.get_io_device()->get_home();
-        service_location_ = yijinjing::data::location::make(mode::LIVE, category::SYSTEM, "service", "algo", home->locator);
+        service_location_ = yijinjing::data::location::make_shared(mode::LIVE, category::SYSTEM, "service", "algo", home->locator);
     }
 
     void AlgoContext::react()
@@ -120,7 +120,7 @@ namespace kungfu::wingchun::algo
 
     void AlgoContext::subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange)
     {
-        auto md_location = location::make(mode::LIVE, category::MD, source, source, app_.get_io_device()->get_home()->locator);
+        auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, app_.get_io_device()->get_home()->locator);
         auto writer = app_.get_writer(md_location->uid);
         for (const auto &inst : instruments)
         {
@@ -135,7 +135,7 @@ namespace kungfu::wingchun::algo
         {
             return 0;
         }
-        auto account_location = location::make(mode::LIVE, category::TD, order.source_id, order.account_id, home->locator);
+        auto account_location = location::make_shared(mode::LIVE, category::TD, order.source_id, order.account_id, home->locator);
         auto writer = app_.get_writer(account_location->uid);
         OrderInput &input = writer->open_data<OrderInput>(0);
         memcpy(&input, &order, sizeof(OrderInput));

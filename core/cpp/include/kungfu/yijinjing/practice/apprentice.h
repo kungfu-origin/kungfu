@@ -209,7 +209,12 @@ namespace kungfu::yijinjing::practice
 
         void checkin();
 
-        void register_location_from_event(const event_ptr &event);
+        template <typename T>
+        void register_location_from_event(const event_ptr &event)
+        {
+            auto app_location = data::location::make_shared(event->data<T>(), get_io_device()->get_home()->locator);
+            register_location(event->trigger_time(), app_location);
+        }
 
         void deregister_location_from_event(const event_ptr &event);
 

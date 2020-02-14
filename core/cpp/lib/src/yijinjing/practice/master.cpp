@@ -98,16 +98,8 @@ namespace kungfu::yijinjing::practice
 
         for (const auto &item : locations_)
         {
-            nlohmann::json location;
-            location["mode"] = item.second->mode;
-            location["category"] = item.second->category;
-            location["group"] = item.second->group;
-            location["name"] = item.second->name;
-            auto msg = location.dump();
-            SPDLOG_DEBUG("adding location {}", msg);
-            auto &&frame = writer->open_frame(e->gen_time(), Location::tag, msg.length());
-            memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
-            writer->close_frame(msg.length());
+            SPDLOG_DEBUG("adding location {}", item.second->to_string());
+            writer->write(e->gen_time(), dynamic_cast<Location&>(*item.second));
         }
 
         for (const auto &item: channels_)
@@ -127,32 +119,17 @@ namespace kungfu::yijinjing::practice
 
     void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
     {
-        auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         auto location = get_location(app_location_uid);
-        nlohmann::json location_desc{};
-        location_desc["mode"] = location->mode;
-        location_desc["category"] = location->category;
-        location_desc["group"] = location->group;
-        location_desc["name"] = location->name;
-        location_desc["uname"] = location->uname;
-        location_desc["uid"] = app_location_uid;
-
+        auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         writers_[app_location_uid]->mark(trigger_time, SessionEnd::tag);
         io_device->close_session(location, trigger_time);
-
         deregister_channel_by_source(app_location_uid);
-
         deregister_location(trigger_time, app_location_uid);
         reader_->disjoin(app_location_uid);
         writers_.erase(app_location_uid);
         timer_tasks_.erase(app_location_uid);
-
-        auto msg = location_desc.dump();
-        auto &&frame = writers_[0]->open_frame(trigger_time, Deregister::tag, msg.length());
-        memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
-        writers_[0]->close_frame(msg.length());
-
         app_sqlizers_.erase(app_location_uid);
+        writers_[0]->write(trigger_time, location->to<Deregister>());
     }
 
     void master::publish_time(int32_t msg_type, int64_t nanotime)

@@ -16,7 +16,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::broker
 {
     MarketData::MarketData(bool low_latency, locator_ptr locator, const std::string &source) :
-            apprentice(location::make(mode::LIVE, category::MD, source, source, std::move(locator)), low_latency)
+            apprentice(location::make_shared(mode::LIVE, category::MD, source, source, std::move(locator)), low_latency)
     {
         log::copy_log_settings(get_io_device()->get_home(), source);
     }
