@@ -66,9 +66,9 @@ namespace kungfu::wingchun::strategy
         //@param offset        开平方向
         //@return              订单ID
         virtual uint64_t insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                                      double limit_price, int64_t volume, longfist::PriceType type, longfist::Side side,
-                                      longfist::Offset offset = longfist::Offset::Open,
-                                      longfist::HedgeFlag hedge_flag = longfist::HedgeFlag::Speculation);
+                                      double limit_price, int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
+                                      longfist::enums::Offset offset = longfist::enums::Offset::Open,
+                                      longfist::enums::HedgeFlag hedge_flag = longfist::enums::HedgeFlag::Speculation);
 
         //撤单
         //@param order_id      订单ID

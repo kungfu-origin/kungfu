@@ -86,7 +86,7 @@ namespace kungfu::yijinjing::journal
 
     std::string page::get_page_path(const data::location_ptr &location, uint32_t dest_id, int id)
     {
-        return location->locator->layout_file(location, data::layout::JOURNAL, fmt::format("{:08x}.{}", dest_id, id));
+        return location->locator->layout_file(location, longfist::enums::layout::JOURNAL, fmt::format("{:08x}.{}", dest_id, id));
     }
 
     int page::find_page_id(const data::location_ptr &location, uint32_t dest_id, int64_t time)

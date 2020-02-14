@@ -129,10 +129,10 @@ namespace kungfu::node
 
     Napi::Value Reader::Join(const Napi::CallbackInfo &info)
     {
-        auto category = get_category_by_name(info[0].As<Napi::String>().Utf8Value());
+        auto category = longfist::enums::get_category_by_name(info[0].As<Napi::String>().Utf8Value());
         auto group = info[1].As<Napi::String>().Utf8Value();
         auto name = info[2].As<Napi::String>().Utf8Value();
-        auto mode = get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
+        auto mode = longfist::enums::get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
         uint32_t dest_id = info[4].As<Napi::Number>().Int32Value();
         auto from_time = GetTimestamp(info[5]);
         join(std::make_shared<location>(mode, category, group, name, io_device_->get_home()->locator), dest_id, from_time);

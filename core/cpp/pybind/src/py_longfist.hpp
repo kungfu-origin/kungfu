@@ -17,6 +17,7 @@ namespace kungfu::longfist
 
     void bind(pybind11::module &&m)
     {
+        using namespace kungfu::longfist::enums;
         auto m_enum = m.def_submodule("enum");
 
         py::enum_<InstrumentType>(m_enum, "InstrumentType", py::arithmetic())

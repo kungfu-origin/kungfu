@@ -205,7 +205,7 @@ namespace kungfu::wingchun::service
         $([&](const event_ptr &event)
           {
               auto broker_location = get_location(event->source());
-              update_broker_state(event->gen_time(), broker_location, static_cast<longfist::BrokerState>(event->data<int32_t>()));
+              update_broker_state(event->gen_time(), broker_location, static_cast<longfist::enums::BrokerState>(event->data<int32_t>()));
           });
 
         events_ | is(Position::tag) | filter([&](const event_ptr &event)

@@ -22,7 +22,7 @@ namespace kungfu::wingchun::ctp {
 
         if (api_ == nullptr) {
             auto home = get_io_device()->get_home();
-            std::string runtime_folder = home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+            std::string runtime_folder = home->locator->layout_dir(home, longfist::enums::layout::LOG);
             SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
             api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
             api_->RegisterSpi(this);

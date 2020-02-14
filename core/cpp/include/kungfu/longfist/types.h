@@ -6,10 +6,12 @@
 #define KUNGFU_LONGFIST_TYPES_H
 
 #include <kungfu/common.h>
-#include <kungfu/longfist/enum.h>
+#include <kungfu/longfist/enums.h>
 
 namespace kungfu::longfist::types
 {
+    using namespace kungfu::longfist::enums;
+
     static constexpr int INSTRUMENT_ID_LEN = 32;
     static constexpr int PRODUCT_ID_LEN = 32;
     static constexpr int DATE_LEN = 9;
@@ -25,9 +27,9 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(SessionEnd, 10002);
     KF_DEFINE_MARK_TYPE(Time, 10003);
     KF_DEFINE_MARK_TYPE(Register, 10011);
+    KF_DEFINE_MARK_TYPE(Location, 10026);
     KF_DEFINE_MARK_TYPE(Deregister, 10012);
     KF_DEFINE_MARK_TYPE(RequestStart, 10025);
-    KF_DEFINE_MARK_TYPE(Location, 10026);
     KF_DEFINE_MARK_TYPE(Subscribe, 302);
     KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
     KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);

@@ -34,7 +34,7 @@ namespace kungfu::wingchun::xtp
     std::string TraderXTP::get_runtime_folder() const
     {
         auto home = get_io_device()->get_home();
-        return home->locator->layout_dir(home, yijinjing::data::layout::LOG);
+        return home->locator->layout_dir(home, longfist::enums::layout::LOG);
     }
 
     void TraderXTP::on_start()

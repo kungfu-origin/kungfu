@@ -9,7 +9,7 @@
 #include <fmt/format.h>
 
 #include <kungfu/common.h>
-#include <kungfu/longfist/enum.h>
+#include <kungfu/longfist/enums.h>
 #include <kungfu/longfist/types.h>
 
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)

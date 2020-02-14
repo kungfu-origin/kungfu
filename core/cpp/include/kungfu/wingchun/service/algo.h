@@ -16,7 +16,7 @@ namespace kungfu::wingchun::service
     class Algo : public yijinjing::practice::apprentice
     {
     public:
-        explicit Algo(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
+        explicit Algo(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
         virtual ~Algo() = default;
 

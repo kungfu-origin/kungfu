@@ -16,7 +16,7 @@ namespace kungfu::wingchun::service
     class Ledger : public yijinjing::practice::apprentice
     {
     public:
-        explicit Ledger(yijinjing::data::locator_ptr locator, yijinjing::data::mode m, bool low_latency = false);
+        explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
         virtual ~Ledger() = default;
 
@@ -60,9 +60,9 @@ namespace kungfu::wingchun::service
 
         void on_start() override;
 
-        void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::BrokerState state);
+        void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
 
-        void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::BrokerState state);
+        void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
 
     private:
         yijinjing::nanomsg::socket_ptr pub_sock_;
@@ -70,11 +70,11 @@ namespace kungfu::wingchun::service
 
         book::BookContext_ptr book_context_;
 
-        std::unordered_map<uint32_t, longfist::BrokerState> broker_states_;
+        std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
 
         void monitor_instruments(uint32_t broker_location);
 
-        longfist::BrokerState get_broker_state(uint32_t broker_location) const;
+        longfist::enums::BrokerState get_broker_state(uint32_t broker_location) const;
 
         void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 

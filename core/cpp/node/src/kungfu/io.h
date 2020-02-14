@@ -25,10 +25,10 @@ namespace kungfu::node
 
         [[nodiscard]] std::string get_env(const std::string &name) const override;
 
-        [[nodiscard]] std::string layout_dir(yijinjing::data::location_ptr location, yijinjing::data::layout l) const override;
+        [[nodiscard]] std::string layout_dir(yijinjing::data::location_ptr location, longfist::enums::layout l) const override;
 
         [[nodiscard]] std::string
-        layout_file(yijinjing::data::location_ptr location, yijinjing::data::layout l, const std::string &name) const override;
+        layout_file(yijinjing::data::location_ptr location, longfist::enums::layout l, const std::string &name) const override;
 
         [[nodiscard]] std::string default_to_system_db(yijinjing::data::location_ptr location, const std::string &name) const override;
 

@@ -150,13 +150,13 @@ namespace kungfu::wingchun
         return rtn;
     }
 
-    inline bool is_final_status(const longfist::OrderStatus &status)
+    inline bool is_final_status(const longfist::enums::OrderStatus &status)
     {
         switch (status)
         {
-            case longfist::OrderStatus::Submitted:
-            case longfist::OrderStatus::Pending:
-            case longfist::OrderStatus::PartialFilledActive:
+            case longfist::enums::OrderStatus::Submitted:
+            case longfist::enums::OrderStatus::Pending:
+            case longfist::enums::OrderStatus::PartialFilledActive:
                 return false;
             default:
                 return true;
@@ -239,77 +239,77 @@ namespace kungfu::wingchun
         }
     }
 
-    inline longfist::InstrumentType get_instrument_type(const std::string &instrument_id, const std::string &exchange_id)
+    inline longfist::enums::InstrumentType get_instrument_type(const std::string &instrument_id, const std::string &exchange_id)
     {
         if (string_equals(exchange_id, EXCHANGE_SSE))
         {
             if (startswith(instrument_id, "00"))
             {
-                return longfist::InstrumentType::Index;
+                return longfist::enums::InstrumentType::Index;
             } else if (startswith(instrument_id, "0"))
             {
-                return longfist::InstrumentType::Bond;
+                return longfist::enums::InstrumentType::Bond;
             } else if (startswith(instrument_id, "1"))
             {
-                return longfist::InstrumentType::Bond;
+                return longfist::enums::InstrumentType::Bond;
             } else if (startswith(instrument_id, "2"))
             {
-                return longfist::InstrumentType::Repo;
+                return longfist::enums::InstrumentType::Repo;
             } else if (startswith(instrument_id, "5"))
             {
-                return longfist::InstrumentType::Fund;
+                return longfist::enums::InstrumentType::Fund;
             } else if (startswith(instrument_id, "6"))
             {
-                return longfist::InstrumentType::Stock;
+                return longfist::enums::InstrumentType::Stock;
             }
         } else if (string_equals(exchange_id, EXCHANGE_SZE))
         {
             if (startswith(instrument_id, "0"))
             {
-                return longfist::InstrumentType::Stock;
+                return longfist::enums::InstrumentType::Stock;
             } else if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18"))
             {
-                return longfist::InstrumentType::Fund;
+                return longfist::enums::InstrumentType::Fund;
             } else if (startswith(instrument_id, "13"))
             {
-                return longfist::InstrumentType::Repo;
+                return longfist::enums::InstrumentType::Repo;
             } else if (startswith(instrument_id, "1"))
             {
-                return longfist::InstrumentType::Bond;
+                return longfist::enums::InstrumentType::Bond;
             } else if (startswith(instrument_id, "30"))
             {
-                return longfist::InstrumentType::Stock;
+                return longfist::enums::InstrumentType::Stock;
             }
         } else if (string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) ||
                    string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
                    string_equals(exchange_id, EXCHANGE_INE))
         {
-            return longfist::InstrumentType::Future;
+            return longfist::enums::InstrumentType::Future;
         }
-        return longfist::InstrumentType::Unknown;
+        return longfist::enums::InstrumentType::Unknown;
     }
 
-    inline std::string str_from_instrument_type(longfist::InstrumentType type)
+    inline std::string str_from_instrument_type(longfist::enums::InstrumentType type)
     {
         switch (type)
         {
-            case longfist::InstrumentType::Unknown:
+            case longfist::enums::InstrumentType::Unknown:
                 return "Unknown";
-            case longfist::InstrumentType::Stock:
+            case longfist::enums::InstrumentType::Stock:
                 return "Stock";
-            case longfist::InstrumentType::Future:
+            case longfist::enums::InstrumentType::Future:
                 return "Future";
-            case longfist::InstrumentType::Bond:
+            case longfist::enums::InstrumentType::Bond:
                 return "Bond";
-            case longfist::InstrumentType::StockOption:
+            case longfist::enums::InstrumentType::StockOption:
                 return "StockOption";
-            case longfist::InstrumentType::Fund:
+            case longfist::enums::InstrumentType::Fund:
                 return "Fund";
-            case longfist::InstrumentType::TechStock:
+            case longfist::enums::InstrumentType::TechStock:
                 return "TechStock";
-            case longfist::InstrumentType::Index:
+            case longfist::enums::InstrumentType::Index:
                 return "Index";
-            case longfist::InstrumentType::Repo:
+            case longfist::enums::InstrumentType::Repo:
                 return "Repo";
             default:
                 return "Unknown";
@@ -331,25 +331,25 @@ namespace kungfu::wingchun
         return product;
     }
 
-    inline longfist::Direction get_future_direction(longfist::Side side, longfist::Offset offset)
+    inline longfist::enums::Direction get_future_direction(longfist::enums::Side side, longfist::enums::Offset offset)
     {
-        if ((side == longfist::Side::Buy && offset == longfist::Offset::Open) || (side == longfist::Side::Sell && offset != longfist::Offset::Open))
+        if ((side == longfist::enums::Side::Buy && offset == longfist::enums::Offset::Open) || (side == longfist::enums::Side::Sell && offset != longfist::enums::Offset::Open))
         {
-            return longfist::Direction::Long;
+            return longfist::enums::Direction::Long;
         } else
         {
-            return longfist::Direction::Short;
+            return longfist::enums::Direction::Short;
         }
     }
 
-    inline bool is_open(longfist::InstrumentType instrument_type, longfist::Side side, longfist::Offset offset)
+    inline bool is_open(longfist::enums::InstrumentType instrument_type, longfist::enums::Side side, longfist::enums::Offset offset)
     {
-        if (instrument_type == longfist::InstrumentType::Stock || instrument_type == longfist::InstrumentType::Bond)
+        if (instrument_type == longfist::enums::InstrumentType::Stock || instrument_type == longfist::enums::InstrumentType::Bond)
         {
-            return side == longfist::Side::Buy;
-        } else if (instrument_type == longfist::InstrumentType::Future)
+            return side == longfist::enums::Side::Buy;
+        } else if (instrument_type == longfist::enums::InstrumentType::Future)
         {
-            return offset == longfist::Offset::Open;
+            return offset == longfist::enums::Offset::Open;
         } else
         {
             return false;
@@ -440,7 +440,7 @@ namespace kungfu::wingchun
         order.volume = input.volume;
         order.volume_traded = 0;
         order.volume_left = input.volume;
-        order.status = longfist::OrderStatus::Submitted;
+        order.status = longfist::enums::OrderStatus::Submitted;
 
         order.side = input.side;
         order.offset = input.offset;

@@ -782,7 +782,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("run", &Trader::run);
 //
 //    py::class_<Ledger, PyLedger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
-//            .def(py::init<data::locator_ptr, data::mode, bool>())
+//            .def(py::init<data::locator_ptr, longfist::enums::mode, bool>())
 //            .def_property_readonly("config_location", &Ledger::get_config_location)
 //            .def_property_readonly("io_device", &Ledger::get_io_device)
 //            .def_property_readonly("book_context", &Ledger::get_book_context)
@@ -812,7 +812,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("run", &Ledger::run);
 //
 //    py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
-//            .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, data::mode, bool>())
+//            .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, longfist::enums::mode, bool>())
 //            .def("set_begin_time", &strategy::Runner::set_begin_time)
 //            .def("set_end_time", &strategy::Runner::set_end_time)
 //            .def("run", &strategy::Runner::run)
@@ -869,7 +869,7 @@ PYBIND11_MODULE(pywingchun, m)
 //            .def("add_order", &algo::AlgoContext::add_order);
 //
 //    py::class_<service::Algo, PyAlgoService, service::Algo_ptr>(m, "AlgoService")
-////            .def(py::init<data::locator_ptr, data::mode, bool>())
+////            .def(py::init<data::locator_ptr, longfist::enums::mode, bool>())
 //            .def_property_readonly("algo_context", &service::Algo::get_algo_context)
 //            .def_property_readonly("io_device", &service::Algo::get_io_device)
 //            .def("now", &service::Algo::now)
@@ -885,6 +885,6 @@ PYBIND11_MODULE(pywingchun, m)
 //            ;
 //
 //    py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
-//            .def(py::init<data::locator_ptr, data::mode, bool, std::string&>())
+//            .def(py::init<data::locator_ptr, longfist::enums::mode, bool, std::string&>())
 //            .def("run", &service::BarGenerator::run);
 }

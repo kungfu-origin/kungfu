@@ -45,12 +45,12 @@ namespace kungfu::yijinjing
             PYBIND11_OVERLOAD_PURE(std::string, data::locator, get_env, name)
         }
 
-        [[nodiscard]] std::string layout_dir(data::location_ptr location, data::layout l) const override
+        [[nodiscard]] std::string layout_dir(data::location_ptr location, longfist::enums::layout l) const override
         {
             PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_dir, location, l)
         }
 
-        [[nodiscard]] std::string layout_file(data::location_ptr location, data::layout l, const std::string &name) const override
+        [[nodiscard]] std::string layout_file(data::location_ptr location, longfist::enums::layout l, const std::string &name) const override
         {
             PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_file, location, l, name)
         }
@@ -190,30 +190,30 @@ namespace kungfu::yijinjing
         m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
         m.def("get_page_path", &page::get_page_path);
 
-        py::enum_<data::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
-                .value("LIVE", data::mode::LIVE)
-                .value("DATA", data::mode::DATA)
-                .value("REPLAY", data::mode::REPLAY)
-                .value("BACKTEST", data::mode::BACKTEST)
+        py::enum_<longfist::enums::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
+                .value("LIVE", longfist::enums::mode::LIVE)
+                .value("DATA", longfist::enums::mode::DATA)
+                .value("REPLAY", longfist::enums::mode::REPLAY)
+                .value("BACKTEST", longfist::enums::mode::BACKTEST)
                 .export_values();
-        m.def("get_mode_name", &data::get_mode_name);
-        m.def("get_mode_by_name", &data::get_mode_by_name);
+        m.def("get_mode_name", &longfist::enums::get_mode_name);
+        m.def("get_mode_by_name", &longfist::enums::get_mode_by_name);
 
-        py::enum_<data::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
-                .value("MD", data::category::MD)
-                .value("TD", data::category::TD)
-                .value("STRATEGY", data::category::STRATEGY)
-                .value("SYSTEM", data::category::SYSTEM)
+        py::enum_<longfist::enums::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
+                .value("MD", longfist::enums::category::MD)
+                .value("TD", longfist::enums::category::TD)
+                .value("STRATEGY", longfist::enums::category::STRATEGY)
+                .value("SYSTEM", longfist::enums::category::SYSTEM)
                 .export_values();
-        m.def("get_category_name", &data::get_category_name);
+        m.def("get_category_name", &longfist::enums::get_category_name);
 
-        py::enum_<data::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
-                .value("JOURNAL", data::layout::JOURNAL)
-                .value("SQLITE", data::layout::SQLITE)
-                .value("NANOMSG", data::layout::NANOMSG)
-                .value("LOG", data::layout::LOG)
+        py::enum_<longfist::enums::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
+                .value("JOURNAL", longfist::enums::layout::JOURNAL)
+                .value("SQLITE", longfist::enums::layout::SQLITE)
+                .value("NANOMSG", longfist::enums::layout::NANOMSG)
+                .value("LOG", longfist::enums::layout::LOG)
                 .export_values();
-        m.def("get_layout_name", &data::get_layout_name);
+        m.def("get_layout_name", &longfist::enums::get_layout_name);
 
         py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
                 .def_property_readonly("gen_time", &event::gen_time)
@@ -243,7 +243,7 @@ namespace kungfu::yijinjing
                 { return f.address() + f.header_length(); });
 
         py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
-                .def(py::init<data::mode, data::category, const std::string &, const std::string &, data::locator_ptr>())
+                .def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &, data::locator_ptr>())
                 .def_readonly("mode", &data::location::mode)
                 .def_readonly("category", &data::location::category)
                 .def_readonly("group", &data::location::group)

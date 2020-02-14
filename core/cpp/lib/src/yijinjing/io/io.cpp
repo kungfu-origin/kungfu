@@ -61,7 +61,7 @@ namespace kungfu::yijinjing
 
         void init(const io_device &io)
         {
-            auto location = std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master",
+            auto location = std::make_shared<data::location>(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, "master", "master",
                                                              io.get_home()->locator);
             init_socket(socket_, location, io.get_url_factory());
         }
@@ -119,7 +119,7 @@ namespace kungfu::yijinjing
 
         void init(const io_device &io)
         {
-            auto location = std::make_shared<data::location>(data::mode::LIVE, data::category::SYSTEM, "master", "master",
+            auto location = std::make_shared<data::location>(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, "master", "master",
                                                              io.get_home()->locator);
             init_socket(socket_, location, io.get_url_factory());
             if (not low_latency_)
@@ -487,7 +487,7 @@ where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$
         {
             SPDLOG_TRACE("investigating location {}", location->uname);
             locations[location->uid] = location;
-            if (location->category == data::category::SYSTEM && location->group == "master" && location->name != "master")
+            if (location->category == longfist::enums::category::SYSTEM && location->group == "master" && location->name != "master")
             {
                 master_cmd_uids.insert(location->uid);
             }

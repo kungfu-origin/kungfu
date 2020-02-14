@@ -28,7 +28,7 @@ namespace kungfu::wingchun::ctp {
 
         ~TraderCTP() {};
 
-        const longfist::AccountType get_account_type() const override { return longfist::AccountType::Future; }
+        const longfist::enums::AccountType get_account_type() const override { return longfist::enums::AccountType::Future; }
 
         bool insert_order(const event_ptr &event) override;
 

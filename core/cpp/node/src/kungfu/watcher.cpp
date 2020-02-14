@@ -34,8 +34,7 @@ namespace kungfu::node
         {
             using DataType = typename decltype(+boost::hana::second(it))::type;
             auto name = std::string(boost::hana::first(it).c_str());
-            auto states = Napi::Object::New(info.Env());
-            ledger_ref_.Set(name, states);
+            ledger_ref_.Set(name, Napi::Object::New(info.Env()));
         });
     }
 

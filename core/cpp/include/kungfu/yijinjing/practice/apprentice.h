@@ -51,7 +51,7 @@ namespace kungfu::yijinjing::practice
 
         std::string get_config_db_file(const std::string &name) const
         {
-            return config_location_->locator->layout_file(config_location_, yijinjing::data::layout::SQLITE, name);
+            return config_location_->locator->layout_file(config_location_, longfist::enums::layout::SQLITE, name);
         }
 
         yijinjing::data::location_ptr get_config_location() const
@@ -65,7 +65,7 @@ namespace kungfu::yijinjing::practice
                 return home->locator->default_to_system_db(home, name);
             } else
             {
-                return home->locator->layout_file(home, yijinjing::data::layout::SQLITE, name);
+                return home->locator->layout_file(home, longfist::enums::layout::SQLITE, name);
             }
         }
 

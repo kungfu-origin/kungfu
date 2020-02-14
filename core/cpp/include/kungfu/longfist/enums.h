@@ -8,8 +8,108 @@
 #include <fmt/ostream.h>
 #include <spdlog/fmt/ostr.h>
 
-namespace kungfu::longfist
+namespace kungfu::longfist::enums
 {
+    enum class mode : int8_t
+    {
+        LIVE,
+        DATA,
+        REPLAY,
+        BACKTEST
+    };
+
+    inline std::string get_mode_name(mode m)
+    {
+        switch (m)
+        {
+            case mode::LIVE:
+                return "live";
+            case mode::DATA:
+                return "data";
+            case mode::REPLAY:
+                return "replay";
+            case mode::BACKTEST:
+                return "backtest";
+            default:
+                return "live";
+        }
+    }
+
+    inline mode get_mode_by_name(const std::string &name)
+    {
+        if (name == "live")
+            return mode::LIVE;
+        else if (name == "data")
+            return mode::DATA;
+        else if (name == "replay")
+            return mode::REPLAY;
+        else if (name == "backtest")
+            return mode::BACKTEST;
+        else
+            return mode::LIVE;
+    }
+
+    enum class category : int8_t
+    {
+        MD,
+        TD,
+        STRATEGY,
+        SYSTEM
+    };
+
+    inline std::string get_category_name(category c)
+    {
+        switch (c)
+        {
+            case category::MD:
+                return "md";
+            case category::TD:
+                return "td";
+            case category::STRATEGY:
+                return "strategy";
+            case category::SYSTEM:
+                return "system";
+            default:
+                return "system";
+        }
+    }
+
+    inline category get_category_by_name(const std::string &name)
+    {
+        if (name == "md")
+            return category::MD;
+        else if (name == "td")
+            return category::TD;
+        else if (name == "strategy")
+            return category::STRATEGY;
+        else
+            return category::SYSTEM;
+    }
+
+    enum class layout : int8_t
+    {
+        JOURNAL,
+        SQLITE,
+        NANOMSG,
+        LOG
+    };
+
+    inline std::string get_layout_name(layout l)
+    {
+        switch (l)
+        {
+            case layout::JOURNAL:
+                return "journal";
+            case layout::SQLITE:
+                return "db";
+            case layout::NANOMSG:
+                return "nn";
+            case layout::LOG:
+                return "log";
+            default:
+                return "log";
+        }
+    }
 
     enum class InstrumentType : int8_t
     {

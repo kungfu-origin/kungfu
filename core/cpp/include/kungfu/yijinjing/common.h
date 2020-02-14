@@ -27,6 +27,7 @@
 #include <nlohmann/json.hpp>
 
 #include <kungfu/common.h>
+#include <kungfu/longfist/enums.h>
 #include <kungfu/yijinjing/util/util.h>
 
 namespace kungfu
@@ -72,107 +73,6 @@ namespace kungfu
 
         namespace data
         {
-            enum class mode : int8_t
-            {
-                LIVE,
-                DATA,
-                REPLAY,
-                BACKTEST
-            };
-
-            inline std::string get_mode_name(mode m)
-            {
-                switch (m)
-                {
-                    case mode::LIVE:
-                        return "live";
-                    case mode::DATA:
-                        return "data";
-                    case mode::REPLAY:
-                        return "replay";
-                    case mode::BACKTEST:
-                        return "backtest";
-                    default:
-                        return "live";
-                }
-            }
-
-            inline mode get_mode_by_name(const std::string &name)
-            {
-                if (name == "live")
-                    return mode::LIVE;
-                else if (name == "data")
-                    return mode::DATA;
-                else if (name == "replay")
-                    return mode::REPLAY;
-                else if (name == "backtest")
-                    return mode::BACKTEST;
-                else
-                    return mode::LIVE;
-            }
-
-            enum class category : int8_t
-            {
-                MD,
-                TD,
-                STRATEGY,
-                SYSTEM
-            };
-
-            inline std::string get_category_name(category c)
-            {
-                switch (c)
-                {
-                    case category::MD:
-                        return "md";
-                    case category::TD:
-                        return "td";
-                    case category::STRATEGY:
-                        return "strategy";
-                    case category::SYSTEM:
-                        return "system";
-                    default:
-                        return "system";
-                }
-            }
-
-            inline category get_category_by_name(const std::string &name)
-            {
-                if (name == "md")
-                    return category::MD;
-                else if (name == "td")
-                    return category::TD;
-                else if (name == "strategy")
-                    return category::STRATEGY;
-                else
-                    return category::SYSTEM;
-            }
-
-            enum class layout : int8_t
-            {
-                JOURNAL,
-                SQLITE,
-                NANOMSG,
-                LOG
-            };
-
-            inline std::string get_layout_name(layout l)
-            {
-                switch (l)
-                {
-                    case layout::JOURNAL:
-                        return "journal";
-                    case layout::SQLITE:
-                        return "db";
-                    case layout::NANOMSG:
-                        return "nn";
-                    case layout::LOG:
-                        return "log";
-                    default:
-                        return "log";
-                }
-            }
-
             FORWARD_DECLARE_PTR(location)
 
             FORWARD_DECLARE_PTR(locator)
@@ -188,9 +88,9 @@ namespace kungfu
 
                 [[nodiscard]] virtual std::string get_env(const std::string &name) const = 0;
 
-                [[nodiscard]] virtual std::string layout_dir(location_ptr location, layout l) const = 0;
+                [[nodiscard]] virtual std::string layout_dir(location_ptr location, longfist::enums::layout l) const = 0;
 
-                [[nodiscard]] virtual std::string layout_file(location_ptr location, layout l, const std::string &name) const = 0;
+                [[nodiscard]] virtual std::string layout_file(location_ptr location, longfist::enums::layout l, const std::string &name) const = 0;
 
                 [[nodiscard]] virtual std::string default_to_system_db(location_ptr location, const std::string &name) const = 0;
 
@@ -207,21 +107,21 @@ namespace kungfu
             {
                 static constexpr uint32_t PUBLIC = 0;
 
-                location(data::mode m, data::category c, std::string g, std::string n, locator_ptr l) :
+                location(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n, locator_ptr l) :
                         mode(m), category(c), group(std::move(g)), name(std::move(n)), locator(std::move(l)),
-                        uname(fmt::format("{}/{}/{}/{}", data::get_category_name(category), group, name, data::get_mode_name(mode))),
+                        uname(fmt::format("{}/{}/{}/{}", longfist::enums::get_category_name(category), group, name, longfist::enums::get_mode_name(mode))),
                         uid(util::hash_str_32(uname))
                 {}
 
-                const data::mode mode;
-                const data::category category;
+                const longfist::enums::mode mode;
+                const longfist::enums::category category;
                 const std::string group;
                 const std::string name;
                 const std::string uname;
                 const uint32_t uid;
                 const locator_ptr locator;
 
-                static inline location_ptr make(data::mode m, data::category c, std::string g, std::string n, locator_ptr l)
+                static inline location_ptr make(longfist::enums::mode m, longfist::enums::category c, std::string g, std::string n, locator_ptr l)
                 {
                     return std::make_shared<location>(m, c, g, n, l);
                 }

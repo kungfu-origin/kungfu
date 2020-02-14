@@ -29,7 +29,7 @@ namespace kungfu::yijinjing::log
         if (spdlog::default_logger()->name().empty())
         {
             std::shared_ptr<spdlog::logger> logger;
-            std::string log_file = location->locator->layout_file(location, data::layout::LOG, name);
+            std::string log_file = location->locator->layout_file(location, longfist::enums::layout::LOG, name);
             auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(log_file, 0, 0);
 
             if (location->group != "node")
