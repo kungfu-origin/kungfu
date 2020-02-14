@@ -76,7 +76,8 @@ let cliConfig = {
 
 
 const { getPythonVersion } = require('../../app/.electron-kungfu/utils');
-const pyVersion = getPythonVersion() || '3'
+const pyVersion = getPythonVersion() || '3';
+console.log(pyVersion, '----')
 
 /**
  * Adjust cliConfig for development settings
