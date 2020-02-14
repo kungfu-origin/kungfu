@@ -115,7 +115,8 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.DefinePlugin({
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': '"development"'
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"main"',
     }),
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
@@ -137,6 +138,7 @@ if (process.env.NODE_ENV === 'production') {
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"production"',
+      'process.env.APP_TYPE': '"main"',
     })
   )
 }

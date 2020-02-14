@@ -3,14 +3,19 @@ declare var __resources: string;
 declare var python_version: string;
 
 declare module NodeJS {
+    interface Window { 
+        fileId: number;
+        __watcher: any;
+    }
+
     interface Global {
-        __resources: string
+        __resources: string;
+        __watcher: any;
     }
      
     interface Process {
         resourcesPath: string
     }
-
 }
 
 declare module "*.json" {

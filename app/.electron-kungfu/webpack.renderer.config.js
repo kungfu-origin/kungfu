@@ -178,7 +178,8 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': JSON.stringify('development')
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"renderer"',
     }),
   )
 }
@@ -194,7 +195,8 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.DefinePlugin({
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': JSON.stringify('production')
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.APP_TYPE': '"renderer"',
     }),
     // new BundleAnalyzerPlugin({
     //   analyzerMode: 'static',

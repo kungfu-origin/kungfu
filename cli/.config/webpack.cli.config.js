@@ -86,6 +86,9 @@ if (process.env.NODE_ENV !== 'production') {
   cliConfig.plugins.push(
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../../app/resources').replace(/\\/g, '\\\\')}"`,
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"cli"',
+      'process.env.LANG_ENV': '"en"',
       'python_version': `"${pyVersion.toString()}"`,
     })
   )

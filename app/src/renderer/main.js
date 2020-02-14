@@ -62,7 +62,7 @@ if(currentPath.indexOf('/code') === -1) {
             startGetProcessStatus();
 
             utils.delayMiliSeconds(1000).then(() => {
-                require('__io/journal/index');
+                require('__io/kungfu/index');
             })
 
             utils.delayMiliSeconds(1000).then(() => {

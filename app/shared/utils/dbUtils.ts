@@ -3,7 +3,22 @@ import { logger } from '__gUtils/logUtils';
 import { KF_HOME } from '__gConfig/pathConfig';
 
 const kungfu = require('kungfu-core').kungfu;
-export const renderWatcher = kungfu.watcher(kungfu.locator(KF_HOME), 'watcher_render');
+export const watcher = kungfu.watcher(kungfu.locator(KF_HOME), `watcher_${process.env.APP_TYPE}`);
+
+declare global {
+    interface Window { 
+        __watcher: any;
+    }
+}
+
+export {}
+
+if (process.env.APP_TYPE === 'renderer') {
+    window.__watcher = watcher;
+} else {
+    global.__watcher = watcher;
+}
+
 
 export const sqlite3 = require('kungfu-core').sqlite3.verbose();
 
