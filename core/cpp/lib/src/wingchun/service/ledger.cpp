@@ -332,6 +332,30 @@ namespace kungfu::wingchun::service
 
         apprentice::on_start();
 
+        Order order{};
+        order.instrument_id = "600001";
+        order.order_id = 1;
+        order.volume = 600,
+        order.volume_traded = 200;
+        order.volume_left = 400;
+        order.account_id = "15014990";
+        order.source_id = "xtp";
+        order.client_id = "test";
+
+        writers_[0]->write(0, order);
+
+        // Order order{};
+        // order.instrument_id = "600001";
+        // order.order_id = 1;
+        // order.volume = 700,
+        // order.volume_trade = 400;
+        // order.volume_left = 300;
+        // order.account_id = "15014991";
+        // order.source_id = "xtp";
+        // order.client_id = "test11";
+
+    
+
     }
 
     void Ledger::publish_broker_state(int64_t trigger_time, const location_ptr &broker_location, BrokerState state)
