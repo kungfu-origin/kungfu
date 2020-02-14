@@ -209,6 +209,9 @@ namespace kungfu
     template<typename DataType>
     static constexpr bool is_vector_v = is_vector<DataType>::value;
 
+    template<typename V>
+    static constexpr bool is_numeric_v = std::is_arithmetic_v<V> or std::is_enum_v<V>;
+
     template<typename T, typename = void>
     struct size_fixed : public std::false_type
     {
@@ -335,13 +338,13 @@ namespace kungfu
 
     private:
         template<typename V>
-        static std::enable_if_t<std::is_arithmetic_v<V>, void> init_member(V &v)
+        static std::enable_if_t<is_numeric_v<V>, void> init_member(V &v)
         {
-            v = 0;
+            v = (V)(0);
         }
 
         template<typename V>
-        static std::enable_if_t<not std::is_arithmetic_v<V>, void> init_member(V &v)
+        static std::enable_if_t<not is_numeric_v<V>, void> init_member(V &v)
         {}
 
         template<typename J, typename V>
@@ -416,13 +419,13 @@ namespace kungfu
     DECLARE_PTR(event)
 
     template<typename T, typename... Other>
-    struct TypeTuple
+    struct type_tuple
     {
-        static constexpr auto value = boost::hana::flatten(boost::hana::make_tuple(TypeTuple<T>::value, TypeTuple<Other...>::value));
+        static constexpr auto value = boost::hana::flatten(boost::hana::make_tuple(type_tuple<T>::value, type_tuple<Other...>::value));
     };
 
     template<typename T>
-    struct TypeTuple<T>
+    struct type_tuple<T>
     {
         static constexpr auto value = boost::hana::make_tuple(boost::hana::type_c<T>);
     };
@@ -430,7 +433,7 @@ namespace kungfu
     template<typename T, typename... Ts>
     constexpr void type_check(Ts... arg)
     {
-        constexpr auto check = boost::hana::transform(TypeTuple<Ts...>::value, [](auto t) {return t == boost::hana::type_c<T>;});
+        constexpr auto check = boost::hana::transform(type_tuple<Ts...>::value, [](auto t) {return t == boost::hana::type_c<T>;});
         static_assert(boost::hana::fold(check, std::logical_and()), "type check of arguments failed");
     }
 }
