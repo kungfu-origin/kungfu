@@ -38,7 +38,6 @@ namespace kungfu::node
 
     private:
         static Napi::FunctionReference constructor;
-        Napi::ObjectReference locator_ref_;
         Napi::ObjectReference ledger_ref_;
         yijinjing::data::location ledger_location_;
         serialize::UpdateOperator update_ledger;

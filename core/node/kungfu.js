@@ -16,8 +16,10 @@ const layout_dir_from_home = function(home, category, group, name, mode, layout)
     return dir;
 };
 
+exports.longfist = bindings.longfist;
+
 exports.locator = function(home) {
-    return new bindings.Locator({
+    return {
         has_env: function(name) {
             return name in process.env;
         },
@@ -43,7 +45,7 @@ exports.locator = function(home) {
         list_location_dest: function(category, group, name, mode) {
             return [];
         }
-    });
+    };
 };
 
 exports.io_device = function(mode, category, group, name, locator) {

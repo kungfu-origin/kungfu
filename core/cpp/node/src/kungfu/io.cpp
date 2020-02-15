@@ -9,21 +9,9 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node
 {
-    Napi::FunctionReference Locator::constructor;
-
-    Locator::Locator(const Napi::CallbackInfo &info) : ObjectWrap(info)
+    Locator::Locator(const Napi::Object &locator_obj)
     {
-        Napi::Env env = info.Env();
-        Napi::HandleScope scope(env);
-
-        int length = info.Length();
-
-        if (length <= 0 || !info[0].IsObject())
-        {
-            Napi::TypeError::New(env, "Object expected").ThrowAsJavaScriptException();
-            return;
-        }
-        locator_ref_ = Napi::ObjectReference::New(info[0].As<Napi::Object>(), 1);
+        locator_ref_ = Napi::ObjectReference::New(locator_obj, 1);
     }
 
     Locator::~Locator()
@@ -110,25 +98,6 @@ namespace kungfu::node
         return result;
     }
 
-    Napi::Value Locator::ToString(const Napi::CallbackInfo &info)
-    {
-        return Napi::String::New(info.Env(), "Locator.js");
-    }
-
-    void Locator::Init(Napi::Env env, Napi::Object exports)
-    {
-        Napi::HandleScope scope(env);
-
-        Napi::Function func = DefineClass(env, "Locator", {
-                InstanceMethod("toString", &Locator::ToString)
-        });
-
-        constructor = Napi::Persistent(func);
-        constructor.SuppressDestruct();
-
-        exports.Set("Locator", func);
-    }
-
     Napi::FunctionReference IODevice::constructor;
 
     IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true, false)
@@ -160,7 +129,7 @@ namespace kungfu::node
 
     locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index)
     {
-        return locator_ptr{reinterpret_cast<Locator *>(Napi::ObjectWrap<Locator>::Unwrap(info[index].As<Napi::Object>()))};
+        return std::dynamic_pointer_cast<locator>(std::make_shared<Locator>(info[index].As<Napi::Object>()));
     }
 
     location_ptr IODevice::GetLocation(const Napi::CallbackInfo &info)

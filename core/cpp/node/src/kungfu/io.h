@@ -12,14 +12,12 @@
 
 namespace kungfu::node
 {
-    class Locator : public Napi::ObjectWrap<Locator>, public yijinjing::data::locator
+    class Locator : public yijinjing::data::locator
     {
     public:
-        explicit Locator(const Napi::CallbackInfo &info);
+        explicit Locator(const Napi::Object &locator_obj);
 
         ~Locator();
-
-        Napi::Value ToString(const Napi::CallbackInfo &info);
 
         [[nodiscard]] bool has_env(const std::string &name) const override;
 
@@ -39,11 +37,8 @@ namespace kungfu::node
 
         [[nodiscard]] std::vector<uint32_t> list_location_dest(yijinjing::data::location_ptr location) const override;
 
-        static void Init(Napi::Env env, Napi::Object exports);
-
     private:
         Napi::ObjectReference locator_ref_;
-        static Napi::FunctionReference constructor;
     };
 
     class IODevice : public Napi::ObjectWrap<IODevice>, public yijinjing::io_device
