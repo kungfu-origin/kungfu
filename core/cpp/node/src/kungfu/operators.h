@@ -320,19 +320,21 @@ namespace kungfu::node::serialize
     {
     private:
         JsGet get;
+        Napi::ObjectReference &state_;
         yijinjing::practice::apprentice &app_;
 
     public:
-        explicit JsPublishState(yijinjing::practice::apprentice &app) : app_(app)
+        explicit JsPublishState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state)
         {}
 
         template<typename DataType>
         void operator()(const std::string &type_name, boost::hana::basic_type<DataType> type, Napi::Value &value)
         {
-            DataType result{};
-            get(value, result);
-            SPDLOG_WARN("publish {}", type_name, result.to_string());
-            app_.write_to(0, DataType::tag, result);
+            DataType data{};
+            get(value, data);
+            auto key = fmt::format("{:016x}", data.uid());
+            state_.Get(type_name).ToObject().Set(key, value);
+            app_.write_to(0, DataType::tag, data);
         }
     };
 }

@@ -40,7 +40,7 @@ namespace kungfu::node
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_state(state_ref_),
             update_ledger(ledger_ref_),
-            publish(*this)
+            publish(*this, state_ref_)
     {
         InitStateMap(info, state_ref_);
         InitStateMap(info, ledger_ref_);
