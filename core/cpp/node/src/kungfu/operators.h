@@ -301,16 +301,18 @@ namespace kungfu::node::serialize
         {};
 
         template<typename DataType>
-        void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
+        void operator()(const std::string &type_name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
             auto data = event->data<DataType>();
-            Napi::Object table = state_.Get(name).ToObject();
-            auto key = fmt::format("{:016x}", data.uid());
-            Napi::Value value = state_.Get(key);
+            Napi::Object table = state_.Get(type_name).ToObject();
+            std::string uid = fmt::format("{:016x}", data.uid());
+            Napi::Value value = state_.Get(uid);
             if (value.IsUndefined() or value.IsEmpty())
             {
                 value = Napi::Object::New(state_.Env());
-                table.Set(key, value);
+                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
+                table.Set(uid, value);
             }
             set(data, value);
         }
@@ -332,8 +334,11 @@ namespace kungfu::node::serialize
         {
             DataType data{};
             get(value, data);
-            auto key = fmt::format("{:016x}", data.uid());
-            state_.Get(type_name).ToObject().Set(key, value);
+            auto uid = fmt::format("{:016x}", data.uid());
+            Napi::Object valueObj =value.ToObject();
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
+            state_.Get(type_name).ToObject().Set(uid, valueObj);
             app_.write_to(0, DataType::tag, data);
         }
     };
