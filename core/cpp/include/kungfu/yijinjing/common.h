@@ -171,37 +171,36 @@ namespace kungfu
         using namespace rxcpp::util;
 
         template<typename... Ts>
-        constexpr auto event_filter_any = [](auto member, Ts... arg)
-        {
-            using T = std::result_of_t<decltype(member)(event *)>;
-            type_check<T, Ts...>(arg...);
-            auto args = boost::hana::make_tuple(arg...);
-            return filter([=](const event_ptr &e)
-                          {
-                              auto check = [&](auto a)
-                              {
-                                  return ((*e).*member)() == a;
-                              };
-                              return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
-                          });
+        constexpr auto event_filter_any = [](auto member) {
+            return [=](Ts... arg) {
+                using T = std::result_of_t<decltype(member)(event *)>;
+                type_check<T, Ts...>(arg...);
+                auto args = boost::hana::make_tuple(arg...);
+                return filter([=](const event_ptr &e) {
+                    auto check = [&](auto a) {
+                        return ((*e).*member)() == a;
+                    };
+                    return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
+                });
+            };
         };
 
         template<typename... Ts>
         constexpr decltype(auto) is(Ts... arg)
         {
-            return event_filter_any<Ts...>(&event::msg_type, arg...);
+            return event_filter_any<Ts...>(&event::msg_type)(arg...);
         };
 
         template<typename... Ts>
         constexpr decltype(auto) from(Ts... arg)
         {
-            return event_filter_any<Ts...>(&event::source, arg...);
+            return event_filter_any<Ts...>(&event::source)(arg...);
         };
 
         template<typename... Ts>
         constexpr decltype(auto) to(Ts... arg)
         {
-            return event_filter_any<Ts...>(&event::dest, arg...);
+            return event_filter_any<Ts...>(&event::dest)(arg...);
         };
 
         constexpr auto trace = []()
