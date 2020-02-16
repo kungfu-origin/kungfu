@@ -236,6 +236,22 @@ namespace kungfu
     template<typename DataType>
     static constexpr bool size_fixed_v = size_fixed<DataType>::value;
 
+    template<typename ValueType>
+    static constexpr bool is_signed_int_v = std::is_integral_v<ValueType> and (sizeof(ValueType) <= 4)
+                                            and not std::is_same_v<ValueType, bool>
+                                            and std::is_signed_v<ValueType>;
+
+    template<typename ValueType>
+    static constexpr bool is_unsigned_int_v = std::is_integral_v<ValueType> and (sizeof(ValueType) <= 4)
+                                              and not std::is_same_v<ValueType, bool>
+                                              and std::is_unsigned_v<ValueType>;
+
+    template<typename ValueType>
+    static constexpr bool is_signed_bigint_v = std::is_integral_v<ValueType> and (sizeof(ValueType) > 4) and std::is_signed_v<ValueType>;
+
+    template<typename ValueType>
+    static constexpr bool is_unsigned_bigint_v = std::is_integral_v<ValueType> and (sizeof(ValueType) > 4) and std::is_unsigned_v<ValueType>;
+
     template<typename, typename = void>
     struct hash;
 
@@ -340,7 +356,7 @@ namespace kungfu
         template<typename V>
         static std::enable_if_t<is_numeric_v<V>, void> init_member(V &v)
         {
-            v = (V)(0);
+            v = (V) (0);
         }
 
         template<typename V>
@@ -433,7 +449,8 @@ namespace kungfu
     template<typename T, typename... Ts>
     constexpr void type_check(Ts... arg)
     {
-        constexpr auto check = boost::hana::transform(type_tuple<Ts...>::value, [](auto t) {return t == boost::hana::type_c<T>;});
+        constexpr auto check = boost::hana::transform(type_tuple<Ts...>::value, [](auto t)
+        { return t == boost::hana::type_c<T>; });
         static_assert(boost::hana::fold(check, std::logical_and()), "type check of arguments failed");
     }
 }

@@ -22,24 +22,34 @@ namespace kungfu::node
         );
     }
 
-    Watcher::Watcher(const Napi::CallbackInfo &info) :
-            ObjectWrap(info),
-            apprentice(get_watcher_location(info), true),
-            ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
-            ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_io_device()->get_home()->locator),
-            update_ledger(ledger_ref_)
+    inline void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &ref)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
         {
             using DataType = typename decltype(+boost::hana::second(it))::type;
             auto name = std::string(boost::hana::first(it).c_str());
-            ledger_ref_.Set(name, Napi::Object::New(info.Env()));
+            ref.Set(name, Napi::Object::New(info.Env()));
         });
+    }
+
+    Watcher::Watcher(const Napi::CallbackInfo &info) :
+            ObjectWrap(info),
+            apprentice(get_watcher_location(info), true),
+            ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_io_device()->get_home()->locator),
+            state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
+            ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
+            update_state(state_ref_),
+            update_ledger(ledger_ref_),
+            publish(*this)
+    {
+        InitStateMap(info, state_ref_);
+        InitStateMap(info, ledger_ref_);
     }
 
     Watcher::~Watcher()
     {
         ledger_ref_.Unref();
+        state_ref_.Unref();
     }
 
     Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info)
@@ -59,6 +69,14 @@ namespace kungfu::node
         return Napi::Value();
     }
 
+    Napi::Value Watcher::GetState(const Napi::CallbackInfo &info)
+    {
+        return state_ref_.Value();
+    }
+
+    void Watcher::SetState(const Napi::CallbackInfo &info, const Napi::Value &value)
+    {}
+
     Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
     {
         return ledger_ref_.Value();
@@ -66,6 +84,13 @@ namespace kungfu::node
 
     void Watcher::SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value)
     {}
+
+    Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info)
+    {
+        Napi::Object obj = info[0].ToObject();
+        longfist::cast_type_invoke(obj.Get("type").ToString().Utf8Value(), obj, publish);
+        return Napi::Value();
+    }
 
     void Watcher::Init(Napi::Env env, Napi::Object exports)
     {
@@ -75,6 +100,8 @@ namespace kungfu::node
                 InstanceMethod("isLive", &Watcher::IsLive),
                 InstanceMethod("setup", &Watcher::Setup),
                 InstanceMethod("step", &Watcher::Step),
+                InstanceMethod("publishState", &Watcher::PublishState),
+                InstanceAccessor("state", &Watcher::GetState, &Watcher::SetState),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::SetLedger),
         });
 
@@ -96,10 +123,16 @@ namespace kungfu::node
 
     void Watcher::react()
     {
+        events_ | from(get_master_commands_uid()) |
+        $([&](const event_ptr &event)
+          {
+              longfist::cast_event_invoke(event, update_state);
+          });
+
         events_ | from(ledger_location_.uid) | to(location::PUBLIC) |
         $([&](const event_ptr &event)
           {
-              longfist::cast_invoke(event, update_ledger);
+              longfist::cast_event_invoke(event, update_ledger);
           });
 
         apprentice::react();

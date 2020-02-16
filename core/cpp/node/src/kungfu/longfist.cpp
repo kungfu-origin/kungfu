@@ -22,9 +22,9 @@ namespace kungfu::node
 
         boost::hana::for_each(StateDataTypes, [&](auto it)
         {
-            auto name = boost::hana::first(it).c_str();
+            auto name = boost::hana::first(it);
             using DataType = typename decltype(+boost::hana::second(it))::type;
-            longfist.Set(Napi::String::New(env, name), Napi::Function::New(env, serialize::JsMake::make<DataType>));
+            longfist.Set(Napi::String::New(env, name.c_str()), Napi::Function::New(env, make<DataType, name.c_str()>));
         });
 
         constructor = Napi::Persistent(longfist);

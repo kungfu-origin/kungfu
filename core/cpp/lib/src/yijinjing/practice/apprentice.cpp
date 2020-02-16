@@ -168,7 +168,7 @@ namespace kungfu::yijinjing::practice
         events_ | take_until(events_ | is(RequestStart::tag)) |
         $([&](const event_ptr &event)
           {
-              longfist::cast_invoke(event, recover_state);
+              longfist::cast_event_invoke(event, recover_state);
           });
 
         events_ | is(Channel::tag) |

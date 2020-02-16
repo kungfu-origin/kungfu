@@ -26,9 +26,15 @@ namespace kungfu::node
 
         Napi::Value Step(const Napi::CallbackInfo &info);
 
+        Napi::Value GetState(const Napi::CallbackInfo &info);
+
+        void SetState(const Napi::CallbackInfo &info, const Napi::Value &value);
+
         Napi::Value GetLedger(const Napi::CallbackInfo &info);
 
         void SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value);
+
+        Napi::Value PublishState(const Napi::CallbackInfo &info);
 
         static void Init(Napi::Env env, Napi::Object exports);
 
@@ -38,9 +44,12 @@ namespace kungfu::node
 
     private:
         static Napi::FunctionReference constructor;
-        Napi::ObjectReference ledger_ref_;
         yijinjing::data::location ledger_location_;
-        serialize::UpdateOperator update_ledger;
+        Napi::ObjectReference state_ref_;
+        Napi::ObjectReference ledger_ref_;
+        serialize::JsUpdateState update_state;
+        serialize::JsUpdateState update_ledger;
+        serialize::JsPublishState publish;
     };
 }
 

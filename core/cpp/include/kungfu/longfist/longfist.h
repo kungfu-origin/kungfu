@@ -63,7 +63,19 @@ namespace kungfu::longfist
         StateMapType &state_map_;
     };
 
-    constexpr auto cast_invoke = [](const event_ptr &event, auto &handler)
+    constexpr auto cast_type_invoke = [](const std::string &type, auto &data, auto &handler)
+    {
+        boost::hana::for_each(StateDataTypes, [&](auto it)
+        {
+            if (strcmp(boost::hana::first(it).c_str(), type.c_str()) == 0)
+            {
+                using T = typename decltype(+boost::hana::second(it))::type;
+                handler(boost::hana::first(it).c_str(), boost::hana::second(it), data);
+            }
+        });
+    };
+
+    constexpr auto cast_event_invoke = [](const event_ptr &event, auto &handler)
     {
         boost::hana::for_each(StateDataTypes, [&](auto it)
         {

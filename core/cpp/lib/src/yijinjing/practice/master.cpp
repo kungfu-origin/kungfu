@@ -262,7 +262,7 @@ namespace kungfu::yijinjing::practice
         events_ | to(location::PUBLIC) |
         $([&](const event_ptr &e)
           {
-              longfist::cast_invoke(e, *app_sqlizers_[e->source()]);
+              longfist::cast_event_invoke(e, *app_sqlizers_[e->source()]);
           });
     }
 }
