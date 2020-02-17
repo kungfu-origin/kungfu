@@ -209,9 +209,6 @@ namespace kungfu
     template<typename DataType>
     static constexpr bool is_vector_v = is_vector<DataType>::value;
 
-    template<typename V>
-    static constexpr bool is_numeric_v = std::is_arithmetic_v<V> or std::is_enum_v<V>;
-
     template<typename T, typename = void>
     struct size_fixed : public std::false_type
     {
@@ -252,6 +249,12 @@ namespace kungfu
     template<typename ValueType>
     static constexpr bool is_unsigned_bigint_v = std::is_integral_v<ValueType> and (sizeof(ValueType) > 4) and std::is_unsigned_v<ValueType>;
 
+    template<typename ValueType>
+    static constexpr bool is_numeric_v = std::is_arithmetic_v<ValueType> or std::is_enum_v<ValueType>;
+
+    template<typename ValueType>
+    static constexpr bool is_enum_class_v = std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>;
+
     template<typename, typename = void>
     struct hash;
 
@@ -270,6 +273,15 @@ namespace kungfu
         uint64_t operator()(const T &value)
         {
             return hash_32(reinterpret_cast<const unsigned char *>(value), sizeof(value));
+        }
+    };
+
+    template<typename T>
+    struct hash<T, std::enable_if_t<is_enum_class_v<T>>>
+    {
+        uint64_t operator()(const T &value)
+        {
+            return static_cast<uint64_t>(value);
         }
     };
 
@@ -356,7 +368,7 @@ namespace kungfu
         template<typename V>
         static std::enable_if_t<is_numeric_v<V>, void> init_member(V &v)
         {
-            v = (V) (0);
+            v = static_cast<V>(0);
         }
 
         template<typename V>
