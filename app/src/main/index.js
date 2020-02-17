@@ -25,7 +25,7 @@ var allowQuit = false;
 function createWindow () {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
-	const { width,height } = electronScreen.getPrimaryDisplay().size
+	const { width, height } = electronScreen.getPrimaryDisplay().size
 	mainWindow = new BrowserWindow({
 		show: false,
 		width,
@@ -104,12 +104,19 @@ app.on('ready', () => {
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
-killExtra()
-.catch(err => logger.error(err))
-.finally(() => {
-	killExtraFinished = true;
-	if(appReady && killExtraFinished) createWindow()
-})
+console.time('init clean')
+killKfc()
+	.catch(err => logger.error('init clean killKfc', err))
+	.finally(() => {
+		killExtra()
+			.catch(err => logger.error('init clean killExtra', err))
+			.finally(() => {
+				console.timeEnd('init clean')
+				killExtraFinished = true;
+				if(appReady && killExtraFinished) createWindow()
+			})
+	})
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function (e) {

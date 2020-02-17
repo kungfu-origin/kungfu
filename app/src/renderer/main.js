@@ -61,13 +61,11 @@ if(currentPath.indexOf('/code') === -1) {
         .finally(() => {
             startGetProcessStatus();
 
-            utils.delayMiliSeconds(1000).then(() => {
-                require('__io/kungfu/index');
-            })
+            utils.delayMiliSeconds(1000)
+            .then(() => startLedger(false))
 
-            utils.delayMiliSeconds(1000).then(() => {
-                startLedger(false)
-            })
+            utils.delayMiliSeconds(3000)
+            .then(() => require('__io/kungfu/index'))
         })
 
 }

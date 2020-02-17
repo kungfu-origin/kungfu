@@ -5,12 +5,12 @@ declare var python_version: string;
 declare module NodeJS {
     interface Window { 
         fileId: number;
-        __watcher: any;
     }
 
     interface Global {
         __resources: string;
         __watcher: any;
+        __locator: any;
     }
      
     interface Process {
