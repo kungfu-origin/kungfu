@@ -10,9 +10,9 @@ declare global {
 export {}
 
 process.env.KF_LOG_LEVEL = 'trace';
-const kungfu = require('kungfu-core').kungfu;
-const locator = kungfu.locator(KF_HOME);
 
+export const kungfu = require('kungfu-core').kungfu;
+const locator = kungfu.locator(KF_HOME);
 export const watcher = kungfu.watcher(locator, `watcher_${process.env.APP_TYPE}`)
 
 if (process.env.APP_TYPE === 'renderer') {
@@ -22,3 +22,7 @@ if (process.env.APP_TYPE === 'renderer') {
     global.__watcher = watcher;
     global.__locator = locator;
 }
+
+
+
+
