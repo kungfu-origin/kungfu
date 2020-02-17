@@ -53,9 +53,24 @@ namespace kungfu::node
         state_ref_.Unref();
     }
 
+    Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
+    {
+        return Napi::String::New(info.Env(), get_io_device()->get_home()->uname);
+    }
+
+    Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
+    {
+        return Napi::Boolean::New(info.Env(), is_usable());
+    }
+
     Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info)
     {
         return Napi::Boolean::New(info.Env(), is_live());
+    }
+
+    Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info)
+    {
+        return Napi::Boolean::New(info.Env(), is_started());
     }
 
     Napi::Value Watcher::Setup(const Napi::CallbackInfo &info)
@@ -98,10 +113,13 @@ namespace kungfu::node
         Napi::HandleScope scope(env);
 
         Napi::Function func = DefineClass(env, "Watcher", {
+                InstanceMethod("isUsable", &Watcher::IsUsable),
                 InstanceMethod("isLive", &Watcher::IsLive),
+                InstanceMethod("isStarted", &Watcher::IsStarted),
                 InstanceMethod("setup", &Watcher::Setup),
                 InstanceMethod("step", &Watcher::Step),
                 InstanceMethod("publishState", &Watcher::PublishState),
+                InstanceAccessor("location", &Watcher::GetLocation, &Watcher::SetLocation),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::SetState),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::SetLedger),
         });
@@ -116,7 +134,7 @@ namespace kungfu::node
     {
         apprentice::register_location(trigger_time, location);
 
-        if (location->uid == ledger_location_.uid)
+        if (location->uid == ledger_location_.uid and has_writer(get_master_commands_uid()))
         {
             request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
         }

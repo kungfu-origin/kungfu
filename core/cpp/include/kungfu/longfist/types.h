@@ -26,6 +26,8 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(SessionStart, 10001);
     KF_DEFINE_MARK_TYPE(SessionEnd, 10002);
     KF_DEFINE_MARK_TYPE(Time, 10003);
+    KF_DEFINE_MARK_TYPE(Ping, 10008);
+    KF_DEFINE_MARK_TYPE(Pong, 10009);
     KF_DEFINE_MARK_TYPE(RequestStart, 10025);
     KF_DEFINE_MARK_TYPE(Subscribe, 302);
     KF_DEFINE_MARK_TYPE(SubscribeAll, 303);

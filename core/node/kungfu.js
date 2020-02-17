@@ -53,5 +53,39 @@ exports.io_device = function(mode, category, group, name, locator) {
 };
 
 exports.watcher = function(locator, name) {
-    return new bindings.Watcher(locator, name);
+    let wb = new bindings.Watcher(locator, name);
+    wb.run = function(stepCallback) {
+        const self = this;
+        const setTimerPromiseTask = function (fn, interval) {
+            if (interval === void 0) { interval = 500; }
+            var taskTimer = null;
+            function timerPromiseTask(fn, interval) {
+                if (interval === void 0) { interval = 500; }
+                if (taskTimer)
+                    clearTimeout(taskTimer);
+                fn()
+                    .finally(function () {
+                        taskTimer = setTimeout(function () {
+                            timerPromiseTask(fn, interval);
+                        }, interval);
+                    });
+            }
+            timerPromiseTask(fn, interval);
+        };
+        setTimerPromiseTask(() => {
+            return new Promise((resolve) => {
+                if (self.isUsable() && !self.isLive() && !self.isStarted()) {
+                    self.setup();
+                }
+                if (self.isLive()) {
+                    self.step();
+                }
+                if (self.isLive() && self.isStarted()) {
+                    stepCallback(self);
+                }
+                resolve();
+            })
+        });
+    };
+    return wb;
 };

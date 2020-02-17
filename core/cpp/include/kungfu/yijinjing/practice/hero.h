@@ -14,12 +14,17 @@
 
 namespace kungfu::yijinjing::practice
 {
-    class hero
+    class hero : public resource
     {
     public:
         explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
         virtual ~hero() = default;
+
+        bool is_usable() override
+        { return io_device_->is_usable(); }
+
+        void setup() override;
 
         virtual void on_notify()
         {}
@@ -32,8 +37,6 @@ namespace kungfu::yijinjing::practice
 
         void set_end_time(int64_t end_time)
         { end_time_ = end_time; }
-
-        void setup();
 
         void step();
 
@@ -114,7 +117,7 @@ namespace kungfu::yijinjing::practice
         rx::composite_subscription cs_;
         int64_t now_;
         volatile bool continual_ = true;
-        volatile bool live_ = true;
+        volatile bool live_ = false;
 
         inline bool check_location(uint32_t source_id, uint32_t dest_id)
         {
