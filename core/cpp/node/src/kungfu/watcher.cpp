@@ -44,6 +44,7 @@ namespace kungfu::node
     {
         InitStateMap(info, state_ref_);
         InitStateMap(info, ledger_ref_);
+        SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
     }
 
     Watcher::~Watcher()
