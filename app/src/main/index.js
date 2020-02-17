@@ -105,16 +105,11 @@ app.on('ready', () => {
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('init clean')
-killKfc()
-	.catch(err => logger.error('init clean killKfc', err))
+KillAll()
 	.finally(() => {
-		killExtra()
-			.catch(err => logger.error('init clean killExtra', err))
-			.finally(() => {
-				console.timeEnd('init clean')
-				killExtraFinished = true;
-				if(appReady && killExtraFinished) createWindow()
-			})
+		console.timeEnd('init clean')
+		killExtraFinished = true;
+		if(appReady && killExtraFinished) createWindow()
 	})
 
 
@@ -137,7 +132,7 @@ app.on('will-quit', async (e) => {
 	if(allowQuit) return
 	if(process.env.APP_TYPE === 'test') {
 		try {
-			await KillAll()
+			await killAllBeforeQuit()
 		} catch (err) {
 			console.error(err)
 		}
@@ -227,7 +222,11 @@ function showQuitMessageBox(){
 		icon: path.join(__resources, 'icon', 'icon.png')
 	}, (index) => {
 		if(index === 0){
-			KillAll().then(() => app.quit())
+			console.time('quit clean')
+			killAllBeforeQuit().finally(() => {
+				console.timeEnd('quit clean')
+				app.quit()
+			})
 		}else{
 			if((mainWindow !== null) && !mainWindow.isDestroyed()){
 				if(platform === 'mac') mainWindow.hide();
@@ -240,29 +239,27 @@ function showQuitMessageBox(){
 //结束所有进程
 function KillAll(){
 	return new Promise(resolve => {
-		if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
-		allowQuit = true;
-		console.time('kill kfcs');
 		killKfc()
 		.catch(err => console.error(err)) 
 		.finally(() => {
-			console.timeEnd('kill kfcs');
 			if(platform === 'linux') killKungfu()
-			console.time('kill daemon');
 			killGodDaemon()
 			.catch(err => console.error(err)) 				
 			.finally(() => {
-				console.timeEnd('kill daemon');
-				console.time('kill extra');
 				killExtra()
 				.catch(err => console.error(err)) 								
 				.finally(() => {
-					console.timeEnd('kill extra');	
 					resolve(true)
 				})
 			})
 		})
 	})
+}
+
+function killAllBeforeQuit() {
+	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
+	allowQuit = true;
+	return KillAll()
 }
 
 
