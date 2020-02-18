@@ -8,7 +8,7 @@ import ElementUI from 'element-ui';
 import Components from './assets/components'
 import moment from 'moment';
 import App from './App.vue';
-import { listProcessStatus, startMaster, startLedger } from '__gUtils/processUtils';
+import { startGetProcessStatus, startMaster, startLedger } from '__gUtils/processUtils';
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
@@ -42,24 +42,18 @@ window.store = store;
 
 process.env.ELECTRON_RUN_AS_NODE = true;
 
+
+
 const currentPath = window.location.hash;
 if(currentPath.indexOf('/code') === -1) {
-    //循环获取processStatus
-    const startGetProcessStatus = () => {
-        utils.setTimerPromiseTask(() => {
-            return listProcessStatus()
-                .then(res => {
-                    const processStatus = Object.freeze(res);
-                    processStatus && Vue.store.dispatch('setProcessStatus', processStatus)
-                })
-                .catch(err => console.error(err))
-        }, 1000)
-    }
+    
 
     //kungfu master 启动流程
     startMaster(false)
         .finally(() => {
-            startGetProcessStatus();
+            startGetProcessStatus((processStatus) => {
+                Vue.store.dispatch('setProcessStatus', processStatus)
+            });
 
             utils.delayMiliSeconds(1000)
             .then(() => startLedger(false))

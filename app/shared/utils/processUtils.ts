@@ -2,6 +2,7 @@ import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH, b
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
+import { setTimerPromiseTask } from '__gUtils/busiUtils'; 
 import { getProcesses } from 'getprocesses';
 
 
@@ -426,4 +427,18 @@ export const killGodDaemon = () => {
     })
 }
 
+
+//循环获取processStatus
+export const startGetProcessStatus = (callback: Function) => {
+    setTimerPromiseTask(() => {
+        return listProcessStatus()
+            .then(res => {
+                const processStatus = Object.freeze(res || {});
+                if (Object.keys(processStatus).length && callback) {
+                    callback(processStatus)
+                }
+            })
+            .catch(err => console.error(err))
+    }, 1000)
+}
 

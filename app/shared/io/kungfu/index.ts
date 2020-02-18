@@ -1,23 +1,44 @@
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils'; 
 import { watcher, kungfu } from '__gUtils/kungfuUtils';
-
-const longfist = kungfu.longfist;
+import { Observable } from 'rxjs';
 
 watcher.setup();
 
-insertOrders()
+const startGetKungfuState = (callback: Function) => {
+    console.log('startGetKungfuState', '----')
+    setTimerPromiseTask(() => {
+        return new Promise((resolve) => {
+            if (watcher.isLive()) {
+                watcher.step();
+                console.log('watcher.state: ', watcher.state);
+                const state = Object.freeze(watcher.state || {});
+                if (Object.keys(state).length && callback) {
+                    callback(state)
+                }   
+            }
+            resolve()
+        })
+    }, 5000);
+}
 
-setTimerPromiseTask(() => {
-    return new Promise((resolve) => {
-        if (watcher.isLive()) {
-            watcher.step();
-            console.log('watcher.state: ', watcher.state);
+const getKungfuStateObserver = (() => {
+    var observer: any = null;
+    return function () {
+        if (!observer) {
+            observer = new Observable(subscriber => {
+                startGetKungfuState((state: any) => {
+                    subscriber.next(state)
+                })
+            })   
         }
-        resolve()
-    })
-}, 5000);
+        return observer
+    }
+})()
 
 
+
+
+const longfist = kungfu.longfist;
 
 function insertOrders () {
     delayMiliSeconds(3000)
