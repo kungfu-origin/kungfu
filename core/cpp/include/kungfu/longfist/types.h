@@ -369,7 +369,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Position, 205,
-            PK(instrument_id, exchange_id, source_id, account_id),
+            PK(holder_uid, instrument_id, exchange_id, direction),
             (int64_t, update_time),                     //更新时间
             (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 

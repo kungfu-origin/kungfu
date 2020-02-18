@@ -13,12 +13,12 @@ def test_time_interval(context, event):
 
 def pre_start(context):
     context.log.info("pre run strategy")
-    context.add_account(source, "15040900", 100000000.0)
+    context.add_account(source, "15014990", 100000000.0)
     context.subscribe(source, ["600000", "601988"], exchange)
 
 def on_quote(context, quote):
     context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
-    order_id = context.insert_order(quote.instrument_id, exchange, "15040900", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open, HedgeFlag.Speculation)
+    order_id = context.insert_order(quote.instrument_id, exchange, "15014990", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open, HedgeFlag.Speculation)
     context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
 
 def on_transaction(context, transaction):

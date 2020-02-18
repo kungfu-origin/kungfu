@@ -5,6 +5,7 @@ import http
 import functools
 import sys
 import traceback
+import pykungfu
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 import kungfu.yijinjing.msg as yjj_msg
@@ -72,23 +73,24 @@ class Ledger(pywingchun.Ledger):
         self.ctx.logger.info("handle instrument request from [{:08x}]".format(event.source))
         writer = self.get_writer(event.source)
         for inst_dict in self.ctx.inst_infos.values():
-            inst = pywingchun.Instrument()
+            inst = pykungfu.longfist.types.Instrument()
             for attr, value in inst_dict.items():
                 if hasattr(inst, attr) and attr != "raw_address":
                     setattr(inst, attr, value)
-            writer.write_data(0, msg.Instrument, inst)
+            writer.write(0, inst)
         writer.mark(0, msg.InstrumentEnd)
 
     def handle_asset_request(self, event, location):
         self.ctx.logger.info("handle asset request for {} [{:08x}] from [{:08x}] ".format(location.uname, location.uid, event.source))
         book = self._get_book(location)
         writer = self.get_writer(event.source)
-        writer.write_data(0, book.event.msg_type, book.event.data)
+        writer.write(0, book.event.data)
         for position in book.positions:
             event = position.event
-            writer.write_data(0, event.msg_type, event.data)
-        position_end = pywingchun.PositionEnd(book.location.uid)
-        writer.write_data(0, msg.PositionEnd, position_end)
+            writer.write(0, event.data)
+        position_end = pykungfu.longfist.types.PositionEnd()        
+        position_end.holder_uid = book.location.uid
+        writer.write(0, position_end)
 
     def on_app_location(self, trigger_time, location):
         self.ctx.logger.info("{} {} [{:08x}]".format(kft.strftime(trigger_time), location.uname, location.uid))
@@ -124,71 +126,22 @@ class Ledger(pywingchun.Ledger):
             return self.ctx.db.get_location(self.ctx, location_uid)
 
     def on_book_event(self, event):
-        self.ctx.logger.debug("book event received: {}".format(event))
+        self.ctx.logger.debug("book event received: {}".format(event))        
         event = event.as_dict()
         self.ctx.db.on_book_event(event)
         self.publish(json.dumps(event, cls=wc_utils.WCEncoder))
 
     def on_order(self, event, order):
-        self.ctx.logger.debug('on order %s', order)
-        frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source)  # account location which send order report event
-        dest_location = self.get_location(event.dest)  # strategy location which receive order report event
-
-        frame_as_dict["data"]["source_id"] = source_location.group
-        frame_as_dict["data"]["account_id"] = source_location.name
-        frame_as_dict["data"]["client_id"] = dest_location.name
-        frame_as_dict["data"]["order_id"] = str(order.order_id)
-        frame_as_dict["data"]["parent_id"] = str(order.parent_id)
-
-        self.ctx.orders[order.order_id] = frame_as_dict
-
-        self.ctx.db.add_order(**frame_as_dict["data"])
-        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
+        pass
 
     def on_order_action_error(self, event, error):
-        self.ctx.logger.debug("on order action error %s", error)
-        frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source)  # account location which send trade report event
-        dest_location = self.get_location(event.dest)  # strategy location which receive event
-        frame_as_dict["data"]["order_id"] = str(error.order_id)
-        frame_as_dict["data"]["order_action_id"] = str(error.order_action_id)
-        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
+        pass
 
     def on_trade(self, event, trade):
-        self.ctx.logger.debug('on trade %s', trade)
-        frame_as_dict = event.as_dict()
-        source_location = self.get_location(event.source)  # account location which send trade report event
-        dest_location = self.get_location(event.dest)  # strategy location which receive trade report event
-        source_id = source_location.group
-        account_id = source_location.name
-        client_id = dest_location.name
-        frame_as_dict["data"]["source_id"] = source_id
-        frame_as_dict["data"]["account_id"] = account_id
-        frame_as_dict["data"]["client_id"] = client_id
-        frame_as_dict["data"]["order_id"] = str(trade.order_id)
-        frame_as_dict["data"]["trade_id"] = str(trade.trade_id)
-        if source_id == "xtp" and trade.order_id in self.ctx.orders:
-            self.ctx.logger.debug("update order {} by trade".format(trade.order_id))
-            order_record = self.ctx.orders[trade.order_id]
-            order = order_record["data"]
-            if not wc_utils.is_final_status(order["status"]):
-                order["volume_left"] = order["volume_left"] - trade.volume
-                order["volume_traded"] = order["volume_traded"] + trade.volume
-                order["status"] = OrderStatus.PartialFilledActive if order["volume_left"] > 0 else OrderStatus.PartialFilledNotActive
-                self.ctx.db.add_order(**order)
-                self.publish(json.dumps(order_record, cls=wc_utils.WCEncoder))
-            else:
-                self.ctx.logger.debug("order {} enter final status {}, failed to update".format(trade.order_id, order["status"]))
-        self.ctx.db.add_trade(**frame_as_dict["data"])
-        self.publish(json.dumps(frame_as_dict, cls=wc_utils.WCEncoder))
+        pass
 
     def on_instruments(self, instruments):
-        inst_list = list(set(instruments))
-        if inst_list:
-            dicts = [msg_utils.object_as_dict(inst) for inst in inst_list]
-            self.ctx.db.set_instruments(dicts)
-            self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in dicts}
+       pass
 
     def _dump_snapshot(self, data_frequency="minute"):
         for book in self.ctx.books.values():
@@ -208,11 +161,14 @@ class Ledger(pywingchun.Ledger):
 
     def _get_book(self, location):
         if location.uid not in self.ctx.books:
-            book_tags = kwb.book.AccountBookTags.make_from_location(location)
-            book = self.ctx.db.load_book(ctx=self.ctx, location=location)
-            if not book:
-                self.ctx.logger.info("failed to load book from sqlite for {} [{:08x}]".format(location.uname, location.uid))
-                book = kwb.book.AccountBook(self.ctx, location=location, avail=DEFAULT_INIT_CASH)
+            positions = self.get_positions(location)
+            if self.has_asset(location):
+                asset = self.get_asset(location)
+            else:
+                asset = pykungfu.longfist.types.Asset()
+                asset.holder_uid = location.uid
+                asset.avail = DEFAULT_INIT_CASH                           
+            book = kwb.book.AccountBook(self.ctx, location=location, positions=positions, avail = asset.avail,initial_equity = asset.initial_equity, static_equity = asset.static_equity, frozen_cash = asset.frozen_cash, frozen_margin = asset.frozen_margin, intraday_fee = asset.intraday_fee, accumulated_fee = asset.accumulated_fee, realized_pnl = asset.realized_pnl)
             self.ctx.books[location.uid] = book
             self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
         return self.ctx.books[location.uid]
