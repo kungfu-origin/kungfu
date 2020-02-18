@@ -19,9 +19,6 @@ namespace kungfu::node
     private:
         explicit Longfist(const Napi::CallbackInfo &info);
 
-        template <typename DataType, const char *type_name>
-        static constexpr auto make = serialize::JsMake<DataType, type_name>{};
-
         static Napi::ObjectReference constructor;
     };
 }

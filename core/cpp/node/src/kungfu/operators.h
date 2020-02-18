@@ -12,9 +12,14 @@
 
 namespace kungfu::node::serialize
 {
-    template<typename DataType, const char *type_name>
+    template<typename DataType>
     struct JsMake
     {
+        const char *type_name;
+
+        JsMake(const char *_type_name) : type_name(_type_name)
+        {}
+
         Napi::Value operator()(const Napi::CallbackInfo &info)
         {
             Napi::Object dataObj = Napi::Object::New(info.Env());
