@@ -117,6 +117,11 @@ namespace kungfu
             memcpy(value, t, sizeof(value));
         }
 
+        size_t size() const
+        {
+            return N;
+        }
+
         operator T *()
         {
             return static_cast<T *>(value);

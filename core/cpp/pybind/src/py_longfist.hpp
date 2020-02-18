@@ -10,6 +10,75 @@
 
 #include <kungfu/longfist/longfist.h>
 
+namespace pybind11::detail
+{
+    template<size_t Size>
+    struct type_caster<kungfu::array<char, Size>>
+    {
+        using ArrayType = kungfu::array<char, Size>;
+        using value_conv = make_caster<char>;
+
+        bool load(handle src, bool convert)
+        {
+            if (!isinstance<str>(src))
+                return false;
+            std::string &&s = reinterpret_borrow<str>(src);
+            if (s.length() > Size)
+                return false;
+            strcpy(value.value, s.c_str());
+            return true;
+        }
+
+        template<typename T>
+        static handle cast(T &&src, return_value_policy policy, handle parent)
+        {
+            return str(src.value).release();
+        }
+
+    PYBIND11_TYPE_CASTER(ArrayType, _("String[") + value_conv::name + _("[") + _<Size>() + _("]") + _("]"));
+    };
+
+    template<typename ValueType, size_t Size>
+    struct type_caster<kungfu::array<ValueType, Size>>
+    {
+        using ArrayType = kungfu::array<ValueType, Size>;
+        using value_conv = make_caster<ValueType>;
+
+        bool load(handle src, bool convert)
+        {
+            if (!isinstance<sequence>(src))
+                return false;
+            auto l = reinterpret_borrow<sequence>(src);
+            if (l.size() > Size)
+                return false;
+            size_t ctr = 0;
+            for (auto it : l)
+            {
+                value_conv conv;
+                if (!conv.load(it, convert))
+                    return false;
+                value.value[ctr++] = cast_op<ValueType &&>(std::move(conv));
+            }
+            return true;
+        }
+
+        template<typename T>
+        static handle cast(T &&src, return_value_policy policy, handle parent)
+        {
+            list l(src.size());
+            for (size_t index = 0; index < Size; index++)
+            {
+                auto &&value = src.value[index];
+                auto value_ = reinterpret_steal<object>(value_conv::cast(forward_like<T>(value), policy, parent));
+                PyList_SET_ITEM(l.ptr(), (ssize_t) index, value_.release().ptr());
+            }
+            return l.release();
+        }
+
+    PYBIND11_TYPE_CASTER(ArrayType, _("List[") + value_conv::name + _("[") + _<Size>() + _("]") + _("]"));
+    };
+}
+
 namespace kungfu::longfist
 {
     namespace py = pybind11;
@@ -212,27 +281,7 @@ namespace kungfu::longfist
             {
                 auto name = hana::first(it);
                 auto accessor = hana::second(it);
-
-                using RawType = decltype(accessor(std::forward<DataType &>(DataType{})));
-                using AttrType = std::decay_t<RawType>;
-
-                auto getter = [&](DataType &target)
-                {
-                    return accessor(target);
-                };
-
-                auto setter = [&](DataType &target, AttrType value)
-                {
-                    if constexpr (std::is_pointer<AttrType>::value)
-                    {
-                        memcpy(accessor(target), value, sizeof(RawType));
-                    } else
-                    {
-                        accessor(target) = value;
-                    }
-                };
-
-                py_class.def_property(name.c_str(), getter, setter);
+                py_class.def_readwrite(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
             });
 
             py_class.def("__repr__", &DataType::to_string);
