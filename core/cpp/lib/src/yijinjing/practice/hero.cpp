@@ -82,6 +82,8 @@ namespace kungfu::yijinjing::practice
 
     void hero::setup()
     {
+        io_device_->setup();
+
         events_ = observable<>::create<event_ptr>(
                 [&, this](subscriber<event_ptr> sb)
                 {

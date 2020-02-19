@@ -179,16 +179,15 @@ export const startProcess = async (options: any, no_ext=false): Promise<object> 
         "args":             args,
         "script":           `kfc${extensionName}`,
         "cwd":              path.join(KUNGFU_ENGINE_PATH, 'kfc'),
-        "log_type": "json",
-        "out_file": buildProcessLogPath(options.name),
-        "err_file": buildProcessLogPath(options.name),
-        "merge_logs": true,
+        "logType": "json",
+        "output": buildProcessLogPath(options.name),
+        "error": buildProcessLogPath(options.name),
+        "mergeLogs": true,
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
-        "max_restarts": 1,
+        "maxRestarts": 1,
         "watch": false,
-        "force": options.force === undefined ? true : options.force,
-        "exec_mode" : "fork",
+        "execMode" : "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
         }
@@ -227,18 +226,19 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
         "interpreter":      'kfc',
         "interpreterArgs":  args,
         "script":           strategyPath,
-        "log_type": "json",
-        "out_file": buildProcessLogPath(name),
-        "err_file": buildProcessLogPath(name),
-        "merge_logs": true,
+        "logType": "json",
+        "output": buildProcessLogPath(name),
+        "error": buildProcessLogPath(name),
+        "mergeLogs": true,
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
-        "max_restarts": 1,
+        "maxRestarts": 1,
         "watch": false,
-        "exec_mode" : "fork",
+        "execMode" : "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
-        }
+        },
+        "killTimeout": 16000
     };
 
     return new Promise((resolve, reject) => {

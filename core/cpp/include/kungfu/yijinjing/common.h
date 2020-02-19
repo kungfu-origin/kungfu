@@ -45,7 +45,15 @@ namespace kungfu
             {}
         };
 
-        class publisher
+        class resource
+        {
+        public:
+            virtual bool is_usable() = 0;
+
+            virtual void setup() = 0;
+        };
+
+        class publisher : public resource
         {
         public:
 
@@ -58,7 +66,7 @@ namespace kungfu
 
         DECLARE_PTR(publisher)
 
-        class observer
+        class observer : public resource
         {
         public:
 

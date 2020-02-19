@@ -48,10 +48,34 @@ namespace kungfu::yijinjing
         }
     };
 
-    class nanomsg_publisher : public publisher
+    class nanomsg_resource : public resource
+    {
+    protected:
+        nanomsg_resource(const io_device &io_device, bool low_latency, protocol p) :
+                io_device_(io_device), low_latency_(low_latency),
+                location_(std::make_shared<data::location>(longfist::enums::mode::LIVE,
+                                                           longfist::enums::category::SYSTEM,
+                                                           "master",
+                                                           "master",
+                                                           io_device_.get_home()->locator)),
+                bind_path_(io_device_.get_url_factory()->make_path_bind(location_, p)),
+                connect_path_(io_device_.get_url_factory()->make_path_connect(location_, p)),
+                socket_(p)
+        {}
+
+        const io_device &io_device_;
+        const bool low_latency_;
+        const location_ptr location_;
+        const std::string bind_path_;
+        const std::string connect_path_;
+        socket socket_;
+    };
+
+    class nanomsg_publisher : public publisher, protected nanomsg_resource
     {
     public:
-        nanomsg_publisher(bool low_latency, protocol p) : socket_(p), low_latency_(low_latency)
+        nanomsg_publisher(const io_device &io_device, bool low_latency, protocol p) :
+                nanomsg_resource(io_device, low_latency, p)
         {}
 
         ~nanomsg_publisher() override
@@ -59,12 +83,8 @@ namespace kungfu::yijinjing
             socket_.close();
         }
 
-        void init(const io_device &io)
-        {
-            auto location = std::make_shared<data::location>(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, "master", "master",
-                                                             io.get_home()->locator);
-            init_socket(socket_, location, io.get_url_factory());
-        }
+        void setup() override
+        {}
 
         int notify() override
         {
@@ -75,53 +95,51 @@ namespace kungfu::yijinjing
         {
             return socket_.send(json_message);
         }
-
-    protected:
-        virtual void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) = 0;
-
-    private:
-        const bool low_latency_;
-        socket socket_;
     };
 
     class nanomsg_publisher_master : public nanomsg_publisher
     {
     public:
-        nanomsg_publisher_master(bool low_latency) : nanomsg_publisher(low_latency, protocol::PUBLISH)
-        {}
-
-    protected:
-        void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) override
+        nanomsg_publisher_master(const io_device &io_device, bool low_latency) : nanomsg_publisher(io_device, low_latency, protocol::PUBLISH)
         {
-            s.bind(url_factory->make_path_bind(location, s.get_protocol()));
+            socket_.bind(bind_path_);
+        }
+
+        bool is_usable() override
+        {
+            return true;
         }
     };
 
     class nanomsg_publisher_client : public nanomsg_publisher
     {
     public:
-        nanomsg_publisher_client(bool low_latency) : nanomsg_publisher(low_latency, protocol::PUSH)
-        {}
-
-    protected:
-        void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) override
+        nanomsg_publisher_client(const io_device &io_device, bool low_latency) :
+                nanomsg_publisher(io_device, low_latency, protocol::PUSH)
         {
-            s.connect(url_factory->make_path_connect(location, s.get_protocol()));
+            socket_.connect(connect_path_);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        bool is_usable() override
+        {
+            auto now = time::now_in_nano();
+            nlohmann::json ping;
+            ping["msg_type"] = Ping::tag;
+            ping["gen_time"] = now;
+            ping["trigger_time"] = now;
+            ping["source"] = 0;
+            ping["dest"] = 0;
+            return socket_.send(ping.dump()) > 0;
         }
     };
 
-    class nanomsg_observer : public observer
+    class nanomsg_observer : public observer, protected nanomsg_resource
     {
     public:
-        nanomsg_observer(bool low_latency, protocol p) : low_latency_(low_latency), socket_(p), recv_flags_(low_latency ? NN_DONTWAIT : 0)
-        {}
-
-        void init(const io_device &io)
+        nanomsg_observer(const io_device &io_device, bool low_latency, protocol p) :
+                nanomsg_resource(io_device, low_latency, p), recv_flags_(low_latency ? NN_DONTWAIT : 0)
         {
-            auto location = std::make_shared<data::location>(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, "master", "master",
-                                                             io.get_home()->locator);
-            init_socket(socket_, location, io.get_url_factory());
             if (not low_latency_)
             {
                 socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, DEFAULT_NOTICE_TIMEOUT);
@@ -133,6 +151,9 @@ namespace kungfu::yijinjing
             socket_.close();
         }
 
+        void setup() override
+        {}
+
         bool wait() override
         {
             return socket_.recv(recv_flags_) > 0;
@@ -143,40 +164,37 @@ namespace kungfu::yijinjing
             return socket_.last_message();
         }
 
-    protected:
-
-        virtual void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) = 0;
-
     private:
-        const bool low_latency_;
-        socket socket_;
         int recv_flags_;
     };
 
     class nanomsg_observer_master : public nanomsg_observer
     {
     public:
-        nanomsg_observer_master(bool low_latency) : nanomsg_observer(low_latency, protocol::PULL)
-        {}
-
-    protected:
-        void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) override
+        nanomsg_observer_master(const io_device &io_device, bool low_latency) : nanomsg_observer(io_device, low_latency, protocol::PULL)
         {
-            s.bind(url_factory->make_path_bind(location, s.get_protocol()));
+            socket_.bind(bind_path_);
+        }
+
+        bool is_usable() override
+        {
+            return true;
         }
     };
 
     class nanomsg_observer_client : public nanomsg_observer
     {
     public:
-        nanomsg_observer_client(bool low_latency) : nanomsg_observer(low_latency, protocol::SUBSCRIBE)
-        {}
-
-    protected:
-        void init_socket(socket &s, location_ptr location, url_factory_ptr url_factory) override
+        nanomsg_observer_client(const io_device &io_device, bool low_latency) :
+                nanomsg_observer(io_device, low_latency, protocol::SUBSCRIBE)
         {
-            s.connect(url_factory->make_path_connect(location, s.get_protocol()));
-            s.setsockopt_str(NN_SUB, NN_SUB_SUBSCRIBE, "");
+            socket_.connect(connect_path_);
+            socket_.setsockopt_str(NN_SUB, NN_SUB_SUBSCRIBE, "");
+        }
+
+        bool is_usable() override
+        {
+            return socket_.recv(0) > 0;
         }
     };
 
@@ -204,11 +222,6 @@ namespace kungfu::yijinjing
     int xConflict(void *pCtx, int eConflict, sqlite3_changeset_iter *pIter)
     {
         return 0;
-    }
-
-    void destruct_str(void *str)
-    {
-        SPDLOG_INFO("destruct");
     }
 
     void handle_sql_error(int rc, const std::string &error_tip)
@@ -400,12 +413,8 @@ and json_extract(session.data, '$.end_time') <= ?4;
 
     io_device_master::io_device_master(data::location_ptr home, bool low_latency) : io_device_with_reply(std::move(home), low_latency, false)
     {
-        auto publisher = std::make_shared<nanomsg_publisher_master>(low_latency);
-        publisher->init(*this);
-        publisher_ = publisher;
-        auto observer = std::make_shared<nanomsg_observer_master>(low_latency);
-        observer->init(*this);
-        observer_ = observer;
+        publisher_ = std::make_shared<nanomsg_publisher_master>(*this, low_latency);
+        observer_ = std::make_shared<nanomsg_observer_master>(*this, low_latency);
 
         sqlite3_prepare_v2(
                 index_db_,
@@ -527,12 +536,8 @@ where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$
 
     io_device_client::io_device_client(data::location_ptr home, bool low_latency) : io_device_with_reply(std::move(home), low_latency, true)
     {
-        auto publisher = std::make_shared<nanomsg_publisher_client>(low_latency);
-        publisher->init(*this);
-        publisher_ = publisher;
-        auto observer = std::make_shared<nanomsg_observer_client>(low_latency);
-        observer->init(*this);
-        observer_ = observer;
+        publisher_ = std::make_shared<nanomsg_publisher_client>(*this, low_latency);
+        observer_ = std::make_shared<nanomsg_observer_client>(*this, low_latency);
     }
 
     void session::update(const frame_ptr &frame)

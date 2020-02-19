@@ -1,11 +1,8 @@
 import { existsSync } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils';
-
-import { watcher } from '__gUtils/kungfuUtils';
+import '__gUtils/kungfuUtils';
 
 export const sqlite3 = require('kungfu-core').sqlite3.verbose();
-
-console.log(watcher)
 
 /**
  * @param  {String} dbPath

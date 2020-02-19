@@ -42,12 +42,8 @@ window.store = store;
 
 process.env.ELECTRON_RUN_AS_NODE = true;
 
-
-
 const currentPath = window.location.hash;
 if(currentPath.indexOf('/code') === -1) {
-    
-
     //kungfu master 启动流程
     startMaster(false)
         .finally(() => {
@@ -57,12 +53,14 @@ if(currentPath.indexOf('/code') === -1) {
 
             utils.delayMiliSeconds(1000)
             .then(() => startLedger(false))
-
-            utils.delayMiliSeconds(3000)
-            .then(() => require('__io/kungfu/index'))
         })
-
 }
 
+
+const { KUNGFU_OBSERVER } = require('__io/kungfu/index');
+
+// KUNGFU_OBSERVER.subscribe((data) => {
+//     console.log(data, '---')
+// })
 
 

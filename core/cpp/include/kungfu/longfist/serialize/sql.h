@@ -101,7 +101,7 @@ namespace sqlite_orm
 {
 
     template<typename T>
-    struct type_printer<T, std::enable_if_t<std::is_enum_v<T> and not std::is_convertible_v<T, int>>> : public integer_printer
+    struct type_printer<T, std::enable_if_t<kungfu::is_enum_class_v<T>>> : public integer_printer
     {
     };
 
@@ -124,7 +124,7 @@ namespace sqlite_orm
 namespace sqlite_orm
 {
     template<typename V>
-    struct statement_binder<V, std::enable_if_t<std::is_enum_v<V> and not std::is_convertible_v<V, int>>>
+    struct statement_binder<V, std::enable_if_t<kungfu::is_enum_class_v<V>>>
     {
         int bind(sqlite3_stmt *stmt, int index, const V &value)
         {
@@ -169,7 +169,7 @@ namespace sqlite_orm
 namespace sqlite_orm
 {
     template<typename V>
-    struct row_extractor<V, std::enable_if_t<std::is_enum_v<V> and not std::is_convertible_v<V, int> and not std::is_same_v<V, journal_mode>>>
+    struct row_extractor<V, std::enable_if_t<kungfu::is_enum_class_v<V> and not std::is_same_v<V, journal_mode>>>
     {
         V extract(const char *row_value)
         {

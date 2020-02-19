@@ -32,7 +32,7 @@ namespace kungfu::yijinjing
 
     FORWARD_DECLARE_PTR(session)
 
-    class io_device
+    class io_device : public resource
     {
     public:
 
@@ -40,13 +40,24 @@ namespace kungfu::yijinjing
 
         virtual ~io_device();
 
+        bool is_usable() override
+        {
+            return publisher_ and observer_ and publisher_->is_usable() and observer_->is_usable();
+        }
+
+        void setup() override
+        {
+            publisher_->setup();
+            observer_->setup();
+        }
+
         [[nodiscard]] data::location_ptr get_home() const
         { return home_; }
 
         [[nodiscard]] data::location_ptr get_live_home() const
         { return live_home_; }
 
-        bool is_low_latency()
+        [[nodiscard]] bool is_low_latency()
         { return low_latency_; }
 
         journal::reader_ptr open_reader_to_subscribe();
@@ -66,10 +77,10 @@ namespace kungfu::yijinjing
         [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const
         { return url_factory_; }
 
-        publisher_ptr get_publisher()
+        [[nodiscard]] publisher_ptr get_publisher()
         { return publisher_; }
 
-        observer_ptr get_observer()
+        [[nodiscard]] observer_ptr get_observer()
         { return observer_; }
 
         [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;

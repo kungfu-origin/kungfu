@@ -68,20 +68,18 @@ namespace kungfu::yijinjing::practice
 
         if (app_locations_.find(app_location->uid) == app_locations_.end())
         {
-            auto master_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-            register_location(e->gen_time(), master_location);
-            app_locations_[app_location->uid] = master_location->uid;
+            auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+            register_location(e->gen_time(), master_cmd_location);
+            app_locations_[app_location->uid] = master_cmd_location->uid;
         }
 
         register_location(e->gen_time(), app_location);
 
-        auto master_location = get_location(app_locations_[app_location->uid]);
-        writers_[app_location->uid] = get_io_device()->open_writer_at(master_location, app_location->uid);
+        auto master_cmd_location = get_location(app_locations_[app_location->uid]);
+        writers_[app_location->uid] = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
         reader_->join(app_location, 0, now);
-        reader_->join(app_location, master_location->uid, now);
-
-        auto &writer = writers_[app_location->uid];
+        reader_->join(app_location, master_cmd_location->uid, now);
 
         {
             auto msg = request_loc.dump();
@@ -90,16 +88,18 @@ namespace kungfu::yijinjing::practice
             writers_[0]->close_frame(msg.length());
         }
 
+        auto &writer = writers_[app_location->uid];
+
         io_device->open_session(app_location, e->gen_time());
         writer->mark(e->gen_time(), SessionStart::tag);
 
         require_write_to(e->gen_time(), app_location->uid, 0);
-        require_write_to(e->gen_time(), app_location->uid, master_location->uid);
+        require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
 
         for (const auto &item : locations_)
         {
             SPDLOG_DEBUG("adding location {}", item.second->to_string());
-            writer->write(e->gen_time(), dynamic_cast<Location&>(*item.second));
+            writer->write(e->gen_time(), dynamic_cast<Location &>(*item.second));
         }
 
         for (const auto &item: channels_)
@@ -201,6 +201,12 @@ namespace kungfu::yijinjing::practice
           {
               auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
               io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
+          });
+
+        events_ | is(Ping::tag) |
+        $([&](const event_ptr &e)
+          {
+              get_io_device()->get_publisher()->publish("{}");
           });
 
         events_ | is(Register::tag) | $$(register_app);

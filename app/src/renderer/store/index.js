@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import baseModule from './base';
 import accountModule from './account';
 import strategyModule from './strategy';
+import tradingDataMoudle from './tradingData';
 
 
 Vue.use(Vuex)
@@ -12,6 +13,7 @@ export default new Vuex.Store({
 	modules: {
 		BASE: baseModule,
 		ACCOUNT: accountModule,
-		STRATEGY: strategyModule
+		STRATEGY: strategyModule,
+		TRADING_DATA: tradingDataMoudle
 	}
 })

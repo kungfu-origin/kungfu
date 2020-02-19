@@ -20,7 +20,16 @@ namespace kungfu::node
         
         ~Watcher();
 
+        Napi::Value GetLocation(const Napi::CallbackInfo &info);
+
+        void SetLocation(const Napi::CallbackInfo &info, const Napi::Value &value)
+        {}
+
+        Napi::Value IsUsable(const Napi::CallbackInfo &info);
+
         Napi::Value IsLive(const Napi::CallbackInfo &info);
+
+        Napi::Value IsStarted(const Napi::CallbackInfo &info);
 
         Napi::Value Setup(const Napi::CallbackInfo &info);
 

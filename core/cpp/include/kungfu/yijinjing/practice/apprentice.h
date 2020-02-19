@@ -33,6 +33,9 @@ namespace kungfu::yijinjing::practice
     public:
         explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
+        bool is_started()
+        { return started_; }
+
         void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
         void request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time);
@@ -89,7 +92,7 @@ namespace kungfu::yijinjing::practice
         void react() override;
 
         virtual void on_start()
-        {}
+        { started_ = true; }
 
         virtual void on_read_from(const event_ptr &event);
 
@@ -206,6 +209,7 @@ namespace kungfu::yijinjing::practice
         std::unordered_map<int, int64_t> timer_checkpoints_;
         int32_t timer_usage_count_;
         longfist::recover recover_state;
+        bool started_;
 
         void checkin();
 

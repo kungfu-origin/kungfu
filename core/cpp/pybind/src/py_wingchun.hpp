@@ -276,6 +276,7 @@ namespace kungfu::wingchun
                 .def_property_readonly("config_location", &Ledger::get_config_location)
                 .def_property_readonly("io_device", &Ledger::get_io_device)
                 .def_property_readonly("book_context", &Ledger::get_book_context)
+                .def_property_readonly("usable", &Ledger::is_usable)
                 .def("now", &Ledger::now)
                 .def("has_location", &Ledger::has_location)
                 .def("get_location", &Ledger::get_location)

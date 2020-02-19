@@ -156,12 +156,12 @@ namespace kungfu::yijinjing::nanomsg
                     break;
                 case EINTR:
                 {
-                    SPDLOG_WARN("interrupted when receiving from {}", url_);
+                    SPDLOG_WARN("interrupted when receiving from [{}]", url_);
                     break;
                 }
                 default:
                 {
-                    SPDLOG_ERROR("can not recv from {} errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
+                    SPDLOG_ERROR("can not recv from [{}] errno [{}] {}", url_, nn_errno(), nn_strerror(nn_errno()));
                     throw nn_exception();
                 }
             }
