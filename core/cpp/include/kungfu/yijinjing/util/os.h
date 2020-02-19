@@ -10,6 +10,7 @@
 #ifdef _WINDOWS
 #define GETPID _getpid
 #else
+#include <unistd.h>
 #define GETPID getpid
 #endif
 

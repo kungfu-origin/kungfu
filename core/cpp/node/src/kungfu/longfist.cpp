@@ -24,7 +24,8 @@ namespace kungfu::node
         {
             auto name = boost::hana::first(it);
             using DataType = typename decltype(+boost::hana::second(it))::type;
-            longfist.Set(Napi::String::New(env, name.c_str()), Napi::Function::New(env, make<DataType, name.c_str()>));
+            static const auto make = serialize::JsMake<DataType>(name.c_str());
+            longfist.Set(Napi::String::New(env, name.c_str()), Napi::Function::New(env, make));
         });
 
         constructor = Napi::Persistent(longfist);

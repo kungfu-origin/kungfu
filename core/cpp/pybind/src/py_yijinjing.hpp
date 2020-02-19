@@ -174,7 +174,7 @@ namespace kungfu::yijinjing
 
     void bind(pybind11::module &&m)
     {
-        m.def("thread_id", &spdlog::details::os::thread_id);
+        m.def("thread_id", &get_thread_id);
         m.def("in_color_terminal", &in_color_terminal);
         m.def("color_print", &color_print);
 

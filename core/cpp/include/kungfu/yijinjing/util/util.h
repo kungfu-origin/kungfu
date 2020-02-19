@@ -7,6 +7,8 @@
 
 #define KUNGFU_HASH_SEED 42
 
+#include <kungfu/common.h>
+
 namespace kungfu::yijinjing::util
 {
     /**
@@ -23,6 +25,8 @@ namespace kungfu::yijinjing::util
     void color_print(const std::string &level, const std::string &log);
 
     bool in_color_terminal();
+
+    size_t get_thread_id();
 }
 
 #endif //KUNGFU_YIJINJING_UTIL_H
