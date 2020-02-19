@@ -59,8 +59,8 @@ if(currentPath.indexOf('/code') === -1) {
 
 const { KUNGFU_OBSERVER } = require('__io/kungfu/index');
 
-// KUNGFU_OBSERVER.subscribe((data) => {
-//     console.log(data, '---')
-// })
+KUNGFU_OBSERVER.subscribe((data) => {
+    console.log(data, '---')
+})
 
 
