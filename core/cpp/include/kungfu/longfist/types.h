@@ -338,7 +338,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Trade, 204,
-            PK(order_id),
+            PK(trade_id),
             (uint64_t, trade_id),                       //成交ID
 
             (uint64_t, order_id),                       //订单ID

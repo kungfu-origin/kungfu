@@ -18,7 +18,7 @@ const layout_dir_from_home = function(home, category, group, name, mode, layout)
 
 exports.longfist = bindings.longfist;
 
-exports.locator = function(home) {
+const locator = function(home) {
     return {
         has_env: function(name) {
             return name in process.env;
@@ -48,44 +48,10 @@ exports.locator = function(home) {
     };
 };
 
-exports.io_device = function(mode, category, group, name, locator) {
-    return new bindings.IODevice(mode, category, group, name, locator);
+exports.io_device = function(mode, category, group, name, home) {
+    return new bindings.IODevice(mode, category, group, name, locator(home));
 };
 
-exports.watcher = function(locator, name) {
-    let wb = new bindings.Watcher(locator, name);
-    wb.run = function(stepCallback) {
-        const self = this;
-        const setTimerPromiseTask = function (fn, interval) {
-            if (interval === void 0) { interval = 500; }
-            var taskTimer = null;
-            function timerPromiseTask(fn, interval) {
-                if (interval === void 0) { interval = 500; }
-                if (taskTimer)
-                    clearTimeout(taskTimer);
-                fn()
-                    .finally(function () {
-                        taskTimer = setTimeout(function () {
-                            timerPromiseTask(fn, interval);
-                        }, interval);
-                    });
-            }
-            timerPromiseTask(fn, interval);
-        };
-        setTimerPromiseTask(() => {
-            return new Promise((resolve) => {
-                if (self.isUsable() && !self.isLive() && !self.isStarted()) {
-                    self.setup();
-                }
-                if (self.isLive()) {
-                    self.step();
-                }
-                if (self.isLive() && self.isStarted()) {
-                    stepCallback(self);
-                }
-                resolve();
-            })
-        });
-    };
-    return wb;
+exports.watcher = function(home, name) {
+    return new bindings.Watcher(locator(home), name);
 };
