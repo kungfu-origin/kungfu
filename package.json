@@ -8,7 +8,7 @@
   "workspaces": ["core", "cli", "app"],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
-    "build": "npm run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
+    "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
     "env-cli": "npm config set kungfu-core:runtime node",
     "env-electron": "npm config set kungfu-core:runtime electron",

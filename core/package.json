@@ -33,7 +33,7 @@
     "node-addon-api": "^2.0.0"
   },
   "devDependencies": {
-    "cmake-js": "==5.3.1",
+    "cmake-js": "==6.0.0",
     "cross-env": "^5.0.5",
     "cross-var": "^1.1.0"
   }

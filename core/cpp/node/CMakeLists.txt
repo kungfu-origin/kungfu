@@ -30,21 +30,21 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 ############################################################
 
 AUX_SOURCE_DIRECTORY(src/kungfu SOURCE_FILES_KUNGFU)
-ADD_LIBRARY(node_kungfu SHARED ${SOURCE_FILES_KUNGFU})
+ADD_LIBRARY(node_kungfu SHARED ${SOURCE_FILES_KUNGFU} ${CMAKE_JS_SRC})
 SET_TARGET_PROPERTIES(node_kungfu PROPERTIES PREFIX "" SUFFIX ".node")
 TARGET_LINK_LIBRARIES(node_kungfu kungfu ${CMAKE_JS_LIB})
 
 ############################################################
 
 AUX_SOURCE_DIRECTORY(src/nanomsg SOURCE_FILES_NANOMSG)
-ADD_LIBRARY(node_nanomsg SHARED ${SOURCE_FILES_NANOMSG})
+ADD_LIBRARY(node_nanomsg SHARED ${SOURCE_FILES_NANOMSG} ${CMAKE_JS_SRC})
 SET_TARGET_PROPERTIES(node_nanomsg PROPERTIES PREFIX "" SUFFIX ".node")
 TARGET_LINK_LIBRARIES(node_nanomsg nanomsg ${CMAKE_JS_LIB})
 
 ############################################################
 
 AUX_SOURCE_DIRECTORY(src/sqlite3 SOURCE_FILES_SQLITE3)
-ADD_LIBRARY(node_sqlite3 SHARED ${SOURCE_FILES_SQLITE3})
+ADD_LIBRARY(node_sqlite3 SHARED ${SOURCE_FILES_SQLITE3} ${CMAKE_JS_SRC})
 SET_TARGET_PROPERTIES(node_sqlite3 PROPERTIES PREFIX "" SUFFIX ".node")
 TARGET_LINK_LIBRARIES(node_sqlite3 sqlite3 ${CMAKE_JS_LIB})
 
@@ -52,7 +52,7 @@ TARGET_LINK_LIBRARIES(node_sqlite3 sqlite3 ${CMAKE_JS_LIB})
 
 if(WIN32)
     AUX_SOURCE_DIRECTORY(src/windows-kill SOURCE_FILES_WINDOWS_KILL)
-    ADD_LIBRARY(node_windows_kill SHARED ${SOURCE_FILES_WINDOWS_KILL})
+    ADD_LIBRARY(node_windows_kill SHARED ${SOURCE_FILES_WINDOWS_KILL} ${CMAKE_JS_SRC})
     SET_TARGET_PROPERTIES(node_windows_kill PROPERTIES PREFIX "" SUFFIX ".node")
     TARGET_LINK_LIBRARIES(node_windows_kill Dbghelp ${CMAKE_JS_LIB})
 endif()

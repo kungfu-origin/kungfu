@@ -11,21 +11,6 @@
 #include "nanomsg/ws.h"
 #include "poll_ctx.h"
 
-#ifdef _MSC_VER
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <delayimp.h>
-
-static FARPROC WINAPI loadDLLHook(unsigned int event, DelayLoadInfo* info) {
-    if (event != dliNotePreLoadLibrary) { return NULL; }
-    if (_stricmp(info->szDll, "NODE.EXE") != 0) { return NULL; }
-
-    return (FARPROC)GetModuleHandle(NULL);
-}
-
-decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = loadDLLHook;
-#endif
-
 using v8::Function;
 using v8::FunctionTemplate;
 using v8::Local;
