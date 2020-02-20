@@ -406,8 +406,8 @@ export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<
 export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = +Number(item.update_time || item.insert_time || 0);
     return Object.freeze({
-        id: item.order_id.toString() + '_' + item.account_id.toString(),
-        updateTime: moment(updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        id: [item.order_id.toString(), item.account_id.toString()].join('-'),
+        updateTime: moment(+updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
@@ -418,25 +418,25 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         status: item.status,
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id,
-        orderId: item.order_id,
+        orderId: item.order_id.toString(),
         exchangeId: item.exchange_id
     })
 }
 
 export const dealTrade = (item: TradeInputData): TradeData => {
-    const updateTime = item.trade_time || item.update_time || 0;
-    return {
-        id: [(item.rowid || '').toString(), item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
-        updateTime: updateTime && moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
+    const updateTime = +Number(item.trade_time || item.update_time || 0);
+    return Object.freeze({
+        id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
+        updateTime: moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],
         price: toDecimal(+item.price, 3),
-        volume: toDecimal(+item.volume, 0),
+        volume: toDecimal(Number(item.volume), 0),
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id
-    }     
+    })  
 }
 
 export const dealPos = (item: PosInputData): PosData => {
@@ -446,9 +446,9 @@ export const dealPos = (item: PosInputData): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
-        yesterdayVolume: toDecimal(item.yesterday_volume, 0),
-        todayVolume: toDecimal(item.volume - item.yesterday_volume, 0),
-        totalVolume: toDecimal(item.volume, 0),
+        yesterdayVolume: toDecimal(Number(item.yesterday_volume), 0),
+        todayVolume: toDecimal(Number(item.volume) - Number(item.yesterday_volume), 0),
+        totalVolume: toDecimal(Number(item.volume), 0),
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'

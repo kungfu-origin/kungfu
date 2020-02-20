@@ -26,62 +26,24 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
-import { debounce, throttleInsert, dealTrade } from "__gUtils/busiUtils"
-import { writeCSV } from '__gUtils/fileUtils';
+
 import DateRangeDialog from '../DateRangeDialog';
+import tradingDataMixin from './js/tradingDataMixin';
+
+import { debounce, dealTrade } from "__gUtils/busiUtils"
+import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     name: 'trades-record',
-    props: {
-        currentId: {
-            type: String,
-            default:''
-        },
-        moduleType: {
-            type: String,
-            default:''
-        },
-        getDataMethod: {
-            type: Function,
-            default: () => {}
-        },
-        //接收推送的数据
-        nanomsgBackData: {
-            type: Object,
-            default: {}
-        }
-    },
 
-    data() {
-        this.throttleInsertTrade = throttleInsert(500, 'unshift')
-        return {
-            rendererTable: false,
-            searchKeyword: '',
-            filter: {
-                id: '',
-                dateRange: null
-            },
-            getDataLock: false,
-            tableData: Object.freeze([]),
-            dateRangeDialogVisiblity: false
-        }
-    },
+    mixins: [ tradingDataMixin ],
 
     components: {
         DateRangeDialog
     },
 
     computed:{
-        ...mapState({
-            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
-        }),
-
-        currentTitle() {
-            return this.currentId ? `${this.currentId}` : ''
-        },
-
         schema(){
             return [{
                 type: 'text',
@@ -120,134 +82,34 @@ export default {
     },
 
     watch: {
-        searchKeyword: debounce(function(val) {
+        kungfuData (trades) {
             const t = this;
-            t.filter.id = val;
-        }),
-
-        filter:{
-            deep: true,
-            handler() {
-                const t = this;
-                if(t.currentId) t.init();
-            }
-        },
-        
-        currentId(val) {
-            const t = this;
-            t.resetData();
-            if(val) t.init();
-        },
-
-        //接收推送返回的数据
-        nanomsgBackData(val) {
-            const t = this;
-            if(!val || t.getDataLock) return
-            t.dealNanomsg(val)
-        },
-
-        tradingDay() {
-            const t = this;
-            t.resetData();
-            if(t.currentId) t.init();
+            const tradesResolve = t.dealTradeList(trades, {
+                tradingDay: t.tradingDay,
+                searchKeyword: t.searchKeyword
+            })
+            tradesResolve.length && (t.tableData = tradesResolve)
         }
-
-    },
-
-    mounted(){
-        const t = this;
-        t.rendererTable = true;
-        t.resetData();
-        if(t.currentId) t.init();
     },
 
     methods:{
-        handleRefresh(){
+        dealTradeList (trades, { tradingDay, searchKeyword}) {
             const t = this;
-            t.resetData();
-            if(t.currentId) t.init();
-        },
+            const tradesAfterFilter = trades
+                .filter(item => (item.trading_day === tradingDay))
+                .filter(item => {
+                    if (searchKeyword.trim() === '') return true;
+                    const { trade_id, client_id, account_id, source_id, instrument_id } = item
+                    return trade_id.toString().includes(searchKeyword) 
+                        || account_id.includes(searchKeyword) 
+                        || source_id.includes(searchKeyword) 
+                        || client_id.includes(searchKeyword)
+                        || instrument_id.includes(searchKeyword) 
+                })
+                .map(item => dealTrade(item))
+                .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
 
-        //选择日期以及保存
-        handleConfirmDateRange(dateRange){
-            const t = this;
-        },
-
-        //重置数据
-        resetData() {
-            const t = this;
-            this.searchKeyword = '';
-            this.filter = {
-                id: '',
-                dateRange: null
-            };
-            t.getDataLock = false;
-            t.tableData = Object.freeze([]);
-            return true;
-        },
-
-        init: debounce(function() {
-            const t = this
-            t.getData()
-        }),
-
-        //首次获取数据
-        getData() {
-            const t = this
-            if(t.getDataLock) throw new Error('get-data-lock');
-            //获得获取数据的方法名
-            t.getDataLock = true
-            t.tableData = Object.freeze([])
-            //id:用户或者交易id，filter：需要筛选的数据
-            return t.getDataMethod(t.currentId, t.filter, t.tradingDay).then(res => {
-                if(!res || !res.length) {
-                    t.tableData = Object.freeze([])
-                    return;
-                }
-                t.tableData = Object.freeze(t.dealData(res))
-            }).finally(() => t.getDataLock = false)
-        },
-
-        //对返回的数据进行处理
-        dealData(data) {
-            const t = this
-            const historyData = data || []
-            const tableData = historyData.map(item => dealTrade(item))
-            return tableData
-        },
-
-
-        dealNanomsg(data) {
-            const t = this
-            //当有日期筛选的时候，不需要推送数据
-            if(t.filter.dateRange) return
-            //如果存在筛选，则推送的数据也需要满足筛选条件
-            const { id, dateRange } = t.filter
-            const { trade_time } = data
-            if(!((data.instrument_id.includes(id) || data.client_id.includes(id)) )) return
-            const tradeData = {
-                ...dealTrade(data),
-                nano: true
-            }
-            t.throttleInsertTrade(tradeData).then(tradeList => {
-                if(!tradeList) return;
-                let oldTableData = t.tableData;
-                oldTableData = [...tradeList, ...oldTableData]
-                //更新数据
-                t.tableData = Object.freeze(oldTableData)
-            })
-           
-        },
-
-        renderCellClass(prop, item){
-            if(prop === 'side'){
-                if(item.side === '买') return 'red'
-                else if(item.side === '卖') return 'green'
-            }
-            if(prop === 'offset'){
-                if(item.offset === '开仓') return 'red'
-                else if(item.offset === '平仓') return 'green'
-            }
+            return Object.freeze(tradesAfterFilter || [])
         }
     }
 }

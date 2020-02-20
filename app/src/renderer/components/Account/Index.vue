@@ -40,19 +40,20 @@
                 <el-row style="height: 50%">
                     <Pos 
                     ref="pos"
-                    :currentId="currentId" 
                     moduleType="account"
+                    :currentId="currentId" 
                     :accountType="accountType"
-                    :nanomsgBackData="posFromNmsg"
+                    :kungfuData="positions"
                     />
                 </el-row>
                 
                 <el-row style="height: 50%">
                     <TradeRecord
                     ref="trade-record"
-                    :currentId="currentId"
                     moduleType="account" 
-                    :nanomsgBackData="tradesFromNmsg"
+                    :currentId="currentId"
+                    :tradingDay="tradingDay"
+                    :kungfuData="trades"
                     />
                 </el-row>
             </el-col>
@@ -71,7 +72,6 @@ import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
 import * as ACCOUNT_API from '__io/db/account';
-import { debounce } from '__gUtils/busiUtils';
 import { buildTradingDataPipe } from '__io/kungfu/index';
 
 export default {
@@ -81,8 +81,9 @@ export default {
         this.tradingDataPipe = null;
         return {
             orders: Object.freeze([]),
-            tradesFromNmsg: null,
-            posFromNmsg: null,
+            trades: Object.freeze([]),
+            positions: Object.freeze([]),
+
             minPnlFromNmsg: null
         }
     },
@@ -116,11 +117,15 @@ export default {
     mounted(){
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe().subscribe(data => {
-            console.log(data, '==')
-            const orders = data['orders']['account'][t.currentId]
-            this.orders = Object.freeze(orders || [])
+            // console.log(data, '==')
+            const orders = data['orders']['account'][t.currentId];
+            this.orders = Object.freeze(orders || []);
+            const trades = data['trades']['account'][t.currentId];
+            this.trades = Object.freeze(trades || []);
+            const positions = data['positions']['account'][t.currentId];
+            this.positions = Object.freeze(positions || []);
+
         })
-        console.log(t.tradingDataPipe)
     },
 
     destroyed(){

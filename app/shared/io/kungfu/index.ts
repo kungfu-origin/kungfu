@@ -49,9 +49,9 @@ async function insertTradingData() {
         await delayMiliSeconds(100)
 
         let order = longfist.Order();
-        order.order_id = BigInt(+moment().format('YYYYMMDD') + +i);
+        order.order_id = BigInt(+"20200221" + +i);
         order.update_time = BigInt(+new Date().getTime());
-        order.account_id = '15014990';
+        order.account_id = (i % 2 === 0) ? '15014990' : '15014991';
         order.source_id = 'xtp';
         order.client_id = (i % 3 === 0) ? 'test' : '';
         order.instrument_id = '60000' + i.toString();
@@ -59,30 +59,34 @@ async function insertTradingData() {
         order.volume_left = BigInt(+Number(500 * +Math.random()).toFixed(0));
         order.volume_traded = BigInt(order.volume - order.volume_left);
         order.status = i % 2;
-        order.trading_day = moment().format('YYYYMMDD')
+        order.trading_day = "20200221"
     
         watcher.publishState(order)
 
         let trade = longfist.Trade();
-        trade.trade_id = BigInt(+moment().format('YYYYMMDD') + +i);
+        trade.trade_id = BigInt(+"20200221" + +i);
         trade.trade_time = BigInt(+new Date().getTime());
-        trade.account_id = '15014990';
+        trade.account_id = (i % 2 === 0) ? '15014990' : '15014991';
         trade.source_id = 'xtp';
-        order.client_id = (i % 3 === 0) ? 'test' : '';
+        trade.client_id = (i % 3 === 0) ? 'test' : '';
         trade.instrument_id = '60000' + i.toString();
         trade.price = +Number(1000 * +Math.random())
         trade.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
-        trade.last_price = BigInt(+Number(10000 * +Math.random()).toFixed(0));
-        trade.trading_day = moment().format('YYYYMMDD')
+        trade.last_price = +Number(10000 * +Math.random()).toFixed(0);
+        trade.trading_day = "20200221"
 
         watcher.publishState(trade)
 
         let position = longfist.Position();
         position.instrument_id = '60000' + i.toString();
-        position.account_id = '15014990';
+        position.account_id = (i % 2 === 0) ? '15014990' : '15014991';
         position.source_id = 'xtp';
+        position.client_id = (i % 3 === 0) ? 'test' : '';
+        position.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
+        position.yesterday_volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
+        position.last_price = +Number(10000 * +Math.random()).toFixed(0);
         position.direction = i % 2;
-        position.trading_day = moment().format('YYYYMMDD')
+        position.trading_day = "20200221"
 
         watcher.publishState(position)
 
@@ -93,7 +97,6 @@ async function insertTradingData() {
 
 }
 
-// insertTradingData()
 
 
 

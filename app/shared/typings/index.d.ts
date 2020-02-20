@@ -128,15 +128,15 @@ interface OrderData {
 }
 
 interface OrderInputData {
-    update_time: bigInt,
-    insert_time: bigInt,
-    order_id: bigInt,
+    update_time: bigint,
+    insert_time: bigint,
+    order_id: bigint,
     instrument_id: string,
     side: number,
     offset: number,
-    volume: bigInt,
-    volume_left: bigInt,
-    volume_traded: bigInt,
+    volume: bigint,
+    volume_left: bigint,
+    volume_traded: bigint,
     status: any,
     limit_price: number,
     client_id: string,
@@ -159,8 +159,8 @@ interface PosData {
 interface PosInputData {
     instrument_id: string;
     direction: number;
-    yesterday_volume: number;
-    volume: number;
+    yesterday_volume: bigint;
+    volume: bigint;
     last_price: number;
     margin: number;
     [propName: string]: any;
@@ -182,13 +182,13 @@ interface TradeData {
 interface TradeInputData {
     account_id: string;
     client_id: string;
-    trade_id: string;
+    trade_id: bigint;
     instrument_id: string;
-    trade_time: number;
+    trade_time: bigint;
     offset: number;
     side: number;
     price: string;
-    volume: string;
+    volume: bigint;
     [propName: string]: any;
 }
 

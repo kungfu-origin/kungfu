@@ -6,11 +6,8 @@ export default {
             type: String,
             default:''
         },
+        
         moduleType: {
-            type: String,
-            default:''
-        },
-        gatewayName: {
             type: String,
             default:''
         },
@@ -65,6 +62,10 @@ export default {
     },
 
     methods: {
+        handleRefresh(){
+            this.resetData();
+        },
+
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
             const t = this;
@@ -72,7 +73,6 @@ export default {
         },
 
         resetData() {
-            console.log(11)
             const t = this;
             t.todayFinish = false;
             t.searchKeyword = "";

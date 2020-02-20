@@ -1,5 +1,5 @@
 <template>
-  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `交易中委托 ${currentTitle}`">
+  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `当前委托 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -14,7 +14,7 @@
             <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-release mouse-over" title="交易中委托" @click="handleCheckTodayUnfinished"></i>
+            <i class="el-icon-s-release mouse-over" title="当前委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
@@ -48,17 +48,25 @@ import moment from "moment"
 import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { debounce, throttle, dealOrder } from "__gUtils/busiUtils";
-import { writeCSV } from '__gUtils/fileUtils';
+import { dealOrder } from "__gUtils/busiUtils";
 import { nanoCancelOrder, nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
+import { writeCSV } from '__gUtils/fileUtils';
 
 
 export default {
     name: "current-orders",
-    mixins: [ tradingDataMixin ],
+   
+   mixins: [ tradingDataMixin ],
 
-    data() {
+    props: {
+        gatewayName: {
+            type: String,
+            default:''
+        },
+    },
+
+    data () {
         return {
             todayFinish: false, //为 ture 显示当日已完成
         };
@@ -127,16 +135,19 @@ export default {
     },
 
     watch: {
-        kungfuData (data) {
-            this.dealKungfuData(data)
+        kungfuData (orders) {
+            const t = this;
+            const ordersResolve = t.dealOrderList(orders, {
+                tradingDay: t.tradingDay,
+                searchKeyword: t.searchKeyword,
+                todayFinish: t.todayFinish
+            });
+
+            ordersResolve.length && (t.tableData = ordersResolve)
         }
     },
 
     methods: {
-        handleRefresh(){
-            this.resetData();
-        },
-
         handleCancelOrder(props){
             const t = this;
             const accountId = `${props.source_id}_${props.account_id}`
@@ -190,29 +201,31 @@ export default {
         },
 
         //对返回的数据进行处理
-        dealKungfuData (orderList) {
-
+        dealOrderList (orders, { tradingDay, searchKeyword, todayFinish }) {
             const t = this
             let orderDataByKey = {};
 
-            const ordersAfterFilter = orderList
-            .filter(item => (item.trading_day === t.tradingDay))
+            const ordersAfterFilter = orders
+            .filter(item => (item.trading_day === tradingDay))
             .filter(item => {
-                const { order_id, client_id, instrument_id } = item
-                return order_id.toString().includes(t.searchKeyword) 
-                    || instrument_id.includes(t.searchKeyword) 
-                    || client_id.includes(t.searchKeyword)
+                if (searchKeyword.trim() === '') return true;
+                const { order_id, client_id, source_id, account_id, instrument_id } = item
+                return order_id.toString().includes(searchKeyword) 
+                    || account_id.includes(searchKeyword) 
+                    || source_id.includes(searchKeyword) 
+                    || instrument_id.includes(searchKeyword) 
+                    || client_id.includes(searchKeyword)
             })
-            .filter(item => (t.todayFinish ? true : aliveOrderStatusList.includes(item.status)))
-            
-            if (!ordersAfterFilter.length) return;
+            .filter(item => (todayFinish ? true : aliveOrderStatusList.includes(item.status)))
+
+            if (!ordersAfterFilter.length) return Object.freeze([]);
 
             ordersAfterFilter.forEach(item => {
                 const orderData = dealOrder(item);
                 orderDataByKey[orderData.id] = orderData;
             })
 
-            t.tableData = Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{
+            return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{
                 return  b.updateTimeNum - a.updateTimeNum
             }))
         },

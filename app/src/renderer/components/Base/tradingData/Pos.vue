@@ -32,70 +32,31 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import { debounce, dealPos } from '__gUtils/busiUtils'
-import { ipcRenderer } from 'electron'
-import { writeCSV } from '__gUtils/fileUtils';
+import { mapState, mapGetters } from 'vuex';
+import { ipcRenderer } from 'electron';
+
 import MakeOrderDialog from '../MakeOrderDialog';
+import tradingDataMixin from './js/tradingDataMixin';
+
+import { debounce, dealPos } from '__gUtils/busiUtils';
+import { writeCSV } from '__gUtils/fileUtils';
+
 
 const ls = require('local-storage');
 
 export default {
     name: 'positions',
-    props: {
-        //传入的id
-        currentId: {
-            type: String,
-            default:''
-        },
-        //页面类型，是账户页面用还是交易页面用
-        moduleType: {
-            type: String,
-            default:''
-        },
-        //账户类型，是期货还是股票
-        accountType: {
-            type: String,
-            default:''
-        },
-
-        //接收推送的数据
-        nanomsgBackData: ''
-     
-    },
+  
+    mixins: [ tradingDataMixin ],
 
     data() {
-        this.accountTypeList = [{
-            value: '1',
-            label: '股票'
-        },{
-            value: '2',
-            label: '期货'
-        },{
-            value: '3',
-            label: '债券'
-        }];
-             
-        this.posDataByKey = {}; //保存object类型，好在nanomsg推送的时候，找到key
-
         return {
-            rendererTable: false,
-            filter: {
-                instrumentId: ''  //代码id
-            },
-            searchKeyword: '',
-            getDataLock: false, //防止重复快速的调用
             tableData: Object.freeze([]),
-
             makeOrderDialogVisiblity: false
         }
     },
 
     computed:{
-        currentTitle() {
-            return this.currentId ? `${this.currentId}` : ''
-        },
-
         schema() {
             const t = this
             return [{
@@ -149,45 +110,24 @@ export default {
 
 
     watch: {
-        //防抖
-        searchKeyword: debounce(function (value) {
-            this.filter.instrumentId = value
-        }),
-
-        currentId(val) {
+        kungfuData (positions) {
             const t = this;
-            t.resetData();
-            if(val) t.init();
-        },
+            const positionsResolve = t.dealPositionList(positions, t.searchKeyword);
+            (positionsResolve.length) && (t.tableData = positionsResolve);
 
-        filter:{
-            deep: true,
-            handler() {
-                const t = this;
-                t.currentId && t.init()
-            }
-        },
-
-        //接收推送返回的数据
-        nanomsgBackData(val) {
-            const t = this;
-            if(!val || t.getDataLock) return
-            t.dealNanomsg(val)
-        },
-
-         tradingDay() {
-            const t = this;
-            t.resetData();
-            if(t.currentId) t.init();
+            const instrumentIdsList = ls.get('instrument_ids_list')
+            const instrumentIds = positionsResolve
+                .map(item => item.instrumentId)
+                .reduce((result, item) => {
+                    result[item.instrumentId] = 1;
+                    return result;
+                })
+            
+            ls.set('instrument_ids_list', {
+                ...instrumentIdsList,
+                ...instrumentIds
+            })
         }
-
-    },
-
-    mounted(){
-        const t = this;
-        t.rendererTable = true;
-        t.resetData();
-        t.currentId && t.init()
     },
 
     destroyed(){
@@ -195,13 +135,7 @@ export default {
     },
     
     methods:{
-        handleRefresh(){
-            const t = this;
-            t.resetData();
-            t.currentId && t.init();
-        },
-
-        handleExport(){
+        handleExport () {
             const t = this;
             t.$saveFile({
                 title: '保存持仓信息',
@@ -211,106 +145,33 @@ export default {
             })
         },
 
-        init: debounce(function() {
+        dealPositionList (positions, searchKeyword) {
             const t = this;
-            t.getData()
-        }),
+            let positionDataByKey = {};
 
-        //重置数据
-        resetData() {
-            const t = this
-            t.filter = {
-                type: '',
-                instrumentId: ''
-            };
-            t.searchKeyword = '';
-            t.getDataLock = false;
-            t.tableData = Object.freeze([]);
-            return true;
-        },
-
-        //获取数据
-        getData() {
-            const t = this
-            if(t.getDataLock) throw new Error('get data lock！');
-            t.getDataLock = true
-            t.tableData = []
-            t.posDataByKey = {}
-            return new Promise((resolve, reject) => {
-                // t.getDataMethod(t.currentId, t.filter).then(res => {
-                //     if(!res){
-                //         resolve(Object.freeze([]))
-                //         return;
-                //     }
-                //     let tableData = []
-                //     let instrumentIds = {}
-                //     res.map(item => {
-                //         const dealItem = dealPos(item)
-                //         tableData.push(dealItem)
-                //         const key = t.getKey(item)//key并非ticker
-                //         t.posDataByKey[key] = dealItem
-
-                //         // saving to localstorage for make order input
-                //         const instrumentId = item.instrument_id;
-                //         instrumentIds[instrumentId] = 1
-                //     })
-                //     t.tableData = Object.freeze(tableData) 
-                //     resolve(t.posDataByKey)
-
-                //     // saving to localstorage for make order input
-                //     const instrumentIdsList = ls.get('instrument_ids_list');
-                //     ls.set('instrument_ids_list', {
-                //         ...instrumentIdsList,
-                //         ...instrumentIds
-                //     })
-
-                // }).finally(() => {
-                //     t.getDataLock = false
-                // })
+            const positionsAfterFilter = positions
+            .filter(item => {
+                if (searchKeyword.trim() === '') return true;
+                const { instrument_id } = item
+                return instrument_id.includes(searchKeyword) 
             })
-        },
 
-        dealNanomsg(data) {
-            const t = this
-            //如果存在筛选，则推送的数据也需要满足筛选条件
-            if(!data.instrument_id.includes(t.filter.instrumentId)) return
-            const poskey = t.getKey(data)
-            t.posDataByKey[poskey] = { 
-                ...dealPos(data),
-                nano: true
-            }
-            //更新数据, 根据ID来排序
-            const sortPosList = Object.values(t.posDataByKey).sort((a, b) =>{
+            if (!positionsAfterFilter.length) return Object.freeze([]);
+
+            positionsAfterFilter.forEach(item => {
+                const positionData = dealPos(item);
+                const poskey = t.getKey(positionData)
+                positionDataByKey[poskey] = positionData;
+            })
+
+            return Object.freeze(Object.values(positionDataByKey).sort((a, b) =>{
                 return a.instrumentId - b.instrumentId
-            })
-            //更新数据
-            t.tableData = Object.freeze(sortPosList)
+            }))
         },
 
         //拼接key值
         getKey(data) {
             return (data.instrument_id + data.direction)
-        },
-
-        renderCellClass(prop, item){
-            switch(prop){
-                case 'direction':
-                    if(item.direction === '多') return 'red'
-                    else if(item.direction === '空') return 'green'
-                    break
-                case 'realizedPnl':
-                    if(+item.realizedPnl > 0) return 'red'
-                    else if(+item.realizedPnl < 0) return 'green'
-                    break
-                case 'unRealizedPnl':
-                    if(+item.unRealizedPnl > 0) return 'red'
-                    else if(+item.unRealizedPnl < 0) return 'green'
-                    break
-                case 'lastPrice':
-                    if(+item.lastPrice > +item.avgPrice) return 'red'
-                    else if(+item.lastPrice < +item.avgPrice) return 'green'
-                    break;
-            }
         }
     }
 }
