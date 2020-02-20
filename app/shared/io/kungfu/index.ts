@@ -52,7 +52,8 @@ async function insertTradingData() {
         order.order_id = BigInt(+moment().format('YYYYMMDD') + +i);
         order.update_time = BigInt(+new Date().getTime());
         order.account_id = '15014990';
-        order.source_id = 'xtp'
+        order.source_id = 'xtp';
+        order.client_id = (i % 3 === 0) ? 'test' : '';
         order.instrument_id = '60000' + i.toString();
         order.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
         order.volume_left = BigInt(+Number(500 * +Math.random()).toFixed(0));
@@ -66,7 +67,8 @@ async function insertTradingData() {
         trade.trade_id = BigInt(+moment().format('YYYYMMDD') + +i);
         trade.trade_time = BigInt(+new Date().getTime());
         trade.account_id = '15014990';
-        trade.source_id = 'xtp'
+        trade.source_id = 'xtp';
+        order.client_id = (i % 3 === 0) ? 'test' : '';
         trade.instrument_id = '60000' + i.toString();
         trade.price = +Number(1000 * +Math.random())
         trade.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
