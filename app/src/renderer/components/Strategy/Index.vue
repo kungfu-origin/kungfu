@@ -59,10 +59,10 @@
 <script>
 import Strategy from './components/Strategy';
 import Log from './components/Log';
-import CurrentOrder from '../Base/CurrentOrder';
-import TradeRecord from '../Base/TradeRecord';
-import Pos from '../Base/Pos';
-import Pnl from '../Base/pnl/Index';
+import CurrentOrder from '../Base/tradingData/CurrentOrder';
+import TradeRecord from '../Base/tradingData/TradeRecord';
+import Pos from '../Base/tradingData/Pos';
+import Pnl from '../Base/tradingData/pnl/Index';
 import { mapState, mapGetters } from 'vuex';
 import * as STRATEGY_API from '__io/db/strategy';
 import * as MSG_TYPE from '__io/nano/msgType';

@@ -220,10 +220,10 @@
                 .replace(/\[ debug  \]/g, `[ <span class="${logColor.debug}">debug</span> &nbsp;&nbsp;]`)
                 .replace(/\[critical\]/g, `[ <span class="${logColor.critical}">critical</span>]`)
             if(
-                message.indexOf('Failed') !== -1 ||
-                message.indexOf('Traceback') !== -1 ||
-                message.indexOf('critical') !== -1 ||
-                message.indexOf('uncaught exception') !== -1
+                message.includes('Failed') ||
+                message.includes('Traceback')  ||
+                message.includes('critical') ||
+                message.includes('uncaught exception') 
             ) 
             message = `<span class="error red">${message}</span>`
             return { message }

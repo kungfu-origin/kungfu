@@ -28,8 +28,8 @@ taurusKeywordsTmp = propertiesMD
 
 kungfuKeywords = propertiesMD
     .split('\n')
-    .filter(l => l.indexOf('|') !== -1)
-    .filter(l => l.indexOf('---') === -1)
+    .filter(l => l.includes('|'))
+    .filter(l => l.includes('---'))
     .map(l => l.split('|')[1].trim())
     .filter(l => {
         const re = /.*[\u4e00-\u9fa5]+.*/;
@@ -40,7 +40,7 @@ tarusPropertyKeywordsTmp = functionsMD
     .split('####')
     .filter(f => f.split('>')[0].indexOf('###') === -1)
     .map(f => f.split('>')[0].trim())
-    .filter(name => name.indexOf('.') !== -1)
+    .filter(name => name.includes('.'))
     .map(n => {
         return n.split('.').slice(1)
     })

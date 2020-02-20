@@ -1,6 +1,6 @@
 //type: 'md' / 'td'
 export default {
-    data() {
+    data () {
         return  {
             method: 'add',
             accountForm: {},
@@ -14,24 +14,24 @@ export default {
         }
     },
 
-    mounted() {
+    mounted () {
         const t = this;
         t.renderTable = true
     },
 
-    beforeMount(){
+    beforeMount () {
         const t = this;
         t.getTableList();
     },
 
     methods: {
         //添加账户，打开选择柜台弹窗
-        handleAdd(){
+        handleAdd () {
             this.visiblity.selectSource = true;
         },
 
         //编辑账户
-        handleOpenUpdateAccountDialog(row) {
+        handleOpenUpdateAccountDialog (row) {
             const t = this
             t.method = 'update'
             t.accountForm = JSON.parse(row.config) 
@@ -39,7 +39,7 @@ export default {
             t.visiblity.setAccount = true
         },
         //选择柜台
-        handleSelectSource(sourceName) {
+        handleSelectSource (sourceName) {
             const t = this
             t.method = 'add';
             t.selectedSource = sourceName
@@ -47,14 +47,14 @@ export default {
         },
 
         //添加或修改账户详情后的操作
-        successSubmitSetting() {
+        successSubmitSetting () {
             const t = this;
             t.getTableList();
             t.refreshData();
         },
 
         //清空数据
-        refreshData() {
+        refreshData () {
             const t = this
             t.selectedSource = ''
         },

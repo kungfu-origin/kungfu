@@ -29,3 +29,5 @@ export const statusConfig: StatusConfig = {
     '11':  { name: isEnglish ? 'PosErrored' : '持仓错误', color: 'bg-red', level: -1 },
     '100': { name: isEnglish ? 'Ready' : '就绪',  color: 'bg-green', level: 1 }
 }
+
+

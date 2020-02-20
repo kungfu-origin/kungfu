@@ -19,7 +19,7 @@ export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
         processes.forEach(p => {
             const rawCommandLine = p.rawCommandLine
             tasks.forEach((task: string): void => {
-                if(rawCommandLine.indexOf(task) !== -1) {
+                if(rawCommandLine.includes(task)) {
                     pIdList.push(p.pid)
                 }
             })

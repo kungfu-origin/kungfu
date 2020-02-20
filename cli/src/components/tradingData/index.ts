@@ -261,7 +261,7 @@ class TradingDataDashboard extends Dashboard {
 							let val = kvPair[1]
 							let theFirst = key[0]
 							key = theFirst.toUpperCase() + key.slice(1)
-							if(['UnRealizedPnl', 'RealizedPnl'].indexOf(key) !== -1) {
+							if(['UnRealizedPnl', 'RealizedPnl'].includes(key)) {
 								val = dealNum(+val)
 							}
 							return parseToString(
@@ -281,7 +281,7 @@ class TradingDataDashboard extends Dashboard {
 				processList = processList
 					.filter((proc: ProcessListItem) => {
 						if((proc.type === 'td') && (proc.account_id === t.targetId)) return true;
-						else if((proc.type === 'md') && (t.targetId.indexOf(proc.source_name) !== -1)) return true
+						else if((proc.type === 'md') && (t.targetId.includes(proc.source_name))) return true
 						else if(proc.type === 'main') return true
 						else return false
 					})

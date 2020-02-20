@@ -44,7 +44,7 @@ export default {
     mounted(){
         const t = this;
         //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
-        if(window.location.hash.indexOf('code') !== -1) return 
+        if(window.location.hash.includes('code')) return 
 
         //remove loading mask
         if(document.getElementById('loading')) document.getElementById('loading').remove();
@@ -103,7 +103,7 @@ export default {
             Object.keys(status || {}).forEach(key => {
                 const s = status[key]
                 if(s !== 'online') {
-                    if(key.indexOf('td') !== -1 || key.indexOf('md') !== -1) {
+                    if(key.includes('td') || key.includes('md')) {
                         t.$store.dispatch('deleteOneMdTdState', key)
                     }
                 }

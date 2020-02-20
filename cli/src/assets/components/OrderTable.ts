@@ -1,6 +1,6 @@
 import Table from '@/assets/components/Table';
-import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
-
+import { calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
+import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 const colors = require('colors/safe');
 
 interface OrdersData {
@@ -48,7 +48,7 @@ class OrderTable extends Table {
 			if(offset.toLowerCase() === 'open') offset = colors.red(offset);
 			else if(offset.toLowerCase() === 'close') offset = colors.green(offset);
 			let statusName = o.statusName
-			if([3, 5, 6].indexOf(+o.status) !== -1) statusName = colors.green(statusName);
+			if([3, 5, 6].includes(+o.status)) statusName = colors.green(statusName);
 			else if(+o.status === 4) statusName = colors.red(statusName);
 			else statusName = statusName;
 

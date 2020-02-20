@@ -68,7 +68,7 @@ export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<Fi
     return new Promise((resolve, reject) => {
         listDir(filePath).then(files => {
             files.forEach((file: any) => {
-                if(ignoreList.indexOf(file) !== -1) return;
+                if(ignoreList.includes(file)) return;
                 const fileDir: string = path.join(filePath, file);
                 const stats: any = fse.statSync(fileDir)
                 if(stats){

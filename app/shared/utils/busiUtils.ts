@@ -404,7 +404,7 @@ export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<
 // ========================== 交易数据处理 start ===========================
 
 export const dealOrder = (item: OrderInputData): OrderData => {
-    const updateTime = item.update_time || item.insert_time || 0;
+    const updateTime = +Number(item.update_time || item.insert_time || 0);
     return Object.freeze({
         id: item.order_id.toString() + '_' + item.account_id.toString(),
         updateTime: moment(updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
@@ -413,7 +413,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
         limitPrice: toDecimal(item.limit_price, 3) || '--',
-        volumeTraded: item.volume_traded + "/" + (item.volume),
+        volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         statusName: orderStatus[item.status],
         status: item.status,
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
@@ -488,7 +488,7 @@ export const getExtensions = (): Promise<any> => {
             else return false;
             if(isDir) {
                 return listDir(fp).then((childFiles: string[]) => {
-                    if(childFiles.indexOf('package.json') !== -1) return fp;
+                    if(childFiles.includes('package.json')) return fp;
                     else return false;
                 })
             } else {
@@ -560,4 +560,27 @@ export const ifAccountStrategyDBExisted = () => {
     const isExistedStrategyDB = existsSync(STRATEGYS_DB)
     if(isExistedAccountDB && isExistedStrategyDB) return true
     else return false
+}
+
+export const transformListToDataByAccountIdClientId = (list: any) => {
+    let data: StringToAny = {
+        'account': {},
+        'strategy': {}
+    }
+    list.forEach((item: any) => {
+        const clientId = item.client_id;
+        const accountId = `${item.source_id}_${item.account_id}`;
+        if (clientId) {
+            if (!data.strategy[clientId]) data.strategy[clientId] = [];
+            data.strategy[clientId].push(item)
+        }
+
+        if (accountId) {
+            if (!data.account[accountId]) data.account[accountId] = [];
+            data.account[accountId].push(item)
+        }
+      
+    })
+
+    return data
 }

@@ -128,14 +128,15 @@ interface OrderData {
 }
 
 interface OrderInputData {
-    update_time: number,
-    insert_time: number,
-    order_id: string,
+    update_time: bigInt,
+    insert_time: bigInt,
+    order_id: bigInt,
     instrument_id: string,
     side: number,
     offset: number,
-    volume: number,
-    volume_traded: number,
+    volume: bigInt,
+    volume_left: bigInt,
+    volume_traded: bigInt,
     status: any,
     limit_price: number,
     client_id: string,
@@ -292,4 +293,17 @@ interface SystemConfigChildArgsItemData {
 interface SystemConfigChildSelectItemData {
     value: string | number;
     name: string | number;
+}
+
+interface DataWithAccountIdClientId {
+    client_id: string;
+    account_id: string;
+    source_id: string;
+    [propName: string]: string | number;
+}
+
+interface StringToDataWithAccountIdClientIdData {
+    [propName: string]: { 
+        [propName: string]: DataWithAccountIdClientId[]
+    }
 }

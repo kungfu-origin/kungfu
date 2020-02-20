@@ -36,7 +36,7 @@ import { mapState, mapGetters } from 'vuex'
 import { debounce, dealPos } from '__gUtils/busiUtils'
 import { ipcRenderer } from 'electron'
 import { writeCSV } from '__gUtils/fileUtils';
-import MakeOrderDialog from './MakeOrderDialog';
+import MakeOrderDialog from '../MakeOrderDialog';
 
 const ls = require('local-storage');
 
@@ -58,11 +58,7 @@ export default {
             type: String,
             default:''
         },
-        //获取数据的方法名
-        getDataMethod: {
-            type: Function,
-            default: () => {}
-        },
+
         //接收推送的数据
         nanomsgBackData: ''
      
@@ -241,36 +237,36 @@ export default {
             t.tableData = []
             t.posDataByKey = {}
             return new Promise((resolve, reject) => {
-                t.getDataMethod(t.currentId, t.filter).then(res => {
-                    if(!res){
-                        resolve(Object.freeze([]))
-                        return;
-                    }
-                    let tableData = []
-                    let instrumentIds = {}
-                    res.map(item => {
-                        const dealItem = dealPos(item)
-                        tableData.push(dealItem)
-                        const key = t.getKey(item)//key并非ticker
-                        t.posDataByKey[key] = dealItem
+                // t.getDataMethod(t.currentId, t.filter).then(res => {
+                //     if(!res){
+                //         resolve(Object.freeze([]))
+                //         return;
+                //     }
+                //     let tableData = []
+                //     let instrumentIds = {}
+                //     res.map(item => {
+                //         const dealItem = dealPos(item)
+                //         tableData.push(dealItem)
+                //         const key = t.getKey(item)//key并非ticker
+                //         t.posDataByKey[key] = dealItem
 
-                        // saving to localstorage for make order input
-                        const instrumentId = item.instrument_id;
-                        instrumentIds[instrumentId] = 1
-                    })
-                    t.tableData = Object.freeze(tableData) 
-                    resolve(t.posDataByKey)
+                //         // saving to localstorage for make order input
+                //         const instrumentId = item.instrument_id;
+                //         instrumentIds[instrumentId] = 1
+                //     })
+                //     t.tableData = Object.freeze(tableData) 
+                //     resolve(t.posDataByKey)
 
-                    // saving to localstorage for make order input
-                    const instrumentIdsList = ls.get('instrument_ids_list');
-                    ls.set('instrument_ids_list', {
-                        ...instrumentIdsList,
-                        ...instrumentIds
-                    })
+                //     // saving to localstorage for make order input
+                //     const instrumentIdsList = ls.get('instrument_ids_list');
+                //     ls.set('instrument_ids_list', {
+                //         ...instrumentIdsList,
+                //         ...instrumentIds
+                //     })
 
-                }).finally(() => {
-                    t.getDataLock = false
-                })
+                // }).finally(() => {
+                //     t.getDataLock = false
+                // })
             })
         },
 

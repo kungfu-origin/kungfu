@@ -15,7 +15,7 @@ export const updateAccountStrategy = async () => {
             source: async (answersSoFar: any, input: string) => {
                 input = input || '';
                 return accountStrategyList
-                    .filter((s: string): boolean => s.indexOf(input) !== -1)
+                    .filter((s: string): boolean => s.includes(input))
             }
         }
     ])

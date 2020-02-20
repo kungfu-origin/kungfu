@@ -17,7 +17,7 @@ export const removeAccountStrategy = async () => {
             source: async (answersSoFar: any, input: string) => {
                 input = input || '';
                 return accountStrategyList
-                    .filter((s: string) => s.indexOf(input) !== -1)
+                    .filter((s: string) => s.includes(input))
             }
         }
     ])

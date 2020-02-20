@@ -11,7 +11,7 @@
             :key="column.prop" 
             :title="column.label"
             :style="{
-                'width': column.width ? column.width : headerWidth[column.prop]
+                'max-width': getHeaderWidth(column)
             }">
                 {{column.label}}
             </li>
@@ -34,7 +34,7 @@
                             renderCellClass(column.prop, item),                        
                             'tr-table-cell', 
                             'text-overflow',
-                            item.nano ? 'nano' : '',
+                            item.update ? 'update' : '',
                             column.type === 'number' ? 'number' : '',
                             column.type === 'operation' ? 'oper' : ''
                         ]"
@@ -122,7 +122,7 @@ export default {
         //必须有id项
         data: {
             default: [],
-            type: [Object, Array]
+            type: [ Object, Array ]
         },
 
         schema: {
@@ -146,9 +146,9 @@ export default {
     },
 
     watch: {
-        data(newVal=[], oldVal=[]) {
+        data(newVal) {
             const t = this;
-            if((oldVal.length == 0) && (newVal.length !== 0)) {
+            if (newVal.length !== 0) {
                 t.$nextTick().then(() => {
                     t.show = true;
                 })
@@ -207,6 +207,17 @@ export default {
             const $target = t.$refs['tr-table-body']
             if(!$target) return;
             t.bodyWidth = $target.clientWidth;
+        },
+
+        getHeaderWidth (column) {
+            const prop = column.prop;
+            const headerWidthByCalc = this.headerWidth[column.prop];
+            const columnWidth = column.width;
+            if (columnWidth) {
+                return column.width 
+            } else {
+                return headerWidthByCalc
+            }
         }
     }
 }
@@ -219,6 +230,9 @@ export default {
     height: 100%;
     position: relative;
     .tr-table-header{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
         height: 25px;
         line-height: 25px;
         background: $tab_header;
@@ -263,7 +277,7 @@ export default {
      .tr-table-cell{
         height: 20px;
         line-height: 20px;
-        padding: 0 10px;
+        padding: 0 6px;
         box-sizing: border-box;
         word-wrap: break-word;
         flex: 1;
@@ -288,13 +302,13 @@ export default {
     .tr-table-cell.gray{
         color: $font;
     }
-    .tr-table-cell.nano{
+    .tr-table-cell.update{
         animation: nanoBlink 0.5s 1;
     }
-    .tr-table-cell.nano.number.red{
+    .tr-table-cell.update.number.red{
         animation: nanoRedBlink 0.5s 1;
     }
-    .tr-table-cell.nano.number.green{
+    .tr-table-cell.update.number.green{
         animation: nanoGreenBlink 0.5s 1;
     }
 

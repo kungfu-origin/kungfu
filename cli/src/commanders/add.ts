@@ -58,7 +58,7 @@ const selectSourcePrompt = async (accountSource: Sources, existedSource: string[
             message: 'Select one type of source    ',
             source: async (answersSoFar: any, input = '') => {
                 return availSources
-                    .filter((s: string) => s.indexOf(input) !== -1);
+                    .filter((s: string) => s.includes(input));
             }
         }
     ])
@@ -206,7 +206,7 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
                 
                 const strategyList = await getStrategyList()
                 const existedIds = strategyList.map((s: Strategy) => s.strategy_id);
-                (existedIds.indexOf(value) !== -1) && (hasError = new Error('Strategy_id has existed!'));
+                (existedIds.includes(value)) && (hasError = new Error('Strategy_id has existed!'));
                 
                 if(hasError) return hasError
                 else return true;
@@ -306,7 +306,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
 async function existedAccountIdValidator(value: any):Promise<any> {
     const accountList = await getTdList()
     const existedIds = accountList.map((a: Account) => a.account_id.toAccountId());
-    if (existedIds.indexOf(value) !== -1) return new Error('AccountId has existed!');
+    if (existedIds.includes(value)) return new Error('AccountId has existed!');
 }
 
 export function filterAccountConfig(config: NormalObject) {

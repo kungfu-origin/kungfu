@@ -18,8 +18,8 @@ export const monitPrompt = async (list: boolean) => {
             source: async (answersSoFar: any, input: string) => {
                 input = input || '';
                 return accountStrategyList
-                    .filter((s: string) => s.toLowerCase().indexOf('md') == -1)
-                    .filter((s: string) => s.indexOf(input.trim()) !== -1)
+                    .filter((s: string) => s.toLowerCase().includes('md'))
+                    .filter((s: string) => s.includes(input.trim()))
             }
         }
     ]);
@@ -30,7 +30,7 @@ export const monitPrompt = async (list: boolean) => {
     const { processName } = answers;
     const processSplit = processName.split(' ')
     const processId = processSplit[processSplit.length - 1].trim();
-    const type = processSplit[0].indexOf('strategy') !== -1 ? 'strategy' : 'account';
+    const type = processSplit[0].includes('strategy') ? 'strategy' : 'account';
     return tradingData(processId, type)
 }
 

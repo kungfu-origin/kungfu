@@ -43,17 +43,19 @@ export const statusName: StringToStringObject = {
 // Filled = '5', //已成交
 // PartialFilledNotActive = '6', //部分撤单
 // PartialFilledActive = '7' //正在交易
-// 3,4,5,6已完成
+// 0,3,4,5,6 已完成
 export const orderStatus: NumberToStringObject = {
     0: isEnglish ? 'Unknow' : '未知',
-    1: isEnglish ? 'Submitted' : '已提交',
-    2: isEnglish ? 'Pending' : '等待中',
-    3: isEnglish ? 'Cancelled' : '已撤单',
-    4: isEnglish ? 'Error' : '错误',
+    1: isEnglish ? 'Submitted' : '已提交', // ing
+    2: isEnglish ? 'Pending' : '等待中', // ing
+    3: isEnglish ? 'Cancelled' : '已撤单', 
+    4: isEnglish ? 'Error' : '错误', 
     5: isEnglish ? 'Filled' : '已成交',
-    6: isEnglish ? 'PartialCancel' : '部分撤单',
-    7: isEnglish ? 'Trading' : '正在交易',
+    6: isEnglish ? 'PartialCancel' : '部分撤单', 
+    7: isEnglish ? 'Trading' : '正在交易', // ing
 }
+
+export const aliveOrderStatusList = [1, 2, 7]
 
 export const sourceTypeConfig: SourceType = {
     'stock': {

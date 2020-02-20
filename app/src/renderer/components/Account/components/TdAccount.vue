@@ -240,7 +240,7 @@ export default {
             const t = this
             let accounts = []
             if(!t.accountIdSearchKeyDebounce) return t.tdList;
-            return t.tdList.filter(a => (a.account_id.indexOf(t.accountIdSearchKeyDebounce) !== -1));
+            return t.tdList.filter(a => (a.account_id.includes(t.accountIdSearchKeyDebounce)));
         },
     },
     watch: {

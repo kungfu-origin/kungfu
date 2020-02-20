@@ -78,13 +78,13 @@ export const getAccountsStrategys = async (): Promise<any> => {
 
 
 export const getKungfuTypeFromString = (typeString: string) => {
-    const isTd = typeString.toLocaleLowerCase().indexOf('td')
-    const isMd = typeString.toLocaleLowerCase().indexOf('md')
-    const isStrategy = typeString.toLocaleLowerCase().indexOf('strategy')
+    const isTd = typeString.toLocaleLowerCase().includes('td')
+    const isMd = typeString.toLocaleLowerCase().includes('md')
+    const isStrategy = typeString.toLocaleLowerCase().includes('strategy')
     
-    if(isTd !== -1) return 'td';
-    else if(isMd !== -1) return 'md';
-    else if(isStrategy !== -1) return 'strategy'
+    if(isTd) return 'td';
+    else if(isMd) return 'md';
+    else if(isStrategy) return 'strategy'
     else return ''
 }
 
@@ -317,7 +317,7 @@ const dealLogMessage = (line: string, processId: string) => {
 
         if(message.split('[').length < 4) {
             const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000');
-            const type = 'error'.indexOf(lineData.type) !== -1 ? 'error' : lineData.type;
+            const type = 'error'.includes(lineData.type) ? 'error' : lineData.type;
             message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
         }
 
@@ -344,7 +344,7 @@ const dealLogMessage = (line: string, processId: string) => {
             .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
             .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
     
-        if(message.indexOf('critical') !== -1) message = `${colors[logColor.critical](message)}`
+        if(message.includes('critical')) message = `${colors[logColor.critical](message)}`
         
         return { 
             message,

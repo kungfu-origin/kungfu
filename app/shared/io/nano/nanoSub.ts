@@ -30,7 +30,7 @@ export const buildGatewayStatePipe = () => {
 export const buildTradingDataPipe = () => {
     const tradingDataTypes = [MSG_TYPE.order, MSG_TYPE.trade, MSG_TYPE.position, MSG_TYPE.portfolio]
     return subObservable.pipe(
-        filter((d: any) => (tradingDataTypes.indexOf(d.msg_type) !== -1))
+        filter((d: any) => (tradingDataTypes.includes(d.msg_type)))
     )
 }
 

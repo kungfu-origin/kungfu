@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="filter.dateRange ? `历史成交 ${currentTitle}` : `当日成交 ${currentTitle}`">
+<tr-dashboard :title="`当日成交 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -30,7 +30,7 @@ import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
 import { debounce, throttleInsert, dealTrade } from "__gUtils/busiUtils"
 import { writeCSV } from '__gUtils/fileUtils';
-import DateRangeDialog from './DateRangeDialog';
+import DateRangeDialog from '../DateRangeDialog';
 
 export default {
     name: 'trades-record',
@@ -171,18 +171,6 @@ export default {
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
             const t = this;
-            t.getDataMethod(t.currentId, {
-                id: t.filter.id,
-                dateRange
-            }, t.tradingDay).then(res => {
-                if(!res) return;
-                t.$saveFile({
-                    title: '成交记录',
-                }).then(filename => {
-                    if(!filename) return;
-                    writeCSV(filename, res)
-                })
-            })
         },
 
         //重置数据

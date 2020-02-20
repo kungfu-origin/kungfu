@@ -290,7 +290,7 @@ export default {
                 })
 
             const results = (queryString.trim() 
-            ? instrumentIdsListResolve.filter(instrumentId => (instrumentId.value.indexOf(queryString) !== -1)) 
+            ? instrumentIdsListResolve.filter(instrumentId => (instrumentId.value.includes(queryString))) 
             : instrumentIdsListResolve)
             cb(results)
         },
@@ -305,7 +305,7 @@ export default {
 
         getSourceName(accountId){
             const t = this;
-            const targetAccount = t.tdList.filter(a => a.account_id.indexOf(accountId) !== -1)
+            const targetAccount = t.tdList.filter(a => a.account_id.includes(accountId))
             if(!targetAccount.length) return ''
             return targetAccount[0].source_name;
         },

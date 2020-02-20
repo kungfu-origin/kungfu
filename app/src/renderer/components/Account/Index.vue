@@ -26,11 +26,11 @@
                     <el-col>
                         <CurrentOrder
                         ref="current-order"
-                        :currentId="currentId"
                         moduleType="account" 
+                        :currentId="currentId"
+                        :tradingDay="tradingDay"
+                        :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
-                        :getDataMethod="getAccountOrder" 
-                        :nanomsgBackData="ordersFromNmsg"
                         />   
                     </el-col>              
                 </el-row>
@@ -43,7 +43,6 @@
                     :currentId="currentId" 
                     moduleType="account"
                     :accountType="accountType"
-                    :getDataMethod="getAccountPos"
                     :nanomsgBackData="posFromNmsg"
                     />
                 </el-row>
@@ -53,7 +52,6 @@
                     ref="trade-record"
                     :currentId="currentId"
                     moduleType="account" 
-                    :getDataMethod="getAccountTrade"
                     :nanomsgBackData="tradesFromNmsg"
                     />
                 </el-row>
@@ -67,15 +65,14 @@ import {mapState, mapGetters} from 'vuex'
 
 import TdAccount from './components/TdAccount';
 import MdAccount from './components/MdAccount';
-import CurrentOrder from '../Base/CurrentOrder';
-import TradeRecord from '../Base/TradeRecord';
-import Pos from '../Base/Pos';
-import Pnl from '../Base/pnl/Index';
+import CurrentOrder from '../Base/tradingData/CurrentOrder';
+import TradeRecord from '../Base/tradingData/TradeRecord';
+import Pos from '../Base/tradingData/Pos';
+import Pnl from '../Base/tradingData/pnl/Index';
+
 import * as ACCOUNT_API from '__io/db/account';
 import { debounce } from '__gUtils/busiUtils';
-import { buildTradingDataPipe, buildCashPipe } from '__io/nano/nanoSub';
-import * as MSG_TYPE from '__io/nano/msgType';
-
+import { buildTradingDataPipe } from '__io/kungfu/index';
 
 export default {
     name: 'account',
@@ -83,7 +80,7 @@ export default {
         const t = this;
         this.tradingDataPipe = null;
         return {
-            ordersFromNmsg: null,
+            orders: Object.freeze([]),
             tradesFromNmsg: null,
             posFromNmsg: null,
             minPnlFromNmsg: null
@@ -97,6 +94,7 @@ export default {
 
     computed:{
         ...mapState({
+            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
             tdAccountSource: state => (state.BASE.tdAccountSource || {})
         }),
@@ -117,32 +115,12 @@ export default {
 
     mounted(){
         const t = this;
-        t.tradingDataPipe = buildTradingDataPipe().subscribe(d => {
-            const msgType = d.msg_type;
-            const tradingData = d.data;
-            const ledgerCategory = tradingData.ledger_category
-            const accountId = tradingData.account_id || '';
-            const currentId = t.currentId.toAccountId();
-            switch (msgType) {
-                case MSG_TYPE.order:
-                    if(accountId !== currentId) return;
-                    t.ordersFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.trade:
-                    if(accountId !== currentId) return;
-                    t.tradesFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.position:
-                    if(accountId !== currentId) return;
-                    if(ledgerCategory !== 0) return;
-                    t.posFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.portfolio:
-                    if(accountId !== currentId) return;
-                    if(ledgerCategory !== 0) return;
-                    t.minPnlFromNmsg = Object.freeze(tradingData);     
-            }
+        t.tradingDataPipe = buildTradingDataPipe().subscribe(data => {
+            console.log(data, '==')
+            const orders = data['orders']['account'][t.currentId]
+            this.orders = Object.freeze(orders || [])
         })
+        console.log(t.tradingDataPipe)
     },
 
     destroyed(){
@@ -151,9 +129,6 @@ export default {
     },
  
     methods:{
-        getAccountPos: ACCOUNT_API.getAccountPos,
-        getAccountOrder: ACCOUNT_API.getAccountOrder,
-        getAccountTrade: ACCOUNT_API.getAccountTrade,
         getAccountPnlMin: ACCOUNT_API.getAccountPnlMin,
         getAccountPnlDay: ACCOUNT_API.getAccountPnlDay,
     }
