@@ -250,7 +250,11 @@ namespace kungfu::yijinjing
                 .def_readonly("name", &data::location::name)
                 .def_readonly("uname", &data::location::uname)
                 .def_readonly("uid", &data::location::uid)
-                .def_readonly("locator", &data::location::locator);
+                .def_readonly("locator", &data::location::locator)
+                .def("__repr__", [&](data::location &target)
+                {
+                    return target.uname;
+                });
 
         py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
                 .def(py::init())
@@ -302,8 +306,8 @@ namespace kungfu::yijinjing
                 .def("join", &reader::join)
                 .def("disjoin", &reader::disjoin);
 
-        py::class_<writer, writer_ptr>(m, "writer")
-                .def("write_raw", &writer::write_raw)
+        auto py_writer = py::class_<writer, writer_ptr>(m, "writer");
+        py_writer.def("write_raw", &writer::write_raw)
                 .def("write_str",
                      [](const writer_ptr &w, int64_t trigger_time, int32_t msg_type, const std::string &data)
                      {
@@ -312,6 +316,12 @@ namespace kungfu::yijinjing
                 .def("current_frame_uid", &writer::current_frame_uid)
                 .def("mark", &writer::mark)
                 .def("mark_with_time", &writer::mark_with_time);
+
+        hana::for_each(longfist::StateDataTypes, [&](auto type)
+        {
+            using DataType = typename decltype(+hana::second(type))::type;
+            py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
+        });
 
         py::class_<io_device, io_device_ptr> io_device(m, "io_device");
         io_device.def(py::init<data::location_ptr, bool, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true,
@@ -339,6 +349,14 @@ namespace kungfu::yijinjing
         py::class_<master, PyMaster>(m, "master")
                 .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
                 .def_property_readonly("io_device", &master::get_io_device)
+                .def("now", &master::now)
+                .def("get_home_uid", &master::get_home_uid)
+                .def("get_live_home_uid", &master::get_live_home_uid)
+                .def("get_home_uname", &master::get_home_uname)
+                .def("has_location", &master::has_location)
+                .def("get_location", &master::get_location)
+                .def("has_writer", &master::has_writer)
+                .def("get_writer", &master::get_writer)
                 .def("run", &master::run)
                 .def("publish_time", &master::publish_time)
                 .def("send_time", &master::send_time)

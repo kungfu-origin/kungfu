@@ -28,6 +28,37 @@ namespace kungfu::wingchun::service
 
         uint64_t cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
 
+        std::vector<longfist::types::Position> get_positions(const yijinjing::data::location_ptr &location)
+        {
+           auto position_map = state_map_[boost::hana::type_c<longfist::types::Position>];
+           std::vector<longfist::types::Position> res = {};
+           for(const auto& kv: position_map)
+           {
+               const auto& position = kv.second;
+               if (position.holder_uid == location->uid)
+               {
+                   res.push_back(position);
+               }
+           }
+           return res;
+        }
+
+        bool has_asset(const yijinjing::data::location_ptr &location)
+        {
+            auto asset_map = state_map_[boost::hana::type_c<longfist::types::Asset>];           
+            return asset_map.find(location->uid) != asset_map.end();
+        }
+
+        longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location) 
+        {
+            auto asset_map = state_map_[boost::hana::type_c<longfist::types::Asset>];
+            if (asset_map.find(location->uid) == asset_map.end())
+            {
+                throw wingchun_error("asset info not exist");
+            }
+            return asset_map[location->uid];
+        }
+
         virtual std::string handle_request(const event_ptr &event, const std::string &msg) = 0;
 
         virtual void handle_instrument_request(const event_ptr &event) = 0;
@@ -63,7 +94,7 @@ namespace kungfu::wingchun::service
         void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
 
         void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
-
+      
     private:
         yijinjing::nanomsg::socket_ptr pub_sock_;
         longfist::journal::publisher publish_state;

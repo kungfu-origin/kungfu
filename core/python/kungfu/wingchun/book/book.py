@@ -7,6 +7,7 @@ import datetime
 from pykungfu import yijinjing as pyyjj
 import sys
 import traceback
+import pykungfu
 from collections import namedtuple
 from pykungfu import wingchun as pywingchun
 from rx.subject import Subject
@@ -68,7 +69,7 @@ class AccountBook(pywingchun.Book):
 
         positions = kwargs.pop("positions", [])
         for pos in positions:
-            if isinstance(pos, pywingchun.Position):
+            if isinstance(pos, pykungfu.longfist.types.Position):
                 pos = msg_utils.object_as_dict(pos)
             if isinstance(pos, dict):
                 try:
@@ -147,16 +148,16 @@ class AccountBook(pywingchun.Book):
 
     def on_quote(self, event, quote):
         self.ctx.logger.debug('{} received quote event: {}'.format(self.location.uname, quote))
-        symbol_id = pyyjj.hash_str_32("{}.{}".format(quote.instrument_id, quote.exchange_id))
-        self._tickers[symbol_id] = quote
-        long_pos_uid = get_position_uid(quote.instrument_id, quote.exchange_id, wc_constants.Direction.Long)
-        short_pos_uid = get_position_uid(quote.instrument_id, quote.exchange_id, wc_constants.Direction.Short)
-        if long_pos_uid in self._positions:
-            position = self._positions[long_pos_uid]
-            position.apply_quote(quote)
-        if short_pos_uid in self._positions:
-            position = self._positions[short_pos_uid]
-            position.apply_quote(quote)
+        self._tickers[quote.uid] = quote
+        temp = pykungfu.longfist.types.Position()        
+        temp.holder_uid = self.location.uid
+        temp.instrument_id = quote.instrument_id
+        temp.exchange_id = quote.exchange_id
+        for dir in [pykungfu.longfist.enum.Direction.Long, pykungfu.longfist.enum.Direction.Short]:
+            temp.direction = dir            
+            if temp.uid in self._positions:
+                position = self._positions[temp.uid]
+                position.apply_quote(quote)      
         self._on_interval_check(event.gen_time)
 
     def on_asset(self, event, asset):
@@ -173,7 +174,7 @@ class AccountBook(pywingchun.Book):
             self.ctx.logger.info(pos)
         self._positions = {}
         for pos in positions:
-            if isinstance(pos, pywingchun.Position):
+            if isinstance(pos, pykungfu.longfist.types.Position):
                 pos = msg_utils.object_as_dict(pos)
             if isinstance(pos, dict):
                 try:
@@ -203,7 +204,7 @@ class AccountBook(pywingchun.Book):
 
     @property
     def active_orders(self):
-        return list([order for order in self._orders.values() if order.active])
+        return list([order for order in self._orders.values() if order.status in [pykungfu.longfist.enum.OrderStatus.Submitted, pykungfu.longfist.enum.OrderStatus.Pending, pykungfu.longfist.enum.OrderStatus.PartialFilledActive] ])
 
     @property
     def total_cash(self):
@@ -233,7 +234,7 @@ class AccountBook(pywingchun.Book):
 
     @property
     def event(self):
-        data = pywingchun.Asset()
+        data = pykungfu.longfist.types.Asset()        
         data.avail = self.avail
         data.margin = self.margin
         data.market_value = self.market_value
