@@ -16,6 +16,8 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
+            console.log(data)
+
             const orders = Object.values(data.Order || {});
             const trades = Object.values(data.Trade || {});
             const positions = Object.values(data.Position || {});
@@ -87,15 +89,33 @@ async function insertTradingData() {
         position.yesterday_volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
         position.last_price = +Number(10000 * +Math.random()).toFixed(0);
         position.direction = i % 2;
-        position.trading_day = moment().format('YYYYMMDD')
-
+        position.ledger_category = (i % 3 === 0) ? 1 : 0;
         watcher.publishState(position)
 
+        let asset = longfist.Asset();
+        asset.holder_uid = +new Date().getTime() + +i;
+        asset.account_id = (i % 2 === 0) ? '15014990' : '15014991';
+        asset.source_id = 'xtp';
+        asset.client_id = (i % 3 === 0) ? 'test' : '';
+        asset.update_time = BigInt(+new Date().getTime());
+        asset.initial_equity = +Number(1000 * +Math.random()).toFixed(0);
+        asset.static_equity = +Number(1000 * +Math.random()).toFixed(0);
+        asset.dynamic_equity = +Number(1000 * +Math.random()).toFixed(0);
+        asset.realized_pnl = +Number(1000 * +Math.random()).toFixed(0);
+        asset.unrealized_pnl = +Number(1000 * +Math.random()).toFixed(0);
+        asset.avail = +Number(1000 * +Math.random()).toFixed(0);
+        asset.market_value = +Number(1000 * +Math.random()).toFixed(0);
+        asset.margin = +Number(1000 * +Math.random()).toFixed(0);
+        asset.accumulated_fee = +Number(1000 * +Math.random()).toFixed(0);
+        asset.intraday_fee = +Number(1000 * +Math.random()).toFixed(0);
+        asset.position_pnl = +Number(1000 * +Math.random()).toFixed(0);
+        asset.close_pnl = +Number(1000 * +Math.random()).toFixed(0);
+        asset.accumulated_fee = +Number(1000 * +Math.random()).toFixed(0);
+        position.ledger_category = (i % 3 === 0) ? 1 : 0;
+        watcher.publishState(asset)
 
         console.log('insert TradingData', `${i}/${len - 1}`)
-
     }
-
 }
 
 

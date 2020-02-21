@@ -125,7 +125,7 @@ app.on('activate', function () {
 // dock icon is clicked and there are no other windows open.
     if (mainWindow && mainWindow.isDestroyed()) createWindow()
     else if(mainWindow && mainWindow.isVisible()) mainWindow.focus()
-    else mainWindow.show()
+    else mainWindow && mainWindow.show()
 })
 
 app.on('will-quit', async (e) => {
