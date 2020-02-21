@@ -19,7 +19,6 @@
 #include <kungfu/yijinjing/common.h>
 
 #define MAX_MSG_LENGTH 16 * 1024
-#define DEFAULT_NOTICE_TIMEOUT 1000
 
 namespace kungfu::yijinjing::nanomsg
 {

@@ -25,6 +25,9 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 
+#define DEFAULT_RECV_TIMEOUT 25
+#define DEFAULT_NOTICE_TIMEOUT 1000
+
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -140,10 +143,7 @@ namespace kungfu::yijinjing
         nanomsg_observer(const io_device &io_device, bool low_latency, protocol p) :
                 nanomsg_resource(io_device, low_latency, p), recv_flags_(low_latency ? NN_DONTWAIT : 0)
         {
-            if (not low_latency_)
-            {
-                socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, DEFAULT_NOTICE_TIMEOUT);
-            }
+            socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, DEFAULT_RECV_TIMEOUT);
         }
 
         virtual ~nanomsg_observer()
@@ -152,7 +152,12 @@ namespace kungfu::yijinjing
         }
 
         void setup() override
-        {}
+        {
+            if (not low_latency_)
+            {
+                socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, DEFAULT_NOTICE_TIMEOUT);
+            }
+        }
 
         bool wait() override
         {
