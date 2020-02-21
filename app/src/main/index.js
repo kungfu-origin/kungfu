@@ -22,12 +22,12 @@ setMenu();
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
 var allowQuit = false;
-function createWindow () {
+function createWindow (force=false) {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
 	const { width, height } = electronScreen.getPrimaryDisplay().size
 	mainWindow = new BrowserWindow({
-		show: false,
+		show: !!force,
 		width,
 		height,
 		useContentSize: true,
@@ -91,9 +91,6 @@ if(!gotTheLock) {
 	})
 }
 
-
-
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -109,7 +106,7 @@ KillAll()
 	.finally(() => {
 		console.timeEnd('init clean')
 		killExtraFinished = true;
-		if(appReady && killExtraFinished) createWindow()
+		if(appReady && killExtraFinished) createWindow(true)
 	})
 
 

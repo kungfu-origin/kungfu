@@ -91,6 +91,12 @@ async function insertTradingData() {
         position.direction = i % 2;
         position.ledger_category = (i % 3 === 0) ? 1 : 0;
         watcher.publishState(position)
+        console.log('insert TradingData', `${i}/${len - 1}`)
+
+        
+    }
+
+    for (var i = 1; i < 4; i++) {
 
         let asset = longfist.Asset();
         asset.holder_uid = +new Date().getTime() + +i;
@@ -111,11 +117,14 @@ async function insertTradingData() {
         asset.position_pnl = +Number(1000 * +Math.random()).toFixed(0);
         asset.close_pnl = +Number(1000 * +Math.random()).toFixed(0);
         asset.accumulated_fee = +Number(1000 * +Math.random()).toFixed(0);
-        position.ledger_category = (i % 3 === 0) ? 1 : 0;
+        asset.ledger_category = (i % 3 === 0) ? 1 : 0;
         watcher.publishState(asset)
 
-        console.log('insert TradingData', `${i}/${len - 1}`)
+        console.log('insert assets', `${i}`)
+
+
     }
+
 }
 
 
