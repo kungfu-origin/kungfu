@@ -92,8 +92,6 @@ async function insertTradingData() {
         position.ledger_category = (i % 3 === 0) ? 1 : 0;
         watcher.publishState(position)
         console.log('insert TradingData', `${i}/${len - 1}`)
-
-        
     }
 
     for (var i = 1; i < 4; i++) {
