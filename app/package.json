@@ -20,7 +20,7 @@
     "node": ">=10.16.0 <11.0.0"
   },
   "scripts": {
-    "install-deps": "electron-builder install-app-deps && node ./.electron-kungfu/getPyVersion.js",
+    "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
@@ -64,9 +64,7 @@
       "**/kungfu-core/build/*/libnanomsg.*",
       "**/kungfu-core/build/*/nanomsg.*",
       "**/kungfu-core/build/*/libsqlite3.*",
-      "**/kungfu-core/build/*/libSQLiteCpp.*",
-      "**/kungfu-core/build/*/libwingchun.*",
-      "**/kungfu-core/build/*/libyijinjing.*",
+      "**/kungfu-core/build/*/libkungfu.*",
       "**/kungfu-core/node/*",
       "**/kungfu-core/package.json"
     ],
