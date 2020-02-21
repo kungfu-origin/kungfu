@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import platform
 import datetime
 from conans import ConanFile
 from conans import tools
@@ -94,7 +93,7 @@ class KungfuCoreConan(ConanFile):
                         '--CDPYTHON_EXECUTABLE=' + python_path,
                         '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel]
 
-        if platform.system() == 'Windows':
+        if tools.detected_os() == 'Windows':
             return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch),
                                    '--CDCMAKE_GENERATOR_PLATFORM=' + str(self.options.arch), cmd]
         else:

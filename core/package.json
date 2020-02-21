@@ -16,8 +16,7 @@
   "scripts": {
     "install-deps": "cross-env PIPENV_TIMEOUT=600 pipenv --three install",
     "conan": "pipenv run conan",
-    "build": "yarn run build:cfg && yarn run build:cpp && yarn run build:pip && yarn run freeze",
-    "build:pip": "cd python && rimraf dist/* && cross-var pipenv run python setup.py clean --all && cross-var pipenv run python setup.py bdist_wheel",
+    "build": "yarn run build:cfg && yarn run build:cpp && yarn run freeze",
     "build:cfg": "cross-var yarn conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o runtime=$npm_package_config_runtime -o node_version=$npm_package_config_node -o electron_version=$npm_package_config_electron",
     "build:cpp": "cross-var yarn conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "freeze": "cross-var yarn conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
