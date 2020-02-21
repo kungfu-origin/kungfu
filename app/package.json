@@ -79,7 +79,7 @@
         ]
       },
       {
-        "from": "../core/python/dist",
+        "from": "../core/build/setuptools/dist",
         "to": "kungfu-resources/python",
         "filter": [
           "kungfu-2*-py3-*.whl"
