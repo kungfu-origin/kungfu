@@ -22,12 +22,12 @@ setMenu();
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
 var allowQuit = false;
-function createWindow (force=false) {
+function createWindow () {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
 	const { width, height } = electronScreen.getPrimaryDisplay().size
 	mainWindow = new BrowserWindow({
-		show: !!force,
+		show: false,
 		width,
 		height,
 		useContentSize: true,
@@ -36,6 +36,7 @@ function createWindow (force=false) {
 		},
 		backgroundColor: '#161B2E',
 	})
+
 	const isDevelopment = process.env.NODE_ENV === "development" 
 	// and load the index.html of the app.
 	if(isDevelopment){
@@ -46,7 +47,7 @@ function createWindow (force=false) {
 	}
 
 	// Open the DevTools.
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
@@ -71,6 +72,7 @@ function createWindow (force=false) {
 	})
 
 	mainWindow.on('ready-to-show', function() {
+		logger.info('mainWindow ready-to-show', mainWindow)
 		mainWindow.show();
 		mainWindow.focus();
 	});
@@ -97,14 +99,18 @@ if(!gotTheLock) {
 var appReady = false, killExtraFinished = false;
 app.on('ready', () => {
 	appReady = true;
+	logger.info('app ready', 'appReady', appReady, 'killExtraFinished', killExtraFinished)
+
 	if(appReady && killExtraFinished) createWindow()
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('init clean')
-KillAll()
+killExtra()
 	.finally(() => {
 		console.timeEnd('init clean')
+		logger.info('kill all', appReady, 'killExtraFinished', killExtraFinished)
+
 		killExtraFinished = true;
 		if(appReady && killExtraFinished) createWindow(true)
 	})
