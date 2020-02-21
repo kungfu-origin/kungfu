@@ -100,11 +100,8 @@ export default {
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
                     const { trade_id, client_id, account_id, source_id, instrument_id } = item
-                    return trade_id.toString().includes(searchKeyword) 
-                        || account_id.includes(searchKeyword) 
-                        || source_id.includes(searchKeyword) 
-                        || client_id.includes(searchKeyword)
-                        || instrument_id.includes(searchKeyword) 
+                    const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
+                    return strings.includes(searchKeyword) 
                 })
                 .map(item => dealTrade(item))
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))

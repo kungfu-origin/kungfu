@@ -20,7 +20,7 @@ class TradeTable extends Table {
 	}
 
 	setItems(tradeDataList: TradeData[]) {
-		tradeDataList.forEach((tradeData: TradeData) => {
+		tradeDataList.kfForEach((tradeData: TradeData) => {
 			this.tradeList.unshift(tradeData)			
 		})
 		this.tradeList = this.tradeList.slice(0, 1000)

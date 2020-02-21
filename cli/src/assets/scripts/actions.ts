@@ -399,7 +399,7 @@ const watchLogObservable = (processId: string) => {
         watcher.watch();
         watcher.on('line', (line: string) => {
             const logList: any = dealLogMessage(line, processId);
-            logList.forEach((l: any) => observer.next(l.message || ''))
+            logList.kfForEach((l: any) => observer.next(l.message || ''))
         })
         watcher.on('error', () => watcher.unwatch())
     })
@@ -473,7 +473,7 @@ export const getPosObservable = (type: string, id: string) => {
         getPosMethod(id,  {})
             .then((positions: PosInputData[]) => {
                 logger.info('pos ', positions.length)
-                positions.forEach((pos: PosInputData) => {
+                positions.kfForEach((pos: PosInputData) => {
                     observer.next(['pos', dealPos(pos)]);
                 })
             })
@@ -524,7 +524,7 @@ export const getAssetObservable = (type: string, id: string) => {
     return new Observable(observer => {
         getAssetMethod(id).then((assets: AssetInputData[]) => {
             logger.info('asset ', assets.length)
-            assets.forEach((asset: AssetInputData) => {
+            assets.kfForEach((asset: AssetInputData) => {
                 const assetData = dealAsset(asset);
                 if(type === 'account') delete assetData['clientId']
                 else if(type === 'strategy') delete assetData['accountId']

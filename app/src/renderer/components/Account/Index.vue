@@ -13,7 +13,6 @@
                     </el-col>
                     <el-col :span="10">
                         <Pnl 
-                        ref="pnl"
                         :currentId="currentId" 
                         moduleType="account"
                         :minMethod="getAccountPnlMin"
@@ -25,7 +24,6 @@
                 <el-row style="height: 33.333%">
                     <el-col>
                         <CurrentOrder
-                        ref="current-order"
                         moduleType="account" 
                         :currentId="currentId"
                         :tradingDay="tradingDay"
@@ -39,7 +37,6 @@
             <el-col :span="10">
                 <el-row style="height: 50%">
                     <Pos 
-                    ref="pos"
                     moduleType="account"
                     :currentId="currentId" 
                     :accountType="accountType"
@@ -49,7 +46,6 @@
                 
                 <el-row style="height: 50%">
                     <TradeRecord
-                    ref="trade-record"
                     moduleType="account" 
                     :currentId="currentId"
                     :tradingDay="tradingDay"
@@ -116,15 +112,13 @@ export default {
 
     mounted(){
         const t = this;
-        t.tradingDataPipe = buildTradingDataPipe().subscribe(data => {
-            // console.log(data, '==')
-            const orders = data['orders']['account'][t.currentId];
+        t.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+            const orders = data['orders'][t.currentId];
             this.orders = Object.freeze(orders || []);
-            const trades = data['trades']['account'][t.currentId];
+            const trades = data['trades'][t.currentId];
             this.trades = Object.freeze(trades || []);
-            const positions = data['positions']['account'][t.currentId];
+            const positions = data['positions'][t.currentId];
             this.positions = Object.freeze(positions || []);
-
         })
     },
 

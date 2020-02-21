@@ -272,7 +272,7 @@ export default {
                     const instrumentIdsList = ls.get('instrument_ids_list');
                     ls.set('instrument_ids_list', {
                         ...instrumentIdsList,
-                        [makeOrderForm.instrument_id]: +new Date().getTime()
+                        [makeOrderForm.instrument_id || '']: +new Date().getTime()
                     })
                 }
             })

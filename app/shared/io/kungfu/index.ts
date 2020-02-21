@@ -1,7 +1,7 @@
 import { startGetKungfuState } from '__gUtils/kungfuUtils';
-import { Observable, from } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { transformListToDataByAccountIdClientId, delayMiliSeconds } from '__gUtils/BusiUtils';
+import { transformTradingItemListToData } from '__gUtils/BusiUtils';
 
 
 
@@ -10,8 +10,10 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
         subscriber.next(state)
     })
 })   
+
+
        
-export const buildTradingDataPipe = () => {
+export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
             const orders = Object.values(data.Order || {});
@@ -19,16 +21,15 @@ export const buildTradingDataPipe = () => {
             const positions = Object.values(data.Position || {});
 
             return {
-                orders: transformListToDataByAccountIdClientId(orders),
-                trades: transformListToDataByAccountIdClientId(trades),
-                positions: transformListToDataByAccountIdClientId(positions),
+                orders: transformTradingItemListToData(orders, type),
+                trades: transformTradingItemListToData(trades, type),
+                positions: transformTradingItemListToData(positions, type, true),
             }
         })
     )
 }
 
-
-
+// insertTradingData()
 async function insertTradingData() {
     const moment = require('moment')
     const { kungfu, watcher } = require('__gUtils/kungfuUtils');
@@ -49,7 +50,7 @@ async function insertTradingData() {
         await delayMiliSeconds(100)
 
         let order = longfist.Order();
-        order.order_id = BigInt(+"20200221" + +i);
+        order.order_id = BigInt(+moment().format('YYYYMMDD') + +i);
         order.update_time = BigInt(+new Date().getTime());
         order.account_id = (i % 2 === 0) ? '15014990' : '15014991';
         order.source_id = 'xtp';
@@ -58,13 +59,13 @@ async function insertTradingData() {
         order.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
         order.volume_left = BigInt(+Number(500 * +Math.random()).toFixed(0));
         order.volume_traded = BigInt(order.volume - order.volume_left);
-        order.status = i % 2;
-        order.trading_day = "20200221"
+        order.status = i % 8;
+        order.trading_day = moment().format('YYYYMMDD')
     
         watcher.publishState(order)
 
         let trade = longfist.Trade();
-        trade.trade_id = BigInt(+"20200221" + +i);
+        trade.trade_id = BigInt(+moment().format('YYYYMMDD') + +i);
         trade.trade_time = BigInt(+new Date().getTime());
         trade.account_id = (i % 2 === 0) ? '15014990' : '15014991';
         trade.source_id = 'xtp';
@@ -73,7 +74,7 @@ async function insertTradingData() {
         trade.price = +Number(1000 * +Math.random())
         trade.volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
         trade.last_price = +Number(10000 * +Math.random()).toFixed(0);
-        trade.trading_day = "20200221"
+        trade.trading_day = moment().format('YYYYMMDD')
 
         watcher.publishState(trade)
 
@@ -86,7 +87,7 @@ async function insertTradingData() {
         position.yesterday_volume = BigInt(+Number(10000 * +Math.random()).toFixed(0));
         position.last_price = +Number(10000 * +Math.random()).toFixed(0);
         position.direction = i % 2;
-        position.trading_day = "20200221"
+        position.trading_day = moment().format('YYYYMMDD')
 
         watcher.publishState(position)
 

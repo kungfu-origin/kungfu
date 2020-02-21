@@ -13,7 +13,6 @@
                                 moduleType="strategy"
                                 :minMethod="getStrategyPnlMin"
                                 :dayMethod="getStrategyPnlDay"
-                                :nanomsgBackData="minPnlFromNmsg"
                                 ></Pnl>
                         </el-col>
                     </el-row>
@@ -26,29 +25,25 @@
                 <el-col  :span="10">
                     <el-row style="height: 33.333%">
                             <Pos
-                            ref="pos"
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :getDataMethod="getStrategyPos"
-                            :nanomsgBackData="posFromNmsg"                   
+                            :kungfuData="positions"                   
                             ></Pos>
                     </el-row>
                     <el-row  style="height: 33.333%">
                             <CurrentOrder
-                            ref="current-order"
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :getDataMethod="getStrategyOrder"
-                            :nanomsgBackData="ordersFromNmsg"
+                            :kungfuData="orders"     
+                            :tradingDay="tradingDay"              
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
                             <TradeRecord 
-                            ref="trade-record"
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :getDataMethod="getStrategyTrade"
-                            :nanomsgBackData="tradesFromNmsg"
+                            :kungfuData="trades"    
+                            :tradingDay="tradingDay"              
                             ></TradeRecord>
                     </el-row>
                 </el-col>
@@ -57,55 +52,38 @@
     </main-content>
 </template>
 <script>
+
+import { mapState, mapGetters } from 'vuex';
+
 import Strategy from './components/Strategy';
 import Log from './components/Log';
 import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
-import { mapState, mapGetters } from 'vuex';
-import * as STRATEGY_API from '__io/db/strategy';
-import * as MSG_TYPE from '__io/nano/msgType';
-import { buildTradingDataPipe } from '__io/nano/nanoSub';
 
+import * as STRATEGY_API from '__io/db/strategy';
+import { buildTradingDataPipe } from '__io/kungfu/index';
 
 export default {
     data(){
         this.tradingDataPipe = null;
         return {
-            ordersFromNmsg: null,
-            tradesFromNmsg: null,
-            posFromNmsg: null,
-            minPnlFromNmsg: null
+            orders: Object.freeze([]),
+            trades: Object.freeze([]),
+            positions: Object.freeze([]),
         }
     },
- 
+
     mounted(){
         const t = this;
-        t.tradingDataPipe = buildTradingDataPipe().subscribe(d => {
-            const msgType = d.msg_type;
-            const tradingData = d.data;
-            const ledgerCategory = tradingData.ledger_category;
-            const strategyId = tradingData.client_id || '';
-            switch (msgType) {
-                case MSG_TYPE.order:
-                    if(strategyId !== t.strategyId) return;
-                    t.ordersFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.trade:
-                    if(strategyId !== t.strategyId) return;
-                    t.tradesFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.position:
-                    if(strategyId !== t.strategyId) return;
-                    if(ledgerCategory !== 1) return;
-                    t.posFromNmsg = Object.freeze(tradingData);
-                    break
-                case MSG_TYPE.portfolio:
-                    if(strategyId !== t.strategyId) return;
-                    if(ledgerCategory !== 1) return;
-                    t.minPnlFromNmsg = Object.freeze(tradingData);
-            }
+        t.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
+            const orders = data['orders'][t.strategyId];
+            this.orders = Object.freeze(orders || []);
+            const trades = data['trades'][t.strategyId];
+            this.trades = Object.freeze(trades || []);
+            const positions = data['positions'][t.strategyId];
+            this.positions = Object.freeze(positions || []);
         })
     },
 
@@ -116,6 +94,7 @@ export default {
    
     computed: {
         ...mapState({
+            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             currentStrategy: state => state.STRATEGY.currentStrategy,
         }),
 
@@ -129,13 +108,8 @@ export default {
     },
 
     methods:{
-        
-        getStrategyPos: STRATEGY_API.getStrategyPos,
-        getStrategyOrder: STRATEGY_API.getStrategyOrder,
-        getStrategyTrade: STRATEGY_API.getStrategyTrade,
         getStrategyPnlMin: STRATEGY_API.getStrategyPnlMin,
         getStrategyPnlDay: STRATEGY_API.getStrategyPnlDay
-
     }
 }
 </script>

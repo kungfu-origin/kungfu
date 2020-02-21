@@ -36,7 +36,8 @@
                             'text-overflow',
                             item.update ? 'update' : '',
                             column.type === 'number' ? 'number' : '',
-                            column.type === 'operation' ? 'oper' : ''
+                            column.type === 'operation' ? 'oper' : '',
+                            column.align === 'center' ? 'text-center' : ''
                         ]"
                         v-for="column in schema" 
                         :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
@@ -74,7 +75,8 @@
                             :class="[
                                 renderCellClass(column.prop, item),
                                 'tr-table-cell', 
-                                column.width ? 'text-overflow' : ''
+                                column.width ? 'text-overflow' : '',
+                                column.align === 'center' ? 'text-center' : ''
                             ]"
                             :title="item[column.prop] || ''"
                             v-for="column in schema" 

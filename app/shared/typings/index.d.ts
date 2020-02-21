@@ -114,6 +114,7 @@ interface OrderData {
     id: string;
     updateTime: string,
     updateTimeNum: number;
+    orderId: string;
     instrumentId: string;
     side: string;
     offset: string;
@@ -123,7 +124,7 @@ interface OrderData {
     status: string;
     clientId: string;
     accountId: string;
-    orderId: string;
+    sourceId: string,
     exchangeId: string;
 }
 
@@ -141,6 +142,7 @@ interface OrderInputData {
     limit_price: number,
     client_id: string,
     account_id: string,
+    source_id: string,
     exchange_id: string
 }
 
@@ -148,9 +150,9 @@ interface PosData {
     id: string;
     instrumentId: string;
     direction: string;
-    yesterdayVolume: string;
-    todayVolume: string;
-    totalVolume: string;
+    yesterdayVolume: Number;
+    todayVolume: Number;
+    totalVolume: Number;
     avgPrice: string;
     lastPrice: string;
     unRealizedPnl: string;
@@ -174,14 +176,16 @@ interface TradeData {
     side: string;
     offset: string;
     price: string;
-    volume: string;
+    volume: Number;
     clientId: string;
     accountId: string;
+    sourceId: string;
 }
 
 interface TradeInputData {
     account_id: string;
     client_id: string;
+    source_id: string;
     trade_id: bigint;
     instrument_id: string;
     trade_time: bigint;

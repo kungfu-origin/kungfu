@@ -115,6 +115,7 @@ export default {
                 prop: "limitPrice",
             },{
                 type: "text",
+                align: "center",
                 label: "已成交/全部",
                 prop: "volumeTraded",
             },{
@@ -210,17 +211,14 @@ export default {
             .filter(item => {
                 if (searchKeyword.trim() === '') return true;
                 const { order_id, client_id, source_id, account_id, instrument_id } = item
-                return order_id.toString().includes(searchKeyword) 
-                    || account_id.includes(searchKeyword) 
-                    || source_id.includes(searchKeyword) 
-                    || instrument_id.includes(searchKeyword) 
-                    || client_id.includes(searchKeyword)
+                const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
+                return strings.includes(searchKeyword) 
             })
             .filter(item => (todayFinish ? true : aliveOrderStatusList.includes(item.status)))
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 
-            ordersAfterFilter.forEach(item => {
+            ordersAfterFilter.kfForEach(item => {
                 const orderData = dealOrder(item);
                 orderDataByKey[orderData.id] = orderData;
             })

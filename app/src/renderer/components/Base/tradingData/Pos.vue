@@ -32,8 +32,6 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import { ipcRenderer } from 'electron';
 
 import MakeOrderDialog from '../MakeOrderDialog';
 import tradingDataMixin from './js/tradingDataMixin';
@@ -114,24 +112,11 @@ export default {
             const t = this;
             const positionsResolve = t.dealPositionList(positions, t.searchKeyword);
             (positionsResolve.length) && (t.tableData = positionsResolve);
-
-            const instrumentIdsList = ls.get('instrument_ids_list')
-            const instrumentIds = positionsResolve
-                .map(item => item.instrumentId)
-                .reduce((result, item) => {
-                    result[item.instrumentId] = 1;
-                    return result;
-                })
-            
-            ls.set('instrument_ids_list', {
-                ...instrumentIdsList,
-                ...instrumentIds
-            })
         }
     },
 
     destroyed(){
-        ipcRenderer.removeAllListeners(`res-cancel-order-rate-${this.moduleType}`)
+        this.saveInstrumentIdsToLS();
     },
     
     methods:{
@@ -158,7 +143,7 @@ export default {
 
             if (!positionsAfterFilter.length) return Object.freeze([]);
 
-            positionsAfterFilter.forEach(item => {
+            positionsAfterFilter.kfForEach(item => {
                 const positionData = dealPos(item);
                 const poskey = t.getKey(positionData)
                 positionDataByKey[poskey] = positionData;
@@ -171,7 +156,29 @@ export default {
 
         //拼接key值
         getKey(data) {
-            return (data.instrument_id + data.direction)
+            return (data.instrumentId + data.direction)
+        },
+
+        saveInstrumentIdsToLS () {
+            if(!this.tableData.length) return;
+            const instrumentIdsList = ls.get('instrument_ids_list')
+            const instrumentIds = this.tableData
+                .map(item => item.instrumentId)
+                .reduce((result, item) => {
+                    if (typeof result !== "object") {
+                        return {
+                            [result]: 1,
+                            [item]: 1
+                        }
+                    }
+                    result[item] = 1;
+                    return result;
+                })
+            
+            ls.set('instrument_ids_list', {
+                ...instrumentIdsList,
+                ...instrumentIds
+            })
         }
     }
 }

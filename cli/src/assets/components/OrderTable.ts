@@ -25,7 +25,7 @@ class OrderTable extends Table {
 	}
 
 	setItems(orderDataList: OrderData[]) {
-		orderDataList.forEach((orderData: OrderData) => {
+		orderDataList.kfForEach((orderData: OrderData) => {
 			this.ordersData[orderData.id] = orderData;			
 		})
 		this.ordersList = Object.values(this.ordersData || {}).sort((a: OrderData, b: OrderData) => {

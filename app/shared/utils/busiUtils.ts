@@ -51,6 +51,7 @@ declare global {
 
     interface Array<T> {
         removeRepeat(): any;
+        kfForEach(cb: Function): any
     }
 }
 
@@ -81,8 +82,18 @@ String.prototype.parseSourceAccountId = function(): SourceAccountId {
     }
 }
 
-Array.prototype.removeRepeat = function(): any{
+Array.prototype.removeRepeat = function (): any {
     return Array.from(new Set(this))
+}
+
+Array.prototype.kfForEach = function (cb: Function): any {
+    if (!cb) return;
+    const t = this;
+    let i = 0, len = t.length;
+    while (i < len) {
+        cb.call(t, t[i], i)
+        i++
+    }
 }
 
 export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
@@ -103,10 +114,12 @@ export const deepClone = <T>(obj: T): T => {
 //保留几位数据
 //(数据，保留位数，结果乘几个10，类型)
 export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): string => {
-    if(num === null) num = 0;
-    if(isNaN(parseFloat(num.toString()))) return ''; //如果为转换后为NaN,返回空
+    if (num === null) num = 0;
+    if (isNaN(num)) return ''; //如果为转换后为NaN,返回空
     //如果存在科学计数法的数据则返回不做处理
-    if(num.toString().indexOf('e') != -1) return new Number(num).toExponential(2)
+    if (`${num}`.includes('e')) return new Number(num).toExponential(2)
+    if (multiply === 0) return Number(num).toFixed(digit)
+
     const multiplyNum: number = Math.pow(10, multiply);
     let floatNum = parseFloat(num.toString());
     const digitNum: number = Math.pow(10, digit);
@@ -375,7 +388,7 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
             lineReader.on('line', line => {
                 const messageData = dealLogMessageMethod(line, searchKeyword)
                 if(!messageData) return;
-                messageData.forEach((msg: LogMessageData): void => {
+                messageData.kfForEach((msg: LogMessageData): void => {
                     if(!msg) return;
                     logId++
                     numList.insert({
@@ -418,6 +431,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         status: item.status,
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id,
+        sourceId: item.source_id,
         orderId: item.order_id.toString(),
         exchangeId: item.exchange_id
     })
@@ -433,9 +447,10 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         side: sideName[item.side],
         offset: offsetName[item.offset],
         price: toDecimal(+item.price, 3),
-        volume: toDecimal(Number(item.volume), 0),
+        volume: Number(item.volume),
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
-        accountId: item.account_id
+        accountId: item.account_id,
+        sourceId: item.source_id
     })  
 }
 
@@ -446,9 +461,9 @@ export const dealPos = (item: PosInputData): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
-        yesterdayVolume: toDecimal(Number(item.yesterday_volume), 0),
-        todayVolume: toDecimal(Number(item.volume) - Number(item.yesterday_volume), 0),
-        totalVolume: toDecimal(Number(item.volume), 0),
+        yesterdayVolume: Number(item.yesterday_volume),
+        todayVolume: Number(item.volume) - Number(item.yesterday_volume),
+        totalVolume: Number(item.volume),
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
@@ -555,32 +570,82 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     timerPromiseTask(fn, interval)
 } 
 
-export const ifAccountStrategyDBExisted = () => {
-    const isExistedAccountDB = existsSync(ACCOUNTS_DB)
-    const isExistedStrategyDB = existsSync(STRATEGYS_DB)
-    if(isExistedAccountDB && isExistedStrategyDB) return true
-    else return false
-}
 
-export const transformListToDataByAccountIdClientId = (list: any) => {
-    let data: StringToAny = {
-        'account': {},
-        'strategy': {}
+export const transformTradingItemListToData = (list: any, type: string, ifLedgerCategory?: Boolean) => {
+    let data: StringToAny = {}
+
+    if (type === 'account') {
+        if (ifLedgerCategory) {
+            list.kfForEach((item: any) => {
+                const accountId = `${item.source_id}_${item.account_id}`;
+                if (!accountId) return;
+                const ledgerCategory = +item.ledger_category;
+                if (ledgerCategory === 0) {
+                    if (!data[accountId]) data[accountId] = [];
+                    data[accountId].push(item)
+                }
+            })
+        } else {
+            list.kfForEach((item: any) => {
+                const accountId = `${item.source_id}_${item.account_id}`;
+                if (!accountId) return;
+                if (!data[accountId]) data[accountId] = [];
+                data[accountId].push(item)
+            })
+        }
+    } else if (type === 'strategy') {
+        if (ifLedgerCategory) {
+            list.kfForEach((item: any) => {
+                const clientId = item.client_id;
+                if (!clientId) return;
+                const ledgerCategory = +item.ledger_category;
+                if (ledgerCategory === 1) {
+                    if (!data[clientId]) data[clientId] = [];
+                    data[clientId].push(item)
+                }
+            })
+        } else {
+            list.kfForEach((item: any) => {
+                const clientId = item.client_id;
+                if (!clientId) return;
+                if (!data[clientId]) data[clientId] = [];
+                data[clientId].push(item)
+            })
+        }
     }
-    list.forEach((item: any) => {
-        const clientId = item.client_id;
-        const accountId = `${item.source_id}_${item.account_id}`;
-        if (clientId) {
-            if (!data.strategy[clientId]) data.strategy[clientId] = [];
-            data.strategy[clientId].push(item)
-        }
-
-        if (accountId) {
-            if (!data.account[accountId]) data.account[accountId] = [];
-            data.account[accountId].push(item)
-        }
-      
-    })
 
     return data
+}
+
+export const getDataFromTradingData = (type: string) => {
+    if (type === 'strategy') {
+        return (list: any[], targetId: string, ifLedgerCategory: Boolean) => {
+            return list
+                .filter((item: any) => {
+                    if (ifLedgerCategory) {
+                        return +item.ledger_category === 1;
+                    } else {
+                        return true;
+                    }
+                })
+                .filter((item: any) => {
+                   return item.client_id === targetId
+                })
+        }
+    } else if (type === 'account') {
+        return (list: any[], targetId: string, ifLedgerCategory: Boolean) => {
+            return list
+                .filter((item: any) => {
+                    if (ifLedgerCategory) {
+                        return +item.ledger_category === 0;
+                    } else {
+                        return true;
+                    }
+                })
+                .filter((item: any) => {
+                    console.log(item, targetId)
+                    return `${item.source_id}_${item.account_id}` === targetId
+                })
+        }
+    }
 }

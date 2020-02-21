@@ -245,7 +245,7 @@ export default {
         pushTableData(itemList){
             const t = this;
             const tableData = t.tableData.slice(0);
-            itemList.forEach(item => {
+            itemList.kfForEach(item => {
                 t.logCount++;
                 if(!item || !item.message) return;
                 tableData.push(Object.freeze({
