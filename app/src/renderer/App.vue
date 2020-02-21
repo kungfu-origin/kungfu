@@ -74,7 +74,7 @@ export default {
         t.subAccountCash();
         t.subTradingDay();
       
-        t.reqCalendar();
+        // t.reqCalendar();
         t.reqCash();
         t.reqGatewayState();
 
