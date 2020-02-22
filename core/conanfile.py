@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import shutil
 import getpass
 import platform
 import subprocess
@@ -9,9 +10,13 @@ from conans import ConanFile
 from conans import tools
 
 
+with open(os.path.join('package.json'), 'r') as package_json_file:
+    package_json = json.load(package_json_file)
+
+
 class KungfuCoreConan(ConanFile):
-    name = "kungfu-core"
-    version = "2.2.0-dev"
+    name = package_json['name']
+    version = package_json['version']
     generators = "cmake"
     requires = [
         "fmt/6.1.2",
@@ -38,75 +43,19 @@ class KungfuCoreConan(ConanFile):
     }
 
     def build(self):
-        build_type = str(self.settings.build_type)
-        os.environ['CMAKE_BUILD_TYPE'] = build_type
-
-        cmd = self._build_cmake_js_cmd('build')
-        rc = subprocess.Popen(cmd).wait()
-
-        if rc != 0:
-            self.output.error('build failed')
-            sys.exit(rc)
-
-        self.output.success('source files compiled')
-
-        now = datetime.datetime.now()
-        build_date = now.strftime('%Y%m%d%H%M%S')
-
-        git = tools.Git()
-        git_revision = git.get_revision()[:8]
-
-        build_version = f'{self.version}.{build_date}.{git_revision}' if tools.Version(self.version).prerelease else self.version
-        with open(os.path.join(os.getcwd(), build_type, 'version.info'), 'w') as version_file:
-            version_file.write(build_version)
-
-        build_info = {
-            'version': build_version,
-            'pythonVersion': platform.python_version(),
-            'git': {
-                'tag': git.get_tag(),
-                'branch': git.get_branch(),
-                'revision': git.get_revision(),
-                'pristine': git.is_pristine()
-            },
-            'build': {
-                'user': getpass.getuser(),
-                'osVersion': tools.os_info.os_version,
-                'timestamp': now.strftime('%Y/%m/%d %H:%M:%S')
-            }
-        }
-        with open(os.path.join(os.getcwd(), build_type, 'build_info.json'), 'w') as output:
-            json.dump(build_info, output, indent=2)
-
-        self.output.success(f'build version {build_version}')
+        build_type = self._get_build_type()
+        self._gen_build_info(build_type)
+        self._run_cmake_js(build_type, 'build')
 
     def package(self):
+        build_type = self._get_build_type()
+        self._run_pyinstaller(build_type)
+        self._run_setuptools(build_type)
+
+    def _get_build_type(self):
         build_type = str(self.settings.build_type)
         os.environ['CMAKE_BUILD_TYPE'] = build_type
-
-        with tools.chdir('..'):
-            rc = subprocess.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
-            if tools.detected_os() == 'Macos' and os.path.exists('build/kfc/.Python'):
-                os.chdir('build/kfc')
-                os.rename('.Python', 'Python')
-                os.symlink('Python', '.Python')
-            if rc != 0:
-                self.output.error('PyInstaller failed')
-                sys.exit(rc)
-
-        self.output.success('PyInstaller done')
-
-        setup_py = os.path.abspath(os.path.join('..', 'python', 'setup.py'))
-        setup_dir = 'setuptools'
-        tools.rmdir(setup_dir)
-        tools.mkdir(setup_dir)
-        with tools.chdir(setup_dir):
-            rc = subprocess.Popen(['pipenv', 'run', 'python', setup_py, 'bdist_wheel']).wait()
-            if rc != 0:
-                self.output.error('setuptools failed')
-                sys.exit(rc)
-
-        self.output.success('setuptools done')
+        return build_type
 
     def _get_node_version(self):
         return str(self.options.electron_version) if self.options.js_runtime == 'electron' else str(self.options.node_version)
@@ -123,15 +72,81 @@ class KungfuCoreConan(ConanFile):
         loglevel = spdlog_levels[str(self.options.log_level)]
         python_path = subprocess.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
 
-        cmake_js_cmd = [tools.which('yarn'), 'cmake-js', '--debug' if self.settings.build_type == 'Debug' else '',
-                        '--arch', str(self.options.arch),
-                        '--runtime', str(self.options.js_runtime),
-                        '--runtime-version', self._get_node_version(),
-                        '--CDPYTHON_EXECUTABLE=' + python_path,
-                        '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel]
+        cmake_js_cmd = [
+            tools.which('yarn'),
+            'cmake-js',
+            '--debug' if self.settings.build_type == 'Debug' else '',
+            '--arch', str(self.options.arch),
+            '--runtime', str(self.options.js_runtime),
+            '--runtime-version', self._get_node_version(),
+            '--CDPYTHON_EXECUTABLE=' + python_path,
+            '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel
+        ]
 
         if tools.detected_os() == 'Windows':
             return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch),
                                    '--CDCMAKE_GENERATOR_PLATFORM=' + str(self.options.arch), cmd]
         else:
             return cmake_js_cmd + [cmd]
+
+    def _gen_build_info(self, build_type):
+        now = datetime.datetime.now()
+        build_date = now.strftime('%Y%m%d%H%M%S')
+
+        git = tools.Git()
+        git_revision = git.get_revision()[:8]
+
+        build_version = f'{self.version}.{build_date}.{git_revision}' if tools.Version(self.version).prerelease else self.version
+
+        build_info = {
+            'version': build_version,
+            'pythonVersion': platform.python_version(),
+            'git': {
+                'tag': git.get_tag(),
+                'branch': git.get_branch(),
+                'revision': git.get_revision(),
+                'pristine': git.is_pristine()
+            },
+            'build': {
+                'user': getpass.getuser(),
+                'osVersion': tools.os_info.os_version,
+                'timestamp': now.strftime('%Y/%m/%d %H:%M:%S')
+            }
+        }
+        tools.mkdir(build_type)
+        with open(os.path.join(build_type, 'build_info.json'), 'w') as output:
+            json.dump(build_info, output, indent=2)
+        self.output.success(f'build version {build_version}')
+
+    def _run_cmake_js(self, build_type, cmd):
+        rc = subprocess.Popen(self._build_cmake_js_cmd(cmd)).wait()
+        if rc != 0:
+            self.output.error(f'cmake-js {cmd} failed')
+            sys.exit(rc)
+        self.output.success(f'cmake-js {cmd} done')
+
+    def _run_pyinstaller(self, build_type):
+        with tools.chdir(os.path.pardir):
+            rc = subprocess.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
+            if tools.detected_os() == 'Macos' and os.path.exists('build/kfc/.Python'):
+                os.chdir('build/kfc')
+                os.rename('.Python', 'Python')
+                os.symlink('Python', '.Python')
+            if rc != 0:
+                self.output.error('PyInstaller failed')
+                sys.exit(rc)
+        self.output.success('PyInstaller done')
+
+    def _run_setuptools(self, build_type):
+        python_build_dir = 'python'
+        tools.rmdir(python_build_dir)
+        shutil.copytree(build_type, python_build_dir, ignore=shutil.ignore_patterns('node*'))
+        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu'), os.path.join(python_build_dir, 'kungfu'))
+        shutil.copy2(os.path.join(os.pardir, 'python', 'setup.py'), python_build_dir)
+
+        with tools.chdir('python'):
+            rc = subprocess.Popen(['pipenv', 'run', 'python', 'setup.py', 'bdist_wheel']).wait()
+            if rc != 0:
+                self.output.error('setuptools failed')
+                sys.exit(rc)
+        self.output.success('setuptools done')

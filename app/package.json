@@ -58,11 +58,11 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
-      "**/kungfu-core/build/*/node_kungfu.node",
       "**/kungfu-core/build/*/node_nanomsg.node",
       "**/kungfu-core/build/*/node_sqlite3.node",
-      "**/kungfu-core/build/*/libnanomsg.*",
+      "**/kungfu-core/build/*/node_kungfu.node",
       "**/kungfu-core/build/*/nanomsg.*",
+      "**/kungfu-core/build/*/libnanomsg.*",
       "**/kungfu-core/build/*/libsqlite3.*",
       "**/kungfu-core/build/*/libkungfu.*",
       "**/kungfu-core/node/*",
@@ -77,10 +77,10 @@
         ]
       },
       {
-        "from": "../core/build/setuptools/dist",
+        "from": "../core/build/python/dist",
         "to": "kungfu-resources/python",
         "filter": [
-          "kungfu-2*-py3-*.whl"
+          "kungfu-*-py3-*.whl"
         ]
       },
       {
@@ -97,15 +97,13 @@
         "filter": [
           "kungfu-cli",
           "kungfu-cli.*",
-          "node_kungfu.node",
           "node_nanomsg.node",
           "node_sqlite3.node",
+          "node_kungfu.node",
           "nanomsg.*",
           "libnanomsg.*",
           "libsqlite3.*",
-          "libSQLiteCPP.*",
-          "libwingchun.*",
-          "libyijinjing.*"
+          "libkungfu.*"
         ]
       }
     ],
@@ -169,7 +167,7 @@
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",
     "getprocesses": "^1.1.1",
-    "kungfu-core": "2.2.0",
+    "kungfu-core": "*",
     "local-storage": "^2.0.0",
     "log4js": "^4.0.2",
     "monaco-editor": "0.18.1",

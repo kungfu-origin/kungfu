@@ -15,16 +15,12 @@ limitations under the License.
 '''
 
 import os
-from .env import setup_environment_variables
+import json
+import pykungfu
+
+with open(os.path.join(os.path.dirname(os.path.abspath(pykungfu.__file__)), 'build_info.json'), 'r') as build_info_file:
+    __build_info__ = json.load(build_info_file)
+    __version__ = __build_info__['version']
+
 from .msg import monkey_patch
-from .version import get_version
-
-setup_environment_variables()
 monkey_patch()
-
-version_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "version.info"))
-if os.path.exists(version_file_path):
-    with open(version_file_path, 'r') as version_file:
-        __version__ = version_file.readline()
-else:
-    __version__ = get_version()

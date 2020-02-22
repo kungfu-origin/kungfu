@@ -1,10 +1,8 @@
 import os
-import atexit
 import platform
 import json
 import click
 import kungfu.yijinjing.journal as kfj
-from pykungfu import longfist as pylongfist
 from pykungfu import yijinjing as pyyjj
 from kungfu import __version__
 
@@ -72,7 +70,8 @@ def recursive_help(cmd, parent=None):
 @click.option('-l', '--log_level', type=click.Choice(['trace', 'debug', 'info', 'warning', 'error', 'critical']),
               default='warning', help='logging level')
 @click.option('-n', '--name', type=str, help='name for the process, defaults to command if not set')
-@click.version_option(__version__, '--version', '-v', message='version {}'.format(__version__))
+@click.help_option('-h', '--help')
+@click.version_option(__version__, '-v', '--version', message='{}'.format(__version__))
 @click.pass_context
 def kfc(ctx, home, log_level, name):
     if not home:
