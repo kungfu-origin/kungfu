@@ -344,7 +344,7 @@ namespace kungfu::node::serialize
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
             state_.Get(type_name).ToObject().Set(uid, valueObj);
-            app_.write_to(0, DataType::tag, data);
+            app_.write_to(0, data);
         }
     };
 }

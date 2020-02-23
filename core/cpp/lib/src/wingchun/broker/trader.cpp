@@ -38,4 +38,11 @@ namespace kungfu::wingchun::broker
               cancel_order(event);
           });
     }
+
+    void Trader::publish_state(longfist::enums::BrokerState state)
+    {
+        longfist::types::BrokerStateUpdate update{};
+        update.state = state;
+        write_to(0, update);
+    }
 }

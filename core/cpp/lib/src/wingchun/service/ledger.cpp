@@ -209,10 +209,10 @@ namespace kungfu::wingchun::service
           });
 
         events_ | is(Position::tag) | filter([&](const event_ptr &event)
-                                                   {
-                                                       auto source = event->source();
-                                                       return this->has_location(source) && this->get_location(source)->category == category::TD;
-                                                   }) |
+                                             {
+                                                 auto source = event->source();
+                                                 return this->has_location(source) && this->get_location(source)->category == category::TD;
+                                             }) |
         $([&](const event_ptr &event)
           {
               const auto &position = event->data<Position>();
@@ -229,9 +229,7 @@ namespace kungfu::wingchun::service
               try
               { on_quote(event, event->data<Quote>()); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         events_ | is(Order::tag) |
@@ -240,9 +238,7 @@ namespace kungfu::wingchun::service
               try
               { on_order(event, event->data<Order>()); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         events_ | is(Trade::tag) |
@@ -251,9 +247,7 @@ namespace kungfu::wingchun::service
               try
               { on_trade(event, event->data<Trade>()); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         events_ | is(OrderActionError::tag) |
@@ -262,9 +256,7 @@ namespace kungfu::wingchun::service
               try
               { on_order_action_error(event, event->data<OrderActionError>()); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         events_ | is(QryAsset::tag) |
@@ -286,22 +278,16 @@ namespace kungfu::wingchun::service
                   handle_asset_request(event, app_location);
               }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         events_ | is(InstrumentRequest::tag) |
         $([&](const event_ptr &event)
           {
               try
-              {
-                  handle_instrument_request(event);
-              }
+              { handle_instrument_request(event); }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         /**
@@ -323,9 +309,7 @@ namespace kungfu::wingchun::service
                   get_io_device()->get_rep_sock()->send(response);
               }
               catch (const std::exception &e)
-              {
-                  SPDLOG_ERROR("Unexpected exception {}", e.what());
-              }
+              { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
         publish_state(writers_[0], now());
@@ -385,13 +369,9 @@ namespace kungfu::wingchun::service
               try
               { std::rethrow_exception(e); }
               catch (const rx::empty_error &ex)
-              {
-                  SPDLOG_WARN("{}", ex.what());
-              }
+              { SPDLOG_WARN("{}", ex.what()); }
               catch (const std::exception &ex)
-              {
-                  SPDLOG_WARN("Unexpected exception {}", ex.what());
-              }
+              { SPDLOG_WARN("Unexpected exception {}", ex.what()); }
           });
     }
 
@@ -445,7 +425,7 @@ namespace kungfu::wingchun::service
         }
         auto location = get_location(account_location_id);
         auto md_location = location::make_shared(get_io_device()->get_home()->mode, category::MD, location->group, location->group,
-                                          get_io_device()->get_home()->locator);
+                                                 get_io_device()->get_home()->locator);
         SPDLOG_INFO("subscribe {} instruments for account {}@{} from {} [{:08x}]",
                     instruments.size(), location->name, location->group, md_location->uname, md_location->uid);
 
@@ -473,8 +453,8 @@ namespace kungfu::wingchun::service
                     events_ | is(BrokerStateUpdate::tag) | from(md_location->uid) |
                     filter([=](const event_ptr &e)
                            {
-                               const BrokerState &data = e->data<BrokerState>();
-                               return data == BrokerState::LoggedIn or data == BrokerState::Ready;
+                               const BrokerStateUpdate &data = e->data<BrokerStateUpdate>();
+                               return data.state == BrokerState::LoggedIn or data.state == BrokerState::Ready;
                            }) | first() |
                     $([=](const event_ptr &e)
                       {

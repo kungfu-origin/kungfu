@@ -25,7 +25,7 @@ namespace kungfu::wingchun::broker
         const std::string &get_source() const
         { return source_; }
 
-        virtual const longfist::enums::AccountType get_account_type() const = 0;
+        virtual const longfist::enums::AccountType   get_account_type() const = 0;
 
         virtual bool insert_order(const event_ptr &event) = 0;
 
@@ -39,11 +39,7 @@ namespace kungfu::wingchun::broker
 
     protected:
 
-        void publish_state(longfist::enums::BrokerState state)
-        {
-            auto s = static_cast<int32_t>(state);
-            write_to(0, longfist::types::BrokerStateUpdate::tag, s);
-        }
+        void publish_state(longfist::enums::BrokerState state);
 
     private:
         std::string source_;

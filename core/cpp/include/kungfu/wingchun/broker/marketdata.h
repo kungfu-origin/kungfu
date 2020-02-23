@@ -28,11 +28,7 @@ namespace kungfu::wingchun::broker
         virtual bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) = 0;
 
     protected:
-        void publish_state(longfist::enums::BrokerState state)
-        {
-            auto s = static_cast<int32_t>(state);
-            write_to(0, longfist::types::BrokerStateUpdate::tag, s);
-        }
+        void publish_state(longfist::enums::BrokerState state);
     };
 }
 

@@ -34,7 +34,9 @@ namespace kungfu::yijinjing::practice
         explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
         bool is_started()
-        { return started_; }
+        {
+            return started_;
+        }
 
         void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
@@ -52,11 +54,6 @@ namespace kungfu::yijinjing::practice
             return master_start_time_;
         }
 
-        std::string get_config_db_file(const std::string &name) const
-        {
-            return config_location_->locator->layout_file(config_location_, longfist::enums::layout::SQLITE, name);
-        }
-
         yijinjing::data::location_ptr get_config_location() const
         { return config_location_; }
 
@@ -72,10 +69,10 @@ namespace kungfu::yijinjing::practice
             }
         }
 
-        template<typename T>
-        inline void write_to(int64_t trigger_time, int32_t msg_type, T &data, uint32_t dest_id = 0)
+        template<typename DataType>
+        inline void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = 0)
         {
-            writers_[dest_id]->write(trigger_time, msg_type, data);
+            writers_[dest_id]->write(trigger_time, data);
         }
 
         virtual void on_trading_day(const event_ptr &event, int64_t daytime)

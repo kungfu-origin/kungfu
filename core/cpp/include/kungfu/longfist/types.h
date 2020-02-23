@@ -35,7 +35,6 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(CancelOrder, 354);
     KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
     KF_DEFINE_MARK_TYPE(InstrumentRequest, 356);
-    KF_DEFINE_MARK_TYPE(BrokerStateUpdate, 401);
     KF_DEFINE_MARK_TYPE(QryAsset, 402);
     KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
     KF_DEFINE_MARK_TYPE(AlgoOrderInput, 210);
@@ -511,6 +510,12 @@ namespace kungfu::longfist::types
             (double, close_today_ratio),               //平今费率
 
             (double, min_commission)                  //最小手续费
+    );
+
+    KF_DEFINE_PACK_TYPE(
+            BrokerStateUpdate, 401,
+            PK(state),
+            (BrokerState, state)
     );
 
     KF_DEFINE_DATA_TYPE(

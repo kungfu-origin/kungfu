@@ -46,11 +46,13 @@ class KungfuCoreConan(ConanFile):
         build_type = self._get_build_type()
         self._gen_build_info(build_type)
         self._run_cmake_js(build_type, 'build')
+        self._show_build_info(build_type)
 
     def package(self):
         build_type = self._get_build_type()
         self._run_pyinstaller(build_type)
         self._run_setuptools(build_type)
+        self._show_build_info(build_type)
 
     def _get_build_type(self):
         build_type = str(self.settings.build_type)
@@ -59,35 +61,6 @@ class KungfuCoreConan(ConanFile):
 
     def _get_node_version(self):
         return str(self.options.electron_version) if self.options.js_runtime == 'electron' else str(self.options.node_version)
-
-    def _build_cmake_js_cmd(self, cmd):
-        spdlog_levels = {
-            'trace': 'SPDLOG_LEVEL_TRACE',
-            'debug': 'SPDLOG_LEVEL_DEBUG',
-            'info': 'SPDLOG_LEVEL_INFO',
-            'warning': 'SPDLOG_LEVEL_WARN',
-            'error': 'SPDLOG_LEVEL_ERROR',
-            'critical': 'SPDLOG_LEVEL_CRITICAL'
-        }
-        loglevel = spdlog_levels[str(self.options.log_level)]
-        python_path = subprocess.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
-
-        cmake_js_cmd = [
-            tools.which('yarn'),
-            'cmake-js',
-            '--debug' if self.settings.build_type == 'Debug' else '',
-            '--arch', str(self.options.arch),
-            '--runtime', str(self.options.js_runtime),
-            '--runtime-version', self._get_node_version(),
-            '--CDPYTHON_EXECUTABLE=' + python_path,
-            '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel
-        ]
-
-        if tools.detected_os() == 'Windows':
-            return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch),
-                                   '--CDCMAKE_GENERATOR_PLATFORM=' + str(self.options.arch), cmd]
-        else:
-            return cmake_js_cmd + [cmd]
 
     def _gen_build_info(self, build_type):
         now = datetime.datetime.now()
@@ -117,6 +90,41 @@ class KungfuCoreConan(ConanFile):
         with open(os.path.join(build_type, 'build_info.json'), 'w') as output:
             json.dump(build_info, output, indent=2)
         self.output.success(f'build version {build_version}')
+
+    def _show_build_info(self, build_type):
+        with open(os.path.join(build_type, 'build_info.json'), 'r') as build_info_file:
+            build_info = json.load(build_info_file)
+            build_version = build_info['version']
+            self.output.success(f'build version {build_version}')
+
+    def _build_cmake_js_cmd(self, cmd):
+        spdlog_levels = {
+            'trace': 'SPDLOG_LEVEL_TRACE',
+            'debug': 'SPDLOG_LEVEL_DEBUG',
+            'info': 'SPDLOG_LEVEL_INFO',
+            'warning': 'SPDLOG_LEVEL_WARN',
+            'error': 'SPDLOG_LEVEL_ERROR',
+            'critical': 'SPDLOG_LEVEL_CRITICAL'
+        }
+        loglevel = spdlog_levels[str(self.options.log_level)]
+        python_path = subprocess.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
+
+        cmake_js_cmd = [
+            tools.which('yarn'),
+            'cmake-js',
+            '--debug' if self.settings.build_type == 'Debug' else '',
+            '--arch', str(self.options.arch),
+            '--runtime', str(self.options.js_runtime),
+            '--runtime-version', self._get_node_version(),
+            '--CDPYTHON_EXECUTABLE=' + python_path,
+            '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel
+        ]
+
+        if tools.detected_os() == 'Windows':
+            return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch),
+                                   '--CDCMAKE_GENERATOR_PLATFORM=' + str(self.options.arch), cmd]
+        else:
+            return cmake_js_cmd + [cmd]
 
     def _run_cmake_js(self, build_type, cmd):
         rc = subprocess.Popen(self._build_cmake_js_cmd(cmd)).wait()

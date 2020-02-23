@@ -72,4 +72,11 @@ namespace kungfu::wingchun::broker
               subscribe(symbols);
           });
     }
+
+    void MarketData::publish_state(longfist::enums::BrokerState state)
+    {
+        longfist::types::BrokerStateUpdate update{};
+        update.state = state;
+        write_to(0, update);
+    }
 }

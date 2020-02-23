@@ -9,7 +9,7 @@ from kungfu.yijinjing.log import create_logger
 @click.pass_context
 def ext(ctx):
     pass_ctx_from_root(ctx)
-    ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'extension', ctx.locator)
+    ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'extension', 'cli', ctx.locator)
     ctx.logger = create_logger('ext', ctx.log_level, ctx.journal_util_location)
     if not os.getenv('KF_NO_EXT'):
         pass
