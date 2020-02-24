@@ -227,13 +227,16 @@ export default {
     computed:{
         ...mapState({
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            mdTdState: state => state.ACCOUNT.mdTdState,
-            accountsAsset: state => state.ACCOUNT.accountsAsset,
-            tdList: state => state.ACCOUNT.tdList, 
-            currentAccount: state => state.ACCOUNT.currentAccount,
-            currentId: state => (state.ACCOUNT.currentAccount || {}).account_id,
-            processStatus: state => state.BASE.processStatus
+            mdTdState: state => state.ACCOUNT.mdTdState || {},
+            accountsAsset: state => state.ACCOUNT.accountsAsset || {},
+            tdList: state => state.ACCOUNT.tdList || [], 
+            currentAccount: state => state.ACCOUNT.currentAccount || {},
+            processStatus: state => state.BASE.processStatus || {}
         }),
+
+        currentId () {
+            return this.currentAccount.account_id || ''
+        },
 
         //用来存放筛选完的列表
         accountFilter() {

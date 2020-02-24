@@ -21,10 +21,6 @@ export const setAccountsAsset = ({ commit }, accountsAsset) => {
     commit('SET_ACCOUNTS_ASSET', accountsAsset)
 }
 
-export const setAccountAssetById = ({ commit },  { accountId, accountsAsset }) => {
-    commit('SET_ACCOUNT_ASSET',  { accountId, accountsAsset })
-}
-
 export const setTdList = ({ commit }, tdList) => {
     commit('SET_TD_LIST', tdList)
 }

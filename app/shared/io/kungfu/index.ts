@@ -1,7 +1,7 @@
 import { startGetKungfuState } from '__gUtils/kungfuUtils';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { transformTradingItemListToData } from '__gUtils/BusiUtils';
+import { transformTradingItemListToData, transformAssetItemListToData } from '__gUtils/BusiUtils';
 
 
 
@@ -16,16 +16,15 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
-            console.log(data)
-
             const orders = Object.values(data.Order || {});
             const trades = Object.values(data.Trade || {});
             const positions = Object.values(data.Position || {});
-
+            const assets = Object.values(data.Asset || {})
             return {
                 orders: transformTradingItemListToData(orders, type),
                 trades: transformTradingItemListToData(trades, type),
                 positions: transformTradingItemListToData(positions, type, true),
+                assets: transformAssetItemListToData(assets, type),
             }
         })
     )
@@ -119,8 +118,6 @@ async function insertTradingData() {
         watcher.publishState(asset)
 
         console.log('insert assets', `${i}`)
-
-
     }
 
 }

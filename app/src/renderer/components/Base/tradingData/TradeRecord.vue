@@ -103,7 +103,11 @@ export default {
                     const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
                     return strings.includes(searchKeyword) 
                 })
-                .map(item => dealTrade(item))
+                .map(item => {
+                    let tradeData = dealTrade(item);
+                    tradeData.update = !!t.tableData.length;
+                    return tradeData
+                })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
 
             return Object.freeze(tradesAfterFilter || [])

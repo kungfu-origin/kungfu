@@ -418,7 +418,7 @@ export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = +Number(item.update_time || item.insert_time || 0);
-    return Object.freeze({
+    return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: moment(+updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
         updateTimeNum: +updateTime,
@@ -434,12 +434,12 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         sourceId: item.source_id,
         orderId: item.order_id.toString(),
         exchangeId: item.exchange_id
-    })
+    }
 }
 
 export const dealTrade = (item: TradeInputData): TradeData => {
     const updateTime = +Number(item.trade_time || item.update_time || 0);
-    return Object.freeze({
+    return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
         updateTimeNum: +updateTime,
@@ -451,13 +451,13 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id,
         sourceId: item.source_id
-    })  
+    }
 }
 
 export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = posDirection[item.direction] || '--';
-    return Object.freeze({
+    return {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
@@ -467,7 +467,7 @@ export const dealPos = (item: PosInputData): PosData => {
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
-    })
+    }
 }
 
 export const dealAsset = (item: AssetInputData): AssetData => {
@@ -571,7 +571,7 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
 } 
 
 
-export const transformTradingItemListToData = (list: any, type: string, ifLedgerCategory?: Boolean) => {
+export const transformTradingItemListToData = (list: any[], type: string, ifLedgerCategory?: Boolean) => {
     let data: StringToAny = {}
 
     if (type === 'account') {
@@ -617,35 +617,17 @@ export const transformTradingItemListToData = (list: any, type: string, ifLedger
     return data
 }
 
-export const getDataFromTradingData = (type: string) => {
-    if (type === 'strategy') {
-        return (list: any[], targetId: string, ifLedgerCategory: Boolean) => {
-            return list
-                .filter((item: any) => {
-                    if (ifLedgerCategory) {
-                        return +item.ledger_category === 1;
-                    } else {
-                        return true;
-                    }
-                })
-                .filter((item: any) => {
-                   return item.client_id === targetId
-                })
-        }
-    } else if (type === 'account') {
-        return (list: any[], targetId: string, ifLedgerCategory: Boolean) => {
-            return list
-                .filter((item: any) => {
-                    if (ifLedgerCategory) {
-                        return +item.ledger_category === 0;
-                    } else {
-                        return true;
-                    }
-                })
-                .filter((item: any) => {
-                    console.log(item, targetId)
-                    return `${item.source_id}_${item.account_id}` === targetId
-                })
-        }
-    }
+export const transformAssetItemListToData = (list: any[], type: string) => {
+    let accountIdClientIdData = transformTradingItemListToData(list, type, true);
+    Object.keys(accountIdClientIdData || {}).forEach((id: string) => {
+        const valueData = accountIdClientIdData[id]
+            .reduce((a: any, b: any) => {
+                return {
+                    ...a,
+                    ...b
+                }
+            })
+        accountIdClientIdData[id] = valueData
+    })
+    return accountIdClientIdData
 }

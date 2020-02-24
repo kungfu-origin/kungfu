@@ -116,10 +116,8 @@ export default {
             const t = this;
             t.selectedSource = ''
             t.$emit('update:visible', false);
-        },
-
+        }
     }
-
 }
 </script>
 

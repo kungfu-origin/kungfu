@@ -219,7 +219,8 @@ export default {
             if (!ordersAfterFilter.length) return Object.freeze([]);
 
             ordersAfterFilter.kfForEach(item => {
-                const orderData = dealOrder(item);
+                let orderData = dealOrder(item);
+                orderData.update = true;
                 orderDataByKey[orderData.id] = orderData;
             })
 

@@ -144,7 +144,8 @@ export default {
             if (!positionsAfterFilter.length) return Object.freeze([]);
 
             positionsAfterFilter.kfForEach(item => {
-                const positionData = dealPos(item);
+                let positionData = dealPos(item);
+                positionData.update = true;
                 const poskey = t.getKey(positionData)
                 positionDataByKey[poskey] = positionData;
             })

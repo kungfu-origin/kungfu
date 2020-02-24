@@ -9,7 +9,10 @@ export const DELETE_ONE_MD_TD_STATE = (state, id) => {
 }
 
 export const SET_ACCOUNTS_ASSET = (state, accountsAsset) => {
-    state.accountsAsset = accountsAsset
+    state.accountsAsset = {
+        ...state.accountsAsset,
+        ...accountsAsset
+    }
 }
 
 export const SET_ACCOUNT_ASSET = (state, { accountId, accountsAsset }) => {

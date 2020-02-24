@@ -119,6 +119,8 @@ export default {
             this.trades = Object.freeze(trades || []);
             const positions = data['positions'][t.currentId];
             this.positions = Object.freeze(positions || []);
+            const assets = data['assets'];
+            this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
         })
     },
 

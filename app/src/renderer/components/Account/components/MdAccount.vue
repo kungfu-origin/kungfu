@@ -50,6 +50,7 @@
                 <el-table-column
                     label=""
                     align="right"
+                    min-width="120"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>

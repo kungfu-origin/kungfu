@@ -68,14 +68,11 @@ export default {
         t.$store.dispatch('getAccountSourceConfig')
         t.$store.dispatch('getStrategyList')
         t.$store.dispatch('getTdList')
-            .then(tdList => t.getAccountsCash(tdList))
 
         t.subGatewayState();
-        t.subAccountCash();
         t.subTradingDay();
       
         // t.reqCalendar();
-        t.reqCash();
         t.reqGatewayState();
 
         t.$store.dispatch('getKungfuConfig')
@@ -131,20 +128,6 @@ export default {
             })
         },
 
-        subAccountCash() {
-            const t = this;
-            t.cashPipe = buildCashPipe().subscribe(({ data }) => {
-                const { account_id, source_id, ledger_category } = data;
-                const accountId = `${source_id}_${account_id}`;                  
-                if(ledger_category !== 0) return;
-                // console.log('[CASH] sub',  accountId, data)
-                t.$store.dispatch('setAccountAssetById', { accountId, accountsAsset: Object.freeze({
-                    ...data,
-                    nano: true
-                })})
-            })
-        },
-
         subTradingDay() {
             const t = this;
             //sub 交易日
@@ -155,20 +138,6 @@ export default {
                     // console.log('[TRADING DAY] sub', tradingDay)
                     t.$store.dispatch('setTradingDay', tradingDay);
                 }
-            })
-        },
-        
-        //获取accounts的cash
-        getAccountsCash(accountList) {
-            const t = this
-            //从数据库中查找
-            if(!accountList || !accountList.length) return
-            getAccountAsset().then(cashList => {
-                const cashData = [{}, ...cashList].reduce((cash, curr) => {
-                    cash[`${curr.source_id}_${curr.account_id}`] = curr
-                    return cash
-                })
-                t.$store.dispatch('setAccountsAsset', cashData)
             })
         },
 
@@ -202,12 +171,6 @@ export default {
         reqGatewayState(){
             delayMiliSeconds(3000)//需要等ledger起来
             .then(() => nanoReqGatewayState())
-        },
-
-        //获取资金信息
-        reqCash() {
-            delayMiliSeconds(3000)//需要等ledger起来
-            .then(() => nanoReqCash())
         }
     }
 }
