@@ -127,9 +127,8 @@ class Ledger(pywingchun.Ledger):
 
     def on_book_event(self, event):
         self.ctx.logger.debug("book event received: {}".format(event))        
-        event = event.as_dict()
-        self.ctx.db.on_book_event(event)
-        self.publish(json.dumps(event, cls=wc_utils.WCEncoder))
+        writer = self.get_writer(0)
+        writer.write(0, event.data)
 
     def on_order(self, event, order):
         pass
