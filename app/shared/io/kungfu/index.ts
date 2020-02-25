@@ -16,6 +16,7 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
+            console.log(data, '---')
             const orders = Object.values(data.Order || {});
             const trades = Object.values(data.Trade || {});
             const positions = Object.values(data.Position || {});
