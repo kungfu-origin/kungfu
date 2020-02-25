@@ -26,7 +26,6 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
     const status = proc.status === 'online';
     const startOrStop = !!status ? 'Stop' : 'Start';
     const startOrStopMaster = !!status ? 'Restart' : 'Start';
-    console.log(proc, '--')
     switch(proc.type) {
         case 'main':
             if (proc.processId === 'master') {
