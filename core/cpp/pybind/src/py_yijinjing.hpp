@@ -18,6 +18,7 @@
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/practice/master.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/yijinjing/practice/config_store.h>
 
 namespace kungfu::yijinjing
 {
@@ -174,6 +175,8 @@ namespace kungfu::yijinjing
 
     void bind(pybind11::module &&m)
     {
+        yijinjing::ensure_sqlite_initilize();
+
         m.def("thread_id", &get_thread_id);
         m.def("in_color_terminal", &in_color_terminal);
         m.def("color_print", &color_print);
@@ -242,8 +245,8 @@ namespace kungfu::yijinjing
                 .def_property_readonly("data_address", [](const frame &f)
                 { return f.address() + f.header_length(); });
 
-        py::class_<data::location, std::shared_ptr<data::location>>(m, "location")
-                .def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &, data::locator_ptr>())
+        auto location_class = py::class_<data::location, std::shared_ptr<data::location>>(m, "location");
+        location_class.def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &, data::locator_ptr>())
                 .def_readonly("mode", &data::location::mode)
                 .def_readonly("category", &data::location::category)
                 .def_readonly("group", &data::location::group)
@@ -255,6 +258,10 @@ namespace kungfu::yijinjing
                 {
                     return target.uname;
                 });
+        location_class.def("to", py::overload_cast<longfist::types::Config &>(&data::location::to<longfist::types::Config>, py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Register &>(&data::location::to<longfist::types::Register>, py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Deregister &>(&data::location::to<longfist::types::Deregister>, py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Location &>(&data::location::to<longfist::types::Location>, py::const_));
 
         py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
                 .def(py::init())
@@ -324,8 +331,7 @@ namespace kungfu::yijinjing
         });
 
         py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-        io_device.def(py::init<data::location_ptr, bool, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true,
-                      py::arg("unique") = false)
+        io_device.def(py::init<data::location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)
                 .def_property_readonly("publisher", &io_device::get_publisher)
                 .def_property_readonly("observer", &io_device::get_observer)
                 .def_property_readonly("home", &io_device::get_home)
@@ -373,11 +379,16 @@ namespace kungfu::yijinjing
                 .def("on_trading_day", &apprentice::on_trading_day)
                 .def("run", &apprentice::run);
 
-
-//    py::class_<msg::data::RequestReadFrom, std::shared_ptr<msg::data::RequestReadFrom>>(m, "RequestReadFrom")
-//            .def_readonly("source_id", &msg::data::RequestReadFrom::source_id)
-//            .def_readonly("from_time", &msg::data::RequestReadFrom::from_time);
-//    m.def("get_RequestReadFrom", &get_RequestReadFrom);
+        auto cs_class = py::class_<config_store>(m, "config_store");
+        cs_class.def(py::init<const yijinjing::data::locator_ptr&>());
+        hana::for_each(longfist::ConfigDataTypes, [&](auto type)
+        {
+            using DataType = typename decltype(+hana::second(type))::type;
+            cs_class.def("set", &config_store::set<DataType>);
+            cs_class.def("get", &config_store::get<DataType>);
+            cs_class.def("get_all", &config_store::get_all<DataType>);
+            cs_class.def("remove", &config_store::remove<DataType>);
+        });
     }
 }
 

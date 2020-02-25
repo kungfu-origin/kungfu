@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2020/1/14.
 //
 
-#include "watcher.h"
 #include "io.h"
+#include "watcher.h"
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;

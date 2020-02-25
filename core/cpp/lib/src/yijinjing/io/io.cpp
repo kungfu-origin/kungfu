@@ -203,78 +203,14 @@ namespace kungfu::yijinjing
         }
     };
 
-    void sqlite3_log(void *callback, int result_code, const char *msg)
-    {
-        SPDLOG_WARN("[sqlite3] [{}] {}", result_code, msg);
-    }
-
-    int callback(void *NotUsed, int argc, char **argv, char **azColName)
-    {
-        int i;
-        for (i = 0; i < argc; i++)
-        {
-            SPDLOG_INFO("[sqlite3] callback: {} = {}", azColName[i], argv[i] ? argv[i] : "NULL");
-        }
-        return 0;
-    }
-
-    int wal_hook(void *NotUsed, sqlite3 *db, const char *name, int page_nb)
-    {
-        SPDLOG_INFO("wal committed to {} with page number {}", name, page_nb);
-        return 0;
-    }
-
-    int xConflict(void *pCtx, int eConflict, sqlite3_changeset_iter *pIter)
-    {
-        return 0;
-    }
-
-    void handle_sql_error(int rc, const std::string &error_tip)
-    {
-        if (SQLITE_OK != rc)
-        {
-            SPDLOG_ERROR("sqlite3 rc {}", rc);
-            throw yijinjing_error(error_tip);
-        }
-    }
-
-    void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip)
-    {
-        int rc = sqlite3_exec(db, sql.c_str(), callback, NULL, db_error_msg);
-        handle_sql_error(rc, error_tip);
-    }
-
-    void io_device::init_sqlite()
-    {
-        int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, NULL);
-        handle_sql_error(rc, "failed to config sqlite3 log");
-
-        rc = sqlite3_config(SQLITE_CONFIG_MMAP_SIZE, 1048577);
-        handle_sql_error(rc, "failed to config sqlite3");
-
-        sqlite3_initialize();
-        SPDLOG_TRACE("sqlite initialized");
-    }
-
-    void io_device::shutdown_sqlite()
-    {
-        sqlite3_shutdown();
-        SPDLOG_TRACE("sqlite shutdown");
-    }
-
-    io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy, bool unique) : home_(std::move(home)),
-                                                                                                          low_latency_(low_latency),
-                                                                                                          lazy_(lazy), unique_(unique)
+    io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy) :
+            home_(std::move(home)), low_latency_(low_latency), lazy_(lazy)
     {
         if (spdlog::default_logger()->name().empty())
         {
             yijinjing::log::setup_log(home_, home_->name);
         }
-
-        if (unique_)
-        {
-            init_sqlite();
-        }
+        ensure_sqlite_initilize();
 
         db_home_ = location::make_shared(mode::LIVE, category::SYSTEM, "journal", "index", home_->locator);
         live_home_ = location::make_shared(mode::LIVE, home_->category, home_->group, home_->name, home_->locator);
@@ -333,11 +269,6 @@ and json_extract(session.data, '$.end_time') <= ?4;
         sqlite3session_delete(db_session_);
         sqlite3_close_v2(index_db_);
         SPDLOG_TRACE("index db closed");
-
-        if (unique_)
-        {
-            shutdown_sqlite();
-        }
     }
 
     reader_ptr io_device::open_reader_to_subscribe()

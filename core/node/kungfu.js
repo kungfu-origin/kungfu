@@ -48,8 +48,12 @@ const locator = function(home) {
     };
 };
 
-exports.io_device = function(mode, category, group, name, home) {
-    return new bindings.IODevice(mode, category, group, name, locator(home));
+exports.io_device = function(category, group, name, mode, home) {
+    return new bindings.IODevice(category, group, name, mode, locator(home));
+};
+
+exports.ConfigStore = function(home) {
+    return new bindings.ConfigStore(locator(home));
 };
 
 exports.watcher = function(home, name) {

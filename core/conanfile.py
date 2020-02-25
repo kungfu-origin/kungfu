@@ -87,12 +87,12 @@ class KungfuCoreConan(ConanFile):
             }
         }
         tools.mkdir(build_type)
-        with open(os.path.join(build_type, 'build_info.json'), 'w') as output:
+        with open(os.path.join(build_type, 'kungfubuildinfo.json'), 'w') as output:
             json.dump(build_info, output, indent=2)
         self.output.success(f'build version {build_version}')
 
     def _show_build_info(self, build_type):
-        with open(os.path.join(build_type, 'build_info.json'), 'r') as build_info_file:
+        with open(os.path.join(build_type, 'kungfubuildinfo.json'), 'r') as build_info_file:
             build_info = json.load(build_info_file)
             build_version = build_info['version']
             self.output.success(f'build version {build_version}')

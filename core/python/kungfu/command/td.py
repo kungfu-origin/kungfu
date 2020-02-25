@@ -1,8 +1,8 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import longfist
+from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from extensions import EXTENSION_REGISTRY_TD
-from kungfu.data.sqlite.data_proxy import AccountsDB
 
 
 @kfc.command(help_priority=3)
@@ -12,9 +12,7 @@ from kungfu.data.sqlite.data_proxy import AccountsDB
 @click.pass_context
 def td(ctx, source, account, low_latency):
     pass_ctx_from_parent(ctx)
-    ctx.db = AccountsDB(pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator), 'accounts')
-    td_config = ctx.db.get_td_account_config(source, source + '_' + account)
-
-    print(td_config, '-----')
-    ext = EXTENSION_REGISTRY_TD.get_extension(source)(low_latency, ctx.locator, account, td_config)
+    config = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, ctx.locator).to(longfist.types.Config())
+    config = yjj.config_store(ctx.locator).get(config)
+    ext = EXTENSION_REGISTRY_TD.get_extension(source)(low_latency, ctx.locator, account, config.value)
     ext.run()

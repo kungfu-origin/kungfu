@@ -12,7 +12,7 @@
 namespace kungfu::wingchun::xtp
 {
     MarketDataXTP::MarketDataXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config) :
-            MarketData(low_latency, std::move(locator), SOURCE_XTP)
+            MarketData(low_latency, std::move(locator), SOURCE_XTP), api_(nullptr)
     {
         yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
         config_ = nlohmann::json::parse(json_config);

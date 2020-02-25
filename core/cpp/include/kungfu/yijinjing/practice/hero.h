@@ -19,7 +19,7 @@ namespace kungfu::yijinjing::practice
     public:
         explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
-        virtual ~hero() = default;
+        virtual ~hero();
 
         bool is_usable() override
         { return io_device_->is_usable(); }

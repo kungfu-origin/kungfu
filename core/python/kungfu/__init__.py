@@ -18,9 +18,10 @@ import os
 import json
 import pykungfu
 
-with open(os.path.join(os.path.dirname(os.path.abspath(pykungfu.__file__)), 'build_info.json'), 'r') as build_info_file:
+with open(os.path.join(os.path.dirname(os.path.abspath(pykungfu.__file__)), 'kungfubuildinfo.json'), 'r') as build_info_file:
     __build_info__ = json.load(build_info_file)
-    __version__ = __build_info__['version']
+
+__version__ = __build_info__['version']
 
 from .msg import monkey_patch
 monkey_patch()

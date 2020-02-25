@@ -37,9 +37,8 @@ namespace kungfu::yijinjing::practice
 {
     apprentice::apprentice(location_ptr home, bool low_latency) :
             hero(std::make_shared<io_device_client>(home, low_latency)),
-            master_start_time_(0), timer_usage_count_(0),
-            state_map_(build_state_map(longfist::StateDataTypes)), recover_state(state_map_),
-            started_(false)
+            master_start_time_(0), timer_usage_count_(0), started_(false),
+            state_map_(build_data_map(longfist::StateDataTypes)), recover_state(state_map_)
     {
         auto uid_str = fmt::format("{:08x}", get_live_home_uid());
         auto locator = get_io_device()->get_home()->locator;
@@ -252,7 +251,7 @@ namespace kungfu::yijinjing::practice
         data["category"] = home->category;
         data["group"] = home->group;
         data["name"] = home->name;
-        data["uid"] = home->uid;
+        data["location_uid"] = home->uid;
         data["pid"] = GETPID();
         request["data"] = data;
 
