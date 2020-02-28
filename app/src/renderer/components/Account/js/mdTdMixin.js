@@ -16,11 +16,7 @@ export default {
 
     mounted () {
         const t = this;
-        t.renderTable = true
-    },
-
-    beforeMount () {
-        const t = this;
+        t.renderTable = true;
         t.getTableList();
     },
 

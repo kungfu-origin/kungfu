@@ -4,7 +4,7 @@ const path = require('path');
 const { app, BrowserWindow, Menu, dialog } = require('electron');
 const electron = require('electron');
 //base setting, init db
-const { initDB, initConfig } = require('__assets/base');
+const { initConfig } = require('__assets/base');
 const { killGodDaemon,  killExtra, killKfc, killKungfu } = require('__gUtils/processUtils');
 const { logger } = require('__gUtils/logUtils');
 const { platform } = require('__gConfig/platformConfig');
@@ -13,7 +13,6 @@ const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
 
 
 //create db
-initDB();
 initConfig();
 setMenu();
 

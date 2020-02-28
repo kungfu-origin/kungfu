@@ -1,6 +1,6 @@
 <template>
     <div class="info-list-content">
-        <transition>        
+        <!-- <transition>         -->
             <div class="info-list" v-if="value">
                 <el-tabs v-model.trim="currInfoType">
                     <el-tab-pane :lazy="true" label="今天" name="today">
@@ -141,7 +141,7 @@
                     </el-tab-pane>
                 </el-tabs>
             </div>
-        </transition>
+        <!-- </transition> -->
         <div class="info-list-mask"  v-if="value" @click="handleClose"></div>
     </div>    
 </template>

@@ -54,7 +54,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import * as ACCOUNT_API from '__io/db/account';
+import { addTd, updateTdConfig, addMd, updateMdConfig } from '__io/kungfu/account';
+
 import { deepClone } from '__gUtils/busiUtils';
 import { remote } from 'electron';
 
@@ -149,9 +150,9 @@ export default {
             const formValue = t.postForm || {};
 
             if(t.method == 'add') { //添加账户
-                return ACCOUNT_API.addTd(accountId, t.source, JSON.stringify(formValue))
+                return addTd(accountId, JSON.stringify(formValue))
             } else{ //编辑账户
-                return ACCOUNT_API.updateTdConfig(accountId, JSON.stringify(formValue))
+                return updateTdConfig(accountId, JSON.stringify(formValue))
             }
         },
 
@@ -161,9 +162,9 @@ export default {
             const formValue = t.postForm || {};
             
             if(t.method == 'add') { //添加账户
-                return ACCOUNT_API.addMd(sourceName, JSON.stringify(formValue))
+                return addMd(sourceName, JSON.stringify(formValue))
             } else{ //编辑账户
-                return ACCOUNT_API.updateMdConfig(sourceName, JSON.stringify(formValue))
+                return updateMdConfig(sourceName, JSON.stringify(formValue))
             }
         },
 

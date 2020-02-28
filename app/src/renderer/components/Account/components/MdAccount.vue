@@ -91,7 +91,7 @@
 import path from 'path';
 import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
-import * as ACCOUNT_API from '__io/db/account';
+import { getMdList } from '__io/kungfu/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd, deleteMd } from '__io/actions/account';
 
@@ -171,8 +171,8 @@ export default {
         //获取账户列表
         getTableList() {
             const t = this;
-            ACCOUNT_API.getMdList().then(res => {
-                if(!res) return;
+            return getMdList().then(res => {
+                if(!res.length) return;
                 t.$store.dispatch('setMdList', res)
             }).catch(err => {
                 t.$message.error(err.message || '操作失败！')

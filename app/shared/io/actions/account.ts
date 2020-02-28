@@ -1,4 +1,4 @@
-import * as ACCOUNT_API from '__io/db/account';
+import * as ACCOUNT_API from '__io/kungfu/account';
 import { TD_DIR, MD_DIR, buildGatewayPath } from '__gConfig/pathConfig';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';

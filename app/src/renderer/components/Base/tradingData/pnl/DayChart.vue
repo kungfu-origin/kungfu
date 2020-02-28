@@ -195,14 +195,6 @@ export default {
             return toDecimal((pnlData.unrealized_pnl || 0) + (pnlData.realized_pnl || 0), 2)
         },
 
-        // calcuAccumlatedPnlRatio(pnlData, firstPnlData) {
-        //     firstPnlData = firstPnlData || {}
-        //     const latestPnl = +toDecimal((pnlData.unrealized_pnl || 0) + (pnlData.realized_pnl || 0), 2)
-        //     const firstPnl = +toDecimal((firstPnlData.unrealized_pnl || 0) + (firstPnlData.realized_pnl || 0), 2)
-        //     console.log(firstPnlData.initial_equity , '---')
-        //     return (latestPnl - firstPnl ) / firstPnl
-        // },
-
         dealNanomsg(nanomsg) {
             const t = this
             t.dealMinData(nanomsg)

@@ -631,3 +631,22 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
     })
     return accountIdClientIdData
 }
+
+export const encodeKeyToKungfuKey = (key: string, type: string) => {
+    switch (type) {
+        case 'td':
+            const tdIdSplit = key.split('_');
+            if (tdIdSplit.length !== 2) throw new Error(`td id ${key} is illegal!`);
+            const sourceId = tdIdSplit[0];
+            const accountId = tdIdSplit[1];
+            return ['td', sourceId, accountId, 'live'];
+        case 'md':
+            if (!key) throw new Error(`md id ${key} is illegal!`);
+            return ['md', key, key, 'live'];
+        case 'strategy':
+            if (!key) throw new Error(`strategy id ${key} is illegal!`);
+            return ['strategy', 'default', key, 'live'];
+        default:
+            throw new Error(`unknow type ${type}`);
+    }
+}

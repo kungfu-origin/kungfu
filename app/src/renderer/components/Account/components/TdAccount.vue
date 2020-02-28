@@ -189,13 +189,14 @@
         :mdTdList="tdList"
         type="td"
         />
+
     </tr-dashboard>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
-import * as ACCOUNT_API from '__io/db/account';
+import { getTdList } from '__io/kungfu/account';
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
@@ -315,13 +316,11 @@ export default {
         //获取账户列表
         getTableList() {
             const t = this
-            return new Promise(resolve => {
-                t.$store.dispatch('getTdList')
-                .then(tdList => {
-                    if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
-                    resolve(tdList)
-                })
-            })   
+            getTdList().then(tdList => {
+                t.$store.dispatch('setTdList', tdList);
+                if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
+                return tdList
+            })
         },
 
         //删除前进行一些判断

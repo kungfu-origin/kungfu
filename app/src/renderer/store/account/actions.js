@@ -1,7 +1,5 @@
 
-import Vue from 'vue';
 import * as ACCOUNT_API from '__io/db/account';
-import { debounce } from '__gUtils/busiUtils';
 
 //保存选中的账户信息
 export const setCurrentAccount = ({ commit }, account) => {
@@ -27,32 +25,4 @@ export const setTdList = ({ commit }, tdList) => {
 
 export const setMdList = ({ commit }, mdList) => {
     commit('SET_MD_LIST', mdList)
-}
-
-//获取 tdList
-export const getTdList = ({ dispatch }) => {
-    return new Promise((resolve, reject) => {
-        ACCOUNT_API.getTdList()
-        .then(res => {
-            dispatch('setTdList', res);
-            resolve(res)
-        })
-        .catch(err => {
-            console.error(err)
-        })
-    })
-}
-
-//获取 mdList
-export const getMdList = ({ dispatch }) => {
-    return new Promise((resolve, reject) => {
-        ACCOUNT_API.getMdList()
-        .then(res => {
-            dispatch('setMdList', res);
-            resolve(res)
-        })
-        .catch(err => {
-            console.error(err)
-        })
-    })
 }

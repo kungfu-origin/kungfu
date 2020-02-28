@@ -32,8 +32,7 @@ export default {
         handleConfrimSelect(item) {
             const t = this;
             t.$emit('selected', item)
-            t.$nextTick()
-            .then(() => t.handleClose())
+            t.$nextTick().then(() => t.handleClose())
         },
 
         handleClose() {

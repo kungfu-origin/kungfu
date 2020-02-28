@@ -19,7 +19,6 @@ import GlobalSettingDialog from './components/Base/GlobalSettingDialog';
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
-import { getAccountAsset } from '__io/db/account';
 import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
@@ -67,12 +66,11 @@ export default {
         const t = this;
         t.$store.dispatch('getAccountSourceConfig')
         t.$store.dispatch('getStrategyList')
-        t.$store.dispatch('getTdList')
 
         t.subGatewayState();
         t.subTradingDay();
       
-        // t.reqCalendar();
+        t.reqCalendar();
         t.reqGatewayState();
 
         t.$store.dispatch('getKungfuConfig')
