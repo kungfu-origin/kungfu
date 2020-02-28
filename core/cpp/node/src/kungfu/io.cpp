@@ -100,7 +100,7 @@ namespace kungfu::node
 
     Napi::FunctionReference IODevice::constructor;
 
-    IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true, false)
+    IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true)
     {
         Napi::Env env = info.Env();
         Napi::HandleScope scope(env);
@@ -134,10 +134,10 @@ namespace kungfu::node
 
     location_ptr IODevice::GetLocation(const Napi::CallbackInfo &info)
     {
-        longfist::enums::mode m = longfist::enums::get_mode_by_name(info[0].As<Napi::String>().Utf8Value());
-        longfist::enums::category c = longfist::enums::get_category_by_name(info[1].As<Napi::String>().Utf8Value());
-        auto group = info[2].As<Napi::String>().Utf8Value();
-        auto name = info[3].As<Napi::String>().Utf8Value();
+        longfist::enums::category c = longfist::enums::get_category_by_name(info[0].As<Napi::String>().Utf8Value());
+        auto group = info[1].As<Napi::String>().Utf8Value();
+        auto name = info[2].As<Napi::String>().Utf8Value();
+        longfist::enums::mode m = longfist::enums::get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
         return std::make_shared<location>(m, c, group, name, GetLocator(info, 4));
     }
 

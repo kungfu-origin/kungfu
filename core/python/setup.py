@@ -2,7 +2,7 @@ from setuptools import find_packages
 from setuptools import setup
 import json
 
-with open('build_info.json', 'r') as build_info_file:
+with open('kungfubuildinfo.json', 'r') as build_info_file:
     build_info = json.load(build_info_file)
 
 setup(
@@ -12,7 +12,7 @@ setup(
     license="Apache-2.0",
     packages=[''] + find_packages(exclude=["hooks", "test", "extensions"]),
     package_data={
-        '': ['*.so', '*.dylib', '*.dll', '*.json']
+        '': ['*.so', '*.dylib', '*.dll', '*.pyd', '*.json']
     },
     include_package_data=True,
     install_requires=[

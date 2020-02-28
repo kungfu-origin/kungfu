@@ -42,8 +42,20 @@ namespace kungfu::longfist::types
     KF_DEFINE_MARK_TYPE(AlgoOrderModify, 212);
 
     KF_DEFINE_DATA_TYPE(
+            Config, 10005,
+            PK(location_uid),
+            (uint32_t, location_uid),
+            (enums::category, category),
+            (std::string, group),
+            (std::string, name),
+            (enums::mode, mode),
+            (std::string, value)
+    );
+
+    KF_DEFINE_DATA_TYPE(
             Register, 10011,
-            PK(category, group, name, mode),
+            PK(location_uid),
+            (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
             (std::string, group),
@@ -53,7 +65,8 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Deregister, 10012,
-            PK(category, group, name, mode),
+            PK(location_uid),
+            (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
             (std::string, group),
@@ -62,7 +75,8 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Location, 10026,
-            PK(category, group, name, mode),
+            PK(location_uid),
+            (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
             (std::string, group),
@@ -516,13 +530,6 @@ namespace kungfu::longfist::types
             BrokerStateUpdate, 401,
             PK(state),
             (BrokerState, state)
-    );
-
-    KF_DEFINE_DATA_TYPE(
-            Config, 10005,
-            PK(name),
-            (std::string, name),
-            (std::string, value)
     );
 
     KF_DEFINE_DATA_TYPE(

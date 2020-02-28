@@ -16,6 +16,12 @@
 
 namespace kungfu::longfist
 {
+    constexpr auto ConfigDataTypes = boost::hana::make_map(
+            TYPE_PAIR(Config),
+            TYPE_PAIR(InstrumentCommissionRate)
+    );
+    using ConfigDataTypesT = decltype(ConfigDataTypes);
+
     constexpr auto StateDataTypes = boost::hana::make_map(
             TYPE_PAIR(Config),
             TYPE_PAIR(Instrument),
@@ -38,7 +44,7 @@ namespace kungfu::longfist
     );
     using StateDataTypesT = decltype(StateDataTypes);
 
-    constexpr auto build_state_map = [](auto types)
+    constexpr auto build_data_map = [](auto types)
     {
         auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
         {
@@ -47,7 +53,11 @@ namespace kungfu::longfist
         });
         return boost::hana::unpack(maps, boost::hana::make_map);
     };
-    using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
+
+    using ConfigMapType = decltype(build_data_map(longfist::ConfigDataTypes));
+    DECLARE_PTR(ConfigMapType)
+
+    using StateMapType = decltype(build_data_map(longfist::StateDataTypes));
     DECLARE_PTR(StateMapType)
 
     class recover

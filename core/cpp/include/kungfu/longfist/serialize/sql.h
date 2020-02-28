@@ -6,7 +6,7 @@
 #define KUNGFU_LONGFIST_SQL_H
 
 #include <sqlite_orm/sqlite_orm.h>
-#include <kungfu/common.h>
+
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
@@ -63,21 +63,22 @@ namespace kungfu::longfist::sqlite
         return boost::hana::unpack(tables, named_storage(state_db_file));
     };
 
-    using StorageType = decltype(make_storage(std::string(), StateDataTypes));
+    using ConfigStorageType = decltype(make_storage(std::string(), ConfigDataTypes));
+    using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
 
     struct sqlizer
     {
-        const StateDataTypesT &types;
-        StorageType storage;
+        StateStorageType storage;
 
         explicit sqlizer(const std::string &state_db_file) :
-                types(StateDataTypes),
                 storage(longfist::sqlite::make_storage(state_db_file, StateDataTypes))
-        {}
+        {
+            storage.sync_schema();
+        }
 
         void restore(const yijinjing::journal::writer_ptr &writer)
         {
-            boost::hana::for_each(types, [&](auto it)
+            boost::hana::for_each(StateDataTypes, [&](auto it)
             {
                 using DataType = typename decltype(+boost::hana::second(it))::type;
                 for (auto &data : storage.get_all<DataType>())

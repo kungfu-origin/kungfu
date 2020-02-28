@@ -20,23 +20,21 @@
 #ifndef KUNGFU_IO_H
 #define KUNGFU_IO_H
 
+#include <utility>
 #include <sqlite3.h>
 
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
-#include <utility>
-
 namespace kungfu::yijinjing
 {
-
     FORWARD_DECLARE_PTR(session)
 
     class io_device : public resource
     {
     public:
 
-        io_device(data::location_ptr home, bool low_latency, bool lazy, bool unique = true);
+        io_device(data::location_ptr home, bool low_latency, bool lazy);
 
         virtual ~io_device();
 
@@ -85,17 +83,12 @@ namespace kungfu::yijinjing
 
         [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;
 
-        static void init_sqlite();
-
-        static void shutdown_sqlite();
-
     protected:
         data::location_ptr home_;
         data::location_ptr db_home_;
         data::location_ptr live_home_;
         const bool low_latency_;
         const bool lazy_;
-        const bool unique_;
         nanomsg::url_factory_ptr url_factory_;
         publisher_ptr publisher_;
         observer_ptr observer_;
@@ -176,5 +169,10 @@ namespace kungfu::yijinjing
 
         friend io_device_master;
     };
+
+    void handle_sql_error(int rc, const std::string &error_tip);
+    void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip);
+    void ensure_sqlite_initilize();
+    void ensure_sqlite_shutdown();
 }
 #endif //KUNGFU_IO_H

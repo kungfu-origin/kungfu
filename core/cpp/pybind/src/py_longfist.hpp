@@ -9,6 +9,7 @@
 #include <pybind11/stl.h>
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/longfist/serialize/sql.h>
 
 namespace pybind11::detail
 {

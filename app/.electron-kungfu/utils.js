@@ -22,7 +22,7 @@ const getCommitVersion = () => {
 const getPythonVersion = () => {
   var pyVersion = "3";
   try {
-    var buildInfoRaw = fs.readFileSync(path.join(__dirname, '..', '..', 'core', 'build', 'kfc', 'build_info.json'), 'utf-8')
+    var buildInfoRaw = fs.readFileSync(path.join(__dirname, '..', '..', 'core', 'build', 'kfc', 'kungfubuildinfo.json'), 'utf-8')
     var buildInfo = JSON.parse(buildInfoRaw);
     pyVersion = buildInfo.pythonVersion || "3"
   } catch (err) {

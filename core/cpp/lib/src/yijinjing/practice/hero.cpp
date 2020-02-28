@@ -30,6 +30,14 @@ namespace kungfu::yijinjing::practice
         reader_ = io_device_->open_reader_to_subscribe();
     }
 
+    hero::~hero()
+    {
+        writers_.clear();
+        reader_.reset();
+        io_device_.reset();
+        ensure_sqlite_shutdown();
+    }
+
     bool hero::has_location(uint32_t hash)
     {
         return locations_.find(hash) != locations_.end();

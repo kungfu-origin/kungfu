@@ -124,16 +124,28 @@ namespace kungfu
                         uname(fmt::format("{}/{}/{}/{}", longfist::enums::get_category_name(c), g, n, longfist::enums::get_mode_name(m))),
                         uid(util::hash_str_32(uname))
                 {
-                    mode = m;
                     category = c;
                     group = std::move(g);
                     name = std::move(n);
+                    mode = m;
                 }
 
                 template<typename T>
-                inline T to()
+                inline T to() const
                 {
                     T t{};
+                    t.location_uid = uid;
+                    t.mode = mode;
+                    t.category = category;
+                    t.group = group;
+                    t.name = name;
+                    return t;
+                }
+
+                template<typename T>
+                inline T &to(T &t) const
+                {
+                    t.location_uid = uid;
                     t.mode = mode;
                     t.category = category;
                     t.group = group;
