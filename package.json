@@ -12,11 +12,11 @@
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
     "env-cli": "npm config set kungfu-core:runtime node",
     "env-electron": "npm config set kungfu-core:runtime electron",
-    "clean": "yarn wsrun clean",
-    "workspace-clean": "yarn workspace kungfu-core run clean"
+    "clean": "yarn wsrun clean"
   },
   "dependencies": {
     "wsrun": "^5.0.0",
     "nan": "0.3.0"
   }
 }
+
