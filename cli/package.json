@@ -18,7 +18,7 @@
   },
   "scripts": {
     "install-deps": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
-    "clean": "rimraf ./dist/* ./build/* && rimraf ./node_modules/kungfu-core/build/*",
+    "clean": "rimraf ./dist/* ./build/* && rimraf ./node_modules/kungfu-core/*",
     "build": "node -v",
     "build-cli": "node ./.config/build.js && yarn run cp",
     "build-linux": " yarn run dist && pkg . -t=node10.15.3-linux-x64 --out-path=build/cli",
@@ -27,8 +27,8 @@
     "cli": "node dist/cli/index",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .config/webpack.cli.config.js",
     "test": " mocha",
-    "cp": "yarn run cp:node",
-    "cp:node": "copyfiles -a -f ../core/build/*/node_nanomsg.node ../core/build/*/node_sqlite3.node ../core/build/*/libnanomsg.* ../core/build/*/nanomsg.* ./build/cli"
+    "cp": "yarn run cp-node",
+    "cp-node": "copyfiles -a -f ../core/build/*/node_kungfu.node ../core/build/*/node_nanomsg.node ../core/build/*/node_sqlite3.node ../core/build/*/libnanomsg.* ../core/build/*/libsqlite3.* ../core/build/*/libkungfu.* ../core/build/*/nanomsg.* ./build/cli"
   },
   "bin": "./dist/cli/index.js",
   "pkg": {

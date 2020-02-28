@@ -21,7 +21,7 @@
   },
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
-    "clean": "rimraf ./dist/* ./build/* && rimraf ./node_modules/kungfu-core/build/*",
+    "clean": "rimraf ./dist/* ./build/* && rimraf ./node_modules/kungfu-core/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
     "build-cli": "yarn run build",
