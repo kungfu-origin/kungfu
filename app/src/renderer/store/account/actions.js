@@ -1,6 +1,4 @@
 
-import * as ACCOUNT_API from '__io/db/account';
-
 //保存选中的账户信息
 export const setCurrentAccount = ({ commit }, account) => {
     commit('SET_CURRENT_ACCOUNT', account)

@@ -67,7 +67,6 @@ import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
-import * as ACCOUNT_API from '__io/db/account';
 import { buildTradingDataPipe } from '__io/kungfu/index';
 
 export default {
@@ -130,8 +129,8 @@ export default {
     },
  
     methods:{
-        getAccountPnlMin: ACCOUNT_API.getAccountPnlMin,
-        getAccountPnlDay: ACCOUNT_API.getAccountPnlDay,
+        getAccountPnlMin: () => { return Promise.resolve([]) },
+        getAccountPnlDay: () => { return Promise.resolve([]) }
     }
 }
 </script>
