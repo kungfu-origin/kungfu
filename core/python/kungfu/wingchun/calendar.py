@@ -1,13 +1,10 @@
 import datetime
-import collections
 import kungfu.yijinjing.time as kft
-from kungfu.data.sqlite.data_proxy import CalendarDB, make_url
-from kungfu.wingchun.constants import *
+from chinese_calendar import is_holiday
 
 
 class Calendar:
     def __init__(self, ctx):
-        self.holidays = CalendarDB(ctx.system_config_location, "holidays").get_holidays()
         self.update_trading_day(datetime.datetime.now())
 
     def update_trading_day(self, now):
@@ -31,7 +28,4 @@ class Calendar:
         return int((day - kft.EPOCH).total_seconds() * kft.NANO_PER_SECOND)
 
     def is_trading_day(self, dt):
-        return dt.isoweekday() <= 5 and not self.is_holiday(dt)
-
-    def is_holiday(self, dt):
-        return dt in self.holidays
+        return dt.isoweekday() <= 5 and not is_holiday(dt)
