@@ -44,7 +44,7 @@ namespace kungfu::longfist
     );
     using StateDataTypesT = decltype(StateDataTypes);
 
-    constexpr auto build_data_map = [](auto types)
+    constexpr auto build_config_map = [](auto types)
     {
         auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
         {
@@ -54,10 +54,20 @@ namespace kungfu::longfist
         return boost::hana::unpack(maps, boost::hana::make_map);
     };
 
-    using ConfigMapType = decltype(build_data_map(longfist::ConfigDataTypes));
+    using ConfigMapType = decltype(build_config_map(longfist::ConfigDataTypes));
     DECLARE_PTR(ConfigMapType)
 
-    using StateMapType = decltype(build_data_map(longfist::StateDataTypes));
+    constexpr auto build_state_map = [](auto types)
+    {
+        auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
+        {
+            using DataType = typename decltype(+value)::type;
+            return boost::hana::make_pair(value, std::unordered_map<uint64_t, state<DataType>>());
+        });
+        return boost::hana::unpack(maps, boost::hana::make_map);
+    };
+
+    using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
     DECLARE_PTR(StateMapType)
 
     class recover
@@ -69,8 +79,7 @@ namespace kungfu::longfist
         template<typename DataType>
         void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event)
         {
-            auto data = event->data<DataType>();
-            state_map_[boost::hana::type_c<DataType>][data.uid()] = data;
+            state_map_[boost::hana::type_c<DataType>].emplace(event->data<DataType>().uid(), event);
         }
 
     private:

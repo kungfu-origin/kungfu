@@ -8,8 +8,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <sstream>
+
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
+#include <kungfu/common.h>
 
 namespace pybind11::detail
 {
@@ -270,6 +273,7 @@ namespace kungfu::longfist
                      });
 
         auto m_types = m.def_submodule("types");
+        auto m_state = m.def_submodule("state");
 
         hana::for_each(StateDataTypes, [&](auto type)
         {
@@ -299,6 +303,13 @@ namespace kungfu::longfist
             {
                 return sizeof(target);
             });
+
+            py::class_<kungfu::state<DataType>>(m_state, hana::first(type).c_str())
+                    .def_readonly("source", &kungfu::state<DataType>::source)
+                    .def_readonly("dest", &kungfu::state<DataType>::dest)
+                    .def_readonly("gen_time", &kungfu::state<DataType>::gen_time)
+                    .def_readonly("trigger_time", &kungfu::state<DataType>::trigger_time)
+                    .def_readonly("data", &kungfu::state<DataType>::data);
         });
     }
 }

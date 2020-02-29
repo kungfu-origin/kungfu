@@ -34,7 +34,7 @@ namespace kungfu::wingchun::service
            std::vector<longfist::types::Position> res = {};
            for(const auto& kv: position_map)
            {
-               const auto& position = kv.second;
+               const auto& position = kv.second.data;
                if (position.holder_uid == location->uid)
                {
                    res.push_back(position);
@@ -56,7 +56,7 @@ namespace kungfu::wingchun::service
             {
                 throw wingchun_error("asset info not exist");
             }
-            return asset_map[location->uid];
+            return asset_map.at(location->uid).data;
         }
 
         virtual std::string handle_request(const event_ptr &event, const std::string &msg) = 0;

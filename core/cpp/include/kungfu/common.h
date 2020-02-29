@@ -308,6 +308,26 @@ namespace kungfu
         }
     };
 
+    template<typename T, typename... Other>
+    struct type_tuple
+    {
+        static constexpr auto value = boost::hana::flatten(boost::hana::make_tuple(type_tuple<T>::value, type_tuple<Other...>::value));
+    };
+
+    template<typename T>
+    struct type_tuple<T>
+    {
+        static constexpr auto value = boost::hana::make_tuple(boost::hana::type_c<T>);
+    };
+
+    template<typename T, typename... Ts>
+    constexpr void type_check(Ts... arg)
+    {
+        constexpr auto check = boost::hana::transform(type_tuple<Ts...>::value, [](auto t)
+        { return t == boost::hana::type_c<T>; });
+        static_assert(boost::hana::fold(check, std::logical_and()), "type check of arguments failed");
+    }
+
     template<typename DataType>
     struct data
     {
@@ -451,25 +471,31 @@ namespace kungfu
 
     DECLARE_PTR(event)
 
-    template<typename T, typename... Other>
-    struct type_tuple
+    template<typename DataType>
+    struct state
     {
-        static constexpr auto value = boost::hana::flatten(boost::hana::make_tuple(type_tuple<T>::value, type_tuple<Other...>::value));
-    };
+        const uint32_t source;
+        const uint32_t dest;
+        const int64_t gen_time;
+        const int64_t trigger_time;
+        const DataType data;
 
-    template<typename T>
-    struct type_tuple<T>
-    {
-        static constexpr auto value = boost::hana::make_tuple(boost::hana::type_c<T>);
-    };
+        explicit state(const event_ptr &event) :
+                source(event->source()),
+                dest(event->dest()),
+                gen_time(event->gen_time()),
+                trigger_time(event->trigger_time()),
+                data(event->data<DataType>())
+        {}
 
-    template<typename T, typename... Ts>
-    constexpr void type_check(Ts... arg)
-    {
-        constexpr auto check = boost::hana::transform(type_tuple<Ts...>::value, [](auto t)
-        { return t == boost::hana::type_c<T>; });
-        static_assert(boost::hana::fold(check, std::logical_and()), "type check of arguments failed");
-    }
+        state(uint32_t s, uint32_t d, int64_t g, int64_t t, const DataType &data) :
+                source(s),
+                dest(d),
+                gen_time(g),
+                trigger_time(t),
+                data(data)
+        {}
+    };
 }
 
 #endif //KUNGFU_COMMON_H

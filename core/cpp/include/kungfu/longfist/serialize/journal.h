@@ -25,7 +25,7 @@ namespace kungfu::longfist::journal
                 using DataType = typename decltype(+type)::type;
                 for (auto element : state_map_[type])
                 {
-                    writer->write(trigger_time, element.second);
+                    writer->write(trigger_time, element.second.data);
                 }
             });
         }
