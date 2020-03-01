@@ -13,14 +13,16 @@ import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
+import { watcher } from '__gUtils/kungfuUtils';
 
-
-const kungfu = require('kungfu-core').kungfu;
-const configStore = kungfu.ConfigStore(KF_HOME);
-console.log(configStore.getAllConfig());
-const testConfigMD = {"md_port":6002,"client_id":47,"user_id":"15014990","password":"T5WMaVuw","md_ip":"120.27.164.138"};
-configStore.setConfig("md", "ctp", "ctp", "live", JSON.stringify(testConfigMD));
-console.log(configStore.getConfig("md", "ctp", "ctp", "live").value);
+const positions = watcher.ledger.Position;
+for (const key in positions)
+{
+    console.log(positions[key]);
+    console.log(watcher.getLocation(positions[key].source));
+}
+console.log();
+// console.log(watcher.config.getAllConfig());
 
 // app.setup();
 // setInterval(() => {

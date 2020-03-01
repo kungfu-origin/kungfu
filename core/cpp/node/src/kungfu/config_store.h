@@ -31,11 +31,16 @@ namespace kungfu::node
 
         static void Init(Napi::Env env, Napi::Object exports);
 
+        static Napi::Value NewInstance(const Napi::Value arg);
+
     private:
         serialize::JsSet set;
         yijinjing::data::locator_ptr locator_;
         yijinjing::practice::config_store cs_;
+
         static Napi::FunctionReference constructor;
+
+        friend class Watcher;
     };
 }
 

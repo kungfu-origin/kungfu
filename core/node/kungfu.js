@@ -16,8 +16,6 @@ const layout_dir_from_home = function(home, category, group, name, mode, layout)
     return dir;
 };
 
-exports.longfist = bindings.longfist;
-
 const locator = function(home) {
     return {
         has_env: function(name) {
@@ -47,6 +45,8 @@ const locator = function(home) {
         }
     };
 };
+
+exports.longfist = bindings.longfist;
 
 exports.io_device = function(category, group, name, mode, home) {
     return new bindings.IODevice(category, group, name, mode, locator(home));

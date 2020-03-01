@@ -91,5 +91,10 @@ namespace kungfu::node
 
         exports.Set("ConfigStore", func);
     }
+
+    Napi::Value ConfigStore::NewInstance(const Napi::Value arg)
+    {
+        return constructor.New({arg});
+    }
 }
 

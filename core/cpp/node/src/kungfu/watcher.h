@@ -10,6 +10,7 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include "operators.h"
 #include "journal.h"
+#include "config_store.h"
 
 namespace kungfu::node
 {
@@ -20,10 +21,11 @@ namespace kungfu::node
         
         ~Watcher();
 
-        Napi::Value GetLocation(const Napi::CallbackInfo &info);
+        void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
-        void SetLocation(const Napi::CallbackInfo &info, const Napi::Value &value)
-        {}
+        Napi::Value GetConfig(const Napi::CallbackInfo &info);
+
+        Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
         Napi::Value IsUsable(const Napi::CallbackInfo &info);
 
@@ -54,11 +56,14 @@ namespace kungfu::node
     private:
         static Napi::FunctionReference constructor;
         yijinjing::data::location ledger_location_;
+        Napi::ObjectReference config_ref_;
         Napi::ObjectReference state_ref_;
         Napi::ObjectReference ledger_ref_;
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
+
+        void RestoreState(yijinjing::data::location_ptr config_location);
     };
 }
 

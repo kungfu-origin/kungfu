@@ -7,7 +7,9 @@
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::sqlite;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
@@ -15,7 +17,7 @@ namespace kungfu::node
 {
     Napi::FunctionReference Watcher::constructor;
 
-    inline location_ptr get_watcher_location(const Napi::CallbackInfo &info)
+    inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info)
     {
         return std::make_shared<location>(
                 mode::LIVE, category::SYSTEM, "node", info[1].As<Napi::String>().Utf8Value(), IODevice::GetLocator(info)
@@ -34,8 +36,9 @@ namespace kungfu::node
 
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
-            apprentice(get_watcher_location(info), true),
+            apprentice(GetWatcherLocation(info), true),
             ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_io_device()->get_home()->locator),
+            config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_state(state_ref_),
@@ -45,17 +48,45 @@ namespace kungfu::node
         InitStateMap(info, state_ref_);
         InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
+
+        auto locator = get_io_device()->get_home()->locator;
+        RestoreState(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", locator));
+        for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
+        {
+            RestoreState(location::make_shared(pair.second, locator));
+        }
+        SPDLOG_INFO("watcher ledger restored");
     }
 
     Watcher::~Watcher()
     {
         ledger_ref_.Unref();
         state_ref_.Unref();
+        config_ref_.Unref();
     }
+
+    void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value)
+    {}
 
     Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
-        return Napi::String::New(info.Env(), get_io_device()->get_home()->uname);
+        auto uid = info[0].ToNumber().Uint32Value();
+        if (not has_location(uid))
+        {
+            return Napi::Value();
+        }
+        auto location = get_location(uid);
+        auto locationObj = Napi::Object::New(info.Env());
+        locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+        locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+        locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+        locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+        return locationObj;
+    }
+
+    Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info)
+    {
+        return config_ref_.Value();
     }
 
     Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
@@ -118,10 +149,11 @@ namespace kungfu::node
                 InstanceMethod("isStarted", &Watcher::IsStarted),
                 InstanceMethod("setup", &Watcher::Setup),
                 InstanceMethod("step", &Watcher::Step),
+                InstanceMethod("getLocation", &Watcher::GetLocation),
                 InstanceMethod("publishState", &Watcher::PublishState),
-                InstanceAccessor("location", &Watcher::GetLocation, &Watcher::SetLocation),
-                InstanceAccessor("state", &Watcher::GetState, &Watcher::SetState),
-                InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::SetLedger),
+                InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
+                InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
+                InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
         });
 
         constructor = Napi::Persistent(func);
@@ -155,5 +187,13 @@ namespace kungfu::node
           });
 
         apprentice::react();
+    }
+
+    void Watcher::RestoreState(location_ptr state_location)
+    {
+        register_location(0, state_location);
+        auto storage = make_storage(state_location->locator->layout_file(state_location, layout::SQLITE, "state"), StateDataTypes);
+        storage.sync_schema();
+        serialize::JsRestoreState(ledger_ref_, state_location, storage)();
     }
 }
