@@ -18,11 +18,10 @@ import { watcher } from '__gUtils/kungfuUtils';
 const positions = watcher.ledger.Position;
 for (const key in positions)
 {
-    console.log(positions[key]);
-    console.log(watcher.getLocation(positions[key].source));
+    const location = watcher.getLocation(positions[key].source);
+    console.log(location);
+    console.log(watcher.config.getConfig(location));
 }
-console.log();
-// console.log(watcher.config.getAllConfig());
 
 // app.setup();
 // setInterval(() => {

@@ -25,12 +25,24 @@ namespace kungfu::node
 
     inline Config getConfigFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator)
     {
-        location config_location(
-                get_mode_by_name(info[3].As<Napi::String>().Utf8Value()),
-                get_category_by_name(info[0].As<Napi::String>().Utf8Value()),
-                info[1].As<Napi::String>().Utf8Value(),
-                info[2].As<Napi::String>().Utf8Value(),
-                locator);
+        mode m;
+        category c;
+        std::string group, name;
+        if (info[0].IsObject())
+        {
+            auto obj = info[0].ToObject();
+            m = get_mode_by_name(obj.Get("mode").ToString().Utf8Value());
+            c = get_category_by_name(obj.Get("category").ToString().Utf8Value());
+            group = obj.Get("group").ToString().Utf8Value();
+            name = obj.Get("name").ToString().Utf8Value();
+        } else
+        {
+            m = get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
+            c = get_category_by_name(info[0].As<Napi::String>().Utf8Value());
+            group = info[1].As<Napi::String>().Utf8Value();
+            name = info[2].As<Napi::String>().Utf8Value();
+        }
+        location config_location(m, c, group, name, locator);
         Config query{};
         query.location_uid = config_location.uid;
         query.category = config_location.category;
@@ -43,7 +55,14 @@ namespace kungfu::node
     Napi::Value ConfigStore::SetConfig(const Napi::CallbackInfo &info)
     {
         Config config = getConfigFromJs(info, locator_);
-        config.value = info[4].ToString().Utf8Value();
+        int valueIndex = info[0].IsObject() ? 1 : 4;
+        if (info[0].IsObject())
+        {
+            config.value = info[0].ToObject().Get("value").ToString().Utf8Value();
+        } else
+        {
+            config.value = info[valueIndex].ToString().Utf8Value();
+        }
         cs_.set(config);
         return Napi::Value();
     }
