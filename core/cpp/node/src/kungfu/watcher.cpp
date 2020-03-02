@@ -50,11 +50,11 @@ namespace kungfu::node
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
         auto locator = get_io_device()->get_home()->locator;
-        RestoreState(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", locator));
         for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
         {
             RestoreState(location::make_shared(pair.second, locator));
         }
+        RestoreState(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", locator));
         SPDLOG_INFO("watcher ledger restored");
     }
 

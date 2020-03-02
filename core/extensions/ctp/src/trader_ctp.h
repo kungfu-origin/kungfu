@@ -10,14 +10,10 @@
 #include <kungfu/wingchun/broker/trader.h>
 
 #include "common.h"
-#include "order_mapper.h"
-#include "trade_mapper.h"
 
 #include "ThostFtdcTraderApi.h"
 
 namespace kungfu::wingchun::ctp {
-    typedef std::shared_ptr<OrderMapper> OrderMapperPtr;
-    typedef std::shared_ptr<TradeMapper> TradeMapperPtr;
     typedef std::unordered_map<std::string, longfist::types::Position> PositionMap;
     typedef std::unordered_map<std::string, longfist::types::Instrument> InstrumentMap;
 
@@ -107,8 +103,10 @@ namespace kungfu::wingchun::ctp {
 
         CThostFtdcTraderApi *api_;
 
-        OrderMapperPtr order_mapper_;
-        TradeMapperPtr trade_mapper_;
+        std::unordered_map<std::string, uint64_t> inbound_order_refs_;
+        std::unordered_map<std::string, uint64_t> inbound_order_sysids_;
+        std::unordered_map<std::string, uint64_t> inbound_trade_ids_;
+        std::unordered_map<uint64_t, uint64_t> outbound_orders_;
 
         PositionMap long_position_map_;
         PositionMap short_position_map_;

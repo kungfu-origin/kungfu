@@ -19,16 +19,13 @@ namespace kungfu::wingchun::ctp {
             order_ref_(-1), request_id_(0), api_(nullptr) {
         yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
         config_ = nlohmann::json::parse(json_config);
-        order_mapper_ = std::make_shared<OrderMapper>(get_app_db_file("order_mapper"));
-        trade_mapper_ = std::make_shared<TradeMapper>(get_app_db_file("trade_mapper"));
     }
 
     void TraderCTP::on_start() {
         broker::Trader::on_start();
 
         if (api_ == nullptr) {
-            auto home = get_io_device()->get_home();
-            std::string runtime_folder = home->locator->layout_dir(home, longfist::enums::layout::LOG);
+            std::string runtime_folder = get_runtime_folder();
             SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
             api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
             api_->RegisterSpi(this);
@@ -45,14 +42,11 @@ namespace kungfu::wingchun::ctp {
         strcpy(login_field.UserID, config_.account_id.c_str());
         strcpy(login_field.BrokerID, config_.broker_id.c_str());
         strcpy(login_field.Password, config_.password.c_str());
-        SPDLOG_TRACE("(UserID) {} (BrokerID) {} (Password) ***", login_field.UserID, login_field.BrokerID);
         int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
         if (rtn != 0) {
-            SPDLOG_ERROR("failed to request login, (error_id) {}", rtn);
-            return false;
-        } else {
-            return true;
+            SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID, login_field.BrokerID, rtn);
         }
+        return rtn == 0;
     }
 
     bool TraderCTP::req_settlement_confirm() {
@@ -121,73 +115,59 @@ namespace kungfu::wingchun::ctp {
         strcpy(ctp_input.BrokerID, config_.broker_id.c_str());
         strcpy(ctp_input.InvestorID, config_.account_id.c_str());
 
-        int order_ref = order_ref_++;
-        strcpy(ctp_input.OrderRef, std::to_string(order_ref).c_str());
+        order_ref_++;
+        strcpy(ctp_input.OrderRef, std::to_string(order_ref_).c_str());
 
-        SPDLOG_TRACE(to_string(ctp_input));
         int error_id = api_->ReqOrderInsert(&ctp_input, ++request_id_);
-        int64_t nano = kungfu::yijinjing::time::now_in_nano();
-        if (error_id != 0) {
-            auto writer = get_writer(event->source());
-            Order &order = writer->open_data<Order>(event->gen_time());
-            order_from_input(input, order);
-            order.insert_time = nano;
-            order.update_time = nano;
+        SPDLOG_TRACE(to_string(ctp_input));
+
+        auto nano = kungfu::yijinjing::time::now_in_nano();
+        auto writer = get_writer(event->source());
+        Order &order = writer->open_data<Order>(event->gen_time());
+        order_from_input(input, order);
+        order.insert_time = nano;
+        order.update_time = nano;
+
+        if (error_id == 0)
+        {
+            outbound_orders_[input.order_id] = order_ref_;
+            inbound_order_refs_[ctp_input.OrderRef] = input.order_id;
+            SPDLOG_INFO("FrontID: {} SessionID: {} OrderRef: {}", front_id_, session_id_, ctp_input.OrderRef);
+        } else {
             order.error_id = error_id;
             order.status = OrderStatus::Error;
-            writer->close_data();
             SPDLOG_ERROR("failed to insert order {}, (error_id) {}", input.order_id, error_id);
-            return false;
-        } else {
-            CtpOrder order_record = {};
-            order_record.internal_order_id = input.order_id;
-            order_record.broker_id = config_.broker_id;
-            order_record.investor_id = config_.account_id;
-            order_record.exchange_id = input.exchange_id.value;
-            order_record.instrument_id = ctp_input.InstrumentID;
-            order_record.order_ref = ctp_input.OrderRef;
-            order_record.front_id = front_id_;
-            order_record.session_id = session_id_;
-            order_record.source = event->source();
-            order_record.parent_id = input.parent_id;
-            order_record.insert_time = nano;
-            order_mapper_->add_order(input.order_id, order_record);
-            SPDLOG_INFO("(FrontID) {} (SessionID) {} (OrderRef) {}", front_id_, session_id_, ctp_input.OrderRef);
-            return true;
         }
+
+        orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
+        writer->close_data();
+        return error_id == 0;
     }
 
     bool TraderCTP::cancel_order(const event_ptr &event) {
         const OrderAction &action = event->data<OrderAction>();
-        CtpOrder order_record = order_mapper_->get_order_info(action.order_id);
-        if (order_record.internal_order_id == 0) {
-            auto writer = get_writer(event->source());
-            OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time());
-            strncpy(error.error_msg, "failed to find order info", ERROR_MSG_LEN);
-            error.order_id = action.order_id;
-            error.order_action_id = action.order_action_id;
-            writer->close_data();
-            SPDLOG_ERROR("failed to find order info for {}", action.order_id);
+        if (outbound_orders_.find(action.order_id) == outbound_orders_.end())
+        {
+            SPDLOG_ERROR("failed to cancel order {}, can't find related ctp order id", action.order_id);
             return false;
         }
+        auto ctp_order_ref = outbound_orders_[action.order_id];
+        auto order_state = orders_.at(action.order_id);
+
         CThostFtdcInputOrderActionField ctp_action = {};
-        strcpy(ctp_action.BrokerID, order_record.broker_id.c_str());
-        strcpy(ctp_action.InvestorID, order_record.investor_id.c_str());
-        strcpy(ctp_action.OrderRef, order_record.order_ref.c_str());
-        ctp_action.FrontID = order_record.front_id;
-        ctp_action.SessionID = order_record.session_id;
+        strcpy(ctp_action.BrokerID, config_.broker_id.c_str());
+        strcpy(ctp_action.InvestorID, config_.account_id.c_str());
+        strcpy(ctp_action.OrderRef, std::to_string(ctp_order_ref).c_str());
+        ctp_action.FrontID = front_id_;
+        ctp_action.SessionID = session_id_;
         ctp_action.ActionFlag = THOST_FTDC_AF_Delete;
-        strcpy(ctp_action.InstrumentID, order_record.instrument_id.c_str());
-        strcpy(ctp_action.ExchangeID, order_record.exchange_id.c_str());
-        SPDLOG_TRACE("(FrontID) {} (SessionID) {} (OrderRef)", ctp_action.FrontID, ctp_action.SessionID,
-                     ctp_action.OrderRef);
+        strcpy(ctp_action.InstrumentID, order_state.data.instrument_id.c_str());
+        strcpy(ctp_action.ExchangeID, order_state.data.exchange_id.c_str());
 
         int error_id = api_->ReqOrderAction(&ctp_action, ++request_id_);
         if (error_id == 0) {
-            action_event_map_[request_id_] = action;
-            SPDLOG_TRACE("success to req cancel order {}, order action id {}, request id {}", action.order_id,
-                         action.order_action_id, request_id_);
-            return true;
+            actions_[request_id_] = action;
+            SPDLOG_TRACE("requested cancel order {}, order action id {}, request id {}", action.order_id, action.order_action_id, request_id_);
         } else {
             auto writer = get_writer(event->source());
             OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time());
@@ -196,8 +176,8 @@ namespace kungfu::wingchun::ctp {
             error.order_action_id = action.order_action_id;
             writer->close_data();
             SPDLOG_ERROR("failed to cancel order {}, error_id: {}", action.order_id, error_id);
-            return false;
         }
+        return error_id == 0;
     }
 
     void TraderCTP::OnFrontConnected() {
@@ -206,82 +186,62 @@ namespace kungfu::wingchun::ctp {
     }
 
     void TraderCTP::OnFrontDisconnected(int nReason) {
-        SPDLOG_ERROR("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason));
+        SPDLOG_ERROR("disconnected [{}] {}", nReason, disconnected_reason(nReason));
     }
 
     void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField,
                                       CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-            SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-        } else {
-            SPDLOG_INFO("success to authenticate");
-            login();
+            SPDLOG_ERROR("failed to authenticate, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+            return;
         }
+        login();
     }
 
     void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
                                    int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
             SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
-        } else {
-            SPDLOG_INFO("(Bid) {} (Uid) {} (SName) {} (TradingDay) {} (FrontID) {} (SessionID) {} (TradingDay) {}",
-                        pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->SystemName,
-                        pRspUserLogin->TradingDay,
-                        pRspUserLogin->FrontID, pRspUserLogin->SessionID, pRspUserLogin->TradingDay);
-            session_id_ = pRspUserLogin->SessionID;
-            front_id_ = pRspUserLogin->FrontID;
-            order_ref_ = atoi(pRspUserLogin->MaxOrderRef);
-            trading_day_ = pRspUserLogin->TradingDay;
-            req_settlement_confirm();
+            return;
         }
+        SPDLOG_INFO("login success, BrokerID: {} UserID: {} SystemName: {} TradingDay: {} FrontID: {} SessionID: {}",
+                    pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->SystemName,
+                    pRspUserLogin->TradingDay, pRspUserLogin->FrontID, pRspUserLogin->SessionID);
+        session_id_ = pRspUserLogin->SessionID;
+        front_id_ = pRspUserLogin->FrontID;
+        order_ref_ = atoi(pRspUserLogin->MaxOrderRef);
+        trading_day_ = pRspUserLogin->TradingDay;
+        req_settlement_confirm();
     }
 
     void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo,
-                                    int nRequestID, bool bIsLast) {}
+                                    int nRequestID, bool bIsLast)
+    {}
 
     void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm,
                                                CThostFtdcRspInfoField *pRspInfo,
                                                int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-            SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
-        } else {
-            SPDLOG_INFO("success to confirm settlement info");
-            publish_state(BrokerState::Ready);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            req_qry_instrument();
+            SPDLOG_ERROR("failed confirm settlement info, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
         }
+        publish_state(BrokerState::Ready);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        req_qry_instrument();
     }
 
     void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo,
                                      int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-            auto order_info = order_mapper_->get_order_info_by_order_ref(this->front_id_, this->session_id_,
-                                                                         pInputOrder->OrderRef);
-            if (order_info.internal_order_id != 0) {
-                auto writer = get_writer(order_info.source);
-                Order &order = writer->open_data<Order>(0);
-                order.order_id = order_info.internal_order_id;
-                order.parent_id = order_info.parent_id;
-                order.insert_time = order_info.insert_time;
-                order.update_time = kungfu::yijinjing::time::now_in_nano();
-                strcpy(order.trading_day, trading_day_.c_str());
-                strcpy(order.instrument_id, pInputOrder->InstrumentID);
-                strcpy(order.exchange_id, pInputOrder->ExchangeID);
-                strcpy(order.account_id, pInputOrder->InvestorID);
-                order.instrument_type = InstrumentType::Future;
-                order.limit_price = pInputOrder->LimitPrice;
-                order.volume = pInputOrder->VolumeTotalOriginal;
-                order.status = OrderStatus::Error;
-                order.error_id = pRspInfo->ErrorID;
-                strcpy(order.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str());
-                from_ctp_direction(pInputOrder->Direction, order.side);
-                from_ctp_comb_offset(pInputOrder->CombOffsetFlag, order.offset);
-                from_ctp_price_type(pInputOrder->OrderPriceType, pInputOrder->VolumeCondition,
-                                    pInputOrder->TimeCondition, order.price_type);
-                writer->close_data();
+            auto order_id = inbound_order_refs_[pInputOrder->OrderRef];
+            if (orders_.find(order_id) != orders_.end()) {
+                auto order_state = orders_.at(order_id);
+                order_state.data.status = OrderStatus::Error;
+                order_state.data.error_id = pRspInfo->ErrorID;
+                strcpy(order_state.data.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str());
+                write_to(0, order_state.data, order_state.dest);
             }
-            SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}, (InputOrder) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg),
-                         pInputOrder == nullptr ? "" : to_string(*pInputOrder));
+            SPDLOG_ERROR("failed to insert order, ErrorId: {} ErrorMsg: {}, InputOrder: {}",
+                    pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder));
         }
     }
 
@@ -289,8 +249,8 @@ namespace kungfu::wingchun::ctp {
                                      CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
             auto it = action_event_map_.find(nRequestID);
-            if (it != action_event_map_.end()) {
-                const auto &action = it->second;
+            if (actions_.find(nRequestID) != actions_.end()) {
+                const auto &action = actions_.at(nRequestID);
                 uint32_t source = (action.order_action_id >> 32) ^get_home_uid();
                 if (has_writer(source)) {
                     auto writer = get_writer(source);
@@ -312,63 +272,62 @@ namespace kungfu::wingchun::ctp {
 
     void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
         SPDLOG_TRACE(to_string(*pOrder));
-        order_mapper_->update_sys_id(pOrder->FrontID, pOrder->SessionID, pOrder->OrderRef, pOrder->ExchangeID,
-                                     pOrder->OrderSysID);
-        auto order_info = order_mapper_->get_order_info_by_order_ref(pOrder->FrontID, pOrder->SessionID,
-                                                                     pOrder->OrderRef);
-        if (order_info.internal_order_id == 0) {
+        auto order_id = inbound_order_refs_[pInputOrder->OrderRef];
+        inbound_order_sysids_[pOrder->OrderSysID] = order_id;
+        if  (orders_.find(order_id) == orders_.end()) {
             SPDLOG_ERROR("can't find FrontID {} SessionID {} OrderRef {}", pOrder->FrontID, pOrder->SessionID,
                          pOrder->OrderRef);
-        } else {
-            auto writer = get_writer(order_info.source);
-            Order &order = writer->open_data<Order>(0);
-            from_ctp(*pOrder, order);
-            order.order_id = order_info.internal_order_id;
-            order.parent_id = order_info.parent_id;
-            order.insert_time = order_info.insert_time;
-            order.update_time = kungfu::yijinjing::time::now_in_nano();
-            writer->close_data();
+            return;
         }
+        auto order_state = orders_.at(order_id);
+        auto writer = get_writer(order_state.dest);
+        Order &order = writer->open_data<Order>(0);
+        from_ctp(*pOrder, order);
+        order.order_id = order_info.internal_order_id;
+        order.parent_id = order_info.parent_id;
+        order.insert_time = order_info.insert_time;
+        order.update_time = kungfu::yijinjing::time::now_in_nano();
+        writer->close_data();
     }
 
     void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
         SPDLOG_TRACE(to_string(*pTrade));
-        auto order_info = order_mapper_->get_order_info_by_sys_id(pTrade->ExchangeID, pTrade->OrderSysID);
-        if (order_info.internal_order_id == 0) {
-            SPDLOG_ERROR("can't find ExchangeID {} and OrderSysID {}", pTrade->ExchangeID, pTrade->OrderSysID);
-        } else {
-            auto writer = get_writer(order_info.source);
-            Trade &trade = writer->open_data<Trade>(0);
-            from_ctp(*pTrade, trade);
-            strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
-            uint64_t trade_id = writer->current_frame_uid();
-            trade.trade_id = trade_id;
-            trade.order_id = order_info.internal_order_id;
-            trade.parent_order_id = order_info.parent_id;
-            writer->close_data();
-
-            trade_mapper_->save(trade_id, kungfu::yijinjing::time::now_in_nano(), pTrade->TradingDay,
-                                pTrade->ExchangeID, pTrade->TradeID);
-
+        auto order_id = inbound_order_sysids_[pTrade->OrderSysID];
+        if  (orders_.find(order_id) == orders_.end()) {
+            SPDLOG_ERROR("can't find FrontID {} SessionID {} OrderRef {}", pOrder->FrontID, pOrder->SessionID,
+                         pOrder->OrderRef);
+            return;
         }
+        auto order_state = orders_.at(order_id);
+        auto writer = get_writer(order_state.dest);
+        Trade &trade = writer->open_data<Trade>(0);
+        from_ctp(*pTrade, trade);
+        strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
+        uint64_t trade_id = writer->current_frame_uid();
+        trade.trade_id = trade_id;
+        trade.order_id = order_info.internal_order_id;
+        trade.parent_order_id = order_info.parent_id;
+        inbound_trade_ids_[pTrade->TradeID] = trade.uid();
+        trades_[trade.uid()] = trade;
+        writer->close_data();
     }
 
     void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount,
                                            CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
             SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
-        } else {
-            SPDLOG_TRACE(to_string(*pTradingAccount));
-            auto writer = get_writer(0);
-            Asset &account = writer->open_data<Asset>(0);
-            strcpy(account.account_id, get_account_id().c_str());
-            from_ctp(*pTradingAccount, account);
-            account.update_time = kungfu::yijinjing::time::now_in_nano();
-            account.holder_uid = get_io_device()->get_home()->uid;
-            writer->close_data();
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            req_position();
+            return;
         }
+        SPDLOG_TRACE(to_string(*pTradingAccount));
+        auto writer = get_writer(0);
+        Asset &account = writer->open_data<Asset>(0);
+        strcpy(account.account_id, get_account_id().c_str());
+        from_ctp(*pTradingAccount, account);
+        account.update_time = kungfu::yijinjing::time::now_in_nano();
+        account.holder_uid = get_io_device()->get_home()->uid;
+        writer->close_data();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        req_position();
     }
 
     void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
@@ -441,9 +400,11 @@ namespace kungfu::wingchun::ctp {
                 CtpTrade trade_info = trade_mapper_->get(pInvestorPositionDetail->OpenDate,
                                                          pInvestorPositionDetail->ExchangeID,
                                                          pInvestorPositionDetail->TradeID);
-                if (trade_info.trade_id != 0) {
-                    pos_detail.trade_id = trade_info.trade_id;
-                    pos_detail.trade_time = trade_info.trade_time;
+                if (inbound_trade_ids_.find(pInvestorPositionDetail->TradeID) != inbound_trade_ids_.end()) {
+                    auto trade_id = inbound_trade_ids_.at(pInvestorPositionDetail->TradeID);
+                    auto &trade = trades_[trade_id];
+                    pos_detail.trade_id = trade.trade_id;
+                    pos_detail.trade_time = trade.trade_time;
                 } else {
                     pos_detail.trade_id = writer->current_frame_uid();
                 }
@@ -460,20 +421,20 @@ namespace kungfu::wingchun::ctp {
                                        int nRequestID, bool bIsLast) {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
             SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
-        } else {
-            SPDLOG_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
-            auto writer = get_writer(0);
-            if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
-                Instrument &instrument = writer->open_data<Instrument>(0);
-                from_ctp(*pInstrument, instrument);
-                instrument_map_[pInstrument->InstrumentID] = instrument;
-                writer->close_data();
-            }
-            if (bIsLast) {
-                writer->mark(0, InstrumentEnd::tag);
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                req_account();
-            }
+            return;
+        }
+        SPDLOG_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
+        auto writer = get_writer(0);
+        if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
+            Instrument &instrument = writer->open_data<Instrument>(0);
+            from_ctp(*pInstrument, instrument);
+            instrument_map_[pInstrument->InstrumentID] = instrument;
+            writer->close_data();
+        }
+        if (bIsLast) {
+            writer->mark(0, InstrumentEnd::tag);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            req_account();
         }
     }
 }

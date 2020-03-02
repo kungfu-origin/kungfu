@@ -17,7 +17,10 @@ namespace kungfu::wingchun::broker
 {
     Trader::Trader(bool low_latency, locator_ptr locator, const std::string &source, const std::string &account_id) :
             apprentice(location::make_shared(mode::LIVE, category::TD, source, account_id, std::move(locator)), low_latency),
-            source_(source), account_id_(account_id)
+            source_(source), account_id_(account_id),
+            orders_(state_map_[boost::hana::type_c<longfist::types::Order>]),
+            actions_(state_map_[boost::hana::type_c<longfist::types::OrderAction>]),
+            trades_(state_map_[boost::hana::type_c<longfist::types::Trade>])
     {
         log::copy_log_settings(get_io_device()->get_home(), account_id);
     }

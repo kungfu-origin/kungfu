@@ -38,8 +38,17 @@ namespace kungfu::wingchun::broker
         virtual void on_start() override;
 
     protected:
+        std::unordered_map<uint64_t, state<longfist::types::Order>> &orders_;
+        std::unordered_map<uint64_t, state<longfist::types::OrderAction>> &actions_;
+        std::unordered_map<uint64_t, state<longfist::types::Trade>> &trades_;
 
         void publish_state(longfist::enums::BrokerState state);
+
+        inline std::string get_runtime_folder()
+        {
+            auto home = get_io_device()->get_home();
+            return home->locator->layout_dir(home, longfist::enums::layout::LOG);
+        }
 
     private:
         std::string source_;

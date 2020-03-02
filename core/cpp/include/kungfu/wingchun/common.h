@@ -11,6 +11,7 @@
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/util/util.h>
+#include <kungfu/yijinjing/practice/apprentice.h>
 
 #define REGION_CN "CN"
 #define REGION_HK "HK"

@@ -177,8 +177,6 @@ namespace kungfu::wingchun::xtp
         std::string trading_day_;
         std::unordered_map<uint64_t, uint64_t> inbound_orders_;
         std::unordered_map<uint64_t, uint64_t> outbound_orders_;
-
-        std::string get_runtime_folder() const;
     };
 }
 #endif //KUNGFU_XTP_EXT_TRADER_H

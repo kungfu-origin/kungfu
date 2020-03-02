@@ -29,6 +29,12 @@ namespace kungfu::wingchun::broker
 
     protected:
         void publish_state(longfist::enums::BrokerState state);
+
+        inline std::string get_runtime_folder()
+        {
+            auto home = get_io_device()->get_home();
+            return home->locator->layout_dir(home, longfist::enums::layout::LOG);
+        }
     };
 }
 
