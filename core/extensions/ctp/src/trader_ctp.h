@@ -106,6 +106,7 @@ namespace kungfu::wingchun::ctp {
         std::unordered_map<std::string, uint64_t> inbound_order_refs_;
         std::unordered_map<std::string, uint64_t> inbound_order_sysids_;
         std::unordered_map<std::string, uint64_t> inbound_trade_ids_;
+        std::unordered_map<uint64_t, uint64_t> inbound_actions_;
         std::unordered_map<uint64_t, uint64_t> outbound_orders_;
 
         PositionMap long_position_map_;
