@@ -475,19 +475,20 @@ namespace kungfu
     struct state
     {
         const uint32_t source;
-        const int64_t update_time;
-        const DataType data;
+        const uint32_t dest;
+
+        int64_t update_time;
+        DataType data;
 
         explicit state(const event_ptr &event) :
                 source(event->source()),
+                dest(event->dest()),
                 update_time(event->gen_time()),
                 data(event->data<DataType>())
         {}
 
-        state(uint32_t s, int64_t t, const DataType &data) :
-                source(s),
-                update_time(t),
-                data(data)
+        state(uint32_t s, uint32_t d, int64_t t, const DataType &data) :
+                source(s), dest(d), update_time(t), data(data)
         {}
     };
 }

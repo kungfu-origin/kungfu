@@ -264,7 +264,7 @@ namespace kungfu::yijinjing::practice
               SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
           });
 
-        events_ | to(location::PUBLIC) |
+        events_ |
         $([&](const event_ptr &e)
           {
               longfist::cast_event_invoke(e, *app_sqlizers_[e->source()]);

@@ -11,7 +11,6 @@
 
 #include "xtp_trader_api.h"
 #include "common.h"
-#include "order_mapper.h"
 
 namespace kungfu::wingchun::xtp
 {
@@ -176,10 +175,10 @@ namespace kungfu::wingchun::xtp
         uint64_t session_id_;
         int request_id_;
         std::string trading_day_;
+        std::unordered_map<uint64_t, uint64_t> inbound_orders_;
+        std::unordered_map<uint64_t, uint64_t> outbound_orders_;
 
         std::string get_runtime_folder() const;
-
-        std::shared_ptr<OrderMapper> order_mapper_;
     };
 }
 #endif //KUNGFU_XTP_EXT_TRADER_H

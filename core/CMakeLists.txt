@@ -119,12 +119,11 @@ ADD_COMPILE_DEFINITIONS(SPDLOG_NO_ATOMIC_LEVELS)
 
 ############################################################
 
-INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1)
 INCLUDE_DIRECTORIES(deps/hana-1.6.0/include)
 INCLUDE_DIRECTORIES(deps/json-3.5.0/single_include)
-INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
+INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1)
 INCLUDE_DIRECTORIES(deps/sqlite_orm-1.5/include)
-INCLUDE_DIRECTORIES(deps/SQLiteCpp-2.3.0/include)
+INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/deps/nanomsg-1.1.5/include)
 
 ############################################################
