@@ -89,15 +89,6 @@ def kfc(ctx, home, log_level, name):
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
 
-    settings_path = os.path.join(home, 'settings.json')
-    if not os.path.exists(settings_path):
-        default_settings_file = open(settings_path, 'w+')
-        default_settings_file.write('{}')
-        default_settings_file.close()
-    with open(settings_path) as settings_file:
-        ctx.settings = json.load(settings_file)
-        settings_file.close()
-
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.locator = kfj.Locator(home)
