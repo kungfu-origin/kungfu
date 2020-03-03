@@ -1,4 +1,4 @@
-import * as STRATEGY_API from '__io/db/strategy';
+import * as STRATEGY_API from '__io/kungfu/strategy';
 import { deleteStrat } from '__io/actions/strategy';
 
 //设置当前策略

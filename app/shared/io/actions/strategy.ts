@@ -1,4 +1,4 @@
-import { deleteStrategy, getStrategyById } from '__io/db/strategy';
+import { deleteStrategy, getStrategyById } from '__io/kungfu/strategy';
 import { nanoReqRemoveStrategyPos } from '__io/nano/nanoReq';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { deleteProcess, startStrategy } from '__gUtils/processUtils';
@@ -24,7 +24,7 @@ export const switchStrategy = (strategyId: string, value: boolean): Promise<Mess
     }
 
     // for import file changed in code editor module
-    return getStrategyById(strategyId).then((curStrategy: Strategy[]): Promise<MessageData> => {
+    return getStrategyById(strategyId).then((curStrategy: any): Promise<MessageData> => {
         const notExistMessage: MessageData = { type: 'error', message: `${strategyId} is not existed!` }
         if(!curStrategy.length) return new Promise(resolve => resolve(notExistMessage)); 
         const strategyPath = curStrategy[0].strategy_path;

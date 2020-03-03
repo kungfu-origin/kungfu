@@ -7,7 +7,7 @@
 </main-content>
 </template>
 <script>
-import * as STRATEGY_API from '__io/db/strategy';
+import * as STRATEGY_API from '__io/kungfu/strategy';
 import FileTree from './components/FileTree';
 import Editor from './components/MonacoEditor';
 import { setTimeout } from 'timers';

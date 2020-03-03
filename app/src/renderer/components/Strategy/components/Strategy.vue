@@ -127,7 +127,7 @@ import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
 import { openWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
-import * as STRATEGY_API from '__io/db/strategy';
+import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';
 import { debounce } from '__gUtils/busiUtils';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
