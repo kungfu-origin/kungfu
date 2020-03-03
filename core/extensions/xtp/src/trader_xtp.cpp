@@ -36,10 +36,10 @@ namespace kungfu::wingchun::xtp
     {
         Trader::on_start();
         std::string runtime_folder = get_runtime_folder();
-        SPDLOG_INFO("Connecting XTP TD for {} at {}:{} with runtime folder {}", config_.user_id, config_.td_ip, config_.td_port, runtime_folder);
+        SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", config_.user_id, config_.td_ip, config_.td_port);
         api_ = XTP::API::TraderApi::CreateTraderApi(config_.client_id, runtime_folder.c_str());
         api_->RegisterSpi(this);
-        api_->SubscribePublicTopic(XTP_TERT_QUICK);//只传送登录后公有流（订单响应、成交回报）的内容
+        api_->SubscribePublicTopic(XTP_TERT_QUICK);
         api_->SetSoftwareVersion("1.1.0");
         api_->SetSoftwareKey(config_.software_key.c_str());
         session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.user_id.c_str(), config_.password.c_str(), XTP_PROTOCOL_TCP);
@@ -151,7 +151,7 @@ namespace kungfu::wingchun::xtp
         Order &order = writer->open_data<Order>(0);
         memcpy(&order, &(order_state.data), sizeof(order));
         from_xtp(*order_info, order);
-        if (error_info != nullptr)
+        if (error_info != nullptr and error_info->error_id != 0)
         {
             order.error_id = error_info->error_id;
             strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);

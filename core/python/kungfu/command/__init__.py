@@ -103,7 +103,6 @@ def kfc(ctx, home, log_level, name):
 def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
     ctx.log_level = ctx.parent.log_level
-    ctx.settings = ctx.parent.settings
     ctx.locator = ctx.parent.locator
     ctx.system_config_location = ctx.parent.system_config_location
     ctx.name = ctx.parent.name

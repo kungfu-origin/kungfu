@@ -174,16 +174,17 @@ namespace kungfu::node
 
     void Watcher::react()
     {
-        events_ | from(get_master_commands_uid()) |
+        events_ |
         $([&](const event_ptr &event)
           {
-              longfist::cast_event_invoke(event, update_state);
+              longfist::cast_event_invoke(event, event->source() == get_master_commands_uid() ? update_state : update_ledger);
           });
 
-        events_ | from(ledger_location_.uid) | to(location::PUBLIC) |
+        events_ | is(Channel::tag) |
         $([&](const event_ptr &event)
           {
-              longfist::cast_event_invoke(event, update_ledger);
+              const Channel &channel = event->data<Channel>();
+              reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
           });
 
         apprentice::react();

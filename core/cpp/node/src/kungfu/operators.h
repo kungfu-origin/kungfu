@@ -320,6 +320,7 @@ namespace kungfu::node::serialize
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
+                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
                 table.Set(uid, value);
             }
@@ -358,6 +359,7 @@ namespace kungfu::node::serialize
                         value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
                         value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
                         value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
                         value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
                         table.Set(uid, value);
                     }
@@ -390,6 +392,7 @@ namespace kungfu::node::serialize
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
+            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
             state_.Get(type_name).ToObject().Set(uid, valueObj);
             app_.write_to(0, data);
