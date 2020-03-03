@@ -40,6 +40,7 @@ namespace kungfu::yijinjing::log
             } else
             {
                 logger = std::make_shared<spdlog::logger>(name, daily_sink);
+                logger->flush_on(spdlog::level::trace);
             }
 
             logger->set_pattern(DEFAULT_LOG_PATTERN);
