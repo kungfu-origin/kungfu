@@ -4,9 +4,14 @@ import { setTimerPromiseTask, encodeKeyToKungfuKey } from '__gUtils/BusiUtils';
 
 process.env.KF_LOG_LEVEL = 'trace';
 
-export const kungfu = require('kungfu-core').kungfu;
-export const watcher = kungfu.watcher(KF_HOME, `watcher_${process.env.APP_TYPE}`)
 
+console.log(11111)
+
+export const kungfu = require('kungfu-core').kungfu;
+console.log(2222)
+
+export const watcher = kungfu.watcher(KF_HOME, `watcher_${process.env.APP_TYPE}`)
+console.log(33333)
 export const startGetKungfuState = (callback: Function, interval = 1000) => {
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
@@ -25,8 +30,10 @@ export const startGetKungfuState = (callback: Function, interval = 1000) => {
     }, interval);
 }
 
+console.log(4444)
 
 const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
+console.log(5555)
 
 export const getAllKfConfig = () => {
     return kungfuConfigStore.getAllConfig();

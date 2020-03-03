@@ -171,12 +171,12 @@ export default {
         //获取账户列表
         getTableList() {
             const t = this;
-            return getMdList().then(res => {
-                if(!res.length) return;
-                t.$store.dispatch('setMdList', res)
-            }).catch(err => {
-                t.$message.error(err.message || '操作失败！')
-            })
+            return getMdList()
+                .then(res => {
+                    t.$store.dispatch('setMdList', res || [])
+                }).catch(err => {
+                    t.$message.error(err.message || '操作失败！')
+                })
         },
     }
     

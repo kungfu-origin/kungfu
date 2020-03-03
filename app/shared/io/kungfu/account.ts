@@ -1,4 +1,4 @@
-import { getAllKfConfig, setKfConfig, getKfConfig, removeKfConfig } from '__gUtils/kungfuUtils';
+import { getAllKfConfig, setKfConfig, removeKfConfig } from '__gUtils/kungfuUtils';
 
 
 export const getTdList = () => {

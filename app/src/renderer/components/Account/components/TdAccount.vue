@@ -316,11 +316,15 @@ export default {
         //获取账户列表
         getTableList() {
             const t = this
-            getTdList().then(tdList => {
-                t.$store.dispatch('setTdList', tdList);
-                if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
-                return tdList
-            })
+            return getTdList()
+                .then(tdList => {
+                    t.$store.dispatch('setTdList', tdList);
+                    if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
+                    return tdList
+                })
+                .catch(err => {
+                    t.$message.error(err.message || '操作失败！')
+                })
         },
 
         //删除前进行一些判断
