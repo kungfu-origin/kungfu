@@ -297,6 +297,50 @@ namespace kungfu::node::serialize
         }
     };
 
+    struct JsRestoreState
+    {
+    private:
+        JsSet set;
+        yijinjing::practice::apprentice &app_;
+        Napi::ObjectReference &state_;
+        yijinjing::data::location_ptr location_;
+        longfist::sqlite::StateStorageType &storage_;
+
+    public:
+        explicit JsRestoreState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state,
+                                yijinjing::data::location_ptr location, longfist::sqlite::StateStorageType &storage) :
+                app_(app), state_(state), location_(std::move(location)), storage_(storage)
+        {}
+
+        void operator()()
+        {
+            auto now = yijinjing::time::now_in_nano();
+            boost::hana::for_each(longfist::StateDataTypes, [&](auto it)
+            {
+                using DataType = typename decltype(+boost::hana::second(it))::type;
+                auto type_name = boost::hana::first(it).c_str();
+                for (auto &data : storage_.template get_all<DataType>())
+                {
+                    Napi::Object table = state_.Get(type_name).ToObject();
+                    uint32_t dest_uid = (data.uid() >> 32) xor location_->uid; // TODO find better method to set dest_uid, this only works for orders/trades
+                    std::string uid_key = fmt::format("{:016x}", data.uid());
+                    Napi::Value value = state_.Get(uid_key);
+                    if (value.IsUndefined() or value.IsEmpty())
+                    {
+                        value = Napi::Object::New(state_.Env());
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest_uid)));
+                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
+                        table.Set(uid_key, value);
+                    }
+                    set(data, value);
+                }
+            });
+        }
+    };
+
     struct JsUpdateState
     {
     private:
@@ -328,53 +372,12 @@ namespace kungfu::node::serialize
         }
     };
 
-    struct JsRestoreState
-    {
-    private:
-        JsSet set;
-        Napi::ObjectReference &state_;
-        yijinjing::data::location_ptr location_;
-        longfist::sqlite::StateStorageType &storage_;
-
-    public:
-        explicit JsRestoreState(Napi::ObjectReference &state, yijinjing::data::location_ptr location, longfist::sqlite::StateStorageType &storage) :
-                state_(state), location_(std::move(location)), storage_(storage)
-        {}
-
-        void operator()()
-        {
-            auto now = yijinjing::time::now_in_nano();
-            boost::hana::for_each(longfist::StateDataTypes, [&](auto it)
-            {
-                using DataType = typename decltype(+boost::hana::second(it))::type;
-                auto type_name = boost::hana::first(it).c_str();
-                for (auto &data : storage_.template get_all<DataType>())
-                {
-                    Napi::Object table = state_.Get(type_name).ToObject();
-                    std::string uid = fmt::format("{:016x}", data.uid());
-                    Napi::Value value = state_.Get(uid);
-                    if (value.IsUndefined() or value.IsEmpty())
-                    {
-                        value = Napi::Object::New(state_.Env());
-                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
-                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
-                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
-                        value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
-                        table.Set(uid, value);
-                    }
-                    set(data, value);
-                }
-            });
-        }
-    };
-
     struct JsPublishState
     {
     private:
         JsGet get;
-        Napi::ObjectReference &state_;
         yijinjing::practice::apprentice &app_;
+        Napi::ObjectReference &state_;
 
     public:
         explicit JsPublishState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state)
@@ -387,14 +390,14 @@ namespace kungfu::node::serialize
             get(value, data);
             auto now = yijinjing::time::now_in_nano();
             auto location = app_.get_io_device()->get_home();
-            auto uid = fmt::format("{:016x}", data.uid());
+            auto uid_key = fmt::format("{:016x}", data.uid());
             Napi::Object valueObj = value.ToObject();
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid_key)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
-            state_.Get(type_name).ToObject().Set(uid, valueObj);
+            state_.Get(type_name).ToObject().Set(uid_key, valueObj);
             app_.write_to(0, data);
         }
     };

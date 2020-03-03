@@ -291,7 +291,7 @@ namespace kungfu::wingchun::ctp
             {
                 auto &action_state = actions_.at(action_id);
                 auto &action = action_state.data;
-                uint32_t source = (action.order_action_id >> 32) ^get_home_uid();
+                uint32_t source = (action.order_action_id >> 32) xor get_home_uid();
                 if (has_writer(source))
                 {
                     auto writer = get_writer(source);

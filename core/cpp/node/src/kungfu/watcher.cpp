@@ -195,6 +195,6 @@ namespace kungfu::node
         register_location(0, state_location);
         auto storage = make_storage(state_location->locator->layout_file(state_location, layout::SQLITE, "state"), StateDataTypes);
         storage.sync_schema();
-        serialize::JsRestoreState(ledger_ref_, state_location, storage)();
+        serialize::JsRestoreState(*this, ledger_ref_, state_location, storage)();
     }
 }

@@ -151,7 +151,7 @@ namespace kungfu::wingchun::algo
         {
             return 0;
         }
-        uint32_t account_location_id = (order_id >> 32) ^ app_.get_home_uid();
+        uint32_t account_location_id = (order_id >> 32) xor app_.get_home_uid();
         auto writer = app_.get_writer(account_location_id);
         OrderAction &action = writer->open_data<OrderAction>(0);
         action.order_action_id = writer->current_frame_uid();

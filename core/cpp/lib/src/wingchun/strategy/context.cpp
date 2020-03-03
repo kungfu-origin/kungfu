@@ -268,7 +268,7 @@ namespace kungfu::wingchun::strategy
 
     uint64_t Context::cancel_order(uint64_t order_id)
     {
-        uint32_t account_location_id = (order_id >> 32) ^app_.get_home_uid();
+        uint32_t account_location_id = (order_id >> 32) xor app_.get_home_uid();
         SPDLOG_INFO("{:08x} cancel order {:016x} with account location {:08x}", app_.get_home_uid(), order_id, account_location_id);
         if (app_.has_writer(account_location_id))
         {
