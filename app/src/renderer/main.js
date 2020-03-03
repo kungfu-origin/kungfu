@@ -34,7 +34,11 @@ new Vue({
 }).$mount('#app', true)
 
 
+
 // debug export
+const { watcher } = require('__gUtils/kungfuUtils')
+window.watcher = watcher;
+
 window.fileId = 0;
 window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay);
 window.getTradingDay = () => store.state.BASE.tradingDay;

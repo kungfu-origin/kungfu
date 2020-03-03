@@ -17,7 +17,7 @@ export const buildTradingDataPipe = (type: string) => {
             const orders = Object.values(data.Order || {});
             const trades = Object.values(data.Trade || {});
             const positions = Object.values(data.Position || {});
-            const assets = Object.values(data.Asset || {})
+            const assets = Object.values(data.Asset || {});
             return {
                 orders: transformTradingItemListToData(orders, type),
                 trades: transformTradingItemListToData(trades, type),
