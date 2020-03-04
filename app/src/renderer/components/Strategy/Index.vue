@@ -27,7 +27,8 @@
                             <Pos
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :kungfuData="positions"                   
+                            :kungfuData="positions"   
+                            :addTime="addTime"                
                             ></Pos>
                     </el-row>
                     <el-row  style="height: 33.333%">
@@ -36,6 +37,7 @@
                             moduleType="strategy"
                             :kungfuData="orders"     
                             :tradingDay="tradingDay"              
+                            :addTime="addTime"                
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
@@ -43,7 +45,8 @@
                             :currentId="strategyId"
                             moduleType="strategy"
                             :kungfuData="trades"    
-                            :tradingDay="tradingDay"              
+                            :tradingDay="tradingDay"          
+                            :addTime="addTime"                
                             ></TradeRecord>
                     </el-row>
                 </el-col>
@@ -100,7 +103,11 @@ export default {
 
         strategyId(){
             return this.currentStrategy.strategy_id
-        }    
+        },
+        
+        addTime () {
+            return this.currentStrategy.add_time
+        }
     },
 
     components: {

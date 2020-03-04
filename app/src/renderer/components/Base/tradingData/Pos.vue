@@ -134,12 +134,16 @@ export default {
             const t = this;
             let positionDataByKey = {};
 
-            const positionsAfterFilter = positions
+            let positionsAfterFilter = positions
             .filter(item => {
                 if (searchKeyword.trim() === '') return true;
                 const { instrument_id } = item
                 return instrument_id.includes(searchKeyword) 
             })
+
+            if (t.moduleType === 'strategy') {
+                positionsAfterFilter = positionsAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+            }
 
             if (!positionsAfterFilter.length) return Object.freeze([]);
 

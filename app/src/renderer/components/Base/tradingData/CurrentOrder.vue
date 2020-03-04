@@ -206,7 +206,7 @@ export default {
             const t = this
             let orderDataByKey = {};
 
-            const ordersAfterFilter = orders
+            let ordersAfterFilter = orders
             .filter(item => (item.trading_day === tradingDay))
             .filter(item => {
                 if (searchKeyword.trim() === '') return true;
@@ -214,7 +214,11 @@ export default {
                 const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
                 return strings.includes(searchKeyword) 
             })
-            .filter(item => (todayFinish ? true : aliveOrderStatusList.includes(item.status)))
+            .filter(item => (todayFinish ? true : aliveOrderStatusList.includes(item.status)));
+
+            if (t.moduleType === 'strategy') {
+                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+            }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 

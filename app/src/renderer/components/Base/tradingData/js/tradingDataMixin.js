@@ -20,6 +20,11 @@ export default {
         tradingDay: {
             type: String,
             default: ''
+        },
+
+        addTime: {
+            type: Number,
+            default: 0
         }
     },
     

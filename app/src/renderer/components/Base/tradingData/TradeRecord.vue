@@ -95,7 +95,7 @@ export default {
     methods:{
         dealTradeList (trades, { tradingDay, searchKeyword}) {
             const t = this;
-            const tradesAfterFilter = trades
+            let tradesAfterFilter = trades
                 .filter(item => (item.trading_day === tradingDay))
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
@@ -103,6 +103,12 @@ export default {
                     const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
                     return strings.includes(searchKeyword) 
                 })
+
+            if (t.moduleType === 'strategy') {
+                tradesAfterFilter = tradesAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+            }
+
+            tradesAfterFilter = tradesAfterFilter
                 .map(item => {
                     let tradeData = dealTrade(item);
                     tradeData.update = !!t.tableData.length;
