@@ -68,25 +68,24 @@ namespace kungfu::node
     void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value)
     {}
 
-    Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
+    Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info)
     {
-        auto uid = info[0].ToNumber().Uint32Value();
-        if (not has_location(uid))
-        {
-            return Napi::Value();
-        }
-        auto location = get_location(uid);
-        auto locationObj = Napi::Object::New(info.Env());
-        locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-        locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-        locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-        locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-        return locationObj;
+        return std::dynamic_pointer_cast<Locator>(get_io_device()->get_home()->locator)->get_js_locator();
     }
 
     Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info)
     {
         return config_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetState(const Napi::CallbackInfo &info)
+    {
+        return state_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
+    {
+        return ledger_ref_.Value();
     }
 
     Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
@@ -116,21 +115,30 @@ namespace kungfu::node
         return Napi::Value();
     }
 
-    Napi::Value Watcher::GetState(const Napi::CallbackInfo &info)
+    Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
-        return state_ref_.Value();
+        auto uid = info[0].ToNumber().Uint32Value();
+        auto locationObj = Napi::Object::New(info.Env());
+        if (uid == 0)
+        {
+            auto location = get_io_device()->get_home();
+            locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+            locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+            locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+            locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+            locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+        }
+        if (has_location(uid))
+        {
+            auto location = get_location(uid);
+            locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+            locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+            locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+            locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+            locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+        }
+        return locationObj;
     }
-
-    void Watcher::SetState(const Napi::CallbackInfo &info, const Napi::Value &value)
-    {}
-
-    Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
-    {
-        return ledger_ref_.Value();
-    }
-
-    void Watcher::SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value)
-    {}
 
     Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info)
     {
@@ -151,6 +159,7 @@ namespace kungfu::node
                 InstanceMethod("step", &Watcher::Step),
                 InstanceMethod("getLocation", &Watcher::GetLocation),
                 InstanceMethod("publishState", &Watcher::PublishState),
+                InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
@@ -193,8 +202,6 @@ namespace kungfu::node
     void Watcher::RestoreState(location_ptr state_location)
     {
         register_location(0, state_location);
-        auto storage = make_storage(state_location->locator->layout_file(state_location, layout::SQLITE, "state"), StateDataTypes);
-        storage.sync_schema();
-        serialize::JsRestoreState(*this, ledger_ref_, state_location, storage)();
+        serialize::JsRestoreState(*this, ledger_ref_, state_location)();
     }
 }

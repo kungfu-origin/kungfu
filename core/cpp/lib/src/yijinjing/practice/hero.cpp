@@ -10,7 +10,6 @@
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
-#include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/yijinjing/practice/hero.h>
 
 using namespace kungfu::rx;

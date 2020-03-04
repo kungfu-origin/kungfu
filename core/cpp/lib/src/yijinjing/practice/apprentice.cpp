@@ -109,10 +109,12 @@ namespace kungfu::yijinjing::practice
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
         {
-            events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first() |
-            rx::timeout(seconds(10), observe_on_new_thread()) |
+            auto events_after_register = events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first();
+
+            events_after_register | rx::timeout(seconds(10), observe_on_new_thread()) |
             $([&](const event_ptr &e)
               {
+                  // once registered this subscriber finished, no worry for performance.
                   // timeout happens on new thread, can not subscribe journal reader here
                   // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
               },
@@ -125,13 +127,9 @@ namespace kungfu::yijinjing::practice
                       SPDLOG_ERROR("app register timeout");
                       hero::signal_stop();
                   }
-              },
-              [&]()
-              {
-                  // once registered this subscriber finished, no worry for performance.
               });
 
-            events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first() |
+            events_after_register |
             $([&](const event_ptr &e)
               {
                   reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());

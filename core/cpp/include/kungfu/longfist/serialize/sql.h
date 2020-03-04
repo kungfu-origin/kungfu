@@ -68,22 +68,25 @@ namespace kungfu::longfist::sqlite
 
     struct sqlizer
     {
-        StateStorageType storage;
+        explicit sqlizer(yijinjing::data::location_ptr location) : location_(location)
+        {}
 
-        explicit sqlizer(const std::string &state_db_file) :
-                storage(longfist::sqlite::make_storage(state_db_file, StateDataTypes))
+        void restore(const yijinjing::journal::writer_ptr &app_cmd_writer)
         {
-            storage.sync_schema();
-        }
-
-        void restore(const yijinjing::journal::writer_ptr &writer)
-        {
+            SPDLOG_INFO("restore for {}", location_->uname);
+            for (auto dest : location_->locator->list_location_dest(location_))
+            {
+                ensure_storage(dest);
+            }
             boost::hana::for_each(StateDataTypes, [&](auto it)
             {
                 using DataType = typename decltype(+boost::hana::second(it))::type;
-                for (auto &data : storage.get_all<DataType>())
+                for (auto &pair : storages_)
                 {
-                    writer->write(0, data);
+                    for (auto &data : pair.second.get_all<DataType>())
+                    {
+                        app_cmd_writer->write(0, data);
+                    }
                 }
             });
         }
@@ -93,7 +96,23 @@ namespace kungfu::longfist::sqlite
                                                              boost::hana::basic_type<DataType> type,
                                                              const event_ptr &event)
         {
-            storage.replace(event->data<DataType>());
+            ensure_storage(event->dest());
+            storages_.at(event->dest()).replace(event->data<DataType>());
+        }
+
+    private:
+        const yijinjing::data::location_ptr location_;
+        std::unordered_map<uint32_t, StateStorageType> storages_;
+
+        inline void ensure_storage(uint32_t dest)
+        {
+            if (storages_.find(dest) == storages_.end())
+            {
+                auto db_file = location_->locator->layout_file(location_, enums::layout::SQLITE, fmt::format("{:08x}", dest));
+                auto storage = make_storage(db_file, StateDataTypes);
+                storage.sync_schema();
+                storages_.emplace(dest, storage);
+            }
         }
     };
 

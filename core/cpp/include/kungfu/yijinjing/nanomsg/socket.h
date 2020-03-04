@@ -196,7 +196,14 @@ namespace kungfu::yijinjing::nanomsg
         { return binding_.size(); }
 
         [[nodiscard]] const void *data_address() const override
-        { return &binding_["data"]; }
+        {
+            if (binding_.find("data") == binding_.end())
+            {
+                SPDLOG_ERROR("nanomsg event has no data {}", msg_);
+                return &binding_;
+            }
+            return &binding_["data"];
+        }
 
         [[nodiscard]] const char *data_as_bytes() const override
         { return msg_.c_str(); }
@@ -217,11 +224,9 @@ namespace kungfu::yijinjing::nanomsg
             if (binding_.find(name) == binding_.end())
             {
                 return default_value;
-            } else
-            {
-                T value = binding_[name];
-                return value;
             }
+            T value = binding_[name];
+            return value;
         }
     };
 

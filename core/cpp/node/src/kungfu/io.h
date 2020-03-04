@@ -37,6 +37,8 @@ namespace kungfu::node
 
         [[nodiscard]] std::vector<uint32_t> list_location_dest(yijinjing::data::location_ptr location) const override;
 
+        Napi::Object get_js_locator();
+
     private:
         Napi::ObjectReference locator_ref_;
     };

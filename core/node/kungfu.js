@@ -41,7 +41,14 @@ const locator = function(home) {
             return [];
         },
         list_location_dest: function(category, group, name, mode) {
-            return [];
+            const dest_dir = layout_dir_from_home(home, category, group, name, mode, "journal");
+            const pages = glob.sync(path.join(dest_dir, "*.journal"));
+            const destObj = {};
+            pages.map(p => {
+                const uid = p.match(/.\w+\.\d+\.journal/g)[0].substr(1, 9);
+                destObj[uid] = uid;
+            });
+            return Object.keys(destObj).map(k => parseInt(k, 16));
         }
     };
 };

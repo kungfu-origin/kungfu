@@ -13,6 +13,7 @@
 #include <kungfu/yijinjing/practice/master.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::longfist::sqlite;
 using namespace kungfu::yijinjing;
@@ -109,9 +110,9 @@ namespace kungfu::yijinjing::practice
 
         on_register(e, app_location);
 
-        auto state_db_file = home->locator->layout_file(app_location, layout::SQLITE, "state");
-        app_sqlizers_[app_location->uid] = std::make_shared<sqlizer>(state_db_file);
-        app_sqlizers_[app_location->uid]->restore(writer);
+        app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
+        SPDLOG_INFO("has sql {}", app_sqlizers_.find(app_location->uid) == app_sqlizers_.end());
+        app_sqlizers_.at(app_location->uid)->restore(writer);
 
         writer->mark(start_time_, RequestStart::tag);
     }
@@ -200,6 +201,7 @@ namespace kungfu::yijinjing::practice
           {
               auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
               io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
+              cast_event_invoke(e, *app_sqlizers_.at(e->source()));
           });
 
         events_ | is(Ping::tag) |
@@ -262,12 +264,6 @@ namespace kungfu::yijinjing::practice
               task.repeat_count = 0;
               task.repeat_limit = request.repeat;
               SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
-          });
-
-        events_ |
-        $([&](const event_ptr &e)
-          {
-              longfist::cast_event_invoke(e, *app_sqlizers_[e->source()]);
           });
     }
 }

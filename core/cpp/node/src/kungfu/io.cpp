@@ -98,6 +98,11 @@ namespace kungfu::node
         return result;
     }
 
+    Napi::Object Locator::get_js_locator()
+    {
+        return locator_ref_.Value();
+    }
+
     Napi::FunctionReference IODevice::constructor;
 
     IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true)

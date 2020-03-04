@@ -29,6 +29,7 @@
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/util/util.h>
+#include <kungfu/yijinjing/util/stacktrace.h>
 
 namespace kungfu
 {
@@ -190,18 +191,41 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
+        constexpr auto error_handler_log = [](const std::string subscriber_name)
+        {
+            return [=](std::exception_ptr e)
+            {
+                try
+                { std::rethrow_exception(e); }
+                catch (const std::exception &ex)
+                { SPDLOG_ERROR("subscriber {} got error: {}", subscriber_name, ex.what()); }
+            };
+        };
+
+        constexpr auto complete_handler_log = [](const std::string subscriber_name)
+        {
+            return [=]()
+            {
+                SPDLOG_DEBUG("subscriber {} completed", subscriber_name);
+            };
+        };
+
         template<typename... Ts>
-        constexpr auto event_filter_any = [](auto member) {
-            return [=](Ts... arg) {
+        constexpr auto event_filter_any = [](auto member)
+        {
+            return [=](Ts... arg)
+            {
                 using T = std::result_of_t<decltype(member)(event *)>;
                 type_check<T, Ts...>(arg...);
                 auto args = boost::hana::make_tuple(arg...);
-                return filter([=](const event_ptr &e) {
-                    auto check = [&](auto a) {
-                        return ((*e).*member)() == a;
-                    };
-                    return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
-                });
+                return filter([=](const event_ptr &e)
+                              {
+                                  auto check = [&](auto a)
+                                  {
+                                      return ((*e).*member)() == a;
+                                  };
+                                  return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
+                              });
             };
         };
 
@@ -237,7 +261,10 @@ namespace kungfu
             try
             { std::rethrow_exception(e); }
             catch (const std::exception &ex)
-            { SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what()); }
+            {
+                SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
+//                yijinjing::util::print_stack_trace();
+            }
             raise(SIGINT);
         };
 

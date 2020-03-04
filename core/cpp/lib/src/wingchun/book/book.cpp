@@ -166,6 +166,8 @@ namespace kungfu::wingchun::book
             throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
         }
 
+        auto error_handler = rx::error_handler_log(fmt::format("book [{}]", location->uname));
+
         books_[location->uid] = book;
 
         this->monitor_positions(location, book);
@@ -224,17 +226,25 @@ namespace kungfu::wingchun::book
                       SPDLOG_WARN("location {} not exist", channel.source_id);
                   }
               }
-          });
+          }, error_handler);
 
         events_ | filter([=](const event_ptr &event)
-                         { return event->msg_type() == PositionEnd::tag and event->data<PositionEnd>().holder_uid == location->uid; }) |
-        first() | $([=](const event_ptr &event)
-                    { book->ready_ = true; });
+                         {
+                             return event->msg_type() == PositionEnd::tag and event->data<PositionEnd>().holder_uid == location->uid;
+                         }) | first() |
+        $([=](const event_ptr &event)
+          {
+              book->ready_ = true;
+          }, error_handler);
 
         events_ | filter([=](const event_ptr &event)
-                         { return event->msg_type() == PositionDetailEnd::tag and event->data<PositionDetailEnd>().holder_uid == location->uid; }) |
-        first() | $([=](const event_ptr &event)
-                    { book->ready_ = true; });
+                         {
+                             return event->msg_type() == PositionDetailEnd::tag and event->data<PositionDetailEnd>().holder_uid == location->uid;
+                         }) | first() |
+        $([=](const event_ptr &event)
+          {
+              book->ready_ = true;
+          }, error_handler);
 
         events_ | is(Quote::tag) |
         $([=](const event_ptr &event)
@@ -247,7 +257,7 @@ namespace kungfu::wingchun::book
               {
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
-          });
+          }, error_handler);
 
         events_ | is(Trade::tag) | filter([=](const event_ptr &e)
                                           {
@@ -263,7 +273,7 @@ namespace kungfu::wingchun::book
               {
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
-          });
+          }, error_handler);
 
         events_ | is(Order::tag) | filter([=](const event_ptr &e)
                                           {
@@ -280,7 +290,7 @@ namespace kungfu::wingchun::book
               {
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
-          });
+          }, error_handler);
 
         events_ | is(OrderInput::tag) | filter([=](const event_ptr &e)
                                                {
@@ -298,23 +308,24 @@ namespace kungfu::wingchun::book
               {
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
-          });
+          }, error_handler);
 
         events_ | is(Asset::tag) | filter([=](const event_ptr &e)
                                           {
                                               const auto &asset = e->data<Asset>();
                                               return asset.holder_uid == location->uid;
-                                          }) | $([=](const event_ptr &event)
-                                                 {
-                                                     try
-                                                     {
-                                                         book->on_asset(event, event->data<Asset>());
-                                                     }
-                                                     catch (const std::exception &e)
-                                                     {
-                                                         SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                                     }
-                                                 });
+                                          }) |
+        $([=](const event_ptr &event)
+          {
+              try
+              {
+                  book->on_asset(event, event->data<Asset>());
+              }
+              catch (const std::exception &e)
+              {
+                  SPDLOG_ERROR("Unexpected exception {}", e.what());
+              }
+          }, error_handler);
 
         events_ | is(TradingDay::tag) |
         $([=](const event_ptr &event)
@@ -327,7 +338,7 @@ namespace kungfu::wingchun::book
               {
                   SPDLOG_ERROR("Unexpected exception {}", e.what());
               }
-          });
+          }, error_handler);
 
         auto home = app_.get_io_device()->get_home();
         if (home->uid != service_location_->uid)
@@ -360,7 +371,7 @@ namespace kungfu::wingchun::book
                       memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
                       writer->close_frame(msg.length());
                       SPDLOG_INFO("{}[{:08x}] asset requested", location->uname, location->uid);
-                  });
+                  }, error_handler);
             } else
             {
                 nlohmann::json location_desc{};

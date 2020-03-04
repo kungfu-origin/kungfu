@@ -23,9 +23,13 @@ namespace kungfu::node
 
         void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
+        Napi::Value GetLocator(const Napi::CallbackInfo &info);
+
         Napi::Value GetConfig(const Napi::CallbackInfo &info);
 
-        Napi::Value GetLocation(const Napi::CallbackInfo &info);
+        Napi::Value GetState(const Napi::CallbackInfo &info);
+
+        Napi::Value GetLedger(const Napi::CallbackInfo &info);
 
         Napi::Value IsUsable(const Napi::CallbackInfo &info);
 
@@ -37,13 +41,7 @@ namespace kungfu::node
 
         Napi::Value Step(const Napi::CallbackInfo &info);
 
-        Napi::Value GetState(const Napi::CallbackInfo &info);
-
-        void SetState(const Napi::CallbackInfo &info, const Napi::Value &value);
-
-        Napi::Value GetLedger(const Napi::CallbackInfo &info);
-
-        void SetLedger(const Napi::CallbackInfo &info, const Napi::Value &value);
+        Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
         Napi::Value PublishState(const Napi::CallbackInfo &info);
 
