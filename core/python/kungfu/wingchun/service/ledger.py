@@ -144,12 +144,7 @@ class Ledger(pywingchun.Ledger):
 
     def _dump_snapshot(self, data_frequency="minute"):
         for book in self.ctx.books.values():
-            event = book.event.as_dict()
-            event["msg_type"] = msg.AssetSnapshot
-            tags = {"update_time": self.now(), "data_frequency": data_frequency}
-            event["data"].update(tags)
-            self.ctx.db.on_book_event(event)
-            self.publish(json.dumps(event, cls=wc_utils.WCEncoder))
+            self.dump_asset_snapshot(book.event.data)
 
     def has_book(self, uid):
         return uid in self.ctx.books
@@ -167,7 +162,7 @@ class Ledger(pywingchun.Ledger):
                 asset = pykungfu.longfist.types.Asset()
                 asset.holder_uid = location.uid
                 asset.avail = DEFAULT_INIT_CASH                           
-            book = kwb.book.AccountBook(self.ctx, location=location, positions=positions, avail = asset.avail,initial_equity = asset.initial_equity, static_equity = asset.static_equity, frozen_cash = asset.frozen_cash, frozen_margin = asset.frozen_margin, intraday_fee = asset.intraday_fee, accumulated_fee = asset.accumulated_fee, realized_pnl = asset.realized_pnl)
+            book = kwb.book.AccountBook(self.ctx, location=location, positions=positions, avail=asset.avail, initial_equity=asset.initial_equity, static_equity=asset.static_equity, frozen_cash = asset.frozen_cash, frozen_margin=asset.frozen_margin, intraday_fee=asset.intraday_fee, accumulated_fee=asset.accumulated_fee, realized_pnl=asset.realized_pnl)
             self.ctx.books[location.uid] = book
             self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
         return self.ctx.books[location.uid]

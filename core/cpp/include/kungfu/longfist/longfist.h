@@ -35,6 +35,7 @@ namespace kungfu::longfist
             TYPE_PAIR(Order),
             TYPE_PAIR(Trade),
             TYPE_PAIR(Asset),
+            TYPE_PAIR(AssetSnapshot),
             TYPE_PAIR(Position),
             TYPE_PAIR(PositionEnd),
             TYPE_PAIR(PositionDetail),

@@ -28,36 +28,13 @@ namespace kungfu::wingchun::service
 
         uint64_t cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
 
-        std::vector<longfist::types::Position> get_positions(const yijinjing::data::location_ptr &location)
-        {
-           auto position_map = state_map_[boost::hana::type_c<longfist::types::Position>];
-           std::vector<longfist::types::Position> res = {};
-           for(const auto& kv: position_map)
-           {
-               const auto& position = kv.second.data;
-               if (position.holder_uid == location->uid)
-               {
-                   res.push_back(position);
-               }
-           }
-           return res;
-        }
+        std::vector<longfist::types::Position> get_positions(const yijinjing::data::location_ptr &location);
 
-        bool has_asset(const yijinjing::data::location_ptr &location)
-        {
-            auto asset_map = state_map_[boost::hana::type_c<longfist::types::Asset>];           
-            return asset_map.find(location->uid) != asset_map.end();
-        }
+        bool has_asset(const yijinjing::data::location_ptr &location);
 
-        longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location) 
-        {
-            auto asset_map = state_map_[boost::hana::type_c<longfist::types::Asset>];
-            if (asset_map.find(location->uid) == asset_map.end())
-            {
-                throw wingchun_error("asset info not exist");
-            }
-            return asset_map.at(location->uid).data;
-        }
+        longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location);
+
+        void dump_asset_snapshot(const longfist::types::Asset &asset);
 
         virtual std::string handle_request(const event_ptr &event, const std::string &msg) = 0;
 
@@ -96,16 +73,17 @@ namespace kungfu::wingchun::service
         void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
       
     private:
-        yijinjing::nanomsg::socket_ptr pub_sock_;
         longfist::journal::publisher publish_state;
 
+        yijinjing::nanomsg::socket_ptr pub_sock_;
         book::BookContext_ptr book_context_;
 
+        std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
         std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
 
-        void monitor_instruments(uint32_t broker_location);
-
         longfist::enums::BrokerState get_broker_state(uint32_t broker_location) const;
+
+        void monitor_instruments(uint32_t broker_location);
 
         void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 

@@ -20,13 +20,23 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publish_state(state_map_)
+            publish_state(state_map_),
+            assets_(state_map_[boost::hana::type_c<longfist::types::Asset>])
     {
         log::copy_log_settings(get_io_device()->get_home(), "ledger");
         if (m == mode::LIVE)
         {
             pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
         }
+    }
+
+    book::BookContext_ptr Ledger::get_book_context()
+    {
+        if (book_context_ == nullptr)
+        {
+            book_context_ = std::make_shared<book::BookContext>(*this, events_);
+        }
+        return book_context_;
     }
 
     void Ledger::publish(const std::string &msg)
@@ -36,17 +46,6 @@ namespace kungfu::wingchun::service
             pub_sock_->send(msg);
         }
         SPDLOG_DEBUG("published {}", msg);
-    }
-
-    BrokerState Ledger::get_broker_state(uint32_t broker_location) const
-    {
-        if (broker_states_.find(broker_location) != broker_states_.end())
-        {
-            return broker_states_.at(broker_location);
-        } else
-        {
-            return BrokerState::Unknown;
-        }
     }
 
     void Ledger::publish_broker_states(int64_t trigger_time)
@@ -59,6 +58,69 @@ namespace kungfu::wingchun::service
                 publish_broker_state(trigger_time, get_location(item.first), item.second);
             }
         }
+    }
+
+    uint64_t Ledger::cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
+    {
+        SPDLOG_INFO("cancel order {}", order_id);
+        if (has_writer(account_location_uid))
+        {
+            auto writer = get_writer(account_location_uid);
+            OrderAction &action = writer->open_data<OrderAction>(event->gen_time());
+            action.order_action_id = writer->current_frame_uid();
+            action.order_id = order_id;
+            action.action_flag = OrderActionFlag::Cancel;
+            writer->close_data();
+            return action.order_action_id;
+        } else
+        {
+            if (has_location(account_location_uid))
+            {
+                SPDLOG_ERROR("writer to {} [{:08x}] not exists", get_location(account_location_uid)->uname, account_location_uid);
+            } else
+            {
+                SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);
+            }
+            return 0;
+        }
+    }
+
+    std::vector<longfist::types::Position> Ledger::get_positions(const yijinjing::data::location_ptr &location)
+    {
+        auto position_map = state_map_[boost::hana::type_c<longfist::types::Position>];
+        std::vector<longfist::types::Position> res = {};
+        for(const auto& kv: position_map)
+        {
+            const auto& position = kv.second.data;
+            if (position.holder_uid == location->uid)
+            {
+                res.push_back(position);
+            }
+        }
+        return res;
+    }
+
+    bool Ledger::has_asset(const yijinjing::data::location_ptr &location)
+    {
+        return assets_.find(location->uid) != assets_.end();
+    }
+
+    longfist::types::Asset Ledger::get_asset(const yijinjing::data::location_ptr &location)
+    {
+        if (assets_.find(location->uid) == assets_.end())
+        {
+            throw wingchun_error(fmt::format("asset info for {} not exist", location->uname));
+        }
+        return assets_.at(location->uid).data;
+    }
+
+    void Ledger::dump_asset_snapshot(const Asset &asset)
+    {
+        auto writer = writers_.at(0);
+        AssetSnapshot &snapshot = writer->open_data<AssetSnapshot>();
+        memcpy(&snapshot, &asset, sizeof(snapshot));
+        snapshot.update_time = now();
+        writer->close_data();
     }
 
     void Ledger::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location)
@@ -163,6 +225,17 @@ namespace kungfu::wingchun::service
         }
     }
 
+    BrokerState Ledger::get_broker_state(uint32_t broker_location) const
+    {
+        if (broker_states_.find(broker_location) != broker_states_.end())
+        {
+            return broker_states_.at(broker_location);
+        } else
+        {
+            return BrokerState::Unknown;
+        }
+    }
+
     void Ledger::monitor_instruments(uint32_t broker_location)
     {
         auto insts = events_ | from(broker_location) |
@@ -186,15 +259,6 @@ namespace kungfu::wingchun::service
                     this->on_instruments(res);
                     this->monitor_instruments(broker_location);
                 });
-    }
-
-    book::BookContext_ptr Ledger::get_book_context()
-    {
-        if (book_context_ == nullptr)
-        {
-            book_context_ = std::make_shared<book::BookContext>(*this, events_);
-        }
-        return book_context_;
     }
 
     void Ledger::on_start()
@@ -389,31 +453,6 @@ namespace kungfu::wingchun::service
                   monitor_market_data(trigger_time, md_location_uid);
               }
           });
-    }
-
-    uint64_t Ledger::cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id)
-    {
-        SPDLOG_INFO("cancel order {}", order_id);
-        if (has_writer(account_location_uid))
-        {
-            auto writer = get_writer(account_location_uid);
-            OrderAction &action = writer->open_data<OrderAction>(event->gen_time());
-            action.order_action_id = writer->current_frame_uid();
-            action.order_id = order_id;
-            action.action_flag = OrderActionFlag::Cancel;
-            writer->close_data();
-            return action.order_action_id;
-        } else
-        {
-            if (has_location(account_location_uid))
-            {
-                SPDLOG_ERROR("writer to {} [{:08x}] not exists", get_location(account_location_uid)->uname, account_location_uid);
-            } else
-            {
-                SPDLOG_ERROR("writer to [{:08x}] not exists", account_location_uid);
-            }
-            return 0;
-        }
     }
 
     void Ledger::request_subscribe(uint32_t account_location_id, const std::vector<Instrument> &instruments)

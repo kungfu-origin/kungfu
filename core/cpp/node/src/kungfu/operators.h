@@ -317,6 +317,7 @@ namespace kungfu::node::serialize
             {
                 auto db_file = location_->locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
                 auto storage = longfist::sqlite::make_storage(db_file, longfist::StateDataTypes);
+                storage.sync_schema();
                 boost::hana::for_each(longfist::StateDataTypes, [&](auto it)
                 {
                     using DataType = typename decltype(+boost::hana::second(it))::type;
