@@ -1,6 +1,6 @@
 
 import { KF_HOME } from '__gConfig/pathConfig';
-import { setTimerPromiseTask, encodeKeyToKungfuKey } from '__gUtils/BusiUtils';
+import { setTimerPromiseTask, encodeKeyToKungfuLocation } from '__gUtils/BusiUtils';
 
 process.env.KF_LOG_LEVEL = 'trace';
 
@@ -31,17 +31,17 @@ export const getAllKfConfig = () => {
 }
 
 export const setKfConfig = (key: string, type: string, config: string) => {
-    const kungfuKey = encodeKeyToKungfuKey(key, type);
+    const kungfuKey = encodeKeyToKungfuLocation(key, type);
     return kungfuConfigStore.setConfig(kungfuKey[0], kungfuKey[1], kungfuKey[2], kungfuKey[3], config)
 }
 
 export const getKfConfig = (key: string, type: string) => {
-    const kungfuKey = encodeKeyToKungfuKey(key, type);
+    const kungfuKey = encodeKeyToKungfuLocation(key, type);
     return kungfuConfigStore.getConfig(kungfuKey[0], kungfuKey[1], kungfuKey[2], kungfuKey[3])    
 }
 
 export const removeKfConfig = (key: string, type: string) => {
-    const kungfuKey = encodeKeyToKungfuKey(key, type);
+    const kungfuKey = encodeKeyToKungfuLocation(key, type);
     return kungfuConfigStore.removeConfig(kungfuKey[0], kungfuKey[1], kungfuKey[2], kungfuKey[3])
 }
 

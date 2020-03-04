@@ -18,7 +18,7 @@
   },
   "scripts": {
     "install-deps": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
-    "clean": "rimraf ./dist/* ./build/* && rimraf ./node_modules/kungfu-core/*",
+    "clean": "rimraf ./dist/* ./build/*",
     "build": "node -v",
     "build-cli": "node ./.config/build.js && yarn run cp",
     "build-linux": " yarn run dist && pkg . -t=node10.15.3-linux-x64 --out-path=build/cli",

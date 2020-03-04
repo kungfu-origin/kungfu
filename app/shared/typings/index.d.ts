@@ -311,3 +311,10 @@ interface StringToDataWithAccountIdClientIdData {
         [propName: string]: DataWithAccountIdClientId[]
     }
 }
+
+interface KungfuLocation {
+    category: string,
+    group: string,
+    name: string,
+    mode: string
+}

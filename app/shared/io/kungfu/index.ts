@@ -1,7 +1,8 @@
-import { startGetKungfuState } from '__gUtils/kungfuUtils';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { transformTradingItemListToData, transformAssetItemListToData } from '__gUtils/BusiUtils';
+
+import { startGetKungfuState } from '__gUtils/kungfuUtils';
+import { transformTradingItemListToData, transformOrderTradeListToData, transformAssetItemListToData } from '__io/kungfu/utils';
 
 
 
@@ -19,9 +20,9 @@ export const buildTradingDataPipe = (type: string) => {
             const positions = Object.values(data.Position || {});
             const assets = Object.values(data.Asset || {});
             return {
-                orders: transformTradingItemListToData(orders, type),
-                trades: transformTradingItemListToData(trades, type),
-                positions: transformTradingItemListToData(positions, type, true),
+                orders: transformOrderTradeListToData(orders, type),
+                trades: transformOrderTradeListToData(trades, type),
+                positions: transformTradingItemListToData(positions, type),
                 assets: transformAssetItemListToData(assets, type),
             }
         })

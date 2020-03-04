@@ -238,8 +238,8 @@ export default {
         validateAccountId(rule, value, callback) {
             const t = this
             const index = t.mdTdList.findIndex(a => {
-               const account_id = a.account_id.toAccountId();
-               return account_id == value
+               const account_id = a.account_id
+               return account_id == `${t.source}_${value}`
             })
             if(index != -1) {
                 callback('已存在该账户ID！')

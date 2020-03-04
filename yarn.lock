@@ -6581,14 +6581,6 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.npm.taobao.org/kind-of/download/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha1-B8BQNKbDSfoG4k+jWqdttFgM5N0=
 
-kungfu-core@./core:
-  version "2.2.0-dev"
-  dependencies:
-    bindings "^1.5.0"
-    fs-extra "^8.1.0"
-    nan "^2.14.0"
-    node-addon-api "^2.0.0"
-
 latest-version@^5.0.0:
   version "5.1.0"
   resolved "https://registry.npm.taobao.org/latest-version/download/latest-version-5.1.0.tgz#119dfe908fe38d15dfa43ecd13fa12ec8832face"

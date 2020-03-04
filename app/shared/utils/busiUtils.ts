@@ -1,7 +1,7 @@
 import readline from 'readline';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
-import { EXTENSION_DIR, STRATEGYS_DB, ACCOUNTS_DB } from '__gConfig/pathConfig';
-import { listDir, statSync, readJsonSync, existsSync } from '__gUtils/fileUtils';
+import { EXTENSION_DIR } from '__gConfig/pathConfig';
+import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -571,68 +571,8 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
 } 
 
 
-export const transformTradingItemListToData = (list: any[], type: string, ifLedgerCategory?: Boolean) => {
-    let data: StringToAny = {}
 
-    if (type === 'account') {
-        if (ifLedgerCategory) {
-            list.kfForEach((item: any) => {
-                const accountId = `${item.source_id}_${item.account_id}`;
-                if (!accountId) return;
-                const ledgerCategory = +item.ledger_category;
-                if (ledgerCategory === 0) {
-                    if (!data[accountId]) data[accountId] = [];
-                    data[accountId].push(item)
-                }
-            })
-        } else {
-            list.kfForEach((item: any) => {
-                const accountId = `${item.source_id}_${item.account_id}`;
-                if (!accountId) return;
-                if (!data[accountId]) data[accountId] = [];
-                data[accountId].push(item)
-            })
-        }
-    } else if (type === 'strategy') {
-        if (ifLedgerCategory) {
-            list.kfForEach((item: any) => {
-                const clientId = item.client_id;
-                if (!clientId) return;
-                const ledgerCategory = +item.ledger_category;
-                if (ledgerCategory === 1) {
-                    if (!data[clientId]) data[clientId] = [];
-                    data[clientId].push(item)
-                }
-            })
-        } else {
-            list.kfForEach((item: any) => {
-                const clientId = item.client_id;
-                if (!clientId) return;
-                if (!data[clientId]) data[clientId] = [];
-                data[clientId].push(item)
-            })
-        }
-    }
-
-    return data
-}
-
-export const transformAssetItemListToData = (list: any[], type: string) => {
-    let accountIdClientIdData = transformTradingItemListToData(list, type, true);
-    Object.keys(accountIdClientIdData || {}).forEach((id: string) => {
-        const valueData = accountIdClientIdData[id]
-            .reduce((a: any, b: any) => {
-                return {
-                    ...a,
-                    ...b
-                }
-            })
-        accountIdClientIdData[id] = valueData
-    })
-    return accountIdClientIdData
-}
-
-export const encodeKeyToKungfuKey = (key: string, type: string) => {
+export const encodeKeyToKungfuLocation = (key: string, type: string) => {
     switch (type) {
         case 'td':
             const tdIdSplit = key.split('_');
@@ -650,3 +590,4 @@ export const encodeKeyToKungfuKey = (key: string, type: string) => {
             throw new Error(`unknow type ${type}`);
     }
 }
+
