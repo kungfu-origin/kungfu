@@ -95,6 +95,19 @@ namespace kungfu::node
     std::vector<uint32_t> Locator::list_location_dest(location_ptr location) const
     {
         std::vector<uint32_t> result;
+        auto js_delegate = locator_ref_.Get("list_location_dest").As<Napi::Function>();
+        auto v = js_delegate.Call({
+                                          Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),
+                                          Napi::String::New(locator_ref_.Env(), location->group),
+                                          Napi::String::New(locator_ref_.Env(), location->name),
+                                          Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode))
+                                  });
+        Napi::Array r = v.As<Napi::Array>();
+        for (int i = 0; i < r.Length(); i++)
+        {
+            Napi::Value e = r[i];
+            result.push_back(e.As<Napi::Number>().Uint32Value());
+        }
         return result;
     }
 
