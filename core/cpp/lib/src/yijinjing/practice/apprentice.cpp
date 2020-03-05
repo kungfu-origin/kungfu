@@ -41,7 +41,7 @@ namespace kungfu::yijinjing::practice
             state_map_(build_state_map(longfist::StateDataTypes)), recover_state(state_map_)
     {
         auto uid_str = fmt::format("{:08x}", get_live_home_uid());
-        auto locator = get_io_device()->get_home()->locator;
+        auto locator = get_locator();
         master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
         master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
         config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
@@ -174,7 +174,7 @@ namespace kungfu::yijinjing::practice
         {
             // dest_id 0 should be configurable TODO
             reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, get_io_device()->get_home()->group,
-                                                     get_io_device()->get_home()->name, get_io_device()->get_home()->locator), 0, begin_time_);
+                                                     get_io_device()->get_home()->name, get_locator()), 0, begin_time_);
         }
 
         events_ | is(Location::tag) | $$(register_location_from_event<Location>);

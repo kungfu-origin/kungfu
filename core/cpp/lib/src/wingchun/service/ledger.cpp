@@ -336,7 +336,7 @@ namespace kungfu::wingchun::service
                           static_cast<mode>(location_json["mode"]),
                           static_cast<category>(location_json["category"]),
                           location_json["group"], location_json["name"],
-                          get_io_device()->get_home()->locator
+                          get_locator()
                   );
                   SPDLOG_INFO("asset for {}[{:08x}] requested", app_location->uname, app_location->uid);
                   handle_asset_request(event, app_location);
@@ -464,7 +464,7 @@ namespace kungfu::wingchun::service
         }
         auto location = get_location(account_location_id);
         auto md_location = location::make_shared(get_io_device()->get_home()->mode, category::MD, location->group, location->group,
-                                                 get_io_device()->get_home()->locator);
+                                                 get_locator());
         SPDLOG_INFO("subscribe {} instruments for account {}@{} from {} [{:08x}]",
                     instruments.size(), location->name, location->group, md_location->uname, md_location->uid);
 

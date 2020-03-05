@@ -189,14 +189,14 @@ namespace kungfu::yijinjing::practice
         template <typename DataType>
         void register_location_from_event(const event_ptr &event)
         {
-            auto app_location = data::location::make_shared(event->data<DataType>(), get_io_device()->get_home()->locator);
+            auto app_location = data::location::make_shared(event->data<DataType>(), get_locator());
             register_location(event->trigger_time(), app_location);
         }
 
         template <typename DataType>
         void deregister_location_from_event(const event_ptr &event)
         {
-            uint32_t location_uid = data::location::make_shared(event->data<DataType>(), get_io_device()->get_home()->locator)->uid;
+            uint32_t location_uid = data::location::make_shared(event->data<DataType>(), get_locator())->uid;
             reader_->disjoin(location_uid);
             deregister_channel_by_source(location_uid);
             deregister_location(event->trigger_time(), location_uid);

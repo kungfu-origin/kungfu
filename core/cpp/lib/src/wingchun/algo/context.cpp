@@ -120,7 +120,7 @@ namespace kungfu::wingchun::algo
 
     void AlgoContext::subscribe(const std::string &source, const std::vector<std::string> &instruments, const std::string &exchange)
     {
-        auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, app_.get_io_device()->get_home()->locator);
+        auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, app_.get_locator());
         auto writer = app_.get_writer(md_location->uid);
         for (const auto &inst : instruments)
         {

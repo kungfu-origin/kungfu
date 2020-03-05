@@ -39,7 +39,9 @@ namespace kungfu::yijinjing::practice
 
         void set_end_time(int64_t end_time);
 
-        yijinjing::io_device_with_reply_ptr get_io_device() const;
+        [[nodiscard]] data::locator_ptr get_locator() const;
+
+        [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
 
         uint32_t get_home_uid() const;
 
@@ -47,15 +49,15 @@ namespace kungfu::yijinjing::practice
 
         const std::string &get_home_uname() const;
 
-        yijinjing::journal::reader_ptr get_reader() const;
+        [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
 
         bool has_writer(uint32_t dest_id) const;
 
-        yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+        [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
         bool has_location(uint32_t hash) const;
 
-        yijinjing::data::location_ptr get_location(uint32_t hash) const;
+        [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t hash) const;
 
         bool has_channel(uint64_t hash) const;
 

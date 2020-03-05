@@ -227,6 +227,20 @@ namespace kungfu::yijinjing::practice
               register_channel(e->gen_time(), channel);
           });
 
+        events_ | is(RequestWriteAtTo::tag) |
+        $([&](const event_ptr &e)
+          {
+              const RequestWriteAtTo &request = e->data<RequestWriteAtTo>();
+              auto source_location = location::make_shared(request, get_locator());
+              reader_->join(source_location, request.dest_id, e->gen_time());
+              writers_.at(e->source())->write(e->gen_time(), request);
+              require_read_from(0, request.dest_id, source_location->uid, e->gen_time());
+              Channel channel = {};
+              channel.source_id = source_location->uid;
+              channel.dest_id = request.dest_id;
+              register_channel(e->gen_time(), channel);
+          });
+
         events_ | is(RequestReadFrom::tag) |
         $([&](const event_ptr &e)
           {

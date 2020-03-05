@@ -129,6 +129,11 @@ namespace kungfu::yijinjing::practice
         end_time_ = end_time;
     }
 
+    data::locator_ptr hero::get_locator() const
+    {
+        return io_device_->get_locator();
+    }
+
     yijinjing::io_device_with_reply_ptr hero::get_io_device() const
     {
         return io_device_;

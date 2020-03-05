@@ -49,6 +49,9 @@ namespace kungfu::yijinjing
             observer_->setup();
         }
 
+        [[nodiscard]] data::locator_ptr get_locator() const
+        { return home_->locator; }
+
         [[nodiscard]] data::location_ptr get_home() const
         { return home_; }
 

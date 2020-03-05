@@ -45,6 +45,8 @@ namespace kungfu::node
 
         Napi::Value PublishState(const Napi::CallbackInfo &info);
 
+        Napi::Value WriteStrategyOrder(const Napi::CallbackInfo &info);
+
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:
@@ -60,6 +62,7 @@ namespace kungfu::node
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
+        std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> strategy_writers_;
 
         void RestoreState(const yijinjing::data::location_ptr& config_location);
     };

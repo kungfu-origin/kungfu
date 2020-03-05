@@ -37,7 +37,7 @@ namespace kungfu::node
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             apprentice(GetWatcherLocation(info), true),
-            ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_io_device()->get_home()->locator),
+            ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator()),
             config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
@@ -49,7 +49,7 @@ namespace kungfu::node
         InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
-        auto locator = get_io_device()->get_home()->locator;
+        auto locator = get_locator();
         for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
         {
             RestoreState(location::make_shared(pair.second, locator));
@@ -70,7 +70,7 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info)
     {
-        return std::dynamic_pointer_cast<Locator>(get_io_device()->get_home()->locator)->get_js_locator();
+        return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
     }
 
     Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info)
@@ -147,6 +147,11 @@ namespace kungfu::node
         return Napi::Value();
     }
 
+    Napi::Value Watcher::WriteStrategyOrder(const Napi::CallbackInfo &info)
+    {
+        return Napi::Value();
+    }
+
     void Watcher::Init(Napi::Env env, Napi::Object exports)
     {
         Napi::HandleScope scope(env);
@@ -159,6 +164,7 @@ namespace kungfu::node
                 InstanceMethod("step", &Watcher::Step),
                 InstanceMethod("getLocation", &Watcher::GetLocation),
                 InstanceMethod("publishState", &Watcher::PublishState),
+                InstanceMethod("writeStrategyOrder", &Watcher::WriteStrategyOrder),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
@@ -194,12 +200,39 @@ namespace kungfu::node
           {
               const Channel &channel = event->data<Channel>();
               reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+              auto source_location = get_location(channel.source_id);
+              auto dest_location = get_location(channel.dest_id);
+              if (source_location->mode == mode::LIVE and
+                  source_location->category == category::TD and dest_location->category == category::STRATEGY)
+              {
+                  auto writer_location = location::make_shared(mode::LIVE, category::STRATEGY, "node", dest_location->name, get_locator());
+                  auto master_cmd_writer = writers_.at(get_master_commands_uid());
+                  RequestWriteAtTo request{};
+                  request.location_uid = writer_location->uid;
+                  request.mode = writer_location->mode;
+                  request.category = writer_location->category;
+                  request.group = writer_location->group;
+                  request.name = writer_location->name;
+                  master_cmd_writer->write(0, request);
+                  SPDLOG_INFO("request writer for strategy at {}", writer_location->uname);
+              }
           });
+
+        events_ | is(RequestWriteAtTo::tag) |
+        $([&](const event_ptr &event)
+        {
+            const RequestWriteAtTo &request = event->data<RequestWriteAtTo>();
+            auto strategy_location = location::make_shared(request.mode, request.category, "default", request.name, get_locator());
+            auto writer_location = location::make_shared(request, get_locator());
+            auto writer = get_io_device()->open_writer_at(writer_location, request.dest_id);
+            strategy_writers_.emplace(strategy_location->uid, writer);
+            SPDLOG_INFO("writer for strategy {} created at {}", strategy_location->uname, writer_location->uname);
+        });
 
         apprentice::react();
     }
 
-    void Watcher::RestoreState(const location_ptr& state_location)
+    void Watcher::RestoreState(const location_ptr &state_location)
     {
         register_location(0, state_location);
         serialize::JsRestoreState(*this, ledger_ref_, state_location)();
