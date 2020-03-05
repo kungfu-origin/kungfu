@@ -48,6 +48,26 @@ namespace kungfu::yijinjing::practice
         locations_[master_commands_location_->uid] = master_commands_location_;
     }
 
+    bool apprentice::is_started() const
+    {
+        return started_;
+    }
+
+    uint32_t apprentice::get_master_commands_uid() const
+    {
+        return master_commands_location_->uid;
+    }
+
+    int64_t apprentice::get_master_start_time() const
+    {
+        return master_start_time_;
+    }
+
+    location_ptr apprentice::get_config_location() const
+    {
+        return config_location_;
+    }
+
     void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time)
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
@@ -105,6 +125,9 @@ namespace kungfu::yijinjing::practice
           });
     }
 
+    void apprentice::on_trading_day(const event_ptr &event, int64_t daytime)
+    {}
+
     void apprentice::react()
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
@@ -156,7 +179,7 @@ namespace kungfu::yijinjing::practice
 
         events_ | is(Location::tag) | $$(register_location_from_event<Location>);
         events_ | is(Register::tag) | $$(register_location_from_event<Register>);
-        events_ | is(Deregister::tag) | $$(deregister_location_from_event);
+        events_ | is(Deregister::tag) | $$(deregister_location_from_event<Deregister>);
 
         events_ | is(RequestReadFrom::tag) | $$(on_read_from);
         events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
@@ -210,6 +233,11 @@ namespace kungfu::yijinjing::practice
         }
     }
 
+    void apprentice::on_start()
+    {
+        started_ = true;
+    }
+
     void apprentice::on_read_from(const event_ptr &event)
     {
         do_read_from<RequestReadFrom>(event, get_live_home_uid());
@@ -255,14 +283,6 @@ namespace kungfu::yijinjing::practice
 
         SPDLOG_DEBUG("checkin request: {}", request.dump());
         get_io_device()->get_publisher()->publish(request.dump());
-    }
-
-    void apprentice::deregister_location_from_event(const event_ptr &event)
-    {
-        uint32_t location_uid = location::make_shared(event->data<Deregister>(), get_io_device()->get_home()->locator)->uid;
-        reader_->disjoin(location_uid);
-        deregister_channel_by_source(location_uid);
-        deregister_location(event->trigger_time(), location_uid);
     }
 
 }

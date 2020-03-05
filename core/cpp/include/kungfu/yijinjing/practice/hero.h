@@ -21,65 +21,51 @@ namespace kungfu::yijinjing::practice
 
         virtual ~hero();
 
-        bool is_usable() override
-        { return io_device_->is_usable(); }
+        bool is_usable() override;
 
         void setup() override;
-
-        virtual void on_notify()
-        {}
-
-        virtual void on_exit()
-        {}
-
-        void set_begin_time(int64_t begin_time)
-        { begin_time_ = begin_time; }
-
-        void set_end_time(int64_t end_time)
-        { end_time_ = end_time; }
 
         void step();
 
         void run();
 
-        bool is_live()
-        { return live_; }
+        bool is_live() const;
 
-        void signal_stop()
-        { live_ = false; };
+        void signal_stop();
 
-        yijinjing::io_device_with_reply_ptr get_io_device() const
-        { return io_device_; }
+        int64_t now() const;
 
-        uint32_t get_home_uid() const
-        { return get_io_device()->get_home()->uid; }
+        void set_begin_time(int64_t begin_time);
 
-        uint32_t get_live_home_uid() const
-        { return get_io_device()->get_live_home()->uid; }
+        void set_end_time(int64_t end_time);
 
-        const std::string &get_home_uname() const
-        { return get_io_device()->get_home()->uname; }
+        yijinjing::io_device_with_reply_ptr get_io_device() const;
 
-        int64_t now()
-        { return now_; }
+        uint32_t get_home_uid() const;
 
-        yijinjing::journal::reader_ptr get_reader() const
-        { return reader_; }
+        uint32_t get_live_home_uid() const;
 
-        bool has_location(uint32_t hash);
+        const std::string &get_home_uname() const;
 
-        yijinjing::data::location_ptr get_location(uint32_t hash);
+        yijinjing::journal::reader_ptr get_reader() const;
 
-        bool has_writer(uint32_t dest_id);
+        bool has_writer(uint32_t dest_id) const;
 
-        yijinjing::journal::writer_ptr get_writer(uint32_t dest_id);
+        yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+
+        bool has_location(uint32_t hash) const;
+
+        yijinjing::data::location_ptr get_location(uint32_t hash) const;
 
         bool has_channel(uint64_t hash) const;
 
         const longfist::types::Channel &get_channel(uint64_t hash) const;
 
-        std::unordered_map<uint64_t, longfist::types::Channel> &get_channels()
-        { return channels_; }
+        std::unordered_map<uint64_t, longfist::types::Channel> &get_channels();
+
+        virtual void on_notify();
+
+        virtual void on_exit();
 
     protected:
         int64_t begin_time_;
@@ -98,7 +84,7 @@ namespace kungfu::yijinjing::practice
 
         virtual void deregister_channel(int64_t trigger_time, uint64_t channel_uid);
 
-        void deregister_channel_by_source(uint32_t source_id);
+        virtual void deregister_channel_by_source(uint32_t source_id);
 
         void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
@@ -119,20 +105,7 @@ namespace kungfu::yijinjing::practice
         volatile bool continual_ = true;
         volatile bool live_ = false;
 
-        inline bool check_location(uint32_t source_id, uint32_t dest_id)
-        {
-            if (not has_location(source_id))
-            {
-                SPDLOG_ERROR("source location [{:08x}] not exists", source_id);
-                return false;
-            }
-            if (dest_id != 0 and not has_location(dest_id))
-            {
-                SPDLOG_ERROR("dest location [{:08x}] not exists", dest_id);
-                return false;
-            }
-            return true;
-        }
+        bool check_location(uint32_t source_id, uint32_t dest_id);
 
         template<typename T>
         std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer,

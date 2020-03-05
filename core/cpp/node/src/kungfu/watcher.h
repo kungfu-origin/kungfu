@@ -61,7 +61,7 @@ namespace kungfu::node
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
 
-        void RestoreState(yijinjing::data::location_ptr config_location);
+        void RestoreState(const yijinjing::data::location_ptr& config_location);
     };
 }
 

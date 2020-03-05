@@ -37,54 +37,9 @@ namespace kungfu::yijinjing::practice
         ensure_sqlite_shutdown();
     }
 
-    bool hero::has_location(uint32_t hash)
+    bool hero::is_usable()
     {
-        return locations_.find(hash) != locations_.end();
-    }
-
-    location_ptr hero::get_location(uint32_t hash)
-    {
-        if (has_location(hash))
-        {
-            return locations_[hash];
-        } else
-        {
-            throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", hash));
-        }
-    }
-
-    bool hero::has_channel(uint64_t hash) const
-    {
-        return channels_.find(hash) != channels_.end();
-    }
-
-    const Channel &hero::get_channel(uint64_t hash) const
-    {
-        if (not this->has_channel(hash))
-        {
-            throw yijinjing_error(fmt::format("has no channel for [{:08x}]", hash));
-        }
-        return channels_.at(hash);
-    }
-
-    bool hero::has_writer(uint32_t dest_id)
-    {
-        return writers_.find(dest_id) != writers_.end();
-    }
-
-    writer_ptr hero::get_writer(uint32_t dest_id)
-    {
-        if (writers_.find(dest_id) == writers_.end())
-        {
-            if (has_location(dest_id))
-            {
-                throw yijinjing_error(fmt::format("has no writer for [{:08x}] {}", dest_id, get_location(dest_id)->uname));
-            } else
-            {
-                throw yijinjing_error(fmt::format("has no writer for [{:08x}]", dest_id));
-            }
-        }
-        return writers_[dest_id];
+        return io_device_->is_usable();
     }
 
     void hero::setup()
@@ -149,6 +104,115 @@ namespace kungfu::yijinjing::practice
         SPDLOG_INFO("{} finished", get_home_uname());
     }
 
+    bool hero::is_live() const
+    {
+        return live_;
+    }
+
+    void hero::signal_stop()
+    {
+        live_ = false;
+    }
+
+    int64_t hero::now() const
+    {
+        return now_;
+    }
+
+    void hero::set_begin_time(int64_t begin_time)
+    {
+        begin_time_ = begin_time;
+    }
+
+    void hero::set_end_time(int64_t end_time)
+    {
+        end_time_ = end_time;
+    }
+
+    yijinjing::io_device_with_reply_ptr hero::get_io_device() const
+    {
+        return io_device_;
+    }
+
+    uint32_t hero::get_home_uid() const
+    {
+        return get_io_device()->get_home()->uid;
+    }
+
+    uint32_t hero::get_live_home_uid() const
+    {
+        return get_io_device()->get_live_home()->uid;
+    }
+
+    const std::string &hero::get_home_uname() const
+    {
+        return get_io_device()->get_home()->uname;
+    }
+
+    yijinjing::journal::reader_ptr hero::get_reader() const
+    {
+        return reader_;
+    }
+
+    bool hero::has_writer(uint32_t dest_id) const
+    {
+        return writers_.find(dest_id) != writers_.end();
+    }
+
+    writer_ptr hero::get_writer(uint32_t dest_id) const
+    {
+        if (writers_.find(dest_id) == writers_.end())
+        {
+            if (has_location(dest_id))
+            {
+                throw yijinjing_error(fmt::format("has no writer for [{:08x}] {}", dest_id, get_location(dest_id)->uname));
+            } else
+            {
+                throw yijinjing_error(fmt::format("has no writer for [{:08x}]", dest_id));
+            }
+        }
+        return writers_.at(dest_id);
+    }
+
+    bool hero::has_location(uint32_t hash) const
+    {
+        return locations_.find(hash) != locations_.end();
+    }
+
+    location_ptr hero::get_location(uint32_t hash) const
+    {
+        if (not has_location(hash))
+        {
+            throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", hash));
+        }
+        return locations_.at(hash);
+    }
+
+    bool hero::has_channel(uint64_t hash) const
+    {
+        return channels_.find(hash) != channels_.end();
+    }
+
+    const Channel &hero::get_channel(uint64_t hash) const
+    {
+        if (not this->has_channel(hash))
+        {
+            throw yijinjing_error(fmt::format("has no channel for [{:08x}]", hash));
+        }
+        return channels_.at(hash);
+    }
+
+    std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels()
+    {
+        return channels_;
+    }
+
+    void hero::on_notify()
+    {}
+
+    void hero::on_exit()
+    {}
+
     void hero::register_location(int64_t trigger_time, const location_ptr &location)
     {
         if (not has_location(location->uid))
@@ -162,14 +226,13 @@ namespace kungfu::yijinjing::practice
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
     {
-        if (has_location(location_uid))
+        if (not has_location(location_uid))
         {
-            auto location = get_location(location_uid);
-            locations_.erase(location_uid);
-            SPDLOG_INFO("deregister-ed location {} [{:08x}]", location->uname, location_uid);
+            SPDLOG_WARN("location [{:08x}] has not been registered", location_uid);
             return;
         }
-        SPDLOG_WARN("location [{:08x}] has not been registered", location_uid);
+        SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
+        locations_.erase(location_uid);
     }
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)
@@ -224,7 +287,10 @@ namespace kungfu::yijinjing::practice
 
     void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id)
     {
-        if (not check_location(source_id, dest_id)) return;
+        if (not check_location(source_id, dest_id))
+        {
+            return;
+        }
         auto writer = get_writer(source_id);
         RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time);
         msg.dest_id = dest_id;
@@ -295,6 +361,21 @@ namespace kungfu::yijinjing::practice
         if (get_io_device()->get_home()->mode != mode::LIVE and not reader_->data_available())
         {
             SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
+            return false;
+        }
+        return true;
+    }
+
+    bool hero::check_location(uint32_t source_id, uint32_t dest_id)
+    {
+        if (not has_location(source_id))
+        {
+            SPDLOG_ERROR("source location [{:08x}] not exists", source_id);
+            return false;
+        }
+        if (dest_id != 0 and not has_location(dest_id))
+        {
+            SPDLOG_ERROR("dest location [{:08x}] not exists", dest_id);
             return false;
         }
         return true;

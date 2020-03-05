@@ -33,10 +33,13 @@ namespace kungfu::yijinjing::practice
     public:
         explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-        bool is_started()
-        {
-            return started_;
-        }
+        bool is_started() const;
+
+        uint32_t get_master_commands_uid() const;
+
+        int64_t get_master_start_time() const;
+
+        yijinjing::data::location_ptr get_config_location() const;
 
         void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
@@ -44,30 +47,11 @@ namespace kungfu::yijinjing::practice
 
         void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-        uint32_t get_master_commands_uid() const
-        {
-            return master_commands_location_->uid;
-        }
+        void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
-        int64_t get_master_start_time() const
-        {
-            return master_start_time_;
-        }
+        void add_time_interval(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
-        yijinjing::data::location_ptr get_config_location() const
-        { return config_location_; }
-
-        std::string get_app_db_file(const std::string &name, bool default_to_system = false)
-        {
-            auto home = get_io_device()->get_home();
-            if (default_to_system)
-            {
-                return home->locator->default_to_system_db(home, name);
-            } else
-            {
-                return home->locator->layout_file(home, longfist::enums::layout::SQLITE, name);
-            }
-        }
+        virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
         template<typename DataType>
         inline void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = 0)
@@ -75,21 +59,13 @@ namespace kungfu::yijinjing::practice
             writers_[dest_id]->write(trigger_time, data);
         }
 
-        virtual void on_trading_day(const event_ptr &event, int64_t daytime)
-        {}
-
-        void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
-
-        void add_time_interval(int64_t nanotime, const std::function<void(event_ptr)> &callback);
-
     protected:
         longfist::StateMapType state_map_;
         yijinjing::data::location_ptr config_location_;
 
         void react() override;
 
-        virtual void on_start()
-        { started_ = true; }
+        virtual void on_start();
 
         virtual void on_read_from(const event_ptr &event);
 
@@ -210,19 +186,26 @@ namespace kungfu::yijinjing::practice
 
         void checkin();
 
-        template <typename T>
+        template <typename DataType>
         void register_location_from_event(const event_ptr &event)
         {
-            auto app_location = data::location::make_shared(event->data<T>(), get_io_device()->get_home()->locator);
+            auto app_location = data::location::make_shared(event->data<DataType>(), get_io_device()->get_home()->locator);
             register_location(event->trigger_time(), app_location);
         }
 
-        void deregister_location_from_event(const event_ptr &event);
+        template <typename DataType>
+        void deregister_location_from_event(const event_ptr &event)
+        {
+            uint32_t location_uid = data::location::make_shared(event->data<DataType>(), get_io_device()->get_home()->locator)->uid;
+            reader_->disjoin(location_uid);
+            deregister_channel_by_source(location_uid);
+            deregister_location(event->trigger_time(), location_uid);
+        }
 
-        template <typename R>
+        template <typename DataType>
         inline void do_read_from(const event_ptr &event, uint32_t dest_id)
         {
-            const R &request = event->data<R>();
+            const DataType &request = event->data<DataType>();
             SPDLOG_INFO("{} requires {} read from {} from {}",
                         get_location(event->source())->uname,
                         get_location(event->dest())->uname,

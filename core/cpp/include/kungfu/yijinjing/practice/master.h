@@ -31,11 +31,9 @@ namespace kungfu::yijinjing::practice
 
         void on_notify() override;
 
-        virtual void on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location)
-        {}
+        virtual void on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location);
 
-        virtual void on_interval_check(int64_t nanotime)
-        {}
+        virtual void on_interval_check(int64_t nanotime);
 
         void register_app(const event_ptr &e);
 

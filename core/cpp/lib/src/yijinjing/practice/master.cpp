@@ -45,6 +45,12 @@ namespace kungfu::yijinjing::practice
         get_io_device()->get_publisher()->notify();
     }
 
+    void master::on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location)
+    {}
+
+    void master::on_interval_check(int64_t nanotime)
+    {}
+
     void master::register_app(const event_ptr &e)
     {
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());

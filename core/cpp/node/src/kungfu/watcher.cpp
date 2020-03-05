@@ -199,7 +199,7 @@ namespace kungfu::node
         apprentice::react();
     }
 
-    void Watcher::RestoreState(location_ptr state_location)
+    void Watcher::RestoreState(const location_ptr& state_location)
     {
         register_location(0, state_location);
         serialize::JsRestoreState(*this, ledger_ref_, state_location)();
