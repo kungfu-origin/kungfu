@@ -84,8 +84,6 @@ namespace kungfu::yijinjing::practice
 
         virtual void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-        virtual void deregister_channel(int64_t trigger_time, uint64_t channel_uid);
-
         virtual void deregister_channel_by_source(uint32_t source_id);
 
         void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);

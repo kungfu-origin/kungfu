@@ -224,20 +224,16 @@ namespace kungfu::yijinjing::practice
         {
             locations_[location->uid] = location;
             SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
-            return;
         }
-        SPDLOG_WARN("location {} [{:08x}] already registered", location->uname, location->uid);
     }
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
     {
-        if (not has_location(location_uid))
+        if (has_location(location_uid))
         {
-            SPDLOG_WARN("location [{:08x}] has not been registered", location_uid);
-            return;
+            SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
+            locations_.erase(location_uid);
         }
-        SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
-        locations_.erase(location_uid);
     }
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)
@@ -247,17 +243,6 @@ namespace kungfu::yijinjing::practice
         SPDLOG_INFO("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
                     has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
                     has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
-    }
-
-    void hero::deregister_channel(int64_t trigger_time, uint64_t channel_uid)
-    {
-        if (has_channel(channel_uid))
-        {
-            channels_.erase(channel_uid);
-            SPDLOG_INFO("deregister-ed channel [{:08x}]", channel_uid);
-            return;
-        }
-        SPDLOG_ERROR("channel [{:08x}] does not exist", channel_uid);
     }
 
     void hero::deregister_channel_by_source(uint32_t source_id)

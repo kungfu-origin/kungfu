@@ -268,6 +268,7 @@ namespace kungfu::yijinjing::practice
         data["name"] = home->name;
         data["location_uid"] = home->uid;
         data["pid"] = GETPID();
+        data["checkin_time"] = now;
         request["data"] = data;
 
         SPDLOG_DEBUG("checkin request: {}", request.dump());

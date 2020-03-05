@@ -60,7 +60,8 @@ namespace kungfu::longfist::types
             (enums::mode, mode),
             (std::string, group),
             (std::string, name),
-            (int32_t, pid)
+            (int32_t, pid),
+            (int64_t, checkin_time)
     );
 
     KF_DEFINE_DATA_TYPE(

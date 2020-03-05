@@ -56,13 +56,11 @@ namespace kungfu::yijinjing::practice
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         auto home = io_device->get_home();
 
-        auto request_loc = e->data<nlohmann::json>();
-        auto app_location = std::make_shared<location>(
-                static_cast<mode>(request_loc["mode"]),
-                static_cast<category>(request_loc["category"]),
-                request_loc["group"], request_loc["name"],
-                home->locator
-        );
+        auto request_json = e->data<nlohmann::json>();
+        auto request_data = e->data_as_string();
+
+        Register register_msg(request_data.c_str(), request_data.length());
+        auto app_location = location::make_shared(register_msg, home->locator);
 
         if (has_location(app_location->uid))
         {
@@ -72,25 +70,22 @@ namespace kungfu::yijinjing::practice
 
         auto now = time::now_in_nano();
         auto uid_str = fmt::format("{:08x}", app_location->uid);
+        auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
 
-        if (app_locations_.find(app_location->uid) == app_locations_.end())
-        {
-            auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-            register_location(e->gen_time(), master_cmd_location);
-            app_locations_[app_location->uid] = master_cmd_location->uid;
-        }
-
+        register_location(e->gen_time(), master_cmd_location);
         register_location(e->gen_time(), app_location);
+        app_locations_.emplace(app_location->uid, master_cmd_location->uid);
+        registry_.emplace(app_location->uid, register_msg);
+        registry_.at(app_location->uid).checkin_time = e->gen_time();
 
-        auto master_cmd_location = get_location(app_locations_[app_location->uid]);
-        writers_[app_location->uid] = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
+        writers_.emplace(app_location->uid, get_io_device()->open_writer_at(master_cmd_location, app_location->uid));
 
         reader_->join(app_location, 0, now);
         reader_->join(app_location, master_cmd_location->uid, now);
 
         publish_register(e->gen_time(), app_location);
 
-        auto &writer = writers_[app_location->uid];
+        auto writer = writers_.at(app_location->uid);
 
         io_device->open_session(app_location, e->gen_time());
         writer->mark(e->gen_time(), SessionStart::tag);
@@ -100,21 +95,17 @@ namespace kungfu::yijinjing::practice
 
         for (const auto &item : locations_)
         {
-            SPDLOG_DEBUG("adding location {}", item.second->to_string());
             writer->write(e->gen_time(), dynamic_cast<Location &>(*item.second));
         }
-
-        for (const auto &item: channels_)
-        {
-            writer->write(e->gen_time(), item.second);
-        }
-
-        on_register(e, app_location);
 
         app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
         app_sqlizers_.at(app_location->uid)->restore(writer);
 
         writer->mark(start_time_, RequestStart::tag);
+
+        push_register_and_channels(e->gen_time(), writer);
+
+        on_register(e, app_location);
     }
 
     void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid)
@@ -126,6 +117,7 @@ namespace kungfu::yijinjing::practice
         deregister_channel_by_source(app_location_uid);
         deregister_location(trigger_time, app_location_uid);
         reader_->disjoin(app_location_uid);
+        registry_.erase(app_location_uid);
         writers_.erase(app_location_uid);
         timer_tasks_.erase(app_location_uid);
         app_sqlizers_.erase(app_location_uid);
@@ -274,7 +266,7 @@ namespace kungfu::yijinjing::practice
               task.repeat_count = 0;
               task.repeat_limit = request.repeat;
               SPDLOG_TRACE("time request from {} duration {} repeat {} at {}",
-                      get_location(e->source())->uname, request.duration, request.repeat, time::strftime(e->gen_time()));
+                           get_location(e->source())->uname, request.duration, request.repeat, time::strftime(e->gen_time()));
           });
     }
 
@@ -287,5 +279,18 @@ namespace kungfu::yijinjing::practice
         message.group = location->group;
         message.name = location->name;
         writers_[0]->write(trigger_time, message);
+    }
+
+    void master::push_register_and_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    {
+        for (const auto &item : registry_)
+        {
+            writer->write(trigger_time, item.second);
+        }
+
+        for (const auto &item: channels_)
+        {
+            writer->write(trigger_time, item.second);
+        }
     }
 }
