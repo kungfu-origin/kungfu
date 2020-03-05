@@ -11,7 +11,7 @@
                                 ref="pnl"
                                 :currentId="strategyId" 
                                 moduleType="strategy"
-                                :minMethod="getStrategyPnlMin"
+                                :kungfuData="pnl"   
                                 :dayMethod="getStrategyPnlDay"
                                 ></Pnl>
                         </el-col>
@@ -65,7 +65,6 @@ import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
-import * as STRATEGY_API from '__io/db/strategy';
 import { buildTradingDataPipe } from '__io/kungfu/index';
 
 export default {
@@ -75,6 +74,7 @@ export default {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
             positions: Object.freeze([]),
+            pnl: Object.freeze([]),
         }
     },
 
@@ -87,6 +87,8 @@ export default {
             this.trades = Object.freeze(trades || []);
             const positions = data['positions'][t.strategyId];
             this.positions = Object.freeze(positions || []);
+            const pnl = data['pnl'][t.strategyId];
+            this.pnl = Object.freeze(pnl || []);
         })
     },
 
@@ -115,8 +117,7 @@ export default {
     },
 
     methods:{
-        getStrategyPnlMin: STRATEGY_API.getStrategyPnlMin,
-        getStrategyPnlDay: STRATEGY_API.getStrategyPnlDay
+        getStrategyPnlDay: () => { return Promise.resolve([]) }
     }
 }
 </script>

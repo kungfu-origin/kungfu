@@ -5,7 +5,7 @@
             <!-- <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div> -->
             <div>日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
         </div>
-        <tr-no-data v-if="minPnlData.length == 0 && rendererPnl"/>
+        <tr-no-data v-if="kungfuData.length == 0 && rendererPnl"/>
         <div id="min-chart" v-else></div>
     </div>
 </template>
@@ -21,26 +21,24 @@ export default {
     name: 'min-chart',
     props: {
         value: false,
+        
         currentId: {
             type: String,
             default: '',
         },
+
         moduleType: {
             type: String,
             default: "",
         },
-        minMethod: {
-            type: Function,
-            default: () => {},
-        },
-        //接收推送的数据
-        nanomsgBackData: null
+
+        kungfuData: {
+            type: Array,
+            default: () => ([])
+        }
     },
 
     data() {
-        this.dataZoomBottomPadding = 70;
-        this.bottomPadding = 70;
-        this.minGroupKey = {};
         this.myChart = null;
         this.echartsSeries = {
             type: 'line',
@@ -59,7 +57,6 @@ export default {
         };
         return {
             minData: [Object.freeze([]), Object.freeze([])],
-            minPnlData: [],
             rendererPnl: false
         }
       
@@ -72,16 +69,9 @@ export default {
 
         intradayPnl(){
             const t = this;
-            if(!t.minPnlData.length) return '--';
-            return t.calcuIntradayPnl(t.minPnlData[t.minPnlData.length - 1])
-        },
-
-        // intradayPnlRatio(){
-        //     const t = this;
-        //     if(!t.minPnlData.length) return '--'
-        //     const firstEquityDaily = toDecimal(t.minPnlData[0].static_equity, 2)
-        //     return toDecimal(t.intradayPnl / firstEquityDaily , 4, 2)
-        // },
+            if(!t.kungfuData.length) return '--';
+            return t.calcuIntradayPnl(t.kungfuData[t.kungfuData.length - 1])
+        }
     },
 
     
@@ -89,108 +79,78 @@ export default {
         const t = this;
         t.rendererPnl = true;
         t.resetData();
-        if(t.currentId) t.getMinData();
+        t.initChart();
     },
 
     watch: {
         currentId(val) {
             this.resetData();
-            if(val) this.getMinData();
         },
 
         value(val) {
             this.myChart && this.myChart.resize()
         },
 
-        //接收推送的数据
-        nanomsgBackData(val) {
-            if(!val) return
-            this.dealNanomsg(val)
-        },
-
-        minPnlData(newVal, oldVal){
-            if(oldVal.length === 0 && newVal.length !== 0) this.initChart()
+        kungfuData (pnlMinList, oldPnlMinList) {
+            const { timeList, pnlDataList } = this.dealMinPnlList(pnlMinList)
+            if (!oldPnlMinList.length && pnlMinList.length) {
+                this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
+            } else if (oldPnlMinList.length && pnlMinList.length) {
+                this.updateChart(timeList, pnlDataList)
+            }
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据
-        tradingDay(val, oldVal) {
-            const t = this;
-            if(!oldVal && !val && !t.currentId) return;
+        tradingDay() {
             this.resetData();            
-            if(t.currentId) t.getMinData();
         }
     },
 
     methods:{
-        initChart() {
+        initChart(timeList, pnlDataList) {
             const t = this
-            const dom = document.getElementById('min-chart')
+            const dom = document.getElementById('min-chart');
             if(!dom) return;
             t.myChart = echarts.getInstanceByDom(dom)
             if(t.myChart === undefined) t.myChart = echarts.init(dom);
             let defaultConfig = deepClone(lineConfig)  
-            defaultConfig.xAxis.data = t.minData[0]
-            defaultConfig.series = { data: t.minData[1], ...t.echartsSeries }
+            defaultConfig.xAxis.data = timeList
+            defaultConfig.series = { data: pnlDataList, ...t.echartsSeries }
             t.myChart.setOption(defaultConfig)
         },
 
-        getMinData() {
-            const t = this
-            const id = t.currentId;
-            t.minMethod(t.currentId, t.tradingDay)
-            .then(data => {
-                //当调用的传值和当前的传值不同的是，则返回
-                if(id != t.currentId) return
-                let xAxisData = []
-                let serirsData = []
-                t.minGroupKey = {}
-                data && data.forEach(item => {
-                    const hhmmTime = moment(item.update_time / 1000000).format('HH:mm')
-                    t.minGroupKey[hhmmTime] = item
-                    xAxisData.push(hhmmTime)
-                    serirsData.push(t.calcuIntradayPnl(item))
-                })
-                t.minData = [Object.freeze(xAxisData), Object.freeze(serirsData)]
-                t.minPnlData = Object.freeze(data || [])
-            })
-            .catch(err => t.$message.error(err.message || '获取失败'))
-            .finally(() => t.initChart())
-        },
-
-        dealNanomsg(nanomsg) {
+        dealMinPnlList (pnlMinList) {
             const t = this;
-            const oldPnlDataLen = t.minPnlData.length;
-            const hhmmTime = moment(nanomsg.update_time / 1000000).format('HH:mm')
-            t.minGroupKey[hhmmTime] = nanomsg
-            let tmpMinData0 = t.minData[0].slice();
-            tmpMinData0.push(hhmmTime)
-            let tmpMinData1 = t.minData[1].slice();
-            tmpMinData1.push(t.calcuIntradayPnl(nanomsg))
-            t.minData = [Object.freeze(tmpMinData0), Object.freeze(tmpMinData1)]
+            let timeList = [], pnlDataList = [];
 
-            let tmpMinPnlData = t.minPnlData.slice();
-            tmpMinPnlData.push(nanomsg)
-            t.minPnlData = tmpMinPnlData
+            pnlMinList
+                .filter(pnlData => pnlData.trading_day === this.tradingDay)
+                .kfForEach(pnlData => {
+                    const updateTime = moment(Number(pnlData.update_time) / 1000000).format('HH:mm');
+                    timeList.push(updateTime);
+                    const pnlValue = t.calcuIntradayPnl(pnlData)
+                    pnlDataList.push(pnlValue)
+                })
 
-            t.$nextTick().then(() => {
-                if(!oldPnlDataLen) t.initChart();
-                else t.updateChart();
-            })
+            return {
+                timeList: Object.freeze(timeList), 
+                pnlDataList: Object.freeze(pnlDataList)
+            }
         },
 
         calcuIntradayPnl(pnlData) {
             return toDecimal(pnlData.unrealized_pnl + pnlData.realized_pnl)
         },
 
-        updateChart() {
+        updateChart(timeList, pnlDataList) {
             const t = this;
             t.myChart && t.myChart.setOption({
                 series: {
-                    data: t.minData[1],
+                    data: pnlDataList,
                     ...t.echartsSeries
                 },
                 xAxis: {
-                    data:t.minData[0]
+                    data: timeList
                 }
             })
         },
@@ -199,8 +159,7 @@ export default {
             const t = this;
             t.myChart && t.myChart.clear();
             t.myChart = null;
-            t.minData = [Object.freeze([]), Object.freeze([])];
-            t.minPnlData = [];
+            t.minData = [ Object.freeze([]), Object.freeze([]) ];
             return true;
         },
     }

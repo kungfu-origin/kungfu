@@ -45,8 +45,6 @@ export default {
     },
 
     data() {
-        this.dataZoomBottomPadding = 70;
-        this.bottomPadding = 70;
         this.myChart = null;
         this.dayGroupKey = {}; //记录以时间为key的数据
         this.echartsSeries = {
@@ -82,13 +80,6 @@ export default {
         ...mapState({
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
         }),
-
-        // accumulatedPnlRatio(){
-        //     const t = this;
-        //     if(!t.dayPnlData.length) return '--'
-        //     const len =  t.dayPnlData.length;
-        //     return t.calcuAccumlatedPnlRatio(t.dayPnlData[len - 1], t.dayPnlData[0])
-        // },
 
         accumulatedPnl(){
             const t = this;

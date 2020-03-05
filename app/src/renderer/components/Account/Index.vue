@@ -15,9 +15,8 @@
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
-                        :minMethod="getAccountPnlMin"
                         :dayMethod="getAccountPnlDay"
-                        :nanomsgBackData="minPnlFromNmsg"
+                        :kungfuData="pnl"
                         />
                     </el-col>
                 </el-row>
@@ -78,8 +77,7 @@ export default {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
             positions: Object.freeze([]),
-
-            minPnlFromNmsg: null
+            pnl: Object.freeze([]),
         }
     },
 
@@ -120,6 +118,8 @@ export default {
             this.positions = Object.freeze(positions || []);
             const assets = data['assets'];
             this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
+            const pnl = data['pnl'][t.currentId];
+            this.pnl = Object.freeze(pnl || []);
         })
     },
 
@@ -129,7 +129,6 @@ export default {
     },
  
     methods:{
-        getAccountPnlMin: () => { return Promise.resolve([]) },
         getAccountPnlDay: () => { return Promise.resolve([]) }
     }
 }

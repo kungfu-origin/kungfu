@@ -26,9 +26,6 @@ import DayChart from './DayChart';
 import MinChart from './MinChart';
 
 export default {
-    props: {
-       
-    },
 
     inheritAttrs: false,
     
