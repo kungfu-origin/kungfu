@@ -12,13 +12,12 @@ export const startGetKungfuState = (callback: Function, interval = 1000) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
                 watcher.setup();
             }
+            
             if (watcher.isLive()) {
                 watcher.step();
             }
-            if (watcher.isLive() && watcher.isStarted()) {
-                callback(Object.freeze(watcher.ledger));
-            }
-
+            
+            callback(Object.freeze(watcher.ledger));
             resolve();
         })
     }, interval);
