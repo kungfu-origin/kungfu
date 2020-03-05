@@ -57,6 +57,8 @@ namespace kungfu::yijinjing::practice
         std::unordered_map<uint32_t, uint32_t> app_locations_;
         std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
+
+        void publish_register(int64_t trigger_time, const yijinjing::data::location_ptr &location);
     };
 }
 #endif //KUNGFU_MASTER_H

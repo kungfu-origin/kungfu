@@ -130,53 +130,6 @@ namespace kungfu::yijinjing::practice
 
     void apprentice::react()
     {
-        if (get_io_device()->get_home()->mode == mode::LIVE)
-        {
-            auto events_after_register = events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first();
-
-            events_after_register | rx::timeout(seconds(10), observe_on_new_thread()) |
-            $([&](const event_ptr &e)
-              {
-                  // once registered this subscriber finished, no worry for performance.
-                  // timeout happens on new thread, can not subscribe journal reader here
-                  // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
-              },
-              [&](std::exception_ptr e)
-              {
-                  try
-                  { std::rethrow_exception(e); }
-                  catch (const timeout_error &ex)
-                  {
-                      SPDLOG_ERROR("app register timeout");
-                      hero::signal_stop();
-                  }
-              });
-
-            events_after_register |
-            $([&](const event_ptr &e)
-              {
-                  reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
-              },
-              [&](std::exception_ptr e)
-              {
-                  try
-                  { std::rethrow_exception(e); }
-                  catch (const std::exception &ex)
-                  {
-                      SPDLOG_ERROR("Register failed: {}", ex.what());
-                      hero::signal_stop();
-                  }
-              });
-        } else if (get_io_device()->get_home()->mode == mode::REPLAY)
-        {
-            reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
-        } else if (get_io_device()->get_home()->mode == mode::BACKTEST)
-        {
-            // dest_id 0 should be configurable TODO
-            reader_->join(std::make_shared<location>(mode::BACKTEST, category::MD, get_io_device()->get_home()->group,
-                                                     get_io_device()->get_home()->name, get_locator()), 0, begin_time_);
-        }
-
         events_ | is(Location::tag) | $$(register_location_from_event<Location>);
         events_ | is(Register::tag) | $$(register_location_from_event<Register>);
         events_ | is(Deregister::tag) | $$(deregister_location_from_event<Deregister>);
@@ -184,12 +137,6 @@ namespace kungfu::yijinjing::practice
         events_ | is(RequestReadFrom::tag) | $$(on_read_from);
         events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
         events_ | is(RequestWriteTo::tag) | $$(on_write_to);
-
-        events_ | take_until(events_ | is(RequestStart::tag)) |
-        $([&](const event_ptr &event)
-          {
-              longfist::cast_event_invoke(event, recover_state);
-          });
 
         events_ | is(Channel::tag) |
         $([&](const event_ptr &e)
@@ -203,33 +150,75 @@ namespace kungfu::yijinjing::practice
               on_trading_day(e, e->data<TradingDay>().timestamp);
           });
 
+        events_ | take_until(events_ | is(RequestStart::tag)) |
+        $([&](const event_ptr &event)
+          {
+              longfist::cast_event_invoke(event, recover_state);
+          });
 
-        if (get_io_device()->get_home()->mode != mode::BACKTEST)
+        switch (get_io_device()->get_home()->mode)
         {
-            reader_->join(master_home_location_, 0, begin_time_);
-            events_ | is(RequestStart::tag) | first() |
-            $([&](const event_ptr &e)
-              {
-                  master_start_time_ = e->trigger_time();
-                  on_start();
-              },
-              [&](const std::exception_ptr &e)
-              {
-                  try
-                  { std::rethrow_exception(e); }
-                  catch (const rx::empty_error &ex)
-                  { SPDLOG_WARN("{}", ex.what()); }
-                  catch (const std::exception &ex)
-                  { SPDLOG_WARN("Unexpected exception before start {}", ex.what()); }
-              });
-        } else
-        {
-            on_start();
-        }
+            case mode::BACKTEST:
+            {
+                // dest_id 0 should be configurable TODO
+                auto home = get_io_device()->get_home();
+                auto backtest_location = std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
+                reader_->join(backtest_location, 0, begin_time_);
+                on_start();
+                break;
+            }
+            case mode::LIVE:
+            {
+                auto self_register_event = events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first();
 
-        if (get_io_device()->get_home()->mode == mode::LIVE)
-        {
-            checkin();
+                self_register_event | rx::timeout(seconds(10), observe_on_new_thread()) |
+                $([&](const event_ptr &e)
+                  {
+                      // once registered this subscriber finished, no worry for performance.
+                      // timeout happens on new thread, can not subscribe journal reader here
+                      // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
+                  },
+                  [&](std::exception_ptr e)
+                  {
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const timeout_error &ex)
+                      {
+                          SPDLOG_ERROR("app register timeout");
+                          hero::signal_stop();
+                      }
+                  });
+
+                self_register_event |
+                $([&](const event_ptr &e)
+                  {
+                      reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
+                  },
+                  [&](std::exception_ptr e)
+                  {
+                      try
+                      { std::rethrow_exception(e); }
+                      catch (const std::exception &ex)
+                      {
+                          SPDLOG_ERROR("Register failed: {}", ex.what());
+                          hero::signal_stop();
+                      }
+                  });
+
+                checkin();
+                expect_start();
+                break;
+            }
+            case mode::REPLAY:
+            {
+                reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
+                expect_start();
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
     }
 
@@ -285,4 +274,23 @@ namespace kungfu::yijinjing::practice
         get_io_device()->get_publisher()->publish(request.dump());
     }
 
+    void apprentice::expect_start()
+    {
+        reader_->join(master_home_location_, 0, begin_time_);
+        events_ | is(RequestStart::tag) | first() |
+        $([&](const event_ptr &e)
+          {
+              master_start_time_ = e->trigger_time();
+              on_start();
+          },
+          [&](const std::exception_ptr &e)
+          {
+              try
+              { std::rethrow_exception(e); }
+              catch (const rx::empty_error &ex)
+              { SPDLOG_WARN("Unexpected rx empty {}", ex.what()); }
+              catch (const std::exception &ex)
+              { SPDLOG_WARN("Unexpected exception before start {}", ex.what()); }
+          });
+    }
 }

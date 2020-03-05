@@ -346,7 +346,7 @@ namespace kungfu::yijinjing::practice
                 sb.on_next(std::make_shared<nanomsg_json>(msg));
             }
         }
-        while (reader_->data_available())
+        while (live_ and reader_->data_available())
         {
             if (reader_->current_frame()->gen_time() <= end_time_)
             {

@@ -200,36 +200,45 @@ namespace kungfu::node
           {
               const Channel &channel = event->data<Channel>();
               reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
-              auto source_location = get_location(channel.source_id);
-              auto dest_location = get_location(channel.dest_id);
-              if (source_location->mode == mode::LIVE and
-                  source_location->category == category::TD and dest_location->category == category::STRATEGY)
-              {
-                  auto writer_location = location::make_shared(mode::LIVE, category::STRATEGY, "node", dest_location->name, get_locator());
-                  auto master_cmd_writer = writers_.at(get_master_commands_uid());
-                  RequestWriteAtTo request{};
-                  request.location_uid = writer_location->uid;
-                  request.mode = writer_location->mode;
-                  request.category = writer_location->category;
-                  request.group = writer_location->group;
-                  request.name = writer_location->name;
-                  master_cmd_writer->write(0, request);
-                  SPDLOG_INFO("request writer for strategy at {}", writer_location->uname);
-              }
           });
+
+        apprentice::react();
+    }
+
+    void Watcher::on_start()
+    {
+        events_ | is(Channel::tag) |
+        $([&](const event_ptr &event)
+        {
+            const Channel &channel = event->data<Channel>();
+            auto source_location = get_location(channel.source_id);
+            auto dest_location = get_location(channel.dest_id);
+            if (source_location->mode == mode::LIVE and
+                source_location->category == category::TD and dest_location->category == category::STRATEGY)
+            {
+                auto writer_location = location::make_shared(mode::LIVE, category::STRATEGY, "node", dest_location->name, get_locator());
+                auto master_cmd_writer = writers_.at(get_master_commands_uid());
+                RequestWriteAtTo request{};
+                request.location_uid = writer_location->uid;
+                request.mode = writer_location->mode;
+                request.category = writer_location->category;
+                request.group = writer_location->group;
+                request.name = writer_location->name;
+                master_cmd_writer->write(0, request);
+                SPDLOG_INFO("request writer for strategy at {}", writer_location->uname);
+            }
+        });
 
         events_ | is(RequestWriteAtTo::tag) |
         $([&](const event_ptr &event)
-        {
-            const RequestWriteAtTo &request = event->data<RequestWriteAtTo>();
-            auto strategy_location = location::make_shared(request.mode, request.category, "default", request.name, get_locator());
-            auto writer_location = location::make_shared(request, get_locator());
-            auto writer = get_io_device()->open_writer_at(writer_location, request.dest_id);
-            strategy_writers_.emplace(strategy_location->uid, writer);
-            SPDLOG_INFO("writer for strategy {} created at {}", strategy_location->uname, writer_location->uname);
-        });
-
-        apprentice::react();
+          {
+              const RequestWriteAtTo &request = event->data<RequestWriteAtTo>();
+              auto strategy_location = location::make_shared(request.mode, request.category, "default", request.name, get_locator());
+              auto writer_location = location::make_shared(request, get_locator());
+              auto writer = get_io_device()->open_writer_at(writer_location, request.dest_id);
+              strategy_writers_.emplace(strategy_location->uid, writer);
+              SPDLOG_INFO("writer for strategy {} created at {}", strategy_location->uname, writer_location->uname);
+          });
     }
 
     void Watcher::RestoreState(const location_ptr &state_location)

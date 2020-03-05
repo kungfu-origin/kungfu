@@ -18,7 +18,7 @@ namespace kungfu::node
     {
     public:
         explicit Watcher(const Napi::CallbackInfo &info);
-        
+
         ~Watcher();
 
         void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
@@ -51,7 +51,10 @@ namespace kungfu::node
 
     protected:
         void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
+
         void react() override;
+
+        void on_start() override;
 
     private:
         static Napi::FunctionReference constructor;
@@ -64,7 +67,7 @@ namespace kungfu::node
         serialize::JsPublishState publish;
         std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> strategy_writers_;
 
-        void RestoreState(const yijinjing::data::location_ptr& config_location);
+        void RestoreState(const yijinjing::data::location_ptr &config_location);
     };
 }
 

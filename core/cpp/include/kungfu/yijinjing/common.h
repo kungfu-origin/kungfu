@@ -129,6 +129,7 @@ namespace kungfu
                     group = std::move(g);
                     name = std::move(n);
                     mode = m;
+                    location_uid = uid;
                 }
 
                 template<typename T>
@@ -272,7 +273,6 @@ namespace kungfu
             catch (const std::exception &ex)
             {
                 SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
-//                yijinjing::util::print_stack_trace();
             }
             raise(SIGINT);
         };

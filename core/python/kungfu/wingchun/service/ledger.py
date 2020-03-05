@@ -107,7 +107,6 @@ class Ledger(pywingchun.Ledger):
             book = self._get_book(location)
             book.subject.subscribe(self.on_book_event)
             self.book_context.add_book(location, book)
-        self.ctx.db.add_location(location)
 
     def on_trading_day(self, event, daytime):
         self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))

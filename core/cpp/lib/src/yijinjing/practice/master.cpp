@@ -88,12 +88,7 @@ namespace kungfu::yijinjing::practice
         reader_->join(app_location, 0, now);
         reader_->join(app_location, master_cmd_location->uid, now);
 
-        {
-            auto msg = request_loc.dump();
-            auto frame = writers_[0]->open_frame(e->gen_time(), Register::tag, msg.length());
-            memcpy(reinterpret_cast<void *>(frame->address() + frame->header_length()), msg.c_str(), msg.length());
-            writers_[0]->close_frame(msg.length());
-        }
+        publish_register(e->gen_time(), app_location);
 
         auto &writer = writers_[app_location->uid];
 
@@ -117,7 +112,6 @@ namespace kungfu::yijinjing::practice
         on_register(e, app_location);
 
         app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
-        SPDLOG_INFO("has sql {}", app_sqlizers_.find(app_location->uid) == app_sqlizers_.end());
         app_sqlizers_.at(app_location->uid)->restore(writer);
 
         writer->mark(start_time_, RequestStart::tag);
@@ -279,7 +273,19 @@ namespace kungfu::yijinjing::practice
               task.duration = request.duration;
               task.repeat_count = 0;
               task.repeat_limit = request.repeat;
-              SPDLOG_DEBUG("time request from {} duration {} repeat {}", get_location(e->source())->uname, request.duration, request.repeat);
+              SPDLOG_TRACE("time request from {} duration {} repeat {} at {}",
+                      get_location(e->source())->uname, request.duration, request.repeat, time::strftime(e->gen_time()));
           });
+    }
+
+    void master::publish_register(int64_t trigger_time, const yijinjing::data::location_ptr &location)
+    {
+        Register message = {};
+        message.location_uid = location->uid;
+        message.mode = location->mode;
+        message.category = location->category;
+        message.group = location->group;
+        message.name = location->name;
+        writers_[0]->write(trigger_time, message);
     }
 }

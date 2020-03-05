@@ -54,7 +54,7 @@ namespace kungfu::yijinjing::practice
         virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
         template<typename DataType>
-        inline void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = 0)
+        void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = 0)
         {
             writers_[dest_id]->write(trigger_time, data);
         }
@@ -75,6 +75,7 @@ namespace kungfu::yijinjing::practice
 
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime)
         {
+            SPDLOG_WARN("add timer {} at {}", time::strftime(nanotime), time::strftime(now()));
             auto writer = writers_[master_commands_location_->uid];
             int32_t timer_usage_count = timer_usage_count_;
             int64_t duration_ns = nanotime - now();
@@ -186,6 +187,8 @@ namespace kungfu::yijinjing::practice
 
         void checkin();
 
+        void expect_start();
+
         template <typename DataType>
         void register_location_from_event(const event_ptr &event)
         {
@@ -203,7 +206,7 @@ namespace kungfu::yijinjing::practice
         }
 
         template <typename DataType>
-        inline void do_read_from(const event_ptr &event, uint32_t dest_id)
+        void do_read_from(const event_ptr &event, uint32_t dest_id)
         {
             const DataType &request = event->data<DataType>();
             SPDLOG_INFO("{} requires {} read from {} from {}",
