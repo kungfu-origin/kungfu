@@ -236,16 +236,7 @@ namespace kungfu::wingchun::book
           {
               book->ready_ = true;
           }, error_handler);
-
-        events_ | filter([=](const event_ptr &event)
-                         {
-                             return event->msg_type() == PositionDetailEnd::tag and event->data<PositionDetailEnd>().holder_uid == location->uid;
-                         }) | first() |
-        $([=](const event_ptr &event)
-          {
-              book->ready_ = true;
-          }, error_handler);
-
+       
         events_ | is(Quote::tag) |
         $([=](const event_ptr &event)
           {
