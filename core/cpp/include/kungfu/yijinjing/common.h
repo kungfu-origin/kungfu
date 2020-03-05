@@ -210,6 +210,15 @@ namespace kungfu
             };
         };
 
+        template<typename EventType>
+        constexpr auto instanceof = []()
+        {
+            return filter([](const event_ptr &event)
+                          {
+                              return dynamic_cast<EventType *>(event.get()) != nullptr;
+                          });
+        };
+
         template<typename... Ts>
         constexpr auto event_filter_any = [](auto member)
         {

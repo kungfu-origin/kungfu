@@ -198,11 +198,7 @@ namespace kungfu::yijinjing::practice
 
     void master::react()
     {
-        events_ |
-        filter([&](const event_ptr &event)
-               {
-                   return dynamic_cast<journal::frame *>(event.get()) != nullptr;
-               }) |
+        events_ | instanceof<journal::frame>() |
         $([&](const event_ptr &e)
           {
               auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
