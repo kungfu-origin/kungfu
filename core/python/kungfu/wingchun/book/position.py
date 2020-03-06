@@ -153,7 +153,7 @@ class StockPosition(Position):
         self.book.subject.on_next(self.event)
 
     def apply_order(self, order):
-        if not order.status in [pykungfu.longfist.enum.OrderStatus.Submitted, pykungfu.longfist.enum.OrderStatus.Pending, pykungfu.longfist.enum.OrderStatus.PartialFilledActive] and order.volume_left > 0:
+        if not order.status in [pykungfu.longfist.enums.OrderStatus.Submitted, pykungfu.longfist.enums.OrderStatus.Pending, pykungfu.longfist.enums.OrderStatus.PartialFilledActive] and order.volume_left > 0:
             if order.side == Side.Sell:
                 self.frozen_total -= order.volume_left
                 self.frozen_yesterday -= order.volume_left
@@ -376,7 +376,7 @@ class FuturePosition(Position):
         self.book.subject.on_next(self.event)
 
     def apply_order(self, order):
-        if not order.status in [pykungfu.longfist.enum.OrderStatus.Submitted, pykungfu.longfist.enum.OrderStatus.Pending, pykungfu.longfist.enum.OrderStatus.PartialFilledActive] and order.volume_left > 0:
+        if not order.status in [pykungfu.longfist.enums.OrderStatus.Submitted, pykungfu.longfist.enums.OrderStatus.Pending, pykungfu.longfist.enums.OrderStatus.PartialFilledActive] and order.volume_left > 0:
             if order.offset == Offset.Open:
                 frozen_margin = self.contract_multiplier * order.frozen_price * order.volume * self.margin_ratio
                 self.book.avail += frozen_margin

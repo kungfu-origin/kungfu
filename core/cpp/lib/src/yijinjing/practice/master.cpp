@@ -230,6 +230,22 @@ namespace kungfu::yijinjing::practice
               require_read_from_public(e->gen_time(), e->source(), request.source_id, request.from_time);
           });
 
+        events_ | is(RequestSimplexChannel::tag) |
+        $([&](const event_ptr &e)
+          {
+              const RequestSimplexChannel &request = e->data<RequestSimplexChannel>();
+              if (is_location_live(request.source_id))
+              {
+                  reader_->join(get_location(request.source_id), request.dest_id, e->gen_time());
+                  require_write_to(e->gen_time(), request.source_id, request.dest_id);
+                  Channel channel = {};
+                  channel.source_id = e->source();
+                  channel.dest_id = request.dest_id;
+                  register_channel(e->gen_time(), channel);
+                  writers_.at(location::PUBLIC)->write(e->gen_time(), channel);
+              }
+          });
+
         events_ | is(TimeRequest::tag) |
         $([&](const event_ptr &e)
           {

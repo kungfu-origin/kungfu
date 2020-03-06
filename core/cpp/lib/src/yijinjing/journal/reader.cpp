@@ -33,7 +33,7 @@ namespace kungfu::yijinjing::journal
         {
             if (journal->location_->uid == location->uid && journal->dest_id_ == dest_id)
             {
-                SPDLOG_INFO("reader joins journal {}/{:08x} more than once", location->uname, dest_id);
+                SPDLOG_DEBUG("reader joins journal {}/{:08x} more than once", location->uname, dest_id);
                 return;
             }
         }

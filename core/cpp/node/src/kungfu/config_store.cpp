@@ -25,30 +25,16 @@ namespace kungfu::node
 
     inline Config getConfigFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator)
     {
-        mode m;
-        category c;
-        std::string group, name;
-        if (info[0].IsObject())
+        Config query = {};
+        auto config_location = ExtractLocation(info, 0, locator);
+        if (config_location)
         {
-            auto obj = info[0].ToObject();
-            m = get_mode_by_name(obj.Get("mode").ToString().Utf8Value());
-            c = get_category_by_name(obj.Get("category").ToString().Utf8Value());
-            group = obj.Get("group").ToString().Utf8Value();
-            name = obj.Get("name").ToString().Utf8Value();
-        } else
-        {
-            m = get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
-            c = get_category_by_name(info[0].As<Napi::String>().Utf8Value());
-            group = info[1].As<Napi::String>().Utf8Value();
-            name = info[2].As<Napi::String>().Utf8Value();
+            query.location_uid = config_location->uid;
+            query.category = config_location->category;
+            query.group = config_location->group;
+            query.name = config_location->name;
+            query.mode = config_location->mode;
         }
-        location config_location(m, c, group, name, locator);
-        Config query{};
-        query.location_uid = config_location.uid;
-        query.category = config_location.category;
-        query.group = config_location.group;
-        query.name = config_location.name;
-        query.mode = config_location.mode;
         return query;
     }
 

@@ -12,6 +12,8 @@
 
 namespace kungfu::node
 {
+    yijinjing::data::location_ptr ExtractLocation(const Napi::CallbackInfo &info, int index, const yijinjing::data::locator_ptr &locator);
+
     class Locator : public yijinjing::data::locator
     {
     public:

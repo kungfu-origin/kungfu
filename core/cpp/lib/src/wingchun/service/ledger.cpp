@@ -168,8 +168,11 @@ namespace kungfu::wingchun::service
           {
               auto register_data = event->data<Register>();
               auto app_location = location::make_shared(register_data, get_locator());
-              request_write_to(event->gen_time(), app_location->uid);
-              request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+              if (app_location->category != category::SYSTEM)
+              {
+                  request_write_to(event->gen_time(), app_location->uid);
+                  request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+              }
               if (app_location->category == category::MD)
               {
                   update_broker_state(event->gen_time(), app_location, BrokerState::Connected);
@@ -197,8 +200,12 @@ namespace kungfu::wingchun::service
         events_ | is(Channel::tag) |
         $([&](const event_ptr &event)
           {
+              auto home_uid = get_home_uid();
               const Channel &channel = event->data<Channel>();
-              reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+              if (channel.source_id != home_uid and channel.dest_id != home_uid)
+              {
+                  reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+              }
           });
 
         events_ | is(BrokerStateUpdate::tag) |

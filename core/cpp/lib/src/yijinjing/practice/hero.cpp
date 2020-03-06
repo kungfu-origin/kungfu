@@ -169,13 +169,8 @@ namespace kungfu::yijinjing::practice
     {
         if (writers_.find(dest_id) == writers_.end())
         {
-            if (has_location(dest_id))
-            {
-                throw yijinjing_error(fmt::format("has no writer for [{:08x}] {}", dest_id, get_location(dest_id)->uname));
-            } else
-            {
-                throw yijinjing_error(fmt::format("has no writer for [{:08x}]", dest_id));
-            }
+            SPDLOG_WARN("has no writer for [{:08x}], return public writer instead", dest_id);
+            return writers_.at(location::PUBLIC);
         }
         return writers_.at(dest_id);
     }
@@ -197,6 +192,11 @@ namespace kungfu::yijinjing::practice
     bool hero::is_location_live(uint32_t uid) const
     {
         return registry_.find(uid) != registry_.end();
+    }
+
+    bool hero::has_channel(uint32_t source, uint32_t dest) const
+    {
+        return has_channel(make_chanel_hash(source, dest));
     }
 
     bool hero::has_channel(uint64_t hash) const
@@ -224,7 +224,12 @@ namespace kungfu::yijinjing::practice
     void hero::on_exit()
     {}
 
-    bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id)
+    uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const
+    {
+        return uint64_t(source_id) << 32 | uint64_t(dest_id);
+    }
+
+    bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const
     {
         if (not has_location(source_id))
         {
@@ -239,7 +244,7 @@ namespace kungfu::yijinjing::practice
         return true;
     }
 
-    bool hero::check_location_live(uint32_t source_id, uint32_t dest_id)
+    bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const
     {
         if (not check_location_exists(source_id, dest_id))
         {
@@ -296,7 +301,7 @@ namespace kungfu::yijinjing::practice
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)
     {
-        uint64_t channel_uid = uint64_t(channel.source_id) << 32 | channel.dest_id;
+        uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
         channels_[channel_uid] = channel;
         SPDLOG_INFO("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
                     has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,

@@ -4,11 +4,44 @@
 
 #include "io.h"
 
+using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
+using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node
 {
+    location_ptr ExtractLocation(const Napi::CallbackInfo &info, int index, const locator_ptr &locator)
+    {
+        try
+        {
+            if (info[index].IsObject())
+            {
+                auto obj = info[index].ToObject();
+                return location::make_shared(
+                        get_mode_by_name(obj.Get("mode").ToString().Utf8Value()),
+                        get_category_by_name(obj.Get("category").ToString().Utf8Value()),
+                        obj.Get("group").ToString().Utf8Value(),
+                        obj.Get("name").ToString().Utf8Value(),
+                        locator
+                );
+            } else
+            {
+                return location::make_shared(
+                        get_mode_by_name(info[index + 3].As<Napi::String>().Utf8Value()),
+                        get_category_by_name(info[index].As<Napi::String>().Utf8Value()),
+                        info[index + 1].As<Napi::String>().Utf8Value(),
+                        info[index + 2].As<Napi::String>().Utf8Value(),
+                        locator
+                );
+            }
+        } catch (...)
+        {
+            return location_ptr();
+        }
+    }
+
     Locator::Locator(const Napi::Object &locator_obj)
     {
         locator_ref_ = Napi::ObjectReference::New(locator_obj, 1);

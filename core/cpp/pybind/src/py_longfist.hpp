@@ -91,9 +91,9 @@ namespace kungfu::longfist
     void bind(pybind11::module &&m)
     {
         using namespace kungfu::longfist::enums;
-        auto m_enum = m.def_submodule("enum");
+        auto m_enums = m.def_submodule("enums");
 
-        py::enum_<InstrumentType>(m_enum, "InstrumentType", py::arithmetic())
+        py::enum_<InstrumentType>(m_enums, "InstrumentType", py::arithmetic())
                 .value("Unknown", InstrumentType::Unknown)
                 .value("Stock", InstrumentType::Stock)
                 .value("Future", InstrumentType::Future)
@@ -111,7 +111,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<CommissionRateMode>(m_enum, "CommissionRateMode", py::arithmetic())
+        py::enum_<CommissionRateMode>(m_enums, "CommissionRateMode", py::arithmetic())
                 .value("ByAmount", CommissionRateMode::ByAmount)
                 .value("ByVolume", CommissionRateMode::ByVolume)
                 .export_values()
@@ -121,7 +121,7 @@ namespace kungfu::longfist
                          return static_cast<int>(a) == b;
                      });
 
-        py::enum_<ExecType>(m_enum, "ExecType", py::arithmetic())
+        py::enum_<ExecType>(m_enums, "ExecType", py::arithmetic())
                 .value("Unknown", ExecType::Unknown)
                 .value("Cancel", ExecType::Cancel)
                 .value("Trade", ExecType::Trade)
@@ -133,7 +133,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<Side>(m_enum, "Side", py::arithmetic())
+        py::enum_<Side>(m_enums, "Side", py::arithmetic())
                 .value("Buy", Side::Buy)
                 .value("Sell", Side::Sell)
                 .value("Lock", Side::Lock)
@@ -148,7 +148,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<Offset>(m_enum, "Offset", py::arithmetic())
+        py::enum_<Offset>(m_enums, "Offset", py::arithmetic())
                 .value("Open", Offset::Open)
                 .value("Close", Offset::Close)
                 .value("CloseToday", Offset::CloseToday)
@@ -161,7 +161,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<HedgeFlag>(m_enum, "HedgeFlag", py::arithmetic())
+        py::enum_<HedgeFlag>(m_enums, "HedgeFlag", py::arithmetic())
                 .value("Speculation", HedgeFlag::Speculation)
                 .value("Arbitrage", HedgeFlag::Arbitrage)
                 .value("Hedge", HedgeFlag::Hedge)
@@ -174,7 +174,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<BsFlag>(m_enum, "BsFlag", py::arithmetic())
+        py::enum_<BsFlag>(m_enums, "BsFlag", py::arithmetic())
                 .value("Unknown", BsFlag::Unknown)
                 .value("Buy", BsFlag::Buy)
                 .value("Sell", BsFlag::Sell)
@@ -185,7 +185,7 @@ namespace kungfu::longfist
                          return static_cast<int>(a) == b;
                      });
 
-        py::enum_<OrderStatus>(m_enum, "OrderStatus", py::arithmetic())
+        py::enum_<OrderStatus>(m_enums, "OrderStatus", py::arithmetic())
                 .value("Unknown", OrderStatus::Unknown)
                 .value("Submitted", OrderStatus::Submitted)
                 .value("Pending", OrderStatus::Pending)
@@ -202,7 +202,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<Direction>(m_enum, "Direction", py::arithmetic())
+        py::enum_<Direction>(m_enums, "Direction", py::arithmetic())
                 .value("Long", Direction::Long)
                 .value("Short", Direction::Short)
                 .export_values()
@@ -213,7 +213,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<PriceType>(m_enum, "PriceType", py::arithmetic())
+        py::enum_<PriceType>(m_enums, "PriceType", py::arithmetic())
                 .value("Any", PriceType::Any)
                 .value("FakBest5", PriceType::FakBest5)
                 .value("Fak", PriceType::Fak)
@@ -229,7 +229,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<VolumeCondition>(m_enum, "VolumeCondition", py::arithmetic())
+        py::enum_<VolumeCondition>(m_enums, "VolumeCondition", py::arithmetic())
                 .value("Any", VolumeCondition::Any)
                 .value("Min", VolumeCondition::Min)
                 .value("All", VolumeCondition::All)
@@ -241,7 +241,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<TimeCondition>(m_enum, "TimeCondition", py::arithmetic())
+        py::enum_<TimeCondition>(m_enums, "TimeCondition", py::arithmetic())
                 .value("IOC", TimeCondition::IOC)
                 .value("GFD", TimeCondition::GFD)
                 .value("GTC", TimeCondition::GTC)
@@ -253,7 +253,7 @@ namespace kungfu::longfist
                      }
                 );
 
-        py::enum_<OrderActionFlag>(m_enum, "OrderActionFlag", py::arithmetic())
+        py::enum_<OrderActionFlag>(m_enums, "OrderActionFlag", py::arithmetic())
                 .value("Cancel", OrderActionFlag::Cancel)
                 .export_values()
                 .def("__eq__",
@@ -262,7 +262,7 @@ namespace kungfu::longfist
                          return static_cast<int>(a) == b;
                      });
 
-        py::enum_<LedgerCategory>(m_enum, "LedgerCategory", py::arithmetic())
+        py::enum_<LedgerCategory>(m_enums, "LedgerCategory", py::arithmetic())
                 .value("Account", LedgerCategory::Account)
                 .value("Strategy", LedgerCategory::Strategy)
                 .export_values()

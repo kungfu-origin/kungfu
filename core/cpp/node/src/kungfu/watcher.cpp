@@ -66,7 +66,9 @@ namespace kungfu::node
     }
 
     void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value)
-    {}
+    {
+        SPDLOG_WARN("do not manipulate watcher internals");
+    }
 
     Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info)
     {
@@ -117,8 +119,8 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
-        auto uid = info[0].ToNumber().Uint32Value();
         auto locationObj = Napi::Object::New(info.Env());
+        auto uid = info.Length() > 0 ? info[0].ToNumber().Uint32Value() : 0;
         if (uid == 0)
         {
             auto location = get_io_device()->get_home();
@@ -147,8 +149,39 @@ namespace kungfu::node
         return Napi::Value();
     }
 
-    Napi::Value Watcher::WriteStrategyOrder(const Napi::CallbackInfo &info)
+    Napi::Value Watcher::IsReadyToIssueOrder(const Napi::CallbackInfo &info)
     {
+        auto account_location = ExtractLocation(info, 0, get_locator());
+        return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
+    }
+
+    Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info)
+    {
+        auto trigger_time = time::now_in_nano();
+        Napi::Object obj = info[0].ToObject();
+        OrderInput input = {};
+        serialize::JsGet{}(obj, input);
+        auto account_location = ExtractLocation(info, 1, get_locator());
+        auto strategy_location = ExtractLocation(info, 2, get_locator());
+        auto writer = get_writer(account_location->uid);
+        if (strategy_location and has_location(strategy_location->uid))
+        {
+            auto proxy_location = location::make_shared(
+                    strategy_location->mode, strategy_location->category,
+                    get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
+            );
+            if (not has_channel(account_location->uid, proxy_location->uid))
+            {
+                RequestSimplexChannel request = {};
+                request.source_id = account_location->uid;
+                request.dest_id = proxy_location->uid;
+                writers_.at(get_master_commands_uid())->write(trigger_time, request);
+            }
+            writer->write_as(trigger_time, input, proxy_location->uid);
+        } else
+        {
+            writer->write(trigger_time, input);
+        }
         return Napi::Value();
     }
 
@@ -164,7 +197,8 @@ namespace kungfu::node
                 InstanceMethod("step", &Watcher::Step),
                 InstanceMethod("getLocation", &Watcher::GetLocation),
                 InstanceMethod("publishState", &Watcher::PublishState),
-                InstanceMethod("writeStrategyOrder", &Watcher::WriteStrategyOrder),
+                InstanceMethod("isReadyToIssueOrder", &Watcher::IsReadyToIssueOrder),
+                InstanceMethod("issueOrder", &Watcher::IssueOrder),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
@@ -199,22 +233,26 @@ namespace kungfu::node
         events_ | is(Channel::tag) |
         $([&](const event_ptr &event)
           {
+              auto home_uid = get_home_uid();
               const Channel &channel = event->data<Channel>();
-              reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+              if (channel.source_id != home_uid and channel.dest_id != home_uid)
+              {
+                  reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+              }
           });
 
         events_ | is(Register::tag) |
         $([&](const event_ptr &event)
-        {
-            auto register_data = event->data<Register>();
-            auto app_location = location::make_shared(register_data, get_locator());
-            if (app_location->category == category::TD)
-            {
-                request_write_to(event->gen_time(), app_location->uid);
-                request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
-            }
-            request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
-        });
+          {
+              auto register_data = event->data<Register>();
+              auto app_location = location::make_shared(register_data, get_locator());
+              if (app_location->category == category::TD)
+              {
+                  request_write_to(event->gen_time(), app_location->uid);
+                  request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
+              }
+              request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+          });
     }
 
     void Watcher::RestoreState(const location_ptr &state_location)

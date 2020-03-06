@@ -61,6 +61,8 @@ namespace kungfu::yijinjing::practice
 
         bool is_location_live(uint32_t uid) const;
 
+        bool has_channel(uint32_t source, uint32_t dest) const;
+
         bool has_channel(uint64_t hash) const;
 
         const longfist::types::Channel &get_channel(uint64_t hash) const;
@@ -81,9 +83,11 @@ namespace kungfu::yijinjing::practice
         std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
         rx::connectable_observable <event_ptr> events_;
 
-        bool check_location_exists(uint32_t source_id, uint32_t dest_id);
+        uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
 
-        bool check_location_live(uint32_t source_id, uint32_t dest_id);
+        bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
+
+        bool check_location_live(uint32_t source_id, uint32_t dest_id) const;
 
         void add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 

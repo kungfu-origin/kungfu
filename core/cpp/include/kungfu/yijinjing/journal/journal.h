@@ -191,6 +191,26 @@ namespace kungfu::yijinjing::journal
         }
 
         template<typename T>
+        std::enable_if_t<kungfu::size_fixed_v<T>, void> write_as(int64_t trigger_time, const T &data, uint32_t source)
+        {
+            auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+            auto size = frame->copy_data(data);
+            frame->set_source(source);
+            close_frame(size);
+        }
+
+        template<typename T>
+        std::enable_if_t<not kungfu::size_fixed_v<T>, void> write_as(int64_t trigger_time, const T &data, uint32_t source)
+        {
+            auto s = data.to_string();
+            auto size = s.length();
+            auto frame = open_frame(trigger_time, T::tag, s.length());
+            memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
+            frame->set_source(source);
+            close_frame(size);
+        }
+
+        template<typename T>
         std::enable_if_t<not kungfu::size_fixed_v<T>, void> write_with_time(int64_t gen_time, const T &data)
         {
             assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->page_->get_page_size());

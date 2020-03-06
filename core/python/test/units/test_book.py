@@ -47,9 +47,9 @@ class TestStockPosition(unittest.TestCase):
         input.exchange_id = "SSE"
         input.volume = 200
         input.limit_price = 16.0
-        input.side = pylongfist.enum.Side.Buy
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Buy
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
         self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
@@ -62,10 +62,10 @@ class TestStockPosition(unittest.TestCase):
         order.volume = 200
         order.volume_traded = 200
         order.limit_price = 16.0
-        order.side = pylongfist.enum.Side.Buy
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Buy
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -75,8 +75,8 @@ class TestStockPosition(unittest.TestCase):
         trade.exchange_id = "SSE"
         trade.volume = 200
         trade.price = 16.0
-        trade.side = pylongfist.enum.Side.Buy
-        trade.offset = pylongfist.enum.Offset.Open
+        trade.side = pylongfist.enums.Side.Buy
+        trade.offset = pylongfist.enums.Offset.Open
         tax = 0.0
         commission = 200 * 16.0 * 0.0008 if 200 * 16.0 * 0.0008 > 5 else 5
         book.on_trade(event, trade)
@@ -94,7 +94,7 @@ class TestStockPosition(unittest.TestCase):
 
     def test_sell(self):
         location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
-        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": pylongfist.enum.Direction.Long}
+        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": pylongfist.enums.Direction.Long}
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
@@ -105,9 +105,9 @@ class TestStockPosition(unittest.TestCase):
         input.exchange_id = "SSE"
         input.volume = 200
         input.limit_price = 16.0
-        input.side = pylongfist.enum.Side.Sell
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Sell
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
         self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000, "incorrect avail")
@@ -123,10 +123,10 @@ class TestStockPosition(unittest.TestCase):
         order.volume = 200
         order.volume_traded = 200
         order.limit_price = 16.0
-        order.side = pylongfist.enum.Side.Sell
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Sell
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -136,8 +136,8 @@ class TestStockPosition(unittest.TestCase):
         trade.exchange_id = "SSE"
         trade.volume = 200
         trade.price = 16.0
-        trade.side = pylongfist.enum.Side.Sell
-        trade.offset = pylongfist.enum.Offset.Open
+        trade.side = pylongfist.enums.Side.Sell
+        trade.offset = pylongfist.enums.Offset.Open
         tax = 200 * 16.0 * 0.001
         commission = 5 if 200 * 16.0 * 0.0008 < 5 else 200 * 16.0 * 0.0008
         book.on_trade(event, trade)
@@ -153,7 +153,7 @@ class TestStockPosition(unittest.TestCase):
 
     def test_sell_cancelled(self):
         location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
-        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": pylongfist.enum.Direction.Long}
+        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": pylongfist.enums.Direction.Long}
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
@@ -164,9 +164,9 @@ class TestStockPosition(unittest.TestCase):
         input.exchange_id = "SSE"
         input.volume = 200
         input.limit_price = 16.0
-        input.side = pylongfist.enum.Side.Sell
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Sell
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
         self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000, "incorrect avail")
@@ -183,10 +183,10 @@ class TestStockPosition(unittest.TestCase):
         order.volume_traded = 100
         order.volume_left = 100
         order.limit_price = 16.0
-        order.side = pylongfist.enum.Side.Sell
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.PartialFilledNotActive
+        order.side = pylongfist.enums.Side.Sell
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.PartialFilledNotActive
         book.on_order(event, order)
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.frozen_total, 100)
@@ -200,7 +200,7 @@ class TestStockPosition(unittest.TestCase):
         trade.exchange_id = "SSE"
         trade.volume = 100
         trade.price = 16.0
-        trade.side = pylongfist.enum.Side.Sell
+        trade.side = pylongfist.enums.Side.Sell
         book.on_trade(event, trade)
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.frozen_yesterday, 0)
@@ -218,9 +218,9 @@ class TestStockPosition(unittest.TestCase):
         input.exchange_id = "SSE"
         input.volume = 200
         input.limit_price = 16.0
-        input.side = pylongfist.enum.Side.Buy
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Buy
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
         self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
@@ -234,10 +234,10 @@ class TestStockPosition(unittest.TestCase):
         order.volume_traded = 100
         order.volume_left = 100
         order.limit_price = 16.0
-        order.side = pylongfist.enum.Side.Buy
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.PartialFilledNotActive
+        order.side = pylongfist.enums.Side.Buy
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.PartialFilledNotActive
 
         book.on_order(event, order)
 
@@ -252,8 +252,8 @@ class TestStockPosition(unittest.TestCase):
         trade.exchange_id = "SSE"
         trade.volume = 100
         trade.price = 16.0
-        trade.side = pylongfist.enum.Side.Buy
-        trade.offset = pylongfist.enum.Offset.Open
+        trade.side = pylongfist.enums.Side.Buy
+        trade.offset = pylongfist.enums.Offset.Open
         tax = 0.0
         commission = trade.volume * trade.price * 0.0008 if trade.volume * trade.price * 0.0008 > 5 else 5
 
@@ -312,9 +312,9 @@ class TestFuturePosition(unittest.TestCase):
         input.exchange_id = exchange_id
         input.volume = 1
         input.limit_price = 3990.0
-        input.side = pylongfist.enum.Side.Buy
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Buy
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
 
         margin_ratio = 0.1
@@ -336,10 +336,10 @@ class TestFuturePosition(unittest.TestCase):
         order.volume = 1
         order.volume_traded = 1
         order.limit_price = 3990.0
-        order.side = pylongfist.enum.Side.Buy
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Buy
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -349,8 +349,8 @@ class TestFuturePosition(unittest.TestCase):
         trade.exchange_id = exchange_id
         trade.volume = 1
         trade.price = 3990.0
-        trade.side = pylongfist.enum.Side.Buy
-        trade.offset = pylongfist.enum.Offset.Open
+        trade.side = pylongfist.enums.Side.Buy
+        trade.offset = pylongfist.enums.Offset.Open
         book.on_trade(event, trade)
         commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
         tax = 0.0
@@ -380,7 +380,7 @@ class TestFuturePosition(unittest.TestCase):
         close_today_commission_ratio = 0.0
 
         dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
-               "direction": pylongfist.enum.Direction.Long, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
+               "direction": pylongfist.enums.Direction.Long, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
@@ -393,9 +393,9 @@ class TestFuturePosition(unittest.TestCase):
         input.exchange_id = exchange_id
         input.volume = 1
         input.limit_price = 3990.0
-        input.side = pylongfist.enum.Side.Sell
-        input.offset = pylongfist.enum.Offset.Close
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Sell
+        input.offset = pylongfist.enums.Offset.Close
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
 
         position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Long)
@@ -410,10 +410,10 @@ class TestFuturePosition(unittest.TestCase):
         order.volume = 1
         order.volume_traded = 1
         order.limit_price = 3990.0
-        order.side = pylongfist.enum.Side.Sell
-        order.offset = pylongfist.enum.Offset.Close
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Sell
+        order.offset = pylongfist.enums.Offset.Close
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -423,8 +423,8 @@ class TestFuturePosition(unittest.TestCase):
         trade.exchange_id = exchange_id
         trade.volume = 1
         trade.price = 3990.0
-        trade.side = pylongfist.enum.Side.Sell
-        trade.offset = pylongfist.enum.Offset.Close
+        trade.side = pylongfist.enums.Side.Sell
+        trade.offset = pylongfist.enums.Offset.Close
         book.on_trade(event, trade)
         margin = trade.price * trade.volume * contract_multiplier * margin_ratio
         commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier
@@ -455,9 +455,9 @@ class TestFuturePosition(unittest.TestCase):
         input.exchange_id = exchange_id
         input.volume = 1
         input.limit_price = 3990.0
-        input.side = pylongfist.enum.Side.Sell
-        input.offset = pylongfist.enum.Offset.Open
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Sell
+        input.offset = pylongfist.enums.Offset.Open
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
 
         margin_ratio = 0.1
@@ -479,10 +479,10 @@ class TestFuturePosition(unittest.TestCase):
         order.volume = 1
         order.volume_traded = 1
         order.limit_price = 3990.0
-        order.side = pylongfist.enum.Side.Sell
-        order.offset = pylongfist.enum.Offset.Open
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Sell
+        order.offset = pylongfist.enums.Offset.Open
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -492,8 +492,8 @@ class TestFuturePosition(unittest.TestCase):
         trade.exchange_id = exchange_id
         trade.volume = 1
         trade.price = 3990.0
-        trade.side = pylongfist.enum.Side.Sell
-        trade.offset = pylongfist.enum.Offset.Open
+        trade.side = pylongfist.enums.Side.Sell
+        trade.offset = pylongfist.enums.Offset.Open
         book.on_trade(event, trade)
         commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
         tax = 0.0
@@ -523,7 +523,7 @@ class TestFuturePosition(unittest.TestCase):
         close_today_commission_ratio = 0.0
 
         dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
-               "direction": pylongfist.enum.Direction.Short, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
+               "direction": pylongfist.enums.Direction.Short, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
@@ -536,9 +536,9 @@ class TestFuturePosition(unittest.TestCase):
         input.exchange_id = exchange_id
         input.volume = 1
         input.limit_price = 3990.0
-        input.side = pylongfist.enum.Side.Buy
-        input.offset = pylongfist.enum.Offset.Close
-        input.price_type = pylongfist.enum.PriceType.Limit
+        input.side = pylongfist.enums.Side.Buy
+        input.offset = pylongfist.enums.Offset.Close
+        input.price_type = pylongfist.enums.PriceType.Limit
         book.on_order_input(event, input)
 
         position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Short)
@@ -553,10 +553,10 @@ class TestFuturePosition(unittest.TestCase):
         order.volume = 1
         order.volume_traded = 1
         order.limit_price = 3990.0
-        order.side = pylongfist.enum.Side.Buy
-        order.offset = pylongfist.enum.Offset.Close
-        order.price_type = pylongfist.enum.PriceType.Limit
-        order.status = pylongfist.enum.OrderStatus.Filled
+        order.side = pylongfist.enums.Side.Buy
+        order.offset = pylongfist.enums.Offset.Close
+        order.price_type = pylongfist.enums.PriceType.Limit
+        order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
         event.gen_time = pyyjj.now_in_nano()
@@ -566,8 +566,8 @@ class TestFuturePosition(unittest.TestCase):
         trade.exchange_id = exchange_id
         trade.volume = 1
         trade.price = 3990.0
-        trade.side = pylongfist.enum.Side.Buy
-        trade.offset = pylongfist.enum.Offset.Close
+        trade.side = pylongfist.enums.Side.Buy
+        trade.offset = pylongfist.enums.Offset.Close
         book.on_trade(event, trade)
         margin = trade.price * trade.volume * contract_multiplier * margin_ratio
         commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier

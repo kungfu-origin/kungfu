@@ -22,20 +22,20 @@ class Region:
     HK = 'HK'
 
 
-InstrumentType = pylongfist.enum.InstrumentType
-ExecType = pylongfist.enum.ExecType
-Side = pylongfist.enum.Side
-Offset = pylongfist.enum.Offset
-BsFlag = pylongfist.enum.BsFlag
-OrderStatus = pylongfist.enum.OrderStatus
-Direction = pylongfist.enum.Direction
-PriceType = pylongfist.enum.PriceType
-VolumeCondition = pylongfist.enum.VolumeCondition
-TimeCondition = pylongfist.enum.TimeCondition
-OrderActionFlag = pylongfist.enum.OrderActionFlag
-LedgerCategory = pylongfist.enum.LedgerCategory
-HedgeFlag = pylongfist.enum.HedgeFlag
-CommissionRateMode = pylongfist.enum.CommissionRateMode
+InstrumentType = pylongfist.enums.InstrumentType
+ExecType = pylongfist.enums.ExecType
+Side = pylongfist.enums.Side
+Offset = pylongfist.enums.Offset
+BsFlag = pylongfist.enums.BsFlag
+OrderStatus = pylongfist.enums.OrderStatus
+Direction = pylongfist.enums.Direction
+PriceType = pylongfist.enums.PriceType
+VolumeCondition = pylongfist.enums.VolumeCondition
+TimeCondition = pylongfist.enums.TimeCondition
+OrderActionFlag = pylongfist.enums.OrderActionFlag
+LedgerCategory = pylongfist.enums.LedgerCategory
+HedgeFlag = pylongfist.enums.HedgeFlag
+CommissionRateMode = pylongfist.enums.CommissionRateMode
 AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
 InstrumentTypeInStockAccount = [InstrumentType.Stock,

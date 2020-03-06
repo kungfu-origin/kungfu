@@ -45,7 +45,9 @@ namespace kungfu::node
 
         Napi::Value PublishState(const Napi::CallbackInfo &info);
 
-        Napi::Value WriteStrategyOrder(const Napi::CallbackInfo &info);
+        Napi::Value IsReadyToIssueOrder(const Napi::CallbackInfo &info);
+
+        Napi::Value IssueOrder(const Napi::CallbackInfo &info);
 
         static void Init(Napi::Env env, Napi::Object exports);
 

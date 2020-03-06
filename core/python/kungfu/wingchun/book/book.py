@@ -153,7 +153,7 @@ class AccountBook(pywingchun.Book):
         temp.holder_uid = self.location.uid
         temp.instrument_id = quote.instrument_id
         temp.exchange_id = quote.exchange_id
-        for dir in [pykungfu.longfist.enum.Direction.Long, pykungfu.longfist.enum.Direction.Short]:
+        for dir in [pykungfu.longfist.enums.Direction.Long, pykungfu.longfist.enums.Direction.Short]:
             temp.direction = dir            
             if temp.uid in self._positions:
                 position = self._positions[temp.uid]
@@ -204,7 +204,7 @@ class AccountBook(pywingchun.Book):
 
     @property
     def active_orders(self):
-        return list([order for order in self._orders.values() if order.status in [pykungfu.longfist.enum.OrderStatus.Submitted, pykungfu.longfist.enum.OrderStatus.Pending, pykungfu.longfist.enum.OrderStatus.PartialFilledActive] ])
+        return list([order for order in self._orders.values() if order.status in [pykungfu.longfist.enums.OrderStatus.Submitted, pykungfu.longfist.enums.OrderStatus.Pending, pykungfu.longfist.enums.OrderStatus.PartialFilledActive] ])
 
     @property
     def total_cash(self):
