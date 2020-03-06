@@ -14,6 +14,8 @@
 
 namespace kungfu::node
 {
+    constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
+
     class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice
     {
     public:
@@ -72,8 +74,8 @@ namespace kungfu::node
 
         void RestoreState(const yijinjing::data::location_ptr &config_location);
 
-        template<typename DataType>
-        Napi::Value InteractWithTD(const Napi::CallbackInfo &info)
+        template<typename DataType, typename IdPtrType = uint64_t DataType::*>
+        Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr)
         {
             auto trigger_time = yijinjing::time::now_in_nano();
             Napi::Object obj = info[0].ToObject();
@@ -83,6 +85,7 @@ namespace kungfu::node
             if (account_location and has_writer(account_location->uid))
             {
                 auto writer = get_writer(account_location->uid);
+
                 auto strategy_location = ExtractLocation(info, 2, get_locator());
                 if (strategy_location and has_location(strategy_location->uid))
                 {
@@ -97,15 +100,17 @@ namespace kungfu::node
                         request.dest_id = proxy_location->uid;
                         writers_.at(get_master_commands_uid())->write(trigger_time, request);
                     }
+                    action.*id_ptr = ((uint64_t)(proxy_location->uid xor account_location->uid) << 32) | (ID_TRANC & writer->current_frame_uid());
                     writer->write_as(trigger_time, action, proxy_location->uid);
                 } else
                 {
+                    action.*id_ptr = writer->current_frame_uid();
                     writer->write(trigger_time, action);
                 }
                 return Napi::Boolean::New(info.Env(), true);
             }
             return Napi::Boolean::New(info.Env(), false);
-        }
+        };
     };
 }
 

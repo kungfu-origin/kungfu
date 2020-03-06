@@ -157,12 +157,12 @@ namespace kungfu::node
 
     Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info)
     {
-        return InteractWithTD<OrderInput>(info);
+        return InteractWithTD<OrderInput>(info, &OrderInput::order_id);
     }
 
     Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info)
     {
-        return InteractWithTD<OrderAction>(info);
+        return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
     }
 
     void Watcher::Init(Napi::Env env, Napi::Object exports)
