@@ -149,7 +149,7 @@ namespace kungfu::node
         return Napi::Value();
     }
 
-    Napi::Value Watcher::IsReadyToIssueOrder(const Napi::CallbackInfo &info)
+    Napi::Value Watcher::isReadyToInteract(const Napi::CallbackInfo &info)
     {
         auto account_location = ExtractLocation(info, 0, get_locator());
         return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
@@ -157,32 +157,12 @@ namespace kungfu::node
 
     Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info)
     {
-        auto trigger_time = time::now_in_nano();
-        Napi::Object obj = info[0].ToObject();
-        OrderInput input = {};
-        serialize::JsGet{}(obj, input);
-        auto account_location = ExtractLocation(info, 1, get_locator());
-        auto strategy_location = ExtractLocation(info, 2, get_locator());
-        auto writer = get_writer(account_location->uid);
-        if (strategy_location and has_location(strategy_location->uid))
-        {
-            auto proxy_location = location::make_shared(
-                    strategy_location->mode, strategy_location->category,
-                    get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
-            );
-            if (not has_channel(account_location->uid, proxy_location->uid))
-            {
-                RequestSimplexChannel request = {};
-                request.source_id = account_location->uid;
-                request.dest_id = proxy_location->uid;
-                writers_.at(get_master_commands_uid())->write(trigger_time, request);
-            }
-            writer->write_as(trigger_time, input, proxy_location->uid);
-        } else
-        {
-            writer->write(trigger_time, input);
-        }
-        return Napi::Value();
+        return InteractWithTD<OrderInput>(info);
+    }
+
+    Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info)
+    {
+        return InteractWithTD<OrderAction>(info);
     }
 
     void Watcher::Init(Napi::Env env, Napi::Object exports)
@@ -197,8 +177,9 @@ namespace kungfu::node
                 InstanceMethod("step", &Watcher::Step),
                 InstanceMethod("getLocation", &Watcher::GetLocation),
                 InstanceMethod("publishState", &Watcher::PublishState),
-                InstanceMethod("isReadyToIssueOrder", &Watcher::IsReadyToIssueOrder),
+                InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),
                 InstanceMethod("issueOrder", &Watcher::IssueOrder),
+                InstanceMethod("cancelOrder", &Watcher::CancelOrder),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),

@@ -45,9 +45,11 @@ namespace kungfu::node
 
         Napi::Value PublishState(const Napi::CallbackInfo &info);
 
-        Napi::Value IsReadyToIssueOrder(const Napi::CallbackInfo &info);
+        Napi::Value isReadyToInteract(const Napi::CallbackInfo &info);
 
         Napi::Value IssueOrder(const Napi::CallbackInfo &info);
+
+        Napi::Value CancelOrder(const Napi::CallbackInfo &info);
 
         static void Init(Napi::Env env, Napi::Object exports);
 
@@ -69,6 +71,37 @@ namespace kungfu::node
         std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> strategy_writers_;
 
         void RestoreState(const yijinjing::data::location_ptr &config_location);
+
+        template<typename DataType>
+        Napi::Value InteractWithTD(const Napi::CallbackInfo &info)
+        {
+            auto trigger_time = yijinjing::time::now_in_nano();
+            Napi::Object obj = info[0].ToObject();
+            DataType action = {};
+            serialize::JsGet{}(obj, action);
+            auto account_location = ExtractLocation(info, 1, get_locator());
+            auto strategy_location = ExtractLocation(info, 2, get_locator());
+            auto writer = get_writer(account_location->uid);
+            if (strategy_location and has_location(strategy_location->uid))
+            {
+                auto proxy_location = yijinjing::data::location::make_shared(
+                        strategy_location->mode, strategy_location->category,
+                        get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
+                );
+                if (not has_channel(account_location->uid, proxy_location->uid))
+                {
+                    longfist::types::RequestSimplexChannel request = {};
+                    request.source_id = account_location->uid;
+                    request.dest_id = proxy_location->uid;
+                    writers_.at(get_master_commands_uid())->write(trigger_time, request);
+                }
+                writer->write_as(trigger_time, action, proxy_location->uid);
+            } else
+            {
+                writer->write(trigger_time, action);
+            }
+            return Napi::Value();
+        }
     };
 }
 

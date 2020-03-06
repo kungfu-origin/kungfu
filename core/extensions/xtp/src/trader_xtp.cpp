@@ -75,8 +75,8 @@ namespace kungfu::wingchun::xtp
 
         if (xtp_order_id != 0)
         {
-            outbound_orders_[input.order_id] = xtp_order_id;
-            inbound_orders_[xtp_order_id] = input.order_id;
+            outbound_orders_.emplace(input.order_id, xtp_order_id);
+            inbound_orders_.emplace(xtp_order_id, input.order_id);
             SPDLOG_TRACE("success to insert order, (order_id){} (xtp_order_id) {}", input.order_id, xtp_order_id);
         } else
         {
@@ -100,7 +100,7 @@ namespace kungfu::wingchun::xtp
             SPDLOG_ERROR("failed to cancel order {}, can't find related xtp order id", action.order_id);
             return false;
         }
-        uint64_t xtp_order_id = outbound_orders_[action.order_id];
+        uint64_t xtp_order_id = outbound_orders_.at(action.order_id);
         auto order_state = orders_.at(action.order_id);
         auto xtp_action_id = api_->CancelOrder(xtp_order_id, session_id_);
         if (xtp_action_id == 0)
@@ -145,7 +145,7 @@ namespace kungfu::wingchun::xtp
             SPDLOG_ERROR("unrecognized xtp_order_id {}@{}", order_info->order_xtp_id, trading_day_);
             return;
         }
-        auto order_id = inbound_orders_[order_info->order_xtp_id];
+        auto order_id = inbound_orders_.at(order_info->order_xtp_id);
         auto order_state = orders_.at(order_id);
         auto writer = get_writer(order_state.dest);
         Order &order = writer->open_data<Order>(0);
@@ -168,7 +168,7 @@ namespace kungfu::wingchun::xtp
             SPDLOG_ERROR("unrecognized xtp_order_id {}", trade_info->order_xtp_id);
             return;
         }
-        auto order_id = inbound_orders_[trade_info->order_xtp_id];
+        auto order_id = inbound_orders_.at(trade_info->order_xtp_id);
         auto order_state = orders_.at(order_id);
         auto writer = get_writer(order_state.dest);
         Trade &trade = writer->open_data<Trade>(0);
