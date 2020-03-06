@@ -125,8 +125,6 @@ function buildCancalAllOrderPostData(type: string, accountOrStrategyId: string) 
     }
 }
 
-
-
 interface MakeOrderData {
     category: string | 'td',
     group: string, // source_name
@@ -138,10 +136,11 @@ interface MakeOrderData {
     price_type: number,
     side: number,
     offset: number,
-    hedge_flag: number
+    hedge_flag: number,
 }
 
 export const nanoMakeOrder = (makeOrderData: MakeOrderData) => {
+    console.log(makeOrderData)
     const reqMsg = JSON.stringify({
         msg_type: msgType.makeOrder,
         data: {

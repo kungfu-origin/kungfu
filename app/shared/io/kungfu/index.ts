@@ -2,8 +2,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { startGetKungfuState } from '__gUtils/kungfuUtils';
-import { transformTradingItemListToData, transformOrderTradeListToData, transformAssetItemListToData } from '__io/kungfu/utils';
-
+import { transformTradingItemListToData, transformOrderTradeListToData, transformAssetItemListToData } from '__gUtils/kungfuUtils';
 
 
 export const KUNGFU_OBSERVER = new Observable(subscriber => {

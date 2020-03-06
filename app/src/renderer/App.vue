@@ -56,6 +56,9 @@ export default {
             }
         })
 
+        //获取tdmd list
+        t.$store.dispatch('getTdMdList')
+
         //ipc event
         ipcRenderer.removeAllListeners('main-process-messages')
         t.bindMainProcessEvent()

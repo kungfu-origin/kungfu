@@ -1,4 +1,6 @@
 
+import { getTdList, getMdList } from '__io/kungfu/account';
+
 //保存选中的账户信息
 export const setCurrentAccount = ({ commit }, account) => {
     commit('SET_CURRENT_ACCOUNT', account)
@@ -23,4 +25,16 @@ export const setTdList = ({ commit }, tdList) => {
 
 export const setMdList = ({ commit }, mdList) => {
     commit('SET_MD_LIST', mdList)
+}
+
+
+export const getTdMdList = ({ dispatch }) => {
+    return Promise.all([getTdList(), getMdList()])
+        .then(tdMdList => {
+            const tdList = tdMdList[0] || [];
+            const mdList = tdMdList[1] || [];
+            dispatch('setTdList', tdList);
+            dispatch('setMdList', mdList || [])
+        })
+    
 }

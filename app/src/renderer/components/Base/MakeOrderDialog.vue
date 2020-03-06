@@ -131,9 +131,11 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { nanoMakeOrder } from '__io/nano/nanoReq';
+import { kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
 import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds } from '__gConfig/tradingConfig';
 import { Autocomplete } from 'element-ui';
+import { from } from 'rxjs';
 
 const ls = require('local-storage');
 
@@ -203,13 +205,18 @@ export default {
             return t.tdAccountSource[sourceName].typeName
         },
 
-        currentAccountId() {
+        currentAccountResolve () {
             const t = this;
             if(t.moduleType === 'account') {
-                return t.currentId.toAccountId();
+                return t.currentId
             } else if(t.moduleType === 'strategy') {
-                return t.currentAccount.toAccountId();
+                return t.currentAccount
             }
+        }, 
+
+        currentAccountId() {
+            const t = this;
+            return this.currentAccountResolve.toAccountId()
         },
 
         currentSourceName() {
@@ -253,20 +260,22 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     const makeOrderForm = deepClone(t.makeOrderForm);
-                    makeOrderForm.category = 'td';
-                    makeOrderForm.group = t.currentSourceName;
-                    makeOrderForm.name = t.currentAccountId;
-                    const gatewayName = `td_${makeOrderForm.group}_${makeOrderForm.name}`;
+                    const gatewayName = `td_${t.currentSourceName}_${t.currentAccountId}`;
 
                     if(!ifProcessRunning(gatewayName, t.processStatus)){
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
-                    t.$message.info('正在发送订单指令...');
 
-                    nanoMakeOrder(makeOrderForm)
-                        .then(() => t.$message.success('下单指令已发送！'))
-                        .catch(err => t.$message.error(err))
+                    if (t.moduleType === 'account') {
+                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolve)
+                            .then(() => t.$message.success('下单指令已发送！'))
+                            .catch(err => t.$message.error(err))
+                    } else if (t.moduleType === 'strategy') {
+                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolve, t.currentId)
+                            .then(() => t.$message.success('下单指令已发送！'))
+                            .catch(err => t.$message.error(err))
+                    }
                     
                     //save instrumentid to ls
                     const instrumentIdsList = ls.get('instrument_ids_list');
