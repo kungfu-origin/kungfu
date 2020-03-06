@@ -227,11 +227,8 @@ namespace kungfu::node
           {
               auto register_data = event->data<Register>();
               auto app_location = location::make_shared(register_data, get_locator());
-              if (app_location->category == category::TD)
-              {
-                  request_write_to(event->gen_time(), app_location->uid);
-                  request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
-              }
+              request_write_to(event->gen_time(), app_location->uid);
+              request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
               request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
           });
     }

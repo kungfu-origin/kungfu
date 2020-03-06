@@ -87,8 +87,14 @@ namespace kungfu::node
                 auto writer = get_writer(account_location->uid);
 
                 auto strategy_location = ExtractLocation(info, 2, get_locator());
-                if (strategy_location and has_location(strategy_location->uid))
+                if (strategy_location)
                 {
+                    if (not has_location(strategy_location->uid))
+                    {
+                        add_location(trigger_time, strategy_location);
+                        auto location_data = *std::dynamic_pointer_cast<longfist::types::Location>(strategy_location);
+                        writers_.at(get_master_commands_uid())->write(trigger_time, location_data);
+                    }
                     auto proxy_location = yijinjing::data::location::make_shared(
                             strategy_location->mode, strategy_location->category,
                             get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
