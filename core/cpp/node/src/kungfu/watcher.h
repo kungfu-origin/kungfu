@@ -80,25 +80,28 @@ namespace kungfu::node
             DataType action = {};
             serialize::JsGet{}(obj, action);
             auto account_location = ExtractLocation(info, 1, get_locator());
-            auto strategy_location = ExtractLocation(info, 2, get_locator());
-            auto writer = get_writer(account_location->uid);
-            if (strategy_location and has_location(strategy_location->uid))
+            if (account_location and has_writer(account_location->uid))
             {
-                auto proxy_location = yijinjing::data::location::make_shared(
-                        strategy_location->mode, strategy_location->category,
-                        get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
-                );
-                if (not has_channel(account_location->uid, proxy_location->uid))
+                auto writer = get_writer(account_location->uid);
+                auto strategy_location = ExtractLocation(info, 2, get_locator());
+                if (strategy_location and has_location(strategy_location->uid))
                 {
-                    longfist::types::RequestSimplexChannel request = {};
-                    request.source_id = account_location->uid;
-                    request.dest_id = proxy_location->uid;
-                    writers_.at(get_master_commands_uid())->write(trigger_time, request);
+                    auto proxy_location = yijinjing::data::location::make_shared(
+                            strategy_location->mode, strategy_location->category,
+                            get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
+                    );
+                    if (not has_channel(account_location->uid, proxy_location->uid))
+                    {
+                        longfist::types::RequestSimplexChannel request = {};
+                        request.source_id = account_location->uid;
+                        request.dest_id = proxy_location->uid;
+                        writers_.at(get_master_commands_uid())->write(trigger_time, request);
+                    }
+                    writer->write_as(trigger_time, action, proxy_location->uid);
+                } else
+                {
+                    writer->write(trigger_time, action);
                 }
-                writer->write_as(trigger_time, action, proxy_location->uid);
-            } else
-            {
-                writer->write(trigger_time, action);
             }
             return Napi::Value();
         }
