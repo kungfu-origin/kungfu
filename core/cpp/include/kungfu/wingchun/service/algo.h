@@ -34,9 +34,6 @@ namespace kungfu::wingchun::service
         algo::AlgoContext_ptr get_algo_context() const
         { return context_; }
 
-    protected:
-        void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
-
     private:
         algo::AlgoContext_ptr context_;
     };

@@ -177,22 +177,23 @@ namespace kungfu::node
         exports.Set("Watcher", func);
     }
 
-    void Watcher::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
-    {
-        apprentice::register_location(trigger_time, location);
-
-        if (location->uid == ledger_location_.uid and has_writer(get_master_commands_uid()))
-        {
-            request_read_from_public(now(), ledger_location_.uid, get_master_start_time());
-        }
-    }
-
     void Watcher::react()
     {
         events_ |
         $([&](const event_ptr &event)
           {
-              longfist::cast_event_invoke(event, event->source() == get_master_commands_uid() ? update_state : update_ledger);
+              longfist::cast_event_invoke(event, update_state);
+          });
+
+        apprentice::react();
+    }
+
+    void Watcher::on_start()
+    {
+        events_ |
+        $([&](const event_ptr &event)
+          {
+              longfist::cast_event_invoke(event, update_ledger);
           });
 
         events_ | is(Channel::tag) |
@@ -202,48 +203,23 @@ namespace kungfu::node
               reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
           });
 
-        apprentice::react();
-    }
-
-    void Watcher::on_start()
-    {
-        events_ | is(Channel::tag) |
+        events_ | is(Register::tag) |
         $([&](const event_ptr &event)
         {
-            const Channel &channel = event->data<Channel>();
-            auto source_location = get_location(channel.source_id);
-            auto dest_location = get_location(channel.dest_id);
-            if (source_location->mode == mode::LIVE and
-                source_location->category == category::TD and dest_location->category == category::STRATEGY)
+            auto register_data = event->data<Register>();
+            auto app_location = location::make_shared(register_data, get_locator());
+            if (app_location->category == category::TD)
             {
-                auto writer_location = location::make_shared(mode::LIVE, category::STRATEGY, "node", dest_location->name, get_locator());
-                auto master_cmd_writer = writers_.at(get_master_commands_uid());
-                RequestWriteAtTo request{};
-                request.location_uid = writer_location->uid;
-                request.mode = writer_location->mode;
-                request.category = writer_location->category;
-                request.group = writer_location->group;
-                request.name = writer_location->name;
-                master_cmd_writer->write(0, request);
-                SPDLOG_INFO("request writer for strategy at {}", writer_location->uname);
+                request_write_to(event->gen_time(), app_location->uid);
+                request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
             }
+            request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
         });
-
-        events_ | is(RequestWriteAtTo::tag) |
-        $([&](const event_ptr &event)
-          {
-              const RequestWriteAtTo &request = event->data<RequestWriteAtTo>();
-              auto strategy_location = location::make_shared(request.mode, request.category, "default", request.name, get_locator());
-              auto writer_location = location::make_shared(request, get_locator());
-              auto writer = get_io_device()->open_writer_at(writer_location, request.dest_id);
-              strategy_writers_.emplace(strategy_location->uid, writer);
-              SPDLOG_INFO("writer for strategy {} created at {}", strategy_location->uname, writer_location->uname);
-          });
     }
 
     void Watcher::RestoreState(const location_ptr &state_location)
     {
-        register_location(0, state_location);
+        add_location(0, state_location);
         serialize::JsRestoreState(*this, ledger_ref_, state_location)();
     }
 }

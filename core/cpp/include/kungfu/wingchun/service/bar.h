@@ -18,9 +18,6 @@ namespace kungfu::wingchun::service
 
         void on_start() override;
 
-    protected:
-        void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
-
     private:
         yijinjing::data::location_ptr source_location_;
         int64_t time_interval_;

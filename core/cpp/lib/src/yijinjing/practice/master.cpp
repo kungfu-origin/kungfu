@@ -10,6 +10,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/practice/config_store.h>
 #include <kungfu/yijinjing/practice/master.h>
 
 using namespace kungfu::rx;
@@ -26,6 +27,11 @@ namespace kungfu::yijinjing::practice
             hero(std::make_shared<io_device_master>(home, low_latency)),
             start_time_(time::now_in_nano()), last_check_(0)
     {
+        config_store cs(get_locator());
+        for (auto item : cs.get_all(Config{}))
+        {
+            add_location(start_time_, location::make_shared(item.second, get_locator()));
+        }
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);
         writers_[0] = io_device->open_writer(0);
@@ -59,12 +65,13 @@ namespace kungfu::yijinjing::practice
         auto request_json = e->data<nlohmann::json>();
         auto request_data = e->data_as_string();
 
-        Register register_msg(request_data.c_str(), request_data.length());
-        auto app_location = location::make_shared(register_msg, home->locator);
+        Register register_data(request_data.c_str(), request_data.length());
 
-        if (has_location(app_location->uid))
+        auto app_location = location::make_shared(register_data, home->locator);
+
+        if (is_location_live(app_location->uid))
         {
-            SPDLOG_ERROR("location {} has already been registered", app_location->uname);
+            SPDLOG_ERROR("location {} has already been registered live", app_location->uname);
             return;
         }
 
@@ -72,18 +79,16 @@ namespace kungfu::yijinjing::practice
         auto uid_str = fmt::format("{:08x}", app_location->uid);
         auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
 
-        register_location(e->gen_time(), master_cmd_location);
-        register_location(e->gen_time(), app_location);
+        add_location(e->gen_time(), app_location);
+        add_location(e->gen_time(), master_cmd_location);
+        register_location(e->gen_time(), register_data);
+
         app_locations_.emplace(app_location->uid, master_cmd_location->uid);
-        registry_.emplace(app_location->uid, register_msg);
-        registry_.at(app_location->uid).checkin_time = e->gen_time();
-
         writers_.emplace(app_location->uid, get_io_device()->open_writer_at(master_cmd_location, app_location->uid));
-
         reader_->join(app_location, 0, now);
         reader_->join(app_location, master_cmd_location->uid, now);
 
-        publish_register(e->gen_time(), app_location);
+        writers_[0]->write(e->gen_time(), register_data);
 
         auto writer = writers_.at(app_location->uid);
 
@@ -93,17 +98,15 @@ namespace kungfu::yijinjing::practice
         require_write_to(e->gen_time(), app_location->uid, 0);
         require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
 
-        for (const auto &item : locations_)
-        {
-            writer->write(e->gen_time(), dynamic_cast<Location &>(*item.second));
-        }
-
         app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
         app_sqlizers_.at(app_location->uid)->restore(writer);
 
+        push_locations(e->gen_time(), writer);
+
         writer->mark(start_time_, RequestStart::tag);
 
-        push_register_and_channels(e->gen_time(), writer);
+        push_registers(e->gen_time(), writer);
+        push_channels(e->gen_time(), writer);
 
         on_register(e, app_location);
     }
@@ -138,12 +141,6 @@ namespace kungfu::yijinjing::practice
         {
             SPDLOG_ERROR("Can not send time to {:08x}", dest);
         }
-    }
-
-    void master::register_channel(int64_t trigger_time, const Channel &channel)
-    {
-        hero::register_channel(trigger_time, channel);
-        writers_[0]->write(trigger_time, channel);
     }
 
     bool master::produce_one(const rx::subscriber<event_ptr> &sb)
@@ -198,46 +195,48 @@ namespace kungfu::yijinjing::practice
               get_io_device()->get_publisher()->publish("{}");
           });
 
+        events_ | is(Location::tag) |
+        $([&](const event_ptr &e)
+          {
+              Location data = e->data<Location>();
+              add_location(e->gen_time(), location::make_shared(data, get_locator()));
+              writers_[0]->write(e->gen_time(), data);
+          });
+
         events_ | is(Register::tag) | $$(register_app);
 
         events_ | is(RequestWriteTo::tag) |
         $([&](const event_ptr &e)
           {
               const RequestWriteTo &request = e->data<RequestWriteTo>();
-              reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-              require_write_to(e->gen_time(), e->source(), request.dest_id);
-              require_read_from(0, request.dest_id, e->source(), e->gen_time());
-              Channel channel = {};
-              channel.source_id = e->source();
-              channel.dest_id = request.dest_id;
-              register_channel(e->gen_time(), channel);
-          });
-
-        events_ | is(RequestWriteAtTo::tag) |
-        $([&](const event_ptr &e)
-          {
-              const RequestWriteAtTo &request = e->data<RequestWriteAtTo>();
-              auto source_location = location::make_shared(request, get_locator());
-              reader_->join(source_location, request.dest_id, e->gen_time());
-              writers_.at(e->source())->write(e->gen_time(), request);
-              require_read_from(0, request.dest_id, source_location->uid, e->gen_time());
-              Channel channel = {};
-              channel.source_id = source_location->uid;
-              channel.dest_id = request.dest_id;
-              register_channel(e->gen_time(), channel);
+              if (check_location_live(e->source(), request.dest_id))
+              {
+                  reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
+                  require_write_to(e->gen_time(), e->source(), request.dest_id);
+                  require_read_from(0, request.dest_id, e->source(), e->gen_time());
+                  Channel channel = {};
+                  channel.source_id = e->source();
+                  channel.dest_id = request.dest_id;
+                  register_channel(e->gen_time(), channel);
+                  writers_[0]->write(e->gen_time(), channel);
+              }
           });
 
         events_ | is(RequestReadFrom::tag) |
         $([&](const event_ptr &e)
           {
               const RequestReadFrom &request = e->data<RequestReadFrom>();
-              reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-              require_write_to(e->gen_time(), request.source_id, e->source());
-              require_read_from(e->gen_time(), e->source(), request.source_id, request.from_time);
-              Channel channel = {};
-              channel.source_id = request.source_id;
-              channel.dest_id = e->source();
-              register_channel(e->gen_time(), channel);
+              if (check_location_live(request.source_id, e->source()))
+              {
+                  reader_->join(get_location(request.source_id), e->source(), e->gen_time());
+                  require_write_to(e->gen_time(), request.source_id, e->source());
+                  require_read_from(e->gen_time(), e->source(), request.source_id, request.from_time);
+                  Channel channel = {};
+                  channel.source_id = request.source_id;
+                  channel.dest_id = e->source();
+                  register_channel(e->gen_time(), channel);
+                  writers_[0]->write(e->gen_time(), channel);
+              }
           });
 
         events_ | is(RequestReadFromPublic::tag) |
@@ -270,24 +269,24 @@ namespace kungfu::yijinjing::practice
           });
     }
 
-    void master::publish_register(int64_t trigger_time, const yijinjing::data::location_ptr &location)
+    void master::push_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
     {
-        Register message = {};
-        message.location_uid = location->uid;
-        message.mode = location->mode;
-        message.category = location->category;
-        message.group = location->group;
-        message.name = location->name;
-        writers_[0]->write(trigger_time, message);
+        for (const auto &item : locations_)
+        {
+            writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
+        }
     }
 
-    void master::push_register_and_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    void master::push_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
     {
         for (const auto &item : registry_)
         {
             writer->write(trigger_time, item.second);
         }
+    }
 
+    void master::push_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    {
         for (const auto &item: channels_)
         {
             writer->write(trigger_time, item.second);

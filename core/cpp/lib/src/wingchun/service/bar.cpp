@@ -107,24 +107,22 @@ namespace kungfu::wingchun::service
         return true;
     }
 
-    void BarGenerator::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
-    {
-        if (has_location(location->uid))
-        {
-            return;
-        }
-        apprentice::register_location(trigger_time, location);
-        if (location->uid == source_location_->uid)
-        {
-            request_read_from_public(now(), source_location_->uid, now());
-            request_write_to(now(), source_location_->uid);
-            SPDLOG_INFO("added md {} [{:08x}]", source_location_->uname, source_location_->uid);
-        }
-    }
-
     void BarGenerator::on_start()
     {
         apprentice::on_start();
+
+        events_ | is(Register::tag) |
+        $([&](const event_ptr &event)
+          {
+              auto register_data = event->data<Register>();
+              if (register_data.location_uid == source_location_->uid)
+              {
+                  request_read_from_public(now(), source_location_->uid, now());
+                  request_write_to(now(), source_location_->uid);
+                  SPDLOG_INFO("added md {} [{:08x}]", source_location_->uname, source_location_->uid);
+              }
+          }
+        );
 
         events_ | is(Quote::tag) |
         $([&](const event_ptr &event)

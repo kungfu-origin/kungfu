@@ -58,14 +58,6 @@ namespace kungfu::wingchun::service
 
     protected:
 
-        void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
-
-        void deregister_location(int64_t trigger_time, uint32_t location_uid) override;
-
-        void on_write_to(const event_ptr &event) override;
-
-        void on_read_from(const event_ptr &event) override;
-
         void on_start() override;
 
         void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
@@ -84,8 +76,6 @@ namespace kungfu::wingchun::service
         longfist::enums::BrokerState get_broker_state(uint32_t broker_location) const;
 
         void monitor_instruments(uint32_t broker_location);
-
-        void watch(int64_t trigger_time, const yijinjing::data::location_ptr &app_location);
 
         void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);
 

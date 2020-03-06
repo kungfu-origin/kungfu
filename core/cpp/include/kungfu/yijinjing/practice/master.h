@@ -49,19 +49,18 @@ namespace kungfu::yijinjing::practice
 
         void react() override;
 
-        void register_channel(int64_t trigger_time, const longfist::types::Channel &channel) override;
-
     private:
         int64_t start_time_;
         int64_t last_check_;
         std::unordered_map<uint32_t, uint32_t> app_locations_;
-        std::unordered_map<uint32_t, longfist::types::Register> registry_;
         std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
 
-        void publish_register(int64_t trigger_time, const yijinjing::data::location_ptr &location);
+        void push_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
 
-        void push_register_and_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+        void push_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+
+        void push_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
     };
 }
 #endif //KUNGFU_MASTER_H

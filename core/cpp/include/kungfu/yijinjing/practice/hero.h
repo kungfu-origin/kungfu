@@ -55,9 +55,11 @@ namespace kungfu::yijinjing::practice
 
         [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
-        bool has_location(uint32_t hash) const;
+        bool has_location(uint32_t uid) const;
 
-        [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t hash) const;
+        [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t uid) const;
+
+        bool is_location_live(uint32_t uid) const;
 
         bool has_channel(uint64_t hash) const;
 
@@ -74,17 +76,26 @@ namespace kungfu::yijinjing::practice
         int64_t end_time_;
         std::unordered_map<uint64_t, longfist::types::Channel> channels_;
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
+        std::unordered_map<uint32_t, longfist::types::Register> registry_;
         yijinjing::journal::reader_ptr reader_;
         std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
         rx::connectable_observable <event_ptr> events_;
 
-        virtual void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
+        bool check_location_exists(uint32_t source_id, uint32_t dest_id);
 
-        virtual void deregister_location(int64_t trigger_time, uint32_t location_uid);
+        bool check_location_live(uint32_t source_id, uint32_t dest_id);
 
-        virtual void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+        void add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
-        virtual void deregister_channel_by_source(uint32_t source_id);
+        void remove_location(int64_t trigger_time, uint32_t location_uid);
+
+        void register_location(int64_t trigger_time, const longfist::types::Register &register_data);
+
+        void deregister_location(int64_t trigger_time, uint32_t location_uid);
+
+        void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+
+        void deregister_channel_by_source(uint32_t source_id);
 
         void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
@@ -105,24 +116,21 @@ namespace kungfu::yijinjing::practice
         volatile bool continual_ = true;
         volatile bool live_ = false;
 
-        bool check_location(uint32_t source_id, uint32_t dest_id);
-
         template<typename T>
         std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer,
                                                                 int64_t trigger_time,
                                                                 uint32_t dest_id, uint32_t source_id,
                                                                 int64_t from_time)
         {
-            if (not check_location(source_id, dest_id))
+            if (check_location_exists(source_id, dest_id))
             {
-                return;
+                T &msg = writer->template open_data<T>(trigger_time);
+                msg.source_id = source_id;
+                msg.from_time = from_time;
+                writer->close_data();
+                SPDLOG_INFO("require {} read from {} from {}",
+                            get_location(dest_id)->uname, get_location(source_id)->uname, time::strftime(msg.from_time));
             }
-            T &msg = writer->template open_data<T>(trigger_time);
-            msg.source_id = source_id;
-            msg.from_time = from_time;
-            writer->close_data();
-            SPDLOG_INFO("require {} read from {} from {}",
-                        get_location(dest_id)->uname, get_location(source_id)->uname, time::strftime(msg.from_time));
         }
 
         static void delegate_produce(hero *instance, const rx::subscriber <event_ptr> &sb);

@@ -112,17 +112,6 @@ namespace kungfu::longfist::types
             (uint32_t, dest_id)
     );
 
-    KF_DEFINE_DATA_TYPE(
-            RequestWriteAtTo, 10024,
-            PK(location_uid, dest_id),
-            (uint32_t, location_uid),
-            (enums::category, category),
-            (enums::mode, mode),
-            (std::string, group),
-            (std::string, name),
-            (uint32_t, dest_id)
-    );
-
     KF_DEFINE_PACK_TYPE(
             TradingDay, 10027,
             PK(timestamp),

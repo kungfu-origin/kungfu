@@ -25,8 +25,40 @@ namespace kungfu::wingchun::service
 
     void Algo::on_start()
     {
-        context_ = std::make_shared<algo::AlgoContext>(*this, events_);
-        context_->react();
+        events_ | is(Register::tag) |
+        $([&](const event_ptr &event)
+          {
+              auto register_data = event->data<Register>();
+              auto source_location = location::make_shared(register_data, get_locator());
+              auto trigger_time = event->gen_time();
+
+              switch (source_location->category)
+              {
+                  case category::MD:
+                  {
+                      request_read_from_public(trigger_time, source_location->uid, trigger_time);
+                      request_write_to(trigger_time, source_location->uid);
+                      break;
+                  }
+                  case category::TD:
+                  {
+                      request_read_from(trigger_time, source_location->uid, trigger_time);
+                      request_write_to(trigger_time, source_location->uid);
+                      break;
+                  }
+                  case category::STRATEGY:
+                  {
+                      request_read_from(trigger_time, source_location->uid, trigger_time);
+                      request_write_to(trigger_time, source_location->uid);
+                      break;
+                  }
+                  default:
+                  {
+                      break;
+                  }
+              }
+          }
+        );
 
         events_ | is(AlgoOrderInput::tag) |
         $([&](const event_ptr &event)
@@ -46,42 +78,9 @@ namespace kungfu::wingchun::service
               modify_order(event, event->data_as_string());
           });
 
+        context_ = std::make_shared<algo::AlgoContext>(*this, events_);
+        context_->react();
+
         apprentice::on_start();
-    }
-
-    void Algo::register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
-    {
-        if (has_location(location->uid))
-        {
-            // bypass location events from others master cmd journal
-            return;
-        }
-        apprentice::register_location(trigger_time, location);
-
-        switch (location->category)
-        {
-            case category::MD:
-            {
-                request_read_from_public(trigger_time, location->uid, trigger_time);
-                request_write_to(trigger_time, location->uid);
-                break;
-            }
-            case category::TD:
-            {
-                request_read_from(trigger_time, location->uid, trigger_time);
-                request_write_to(trigger_time, location->uid);
-                break;
-            }
-            case category::STRATEGY:
-            {
-                request_read_from(trigger_time, location->uid, trigger_time);
-                request_write_to(trigger_time, location->uid);
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
     }
 }

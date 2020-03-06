@@ -40,12 +40,12 @@ namespace kungfu::yijinjing::log
             } else
             {
                 logger = std::make_shared<spdlog::logger>(name, daily_sink);
-                logger->flush_on(spdlog::level::trace);
             }
 
             logger->set_pattern(DEFAULT_LOG_PATTERN);
-            spdlog::level::level_enum env_log_level = get_env_log_level(location->locator);
-            logger->set_level(env_log_level);
+            logger->set_level(get_env_log_level(location->locator));
+            logger->flush_on(spdlog::level::trace);
+
             spdlog::set_default_logger(logger);
         } else
         {

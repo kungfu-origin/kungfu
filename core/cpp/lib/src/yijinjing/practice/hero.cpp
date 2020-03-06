@@ -26,6 +26,7 @@ namespace kungfu::yijinjing::practice
             io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX)
     {
         os::handle_os_signals(this);
+        add_location(0, get_io_device()->get_home());
         reader_ = io_device_->open_reader_to_subscribe();
     }
 
@@ -179,18 +180,23 @@ namespace kungfu::yijinjing::practice
         return writers_.at(dest_id);
     }
 
-    bool hero::has_location(uint32_t hash) const
+    bool hero::has_location(uint32_t uid) const
     {
-        return locations_.find(hash) != locations_.end();
+        return locations_.find(uid) != locations_.end();
     }
 
-    location_ptr hero::get_location(uint32_t hash) const
+    location_ptr hero::get_location(uint32_t uid) const
     {
-        if (not has_location(hash))
+        if (not has_location(uid))
         {
-            throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", hash));
+            throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", uid));
         }
-        return locations_.at(hash);
+        return locations_.at(uid);
+    }
+
+    bool hero::is_location_live(uint32_t uid) const
+    {
+        return registry_.find(uid) != registry_.end();
     }
 
     bool hero::has_channel(uint64_t hash) const
@@ -218,21 +224,73 @@ namespace kungfu::yijinjing::practice
     void hero::on_exit()
     {}
 
-    void hero::register_location(int64_t trigger_time, const location_ptr &location)
+    bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id)
+    {
+        if (not has_location(source_id))
+        {
+            SPDLOG_ERROR("[{:08x}] -> [{:08x}] source does not exist", source_id, dest_id);
+            return false;
+        }
+        if (dest_id != 0 and not has_location(dest_id))
+        {
+            SPDLOG_ERROR("[{:08x}] -> [{:08x}] dest does not exist", source_id, dest_id);
+            return false;
+        }
+        return true;
+    }
+
+    bool hero::check_location_live(uint32_t source_id, uint32_t dest_id)
+    {
+        if (not check_location_exists(source_id, dest_id))
+        {
+            return false;
+        }
+        if (registry_.find(source_id) == registry_.end())
+        {
+            SPDLOG_ERROR("[{:08x}] -> [{:08x}] source is not live", source_id, dest_id);
+            return false;
+        }
+        if (registry_.find(dest_id) == registry_.end())
+        {
+            SPDLOG_ERROR("[{:08x}] -> [{:08x}] dest is not live", source_id, dest_id);
+            return false;
+        }
+        return true;
+    }
+
+    void hero::add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location)
     {
         if (not has_location(location->uid))
         {
-            locations_[location->uid] = location;
-            SPDLOG_INFO("registered location {} [{:08x}]", location->uname, location->uid);
+            locations_.emplace(location->uid, location);
+            SPDLOG_INFO("added location {} [{:08x}]", location->uname, location->uid);
+        }
+    }
+
+    void hero::remove_location(int64_t trigger_time, uint32_t location_uid)
+    {
+        if (has_location(location_uid))
+        {
+            SPDLOG_INFO("removed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
+            locations_.erase(location_uid);
+        }
+    }
+
+    void hero::register_location(int64_t trigger_time, const longfist::types::Register &register_data)
+    {
+        if (not is_location_live(register_data.location_uid))
+        {
+            registry_.emplace(register_data.location_uid, register_data);
+            SPDLOG_INFO("registered location {} [{:08x}]", register_data.to_string(), register_data.location_uid);
         }
     }
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
     {
-        if (has_location(location_uid))
+        if (is_location_live(location_uid))
         {
+            registry_.erase(location_uid);
             SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
-            locations_.erase(location_uid);
         }
     }
 
@@ -277,7 +335,7 @@ namespace kungfu::yijinjing::practice
 
     void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id)
     {
-        if (not check_location(source_id, dest_id))
+        if (not check_location_exists(source_id, dest_id))
         {
             return;
         }
@@ -351,21 +409,6 @@ namespace kungfu::yijinjing::practice
         if (get_io_device()->get_home()->mode != mode::LIVE and not reader_->data_available())
         {
             SPDLOG_INFO("reached journal end {}", time::strftime(reader_->current_frame()->gen_time()));
-            return false;
-        }
-        return true;
-    }
-
-    bool hero::check_location(uint32_t source_id, uint32_t dest_id)
-    {
-        if (not has_location(source_id))
-        {
-            SPDLOG_ERROR("source location [{:08x}] not exists", source_id);
-            return false;
-        }
-        if (dest_id != 0 and not has_location(dest_id))
-        {
-            SPDLOG_ERROR("dest location [{:08x}] not exists", dest_id);
             return false;
         }
         return true;

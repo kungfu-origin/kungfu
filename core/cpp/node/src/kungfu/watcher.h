@@ -50,7 +50,6 @@ namespace kungfu::node
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:
-        void register_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) override;
 
         void react() override;
 

@@ -42,10 +42,15 @@ namespace kungfu::yijinjing::practice
     {
         auto uid_str = fmt::format("{:08x}", get_live_home_uid());
         auto locator = get_locator();
+
         master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
+        add_location(0, master_home_location_);
+
         master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
+        add_location(0, master_commands_location_);
+
         config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
-        locations_[master_commands_location_->uid] = master_commands_location_;
+        add_location(0, config_location_);
     }
 
     bool apprentice::is_started() const
@@ -130,24 +135,42 @@ namespace kungfu::yijinjing::practice
 
     void apprentice::react()
     {
-        events_ | is(Location::tag) | $$(register_location_from_event<Location>);
-        events_ | is(Register::tag) | $$(register_location_from_event<Register>);
-        events_ | is(Deregister::tag) | $$(deregister_location_from_event<Deregister>);
+        events_ | is(Location::tag) |
+        $([&](const event_ptr &event)
+          {
+              add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator()));
+          });
+
+        events_ | is(Register::tag) |
+        $([&](const event_ptr &event)
+          {
+              register_location(event->trigger_time(), event->data<Register>());
+          });
+
+        events_ | is(Deregister::tag) |
+        $([&](const event_ptr &event)
+          {
+              uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
+              reader_->disjoin(location_uid);
+              writers_.erase(location_uid);
+              deregister_channel_by_source(location_uid);
+              deregister_location(event->trigger_time(), location_uid);
+          });
 
         events_ | is(RequestReadFrom::tag) | $$(on_read_from);
         events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
         events_ | is(RequestWriteTo::tag) | $$(on_write_to);
 
         events_ | is(Channel::tag) |
-        $([&](const event_ptr &e)
+        $([&](const event_ptr &event)
           {
-              register_channel(e->gen_time(), e->data<Channel>());
+              register_channel(event->gen_time(), event->data<Channel>());
           });
 
         events_ | is(TradingDay::tag) |
-        $([&](const event_ptr &e)
+        $([&](const event_ptr &event)
           {
-              on_trading_day(e, e->data<TradingDay>().timestamp);
+              on_trading_day(event, event->data<TradingDay>().timestamp);
           });
 
         events_ | take_until(events_ | is(RequestStart::tag)) |
@@ -172,7 +195,7 @@ namespace kungfu::yijinjing::practice
                 auto self_register_event = events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first();
 
                 self_register_event | rx::timeout(seconds(10), observe_on_new_thread()) |
-                $([&](const event_ptr &e)
+                $([&](const event_ptr &event)
                   {
                       // once registered this subscriber finished, no worry for performance.
                       // timeout happens on new thread, can not subscribe journal reader here
@@ -190,9 +213,9 @@ namespace kungfu::yijinjing::practice
                   });
 
                 self_register_event |
-                $([&](const event_ptr &e)
+                $([&](const event_ptr &event)
                   {
-                      reader_->join(master_commands_location_, get_live_home_uid(), e->gen_time());
+                      reader_->join(master_commands_location_, get_live_home_uid(), event->gen_time());
                   },
                   [&](std::exception_ptr e)
                   {
