@@ -102,8 +102,9 @@ namespace kungfu::node
                 {
                     writer->write(trigger_time, action);
                 }
+                return Napi::Boolean::New(info.Env(), true);
             }
-            return Napi::Value();
+            return Napi::Boolean::New(info.Env(), false);
         }
     };
 }
