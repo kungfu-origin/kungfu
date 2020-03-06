@@ -65,7 +65,7 @@ namespace kungfu::yijinjing::practice
 
         const longfist::types::Channel &get_channel(uint64_t hash) const;
 
-        std::unordered_map<uint64_t, longfist::types::Channel> &get_channels();
+        const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
 
         virtual void on_notify();
 

@@ -27,55 +27,56 @@ namespace kungfu::yijinjing
     using namespace kungfu;
     using namespace kungfu::longfist::types;
     using namespace kungfu::yijinjing;
+    using namespace kungfu::yijinjing::data;
     using namespace kungfu::yijinjing::journal;
     using namespace kungfu::yijinjing::nanomsg;
     using namespace kungfu::yijinjing::util;
     using namespace kungfu::yijinjing::practice;
 
-    class PyLocator : public data::locator
+    class PyLocator : public locator
     {
-        using data::locator::locator;
+        using locator::locator;
 
         [[nodiscard]] bool has_env(const std::string &name) const override
         {
-            PYBIND11_OVERLOAD_PURE(bool, data::locator, has_env, name)
+            PYBIND11_OVERLOAD_PURE(bool, locator, has_env, name)
         }
 
         [[nodiscard]] std::string get_env(const std::string &name) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::string, data::locator, get_env, name)
+            PYBIND11_OVERLOAD_PURE(std::string, locator, get_env, name)
         }
 
-        [[nodiscard]] std::string layout_dir(data::location_ptr location, longfist::enums::layout l) const override
+        [[nodiscard]] std::string layout_dir(location_ptr location, longfist::enums::layout l) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_dir, location, l)
+            PYBIND11_OVERLOAD_PURE(std::string, locator, layout_dir, location, l)
         }
 
-        [[nodiscard]] std::string layout_file(data::location_ptr location, longfist::enums::layout l, const std::string &name) const override
+        [[nodiscard]] std::string layout_file(location_ptr location, longfist::enums::layout l, const std::string &name) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::string, data::locator, layout_file, location, l, name)
+            PYBIND11_OVERLOAD_PURE(std::string, locator, layout_file, location, l, name)
         }
 
-        [[nodiscard]] std::string default_to_system_db(data::location_ptr location, const std::string &name) const override
+        [[nodiscard]] std::string default_to_system_db(location_ptr location, const std::string &name) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::string, data::locator, default_to_system_db, location, name)
+            PYBIND11_OVERLOAD_PURE(std::string, locator, default_to_system_db, location, name)
         }
 
-        [[nodiscard]] std::vector<int> list_page_id(data::location_ptr location, uint32_t dest_id) const override
+        [[nodiscard]] std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::vector<int>, data::locator, list_page_id, location, dest_id)
+            PYBIND11_OVERLOAD_PURE(std::vector<int>, locator, list_page_id, location, dest_id)
         }
 
 
-        [[nodiscard]] std::vector<data::location_ptr>
+        [[nodiscard]] std::vector<location_ptr>
         list_locations(const std::string &category, const std::string &group, const std::string &name, const std::string &mode) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::vector<data::location_ptr>, data::locator, list_locations, category, group, name, mode)
+            PYBIND11_OVERLOAD_PURE(std::vector<location_ptr>, locator, list_locations, category, group, name, mode)
         }
 
-        [[nodiscard]] std::vector<uint32_t> list_location_dest(data::location_ptr location) const override
+        [[nodiscard]] std::vector<uint32_t> list_location_dest(location_ptr location) const override
         {
-            PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, data::locator, list_location_dest, location)
+            PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, locator, list_location_dest, location)
         }
     };
 
@@ -141,19 +142,24 @@ namespace kungfu::yijinjing
     public:
         using master::master;
 
-        void on_register(const event_ptr &event, const data::location_ptr &app_location) override
+        void on_exit() override
         {
-            PYBIND11_OVERLOAD(void, master, on_register, event, app_location);
+            PYBIND11_OVERLOAD_PURE(void, master, on_exit);
+        }
+
+        void on_register(const event_ptr &event, const location_ptr &app_location) override
+        {
+            PYBIND11_OVERLOAD_PURE(void, master, on_register, event, app_location);
         }
 
         void on_interval_check(int64_t nanotime) override
         {
-            PYBIND11_OVERLOAD(void, master, on_interval_check, nanotime);
+            PYBIND11_OVERLOAD_PURE(void, master, on_interval_check, nanotime);
         }
 
-        void on_exit() override
+        int64_t acquire_trading_day() override
         {
-            PYBIND11_OVERLOAD(void, master, on_exit);
+            PYBIND11_OVERLOAD_PURE(int64_t, master, acquire_trading_day);
         }
     };
 
@@ -245,34 +251,34 @@ namespace kungfu::yijinjing
                 .def_property_readonly("data_address", [](const frame &f)
                 { return f.address() + f.header_length(); });
 
-        auto location_class = py::class_<data::location, std::shared_ptr<data::location>>(m, "location");
-        location_class.def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &, data::locator_ptr>())
-                .def_readonly("mode", &data::location::mode)
-                .def_readonly("category", &data::location::category)
-                .def_readonly("group", &data::location::group)
-                .def_readonly("name", &data::location::name)
-                .def_readonly("uname", &data::location::uname)
-                .def_readonly("uid", &data::location::uid)
-                .def_readonly("locator", &data::location::locator)
-                .def("__repr__", [&](data::location &target)
+        auto location_class = py::class_<location, std::shared_ptr<location>>(m, "location");
+        location_class.def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &, locator_ptr>())
+                .def_readonly("mode", &location::mode)
+                .def_readonly("category", &location::category)
+                .def_readonly("group", &location::group)
+                .def_readonly("name", &location::name)
+                .def_readonly("uname", &location::uname)
+                .def_readonly("uid", &location::uid)
+                .def_readonly("locator", &location::locator)
+                .def("__repr__", [&](location &target)
                 {
                     return target.uname;
                 });
-        location_class.def("to", py::overload_cast<longfist::types::Config &>(&data::location::to<longfist::types::Config>, py::const_));
-        location_class.def("to", py::overload_cast<longfist::types::Register &>(&data::location::to<longfist::types::Register>, py::const_));
-        location_class.def("to", py::overload_cast<longfist::types::Deregister &>(&data::location::to<longfist::types::Deregister>, py::const_));
-        location_class.def("to", py::overload_cast<longfist::types::Location &>(&data::location::to<longfist::types::Location>, py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Config &>(&location::to < longfist::types::Config > , py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Register &>(&location::to < longfist::types::Register > , py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Deregister &>(&location::to < longfist::types::Deregister > , py::const_));
+        location_class.def("to", py::overload_cast<longfist::types::Location &>(&location::to < longfist::types::Location > , py::const_));
 
-        py::class_<data::locator, PyLocator, std::shared_ptr<data::locator>>(m, "locator")
+        py::class_<locator, PyLocator, std::shared_ptr<locator>>(m, "locator")
                 .def(py::init())
-                .def("has_env", &data::locator::has_env)
-                .def("get_env", &data::locator::get_env)
-                .def("layout_dir", &data::locator::layout_dir)
-                .def("layout_file", &data::locator::layout_file)
-                .def("list_page_id", &data::locator::list_page_id)
-                .def("list_locations", &data::locator::list_locations, py::arg("category") = "*", py::arg("group") = "*", py::arg("name") = "*",
-                     py::arg("mode") = "*")
-                .def("list_location_dest", &data::locator::list_location_dest);
+                .def("has_env", &locator::has_env)
+                .def("get_env", &locator::get_env)
+                .def("layout_dir", &locator::layout_dir)
+                .def("layout_file", &locator::layout_file)
+                .def("list_page_id", &locator::list_page_id)
+                .def("list_locations",
+                     &locator::list_locations, py::arg("category") = "*", py::arg("group") = "*", py::arg("name") = "*", py::arg("mode") = "*")
+                .def("list_location_dest", &locator::list_location_dest);
 
         py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
                 .value("REPLY", nanomsg::protocol::REPLY)
@@ -331,7 +337,7 @@ namespace kungfu::yijinjing
         });
 
         py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-        io_device.def(py::init<data::location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)
+        io_device.def(py::init<location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false, py::arg("lazy") = true)
                 .def_property_readonly("publisher", &io_device::get_publisher)
                 .def_property_readonly("observer", &io_device::get_observer)
                 .def_property_readonly("home", &io_device::get_home)
@@ -343,17 +349,17 @@ namespace kungfu::yijinjing
                 .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0, py::arg("to") = INT64_MAX);
 
         py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
-        io_device_with_reply.def(py::init<data::location_ptr, bool, bool>());
+        io_device_with_reply.def(py::init<location_ptr, bool, bool>());
 
         py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
-                .def(py::init<data::location_ptr, bool>())
+                .def(py::init<location_ptr, bool>())
                 .def("rebuild_index_db", &io_device_master::rebuild_index_db);
 
         py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
-                .def(py::init<data::location_ptr, bool>());
+                .def(py::init<location_ptr, bool>());
 
         py::class_<master, PyMaster>(m, "master")
-                .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+                .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
                 .def_property_readonly("io_device", &master::get_io_device)
                 .def("now", &master::now)
                 .def("get_home_uid", &master::get_home_uid)
@@ -364,15 +370,15 @@ namespace kungfu::yijinjing
                 .def("has_writer", &master::has_writer)
                 .def("get_writer", &master::get_writer)
                 .def("run", &master::run)
-                .def("publish_time", &master::publish_time)
-                .def("send_time", &master::send_time)
+                .def("on_exit", &master::on_exit)
                 .def("on_register", &master::on_register)
                 .def("on_interval_check", &master::on_interval_check)
-                .def("on_exit", &master::on_exit)
+                .def("acquire_trading_day", &master::acquire_trading_day)
+                .def("publish_trading_day", &master::publish_trading_day)
                 .def("deregister_app", &master::deregister_app);
 
         py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
-                .def(py::init<data::location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+                .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
                 .def_property_readonly("io_device", &apprentice::get_io_device)
                 .def("set_begin_time", &apprentice::set_begin_time)
                 .def("set_end_time", &apprentice::set_end_time)
@@ -380,7 +386,7 @@ namespace kungfu::yijinjing
                 .def("run", &apprentice::run);
 
         auto cs_class = py::class_<config_store>(m, "config_store");
-        cs_class.def(py::init<const yijinjing::data::locator_ptr&>());
+        cs_class.def(py::init<const yijinjing::locator_ptr &>());
         hana::for_each(longfist::ConfigDataTypes, [&](auto type)
         {
             using DataType = typename decltype(+hana::second(type))::type;

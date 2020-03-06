@@ -4,6 +4,7 @@ import json
 import time
 import psutil
 import functools
+from pykungfu import longfist
 from pykungfu import yijinjing as pyyjj
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.msg as yjj_msg
@@ -39,35 +40,17 @@ class Master(pyyjj.master):
         self.ctx.logger = create_logger("master", ctx.log_level, self.io_device.home)
         self.ctx.apprentices = {}
 
-        ctx.calendar = Calendar(ctx)
-        ctx.trading_day = ctx.calendar.trading_day
-        self.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)
+        self.ctx.calendar = Calendar(ctx)
+        self.ctx.trading_day = ctx.calendar.trading_day
 
-        ctx.master = self
+        self.ctx.master = self
 
-    def on_interval_check(self, nanotime):
-        try:
-            run_tasks(self.ctx)
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('task error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-
-    def on_register(self, event, app_location):
-        data = json.loads(event.data_as_string)
-        pid = data['pid']
-        self.ctx.logger.info('app %s %d checking in', app_location.uname, pid)
-        if pid not in self.ctx.apprentices:
-            try:
-                self.ctx.apprentices[pid] = {
-                    'process': psutil.Process(pid),
-                    'location': app_location
-                }
-            except (psutil.AccessDenied, psutil.NoSuchProcess):
-                self.ctx.logger.warn("app %s %d does not exist", app_location.uname, pid)
-        self.send_time(event.source, yjj_msg.TradingDay, self.ctx.calendar.trading_day_ns)
+    def is_live_watcher(self, pid):
+        info = self.ctx.apprentices[pid]
+        location = info['location']
+        return info['process'].is_running() and location.category == longfist.enums.category.SYSTEM and location.group == 'node'
 
     def on_exit(self):
-        pyyjj.master.on_exit(self)
         self.ctx.logger.info('master checking on exit')
 
         for pid in self.ctx.apprentices:
@@ -81,7 +64,7 @@ class Master(pyyjj.master):
         time_to_wait = 10
         while count < time_to_wait:
             remaining = list(
-                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.ctx.apprentices[pid]['process'].is_running() else [],
+                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.is_live_watcher(pid) else [],
                     self.ctx.apprentices))
             remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
             if remaining:
@@ -99,6 +82,29 @@ class Master(pyyjj.master):
 
         self.ctx.logger.info('master cleaned up')
 
+    def on_register(self, event, app_location):
+        data = json.loads(event.data_as_string)
+        pid = data['pid']
+        self.ctx.logger.info('app %s %d checking in', app_location.uname, pid)
+        if pid not in self.ctx.apprentices:
+            try:
+                self.ctx.apprentices[pid] = {
+                    'process': psutil.Process(pid),
+                    'location': app_location
+                }
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                self.ctx.logger.warn("app %s %d does not exist", app_location.uname, pid)
+
+    def on_interval_check(self, nanotime):
+        try:
+            run_tasks(self.ctx)
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self.ctx.logger.error('task error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+
+    def acquire_trading_day(self):
+        return self.ctx.calendar.trading_day_ns
+
 
 @task
 def health_check(ctx):
@@ -114,4 +120,4 @@ def switch_trading_day(ctx):
     trading_day = ctx.calendar.trading_day
     if ctx.trading_day < trading_day:
         ctx.trading_day = trading_day
-        ctx.master.publish_time(yjj_msg.TradingDay, ctx.calendar.trading_day_ns)
+        ctx.master.publish_trading_day()

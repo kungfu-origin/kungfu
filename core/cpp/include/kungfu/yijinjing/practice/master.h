@@ -31,17 +31,17 @@ namespace kungfu::yijinjing::practice
 
         void on_notify() override;
 
-        virtual void on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location);
+        virtual void on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location) = 0;
 
-        virtual void on_interval_check(int64_t nanotime);
+        virtual void on_interval_check(int64_t nanotime) = 0;
+
+        virtual int64_t acquire_trading_day() = 0;
+
+        void publish_trading_day();
 
         void register_app(const event_ptr &e);
 
         void deregister_app(int64_t trigger_time, uint32_t app_location_uid);
-
-        void publish_time(int32_t msg_type, int64_t nanotime);
-
-        void send_time(uint32_t dest, int32_t msg_type, int64_t nanotime);
 
     protected:
 
@@ -56,11 +56,13 @@ namespace kungfu::yijinjing::practice
         std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;
         std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
 
-        void push_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+        void write_trading_day(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
 
-        void push_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+        void write_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
 
-        void push_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+        void write_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
+
+        void write_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer);
     };
 }
 #endif //KUNGFU_MASTER_H

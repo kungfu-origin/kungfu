@@ -213,7 +213,7 @@ namespace kungfu::yijinjing::practice
         return channels_.at(hash);
     }
 
-    std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels()
+    const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels() const
     {
         return channels_;
     }

@@ -34,8 +34,8 @@ namespace kungfu::yijinjing::practice
         }
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);
-        writers_[0] = io_device->open_writer(0);
-        writers_[0]->mark(start_time_, SessionStart::tag);
+        writers_.emplace(location::PUBLIC, io_device->open_writer(0));
+        writers_.at(location::PUBLIC)->mark(start_time_, SessionStart::tag);
     }
 
     void master::on_exit()
@@ -43,19 +43,13 @@ namespace kungfu::yijinjing::practice
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         auto now = time::now_in_nano();
         io_device->close_session(io_device->get_home(), now);
-        writers_[0]->mark(now, SessionEnd::tag);
+        writers_.at(location::PUBLIC)->mark(now, SessionEnd::tag);
     }
 
     void master::on_notify()
     {
         get_io_device()->get_publisher()->notify();
     }
-
-    void master::on_register(const event_ptr &event, const yijinjing::data::location_ptr &app_location)
-    {}
-
-    void master::on_interval_check(int64_t nanotime)
-    {}
 
     void master::register_app(const event_ptr &e)
     {
@@ -85,28 +79,29 @@ namespace kungfu::yijinjing::practice
 
         app_locations_.emplace(app_location->uid, master_cmd_location->uid);
         writers_.emplace(app_location->uid, get_io_device()->open_writer_at(master_cmd_location, app_location->uid));
-        reader_->join(app_location, 0, now);
+        reader_->join(app_location, location::PUBLIC, now);
         reader_->join(app_location, master_cmd_location->uid, now);
 
-        writers_[0]->write(e->gen_time(), register_data);
+        writers_.at(location::PUBLIC)->write(e->gen_time(), register_data);
 
         auto writer = writers_.at(app_location->uid);
 
         io_device->open_session(app_location, e->gen_time());
         writer->mark(e->gen_time(), SessionStart::tag);
 
-        require_write_to(e->gen_time(), app_location->uid, 0);
+        require_write_to(e->gen_time(), app_location->uid, location::PUBLIC);
         require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
+
+        write_trading_day(e->gen_time(), writer);
+        write_locations(e->gen_time(), writer);
 
         app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
         app_sqlizers_.at(app_location->uid)->restore(writer);
 
-        push_locations(e->gen_time(), writer);
-
         writer->mark(start_time_, RequestStart::tag);
 
-        push_registers(e->gen_time(), writer);
-        push_channels(e->gen_time(), writer);
+        write_registers(e->gen_time(), writer);
+        write_channels(e->gen_time(), writer);
 
         on_register(e, app_location);
     }
@@ -124,23 +119,12 @@ namespace kungfu::yijinjing::practice
         writers_.erase(app_location_uid);
         timer_tasks_.erase(app_location_uid);
         app_sqlizers_.erase(app_location_uid);
-        writers_[0]->write(trigger_time, location->to<Deregister>());
+        writers_.at(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
     }
 
-    void master::publish_time(int32_t msg_type, int64_t nanotime)
+    void master::publish_trading_day()
     {
-        writers_[0]->write(0, msg_type, nanotime);
-    }
-
-    void master::send_time(uint32_t dest, int32_t msg_type, int64_t nanotime)
-    {
-        if (has_location(dest))
-        {
-            writers_[dest]->write(0, msg_type, nanotime);
-        } else
-        {
-            SPDLOG_ERROR("Can not send time to {:08x}", dest);
-        }
+        write_trading_day(0, writers_.at(location::PUBLIC));
     }
 
     bool master::produce_one(const rx::subscriber<event_ptr> &sb)
@@ -200,7 +184,7 @@ namespace kungfu::yijinjing::practice
           {
               Location data = e->data<Location>();
               add_location(e->gen_time(), location::make_shared(data, get_locator()));
-              writers_[0]->write(e->gen_time(), data);
+              writers_.at(location::PUBLIC)->write(e->gen_time(), data);
           });
 
         events_ | is(Register::tag) | $$(register_app);
@@ -218,7 +202,7 @@ namespace kungfu::yijinjing::practice
                   channel.source_id = e->source();
                   channel.dest_id = request.dest_id;
                   register_channel(e->gen_time(), channel);
-                  writers_[0]->write(e->gen_time(), channel);
+                  writers_.at(location::PUBLIC)->write(e->gen_time(), channel);
               }
           });
 
@@ -235,7 +219,7 @@ namespace kungfu::yijinjing::practice
                   channel.source_id = request.source_id;
                   channel.dest_id = e->source();
                   register_channel(e->gen_time(), channel);
-                  writers_[0]->write(e->gen_time(), channel);
+                  writers_.at(location::PUBLIC)->write(e->gen_time(), channel);
               }
           });
 
@@ -269,7 +253,14 @@ namespace kungfu::yijinjing::practice
           });
     }
 
-    void master::push_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    void master::write_trading_day(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    {
+        TradingDay &trading_day = writer->open_data<TradingDay>();
+        trading_day.timestamp = acquire_trading_day();
+        writer->close_data();
+    }
+
+    void master::write_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
     {
         for (const auto &item : locations_)
         {
@@ -277,7 +268,7 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void master::push_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    void master::write_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
     {
         for (const auto &item : registry_)
         {
@@ -285,7 +276,7 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void master::push_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
+    void master::write_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)
     {
         for (const auto &item: channels_)
         {
