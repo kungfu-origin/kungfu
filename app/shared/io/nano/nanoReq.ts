@@ -139,15 +139,3 @@ interface MakeOrderData {
     hedge_flag: number,
 }
 
-export const nanoMakeOrder = (makeOrderData: MakeOrderData) => {
-    console.log(makeOrderData)
-    const reqMsg = JSON.stringify({
-        msg_type: msgType.makeOrder,
-        data: {
-            mode: 'live',
-            ...makeOrderData
-        }
-    })
-    return buildRequest(reqMsg, msgType.makeOrder, '下单失败！') 
-}
-

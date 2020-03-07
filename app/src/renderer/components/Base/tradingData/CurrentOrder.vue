@@ -49,7 +49,9 @@ import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__gUtils/busiUtils";
-import { nanoCancelOrder, nanoCancelAllOrder } from '__io/nano/nanoReq';
+import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
+import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
@@ -151,17 +153,24 @@ export default {
     methods: {
         handleCancelOrder(props){
             const t = this;
-            const accountId = `${props.source_id}_${props.account_id}`
-            const gatewayName = `td_${accountId}`
+            const kungfuLocation = decodeKungfuLocation(props.source);
+            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
+            const gatewayName = `td_${accountId}`;
             if(t.processStatus[gatewayName] !== 'online') {
-                t.$message.warning(`需要先启动 ${accountId} 交易进程！`)
+                t.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
                 return;
             }
-            //撤单
-            t.$message.info('正在发送撤单指令...')     
-            nanoCancelOrder({ accountId, orderId: props.orderId })
-                .then(() => t.$message.success('撤单指令已发送！'))
-                .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
+            //撤单   
+            if (t.moduleType === 'strategy') {
+                kungfuCancelOrder( props.orderId, accountId, t.currentId)
+                    .then(() => t.$message.success('撤单指令已发送！'))
+                    .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
+            } else if (t.moduleType === 'account') {
+                kungfuCancelOrder( props.orderId, accountId)
+                    .then(() => t.$message.success('撤单指令已发送！'))
+                    .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
+            }
+           
         },
 
         handleCancelAllOrders(){

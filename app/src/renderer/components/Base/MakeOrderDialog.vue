@@ -130,7 +130,6 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
-import { nanoMakeOrder } from '__io/nano/nanoReq';
 import { kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
 import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds } from '__gConfig/tradingConfig';

@@ -433,7 +433,8 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         accountId: item.account_id,
         sourceId: item.source_id,
         orderId: item.order_id.toString(),
-        exchangeId: item.exchange_id
+        exchangeId: item.exchange_id,
+        source: item.source
     }
 }
 
@@ -450,7 +451,8 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         volume: Number(item.volume),
         clientId: item.client_id === 'ledger' ? '--' : item.client_id,
         accountId: item.account_id,
-        sourceId: item.source_id
+        sourceId: item.source_id,
+        source: item.source
     }
 }
 

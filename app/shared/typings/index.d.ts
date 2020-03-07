@@ -66,8 +66,8 @@ interface StringToProcessStatusDetail {
 
 interface SourceType {
     [propName: string]: {
-        name: string,
-        kfId: number,
+        name: string;
+        kfId: number;
         color: string
     }
 }
@@ -96,23 +96,23 @@ interface MessageData {
 }
 
 interface LogData {
-    type: string,
-    updateTime: string,
-    message: string,
+    type: string;
+    updateTime: string;
+    message: string;
 }
 
 interface LogDataOrigin {
-    timestamp: string,
-    type: string,
-    app_name: string,
-    message: string,
+    timestamp: string;
+    type: string;
+    app_name: string;
+    message: string;
     process_id: number
 }
 
 
 interface OrderData {
     id: string;
-    updateTime: string,
+    updateTime: string;
     updateTimeNum: number;
     orderId: string;
     instrumentId: string;
@@ -124,26 +124,28 @@ interface OrderData {
     status: string;
     clientId: string;
     accountId: string;
-    sourceId: string,
+    sourceId: string;
     exchangeId: string;
+    source: string;
 }
 
 interface OrderInputData {
-    update_time: bigint,
-    insert_time: bigint,
-    order_id: bigint,
-    instrument_id: string,
-    side: number,
-    offset: number,
-    volume: bigint,
-    volume_left: bigint,
-    volume_traded: bigint,
-    status: any,
-    limit_price: number,
-    client_id: string,
-    account_id: string,
-    source_id: string,
-    exchange_id: string
+    update_time: bigint;
+    insert_time: bigint;
+    order_id: bigint;
+    instrument_id: string;
+    side: number;
+    offset: number;
+    volume: bigint;
+    volume_left: bigint;
+    volume_traded: bigint;
+    status: any;
+    limit_price: number;
+    client_id: string;
+    account_id: string;
+    source_id: string;
+    exchange_id: string;
+    source: string;
 }
 
 interface PosData {
@@ -180,6 +182,7 @@ interface TradeData {
     clientId: string;
     accountId: string;
     sourceId: string;
+    source: string;
 }
 
 interface TradeInputData {
@@ -193,6 +196,7 @@ interface TradeInputData {
     side: number;
     price: string;
     volume: bigint;
+    source: string;
     [propName: string]: any;
 }
 
@@ -207,7 +211,7 @@ interface AssetInputData {
     unrealized_pnl: number;
     avail: number;
     market_value: number;
-    margin: number,
+    margin: number;
     ledger_category: number;
 }
 
@@ -232,32 +236,32 @@ interface TradingDataFilter {
 }
 
 interface AccountSettingItem {
-    key: string,
-    name: string,
-    type: string,
-    errMsg?: string,
-    required?: boolean,
-    validator?: any[],
-    tip?: string,
-    data?: any[],
+    key: string;
+    name: string;
+    type: string;
+    errMsg?: string;
+    required?: boolean;
+    validator?: any[];
+    tip?: string;
+    data?: any[];
     default?: any
 }
 
 interface AccountSettingOrigin {
-    name: string,
-    type: string,
-    key: string,
-    td_config: AccountSettingItem[],
-    md_config: AccountSettingItem[],
+    name: string;
+    type: string;
+    key: string;
+    td_config: AccountSettingItem[];
+    md_config: AccountSettingItem[];
 }
 
 interface AccountSetting {
-    name: string,
-    source: string,
-    type: string,
-    typeName: string,
-    key: string,
-    config: AccountSettingItem[],
+    name: string;
+    source: string;
+    type: string;
+    typeName: string;
+    key: string;
+    config: AccountSettingItem[];
 }
 
 interface Sources {
@@ -313,8 +317,8 @@ interface StringToDataWithAccountIdClientIdData {
 }
 
 interface KungfuLocation {
-    category: string,
-    group: string,
-    name: string,
+    category: string;
+    group: string;
+    name: string;
     mode: string
 }

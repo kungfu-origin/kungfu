@@ -2,9 +2,6 @@ import { watcher, encodeKungfuLocation } from '__gUtils/kungfuUtils';
 
 
 interface MakeOrderData {
-    category: string | 'td',
-    group: string, // source_name
-    name: string, // account_id
     intrument_id: string,
     exchange_id: string,
     limit_price: number,
@@ -17,7 +14,6 @@ interface MakeOrderData {
 
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
-    console.log(accountLocation)
     if (!watcher.isReadyToInteract(accountLocation)) {
         return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
     }
@@ -30,27 +26,19 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
     }
 }
 
+export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId: string) => {
+    const accountLocation = encodeKungfuLocation(accountId, 'td');
+    if (!watcher.isReadyToInteract(accountLocation)) {
+        return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
+    }
 
-// //撤单
-// interface MakeOrderParams {
-//     accountId: string,
-//     orderId: string
-// }
-// export const nanoCancelOrder = ({ accountId, orderId }: MakeOrderParams) : Promise<any> => {
-//     const { source, id } = accountId.parseSourceAccountId();
-//     const reqMsg = JSON.stringify({
-//         msg_type: msgType.cancelOrder, 
-//         data: {
-//             'mode': 'live',
-//             'category': 'td',
-//             'group': source,
-//             'name': id,
-//             'order_id': orderId
-//         }
-//     })
-//     // console.log('[REQ CANCEL ORDER]', reqMsg)
-//     return buildRequest(reqMsg, msgType.cancelOrder, '撤单失败！') 
-// }
+    if (strategyId) {
+        const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+        return Promise.resolve(watcher.issueOrder({ order_id: orderId }, accountLocation, strategyLocation))
+    } else {
+        return Promise.resolve(watcher.issueOrder({ order_id: orderId }, accountLocation))
+    }
+}
 
 // /** 全部撤单
 //  * @param  {String} {targetId gatewayname / strategyId
@@ -87,27 +75,5 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
 //             name: accountOrStrategyId
 //         }
 //     }
-// }
-
-interface MakeOrderData {
-    intrument_id: string,
-    exchange_id: string,
-    limit_price: number,
-    volume: number,
-    price_type: number,
-    side: number,
-    offset: number,
-    hedge_flag: number
-}
-
-// export const nanoMakeOrder = (makeOrderData: MakeOrderData) => {
-//     const reqMsg = JSON.stringify({
-//         msg_type: msgType.makeOrder,
-//         data: {
-//             mode: 'live',
-//             ...makeOrderData
-//         }
-//     })
-//     return buildRequest(reqMsg, msgType.makeOrder, '下单失败！') 
 // }
 
