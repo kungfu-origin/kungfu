@@ -14,17 +14,23 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
-            const orders = Object.values(data.Order || {});
-            const trades = Object.values(data.Trade || {});
-            const positions = Object.values(data.Position || {});
-            const assets = Object.values(data.Asset || {});
-            const pnl = Object.values(data.AssetSnapshot || {})
+
+            const ledgerData = data.ledger;
+            const tradingDay = data.tradingDay;
+            console.log(tradingDay, '---')
+
+            const orders = Object.values(ledgerData.Order || {});
+            const trades = Object.values(ledgerData.Trade || {});
+            const positions = Object.values(ledgerData.Position || {});
+            const assets = Object.values(ledgerData.Asset || {});
+            const pnl = Object.values(ledgerData.AssetSnapshot || {})
             return {
                 orders: transformOrderTradeListToData(orders, type),
                 trades: transformOrderTradeListToData(trades, type),
                 positions: transformTradingItemListToData(positions, type),
                 assets: transformAssetItemListToData(assets, type),
-                pnl: transformTradingItemListToData(pnl, type)
+                pnl: transformTradingItemListToData(pnl, type),
+                tradingDay: tradingDay
             }
         })
     )

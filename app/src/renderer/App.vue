@@ -23,7 +23,7 @@ import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
 import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
-import { nanoReqGatewayState, nanoReqCash, nanoReqCalendar } from '__io/nano/nanoReq';
+import { nanoReqGatewayState, nanoReqCash } from '__io/nano/nanoReq';
 
 export default {
     name: 'app',
@@ -72,8 +72,7 @@ export default {
 
         t.subGatewayState();
         t.subTradingDay();
-      
-        t.reqCalendar();
+
         t.reqGatewayState();
 
         t.$store.dispatch('getKungfuConfig')
@@ -151,21 +150,6 @@ export default {
                         break
                 }
             })
-        },
-        
-        //获得交易日的推送
-        reqCalendar() {
-            const t = this
-            //先主动获取
-            delayMiliSeconds(3000)//需要等ledger起来
-            .then(() => nanoReqCalendar())
-            .then(calendar => {
-                if(calendar && calendar.trading_day) {
-                    const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
-                    t.$store.dispatch('setTradingDay', tradingDay);
-                }
-            })
-            .catch(err => console.error(err))
         },
 
         //获取gatewayState（req后会从subGatewayState中获取）
