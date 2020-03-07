@@ -23,8 +23,6 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         ...makeOrderData
     }
 
-    console.log(orderInput)
-
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
@@ -41,10 +39,8 @@ export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId
 
     const orderAction = {
         ...longfist.OrderAction(),
-        order_id: orderId
+        order_id: BigInt(orderId)
     }
-
-    console.log(orderAction)
 
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
