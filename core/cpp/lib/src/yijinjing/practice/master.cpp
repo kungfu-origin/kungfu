@@ -168,9 +168,12 @@ namespace kungfu::yijinjing::practice
         events_ | instanceof<journal::frame>() |
         $([&](const event_ptr &e)
           {
-              auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
-              io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
-              cast_event_invoke(e, *app_sqlizers_.at(e->source()));
+              if (registry_.find(e->source()) != registry_.end())
+              {
+                  auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+                  io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
+                  cast_event_invoke(e, *app_sqlizers_.at(e->source()));
+              }
           });
 
         events_ | is(Ping::tag) |

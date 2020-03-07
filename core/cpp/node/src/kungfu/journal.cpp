@@ -12,13 +12,16 @@ namespace kungfu::node
 {
     int64_t GetTimestamp(Napi::Value arg)
     {
-        bool lossless;
-        if (not arg.As<Napi::BigInt>().IsBigInt())
+        if (arg.IsNumber())
         {
-            SPDLOG_ERROR("timestamp must be a BigInt");
-            throw yijinjing_error("invalid argument from_time");
+            return arg.ToNumber().Int32Value();
         }
-        return arg.As<Napi::BigInt>().Int64Value(&lossless);
+        if (arg.IsBigInt())
+        {
+            bool lossless;
+            return arg.As<Napi::BigInt>().Int64Value(&lossless);
+        }
+        throw yijinjing_error("timestamp argument must be bigint");
     }
 
     Napi::FunctionReference Frame::constructor;

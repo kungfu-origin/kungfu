@@ -213,7 +213,7 @@ namespace kungfu::node
         $([&](const event_ptr &event)
           {
               trading_day_ = event->data<TradingDay>().timestamp;
-              SPDLOG_INFO("update trading day to {}", trading_day_);
+              SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, "%F"));
           });
 
         apprentice::react();

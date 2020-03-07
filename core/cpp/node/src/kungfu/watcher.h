@@ -86,34 +86,41 @@ namespace kungfu::node
             auto account_location = ExtractLocation(info, 1, get_locator());
             if (account_location and has_writer(account_location->uid))
             {
-                auto writer = get_writer(account_location->uid);
+                auto account_writer = get_writer(account_location->uid);
 
                 auto strategy_location = ExtractLocation(info, 2, get_locator());
                 if (strategy_location)
                 {
-                    if (not has_location(strategy_location->uid))
-                    {
-                        add_location(trigger_time, strategy_location);
-                        auto location_data = *std::dynamic_pointer_cast<longfist::types::Location>(strategy_location);
-                        writers_.at(get_master_commands_uid())->write(trigger_time, location_data);
-                    }
                     auto proxy_location = yijinjing::data::location::make_shared(
                             strategy_location->mode, strategy_location->category,
                             get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
                     );
+                    auto master_cmd_writer = get_writer(get_master_commands_uid());
+                    auto ensure_location = [&](auto location)
+                    {
+                        if (not has_location(location->uid))
+                        {
+                            add_location(trigger_time, location);
+                            master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<longfist::types::Location>(location));
+                        }
+                    };
+                    ensure_location(strategy_location);
+                    ensure_location(proxy_location);
                     if (not has_channel(account_location->uid, proxy_location->uid))
                     {
                         longfist::types::Channel request = {};
                         request.source_id = account_location->uid;
                         request.dest_id = proxy_location->uid;
-                        writers_.at(get_master_commands_uid())->write(trigger_time, request);
+                        master_cmd_writer->write(trigger_time, request);
                     }
-                    action.*id_ptr = ((uint64_t)(proxy_location->uid xor account_location->uid) << 32) | (ID_TRANC & writer->current_frame_uid());
-                    writer->write_as(trigger_time, action, proxy_location->uid);
+                    uint64_t id_left = (uint64_t)(proxy_location->uid xor account_location->uid) << 32;
+                    uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
+                    action.*id_ptr = id_left | id_right;
+                    account_writer->write_as(trigger_time, action, proxy_location->uid);
                 } else
                 {
-                    action.*id_ptr = writer->current_frame_uid();
-                    writer->write(trigger_time, action);
+                    action.*id_ptr = account_writer->current_frame_uid();
+                    account_writer->write(trigger_time, action);
                 }
                 return Napi::Boolean::New(info.Env(), true);
             }

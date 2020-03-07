@@ -210,6 +210,7 @@ namespace kungfu::node::serialize
                 using ValueType = std::decay_t<std::result_of_t<decltype(accessor)(const DataType &)>>;
                 Get(const_cast<ValueType &>(accessor(data)), name.c_str(), valueObj);
             });
+            SPDLOG_TRACE("got data from node: {}", data.to_string());
         }
 
         template<typename ValueType>
@@ -244,16 +245,30 @@ namespace kungfu::node::serialize
         std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>, void>
         Get(ValueType &value, const char *name, const Napi::Object &obj)
         {
-            bool lossless;
-            value = obj.Get(name).As<Napi::BigInt>().Int64Value(&lossless);
+            if (obj.Get(name).IsNumber())
+            {
+                value = obj.Get(name).ToNumber().Int32Value();
+            }
+            if (obj.Get(name).IsBigInt())
+            {
+                bool lossless;
+                value = obj.Get(name).As<Napi::BigInt>().Int64Value(&lossless);
+            }
         }
 
         template<typename ValueType>
         std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>, void>
         Get(ValueType &value, const char *name, const Napi::Object &obj)
         {
-            bool lossless;
-            value = obj.Get(name).As<Napi::BigInt>().Uint64Value(&lossless);
+            if (obj.Get(name).IsNumber())
+            {
+                value = obj.Get(name).ToNumber().Uint32Value();
+            }
+            if (obj.Get(name).IsBigInt())
+            {
+                bool lossless;
+                value = obj.Get(name).As<Napi::BigInt>().Uint64Value(&lossless);
+            }
         }
 
         template<typename ValueType>
@@ -330,11 +345,12 @@ namespace kungfu::node::serialize
                         if (value.IsUndefined() or value.IsEmpty())
                         {
                             value = Napi::Object::New(state_.Env());
-                            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-                            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-                            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
-                            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
-                            value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
+                            auto valueObj = value.ToObject();
+                            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+                            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
+                            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
+                            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
+                            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("update_time", Napi::BigInt::New(value.Env(), now)));
                             table.Set(uid_key, value);
                         }
                         set(data, value);
