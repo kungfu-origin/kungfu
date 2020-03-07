@@ -93,7 +93,7 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info)
     {
-        return Napi::String::New(ledger_ref_.Env(), time::strftime(trading_day_, "%F"));
+        return Napi::String::New(ledger_ref_.Env(), time::strftime(trading_day_, "%Y%m%d"));
     }
 
     Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
