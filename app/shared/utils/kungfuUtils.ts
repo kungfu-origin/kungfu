@@ -5,7 +5,8 @@ import { setTimerPromiseTask } from '__gUtils/BusiUtils';
 process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;
-export const watcher = kungfu.watcher(KF_HOME, `watcher_${process.env.APP_TYPE}`)
+export const watcher = kungfu.watcher(KF_HOME, `watcher_${process.env.APP_TYPE}`);
+export const longfist = kungfu.longfist;
 export const startGetKungfuState = (callback: Function, interval = 1000) => {
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {

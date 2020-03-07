@@ -1,4 +1,4 @@
-import { watcher, encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { watcher, longfist, encodeKungfuLocation } from '__gUtils/kungfuUtils';
 
 
 interface MakeOrderData {
@@ -18,11 +18,18 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
     }
 
+    const orderInput = {
+        ...longfist.OrderInput(),
+        ...makeOrderData
+    }
+
+    console.log(orderInput)
+
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
-        return Promise.resolve(watcher.issueOrder(makeOrderData, accountLocation, strategyLocation))
+        return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
     } else {
-        return Promise.resolve(watcher.issueOrder(makeOrderData, accountLocation))
+        return Promise.resolve(watcher.issueOrder(orderInput, accountLocation))
     }
 }
 
@@ -32,11 +39,18 @@ export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId
         return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
     }
 
+    const orderAction = {
+        ...longfist.OrderAction(),
+        order_id: orderId
+    }
+
+    console.log(orderAction)
+
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
-        return Promise.resolve(watcher.issueOrder({ order_id: orderId }, accountLocation, strategyLocation))
+        return Promise.resolve(watcher.cancelOrder(orderAction, accountLocation, strategyLocation))
     } else {
-        return Promise.resolve(watcher.issueOrder({ order_id: orderId }, accountLocation))
+        return Promise.resolve(watcher.cancelOrder(orderAction, accountLocation))
     }
 }
 

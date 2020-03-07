@@ -67,27 +67,6 @@ export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {
     return buildRequest(reqMsg, msgType.reqRemoveStrategyPos, isEnglish ? 'Req delete strategy position failed' : '删除策略持仓失败！') 
 }
 
-//撤单
-interface MakeOrderParams {
-    accountId: string,
-    orderId: string
-}
-export const nanoCancelOrder = ({ accountId, orderId }: MakeOrderParams) : Promise<any> => {
-    const { source, id } = accountId.parseSourceAccountId();
-    const reqMsg = JSON.stringify({
-        msg_type: msgType.cancelOrder, 
-        data: {
-            'mode': 'live',
-            'category': 'td',
-            'group': source,
-            'name': id,
-            'order_id': orderId
-        }
-    })
-    // console.log('[REQ CANCEL ORDER]', reqMsg)
-    return buildRequest(reqMsg, msgType.cancelOrder, '撤单失败！') 
-}
-
 /** 全部撤单
  * @param  {String} {targetId gatewayname / strategyId
  * @param  {String} cancelType account / strategy
@@ -125,17 +104,4 @@ function buildCancalAllOrderPostData(type: string, accountOrStrategyId: string) 
     }
 }
 
-interface MakeOrderData {
-    category: string | 'td',
-    group: string, // source_name
-    name: string, // account_id
-    intrument_id: string,
-    exchange_id: string,
-    limit_price: number,
-    volume: number,
-    price_type: number,
-    side: number,
-    offset: number,
-    hedge_flag: number,
-}
 
