@@ -17,13 +17,17 @@ interface MakeOrderData {
 
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
-    if (!watcher.isReadyToInteract(location)) {
+    console.log(accountLocation)
+    if (!watcher.isReadyToInteract(accountLocation)) {
         return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
     }
 
-    const strategyLocation = strategyId ? encodeKungfuLocation(strategyId, 'strategy') : null;
-    const res = watcher.issueOrder(makeOrderData, accountLocation, [ strategyLocation ])
-    return Promise.resolve(res)
+    if (strategyId) {
+        const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+        return Promise.resolve(watcher.issueOrder(makeOrderData, accountLocation, strategyLocation))
+    } else {
+        return Promise.resolve(watcher.issueOrder(makeOrderData, accountLocation))
+    }
 }
 
 

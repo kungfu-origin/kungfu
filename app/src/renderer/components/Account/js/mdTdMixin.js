@@ -53,6 +53,7 @@ export default {
         refreshData () {
             const t = this
             t.selectedSource = ''
+            t.accountForm = {};
         },
     }
     
