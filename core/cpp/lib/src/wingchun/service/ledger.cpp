@@ -167,22 +167,25 @@ namespace kungfu::wingchun::service
         $([&](const event_ptr &event)
           {
               auto register_data = event->data<Register>();
-              auto app_location = location::make_shared(register_data, get_locator());
-              if (app_location->category != category::SYSTEM)
+              if (register_data.location_uid != get_home_uid())
               {
-                  request_write_to(event->gen_time(), app_location->uid);
-                  request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
-              }
-              if (app_location->category == category::MD)
-              {
-                  update_broker_state(event->gen_time(), app_location, BrokerState::Connected);
-                  monitor_market_data(event->gen_time(), app_location->uid);
-              }
-              if (app_location->category == category::TD)
-              {
-                  request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
-                  update_broker_state(event->gen_time(), app_location, BrokerState::Connected);
-                  monitor_instruments(app_location->uid);
+                  auto app_location = location::make_shared(register_data, get_locator());
+                  if (app_location->category != category::SYSTEM)
+                  {
+                      request_write_to(event->gen_time(), app_location->uid);
+                      request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+                  }
+                  if (app_location->category == category::MD)
+                  {
+                      update_broker_state(event->gen_time(), app_location, BrokerState::Connected);
+                      monitor_market_data(event->gen_time(), app_location->uid);
+                  }
+                  if (app_location->category == category::TD)
+                  {
+                      request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
+                      update_broker_state(event->gen_time(), app_location, BrokerState::Connected);
+                      monitor_instruments(app_location->uid);
+                  }
               }
           });
 
