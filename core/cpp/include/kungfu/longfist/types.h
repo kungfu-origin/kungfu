@@ -126,13 +126,6 @@ namespace kungfu::longfist::types
     );
 
     KF_DEFINE_PACK_TYPE(
-            RequestSimplexChannel, 10029,
-            PK(source_id, dest_id),
-            (uint32_t, source_id),
-            (uint32_t, dest_id)
-    );
-
-    KF_DEFINE_PACK_TYPE(
             Instrument, 209,
             PK(instrument_id, exchange_id),
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),     //合约ID

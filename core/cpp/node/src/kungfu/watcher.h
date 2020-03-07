@@ -101,7 +101,7 @@ namespace kungfu::node
                     );
                     if (not has_channel(account_location->uid, proxy_location->uid))
                     {
-                        longfist::types::RequestSimplexChannel request = {};
+                        longfist::types::Channel request = {};
                         request.source_id = account_location->uid;
                         request.dest_id = proxy_location->uid;
                         writers_.at(get_master_commands_uid())->write(trigger_time, request);
