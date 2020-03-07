@@ -72,36 +72,36 @@ namespace kungfu::yijinjing::practice
         auto now = time::now_in_nano();
         auto uid_str = fmt::format("{:08x}", app_location->uid);
         auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+        auto public_writer = writers_.at(location::PUBLIC);
+        auto app_cmd_writer = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
         add_location(e->gen_time(), app_location);
         add_location(e->gen_time(), master_cmd_location);
-        register_location(e->gen_time(), register_data);
-
         app_locations_.emplace(app_location->uid, master_cmd_location->uid);
-        writers_.emplace(app_location->uid, get_io_device()->open_writer_at(master_cmd_location, app_location->uid));
+        register_location(e->gen_time(), register_data);
+        writers_.emplace(app_location->uid, app_cmd_writer);
         reader_->join(app_location, location::PUBLIC, now);
         reader_->join(app_location, master_cmd_location->uid, now);
 
-        writers_.at(location::PUBLIC)->write(e->gen_time(), register_data);
-
-        auto writer = writers_.at(app_location->uid);
+        public_writer->write(e->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
+        public_writer->write(e->gen_time(), register_data);
 
         io_device->open_session(app_location, e->gen_time());
-        writer->mark(e->gen_time(), SessionStart::tag);
+        app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
 
         require_write_to(e->gen_time(), app_location->uid, location::PUBLIC);
         require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
 
-        write_trading_day(e->gen_time(), writer);
-        write_locations(e->gen_time(), writer);
+        write_trading_day(e->gen_time(), app_cmd_writer);
+        write_locations(e->gen_time(), app_cmd_writer);
 
         app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
-        app_sqlizers_.at(app_location->uid)->restore(writer);
+        app_sqlizers_.at(app_location->uid)->restore(app_cmd_writer);
 
-        writer->mark(start_time_, RequestStart::tag);
+        app_cmd_writer->mark(start_time_, RequestStart::tag);
 
-        write_registers(e->gen_time(), writer);
-        write_channels(e->gen_time(), writer);
+        write_registers(e->gen_time(), app_cmd_writer);
+        write_channels(e->gen_time(), app_cmd_writer);
 
         on_register(e, app_location);
     }

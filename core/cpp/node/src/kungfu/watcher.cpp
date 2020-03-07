@@ -43,7 +43,8 @@ namespace kungfu::node
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_state(state_ref_),
             update_ledger(ledger_ref_),
-            publish(*this, state_ref_)
+            publish(*this, state_ref_),
+            trading_day_(time::now_in_nano())
     {
         InitStateMap(info, state_ref_);
         InitStateMap(info, ledger_ref_);
@@ -88,6 +89,11 @@ namespace kungfu::node
     Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
     {
         return ledger_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info)
+    {
+        return Napi::String::New(ledger_ref_.Env(), time::strftime(trading_day_, "%F"));
     }
 
     Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
@@ -186,6 +192,7 @@ namespace kungfu::node
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
+                InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),
         });
 
         constructor = Napi::Persistent(func);
@@ -202,6 +209,13 @@ namespace kungfu::node
               longfist::cast_event_invoke(event, update_state);
           });
 
+        events_ | is(TradingDay::tag) |
+        $([&](const event_ptr &event)
+          {
+              trading_day_ = event->data<TradingDay>().timestamp;
+              SPDLOG_INFO("update trading day to {}", trading_day_);
+          });
+
         apprentice::react();
     }
 
@@ -216,9 +230,8 @@ namespace kungfu::node
         events_ | is(Channel::tag) |
         $([&](const event_ptr &event)
           {
-              auto home_uid = get_home_uid();
               const Channel &channel = event->data<Channel>();
-              if (channel.source_id != home_uid and channel.dest_id != home_uid)
+              if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid())
               {
                   reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
               }
@@ -228,10 +241,13 @@ namespace kungfu::node
         $([&](const event_ptr &event)
           {
               auto register_data = event->data<Register>();
-              auto app_location = location::make_shared(register_data, get_locator());
-              request_write_to(event->gen_time(), app_location->uid);
-              request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
-              request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+              if (register_data.location_uid != get_home_uid())
+              {
+                  auto app_location = location::make_shared(register_data, get_locator());
+                  request_write_to(event->gen_time(), app_location->uid);
+                  request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
+                  request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+              }
           });
     }
 

@@ -33,6 +33,8 @@ namespace kungfu::node
 
         Napi::Value GetLedger(const Napi::CallbackInfo &info);
 
+        Napi::Value GetTradingDay(const Napi::CallbackInfo &info);
+
         Napi::Value IsUsable(const Napi::CallbackInfo &info);
 
         Napi::Value IsLive(const Napi::CallbackInfo &info);
@@ -70,7 +72,7 @@ namespace kungfu::node
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
-        std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> strategy_writers_;
+        int64_t trading_day_;
 
         void RestoreState(const yijinjing::data::location_ptr &config_location);
 

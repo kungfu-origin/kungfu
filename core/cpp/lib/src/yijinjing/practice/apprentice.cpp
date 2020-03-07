@@ -187,12 +187,19 @@ namespace kungfu::yijinjing::practice
                 auto home = get_io_device()->get_home();
                 auto backtest_location = std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
                 reader_->join(backtest_location, 0, begin_time_);
+                SPDLOG_INFO("on start");
                 on_start();
                 break;
             }
             case mode::LIVE:
             {
-                auto self_register_event = events_ | skip_until(events_ | is(Register::tag) | from(master_home_location_->uid)) | first();
+                auto self_register_event = events_ |
+                                           skip_until(events_ | is(Register::tag) | filter([&](const event_ptr &event)
+                                                                                           {
+                                                                                               auto uid = event->data<Register>().location_uid;
+                                                                                               return uid == get_home_uid();
+                                                                                           })) |
+                                           first();
 
                 self_register_event | rx::timeout(seconds(10), observe_on_new_thread()) |
                 $([&](const event_ptr &event)
@@ -305,6 +312,7 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               master_start_time_ = e->trigger_time();
+              SPDLOG_INFO("on start");
               on_start();
           },
           [&](const std::exception_ptr &e)
