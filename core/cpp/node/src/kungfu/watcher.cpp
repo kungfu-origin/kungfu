@@ -2,6 +2,7 @@
 // Created by Keren Dong on 2020/1/14.
 //
 
+#include <sstream>
 #include "io.h"
 #include "watcher.h"
 
@@ -15,6 +16,11 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node
 {
+    inline std::string format(uint32_t uid)
+    {
+        return fmt::format("{:08x}", uid);
+    }
+
     Napi::FunctionReference Watcher::constructor;
 
     inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info)
@@ -41,6 +47,7 @@ namespace kungfu::node
             config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
+            app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_state(state_ref_),
             update_ledger(ledger_ref_),
             publish(*this, state_ref_)
@@ -67,6 +74,7 @@ namespace kungfu::node
 
     Watcher::~Watcher()
     {
+        app_states_ref_.Unref();
         ledger_ref_.Unref();
         state_ref_.Unref();
         config_ref_.Unref();
@@ -95,6 +103,11 @@ namespace kungfu::node
     Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info)
     {
         return ledger_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetAppStates(const Napi::CallbackInfo &info)
+    {
+        return app_states_ref_.Value();
     }
 
     Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info)
@@ -149,6 +162,8 @@ namespace kungfu::node
         locationObj.Set("group", Napi::String::New(info.Env(), location->group));
         locationObj.Set("name", Napi::String::New(info.Env(), location->name));
         locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+        locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
+        locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
         locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
         return locationObj;
     }
@@ -203,6 +218,7 @@ namespace kungfu::node
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
+                InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),
                 InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),
         });
 
@@ -249,7 +265,22 @@ namespace kungfu::node
                   request_write_to(event->gen_time(), app_location->uid);
                   request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
                   request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+                  app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Connected));
               }
+          });
+
+        events_ | is(Deregister::tag) |
+        $([&](const event_ptr &event)
+          {
+              auto app_location = location::make_shared(event->data<Deregister>(), get_locator());
+              app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::DisConnected));
+          });
+
+        events_ | is(BrokerStateUpdate::tag) |
+        $([&](const event_ptr &event)
+          {
+              auto app_location = get_location(event->source());
+              app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) event->data<BrokerStateUpdate>().state));
           });
     }
 
@@ -265,7 +296,17 @@ namespace kungfu::node
         {
             return get_io_device()->get_home();
         }
-        auto uid = info[0].ToNumber().Uint32Value();
+        uint32_t uid = 0;
+        if (info[0].IsNumber())
+        {
+            uid = info[0].ToNumber().Uint32Value();
+        }
+        if (info[0].IsString())
+        {
+            std::stringstream ss;
+            ss << std::hex << info[0].ToString().Utf8Value();
+            ss >> uid;
+        }
         if (has_location(uid))
         {
             return get_location(uid);

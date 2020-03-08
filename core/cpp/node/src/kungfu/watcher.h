@@ -33,6 +33,8 @@ namespace kungfu::node
 
         Napi::Value GetLedger(const Napi::CallbackInfo &info);
 
+        Napi::Value GetAppStates(const Napi::CallbackInfo &info);
+
         Napi::Value GetTradingDay(const Napi::CallbackInfo &info);
 
         Napi::Value IsUsable(const Napi::CallbackInfo &info);
@@ -69,6 +71,7 @@ namespace kungfu::node
         Napi::ObjectReference config_ref_;
         Napi::ObjectReference state_ref_;
         Napi::ObjectReference ledger_ref_;
+        Napi::ObjectReference app_states_ref_;
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
