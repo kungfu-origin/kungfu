@@ -1,5 +1,5 @@
 
-import { KF_HOME, KF_HOME_BASE_DIR } from '__gConfig/pathConfig';
+import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 
