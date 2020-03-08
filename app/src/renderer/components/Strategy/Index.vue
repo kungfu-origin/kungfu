@@ -89,8 +89,6 @@ export default {
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
             this.pnl = Object.freeze(pnl || []);
-            const tradingDay = data.tradingDay;
-            this.$store.dispatch('setTradingDay', tradingDay);
         })
     },
 

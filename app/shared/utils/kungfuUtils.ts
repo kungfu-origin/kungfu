@@ -14,7 +14,7 @@ export const watcher: any = (() => {
 })()
 export const longfist = kungfu.longfist;
 
-export const startGetKungfuState = (callback: Function, interval = 1000) => {
+export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -27,6 +27,25 @@ export const startGetKungfuState = (callback: Function, interval = 1000) => {
 
             callback({ 
                 ledger: Object.freeze(watcher.ledger), 
+            });
+            resolve();
+        })
+    }, interval);
+}
+
+
+export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
+    setTimerPromiseTask(() => {
+        return new Promise((resolve) => {
+            if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
+                watcher.setup();
+            }
+            
+            if (watcher.isLive()) {
+                watcher.step();
+            }
+
+            callback({ 
                 tradingDay: watcher.tradingDay,
                 appStates: Object.freeze(watcher.appStates),
             });
@@ -34,6 +53,7 @@ export const startGetKungfuState = (callback: Function, interval = 1000) => {
         })
     }, interval);
 }
+
 
 
 

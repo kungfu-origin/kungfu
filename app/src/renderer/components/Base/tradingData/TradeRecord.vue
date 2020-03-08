@@ -106,7 +106,10 @@ export default {
                 })
 
             if (t.moduleType === 'strategy') {
-                tradesAfterFilter = tradesAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+                tradesAfterFilter = tradesAfterFilter
+                    .filter(item => {
+                        return Number(item.trade_time) >= t.addTime 
+                    })
             }
 
             tradesAfterFilter = tradesAfterFilter

@@ -1,7 +1,7 @@
 
 /* eslint-disable */
 import Vue from 'vue';
-import './setWindow';
+import './setKungfuParamsOnWindow';
 import router from './routers';
 import store from './store';
 import * as utils from '__gUtils/busiUtils'
@@ -48,4 +48,9 @@ if(currentPath.indexOf('/code') === -1) {
             .then(() => startLedger(false))
         })
 }
+
+window.fileId = 0;
+window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay);
+window.getTradingDay = () => store.state.BASE.tradingDay;
+
 

@@ -1,18 +1,24 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { startGetKungfuState } from '__gUtils/kungfuUtils';
+import { startGetKungfuTradingData, startGetKungfuGlobalData } from '__gUtils/kungfuUtils';
 import { transformTradingItemListToData, transformOrderTradeListToData, transformAssetItemListToData } from '__gUtils/kungfuUtils';
 
 
-export const KUNGFU_OBSERVER = new Observable(subscriber => {
-    startGetKungfuState((state: any) => {
+export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
+    startGetKungfuTradingData((state: any) => {
         subscriber.next(state)
     })
 })   
+
+export const KUNGFU_GLOBAL_DATA_OBSERVER = new Observable(Subscriber => {
+    startGetKungfuGlobalData((state: any) => {
+        Subscriber.next(state)
+    })
+})
        
 export const buildTradingDataPipe = (type: string) => {
-    return KUNGFU_OBSERVER.pipe(
+    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const ledgerData = data.ledger;
             const orders = Object.values(ledgerData.Order || {});

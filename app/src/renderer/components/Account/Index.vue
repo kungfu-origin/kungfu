@@ -120,9 +120,6 @@ export default {
             this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             const pnl = data['pnl'][t.currentId];
             this.pnl = Object.freeze(pnl || []);
-            const tradingDay = data.tradingDay;
-            this.$store.dispatch('setTradingDay', tradingDay);
-            const appStates = data.appStates;
         })
     },
 

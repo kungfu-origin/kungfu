@@ -10,7 +10,4 @@ if(currentPath.indexOf('/code') !== -1) {
 const { watcher, longfist } = require('__gUtils/kungfuUtils')
 window.watcher = watcher;
 window.longfist = longfist;
-window.fileId = 0;
-window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay);
-window.getTradingDay = () => store.state.BASE.tradingDay;
 
