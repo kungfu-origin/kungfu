@@ -126,7 +126,7 @@ export default {
                 prop: "statusName",
             },{
                 type: "text",
-                label: this.moduleType == 'account' ? '下单者' : '账户',
+                label: this.moduleType == 'account' ? '策略' : '账户',
                 prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
             },{
                 type: 'operation',
