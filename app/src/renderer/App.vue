@@ -19,7 +19,7 @@ import GlobalSettingDialog from './components/Base/GlobalSettingDialog';
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
-import { KUNGFU_GLOBAL_DATA_OBSERVER } from '__io/kungfu/index';
+import { buildKungfuGlobalDataPipe } from '__io/kungfu/index';
 import { deleteProcess } from '__gUtils/processUtils';
 
 export default {
@@ -104,9 +104,11 @@ export default {
         },
 
         subKungfuGlobalData () {
-            return KUNGFU_GLOBAL_DATA_OBSERVER.subscribe(data => {
+            return buildKungfuGlobalDataPipe().subscribe(data => {
                 const tradingDay = data.tradingDay;
                 this.$store.dispatch('setTradingDay', tradingDay);
+
+                // console.log(data, '----')
             })
             
         },

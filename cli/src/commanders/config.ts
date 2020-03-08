@@ -43,7 +43,7 @@ const buildChoices = async (configItem: SystemConfigChildNormalItem) => {
     } 
 }
 
-const parseConfigItemQuestions = async (configItem: SystemConfigChildNormalItem, existedConfigData: StringToAny): Promise<PromptQuestion> => {
+const parseConfigItemQuestions = async (configItem: SystemConfigChildNormalItem, existedConfigData: StringToAnyObject): Promise<PromptQuestion> => {
     const { required, name, key, type, tip } = configItem;
     const targetType = getQuestionInputType(type);
     const existedValue = existedConfigData[key];
@@ -79,6 +79,6 @@ export const setSystemConfig = async () => {
     const questions = await Promise.all(configChildItems.map((cItem: SystemConfigChildNormalItem) => parseConfigItemQuestions(cItem, configValueData)))
     return inquirer
         .prompt(questions)
-        .then((answers: StringToAny) => setValueByConfigItem(configType, configItemKey, answers))
+        .then((answers: StringToAnyObject) => setValueByConfigItem(configType, configItemKey, answers))
 }
 

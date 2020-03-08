@@ -44,7 +44,7 @@ interface StringToFunctionObject {
     [propName: string]: Function;
 }
 
-interface StringToAny {
+interface StringToAnyObject {
     [propName: string]: any
 }
 
@@ -285,9 +285,6 @@ interface NumList {
 
 interface MdTdState {
     processId?: string;
-    category: number;
-    group: string;
-    name: string;
     state: number
 }
 

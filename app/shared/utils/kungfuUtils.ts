@@ -2,6 +2,7 @@
 import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
+import { statusConfig } from '__gConfig/statusConfig';
 
 import moment from 'moment';
 
@@ -80,7 +81,7 @@ export const removeKfConfig = (key: string, type: string) => {
 
 
 export const transformOrderTradeListToData = (list: any[], type: string) => {
-    let data: StringToAny = {};
+    let data: StringToAnyObject = {};
 
     if (type === 'account') {
         list.kfForEach((item: any) => {
@@ -103,7 +104,7 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
 }
 
 export const transformTradingItemListToData = (list: any[], type: string) => {
-    let data: StringToAny = {}
+    let data: StringToAnyObject = {}
 
     if (type === 'account') {
         list.kfForEach((item: any) => {
@@ -283,6 +284,15 @@ export const dealAsset = (item: AssetInputData): AssetData => {
     }
 }
 
+
+export const dealGatewayStates = (gatewayStates: StringToStringObject) => {
+
+    Object.keys(gatewayStates).map((key: string) => {
+        const kungfuLocation = watcher.getLocation(key)
+        console.log(kungfuLocation)
+    })
+
+}
 
 
 

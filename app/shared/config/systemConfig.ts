@@ -354,16 +354,16 @@ export const getValueByConfigItem = (configType: string, configItemKey: string) 
     return targetConfigData
 }
 
-export const setValueByConfigItem = (configType: string, configItemKey: string, configChildItemData: StringToAny) => {
+export const setValueByConfigItem = (configType: string, configItemKey: string, configChildItemData: StringToAnyObject) => {
     if(configType === 'systemConfig') {
-        let kfSystemConfig: StringToAny = readJsonSync(KF_CONFIG_PATH) || {};
+        let kfSystemConfig: StringToAnyObject = readJsonSync(KF_CONFIG_PATH) || {};
         kfSystemConfig[configItemKey] = {
             ...kfSystemConfig[configItemKey],
             ...configChildItemData
         }
         outputJsonSync(KF_CONFIG_PATH, kfSystemConfig)
     } else if(configType === 'systemTradingConfig') {
-        const kfSystemTradingConfig: StringToAny = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+        const kfSystemTradingConfig: StringToAnyObject = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
         kfSystemTradingConfig[configItemKey] = {
             ...kfSystemTradingConfig[configItemKey],
             ...configChildItemData
