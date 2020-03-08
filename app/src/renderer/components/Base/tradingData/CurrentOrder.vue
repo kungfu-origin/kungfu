@@ -70,7 +70,7 @@ export default {
 
     data () {
         return {
-            todayFinish: false, //为 ture 显示当日已完成
+            todayFinish: true, //为 ture 显示当日已完成
         };
     },
 

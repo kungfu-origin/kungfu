@@ -79,7 +79,7 @@ export default {
 
         resetData() {
             const t = this;
-            t.todayFinish = false;
+            t.todayFinish = true;
             t.searchKeyword = "";
             t.tableData = Object.freeze([]);
             return true;
