@@ -68,6 +68,11 @@ namespace kungfu::yijinjing::practice
         return master_start_time_;
     }
 
+    int64_t apprentice::get_trading_day() const
+    {
+        return trading_day_;
+    }
+
     location_ptr apprentice::get_config_location() const
     {
         return config_location_;
@@ -170,7 +175,9 @@ namespace kungfu::yijinjing::practice
         events_ | is(TradingDay::tag) |
         $([&](const event_ptr &event)
           {
-              on_trading_day(event, event->data<TradingDay>().timestamp);
+              trading_day_ = event->data<TradingDay>().timestamp;
+              SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, "%Y%m%d"));
+              on_trading_day(event, trading_day_);
           });
 
         events_ | take_until(events_ | is(RequestStart::tag)) |
@@ -178,6 +185,9 @@ namespace kungfu::yijinjing::practice
           {
               longfist::cast_event_invoke(event, recover_state);
           });
+
+        SPDLOG_INFO("on ready");
+        on_ready();
 
         switch (get_io_device()->get_home()->mode)
         {
@@ -187,6 +197,7 @@ namespace kungfu::yijinjing::practice
                 auto home = get_io_device()->get_home();
                 auto backtest_location = std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
                 reader_->join(backtest_location, 0, begin_time_);
+                started_ = true;
                 SPDLOG_INFO("on start");
                 on_start();
                 break;
@@ -252,10 +263,11 @@ namespace kungfu::yijinjing::practice
         }
     }
 
+    void apprentice::on_ready()
+    {}
+
     void apprentice::on_start()
-    {
-        started_ = true;
-    }
+    {}
 
     void apprentice::on_read_from(const event_ptr &event)
     {
@@ -312,6 +324,7 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               master_start_time_ = e->trigger_time();
+              started_ = true;
               SPDLOG_INFO("on start");
               on_start();
           },

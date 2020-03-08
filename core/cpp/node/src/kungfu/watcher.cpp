@@ -43,8 +43,7 @@ namespace kungfu::node
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             update_state(state_ref_),
             update_ledger(ledger_ref_),
-            publish(*this, state_ref_),
-            trading_day_(time::now_in_nano())
+            publish(*this, state_ref_)
     {
         InitStateMap(info, state_ref_);
         InitStateMap(info, ledger_ref_);
@@ -93,7 +92,7 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info)
     {
-        return Napi::String::New(ledger_ref_.Env(), time::strftime(trading_day_, "%Y%m%d"));
+        return Napi::String::New(ledger_ref_.Env(), time::strftime(get_trading_day(), "%Y%m%d"));
     }
 
     Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info)
@@ -113,45 +112,69 @@ namespace kungfu::node
 
     Napi::Value Watcher::Setup(const Napi::CallbackInfo &info)
     {
-        setup();
-        return Napi::Value();
+        try
+        {
+            setup();
+            return Napi::Value();
+        } catch (...)
+        {
+            throw Napi::Error::New(info.Env(), "setup failed");
+        }
     }
 
     Napi::Value Watcher::Step(const Napi::CallbackInfo &info)
     {
-        step();
-        return Napi::Value();
+        try
+        {
+            step();
+            return Napi::Value();
+        } catch (...)
+        {
+            throw Napi::Error::New(info.Env(), "step failed");
+        }
     }
 
     Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
-        auto locationObj = Napi::Object::New(info.Env());
-        auto uid = info.Length() > 0 ? info[0].ToNumber().Uint32Value() : 0;
-        if (uid == 0)
+        try
         {
-            auto location = get_io_device()->get_home();
-            locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-            locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-            locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-            locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-            locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
-        }
-        if (has_location(uid))
+            auto locationObj = Napi::Object::New(info.Env());
+            auto uid = info.Length() > 0 ? info[0].ToNumber().Uint32Value() : 0;
+            if (uid == 0)
+            {
+                auto location = get_io_device()->get_home();
+                locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+                locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+                locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+                locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+                locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+            }
+            if (has_location(uid))
+            {
+                auto location = get_location(uid);
+                locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+                locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+                locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+                locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+                locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+            }
+            return locationObj;
+        } catch (...)
         {
-            auto location = get_location(uid);
-            locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-            locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-            locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-            locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-            locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+            throw Napi::Error::New(info.Env(), "invalid location arguments");
         }
-        return locationObj;
     }
 
     Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info)
     {
         Napi::Object obj = info[0].ToObject();
-        longfist::cast_type_invoke(obj.Get("type").ToString().Utf8Value(), obj, publish);
+        try
+        {
+            longfist::cast_type_invoke(obj.Get("type").ToString().Utf8Value(), obj, publish);
+        } catch (...)
+        {
+            throw Napi::Error::New(info.Env(), "invalid state arguments");
+        }
         return Napi::Value();
     }
 
@@ -201,22 +224,13 @@ namespace kungfu::node
         exports.Set("Watcher", func);
     }
 
-    void Watcher::react()
+    void Watcher::on_ready()
     {
         events_ |
         $([&](const event_ptr &event)
           {
               longfist::cast_event_invoke(event, update_state);
           });
-
-        events_ | is(TradingDay::tag) |
-        $([&](const event_ptr &event)
-          {
-              trading_day_ = event->data<TradingDay>().timestamp;
-              SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, "%Y%m%d"));
-          });
-
-        apprentice::react();
     }
 
     void Watcher::on_start()

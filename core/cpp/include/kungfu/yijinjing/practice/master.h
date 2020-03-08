@@ -47,7 +47,7 @@ namespace kungfu::yijinjing::practice
 
         bool produce_one(const rx::subscriber<event_ptr> &sb) override;
 
-        void react() override;
+        void react() final;
 
     private:
         int64_t start_time_;

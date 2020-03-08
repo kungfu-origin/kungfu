@@ -38,7 +38,7 @@ namespace kungfu::node
             }
         } catch (...)
         {
-            return location_ptr();
+            throw Napi::Error::New(info.Env(), "invalid location arguments");
         }
     }
 

@@ -39,6 +39,8 @@ namespace kungfu::yijinjing::practice
 
         int64_t get_master_start_time() const;
 
+        int64_t get_trading_day() const;
+
         yijinjing::data::location_ptr get_config_location() const;
 
         void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
@@ -63,15 +65,17 @@ namespace kungfu::yijinjing::practice
         longfist::StateMapType state_map_;
         yijinjing::data::location_ptr config_location_;
 
-        void react() override;
+        void react() final;
+
+        virtual void on_ready();
 
         virtual void on_start();
 
-        virtual void on_read_from(const event_ptr &event);
+        void on_read_from(const event_ptr &event);
 
-        virtual void on_read_from_public(const event_ptr &event);
+        void on_read_from_public(const event_ptr &event);
 
-        virtual void on_write_to(const event_ptr &event);
+        void on_write_to(const event_ptr &event);
 
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime)
         {
@@ -184,6 +188,7 @@ namespace kungfu::yijinjing::practice
         int32_t timer_usage_count_;
         longfist::recover recover_state;
         bool started_;
+        int64_t trading_day_;
 
         void checkin();
 

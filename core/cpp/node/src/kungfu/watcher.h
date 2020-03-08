@@ -59,7 +59,7 @@ namespace kungfu::node
 
     protected:
 
-        void react() override;
+        void on_ready() override;
 
         void on_start() override;
 
@@ -72,59 +72,64 @@ namespace kungfu::node
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
-        int64_t trading_day_;
 
         void RestoreState(const yijinjing::data::location_ptr &config_location);
 
         template<typename DataType, typename IdPtrType = uint64_t DataType::*>
         Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr)
         {
-            auto trigger_time = yijinjing::time::now_in_nano();
-            Napi::Object obj = info[0].ToObject();
-            DataType action = {};
-            serialize::JsGet{}(obj, action);
-            auto account_location = ExtractLocation(info, 1, get_locator());
-            if (account_location and has_writer(account_location->uid))
+            try
             {
-                auto account_writer = get_writer(account_location->uid);
+                auto trigger_time = yijinjing::time::now_in_nano();
+                Napi::Object obj = info[0].ToObject();
+                DataType action = {};
+                serialize::JsGet{}(obj, action);
+                auto account_location = ExtractLocation(info, 1, get_locator());
+                if (account_location and has_writer(account_location->uid))
+                {
+                    auto account_writer = get_writer(account_location->uid);
 
-                auto strategy_location = ExtractLocation(info, 2, get_locator());
-                if (strategy_location)
-                {
-                    auto proxy_location = yijinjing::data::location::make_shared(
-                            strategy_location->mode, strategy_location->category,
-                            get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
-                    );
-                    auto master_cmd_writer = get_writer(get_master_commands_uid());
-                    auto ensure_location = [&](auto location)
+                    auto strategy_location = ExtractLocation(info, 2, get_locator());
+                    if (strategy_location)
                     {
-                        if (not has_location(location->uid))
+                        auto proxy_location = yijinjing::data::location::make_shared(
+                                strategy_location->mode, strategy_location->category,
+                                get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
+                        );
+                        auto master_cmd_writer = get_writer(get_master_commands_uid());
+                        auto ensure_location = [&](auto location)
                         {
-                            add_location(trigger_time, location);
-                            master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<longfist::types::Location>(location));
+                            if (not has_location(location->uid))
+                            {
+                                add_location(trigger_time, location);
+                                master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<longfist::types::Location>(location));
+                            }
+                        };
+                        ensure_location(strategy_location);
+                        ensure_location(proxy_location);
+                        if (not has_channel(account_location->uid, proxy_location->uid))
+                        {
+                            longfist::types::Channel request = {};
+                            request.source_id = account_location->uid;
+                            request.dest_id = proxy_location->uid;
+                            master_cmd_writer->write(trigger_time, request);
                         }
-                    };
-                    ensure_location(strategy_location);
-                    ensure_location(proxy_location);
-                    if (not has_channel(account_location->uid, proxy_location->uid))
+                        uint64_t id_left = (uint64_t) (proxy_location->uid xor account_location->uid) << 32;
+                        uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
+                        action.*id_ptr = id_left | id_right;
+                        account_writer->write_as(trigger_time, action, proxy_location->uid);
+                    } else
                     {
-                        longfist::types::Channel request = {};
-                        request.source_id = account_location->uid;
-                        request.dest_id = proxy_location->uid;
-                        master_cmd_writer->write(trigger_time, request);
+                        action.*id_ptr = account_writer->current_frame_uid();
+                        account_writer->write(trigger_time, action);
                     }
-                    uint64_t id_left = (uint64_t)(proxy_location->uid xor account_location->uid) << 32;
-                    uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
-                    action.*id_ptr = id_left | id_right;
-                    account_writer->write_as(trigger_time, action, proxy_location->uid);
-                } else
-                {
-                    action.*id_ptr = account_writer->current_frame_uid();
-                    account_writer->write(trigger_time, action);
+                    return Napi::Boolean::New(info.Env(), true);
                 }
-                return Napi::Boolean::New(info.Env(), true);
+                throw Napi::Error::New(info.Env(), "invalid account location");
+            } catch (...)
+            {
+                throw Napi::Error::New(info.Env(), "invalid order arguments");
             }
-            return Napi::Boolean::New(info.Env(), false);
         };
     };
 }
