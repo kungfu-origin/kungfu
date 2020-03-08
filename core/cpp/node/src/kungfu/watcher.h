@@ -152,6 +152,9 @@ namespace kungfu::node
                     return Napi::Boolean::New(info.Env(), true);
                 }
                 throw Napi::Error::New(info.Env(), "invalid account location");
+            } catch (const std::exception &ex)
+            {
+                throw Napi::Error::New(info.Env(), fmt::format("invalid order arguments: {}", ex.what()));
             } catch (...)
             {
                 throw Napi::Error::New(info.Env(), "invalid order arguments");

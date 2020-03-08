@@ -136,6 +136,9 @@ namespace kungfu::node
         {
             setup();
             return Napi::Value();
+        } catch (const std::exception &ex)
+        {
+            throw Napi::Error::New(info.Env(), fmt::format("setup failed: {}", ex.what()));
         } catch (...)
         {
             throw Napi::Error::New(info.Env(), "setup failed");
@@ -148,6 +151,9 @@ namespace kungfu::node
         {
             step();
             return Napi::Value();
+        } catch (const std::exception &ex)
+        {
+            throw Napi::Error::New(info.Env(), fmt::format("step failed: {}", ex.what()));
         } catch (...)
         {
             throw Napi::Error::New(info.Env(), "step failed");

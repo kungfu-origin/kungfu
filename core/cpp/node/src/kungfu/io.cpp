@@ -36,6 +36,9 @@ namespace kungfu::node
                         locator
                 );
             }
+        } catch (const std::exception &ex)
+        {
+            throw Napi::Error::New(info.Env(), fmt::format("invalid location arguments: {}", ex.what()));
         } catch (...)
         {
             throw Napi::Error::New(info.Env(), "invalid location arguments");
