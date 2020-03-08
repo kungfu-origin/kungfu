@@ -304,6 +304,9 @@ export default {
     .tr-table-cell.gray{
         color: $font;
     }
+     .tr-table-cell.blue{
+        color: $blue;
+    }
     .tr-table-cell.update{
         animation: nanoBlink 0.5s 1;
     }

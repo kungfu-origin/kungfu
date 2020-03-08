@@ -171,8 +171,13 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
 
 function resolveClientId (dest: string): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
-    let group = kungfuLocation.group === 'node' ? '手动' : '';
+    let group = kungfuLocation.group === 'node' ? 'Manual' : '';
     let name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
+    
+    if (group === 'Manual') {
+        // console.log(kungfuLocation)
+    }
+    
     if (![ name, group ].join(' ').trim()) {
         console.log(kungfuLocation)
         console.log(dest)
