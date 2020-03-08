@@ -171,8 +171,8 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
 
 function resolveClientId (dest: string): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
-    let group = kungfuLocation.group === 'node' ? 'Manual' : '';
-    let name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
+    const group = kungfuLocation.group === 'node' ? 'Manual' : '';
+    const name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
     
     if (group === 'Manual') {
         // console.log(kungfuLocation)
@@ -183,6 +183,14 @@ function resolveClientId (dest: string): string {
         console.log(dest)
         console.error('dest 异常')
     }
+    return [ name, group ].join(' ')
+}
+
+function resolveAccountId (source: string, dest: string): string {
+    const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
+    const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
+    const name = kungfuLocationSource.group + '_' + kungfuLocationSource.name;
+    const group = kungfuLocationDest.group === 'node' ? 'Manual' : '';
     return [ name, group ].join(' ')
 }
 
@@ -200,7 +208,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         statusName: orderStatus[item.status],
         status: item.status,
         clientId: resolveClientId(item.dest || ''),
-        accountId: item.account_id,
+        accountId: resolveAccountId(item.source, item.dest),
         sourceId: item.source_id,
         orderId: item.order_id.toString(),
         exchangeId: item.exchange_id,
@@ -220,7 +228,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),
-        accountId: item.account_id,
+        accountId: resolveAccountId(item.source, item.dest),
         sourceId: item.source_id,
         source: item.source
     }
