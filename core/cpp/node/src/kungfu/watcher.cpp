@@ -163,6 +163,10 @@ namespace kungfu::node
     Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
         auto location = FindLocation(info);
+        if (not location)
+        {
+            return Napi::Value();
+        }
         auto locationObj = Napi::Object::New(info.Env());
         locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
         locationObj.Set("group", Napi::String::New(info.Env(), location->group));
@@ -321,6 +325,6 @@ namespace kungfu::node
         {
             return proxy_locations_.at(uid);
         }
-        throw Napi::Error::New(info.Env(), "location not found");
+        return location_ptr();
     }
 }
