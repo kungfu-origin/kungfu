@@ -17,7 +17,6 @@ export const buildTradingDataPipe = (type: string) => {
 
             const ledgerData = data.ledger;
             const tradingDay = data.tradingDay;
-            console.log(tradingDay, '---')
 
             const orders = Object.values(ledgerData.Order || {});
             const trades = Object.values(ledgerData.Trade || {});
