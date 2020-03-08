@@ -71,6 +71,7 @@ namespace kungfu::wingchun::service
         book::BookContext_ptr book_context_;
 
         std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
+        std::unordered_map<uint64_t, state<longfist::types::OrderStat>> &order_stats_;
         std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
 
         longfist::enums::BrokerState get_broker_state(uint32_t broker_location) const;

@@ -21,7 +21,8 @@ namespace kungfu::wingchun::service
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
             publish_state(state_map_),
-            assets_(state_map_[boost::hana::type_c<longfist::types::Asset>])
+            assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
+            order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>])
     {
         log::copy_log_settings(get_io_device()->get_home(), "ledger");
         if (m == mode::LIVE)
@@ -242,11 +243,33 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
+        events_ | is(OrderInput::tag) |
+        $([&](const event_ptr &event)
+          {
+            const OrderInput &data = event->data<OrderInput>();
+            OrderStat stat = {};
+            stat.order_id = data.order_id;
+            stat.md_time = event->trigger_time();
+            stat.insert_time = event->gen_time();
+            order_stats_.emplace(data.order_id, state<OrderStat>(get_home_uid(), event->dest(), event->gen_time(), stat));
+            write_to(event->gen_time(), stat, event->dest());
+          });
+
         events_ | is(Order::tag) |
         $([&](const event_ptr &event)
           {
               try
-              { on_order(event, event->data<Order>()); }
+              {
+                  const Order &data = event->data<Order>();
+                  if (order_stats_.find(data.order_id) == order_stats_.end())
+                  {
+                      order_stats_.emplace(data.order_id, state<OrderStat>(get_home_uid(), event->source(), event->gen_time(), OrderStat()));
+                  }
+                  OrderStat &stat = order_stats_.at(data.order_id).data;
+                  stat.ack_time = event->gen_time();
+                  write_to(event->gen_time(), stat, event->source());
+                  on_order(event, data);
+              }
               catch (const std::exception &e)
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });

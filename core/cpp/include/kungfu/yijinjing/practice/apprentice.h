@@ -56,7 +56,7 @@ namespace kungfu::yijinjing::practice
         virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
         template<typename DataType>
-        void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = 0)
+        void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC)
         {
             writers_[dest_id]->write(trigger_time, data);
         }
