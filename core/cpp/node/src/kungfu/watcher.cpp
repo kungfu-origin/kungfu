@@ -52,7 +52,14 @@ namespace kungfu::node
         auto locator = get_locator();
         for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
         {
-            RestoreState(location::make_shared(pair.second, locator));
+            auto state_location = location::make_shared(pair.second, locator);
+            RestoreState(state_location);
+            if (state_location->category == category::STRATEGY)
+            {
+                auto proxy_location = location::make_shared(state_location->mode, state_location->category, "node", state_location->name,
+                                                            get_locator());
+                proxy_locations_.emplace(proxy_location->uid, proxy_location);
+            }
         }
         RestoreState(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", locator));
         SPDLOG_INFO("watcher ledger restored");
@@ -136,33 +143,14 @@ namespace kungfu::node
 
     Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info)
     {
-        try
-        {
-            auto locationObj = Napi::Object::New(info.Env());
-            auto uid = info.Length() > 0 ? info[0].ToNumber().Uint32Value() : 0;
-            if (uid == 0)
-            {
-                auto location = get_io_device()->get_home();
-                locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-                locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-                locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-                locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-                locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
-            }
-            if (has_location(uid))
-            {
-                auto location = get_location(uid);
-                locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-                locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-                locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-                locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-                locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
-            }
-            return locationObj;
-        } catch (...)
-        {
-            throw Napi::Error::New(info.Env(), "invalid location arguments");
-        }
+        auto location = FindLocation(info);
+        auto locationObj = Napi::Object::New(info.Env());
+        locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+        locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+        locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+        locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+        locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+        return locationObj;
     }
 
     Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info)
@@ -269,5 +257,23 @@ namespace kungfu::node
     {
         add_location(0, state_location);
         serialize::JsRestoreState(*this, ledger_ref_, state_location)();
+    }
+
+    yijinjing::data::location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info)
+    {
+        if (info.Length() == 0)
+        {
+            return get_io_device()->get_home();
+        }
+        auto uid = info[0].ToNumber().Uint32Value();
+        if (has_location(uid))
+        {
+            return get_location(uid);
+        }
+        if (proxy_locations_.find(uid) != proxy_locations_.end())
+        {
+            return proxy_locations_.at(uid);
+        }
+        throw Napi::Error::New(info.Env(), "location not found");
     }
 }

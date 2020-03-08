@@ -23,8 +23,6 @@ namespace kungfu::wingchun::broker
 
     void MarketData::on_start()
     {
-        apprentice::on_start();
-
         events_ | is(SubscribeAll::tag) |
         $([&](const event_ptr &event)
           {

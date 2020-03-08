@@ -27,8 +27,6 @@ namespace kungfu::wingchun::broker
 
     void Trader::on_start()
     {
-        apprentice::on_start();
-
         events_ | is(OrderInput::tag) |
         $([&](const event_ptr &event)
           {

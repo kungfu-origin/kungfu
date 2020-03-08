@@ -72,12 +72,17 @@ namespace kungfu::node
         serialize::JsUpdateState update_state;
         serialize::JsUpdateState update_ledger;
         serialize::JsPublishState publish;
+        std::unordered_map<uint32_t, yijinjing::data::location_ptr> proxy_locations_;
 
         void RestoreState(const yijinjing::data::location_ptr &config_location);
+
+        yijinjing::data::location_ptr FindLocation(const Napi::CallbackInfo &info);
 
         template<typename DataType, typename IdPtrType = uint64_t DataType::*>
         Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr)
         {
+            using namespace kungfu::rx;
+            using namespace kungfu::longfist::types;
             try
             {
                 auto trigger_time = yijinjing::time::now_in_nano();
@@ -102,22 +107,40 @@ namespace kungfu::node
                             if (not has_location(location->uid))
                             {
                                 add_location(trigger_time, location);
-                                master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<longfist::types::Location>(location));
+                                master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<Location>(location));
                             }
+                        };
+                        auto perform = [trigger_time, account_location, proxy_location, account_writer, action, id_ptr]()
+                        {
+                            uint64_t id_left = (uint64_t) (proxy_location->uid xor account_location->uid) << 32;
+                            uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
+                            DataType data = action;
+                            data.*id_ptr = id_left | id_right;
+                            account_writer->write_as(trigger_time, data, proxy_location->uid);
+                            SPDLOG_INFO("{} sent to {} order {}", proxy_location->uname, account_location->uname, data.to_string());
                         };
                         ensure_location(strategy_location);
                         ensure_location(proxy_location);
-                        if (not has_channel(account_location->uid, proxy_location->uid))
+                        if (has_channel(account_location->uid, proxy_location->uid))
                         {
-                            longfist::types::Channel request = {};
+                            perform();
+                        } else
+                        {
+                            events_ | is(Channel::tag) |
+                            filter([account_location, proxy_location](const event_ptr &event)
+                                   {
+                                       const Channel &channel = event->data<Channel>();
+                                       return channel.source_id == account_location->uid and channel.dest_id == proxy_location->uid;
+                                   }) | first() |
+                            $([perform](const event_ptr &event)
+                              {
+                                  perform();
+                              });
+                            Channel request = {};
                             request.source_id = account_location->uid;
                             request.dest_id = proxy_location->uid;
                             master_cmd_writer->write(trigger_time, request);
                         }
-                        uint64_t id_left = (uint64_t) (proxy_location->uid xor account_location->uid) << 32;
-                        uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
-                        action.*id_ptr = id_left | id_right;
-                        account_writer->write_as(trigger_time, action, proxy_location->uid);
                     } else
                     {
                         action.*id_ptr = account_writer->current_frame_uid();
@@ -133,6 +156,5 @@ namespace kungfu::node
         };
     };
 }
-
 
 #endif //KUNGFU_NODE_WATCHER_H
