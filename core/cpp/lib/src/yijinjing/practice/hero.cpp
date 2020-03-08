@@ -102,7 +102,7 @@ namespace kungfu::yijinjing::practice
         continual_ = true;
         events_.connect(cs_);
         on_exit();
-        SPDLOG_INFO("{} finished", get_home_uname());
+        SPDLOG_INFO("{} [{:08x}] finished", get_home_uname(), get_home_uid());
     }
 
     bool hero::is_live() const
@@ -358,7 +358,8 @@ namespace kungfu::yijinjing::practice
         {
             do
             {
-                live_ = produce_one(sb) && live_;
+                on_active();
+                live_ = drain(sb) && live_;
             } while (continual_ and live_);
         } catch (...)
         {
@@ -371,7 +372,7 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    bool hero::produce_one(const rx::subscriber<event_ptr> &sb)
+    bool hero::drain(const rx::subscriber<event_ptr> &sb)
     {
         if (io_device_->get_home()->mode == mode::LIVE)
         {

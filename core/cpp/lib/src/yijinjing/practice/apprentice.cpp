@@ -263,6 +263,9 @@ namespace kungfu::yijinjing::practice
         }
     }
 
+    void apprentice::on_active()
+    {}
+
     void apprentice::on_ready()
     {}
 

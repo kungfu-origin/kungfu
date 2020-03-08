@@ -127,42 +127,6 @@ namespace kungfu::yijinjing::practice
         write_trading_day(0, writers_.at(location::PUBLIC));
     }
 
-    bool master::produce_one(const rx::subscriber<event_ptr> &sb)
-    {
-        auto now = time::now_in_nano();
-
-        for (auto &app : timer_tasks_)
-        {
-            uint32_t app_id = app.first;
-            auto &app_tasks = app.second;
-            for (auto it = app_tasks.begin(); it != app_tasks.end();)
-            {
-                auto &task = it->second;
-                if (task.checkpoint <= now)
-                {
-                    writers_[app_id]->mark(0, Time::tag);
-                    SPDLOG_DEBUG("sent time event to {}", get_location(app_id)->uname);
-                    task.checkpoint += task.duration;
-                    task.repeat_count++;
-                    if (task.repeat_count >= task.repeat_limit)
-                    {
-                        it = app_tasks.erase(it);
-                        continue;
-                    }
-                }
-                it++;
-            }
-        }
-
-        if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
-        {
-            on_interval_check(now);
-            last_check_ = now;
-        }
-
-        return hero::produce_one(sb);
-    }
-
     void master::react()
     {
         events_ | instanceof<journal::frame>() |
@@ -267,6 +231,40 @@ namespace kungfu::yijinjing::practice
               SPDLOG_TRACE("time request from {} duration {} repeat {} at {}",
                            get_location(e->source())->uname, request.duration, request.repeat, time::strftime(e->gen_time()));
           });
+    }
+
+    void master::on_active()
+    {
+        auto now = time::now_in_nano();
+
+        for (auto &app : timer_tasks_)
+        {
+            uint32_t app_id = app.first;
+            auto &app_tasks = app.second;
+            for (auto it = app_tasks.begin(); it != app_tasks.end();)
+            {
+                auto &task = it->second;
+                if (task.checkpoint <= now)
+                {
+                    writers_[app_id]->mark(0, Time::tag);
+                    SPDLOG_DEBUG("sent time event to {}", get_location(app_id)->uname);
+                    task.checkpoint += task.duration;
+                    task.repeat_count++;
+                    if (task.repeat_count >= task.repeat_limit)
+                    {
+                        it = app_tasks.erase(it);
+                        continue;
+                    }
+                }
+                it++;
+            }
+        }
+
+        if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now)
+        {
+            on_interval_check(now);
+            last_check_ = now;
+        }
     }
 
     void master::write_trading_day(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer)

@@ -107,11 +107,9 @@ namespace kungfu::yijinjing::practice
 
         void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
-        void produce(const rx::subscriber <event_ptr> &sb);
-
-        virtual bool produce_one(const rx::subscriber <event_ptr> &sb);
-
         virtual void react() = 0;
+
+        virtual void on_active() = 0;
 
     private:
         yijinjing::io_device_with_reply_ptr io_device_;
@@ -119,6 +117,10 @@ namespace kungfu::yijinjing::practice
         int64_t now_;
         volatile bool continual_ = true;
         volatile bool live_ = false;
+
+        void produce(const rx::subscriber <event_ptr> &sb);
+
+        bool drain(const rx::subscriber <event_ptr> &sb);
 
         template<typename T>
         std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer,

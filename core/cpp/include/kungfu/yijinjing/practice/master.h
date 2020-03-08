@@ -45,9 +45,9 @@ namespace kungfu::yijinjing::practice
 
     protected:
 
-        bool produce_one(const rx::subscriber<event_ptr> &sb) override;
-
         void react() final;
+
+        void on_active() final;
 
     private:
         int64_t start_time_;

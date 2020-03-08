@@ -67,6 +67,8 @@ namespace kungfu::yijinjing::practice
 
         void react() final;
 
+        void on_active() override;
+
         virtual void on_ready();
 
         virtual void on_start();
@@ -184,11 +186,11 @@ namespace kungfu::yijinjing::practice
         yijinjing::data::location_ptr master_home_location_;
         yijinjing::data::location_ptr master_commands_location_;
         int64_t master_start_time_;
+        int64_t trading_day_;
+        bool started_;
         std::unordered_map<int, int64_t> timer_checkpoints_;
         int32_t timer_usage_count_;
         longfist::recover recover_state;
-        bool started_;
-        int64_t trading_day_;
 
         void checkin();
 
