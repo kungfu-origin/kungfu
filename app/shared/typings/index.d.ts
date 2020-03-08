@@ -146,6 +146,7 @@ interface OrderInputData {
     source_id: string;
     exchange_id: string;
     source: string;
+    dest: string;
 }
 
 interface PosData {
@@ -197,6 +198,7 @@ interface TradeInputData {
     price: string;
     volume: bigint;
     source: string;
+    dest: string;
     [propName: string]: any;
 }
 

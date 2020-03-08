@@ -1,5 +1,4 @@
 const path = require('path');
-const { platform } = require('__gConfig/platformConfig');
 const { addFileSync } = require('__gUtils/fileUtils');
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {

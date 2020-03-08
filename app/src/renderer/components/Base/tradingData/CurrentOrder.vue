@@ -48,7 +48,7 @@ import moment from "moment"
 import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { dealOrder } from "__gUtils/busiUtils";
+import { dealOrder } from "__gUtils/kungfuUtils";
 import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
 import { nanoCancelAllOrder } from '__io/nano/nanoReq';
@@ -83,7 +83,7 @@ export default {
             processStatus: state => state.BASE.processStatus
         }),
 
-        schema(){
+        schema () {
             return  [
             {
                 type: 'text',
@@ -151,7 +151,7 @@ export default {
     },
 
     methods: {
-        handleCancelOrder(props){
+        handleCancelOrder (props) {
             const t = this;
             const kungfuLocation = decodeKungfuLocation(props.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
@@ -173,7 +173,7 @@ export default {
            
         },
 
-        handleCancelAllOrders(){
+        handleCancelAllOrders () {
             const t = this;
 
             //先判断对应进程是否启动
@@ -202,11 +202,11 @@ export default {
         },
 
         //查看当日已完成
-        handleCheckTodayFinished(){
+        handleCheckTodayFinished () {
             this.todayFinish = true;
         },
 
-        handleCheckTodayUnfinished(){
+        handleCheckTodayUnfinished () {
             this.todayFinish = false;
         },
 
@@ -240,7 +240,7 @@ export default {
             return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{
                 return  b.updateTimeNum - a.updateTimeNum
             }))
-        },
+        }
     }
 }
 </script>

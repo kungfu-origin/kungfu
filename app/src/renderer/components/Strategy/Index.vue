@@ -91,7 +91,6 @@ export default {
             this.pnl = Object.freeze(pnl || []);
             const tradingDay = data.tradingDay;
             this.$store.dispatch('setTradingDay', tradingDay);
-            console.log(tradingDay, '---')
         })
     },
 

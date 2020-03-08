@@ -36,7 +36,8 @@
 import MakeOrderDialog from '../MakeOrderDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { debounce, dealPos } from '__gUtils/busiUtils';
+import { debounce } from '__gUtils/busiUtils';
+import { dealPos } from '__gUtils/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 
 

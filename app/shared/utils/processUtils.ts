@@ -5,7 +5,6 @@ import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask } from '__gUtils/busiUtils'; 
 import { getProcesses } from 'getprocesses';
 
-
 const path = require('path');
 const fkill = require('fkill');
 const taskkill = require('taskkill');

@@ -1,5 +1,4 @@
 import readline from 'readline';
-import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
 
@@ -413,86 +412,6 @@ export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<
         return [tradingDay, tradingDay]
     } else throw new Error('dateRange == [] and tradingDay undefined!')
 }
-
-// ========================== 交易数据处理 start ===========================
-
-export const dealOrder = (item: OrderInputData): OrderData => {
-    const updateTime = +Number(item.update_time || item.insert_time || 0);
-    return {
-        id: [item.order_id.toString(), item.account_id.toString()].join('-'),
-        updateTime: moment(+updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
-        updateTimeNum: +updateTime,
-        instrumentId: item.instrument_id,
-        side: sideName[item.side] ? sideName[item.side] : '--',
-        offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
-        limitPrice: toDecimal(item.limit_price, 3) || '--',
-        volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
-        statusName: orderStatus[item.status],
-        status: item.status,
-        clientId: item.client_id === 'ledger' ? '--' : item.client_id,
-        accountId: item.account_id,
-        sourceId: item.source_id,
-        orderId: item.order_id.toString(),
-        exchangeId: item.exchange_id,
-        source: item.source
-    }
-}
-
-export const dealTrade = (item: TradeInputData): TradeData => {
-    const updateTime = +Number(item.trade_time || item.update_time || 0);
-    return {
-        id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
-        updateTime: moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
-        updateTimeNum: +updateTime,
-        instrumentId: item.instrument_id,
-        side: sideName[item.side],
-        offset: offsetName[item.offset],
-        price: toDecimal(+item.price, 3),
-        volume: Number(item.volume),
-        clientId: item.client_id === 'ledger' ? '--' : item.client_id,
-        accountId: item.account_id,
-        sourceId: item.source_id,
-        source: item.source
-    }
-}
-
-export const dealPos = (item: PosInputData): PosData => {
-    //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
-    const direction: string = posDirection[item.direction] || '--';
-    return {
-        id: item.instrument_id + direction,
-        instrumentId: item.instrument_id,
-        direction,
-        yesterdayVolume: Number(item.yesterday_volume),
-        todayVolume: Number(item.volume) - Number(item.yesterday_volume),
-        totalVolume: Number(item.volume),
-        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
-        lastPrice: toDecimal(item.last_price, 3) || '--',
-        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
-    }
-}
-
-export const dealAsset = (item: AssetInputData): AssetData => {
-    return {
-        accountId: `${item.source_id}_${item.account_id}`,
-        clientId: item.client_id,
-        initialEquity: toDecimal(item.initial_equity) || '--',
-        staticEquity: toDecimal(item.static_equity) || '--',
-        dynamicEquity: toDecimal(item.dynamic_equity) || '--',
-        realizedPnl: toDecimal(item.realized_pnl) || '--',
-        unRealizedPnl: toDecimal(item.unrealized_pnl) || '--',
-        avail: toDecimal(item.avail) || '--',
-        marketValue: toDecimal(item.market_value) || '--',
-        margin: toDecimal(item.margin) || '--'
-    }
-}
-
-
-
-
-// ========================== 交易数据处理 end ===========================
-
-
 
 export const getExtensions = (): Promise<any> => {
     return listDir(EXTENSION_DIR)

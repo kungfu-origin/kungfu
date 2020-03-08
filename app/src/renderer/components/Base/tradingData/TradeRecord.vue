@@ -31,7 +31,8 @@ import moment from 'moment'
 import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { debounce, dealTrade } from "__gUtils/busiUtils"
+import { debounce } from "__gUtils/busiUtils";
+import { dealTrade } from "__gUtils/kungfuUtils";
 import { writeCSV } from '__gUtils/fileUtils';
 
 export default {

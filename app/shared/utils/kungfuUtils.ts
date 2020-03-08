@@ -1,6 +1,9 @@
 
-import { KF_HOME } from '__gConfig/pathConfig';
-import { setTimerPromiseTask } from '__gUtils/BusiUtils';
+import { KF_HOME, KF_HOME_BASE_DIR } from '__gConfig/pathConfig';
+import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
+import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
+
+import moment from 'moment';
 
 process.env.KF_LOG_LEVEL = 'trace';
 
@@ -115,8 +118,15 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
     return accountIdClientIdData
 }
 
-export function decodeKungfuLocation (source: string) {
-    const location: KungfuLocation = watcher.getLocation(source)
+export function decodeKungfuLocation (sourceOrDest: string): KungfuLocation {
+    if (!sourceOrDest) return {
+        category: 'td',
+        group: 'node',
+        name: '',
+        mode: 'live'
+    }
+    
+    const location: KungfuLocation = watcher.getLocation(sourceOrDest)
     return location
 }
 
@@ -156,4 +166,94 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
     }
 }
 
+
+// ========================== 交易数据处理 start ===========================
+
+function resolveClientId (dest: string): string {
+    const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
+    let group = kungfuLocation.group === 'node' ? '手动' : '';
+    let name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
+    if (![ name, group ].join(' ').trim()) {
+        console.log(kungfuLocation)
+        console.log(dest)
+        console.error('dest 异常')
+    }
+    return [ name, group ].join(' ')
+}
+
+export const dealOrder = (item: OrderInputData): OrderData => {
+    const updateTime = +Number(item.update_time || item.insert_time || 0);
+    return {
+        id: [item.order_id.toString(), item.account_id.toString()].join('-'),
+        updateTime: moment(+updateTime / 1000000).format("YYYY-MM-DD HH:mm:ss"),
+        updateTimeNum: +updateTime,
+        instrumentId: item.instrument_id,
+        side: sideName[item.side] ? sideName[item.side] : '--',
+        offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        limitPrice: toDecimal(item.limit_price, 3) || '--',
+        volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
+        statusName: orderStatus[item.status],
+        status: item.status,
+        clientId: resolveClientId(item.dest || ''),
+        accountId: item.account_id,
+        sourceId: item.source_id,
+        orderId: item.order_id.toString(),
+        exchangeId: item.exchange_id,
+        source: item.source
+    }
+}
+
+export const dealTrade = (item: TradeInputData): TradeData => {
+    const updateTime = +Number(item.trade_time || item.update_time || 0);
+    return {
+        id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
+        updateTime: moment(+updateTime / 1000000).format('YYYY-MM-DD HH:mm:ss'),
+        updateTimeNum: +updateTime,
+        instrumentId: item.instrument_id,
+        side: sideName[item.side],
+        offset: offsetName[item.offset],
+        price: toDecimal(+item.price, 3),
+        volume: Number(item.volume),
+        clientId: resolveClientId(item.dest || '‘),
+        accountId: item.account_id,
+        sourceId: item.source_id,
+        source: item.source
+    }
+}
+
+export const dealPos = (item: PosInputData): PosData => {
+    //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
+    const direction: string = posDirection[item.direction] || '--';
+    return {
+        id: item.instrument_id + direction,
+        instrumentId: item.instrument_id,
+        direction,
+        yesterdayVolume: Number(item.yesterday_volume),
+        todayVolume: Number(item.volume) - Number(item.yesterday_volume),
+        totalVolume: Number(item.volume),
+        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
+        lastPrice: toDecimal(item.last_price, 3) || '--',
+        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
+    }
+}
+
+export const dealAsset = (item: AssetInputData): AssetData => {
+    return {
+        accountId: `${item.source_id}_${item.account_id}`,
+        clientId: item.client_id,
+        initialEquity: toDecimal(item.initial_equity) || '--',
+        staticEquity: toDecimal(item.static_equity) || '--',
+        dynamicEquity: toDecimal(item.dynamic_equity) || '--',
+        realizedPnl: toDecimal(item.realized_pnl) || '--',
+        unRealizedPnl: toDecimal(item.unrealized_pnl) || '--',
+        avail: toDecimal(item.avail) || '--',
+        marketValue: toDecimal(item.market_value) || '--',
+        margin: toDecimal(item.margin) || '--'
+    }
+}
+
+
+
+
+// ========================== 交易数据处理 end ===========================
 
