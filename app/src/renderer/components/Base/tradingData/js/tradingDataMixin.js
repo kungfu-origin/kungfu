@@ -117,7 +117,7 @@ export default {
                     break;
                 case 'clientId':
                 case 'accountId':
-                    if (item.clientId.toLowerCase().includes('manual')) return 'blue'
+                    if (item.clientId.toLowerCase().includes('手动')) return 'blue'
                     break
 
             }

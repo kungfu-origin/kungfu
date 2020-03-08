@@ -1,4 +1,4 @@
-import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';

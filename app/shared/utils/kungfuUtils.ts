@@ -8,7 +8,10 @@ import moment from 'moment';
 process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;
-export const watcher = kungfu.watcher(KF_HOME, `watcher_${process.env.APP_TYPE}`);
+export const watcher: any = (() => {
+    if (process.env.RENDERER_TYPE === 'codeEditor') return {}
+    return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
+})()
 export const longfist = kungfu.longfist;
 
 export const startGetKungfuState = (callback: Function, interval = 1000) => {
@@ -171,27 +174,18 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
 
 function resolveClientId (dest: string): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
-    const group = kungfuLocation.group === 'node' ? 'Manual' : '';
+    const group = kungfuLocation.group === 'node' ? '[手动]' : '';
     const name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
-    
-    if (group === 'Manual') {
-        // console.log(kungfuLocation)
-    }
-    
-    if (![ name, group ].join(' ').trim()) {
-        console.log(kungfuLocation)
-        console.log(dest)
-        console.error('dest 异常')
-    }
-    return [ name, group ].join(' ')
+
+    return [ group, name ].join(' ')
 }
 
 function resolveAccountId (source: string, dest: string): string {
     const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
     const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
     const name = kungfuLocationSource.group + '_' + kungfuLocationSource.name;
-    const group = kungfuLocationDest.group === 'node' ? 'Manual' : '';
-    return [ name, group ].join(' ')
+    const group = kungfuLocationDest.group === 'node' ? '[手动]' : '';
+    return [ group, name ].join(' ')
 }
 
 export const dealOrder = (item: OrderInputData): OrderData => {
