@@ -122,6 +122,7 @@ export default {
             this.pnl = Object.freeze(pnl || []);
             const tradingDay = data.tradingDay;
             this.$store.dispatch('setTradingDay', tradingDay);
+            const appStates = data.appStates;
         })
     },
 

@@ -19,9 +19,8 @@ import GlobalSettingDialog from './components/Base/GlobalSettingDialog';
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
-import { connectCalendarNanomsg } from '__io/nano/buildNmsg'
 import * as MSG_TYPE from '__io/nano/msgType'
-import { buildGatewayStatePipe, buildCashPipe, buildTradingDayPipe } from '__io/nano/nanoSub'; 
+// import { buildGatewayStatePipe } from '__io/nano/nanoSub'; 
 import { deleteProcess } from '__gUtils/processUtils';
 import { nanoReqGatewayState, nanoReqCash } from '__io/nano/nanoReq';
 
@@ -70,8 +69,7 @@ export default {
         t.$store.dispatch('getAccountSourceConfig')
         t.$store.dispatch('getStrategyList')
 
-        t.subGatewayState();
-        t.subTradingDay();
+        // t.subGatewayState();
 
         t.reqGatewayState();
 
@@ -124,19 +122,6 @@ export default {
                         id: processId,
                         stateData: stateData
                     })
-                }
-            })
-        },
-
-        subTradingDay() {
-            const t = this;
-            //sub 交易日
-            t.tradingDayPipe = buildTradingDayPipe().subscribe(d => {
-                const calendar = d.data;
-                if(calendar && calendar.trading_day) {
-                    const tradingDay = moment(calendar.trading_day).format('YYYYMMDD');
-                    // console.log('[TRADING DAY] sub', tradingDay)
-                    t.$store.dispatch('setTradingDay', tradingDay);
                 }
             })
         },

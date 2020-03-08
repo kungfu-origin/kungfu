@@ -25,7 +25,11 @@ export const startGetKungfuState = (callback: Function, interval = 1000) => {
                 watcher.step();
             }
 
-            callback({ ledger: Object.freeze(watcher.ledger), tradingDay: watcher.tradingDay });
+            callback({ 
+                ledger: Object.freeze(watcher.ledger), 
+                tradingDay: watcher.tradingDay,
+                appStates: Object.freeze(watcher.appStates),
+            });
             resolve();
         })
     }, interval);

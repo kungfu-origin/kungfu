@@ -14,10 +14,7 @@ export const KUNGFU_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_OBSERVER.pipe(
         map((data: any): any => {
-
             const ledgerData = data.ledger;
-            const tradingDay = data.tradingDay;
-
             const orders = Object.values(ledgerData.Order || {});
             const trades = Object.values(ledgerData.Trade || {});
             const positions = Object.values(ledgerData.Position || {});
@@ -29,7 +26,8 @@ export const buildTradingDataPipe = (type: string) => {
                 positions: transformTradingItemListToData(positions, type),
                 assets: transformAssetItemListToData(assets, type),
                 pnl: transformTradingItemListToData(pnl, type),
-                tradingDay: tradingDay
+                tradingDay: data.tradingDay,
+                appStates: data.appStates
             }
         })
     )
