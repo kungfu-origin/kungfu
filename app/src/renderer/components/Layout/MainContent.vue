@@ -35,7 +35,7 @@
                 </tr-footer-item>
             
                 <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
-                    <!-- <EngineStatus></EngineStatus> -->
+                    <EngineStatus></EngineStatus>
                 </tr-footer-item>
 
                 <tr-footer-item class="fr" v-if="currentRouter === 'code'">
@@ -49,7 +49,7 @@
 <script>
 import { deepClone } from '__gUtils/busiUtils';
 import { mapState, mapGetters } from 'vuex';
-// import EngineStatus from './components/EngineStatus';
+import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
 import CodeSpaceTab from './components/CodeSpaceTab';
 
@@ -75,7 +75,7 @@ export default {
     },
 
     components: {
-        // EngineStatus,
+        EngineStatus,
 		CoreStatus,
         CodeSpaceTab,
     },

@@ -2,7 +2,6 @@
 import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
-import { statusConfig } from '__gConfig/statusConfig';
 
 import moment from 'moment';
 
@@ -48,7 +47,7 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
 
             callback({ 
                 tradingDay: watcher.tradingDay,
-                appStates: Object.freeze(watcher.appStates),
+                appStates: watcher.appStates,
             });
             resolve();
         })
@@ -285,13 +284,29 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 }
 
 
-export const dealGatewayStates = (gatewayStates: StringToStringObject) => {
-
-    Object.keys(gatewayStates).map((key: string) => {
-        const kungfuLocation = watcher.getLocation(key)
-        console.log(kungfuLocation)
-    })
-
+export const dealGatewayStates = (gatewayStates: StringToStringObject): Array<MdTdState | {}> => {
+    return Object.keys(gatewayStates)
+        .map((key: string) => {
+            const kungfuLocation = watcher.getLocation(key)
+            if (!kungfuLocation) return {}
+            switch (kungfuLocation.category) {
+                case 'td':
+                    return {
+                        processId: `td_${kungfuLocation.group}_${kungfuLocation.name}`,
+                        state: gatewayStates[key]
+                    }
+                case 'md':
+                    return {
+                        processId: `md_${kungfuLocation.group}`,
+                        state: gatewayStates[key]
+                    }
+                default: 
+                    return {}
+            }
+        })
+        .filter((mdTdState): MdTdState | {} => {
+            return mdTdState !== {}
+        })
 }
 
 

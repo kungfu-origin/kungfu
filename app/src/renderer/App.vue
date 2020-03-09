@@ -76,25 +76,6 @@ export default {
     },
 
     methods: {   
-        // subGatewayState() {
-        //     const t = this;
-        //     t.gatewayStatePipe = buildGatewayStatePipe().subscribe(data => {
-        //         const processId = data[0];
-        //         const stateData = data[1];
-        //         //if state is 2 means disconnect, kill process, delay 3s; 
-        //         if(+stateData.state === 5) {
-        //             delayMiliSeconds(1000)
-        //             .then(() => deleteProcess(processId))
-        //         } else { 
-        //             // console.log('[GATEWAY STATE] sub', processId, stateData)
-        //             t.$store.dispatch('setOneMdTdState', {
-        //                 id: processId,
-        //                 stateData: stateData
-        //             })
-        //         }
-        //     })
-        // },
-
         removeLoadingMask () {
             //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
             if(window.location.hash.includes('code')) return 
@@ -107,10 +88,13 @@ export default {
             return buildKungfuGlobalDataPipe().subscribe(data => {
                 const tradingDay = data.tradingDay;
                 this.$store.dispatch('setTradingDay', tradingDay);
-
-                // console.log(data, '----')
+                data.gatewayStates.forEach(gatewayState => {
+                    this.$store.dispatch('setOneMdTdState', {
+                        id: gatewayState.processId,
+                        stateData: gatewayState
+                    })
+                })
             })
-            
         },
 
         removeKeyDownEvent () {
