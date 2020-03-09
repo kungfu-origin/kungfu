@@ -27,7 +27,6 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
     } else {
-        console.log(orderInput, accountLocation)
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation))
     }
 }
