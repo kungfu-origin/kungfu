@@ -81,6 +81,8 @@ namespace kungfu::node
 
         yijinjing::data::location_ptr FindLocation(const Napi::CallbackInfo &info);
 
+        void MonitorMarketData(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+
         template<typename DataType, typename IdPtrType = uint64_t DataType::*>
         Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr)
         {
@@ -138,7 +140,8 @@ namespace kungfu::node
                             $([perform](const event_ptr &event)
                               {
                                   perform();
-                              });
+                              },
+                              error_handler_log(fmt::format("channel {} -> {}", account_location->uname, proxy_location->uname)));
                             Channel request = {};
                             request.source_id = account_location->uid;
                             request.dest_id = proxy_location->uid;

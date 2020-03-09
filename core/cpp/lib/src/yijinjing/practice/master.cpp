@@ -35,7 +35,7 @@ namespace kungfu::yijinjing::practice
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);
         writers_.emplace(location::PUBLIC, io_device->open_writer(0));
-        writers_.at(location::PUBLIC)->mark(start_time_, SessionStart::tag);
+        get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
     }
 
     void master::on_exit()
@@ -43,7 +43,7 @@ namespace kungfu::yijinjing::practice
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         auto now = time::now_in_nano();
         io_device->close_session(io_device->get_home(), now);
-        writers_.at(location::PUBLIC)->mark(now, SessionEnd::tag);
+        get_writer(location::PUBLIC)->mark(now, SessionEnd::tag);
     }
 
     void master::on_notify()
@@ -72,7 +72,7 @@ namespace kungfu::yijinjing::practice
         auto now = time::now_in_nano();
         auto uid_str = fmt::format("{:08x}", app_location->uid);
         auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
-        auto public_writer = writers_.at(location::PUBLIC);
+        auto public_writer = get_writer(location::PUBLIC);
         auto app_cmd_writer = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
         add_location(e->gen_time(), app_location);
@@ -119,12 +119,12 @@ namespace kungfu::yijinjing::practice
         writers_.erase(app_location_uid);
         timer_tasks_.erase(app_location_uid);
         app_sqlizers_.erase(app_location_uid);
-        writers_.at(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
+        get_writer(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
     }
 
     void master::publish_trading_day()
     {
-        write_trading_day(0, writers_.at(location::PUBLIC));
+        write_trading_day(0, get_writer(location::PUBLIC));
     }
 
     void master::react()
@@ -151,7 +151,7 @@ namespace kungfu::yijinjing::practice
           {
               Location data = e->data<Location>();
               add_location(e->gen_time(), location::make_shared(data, get_locator()));
-              writers_.at(location::PUBLIC)->write(e->gen_time(), data);
+              get_writer(location::PUBLIC)->write(e->gen_time(), data);
           });
 
         events_ | is(Register::tag) | $$(register_app);
@@ -160,7 +160,7 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               const RequestWriteTo &request = e->data<RequestWriteTo>();
-              if (check_location_live(e->source(), request.dest_id))
+              if (check_location_live(e->source(), request.dest_id) and not has_channel(e->source(), request.dest_id))
               {
                   reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
                   require_write_to(e->gen_time(), e->source(), request.dest_id);
@@ -169,7 +169,7 @@ namespace kungfu::yijinjing::practice
                   channel.source_id = e->source();
                   channel.dest_id = request.dest_id;
                   register_channel(e->gen_time(), channel);
-                  writers_.at(location::PUBLIC)->write(e->gen_time(), channel);
+                  get_writer(location::PUBLIC)->write(e->gen_time(), channel);
               }
           });
 
@@ -177,7 +177,7 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               const RequestReadFrom &request = e->data<RequestReadFrom>();
-              if (check_location_live(request.source_id, e->source()))
+              if (check_location_live(request.source_id, e->source()) and not has_channel(request.source_id, e->source()))
               {
                   reader_->join(get_location(request.source_id), e->source(), e->gen_time());
                   require_write_to(e->gen_time(), request.source_id, e->source());
@@ -186,7 +186,7 @@ namespace kungfu::yijinjing::practice
                   channel.source_id = request.source_id;
                   channel.dest_id = e->source();
                   register_channel(e->gen_time(), channel);
-                  writers_.at(location::PUBLIC)->write(e->gen_time(), channel);
+                  get_writer(location::PUBLIC)->write(e->gen_time(), channel);
               }
           });
 
@@ -201,12 +201,12 @@ namespace kungfu::yijinjing::practice
         $([&](const event_ptr &e)
           {
               const Channel &request = e->data<Channel>();
-              if (is_location_live(request.source_id))
+              if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id))
               {
                   reader_->join(get_location(request.source_id), request.dest_id, e->gen_time());
                   require_write_to(e->gen_time(), request.source_id, request.dest_id);
                   register_channel(e->gen_time(), request);
-                  writers_.at(location::PUBLIC)->write(e->gen_time(), request);
+                  get_writer(location::PUBLIC)->write(e->gen_time(), request);
               }
           });
 

@@ -192,6 +192,12 @@ namespace kungfu
         using namespace rxcpp::operators;
         using namespace rxcpp::util;
 
+        constexpr auto noop_event_handler = []()
+        {
+            return [](const event_ptr &e)
+            {};
+        };
+
         constexpr auto error_handler_log = [](const std::string subscriber_name)
         {
             return [=](std::exception_ptr e)

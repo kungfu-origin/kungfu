@@ -269,13 +269,20 @@ namespace kungfu::node
         $([&](const event_ptr &event)
           {
               auto register_data = event->data<Register>();
-              if (register_data.location_uid != get_home_uid())
+              if (register_data.location_uid == get_home_uid())
               {
-                  auto app_location = location::make_shared(register_data, get_locator());
-                  request_write_to(event->gen_time(), app_location->uid);
-                  request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
-                  request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
-                  app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Connected));
+                  return;
+              }
+
+              auto app_location = location::make_shared(register_data, get_locator());
+              request_write_to(event->gen_time(), app_location->uid);
+              request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
+              request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+              app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Connected));
+
+              if (app_location->category == category::MD and app_location->mode == mode::LIVE)
+              {
+                  MonitorMarketData(event->gen_time(), app_location);
               }
           });
 
@@ -326,5 +333,25 @@ namespace kungfu::node
             return proxy_locations_.at(uid);
         }
         return location_ptr();
+    }
+
+    void Watcher::MonitorMarketData(int64_t trigger_time, const yijinjing::data::location_ptr &md_location)
+    {
+        events_ | is(Quote::tag) | from(md_location->uid) | first() |
+        $([&, trigger_time, md_location](const event_ptr &event)
+          {
+              app_states_ref_.Set(format(md_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Ready));
+              events_ | from(md_location->uid) | is(Quote::tag) | timeout(std::chrono::seconds(5)) |
+              $(noop_event_handler(),
+                [&, trigger_time, md_location](std::exception_ptr e)
+                {
+                    if (is_location_live(md_location->uid))
+                    {
+                        app_states_ref_.Set(format(md_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Idle));
+                        MonitorMarketData(trigger_time, md_location);
+                    }
+                });
+          },
+          error_handler_log(fmt::format("monitor md {}", md_location->uname)));
     }
 }

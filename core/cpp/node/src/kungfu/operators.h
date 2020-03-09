@@ -381,7 +381,7 @@ namespace kungfu::node::serialize
             {
                 value = Napi::Object::New(state_.Env());
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid)));
+                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
@@ -412,7 +412,7 @@ namespace kungfu::node::serialize
             auto uid_key = fmt::format("{:016x}", data.uid());
             Napi::Object valueObj = value.ToObject();
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid", Napi::String::New(value.Env(), uid_key)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
             value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
