@@ -158,7 +158,7 @@ namespace kungfu::yijinjing::practice
               uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
               reader_->disjoin(location_uid);
               writers_.erase(location_uid);
-              deregister_channel_by_source(location_uid);
+              deregister_channel(location_uid);
               deregister_location(event->trigger_time(), location_uid);
           });
 

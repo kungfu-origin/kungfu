@@ -192,8 +192,6 @@ class AccountBook(pywingchun.Book):
             self.subject.on_next(self.event)
             for pos in self.positions:
                 self.subject.on_next(pos.event)
-            self.ctx.db.dump_book(self)
-            self.ctx.logger.info("book {} [{:08x}] saved in database".format(self.location.uname, self.location.uid))
 
     def on_position_details(self, details):
         pass

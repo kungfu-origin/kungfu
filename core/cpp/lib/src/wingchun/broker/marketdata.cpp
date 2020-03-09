@@ -16,13 +16,13 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::broker
 {
     MarketData::MarketData(bool low_latency, locator_ptr locator, const std::string &source) :
-            apprentice(location::make_shared(mode::LIVE, category::MD, source, source, std::move(locator)), low_latency)
-    {
-        log::copy_log_settings(get_io_device()->get_home(), source);
-    }
+            Broker(location::make_shared(mode::LIVE, category::MD, source, source, std::move(locator)), low_latency)
+    {}
 
     void MarketData::on_start()
     {
+        Broker::on_start();
+
         events_ | is(SubscribeAll::tag) |
         $([&](const event_ptr &event)
           {
@@ -69,12 +69,5 @@ namespace kungfu::wingchun::broker
               }
               subscribe(symbols);
           });
-    }
-
-    void MarketData::publish_state(longfist::enums::BrokerState state)
-    {
-        longfist::types::BrokerStateUpdate update{};
-        update.state = state;
-        write_to(0, update);
     }
 }

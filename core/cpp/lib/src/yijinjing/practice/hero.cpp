@@ -167,11 +167,7 @@ namespace kungfu::yijinjing::practice
 
     writer_ptr hero::get_writer(uint32_t dest_id) const
     {
-        if (writers_.find(dest_id) == writers_.end())
-        {
-            SPDLOG_WARN("has no writer for [{:08x}], return public writer instead", dest_id);
-            return writers_.at(location::PUBLIC);
-        }
+        assert(writers_.find(dest_id) != writers_.end());
         return writers_.at(dest_id);
     }
 
@@ -182,10 +178,7 @@ namespace kungfu::yijinjing::practice
 
     location_ptr hero::get_location(uint32_t uid) const
     {
-        if (not has_location(uid))
-        {
-            throw yijinjing_error(fmt::format("location with uid {:08x} does not exist", uid));
-        }
+        assert(has_location(uid));
         return locations_.at(uid);
     }
 
@@ -206,10 +199,7 @@ namespace kungfu::yijinjing::practice
 
     const Channel &hero::get_channel(uint64_t hash) const
     {
-        if (not this->has_channel(hash))
-        {
-            throw yijinjing_error(fmt::format("has no channel for [{:08x}]", hash));
-        }
+        assert(has_channel(hash));
         return channels_.at(hash);
     }
 
@@ -308,12 +298,12 @@ namespace kungfu::yijinjing::practice
                     has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
     }
 
-    void hero::deregister_channel_by_source(uint32_t source_id)
+    void hero::deregister_channel(uint32_t location_uid)
     {
         auto channel_it = channels_.begin();
         while (channel_it != channels_.end())
         {
-            if (channel_it->second.source_id == source_id)
+            if (channel_it->second.source_id == location_uid or channel_it->second.dest_id == location_uid)
             {
                 const auto &channel_uid = channel_it->first;
                 const auto &channel = channel_it->second;
@@ -321,10 +311,9 @@ namespace kungfu::yijinjing::practice
                             has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
                             has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
                 channel_it = channels_.erase(channel_it);
-            } else
-            {
-                channel_it++;
+                continue;
             }
+            channel_it++;
         }
     }
 

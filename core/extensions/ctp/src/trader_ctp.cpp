@@ -256,7 +256,7 @@ namespace kungfu::wingchun::ctp
             SPDLOG_ERROR("failed confirm settlement info, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID,
                          gbk2utf8(pRspInfo->ErrorMsg));
         }
-        publish_state(BrokerState::Ready);
+        update_broker_state(BrokerState::Ready);
         std::this_thread::sleep_for(std::chrono::seconds(1));
         req_qry_instrument();
     }

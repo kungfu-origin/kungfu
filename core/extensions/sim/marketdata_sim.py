@@ -1,4 +1,3 @@
-
 from pykungfu import wingchun as pywingchun
 from . import mdmaker
 from collections import namedtuple
@@ -7,7 +6,9 @@ import kungfu.yijinjing.time as kft
 from pykungfu import yijinjing as pyyjj
 import kungfu.wingchun.msg as wc_msg
 
+
 MakerConfig = namedtuple("MakerConfig", ["base", "bound", "samples", "variation", "randseed"])
+
 
 class MarketDataSim(pywingchun.MarketData):
     def __init__(self, low_latency, locator, config_json):
@@ -18,6 +19,7 @@ class MarketDataSim(pywingchun.MarketData):
 
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())
+        self.update_broker_state(100)
         pywingchun.MarketData.on_start(self)
 
     def quote_from_orderbook(self, ob):

@@ -141,24 +141,6 @@ namespace kungfu::wingchun
         void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, on_app_location, trigger_time, app_location) }
 
-        void on_quote(event_ptr event, const Quote &quote) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_quote, event, quote) }
-
-        void on_order(event_ptr event, const Order &order) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_order, event, order) }
-
-        void on_order_action_error(event_ptr event, const OrderActionError &error) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_order_action_error, event, error) }
-
-        void on_trade(event_ptr event, const Trade &trade) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_trade, event, trade) }
-
-        void on_instruments(const std::vector<Instrument> &instruments) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_instruments, instruments) }
-
-        void on_trading_day(const event_ptr &event, int64_t daytime) override
-        {PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime); }
-
         void pre_start() override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, pre_start) }
     };
@@ -257,6 +239,7 @@ namespace kungfu::wingchun
                 .def("on_start", &MarketData::on_start)
                 .def("add_time_interval", &MarketData::add_time_interval)
                 .def("get_writer", &MarketData::get_writer)
+                .def("update_broker_state", &MarketData::update_broker_state)
                 .def("now", &MarketData::now)
                 .def("run", &MarketData::run);
 
@@ -268,6 +251,7 @@ namespace kungfu::wingchun
                 .def("get_account_type", &Trader::get_account_type)
                 .def("insert_order", &Trader::insert_order)
                 .def("cancel_order", &Trader::cancel_order)
+                .def("update_broker_state", &Trader::update_broker_state)
                 .def("now", &Trader::now)
                 .def("run", &Trader::run);
 
@@ -275,32 +259,26 @@ namespace kungfu::wingchun
                 .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
                 .def_property_readonly("config_location", &Ledger::get_config_location)
                 .def_property_readonly("io_device", &Ledger::get_io_device)
-                .def_property_readonly("book_context", &Ledger::get_book_context)
                 .def_property_readonly("usable", &Ledger::is_usable)
+                .def_property_readonly("book_context", &Ledger::get_book_context)
+                .def_property_readonly("instruments", &Ledger::get_instruments)
                 .def("now", &Ledger::now)
+                .def("set_begin_time", &Ledger::set_begin_time)
+                .def("set_end_time", &Ledger::set_end_time)
                 .def("has_location", &Ledger::has_location)
                 .def("get_location", &Ledger::get_location)
                 .def("has_writer", &Ledger::has_writer)
                 .def("get_writer", &Ledger::get_writer)
-                .def("publish", &Ledger::publish)
-                .def("publish_broker_states", &Ledger::publish_broker_states)
-                .def("cancel_order", &Ledger::cancel_order)
-                .def("get_positions", &Ledger::get_positions)
                 .def("has_asset", &Ledger::has_asset)
                 .def("get_asset", &Ledger::get_asset)
+                .def("get_positions", &Ledger::get_positions)
+                .def("publish", &Ledger::publish)
                 .def("dump_asset_snapshot", &Ledger::dump_asset_snapshot)
+                .def("cancel_order", &Ledger::cancel_order)
                 .def("handle_request", &Ledger::handle_request)
                 .def("handle_instrument_request", &Ledger::handle_instrument_request)
                 .def("handle_asset_request", &Ledger::handle_asset_request)
-                .def("on_trading_day", &Ledger::on_trading_day)
                 .def("on_app_location", &Ledger::on_app_location)
-                .def("on_quote", &Ledger::on_quote)
-                .def("on_order", &Ledger::on_order)
-                .def("on_order_action_error", &Ledger::on_order_action_error)
-                .def("on_trade", &Ledger::on_trade)
-                .def("on_instruments", &Ledger::on_instruments)
-                .def("set_begin_time", &Ledger::set_begin_time)
-                .def("set_end_time", &Ledger::set_end_time)
                 .def("pre_start", &Ledger::pre_start)
                 .def("add_timer", &Ledger::add_timer)
                 .def("add_time_interval", &Ledger::add_time_interval)

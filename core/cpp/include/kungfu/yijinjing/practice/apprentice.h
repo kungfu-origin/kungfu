@@ -58,7 +58,7 @@ namespace kungfu::yijinjing::practice
         template<typename DataType>
         void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC)
         {
-            writers_[dest_id]->write(trigger_time, data);
+            get_writer(dest_id)->write(trigger_time, data);
         }
 
     protected:
@@ -82,7 +82,7 @@ namespace kungfu::yijinjing::practice
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime)
         {
             SPDLOG_WARN("add timer {} at {}", time::strftime(nanotime), time::strftime(now()));
-            auto writer = writers_[master_commands_location_->uid];
+            auto writer = get_writer(master_commands_location_->uid);
             int32_t timer_usage_count = timer_usage_count_;
             int64_t duration_ns = nanotime - now();
             longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
@@ -106,7 +106,7 @@ namespace kungfu::yijinjing::practice
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> time_interval(Duration &&d)
         {
             auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
-            auto writer = writers_[master_commands_location_->uid];
+            auto writer = get_writer(master_commands_location_->uid);
             int32_t timer_usage_count = timer_usage_count_;
             longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
@@ -123,7 +123,7 @@ namespace kungfu::yijinjing::practice
                                       if (e->msg_type() == longfist::types::Time::tag &&
                                           e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns)
                                       {
-                                          auto writer = writers_[master_commands_location_->uid];
+                                          auto writer = get_writer(master_commands_location_->uid);
                                           longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                                           r.id = timer_usage_count;
                                           r.duration = duration_ns;
@@ -143,7 +143,7 @@ namespace kungfu::yijinjing::practice
         std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timeout(Duration &&d)
         {
             auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
-            auto writer = writers_[master_commands_location_->uid];
+            auto writer = get_writer(master_commands_location_->uid);
             int32_t timer_usage_count = timer_usage_count_;
             longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
             r.id = timer_usage_count;
@@ -158,7 +158,7 @@ namespace kungfu::yijinjing::practice
                                          {
                                              if (e->msg_type() != longfist::types::Time::tag)
                                              {
-                                                 auto writer = writers_[master_commands_location_->uid];
+                                                 auto writer = get_writer(master_commands_location_->uid);
                                                  longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                                                  r.id = timer_usage_count;
                                                  r.duration = duration_ns;
@@ -195,15 +195,6 @@ namespace kungfu::yijinjing::practice
         void checkin();
 
         void expect_start();
-
-        template <typename DataType>
-        void deregister_location_from_event(const event_ptr &event)
-        {
-            uint32_t location_uid = data::location::make_shared(event->data<DataType>(), get_locator())->uid;
-            reader_->disjoin(location_uid);
-            deregister_channel_by_source(location_uid);
-            deregister_location(event->trigger_time(), location_uid);
-        }
 
         template <typename DataType>
         void do_read_from(const event_ptr &event, uint32_t dest_id)

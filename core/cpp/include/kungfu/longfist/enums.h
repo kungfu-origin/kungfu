@@ -315,6 +315,12 @@ namespace kungfu::longfist::enums
         Connected = 3,
         LoggedIn = 4,
         LoggedInFailed = 5,
+        AccConfirmed = 6,
+        AccFailed = 7,
+        CashConfirmed = 8,
+        CashErrored = 9,
+        PosConfirmed = 10,
+        PosErrored = 11,
         Ready = 100
     };
 

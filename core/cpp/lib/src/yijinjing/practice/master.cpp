@@ -110,9 +110,9 @@ namespace kungfu::yijinjing::practice
     {
         auto location = get_location(app_location_uid);
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
-        writers_[app_location_uid]->mark(trigger_time, SessionEnd::tag);
+        get_writer(app_location_uid)->mark(trigger_time, SessionEnd::tag);
         io_device->close_session(location, trigger_time);
-        deregister_channel_by_source(app_location_uid);
+        deregister_channel(app_location_uid);
         deregister_location(trigger_time, app_location_uid);
         reader_->disjoin(app_location_uid);
         registry_.erase(app_location_uid);
@@ -246,7 +246,7 @@ namespace kungfu::yijinjing::practice
                 auto &task = it->second;
                 if (task.checkpoint <= now)
                 {
-                    writers_[app_id]->mark(0, Time::tag);
+                    get_writer(app_id)->mark(0, Time::tag);
                     SPDLOG_DEBUG("sent time event to {}", get_location(app_id)->uname);
                     task.checkpoint += task.duration;
                     task.repeat_count++;

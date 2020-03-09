@@ -107,7 +107,7 @@ namespace kungfu::wingchun::ctp
 
     void MarketDataCTP::OnFrontDisconnected(int nReason)
     {
-        publish_state(BrokerState::DisConnected);
+        update_broker_state(BrokerState::DisConnected);
         SPDLOG_ERROR("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason));
     }
 
@@ -116,11 +116,11 @@ namespace kungfu::wingchun::ctp
     {
         if (pRspInfo != nullptr && pRspInfo->ErrorID != 0)
         {
-            publish_state(BrokerState::LoggedInFailed);
+            update_broker_state(BrokerState::LoggedInFailed);
             SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
         } else
         {
-            publish_state(BrokerState::LoggedIn);
+            update_broker_state(BrokerState::LoggedIn);
             SPDLOG_INFO("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID,
                         pRspUserLogin->TradingDay);
         }

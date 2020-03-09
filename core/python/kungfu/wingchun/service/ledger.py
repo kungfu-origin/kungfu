@@ -1,3 +1,4 @@
+from pykungfu import longfist
 from pykungfu import wingchun as pywingchun
 from pykungfu import yijinjing as pyyjj
 import json
@@ -5,19 +6,15 @@ import http
 import functools
 import sys
 import traceback
-import pykungfu
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
-import kungfu.yijinjing.msg as yjj_msg
+import kungfu.wingchun.book as kwb
+import kungfu.wingchun.utils as wc_utils
+import kungfu.wingchun.constants as wc_constants
 from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
-from kungfu.data.sqlite.data_proxy import LedgerDB, CommissionDB
-import kungfu.wingchun.book as kwb
+from kungfu.data.sqlite.data_proxy import CommissionDB
 from kungfu.wingchun.calendar import Calendar
-from kungfu.wingchun.constants import OrderStatus
-import kungfu.wingchun.utils as wc_utils
-import kungfu.msg.utils as msg_utils
-import kungfu.wingchun.constants as wc_constants
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
@@ -49,12 +46,9 @@ class Ledger(pywingchun.Ledger):
         self.ctx.config_location = self.config_location
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
-        self.ctx.db = LedgerDB(self.io_device.home, ctx.name)
-        self.ctx.inst_infos = {inst["instrument_id"]: inst for inst in self.ctx.db.all_instrument_infos()}
         self.ctx.commission_infos = {commission["product_id"]: commission for commission in
                                      CommissionDB(self.ctx.config_location, "commission").all_commission_info()}
         self.ctx.orders = {}
-        self.ctx.trading_day = None
         self.ctx.books = {}
         self.ctx.now = self.now
         self.ctx.get_inst_info = self.get_inst_info
@@ -72,78 +66,31 @@ class Ledger(pywingchun.Ledger):
     def handle_instrument_request(self, event):
         self.ctx.logger.info("handle instrument request from [{:08x}]".format(event.source))
         writer = self.get_writer(event.source)
-        for inst_dict in self.ctx.inst_infos.values():
-            inst = pykungfu.longfist.types.Instrument()
-            for attr, value in inst_dict.items():
-                if hasattr(inst, attr) and attr != "raw_address":
-                    setattr(inst, attr, value)
-            writer.write(0, inst)
-        writer.mark(0, msg.InstrumentEnd)
+        for inst in self.instruments.values():
+            writer.write(event.gen_time, inst)
+        writer.mark(event.gen_time, msg.InstrumentEnd)
 
     def handle_asset_request(self, event, location):
         self.ctx.logger.info("handle asset request for {} [{:08x}] from [{:08x}] ".format(location.uname, location.uid, event.source))
         book = self._get_book(location)
         writer = self.get_writer(event.source)
-        writer.write(0, book.event.data)
+        writer.write(event.gen_time, book.event.data)
         for position in book.positions:
             event = position.event
-            writer.write(0, event.data)
-        position_end = pykungfu.longfist.types.PositionEnd()        
+            writer.write(event.gen_time, event.data)
+        position_end = longfist.types.PositionEnd()
         position_end.holder_uid = book.location.uid
-        writer.write(0, position_end)
+        writer.write(event.gen_time, position_end)
 
     def on_app_location(self, trigger_time, location):
-        self.ctx.logger.info("{} {} [{:08x}]".format(kft.strftime(trigger_time), location.uname, location.uid))
-        if location.category == pyyjj.category.TD:
-            tags = kwb.book.AccountBookTags.make_from_location(location)
-            self.ctx.logger.info("mark orders status unknown for {}[{:08x}] with tags: {}".format(location.uname, location.uid, tags))
-            orders = self.ctx.db.mark_orders_status_unknown(tags.source_id, tags.account_id)
-            for order in orders:
-                self.publish(json.dumps({"msg_type": msg.Order, "data": order}, cls=wc_utils.WCEncoder))
+        if location.category == pyyjj.category.TD or location.category == pyyjj.category.STRATEGY:
             book = self._get_book(location)
             book.subject.subscribe(self.on_book_event)
             self.book_context.add_book(location, book)
-        elif location.category == pyyjj.category.STRATEGY:
-            book = self._get_book(location)
-            book.subject.subscribe(self.on_book_event)
-            self.book_context.add_book(location, book)
-
-    def on_trading_day(self, event, daytime):
-        self.ctx.logger.info('on trading day %s', kft.to_datetime(daytime))
-        trading_day = kft.to_datetime(daytime)
-        if self.ctx.trading_day is not None and self.ctx.trading_day != trading_day:
-            self.publish(json.dumps({'msg_type': msg.Calendar, 'data': {'trading_day': '%s' % self.ctx.calendar.trading_day}}))
-        self.ctx.trading_day = trading_day
-
-    def on_quote(self, event, quote):
-        pass
-
-    def get_location(self, location_uid):
-        if self.has_location(location_uid):
-            return pywingchun.Ledger.get_location(self, location_uid)
-        else:
-            return self.ctx.db.get_location(self.ctx, location_uid)
 
     def on_book_event(self, event):
-        self.ctx.logger.debug("book event received: {}".format(event))        
-        writer = self.get_writer(0)
-        writer.write(0, event.data)
-
-    def on_order(self, event, order):
-        pass
-
-    def on_order_action_error(self, event, error):
-        pass
-
-    def on_trade(self, event, trade):
-        pass
-
-    def on_instruments(self, instruments):
-       pass
-
-    def _dump_snapshot(self, data_frequency="minute"):
-        for book in self.ctx.books.values():
-            self.dump_asset_snapshot(book.event.data)
+        self.get_writer(0).write(event.gen_time, event.data)
+        self.ctx.logger.debug("book event received: {}".format(event))
 
     def has_book(self, uid):
         return uid in self.ctx.books
@@ -152,50 +99,40 @@ class Ledger(pywingchun.Ledger):
         self.book_context.pop_book(uid)
         return self.ctx.books.pop(uid, None)
 
+    def get_inst_info(self, instrument_id):
+        return self.instruments[instrument_id]
+
+    def get_commission_info(self, instrument_id):
+        product_id = wc_utils.get_product_id(instrument_id).upper()
+        return self.ctx.commission_infos[product_id]
+
+    def _dump_snapshot(self, data_frequency="minute"):
+        for book in self.ctx.books.values():
+            self.dump_asset_snapshot(book.event.data)
+
     def _get_book(self, location):
         if location.uid not in self.ctx.books:
             positions = self.get_positions(location)
             if self.has_asset(location):
                 asset = self.get_asset(location)
             else:
-                asset = pykungfu.longfist.types.Asset()
+                asset = longfist.types.Asset()
                 asset.holder_uid = location.uid
-                asset.avail = DEFAULT_INIT_CASH                           
-            book = kwb.book.AccountBook(self.ctx, location=location, positions=positions, avail=asset.avail, initial_equity=asset.initial_equity, static_equity=asset.static_equity, frozen_cash = asset.frozen_cash, frozen_margin=asset.frozen_margin, intraday_fee=asset.intraday_fee, accumulated_fee=asset.accumulated_fee, realized_pnl=asset.realized_pnl)
+                asset.avail = DEFAULT_INIT_CASH
+            book = kwb.book.AccountBook(self.ctx,
+                                        location=location,
+                                        positions=positions,
+                                        avail=asset.avail,
+                                        initial_equity=asset.initial_equity,
+                                        static_equity=asset.static_equity,
+                                        frozen_cash=asset.frozen_cash,
+                                        frozen_margin=asset.frozen_margin,
+                                        intraday_fee=asset.intraday_fee,
+                                        accumulated_fee=asset.accumulated_fee,
+                                        realized_pnl=asset.realized_pnl)
             self.ctx.books[location.uid] = book
             self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
         return self.ctx.books[location.uid]
-
-    def get_inst_info(self, instrument_id):
-        if not instrument_id in self.ctx.inst_infos:
-            self.ctx.inst_infos[instrument_id] = self.ctx.db.get_instrument_info(instrument_id)
-        return self.ctx.inst_infos[instrument_id]
-
-    def get_commission_info(self, instrument_id):
-        product_id = wc_utils.get_product_id(instrument_id).upper()
-        return self.ctx.commission_infos[product_id]
-
-
-@on(msg.Calendar)
-def calendar_request(ctx, event, location, data):
-    message = {
-        'msg_type': msg.Calendar,
-        'data': {
-            'trading_day': ctx.calendar.trading_day.strftime("%Y%m%d"),
-        }
-    }
-    ctx.ledger.publish(json.dumps(message))
-    message.update({'status': http.HTTPStatus.OK})
-    return message
-
-
-@on(msg.BrokerStateRefresh)
-def broker_state_refresh(ctx, event, location, data):
-    ctx.ledger.publish_broker_states(event.gen_time)
-    return {
-        'status': http.HTTPStatus.OK,
-        'msg_type': msg.BrokerStateRefresh
-    }
 
 
 @on(msg.NewOrderSingle)
@@ -280,31 +217,6 @@ def cancel_all_order(ctx, event, location, data):
     }
 
 
-@on(msg.QryAsset)
-def qry_asset(ctx, event, location, data):
-    ctx.logger.info("qry asset, input: {}".format(data))
-    book_tags = kwb.book.AccountBookTags(ledger_category=data["ledger_category"], source_id=data["source_id"], account_id=data["account_id"],
-                                         client_id=data["client_id"])
-    if book_tags in ctx.books:
-        message = ctx.books[book_tags].message
-        message.update({'status': http.HTTPStatus.OK, 'msg_type': msg.QryAsset})
-        return message
-    else:
-        return {
-            'status': http.HTTPStatus.NOT_FOUND,
-            'msg_type': msg.QryAsset
-        }
-
-
-@on(msg.PublishAllAssetInfo)
-def publish_all_asset(ctx, event, location, data):
-    ctx.logger.info("req publish all recorded asset info")
-    for book in ctx.books.values():
-        event = book.event.as_dict()
-        ctx.ledger.publish(json.dumps(event, cls=wc_utils.WCEncoder))
-    return {'status': http.HTTPStatus.OK, 'msg_type': msg.PublishAllAssetInfo}
-
-
 @on(msg.RemoveStrategy)
 def remove_strategy(ctx, event, location, data):
     if location is None:
@@ -321,16 +233,7 @@ def remove_strategy(ctx, event, location, data):
         }
     else:
         ctx.ledger.pop_book(uid=location.uid)
-        ctx.db.remove_book(uid=location.uid)
         return {
             'status': http.HTTPStatus.OK,
             'msg_type': msg.RemoveStrategy
         }
-
-
-@on(yjj_msg.TradingDay)
-def update_trading_day(ctx, event, location, data):
-    ctx.logger.warn("switch trading day from UI for test")
-    daytime = data["daytime"]
-    ctx.ledger.on_trading_day(event, daytime)
-    return {'status': http.HTTPStatus.OK, 'msg_type': yjj_msg.TradingDay}

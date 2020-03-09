@@ -9,10 +9,11 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/wingchun/broker/broker.h>
 
 namespace kungfu::wingchun::broker
 {
-    class MarketData : public yijinjing::practice::apprentice
+    class MarketData : public Broker
     {
     public:
         explicit MarketData(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source);
@@ -26,15 +27,6 @@ namespace kungfu::wingchun::broker
         virtual bool subscribe_all() = 0;
 
         virtual bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) = 0;
-
-    protected:
-        void publish_state(longfist::enums::BrokerState state);
-
-        inline std::string get_runtime_folder()
-        {
-            auto home = get_io_device()->get_home();
-            return home->locator->layout_dir(home, longfist::enums::layout::LOG);
-        }
     };
 }
 

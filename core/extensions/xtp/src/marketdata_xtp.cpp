@@ -46,11 +46,11 @@ namespace kungfu::wingchun::xtp
                               get_xtp_protocol_type(config_.protocol));
         if (res == 0)
         {
-            publish_state(BrokerState::LoggedIn);
+            update_broker_state(BrokerState::LoggedIn);
             SPDLOG_INFO("login success! (user_id) {}", config_.user_id);
         } else
         {
-            publish_state(BrokerState::LoggedInFailed);
+            update_broker_state(BrokerState::LoggedInFailed);
             XTPRI *error_info = api_->GetApiLastError();
             SPDLOG_ERROR("(ErrorId) {}, (ErrorMsg){}", error_info->error_id, error_info->error_msg);
         }
@@ -124,7 +124,7 @@ namespace kungfu::wingchun::xtp
     void MarketDataXTP::OnDisconnected(int reason)
     {
         SPDLOG_ERROR("(reason) {}", reason);
-        publish_state(BrokerState::DisConnected);
+        update_broker_state(BrokerState::DisConnected);
     }
 
     void MarketDataXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)

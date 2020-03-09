@@ -63,8 +63,8 @@ namespace kungfu::node
             RestoreState(state_location);
             if (state_location->category == category::STRATEGY)
             {
-                auto proxy_location = location::make_shared(state_location->mode, state_location->category, "node", state_location->name,
-                                                            get_locator());
+                auto strategy_name = state_location->name;
+                auto proxy_location = location::make_shared(state_location->mode, category::STRATEGY, "node", strategy_name, get_locator());
                 proxy_locations_.emplace(proxy_location->uid, proxy_location);
             }
         }
@@ -290,7 +290,7 @@ namespace kungfu::node
         $([&](const event_ptr &event)
           {
               auto app_location = location::make_shared(event->data<Deregister>(), get_locator());
-              app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::DisConnected));
+              app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int) BrokerState::Unknown));
           });
 
         events_ | is(BrokerStateUpdate::tag) |

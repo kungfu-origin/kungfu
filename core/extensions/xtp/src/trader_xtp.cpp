@@ -45,12 +45,12 @@ namespace kungfu::wingchun::xtp
         session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.user_id.c_str(), config_.password.c_str(), XTP_PROTOCOL_TCP);
         if (session_id_ > 0)
         {
-            publish_state(BrokerState::Ready);
+            update_broker_state(BrokerState::Ready);
             SPDLOG_INFO("login success");
             req_account();
         } else
         {
-            publish_state(BrokerState::LoggedInFailed);
+            update_broker_state(BrokerState::LoggedInFailed);
             XTPRI *error_info = api_->GetApiLastError();
             SPDLOG_ERROR("login failed, error_id: {}, error_msg: {}", error_info->error_id, error_info->error_msg);
         }
@@ -132,7 +132,7 @@ namespace kungfu::wingchun::xtp
     {
         if (session_id == session_id_)
         {
-            publish_state(BrokerState::DisConnected);
+            update_broker_state(BrokerState::DisConnected);
             SPDLOG_ERROR("disconnected, reason: {}", reason);
         }
     }

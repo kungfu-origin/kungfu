@@ -100,7 +100,9 @@ namespace kungfu::node
                 {
                     return Napi::Boolean::New(info.Env(), false);
                 }
+
                 auto account_writer = get_writer(account_location->uid);
+                auto master_cmd_writer = get_writer(get_master_commands_uid());
 
                 if (info.Length() == 2)
                 {
@@ -119,7 +121,7 @@ namespace kungfu::node
                         strategy_location->mode, strategy_location->category,
                         get_io_device()->get_home()->group, strategy_location->name, strategy_location->locator
                 );
-                auto master_cmd_writer = get_writer(get_master_commands_uid());
+
                 auto ensure_location = [&](auto location)
                 {
                     if (not has_location(location->uid))
@@ -137,29 +139,31 @@ namespace kungfu::node
                     account_writer->write_as(trigger_time, data, proxy_location->uid);
                     SPDLOG_INFO("{} sent to {} order {}", proxy_location->uname, account_location->uname, data.to_string());
                 };
+
                 ensure_location(strategy_location);
                 ensure_location(proxy_location);
+
                 if (has_channel(account_location->uid, proxy_location->uid))
                 {
                     perform();
-                } else
-                {
-                    events_ | is(Channel::tag) |
-                    filter([account_location, proxy_location](const event_ptr &event)
-                           {
-                               const Channel &channel = event->data<Channel>();
-                               return channel.source_id == account_location->uid and channel.dest_id == proxy_location->uid;
-                           }) | first() |
-                    $([perform](const event_ptr &event)
-                      {
-                          perform();
-                      },
-                      error_handler_log(fmt::format("channel {} -> {}", account_location->uname, proxy_location->uname)));
-                    Channel request = {};
-                    request.source_id = account_location->uid;
-                    request.dest_id = proxy_location->uid;
-                    master_cmd_writer->write(trigger_time, request);
+                    return Napi::Boolean::New(info.Env(), true);
                 }
+
+                events_ | is(Channel::tag) |
+                filter([account_location, proxy_location](const event_ptr &event)
+                       {
+                           const Channel &channel = event->data<Channel>();
+                           return channel.source_id == account_location->uid and channel.dest_id == proxy_location->uid;
+                       }) | first() |
+                $([perform](const event_ptr &event)
+                  {
+                      perform();
+                  },
+                  error_handler_log(fmt::format("channel {} -> {}", account_location->uname, proxy_location->uname)));
+                Channel request = {};
+                request.source_id = account_location->uid;
+                request.dest_id = proxy_location->uid;
+                master_cmd_writer->write(trigger_time, request);
                 return Napi::Boolean::New(info.Env(), true);
             } catch (const std::exception &ex)
             {

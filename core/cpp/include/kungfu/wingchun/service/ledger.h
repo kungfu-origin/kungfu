@@ -24,8 +24,6 @@ namespace kungfu::wingchun::service
 
         void publish(const std::string &msg);
 
-        void publish_broker_states(int64_t trigger_time);
-
         uint64_t cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
 
         std::vector<longfist::types::Position> get_positions(const yijinjing::data::location_ptr &location);
@@ -33,6 +31,8 @@ namespace kungfu::wingchun::service
         bool has_asset(const yijinjing::data::location_ptr &location);
 
         longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location);
+
+        const std::unordered_map<uint64_t, longfist::types::Instrument> &get_instruments() const;
 
         void dump_asset_snapshot(const longfist::types::Asset &asset);
 
@@ -44,26 +44,14 @@ namespace kungfu::wingchun::service
 
         virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
 
-        virtual void on_quote(event_ptr event, const longfist::types::Quote &quote) = 0;
-
-        virtual void on_order_action_error(event_ptr event, const longfist::types::OrderActionError &error) = 0;
-
-        virtual void on_order(event_ptr event, const longfist::types::Order &order) = 0;
-
-        virtual void on_trade(event_ptr event, const longfist::types::Trade &trade) = 0;
-
-        virtual void on_instruments(const std::vector<longfist::types::Instrument> &instruments) = 0;
-
         virtual void pre_start() = 0;
 
     protected:
 
+        void on_ready() override;
+
         void on_start() override;
 
-        void publish_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
-
-        void update_broker_state(int64_t trigger_time, const yijinjing::data::location_ptr &broker_location, longfist::enums::BrokerState state);
-      
     private:
         longfist::journal::publisher publish_state;
 
@@ -72,43 +60,11 @@ namespace kungfu::wingchun::service
 
         std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
         std::unordered_map<uint64_t, state<longfist::types::OrderStat>> &order_stats_;
+
         std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
-
-        longfist::enums::BrokerState get_broker_state(uint32_t broker_location) const;
-
-        void monitor_instruments(uint32_t broker_location);
-
-        void monitor_market_data(int64_t trigger_time, uint32_t md_location_uid);
-
-        void alert_market_data(int64_t trigger_time, uint32_t md_location_uid);
-
-        void request_subscribe(uint32_t account_location_id, const std::vector<longfist::types::Instrument> &instruments);
-
-        template<class T>
-        std::vector<longfist::types::Instrument> convert_to_instruments(const std::vector<T> &data)
-        {
-            std::vector<longfist::types::Instrument> instruments;
-            for (const auto &item: data)
-            {
-                longfist::types::Instrument instrument = {};
-                strcpy(instrument.instrument_id, item.instrument_id);
-                strcpy(instrument.exchange_id, item.exchange_id);
-                instruments.push_back(instrument);
-            }
-            std::sort(instruments.begin(), instruments.end(), [](const longfist::types::Instrument &a1, const longfist::types::Instrument &a2)
-            {
-                auto a1_value = get_symbol_id(a1.instrument_id, a1.exchange_id);
-                auto a2_value = get_symbol_id(a2.instrument_id, a2.exchange_id);
-                return a1_value < a2_value;
-            });
-            auto it = std::unique(instruments.begin(), instruments.end(),
-                                  [](const longfist::types::Instrument &a1, const longfist::types::Instrument &a2)
-                                  {
-                                      return strcmp(a1.instrument_id, a2.instrument_id) == 0 && strcmp(a1.exchange_id, a2.exchange_id) == 0;
-                                  });
-            instruments.erase(it, instruments.end());
-            return instruments;
-        }
+        std::unordered_map<uint32_t, yijinjing::data::location_ptr> subscribed_md_locations_;
+        std::unordered_map<uint64_t, longfist::types::Instrument> instruments_;
+        std::unordered_map<uint64_t, yijinjing::data::location_ptr> instrument_md_locations_;
     };
 }
 

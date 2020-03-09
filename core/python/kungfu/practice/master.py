@@ -48,7 +48,7 @@ class Master(pyyjj.master):
     def is_live_watcher(self, pid):
         info = self.ctx.apprentices[pid]
         location = info['location']
-        return info['process'].is_running() and location.category == longfist.enums.category.SYSTEM and location.group == 'node'
+        return info['process'].is_running() and location.category == pyyjj.category.SYSTEM and location.group == 'node'
 
     def on_exit(self):
         self.ctx.logger.info('master checking on exit')
