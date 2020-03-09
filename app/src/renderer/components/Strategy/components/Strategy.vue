@@ -249,7 +249,7 @@ export default {
         //编辑策略
         handleEditStrategy(row){
             const t = this;
-            t.$utils.openWin(`code/${row.strategy_id}`, BrowserWindow)
+            t.$utils.openWin(`/kungfu-code-editor/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略
