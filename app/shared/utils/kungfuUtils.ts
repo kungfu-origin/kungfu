@@ -84,7 +84,8 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
 
     if (type === 'account') {
         list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(item.source)
+            const location = decodeKungfuLocation(item.source);
+            if (!location) return;
             const accountId = `${location.group}_${location.name}`;
             if (!accountId) return;
             if (!data[accountId]) data[accountId] = [];
@@ -92,13 +93,23 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
         })
     } else if (type === 'strategy') {
         list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(item.dest)
+            const location = decodeKungfuLocation(item.dest);
+            if (!location) return;
             const clientId = location.name;
             if (!clientId) return;
             if (!data[clientId]) data[clientId] = [];
             data[clientId].push(item)
         })
     }
+    return data;
+}
+
+
+export const transformOrderStatListToData = (list: any[]) => {
+    let data: StringToAnyObject = {};
+    list.kfForEach((item: any) => {
+        data[item.order_id.toString()] = dealOrderStat(item);
+    })
     return data;
 }
 
@@ -126,7 +137,6 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
             }
         })
     }
-
     return data
 }
 
@@ -280,6 +290,22 @@ export const dealAsset = (item: AssetInputData): AssetData => {
         avail: toDecimal(item.avail) || '--',
         marketValue: toDecimal(item.market_value) || '--',
         margin: toDecimal(item.margin) || '--'
+    }
+}
+
+export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
+    const insertTime = Number(item.insert_time);
+    const ackTime = Number(item.ack_time);
+    const mdTime = Number(item.md_time);
+
+    return {
+        ackTime,
+        insertTime,
+        mdTime,
+        systemLatency: toDecimal((insertTime - mdTime) / 1000),
+        orderId: item.order_id.toString(),
+        dest: item.dest,
+        source: item.source
     }
 }
 

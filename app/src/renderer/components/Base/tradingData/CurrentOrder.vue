@@ -66,6 +66,11 @@ export default {
             type: String,
             default:''
         },
+
+        orderStat: {
+            type: Object,
+            default: () => ({})
+        }
     },
 
     data () {
@@ -128,6 +133,10 @@ export default {
                 type: "text",
                 label: this.moduleType == 'account' ? '策略' : '账户',
                 prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
+            },{
+                type: 'number',
+                label: "系统延迟(μs)",
+                prop: "systemLatency",   
             },{
                 type: 'operation',
                 label: '',
@@ -234,6 +243,7 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = dealOrder(item);
                 orderData.update = true;
+                orderData.systemLatency = (t.orderStat[orderData.orderId] || {}).systemLatency || '';
                 orderDataByKey[orderData.id] = orderData;
             })
 

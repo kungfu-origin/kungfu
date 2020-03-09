@@ -149,28 +149,6 @@ interface OrderInputData {
     dest: string;
 }
 
-interface PosData {
-    id: string;
-    instrumentId: string;
-    direction: string;
-    yesterdayVolume: Number;
-    todayVolume: Number;
-    totalVolume: Number;
-    avgPrice: string;
-    lastPrice: string;
-    unRealizedPnl: string;
-}
-
-interface PosInputData {
-    instrument_id: string;
-    direction: number;
-    yesterday_volume: bigint;
-    volume: bigint;
-    last_price: number;
-    margin: number;
-    [propName: string]: any;
-}
-
 interface TradeData {
     id: string;
     instrumentId: string;
@@ -202,6 +180,28 @@ interface TradeInputData {
     [propName: string]: any;
 }
 
+interface PosData {
+    id: string;
+    instrumentId: string;
+    direction: string;
+    yesterdayVolume: Number;
+    todayVolume: Number;
+    totalVolume: Number;
+    avgPrice: string;
+    lastPrice: string;
+    unRealizedPnl: string;
+}
+
+interface PosInputData {
+    instrument_id: string;
+    direction: number;
+    yesterday_volume: bigint;
+    volume: bigint;
+    last_price: number;
+    margin: number;
+    [propName: string]: any;
+}
+
 interface AssetInputData {
     account_id: string;
     source_id: string;
@@ -229,6 +229,26 @@ interface AssetData {
     marketValue: string;
     margin: string;
 }
+
+interface OrderStatInputData {
+    ack_time: bigint;
+    insert_time: bigint;
+    md_time: bigint;
+    order_id: bigint;
+    dest: string;
+    source: string
+}
+
+interface OrderStatData {
+    ackTime: number;
+    insertTime: number;
+    mdTime: number;
+    orderId: string;
+    dest: string;
+    source: string;
+    systemLatency: string;
+}
+
 
 interface TradingDataFilter {
     instrumentId?: string;

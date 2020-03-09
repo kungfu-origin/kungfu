@@ -28,6 +28,7 @@
                         :tradingDay="tradingDay"
                         :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
+                        :orderStat="orderStat"
                         />   
                     </el-col>              
                 </el-row>
@@ -78,6 +79,7 @@ export default {
             trades: Object.freeze([]),
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
+            orderStat: Object.freeze({}),
         }
     },
 
@@ -120,6 +122,8 @@ export default {
             this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             const pnl = data['pnl'][t.currentId];
             this.pnl = Object.freeze(pnl || []);
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {})
         })
     },
 

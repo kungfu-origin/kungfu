@@ -37,7 +37,8 @@
                             moduleType="strategy"
                             :kungfuData="orders"     
                             :tradingDay="tradingDay"              
-                            :addTime="addTime"                
+                            :addTime="addTime"   
+                            :orderStat="orderStat"             
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
@@ -75,6 +76,7 @@ export default {
             trades: Object.freeze([]),
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
+            orderStat: Object.freeze({})
         }
     },
 
@@ -89,6 +91,8 @@ export default {
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
             this.pnl = Object.freeze(pnl || []);
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {})
         })
     },
 
