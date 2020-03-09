@@ -34,24 +34,6 @@ export const nanoReqGatewayState = () : Promise<any> => {
     return buildRequest(reqMsg, msgType.reqGatewayState, '请求柜台状态失败！')
 }
 
-export const nanoReqCash = () : Promise<any> => {
-    const reqMsg = JSON.stringify({
-        msg_type: msgType.reqCash,
-        data: {}
-    })
-    return buildRequest(reqMsg, msgType.reqCash, '请求资金信息失败！')
-
-}
-
-//日历
-//主动获得交易日
-export const nanoReqCalendar = () : Promise<any> => {
-    const reqMsg = JSON.stringify({
-        msg_type: msgType.calendar,
-        data: {}
-    });
-    return buildRequest(reqMsg, msgType.calendar, isEnglish ? 'Req tradingDay failed' : '请求交易日失败！') 
-}
 
 //请求删除策略持仓
 export const nanoReqRemoveStrategyPos = (strategyId: string) : Promise<any> => {

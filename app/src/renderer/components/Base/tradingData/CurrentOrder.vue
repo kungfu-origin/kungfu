@@ -91,12 +91,6 @@ export default {
         schema () {
             return  [
             {
-                type: 'text',
-                label: '',
-                prop: "orderId",
-                width: '60px'
-            },
-            {
                 type: "text",
                 label: "下单时间",
                 prop: "updateTime",
@@ -186,11 +180,13 @@ export default {
             const t = this;
 
             //先判断对应进程是否启动
-            if(t.moduleType === 'account'){
-                if(t.processStatus[t.gatewayName] !== 'online') {
-                    t.$message.warning(`需要先启动 ${t.gatewayName.toAccountId()} 交易进程！`)
-                    return;
-                }
+            if (!t.gatewayName.toAccountId()) {
+                return;
+            }
+
+            if((t.moduleType === 'account') && (t.processStatus[t.gatewayName] !== 'online')){
+                t.$message.warning(`需要先启动 ${t.gatewayName.toAccountId()} 交易进程！`)
+                return;
             }
 
             t.$confirm(`确认全部撤单？`, '提示', {

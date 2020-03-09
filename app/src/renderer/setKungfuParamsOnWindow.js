@@ -4,6 +4,8 @@ process.env.ELECTRON_RUN_AS_NODE = true;
 const currentPath = window.location.hash;
 if(currentPath.indexOf('/code') !== -1) {
     process.env.RENDERER_TYPE = 'codeEditor'
+} else {
+    process.env.RENDERER_TYPE = 'app'
 }
 
 // debug export

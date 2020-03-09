@@ -2,19 +2,19 @@
 import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
-
 import moment from 'moment';
 
-process.env.KF_LOG_LEVEL = 'trace';
+// process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;
 export const watcher: any = (() => {
-    if (process.env.RENDERER_TYPE === 'codeEditor') return {}
+    if (process.env.RENDERER_TYPE !== 'app') return {}
     return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
 })()
 export const longfist = kungfu.longfist;
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
+    if (process.env.RENDERER_TYPE !== 'app') return 
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -35,6 +35,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
+    if (process.env.RENDERER_TYPE !== 'app') return 
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
