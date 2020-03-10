@@ -42,8 +42,8 @@ export default {
         this.bindMainProcessEvent();
 
         this.$store.dispatch('getTdMdList');
-        this.$store.dispatch('getAccountSourceConfig');
         this.$store.dispatch('getStrategyList');
+        this.$store.dispatch('getAccountSourceConfig');
         this.$store.dispatch('getKungfuConfig');
         this.kungfuGloablDataObserver = this.subKungfuGlobalData();
 

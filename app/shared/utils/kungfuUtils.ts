@@ -58,7 +58,7 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
 
 
 
-const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
+export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
 
 export const getAllKfConfig = () => {
     return kungfuConfigStore.getAllConfig();
@@ -209,6 +209,8 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
 
 function resolveClientId (dest: string): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
+    if (!kungfuLocation) return ''
+    
     const group = kungfuLocation.group === 'node' ? '[手动]' : '';
     const name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
 

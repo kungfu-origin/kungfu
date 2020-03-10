@@ -249,7 +249,7 @@ export default {
         //编辑策略
         handleEditStrategy(row){
             const t = this;
-            t.$utils.openWin(`/kungfu-code-editor/${row.strategy_id}`, BrowserWindow)
+            t.$utils.openWin(`/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略
@@ -302,6 +302,7 @@ export default {
             const t = this;
             const strategyId = strategy.strategy_id;
             switchStrategy(strategyId, value).then(({ type, message }) => t.$message[type](message));
+            t.$store.dispatch('getStrategyList');
         },
 
         //关闭添加strategy弹窗, refresh数据

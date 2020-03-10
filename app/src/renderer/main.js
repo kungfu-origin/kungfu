@@ -35,7 +35,7 @@ new Vue({
 
 
 const currentPath = window.location.hash;
-if(currentPath.indexOf('/kungfu-code-editor') === -1) {
+if(currentPath.indexOf('/kungfuCodeEditor') === -1) {
     const { startGetProcessStatus, startMaster, startLedger } = require('__gUtils/processUtils');
     //kungfu master 启动流程
     startMaster(false)

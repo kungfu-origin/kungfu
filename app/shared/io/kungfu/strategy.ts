@@ -18,7 +18,7 @@ export const getStrategyList = () => {
     })
 }
 
-export const getStrategyById = (strategyId: string) => {
+export const getStrategyById = (strategyId: string): Promise<Array<Strategy>> => {
     return new Promise(resolve => {
         const strategyData: any = getKfConfig(strategyId, 'strategy')
         const strategy: any[] = [{ ...JSON.parse(strategyData.value || '{}') }]
@@ -46,8 +46,12 @@ export const deleteStrategy = (strategyId: string) => {
     })
 }
  
-export const updateStrategyPath = (strategyId: string, strategyPath: string) => {
-    const addTime = +new Date().getTime() * Math.pow(10,6)
+export const updateStrategyPath = async (strategyId: string, strategyPath: string) => {
+    let addTime = +new Date().getTime() * Math.pow(10,6)
+    const strategyOld: Array<Strategy> = await getStrategyById(strategyId)
+    if (strategyOld.length) {
+        addTime = strategyOld[0].add_time
+    }
     return new Promise(resolve => {
         const strategy = setKfConfig(strategyId, 'strategy', JSON.stringify({
             strategy_id: strategyId,

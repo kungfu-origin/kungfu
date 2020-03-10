@@ -38,15 +38,7 @@ export const addStrategy = (strategy_id: string, strategy_path: string) => {
 export const deleteStrategy = (strategy_id: string) => {
     return runInsertUpdateDeleteDB(STRATEGYS_DB, "DELETE FROM strategys WHERE strategy_id = ?", strategy_id)
 }
- 
-/**
- * 更改策略路径
- * @param  {String} strategy_id
- * @param  {String} strategy_path
- */
-export const updateStrategyPath = (strategy_id: string, strategy_path: string) => {
-    return runInsertUpdateDeleteDB(STRATEGYS_DB, 'UPDATE strategys SET strategy_path = ? WHERE strategy_id = ?', [strategy_path, strategy_id])    
-}
+
 
 
 export const getStrategyAssetById = (strategyId: string) => {

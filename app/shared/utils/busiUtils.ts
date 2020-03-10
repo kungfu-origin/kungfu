@@ -197,9 +197,8 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * @param  {string} htmlPath
  */
 export const openWin = (htmlPath: string, BrowserWindow: any): void => {
-
     const modalPath = process.env.NODE_ENV !== 'production'
-    ? `http://localhost:9090/#/${htmlPath}`
+    ? `http://localhost:9090/#${htmlPath}`
     : `file://${__dirname}/index.html#${htmlPath}`
     
     let win = new BrowserWindow({

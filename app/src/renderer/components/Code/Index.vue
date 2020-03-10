@@ -13,6 +13,8 @@ import Editor from './components/MonacoEditor';
 import { setTimeout } from 'timers';
 const {dialog} = require('electron').remote;
 export default {
+    name: 'kungfu-code-editor',
+    
     data(){
         return {
             strategy: {},
