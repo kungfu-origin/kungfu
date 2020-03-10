@@ -37,6 +37,7 @@ namespace kungfu
 
             private:
                 Context_ptr context_;
+                bool started_;
             };
         }
     }

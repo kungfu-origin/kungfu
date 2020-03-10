@@ -167,7 +167,10 @@ namespace kungfu::yijinjing::practice
 
     writer_ptr hero::get_writer(uint32_t dest_id) const
     {
-        assert(writers_.find(dest_id) != writers_.end());
+        if (writers_.find(dest_id) == writers_.end())
+        {
+            SPDLOG_ERROR("no writer for {}", has_location(dest_id) ? get_location(dest_id)->uname : fmt::format("{:08x}", dest_id));
+        }
         return writers_.at(dest_id);
     }
 

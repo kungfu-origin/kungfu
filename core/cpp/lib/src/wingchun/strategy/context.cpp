@@ -15,6 +15,7 @@ using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::strategy
 {
@@ -35,32 +36,7 @@ namespace kungfu::wingchun::strategy
         $([&](const event_ptr &event)
           {
               const Quote &quote = event->data<Quote>();
-              auto id = get_symbol_id(quote.instrument_id, quote.exchange_id);
-              quotes_[id].last_price = quote.last_price;
-          });
-
-        events_ | is(Order::tag) | to(app_.get_home_uid()) |
-        $([&](const event_ptr &event)
-          {
-              auto order = event->data<Order>();
-          });
-
-        events_ | is(Trade::tag) | to(app_.get_home_uid()) |
-        $([&](const event_ptr &event)
-          {
-              auto trade = event->data<Trade>();
-          });
-
-        events_ | is(Entrust::tag) |
-        $([&](const event_ptr &event)
-          {
-              auto entrust = event->data<Entrust>();
-          });
-
-        events_ | is(Transaction::tag) |
-        $([&](const event_ptr &event)
-          {
-              auto transaction = event->data<Transaction>();
+              quotes_.emplace(get_symbol_id(quote.instrument_id, quote.exchange_id), quote);
           });
 
         subscribe_instruments();
@@ -101,9 +77,9 @@ namespace kungfu::wingchun::strategy
             throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
         }
 
-        accounts_[account_id] = account_location;
-        account_cash_limits_[account_id] = cash_limit;
-        account_location_ids_[account_id] = account_location->uid;
+        accounts_.emplace(account_id, account_location);
+        account_cash_limits_.emplace(account_id, cash_limit);
+        account_location_ids_.emplace(account_id, account_location->uid);
 
         app_.request_write_to(app_.now(), account_location->uid);
         app_.request_read_from(app_.now(), account_location->uid, app_.now());
@@ -114,7 +90,7 @@ namespace kungfu::wingchun::strategy
     std::vector<yijinjing::data::location_ptr> Context::list_accounts()
     {
         std::vector<yijinjing::data::location_ptr> acc_locations;
-        for (auto item : accounts_)
+        for (auto &item : accounts_)
         {
             acc_locations.push_back(item.second);
         }
@@ -268,33 +244,27 @@ namespace kungfu::wingchun::strategy
 
     uint64_t Context::cancel_order(uint64_t order_id)
     {
-        uint32_t account_location_id = (order_id >> 32) xor app_.get_home_uid();
-        SPDLOG_INFO("{:08x} cancel order {:016x} with account location {:08x}", app_.get_home_uid(), order_id, account_location_id);
-        if (app_.has_writer(account_location_id))
+        uint32_t account_location_id = (order_id >> 32) xor (app_.get_home_uid());
+        if (not app_.has_writer(account_location_id))
         {
-            auto writer = app_.get_writer(account_location_id);
-            OrderAction &action = writer->open_data<OrderAction>(0);
-
-            action.order_action_id = writer->current_frame_uid();
-            action.order_id = order_id;
-            action.action_flag = OrderActionFlag::Cancel;
-
-            writer->close_data();
-            return action.order_action_id;
-        } else
-        {
-            SPDLOG_ERROR("has no writer for {}", account_location_id);
+            SPDLOG_ERROR("invalid order_id {:16x}", order_id);
             return 0;
         }
+        auto account_location = app_.get_location(account_location_id);
+        SPDLOG_INFO("cancel order {:016x} with account location {}", app_.get_home_uid(), order_id, account_location->uname);
+        auto writer = app_.get_writer(account_location_id);
+        OrderAction &action = writer->open_data<OrderAction>(0);
+
+        action.order_action_id = writer->current_frame_uid();
+        action.order_id = order_id;
+        action.action_flag = OrderActionFlag::Cancel;
+
+        writer->close_data();
+        return action.order_action_id;
     }
 
     uint32_t Context::lookup_account_location_id(const std::string &account)
     {
-        uint32_t account_id = yijinjing::util::hash_str_32(account);
-        if (account_location_ids_.find(account_id) == account_location_ids_.end())
-        {
-            throw wingchun_error("invalid account " + account);
-        }
-        return account_location_ids_[account_id];
+        return account_location_ids_.at(hash_str_32(account));
     }
 }

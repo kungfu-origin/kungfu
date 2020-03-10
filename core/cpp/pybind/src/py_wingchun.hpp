@@ -71,6 +71,8 @@ namespace kungfu::wingchun
     {
     public:
         using kwb::Book::Book;
+        const yijinjing::data::location_ptr get_location() const override
+        {PYBIND11_OVERLOAD_PURE(yijinjing::data::location_ptr, kwb::Book, get_location, py::const_); }
         void on_trading_day(event_ptr event, int64_t daytime) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
         void on_quote(event_ptr event, const Quote &quote) override
@@ -214,6 +216,7 @@ namespace kungfu::wingchun
         py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
                 .def(py::init())
                 .def_property_readonly("ready", &kwb::Book::is_ready)
+                .def("get_location", &kwb::Book::get_location)
                 .def("on_trading_day", &kwb::Book::on_trading_day)
                 .def("on_quote", &kwb::Book::on_quote)
                 .def("on_order_input", &kwb::Book::on_order_input)
@@ -293,7 +296,6 @@ namespace kungfu::wingchun
                 .def("add_strategy", &strategy::Runner::add_strategy);
 
         py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
-                .def_property_readonly("config_location", &strategy::Context::get_config_location)
                 .def_property_readonly("book_context", &strategy::Context::get_book_context)
                 .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
                 .def("now", &strategy::Context::now)

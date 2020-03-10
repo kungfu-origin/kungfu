@@ -20,7 +20,7 @@ namespace kungfu::wingchun::strategy
 {
     Runner::Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, longfist::enums::mode m,
                    bool low_latency)
-            : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
+            : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency), started_(false)
     {}
 
     Context_ptr Runner::make_context()
@@ -43,51 +43,39 @@ namespace kungfu::wingchun::strategy
 
     void Runner::on_start()
     {
+        apprentice::on_start();
+
         context_ = make_context();
         context_->react();
 
-        events_ | timer(now() + yijinjing::time_unit::NANOSECONDS_PER_SECOND * 2) |
+        events_ | take_until(events_ | filter([&](const event_ptr &e)
+                                              { return started_; })) |
         $([&](const event_ptr &e)
           {
-              auto book_ctx = context_->get_book_context();
-              auto books = book_ctx->get_books();
-              bool ready = std::all_of(books.begin(), books.end(), [](book::Book_ptr book)
-              { return book->is_ready(); });
-              if (ready)
+              if (started_)
               {
-                  for (const auto &strategy : strategies_)
+                  return;
+              }
+              for (auto &account_location : context_->list_accounts())
+              {
+                  if (not has_writer(account_location->uid))
                   {
-                      strategy->post_start(context_);
+                      return;
                   }
-              } else
-              {
-                  SPDLOG_WARN("failed to initialize books");
-                  signal_stop();
               }
-          },
-          [&](std::exception_ptr e)
-          {
-              try
-              { std::rethrow_exception(e); }
-              catch (const rx::empty_error &ex)
+              started_ = true;
+              SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
+              for (const auto &strategy : strategies_)
               {
-                  SPDLOG_WARN("{}", ex.what());
-              }
-              catch (const std::exception &ex)
-              {
-                  SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
+                  strategy->post_start(context_);
               }
           });
 
-        for (const auto &strategy : strategies_)
-        {
-            strategy->pre_start(context_);
-        }
-
         events_ | is(Quote::tag) | filter([=](const event_ptr &event)
-                                     { return context_->is_subscribed(event->data<Quote>()); }) |
+                                          { return context_->is_subscribed(event->data<Quote>()); }) |
         $([&](const event_ptr &event)
           {
+              context_->book_context_->on_quote(event, event->data<Quote>());
               for (const auto &strategy : strategies_)
               {
                   strategy->on_quote(context_, event->data<Quote>());
@@ -95,7 +83,7 @@ namespace kungfu::wingchun::strategy
           });
 
         events_ | is(Bar::tag) | filter([=](const event_ptr &event)
-                                   { return context_->is_subscribed(event->data<Bar>()); }) |
+                                        { return context_->is_subscribed(event->data<Bar>()); }) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -104,35 +92,8 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        events_ | is(Order::tag) | to(context_->app_.get_home_uid()) |
-        $([&](const event_ptr &event)
-          {
-              for (const auto &strategy : strategies_)
-              {
-                  strategy->on_order(context_, event->data<Order>());
-              }
-          });
-
-        events_ | is(OrderActionError::tag) | to(context_->app_.get_home_uid()) |
-        $([&](const event_ptr &event)
-          {
-              for (const auto &strategy : strategies_)
-              {
-                  strategy->on_order_action_error(context_, event->data<OrderActionError>());
-              }
-          });
-
-        events_ | is(Trade::tag) | to(context_->app_.get_home_uid()) |
-        $([&](const event_ptr &event)
-          {
-              for (const auto &strategy : strategies_)
-              {
-                  strategy->on_trade(context_, event->data<Trade>());
-              }
-          });
-
         events_ | is(Entrust::tag) | filter([=](const event_ptr &event)
-                                       { return context_->is_subscribed(event->data<Entrust>()); }) |
+                                            { return context_->is_subscribed(event->data<Entrust>()); }) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -142,7 +103,7 @@ namespace kungfu::wingchun::strategy
           });
 
         events_ | is(Transaction::tag) | filter([=](const event_ptr &event)
-                                           { return context_->is_subscribed(event->data<Transaction>()); }) |
+                                                { return context_->is_subscribed(event->data<Transaction>()); }) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -151,8 +112,51 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        apprentice::on_start();
+        events_ | is(Order::tag) |
+        $([&](const event_ptr &event)
+          {
+              context_->book_context_->on_order(event, event->data<Order>());
+              for (const auto &strategy : strategies_)
+              {
+                  strategy->on_order(context_, event->data<Order>());
+              }
+          });
 
+        events_ | is(OrderActionError::tag) |
+        $([&](const event_ptr &event)
+          {
+              for (const auto &strategy : strategies_)
+              {
+                  strategy->on_order_action_error(context_, event->data<OrderActionError>());
+              }
+          });
+
+        events_ | is(Trade::tag) |
+        $([&](const event_ptr &event)
+          {
+              context_->book_context_->on_trade(event, event->data<Trade>());
+              for (const auto &strategy : strategies_)
+              {
+                  strategy->on_trade(context_, event->data<Trade>());
+              }
+          });
+
+        events_ | is(Asset::tag) |
+        $([&](const event_ptr &event)
+          {
+              context_->book_context_->on_asset(event, event->data<Asset>());
+          });
+
+        events_ | is(TradingDay::tag) |
+        $([&](const event_ptr &event)
+          {
+              context_->book_context_->on_trading_day(event, event->data<TradingDay>().timestamp);
+          });
+
+        for (const auto &strategy : strategies_)
+        {
+            strategy->pre_start(context_);
+        }
     }
 
     void Runner::on_exit()

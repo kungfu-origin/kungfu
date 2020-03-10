@@ -275,7 +275,13 @@ namespace kungfu
         constexpr auto interrupt_on_error = [](const std::exception_ptr &e)
         {
             try
-            { std::rethrow_exception(e); }
+            {
+                std::rethrow_exception(e);
+            }
+            catch (const yijinjing::yijinjing_error &err)
+            {
+                yijinjing::util::print_stack_trace();
+            }
             catch (const std::exception &ex)
             {
                 SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());

@@ -196,18 +196,21 @@ namespace kungfu::wingchun::service
         events_ | is(OrderInput::tag) |
         $([&](const event_ptr &event)
           {
-              const OrderInput &data = event->data<OrderInput>();
+              book_context_->on_order_input(event, event->data<OrderInput>());
+
               OrderStat stat = {};
-              stat.order_id = data.order_id;
+              stat.order_id = event->data<OrderInput>().order_id;
               stat.md_time = event->trigger_time();
               stat.insert_time = event->gen_time();
-              order_stats_.emplace(data.order_id, state<OrderStat>(get_home_uid(), event->dest(), event->gen_time(), stat));
+              order_stats_.emplace(stat.order_id, state<OrderStat>(get_home_uid(), event->dest(), event->gen_time(), stat));
               write_to(event->gen_time(), stat, event->dest());
           });
 
         events_ | is(Order::tag) |
         $([&](const event_ptr &event)
           {
+              book_context_->on_order(event, event->data<Order>());
+
               const Order &data = event->data<Order>();
               if (order_stats_.find(data.order_id) == order_stats_.end())
               {
@@ -216,6 +219,18 @@ namespace kungfu::wingchun::service
               OrderStat &stat = order_stats_.at(data.order_id).data;
               stat.ack_time = event->gen_time();
               write_to(event->gen_time(), stat, event->source());
+          });
+
+        events_ | is(Trade::tag) |
+        $([&](const event_ptr &event)
+          {
+              book_context_->on_trade(event, event->data<Trade>());
+          });
+
+        events_ | is(TradingDay::tag) |
+        $([&](const event_ptr &event)
+          {
+              book_context_->on_trading_day(event, event->data<TradingDay>().timestamp);
           });
 
         events_ | is(InstrumentRequest::tag) |

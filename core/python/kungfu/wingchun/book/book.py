@@ -86,6 +86,9 @@ class AccountBook(pywingchun.Book):
 
         self._last_check = 0
 
+    def get_location(self):
+        return self.location
+
     def _on_interval_check(self, now):
         if self._last_check + int(1e9) * 30 < now:
             for order in self.active_orders:
@@ -103,8 +106,7 @@ class AccountBook(pywingchun.Book):
             self.trading_day = datetime.datetime.strptime(self.trading_day, DATE_FORMAT)
 
     def on_trading_day(self, event, daytime):
-        trading_day = kft.to_datetime(daytime)
-        self.apply_trading_day(trading_day)
+        self.apply_trading_day(kft.to_datetime(daytime))
 
     def on_order_input(self, event, input):
         self.ctx.logger.debug("{} received order input event: {}".format(self.location.uname, input))
@@ -147,7 +149,7 @@ class AccountBook(pywingchun.Book):
         self.subject.on_next(self.event)
 
     def on_quote(self, event, quote):
-        self.ctx.logger.debug('{} received quote event: {}'.format(self.location.uname, quote))
+        self.ctx.logger.trace('{} received quote event: {}'.format(self.location.uname, quote))
         self._tickers[quote.uid] = quote
         temp = pykungfu.longfist.types.Position()        
         temp.holder_uid = self.location.uid

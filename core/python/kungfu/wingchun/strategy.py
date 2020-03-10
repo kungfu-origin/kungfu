@@ -25,11 +25,11 @@ class Strategy(pywingchun.Strategy):
 
     def __add_account(self, source, account, cash_limit):
         self.wc_context.add_account(source, account, cash_limit)
-        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
-        book = AccountBook(self.ctx, location)
-        self.ctx.books[location.uid] = book
-        self.book_context.add_book(location, book)
-        self.ctx.logger.info("added book {}@{}".format(account, source))
+        # location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
+        # book = AccountBook(self.ctx, location)
+        # self.ctx.books[location.uid] = book
+        # self.book_context.add_book(location, book)
+        # self.ctx.logger.info("added book {}@{}".format(account, source))
 
     def __get_account_book(self, source, account):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
@@ -61,9 +61,10 @@ class Strategy(pywingchun.Strategy):
         self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
 
     def __init_commission_info(self):
-        config_location = self.ctx.config_location
-        self.ctx.commission_infos = {commission["product_id"]: commission for commission in
-                                     CommissionDB(config_location, "commission").all_commission_info()}
+        print('init commission')
+        # config_location = self.ctx.config_location
+        # self.ctx.commission_infos = {commission["product_id"]: commission for commission in
+        #                              CommissionDB(config_location, "commission").all_commission_info()}
 
     def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
@@ -111,7 +112,6 @@ class Strategy(pywingchun.Strategy):
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
-        self.ctx.config_location = wc_context.config_location
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
         self.ctx.get_commission_info = self.__get_commission_info
@@ -119,11 +119,9 @@ class Strategy(pywingchun.Strategy):
         self.__init_book()
         self.__init_algo()
         self._pre_start(self.ctx)
-        self.ctx.log.info('strategy prepare to run')
 
     def post_start(self, wc_context):
         self._post_start(self.ctx)
-        self.ctx.log.info('strategy ready to run')
 
     def pre_stop(self, wc_context):
         self._pre_stop(self.ctx)
