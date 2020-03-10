@@ -17,6 +17,7 @@
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
+                    <span class="core-process-item switch"></span>
                     <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('master.log')" ></i>
                     </span>
@@ -32,6 +33,9 @@
                         v-if="$utils.ifProcessRunning('ledger', processStatus)"
                         :value="buildState('ledger')"></tr-status>
                         <tr-status v-else></tr-status>
+                    </span>
+                    <span class="core-process-item switch">
+                        <el-switch :value="$utils.ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
                     </span>
                      <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('ledger.log')" ></i>
@@ -49,6 +53,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
+import { switchLedger } from '__io/actions/base';
 import { LOG_DIR } from '__gConfig/pathConfig';
 
 const path = require('path');
@@ -106,6 +111,10 @@ export default {
             return t.processStatus[processId]
         },
 
+        handleLedgerSwitch (e) {
+            switchLedger(e)
+        },
+
         handleOpenLog(target) {
             this.$showLog(path.join(LOG_DIR, target))
         }
@@ -117,49 +126,44 @@ export default {
 .core-status-popover{
     box-shadow: 0px 0px 30px $bg;
 }
+
 .core-status-content{
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
-    max-width: 295px;
+    
     .core-item{
-        float: left;
-        width: 295px;
+        width: 330px;
         margin: 10px;
-        .type-name{
-            font-size: 16px;
-            color: #fff;
-            margin-bottom: 10px;
-            padding-left: 5px;
-        }
+
         .core-status{
+            display: flex;
             font-size: 14px;
+
             .core-process-item{
                 display: inline-block;
-                width: 80px;
                 padding-left: 5px;
                 color: $font_5;
                 text-align: left;
                 vertical-align: bottom;
                 color: $font;
-            }
-            .core-process-item.get-log{
-                width: 20px;
-            }
-            .core-process-item.core-process-title{
-                width: 155px;
-            }
-            .source-name{
-                width: 45px;
-            }
-            .core-status{
-                padding-left: 30px;
-                box-sizing: border-box;
-            }
-            .status-switch{
-                width: 40px;
-            }
+
+                &.get-log {
+                    width: 20px;
+                }
+
+                &.switch {
+                    flex: 1;
+                }
+
+                &.core-process-title{
+                    width: 155px;
+                }
+
+                &.status-switch{
+                    width: 40px;
+                }
+            }  
         }
     }
-    
 }
 
 
