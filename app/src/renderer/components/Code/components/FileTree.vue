@@ -130,7 +130,6 @@ export default {
         //bind data中path 与 sqlite中path
         async bindStrategyPath(strategyPath){
             const t = this;
-            console.log(t.strategy)
             await STRATEGY_API.updateStrategyPath(t.strategy.strategy_id, strategyPath[0])
             t.$message.success(`策略${t.strategy.strategy_id}文件路径修改成功！`)
             //每次更新path，需要通知root组件更新stratgy

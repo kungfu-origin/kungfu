@@ -51,8 +51,7 @@
         "from": ".",
         "to": "dist/app",
         "filter": [
-          "resources",
-          "!default/*"
+          "resources"
         ]
       },
       "!**/kungfu-core/*",
@@ -87,7 +86,6 @@
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
-          "default/*",
           "config/*"
         ]
       },

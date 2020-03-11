@@ -30,15 +30,15 @@
         <!-- 底部 -->
         <el-footer height="30px">
             <div class="footer-content" >
-                <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
+                <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
                     <CoreStatus></CoreStatus>
                 </tr-footer-item>
             
-                <tr-footer-item class="fr" v-if="currentRouter !== 'code'">
+                <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
 
-                <tr-footer-item class="fr" v-if="currentRouter === 'code'">
+                <tr-footer-item class="fr" v-if="currentRouter === 'kungfuCodeEditor'">
                     <CodeSpaceTab></CodeSpaceTab>
                 </tr-footer-item>
             </div>
@@ -66,7 +66,6 @@ export default {
         return {
             currentRouter: '',
             infoListVisiblity: false,
-            navOpend: deepClone(this.$store.state.BASE.navOpend),
         }
     },
 

@@ -5,6 +5,7 @@ from kungfu.wingchun.constants import *
 source = Source.XTP
 exchange = Exchange.SSE
 
+
 def test_timer(context, event):
     context.log.info('test timer')
 
