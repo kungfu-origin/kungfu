@@ -149,7 +149,7 @@ export default {
                 todayFinish: t.todayFinish
             });
 
-            ordersResolve.length && (t.tableData = ordersResolve)
+           t.tableData = ordersResolve
         }
     },
 
@@ -227,8 +227,16 @@ export default {
                 const { order_id, client_id, source_id, account_id, instrument_id } = item
                 const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
                 return strings.includes(searchKeyword) 
-            })
-            .filter(item => (todayFinish ? true : aliveOrderStatusList.includes(+item.status)));
+            });
+            
+            if (!todayFinish) {
+                ordersAfterFilter = ordersAfterFilter
+                    .filter(item => {
+                        console.log(aliveOrderStatusList.includes(+item.status), item.status)
+                        return aliveOrderStatusList.includes(+item.status)
+                        
+                    })
+            }
 
             if (t.moduleType === 'strategy') {
                 ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
