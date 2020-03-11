@@ -1,4 +1,4 @@
-import sys
+import random
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
 
@@ -20,8 +20,10 @@ def pre_start(context):
 
 def on_quote(context, quote):
     context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
-    order_id = context.insert_order(quote.instrument_id, exchange, "15014990", quote.ask_price[0], 200, PriceType.Limit, Side.Buy, Offset.Open, HedgeFlag.Speculation)
-    context.log.info("quote received: [time]{} [instrument_id]{} [last_price]{}".format(kft.strftime(quote.data_time), quote.instrument_id, quote.last_price))
+    side = random.choice([Side.Buy, Side.Sell])
+    price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
+    price_type = random.choice([PriceType.Any, PriceType.Limit])
+    order_id = context.insert_order(quote.instrument_id, exchange, "15014990", price, 100, price_type, side, Offset.Open, HedgeFlag.Speculation)
 
 def on_transaction(context, transaction):
     context.log.info("{} {}".format(transaction.instrument_id, transaction.exchange_id))
@@ -32,7 +34,7 @@ def on_entrust(context, entrust):
     pass
 
 def on_order(context, order):
-    context.log.info('order received: [instrument_id]{} [volume]{} [price]{}'.format(order.instrument_id, order.volume, order.limit_price))
+    context.log.info('order received: [instrument_id]{} [volume]{} [price]{} {}'.format(order.instrument_id, order.volume, order.limit_price, order.error_msg))
 
 def on_trade(context, trade):
     context.log.info('trade received: {} [trade_id]{} [volume]{} [price]{}'.format(kft.strftime(trade.trade_time), trade.order_id, trade.volume, trade.price))

@@ -130,7 +130,7 @@ namespace kungfu::yijinjing::practice
         end_time_ = end_time;
     }
 
-    data::locator_ptr hero::get_locator() const
+    const data::locator_ptr &hero::get_locator() const
     {
         return io_device_->get_locator();
     }
@@ -140,19 +140,29 @@ namespace kungfu::yijinjing::practice
         return io_device_;
     }
 
+    const yijinjing::data::location_ptr &hero::get_home() const
+    {
+        return get_io_device()->get_home();
+    }
+
     uint32_t hero::get_home_uid() const
     {
         return get_io_device()->get_home()->uid;
     }
 
-    uint32_t hero::get_live_home_uid() const
-    {
-        return get_io_device()->get_live_home()->uid;
-    }
-
     const std::string &hero::get_home_uname() const
     {
         return get_io_device()->get_home()->uname;
+    }
+
+    const yijinjing::data::location_ptr &hero::get_live_home() const
+    {
+        return get_io_device()->get_live_home();
+    }
+
+    uint32_t hero::get_live_home_uid() const
+    {
+        return get_io_device()->get_live_home()->uid;
     }
 
     yijinjing::journal::reader_ptr hero::get_reader() const

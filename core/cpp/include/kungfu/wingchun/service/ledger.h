@@ -9,6 +9,7 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/book/book.h>
 
 namespace kungfu::wingchun::service
@@ -32,7 +33,7 @@ namespace kungfu::wingchun::service
 
         longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location);
 
-        const std::unordered_map<uint64_t, longfist::types::Instrument> &get_instruments() const;
+        const std::unordered_map<uint32_t, longfist::types::Instrument> &get_instruments() const;
 
         void dump_asset_snapshot(const longfist::types::Asset &asset);
 
@@ -56,15 +57,11 @@ namespace kungfu::wingchun::service
         longfist::journal::publisher publish_state;
 
         yijinjing::nanomsg::socket_ptr pub_sock_;
+        broker::Subscription subscription_;
         book::BookContext_ptr book_context_;
 
         std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
         std::unordered_map<uint64_t, state<longfist::types::OrderStat>> &order_stats_;
-
-        std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
-        std::unordered_map<uint32_t, yijinjing::data::location_ptr> subscribed_md_locations_;
-        std::unordered_map<uint64_t, longfist::types::Instrument> instruments_;
-        std::unordered_map<uint64_t, yijinjing::data::location_ptr> instrument_md_locations_;
     };
 }
 

@@ -86,17 +86,8 @@ class AccountBook(pywingchun.Book):
 
         self._last_check = 0
 
-    def get_location(self):
-        return self.location
-
-    def _on_interval_check(self, now):
-        if self._last_check + int(1e9) * 30 < now:
-            for order in self.active_orders:
-                if order.status == wc_constants.OrderStatus.Submitted and now - order.insert_time >= int(1e9) * 5:
-                    order.status = wc_constants.OrderStatus.Unknown
-                    self.apply_order(order)
-            self.subject.on_next(self.event)
-            self._last_check = now
+    def get_location_uid(self):
+        return self.location.uid
 
     def setup_trading_day(self, trading_day):
         self.trading_day = trading_day
@@ -107,6 +98,20 @@ class AccountBook(pywingchun.Book):
 
     def on_trading_day(self, event, daytime):
         self.apply_trading_day(kft.to_datetime(daytime))
+        self.subject.on_next(self.event)
+
+    def on_quote(self, event, quote):
+        self._tickers[quote.uid] = quote
+        temp = pykungfu.longfist.types.Position()
+        temp.holder_uid = self.location.uid
+        temp.instrument_id = quote.instrument_id
+        temp.exchange_id = quote.exchange_id
+        for dir in [pykungfu.longfist.enums.Direction.Long, pykungfu.longfist.enums.Direction.Short]:
+            temp.direction = dir
+            if temp.uid in self._positions:
+                position = self._positions[temp.uid]
+                position.apply_quote(quote)
+        self._on_interval_check(event.gen_time)
 
     def on_order_input(self, event, input):
         self.ctx.logger.debug("{} received order input event: {}".format(self.location.uname, input))
@@ -146,23 +151,9 @@ class AccountBook(pywingchun.Book):
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             self.ctx.logger.error('apply trade error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-        self.subject.on_next(self.event)
-
-    def on_quote(self, event, quote):
-        self.ctx.logger.trace('{} received quote event: {}'.format(self.location.uname, quote))
-        self._tickers[quote.uid] = quote
-        temp = pykungfu.longfist.types.Position()        
-        temp.holder_uid = self.location.uid
-        temp.instrument_id = quote.instrument_id
-        temp.exchange_id = quote.exchange_id
-        for dir in [pykungfu.longfist.enums.Direction.Long, pykungfu.longfist.enums.Direction.Short]:
-            temp.direction = dir            
-            if temp.uid in self._positions:
-                position = self._positions[temp.uid]
-                position.apply_quote(quote)      
-        self._on_interval_check(event.gen_time)
 
     def on_asset(self, event, asset):
+        self.ctx.logger.info("on asset python")
         self.ctx.logger.info("{} [{:08x}] asset report received, msg_type: {}, data: {}".
                              format(self.location.uname, self.location.uid, event.msg_type, asset))
         self.avail = asset.avail
@@ -289,6 +280,15 @@ class AccountBook(pywingchun.Book):
             return ticker.last_price
         else:
             return 0.0
+
+    def _on_interval_check(self, now):
+        if self._last_check + int(1e9) * 30 < now:
+            for order in self.active_orders:
+                if order.status == wc_constants.OrderStatus.Submitted and now - order.insert_time >= int(1e9) * 5:
+                    order.status = wc_constants.OrderStatus.Unknown
+                    self.apply_order(order)
+            self.subject.on_next(self.event)
+            self._last_check = now
 
     def _get_position(self, instrument_id, exchange_id, direction=wc_constants.Direction.Long):
         uid = get_position_uid(instrument_id, exchange_id, direction)

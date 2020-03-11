@@ -7,10 +7,12 @@
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+
 #include <kungfu/wingchun/common.h>
-#include <kungfu/wingchun/strategy/strategy.h>
+#include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/algo/algo.h>
+#include <kungfu/wingchun/strategy/strategy.h>
 
 namespace kungfu::wingchun::strategy
 {
@@ -79,39 +81,37 @@ namespace kungfu::wingchun::strategy
         { return algo_context_; }
 
     protected:
-        virtual void react();
+        virtual void on_start();
 
-        std::unordered_map<uint32_t, longfist::types::Quote> quotes_;
+        std::unordered_map<uint64_t, longfist::types::Quote> quotes_;
         yijinjing::practice::apprentice &app_;
         const rx::connectable_observable<event_ptr> &events_;
 
     private:
         book::BookContext_ptr book_context_;
         algo::AlgoContext_ptr algo_context_;
+        yijinjing::data::location_ptr ledger_location_;
 
         uint32_t lookup_account_location_id(const std::string &account);
 
-        void subscribe_instruments();
+        const yijinjing::data::location_ptr &find_marketdata(const std::string &source);
 
-        uint32_t add_marketdata(const std::string &source);
-
-        void request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange);
-
-        template<class T>
-        bool is_subscribed(const T &data)
+        template<class DataType>
+        bool is_subscribed(const event_ptr &event)
         {
-            return subscribe_all_ or subscribed_symbols_.find(get_symbol_id(data.instrument_id, data.exchange_id)) != subscribed_symbols_.end();
+            const DataType &data = event->data<DataType>();
+            return subscription_.is_subscribed(app_.get_location(event->source()), data.exchange_id, data.instrument_id);
         }
 
     private:
+        bool started_;
         std::unordered_map<uint32_t, uint32_t> account_location_ids_;
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
         std::unordered_map<uint32_t, double> account_cash_limits_;
-        std::unordered_map<std::string, uint32_t> market_data_;
+        std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
+        broker::Subscription subscription_;
 
-        bool subscribe_all_;
-
-        std::unordered_map<uint32_t, uint32_t> subscribed_symbols_;
+        void connect_account(const longfist::types::Register& register_data);
 
         friend class Runner;
     };

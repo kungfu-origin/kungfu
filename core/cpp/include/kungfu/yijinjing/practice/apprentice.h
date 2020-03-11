@@ -55,6 +55,15 @@ namespace kungfu::yijinjing::practice
 
         virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
+        template <typename HandlerType>
+        void for_each_live_location(HandlerType handler)
+        {
+            for (const auto &pair : registry_)
+            {
+                handler(pair.second);
+            }
+        }
+
         template<typename DataType>
         void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC)
         {

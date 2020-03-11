@@ -49,13 +49,13 @@ namespace kungfu::yijinjing
             observer_->setup();
         }
 
-        [[nodiscard]] data::locator_ptr get_locator() const
+        [[nodiscard]] const data::locator_ptr &get_locator() const
         { return home_->locator; }
 
-        [[nodiscard]] data::location_ptr get_home() const
+        [[nodiscard]] const data::location_ptr &get_home() const
         { return home_; }
 
-        [[nodiscard]] data::location_ptr get_live_home() const
+        [[nodiscard]] const data::location_ptr &get_live_home() const
         { return live_home_; }
 
         [[nodiscard]] bool is_low_latency()

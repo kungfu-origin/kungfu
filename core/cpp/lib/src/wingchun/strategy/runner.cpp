@@ -20,7 +20,7 @@ namespace kungfu::wingchun::strategy
 {
     Runner::Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, longfist::enums::mode m,
                    bool low_latency)
-            : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency), started_(false)
+            : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
     {}
 
     Context_ptr Runner::make_context()
@@ -43,19 +43,17 @@ namespace kungfu::wingchun::strategy
 
     void Runner::on_start()
     {
-        apprentice::on_start();
-
         context_ = make_context();
-        context_->react();
+
+        for (const auto &strategy : strategies_)
+        {
+            strategy->pre_start(context_);
+        }
 
         events_ | take_until(events_ | filter([&](const event_ptr &e)
-                                              { return started_; })) |
+                                              { return context_->started_; })) |
         $([&](const event_ptr &e)
           {
-              if (started_)
-              {
-                  return;
-              }
               for (auto &account_location : context_->list_accounts())
               {
                   if (not has_writer(account_location->uid))
@@ -63,7 +61,7 @@ namespace kungfu::wingchun::strategy
                       return;
                   }
               }
-              started_ = true;
+              context_->started_ = true;
               SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
               for (const auto &strategy : strategies_)
               {
@@ -71,8 +69,7 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        events_ | is(Quote::tag) | filter([=](const event_ptr &event)
-                                          { return context_->is_subscribed(event->data<Quote>()); }) |
+        events_ | is_own<Quote>(context_) |
         $([&](const event_ptr &event)
           {
               context_->book_context_->on_quote(event, event->data<Quote>());
@@ -82,8 +79,7 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        events_ | is(Bar::tag) | filter([=](const event_ptr &event)
-                                        { return context_->is_subscribed(event->data<Bar>()); }) |
+        events_ | is_own<Bar>(context_) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -92,8 +88,7 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        events_ | is(Entrust::tag) | filter([=](const event_ptr &event)
-                                            { return context_->is_subscribed(event->data<Entrust>()); }) |
+        events_ | is_own<Entrust>(context_) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -102,8 +97,7 @@ namespace kungfu::wingchun::strategy
               }
           });
 
-        events_ | is(Transaction::tag) | filter([=](const event_ptr &event)
-                                                { return context_->is_subscribed(event->data<Transaction>()); }) |
+        events_ | is_own<Transaction>(context_) |
         $([&](const event_ptr &event)
           {
               for (const auto &strategy : strategies_)
@@ -153,10 +147,7 @@ namespace kungfu::wingchun::strategy
               context_->book_context_->on_trading_day(event, event->data<TradingDay>().timestamp);
           });
 
-        for (const auto &strategy : strategies_)
-        {
-            strategy->pre_start(context_);
-        }
+        context_->on_start();
     }
 
     void Runner::on_exit()

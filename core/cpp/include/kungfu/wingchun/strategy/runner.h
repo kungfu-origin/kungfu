@@ -9,38 +9,40 @@
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/strategy.h>
 
-namespace kungfu
+namespace kungfu::wingchun::strategy
 {
-    namespace wingchun
+    class Runner : public yijinjing::practice::apprentice
     {
-        namespace strategy
+    public:
+        Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, longfist::enums::mode m, bool low_latency);
+
+        virtual ~Runner() = default;
+
+        void add_strategy(const Strategy_ptr &strategy);
+
+        void on_trading_day(const event_ptr &event, int64_t daytime) override;
+
+    protected:
+        std::vector<Strategy_ptr> strategies_;
+
+        void on_start() override;
+
+        void on_exit() override;
+
+        virtual Context_ptr make_context();
+
+    private:
+        Context_ptr context_;
+
+        template<typename DataType>
+        static constexpr auto is_own = [](const Context_ptr &context)
         {
-            class Runner : public yijinjing::practice::apprentice
-            {
-            public:
-                Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name, longfist::enums::mode m, bool low_latency);
-
-                virtual ~Runner() = default;
-
-                void add_strategy(const Strategy_ptr& strategy);
-
-                void on_trading_day(const event_ptr &event, int64_t daytime) override;
-
-            protected:
-                std::vector<Strategy_ptr> strategies_;
-
-                void on_start() override ;
-
-                void on_exit() override ;
-
-                virtual Context_ptr make_context();
-
-            private:
-                Context_ptr context_;
-                bool started_;
-            };
-        }
-    }
+            return rx::filter([&](const event_ptr &event)
+                              {
+                                  return event->msg_type() == DataType::tag and context->is_subscribed<DataType>(event);
+                              });
+        };
+    };
 }
 
 #endif //WINGCHUN_RUNNER_H

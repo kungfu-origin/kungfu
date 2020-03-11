@@ -82,14 +82,18 @@ class Ledger(pywingchun.Ledger):
         position_end.holder_uid = book.location.uid
         writer.write(event.gen_time, position_end)
 
+    def on_trading_day(self, event, daytime):
+        self.ctx.trading_day = kft.to_datetime(daytime)
+
     def on_app_location(self, trigger_time, location):
         if location.category == pyyjj.category.TD or location.category == pyyjj.category.STRATEGY:
             book = self._get_book(location)
+            self.ctx.logger.info("ledger got book for {}".format(location.uname))
             book.subject.subscribe(self.on_book_event)
             self.book_context.add_book(location, book)
 
     def on_book_event(self, event):
-        self.get_writer(0).write(event.gen_time, event.data)
+        self.get_writer(0).write(0, event.data)
         self.ctx.logger.debug("book event received: {}".format(event))
 
     def has_book(self, uid):
@@ -106,7 +110,7 @@ class Ledger(pywingchun.Ledger):
         product_id = wc_utils.get_product_id(instrument_id).upper()
         return self.ctx.commission_infos[product_id]
 
-    def _dump_snapshot(self, data_frequency="minute"):
+    def _dump_snapshot(self):
         for book in self.ctx.books.values():
             self.dump_asset_snapshot(book.event.data)
 

@@ -278,14 +278,11 @@ namespace kungfu
             {
                 std::rethrow_exception(e);
             }
-            catch (const yijinjing::yijinjing_error &err)
-            {
-                yijinjing::util::print_stack_trace();
-            }
             catch (const std::exception &ex)
             {
                 SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
             }
+            yijinjing::util::print_stack_trace();
             raise(SIGINT);
         };
 

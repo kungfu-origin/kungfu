@@ -14,6 +14,13 @@
 
 namespace kungfu::yijinjing::practice
 {
+
+    constexpr auto location_handler = [](const yijinjing::data::location_ptr &location)
+    {};
+
+    constexpr auto register_handler = [](const longfist::types::Register &r)
+    {};
+
     class hero : public resource
     {
     public:
@@ -39,15 +46,19 @@ namespace kungfu::yijinjing::practice
 
         void set_end_time(int64_t end_time);
 
-        [[nodiscard]] data::locator_ptr get_locator() const;
+        [[nodiscard]] const data::locator_ptr &get_locator() const;
 
         [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
 
+        const yijinjing::data::location_ptr &get_home() const;
+
         uint32_t get_home_uid() const;
 
-        uint32_t get_live_home_uid() const;
-
         const std::string &get_home_uname() const;
+
+        const yijinjing::data::location_ptr &get_live_home() const;
+
+        uint32_t get_live_home_uid() const;
 
         [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
 

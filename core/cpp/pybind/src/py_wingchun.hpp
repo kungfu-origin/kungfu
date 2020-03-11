@@ -71,23 +71,23 @@ namespace kungfu::wingchun
     {
     public:
         using kwb::Book::Book;
-        const yijinjing::data::location_ptr get_location() const override
-        {PYBIND11_OVERLOAD_PURE(yijinjing::data::location_ptr, kwb::Book, get_location, py::const_); }
-        void on_trading_day(event_ptr event, int64_t daytime) override
+        uint32_t get_location_uid() const override
+        {PYBIND11_OVERLOAD_PURE(uint32_t , kwb::Book, get_location_uid, py::const_); }
+        void on_trading_day(const event_ptr &event, int64_t daytime) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
-        void on_quote(event_ptr event, const Quote &quote) override
+        void on_quote(const event_ptr &event, const Quote &quote) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
-        void on_order_input(event_ptr event, const OrderInput &input) override
+        void on_order_input(const event_ptr &event, const OrderInput &input) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order_input, event, input); }
-        void on_order(event_ptr event, const Order &order) override
+        void on_order(const event_ptr &event, const Order &order) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order, event, order); }
-        void on_trade(event_ptr event, const Trade &trade) override
+        void on_trade(const event_ptr &event, const Trade &trade) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trade, event, trade); }
         void on_positions(const std::vector<Position>& positions) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_positions, positions); }
         void on_position_details(const std::vector<PositionDetail>& position_details) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_position_details, position_details); }
-        virtual void on_asset(event_ptr event, const Asset& asset) override
+        virtual void on_asset(const event_ptr &event, const Asset& asset) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_asset, event, asset); }
     };
 
@@ -139,6 +139,9 @@ namespace kungfu::wingchun
 
         void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, handle_asset_request, event, app_location) }
+
+        void on_trading_day(const event_ptr &event, int64_t daytime) override
+        {PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime); }
 
         void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, on_app_location, trigger_time, app_location) }
@@ -216,7 +219,7 @@ namespace kungfu::wingchun
         py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
                 .def(py::init())
                 .def_property_readonly("ready", &kwb::Book::is_ready)
-                .def("get_location", &kwb::Book::get_location)
+                .def("get_location_uid", &kwb::Book::get_location_uid)
                 .def("on_trading_day", &kwb::Book::on_trading_day)
                 .def("on_quote", &kwb::Book::on_quote)
                 .def("on_order_input", &kwb::Book::on_order_input)
@@ -281,6 +284,7 @@ namespace kungfu::wingchun
                 .def("handle_request", &Ledger::handle_request)
                 .def("handle_instrument_request", &Ledger::handle_instrument_request)
                 .def("handle_asset_request", &Ledger::handle_asset_request)
+                .def("on_trading_day", &Ledger::on_trading_day)
                 .def("on_app_location", &Ledger::on_app_location)
                 .def("pre_start", &Ledger::pre_start)
                 .def("add_timer", &Ledger::add_timer)

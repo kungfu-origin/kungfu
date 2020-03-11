@@ -20,7 +20,7 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publish_state(state_map_),
+            publish_state(state_map_), subscription_(*this),
             assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
             order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>])
     {
@@ -88,9 +88,9 @@ namespace kungfu::wingchun::service
         return assets_.at(location->uid).data;
     }
 
-    const std::unordered_map<uint64_t, longfist::types::Instrument> &Ledger::get_instruments() const
+    const std::unordered_map<uint32_t, longfist::types::Instrument> &Ledger::get_instruments() const
     {
-        return instruments_;
+        return subscription_.get_instruments();
     }
 
     void Ledger::dump_asset_snapshot(const Asset &asset)
@@ -111,17 +111,9 @@ namespace kungfu::wingchun::service
               auto holder_location = get_location(position.holder_uid);
               if (holder_location->category == category::TD)
               {
-                  Instrument instrument = {};
-                  strcpy(instrument.instrument_id, position.instrument_id);
-                  strcpy(instrument.exchange_id, position.exchange_id);
-
-                  if (instruments_.find(instrument.uid()) == instruments_.end())
-                  {
-                      auto group = holder_location->group;
-                      auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-                      instruments_.emplace(instrument.uid(), instrument);
-                      instrument_md_locations_.emplace(instrument.uid(), md_location);
-                  }
+                  auto group = holder_location->group;
+                  auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
+                  subscription_.add(md_location, position.exchange_id, position.instrument_id);
               }
           });
     }
@@ -141,14 +133,7 @@ namespace kungfu::wingchun::service
                   request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
                   request_write_to(event->gen_time(), app_location->uid);
               }
-          });
-
-        events_ | is(Deregister::tag) |
-        $([&](const event_ptr &event)
-          {
-              auto location_uid = event->data<Deregister>().location_uid;
-              broker_states_.emplace(location_uid, BrokerState::DisConnected);
-              subscribed_md_locations_.erase(location_uid);
+              on_app_location(event->gen_time(), app_location);
           });
 
         events_ | is(Channel::tag) |
@@ -159,38 +144,6 @@ namespace kungfu::wingchun::service
               {
                   reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
               }
-          });
-
-        events_ | is(BrokerStateUpdate::tag) |
-        $([&](const event_ptr &event)
-          {
-              auto state = event->data<BrokerStateUpdate>().state;
-              auto broker_location = get_location(event->source());
-              if (broker_location->category == category::MD)
-              {
-                  bool good_state = state == BrokerState::LoggedIn or state == BrokerState::Ready;
-                  bool subscribed = subscribed_md_locations_.find(broker_location->uid) != subscribed_md_locations_.end();
-                  if (good_state and not subscribed and has_writer(broker_location->uid))
-                  {
-                      SPDLOG_INFO("subscribe from MD {}", broker_location->uname);
-                      for (auto &pair : instruments_)
-                      {
-                          auto instrument = pair.second;
-                          auto md_location = instrument_md_locations_.at(instrument.uid());
-                          auto writer = get_writer(md_location->uid);
-                          if (md_location->uid == broker_location->uid)
-                          {
-                              write_subscribe_msg(writer, now(), instrument.exchange_id, instrument.instrument_id);
-                          }
-                      }
-                      subscribed_md_locations_.emplace(broker_location->uid, broker_location);
-                  }
-                  if (state == BrokerState::Connected or state == BrokerState::DisConnected)
-                  {
-                      subscribed_md_locations_.erase(broker_location->uid);
-                  }
-              }
-              broker_states_.emplace(broker_location->uid, state);
           });
 
         events_ | is(OrderInput::tag) |
@@ -264,6 +217,7 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
+        subscription_.subscribe(events_);
         publish_state(get_writer(location::PUBLIC), now());
     }
 }

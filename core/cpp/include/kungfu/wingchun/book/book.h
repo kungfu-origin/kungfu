@@ -18,23 +18,23 @@ namespace kungfu::wingchun::book
         Book() : ready_(false)
         {}
 
-        [[nodiscard]] virtual const yijinjing::data::location_ptr get_location() const = 0;
+        [[nodiscard]] virtual uint32_t get_location_uid() const = 0;
 
-        virtual void on_quote(event_ptr event, const longfist::types::Quote &quote) = 0;
+        virtual void on_quote(const event_ptr &event, const longfist::types::Quote &quote) = 0;
 
-        virtual void on_trade(event_ptr event, const longfist::types::Trade &trade) = 0;
+        virtual void on_trade(const event_ptr &event, const longfist::types::Trade &trade) = 0;
 
-        virtual void on_order(event_ptr event, const longfist::types::Order &order) = 0;
+        virtual void on_order(const event_ptr &event, const longfist::types::Order &order) = 0;
 
-        virtual void on_order_input(event_ptr event, const longfist::types::OrderInput &input) = 0;
+        virtual void on_order_input(const event_ptr &event, const longfist::types::OrderInput &input) = 0;
 
         virtual void on_positions(const std::vector<longfist::types::Position> &positions) = 0;
 
         virtual void on_position_details(const std::vector<longfist::types::PositionDetail> &position_details) = 0;
 
-        virtual void on_asset(event_ptr event, const longfist::types::Asset &asset) = 0;
+        virtual void on_asset(const event_ptr &event, const longfist::types::Asset &asset) = 0;
 
-        virtual void on_trading_day(event_ptr event, int64_t daytime) = 0;
+        virtual void on_trading_day(const event_ptr &event, int64_t daytime) = 0;
 
         virtual ~Book() = default;
 

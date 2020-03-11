@@ -15,14 +15,12 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::book
 {
     BookContext::BookContext(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events) :
-            app_(app), events_(events)
+            app_(app), events_(events), instruments_(), books_()
     {
         auto home = app.get_io_device()->get_home();
         log::copy_log_settings(home, home->name);
         this->monitor_instruments();
         service_location_ = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app.get_locator());
-        SPDLOG_INFO("book context for {}", app.get_home_uname());
-        SPDLOG_INFO("book context books {}", books_.size());
     }
 
     const Instrument &BookContext::get_inst_info(const std::string &instrument_id) const
@@ -64,7 +62,7 @@ namespace kungfu::wingchun::book
     {
         for (const auto &item: books_)
         {
-            if (item.second->get_location()->uid == event->source())
+            if (item.first == event->source())
             {
                 item.second->on_trade(event, trade);
             }
@@ -75,7 +73,7 @@ namespace kungfu::wingchun::book
     {
         for (const auto &item: books_)
         {
-            if (item.second->get_location()->uid == event->source())
+            if (item.first == event->source())
             {
                 item.second->on_order(event, order);
             }
@@ -84,11 +82,9 @@ namespace kungfu::wingchun::book
 
     void BookContext::on_order_input(const event_ptr &event, const longfist::types::OrderInput &input)
     {
-        SPDLOG_INFO("on order input {}", input.to_string());
-        SPDLOG_INFO("on order input books size {}", books_.size());
         for (const auto &item: books_)
         {
-            if (item.second->get_location()->uid == event->source())
+            if (item.first == event->source())
             {
                 item.second->on_order_input(event, input);
             }
@@ -99,7 +95,7 @@ namespace kungfu::wingchun::book
     {
         for (const auto &item: books_)
         {
-            if (item.second->get_location()->uid == event->dest())
+            if (item.first == event->dest())
             {
                 item.second->on_asset(event, asset);
             }

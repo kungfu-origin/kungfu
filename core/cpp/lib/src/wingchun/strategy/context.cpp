@@ -19,32 +19,31 @@ using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::strategy
 {
-    Context::Context(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events) :
-            app_(app), events_(events), subscribe_all_(false)
+    Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events) :
+            app_(app), events_(events), started_(false),
+            book_context_(std::make_shared<book::BookContext>(app_, events_)),
+            algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
+            ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())),
+            subscription_(app_)
     {
-        auto home = app.get_io_device()->get_home();
-        log::copy_log_settings(home, home->name);
-        book_context_ = std::make_shared<book::BookContext>(app, events);
-        algo_context_ = std::make_shared<algo::AlgoContext>(app, events);
+        log::copy_log_settings(app_.get_home(), app_.get_home()->name);
     }
 
-    void Context::react()
+    void Context::on_start()
     {
-        algo_context_->react();
-
         events_ | is(Quote::tag) |
         $([&](const event_ptr &event)
           {
-              const Quote &quote = event->data<Quote>();
-              quotes_.emplace(get_symbol_id(quote.instrument_id, quote.exchange_id), quote);
+              quotes_.emplace(event->data<Quote>().uid(), event->data<Quote>());
           });
 
-        subscribe_instruments();
+        events_ | is(Register::tag) |
+        $([&](const event_ptr &event)
+          {
+              connect_account(event->data<Register>());
+          });
 
-        auto home = app_.get_io_device()->get_home();
-        auto ledger_location = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
-        app_.request_write_to(app_.now(), ledger_location->uid);
-        app_.request_read_from(app_.now(), ledger_location->uid, app_.now());
+        subscription_.subscribe(events_);
     }
 
     int64_t Context::now() const
@@ -64,7 +63,7 @@ namespace kungfu::wingchun::strategy
 
     void Context::add_account(const std::string &source, const std::string &account, double cash_limit)
     {
-        uint32_t account_id = yijinjing::util::hash_str_32(account);
+        uint32_t account_id = hash_str_32(account);
         if (accounts_.find(account_id) != accounts_.end())
         {
             throw wingchun_error(fmt::format("duplicated account {}@{}", account, source));
@@ -80,9 +79,6 @@ namespace kungfu::wingchun::strategy
         accounts_.emplace(account_id, account_location);
         account_cash_limits_.emplace(account_id, cash_limit);
         account_location_ids_.emplace(account_id, account_location->uid);
-
-        app_.request_write_to(app_.now(), account_location->uid);
-        app_.request_read_from(app_.now(), account_location->uid, app_.now());
 
         SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
     }
@@ -107,126 +103,53 @@ namespace kungfu::wingchun::strategy
         return account_cash_limits_[account_id];
     }
 
-    void Context::subscribe_instruments()
-    {
-        auto home = app_.get_io_device()->get_home();
-        auto ledger_location = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", home->locator);
-        if (home->mode == mode::LIVE and not app_.has_location(ledger_location->uid))
-        {
-            throw wingchun_error("has no location for ledger service");
-        }
-        if (not app_.has_writer(ledger_location->uid))
-        {
-            events_ | is(RequestWriteTo::tag) |
-            filter([=](const event_ptr &e)
-                   {
-                       const RequestWriteTo &data = e->data<RequestWriteTo>();
-                       return data.dest_id == ledger_location->uid;
-                   }) | first() |
-            $([=](const event_ptr &e)
-              {
-                  auto writer = app_.get_writer(ledger_location->uid);
-                  writer->mark(0, InstrumentRequest::tag);
-                  SPDLOG_INFO("instrument requested");
-              });
-        } else
-        {
-            auto writer = app_.get_writer(ledger_location->uid);
-            writer->mark(0, InstrumentRequest::tag);
-            SPDLOG_INFO("instrument requested");
-        }
-    }
-
-    uint32_t Context::add_marketdata(const std::string &source)
+    const location_ptr &Context::find_marketdata(const std::string &source)
     {
         if (market_data_.find(source) == market_data_.end())
         {
-            auto home = app_.get_io_device()->get_home();
+            auto home = app_.get_home();
             auto md_location = source == "bar" ? location::make_shared(mode::LIVE, category::SYSTEM, "service", source, home->locator) :
                                location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
             if (not app_.has_location(md_location->uid))
             {
                 throw wingchun_error(fmt::format("invalid md {}", source));
             }
-            app_.request_read_from_public(app_.now(), md_location->uid, app_.now());
-            app_.request_write_to(app_.now(), md_location->uid);
-            market_data_[source] = md_location->uid;
-            SPDLOG_INFO("added md {} [{:08x}]", source, md_location->uid);
+            market_data_.emplace(source, md_location);
+            SPDLOG_INFO("added md {} at {} [{:08x}]", source, md_location->uname, md_location->uid);
         }
-        return market_data_[source];
+        return market_data_.at(source);
     }
 
     void Context::subscribe_all(const std::string &source)
     {
-        subscribe_all_ = true;
-        auto md_source = add_marketdata(source);
-        SPDLOG_INFO("strategy subscribe all from {} [{:08x}]", source, md_source);
-        if (not app_.has_writer(md_source))
-        {
-            events_ | is(RequestWriteTo::tag) |
-            filter([=](const event_ptr &e)
-                   {
-                       const RequestWriteTo &data = e->data<RequestWriteTo>();
-                       return data.dest_id == md_source;
-                   }) | first() |
-            $([=](const event_ptr &e)
-              {
-                  auto writer = app_.get_writer(md_source);
-                  writer->mark(0, SubscribeAll::tag);
-              });
-        } else
-        {
-            auto writer = app_.get_writer(md_source);
-            writer->mark(0, SubscribeAll::tag);
-        }
+        subscription_.add_all(find_marketdata(source));
     }
 
     void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
     {
+        auto md_location = find_marketdata(source);
         for (const auto &symbol: symbols)
         {
-            auto symbol_id = get_symbol_id(symbol.c_str(), exchange.c_str());
-            subscribed_symbols_[symbol_id] = symbol_id;
-        }
-
-        auto md_source = add_marketdata(source);
-        SPDLOG_INFO("strategy subscribe from {} [{:08x}]", source, md_source);
-        if (not app_.has_writer(md_source))
-        {
-            events_ | is(RequestWriteTo::tag) |
-            filter([=](const event_ptr &e)
-                   {
-                       const RequestWriteTo &data = e->data<RequestWriteTo>();
-                       return data.dest_id == md_source;
-                   }) | first() |
-            $([=](const event_ptr &e)
-              {
-                  request_subscribe(md_source, symbols, exchange);
-              });
-        } else
-        {
-            request_subscribe(md_source, symbols, exchange);
-        }
-    }
-
-    void Context::request_subscribe(uint32_t source, const std::vector<std::string> &symbols, const std::string &exchange)
-    {
-        for (const auto &symbol : symbols)
-        {
-            write_subscribe_msg(app_.get_writer(source), app_.now(), exchange, symbol);
+            subscription_.add(md_location, exchange, symbol);
         }
     }
 
     uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
                                    double limit_price, int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag)
     {
+        auto account_location_uid = lookup_account_location_id(account);
+        if (not app_.has_writer(account_location_uid))
+        {
+            SPDLOG_ERROR("account {} not ready", account);
+            return 0;
+        }
         auto inst_type = get_instrument_type(symbol, exchange);
         if (inst_type == InstrumentType::Unknown || inst_type == InstrumentType::Repo)
         {
             SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(inst_type), symbol, exchange);
             return 0;
         }
-        auto writer = app_.get_writer(lookup_account_location_id(account));
+        auto writer = app_.get_writer(account_location_uid);
         OrderInput &input = writer->open_data<OrderInput>(app_.now());
         input.order_id = writer->current_frame_uid();
         strcpy(input.instrument_id, symbol.c_str());
@@ -244,15 +167,19 @@ namespace kungfu::wingchun::strategy
 
     uint64_t Context::cancel_order(uint64_t order_id)
     {
-        uint32_t account_location_id = (order_id >> 32) xor (app_.get_home_uid());
-        if (not app_.has_writer(account_location_id))
+        uint32_t account_location_uid = (order_id >> 32) xor (app_.get_home_uid());
+        if (not app_.has_location(account_location_uid) or not app_.is_location_live(account_location_uid))
+        {
+            SPDLOG_ERROR("account not ready for cancel this order {:16x}", order_id);
+            return 0;
+        }
+        if (not app_.has_writer(account_location_uid))
         {
             SPDLOG_ERROR("invalid order_id {:16x}", order_id);
             return 0;
         }
-        auto account_location = app_.get_location(account_location_id);
-        SPDLOG_INFO("cancel order {:016x} with account location {}", app_.get_home_uid(), order_id, account_location->uname);
-        auto writer = app_.get_writer(account_location_id);
+        auto account_location = app_.get_location(account_location_uid);
+        auto writer = app_.get_writer(account_location_uid);
         OrderAction &action = writer->open_data<OrderAction>(0);
 
         action.order_action_id = writer->current_frame_uid();
@@ -266,5 +193,19 @@ namespace kungfu::wingchun::strategy
     uint32_t Context::lookup_account_location_id(const std::string &account)
     {
         return account_location_ids_.at(hash_str_32(account));
+    }
+
+    void Context::connect_account(const longfist::types::Register& register_data)
+    {
+        auto app_location = app_.get_location(register_data.location_uid);
+        auto key = hash_str_32(app_location->name);
+        SPDLOG_WARN("app_location {} key {:08x}, {}", app_location->uname, key, accounts_.find(key) != accounts_.end());
+        if (app_location->category == category::TD and accounts_.find(key) != accounts_.end())
+        {
+            SPDLOG_INFO("connecting account {}", app_location->uname);
+            app_.request_read_from_public(app_.now(), app_location->uid, register_data.checkin_time);
+            app_.request_read_from(app_.now(), app_location->uid, register_data.checkin_time);
+            app_.request_write_to(app_.now(), app_location->uid);
+        }
     }
 }
