@@ -1,5 +1,8 @@
 <template>
   <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
+    <template v-slot:dashboard-header-left>
+        <span class="trading-day-header">交易日：{{tradingDay}}</span>    
+    </template>
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -261,5 +264,9 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+    .trading-day-header {
+        font-size: 10px;
+        padding-left: 10px;
+    }
 </style>

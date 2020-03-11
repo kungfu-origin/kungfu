@@ -267,7 +267,7 @@ export default {
         flex-direction: row;
         justify-content: flex-start;
         .oper{
-            text-align: right;
+            text-align: left;
             font-size: 14px;
         }
     }

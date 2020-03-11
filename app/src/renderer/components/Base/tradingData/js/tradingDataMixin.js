@@ -1,4 +1,3 @@
-import { debounce } from '__gUtils/BusiUtils';
 
 export default {
     props: {
@@ -47,6 +46,7 @@ export default {
     },
 
     computed: {
+
         schema () {
             return []
         },

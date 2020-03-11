@@ -2,7 +2,10 @@
     <div class="tr-dashboard" :style="{'height': height, 'min-height': minHeight}">
         <div class="tr-dashboard-warp">
             <div class="tr-dashboard-header" v-if="!noHeader">
-                <div class="tr-dashboard-title">{{title}}</div>
+                <div class="tr-dashboard-title-left">
+                    <div class="tr-dashboard-title">{{title}}</div>
+                    <slot name="dashboard-header-left"></slot>
+                </div>
                 <slot name="dashboard-header"></slot>
             </div>
             <div :class="{'no-header': noHeader, 'tr-dashboard-body': true}">
@@ -75,10 +78,12 @@ export default {
     line-height: 36px;
     padding: 0px 5px 0px 10px;
     overflow: hidden;
-    >div{
-        float: right;
-    }
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+
     .tr-dashboard-title{
+        font-size: 14px;
         display: inline-block;
         float: none;
     }
