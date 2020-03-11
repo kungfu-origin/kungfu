@@ -65,7 +65,7 @@ export default {
                     width: '60px'
                 },{
                     type: 'text',
-                    label: '多空',
+                    label: '',
                     prop: 'direction',
                     width: '50px'
                 },{
