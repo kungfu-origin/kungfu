@@ -325,8 +325,8 @@ methods: {
 
 	//打开文件夹 
 	handleOpenWhlFolder() {
-		console.log(path.join(KUNGFU_RESOURCES_DIR, 'kungfu-resources', 'python'))
-		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'kungfu-resources', 'python'));
+		console.log(path.join(KUNGFU_RESOURCES_DIR, 'python'))
+		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'python'));
 	},
 
 	//table 添加row
