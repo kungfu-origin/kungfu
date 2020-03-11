@@ -50,30 +50,32 @@ export default {
                 type: 'text',
                 label: '成交时间',
                 prop: 'updateTime',
-                width: '120px'
+                width: '70px'
             },{
                 type: 'text',
                 label: '代码',
                 prop: 'instrumentId',
-                width: '80px'
+                width: '60px'
             },{
                 type: 'text',
-                label: '买卖',
+                label: '',
                 prop: 'side',
-                width: '50px'
+                width: '30px'
             },{
                 type: 'text',
-                label: '开平',
+                label: '',
                 prop: 'offset',
-                width: '50px'
+                width: '30px'
             },{
                 type: 'number',
                 label: '成交价',
                 prop: 'price',
+                width: '80px'
             },{
                 type: 'number',
                 label: '成交量',
                 prop: 'volume',
+                width: '60px'
             },{
                 type: 'text',
                 label: this.moduleType == 'account' ? '策略': '账户',

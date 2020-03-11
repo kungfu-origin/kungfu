@@ -229,7 +229,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = +Number(item.update_time || item.insert_time || 0);
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
-        updateTime: moment(+updateTime / 1000000).format("MM-DD HH:mm:ss"),
+        updateTime: moment(+updateTime / 1000000).format("HH:mm:ss"),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
@@ -251,7 +251,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     const updateTime = +Number(item.trade_time || item.update_time || 0);
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
-        updateTime: moment(+updateTime / 1000000).format('MM-DD HH:mm:ss'),
+        updateTime: moment(+updateTime / 1000000).format('HH:mm:ss'),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side],

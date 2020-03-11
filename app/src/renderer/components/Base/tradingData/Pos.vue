@@ -62,7 +62,7 @@ export default {
                     type: 'text',
                     label: '代码',
                     prop: 'instrumentId',
-                    width: '80px'
+                    width: '60px'
                 },{
                     type: 'text',
                     label: '多空',

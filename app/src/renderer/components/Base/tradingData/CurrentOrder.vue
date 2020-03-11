@@ -94,43 +94,47 @@ export default {
                 type: "text",
                 label: "下单时间",
                 prop: "updateTime",
-                width: '120px'
+                width: '70px'
             },{
                 type: "text",
                 label: "代码",
                 prop: "instrumentId",
-                width: '80px'
+                width: '60px'
             },{
                 type: "text",
-                label: "买卖",
+                label: "",
                 prop: "side",
-                width: '50px'
+                width: '30px'
             },{
                 type: "text",
-                label: "开平",
+                label: "",
                 prop: "offset",
-                width: '50px'
+                width: '30px'
             },{
                 type: "number",
                 label: "委托价",
                 prop: "limitPrice",
+                width: '80px'
             },{
                 type: "text",
                 align: "center",
                 label: "已成交/全部",
                 prop: "volumeTraded",
+                width: '80px'
             },{
                 type: "text",
                 label: "订单状态",
                 prop: "statusName",
+                width: '60px'
+            },{
+                type: 'number',
+                label: "系统延迟(μs)",
+                prop: "systemLatency", 
+                width: '70px'
             },{
                 type: "text",
                 label: this.moduleType == 'account' ? '策略' : '账户',
                 prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
-            },{
-                type: 'number',
-                label: "系统延迟(μs)",
-                prop: "systemLatency",   
             },{
                 type: 'operation',
                 label: '',
