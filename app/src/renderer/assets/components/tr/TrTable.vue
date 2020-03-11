@@ -151,9 +151,9 @@ export default {
         data(newVal) {
             const t = this;
             if (newVal.length !== 0) {
-                t.$nextTick().then(() => {
-                    t.show = true;
-                })
+                t.$nextTick().then(() => t.show = true)
+            } else {
+                t.$nextTick().then(() => t.show = false)
             }
         }
     },

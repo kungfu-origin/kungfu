@@ -26,13 +26,6 @@ const buildRequest = (reqMsg: string, msgTypeVal: number, errMsg: string): Promi
     })
 }
 
-export const nanoReqGatewayState = () : Promise<any> => {
-    const reqMsg = JSON.stringify({
-        msg_type: msgType.reqGatewayState,
-        data: {}
-    })
-    return buildRequest(reqMsg, msgType.reqGatewayState, '请求柜台状态失败！')
-}
 
 
 //请求删除策略持仓
