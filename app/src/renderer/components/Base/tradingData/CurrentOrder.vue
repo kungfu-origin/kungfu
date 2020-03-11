@@ -1,5 +1,5 @@
 <template>
-  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `当前委托 ${currentTitle}`">
+  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -14,7 +14,7 @@
             <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-release mouse-over" title="当前委托" @click="handleCheckTodayUnfinished"></i>
+            <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
@@ -94,7 +94,7 @@ export default {
                 type: "text",
                 label: "下单时间",
                 prop: "updateTime",
-                width: '160px'
+                width: '120px'
             },{
                 type: "text",
                 label: "代码",
@@ -232,9 +232,7 @@ export default {
             if (!todayFinish) {
                 ordersAfterFilter = ordersAfterFilter
                     .filter(item => {
-                        console.log(aliveOrderStatusList.includes(+item.status), item.status)
                         return aliveOrderStatusList.includes(+item.status)
-                        
                     })
             }
 

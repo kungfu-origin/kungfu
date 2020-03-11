@@ -50,7 +50,7 @@ export default {
                 type: 'text',
                 label: '成交时间',
                 prop: 'updateTime',
-                width: '160px'
+                width: '120px'
             },{
                 type: 'text',
                 label: '代码',
