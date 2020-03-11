@@ -36,6 +36,7 @@
                             'text-overflow',
                             item.update ? 'update' : '',
                             column.type === 'number' ? 'number' : '',
+                            column.type === 'account-strategy' ? 'account-strategy' : '',
                             column.type === 'operation' ? 'oper' : '',
                             column.align === 'center' ? 'text-center' : ''
                         ]"
@@ -269,6 +270,11 @@ export default {
         .oper{
             text-align: left;
             font-size: 14px;
+            min-width: 40px;
+        }
+
+        .account-strategy {
+            max-width: 100px !important;
         }
     }
 

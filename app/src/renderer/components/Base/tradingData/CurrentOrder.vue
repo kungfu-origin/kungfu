@@ -135,14 +135,13 @@ export default {
                 prop: "systemLatency", 
                 width: '70px'
             },{
-                type: "text",
+                type: "account-strategy",
                 label: this.moduleType == 'account' ? '策略' : '账户',
                 prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
             },{
                 type: 'operation',
                 label: '',
                 prop: 'oper',
-                width: '40px'
             }]
         }
     },

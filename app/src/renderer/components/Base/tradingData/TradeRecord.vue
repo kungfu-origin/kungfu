@@ -80,7 +80,7 @@ export default {
                 prop: 'volume',
                 width: '60px'
             },{
-                type: 'text',
+                type: 'account-strategy',
                 label: this.moduleType == 'account' ? '策略': '账户',
                 prop: this.moduleType == 'account' ? 'clientId': 'accountId',
             }]
