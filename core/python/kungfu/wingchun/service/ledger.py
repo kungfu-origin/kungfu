@@ -15,6 +15,7 @@ from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.data.sqlite.data_proxy import CommissionDB
 from kungfu.wingchun.calendar import Calendar
+from kungfu.wingchun.book import accounting
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()
@@ -54,6 +55,8 @@ class Ledger(pywingchun.Ledger):
         self.ctx.get_inst_info = self.get_inst_info
         self.ctx.get_commission_info = self.get_commission_info
 
+        accounting.setup_bookkeeper(self.ctx, self.bookkeeper)
+
     def pre_start(self):
         self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
 
@@ -85,22 +88,11 @@ class Ledger(pywingchun.Ledger):
     def on_trading_day(self, event, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
 
-    def on_app_location(self, trigger_time, location):
-        if location.category == pyyjj.category.TD or location.category == pyyjj.category.STRATEGY:
-            book = self._get_book(location)
-            self.ctx.logger.info("ledger got book for {}".format(location.uname))
-            book.subject.subscribe(self.on_book_event)
-            self.book_context.add_book(location, book)
-
-    def on_book_event(self, event):
-        self.get_writer(event.data.holder_uid).write(0, event.data)
-        self.ctx.logger.debug("book event received: {}".format(event))
-
     def has_book(self, uid):
         return uid in self.ctx.books
 
     def pop_book(self, uid):
-        self.book_context.pop_book(uid)
+        self.book_manager.pop_book(uid)
         return self.ctx.books.pop(uid, None)
 
     def get_inst_info(self, instrument_id):
@@ -113,30 +105,6 @@ class Ledger(pywingchun.Ledger):
     def _dump_snapshot(self):
         for book in self.ctx.books.values():
             self.dump_asset_snapshot(book.event.data)
-
-    def _get_book(self, location):
-        if location.uid not in self.ctx.books:
-            positions = self.get_positions(location)
-            if self.has_asset(location):
-                asset = self.get_asset(location)
-            else:
-                asset = longfist.types.Asset()
-                asset.holder_uid = location.uid
-                asset.avail = DEFAULT_INIT_CASH
-            book = kwb.book.AccountBook(self.ctx,
-                                        location=location,
-                                        positions=positions,
-                                        avail=asset.avail,
-                                        initial_equity=asset.initial_equity,
-                                        static_equity=asset.static_equity,
-                                        frozen_cash=asset.frozen_cash,
-                                        frozen_margin=asset.frozen_margin,
-                                        intraday_fee=asset.intraday_fee,
-                                        accumulated_fee=asset.accumulated_fee,
-                                        realized_pnl=asset.realized_pnl)
-            self.ctx.books[location.uid] = book
-            self.ctx.logger.info("success to init book for {} [{:08x}]".format(location.uname, location.uid))
-        return self.ctx.books[location.uid]
 
 
 @on(msg.NewOrderSingle)

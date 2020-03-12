@@ -20,7 +20,9 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publish_state(state_map_), broker_client_(*this, true, true),
+            publish_state(state_map_),
+            broker_client_(*this, true, true),
+            bookkeeper_(*this, broker_client_),
             assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
             order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>])
     {
@@ -31,13 +33,9 @@ namespace kungfu::wingchun::service
         }
     }
 
-    book::BookContext_ptr Ledger::get_book_context()
+    book::Bookkeeper &Ledger::get_bookkeeper()
     {
-        if (book_context_ == nullptr)
-        {
-            book_context_ = std::make_shared<book::BookContext>(*this, events_);
-        }
-        return book_context_;
+        return bookkeeper_;
     }
 
     void Ledger::publish(const std::string &msg)
@@ -122,6 +120,9 @@ namespace kungfu::wingchun::service
     {
         pre_start();
 
+        broker_client_.on_start(events_);
+        bookkeeper_.on_start(events_);
+
         events_ | is(Register::tag) |
         $([&](const event_ptr &event)
           {
@@ -133,7 +134,6 @@ namespace kungfu::wingchun::service
                   request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
                   request_write_to(event->gen_time(), app_location->uid);
               }
-              on_app_location(event->gen_time(), app_location);
           });
 
         events_ | is(Channel::tag) |
@@ -146,13 +146,20 @@ namespace kungfu::wingchun::service
               }
           });
 
+        events_ | is(Quote::tag) |
+        $([&](const event_ptr &event)
+          {
+              const Quote &data = event->data<Quote>();
+          });
+
         events_ | is(OrderInput::tag) |
         $([&](const event_ptr &event)
           {
-              book_context_->on_order_input(event, event->data<OrderInput>());
+              const OrderInput &data = event->data<OrderInput>();
+              write_book(event, data);
 
               OrderStat stat = {};
-              stat.order_id = event->data<OrderInput>().order_id;
+              stat.order_id = data.order_id;
               stat.md_time = event->trigger_time();
               stat.insert_time = event->gen_time();
               order_stats_.emplace(stat.order_id, state<OrderStat>(get_home_uid(), event->dest(), event->gen_time(), stat));
@@ -162,9 +169,9 @@ namespace kungfu::wingchun::service
         events_ | is(Order::tag) |
         $([&](const event_ptr &event)
           {
-              book_context_->on_order(event, event->data<Order>());
-
               const Order &data = event->data<Order>();
+              write_book(event, data);
+
               if (order_stats_.find(data.order_id) == order_stats_.end())
               {
                   order_stats_.emplace(data.order_id, state<OrderStat>(get_home_uid(), event->source(), event->gen_time(), OrderStat()));
@@ -177,13 +184,8 @@ namespace kungfu::wingchun::service
         events_ | is(Trade::tag) |
         $([&](const event_ptr &event)
           {
-              book_context_->on_trade(event, event->data<Trade>());
-          });
-
-        events_ | is(TradingDay::tag) |
-        $([&](const event_ptr &event)
-          {
-              book_context_->on_trading_day(event, event->data<TradingDay>().timestamp);
+              const Trade &data = event->data<Trade>();
+              write_book(event, data);
           });
 
         events_ | is(InstrumentRequest::tag) |
@@ -217,7 +219,6 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
-        broker_client_.on_start(events_);
         publish_state(get_writer(location::PUBLIC), now());
 
         add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [](event_ptr event)

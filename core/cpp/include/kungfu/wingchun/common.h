@@ -334,7 +334,8 @@ namespace kungfu::wingchun
 
     inline longfist::enums::Direction get_future_direction(longfist::enums::Side side, longfist::enums::Offset offset)
     {
-        if ((side == longfist::enums::Side::Buy && offset == longfist::enums::Offset::Open) || (side == longfist::enums::Side::Sell && offset != longfist::enums::Offset::Open))
+        if ((side == longfist::enums::Side::Buy && offset == longfist::enums::Offset::Open) ||
+            (side == longfist::enums::Side::Sell && offset != longfist::enums::Offset::Open))
         {
             return longfist::enums::Direction::Long;
         } else
@@ -421,19 +422,58 @@ namespace kungfu::wingchun
         }
     }
 
-    inline uint32_t get_symbol_id(const char *symbol, const char *exchange)
+    inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType instrument_type,
+                                                    longfist::enums::Side side, longfist::enums::Offset offset)
     {
-        return yijinjing::util::hash_str_32(symbol) ^ yijinjing::util::hash_str_32(exchange);
+        using namespace longfist::enums;
+
+        if (instrument_type == InstrumentType::Stock or
+            instrument_type == InstrumentType::Bond or
+            instrument_type == InstrumentType::Fund or
+            instrument_type == InstrumentType::StockOption or
+            instrument_type == InstrumentType::TechStock or
+            instrument_type == InstrumentType::Index or
+            instrument_type == InstrumentType::Repo)
+        {
+            return Direction::Long;
+        }
+        if (side == Side::Buy and offset == Offset::Open)
+        {
+            return Direction::Long;
+        }
+        if (side == Side::Sell and
+            (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday))
+        {
+            return Direction::Long;
+        }
+        if (side == Side::Sell and offset == Offset::Open)
+        {
+            return Direction::Short;
+        }
+        if (side == Side::Buy and
+            (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday))
+        {
+            return Direction::Short;
+        }
+        throw wingchun_error(fmt::format("invalid direction args {} {} {}", (int) instrument_type, (int) side, (int) offset));
+    }
+
+    inline uint32_t get_symbol_id(const char *instrument_id, const char *exchange_id)
+    {
+        return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
     }
 
     inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order)
     {
         order.parent_id = input.parent_id;
         order.order_id = input.order_id;
+
         strcpy(order.instrument_id, input.instrument_id);
         strcpy(order.exchange_id, input.exchange_id);
         strcpy(order.source_id, input.source_id);
         strcpy(order.account_id, input.account_id);
+
+        order.instrument_type = input.instrument_type;
 
         order.limit_price = input.limit_price;
         order.frozen_price = input.frozen_price;

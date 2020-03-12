@@ -47,6 +47,12 @@ namespace kungfu::wingchun::broker
         enrolled_md_locations_.emplace(md_location->uid, true);
     }
 
+    bool Client::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id, const std::string &instrument_id) const
+    {
+        return is_all_subscribed(app_.get_location(md_location_uid)) or
+               instruments_.find(get_symbol_id(exchange_id.c_str(), instrument_id.c_str())) != instruments_.end();
+    }
+
     bool Client::is_subscribed(const location_ptr &md_location, const std::string &exchange_id, const std::string &instrument_id) const
     {
         return is_all_subscribed(md_location) or instruments_.find(get_symbol_id(exchange_id.c_str(), instrument_id.c_str())) != instruments_.end();

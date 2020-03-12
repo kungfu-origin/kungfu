@@ -295,11 +295,8 @@ namespace kungfu::yijinjing::practice
 
     void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid)
     {
-        if (is_location_live(location_uid))
-        {
-            registry_.erase(location_uid);
-            SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
-        }
+        registry_.erase(location_uid);
+        SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
     }
 
     void hero::register_channel(int64_t trigger_time, const Channel &channel)
@@ -311,12 +308,12 @@ namespace kungfu::yijinjing::practice
                     has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
     }
 
-    void hero::deregister_channel(uint32_t location_uid)
+    void hero::deregister_channel(uint32_t source_location_uid)
     {
         auto channel_it = channels_.begin();
         while (channel_it != channels_.end())
         {
-            if (channel_it->second.source_id == location_uid or channel_it->second.dest_id == location_uid)
+            if (channel_it->second.source_id == source_location_uid)
             {
                 const auto &channel_uid = channel_it->first;
                 const auto &channel = channel_it->second;

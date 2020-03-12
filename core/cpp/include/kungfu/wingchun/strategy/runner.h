@@ -18,12 +18,18 @@ namespace kungfu::wingchun::strategy
 
         virtual ~Runner() = default;
 
+        Context_ptr get_context() const;
+
         void add_strategy(const Strategy_ptr &strategy);
 
         void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
+        virtual void on_init_context();
+
     protected:
         std::vector<Strategy_ptr> strategies_;
+
+        void on_ready() override;
 
         void on_start() override;
 

@@ -3,12 +3,22 @@ import sys
 import importlib
 from pykungfu import yijinjing as pyyjj
 from pykungfu import wingchun as pywingchun
-from kungfu.data.sqlite.data_proxy import CommissionDB
-from kungfu.wingchun.book.book import AccountBook
-from kungfu.wingchun.constants import *
-from kungfu.wingchun.utils import get_product_id
+
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
+
+from kungfu.wingchun.book.book import AccountBook
+from kungfu.wingchun.book import accounting
+from kungfu.wingchun.utils import get_product_id
+
+
+class Runner(pywingchun.Runner):
+    def __init__(self, ctx, mode):
+        pywingchun.Runner.__init__(self, ctx.locator, ctx.group, ctx.name, mode, ctx.low_latency)
+        self.ctx = ctx
+
+    def on_init_context(self):
+        accounting.setup_bookkeeper(self.ctx, self.context.bookkeeper)
 
 
 class Strategy(pywingchun.Strategy):
@@ -28,7 +38,7 @@ class Strategy(pywingchun.Strategy):
         # location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
         # book = AccountBook(self.ctx, location)
         # self.ctx.books[location.uid] = book
-        # self.book_context.add_book(location, book)
+        # self.book_manager.add_book(location, book)
         # self.ctx.logger.info("added book {}@{}".format(account, source))
 
     def __get_account_book(self, source, account):
@@ -36,7 +46,7 @@ class Strategy(pywingchun.Strategy):
         return self.ctx.books[location.uid]
 
     def __get_inst_info(self, instrument_id):
-        return msg_utils.object_as_dict(self.book_context.get_inst_info(instrument_id))
+        return msg_utils.object_as_dict(self.book_manager.get_inst_info(instrument_id))
 
     def __get_commission_info(self, instrument_id):
         product_id = get_product_id(instrument_id).upper()
@@ -61,15 +71,14 @@ class Strategy(pywingchun.Strategy):
         self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
 
     def __init_commission_info(self):
-        print('init commission')
+        pass
         # config_location = self.ctx.config_location
         # self.ctx.commission_infos = {commission["product_id"]: commission for commission in
         #                              CommissionDB(config_location, "commission").all_commission_info()}
 
     def __init_book(self):
         location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
-        self.ctx.book = AccountBook(self.ctx, location)
-        self.book_context.add_book(location, self.ctx.book)
+        self.ctx.book = self.bookkeeper.get_book(location.uid)
 
     def __init_algo(self):
         class AlgoOrderContext:
@@ -100,7 +109,7 @@ class Strategy(pywingchun.Strategy):
     def pre_start(self, wc_context):
         self.ctx.logger.info("pre start")
         self.wc_context = wc_context
-        self.book_context = wc_context.book_context
+        self.bookkeeper = wc_context.bookkeeper
         self.algo_context = wc_context.algo_context
         self.ctx.now = wc_context.now
         self.ctx.add_timer = self.__add_timer

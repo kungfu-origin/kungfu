@@ -74,8 +74,8 @@ namespace kungfu::wingchun::strategy
         //@return              撤单操作ID
         virtual uint64_t cancel_order(uint64_t order_id);
 
-        virtual book::BookContext_ptr get_book_context() const
-        { return book_context_; };
+        book::Bookkeeper &get_bookkeeper()
+        { return bookkeeper_; }
 
         virtual algo::AlgoContext_ptr get_algo_context() const
         { return algo_context_; }
@@ -89,14 +89,14 @@ namespace kungfu::wingchun::strategy
 
     private:
         bool started_;
-        book::BookContext_ptr book_context_;
+        broker::Client broker_client_;
+        book::Bookkeeper bookkeeper_;
         algo::AlgoContext_ptr algo_context_;
         yijinjing::data::location_ptr ledger_location_;
         std::unordered_map<uint32_t, uint32_t> account_location_ids_;
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
         std::unordered_map<uint32_t, double> account_cash_limits_;
         std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
-        broker::Client broker_client_;
 
         uint32_t lookup_account_location_id(const std::string &account);
 

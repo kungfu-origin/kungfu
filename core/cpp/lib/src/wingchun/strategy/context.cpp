@@ -21,11 +21,11 @@ namespace kungfu::wingchun::strategy
 {
     Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events) :
             app_(app), events_(events), started_(false),
-            quotes_(app.get_state_map()[boost::hana::type_c<longfist::types::Quote>]),
-            book_context_(std::make_shared<book::BookContext>(app_, events_)),
+            broker_client_(app_),
+            bookkeeper_(app_, broker_client_),
             algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
-            ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())),
-            broker_client_(app_)
+            quotes_(app.get_state_map()[boost::hana::type_c<longfist::types::Quote>]),
+            ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator()))
     {
         log::copy_log_settings(app_.get_home(), app_.get_home()->name);
     }
@@ -33,6 +33,7 @@ namespace kungfu::wingchun::strategy
     void Context::on_start()
     {
         broker_client_.on_start(events_);
+        bookkeeper_.on_start(events_);
     }
 
     int64_t Context::now() const
@@ -134,10 +135,10 @@ namespace kungfu::wingchun::strategy
             SPDLOG_ERROR("account {} not ready", account);
             return 0;
         }
-        auto inst_type = get_instrument_type(symbol, exchange);
-        if (inst_type == InstrumentType::Unknown || inst_type == InstrumentType::Repo)
+        auto instrument_type = get_instrument_type(symbol, exchange);
+        if (instrument_type == InstrumentType::Unknown || instrument_type == InstrumentType::Repo)
         {
-            SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(inst_type), symbol, exchange);
+            SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(instrument_type), symbol, exchange);
             return 0;
         }
         auto writer = app_.get_writer(account_location_uid);
@@ -146,6 +147,7 @@ namespace kungfu::wingchun::strategy
         strcpy(input.instrument_id, symbol.c_str());
         strcpy(input.exchange_id, exchange.c_str());
         strcpy(input.account_id, account.c_str());
+        input.instrument_type = instrument_type;
         input.limit_price = limit_price;
         input.frozen_price = limit_price;
         input.volume = volume;

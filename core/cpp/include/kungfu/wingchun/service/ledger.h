@@ -21,7 +21,7 @@ namespace kungfu::wingchun::service
 
         virtual ~Ledger() = default;
 
-        book::BookContext_ptr get_book_context();
+        book::Bookkeeper &get_bookkeeper();
 
         void publish(const std::string &msg);
 
@@ -43,8 +43,6 @@ namespace kungfu::wingchun::service
 
         virtual void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) = 0;
 
-        virtual void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) = 0;
-
         virtual void pre_start() = 0;
 
     protected:
@@ -58,10 +56,26 @@ namespace kungfu::wingchun::service
 
         yijinjing::nanomsg::socket_ptr pub_sock_;
         broker::Client broker_client_;
-        book::BookContext_ptr book_context_;
+        book::Bookkeeper bookkeeper_;
 
         std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
         std::unordered_map<uint64_t, state<longfist::types::OrderStat>> &order_stats_;
+
+        template <typename DataType>
+        void write_book(int64_t trigger_time, const uint32_t location_uid, const DataType &data)
+        {
+            auto &book = bookkeeper_.get_book(location_uid);
+            const auto &position = book.get_position(data);
+            write_to(trigger_time, position, location_uid);
+            write_to(trigger_time, book.asset, location_uid);
+        }
+
+        template <typename DataType>
+        void write_book(const event_ptr &event, const DataType &data)
+        {
+            write_book(event->gen_time(), event->source(), data);
+            write_book(event->gen_time(), event->dest(), data);
+        }
     };
 }
 

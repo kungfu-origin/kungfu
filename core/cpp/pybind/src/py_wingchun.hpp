@@ -23,8 +23,9 @@
 #include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/algo/algo.h>
 
-PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::Position>)
-PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::PositionDetail>)
+PYBIND11_MAKE_OPAQUE(std::unordered_map<uint32_t, kungfu::longfist::types::Position>)
+PYBIND11_MAKE_OPAQUE(std::unordered_map<uint32_t, kungfu::longfist::types::PositionDetail>)
+PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::Order>)
 
 namespace kungfu::wingchun
 {
@@ -39,63 +40,67 @@ namespace kungfu::wingchun
     using namespace kungfu::wingchun::broker;
     using namespace kungfu::wingchun::service;
 
-    class PyMarketData: public MarketData
+    class PyMarketData : public MarketData
     {
     public:
         using MarketData::MarketData;
+
         bool subscribe(const std::vector<Instrument> &instruments) override
-        { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments); }
+        {PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments); }
+
         bool subscribe_all() override
-        { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe_all); }
+        {PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe_all); }
+
         bool unsubscribe(const std::vector<Instrument> &instruments) override
-        { PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe,instruments); }
+        {PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe, instruments); }
+
         void on_start() override
-        {PYBIND11_OVERLOAD(void, MarketData, on_start, );}
+        {PYBIND11_OVERLOAD(void, MarketData, on_start,); }
     };
 
-    class PyTrader: public Trader
+    class PyTrader : public Trader
     {
     public:
         using Trader::Trader;
+
         const AccountType get_account_type() const override
-        { PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type,); }
+        {PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type,); }
+
         bool insert_order(const kungfu::event_ptr &event) override
-        { PYBIND11_OVERLOAD_PURE(bool, Trader, insert_order, event); }
+        {PYBIND11_OVERLOAD_PURE(bool, Trader, insert_order, event); }
+
         bool cancel_order(const kungfu::event_ptr &event) override
-        { PYBIND11_OVERLOAD_PURE(bool, Trader, cancel_order, event); }
+        {PYBIND11_OVERLOAD_PURE(bool, Trader, cancel_order, event); }
+
         bool req_position() override
-        { PYBIND11_OVERLOAD_PURE(bool, Trader, req_position,); }
+        {PYBIND11_OVERLOAD_PURE(bool, Trader, req_position,); }
+
         bool req_account() override
-        { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account,); }
+        {PYBIND11_OVERLOAD_PURE(bool, Trader, req_account,); }
+
         void on_start() override
-        {PYBIND11_OVERLOAD(void, Trader, on_start, );}
+        {PYBIND11_OVERLOAD(void, Trader, on_start,); }
     };
 
-    class PyBook: public kwb::Book
+    class PyAccountingMethod : public kwb::AccountingMethod
     {
     public:
-        using kwb::Book::Book;
-        [[nodiscard]] uint32_t get_location_uid() const override
-        {PYBIND11_OVERLOAD_PURE(uint32_t , kwb::Book, get_location_uid, py::const_); }
-        void on_trading_day(const event_ptr &event, int64_t daytime) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
-        void on_quote(const event_ptr &event, const Quote &quote) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_quote, event, quote); }
-        void on_order_input(const event_ptr &event, const OrderInput &input) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order_input, event, input); }
-        void on_order(const event_ptr &event, const Order &order) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_order, event, order); }
-        void on_trade(const event_ptr &event, const Trade &trade) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trade, event, trade); }
-        void on_positions(const std::vector<Position>& positions) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_positions, positions); }
-        void on_position_details(const std::vector<PositionDetail>& position_details) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_position_details, position_details); }
-        void on_asset(const event_ptr &event, const Asset& asset) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_asset, event, asset); }
+        using kwb::AccountingMethod::AccountingMethod;
+
+        void apply_quote(const kwb::Book &book, const Quote &quote) override
+        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_quote, book, quote); }
+
+        void apply_order_input(const kwb::Book &book, const OrderInput &input) override
+        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_order_input, book, input); }
+
+        void apply_order(const kwb::Book &book, const Order &order) override
+        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_order, book, order); }
+
+        void apply_trade(const kwb::Book &book, const Trade &trade) override
+        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_trade, book, trade); }
     };
 
-    class PyAlgoOrder: public algo::AlgoOrder
+    class PyAlgoOrder : public algo::AlgoOrder
     {
         using algo::AlgoOrder::AlgoOrder;
 
@@ -108,25 +113,28 @@ namespace kungfu::wingchun
         void on_stop(algo::AlgoContext_ptr context) override
         {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_stop, context); }
 
-        void on_child_order(algo::AlgoContext_ptr context, const Order& order) override
+        void on_child_order(algo::AlgoContext_ptr context, const Order &order) override
         {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_order, context, order); }
 
-        void on_child_trade(algo::AlgoContext_ptr context, const Trade& trade) override
+        void on_child_trade(algo::AlgoContext_ptr context, const Trade &trade) override
         {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_child_trade, context, trade); }
 
-        void on_order_report(algo::AlgoContext_ptr context, const std::string& report_msg) override
+        void on_order_report(algo::AlgoContext_ptr context, const std::string &report_msg) override
         {PYBIND11_OVERLOAD(void, algo::AlgoOrder, on_order_report, context, report_msg); }
 
     };
 
-    class PyAlgoService: public service::Algo
+    class PyAlgoService : public service::Algo
     {
         using service::Algo::Algo;
-        void insert_order(const event_ptr &event, const std::string& msg) override
+
+        void insert_order(const event_ptr &event, const std::string &msg) override
         {PYBIND11_OVERLOAD_PURE(void, service::Algo, insert_order, event, msg) }
-        void cancel_order(const event_ptr &event, const OrderAction& action) override
+
+        void cancel_order(const event_ptr &event, const OrderAction &action) override
         {PYBIND11_OVERLOAD_PURE(void, service::Algo, cancel_order, event, action) }
-        void modify_order(const event_ptr &event, const std::string& msg) override
+
+        void modify_order(const event_ptr &event, const std::string &msg) override
         {PYBIND11_OVERLOAD_PURE(void, service::Algo, modify_order, event, msg) }
     };
 
@@ -147,9 +155,6 @@ namespace kungfu::wingchun
         void on_trading_day(const event_ptr &event, int64_t daytime) override
         {PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime); }
 
-        void on_app_location(int64_t trigger_time, const yijinjing::data::location_ptr &app_location) override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, on_app_location, trigger_time, app_location) }
-
         void pre_start() override
         {PYBIND11_OVERLOAD_PURE(void, Ledger, pre_start) }
     };
@@ -161,6 +166,9 @@ namespace kungfu::wingchun
 
         void on_trading_day(const event_ptr &event, int64_t daytime) override
         {PYBIND11_OVERLOAD(void, strategy::Runner, on_trading_day, event, daytime); }
+
+        void on_init_context() override
+        {PYBIND11_OVERLOAD(void, strategy::Runner, on_init_context); }
     };
 
     class PyStrategy : public strategy::Strategy
@@ -208,8 +216,9 @@ namespace kungfu::wingchun
 
     void bind(pybind11::module &&m)
     {
-        py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::Position>>(m, "PositionMap", py::module_local(false));
-        py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::PositionDetail>>(m, "PositionDetailMap", py::module_local(false));
+        py::bind_map<std::unordered_map<uint32_t, kungfu::longfist::types::Position>>(m, "PositionMap");
+        py::bind_map<std::unordered_map<uint32_t, kungfu::longfist::types::PositionDetail>>(m, "PositionDetailMap");
+        py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::Order>>(m, "OrderMap");
 
         auto m_utils = m.def_submodule("utils");
         m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
@@ -223,32 +232,34 @@ namespace kungfu::wingchun
             return order;
         });
 
-        py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
-                .def(py::init())
-                .def_readonly("asset", &kwb::Book::asset)
+        auto book_class = py::class_<kwb::Book, kwb::Book_ptr>(m, "Book");
+        book_class.def_readonly("asset", &kwb::Book::asset)
                 .def_readonly("long_positions", &kwb::Book::long_positions)
                 .def_readonly("long_position_details", &kwb::Book::long_position_details)
                 .def_readonly("short_positions", &kwb::Book::short_positions)
                 .def_readonly("short_position_details", &kwb::Book::short_position_details)
-                .def("get_location_uid", &kwb::Book::get_location_uid)
-                .def("on_trading_day", &kwb::Book::on_trading_day)
-                .def("on_quote", &kwb::Book::on_quote)
-                .def("on_order_input", &kwb::Book::on_order_input)
-                .def("on_order", &kwb::Book::on_order)
-                .def("on_trade", &kwb::Book::on_trade)
-                .def("on_positions", &kwb::Book::on_positions)
-                .def("on_position_details", &kwb::Book::on_position_details)
-                .def("on_asset", &kwb::Book::on_asset)
-                ;
+                .def_readonly("orders", &kwb::Book::orders)
+                .def("get_long_position", &kwb::Book::get_long_position)
+                .def("get_short_position", &kwb::Book::get_short_position);
+        book_class.def("get_position", py::overload_cast<const OrderInput &>(&kwb::Book::get_position<OrderInput>));
+        book_class.def("get_position", py::overload_cast<const Order &>(&kwb::Book::get_position<Order>));
+        book_class.def("get_position", py::overload_cast<const Trade &>(&kwb::Book::get_position<Trade>));
 
-        py::class_<kwb::BookContext, std::shared_ptr<kwb::BookContext>>(m, "BookContext")
-                .def("add_book", &kwb::BookContext::add_book)
-                .def("pop_book", &kwb::BookContext::pop_book)
-                .def("get_inst_info", &kwb::BookContext::get_inst_info)
-                ;
+        py::class_<kwb::AccountingMethod, PyAccountingMethod, kwb::AccountingMethod_ptr>(m, "AccountingMethod")
+                .def(py::init<>())
+                .def("apply_quote", &kwb::AccountingMethod::apply_quote)
+                .def("apply_order_input", &kwb::AccountingMethod::apply_order_input)
+                .def("apply_order", &kwb::AccountingMethod::apply_order)
+                .def("apply_trade", &kwb::AccountingMethod::apply_trade);
+
+        py::class_<kwb::Bookkeeper, std::shared_ptr<kwb::Bookkeeper>>(m, "Bookkeeper")
+                .def_property_readonly("books", &kwb::Bookkeeper::get_books)
+                .def("get_book", &kwb::Bookkeeper::get_book)
+                .def("set_accounting_method", &kwb::Bookkeeper::set_accounting_method)
+                .def("get_inst_info", &kwb::Bookkeeper::get_inst_info);
 
         py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
-                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string&>())
+                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &>())
                 .def_property_readonly("io_device", &MarketData::get_io_device)
                 .def("subscribe", &MarketData::subscribe)
                 .def("subscribe_all", &MarketData::subscribe_all)
@@ -261,7 +272,7 @@ namespace kungfu::wingchun
                 .def("run", &MarketData::run);
 
         py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
-                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string&, const std::string&>())
+                .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &, const std::string &>())
                 .def_property_readonly("io_device", &Trader::get_io_device)
                 .def("on_start", &Trader::on_start)
                 .def("get_writer", &Trader::get_writer)
@@ -277,7 +288,7 @@ namespace kungfu::wingchun
                 .def_property_readonly("config_location", &Ledger::get_config_location)
                 .def_property_readonly("io_device", &Ledger::get_io_device)
                 .def_property_readonly("usable", &Ledger::is_usable)
-                .def_property_readonly("book_context", &Ledger::get_book_context)
+                .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper)
                 .def_property_readonly("instruments", &Ledger::get_instruments)
                 .def("now", &Ledger::now)
                 .def("set_begin_time", &Ledger::set_begin_time)
@@ -296,7 +307,6 @@ namespace kungfu::wingchun
                 .def("handle_instrument_request", &Ledger::handle_instrument_request)
                 .def("handle_asset_request", &Ledger::handle_asset_request)
                 .def("on_trading_day", &Ledger::on_trading_day)
-                .def("on_app_location", &Ledger::on_app_location)
                 .def("pre_start", &Ledger::pre_start)
                 .def("add_timer", &Ledger::add_timer)
                 .def("add_time_interval", &Ledger::add_time_interval)
@@ -304,6 +314,7 @@ namespace kungfu::wingchun
 
         py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(m, "Runner")
                 .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &, longfist::enums::mode, bool>())
+                .def_property_readonly("context", &strategy::Runner::get_context)
                 .def("set_begin_time", &strategy::Runner::set_begin_time)
                 .def("set_end_time", &strategy::Runner::set_end_time)
                 .def("run", &strategy::Runner::run)
@@ -311,7 +322,7 @@ namespace kungfu::wingchun
                 .def("add_strategy", &strategy::Runner::add_strategy);
 
         py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
-                .def_property_readonly("book_context", &strategy::Context::get_book_context)
+                .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper)
                 .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
                 .def("now", &strategy::Context::now)
                 .def("add_timer", &strategy::Context::add_timer)
@@ -321,10 +332,11 @@ namespace kungfu::wingchun
                 .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
                 .def("subscribe", &strategy::Context::subscribe)
                 .def("subscribe_all", &strategy::Context::subscribe_all)
-                .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),py::arg("limit_price"),
-                     py::arg("volume"), py::arg("type"), py::arg("side"),py::arg("offset") =Offset::Open, py::arg("hedge_flag")= HedgeFlag::Speculation)
-                .def("cancel_order", &strategy::Context::cancel_order)
-                ;
+                .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),
+                     py::arg("limit_price"),
+                     py::arg("volume"), py::arg("type"), py::arg("side"), py::arg("offset") = Offset::Open,
+                     py::arg("hedge_flag") = HedgeFlag::Speculation)
+                .def("cancel_order", &strategy::Context::cancel_order);
 
         py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
                 .def(py::init())
@@ -349,8 +361,7 @@ namespace kungfu::wingchun
                 .def("on_quote", &algo::AlgoOrder::on_quote)
                 .def("on_child_order", &algo::AlgoOrder::on_child_order)
                 .def("on_child_trade", &algo::AlgoOrder::on_child_trade)
-                .def("on_order_report", &algo::AlgoOrder::on_order_report)
-                ;
+                .def("on_order_report", &algo::AlgoOrder::on_order_report);
 
         py::class_<algo::AlgoContext, std::shared_ptr<algo::AlgoContext>>(m, "AlgoContext")
                 .def("insert_child_order", &algo::AlgoContext::insert_order)
@@ -371,11 +382,10 @@ namespace kungfu::wingchun
                 .def("add_order", &service::Algo::add_order)
                 .def("insert_order", &service::Algo::insert_order)
                 .def("cancel_order", &service::Algo::cancel_order)
-                .def("modify_order", &service::Algo::modify_order)
-                ;
+                .def("modify_order", &service::Algo::modify_order);
 
         py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
-                .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool, std::string&>())
+                .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool, std::string &>())
                 .def("run", &service::BarGenerator::run);
     }
 }

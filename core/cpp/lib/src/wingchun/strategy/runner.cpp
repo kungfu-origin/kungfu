@@ -23,6 +23,11 @@ namespace kungfu::wingchun::strategy
             : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency)
     {}
 
+    Context_ptr Runner::get_context() const
+    {
+        return context_;
+    }
+
     Context_ptr Runner::make_context()
     {
         return std::make_shared<Context>(*this, events_);
@@ -41,10 +46,17 @@ namespace kungfu::wingchun::strategy
         }
     }
 
-    void Runner::on_start()
+    void Runner::on_init_context()
+    {}
+
+    void Runner::on_ready()
     {
         context_ = make_context();
+        on_init_context();
+    }
 
+    void Runner::on_start()
+    {
         for (const auto &strategy : strategies_)
         {
             strategy->pre_start(context_);
@@ -72,7 +84,6 @@ namespace kungfu::wingchun::strategy
         events_ | is_own<Quote>(context_) |
         $([&](const event_ptr &event)
           {
-              context_->book_context_->on_quote(event, event->data<Quote>());
               for (const auto &strategy : strategies_)
               {
                   strategy->on_quote(context_, event->data<Quote>());
@@ -109,7 +120,6 @@ namespace kungfu::wingchun::strategy
         events_ | is(Order::tag) |
         $([&](const event_ptr &event)
           {
-              context_->book_context_->on_order(event, event->data<Order>());
               for (const auto &strategy : strategies_)
               {
                   strategy->on_order(context_, event->data<Order>());
@@ -128,23 +138,10 @@ namespace kungfu::wingchun::strategy
         events_ | is(Trade::tag) |
         $([&](const event_ptr &event)
           {
-              context_->book_context_->on_trade(event, event->data<Trade>());
               for (const auto &strategy : strategies_)
               {
                   strategy->on_trade(context_, event->data<Trade>());
               }
-          });
-
-        events_ | is(Asset::tag) |
-        $([&](const event_ptr &event)
-          {
-              context_->book_context_->on_asset(event, event->data<Asset>());
-          });
-
-        events_ | is(TradingDay::tag) |
-        $([&](const event_ptr &event)
-          {
-              context_->book_context_->on_trading_day(event, event->data<TradingDay>().timestamp);
           });
 
         context_->on_start();

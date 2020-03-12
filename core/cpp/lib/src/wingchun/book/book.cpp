@@ -4,7 +4,6 @@
 
 #include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/book/book.h>
-#include <kungfu/yijinjing/log/setup.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist::types;
@@ -14,36 +13,29 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::book
 {
-    BookContext::BookContext(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events) :
-            app_(app), events_(events), instruments_(), books_()
+
+    longfist::types::Position Book::get_long_position(const longfist::types::Quote &quote)
     {
-        this->monitor_instruments();
+        return get_position(Direction::Long, quote);
     }
 
-    void BookContext::add_book(const yijinjing::data::location_ptr &location, const Book_ptr &book)
+    longfist::types::Position Book::get_short_position(const longfist::types::Quote &quote)
     {
-        if (books_.find(location->uid) != books_.end())
-        {
-            return;
-        }
-
-        if (location->category != category::TD and location->category != category::STRATEGY)
-        {
-            throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
-        }
-
-        books_.emplace(location->uid, book);
-
-        this->monitor_positions(location, book);
-        this->monitor_position_details(location, book);
+        return get_position(Direction::Short, quote);
     }
 
-    void BookContext::pop_book(uint32_t location_uid)
+    Bookkeeper::Bookkeeper(apprentice &app, const broker::Client &broker_client) :
+            app_(app), broker_client_(broker_client), instruments_(), books_()
+    {}
+
+    Book &Bookkeeper::get_book(uint32_t uid)
     {
-        books_.erase(location_uid);
+        auto &result = books_[uid];
+        result.asset.holder_uid = uid;
+        return result;
     }
 
-    const Instrument &BookContext::get_inst_info(const std::string &instrument_id) const
+    const Instrument &Bookkeeper::get_inst_info(const std::string &instrument_id) const
     {
         auto id = yijinjing::util::hash_str_32(instrument_id);
         if (this->instruments_.find(id) == this->instruments_.end())
@@ -53,7 +45,7 @@ namespace kungfu::wingchun::book
         return this->instruments_.at(id);
     }
 
-    std::vector<Instrument> BookContext::all_inst_info() const
+    std::vector<Instrument> Bookkeeper::all_inst_info() const
     {
         std::vector<Instrument> res(instruments_.size());
         transform(instruments_.begin(), instruments_.end(), res.begin(), [](auto kv)
@@ -61,180 +53,58 @@ namespace kungfu::wingchun::book
         return res;
     }
 
-    std::vector<Book_ptr> BookContext::get_books()
+    std::vector<Book> Bookkeeper::get_books()
     {
-        std::vector<Book_ptr> result(books_.size());
+        std::vector<Book> result(books_.size());
         auto selector = [](auto pair)
         { return pair.second; };
         std::transform(books_.begin(), books_.end(), result.begin(), selector);
         return result;
-    };
-
-    void BookContext::on_quote(const event_ptr &event, const longfist::types::Quote &quote)
-    {
-        for (const auto &item: books_)
-        {
-            item.second->on_quote(event, quote);
-        }
     }
 
-    void BookContext::on_trade(const event_ptr &event, const longfist::types::Trade &trade)
+    void Bookkeeper::set_accounting_method(longfist::enums::InstrumentType instrument_type, AccountingMethod_ptr accounting_method)
     {
-        for (const auto &item: books_)
-        {
-            if (item.first == event->source())
-            {
-                item.second->on_trade(event, trade);
-            }
-        }
+        accounting_methods_.emplace(instrument_type, accounting_method);
     }
 
-    void BookContext::on_order(const event_ptr &event, const longfist::types::Order &order)
+    void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events)
     {
-        for (const auto &item: books_)
-        {
-            if (item.first == event->source())
-            {
-                item.second->on_order(event, order);
-            }
-        }
-    }
+        events | is_own<Quote>(broker_client_) |
+        $([&](const event_ptr &event)
+          {
+              const Quote &data = event->data<Quote>();
+              auto accounting_method = accounting_methods_.at(data.instrument_type);
+              for (const auto &item: books_)
+              {
+                  accounting_method->apply_quote(item.second, data);
+              }
+          });
 
-    void BookContext::on_order_input(const event_ptr &event, const longfist::types::OrderInput &input)
-    {
-        for (const auto &item: books_)
-        {
-            if (item.first == event->source())
-            {
-                item.second->on_order_input(event, input);
-            }
-        }
-    }
+        events | is(OrderInput::tag) |
+        $([&](const event_ptr &event)
+          {
+              const OrderInput &data = event->data<OrderInput>();
+              auto accounting_method = accounting_methods_.at(data.instrument_type);
+              accounting_method->apply_order_input(get_book(event->source()), data);
+              accounting_method->apply_order_input(get_book(event->dest()), data);
+          });
 
-    void BookContext::on_asset(const event_ptr &event, const longfist::types::Asset &asset)
-    {
-        for (const auto &item: books_)
-        {
-            if (item.first == event->dest())
-            {
-                item.second->on_asset(event, asset);
-            }
-        }
-    }
+        events | is(Order::tag) |
+        $([&](const event_ptr &event)
+          {
+              const Order &data = event->data<Order>();
+              auto accounting_method = accounting_methods_.at(data.instrument_type);
+              accounting_method->apply_order(get_book(event->source()), data);
+              accounting_method->apply_order(get_book(event->dest()), data);
+          });
 
-    void BookContext::on_trading_day(const event_ptr &event, int64_t daytime)
-    {
-        for (const auto &item: books_)
-        {
-            item.second->on_trading_day(event, daytime);
-        }
-    }
-
-    void BookContext::monitor_instruments()
-    {
-        auto insts = events_ | to(app_.get_live_home_uid()) | take_while([&](const event_ptr &event)
-                                                                         {
-                                                                             return event->msg_type() != InstrumentEnd::tag;
-                                                                         }) | is(Instrument::tag) | reduce(std::vector<Instrument>(),
-                                                                                                           [](std::vector<Instrument> res,
-                                                                                                              event_ptr event)
-                                                                                                           {
-                                                                                                               res.push_back(
-                                                                                                                       event->data<Instrument>());
-                                                                                                               return res;
-                                                                                                           }) | as_dynamic();
-
-        insts.subscribe([&](std::vector<Instrument> res)
-                        {
-                            if (!this->app_.is_live())
-                            { return; }
-                            SPDLOG_INFO("instrument info updated, size: {}", res.size());
-                            this->instruments_.clear();
-                            for (const auto &inst: res)
-                            {
-                                auto id = yijinjing::util::hash_str_32(inst.instrument_id);
-                                this->instruments_[id] = inst;
-                            }
-                            this->monitor_instruments();
-                        });
-    }
-
-    void BookContext::monitor_positions(const location_ptr &location, const Book_ptr &book)
-    {
-        auto positions = events_ | take_while([=](const event_ptr &event)
-                                              {
-                                                  return event->msg_type() != PositionEnd::tag or
-                                                         event->data<PositionEnd>().holder_uid != location->uid;
-                                              }) | is(Position::tag) |
-                         reduce(std::vector<Position>(), [=](std::vector<Position> res, event_ptr event)
-                         {
-                             const auto &position = event->data<Position>();
-                             if (position.holder_uid == location->uid)
-                             {
-                                 res.push_back(event->data<Position>());
-                             }
-                             return res;
-                         }) | as_dynamic();
-
-        positions.subscribe([=](std::vector<Position> res)
-                            {
-                                if (!this->app_.is_live())
-                                { return; }
-                                try
-                                {
-                                    book->on_positions(res);
-                                    this->monitor_positions(location, book);
-                                }
-                                catch (const std::exception &e)
-                                {
-                                    SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                }
-                            },
-                            [=](std::exception_ptr e)
-                            {
-                                try
-                                { std::rethrow_exception(e); }
-                                catch (const rx::empty_error &ex)
-                                { SPDLOG_WARN("{}", ex.what()); }
-                                catch (const std::exception &ex)
-                                { SPDLOG_WARN("Unexpected exception {}", ex.what()); }
-                            });
-    }
-
-    void BookContext::monitor_position_details(const location_ptr &location, const Book_ptr &book)
-    {
-        auto positions = events_ | take_while([=](const event_ptr &event)
-                                              {
-                                                  return event->msg_type() != PositionDetailEnd::tag or
-                                                         event->data<PositionDetailEnd>().holder_uid != location->uid;
-                                              }) | is(PositionDetail::tag) |
-                         reduce(std::vector<PositionDetail>(), [](std::vector<PositionDetail> res, event_ptr event)
-                         {
-                             res.push_back(event->data<PositionDetail>());
-                             return res;
-                         }) | as_dynamic();
-
-        positions.subscribe([=](std::vector<PositionDetail> res)
-                            {
-                                if (!this->app_.is_live())
-                                { return; }
-                                try
-                                {
-                                    book->on_position_details(res);
-                                    this->monitor_position_details(location, book);
-                                } catch (const std::exception &e)
-                                {
-                                    SPDLOG_ERROR("Unexpected exception {}", e.what());
-                                }
-                            },
-                            [=](std::exception_ptr e)
-                            {
-                                try
-                                { std::rethrow_exception(e); }
-                                catch (const rx::empty_error &ex)
-                                { SPDLOG_WARN("{}", ex.what()); }
-                                catch (const std::exception &ex)
-                                { SPDLOG_WARN("Unexpected exception {}", ex.what()); }
-                            });
+        events | is(Trade::tag) |
+        $([&](const event_ptr &event)
+          {
+              const Trade &data = event->data<Trade>();
+              auto accounting_method = accounting_methods_.at(data.instrument_type);
+              accounting_method->apply_trade(get_book(event->source()), data);
+              accounting_method->apply_trade(get_book(event->dest()), data);
+          });
     }
 }

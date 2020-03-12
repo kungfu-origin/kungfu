@@ -19,7 +19,7 @@ def pre_start(context):
     context.subscribe(source, ["600000", "601988"], exchange)
 
 def on_quote(context, quote):
-    context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
+    # context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
     side = random.choice([Side.Buy, Side.Sell])
     price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
     price_type = random.choice([PriceType.Any, PriceType.Limit])
@@ -34,7 +34,9 @@ def on_entrust(context, entrust):
     pass
 
 def on_order(context, order):
-    context.log.info('order received: [instrument_id]{} [volume]{} [price]{} {}'.format(order.instrument_id, order.volume, order.limit_price, order.error_msg))
+    context.log.info('order received')
+    # context.log.info('order received: [instrument_id]{} [volume]{} [price]{} {}'.format(order.instrument_id, order.volume, order.limit_price, order.error_msg))
 
 def on_trade(context, trade):
-    context.log.info('trade received: {} [trade_id]{} [volume]{} [price]{}'.format(kft.strftime(trade.trade_time), trade.order_id, trade.volume, trade.price))
+    context.log.info('trade received')
+    # context.log.info('trade received: {} [trade_id]{} [volume]{} [price]{}'.format(trade.trading_day, trade.order_id, trade.volume, trade.price))

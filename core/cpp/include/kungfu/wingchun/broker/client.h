@@ -24,6 +24,8 @@ namespace kungfu::wingchun::broker
 
         void subscribe_all(const yijinjing::data::location_ptr &md_location);
 
+        [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id, const std::string &instrument_id) const;
+
         [[nodiscard]] bool is_subscribed(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id, const std::string &instrument_id) const;
 
         [[nodiscard]] bool is_all_subscribed(const yijinjing::data::location_ptr &md_location) const;
