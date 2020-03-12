@@ -123,11 +123,7 @@ class AccountBook(pywingchun.Book):
         instrument_type = wc_utils.get_instrument_type(input.instrument_id, input.exchange_id)
         direction = wc_utils.get_position_effect(instrument_type, input.side, input.offset)
         position = self._get_position(input.instrument_id, input.exchange_id, direction)
-        try:
-            position.apply_order_input(input)
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('apply order input error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+        position.apply_order_input(input)
 
     def on_order(self, event, order):
         self.ctx.logger.debug("{} received order event: {}".format(self.location.uname, order))
@@ -136,24 +132,17 @@ class AccountBook(pywingchun.Book):
         instrument_type = wc_utils.get_instrument_type(order.instrument_id, order.exchange_id)
         direction = wc_utils.get_position_effect(instrument_type, order.side, order.offset)
         position = self._get_position(order.instrument_id, order.exchange_id, direction)
-        try:
-            position.apply_order(order)
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('apply order error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+        position.apply_order(order)
+        self.subject.on_next(self.event)
 
     def on_trade(self, event, trade):
         self.ctx.logger.debug("{} received trade event: {}".format(self.location.uname, trade))
         instrument_type = wc_utils.get_instrument_type(trade.instrument_id, trade.exchange_id)
         direction = wc_utils.get_position_effect(instrument_type, trade.side, trade.offset)
-        try:
-            self._get_position(trade.instrument_id, trade.exchange_id, direction).apply_trade(trade)
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('apply trade error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+        self._get_position(trade.instrument_id, trade.exchange_id, direction).apply_trade(trade)
+        self.subject.on_next(self.event)
 
     def on_asset(self, event, asset):
-        self.ctx.logger.info("on asset python")
         self.ctx.logger.info("{} [{:08x}] asset report received, msg_type: {}, data: {}".
                              format(self.location.uname, self.location.uid, event.msg_type, asset))
         self.avail = asset.avail
@@ -195,7 +184,10 @@ class AccountBook(pywingchun.Book):
 
     @property
     def active_orders(self):
-        return list([order for order in self._orders.values() if order.status in [pykungfu.longfist.enums.OrderStatus.Submitted, pykungfu.longfist.enums.OrderStatus.Pending, pykungfu.longfist.enums.OrderStatus.PartialFilledActive] ])
+        return list([order for order in self._orders.values() if order.status in [
+            pykungfu.longfist.enums.OrderStatus.Submitted, pykungfu.longfist.enums.OrderStatus.Pending,
+            pykungfu.longfist.enums.OrderStatus.PartialFilledActive
+        ]])
 
     @property
     def total_cash(self):
@@ -225,7 +217,7 @@ class AccountBook(pywingchun.Book):
 
     @property
     def event(self):
-        data = pykungfu.longfist.types.Asset()        
+        data = pykungfu.longfist.types.Asset()
         data.avail = self.avail
         data.margin = self.margin
         data.market_value = self.market_value

@@ -24,7 +24,7 @@ namespace kungfu::wingchun::strategy
             book_context_(std::make_shared<book::BookContext>(app_, events_)),
             algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
             ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())),
-            subscription_(app_)
+            broker_client_(app_)
     {
         log::copy_log_settings(app_.get_home(), app_.get_home()->name);
     }
@@ -43,7 +43,7 @@ namespace kungfu::wingchun::strategy
               connect_account(event->data<Register>());
           });
 
-        subscription_.subscribe(events_);
+        broker_client_.subscribe(events_);
     }
 
     int64_t Context::now() const
@@ -122,7 +122,7 @@ namespace kungfu::wingchun::strategy
 
     void Context::subscribe_all(const std::string &source)
     {
-        subscription_.add_all(find_marketdata(source));
+        broker_client_.add_all(find_marketdata(source));
     }
 
     void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
@@ -130,7 +130,7 @@ namespace kungfu::wingchun::strategy
         auto md_location = find_marketdata(source);
         for (const auto &symbol: symbols)
         {
-            subscription_.add(md_location, exchange, symbol);
+            broker_client_.add(md_location, exchange, symbol);
         }
     }
 

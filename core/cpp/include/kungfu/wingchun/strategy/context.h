@@ -9,7 +9,7 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 #include <kungfu/wingchun/common.h>
-#include <kungfu/wingchun/broker/marketdata.h>
+#include <kungfu/wingchun/broker/client.h>
 #include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/algo/algo.h>
 #include <kungfu/wingchun/strategy/strategy.h>
@@ -100,7 +100,7 @@ namespace kungfu::wingchun::strategy
         bool is_subscribed(const event_ptr &event)
         {
             const DataType &data = event->data<DataType>();
-            return subscription_.is_subscribed(app_.get_location(event->source()), data.exchange_id, data.instrument_id);
+            return broker_client_.is_subscribed(app_.get_location(event->source()), data.exchange_id, data.instrument_id);
         }
 
     private:
@@ -109,7 +109,7 @@ namespace kungfu::wingchun::strategy
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
         std::unordered_map<uint32_t, double> account_cash_limits_;
         std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
-        broker::Subscription subscription_;
+        broker::Client broker_client_;
 
         void connect_account(const longfist::types::Register& register_data);
 

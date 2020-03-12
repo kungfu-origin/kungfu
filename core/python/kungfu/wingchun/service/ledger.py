@@ -93,7 +93,7 @@ class Ledger(pywingchun.Ledger):
             self.book_context.add_book(location, book)
 
     def on_book_event(self, event):
-        self.get_writer(0).write(0, event.data)
+        self.get_writer(event.data.holder_uid).write(0, event.data)
         self.ctx.logger.debug("book event received: {}".format(event))
 
     def has_book(self, uid):

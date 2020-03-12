@@ -142,9 +142,7 @@ class StockPosition(Position):
         return 0.0
 
     def apply_order_input(self, input):
-        if input.side == Side.Sell:
-            if self.sellable < input.volume:
-                raise ValueError("{} to sell, but {} sellable for {}.{}".format(input.volume, self.sellable, self.instrument_id, self.exchange_id))
+        if input.side == Side.Sell and self.sellable >= input.volume:
             self.frozen_total += input.volume
             self.frozen_yesterday += input.volume
         elif input.side == Side.Buy:
@@ -197,9 +195,11 @@ class StockPosition(Position):
 
     def _apply_sell(self, trade):
         if self.yesterday_volume < trade.volume:
-            raise ValueError("{} current yesterday volume is {}, {} to sell".format(self.uname, self.yesterday_volume, trade.volume))
+            self.ctx.logger.error("{} current yesterday volume is {}, {} to sell".format(self.uname, self.yesterday_volume, trade.volume))
+            return
         if self.frozen_total < trade.volume:
-            raise ValueError("{} current frozen volume is {}, {} to sell".format(self.uname, self.frozen_total, trade.volume))
+            self.ctx.logger.error("{} current frozen volume is {}, {} to sell".format(self.uname, self.frozen_total, trade.volume))
+            return
         realized_pnl = self._calculate_realized_pnl(trade.price, trade.volume)
         commission = self._calculate_commission(trade)
         tax = self._calculate_tax(trade)
@@ -312,6 +312,10 @@ class FuturePosition(Position):
         return self.volume - self.yesterday_volume
 
     @property
+    def today_frozen(self):
+        return self.volume - self.frozen_yesterday
+
+    @property
     def frozen_today(self):
         return self.frozen_total - self.frozen_yesterday
 
@@ -404,6 +408,7 @@ class FuturePosition(Position):
         self.book.subject.on_next(self.event)
 
     def apply_quote(self, quote):
+        self.ctx.logger.error(f"apply quote for position {self.instrument_id}")
         if is_valid_price(quote.settlement_price):
             self.settlement_price = quote.settlement_price
             pre_margin = self.margin

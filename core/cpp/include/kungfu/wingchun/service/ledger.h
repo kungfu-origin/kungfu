@@ -9,7 +9,7 @@
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
-#include <kungfu/wingchun/broker/marketdata.h>
+#include <kungfu/wingchun/broker/client.h>
 #include <kungfu/wingchun/book/book.h>
 
 namespace kungfu::wingchun::service
@@ -57,7 +57,7 @@ namespace kungfu::wingchun::service
         longfist::journal::publisher publish_state;
 
         yijinjing::nanomsg::socket_ptr pub_sock_;
-        broker::Subscription subscription_;
+        broker::Client broker_client_;
         book::BookContext_ptr book_context_;
 
         std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;

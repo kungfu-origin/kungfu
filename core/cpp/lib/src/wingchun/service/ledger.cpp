@@ -20,7 +20,7 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publish_state(state_map_), subscription_(*this),
+            publish_state(state_map_), broker_client_(*this),
             assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
             order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>])
     {
@@ -90,7 +90,7 @@ namespace kungfu::wingchun::service
 
     const std::unordered_map<uint32_t, longfist::types::Instrument> &Ledger::get_instruments() const
     {
-        return subscription_.get_instruments();
+        return broker_client_.get_instruments();
     }
 
     void Ledger::dump_asset_snapshot(const Asset &asset)
@@ -113,7 +113,7 @@ namespace kungfu::wingchun::service
               {
                   auto group = holder_location->group;
                   auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-                  subscription_.add(md_location, position.exchange_id, position.instrument_id);
+                  broker_client_.add(md_location, position.exchange_id, position.instrument_id);
               }
           });
     }
@@ -217,7 +217,7 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
-        subscription_.subscribe(events_);
+        broker_client_.subscribe(events_);
         publish_state(get_writer(location::PUBLIC), now());
     }
 }
