@@ -20,7 +20,7 @@ namespace kungfu::wingchun::service
 {
     Ledger::Ledger(locator_ptr locator, mode m, bool low_latency) :
             apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-            publish_state(state_map_), broker_client_(*this),
+            publish_state(state_map_), broker_client_(*this, true, true),
             assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
             order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>])
     {
@@ -113,7 +113,7 @@ namespace kungfu::wingchun::service
               {
                   auto group = holder_location->group;
                   auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-                  broker_client_.add(md_location, position.exchange_id, position.instrument_id);
+                  broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
               }
           });
     }
@@ -127,7 +127,7 @@ namespace kungfu::wingchun::service
           {
               auto register_data = event->data<Register>();
               auto app_location = get_location(register_data.location_uid);
-              if (app_location->category != category::SYSTEM)
+              if (app_location->category == category::STRATEGY)
               {
                   request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
                   request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
@@ -217,8 +217,12 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
-        broker_client_.subscribe(events_);
+        broker_client_.on_start(events_);
         publish_state(get_writer(location::PUBLIC), now());
+
+        add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [](event_ptr event)
+        {
+        });
     }
 }
 

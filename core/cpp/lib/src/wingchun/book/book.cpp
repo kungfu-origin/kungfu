@@ -17,10 +17,30 @@ namespace kungfu::wingchun::book
     BookContext::BookContext(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events) :
             app_(app), events_(events), instruments_(), books_()
     {
-        auto home = app.get_io_device()->get_home();
-        log::copy_log_settings(home, home->name);
         this->monitor_instruments();
-        service_location_ = location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app.get_locator());
+    }
+
+    void BookContext::add_book(const yijinjing::data::location_ptr &location, const Book_ptr &book)
+    {
+        if (books_.find(location->uid) != books_.end())
+        {
+            return;
+        }
+
+        if (location->category != category::TD and location->category != category::STRATEGY)
+        {
+            throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
+        }
+
+        books_.emplace(location->uid, book);
+
+        this->monitor_positions(location, book);
+        this->monitor_position_details(location, book);
+    }
+
+    void BookContext::pop_book(uint32_t location_uid)
+    {
+        books_.erase(location_uid);
     }
 
     const Instrument &BookContext::get_inst_info(const std::string &instrument_id) const
@@ -216,28 +236,5 @@ namespace kungfu::wingchun::book
                                 catch (const std::exception &ex)
                                 { SPDLOG_WARN("Unexpected exception {}", ex.what()); }
                             });
-    }
-
-    void BookContext::pop_book(uint32_t location_uid)
-    {
-        books_.erase(location_uid);
-    }
-
-    void BookContext::add_book(const yijinjing::data::location_ptr &location, const Book_ptr &book)
-    {
-        if (books_.find(location->uid) != books_.end())
-        {
-            return;
-        }
-
-        if (location->category != category::TD and location->category != category::STRATEGY)
-        {
-            throw wingchun_error(fmt::format("invalid book location category: {}", get_category_name(location->category)));
-        }
-
-        books_.emplace(location->uid, book);
-
-        this->monitor_positions(location, book);
-        this->monitor_position_details(location, book);
     }
 }

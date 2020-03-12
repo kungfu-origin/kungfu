@@ -1,15 +1,16 @@
+import sys
+import traceback
 from .position import StockPosition, FuturePosition, Position
 from .position import get_uid as get_position_uid
 import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.constants as wc_constants
 import kungfu.wingchun.msg as wc_msg
 import datetime
+from pykungfu import longfist
 from pykungfu import yijinjing as pyyjj
-import sys
-import traceback
+from pykungfu import wingchun as pywingchun
 import pykungfu
 from collections import namedtuple
-from pykungfu import wingchun as pywingchun
 from rx.subject import Subject
 import json
 import kungfu.msg.utils as msg_utils
@@ -52,7 +53,6 @@ class AccountBook(pywingchun.Book):
         self.ctx = ctx
         self.location = location
         self.tags = AccountBookTags.make_from_location(self.location)
-        self.subject = Subject()
         self.setup_trading_day(kwargs.pop("trading_day", None))
         self.initial_equity = kwargs.pop("initial_equity", 0.0)
         self.static_equity = kwargs.pop("static_equity", 0.0)
@@ -67,24 +67,9 @@ class AccountBook(pywingchun.Book):
         self._tickers = {}
         self._positions = {}
 
-        positions = kwargs.pop("positions", [])
-        for pos in positions:
-            if isinstance(pos, pykungfu.longfist.types.Position):
-                pos = msg_utils.object_as_dict(pos)
-            if isinstance(pos, dict):
-                try:
-                    pos = Position.factory(ctx=self.ctx, book=self, **pos)
-                except Exception as err:
-                    exc_type, exc_obj, exc_tb = sys.exc_info()
-                    self.ctx.logger.error('init position from dict %s, error [%s] %s', pos, exc_type,
-                                          traceback.format_exception(exc_type, exc_obj, exc_tb))
-                    continue
-            if isinstance(pos, Position):
-                self._positions[pos.uid] = pos
-            else:
-                raise TypeError("Position object required, but {} provided".format(type(pos)))
-
         self._last_check = 0
+
+        self.subject = Subject()
 
     def get_location_uid(self):
         return self.location.uid

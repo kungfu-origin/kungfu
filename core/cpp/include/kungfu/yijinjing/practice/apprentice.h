@@ -43,15 +43,17 @@ namespace kungfu::yijinjing::practice
 
         yijinjing::data::location_ptr get_config_location() const;
 
+        const longfist::StateMapType &get_state_map() const;
+
         void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
         void request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
         void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-        void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
+        void add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
 
-        void add_time_interval(int64_t nanotime, const std::function<void(event_ptr)> &callback);
+        void add_time_interval(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
 
         virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 

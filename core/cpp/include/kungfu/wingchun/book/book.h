@@ -15,36 +15,33 @@ namespace kungfu::wingchun::book
     class Book
     {
     public:
-        Book() : ready_(false)
-        {}
+        longfist::types::Asset asset = {};
+
+        std::unordered_map<uint64_t, longfist::types::Position> long_positions = {};
+        std::unordered_map<uint64_t, longfist::types::PositionDetail> long_position_details = {};
+
+        std::unordered_map<uint64_t, longfist::types::Position> short_positions = {};
+        std::unordered_map<uint64_t, longfist::types::PositionDetail> short_position_details = {};
+
+        virtual ~Book() = default;
 
         [[nodiscard]] virtual uint32_t get_location_uid() const = 0;
 
-        virtual void on_quote(const event_ptr &event, const longfist::types::Quote &quote) = 0;
+        virtual void on_trading_day(const event_ptr &event, int64_t daytime) = 0;
 
-        virtual void on_trade(const event_ptr &event, const longfist::types::Trade &trade) = 0;
-
-        virtual void on_order(const event_ptr &event, const longfist::types::Order &order) = 0;
-
-        virtual void on_order_input(const event_ptr &event, const longfist::types::OrderInput &input) = 0;
+        virtual void on_asset(const event_ptr &event, const longfist::types::Asset &asset) = 0;
 
         virtual void on_positions(const std::vector<longfist::types::Position> &positions) = 0;
 
         virtual void on_position_details(const std::vector<longfist::types::PositionDetail> &position_details) = 0;
 
-        virtual void on_asset(const event_ptr &event, const longfist::types::Asset &asset) = 0;
+        virtual void on_quote(const event_ptr &event, const longfist::types::Quote &quote) = 0;
 
-        virtual void on_trading_day(const event_ptr &event, int64_t daytime) = 0;
+        virtual void on_order_input(const event_ptr &event, const longfist::types::OrderInput &input) = 0;
 
-        virtual ~Book() = default;
+        virtual void on_order(const event_ptr &event, const longfist::types::Order &order) = 0;
 
-        [[nodiscard]] bool is_ready() const
-        { return ready_; }
-
-    private:
-        bool ready_;
-
-        friend class BookContext;
+        virtual void on_trade(const event_ptr &event, const longfist::types::Trade &trade) = 0;
     };
 
     DECLARE_PTR(Book)
@@ -68,32 +65,27 @@ namespace kungfu::wingchun::book
 
         [[nodiscard]] std::vector<Book_ptr> get_books();
 
-        void on_quote(const event_ptr &event, const longfist::types::Quote &quote);
-
-        void on_trade(const event_ptr &event, const longfist::types::Trade &trade);
-
-        void on_order(const event_ptr &event, const longfist::types::Order &order);
-
-        void on_order_input(const event_ptr &event, const longfist::types::OrderInput &input);
+        void on_trading_day(const event_ptr &event, int64_t daytime);
 
         void on_asset(const event_ptr &event, const longfist::types::Asset &asset);
 
-        void on_trading_day(const event_ptr &event, int64_t daytime);
+        void on_quote(const event_ptr &event, const longfist::types::Quote &quote);
+
+        void on_order_input(const event_ptr &event, const longfist::types::OrderInput &input);
+
+        void on_order(const event_ptr &event, const longfist::types::Order &order);
+
+        void on_trade(const event_ptr &event, const longfist::types::Trade &trade);
 
     private:
+        yijinjing::practice::apprentice &app_;
+        const rx::connectable_observable <event_ptr> &events_;
+        std::unordered_map<uint32_t, longfist::types::Instrument> instruments_;
+        std::unordered_map<uint32_t, Book_ptr> books_;
+
         void monitor_positions(const yijinjing::data::location_ptr &location, const Book_ptr &book);
 
         void monitor_position_details(const yijinjing::data::location_ptr &location, const Book_ptr &book);
-
-        yijinjing::practice::apprentice &app_;
-
-        const rx::connectable_observable <event_ptr> &events_;
-
-        yijinjing::data::location_ptr service_location_;
-
-        std::unordered_map<uint32_t, longfist::types::Instrument> instruments_;
-
-        std::unordered_map<uint32_t, Book_ptr> books_;
     };
 }
 

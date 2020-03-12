@@ -7,6 +7,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 #include <pybind11/functional.h>
 
 #include <kungfu/longfist/longfist.h>
@@ -21,6 +22,9 @@
 #include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/algo/algo.h>
+
+PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::Position>)
+PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::PositionDetail>)
 
 namespace kungfu::wingchun
 {
@@ -71,7 +75,7 @@ namespace kungfu::wingchun
     {
     public:
         using kwb::Book::Book;
-        uint32_t get_location_uid() const override
+        [[nodiscard]] uint32_t get_location_uid() const override
         {PYBIND11_OVERLOAD_PURE(uint32_t , kwb::Book, get_location_uid, py::const_); }
         void on_trading_day(const event_ptr &event, int64_t daytime) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_trading_day, event, daytime); }
@@ -87,7 +91,7 @@ namespace kungfu::wingchun
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_positions, positions); }
         void on_position_details(const std::vector<PositionDetail>& position_details) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_position_details, position_details); }
-        virtual void on_asset(const event_ptr &event, const Asset& asset) override
+        void on_asset(const event_ptr &event, const Asset& asset) override
         {PYBIND11_OVERLOAD_PURE(void, kwb::Book, on_asset, event, asset); }
     };
 
@@ -204,6 +208,9 @@ namespace kungfu::wingchun
 
     void bind(pybind11::module &&m)
     {
+        py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::Position>>(m, "PositionMap", py::module_local(false));
+        py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::PositionDetail>>(m, "PositionDetailMap", py::module_local(false));
+
         auto m_utils = m.def_submodule("utils");
         m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
         m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
@@ -218,7 +225,11 @@ namespace kungfu::wingchun
 
         py::class_<kwb::Book, PyBook, kwb::Book_ptr>(m, "Book")
                 .def(py::init())
-                .def_property_readonly("ready", &kwb::Book::is_ready)
+                .def_readonly("asset", &kwb::Book::asset)
+                .def_readonly("long_positions", &kwb::Book::long_positions)
+                .def_readonly("long_position_details", &kwb::Book::long_position_details)
+                .def_readonly("short_positions", &kwb::Book::short_positions)
+                .def_readonly("short_position_details", &kwb::Book::short_position_details)
                 .def("get_location_uid", &kwb::Book::get_location_uid)
                 .def("on_trading_day", &kwb::Book::on_trading_day)
                 .def("on_quote", &kwb::Book::on_quote)

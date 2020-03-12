@@ -83,18 +83,26 @@ namespace kungfu::wingchun::strategy
     protected:
         virtual void on_start();
 
-        std::unordered_map<uint64_t, longfist::types::Quote> quotes_;
         yijinjing::practice::apprentice &app_;
         const rx::connectable_observable<event_ptr> &events_;
+        const std::unordered_map<uint64_t, state<longfist::types::Quote>> &quotes_;
 
     private:
+        bool started_;
         book::BookContext_ptr book_context_;
         algo::AlgoContext_ptr algo_context_;
         yijinjing::data::location_ptr ledger_location_;
+        std::unordered_map<uint32_t, uint32_t> account_location_ids_;
+        std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
+        std::unordered_map<uint32_t, double> account_cash_limits_;
+        std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
+        broker::Client broker_client_;
 
         uint32_t lookup_account_location_id(const std::string &account);
 
         const yijinjing::data::location_ptr &find_marketdata(const std::string &source);
+
+        void connect_account(const longfist::types::Register& register_data);
 
         template<class DataType>
         bool is_subscribed(const event_ptr &event)
@@ -102,16 +110,6 @@ namespace kungfu::wingchun::strategy
             const DataType &data = event->data<DataType>();
             return broker_client_.is_subscribed(app_.get_location(event->source()), data.exchange_id, data.instrument_id);
         }
-
-    private:
-        bool started_;
-        std::unordered_map<uint32_t, uint32_t> account_location_ids_;
-        std::unordered_map<uint32_t, yijinjing::data::location_ptr> accounts_;
-        std::unordered_map<uint32_t, double> account_cash_limits_;
-        std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
-        broker::Client broker_client_;
-
-        void connect_account(const longfist::types::Register& register_data);
 
         friend class Runner;
     };

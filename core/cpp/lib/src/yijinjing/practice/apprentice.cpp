@@ -78,6 +78,11 @@ namespace kungfu::yijinjing::practice
         return config_location_;
     }
 
+    const longfist::StateMapType &apprentice::get_state_map() const
+    {
+        return state_map_;
+    }
+
     void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time)
     {
         if (get_io_device()->get_home()->mode == mode::LIVE)
@@ -102,7 +107,7 @@ namespace kungfu::yijinjing::practice
         }
     }
 
-    void apprentice::add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback)
+    void apprentice::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback)
     {
         events_ | timer(nanotime) |
         $([&, callback](const event_ptr &e)
@@ -123,7 +128,7 @@ namespace kungfu::yijinjing::practice
           });
     }
 
-    void apprentice::add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback)
+    void apprentice::add_time_interval(int64_t duration, const std::function<void(const event_ptr &)> &callback)
     {
         events_ | time_interval(std::chrono::nanoseconds(duration)) |
         $([&, callback](const event_ptr &e)

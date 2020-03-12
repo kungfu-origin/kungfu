@@ -21,6 +21,7 @@ namespace kungfu::wingchun::strategy
 {
     Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events) :
             app_(app), events_(events), started_(false),
+            quotes_(app.get_state_map()[boost::hana::type_c<longfist::types::Quote>]),
             book_context_(std::make_shared<book::BookContext>(app_, events_)),
             algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
             ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())),
@@ -31,19 +32,7 @@ namespace kungfu::wingchun::strategy
 
     void Context::on_start()
     {
-        events_ | is(Quote::tag) |
-        $([&](const event_ptr &event)
-          {
-              quotes_.emplace(event->data<Quote>().uid(), event->data<Quote>());
-          });
-
-        events_ | is(Register::tag) |
-        $([&](const event_ptr &event)
-          {
-              connect_account(event->data<Register>());
-          });
-
-        broker_client_.subscribe(events_);
+        broker_client_.on_start(events_);
     }
 
     int64_t Context::now() const
@@ -79,6 +68,8 @@ namespace kungfu::wingchun::strategy
         accounts_.emplace(account_id, account_location);
         account_cash_limits_.emplace(account_id, cash_limit);
         account_location_ids_.emplace(account_id, account_location->uid);
+
+        broker_client_.enroll_account(account_location);
 
         SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
     }
@@ -122,7 +113,7 @@ namespace kungfu::wingchun::strategy
 
     void Context::subscribe_all(const std::string &source)
     {
-        broker_client_.add_all(find_marketdata(source));
+        broker_client_.subscribe_all(find_marketdata(source));
     }
 
     void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols, const std::string &exchange)
@@ -130,7 +121,7 @@ namespace kungfu::wingchun::strategy
         auto md_location = find_marketdata(source);
         for (const auto &symbol: symbols)
         {
-            broker_client_.add(md_location, exchange, symbol);
+            broker_client_.subscribe(md_location, exchange, symbol);
         }
     }
 
@@ -138,7 +129,7 @@ namespace kungfu::wingchun::strategy
                                    double limit_price, int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag)
     {
         auto account_location_uid = lookup_account_location_id(account);
-        if (not app_.has_writer(account_location_uid))
+        if (not broker_client_.is_ready(account_location_uid))
         {
             SPDLOG_ERROR("account {} not ready", account);
             return 0;
@@ -168,12 +159,7 @@ namespace kungfu::wingchun::strategy
     uint64_t Context::cancel_order(uint64_t order_id)
     {
         uint32_t account_location_uid = (order_id >> 32) xor (app_.get_home_uid());
-        if (not app_.has_location(account_location_uid) or not app_.is_location_live(account_location_uid))
-        {
-            SPDLOG_ERROR("account not ready for cancel this order {:16x}", order_id);
-            return 0;
-        }
-        if (not app_.has_writer(account_location_uid))
+        if (not broker_client_.is_ready(account_location_uid))
         {
             SPDLOG_ERROR("invalid order_id {:16x}", order_id);
             return 0;
