@@ -143,7 +143,7 @@ namespace kungfu::wingchun::strategy
             return 0;
         }
         auto writer = app_.get_writer(account_location_uid);
-        OrderInput &input = writer->open_data<OrderInput>(app_.now());
+        OrderInput &input = writer->open_data<OrderInput>(app_.real_now());
         input.order_id = writer->current_frame_uid();
         strcpy(input.instrument_id, symbol.c_str());
         strcpy(input.exchange_id, exchange.c_str());

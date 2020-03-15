@@ -120,6 +120,11 @@ namespace kungfu::yijinjing::practice
         return now_;
     }
 
+    int64_t hero::real_now() const
+    {
+        return real_now_;
+    }
+
     void hero::set_begin_time(int64_t begin_time)
     {
         begin_time_ = begin_time;
@@ -379,6 +384,7 @@ namespace kungfu::yijinjing::practice
             {
                 const std::string &notice = io_device_->get_observer()->get_notice();
                 now_ = time::now_in_nano();
+                real_now_ = time::now_in_nano();
                 if (notice.length() > 2)
                 {
                     sb.on_next(std::make_shared<nanomsg_json>(notice));
@@ -391,6 +397,7 @@ namespace kungfu::yijinjing::practice
             {
                 const std::string &msg = io_device_->get_rep_sock()->last_message();
                 now_ = time::now_in_nano();
+                real_now_ = time::now_in_nano();
                 sb.on_next(std::make_shared<nanomsg_json>(msg));
             }
         }
@@ -403,6 +410,7 @@ namespace kungfu::yijinjing::practice
                 {
                     now_ = frame_time;
                 }
+                real_now_ = time::now_in_nano();
                 sb.on_next(reader_->current_frame());
                 reader_->next();
             } else
