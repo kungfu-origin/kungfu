@@ -40,6 +40,7 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
         if is_valid_price(quote.pre_close_price):
             position.pre_close_price = quote.pre_close_price
         self._update_unrealized_pnl(position)
+        book.update(self.ctx.now())
 
     def apply_order_input(self, book, order_input):
         position = book.get_position(order_input)
@@ -51,6 +52,7 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
             book.asset.avail -= order_input.volume * order_input.frozen_price
         self._update_unrealized_pnl(position)
         position.update_time = self.ctx.now()
+        book.update(self.ctx.now())
 
     def apply_order(self, book, order):
         position = book.get_position(order)
@@ -68,6 +70,7 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
                 book.asset.avail += frozen_amt
         self._update_unrealized_pnl(position)
         position.update_time = self.ctx.now()
+        book.update(self.ctx.now())
 
     def apply_trade(self, book, trade):
         if trade.side == Side.Buy:
@@ -77,6 +80,7 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
         else:
             # ignore stock options lock/unlock/exec/drop operations
             pass
+        book.update(self.ctx.now())
 
     def _apply_buy(self, book, trade):
         position = book.get_position(trade)

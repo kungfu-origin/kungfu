@@ -58,7 +58,7 @@ namespace kungfu::wingchun::book
             return get_position(get_direction(data.instrument_type, data.side, data.offset), data);
         }
 
-        void update();
+        void update(int64_t update_time);
     };
 
     DECLARE_PTR(Book)
@@ -90,7 +90,7 @@ namespace kungfu::wingchun::book
 
         virtual ~Bookkeeper() = default;
 
-        const std::unordered_map<uint32_t, Book_ptr> &get_books() const;
+        [[nodiscard]] const std::unordered_map<uint32_t, Book_ptr> &get_books() const;
 
         Book_ptr get_book(uint32_t uid);
 
@@ -110,7 +110,7 @@ namespace kungfu::wingchun::book
         std::unordered_map<uint32_t, Book_ptr> books_ = {};
         std::unordered_map<uint32_t, longfist::types::Instrument> instruments_ = {};
 
-        void init_book(Book_ptr &book, uint32_t location_uid);
+        Book_ptr make_book(uint32_t location_uid);
 
         void try_update_asset(uint32_t location_uid, const longfist::types::Asset &asset);
 

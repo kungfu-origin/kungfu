@@ -218,13 +218,14 @@ namespace kungfu::wingchun::service
           });
 
         bookkeeper_.restore(state_map_);
+        bookkeeper_.on_trading_day(get_trading_day());
         publish_state(get_writer(location::PUBLIC), now());
 
-        add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [&](const event_ptr &event)
+        add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](const event_ptr &event)
         {
             for (auto &pair : bookkeeper_.get_books())
             {
-                pair.second->asset.update_time = now();
+                pair.second->update(event->gen_time());
                 get_writer(location::PUBLIC)->write(event->gen_time(), AssetSnapshot::tag, pair.second->asset);
             }
         });

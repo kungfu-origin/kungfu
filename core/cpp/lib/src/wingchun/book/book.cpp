@@ -24,8 +24,9 @@ namespace kungfu::wingchun::book
         return get_position(Direction::Short, quote);
     }
 
-    void Book::update()
+    void Book::update(int64_t update_time)
     {
+        asset.update_time = update_time;
         asset.margin = 0;
         asset.market_value = 0;
         asset.unrealized_pnl = 0;
@@ -78,9 +79,7 @@ namespace kungfu::wingchun::book
     {
         if (books_.find(location_uid) == books_.end())
         {
-            auto book = std::make_shared<Book>();
-            init_book(book, location_uid);
-            books_.emplace(location_uid, book);
+            books_.emplace(location_uid, make_book(location_uid));
         }
         return books_.at(location_uid);
     }
@@ -118,7 +117,6 @@ namespace kungfu::wingchun::book
               for (const auto &item: books_)
               {
                   accounting_method->apply_quote(item.second, data);
-                  item.second->update();
               }
           });
 
@@ -128,9 +126,7 @@ namespace kungfu::wingchun::book
               const OrderInput &data = event->data<OrderInput>();
               auto accounting_method = accounting_methods_.at(data.instrument_type);
               accounting_method->apply_order_input(get_book(event->source()), data);
-              get_book(event->source())->update();
               accounting_method->apply_order_input(get_book(event->dest()), data);
-              get_book(event->dest())->update();
           });
 
         events | is(Order::tag) |
@@ -139,9 +135,7 @@ namespace kungfu::wingchun::book
               const Order &data = event->data<Order>();
               auto accounting_method = accounting_methods_.at(data.instrument_type);
               accounting_method->apply_order(get_book(event->source()), data);
-              get_book(event->source())->update();
               accounting_method->apply_order(get_book(event->dest()), data);
-              get_book(event->dest())->update();
           });
 
         events | is(Trade::tag) |
@@ -150,9 +144,7 @@ namespace kungfu::wingchun::book
               const Trade &data = event->data<Trade>();
               auto accounting_method = accounting_methods_.at(data.instrument_type);
               accounting_method->apply_trade(get_book(event->source()), data);
-              get_book(event->source())->update();
               accounting_method->apply_trade(get_book(event->dest()), data);
-              get_book(event->dest())->update();
           });
 
         events | is(Asset::tag) |
@@ -188,16 +180,18 @@ namespace kungfu::wingchun::book
             auto &asset = state.data;
             auto book = get_book(asset.holder_uid);
             book->asset = asset;
-            book->update();
+            book->update(app_.now());
         }
     }
 
-    void Bookkeeper::init_book(Book_ptr &book, uint32_t location_uid)
+    Book_ptr Bookkeeper::make_book(uint32_t location_uid)
     {
         auto location = app_.get_location(location_uid);
+        auto book = std::make_shared<Book>();
         auto &asset = book->asset;
         asset.holder_uid = location_uid;
         asset.ledger_category = location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
+        strcpy(asset.trading_day, time::strftime(app_.get_trading_day(), "%Y%m%d").c_str());
         if (location->category == category::TD)
         {
             strcpy(asset.source_id, location->group.c_str());
@@ -208,6 +202,7 @@ namespace kungfu::wingchun::book
         {
             strcpy(asset.client_id, location->name.c_str());
         }
+        return book;
     }
 
     void Bookkeeper::try_update_asset(uint32_t location_uid, const Asset &asset)

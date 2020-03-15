@@ -240,7 +240,8 @@ namespace kungfu::wingchun
                 .def_readonly("short_position_details", &Book::short_position_details)
                 .def_readonly("orders", &Book::orders)
                 .def("get_long_position", &Book::get_long_position, py::return_value_policy::reference)
-                .def("get_short_position", &Book::get_short_position, py::return_value_policy::reference);
+                .def("get_short_position", &Book::get_short_position, py::return_value_policy::reference)
+                .def("update", &Book::update);
         book_class.def("get_position", py::overload_cast<const OrderInput &>(&Book::get_position<OrderInput>), py::return_value_policy::reference);
         book_class.def("get_position", py::overload_cast<const Order &>(&Book::get_position<Order>), py::return_value_policy::reference);
         book_class.def("get_position", py::overload_cast<const Trade &>(&Book::get_position<Trade>), py::return_value_policy::reference);
