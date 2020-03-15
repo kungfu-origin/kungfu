@@ -116,7 +116,6 @@ export const transformOrderStatListToData = (list: any[]) => {
 
 export const transformTradingItemListToData = (list: any[], type: string) => {
     let data: StringToAnyObject = {}
-
     if (type === 'account') {
         list.kfForEach((item: any) => {
             const accountId = `${item.source_id}_${item.account_id}`;

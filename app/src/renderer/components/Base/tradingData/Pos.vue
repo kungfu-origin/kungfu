@@ -146,6 +146,7 @@ export default {
                 positionsAfterFilter = positionsAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
             }
 
+
             if (!positionsAfterFilter.length) return Object.freeze([]);
 
             positionsAfterFilter.kfForEach(item => {
