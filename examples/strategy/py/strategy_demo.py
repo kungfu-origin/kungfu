@@ -21,6 +21,7 @@ def pre_start(context):
 def on_quote(context, quote):
     # context.logger.info("position: {}".format(context.book.get_position(quote.instrument_id, exchange)))
     side = random.choice([Side.Buy, Side.Sell])
+    side = Side.Buy
     price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
     price_type = random.choice([PriceType.Any, PriceType.Limit])
     order_id = context.insert_order(quote.instrument_id, exchange, "15014990", price, 100, price_type, side, Offset.Open, HedgeFlag.Speculation)

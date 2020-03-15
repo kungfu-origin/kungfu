@@ -57,6 +57,8 @@ namespace kungfu::node
 
         Napi::Value CancelOrder(const Napi::CallbackInfo &info);
 
+        Napi::Value FormatTime(const Napi::CallbackInfo &info);
+
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:

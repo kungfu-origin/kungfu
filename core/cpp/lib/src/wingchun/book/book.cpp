@@ -14,12 +14,12 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::book
 {
 
-    longfist::types::Position Book::get_long_position(const longfist::types::Quote &quote)
+    longfist::types::Position &Book::get_long_position(const longfist::types::Quote &quote)
     {
         return get_position(Direction::Long, quote);
     }
 
-    longfist::types::Position Book::get_short_position(const longfist::types::Quote &quote)
+    longfist::types::Position &Book::get_short_position(const longfist::types::Quote &quote)
     {
         return get_position(Direction::Short, quote);
     }
@@ -28,43 +28,45 @@ namespace kungfu::wingchun::book
             app_(app), broker_client_(broker_client), instruments_(), books_()
     {}
 
-    Book &Bookkeeper::get_book(uint32_t uid)
+    Book_ptr Bookkeeper::get_book(uint32_t location_uid)
     {
-        auto &result = books_[uid];
-        result.asset.holder_uid = uid;
-        return result;
-    }
-
-    const Instrument &Bookkeeper::get_inst_info(const std::string &instrument_id) const
-    {
-        auto id = yijinjing::util::hash_str_32(instrument_id);
-        if (this->instruments_.find(id) == this->instruments_.end())
+        if (books_.find(location_uid) == books_.end())
         {
-            throw wingchun_error(fmt::format("no instrument info found for {}", instrument_id));
+            books_.emplace(location_uid, std::make_shared<Book>());
+            auto &asset = books_.at(location_uid)->asset;
+            auto location = app_.get_location(location_uid);
+            asset.holder_uid = location_uid;
+            asset.ledger_category = location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
+            if (location->category == category::TD)
+            {
+                strcpy(asset.broker_id, location->group.c_str());
+                strcpy(asset.account_id, location->name.c_str());
+            }
         }
-        return this->instruments_.at(id);
-    }
-
-    std::vector<Instrument> Bookkeeper::all_inst_info() const
-    {
-        std::vector<Instrument> res(instruments_.size());
-        transform(instruments_.begin(), instruments_.end(), res.begin(), [](auto kv)
-        { return kv.second; });
-        return res;
-    }
-
-    std::vector<Book> Bookkeeper::get_books()
-    {
-        std::vector<Book> result(books_.size());
-        auto selector = [](auto pair)
-        { return pair.second; };
-        std::transform(books_.begin(), books_.end(), result.begin(), selector);
-        return result;
+        return books_.at(location_uid);
     }
 
     void Bookkeeper::set_accounting_method(longfist::enums::InstrumentType instrument_type, AccountingMethod_ptr accounting_method)
     {
         accounting_methods_.emplace(instrument_type, accounting_method);
+    }
+
+    void Bookkeeper::restore(const longfist::StateMapType &state_map)
+    {
+        for (auto &pair : state_map[boost::hana::type_c<Asset>])
+        {
+            auto &state = pair.second;
+            auto &asset = state.data;
+            get_book(asset.holder_uid)->asset = asset;
+        }
+        for (auto &pair : state_map[boost::hana::type_c<Position>])
+        {
+            auto &state = pair.second;
+            auto &position = state.data;
+            auto book = get_book(position.holder_uid);
+            auto &positions = position.direction == longfist::enums::Direction::Long ? book->long_positions : book->short_positions;
+            positions.emplace(get_symbol_id(position.instrument_id, position.exchange_id), position);
+        }
     }
 
     void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events)

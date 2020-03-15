@@ -14,32 +14,43 @@ namespace kungfu::wingchun::book
 {
     struct Book
     {
+        typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
+        typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
+
         longfist::types::Asset asset = {};
 
-        std::unordered_map<uint32_t, longfist::types::Position> long_positions = {};
-        std::unordered_map<uint32_t, longfist::types::PositionDetail> long_position_details = {};
+        PositionMap long_positions = {};
+        PositionDetailMap long_position_details = {};
 
-        std::unordered_map<uint32_t, longfist::types::Position> short_positions = {};
-        std::unordered_map<uint32_t, longfist::types::PositionDetail> short_position_details = {};
+        PositionMap short_positions = {};
+        PositionDetailMap short_position_details = {};
 
         std::unordered_map<uint64_t, longfist::types::Order> orders = {};
 
-        longfist::types::Position get_long_position(const longfist::types::Quote &quote);
+        longfist::types::Position &get_long_position(const longfist::types::Quote &quote);
 
-        longfist::types::Position get_short_position(const longfist::types::Quote &quote);
+        longfist::types::Position &get_short_position(const longfist::types::Quote &quote);
 
         template<typename DataType>
-        longfist::types::Position get_position(longfist::enums::Direction direction, const DataType &data)
+        longfist::types::Position &get_position(longfist::enums::Direction direction, const DataType &data)
         {
             assert(asset.holder_uid != 0);
-            auto &positions = direction == longfist::enums::Direction::Long ? long_positions : short_positions;
-            auto &result = positions[get_symbol_id(data.instrument_id, data.exchange_id)];
-            result.holder_uid = asset.holder_uid;
+            PositionMap &positions = direction == longfist::enums::Direction::Long ? long_positions : short_positions;
+            auto position_id = get_symbol_id(data.instrument_id, data.exchange_id);
+            auto &result = positions[position_id];
+            if (not result.holder_uid)
+            {
+                result.holder_uid = asset.holder_uid;
+                result.ledger_category = asset.ledger_category;
+                result.instrument_id = data.instrument_id;
+                result.exchange_id = data.exchange_id;
+                result.direction = direction;
+            }
             return result;
         }
 
         template<typename DataType>
-        longfist::types::Position get_position(const DataType &data)
+        longfist::types::Position &get_position(const DataType &data)
         {
             return get_position(get_direction(data.instrument_type, data.side, data.offset), data);
         }
@@ -54,13 +65,13 @@ namespace kungfu::wingchun::book
 
         virtual ~AccountingMethod() = default;
 
-        virtual void apply_quote(const Book &book, const longfist::types::Quote &quote) = 0;
+        virtual void apply_quote(Book_ptr book, const longfist::types::Quote &quote) = 0;
 
-        virtual void apply_order_input(const Book &book, const longfist::types::OrderInput &input) = 0;
+        virtual void apply_order_input(Book_ptr book, const longfist::types::OrderInput &input) = 0;
 
-        virtual void apply_order(const Book &book, const longfist::types::Order &order) = 0;
+        virtual void apply_order(Book_ptr book, const longfist::types::Order &order) = 0;
 
-        virtual void apply_trade(const Book &book, const longfist::types::Trade &trade) = 0;
+        virtual void apply_trade(Book_ptr book, const longfist::types::Trade &trade) = 0;
     };
 
     DECLARE_PTR(AccountingMethod)
@@ -72,15 +83,11 @@ namespace kungfu::wingchun::book
 
         virtual ~Bookkeeper() = default;
 
-        Book &get_book(uint32_t uid);
-
-        [[nodiscard]] const longfist::types::Instrument &get_inst_info(const std::string &instrument_id) const;
-
-        [[nodiscard]] std::vector<longfist::types::Instrument> all_inst_info() const;
-
-        [[nodiscard]] std::vector<Book> get_books();
+        Book_ptr get_book(uint32_t uid);
 
         void set_accounting_method(longfist::enums::InstrumentType instrument_type, AccountingMethod_ptr accounting_method);
+
+        void restore(const longfist::StateMapType &state_map);
 
         void on_start(const rx::connectable_observable<event_ptr> &events);
 
@@ -89,7 +96,7 @@ namespace kungfu::wingchun::book
         const broker::Client &broker_client_;
 
         std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> accounting_methods_ = {};
-        std::unordered_map<uint32_t, Book> books_ = {};
+        std::unordered_map<uint32_t, Book_ptr> books_ = {};
         std::unordered_map<uint32_t, longfist::types::Instrument> instruments_ = {};
 
         template<typename DataType>

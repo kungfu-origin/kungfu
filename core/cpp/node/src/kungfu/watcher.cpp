@@ -209,6 +209,21 @@ namespace kungfu::node
         return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
     }
 
+    Napi::Value Watcher::FormatTime(const Napi::CallbackInfo &info)
+    {
+        int64_t timestamp = 0;
+        if (info[0].IsNumber())
+        {
+            timestamp = info[0].ToNumber().Int32Value();
+        }
+        if (info[0].IsBigInt())
+        {
+            bool lossless;
+            timestamp = info[0].As<Napi::BigInt>().Int64Value(&lossless);
+        }
+        return Napi::String::New(info.Env(), time::strftime(timestamp));
+    }
+
     void Watcher::Init(Napi::Env env, Napi::Object exports)
     {
         Napi::HandleScope scope(env);
@@ -223,6 +238,7 @@ namespace kungfu::node
                 InstanceMethod("publishState", &Watcher::PublishState),
                 InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),
                 InstanceMethod("issueOrder", &Watcher::IssueOrder),
+                InstanceMethod("formatTime", &Watcher::FormatTime),
                 InstanceMethod("cancelOrder", &Watcher::CancelOrder),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
@@ -252,6 +268,10 @@ namespace kungfu::node
         events_ |
         $([&](const event_ptr &event)
           {
+              if (event->msg_type() == Position::tag)
+              {
+                  SPDLOG_WARN("got position {}", event->data<Position>().to_string());
+              }
               longfist::cast_event_invoke(event, update_ledger);
           });
 

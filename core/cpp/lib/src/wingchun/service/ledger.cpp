@@ -219,6 +219,7 @@ namespace kungfu::wingchun::service
               { SPDLOG_ERROR("Unexpected exception {}", e.what()); }
           });
 
+        bookkeeper_.restore(state_map_);
         publish_state(get_writer(location::PUBLIC), now());
 
         add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [](event_ptr event)

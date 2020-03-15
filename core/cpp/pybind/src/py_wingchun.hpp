@@ -30,13 +30,13 @@ PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::Order
 namespace kungfu::wingchun
 {
     namespace py = pybind11;
-    namespace kwb = kungfu::wingchun::book;
 
     using namespace kungfu;
     using namespace kungfu::longfist;
     using namespace kungfu::longfist::types;
     using namespace kungfu::yijinjing;
     using namespace kungfu::wingchun;
+    using namespace kungfu::wingchun::book;
     using namespace kungfu::wingchun::broker;
     using namespace kungfu::wingchun::service;
 
@@ -82,22 +82,22 @@ namespace kungfu::wingchun
         {PYBIND11_OVERLOAD(void, Trader, on_start,); }
     };
 
-    class PyAccountingMethod : public kwb::AccountingMethod
+    class PyAccountingMethod : public AccountingMethod
     {
     public:
-        using kwb::AccountingMethod::AccountingMethod;
+        using AccountingMethod::AccountingMethod;
 
-        void apply_quote(const kwb::Book &book, const Quote &quote) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_quote, book, quote); }
+        void apply_quote(Book_ptr book, const Quote &quote) override
+        {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_quote, book, quote); }
 
-        void apply_order_input(const kwb::Book &book, const OrderInput &input) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_order_input, book, input); }
+        void apply_order_input(Book_ptr book, const OrderInput &input) override
+        {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_order_input, book, input); }
 
-        void apply_order(const kwb::Book &book, const Order &order) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_order, book, order); }
+        void apply_order(Book_ptr book, const Order &order) override
+        {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_order, book, order); }
 
-        void apply_trade(const kwb::Book &book, const Trade &trade) override
-        {PYBIND11_OVERLOAD_PURE(void, kwb::AccountingMethod, apply_trade, book, trade); }
+        void apply_trade(Book_ptr book, const Trade &trade) override
+        {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_trade, book, trade); }
     };
 
     class PyAlgoOrder : public algo::AlgoOrder
@@ -232,31 +232,29 @@ namespace kungfu::wingchun
             return order;
         });
 
-        auto book_class = py::class_<kwb::Book, kwb::Book_ptr>(m, "Book");
-        book_class.def_readonly("asset", &kwb::Book::asset)
-                .def_readonly("long_positions", &kwb::Book::long_positions)
-                .def_readonly("long_position_details", &kwb::Book::long_position_details)
-                .def_readonly("short_positions", &kwb::Book::short_positions)
-                .def_readonly("short_position_details", &kwb::Book::short_position_details)
-                .def_readonly("orders", &kwb::Book::orders)
-                .def("get_long_position", &kwb::Book::get_long_position)
-                .def("get_short_position", &kwb::Book::get_short_position);
-        book_class.def("get_position", py::overload_cast<const OrderInput &>(&kwb::Book::get_position<OrderInput>));
-        book_class.def("get_position", py::overload_cast<const Order &>(&kwb::Book::get_position<Order>));
-        book_class.def("get_position", py::overload_cast<const Trade &>(&kwb::Book::get_position<Trade>));
+        auto book_class = py::class_<Book, Book_ptr>(m, "Book");
+        book_class.def_readonly("asset", &Book::asset)
+                .def_readonly("long_positions", &Book::long_positions)
+                .def_readonly("long_position_details", &Book::long_position_details)
+                .def_readonly("short_positions", &Book::short_positions)
+                .def_readonly("short_position_details", &Book::short_position_details)
+                .def_readonly("orders", &Book::orders)
+                .def("get_long_position", &Book::get_long_position, py::return_value_policy::reference)
+                .def("get_short_position", &Book::get_short_position, py::return_value_policy::reference);
+        book_class.def("get_position", py::overload_cast<const OrderInput &>(&Book::get_position<OrderInput>), py::return_value_policy::reference);
+        book_class.def("get_position", py::overload_cast<const Order &>(&Book::get_position<Order>), py::return_value_policy::reference);
+        book_class.def("get_position", py::overload_cast<const Trade &>(&Book::get_position<Trade>), py::return_value_policy::reference);
 
-        py::class_<kwb::AccountingMethod, PyAccountingMethod, kwb::AccountingMethod_ptr>(m, "AccountingMethod")
+        py::class_<AccountingMethod, PyAccountingMethod, AccountingMethod_ptr>(m, "AccountingMethod")
                 .def(py::init<>())
-                .def("apply_quote", &kwb::AccountingMethod::apply_quote)
-                .def("apply_order_input", &kwb::AccountingMethod::apply_order_input)
-                .def("apply_order", &kwb::AccountingMethod::apply_order)
-                .def("apply_trade", &kwb::AccountingMethod::apply_trade);
+                .def("apply_quote", &AccountingMethod::apply_quote)
+                .def("apply_order_input", &AccountingMethod::apply_order_input)
+                .def("apply_order", &AccountingMethod::apply_order)
+                .def("apply_trade", &AccountingMethod::apply_trade);
 
-        py::class_<kwb::Bookkeeper, std::shared_ptr<kwb::Bookkeeper>>(m, "Bookkeeper")
-                .def_property_readonly("books", &kwb::Bookkeeper::get_books)
-                .def("get_book", &kwb::Bookkeeper::get_book)
-                .def("set_accounting_method", &kwb::Bookkeeper::set_accounting_method)
-                .def("get_inst_info", &kwb::Bookkeeper::get_inst_info);
+        py::class_<Bookkeeper, std::shared_ptr<Bookkeeper>>(m, "Bookkeeper")
+                .def("get_book", &Bookkeeper::get_book)
+                .def("set_accounting_method", &Bookkeeper::set_accounting_method);
 
         py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
                 .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &>())
@@ -288,7 +286,7 @@ namespace kungfu::wingchun
                 .def_property_readonly("config_location", &Ledger::get_config_location)
                 .def_property_readonly("io_device", &Ledger::get_io_device)
                 .def_property_readonly("usable", &Ledger::is_usable)
-                .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper)
+                .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper, py::return_value_policy::reference)
                 .def_property_readonly("instruments", &Ledger::get_instruments)
                 .def("now", &Ledger::now)
                 .def("set_begin_time", &Ledger::set_begin_time)
@@ -322,7 +320,7 @@ namespace kungfu::wingchun
                 .def("add_strategy", &strategy::Runner::add_strategy);
 
         py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
-                .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper)
+                .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper, py::return_value_policy::reference)
                 .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
                 .def("now", &strategy::Context::now)
                 .def("add_timer", &strategy::Context::add_timer)

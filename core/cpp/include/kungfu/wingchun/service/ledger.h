@@ -64,10 +64,9 @@ namespace kungfu::wingchun::service
         template <typename DataType>
         void write_book(int64_t trigger_time, const uint32_t location_uid, const DataType &data)
         {
-            auto &book = bookkeeper_.get_book(location_uid);
-            const auto &position = book.get_position(data);
-            write_to(trigger_time, position, location_uid);
-            write_to(trigger_time, book.asset, location_uid);
+            auto book = bookkeeper_.get_book(location_uid);
+            write_to(trigger_time, book->get_position(data), location_uid);
+            write_to(trigger_time, book->asset, location_uid);
         }
 
         template <typename DataType>

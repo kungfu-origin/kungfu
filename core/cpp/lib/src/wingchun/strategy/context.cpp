@@ -34,6 +34,7 @@ namespace kungfu::wingchun::strategy
     {
         broker_client_.on_start(events_);
         bookkeeper_.on_start(events_);
+        bookkeeper_.restore(app_.get_state_map());
     }
 
     int64_t Context::now() const
