@@ -268,10 +268,6 @@ namespace kungfu::node
         events_ |
         $([&](const event_ptr &event)
           {
-              if (event->msg_type() == Position::tag)
-              {
-                  SPDLOG_WARN("got position {}", event->data<Position>().to_string());
-              }
               longfist::cast_event_invoke(event, update_ledger);
           });
 

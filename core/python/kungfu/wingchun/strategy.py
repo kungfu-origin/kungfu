@@ -110,6 +110,7 @@ class Strategy(pywingchun.Strategy):
         self.ctx.logger.info("pre start")
         self.wc_context = wc_context
         self.bookkeeper = wc_context.bookkeeper
+        self.bookkeeper.on_trading_day(wc_context.trading_day)
         self.algo_context = wc_context.algo_context
         self.ctx.now = wc_context.now
         self.ctx.add_timer = self.__add_timer
@@ -160,7 +161,6 @@ class Strategy(pywingchun.Strategy):
         self._on_trade(self.ctx, trade)
 
     def on_trading_day(self, wc_context, daytime):
-        trading_day = kft.to_datetime(daytime)
-        self.ctx.trading_day = trading_day
-        self.ctx.logger.info("assign trading day {} for ctx".format(trading_day))
+        self.ctx.trading_day = kft.to_datetime(daytime)
+        self.ctx.logger.info("assign trading day {} for ctx".format(self.ctx.trading_day))
         self._on_trading_day(self.ctx, daytime)

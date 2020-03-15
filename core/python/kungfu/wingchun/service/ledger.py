@@ -1,6 +1,5 @@
 from pykungfu import longfist
 from pykungfu import wingchun as pywingchun
-from pykungfu import yijinjing as pyyjj
 import json
 import http
 import functools
@@ -8,7 +7,6 @@ import sys
 import traceback
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
-import kungfu.wingchun.book as kwb
 import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.constants as wc_constants
 from kungfu.wingchun import msg
@@ -57,9 +55,6 @@ class Ledger(pywingchun.Ledger):
 
         accounting.setup_bookkeeper(self.ctx, self.bookkeeper)
 
-    def pre_start(self):
-        self.add_time_interval(1 * kft.NANO_PER_MINUTE, lambda e: self._dump_snapshot())
-
     def handle_request(self, event, msg):
         req = json.loads(msg)
         data = req['data']
@@ -86,6 +81,7 @@ class Ledger(pywingchun.Ledger):
         writer.write(event.gen_time, position_end)
 
     def on_trading_day(self, event, daytime):
+        self.bookkeeper.on_trading_day(daytime)
         self.ctx.trading_day = kft.to_datetime(daytime)
 
     def has_book(self, uid):
@@ -101,10 +97,6 @@ class Ledger(pywingchun.Ledger):
     def get_commission_info(self, instrument_id):
         product_id = wc_utils.get_product_id(instrument_id).upper()
         return self.ctx.commission_infos[product_id]
-
-    def _dump_snapshot(self):
-        for book in self.ctx.books.values():
-            self.dump_asset_snapshot(book.event.data)
 
 
 @on(msg.NewOrderSingle)

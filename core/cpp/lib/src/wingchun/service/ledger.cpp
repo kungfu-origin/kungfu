@@ -118,8 +118,6 @@ namespace kungfu::wingchun::service
 
     void Ledger::on_start()
     {
-        pre_start();
-
         broker_client_.on_start(events_);
         bookkeeper_.on_start(events_);
 
@@ -222,8 +220,13 @@ namespace kungfu::wingchun::service
         bookkeeper_.restore(state_map_);
         publish_state(get_writer(location::PUBLIC), now());
 
-        add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [](event_ptr event)
+        add_time_interval(5 * time_unit::NANOSECONDS_PER_SECOND, [&](const event_ptr &event)
         {
+            for (auto &pair : bookkeeper_.get_books())
+            {
+                pair.second->asset.update_time = now();
+                get_writer(location::PUBLIC)->write(event->gen_time(), AssetSnapshot::tag, pair.second->asset);
+            }
         });
     }
 }

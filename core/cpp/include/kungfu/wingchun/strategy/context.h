@@ -74,6 +74,9 @@ namespace kungfu::wingchun::strategy
         //@return              撤单操作ID
         virtual uint64_t cancel_order(uint64_t order_id);
 
+        int64_t get_trading_day()
+        { return app_.get_trading_day(); }
+
         book::Bookkeeper &get_bookkeeper()
         { return bookkeeper_; }
 

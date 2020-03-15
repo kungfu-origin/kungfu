@@ -87,6 +87,9 @@ namespace kungfu::wingchun
     public:
         using AccountingMethod::AccountingMethod;
 
+        void apply_trading_day(Book_ptr book, int64_t trading_day) override
+        {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_trading_day, book, trading_day); }
+
         void apply_quote(Book_ptr book, const Quote &quote) override
         {PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_quote, book, quote); }
 
@@ -154,9 +157,6 @@ namespace kungfu::wingchun
 
         void on_trading_day(const event_ptr &event, int64_t daytime) override
         {PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime); }
-
-        void pre_start() override
-        {PYBIND11_OVERLOAD_PURE(void, Ledger, pre_start) }
     };
 
     class PyRunner : public strategy::Runner
@@ -247,6 +247,7 @@ namespace kungfu::wingchun
 
         py::class_<AccountingMethod, PyAccountingMethod, AccountingMethod_ptr>(m, "AccountingMethod")
                 .def(py::init<>())
+                .def("apply_trading_day", &AccountingMethod::apply_trading_day)
                 .def("apply_quote", &AccountingMethod::apply_quote)
                 .def("apply_order_input", &AccountingMethod::apply_order_input)
                 .def("apply_order", &AccountingMethod::apply_order)
@@ -254,7 +255,8 @@ namespace kungfu::wingchun
 
         py::class_<Bookkeeper, std::shared_ptr<Bookkeeper>>(m, "Bookkeeper")
                 .def("get_book", &Bookkeeper::get_book)
-                .def("set_accounting_method", &Bookkeeper::set_accounting_method);
+                .def("set_accounting_method", &Bookkeeper::set_accounting_method)
+                .def("on_trading_day", &Bookkeeper::on_trading_day);
 
         py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(m, "MarketData")
                 .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &>())
@@ -305,7 +307,6 @@ namespace kungfu::wingchun
                 .def("handle_instrument_request", &Ledger::handle_instrument_request)
                 .def("handle_asset_request", &Ledger::handle_asset_request)
                 .def("on_trading_day", &Ledger::on_trading_day)
-                .def("pre_start", &Ledger::pre_start)
                 .def("add_timer", &Ledger::add_timer)
                 .def("add_time_interval", &Ledger::add_time_interval)
                 .def("run", &Ledger::run);
@@ -320,6 +321,7 @@ namespace kungfu::wingchun
                 .def("add_strategy", &strategy::Runner::add_strategy);
 
         py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
+                .def_property_readonly("trading_day", &strategy::Context::get_trading_day)
                 .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper, py::return_value_policy::reference)
                 .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
                 .def("now", &strategy::Context::now)

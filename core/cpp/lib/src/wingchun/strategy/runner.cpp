@@ -40,6 +40,10 @@ namespace kungfu::wingchun::strategy
 
     void Runner::on_trading_day(const event_ptr &event, int64_t daytime)
     {
+        if (context_)
+        {
+            context_->bookkeeper_.on_trading_day(daytime);
+        }
         for (const auto &strategy : strategies_)
         {
             strategy->on_trading_day(context_, daytime);
