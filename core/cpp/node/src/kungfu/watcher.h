@@ -59,6 +59,8 @@ namespace kungfu::node
 
         Napi::Value FormatTime(const Napi::CallbackInfo &info);
 
+        Napi::Value SelectPeriod(const Napi::CallbackInfo &info);
+
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:
@@ -69,7 +71,7 @@ namespace kungfu::node
 
     private:
         static Napi::FunctionReference constructor;
-        yijinjing::data::location ledger_location_;
+        yijinjing::data::location_ptr ledger_location_;
         Napi::ObjectReference config_ref_;
         Napi::ObjectReference state_ref_;
         Napi::ObjectReference ledger_ref_;

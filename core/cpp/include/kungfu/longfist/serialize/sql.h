@@ -69,24 +69,23 @@ namespace kungfu::longfist::sqlite
 
     template <typename DataType>
     std::enable_if_t<boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
-    get_all(StateStorageType &storage)
+    get_all(StateStorageType &storage, int64_t from = yijinjing::time::today_nano(), int64_t to = INT64_MAX)
     {
         return storage.get_all<DataType>();
     };
 
     template <typename DataType>
     std::enable_if_t<not boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
-    get_all(StateStorageType &storage)
+    get_all(StateStorageType &storage,int64_t from = yijinjing::time::today_nano(), int64_t to = INT64_MAX)
     {
         using namespace sqlite_orm;
-        auto today = yijinjing::time::today_nano();
         auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [](auto it)
         {
             return DataType::timestamp_key.value() == boost::hana::first(it);
         });
         auto accessor = boost::hana::second(*just);
         auto ts_member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
-        return storage.get_all<DataType>(where(greater_than(ts_member_pointer, today)));
+        return storage.get_all<DataType>(where(greater_or_equal(ts_member_pointer, from) and lesser_or_equal(ts_member_pointer, to)));
     };
 
     struct sqlizer

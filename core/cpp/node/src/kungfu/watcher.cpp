@@ -43,7 +43,7 @@ namespace kungfu::node
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             apprentice(GetWatcherLocation(info), true),
-            ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator()),
+            ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
             config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
@@ -56,19 +56,18 @@ namespace kungfu::node
         InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
-        auto locator = get_locator();
         for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
         {
-            auto state_location = location::make_shared(pair.second, locator);
-            RestoreState(state_location);
+            auto state_location = location::make_shared(pair.second, get_locator());
             if (state_location->category == category::STRATEGY)
             {
                 auto strategy_name = state_location->name;
                 auto proxy_location = location::make_shared(state_location->mode, category::STRATEGY, "node", strategy_name, get_locator());
                 proxy_locations_.emplace(proxy_location->uid, proxy_location);
             }
+            RestoreState(state_location);
         }
-        RestoreState(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", locator));
+        RestoreState(ledger_location_);
         SPDLOG_INFO("watcher ledger restored");
     }
 
@@ -224,6 +223,34 @@ namespace kungfu::node
         return Napi::String::New(info.Env(), time::strftime(timestamp));
     }
 
+    Napi::Value Watcher::SelectPeriod(const Napi::CallbackInfo &info)
+    {
+        auto parse_time = [&](auto i)
+        {
+            return time::strptime(info[i].ToString().Utf8Value(), "%Y%m%d");
+        };
+        try
+        {
+            int64_t from = parse_time(0);
+            int64_t to = info.Length() > 1 ? parse_time(1) : from + time_unit::NANOSECONDS_PER_DAY;
+            SPDLOG_INFO("select period from {} to {}", time::strftime(from), time::strftime(to));
+            Napi::ObjectReference result_ref = Napi::ObjectReference::New(Napi::Object::New(info.Env()));
+            InitStateMap(info, result_ref);
+            for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
+            {
+                auto state_location = location::make_shared(pair.second, get_locator());
+                serialize::JsRestoreState(*this, result_ref, state_location)(from, to);
+            }
+            serialize::JsRestoreState(*this, result_ref, ledger_location_)(from, to);
+            return result_ref.Value();
+        } catch (const std::exception &ex)
+        {
+            SPDLOG_ERROR("failed to select: {}", ex.what());
+            yijinjing::util::print_stack_trace();
+            return Napi::Value();
+        }
+    }
+
     void Watcher::Init(Napi::Env env, Napi::Object exports)
     {
         Napi::HandleScope scope(env);
@@ -238,8 +265,9 @@ namespace kungfu::node
                 InstanceMethod("publishState", &Watcher::PublishState),
                 InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),
                 InstanceMethod("issueOrder", &Watcher::IssueOrder),
-                InstanceMethod("formatTime", &Watcher::FormatTime),
                 InstanceMethod("cancelOrder", &Watcher::CancelOrder),
+                InstanceMethod("formatTime", &Watcher::FormatTime),
+                InstanceMethod("selectPeriod", &Watcher::SelectPeriod),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),

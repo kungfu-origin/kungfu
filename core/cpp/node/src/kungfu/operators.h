@@ -319,7 +319,7 @@ namespace kungfu::node::serialize
                 app_(app), state_(state), location_(std::move(location))
         {}
 
-        void operator()()
+        void operator()(int64_t from = yijinjing::time::today_nano(), int64_t to = INT64_MAX)
         {
             auto now = yijinjing::time::now_in_nano();
             for (auto dest : location_->locator->list_location_dest(location_))
@@ -331,7 +331,7 @@ namespace kungfu::node::serialize
                 {
                     using DataType = typename decltype(+boost::hana::second(it))::type;
                     auto type_name = boost::hana::first(it).c_str();
-                    for (auto &data : longfist::sqlite::get_all<DataType>(storage))
+                    for (auto &data : longfist::sqlite::get_all<DataType>(storage, from, to))
                     {
                         Napi::Object table = state_.Get(type_name).ToObject();
                         std::string uid_key = fmt::format("{:016x}", data.uid());
