@@ -10,7 +10,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/practice/config_store.h>
+#include <kungfu/yijinjing/practice/profile.h>
 #include <kungfu/yijinjing/practice/master.h>
 
 using namespace kungfu::rx;
@@ -27,10 +27,10 @@ namespace kungfu::yijinjing::practice
             hero(std::make_shared<io_device_master>(home, low_latency)),
             start_time_(time::now_in_nano()), last_check_(0)
     {
-        config_store cs(get_locator());
-        for (const auto &pair : cs.get_all(Config{}))
+        profile cs(get_locator());
+        for (const auto &config : cs.get_all(Config{}))
         {
-            add_location(start_time_, location::make_shared(pair.second, get_locator()));
+            add_location(start_time_, location::make_shared(config, get_locator()));
         }
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);

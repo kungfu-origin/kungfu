@@ -16,14 +16,15 @@
 
 namespace kungfu::longfist
 {
-    constexpr auto ConfigDataTypes = boost::hana::make_map(
+    constexpr auto ProfileDataTypes = boost::hana::make_map(
             TYPE_PAIR(Config),
-            TYPE_PAIR(InstrumentCommissionRate)
+            TYPE_PAIR(Commission)
     );
-    using ConfigDataTypesT = decltype(ConfigDataTypes);
+    using ProfileDataTypesT = decltype(ProfileDataTypes);
 
     constexpr auto StateDataTypes = boost::hana::make_map(
             TYPE_PAIR(Config),
+            TYPE_PAIR(Commission),
             TYPE_PAIR(Instrument),
             TYPE_PAIR(Quote),
             TYPE_PAIR(Entrust),
@@ -45,7 +46,7 @@ namespace kungfu::longfist
     );
     using StateDataTypesT = decltype(StateDataTypes);
 
-    constexpr auto build_config_map = [](auto types)
+    constexpr auto build_profile_map = [](auto types)
     {
         auto maps = boost::hana::transform(boost::hana::values(types), [](auto value)
         {
@@ -55,8 +56,8 @@ namespace kungfu::longfist
         return boost::hana::unpack(maps, boost::hana::make_map);
     };
 
-    using ConfigMapType = decltype(build_config_map(longfist::ConfigDataTypes));
-    DECLARE_PTR(ConfigMapType)
+    using ProfileMapType = decltype(build_profile_map(longfist::ProfileDataTypes));
+    DECLARE_PTR(ProfileMapType)
 
     constexpr auto build_state_map = [](auto types)
     {

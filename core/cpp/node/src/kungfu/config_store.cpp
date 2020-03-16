@@ -17,7 +17,7 @@ namespace kungfu::node
     ConfigStore::ConfigStore(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             locator_(IODevice::GetLocator(info)),
-            cs_(IODevice::GetLocator(info))
+            profile_(IODevice::GetLocator(info))
     {}
 
     ConfigStore::~ConfigStore()
@@ -49,34 +49,34 @@ namespace kungfu::node
         {
             config.value = info[valueIndex].ToString().Utf8Value();
         }
-        cs_.set(config);
+        profile_.set(config);
         return Napi::Value();
     }
 
     Napi::Value ConfigStore::GetConfig(const Napi::CallbackInfo &info)
     {
         auto result = Napi::Object::New(info.Env());
-        set(cs_.get(getConfigFromJs(info, locator_)), result);
+        auto config = profile_.get(getConfigFromJs(info, locator_));
+        set(config, result);
         return result;
     }
 
     Napi::Value ConfigStore::GetAllConfig(const Napi::CallbackInfo &info)
     {
         auto table = Napi::Object::New(info.Env());
-        for (const auto &pair : cs_.get_all(Config{}))
+        for (const auto &config : profile_.get_all(Config{}))
         {
-            auto data = pair.second;
-            std::string uid = fmt::format("{:016x}", data.uid());
+            std::string uid = fmt::format("{:016x}", config.uid());
             Napi::Value value = Napi::Object::New(info.Env());
             table.Set(uid, value);
-            set(data, value);
+            set(config, value);
         }
         return table;
     }
 
     Napi::Value ConfigStore::RemoveConfig(const Napi::CallbackInfo &info)
     {
-        cs_.remove(cs_.get(getConfigFromJs(info, locator_)));
+        profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
         return Napi::Value();
     }
 
@@ -102,4 +102,3 @@ namespace kungfu::node
         return constructor.New({arg});
     }
 }
-

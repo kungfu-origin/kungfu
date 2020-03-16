@@ -52,6 +52,23 @@ namespace kungfu::longfist::types
             (std::string, value)
     );
 
+    KF_DEFINE_PACK_TYPE(
+            Commission, 10006,
+            PK(instrument_id, exchange_id), PERPETUAL(),
+            (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
+            (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
+
+            (InstrumentType, instrument_type),         //合约类型
+
+            (CommissionRateMode, mode),                //手续费模式(按照交易额或者交易量)
+
+            (double, open_ratio),                      //开仓费率
+            (double, close_ratio),                     //平仓费率
+            (double, close_today_ratio),               //平今费率
+
+            (double, min_commission)                  //最小手续费
+    );
+
     KF_DEFINE_DATA_TYPE(
             Register, 10011,
             PK(location_uid), PERPETUAL(),
@@ -548,7 +565,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             InstrumentCommissionRate, 214,
-            PK(instrument_id, exchange_id), PERPETUAL(),
+            PK(instrument_id, exchange_id, account_id, broker_id), PERPETUAL(),
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
             (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 

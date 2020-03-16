@@ -12,6 +12,6 @@ from extensions import EXTENSION_REGISTRY_MD
 def md(ctx, source, low_latency):
     pass_ctx_from_parent(ctx)
     config = yjj.location(yjj.mode.LIVE, yjj.category.MD, source, source, ctx.locator).to(longfist.types.Config())
-    config = yjj.config_store(ctx.locator).get(config)
+    config = yjj.profile(ctx.locator).get(config)
     ext = EXTENSION_REGISTRY_MD.get_extension(source)(low_latency, ctx.locator, config.value)
     ext.run()

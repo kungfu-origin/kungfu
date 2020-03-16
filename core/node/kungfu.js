@@ -63,6 +63,10 @@ exports.ConfigStore = function(home) {
     return new bindings.ConfigStore(locator(home));
 };
 
+exports.CommissionStore = function(home) {
+    return new bindings.CommissionStore(locator(home));
+};
+
 exports.watcher = function(home, name) {
     return new bindings.Watcher(locator(home), name);
 };

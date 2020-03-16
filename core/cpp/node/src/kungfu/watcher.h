@@ -11,6 +11,7 @@
 #include "operators.h"
 #include "journal.h"
 #include "config_store.h"
+#include "commission_store.h"
 
 namespace kungfu::node
 {
@@ -28,6 +29,8 @@ namespace kungfu::node
         Napi::Value GetLocator(const Napi::CallbackInfo &info);
 
         Napi::Value GetConfig(const Napi::CallbackInfo &info);
+
+        Napi::Value GetCommission(const Napi::CallbackInfo &info);
 
         Napi::Value GetState(const Napi::CallbackInfo &info);
 
@@ -73,6 +76,7 @@ namespace kungfu::node
         static Napi::FunctionReference constructor;
         yijinjing::data::location_ptr ledger_location_;
         Napi::ObjectReference config_ref_;
+        Napi::ObjectReference commission_ref_;
         Napi::ObjectReference state_ref_;
         Napi::ObjectReference ledger_ref_;
         Napi::ObjectReference app_states_ref_;

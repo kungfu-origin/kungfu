@@ -320,7 +320,7 @@ class FutureAccountingMethod(pywingchun.AccountingMethod):
 
 
 def setup_bookkeeper(ctx, bookkeeper):
-    commissions = pyyjj.config_store(ctx.locator).get_all(longfist.types.InstrumentCommissionRate())
+    commissions = pyyjj.profile(ctx.locator).get_all(longfist.types.Commission())
 
     stock_accounting_method = StockAccountingMethod(ctx)
     future_accounting_method = FutureAccountingMethod(ctx)

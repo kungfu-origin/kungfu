@@ -8,7 +8,7 @@
 #include <napi.h>
 
 #include <kungfu/yijinjing/io.h>
-#include <kungfu/yijinjing/practice/config_store.h>
+#include <kungfu/yijinjing/practice/profile.h>
 
 #include "operators.h"
 
@@ -36,7 +36,7 @@ namespace kungfu::node
     private:
         serialize::JsSet set;
         yijinjing::data::locator_ptr locator_;
-        yijinjing::practice::config_store cs_;
+        yijinjing::practice::profile profile_;
 
         static Napi::FunctionReference constructor;
 

@@ -45,6 +45,7 @@ namespace kungfu::node
             apprentice(GetWatcherLocation(info), true),
             ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
             config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
+            commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
             app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
@@ -56,9 +57,9 @@ namespace kungfu::node
         InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
-        for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
+        for (const auto &config : ConfigStore::Unwrap(config_ref_.Value())->profile_.get_all(Config{}))
         {
-            auto state_location = location::make_shared(pair.second, get_locator());
+            auto state_location = location::make_shared(config, get_locator());
             if (state_location->category == category::STRATEGY)
             {
                 auto strategy_name = state_location->name;
@@ -92,6 +93,11 @@ namespace kungfu::node
     Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info)
     {
         return config_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetCommission(const Napi::CallbackInfo &info)
+    {
+        return commission_ref_.Value();
     }
 
     Napi::Value Watcher::GetState(const Napi::CallbackInfo &info)
@@ -236,9 +242,9 @@ namespace kungfu::node
             SPDLOG_INFO("select period from {} to {}", time::strftime(from), time::strftime(to));
             Napi::ObjectReference result_ref = Napi::ObjectReference::New(Napi::Object::New(info.Env()));
             InitStateMap(info, result_ref);
-            for (const auto &pair : ConfigStore::Unwrap(config_ref_.Value())->cs_.get_all(Config{}))
+            for (const auto &config : ConfigStore::Unwrap(config_ref_.Value())->profile_.get_all(Config{}))
             {
-                auto state_location = location::make_shared(pair.second, get_locator());
+                auto state_location = location::make_shared(config, get_locator());
                 serialize::JsRestoreState(*this, result_ref, state_location)(from, to);
             }
             serialize::JsRestoreState(*this, result_ref, ledger_location_)(from, to);
@@ -270,6 +276,7 @@ namespace kungfu::node
                 InstanceMethod("selectPeriod", &Watcher::SelectPeriod),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
+                InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
                 InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),

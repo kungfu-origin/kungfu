@@ -18,7 +18,7 @@
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/practice/master.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
-#include <kungfu/yijinjing/practice/config_store.h>
+#include <kungfu/yijinjing/practice/profile.h>
 
 namespace kungfu::yijinjing
 {
@@ -385,15 +385,15 @@ namespace kungfu::yijinjing
                 .def("on_trading_day", &apprentice::on_trading_day)
                 .def("run", &apprentice::run);
 
-        auto cs_class = py::class_<config_store>(m, "config_store");
+        auto cs_class = py::class_<profile>(m, "profile");
         cs_class.def(py::init<const yijinjing::locator_ptr &>());
-        hana::for_each(longfist::ConfigDataTypes, [&](auto type)
+        hana::for_each(longfist::ProfileDataTypes, [&](auto type)
         {
             using DataType = typename decltype(+hana::second(type))::type;
-            cs_class.def("set", &config_store::set<DataType>);
-            cs_class.def("get", &config_store::get<DataType>);
-            cs_class.def("get_all", &config_store::get_all<DataType>);
-            cs_class.def("remove", &config_store::remove<DataType>);
+            cs_class.def("set", &profile::set<DataType>);
+            cs_class.def("get", &profile::get<DataType>);
+            cs_class.def("get_all", &profile::get_all<DataType>);
+            cs_class.def("remove", &profile::remove<DataType>);
         });
     }
 }

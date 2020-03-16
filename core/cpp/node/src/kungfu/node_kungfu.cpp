@@ -6,6 +6,7 @@
 
 #include "longfist.h"
 #include "config_store.h"
+#include "commission_store.h"
 #include "journal.h"
 #include "io.h"
 #include "watcher.h"
@@ -18,6 +19,7 @@ namespace kungfu::node
 
         Longfist::Init(env, exports);
         ConfigStore::Init(env, exports);
+        CommissionStore::Init(env, exports);
         Frame::Init(env, exports);
         Reader::Init(env, exports);
         IODevice::Init(env, exports);
