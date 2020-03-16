@@ -24,7 +24,7 @@ namespace kungfu::yijinjing::journal
 
     KF_DEFINE_PACK_TYPE(
             page_header, 1,
-            PK(version),
+            PK(version), PERPETUAL(),
             (uint32_t, version),
             (uint32_t, page_header_length),
             (uint32_t, page_size),

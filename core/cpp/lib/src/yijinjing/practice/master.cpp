@@ -28,9 +28,9 @@ namespace kungfu::yijinjing::practice
             start_time_(time::now_in_nano()), last_check_(0)
     {
         config_store cs(get_locator());
-        for (auto item : cs.get_all(Config{}))
+        for (const auto &pair : cs.get_all(Config{}))
         {
-            add_location(start_time_, location::make_shared(item.second, get_locator()));
+            add_location(start_time_, location::make_shared(pair.second, get_locator()));
         }
         auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
         io_device->open_session(io_device->get_home(), start_time_);

@@ -43,7 +43,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Config, 10005,
-            PK(location_uid),
+            PK(location_uid), PERPETUAL(),
             (uint32_t, location_uid),
             (enums::category, category),
             (std::string, group),
@@ -54,7 +54,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Register, 10011,
-            PK(location_uid),
+            PK(location_uid), PERPETUAL(),
             (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
@@ -66,7 +66,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Deregister, 10012,
-            PK(location_uid),
+            PK(location_uid), PERPETUAL(),
             (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
@@ -76,7 +76,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_DATA_TYPE(
             Location, 10026,
-            PK(location_uid),
+            PK(location_uid), PERPETUAL(),
             (uint32_t, location_uid),
             (enums::category, category),
             (enums::mode, mode),
@@ -86,7 +86,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             TimeRequest, 10004,
-            PK(id),
+            PK(id), PERPETUAL(),
             (int32_t, id),
             (int64_t, duration),
             (int64_t, repeat)
@@ -94,40 +94,40 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             RequestReadFrom, 10021,
-            PK(source_id),
+            PK(source_id), PERPETUAL(),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
     KF_DEFINE_PACK_TYPE(
             RequestReadFromPublic, 10022,
-            PK(source_id),
+            PK(source_id), PERPETUAL(),
             (uint32_t, source_id),
             (int64_t, from_time)
     );
 
     KF_DEFINE_PACK_TYPE(
             RequestWriteTo, 10023,
-            PK(dest_id),
+            PK(dest_id), PERPETUAL(),
             (uint32_t, dest_id)
     );
 
     KF_DEFINE_PACK_TYPE(
             TradingDay, 10027,
-            PK(timestamp),
+            PK(timestamp), PERPETUAL(),
             (int64_t, timestamp)
     );
 
     KF_DEFINE_PACK_TYPE(
             Channel, 10028,
-            PK(source_id, dest_id),
+            PK(source_id, dest_id), PERPETUAL(),
             (uint32_t, source_id),
             (uint32_t, dest_id)
     );
 
     KF_DEFINE_PACK_TYPE(
             Instrument, 209,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), PERPETUAL(),
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),     //合约ID
             (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         //交易所ID
             (InstrumentType, instrument_type),            //合约类型
@@ -152,7 +152,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Quote, 101,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), PERPETUAL(),
             (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -191,7 +191,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Entrust, 102,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), TIMESTAMP(data_time),
             (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -213,7 +213,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Transaction, 103,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), TIMESTAMP(data_time),
             (kungfu::array<char, SOURCE_ID_LEN>, source_id),              //柜台ID
             (kungfu::array<char, DATE_LEN>, trading_day),                 //交易日
 
@@ -239,7 +239,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Bar, 110,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), TIMESTAMP(start_time),
             (kungfu::array<char, DATE_LEN>, trading_day),            //交易日
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
             (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
@@ -260,7 +260,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             OrderInput, 201,
-            PK(order_id),
+            PK(order_id), TIMESTAMP(insert_time),
             (uint64_t, order_id),                       //订单ID
 
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),   //合约代码
@@ -283,33 +283,36 @@ namespace kungfu::longfist::types
             (VolumeCondition, volume_condition),        //成交量类型
             (TimeCondition, time_condition),            //成交时间类型
 
-            (uint64_t, parent_id)                      //母订单ID
+            (uint64_t, parent_id),                      //母订单ID
+            (int64_t, insert_time)                     //写入时间
     );
 
     KF_DEFINE_PACK_TYPE(
             OrderAction, 202,
-            PK(order_action_id),
+            PK(order_action_id), TIMESTAMP(insert_time),
             (uint64_t, order_id),                       //订单ID
             (uint64_t, order_action_id),                //订单操作ID
 
             (OrderActionFlag, action_flag),             //订单操作类型
 
             (double, price),                            //价格
-            (int64_t, volume)                          //数量
+            (int64_t, volume),                          //数量
+            (int64_t, insert_time)                     //写入时间
     );
 
     KF_DEFINE_PACK_TYPE(
             OrderActionError, 202,
-            PK(order_action_id),
+            PK(order_action_id), TIMESTAMP(insert_time),
             (uint64_t, order_id),                       //订单ID
             (uint64_t, order_action_id),                //订单操作ID
             (int32_t, error_id),                        //错误ID
-            (kungfu::array<char, ERROR_MSG_LEN>, error_msg)           //错误信息
+            (kungfu::array<char, ERROR_MSG_LEN>, error_msg),           //错误信息
+            (int64_t, insert_time)                     //写入时间
     );
 
     KF_DEFINE_PACK_TYPE(
             Order, 203,
-            PK(order_id),
+            PK(order_id), TIMESTAMP(insert_time),
             (uint64_t, parent_id),                      //母订单ID
             (uint64_t, order_id),                       //订单ID
 
@@ -352,7 +355,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Trade, 204,
-            PK(trade_id),
+            PK(trade_id), TIMESTAMP(trade_time),
             (uint64_t, trade_id),                       //成交ID
 
             (uint64_t, order_id),                       //订单ID
@@ -383,7 +386,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             Position, 205,
-            PK(holder_uid, instrument_id, exchange_id, direction),
+            PK(holder_uid, instrument_id, exchange_id, direction), PERPETUAL(),
             (int64_t, update_time),                     //更新时间
             (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
@@ -394,7 +397,7 @@ namespace kungfu::longfist::types
             (uint32_t, holder_uid),
             (LedgerCategory, ledger_category),
 
-            (kungfu::array<char, SOURCE_ID_LEN>,  source_id),           //柜台ID
+            (kungfu::array<char, SOURCE_ID_LEN>, source_id),           //柜台ID
             (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),         //账号ID
             (kungfu::array<char, CLIENT_ID_LEN>, client_id),           //Client ID
 
@@ -426,13 +429,13 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             PositionEnd, 800,
-            PK(holder_uid),
+            PK(holder_uid), PERPETUAL(),
             (uint32_t, holder_uid)
     );
 
     KF_DEFINE_PACK_TYPE(
             Asset, 206,
-            PK(holder_uid),
+            PK(holder_uid), PERPETUAL(),
             (int64_t, update_time),               //更新时间
             (kungfu::array<char, DATE_LEN>, trading_day),        //交易日
 
@@ -469,7 +472,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             AssetSnapshot, 207,
-            PK(holder_uid, update_time),
+            PK(holder_uid, update_time), TIMESTAMP(update_time),
             (int64_t, update_time),               //更新时间
             (kungfu::array<char, DATE_LEN>, trading_day),        //交易日
 
@@ -506,7 +509,7 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             PositionDetail, 208,
-            PK(instrument_id, exchange_id, source_id, account_id),
+            PK(instrument_id, exchange_id, source_id, account_id), PERPETUAL(),
             (int64_t, update_time),                     //更新时间
             (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
@@ -539,13 +542,13 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             PositionDetailEnd, 801,
-            PK(holder_uid),
+            PK(holder_uid), PERPETUAL(),
             (uint32_t, holder_uid)
     );
 
     KF_DEFINE_PACK_TYPE(
             InstrumentCommissionRate, 214,
-            PK(instrument_id, exchange_id),
+            PK(instrument_id, exchange_id), PERPETUAL(),
             (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
             (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 
@@ -566,13 +569,13 @@ namespace kungfu::longfist::types
 
     KF_DEFINE_PACK_TYPE(
             BrokerStateUpdate, 401,
-            PK(state),
+            PK(state), PERPETUAL(),
             (BrokerState, state)
     );
 
     KF_DEFINE_DATA_TYPE(
             OrderStat, 215,
-            PK(order_id),
+            PK(order_id), TIMESTAMP(md_time),
             (uint64_t, order_id),
             (int64_t, md_time),
             (int64_t, insert_time),

@@ -312,14 +312,8 @@ namespace kungfu::node::serialize
         }
     };
 
-    struct JsRestoreState
+    class JsRestoreState
     {
-    private:
-        JsSet set;
-        yijinjing::practice::apprentice &app_;
-        Napi::ObjectReference &state_;
-        yijinjing::data::location_ptr location_;
-
     public:
         explicit JsRestoreState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state, yijinjing::data::location_ptr location) :
                 app_(app), state_(state), location_(std::move(location))
@@ -337,7 +331,7 @@ namespace kungfu::node::serialize
                 {
                     using DataType = typename decltype(+boost::hana::second(it))::type;
                     auto type_name = boost::hana::first(it).c_str();
-                    for (auto &data : storage.template get_all<DataType>())
+                    for (auto &data : longfist::sqlite::get_all<DataType>(storage))
                     {
                         Napi::Object table = state_.Get(type_name).ToObject();
                         std::string uid_key = fmt::format("{:016x}", data.uid());
@@ -358,14 +352,16 @@ namespace kungfu::node::serialize
                 });
             }
         }
-    };
 
-    struct JsUpdateState
-    {
     private:
         JsSet set;
+        yijinjing::practice::apprentice &app_;
         Napi::ObjectReference &state_;
+        yijinjing::data::location_ptr location_;
+    };
 
+    class JsUpdateState
+    {
     public:
         explicit JsUpdateState(Napi::ObjectReference &state) : state_(state)
         {};
@@ -384,20 +380,20 @@ namespace kungfu::node::serialize
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
                 value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
-                value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
+                value.ToObject().DefineProperty(
+                        Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
                 table.Set(uid, value);
             }
             set(data, value);
         }
+
+    private:
+        JsSet set;
+        Napi::ObjectReference &state_;
     };
 
-    struct JsPublishState
+    class JsPublishState
     {
-    private:
-        JsGet get;
-        yijinjing::practice::apprentice &app_;
-        Napi::ObjectReference &state_;
-
     public:
         explicit JsPublishState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state)
         {}
@@ -419,6 +415,11 @@ namespace kungfu::node::serialize
             state_.Get(type_name).ToObject().Set(uid_key, valueObj);
             app_.write_to(0, data);
         }
+
+    private:
+        JsGet get;
+        yijinjing::practice::apprentice &app_;
+        Napi::ObjectReference &state_;
     };
 }
 

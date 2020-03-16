@@ -8,6 +8,7 @@
 #include <sqlite_orm/sqlite_orm.h>
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::longfist::sqlite
@@ -66,6 +67,28 @@ namespace kungfu::longfist::sqlite
     using ConfigStorageType = decltype(make_storage(std::string(), ConfigDataTypes));
     using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
 
+    template <typename DataType>
+    std::enable_if_t<boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
+    get_all(StateStorageType &storage)
+    {
+        return storage.get_all<DataType>();
+    };
+
+    template <typename DataType>
+    std::enable_if_t<not boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
+    get_all(StateStorageType &storage)
+    {
+        using namespace sqlite_orm;
+        auto today = yijinjing::time::today_nano();
+        auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [](auto it)
+        {
+            return DataType::timestamp_key.value() == boost::hana::first(it);
+        });
+        auto accessor = boost::hana::second(*just);
+        auto ts_member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
+        return storage.get_all<DataType>(where(greater_than(ts_member_pointer, today)));
+    };
+
     struct sqlizer
     {
         explicit sqlizer(yijinjing::data::location_ptr location) : location_(location)
@@ -83,7 +106,7 @@ namespace kungfu::longfist::sqlite
                 using DataType = typename decltype(+boost::hana::second(it))::type;
                 for (auto &pair : storages_)
                 {
-                    for (auto &data : pair.second.get_all<DataType>())
+                    for (auto &data : get_all<DataType>(pair.second))
                     {
                         app_cmd_writer->write(0, data);
                     }
@@ -180,7 +203,8 @@ namespace sqlite_orm
             if (value.size())
             {
                 return sqlite3_bind_blob(stmt, index, (const void *) &value.front(), int(value.size() * sizeof(V)), SQLITE_TRANSIENT);
-            } else
+            }
+            else
             {
                 return sqlite3_bind_blob(stmt, index, "", 0, SQLITE_TRANSIENT);
             }
@@ -241,7 +265,8 @@ namespace sqlite_orm
             {
                 auto len = ::strlen(row_value);
                 return this->go(row_value, len);
-            } else
+            }
+            else
             {
                 return {};
             }
@@ -263,7 +288,8 @@ namespace sqlite_orm
                 res.reserve(len / sizeof(V));
                 std::copy(bytes, bytes + len, std::back_inserter(res));
                 return res;
-            } else
+            }
+            else
             {
                 return {};
             }

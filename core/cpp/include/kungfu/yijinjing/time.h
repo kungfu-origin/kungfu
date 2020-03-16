@@ -26,23 +26,25 @@ namespace kungfu::yijinjing
     class time_unit
     {
     public:
-        static const int64_t MILLISECONDS_PER_SECOND = 1000;
-        static const int64_t MICROSECONDS_PER_MILLISECOND = 1000;
-        static const int64_t NANOSECONDS_PER_MICROSECOND = 1000;
+        static constexpr int64_t MILLISECONDS_PER_SECOND = 1000;
+        static constexpr int64_t MICROSECONDS_PER_MILLISECOND = 1000;
+        static constexpr int64_t NANOSECONDS_PER_MICROSECOND = 1000;
 
-        static const int64_t MICROSECONDS_PER_SECOND = MICROSECONDS_PER_MILLISECOND * MILLISECONDS_PER_SECOND;
-        static const int64_t NANOSECONDS_PER_MILLISECOND = NANOSECONDS_PER_MICROSECOND * MICROSECONDS_PER_MILLISECOND;
-        static const int64_t NANOSECONDS_PER_SECOND = NANOSECONDS_PER_MILLISECOND * MILLISECONDS_PER_SECOND;
+        static constexpr int64_t MICROSECONDS_PER_SECOND = MICROSECONDS_PER_MILLISECOND * MILLISECONDS_PER_SECOND;
+        static constexpr int64_t NANOSECONDS_PER_MILLISECOND = NANOSECONDS_PER_MICROSECOND * MICROSECONDS_PER_MILLISECOND;
+        static constexpr int64_t NANOSECONDS_PER_SECOND = NANOSECONDS_PER_MILLISECOND * MILLISECONDS_PER_SECOND;
 
-        static const int64_t SECONDS_PER_MINUTE = 60;
-        static const int64_t MINUTES_PER_HOUR = 60;
-        static const int64_t HOURS_PER_DAY = 24;
-        static const int64_t SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+        static constexpr int64_t SECONDS_PER_MINUTE = 60;
+        static constexpr int64_t MINUTES_PER_HOUR = 60;
+        static constexpr int64_t HOURS_PER_DAY = 24;
+        static constexpr int64_t SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
 
-        static const int64_t MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE;
-        static const int64_t NANOSECONDS_PER_MINUTE = NANOSECONDS_PER_SECOND * SECONDS_PER_MINUTE;
-        static const int64_t NANOSECONDS_PER_HOUR = NANOSECONDS_PER_SECOND * SECONDS_PER_HOUR;
-        static const int64_t NANOSECONDS_PER_DAY = NANOSECONDS_PER_HOUR * HOURS_PER_DAY;
+        static constexpr int64_t MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE;
+        static constexpr int64_t NANOSECONDS_PER_MINUTE = NANOSECONDS_PER_SECOND * SECONDS_PER_MINUTE;
+        static constexpr int64_t NANOSECONDS_PER_HOUR = NANOSECONDS_PER_SECOND * SECONDS_PER_HOUR;
+        static constexpr int64_t NANOSECONDS_PER_DAY = NANOSECONDS_PER_HOUR * HOURS_PER_DAY;
+        
+        static constexpr int64_t UTC_OFFSET = NANOSECONDS_PER_HOUR * 8;
     };
 
     class time
@@ -89,6 +91,12 @@ namespace kungfu::yijinjing
                 day += time_unit::NANOSECONDS_PER_DAY;
             }
             return day;
+        }
+
+        static inline int64_t today_nano()
+        {
+            int64_t now = time::now_in_nano();
+            return now - (now % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
         }
 
     private:

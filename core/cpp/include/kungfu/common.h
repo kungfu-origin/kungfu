@@ -30,10 +30,12 @@ using namespace boost::hana::literals;
 #define KF_PACK_TYPE_END ;__pragma(pack(pop))
 #endif
 
-#define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, ...) \
+#define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, TIMESTAMP_KEY, ...) \
 struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
+    static constexpr auto type_name = HANA_STR(#NAME); \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
+    static constexpr auto timestamp_key = TIMESTAMP_KEY; \
     NAME() {}; \
     explicit NAME(const char *address, const uint32_t length) { parse(address, length); }; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
@@ -44,22 +46,27 @@ struct NAME : public kungfu::data<NAME> { \
 #define KF_DEFINE_MARK_TYPE(NAME, TAG) \
 struct NAME : public kungfu::data<NAME> { \
     static constexpr int32_t tag = TAG; \
+    static constexpr auto type_name = HANA_STR(#NAME); \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
+    static constexpr auto timestamp_key = boost::hana::nothing; \
 }
-
-#define PK(...) boost::hana::make_tuple(MAKE_PK(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
 
 #ifdef BOOST_HANA_WORKAROUND_MSVC_PREPROCESSOR_616033
 // refer to boost hana BOOST_HANA_DEFINE_STRUCT
-#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__),)
+#define MAKE_KEY(N, ...) BOOST_HANA_PP_CONCAT(BOOST_HANA_PP_CONCAT(MAKE_KEY_IMPL_, N)(__VA_ARGS__),)
 #else
-#define MAKE_PK(N, ...) BOOST_HANA_PP_CONCAT(MAKE_PK_IMPL_, N)(__VA_ARGS__)
+#define MAKE_KEY(N, ...) BOOST_HANA_PP_CONCAT(MAKE_KEY_IMPL_, N)(__VA_ARGS__)
 #endif
 
-#define MAKE_PK_IMPL_1(k) HANA_STR(#k)
-#define MAKE_PK_IMPL_2(k1, k2) HANA_STR(#k1), HANA_STR(#k2)
-#define MAKE_PK_IMPL_3(k1, k2, k3) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3)
-#define MAKE_PK_IMPL_4(k1, k2, k3, k4) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3), HANA_STR(#k4)
+#define MAKE_KEY_IMPL_1(k) HANA_STR(#k)
+#define MAKE_KEY_IMPL_2(k1, k2) HANA_STR(#k1), HANA_STR(#k2)
+#define MAKE_KEY_IMPL_3(k1, k2, k3) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3)
+#define MAKE_KEY_IMPL_4(k1, k2, k3, k4) HANA_STR(#k1), HANA_STR(#k2), HANA_STR(#k3), HANA_STR(#k4)
+
+#define PK(...) boost::hana::make_tuple(MAKE_KEY(BOOST_HANA_PP_NARG(__VA_ARGS__), __VA_ARGS__))
+
+#define PERPETUAL() boost::hana::nothing
+#define TIMESTAMP(FIELD) boost::hana::just(HANA_STR(#FIELD))
 
 namespace kungfu
 {
