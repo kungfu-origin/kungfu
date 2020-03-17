@@ -2,6 +2,7 @@
 import moment from 'moment';
 
 import { watcher, decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     props: {
@@ -77,36 +78,36 @@ export default {
 
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
-            const t = this;
-            console.log(this.moduleType)
-            console.log(this.kungfuBoardType)
-            console.log(dateRange)
             const from = moment(dateRange[0]).format('YYYYMMDD')
             const to = moment(dateRange[1]).format('YYYYMMDD')
-            const kungfuData = watcher.selectPeriod(from, to)
-            console.log(kungfuData)
-            console.error('请求历史数据 TODO')
+            
+            this.$nextTick()
+                .then(() => {
+                    const kungfuData = watcher.selectPeriod(from, to)
+                    const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
+                    const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
+                    const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'
 
-            let targetList = [];
-            if (this.kungfuBoardType === 'order') {
-                targetList = Object.values(kungfuData.Order);
-            } else if (this.kungfuBoardType === 'trade') {
-                targetList = Object.values(kungfuData.Trade);
-            }
+                    const targetListAfterFilter = targetList.filter(item => {
+                        const locationKey = item[kungfuIdKey];
+                        const kungfuLocation = decodeKungfuLocation(locationKey);
 
-            let kungfuIdKey = ''
-            if (this.moduleType === 'account') {
-                kungfuIdKey = 'source'
-            } else if (this.moduleType === 'strategy') {
-                kungfuIdKey = 'dest'
-            }
+                        if (this.moduleType === 'account') {
+                            return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
+                        } else if (this.moduleType === 'strategy') {
+                            return kungfuLocation.name === this.currentId
+                        }
+                        
+                        return false                
+                    })
 
-            targetList.filter(item => {
-                const key = item[kungfuIdKey];
-                
-            })
-
-
+                    this.$saveFile({
+                        title: exportTitle,
+                    }).then(filename => {
+                        if(!filename) return;
+                        writeCSV(filename, targetListAfterFilter)
+                    })
+                })
         },
 
         resetData() {
