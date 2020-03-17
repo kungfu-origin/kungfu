@@ -47,6 +47,12 @@ export default {
         DateRangeDialog
     },
 
+    data () {
+        return {
+            kungfuBoardType: 'trade',
+        }
+    },
+
     computed:{
         schema(){
             return [{

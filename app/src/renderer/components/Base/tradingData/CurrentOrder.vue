@@ -78,6 +78,7 @@ export default {
 
     data () {
         return {
+            kungfuBoardType: 'order',
             todayFinish: true, //为 ture 显示当日已完成
         };
     },

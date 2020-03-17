@@ -1,4 +1,8 @@
 
+import moment from 'moment';
+
+import { watcher } from '__gUtils/kungfuUtils';
+
 export default {
     props: {
         currentId: {
@@ -74,6 +78,13 @@ export default {
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
             const t = this;
+            console.log(this.moduleType)
+            console.log(this.kungfuBoardType)
+            console.log(dateRange)
+            const from = moment(dateRange[0]).format('YYYYMMDD')
+            const to = moment(dateRange[1]).format('YYYYMMDD')
+            const kungfuData = watcher.selectPeriod(from, to)
+            console.log(kungfuData)
             console.error('请求历史数据 TODO')
         },
 
