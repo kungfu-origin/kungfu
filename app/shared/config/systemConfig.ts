@@ -13,7 +13,7 @@ const enum SystemConfigChildItemTypeEnum {
     File = 'file',
     Process = 'process',
     Sources = 'sources',
-    Table = 'Table',
+    Table = 'table',
 }
 
 const enum SystemConfigTypeEnum {
@@ -42,7 +42,7 @@ export interface SystemConfigChildNormalItem {
     args?: SystemConfigChildArgsItemData[] // process
     target?: string; // process + table
     unique_key?: string; // table
-    row?: SystemCOnfigChildTableRowItemData[]; // table
+    row?: SystemConfigChildTableRowItemData[]; // table
     parentKey?: string; //for bussiness use, extra
 }
 
@@ -56,12 +56,13 @@ interface SytemConfigChildProcessItem {
     parentKey: string; //for bussiness use, extra
 }
 
-interface SystemCOnfigChildTableRowItemData {
+interface SystemConfigChildTableRowItemData {
     key: string;
     name: string;
     type: SystemConfigChildItemTypeEnum;
     default?: any;
     data?: SystemConfigChildSelectItemData[];
+    cellWidth?: Number
 }
 
 
@@ -212,10 +213,11 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
           "unique_key": "row_id",
           "row": [
             {
-              "key": "product_id",
-              "name": "产品",
+              "key": "instrument_id",
+              "name": "代码           ",
               "type": SystemConfigChildItemTypeEnum.Str,
-              "default": ""
+              "default": "",
+              'cellWidth': 5
             },
             {
               "key": "exchange_id",
@@ -302,7 +304,6 @@ export const buildCustomProcessConfig = (): CustomProcessData => {
 export const buildSystemConfig = () => {
     const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
     const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
-
     return {
         system: {
             key: "system",

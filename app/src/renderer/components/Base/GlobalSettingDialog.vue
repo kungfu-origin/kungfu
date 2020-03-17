@@ -49,146 +49,146 @@
 				class="setting-sub-item__input-content"
 				v-if="settingConfig[setting.key].value && (config.type !== 'table')"
 				>
-				<el-input
-					:class="`${item.key}_${config.key}`"
-					v-if="config.type === 'str'"
-					:type="item.key"
-					v-model="settingConfig[setting.key].value[item.key][config.key]"
-					@blur="handleIuput(setting.key)"
-				></el-input>
-				
-				<el-switch
-					:class="`${item.key}_${config.key}`"
-					v-if="config.type === 'process'"
-					:value="processStatus[config.target] === 'online'"
-					@change="e => handleSwitchProcess(e, config, settingConfig[setting.key].value[item.key])"
-				></el-switch>
+					<el-input
+						:class="`${item.key}_${config.key}`"
+						v-if="config.type === 'str'"
+						:type="item.key"
+						v-model="settingConfig[setting.key].value[item.key][config.key]"
+						@blur="handleIuput(setting.key)"
+					></el-input>
+					
+					<el-switch
+						:class="`${item.key}_${config.key}`"
+						v-if="config.type === 'process'"
+						:value="processStatus[config.target] === 'online'"
+						@change="e => handleSwitchProcess(e, config, settingConfig[setting.key].value[item.key])"
+					></el-switch>
 
-				<span
-					class="tr-oper"
-					v-if="config.type === 'process'"
-					@click.stop="handleOpenLogFile(config)"
-				>
-					<i class="el-icon-document mouse-over"></i> {{item.name}}日志
-				</span>
-				
-				<el-switch 
-				:class="`${item.key}_${config.key}`" 
-				v-if="config.type === 'bool'" 
-				v-model.trim="settingConfig[setting.key].value[item.key][config.key]"
-				@change="handleIuput(setting.key)"
-				size="small"
-				></el-switch>
-
-				<span
-					class="tr-oper"
-					v-if="(config.type === 'bool') && (item.key === 'strategy') && (config.key === 'python')"
-					@click.stop="handleOpenWhlFolder()"
-				>
-					<i class="el-icon-folder mouse-over"></i> 打开whl文件夹
-				</span>
-
-				<el-select
-					:class="`${item.key}_${config.key}`"
-					v-if="config.type === 'select'"
-					:multiple="config.multiple"
-					collapse-tags
-					v-model="settingConfig[setting.key].value[item.key][config.key]"
+					<span
+						class="tr-oper"
+						v-if="config.type === 'process'"
+						@click.stop="handleOpenLogFile(config)"
+					>
+						<i class="el-icon-document mouse-over"></i> {{item.name}}日志
+					</span>
+					
+					<el-switch 
+					:class="`${item.key}_${config.key}`" 
+					v-if="config.type === 'bool'" 
+					v-model.trim="settingConfig[setting.key].value[item.key][config.key]"
 					@change="handleIuput(setting.key)"
 					size="small"
-				>
-				<el-option
-					v-for="option in config.data"
-					:key="option.value"
-					:label="option.name"
-					:value="option.value"
-					></el-option>
-				</el-select>
-				
-				<el-select
-					:class="`${item.key}_${config.key}`"
-					v-if="config.type === 'sources'"
-					:multiple="config.multiple"
-					collapse-tags
-					v-model="settingConfig[setting.key].value[item.key][config.key]"
-					@change="handleIuput(setting.key)"
-					size="small"
-				>
+					></el-switch>
+
+					<span
+						class="tr-oper"
+						v-if="(config.type === 'bool') && (item.key === 'strategy') && (config.key === 'python')"
+						@click.stop="handleOpenWhlFolder()"
+					>
+						<i class="el-icon-folder mouse-over"></i> 打开whl文件夹
+					</span>
+
+					<el-select
+						:class="`${item.key}_${config.key}`"
+						v-if="config.type === 'select'"
+						:multiple="config.multiple"
+						collapse-tags
+						v-model="settingConfig[setting.key].value[item.key][config.key]"
+						@change="handleIuput(setting.key)"
+						size="small"
+					>
 					<el-option
-					v-for="option in sourceList"
-					:key="option.value"
-					:label="option.name"
-					:value="option.value"
-					></el-option>
-				</el-select>
+						v-for="option in config.data"
+						:key="option.value"
+						:label="option.name"
+						:value="option.value"
+						></el-option>
+					</el-select>
+					
+					<el-select
+						:class="`${item.key}_${config.key}`"
+						v-if="config.type === 'sources'"
+						:multiple="config.multiple"
+						collapse-tags
+						v-model="settingConfig[setting.key].value[item.key][config.key]"
+						@change="handleIuput(setting.key)"
+						size="small"
+					>
+						<el-option
+						v-for="option in sourceList"
+						:key="option.value"
+						:label="option.name"
+						:value="option.value"
+						></el-option>
+					</el-select>
 				</div>
 
 				<!-- table类型 -->
 				<div class="setting-sub-item__table-content" v-else>
-				<ul class="table-content">
-					<li class="table-header">
-					<el-col :span="3" v-for="cell in config.row" :key="cell.unique_key">
-						<div class="cell-name">{{cell.name}}</div>
-					</el-col>
-					</li>
-					<div class="table-body">
-					<li
-						class="table-rows"
-						v-for="(row, index) in tables[config.target]"
-						:key="row.rowid"
-					>
-						<el-col :span="3" v-for="cell in config.row" :key="cell.unique_key">
-						<el-input
-							size="mini"
-							:class="cell.key"
-							v-if="cell.type === 'str'"
-							v-model="row[cell.key]"
-						></el-input>
-						<el-input-number
-							size="mini"
-							:class="cell.key"
-							v-if="cell.type === 'int'"
-							:controls="false"
-							v-model="row[cell.key]"
-						></el-input-number>
-						<el-input-number
-							size="mini"
-							:class="cell.key"
-							v-if="cell.type === 'float'"
-							:controls="false"
-							v-model="row[cell.key]"
-						></el-input-number>
-						<el-select
-							:class="cell.key"
-							v-if="cell.type === 'select'"
-							:multiple="cell.multiple"
-							collapse-tags
-							v-model="row[cell.key]"
-							size="mini"
+					<ul class="table-content">
+						<li class="table-header">
+							<el-col :span="cell.cellWidth || 3" v-for="cell in config.row" :key="cell.unique_key">
+								<div class="cell-name">{{cell.name}}</div>
+							</el-col>
+						</li>
+						<div class="table-body">
+						<li
+							class="table-rows"
+							v-for="(row, index) in tables[config.target]"
+							:key="row.rowid"
 						>
-							<el-option
-							v-for="option in cell.data"
-							:key="option.value"
-							:label="option.name"
-							:value="option.value"
-							></el-option>
-						</el-select>
-						</el-col>
-						<el-col :span="1">
-						<i
-							class="el-icon-circle-plus mouse-over"
-							@click="handleAddRow(config.target, config.row, index)"
-						></i>
-						</el-col>
-						<el-col :span="1">
-						<i
-							class="el-icon-remove mouse-over"
-							@click="handleRemoveRow(config.target, index)"
-						></i>
-						</el-col>
-					</li>
-					</div>
-				</ul>
+							<el-col :span="cell.cellWidth || 3" v-for="cell in config.row" :key="cell.unique_key">
+							<el-input
+								size="mini"
+								:class="cell.key"
+								v-if="cell.type === 'str'"
+								v-model="row[cell.key]"
+							></el-input>
+							<el-input-number
+								size="mini"
+								:class="cell.key"
+								v-if="cell.type === 'int'"
+								:controls="false"
+								v-model="row[cell.key]"
+							></el-input-number>
+							<el-input-number
+								size="mini"
+								:class="cell.key"
+								v-if="cell.type === 'float'"
+								:controls="false"
+								v-model="row[cell.key]"
+							></el-input-number>
+							<el-select
+								:class="cell.key"
+								v-if="cell.type === 'select'"
+								:multiple="cell.multiple"
+								collapse-tags
+								v-model="row[cell.key]"
+								size="mini"
+							>
+								<el-option
+								v-for="option in cell.data"
+								:key="option.value"
+								:label="option.name"
+								:value="option.value"
+								></el-option>
+							</el-select>
+							</el-col>
+							<el-col :span="1">
+							<i
+								class="el-icon-circle-plus mouse-over"
+								@click="handleAddRow(config.target, config.row, index)"
+							></i>
+							</el-col>
+							<el-col :span="1">
+							<i
+								class="el-icon-remove mouse-over"
+								@click="handleRemoveRow(config.target, index)"
+							></i>
+							</el-col>
+						</li>
+						</div>
+					</ul>
 				</div>
 			</div>
 			</li>
@@ -208,8 +208,8 @@ import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getExtensionConfigs, getExtensions, getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
-import { getFeeSettingData, setFeeSettingData } from "__io/db/base";
-
+// import { getFeeSettingData, setFeeSettingData } from "__io/db/base";
+import { getKfCommission } from '__gUtils/kungfuUtils';
 
 const { shell }  = require('electron').remote 
 const path = require("path");
@@ -227,7 +227,7 @@ props: {
 },
 
 data() {
-	const t = this;
+	console.log(buildSystemConfig())
 	return {
 		activeSettingTypes: ["system", "trading"],
 		activeSettingItem: "",
@@ -240,7 +240,8 @@ data() {
 		tablesSaveMethods: {
 			commission: {
 				filters: ["product_id", "mode", "exchange_id"], //必填，且唯一
-				method: setFeeSettingData
+				// method: setFeeSettingData,
+				method: () => {}
 			}
 		}
 	};
@@ -251,7 +252,8 @@ async beforeMount() {
 	t.getSourceListOptions();
 
 	//获取
-	t.tables.commission = await getFeeSettingData();
+	t.tables.commission = await getKfCommission();
+	console.log(t.tables.commission)
 },
 
 mounted() {
@@ -494,12 +496,13 @@ height: 88%;
 .table-header {
 	height: 35px;
 	.el-col {
-	font-size: 12px;
-	padding: 8px 8px 0px 0px;
-	box-sizing: border-box;
+		font-size: 12px;
+		padding: 8px 8px 0px 0px;
+		box-sizing: border-box;
 	}
 }
 .table-body {
+	width: 100%;
 	max-height: 400px;
 	overflow-y: auto;
 }
@@ -507,6 +510,8 @@ height: 88%;
 	height: 45px;
 	padding-bottom: 4px;
 	box-sizing: border-box;
+
+
 	.el-col {
 	padding: 8px 8px 0px 0px;
 	box-sizing: border-box;

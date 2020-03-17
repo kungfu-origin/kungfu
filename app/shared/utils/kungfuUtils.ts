@@ -12,6 +12,9 @@ export const watcher: any = (() => {
     return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
 })()
 export const longfist = kungfu.longfist;
+export const commissionStore = kungfu.CommissionStore(KF_HOME);
+export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
+
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
     if (process.env.RENDERER_TYPE !== 'app') return 
@@ -58,27 +61,42 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
 
 
 
-export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
-
 export const getAllKfConfig = () => {
     return kungfuConfigStore.getAllConfig();
 }
+
 
 export const setKfConfig = (key: string, type: string, config: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
     return kungfuConfigStore.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
 }
 
+
 export const getKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
     return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
 }
+
 
 export const removeKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
     return kungfuConfigStore.removeConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
 }
 
+export const getKfCommission = () => {
+    return new Promise((resolve, reject) => {
+        try {
+            const commissionData = commissionStore.getAllCommission();
+            resolve(Object.values(commissionData || {}))
+        } catch (err) {
+            reject(err)
+        }
+    })
+}
+
+export const setKfCommission = () => {
+    
+}
 
 export const transformOrderTradeListToData = (list: any[], type: string) => {
     let data: StringToAnyObject = {};
@@ -114,6 +132,7 @@ export const transformOrderStatListToData = (list: any[]) => {
     return data;
 }
 
+
 export const transformTradingItemListToData = (list: any[], type: string) => {
     let data: StringToAnyObject = {}
     if (type === 'account') {
@@ -140,6 +159,7 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
     return data
 }
 
+
 export const transformAssetItemListToData = (list: any[], type: string) => {
     let accountIdClientIdData = transformTradingItemListToData(list, type);
     Object.keys(accountIdClientIdData || {}).forEach((id: string) => {
@@ -154,6 +174,7 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
     })
     return accountIdClientIdData
 }
+
 
 export function decodeKungfuLocation (sourceOrDest: string): KungfuLocation {
     if (!sourceOrDest) return {
@@ -216,6 +237,7 @@ function resolveClientId (dest: string): string {
     return [ group, name ].join(' ')
 }
 
+
 function resolveAccountId (source: string, dest: string): string {
     const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
     const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
@@ -223,6 +245,7 @@ function resolveAccountId (source: string, dest: string): string {
     const group = kungfuLocationDest.group === 'node' ? '[手动]' : '';
     return [ group, name ].join(' ')
 }
+
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = +Number(item.update_time || item.insert_time || 0);
@@ -246,6 +269,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     }
 }
 
+
 export const dealTrade = (item: TradeInputData): TradeData => {
     const updateTime = +Number(item.trade_time || item.update_time || 0);
     return {
@@ -264,6 +288,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     }
 }
 
+
 export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = posDirection[item.direction] || '--';
@@ -280,6 +305,7 @@ export const dealPos = (item: PosInputData): PosData => {
     }
 }
 
+
 export const dealAsset = (item: AssetInputData): AssetData => {
     return {
         accountId: `${item.source_id}_${item.account_id}`,
@@ -294,6 +320,7 @@ export const dealAsset = (item: AssetInputData): AssetData => {
         margin: toDecimal(item.margin) || '--'
     }
 }
+
 
 export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
     const insertTime = Number(item.insert_time);
