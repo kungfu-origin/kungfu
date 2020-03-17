@@ -173,14 +173,14 @@ namespace kungfu::wingchun::ctp
         auto order_state = orders_.at(action.order_id);
 
         CThostFtdcInputOrderActionField ctp_action = {};
-        strcpy_s(ctp_action.BrokerID, sizeof(ctp_action.BrokerID), config_.broker_id.c_str());
-        strcpy_s(ctp_action.InvestorID, sizeof(ctp_action.InvestorID), config_.account_id.c_str());
-        strcpy_s(ctp_action.OrderRef, sizeof(ctp_action.OrderRef), std::to_string(ctp_order_ref).c_str());
+        strcpy(ctp_action.BrokerID, config_.broker_id.c_str());
+        strcpy(ctp_action.InvestorID, config_.account_id.c_str());
+        strcpy(ctp_action.OrderRef, std::to_string(ctp_order_ref).c_str());
         ctp_action.FrontID = front_id_;
         ctp_action.SessionID = session_id_;
         ctp_action.ActionFlag = THOST_FTDC_AF_Delete;
-        strcpy_s(ctp_action.InstrumentID, INSTRUMENT_ID_LEN, order_state.data.instrument_id);
-        strcpy_s(ctp_action.ExchangeID, EXCHANGE_ID_LEN, order_state.data.exchange_id);
+        strcpy(ctp_action.InstrumentID, order_state.data.instrument_id);
+        strcpy(ctp_action.ExchangeID, order_state.data.exchange_id);
 
         int error_id = api_->ReqOrderAction(&ctp_action, ++request_id_);
         if (error_id == 0)
@@ -272,7 +272,7 @@ namespace kungfu::wingchun::ctp
                 auto order_state = orders_.at(order_id);
                 order_state.data.status = OrderStatus::Error;
                 order_state.data.error_id = pRspInfo->ErrorID;
-                strncpy_s(order_state.data.error_msg, ERROR_MSG_LEN, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
+                strncpy(order_state.data.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
                 write_to(0, order_state.data, order_state.dest);
             }
             SPDLOG_ERROR("failed to insert order, ErrorId: {} ErrorMsg: {}, InputOrder: {}",
@@ -297,7 +297,7 @@ namespace kungfu::wingchun::ctp
                     auto writer = get_writer(source);
                     OrderActionError &error = writer->open_data<OrderActionError>(0);
                     error.error_id = pRspInfo->ErrorID;
-                    strncpy_s(error.error_msg, ERROR_MSG_LEN, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
+                    strncpy(error.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
                     error.order_id = action.order_id;
                     error.order_action_id = action.order_action_id;
                     writer->close_data();
@@ -347,7 +347,7 @@ namespace kungfu::wingchun::ctp
         auto writer = get_writer(order_state.dest);
         Trade &trade = writer->open_data<Trade>(0);
         from_ctp(*pTrade, trade);
-        strncpy_s(trade.trading_day, DATE_LEN, trading_day_.c_str(), DATE_LEN);
+        strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
         uint64_t trade_id = writer->current_frame_uid();
         trade.trade_id = trade_id;
         trade.order_id = order_state.data.order_id;
@@ -368,7 +368,7 @@ namespace kungfu::wingchun::ctp
         SPDLOG_TRACE(to_string(*pTradingAccount));
         auto writer = get_writer(0);
         Asset &account = writer->open_data<Asset>(0);
-        strcpy_s(account.account_id, ACCOUNT_ID_LEN, get_account_id().c_str());
+        strcpy(account.account_id, get_account_id().c_str());
         from_ctp(*pTradingAccount, account);
         account.update_time = time::now_in_nano();
         account.holder_uid = get_io_device()->get_home()->uid;
@@ -391,10 +391,10 @@ namespace kungfu::wingchun::ctp
             if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end())
             {
                 Position position = {};
-                strncpy_s(position.trading_day, DATE_LEN, pInvestorPosition->TradingDay, DATE_LEN);
-                strncpy_s(position.instrument_id, INSTRUMENT_ID_LEN, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
-                strncpy_s(position.exchange_id, EXCHANGE_ID_LEN, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
-                strncpy_s(position.account_id, ACCOUNT_ID_LEN, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
+                strncpy(position.trading_day, pInvestorPosition->TradingDay, DATE_LEN);
+                strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
+                strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
+                strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
                 position.holder_uid = get_io_device()->get_home()->uid;
                 position.direction =
                         pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
