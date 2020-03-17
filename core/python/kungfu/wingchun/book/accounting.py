@@ -1,6 +1,6 @@
 import pykungfu
 from pykungfu import longfist
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 from kungfu.wingchun.utils import *
 
@@ -320,7 +320,7 @@ class FutureAccountingMethod(pywingchun.AccountingMethod):
 
 
 def setup_bookkeeper(ctx, bookkeeper):
-    commissions = pyyjj.profile(ctx.locator).get_all(longfist.types.Commission())
+    commissions = yjj.profile(ctx.locator).get_all(longfist.types.Commission())
 
     stock_accounting_method = StockAccountingMethod(ctx)
     future_accounting_method = FutureAccountingMethod(ctx)

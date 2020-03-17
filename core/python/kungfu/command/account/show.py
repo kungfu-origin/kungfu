@@ -1,5 +1,8 @@
 import re
+import json
 import click
+from pykungfu import longfist
+from pykungfu import yijinjing as yjj
 from kungfu.command.account import account, pass_ctx_from_parent
 from tabulate import tabulate
 
@@ -8,10 +11,10 @@ from tabulate import tabulate
 @click.pass_context
 def show(ctx):
     pass_ctx_from_parent(ctx)
-    accounts = ctx.db.list_source_accounts(ctx.source)
-    headers = [obj['key'] for obj in ctx.schema['config']]
-    data = [[account_data['receive_md']] + sort_account_config(account_data['config'], headers) for account_data in accounts]
-    table = tabulate(data, headers=['receive_md'] + headers, tablefmt='simple')
+    accounts = ctx.profile.get_all(longfist.types.Config())
+    headers = [obj['key'] for obj in ctx.schema['td_config']]
+    data = [sort_account_config(json.loads(account_data.value), headers) for account_data in accounts if account_data.category == yjj.category.TD]
+    table = tabulate(data, headers, tablefmt='simple')
     click.echo(table)
 
 

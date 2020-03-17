@@ -11,7 +11,6 @@ import kungfu.wingchun.utils as wc_utils
 import kungfu.wingchun.constants as wc_constants
 from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
-from kungfu.data.sqlite.data_proxy import CommissionDB
 from kungfu.wingchun.calendar import Calendar
 from kungfu.wingchun.book import accounting
 
@@ -45,8 +44,7 @@ class Ledger(pywingchun.Ledger):
         self.ctx.config_location = self.config_location
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
-        self.ctx.commission_infos = {commission["product_id"]: commission for commission in
-                                     CommissionDB(self.ctx.config_location, "commission").all_commission_info()}
+        self.ctx.commission_infos = {}
         self.ctx.orders = {}
         self.ctx.books = {}
         self.ctx.now = self.now

@@ -1,5 +1,5 @@
 
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import json
 from kungfu.wingchun import msg
 import kungfu.yijinjing.msg as yjj_msg
@@ -27,9 +27,9 @@ class LedgerClient:
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
         self.locator = kfj.Locator(home)
-        self.commander_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'service', 'ledger', self.locator)
-        io_device = pyyjj.io_device(self.commander_location)
-        self.cmd_sock = io_device.connect_socket(self.commander_location, pyyjj.protocol.REQUEST, 10000)
+        self.commander_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'service', 'ledger', self.locator)
+        io_device = yjj.io_device(self.commander_location)
+        self.cmd_sock = io_device.connect_socket(self.commander_location, yjj.protocol.REQUEST, 10000)
 
     def insert_order(self, source_name, account_id, instrument_id, exchange_id, limit_price, volume,
                      price_type = PriceType.Limit, side = Side.Buy, offset = Offset.Open, hedge_flag = HedgeFlag.Speculation):

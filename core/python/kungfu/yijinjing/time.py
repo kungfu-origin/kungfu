@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import re
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%N'
 NANO_PER_SECOND = 1000000000
@@ -34,4 +34,4 @@ def strptime(timestr, format=DATETIME_FORMAT):
 
 
 def strfnow(format=DATETIME_FORMAT):
-    return strftime(pyyjj.now_in_nano(), format)
+    return strftime(yjj.now_in_nano(), format)

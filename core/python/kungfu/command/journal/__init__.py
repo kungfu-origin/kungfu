@@ -1,4 +1,4 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import kungfu.yijinjing.journal as kfj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
@@ -18,10 +18,10 @@ def journal(ctx, mode, category, group, name):
     ctx.category = category
     ctx.group = group
     ctx.name = name
-    ctx.location = pyyjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.locator)
-    ctx.journal_util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'journal', 'cli', ctx.locator)
+    ctx.location = yjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.locator)
+    ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'cli', ctx.locator)
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
-    pyyjj.setup_log(ctx.journal_util_location, 'journal')
+    yjj.setup_log(ctx.journal_util_location, 'journal')
 
 
 def pass_ctx_from_parent(ctx):

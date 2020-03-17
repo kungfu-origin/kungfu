@@ -6,7 +6,6 @@ import kungfu.wingchun.msg as wc_msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.algo import AlgoOrder
 from kungfu.wingchun.algo.algotypes import *
-from kungfu.data.sqlite.data_proxy import AlgoDB
 
 
 class Algo(pywingchun.AlgoService):
@@ -14,7 +13,7 @@ class Algo(pywingchun.AlgoService):
         pywingchun.AlgoService.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
         self.ctx = ctx
         self.ctx.logger = create_logger("algo", ctx.log_level, self.io_device.home)
-        self.ctx.db = AlgoDB(self.io_device.home, ctx.name)
+        self.ctx.db = {} #AlgoDB(self.io_device.home, ctx.name)
 
         self.orders = {}
 

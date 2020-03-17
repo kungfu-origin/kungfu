@@ -1,4 +1,4 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
@@ -12,7 +12,7 @@ import json
 @click.pass_context
 def bar(ctx, source, time_interval, low_latency):
     pass_ctx_from_parent(ctx)
-    ctx.mode = pyyjj.mode.LIVE
+    ctx.mode = yjj.mode.LIVE
     args = {"source": source, "time_interval": time_interval}
     instance = pywingchun.BarGenerator(ctx.locator, ctx.mode, low_latency, json.dumps(args))
     instance.run()

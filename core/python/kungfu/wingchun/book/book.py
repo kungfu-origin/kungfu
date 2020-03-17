@@ -16,7 +16,7 @@ from kungfu.wingchun.utils import *
 
 import pykungfu
 from pykungfu import longfist
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 
 from collections import namedtuple
@@ -32,10 +32,10 @@ class AccountBookTags(namedtuple('AccountBookTags', 'holder_uid ledger_category 
 
     @classmethod
     def make_from_location(cls, location):
-        if location.category == pyyjj.category.TD:
+        if location.category == yjj.category.TD:
             return cls(**{"holder_uid": location.uid, "source_id": location.group, "account_id": location.name,
                           "ledger_category": wc_constants.LedgerCategory.Account})
-        elif location.category == pyyjj.category.STRATEGY:
+        elif location.category == yjj.category.STRATEGY:
             return cls(**{"holder_uid": location.uid, "client_id": location.name, "ledger_category": wc_constants.LedgerCategory.Strategy})
         else:
             raise ValueError('invalid location category {}'.format(location.category))
@@ -248,7 +248,7 @@ class AccountBook(pywingchun.Book):
             self.ctx.logger.debug("{} [{:08x}] receive duplicate trading_day message {}".format(self.location.uname, self.location.uid, trading_day))
 
     def get_ticker(self, instrument_id, exchange_id):
-        symbol_id = pyyjj.hash_str_32("{}.{}".format(instrument_id, exchange_id))
+        symbol_id = yjj.hash_str_32("{}.{}".format(instrument_id, exchange_id))
         return self._tickers.get(symbol_id, None)
 
     def get_frozen_price(self, order_id):

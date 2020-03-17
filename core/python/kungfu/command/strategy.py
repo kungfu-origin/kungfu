@@ -2,7 +2,7 @@ import os
 import click
 from importlib import util
 
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
@@ -26,9 +26,9 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.low_latency = low_latency if not replay else True
     ctx.replay = replay
     ctx.category = 'strategy'
-    mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
-    ctx.mode = pyyjj.get_mode_name(mode)
-    ctx.location = pyyjj.location(mode, pyyjj.category.STRATEGY, group, name, ctx.locator)
+    mode = yjj.mode.REPLAY if ctx.replay else yjj.mode.LIVE
+    ctx.mode = yjj.get_mode_name(mode)
+    ctx.location = yjj.location(mode, yjj.category.STRATEGY, group, name, ctx.locator)
     ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
     if path.endswith('.py'):

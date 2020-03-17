@@ -1,9 +1,7 @@
-from pykungfu import yijinjing as pyyjj
-import codecs
+from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, ACCOUNT_SCHEMA
-from kungfu.data.sqlite.data_proxy import AccountsDB
 
 
 @kfc.group(help_priority=2)
@@ -12,8 +10,8 @@ from kungfu.data.sqlite.data_proxy import AccountsDB
 def account(ctx, source):
     pass_ctx_from_root(ctx)
     ctx.source = source
-    ctx.location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
-    ctx.db = AccountsDB(ctx.location, 'accounts')
+    ctx.location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+    ctx.profile = yjj.profile(ctx.locator)
     ctx.schema = ACCOUNT_SCHEMA[source]
 
 
@@ -21,7 +19,7 @@ def pass_ctx_from_parent(ctx):
     pass_ctx_from_root(ctx)
     ctx.source = ctx.parent.source
     ctx.location = ctx.parent.location
-    ctx.db = ctx.parent.db
+    ctx.profile = ctx.parent.profile
     ctx.schema = ctx.parent.schema
 
 

@@ -1,7 +1,7 @@
 import os
 import sys
 import importlib
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 
 import kungfu.msg.utils as msg_utils
@@ -35,14 +35,14 @@ class Strategy(pywingchun.Strategy):
 
     def __add_account(self, source, account, cash_limit):
         self.wc_context.add_account(source, account, cash_limit)
-        # location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
+        # location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
         # book = AccountBook(self.ctx, location)
         # self.ctx.books[location.uid] = book
         # self.book_manager.add_book(location, book)
         # self.ctx.logger.info("added book {}@{}".format(account, source))
 
     def __get_account_book(self, source, account):
-        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.TD, source, account, self.ctx.locator)
+        location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
         return self.ctx.books[location.uid]
 
     def __get_inst_info(self, instrument_id):
@@ -77,7 +77,7 @@ class Strategy(pywingchun.Strategy):
         #                              CommissionDB(config_location, "commission").all_commission_info()}
 
     def __init_book(self):
-        location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
+        location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
         self.ctx.book = self.bookkeeper.get_book(location.uid)
 
     def __init_algo(self):

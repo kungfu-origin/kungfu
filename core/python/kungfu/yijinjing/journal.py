@@ -4,7 +4,7 @@ import glob
 import re
 import json
 import pykungfu
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import pandas as pd
 import errno
 import kungfu.yijinjing.msg as yjj_msg
@@ -33,19 +33,19 @@ LOCATION_UNAME_REGEX = r'(.*)/(.*)/(.*)/(.*)'
 LOCATION_PATTERN = re.compile(LOCATION_UNAME_REGEX)
 
 MODES = {
-    'live': pyyjj.mode.LIVE,
-    'data': pyyjj.mode.DATA,
-    'replay': pyyjj.mode.REPLAY,
-    'backtest': pyyjj.mode.BACKTEST,
-    '*': pyyjj.mode.LIVE
+    'live': yjj.mode.LIVE,
+    'data': yjj.mode.DATA,
+    'replay': yjj.mode.REPLAY,
+    'backtest': yjj.mode.BACKTEST,
+    '*': yjj.mode.LIVE
 }
 
 CATEGORIES = {
-    'md': pyyjj.category.MD,
-    'td': pyyjj.category.TD,
-    'strategy': pyyjj.category.STRATEGY,
-    'system': pyyjj.category.SYSTEM,
-    '*': pyyjj.category.SYSTEM
+    'md': yjj.category.MD,
+    'td': yjj.category.TD,
+    'strategy': yjj.category.STRATEGY,
+    'system': yjj.category.SYSTEM,
+    '*': yjj.category.SYSTEM
 }
 
 
@@ -53,26 +53,26 @@ def find_mode(m):
     for k in MODES:
         if int(MODES[k]) == m:
             return MODES[k]
-    return pyyjj.mode.LIVE
+    return yjj.mode.LIVE
 
 
 def find_category(c):
     for k in CATEGORIES:
         if int(CATEGORIES[k]) == c:
             return CATEGORIES[k]
-    return pyyjj.category.SYSTEM
+    return yjj.category.SYSTEM
 
 
 def get_location_from_json(ctx, data):
     if 'mode' in data and 'category' in data and 'group' in data and 'name' in data:
-        return pyyjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
+        return yjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
     else:
         return None
 
 
-class Locator(pyyjj.locator):
+class Locator(yjj.locator):
     def __init__(self, home):
-        pyyjj.locator.__init__(self)
+        yjj.locator.__init__(self)
         self._home = home
 
     def has_env(self, name):
@@ -82,9 +82,9 @@ class Locator(pyyjj.locator):
         return os.getenv(name)
 
     def layout_dir(self, location, layout):
-        mode = pyyjj.get_mode_name(location.mode)
-        category = pyyjj.get_category_name(location.category)
-        p = os.path.join(self._home, category, location.group, location.name, pyyjj.get_layout_name(layout), mode)
+        mode = yjj.get_mode_name(location.mode)
+        category = yjj.get_category_name(location.category)
+        p = os.path.join(self._home, category, location.group, location.name, yjj.get_layout_name(layout), mode)
         try:
             os.makedirs(p)
         except OSError as e:
@@ -93,22 +93,22 @@ class Locator(pyyjj.locator):
         return p
 
     def layout_file(self, location, layout, name):
-        return os.path.join(self.layout_dir(location, layout), "{}.{}".format(name, pyyjj.get_layout_name(layout)))
+        return os.path.join(self.layout_dir(location, layout), "{}.{}".format(name, yjj.get_layout_name(layout)))
 
     def default_to_system_db(self, location, name):
-        file = os.path.join(self.layout_dir(location, pyyjj.layout.SQLITE), "{}.{}".format(name, pyyjj.get_layout_name(pyyjj.layout.SQLITE)))
+        file = os.path.join(self.layout_dir(location, yjj.layout.SQLITE), "{}.{}".format(name, yjj.get_layout_name(yjj.layout.SQLITE)))
         if os.path.exists(file):
             return file
         else:
-            system_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "etc", "kungfu", self)
-            system_file = os.path.join(self.layout_dir(system_location, pyyjj.layout.SQLITE),
-                                       "{}.{}".format(name, pyyjj.get_layout_name(pyyjj.layout.SQLITE)))
+            system_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, "etc", "kungfu", self)
+            system_file = os.path.join(self.layout_dir(system_location, yjj.layout.SQLITE),
+                                       "{}.{}".format(name, yjj.get_layout_name(yjj.layout.SQLITE)))
             shutil.copy(system_file, file)
             return file
 
     def list_page_id(self, location, dest_id):
         page_ids = []
-        for journal in glob.glob(os.path.join(self.layout_dir(location, pyyjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
+        for journal in glob.glob(os.path.join(self.layout_dir(location, yjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
             match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(6)
@@ -125,14 +125,14 @@ class Locator(pyyjj.locator):
                 group = match.group(2)
                 name = match.group(3)
                 mode = match.group(4)
-                location = pyyjj.location(MODES[mode], CATEGORIES[category], group, name, self)
+                location = yjj.location(MODES[mode], CATEGORIES[category], group, name, self)
                 locations.append(location)
         return locations
 
     def list_location_dest(self, location):
-        search_path = os.path.join(self._home, pyyjj.get_category_name(location.category),
+        search_path = os.path.join(self._home, yjj.get_category_name(location.category),
                                    location.group, location.name, 'journal',
-                                   pyyjj.get_mode_name(location.mode), '*.journal')
+                                   yjj.get_mode_name(location.mode), '*.journal')
         readers = {}
         for journal in glob.glob(search_path):
             match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])
@@ -144,7 +144,7 @@ class Locator(pyyjj.locator):
                 dest = match.group(5)
                 page_id = match.group(6)
                 uname = '{}/{}/{}/{}'.format(category, group, name, mode)
-                uid = pyyjj.hash_str_32(uname)
+                uid = yjj.hash_str_32(uname)
                 if dest in readers:
                     readers[int(dest, 16)].append(page_id)
                 else:
@@ -165,7 +165,7 @@ def collect_journal_locations(ctx):
             dest = match.group(5)
             page_id = match.group(6)
             uname = '{}/{}/{}/{}'.format(category, group, name, mode)
-            uid = pyyjj.hash_str_32(uname)
+            uid = yjj.hash_str_32(uname)
             if uid in locations:
                 if dest in locations[uid]['readers']:
                     locations[uid]['readers'][dest].append(page_id)
@@ -178,7 +178,7 @@ def collect_journal_locations(ctx):
                     'name': name,
                     'mode': mode,
                     'uname': uname,
-                    'uid': pyyjj.hash_str_32(uname),
+                    'uid': yjj.hash_str_32(uname),
                     'readers': {
                         dest: [page_id]
                     }
@@ -190,7 +190,7 @@ def collect_journal_locations(ctx):
 
 
 def find_sessions(ctx):
-    io_device = pyyjj.io_device(ctx.journal_util_location)
+    io_device = yjj.io_device(ctx.journal_util_location)
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
@@ -212,7 +212,7 @@ def find_session(ctx, session_id):
 
 
 def make_location_from_dict(ctx, location):
-    return pyyjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
+    return yjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
 
 
 def trace_journal(ctx, session_id, io_type):
@@ -221,7 +221,7 @@ def trace_journal(ctx, session_id, io_type):
     ])
     session = find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
-    uid = pyyjj.hash_str_32(uname)
+    uid = yjj.hash_str_32(uname)
     ctx.category = '*'
     ctx.group = '*'
     ctx.name = '*'
@@ -229,7 +229,7 @@ def trace_journal(ctx, session_id, io_type):
     locations = collect_journal_locations(ctx)
     location = locations[uid]
     home = make_location_from_dict(ctx, location)
-    io_device = pyyjj.io_device(home)
+    io_device = yjj.io_device(home)
     reader = io_device.open_reader_to_subscribe()
 
     if io_type == 'out' or io_type == 'all':
@@ -237,12 +237,12 @@ def trace_journal(ctx, session_id, io_type):
             dest_id = int(dest, 16)
             reader.join(home, dest_id, session['begin_time'])
 
-    if (io_type == 'in' or io_type == 'all') and not (home.category == pyyjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
-        master_home_uid = pyyjj.hash_str_32('system/master/master/live')
+    if (io_type == 'in' or io_type == 'all') and not (home.category == yjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
+        master_home_uid = yjj.hash_str_32('system/master/master/live')
         master_home_location = make_location_from_dict(ctx, locations[master_home_uid])
         reader.join(master_home_location, 0, session['begin_time'])
 
-        master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
+        master_cmd_uid = yjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, location['uid'], session['begin_time'])
 
@@ -255,7 +255,7 @@ def trace_journal(ctx, session_id, io_type):
             frame.msg_type, frame.frame_length, frame.data_length
         ]
         if frame.dest == home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
-            request = pyyjj.get_RequestReadFrom(frame)
+            request = yjj.get_RequestReadFrom(frame)
             source_location = make_location_from_dict(ctx, locations[request.source_id])
             try:
                 reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)

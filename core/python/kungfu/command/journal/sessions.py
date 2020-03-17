@@ -1,4 +1,4 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import shutil
 from tabulate import tabulate
 
@@ -38,7 +38,7 @@ def sessions(ctx, sortby, ascending, tablefmt):
 @click.pass_context
 def rebuild_index(ctx):
     pass_ctx_from_parent(ctx)
-    io_device = pyyjj.io_device_master(ctx.journal_util_location, False)
+    io_device = yjj.io_device_master(ctx.journal_util_location, False)
     click.echo("rebuild sqlite db")
     io_device.rebuild_index_db()
     click.echo("done")
@@ -48,7 +48,7 @@ def rebuild_index(ctx):
 @click.pass_context
 def sql(ctx):
     pass_ctx_from_parent(ctx)
-    io_device = pyyjj.io_device(ctx.journal_util_location)
+    io_device = yjj.io_device(ctx.journal_util_location)
     click.echo("read from sqlite")
     res = io_device.find_sessions()
     click.echo(res)

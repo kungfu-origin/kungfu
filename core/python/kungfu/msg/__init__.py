@@ -41,7 +41,7 @@ class Registry:
 
 def monkey_patch():
     try:
-        from pykungfu import yijinjing as pyyjj
+        from pykungfu import yijinjing as yjj
     except ImportError as err:
         return
 
@@ -74,6 +74,6 @@ def monkey_patch():
                 "msg_type": frame.msg_type,
                 "data": data}
 
-    pyyjj.frame.data = property(get_data)
-    pyyjj.frame.as_dict = frame_as_dict
-    pyyjj.writer.write_data = write_data
+    yjj.frame.data = property(get_data)
+    yjj.frame.as_dict = frame_as_dict
+    yjj.writer.write_data = write_data

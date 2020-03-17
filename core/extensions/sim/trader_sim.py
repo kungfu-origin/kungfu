@@ -1,5 +1,5 @@
 from pykungfu import longfist as pylongfist
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 import json
 import kungfu.wingchun.utils as wc_utils

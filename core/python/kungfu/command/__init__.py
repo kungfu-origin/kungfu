@@ -3,7 +3,7 @@ import platform
 import json
 import click
 import kungfu.yijinjing.journal as kfj
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from kungfu import __version__
 
 DEFAULT_CMD_PRIORITY = 100
@@ -92,7 +92,7 @@ def kfc(ctx, home, log_level, name):
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.locator = kfj.Locator(home)
-    ctx.system_config_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+    ctx.system_config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:

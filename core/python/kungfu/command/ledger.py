@@ -1,4 +1,4 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
@@ -14,8 +14,8 @@ def ledger(ctx, low_latency, replay, session_id):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency if not replay else True
     ctx.replay = replay
-    ctx.category = pyyjj.category.SYSTEM
-    ctx.mode = pyyjj.mode.REPLAY if ctx.replay else pyyjj.mode.LIVE
+    ctx.category = yjj.category.SYSTEM
+    ctx.mode = yjj.mode.REPLAY if ctx.replay else yjj.mode.LIVE
     ctx.group = 'service'
     ctx.name = 'ledger'
     ctx.session_id = session_id

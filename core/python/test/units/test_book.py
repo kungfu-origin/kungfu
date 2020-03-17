@@ -4,13 +4,10 @@ import platform
 import datetime
 from dotted_dict import DottedDict
 from pykungfu import longfist as pylongfist
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from kungfu.wingchun.book.book import AccountBook
 import kungfu.yijinjing.journal as kfj
-import kungfu.yijinjing.time as kft
 from kungfu.yijinjing.log import create_logger
-from kungfu.data.sqlite.data_proxy import CommissionDB, LedgerDB
-import kungfu.wingchun.utils as wc_utils
 from kungfu.wingchun.constants import *
 
 
@@ -30,9 +27,9 @@ class TestStockPosition(unittest.TestCase):
         self.ctx.locator = kfj.Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
-        self.ctx.now = pyyjj.now_in_nano
+        self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
+        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
         self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
 
     def test_buy(self):
@@ -40,7 +37,7 @@ class TestStockPosition(unittest.TestCase):
         book = AccountBook(self.ctx, location, avail=10000)
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 1
         input.instrument_id = "600000"
@@ -54,7 +51,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 1
         order.instrument_id = "600000"
@@ -68,7 +65,7 @@ class TestStockPosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 1
         trade.instrument_id = "600000"
@@ -98,7 +95,7 @@ class TestStockPosition(unittest.TestCase):
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 1
         input.instrument_id = "600000"
@@ -115,7 +112,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 200)
         self.assertEqual(position.frozen_yesterday, 200)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 1
         order.instrument_id = "600000"
@@ -129,7 +126,7 @@ class TestStockPosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 1
         trade.instrument_id = "600000"
@@ -157,7 +154,7 @@ class TestStockPosition(unittest.TestCase):
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 1
         input.instrument_id = "600000"
@@ -174,7 +171,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 200)
         self.assertEqual(position.frozen_yesterday, 200)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 1
         order.instrument_id = "600000"
@@ -192,7 +189,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 100)
         self.assertEqual(position.frozen_yesterday, 100)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.trade_id = 1
         trade.order_id = 1
@@ -211,7 +208,7 @@ class TestStockPosition(unittest.TestCase):
         book = AccountBook(self.ctx, location, avail=10000)
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 100
         input.instrument_id = "600000"
@@ -225,7 +222,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 100
         order.instrument_id = "600000"
@@ -244,7 +241,7 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(book.frozen_cash, 100 * 16.0, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - 100 * 16.0, "incorrect avail")
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.trade_id = 1
         trade.order_id = 100
@@ -285,10 +282,10 @@ class TestFuturePosition(unittest.TestCase):
         self.ctx.locator = kfj.Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
-        self.ctx.now = pyyjj.now_in_nano
+        self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
-        self.ctx.config_location = pyyjj.location(pyyjj.mode.LIVE, pyyjj.category.SYSTEM, "etc", "kungfu", self.ctx.locator)
+        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
+        self.ctx.config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, "etc", "kungfu", self.ctx.locator)
         self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
         self.ctx.get_inst_info = lambda instrument_id: {"contract_multiplier": 10, "long_margin_ratio": 0.1, "short_margin_ratio": 0.1}
         self.ctx.get_commission_info = lambda instrument_id: {"mode": 0, "open_ratio": 0.000045, "close_ratio": 0.000045, "close_today_ratio": 0.0}
@@ -305,7 +302,7 @@ class TestFuturePosition(unittest.TestCase):
         instrument_id = "rb" + dt.strftime("%y%m")
         exchange_id = "SHFE"
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 100
         input.instrument_id = instrument_id
@@ -328,7 +325,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 100
         order.instrument_id = instrument_id
@@ -342,7 +339,7 @@ class TestFuturePosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 100
         trade.instrument_id = instrument_id
@@ -386,7 +383,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 100
         input.instrument_id = instrument_id
@@ -402,7 +399,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 1)
         self.assertEqual(position.frozen_yesterday, 1)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 100
         order.instrument_id = instrument_id
@@ -416,7 +413,7 @@ class TestFuturePosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 100
         trade.instrument_id = instrument_id
@@ -448,7 +445,7 @@ class TestFuturePosition(unittest.TestCase):
         instrument_id = "rb" + dt.strftime("%y%m")
         exchange_id = "SHFE"
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 100
         input.instrument_id = instrument_id
@@ -471,7 +468,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
         self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 100
         order.instrument_id = instrument_id
@@ -485,7 +482,7 @@ class TestFuturePosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 100
         trade.instrument_id = instrument_id
@@ -529,7 +526,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
 
         event = DottedDict()
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         input = pylongfist.types.OrderInput()
         input.order_id = 100
         input.instrument_id = instrument_id
@@ -545,7 +542,7 @@ class TestFuturePosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 1)
         self.assertEqual(position.frozen_yesterday, 1)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         order = pylongfist.types.Order()
         order.order_id = 100
         order.instrument_id = instrument_id
@@ -559,7 +556,7 @@ class TestFuturePosition(unittest.TestCase):
         order.status = pylongfist.enums.OrderStatus.Filled
         book.on_order(event, order)
 
-        event.gen_time = pyyjj.now_in_nano()
+        event.gen_time = yjj.now_in_nano()
         trade = pylongfist.types.Trade()
         trade.order_id = 100
         trade.instrument_id = instrument_id

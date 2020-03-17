@@ -3,7 +3,7 @@ from . import mdmaker
 from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
 import kungfu.yijinjing.time as kft
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import kungfu.wingchun.msg as wc_msg
 
 
@@ -15,7 +15,7 @@ class MarketDataSim(pywingchun.MarketData):
         pywingchun.MarketData.__init__(self, low_latency, locator, "sim")
         self.config = MakerConfig(base=200.0, bound=1000, samples=1000,variation=4, randseed=6)
         self.orderbooks = {}
-        self.logger = create_logger("sim_md", "info", pyyjj.location( pyyjj.mode.LIVE, pyyjj.category.MD, "sim", "sim", locator))
+        self.logger = create_logger("sim_md", "info", yjj.location( yjj.mode.LIVE, yjj.category.MD, "sim", "sim", locator))
 
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())

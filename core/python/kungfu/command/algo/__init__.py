@@ -1,4 +1,4 @@
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup

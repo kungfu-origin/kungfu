@@ -1,5 +1,5 @@
 
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 import click
 from kungfu.command.journal import journal, pass_ctx_from_parent
@@ -29,7 +29,7 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
     pass_ctx_from_parent(ctx)
     session = kfj.find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
-    uid = pyyjj.hash_str_32(uname)
+    uid = yjj.hash_str_32(uname)
     ctx.category = '*'
     ctx.group = '*'
     ctx.name = '*'
@@ -37,23 +37,23 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
     locations = kfj.collect_journal_locations(ctx)
     location = locations[uid]
     home = kfj.make_location_from_dict(ctx, location)
-    io_device = pyyjj.io_device(home)
+    io_device = yjj.io_device(home)
     reader = io_device.open_reader_to_subscribe()
     if io_type == 'out' or io_type == 'all':
         for dest in location['readers']:
             dest_id = int(dest, 16)
             reader.join(home, dest_id, session['begin_time'])
 
-    if (io_type == 'in' or io_type == 'all') and not (home.category == pyyjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
-        master_home_uid = pyyjj.hash_str_32('system/master/master/live')
+    if (io_type == 'in' or io_type == 'all') and not (home.category == yjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
+        master_home_uid = yjj.hash_str_32('system/master/master/live')
         master_home_location = kfj.make_location_from_dict(ctx, locations[master_home_uid])
         reader.join(master_home_location, 0, session['begin_time'])
 
-        master_cmd_uid = pyyjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
+        master_cmd_uid = yjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
         master_cmd_location = kfj.make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, location['uid'], session['begin_time'])
 
-    start_time = pyyjj.now_in_nano() if not from_beginning else session["begin_time"]
+    start_time = yjj.now_in_nano() if not from_beginning else session["begin_time"]
     msg_count = 0
     msg_type_to_read = None if msg == "all" else kungfu.msg.Registry.meta_from_name(msg)["id"]
     if output:
@@ -83,7 +83,7 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
         if reader.data_available() and msg_count < max_messages:
             frame = reader.current_frame()
             if frame.dest == home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
-                request = pyyjj.get_RequestReadFrom(frame)
+                request = yjj.get_RequestReadFrom(frame)
                 source_location = kfj.make_location_from_dict(ctx, locations[request.source_id])
                 reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)
             if frame.dest == home.uid and frame.msg_type == yjj_msg.Deregister:

@@ -1,4 +1,5 @@
-import click
+from pykungfu import longfist
+from pykungfu import yijinjing as yjj
 from kungfu.command.account import *
 from PyInquirer import prompt
 
@@ -9,8 +10,9 @@ from PyInquirer import prompt
 def add(ctx, receive_md):
     pass_ctx_from_parent(ctx)
     answers = encrypt(ctx.schema, prompt(make_questions(ctx.schema)))
-    account_id = ctx.source + '_' + answers[ctx.schema['key']]
-    if find_account(ctx, account_id):
+    default_config = yjj.location(yjj.mode.LIVE, yjj.category.MD, ctx.source, ctx.source, ctx.locator).to(longfist.types.Config())
+    account_config = yjj.location(yjj.mode.LIVE, yjj.category.MD, ctx.source, ctx.schema['key'], ctx.locator).to(longfist.types.Config())
+    if ctx.profile.get(account_config):
         click.echo('Duplicate account')
     else:
         receive_md = receive_md or not ctx.db.list_source_accounts(ctx.source)

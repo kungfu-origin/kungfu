@@ -1,6 +1,6 @@
 import logging
 import os, sys, platform
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 from kungfu.yijinjing.time import *
 
 LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
@@ -64,14 +64,14 @@ class KungfuFormatter(logging.Formatter):
     def format(self, record):
         record.loglevel = self.format_level(record.levelname.lower())
         record.nanotime = strfnow(format='%m/%d %H:%M:%S.%N')
-        record.tid = pyyjj.thread_id()
+        record.tid = yjj.thread_id()
         return logging.Formatter.format(self, record)
 
 
 class ColorFormatter(KungfuFormatter):
     def format_level(self, levelname):
         levelname_f = KungfuFormatter.format_level(self, levelname)
-        if pyyjj.in_color_terminal():
+        if yjj.in_color_terminal():
             return '{}{}{}'.format(COLORS[levelname], levelname_f, ansicolor.reset)
         else:
             return levelname_f
@@ -92,10 +92,10 @@ class WinConsoleHandler(logging.StreamHandler):
         try:
             msg = self.format(record)
             stream = self.stream
-            if pyyjj.in_color_terminal():
+            if yjj.in_color_terminal():
                 stream.write(msg[:28])
                 self.flush()
-                pyyjj.color_print(record.levelname.lower(), '{:^8}'.format(record.levelname.lower()))
+                yjj.color_print(record.levelname.lower(), '{:^8}'.format(record.levelname.lower()))
                 stream.write(msg[36:])
                 stream.write(self.terminator)
                 self.flush()
@@ -113,7 +113,7 @@ def create_logger(name, level, location):
     if location is not None:
         log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
         log_name = '{}_py_{}'.format(name, log_dateext)
-        log_path = location.locator.layout_file(location, pyyjj.layout.LOG, log_name)
+        log_path = location.locator.layout_file(location, yjj.layout.LOG, log_name)
 
         file_handler = logging.FileHandler(log_path)
         file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))

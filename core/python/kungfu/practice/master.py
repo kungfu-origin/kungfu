@@ -5,7 +5,7 @@ import time
 import psutil
 import functools
 from pykungfu import longfist
-from pykungfu import yijinjing as pyyjj
+from pykungfu import yijinjing as yjj
 import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.msg as yjj_msg
 import kungfu.yijinjing.journal as kfj
@@ -32,9 +32,9 @@ def run_tasks(*args, **kwargs):
         TASKS[task_name](*args, **kwargs)
 
 
-class Master(pyyjj.master):
+class Master(yjj.master):
     def __init__(self, ctx):
-        pyyjj.master.__init__(self, pyyjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
+        yjj.master.__init__(self, yjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
         self.ctx = ctx
         self.ctx.master = self
         self.ctx.logger = create_logger("master", ctx.log_level, self.io_device.home)
@@ -48,7 +48,7 @@ class Master(pyyjj.master):
     def is_live_watcher(self, pid):
         info = self.ctx.apprentices[pid]
         location = info['location']
-        return info['process'].is_running() and location.category == pyyjj.category.SYSTEM and location.group == 'node'
+        return info['process'].is_running() and location.category == yjj.category.SYSTEM and location.group == 'node'
 
     def on_exit(self):
         self.ctx.logger.info('master checking on exit')
@@ -57,7 +57,7 @@ class Master(pyyjj.master):
             apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
                 self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
-                self.deregister_app(pyyjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
+                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
                 apprentice.terminate()
 
         count = 0
@@ -111,7 +111,7 @@ def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
             ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['location'].uname, pid)
-            ctx.master.deregister_app(pyyjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
+            ctx.master.deregister_app(yjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
             del ctx.apprentices[pid]
 
 
