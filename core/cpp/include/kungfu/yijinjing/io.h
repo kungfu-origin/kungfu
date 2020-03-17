@@ -30,6 +30,15 @@ namespace kungfu::yijinjing
 {
     FORWARD_DECLARE_PTR(session)
 
+    class sqlite_session_keeper
+    {
+    public:
+        virtual void open(sqlite3 *index_db) = 0;
+        virtual void close() = 0;
+    };
+
+    DECLARE_PTR(sqlite_session_keeper)
+
     class io_device : public resource
     {
     public:
@@ -98,10 +107,9 @@ namespace kungfu::yijinjing
 
         sqlite3 *index_db_ = nullptr;
         char *db_error_msg_ = nullptr;
-        sqlite3_session *db_session_ = nullptr;
-        int db_changeset_nb_ = 0;
-        void *db_changeset_ptr_ = nullptr;
         sqlite3_stmt *stmt_find_sessions_ = nullptr;
+
+        sqlite_session_keeper_ptr ssk_;
     };
 
     DECLARE_PTR(io_device)

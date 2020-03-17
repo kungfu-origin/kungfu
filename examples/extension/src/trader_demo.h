@@ -22,8 +22,8 @@ namespace kungfu
                           std::map<std::string, int> &config_int,
                           std::map<std::string, double> &config_double);
 
-                const AccountType get_account_type() const override
-                { return AccountType::Stock; }
+                const longfist::enums::AccountType get_account_type() const override
+                { return longfist::enums::AccountType::Stock; }
 
                 void on_start() override;
 

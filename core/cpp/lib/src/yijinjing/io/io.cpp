@@ -36,6 +36,44 @@ using namespace kungfu::yijinjing::nanomsg;
 
 namespace kungfu::yijinjing
 {
+    class local_sqlite_session_keeper : public sqlite_session_keeper
+    {
+    public:
+        local_sqlite_session_keeper()
+        {
+        }
+
+        void open(sqlite3 *index_db) override
+        {
+            int rc;
+
+            rc = sqlite3session_create(index_db, "main", &db_session_);
+            handle_sql_error(rc, "failed to create index db session");
+
+            rc = sqlite3session_attach(db_session_, nullptr);
+            handle_sql_error(rc, "failed to attach index db session");
+        }
+
+        void close() override
+        {
+            int rc = sqlite3session_changeset(db_session_, &db_changeset_nb_, &db_changeset_ptr_);
+            handle_sql_error(rc, "failed to collect index db session changeset");
+            SPDLOG_TRACE("index db changeset nb={}", db_changeset_nb_);
+//            sqlite3changeset_apply(
+//                    index_db_,
+//                    db_changeset_nb_, db_changeset_ptr_,
+//                    0, xConflict,
+//                    (void*)1
+//            );
+            sqlite3session_delete(db_session_);
+        }
+
+    private:
+        sqlite3_session *db_session_ = nullptr;
+        int db_changeset_nb_ = 0;
+        void *db_changeset_ptr_ = nullptr;
+    };
+
     class ipc_url_factory : public url_factory
     {
     public:
@@ -204,7 +242,7 @@ namespace kungfu::yijinjing
     };
 
     io_device::io_device(data::location_ptr home, const bool low_latency, const bool lazy) :
-            home_(std::move(home)), low_latency_(low_latency), lazy_(lazy)
+            home_(std::move(home)), low_latency_(low_latency), lazy_(lazy), ssk_(std::make_shared<local_sqlite_session_keeper>())
     {
         if (spdlog::default_logger()->name().empty())
         {
@@ -234,11 +272,7 @@ namespace kungfu::yijinjing
                 "failed to create tables"
         );
 
-        rc = sqlite3session_create(index_db_, "main", &db_session_);
-        handle_sql_error(rc, "failed to create index db session");
-
-        rc = sqlite3session_attach(db_session_, nullptr);
-        handle_sql_error(rc, "failed to attach index db session");
+        ssk_->open(index_db_);
 
         sqlite3_prepare_v2(
                 index_db_,
@@ -256,17 +290,8 @@ and json_extract(session.data, '$.end_time') <= ?4;
 
     io_device::~io_device()
     {
-        int rc = sqlite3session_changeset(db_session_, &db_changeset_nb_, &db_changeset_ptr_);
-        handle_sql_error(rc, "failed to collect index db session changeset");
-        SPDLOG_TRACE("index db changeset nb={}", db_changeset_nb_);
-//            sqlite3changeset_apply(
-//                    index_db_,
-//                    db_changeset_nb_, db_changeset_ptr_,
-//                    0, xConflict,
-//                    (void*)1
-//            );
         sqlite3_finalize(stmt_find_sessions_);
-        sqlite3session_delete(db_session_);
+        ssk_->close();
         sqlite3_close_v2(index_db_);
         SPDLOG_TRACE("index db closed");
     }
@@ -319,7 +344,8 @@ and json_extract(session.data, '$.end_time') <= ?4;
         {
             sqlite3_bind_int64(stmt_find_sessions_, 1, source);
             sqlite3_bind_int64(stmt_find_sessions_, 2, source);
-        } else
+        }
+        else
         {
             sqlite3_bind_int64(stmt_find_sessions_, 1, 0);
             sqlite3_bind_int64(stmt_find_sessions_, 2, INT64_MAX);
@@ -399,7 +425,8 @@ where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$
         {
             auto &&session = sessions_[frame->source()];
             session->update(frame);
-        } else
+        }
+        else
         {
             SPDLOG_ERROR("no session found for {:08x}", frame->source());
         }

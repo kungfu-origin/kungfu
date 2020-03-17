@@ -25,6 +25,11 @@ namespace kungfu
                 return false;
             }
 
+            bool MarketDataDemo::subscribe_all()
+            {
+                return false;
+            }
+
             bool MarketDataDemo::unsubscribe(const std::vector<longfist::types::Instrument> &instruments)
             {
                 return false;

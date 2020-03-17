@@ -26,6 +26,8 @@ namespace kungfu
 
                 bool subscribe(const std::vector<longfist::types::Instrument> &instruments) override;
 
+                bool subscribe_all() override;
+
                 bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) override;
             };
         }
