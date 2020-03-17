@@ -65,12 +65,12 @@ namespace kungfu::node
             if (info[0].IsArray())
             {
                 auto args = info[0].As<Napi::Array>();
-                std::vector<Commission> commissions{args.Length()};
+                std::vector<Commission> commissions;
                 for (int i = 0; i < args.Length(); i++)
                 {
                     Commission commission = {};
                     serialize::JsGet{}(args.Get(i), commission);
-                    SPDLOG_DEBUG("got commission from node: {}", commission.to_string());
+                    SPDLOG_INFO("got commission from node: {}", commission.to_string());
                     commissions.push_back(commission);
                 }
                 profile_.remove_all<Commission>();
