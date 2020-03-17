@@ -315,8 +315,8 @@ namespace kungfu::node::serialize
     class JsRestoreState
     {
     public:
-        explicit JsRestoreState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state, yijinjing::data::location_ptr location) :
-                app_(app), state_(state), location_(std::move(location))
+        explicit JsRestoreState(Napi::ObjectReference &state, yijinjing::data::location_ptr location) :
+                state_(state), location_(std::move(location))
         {}
 
         void operator()(int64_t from, int64_t to)
@@ -355,7 +355,6 @@ namespace kungfu::node::serialize
 
     private:
         JsSet set;
-        yijinjing::practice::apprentice &app_;
         Napi::ObjectReference &state_;
         yijinjing::data::location_ptr location_;
     };
@@ -421,6 +420,16 @@ namespace kungfu::node::serialize
         yijinjing::practice::apprentice &app_;
         Napi::ObjectReference &state_;
     };
+
+    inline void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &ref)
+    {
+        boost::hana::for_each(longfist::StateDataTypes, [&](auto it)
+        {
+            using DataType = typename decltype(+boost::hana::second(it))::type;
+            auto name = std::string(boost::hana::first(it).c_str());
+            ref.Set(name, Napi::Object::New(info.Env()));
+        });
+    }
 }
 
 #endif //KUNGFU_NODE_SERIALIZE_H

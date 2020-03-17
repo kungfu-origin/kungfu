@@ -18,9 +18,7 @@ namespace kungfu::yijinjing::practice
     {}
 
     profile::profile(const std::string &profile_db_file) : profile_db_file_(profile_db_file)
-    {
-        get_storage().sync_schema();
-    }
+    {}
 
     longfist::sqlite::ProfileStorageType &profile::get_storage()
     {

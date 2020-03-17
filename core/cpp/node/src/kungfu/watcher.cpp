@@ -4,6 +4,9 @@
 
 #include <sstream>
 #include "io.h"
+#include "history.h"
+#include "config_store.h"
+#include "commission_store.h"
 #include "watcher.h"
 
 using namespace kungfu::rx;
@@ -30,20 +33,11 @@ namespace kungfu::node
         );
     }
 
-    inline void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &ref)
-    {
-        boost::hana::for_each(StateDataTypes, [&](auto it)
-        {
-            using DataType = typename decltype(+boost::hana::second(it))::type;
-            auto name = std::string(boost::hana::first(it).c_str());
-            ref.Set(name, Napi::Object::New(info.Env()));
-        });
-    }
-
     Watcher::Watcher(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             apprentice(GetWatcherLocation(info), true),
             ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
+            history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),
             config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
             commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),
             state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
@@ -53,8 +47,8 @@ namespace kungfu::node
             update_ledger(ledger_ref_),
             publish(*this, state_ref_)
     {
-        InitStateMap(info, state_ref_);
-        InitStateMap(info, ledger_ref_);
+        serialize::InitStateMap(info, state_ref_);
+        serialize::InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
         auto today = time::today_nano();
@@ -79,6 +73,7 @@ namespace kungfu::node
         ledger_ref_.Unref();
         state_ref_.Unref();
         config_ref_.Unref();
+        history_ref_.Unref();
     }
 
     void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value)
@@ -94,6 +89,11 @@ namespace kungfu::node
     Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info)
     {
         return config_ref_.Value();
+    }
+
+    Napi::Value Watcher::GetHistory(const Napi::CallbackInfo &info)
+    {
+        return history_ref_.Value();
     }
 
     Napi::Value Watcher::GetCommission(const Napi::CallbackInfo &info)
@@ -215,49 +215,6 @@ namespace kungfu::node
         return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
     }
 
-    Napi::Value Watcher::FormatTime(const Napi::CallbackInfo &info)
-    {
-        int64_t timestamp = 0;
-        if (info[0].IsNumber())
-        {
-            timestamp = info[0].ToNumber().Int32Value();
-        }
-        if (info[0].IsBigInt())
-        {
-            bool lossless;
-            timestamp = info[0].As<Napi::BigInt>().Int64Value(&lossless);
-        }
-        return Napi::String::New(info.Env(), time::strftime(timestamp));
-    }
-
-    Napi::Value Watcher::SelectPeriod(const Napi::CallbackInfo &info)
-    {
-        auto parse_time = [&](auto i)
-        {
-            return time::strptime(info[i].ToString().Utf8Value(), "%Y%m%d");
-        };
-        try
-        {
-            int64_t from = parse_time(0);
-            int64_t to = info.Length() > 1 ? parse_time(1) : from + time_unit::NANOSECONDS_PER_DAY;
-            SPDLOG_INFO("select period from {} to {}", time::strftime(from), time::strftime(to));
-            Napi::ObjectReference result_ref = Napi::ObjectReference::New(Napi::Object::New(info.Env()));
-            InitStateMap(info, result_ref);
-            for (const auto &config : ConfigStore::Unwrap(config_ref_.Value())->profile_.get_all(Config{}))
-            {
-                auto state_location = location::make_shared(config, get_locator());
-                serialize::JsRestoreState(*this, result_ref, state_location)(from, to);
-            }
-            serialize::JsRestoreState(*this, result_ref, ledger_location_)(from, to);
-            return result_ref.Value();
-        } catch (const std::exception &ex)
-        {
-            SPDLOG_ERROR("failed to select: {}", ex.what());
-            yijinjing::util::print_stack_trace();
-            return Napi::Value();
-        }
-    }
-
     void Watcher::Init(Napi::Env env, Napi::Object exports)
     {
         Napi::HandleScope scope(env);
@@ -273,10 +230,9 @@ namespace kungfu::node
                 InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),
                 InstanceMethod("issueOrder", &Watcher::IssueOrder),
                 InstanceMethod("cancelOrder", &Watcher::CancelOrder),
-                InstanceMethod("formatTime", &Watcher::FormatTime),
-                InstanceMethod("selectPeriod", &Watcher::SelectPeriod),
                 InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
                 InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
+                InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),
                 InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet),
                 InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
                 InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
@@ -356,7 +312,7 @@ namespace kungfu::node
     void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to)
     {
         add_location(0, state_location);
-        serialize::JsRestoreState(*this, ledger_ref_, state_location)(from, to);
+        serialize::JsRestoreState(ledger_ref_, state_location)(from, to);
     }
 
     yijinjing::data::location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info)

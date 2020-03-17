@@ -63,7 +63,9 @@ namespace kungfu::longfist::sqlite
                 return sqlite_orm::make_storage(state_db_file, tables...);
             };
         };
-        return boost::hana::unpack(tables, named_storage(state_db_file));
+        auto storage = boost::hana::unpack(tables, named_storage(state_db_file));
+        storage.sync_schema();
+        return storage;
     };
 
     using ProfileStorageType = decltype(make_storage(std::string(), ProfileDataTypes));

@@ -17,7 +17,7 @@ namespace kungfu::node
     CommissionStore::CommissionStore(const Napi::CallbackInfo &info) :
             ObjectWrap(info),
             locator_(IODevice::GetLocator(info)),
-            profile_(IODevice::GetLocator(info))
+            profile_(locator_)
     {}
 
     CommissionStore::~CommissionStore()

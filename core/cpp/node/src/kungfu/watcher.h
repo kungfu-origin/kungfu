@@ -10,8 +10,6 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include "operators.h"
 #include "journal.h"
-#include "config_store.h"
-#include "commission_store.h"
 
 namespace kungfu::node
 {
@@ -29,6 +27,8 @@ namespace kungfu::node
         Napi::Value GetLocator(const Napi::CallbackInfo &info);
 
         Napi::Value GetConfig(const Napi::CallbackInfo &info);
+
+        Napi::Value GetHistory(const Napi::CallbackInfo &info);
 
         Napi::Value GetCommission(const Napi::CallbackInfo &info);
 
@@ -60,10 +60,6 @@ namespace kungfu::node
 
         Napi::Value CancelOrder(const Napi::CallbackInfo &info);
 
-        Napi::Value FormatTime(const Napi::CallbackInfo &info);
-
-        Napi::Value SelectPeriod(const Napi::CallbackInfo &info);
-
         static void Init(Napi::Env env, Napi::Object exports);
 
     protected:
@@ -75,6 +71,7 @@ namespace kungfu::node
     private:
         static Napi::FunctionReference constructor;
         yijinjing::data::location_ptr ledger_location_;
+        Napi::ObjectReference history_ref_;
         Napi::ObjectReference config_ref_;
         Napi::ObjectReference commission_ref_;
         Napi::ObjectReference state_ref_;

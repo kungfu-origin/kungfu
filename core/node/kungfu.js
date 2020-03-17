@@ -55,8 +55,12 @@ const locator = function(home) {
 
 exports.longfist = bindings.longfist;
 
-exports.io_device = function(category, group, name, mode, home) {
+exports.IODevice = function(category, group, name, mode, home) {
     return new bindings.IODevice(category, group, name, mode, locator(home));
+};
+
+exports.History = function(home) {
+    return new bindings.History(locator(home));
 };
 
 exports.ConfigStore = function(home) {
