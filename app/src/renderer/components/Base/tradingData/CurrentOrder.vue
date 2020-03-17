@@ -54,7 +54,7 @@ import tradingDataMixin from './js/tradingDataMixin';
 import { dealOrder } from "__gUtils/kungfuUtils";
 import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
-import { nanoCancelAllOrder } from '__io/nano/nanoReq';
+// import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
@@ -201,11 +201,11 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => t.$message.info('正在发送撤单指令...'))
-            .then(() => nanoCancelAllOrder({
-                targetId: t.moduleType === 'account' ? t.gatewayName : t.currentId,
-                cancelType: t.moduleType,
-                id: t.currentId
-            }))
+            // .then(() => nanoCancelAllOrder({
+            //     targetId: t.moduleType === 'account' ? t.gatewayName : t.currentId,
+            //     cancelType: t.moduleType,
+            //     id: t.currentId
+            // }))
             .then(() => t.$message.success('撤单指令已发送！'))
             .catch((err) => {
                 if(err == 'cancel') return

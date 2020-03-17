@@ -217,7 +217,6 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
               "name": "代码           ",
               "type": SystemConfigChildItemTypeEnum.Str,
               "default": "",
-              'cellWidth': 5
             },
             {
               "key": "exchange_id",

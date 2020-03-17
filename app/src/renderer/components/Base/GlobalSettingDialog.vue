@@ -170,7 +170,7 @@
 								v-for="option in cell.data"
 								:key="option.value"
 								:label="option.name"
-								:value="option.value"
+								:value="+option.value"
 								></el-option>
 							</el-select>
 							</el-col>
@@ -208,8 +208,7 @@ import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getExtensionConfigs, getExtensions, getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
-// import { getFeeSettingData, setFeeSettingData } from "__io/db/base";
-import { getKfCommission } from '__gUtils/kungfuUtils';
+import { getKfCommission, setKfCommission } from '__gUtils/kungfuUtils';
 
 const { shell }  = require('electron').remote 
 const path = require("path");
@@ -227,7 +226,6 @@ props: {
 },
 
 data() {
-	console.log(buildSystemConfig())
 	return {
 		activeSettingTypes: ["system", "trading"],
 		activeSettingItem: "",
@@ -239,9 +237,8 @@ data() {
 		},
 		tablesSaveMethods: {
 			commission: {
-				filters: ["product_id", "mode", "exchange_id"], //必填，且唯一
-				// method: setFeeSettingData,
-				method: () => {}
+				filters: ["instrument_id", "mode", "exchange_id"], //必填，且唯一
+				method: setKfCommission,
 			}
 		}
 	};
@@ -253,7 +250,6 @@ async beforeMount() {
 
 	//获取
 	t.tables.commission = await getKfCommission();
-	console.log(t.tables.commission)
 },
 
 mounted() {
@@ -327,7 +323,6 @@ methods: {
 
 	//打开文件夹 
 	handleOpenWhlFolder() {
-		console.log(path.join(KUNGFU_RESOURCES_DIR, 'python'))
 		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'python'));
 	},
 
@@ -375,9 +370,10 @@ methods: {
 		Object.keys(t.tablesSaveMethods || {}).forEach(key => {
 			const filters = t.tablesSaveMethods[key].filters;
 			const saveMethod = t.tablesSaveMethods[key].method;
+
 			//去重
 			const targetDataResolve = [{}, ...t.tables[key]].reduce((a, b) => {
-				const rowKey = filters.map(key => b[key] || "").join("_");
+				const rowKey = filters.map(key => b[key].toString() || "").join("_");
 				a[rowKey] = b;
 				return a;
 			});
@@ -394,7 +390,7 @@ methods: {
 				return true;
 			});
 			
-			saveMethod(targetData)
+			saveMethod(Object.freeze(targetData))
 				.catch(err => console.error(err));
 		});
 	},
@@ -491,7 +487,7 @@ height: 88%;
 }
 .setting-sub-item__table-content {
 .table-content {
-	width: calc(100% - 50px);
+	width: calc(100% - 10px);
 }
 .table-header {
 	height: 35px;

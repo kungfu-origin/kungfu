@@ -94,7 +94,12 @@ export const getKfCommission = () => {
     })
 }
 
-export const setKfCommission = () => {
+export const setKfCommission = (commissionItems: any) => {
+
+    const commissionData = commissionStore
+
+    console.log(commissionData)
+    console.log(commissionItems)
     
 }
 
