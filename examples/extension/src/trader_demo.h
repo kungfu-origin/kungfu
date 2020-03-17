@@ -6,7 +6,6 @@
 #include <map>
 
 #include <kungfu/yijinjing/common.h>
-#include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/broker/trader.h>
 
 namespace kungfu

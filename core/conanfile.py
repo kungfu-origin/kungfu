@@ -42,6 +42,9 @@ class KungfuCoreConan(ConanFile):
         "electron_version": "4.2.11"
     }
 
+    def imports(self):
+        self.copy('*', src='include', dst='include')
+
     def build(self):
         build_type = self._get_build_type()
         self._gen_build_info(build_type)

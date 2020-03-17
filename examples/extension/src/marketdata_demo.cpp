@@ -20,12 +20,12 @@ namespace kungfu
                 SPDLOG_INFO("Start kfext demo MD");
             }
 
-            bool MarketDataDemo::subscribe(const std::vector<wingchun::msg::data::Instrument> &instruments)
+            bool MarketDataDemo::subscribe(const std::vector<longfist::types::Instrument> &instruments)
             {
                 return false;
             }
 
-            bool MarketDataDemo::unsubscribe(const std::vector<wingchun::msg::data::Instrument> &instruments)
+            bool MarketDataDemo::unsubscribe(const std::vector<longfist::types::Instrument> &instruments)
             {
                 return false;
             }

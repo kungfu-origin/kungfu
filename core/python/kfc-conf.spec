@@ -20,16 +20,18 @@ ext_output_dir = os.path.join(build_dir, 'build_extensions')
 datas = [
     (build_output_dir + sep + '*', '.'),
     (ext_dir, 'extensions'),
-    (ext_output_dir, 'extensions')
+    (ext_output_dir, 'extensions'),
+    (build_dir + sep + 'include', 'include')
 ]
 
 def add_include(path):
     for include in glob.glob(path + sep + '**' + sep + 'include', recursive=True):
+        print(f'adding include {include}')
         datas.append((include, 'include'))
 
 add_include(cpp_dir)
 add_include(deps_dir)
-add_include(build_dir + sep + "deps")
+add_include(build_dir + sep + 'deps')
 
 def add_lib(path):
     for lib in glob.glob(path + sep + '**' + sep + '*.lib', recursive=True):
