@@ -1,7 +1,7 @@
 
 import moment from 'moment';
 
-import { watcher } from '__gUtils/kungfuUtils';
+import { watcher, decodeKungfuLocation } from '__gUtils/kungfuUtils';
 
 export default {
     props: {
@@ -86,13 +86,33 @@ export default {
             const kungfuData = watcher.selectPeriod(from, to)
             console.log(kungfuData)
             console.error('请求历史数据 TODO')
+
+            let targetList = [];
+            if (this.kungfuBoardType === 'order') {
+                targetList = Object.values(kungfuData.Order);
+            } else if (this.kungfuBoardType === 'trade') {
+                targetList = Object.values(kungfuData.Trade);
+            }
+
+            let kungfuIdKey = ''
+            if (this.moduleType === 'account') {
+                kungfuIdKey = 'source'
+            } else if (this.moduleType === 'strategy') {
+                kungfuIdKey = 'dest'
+            }
+
+            targetList.filter(item => {
+                const key = item[kungfuIdKey];
+                
+            })
+
+
         },
 
         resetData() {
-            const t = this;
-            t.todayFinish = true;
-            t.searchKeyword = "";
-            t.tableData = Object.freeze([]);
+            this.todayFinish = true;
+            this.searchKeyword = "";
+            this.tableData = Object.freeze([]);
             return true;
         },
 
