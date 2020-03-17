@@ -25,6 +25,8 @@ namespace kungfu::node
 
         Napi::Value GetCommission(const Napi::CallbackInfo &info);
 
+        Napi::Value SetAllCommission(const Napi::CallbackInfo &info);
+
         Napi::Value GetAllCommission(const Napi::CallbackInfo &info);
 
         Napi::Value RemoveCommission(const Napi::CallbackInfo &info);

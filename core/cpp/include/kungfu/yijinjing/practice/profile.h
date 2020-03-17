@@ -64,6 +64,12 @@ namespace kungfu::yijinjing::practice
             boost::hana::unpack(pk_members, operation);
         }
 
+        template<typename DataType>
+        void remove_all()
+        {
+            get_storage().remove_all<DataType>();
+        }
+
     private:
         const std::string profile_db_file_;
 

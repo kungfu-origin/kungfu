@@ -46,9 +46,7 @@ namespace kungfu::node
 
     Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info)
     {
-        Commission commission = getCommissionFromJs(info, locator_);
-        serialize::JsGet{}(info[0], commission);
-        profile_.set(commission);
+        profile_.set(getCommissionFromJs(info, locator_));
         return Napi::Value();
     }
 
@@ -60,17 +58,46 @@ namespace kungfu::node
         return result;
     }
 
+    Napi::Value CommissionStore::SetAllCommission(const Napi::CallbackInfo &info)
+    {
+        try
+        {
+            if (info[0].IsArray())
+            {
+                auto args = info[0].As<Napi::Array>();
+                std::vector<Commission> commissions{args.Length()};
+                for (int i = 0; i < args.Length(); i++)
+                {
+                    Commission commission = {};
+                    serialize::JsGet{}(args.Get(i), commission);
+                    SPDLOG_DEBUG("got commission from node: {}", commission.to_string());
+                    commissions.push_back(commission);
+                }
+                profile_.remove_all<Commission>();
+                for (auto commission : commissions)
+                {
+                    profile_.set(commission);
+                }
+                return Napi::Boolean::New(info.Env(), true);
+            }
+        } catch (const std::exception &ex)
+        {
+            SPDLOG_ERROR("failed to set commissions {}", ex.what());
+        }
+        return Napi::Boolean::New(info.Env(), false);
+    }
+
     Napi::Value CommissionStore::GetAllCommission(const Napi::CallbackInfo &info)
     {
-        auto table = Napi::Object::New(info.Env());
-        for (const auto &commission : profile_.get_all(Commission{}))
+        auto commissions = profile_.get_all(Commission{});
+        auto result = Napi::Array::New(info.Env(), commissions.size());
+        for (int i = 0; i < commissions.size(); i++)
         {
-            std::string uid = fmt::format("{:016x}", commission.uid());
-            Napi::Value value = Napi::Object::New(info.Env());
-            table.Set(uid, value);
-            set(commission, value);
+            auto target = Napi::Object::New(info.Env());
+            set(commissions[i], target);
+            result.Set(i, target);
         }
-        return table;
+        return result;
     }
 
     Napi::Value CommissionStore::RemoveCommission(const Napi::CallbackInfo &info)
@@ -86,6 +113,7 @@ namespace kungfu::node
         Napi::Function func = DefineClass(env, "CommissionStore", {
                 InstanceMethod("setCommission", &CommissionStore::SetCommission),
                 InstanceMethod("getCommission", &CommissionStore::GetCommission),
+                InstanceMethod("setAllCommission", &CommissionStore::SetAllCommission),
                 InstanceMethod("getAllCommission", &CommissionStore::GetAllCommission),
                 InstanceMethod("removeCommission", &CommissionStore::RemoveCommission),
         });
