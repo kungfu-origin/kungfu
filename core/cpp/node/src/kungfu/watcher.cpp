@@ -57,6 +57,7 @@ namespace kungfu::node
         InitStateMap(info, ledger_ref_);
         SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
+        auto today = time::today_nano();
         for (const auto &config : ConfigStore::Unwrap(config_ref_.Value())->profile_.get_all(Config{}))
         {
             auto state_location = location::make_shared(config, get_locator());
@@ -66,9 +67,9 @@ namespace kungfu::node
                 auto proxy_location = location::make_shared(state_location->mode, category::STRATEGY, "node", strategy_name, get_locator());
                 proxy_locations_.emplace(proxy_location->uid, proxy_location);
             }
-            RestoreState(state_location);
+            RestoreState(state_location, today, INT64_MAX);
         }
-        RestoreState(ledger_location_);
+        RestoreState(ledger_location_, today, INT64_MAX);
         SPDLOG_INFO("watcher ledger restored");
     }
 
@@ -352,10 +353,10 @@ namespace kungfu::node
           });
     }
 
-    void Watcher::RestoreState(const location_ptr &state_location)
+    void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to)
     {
         add_location(0, state_location);
-        serialize::JsRestoreState(*this, ledger_ref_, state_location)();
+        serialize::JsRestoreState(*this, ledger_ref_, state_location)(from, to);
     }
 
     yijinjing::data::location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info)

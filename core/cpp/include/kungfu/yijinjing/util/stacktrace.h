@@ -16,7 +16,7 @@ namespace kungfu::yijinjing::util
 
 #ifdef _WINDOWS
 
-    DWORD print_stack_trace(EXCEPTION_POINTERS *ep);
+    DWORD print_stack_trace(EXCEPTION_POINTERS *ep = nullptr);
 
 #else
 

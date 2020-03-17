@@ -85,7 +85,7 @@ namespace kungfu::node
         serialize::JsPublishState publish;
         std::unordered_map<uint32_t, yijinjing::data::location_ptr> proxy_locations_;
 
-        void RestoreState(const yijinjing::data::location_ptr &config_location);
+        void RestoreState(const yijinjing::data::location_ptr &config_location, int64_t from, int64_t to);
 
         yijinjing::data::location_ptr FindLocation(const Napi::CallbackInfo &info);
 

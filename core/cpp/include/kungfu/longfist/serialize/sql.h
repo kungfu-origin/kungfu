@@ -11,6 +11,8 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
+#include <utility>
+
 namespace kungfu::longfist::sqlite
 {
     constexpr auto make_storage = [](const std::string &state_db_file, const auto &types)
@@ -67,30 +69,37 @@ namespace kungfu::longfist::sqlite
     using ProfileStorageType = decltype(make_storage(std::string(), ProfileDataTypes));
     using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
 
+    template<typename, typename = void>
+    struct time_spec;
+
     template <typename DataType>
-    std::enable_if_t<boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
-    get_all(StateStorageType &storage, int64_t from = yijinjing::time::today_nano(), int64_t to = INT64_MAX)
+    struct time_spec<DataType, std::enable_if_t<not DataType::has_timestamp>>
     {
-        return storage.get_all<DataType>();
+        static inline std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to)
+        {
+            return storage.get_all<DataType>();
+        };
     };
 
     template <typename DataType>
-    std::enable_if_t<not boost::hana::is_nothing(DataType::timestamp_key), std::vector<DataType>>
-    get_all(StateStorageType &storage,int64_t from = yijinjing::time::today_nano(), int64_t to = INT64_MAX)
+    struct time_spec<DataType, std::enable_if_t<DataType::has_timestamp>>
     {
-        using namespace sqlite_orm;
-        auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [](auto it)
+        static inline std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to)
         {
-            return DataType::timestamp_key.value() == boost::hana::first(it);
-        });
-        auto accessor = boost::hana::second(*just);
-        auto ts_member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
-        return storage.get_all<DataType>(where(greater_or_equal(ts_member_pointer, from) and lesser_or_equal(ts_member_pointer, to)));
+            using namespace sqlite_orm;
+            auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), [](auto it)
+            {
+                return DataType::timestamp_key.value() == boost::hana::first(it);
+            });
+            auto accessor = boost::hana::second(*just);
+            auto ts = member_pointer_trait<decltype(accessor)>().pointer();
+            return storage.get_all<DataType>(where(greater_or_equal(ts, from) and lesser_or_equal(ts, to)));
+        };
     };
 
     struct sqlizer
     {
-        explicit sqlizer(yijinjing::data::location_ptr location) : location_(location)
+        explicit sqlizer(yijinjing::data::location_ptr location) : location_(std::move(location))
         {}
 
         void restore(const yijinjing::journal::writer_ptr &app_cmd_writer)
@@ -100,12 +109,13 @@ namespace kungfu::longfist::sqlite
             {
                 ensure_storage(dest);
             }
+            auto today = yijinjing::time::today_nano();
             boost::hana::for_each(StateDataTypes, [&](auto it)
             {
                 using DataType = typename decltype(+boost::hana::second(it))::type;
                 for (auto &pair : storages_)
                 {
-                    for (auto &data : get_all<DataType>(pair.second))
+                    for (auto &data : time_spec<DataType>::get_all(pair.second, today, INT64_MAX))
                     {
                         app_cmd_writer->write(0, data);
                     }

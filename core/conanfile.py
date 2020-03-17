@@ -137,9 +137,11 @@ class KungfuCoreConan(ConanFile):
         with tools.chdir(os.path.pardir):
             rc = subprocess.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
             if tools.detected_os() == 'Macos' and os.path.exists('build/kfc/.Python'):
-                os.chdir('build/kfc')
+                os.chdir(os.path.join('build', 'kfc'))
                 os.rename('.Python', 'Python')
                 os.symlink('Python', '.Python')
+            if tools.detected_os() == 'Windows' and os.path.exists(os.path.join('build', build_type, 'sqlite3.dll')):
+                shutil.copy2(os.path.join('build', build_type, 'sqlite3.dll'), os.path.join('build', 'kfc'))
             if rc != 0:
                 self.output.error('PyInstaller failed')
                 sys.exit(rc)

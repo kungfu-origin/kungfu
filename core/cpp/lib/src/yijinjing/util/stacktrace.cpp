@@ -28,8 +28,7 @@ namespace kungfu::yijinjing::util
     DWORD print_stack_trace(EXCEPTION_POINTERS *ep)
     {
         SPDLOG_CRITICAL("Uncaught exception");
-        StackWalker sw;
-        sw.ShowCallstack();
+        StackWalker().ShowCallstack();
         return EXCEPTION_EXECUTE_HANDLER;
     }
 #else

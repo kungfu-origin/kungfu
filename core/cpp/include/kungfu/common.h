@@ -36,12 +36,13 @@ struct NAME : public kungfu::data<NAME> { \
     static constexpr auto type_name = HANA_STR(#NAME); \
     static constexpr auto primary_keys = PRIMARY_KEYS; \
     static constexpr auto timestamp_key = TIMESTAMP_KEY; \
+    static constexpr bool has_timestamp = boost::hana::is_just(TIMESTAMP_KEY); \
     NAME() {}; \
     explicit NAME(const char *address, const uint32_t length) { parse(address, length); }; \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__); \
 }
 
-#define KF_DEFINE_PACK_TYPE(NAME, TAG, PRIMARY_KEYS, ...) KF_PACK_TYPE_BEGIN KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, __VA_ARGS__) KF_PACK_TYPE_END
+#define KF_DEFINE_PACK_TYPE(NAME, TAG, PRIMARY_KEYS, TIMESTAMP_KEY, ...) KF_PACK_TYPE_BEGIN KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, TIMESTAMP_KEY, __VA_ARGS__) KF_PACK_TYPE_END
 
 #define KF_DEFINE_MARK_TYPE(NAME, TAG) \
 struct NAME : public kungfu::data<NAME> { \
@@ -49,6 +50,7 @@ struct NAME : public kungfu::data<NAME> { \
     static constexpr auto type_name = HANA_STR(#NAME); \
     static constexpr auto primary_keys = boost::hana::make_tuple(); \
     static constexpr auto timestamp_key = boost::hana::nothing; \
+    static constexpr bool has_timestamp = false; \
 }
 
 #ifdef BOOST_HANA_WORKAROUND_MSVC_PREPROCESSOR_616033
@@ -124,7 +126,7 @@ namespace kungfu
             memcpy(value, t, sizeof(value));
         }
 
-        size_t size() const
+        [[nodiscard]] size_t size() const
         {
             return N;
         }
