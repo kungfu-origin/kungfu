@@ -16,15 +16,9 @@
 #ifndef KUNGFU_YIJINJING_COMMON_H
 #define KUNGFU_YIJINJING_COMMON_H
 
-#include <utility>
-#include <typeinfo>
 #include <csignal>
 #include <cstdarg>
-
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
 #include <rxcpp/rx.hpp>
-#include <nlohmann/json.hpp>
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>

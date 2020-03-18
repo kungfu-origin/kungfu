@@ -2,9 +2,7 @@
 // Created by Keren Dong on 2019-06-15.
 //
 
-#include <utility>
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/util/os.h>

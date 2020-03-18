@@ -18,11 +18,9 @@
 //
 
 #include <csignal>
-#include <spdlog/spdlog.h>
-#include <nlohmann/json.hpp>
-#include <fmt/format.h>
 #include <hffix.hpp>
 
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 

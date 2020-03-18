@@ -13,9 +13,7 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <utility>
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/journal/journal.h>

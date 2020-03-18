@@ -2,12 +2,11 @@
 // Created by Keren Dong on 2019-06-06.
 //
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/daily_file_sink.h>
-
-#include <kungfu/yijinjing/util/util.h>
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/log/setup.h>
+
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 namespace kungfu::yijinjing::log
 {

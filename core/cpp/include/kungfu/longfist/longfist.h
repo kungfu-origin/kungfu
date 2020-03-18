@@ -5,9 +5,6 @@
 #ifndef KUNGFU_LONGFIST_H
 #define KUNGFU_LONGFIST_H
 
-#include <spdlog/spdlog.h>
-#include <fmt/format.h>
-
 #include <kungfu/common.h>
 #include <kungfu/longfist/enums.h>
 #include <kungfu/longfist/types.h>

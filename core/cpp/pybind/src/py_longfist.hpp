@@ -11,9 +11,9 @@
 
 #include <sstream>
 
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
-#include <kungfu/common.h>
 
 namespace pybind11::detail
 {

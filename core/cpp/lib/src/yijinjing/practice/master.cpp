@@ -2,11 +2,7 @@
 // Created by Keren Dong on 2019-06-15.
 //
 
-#include <typeinfo>
-#include <nlohmann/json.hpp>
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/time.h>

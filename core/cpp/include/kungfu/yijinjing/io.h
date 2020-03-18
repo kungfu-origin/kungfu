@@ -20,7 +20,6 @@
 #ifndef KUNGFU_IO_H
 #define KUNGFU_IO_H
 
-#include <utility>
 #include <sqlite3.h>
 
 #include <kungfu/yijinjing/journal/journal.h>

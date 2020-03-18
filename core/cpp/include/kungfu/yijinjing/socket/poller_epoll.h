@@ -7,7 +7,7 @@
 
 #include "poller.h"
 #include <sys/epoll.h>
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 
 namespace kungfu
 {

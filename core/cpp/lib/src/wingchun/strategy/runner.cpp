@@ -2,12 +2,9 @@
 // Created by Keren Dong on 2019-06-20.
 //
 
-#include <utility>
-#include <fmt/format.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
-
 #include <kungfu/wingchun/strategy/runner.h>
 
 using namespace kungfu::rx;

@@ -13,15 +13,14 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <utility>
 #include <mutex>
 
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/journal/journal.h>
-#include <spdlog/spdlog.h>
 
 namespace kungfu::yijinjing::journal
 {

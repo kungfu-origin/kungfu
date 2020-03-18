@@ -2,8 +2,7 @@
 // Created by Keren Dong on 2019-06-28.
 //
 
-#include <utility>
-
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/utils.h>

@@ -6,7 +6,7 @@
 #define KUNGFU_WINGCHUN_UTILS_H
 
 #include <hffix.hpp>
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/yijinjing/journal/journal.h>

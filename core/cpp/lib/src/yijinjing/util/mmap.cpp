@@ -15,8 +15,7 @@
 
 #endif // _WINDOWS
 
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/util/os.h>
 

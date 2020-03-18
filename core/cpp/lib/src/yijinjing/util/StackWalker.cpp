@@ -84,7 +84,7 @@
 
 #ifdef _WINDOWS
 
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 #include "StackWalker.h"
 
 #include <stdio.h>

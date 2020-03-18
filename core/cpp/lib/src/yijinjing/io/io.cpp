@@ -13,13 +13,11 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <utility>
-#include <spdlog/spdlog.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/reqrep.h>
 #include <nanomsg/pubsub.h>
-#include <nlohmann/json.hpp>
 
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/log/setup.h>

@@ -2,8 +2,7 @@
 // Created by Keren Dong on 2019-05-25.
 //
 
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 

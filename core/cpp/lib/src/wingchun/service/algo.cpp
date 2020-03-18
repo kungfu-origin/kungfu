@@ -2,8 +2,6 @@
 // Created by qlu on 2019-10-31.
 //
 
-#include <utility>
-
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/utils.h>
 #include <kungfu/wingchun/service/algo.h>

@@ -6,7 +6,7 @@
 #define KUNGFU_SOCKET_H
 
 #include "os.h"
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 
 namespace kungfu
 {

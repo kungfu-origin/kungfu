@@ -2,8 +2,7 @@
 // Created by Keren Dong on 2019-06-20.
 //
 
-#include <utility>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/wingchun/broker/trader.h>
 

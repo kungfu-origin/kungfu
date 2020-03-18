@@ -9,8 +9,16 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <typeinfo>
+#include <utility>
 #include <boost/hana.hpp>
+#include <fmt/format.h>
 #include <nlohmann/json.hpp>
+
+// cope with conan spdlog
+#undef SPDLOG_COMPILED_LIB
+#undef SPDLOG_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #ifdef BOOST_HANA_CONFIG_ENABLE_STRING_UDL
 using namespace boost::hana::literals;

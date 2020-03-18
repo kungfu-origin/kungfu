@@ -5,7 +5,7 @@
 #ifndef KUNGFU_LOG_H
 #define KUNGFU_LOG_H
 
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/common.h>
 
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"

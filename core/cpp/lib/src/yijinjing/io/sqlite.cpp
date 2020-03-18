@@ -2,9 +2,8 @@
 // Created by Keren Dong on 2020/2/25.
 //
 
-#include <string>
 #include <sqlite3.h>
-#include <spdlog/spdlog.h>
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/common.h>
 
 namespace kungfu::yijinjing

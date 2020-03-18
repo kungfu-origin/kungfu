@@ -3,8 +3,8 @@
 //
 
 #include <signal.h>
-#include <spdlog/spdlog.h>
 
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/yijinjing/practice/hero.h>
 

@@ -2,8 +2,9 @@
 // Created by qlu on 2019/2/11.
 //
 
-#include <utility>
 #include <algorithm>
+
+#include <kungfu/common.h>
 #include <kungfu/wingchun/common.h>
 #include "trader_xtp.h"
 #include "type_convert_xtp.h"

@@ -11,8 +11,6 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
-#include <utility>
-
 namespace kungfu::longfist::sqlite
 {
     constexpr auto make_storage = [](const std::string &state_db_file, const auto &types)

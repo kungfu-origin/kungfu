@@ -2,9 +2,10 @@
 // Created by qlu on 2019/2/11.
 //
 
-#include <utility>
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/wingchun/common.h>
+
 #include "marketdata_xtp.h"
 #include "serialize_xtp.h"
 #include "type_convert_xtp.h"

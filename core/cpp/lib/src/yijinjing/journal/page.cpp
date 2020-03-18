@@ -13,11 +13,7 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <utility>
-#include <sstream>
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
-
+#include <kungfu/common.h>
 #include <kungfu/yijinjing/util/os.h>
 #include <kungfu/yijinjing/journal/page.h>
 

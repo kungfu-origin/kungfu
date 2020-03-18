@@ -16,9 +16,9 @@
 #ifndef YIJINJING_JOURNAL_H
 #define YIJINJING_JOURNAL_H
 
-#include <utility>
 #include <mutex>
 
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/journal/frame.h>

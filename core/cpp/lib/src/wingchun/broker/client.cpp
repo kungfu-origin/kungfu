@@ -2,8 +2,6 @@
 // Created by Keren Dong on 2020/3/12.
 //
 
-#include <utility>
-
 #include <kungfu/wingchun/utils.h>
 #include <kungfu/wingchun/broker/client.h>
 
