@@ -2,6 +2,9 @@
 // Created by Keren Dong on 2020/2/15.
 //
 
+#include <kungfu/common.h>
+#include <kungfu/longfist/longfist.h>
+
 #include "longfist.h"
 
 using namespace kungfu::longfist;

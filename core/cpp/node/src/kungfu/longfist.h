@@ -6,7 +6,6 @@
 #define KUNGFU_NODE_LONGFIST_H
 
 #include <napi.h>
-#include <boost/hana.hpp>
 #include "operators.h"
 
 namespace kungfu::node

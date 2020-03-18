@@ -7,35 +7,35 @@
 
 #include <cstdlib>
 #include <cstdint>
+#include <utility>
 #include <string>
 #include <sstream>
 #include <typeinfo>
-#include <utility>
-#include <boost/hana.hpp>
+
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 
-// cope with conan spdlog
+// cope with spdlog-1.5.0@conan-center
 #undef SPDLOG_COMPILED_LIB
 #undef SPDLOG_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
-#ifdef BOOST_HANA_CONFIG_ENABLE_STRING_UDL
+#ifdef __linux__
+#define BOOST_HANA_CONFIG_ENABLE_STRING_UDL
+#include <boost/hana.hpp>
 using namespace boost::hana::literals;
 #define HANA_STR(STR) STR##_s
 #else
+#include <boost/hana.hpp>
 #define HANA_STR(STR) BOOST_HANA_STRING(STR)
 #endif
 
-#define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
-#define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
-
-#ifndef _WIN32
-#define KF_PACK_TYPE_BEGIN
-#define KF_PACK_TYPE_END __attribute__((packed));
-#else
+#ifdef __WINDOWS__
 #define KF_PACK_TYPE_BEGIN __pragma(pack(push, 1))
 #define KF_PACK_TYPE_END ;__pragma(pack(pop))
+#else
+#define KF_PACK_TYPE_BEGIN
+#define KF_PACK_TYPE_END __attribute__((packed));
 #endif
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, TIMESTAMP_KEY, ...) \
@@ -77,6 +77,9 @@ struct NAME : public kungfu::data<NAME> { \
 
 #define PERPETUAL() boost::hana::nothing
 #define TIMESTAMP(FIELD) boost::hana::just(HANA_STR(#FIELD))
+
+#define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr;   /** define smart ptr */
+#define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)      /** forward defile smart ptr */
 
 namespace kungfu
 {
