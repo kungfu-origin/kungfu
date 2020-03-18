@@ -82,7 +82,7 @@ export const removeKfConfig = (key: string, type: string) => {
 export const getKfCommission = () => {
     return new Promise((resolve, reject) => {
         try {
-            const commissionData = watcher.comission.getAllCommission();
+            const commissionData = watcher.commission.getAllCommission();
             resolve(Object.values(commissionData || {}))
         } catch (err) {
             reject(err)
@@ -92,15 +92,15 @@ export const getKfCommission = () => {
 
 export const setKfCommission = (commissionItems: any) => {
     return new Promise((resolve, reject) => {
+        const kfCommissionData = longfist.Commission()
         const comissionResolve = commissionItems.map((item: any) => {
             return {
-                ...longfist.Comission,
+                ...kfCommissionData,
                 ...item
             }
         })
 
-        console.log(comissionResolve)
-        const result = watcher.comission.setAllComission(comissionResolve)
+        const result = watcher.commission.setAllCommission(comissionResolve)
 
         if (result) {
             resolve(result)

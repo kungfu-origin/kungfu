@@ -180,7 +180,7 @@
 								@click="handleAddRow(config.target, config.row, index)"
 							></i>
 							</el-col>
-							<el-col :span="1">
+							<el-col :span="1"  v-if="tables[config.target].length > 1">
 							<i
 								class="el-icon-remove mouse-over"
 								@click="handleRemoveRow(config.target, index)"
