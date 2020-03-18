@@ -8,6 +8,7 @@ import moment from 'moment';
 
 export const kungfu = require('kungfu-core').kungfu;
 export const longfist = kungfu.longfist;
+export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME)
 
 export const watcher: any = (() => {
     if (process.env.RENDERER_TYPE !== 'app') return {}
@@ -58,25 +59,25 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
 
 
 export const getAllKfConfig = () => {
-    return watcher.config.getAllConfig();
+    return kungfuConfigStore.getAllConfig();
 }
 
 
 export const setKfConfig = (key: string, type: string, config: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return watcher.config.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
+    return kungfuConfigStore.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
 }
 
 
 export const getKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return watcher.config.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
+    return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
 }
 
 
 export const removeKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return watcher.config.removeConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
+    return kungfuConfigStore.removeConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
 }
 
 export const getKfCommission = () => {
