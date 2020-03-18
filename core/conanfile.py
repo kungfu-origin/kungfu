@@ -35,6 +35,8 @@ class KungfuCoreConan(ConanFile):
         "electron_version": ["4.2.11"]
     }
     default_options = {
+        "fmt:header_only": "True",
+        "spdlog:header_only": "True",
         "log_level": "info",
         "arch": "x64",
         "js_runtime": "electron",
@@ -124,8 +126,7 @@ class KungfuCoreConan(ConanFile):
         ]
 
         if tools.detected_os() == 'Windows':
-            return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch),
-                                   '--CDCMAKE_GENERATOR_PLATFORM=' + str(self.options.arch), cmd]
+            return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch), cmd]
         else:
             return cmake_js_cmd + [cmd]
 
