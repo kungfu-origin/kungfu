@@ -16,19 +16,19 @@ export const watcher: any = (() => {
 })()
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
-    if (process.env.RENDERER_TYPE !== 'app') return 
+    if (process.env.RENDERER_TYPE !== 'app') return
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
                 watcher.setup();
             }
-            
+
             if (watcher.isLive()) {
                 watcher.step();
             }
 
-            callback({ 
-                ledger: Object.freeze(watcher.ledger), 
+            callback({
+                ledger: Object.freeze(watcher.ledger),
             });
             resolve();
         })
@@ -37,18 +37,18 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
-    if (process.env.RENDERER_TYPE !== 'app') return 
+    if (process.env.RENDERER_TYPE !== 'app') return
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
                 watcher.setup();
             }
-            
+
             if (watcher.isLive()) {
                 watcher.step();
             }
 
-            callback({ 
+            callback({
                 tradingDay: watcher.tradingDay,
                 appStates: watcher.appStates,
             });
@@ -71,7 +71,7 @@ export const setKfConfig = (key: string, type: string, config: string) => {
 
 export const getKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
+    return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
 }
 
 
@@ -109,7 +109,7 @@ export const setKfCommission = (commissionItems: any) => {
             reject(result)
         }
     })
-    
+
 }
 
 export const transformOrderTradeListToData = (list: any[], type: string) => {
@@ -190,20 +190,20 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
 }
 
 
-export function decodeKungfuLocation (sourceOrDest: string): KungfuLocation {
+export function decodeKungfuLocation(sourceOrDest: string): KungfuLocation {
     if (!sourceOrDest) return {
         category: 'td',
         group: 'node',
         name: '',
         mode: 'live'
     }
-    
+
     const location: KungfuLocation = watcher.getLocation(sourceOrDest)
     return location
 }
 
 
-export function encodeKungfuLocation (key: string, type: string): KungfuLocation {
+export function encodeKungfuLocation(key: string, type: string): KungfuLocation {
     switch (type) {
         case 'td':
             const tdIdSplit = key.split('_');
@@ -215,15 +215,15 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
                 category: 'td',
                 group: sourceId,
                 name: accountId,
-                mode: 'live' 
-            } ;
+                mode: 'live'
+            };
         case 'md':
             if (!key) throw new Error(`md id ${key} is illegal!`);
             return {
                 category: 'md',
                 group: key,
                 name: key,
-                mode: 'live' 
+                mode: 'live'
             }
         case 'strategy':
             if (!key) throw new Error(`strategy id ${key} is illegal!`);
@@ -231,7 +231,7 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
                 category: 'strategy',
                 group: 'default',
                 name: key,
-                mode: 'live' 
+                mode: 'live'
             }
         default:
             throw new Error(`unknow type ${type}`);
@@ -241,23 +241,23 @@ export function encodeKungfuLocation (key: string, type: string): KungfuLocation
 
 // ========================== 交易数据处理 start ===========================
 
-function resolveClientId (dest: string): string {
+function resolveClientId(dest: string): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
     if (!kungfuLocation) return ''
 
     const group = kungfuLocation.group === 'node' ? '[手动]' : '';
     const name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
 
-    return [ group, name ].join(' ')
+    return [group, name].join(' ')
 }
 
 
-function resolveAccountId (source: string, dest: string): string {
+function resolveAccountId(source: string, dest: string): string {
     const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
     const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
     const name = kungfuLocationSource.group + '_' + kungfuLocationSource.name;
     const group = kungfuLocationDest.group === 'node' ? '[手动]' : '';
-    return [ group, name ].join(' ')
+    return [group, name].join(' ')
 }
 
 
@@ -369,7 +369,7 @@ export const dealGatewayStates = (gatewayStates: StringToStringObject): Array<Md
                         processId: `md_${kungfuLocation.group}`,
                         state: gatewayStates[key]
                     }
-                default: 
+                default:
                     return {}
             }
         })
