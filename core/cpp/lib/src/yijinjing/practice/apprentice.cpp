@@ -35,7 +35,7 @@ namespace kungfu::yijinjing::practice
 {
     apprentice::apprentice(location_ptr home, bool low_latency) :
             hero(std::make_shared<io_device_client>(home, low_latency)),
-            master_start_time_(0), timer_usage_count_(0), started_(false),
+            started_(false), master_start_time_(0), trading_day_(time::today_nano()), timer_usage_count_(0),
             state_map_(build_state_map(longfist::StateDataTypes)), recover_state(state_map_)
     {
         auto uid_str = fmt::format("{:08x}", get_live_home_uid());
