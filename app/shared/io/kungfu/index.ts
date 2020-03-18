@@ -52,7 +52,7 @@ export const buildKungfuGlobalDataPipe = () => {
 async function insertTradingData() {
     const moment = require('moment')
     const { kungfu, watcher } = require('__gUtils/kungfuUtils');
-    const { delayMiliSeconds } = require('__gUtils/BusiUtils');
+    const { delayMiliSeconds } = require('__gUtils/busiUtils');
     const longfist = kungfu.longfist;
     await delayMiliSeconds(10000)
     watcher.setup();

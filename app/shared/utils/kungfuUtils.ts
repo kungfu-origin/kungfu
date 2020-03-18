@@ -1,6 +1,6 @@
 
 import { KF_HOME } from '__gConfig/pathConfig';
-import { setTimerPromiseTask, toDecimal } from '__gUtils/BusiUtils';
+import { setTimerPromiseTask, toDecimal } from '__gUtils/busiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 import moment from 'moment';
 
