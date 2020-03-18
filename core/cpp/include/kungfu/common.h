@@ -30,7 +30,7 @@ using namespace boost::hana::literals;
 #define HANA_STR(STR) BOOST_HANA_STRING(STR)
 #endif
 
-#ifdef __WINDOWS__
+#ifdef _WINDOWS
 #define KF_PACK_TYPE_BEGIN __pragma(pack(push, 1))
 #define KF_PACK_TYPE_END ;__pragma(pack(pop))
 #else
