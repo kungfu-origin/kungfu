@@ -7,14 +7,12 @@ import moment from 'moment';
 // process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;
+export const longfist = kungfu.longfist;
+
 export const watcher: any = (() => {
     if (process.env.RENDERER_TYPE !== 'app') return {}
     return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
 })()
-export const longfist = kungfu.longfist;
-export const commissionStore = kungfu.CommissionStore(KF_HOME);
-export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
-
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
     if (process.env.RENDERER_TYPE !== 'app') return 
@@ -59,34 +57,32 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
 }
 
 
-
-
 export const getAllKfConfig = () => {
-    return kungfuConfigStore.getAllConfig();
+    return watcher.config.getAllConfig();
 }
 
 
 export const setKfConfig = (key: string, type: string, config: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return kungfuConfigStore.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
+    return watcher.config.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
 }
 
 
 export const getKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
+    return watcher.config.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)    
 }
 
 
 export const removeKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
-    return kungfuConfigStore.removeConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
+    return watcher.config.removeConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
 }
 
 export const getKfCommission = () => {
     return new Promise((resolve, reject) => {
         try {
-            const commissionData = commissionStore.getAllCommission();
+            const commissionData = watcher.comission.getAllCommission();
             resolve(Object.values(commissionData || {}))
         } catch (err) {
             reject(err)
@@ -95,11 +91,23 @@ export const getKfCommission = () => {
 }
 
 export const setKfCommission = (commissionItems: any) => {
+    return new Promise((resolve, reject) => {
+        const comissionResolve = commissionItems.map((item: any) => {
+            return {
+                ...longfist.Comission,
+                ...item
+            }
+        })
 
-    const commissionData = commissionStore
+        console.log(comissionResolve)
+        const result = watcher.comission.setAllComission(comissionResolve)
 
-    console.log(commissionData)
-    console.log(commissionItems)
+        if (result) {
+            resolve(result)
+        } else {
+            reject(result)
+        }
+    })
     
 }
 
