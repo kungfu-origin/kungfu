@@ -68,10 +68,6 @@ message("${KF_SDK_HOME}/include")
 
 ############################################################
 
-ADD_COMPILE_DEFINITIONS(SPDLOG_FMT_EXTERNAL)
-
-############################################################
-
 # Use pybind11
 ADD_SUBDIRECTORY(../../core/deps/pybind11-2.4.3 "${PROJECT_BINARY_DIR}/pybind11")
 
