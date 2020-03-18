@@ -27,7 +27,6 @@
 #define DEFAULT_NOTICE_TIMEOUT 1000
 
 using namespace kungfu::longfist::types;
-using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
@@ -107,7 +106,7 @@ namespace kungfu::yijinjing
         const location_ptr location_;
         const std::string bind_path_;
         const std::string connect_path_;
-        socket socket_;
+        nanomsg::socket socket_;
     };
 
     class nanomsg_publisher : public publisher, protected nanomsg_resource
@@ -318,7 +317,7 @@ and json_extract(session.data, '$.end_time') <= ?4;
 
     socket_ptr io_device::connect_socket(const data::location_ptr &location, const protocol &p, int timeout)
     {
-        socket_ptr s = std::make_shared<socket>(p);
+        socket_ptr s = std::make_shared<nanomsg::socket>(p);
         s->connect(url_factory_->make_path_connect(location, p));
         s->setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
         SPDLOG_INFO("connected socket [{}] {} at {} with timeout {}", nanomsg::get_protocol_name(p), location->name, s->get_url(), timeout);
@@ -327,7 +326,7 @@ and json_extract(session.data, '$.end_time') <= ?4;
 
     socket_ptr io_device::bind_socket(const protocol &p, int timeout)
     {
-        socket_ptr s = std::make_shared<socket>(p);
+        socket_ptr s = std::make_shared<nanomsg::socket>(p);
         s->bind(url_factory_->make_path_bind(home_, p));
         s->setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, timeout);
         SPDLOG_INFO("bind to socket [{}] {} at {} with timeout {}", nanomsg::get_protocol_name(p), home_->name, s->get_url(), timeout);
@@ -367,7 +366,7 @@ and json_extract(session.data, '$.end_time') <= ?4;
     io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy) :
             io_device(std::move(home), low_latency, lazy)
     {
-        rep_sock_ = std::make_shared<socket>(protocol::REPLY);
+        rep_sock_ = std::make_shared<nanomsg::socket>(protocol::REPLY);
         rep_sock_->bind(url_factory_->make_path_bind(home_, protocol::REPLY));
     }
 
