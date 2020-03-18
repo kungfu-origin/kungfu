@@ -95,7 +95,7 @@ export default {
 
             if(!ifProcessRunning('ledger', t.processStatus)){
                 if(!t.ledgerErrController && !!t.processStatus['ledger']){
-                    t.$message.error('数据进程断开，交易数据将会丢失，请重启应用！', 0)
+                    t.$message.error('数据进程断开，交易数据将会丢失，请重启数据进程！', 0)
                     t.ledgerErrController = true;  
                 }
                 return 'color-red'
