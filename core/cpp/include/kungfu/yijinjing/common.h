@@ -189,7 +189,7 @@ constexpr auto event_filter_any = [](auto member) {
     auto args = boost::hana::make_tuple(arg...);
     return filter([=](const event_ptr &e) {
       auto check = [&](auto a) { return ((*e).*member)() == a; };
-      return boost::hana::fold(boost::hana::transform(args, check), std::logical_or());
+      return boost::hana::fold(boost::hana::transform(args, check), std::logical_or<bool>());
     });
   };
 };
