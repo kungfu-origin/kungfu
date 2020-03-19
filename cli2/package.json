@@ -41,7 +41,7 @@
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
-    "cfonts": "^2.4.5",
+    "cfonts": "2.4.5",
     "colors": "^1.3.3",
     "commander": "^2.20.0",
     "fast-csv": "^2.5.0",

@@ -1,4 +1,4 @@
-import { getAccountsStrategys } from '@/assets/scripts/base';
+import { getAccountsStrategys } from '@/assets/scripts/actions/accountStrategyActions';
 import { parseToString } from '@/assets/scripts/utils';
 
 const colors = require('colors');

@@ -2535,6 +2535,16 @@ center-align@^0.1.1:
     align-text "^0.1.3"
     lazy-cache "^1.0.3"
 
+cfonts@2.4.5:
+  version "2.4.5"
+  resolved "https://registry.npm.taobao.org/cfonts/download/cfonts-2.4.5.tgz#fe7e6152b5042f5eb5b50fa935da84d4064c67d7"
+  integrity sha1-/n5hUrUEL161tQ+pNdqE1AZMZ9c=
+  dependencies:
+    ansi-styles "^4.1.0"
+    chalk "^2.4.2"
+    change-case "^3.1.0"
+    window-size "^1.1.1"
+
 cfonts@^1.1.3:
   version "1.2.0"
   resolved "https://registry.npm.taobao.org/cfonts/download/cfonts-1.2.0.tgz#876021c9f8fa40ae73274ff60412b7fd41e9afa1"
@@ -2546,14 +2556,6 @@ cfonts@^1.1.3:
     change-case "^3.0.2"
     commander "^2.15.1"
     window-size "^1.1.0"
-
-cfonts@^2.4.5:
-  version "2.8.0"
-  resolved "https://registry.npm.taobao.org/cfonts/download/cfonts-2.8.0.tgz#ffdb7042654f769f2397367def786a018495cd78"
-  integrity sha1-/9twQmVPdp8jlzZ973hqAYSVzXg=
-  dependencies:
-    chalk "^3.0.0"
-    window-size "^1.1.1"
 
 chai-as-promised@^7.1.1:
   version "7.1.1"
@@ -2640,7 +2642,7 @@ change-case@3.0.x:
     upper-case "^1.1.1"
     upper-case-first "^1.1.0"
 
-change-case@^3.0.2:
+change-case@^3.0.2, change-case@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npm.taobao.org/change-case/download/change-case-3.1.0.tgz#0e611b7edc9952df2e8513b27b42de72647dd17e"
   integrity sha1-DmEbftyZUt8uhROye0LecmR90X4=

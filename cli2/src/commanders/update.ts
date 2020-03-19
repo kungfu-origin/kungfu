@@ -1,5 +1,5 @@
 import { accountConfigPrompt, addUpdateTdByPrompt, addUpdateMdByPrompt, addUpdateStrategyPrompt, filterAccountConfig } from '@/commanders/add';
-import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/base';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/actions/accountStrategyActions';
 import { getKungfuTypeFromString } from '@/assets/scripts/utils';
 import { getAccountSource } from '__gConfig/accountConfig';
 

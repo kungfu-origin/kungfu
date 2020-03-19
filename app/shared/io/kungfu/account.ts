@@ -20,7 +20,7 @@ export const getTdList = (): Promise<Td[]> => {
     })
 }
 
-export const getMdList = () => {
+export const getMdList = (): Promise<Md[]> => {
     return new Promise(resolve => {
         const kfConfigList = getAllKfConfig();
         const mdList = Object.values(kfConfigList || {})

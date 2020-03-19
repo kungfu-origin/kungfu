@@ -1,4 +1,4 @@
-import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/base';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/actions/accountStrategyActions';
 import { getKungfuTypeFromString } from '@/assets/scripts/utils';
 import { deleteMd, deleteTd } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';

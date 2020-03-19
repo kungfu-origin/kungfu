@@ -1,13 +1,13 @@
-import posTable from './node_modules/@/assets/components/PosTable';
-import orderTable from './node_modules/@/assets/components/OrderTable';
-import tradeTable from './node_modules/@/assets/components/TradeTable';
-import Dashboard from './node_modules/@/assets/components/Dashboard';
-import MessageBox from './node_modules/@/assets/components/MessageBox';
+import posTable from '@/assets/components/PosTable';
+import orderTable from '@/assets/components/OrderTable';
+import tradeTable from '@/assets/components/TradeTable';
+import Dashboard from '@/assets/components/Dashboard';
+import MessageBox from '@/assets/components/MessageBox';
 
-import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from './node_modules/@/assets/scripts/utils';
-import { tradingDataObservale, processListObservable, switchProcess } from './node_modules/@/assets/scripts/actions';
+import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
+import { tradingDataObservale, processListObservable, switchProcess } from '@/assets/scripts/actions';
 // import { nanoCancelAllOrder } from '__io/nano/nanoReq';
-import { throttleInsert } from './node_modules/__gUtils/busiUtils';
+import { throttleInsert } from '__gUtils/busiUtils';
 
 const blessed = require('blessed');
 

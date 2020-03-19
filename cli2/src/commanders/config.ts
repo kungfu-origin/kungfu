@@ -7,7 +7,6 @@ const inquirer = require( 'inquirer' );
 
 const systemConfig = mergeSystemConfigTogether();
 
-
 const promptQuestionForSelectTargetConfigItem = () => {
     return inquirer.prompt([
         {

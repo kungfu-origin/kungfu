@@ -65,18 +65,18 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
 
 
 
-// const mdTdStateObservable = () => {
-//     nanoReqGatewayState();
-//     let mdTdStateData: StringToMdTdState = {};
-//     return new Observable(observer => {
-//         observer.next({})
-//         buildGatewayStatePipe().subscribe((data: any[] | undefined): void => {
-//             data = data || []
-//             mdTdStateData[data[0]] = data[1]
-//             observer.next(mdTdStateData)
-//         })
-//     })
-// }
+const mdTdStateObservable = () => {
+    nanoReqGatewayState();
+    let mdTdStateData: StringToMdTdState = {};
+    return new Observable(observer => {
+        observer.next({})
+        buildGatewayStatePipe().subscribe((data: any[] | undefined): void => {
+            data = data || []
+            mdTdStateData[data[0]] = data[1]
+            observer.next(mdTdStateData)
+        })
+    })
+}
 
 // export const processStatusObservable = () => {
 //     return new Observable(observer => {
@@ -90,42 +90,6 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
 //         }, 1000)    
 //     })
 // }
-
-export const mdListObservable = () => {
-    return new Observable(observer => {
-        setTimerPromiseTask(() => {
-            return getMdList()
-                .then((mdList: Md[]) => {
-                    observer.next(mdList)
-                })
-                .catch((err: Error) => logger.error(err))
-        }, 5000)
-    })
-}
-
-export const tdListObservable = () => {
-    return new Observable(observer => {
-        setTimerPromiseTask(() => {
-            return getTdList()
-                .then((tdList: Account[]) => {
-                    observer.next(tdList)
-                })
-                .catch((err: Error) => logger.error(err))
-        }, 5000)
-    })
-}
-
-export const strategyListObservable = () => {
-    return new Observable(observer => {
-        setTimerPromiseTask(() => {
-            return getStrategyList()
-            .then((strategyList: Strategy[]) => {
-                observer.next(strategyList)
-            })
-            .catch((err: Error) => logger.error(err))
-        }, 5000)
-    })
-}
 
 
 // //系统所有进程列表
@@ -220,159 +184,31 @@ export const strategyListObservable = () => {
 //     }
 // )
 
-// function buildTdMdStatus(processId: string, stringMdTddState: StringToMdTdState, processStatus: string): string | number {
-//     if(!stringMdTddState[processId]) return processStatus
-//     else if(processStatus === 'online') return stringMdTddState[processId].state
-//     else return processStatus
-// }
+function buildTdMdStatus(processId: string, stringMdTddState: StringToMdTdState, processStatus: string): string | number {
+    if(!stringMdTddState[processId]) return processStatus
+    else if(processStatus === 'online') return stringMdTddState[processId].state
+    else return processStatus
+}
 
-// function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
-//     if(!processStatus) return {
-//         status: '--',
-//         monit: {
-//             cpu: 0,
-//             memory: 0,
-//         }
-//     }
+function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
+    if(!processStatus) return {
+        status: '--',
+        monit: {
+            cpu: 0,
+            memory: 0,
+        }
+    }
 
-//     const memory = Number(BigInt((processStatus.monit || {}).memory || 0) / BigInt(1024 * 1024));
-//     const cpu =  (processStatus.monit || {}).cpu || 0
-//     return {
-//         status: processStatus.status,
-//         monit: {
-//             cpu: cpu == 0 ? cpu : colors.green(cpu),
-//             memory: memory == Number(0) ? memory : colors.green(memory)
-//         }
-//     }
-// }
-
-
-// // =============================== logs start ==================================================
-
-// const dealUpdateTime = (updateTime: string): any => {
-//     const updateTimeLength = updateTime.length;
-//     if(updateTimeLength === 24) return updateTime.slice(0, 18)
-//     else if(updateTime.split('-').length > 1) {
-//         const newUpdateTime = updateTime.split('-').slice(1).join('/');
-//         return dealUpdateTime(newUpdateTime)
-//     }
-//     else return updateTime
-// }
-
-// const dealLogMessage = (line: string, processId: string) => {
-//     let lineData: LogDataOrigin;
-//     try{
-//         lineData = JSON.parse(line);
-//     } catch (err) {
-//         return false
-//     }
-//     let messages = lineData.message.split('\n').filter((m: string) => m !== '');
-//     return messages.map((message: string) => {
-//         message = message.split('\n[').join('[')
-
-//         if(message.split('[').length < 4) {
-//             const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000');
-//             const type = 'error'.includes(lineData.type) ? 'error' : lineData.type;
-//             message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
-//         }
-
-//         const msgList = message.split(']');
-//         const updateTime = msgList[0].slice(1)
-//         const updateTimeResolve = dealUpdateTime(updateTime)
-//         const typeResolve = `[${msgList[1].trim().slice(1).trim()}]`;
-        
-//         let lastInfo = ''
-//         if(msgList.length >= 4) {
-//             lastInfo = msgList.slice(4).join(']')
-//         } else {
-//             lastInfo = msgList.slice(2).join(']')
-//         }
-
-//         const messageResolve = `[${updateTimeResolve}]${typeResolve}${lastInfo}`
-
-//         message = messageResolve
-//             .replace(/\[info\]/g, `[ ${colors[logColor.info]('info')}    ] `)
-//             .replace(/\[out\]/g,    `[ out     ] `)
-//             .replace(/\[trace\]/g, `[ trace   ] `)
-//             .replace(/\[error\]/g, `[ ${colors[logColor.error]('error')}   ] `)
-//             .replace(/\[warning\]/g, `[ ${colors[logColor.warning]('warning')} ] `)
-//             .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
-//             .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
-    
-//         if(message.includes('critical')) message = `${colors[logColor.critical](message)}`
-        
-//         return { 
-//             message,
-//             updateTime: lineData.timestamp
-//         }
-//     })
-// }
-
-
-// const getLogObservable = (pid: string) => {
-//     const logPath = path.join(LOG_DIR, `${pid}.log`);
-//     return new Observable(observer => {
-//         getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
-//         .then((logList: NumList) => observer.next(logList))
-//         .catch(() => observer.next({ list: [] }))
-//         .finally(() => observer.complete())
-//     })
-// }
-
-
-// export const getMergedLogsObservable = (processIds: string[]) => {
-//     return forkJoin(
-//         ...processIds
-//         .map((logPath: string) => getLogObservable(logPath))        
-//     ).pipe(
-//         map((list: any[]) => {
-//             list = list
-//                 .map((l: any) => l.list)
-//                 .reduce((a: any, b: any): any => a.concat(b))
-//                 .filter((l: any) => !!l)
-//                 .map((l: any) => {
-//                     return l
-//                 })
-//             if(list.length) {
-//                 list = list
-//                     .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
-//                     .map((l: any) => l.message)  
-//             }
-                          
-//             return list
-//         })
-//     )
-// }
-
-// const watchLogObservable = (processId: string) => {
-//     return new Observable(observer => {
-//         const logPath = path.join(LOG_DIR, `${processId}.log`);
-//         addFileSync('', logPath, 'file');
-//         const watcher = new Tail(logPath, {
-//             useWatchFile: true
-//         });
-//         watcher.watch();
-//         watcher.on('line', (line: string) => {
-//             const logList: any = dealLogMessage(line, processId);
-//             logList.kfForEach((l: any) => observer.next(l.message || ''))
-//         })
-//         watcher.on('error', () => watcher.unwatch())
-//     })
-    
-// }
-
-// export const watchLogsObservable = (processIds: string[]) => {
-//     return merge(...processIds.map(pid => watchLogObservable(pid)))
-// }
-
-// export const LogsAndWatcherConcatObservable = (processIds: string[]) => {
-//     return concat(
-//         getMergedLogsObservable(processIds),
-//         watchLogsObservable(processIds)
-//     )
-// }
-
-// // =============================== logs end ==================================================
+    const memory = Number(BigInt((processStatus.monit || {}).memory || 0) / BigInt(1024 * 1024));
+    const cpu =  (processStatus.monit || {}).cpu || 0
+    return {
+        status: processStatus.status,
+        monit: {
+            cpu: cpu == 0 ? cpu : colors.green(cpu),
+            memory: memory == Number(0) ? memory : colors.green(memory)
+        }
+    }
+}
 
 // // =============================== trading Data start =========================================
 

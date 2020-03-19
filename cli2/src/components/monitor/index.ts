@@ -1,7 +1,8 @@
 import Dashboard from '@/assets/components/Dashboard';
 import MessageBox from '@/assets/components/MessageBox';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scripts/utils';
-import { processListObservable, LogsAndWatcherConcatObservable, switchProcess } from '@/assets/scripts/actions';
+import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
+import { LogsAndWatcherConcatObservable } from '@/assets/scripts/actions/logActions';
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
 const blessed = require('blessed');
 
