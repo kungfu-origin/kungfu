@@ -9,24 +9,23 @@
 
 #include <kungfu/common.h>
 
-namespace kungfu::yijinjing::util
-{
-    /**
-     * Murmur Hash 2
-     * @param key content to be hashed
-     * @param len length of key
-     * @param seed
-     * @return hash result
-     */
-    uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed = KUNGFU_HASH_SEED);
+namespace kungfu::yijinjing::util {
+/**
+ * Murmur Hash 2
+ * @param key content to be hashed
+ * @param len length of key
+ * @param seed
+ * @return hash result
+ */
+uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed = KUNGFU_HASH_SEED);
 
-    uint32_t hash_str_32(const std::string &key, uint32_t seed = KUNGFU_HASH_SEED);
+uint32_t hash_str_32(const std::string &key, uint32_t seed = KUNGFU_HASH_SEED);
 
-    void color_print(const std::string &level, const std::string &log);
+void color_print(const std::string &level, const std::string &log);
 
-    bool in_color_terminal();
+bool in_color_terminal();
 
-    size_t get_thread_id();
-}
+size_t get_thread_id();
+} // namespace kungfu::yijinjing::util
 
-#endif //KUNGFU_YIJINJING_UTIL_H
+#endif // KUNGFU_YIJINJING_UTIL_H

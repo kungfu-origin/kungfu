@@ -25,164 +25,141 @@
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
-namespace kungfu::yijinjing
-{
-    FORWARD_DECLARE_PTR(session)
+namespace kungfu::yijinjing {
+FORWARD_DECLARE_PTR(session)
 
-    class sqlite_session_keeper
-    {
-    public:
-        virtual void open(sqlite3 *index_db) = 0;
-        virtual void close() = 0;
-    };
+class sqlite_session_keeper {
+public:
+  virtual void open(sqlite3 *index_db) = 0;
+  virtual void close() = 0;
+};
 
-    DECLARE_PTR(sqlite_session_keeper)
+DECLARE_PTR(sqlite_session_keeper)
 
-    class io_device : public resource
-    {
-    public:
+class io_device : public resource {
+public:
+  io_device(data::location_ptr home, bool low_latency, bool lazy);
 
-        io_device(data::location_ptr home, bool low_latency, bool lazy);
+  virtual ~io_device();
 
-        virtual ~io_device();
+  bool is_usable() override { return publisher_ and observer_ and publisher_->is_usable() and observer_->is_usable(); }
 
-        bool is_usable() override
-        {
-            return publisher_ and observer_ and publisher_->is_usable() and observer_->is_usable();
-        }
+  void setup() override {
+    publisher_->setup();
+    observer_->setup();
+  }
 
-        void setup() override
-        {
-            publisher_->setup();
-            observer_->setup();
-        }
+  [[nodiscard]] const data::locator_ptr &get_locator() const { return home_->locator; }
 
-        [[nodiscard]] const data::locator_ptr &get_locator() const
-        { return home_->locator; }
+  [[nodiscard]] const data::location_ptr &get_home() const { return home_; }
 
-        [[nodiscard]] const data::location_ptr &get_home() const
-        { return home_; }
+  [[nodiscard]] const data::location_ptr &get_live_home() const { return live_home_; }
 
-        [[nodiscard]] const data::location_ptr &get_live_home() const
-        { return live_home_; }
+  [[nodiscard]] bool is_low_latency() { return low_latency_; }
 
-        [[nodiscard]] bool is_low_latency()
-        { return low_latency_; }
+  journal::reader_ptr open_reader_to_subscribe();
 
-        journal::reader_ptr open_reader_to_subscribe();
+  journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
 
-        journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
+  journal::writer_ptr open_writer(uint32_t dest_id);
 
-        journal::writer_ptr open_writer(uint32_t dest_id);
+  journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
 
-        journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
+  nanomsg::socket_ptr connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
 
-        nanomsg::socket_ptr
-        connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
+  nanomsg::socket_ptr bind_socket(const nanomsg::protocol &p, int timeout = 0);
 
-        nanomsg::socket_ptr
-        bind_socket(const nanomsg::protocol &p, int timeout = 0);
+  [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const { return url_factory_; }
 
-        [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const
-        { return url_factory_; }
+  [[nodiscard]] publisher_ptr get_publisher() { return publisher_; }
 
-        [[nodiscard]] publisher_ptr get_publisher()
-        { return publisher_; }
+  [[nodiscard]] observer_ptr get_observer() { return observer_; }
 
-        [[nodiscard]] observer_ptr get_observer()
-        { return observer_; }
+  [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0,
+                                                       int64_t to = INT64_MAX) const;
 
-        [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0, int64_t to = INT64_MAX) const;
+protected:
+  data::location_ptr home_;
+  data::location_ptr db_home_;
+  data::location_ptr live_home_;
+  const bool low_latency_;
+  const bool lazy_;
+  nanomsg::url_factory_ptr url_factory_;
+  publisher_ptr publisher_;
+  observer_ptr observer_;
 
-    protected:
-        data::location_ptr home_;
-        data::location_ptr db_home_;
-        data::location_ptr live_home_;
-        const bool low_latency_;
-        const bool lazy_;
-        nanomsg::url_factory_ptr url_factory_;
-        publisher_ptr publisher_;
-        observer_ptr observer_;
+  sqlite3 *index_db_ = nullptr;
+  char *db_error_msg_ = nullptr;
+  sqlite3_stmt *stmt_find_sessions_ = nullptr;
 
-        sqlite3 *index_db_ = nullptr;
-        char *db_error_msg_ = nullptr;
-        sqlite3_stmt *stmt_find_sessions_ = nullptr;
+  sqlite_session_keeper_ptr ssk_;
+};
 
-        sqlite_session_keeper_ptr ssk_;
-    };
+DECLARE_PTR(io_device)
 
-    DECLARE_PTR(io_device)
+class io_device_with_reply : public io_device {
+public:
+  io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
 
-    class io_device_with_reply : public io_device
-    {
-    public:
+  [[nodiscard]] nanomsg::socket_ptr get_rep_sock() const { return rep_sock_; }
 
-        io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
+protected:
+  nanomsg::socket_ptr rep_sock_;
+};
 
-        [[nodiscard]] nanomsg::socket_ptr get_rep_sock() const
-        { return rep_sock_; }
+DECLARE_PTR(io_device_with_reply)
 
-    protected:
-        nanomsg::socket_ptr rep_sock_;
-    };
+class io_device_master : public io_device_with_reply {
+public:
+  io_device_master(data::location_ptr home, bool low_latency);
 
-    DECLARE_PTR(io_device_with_reply)
+  void open_session(const data::location_ptr &location, int64_t time);
 
-    class io_device_master : public io_device_with_reply
-    {
-    public:
-        io_device_master(data::location_ptr home, bool low_latency);
+  void update_session(const journal::frame_ptr &frame);
 
-        void open_session(const data::location_ptr &location, int64_t time);
+  void close_session(const data::location_ptr &location, int64_t time);
 
-        void update_session(const journal::frame_ptr &frame);
+  void rebuild_index_db();
 
-        void close_session(const data::location_ptr &location, int64_t time);
+private:
+  std::unordered_map<uint32_t, session_ptr> sessions_;
+  sqlite3_stmt *stmt_clean_sessions_;
+  sqlite3_stmt *stmt_open_session_;
+  sqlite3_stmt *stmt_close_session_;
+};
 
-        void rebuild_index_db();
+DECLARE_PTR(io_device_master)
 
-    private:
-        std::unordered_map<uint32_t, session_ptr> sessions_;
-        sqlite3_stmt *stmt_clean_sessions_;
-        sqlite3_stmt *stmt_open_session_;
-        sqlite3_stmt *stmt_close_session_;
-    };
+class io_device_client : public io_device_with_reply {
+public:
+  io_device_client(data::location_ptr home, bool low_latency);
+};
 
-    DECLARE_PTR(io_device_master)
+DECLARE_PTR(io_device_client)
 
-    class io_device_client : public io_device_with_reply
-    {
-    public:
-        io_device_client(data::location_ptr home, bool low_latency);
-    };
+class session {
+public:
+  explicit session(data::location_ptr location) : location_(std::move(location)) {}
 
-    DECLARE_PTR(io_device_client)
+  ~session() = default;
 
-    class session
-    {
-    public:
-        explicit session(data::location_ptr location) : location_(std::move(location))
-        {}
+  void update(const journal::frame_ptr &frame);
 
-        ~session() = default;
+private:
+  const data::location_ptr location_;
+  int64_t begin_time_ = 0;
+  int64_t end_time_ = -1;
+  int frame_count_ = 0;
+  uint64_t data_size_ = 0;
+  std::vector<uint32_t> write_to_;
+  std::vector<uint32_t> read_from_;
 
-        void update(const journal::frame_ptr &frame);
+  friend io_device_master;
+};
 
-    private:
-        const data::location_ptr location_;
-        int64_t begin_time_ = 0;
-        int64_t end_time_ = -1;
-        int frame_count_ = 0;
-        uint64_t data_size_ = 0;
-        std::vector<uint32_t> write_to_;
-        std::vector<uint32_t> read_from_;
-
-        friend io_device_master;
-    };
-
-    void handle_sql_error(int rc, const std::string &error_tip);
-    void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip);
-    void ensure_sqlite_initilize();
-    void ensure_sqlite_shutdown();
-}
-#endif //KUNGFU_IO_H
+void handle_sql_error(int rc, const std::string &error_tip);
+void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip);
+void ensure_sqlite_initilize();
+void ensure_sqlite_shutdown();
+} // namespace kungfu::yijinjing
+#endif // KUNGFU_IO_H

@@ -5,21 +5,19 @@
 #ifndef KUNGFU_NODE_LONGFIST_H
 #define KUNGFU_NODE_LONGFIST_H
 
-#include <napi.h>
 #include "operators.h"
+#include <napi.h>
 
-namespace kungfu::node
-{
-    class Longfist : public Napi::ObjectWrap<Longfist>
-    {
-    public:
-        static void Init(Napi::Env env, Napi::Object exports);
+namespace kungfu::node {
+class Longfist : public Napi::ObjectWrap<Longfist> {
+public:
+  static void Init(Napi::Env env, Napi::Object exports);
 
-    private:
-        explicit Longfist(const Napi::CallbackInfo &info);
+private:
+  explicit Longfist(const Napi::CallbackInfo &info);
 
-        static Napi::ObjectReference constructor;
-    };
-}
+  static Napi::ObjectReference constructor;
+};
+} // namespace kungfu::node
 
-#endif //KUNGFU_NODE_LONGFIST_H
+#endif // KUNGFU_NODE_LONGFIST_H

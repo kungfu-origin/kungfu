@@ -12,38 +12,36 @@
 
 #include "operators.h"
 
-namespace kungfu::node
-{
-    class CommissionStore : public Napi::ObjectWrap<CommissionStore>
-    {
-    public:
-        explicit CommissionStore(const Napi::CallbackInfo &info);
+namespace kungfu::node {
+class CommissionStore : public Napi::ObjectWrap<CommissionStore> {
+public:
+  explicit CommissionStore(const Napi::CallbackInfo &info);
 
-        ~CommissionStore();
+  ~CommissionStore();
 
-        Napi::Value SetCommission(const Napi::CallbackInfo &info);
+  Napi::Value SetCommission(const Napi::CallbackInfo &info);
 
-        Napi::Value GetCommission(const Napi::CallbackInfo &info);
+  Napi::Value GetCommission(const Napi::CallbackInfo &info);
 
-        Napi::Value SetAllCommission(const Napi::CallbackInfo &info);
+  Napi::Value SetAllCommission(const Napi::CallbackInfo &info);
 
-        Napi::Value GetAllCommission(const Napi::CallbackInfo &info);
+  Napi::Value GetAllCommission(const Napi::CallbackInfo &info);
 
-        Napi::Value RemoveCommission(const Napi::CallbackInfo &info);
+  Napi::Value RemoveCommission(const Napi::CallbackInfo &info);
 
-        static void Init(Napi::Env env, Napi::Object exports);
+  static void Init(Napi::Env env, Napi::Object exports);
 
-        static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(const Napi::Value arg);
 
-    private:
-        serialize::JsSet set;
-        yijinjing::data::locator_ptr locator_;
-        yijinjing::practice::profile profile_;
+private:
+  serialize::JsSet set;
+  yijinjing::data::locator_ptr locator_;
+  yijinjing::practice::profile profile_;
 
-        static Napi::FunctionReference constructor;
+  static Napi::FunctionReference constructor;
 
-        friend class Watcher;
-    };
-}
+  friend class Watcher;
+};
+} // namespace kungfu::node
 
-#endif //KUNGFU_NODE_COMMISSION_H
+#endif // KUNGFU_NODE_COMMISSION_H

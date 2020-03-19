@@ -10,27 +10,25 @@
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/practice/profile.h>
 
-namespace kungfu::node
-{
-    class History : public Napi::ObjectWrap<History>
-    {
-    public:
-        explicit History(const Napi::CallbackInfo &info);
+namespace kungfu::node {
+class History : public Napi::ObjectWrap<History> {
+public:
+  explicit History(const Napi::CallbackInfo &info);
 
-        ~History() = default;
+  ~History() = default;
 
-        static void Init(Napi::Env env, Napi::Object exports);
+  static void Init(Napi::Env env, Napi::Object exports);
 
-        Napi::Value SelectPeriod(const Napi::CallbackInfo &info);
+  Napi::Value SelectPeriod(const Napi::CallbackInfo &info);
 
-        static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(const Napi::Value arg);
 
-    private:
-        yijinjing::data::locator_ptr locator_;
-        yijinjing::data::location_ptr ledger_location_;
-        yijinjing::practice::profile profile_;
-        static Napi::FunctionReference constructor;
-    };
-}
+private:
+  yijinjing::data::locator_ptr locator_;
+  yijinjing::data::location_ptr ledger_location_;
+  yijinjing::practice::profile profile_;
+  static Napi::FunctionReference constructor;
+};
+} // namespace kungfu::node
 
-#endif //KUNGFU_NODE_HISTORY_H
+#endif // KUNGFU_NODE_HISTORY_H

@@ -6,23 +6,22 @@
 #define KUNGFU_STACKTRACE_H
 
 #ifdef _WINDOWS
-#include <cstdio>
-#include <Windows.h>
 #include <Psapi.h>
+#include <Windows.h>
+#include <cstdio>
 #endif // _WINDOWS
 
-namespace kungfu::yijinjing::util
-{
+namespace kungfu::yijinjing::util {
 
 #ifdef _WINDOWS
 
-    DWORD print_stack_trace(EXCEPTION_POINTERS *ep = nullptr);
+DWORD print_stack_trace(EXCEPTION_POINTERS *ep = nullptr);
 
 #else
 
-    void print_stack_trace(FILE *out = stderr);
+void print_stack_trace(FILE *out = stderr);
 
 #endif // _WINDOWS
-}
+} // namespace kungfu::yijinjing::util
 
-#endif //KUNGFU_STACKTRACE_H
+#endif // KUNGFU_STACKTRACE_H

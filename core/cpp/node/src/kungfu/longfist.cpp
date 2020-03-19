@@ -10,31 +10,26 @@
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 
-namespace kungfu::node
-{
-    Napi::ObjectReference Longfist::constructor;
+namespace kungfu::node {
+Napi::ObjectReference Longfist::constructor;
 
-    Longfist::Longfist(const Napi::CallbackInfo &info) : ObjectWrap(info)
-    {}
+Longfist::Longfist(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
-    void Longfist::Init(Napi::Env env, Napi::Object exports)
-    {
-        Napi::HandleScope scope(env);
+void Longfist::Init(Napi::Env env, Napi::Object exports) {
+  Napi::HandleScope scope(env);
 
-        Napi::Object longfist = Napi::Object::New(env);
+  Napi::Object longfist = Napi::Object::New(env);
 
-        boost::hana::for_each(StateDataTypes, [&](auto it)
-        {
-            auto name = boost::hana::first(it);
-            using DataType = typename decltype(+boost::hana::second(it))::type;
-            static const auto make = serialize::JsMake<DataType>(name.c_str());
-            longfist.Set(Napi::String::New(env, name.c_str()), Napi::Function::New(env, make));
-        });
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
+    auto name = boost::hana::first(it);
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    static const auto make = serialize::JsMake<DataType>(name.c_str());
+    longfist.Set(Napi::String::New(env, name.c_str()), Napi::Function::New(env, make));
+  });
 
-        constructor = Napi::Persistent(longfist);
-        constructor.SuppressDestruct();
+  constructor = Napi::Persistent(longfist);
+  constructor.SuppressDestruct();
 
-        exports.Set("longfist", longfist);
-    }
+  exports.Set("longfist", longfist);
 }
-
+} // namespace kungfu::node

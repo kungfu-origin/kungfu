@@ -14,15 +14,14 @@
  *****************************************************************************/
 
 #include "py_longfist.hpp"
-#include "py_yijinjing.hpp"
 #include "py_wingchun.hpp"
+#include "py_yijinjing.hpp"
 
 namespace py = pybind11;
 namespace hana = boost::hana;
 
-PYBIND11_MODULE(pykungfu, m)
-{
-    kungfu::longfist::bind(m.def_submodule("longfist"));
-    kungfu::yijinjing::bind(m.def_submodule("yijinjing"));
-    kungfu::wingchun::bind(m.def_submodule("wingchun"));
+PYBIND11_MODULE(pykungfu, m) {
+  kungfu::longfist::bind(m.def_submodule("longfist"));
+  kungfu::yijinjing::bind(m.def_submodule("yijinjing"));
+  kungfu::wingchun::bind(m.def_submodule("wingchun"));
 }

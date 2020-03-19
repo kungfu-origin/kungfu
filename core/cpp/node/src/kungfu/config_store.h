@@ -12,36 +12,34 @@
 
 #include "operators.h"
 
-namespace kungfu::node
-{
-    class ConfigStore : public Napi::ObjectWrap<ConfigStore>
-    {
-    public:
-        explicit ConfigStore(const Napi::CallbackInfo &info);
+namespace kungfu::node {
+class ConfigStore : public Napi::ObjectWrap<ConfigStore> {
+public:
+  explicit ConfigStore(const Napi::CallbackInfo &info);
 
-        ~ConfigStore();
+  ~ConfigStore();
 
-        Napi::Value SetConfig(const Napi::CallbackInfo &info);
+  Napi::Value SetConfig(const Napi::CallbackInfo &info);
 
-        Napi::Value GetConfig(const Napi::CallbackInfo &info);
+  Napi::Value GetConfig(const Napi::CallbackInfo &info);
 
-        Napi::Value GetAllConfig(const Napi::CallbackInfo &info);
+  Napi::Value GetAllConfig(const Napi::CallbackInfo &info);
 
-        Napi::Value RemoveConfig(const Napi::CallbackInfo &info);
+  Napi::Value RemoveConfig(const Napi::CallbackInfo &info);
 
-        static void Init(Napi::Env env, Napi::Object exports);
+  static void Init(Napi::Env env, Napi::Object exports);
 
-        static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(const Napi::Value arg);
 
-    private:
-        serialize::JsSet set;
-        yijinjing::data::locator_ptr locator_;
-        yijinjing::practice::profile profile_;
+private:
+  serialize::JsSet set;
+  yijinjing::data::locator_ptr locator_;
+  yijinjing::practice::profile profile_;
 
-        static Napi::FunctionReference constructor;
+  static Napi::FunctionReference constructor;
 
-        friend class Watcher;
-    };
-}
+  friend class Watcher;
+};
+} // namespace kungfu::node
 
-#endif //KUNGFU_NODE_CONFIGURATION_H
+#endif // KUNGFU_NODE_CONFIGURATION_H

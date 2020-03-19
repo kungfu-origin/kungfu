@@ -12,23 +12,20 @@
 #define DEFAULT_LOG_LEVEL_NAME "info"
 #define DEFAULT_LOG_PATTERN "[%m/%d %T.%F] [%^%=8l%$] [%6P/%-6t] [%@#%!] %v"
 
-namespace kungfu::yijinjing::log
-{
-    spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);
+namespace kungfu::yijinjing::log {
+spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);
 
-    const std::string &setup_log(const data::location_ptr &location, const std::string &name);
+const std::string &setup_log(const data::location_ptr &location, const std::string &name);
 
-    std::shared_ptr<spdlog::logger> get_main_logger();
+std::shared_ptr<spdlog::logger> get_main_logger();
 
-    inline void copy_log_settings(data::location_ptr location, const std::string &name)
-    {
-        if (get_main_logger()->name().empty())
-        {
-            setup_log(location, name);
-        }
-        auto logger_cloned = get_main_logger()->clone(name);
-        spdlog::set_default_logger(logger_cloned);
-    }
+inline void copy_log_settings(data::location_ptr location, const std::string &name) {
+  if (get_main_logger()->name().empty()) {
+    setup_log(location, name);
+  }
+  auto logger_cloned = get_main_logger()->clone(name);
+  spdlog::set_default_logger(logger_cloned);
 }
+} // namespace kungfu::yijinjing::log
 
-#endif //KUNGFU_LOG_H
+#endif // KUNGFU_LOG_H

@@ -9,151 +9,143 @@
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/io.h>
-#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/journal/journal.h>
+#include <kungfu/yijinjing/time.h>
 
-namespace kungfu::yijinjing::practice
-{
+namespace kungfu::yijinjing::practice {
 
-    constexpr auto location_handler = [](const yijinjing::data::location_ptr &location)
-    {};
+constexpr auto location_handler = [](const yijinjing::data::location_ptr &location) {};
 
-    constexpr auto register_handler = [](const longfist::types::Register &r)
-    {};
+constexpr auto register_handler = [](const longfist::types::Register &r) {};
 
-    class hero : public resource
-    {
-    public:
-        explicit hero(yijinjing::io_device_with_reply_ptr io_device);
+class hero : public resource {
+public:
+  explicit hero(yijinjing::io_device_with_reply_ptr io_device);
 
-        virtual ~hero();
+  virtual ~hero();
 
-        bool is_usable() override;
+  bool is_usable() override;
 
-        void setup() override;
+  void setup() override;
 
-        void step();
+  void step();
 
-        void run();
+  void run();
 
-        bool is_live() const;
+  bool is_live() const;
 
-        void signal_stop();
+  void signal_stop();
 
-        int64_t now() const;
+  int64_t now() const;
 
-        int64_t real_now() const;
+  int64_t real_now() const;
 
-        void set_begin_time(int64_t begin_time);
+  void set_begin_time(int64_t begin_time);
 
-        void set_end_time(int64_t end_time);
+  void set_end_time(int64_t end_time);
 
-        [[nodiscard]] const data::locator_ptr &get_locator() const;
+  [[nodiscard]] const data::locator_ptr &get_locator() const;
 
-        [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
+  [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
 
-        const yijinjing::data::location_ptr &get_home() const;
+  const yijinjing::data::location_ptr &get_home() const;
 
-        uint32_t get_home_uid() const;
+  uint32_t get_home_uid() const;
 
-        const std::string &get_home_uname() const;
+  const std::string &get_home_uname() const;
 
-        const yijinjing::data::location_ptr &get_live_home() const;
+  const yijinjing::data::location_ptr &get_live_home() const;
 
-        uint32_t get_live_home_uid() const;
+  uint32_t get_live_home_uid() const;
 
-        [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
+  [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
 
-        bool has_writer(uint32_t dest_id) const;
+  bool has_writer(uint32_t dest_id) const;
 
-        [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+  [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
-        bool has_location(uint32_t uid) const;
+  bool has_location(uint32_t uid) const;
 
-        [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t uid) const;
+  [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t uid) const;
 
-        bool is_location_live(uint32_t uid) const;
+  bool is_location_live(uint32_t uid) const;
 
-        bool has_channel(uint32_t source, uint32_t dest) const;
+  bool has_channel(uint32_t source, uint32_t dest) const;
 
-        bool has_channel(uint64_t hash) const;
+  bool has_channel(uint64_t hash) const;
 
-        const longfist::types::Channel &get_channel(uint64_t hash) const;
+  const longfist::types::Channel &get_channel(uint64_t hash) const;
 
-        const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
+  const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
 
-        virtual void on_notify();
+  virtual void on_notify();
 
-        virtual void on_exit();
+  virtual void on_exit();
 
-    protected:
-        int64_t begin_time_;
-        int64_t end_time_;
-        std::unordered_map<uint64_t, longfist::types::Channel> channels_;
-        std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
-        std::unordered_map<uint32_t, longfist::types::Register> registry_;
-        yijinjing::journal::reader_ptr reader_;
-        std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
-        rx::connectable_observable <event_ptr> events_;
+protected:
+  int64_t begin_time_;
+  int64_t end_time_;
+  std::unordered_map<uint64_t, longfist::types::Channel> channels_;
+  std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
+  std::unordered_map<uint32_t, longfist::types::Register> registry_;
+  yijinjing::journal::reader_ptr reader_;
+  std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
+  rx::connectable_observable<event_ptr> events_;
 
-        uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
+  uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
 
-        bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
+  bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
 
-        bool check_location_live(uint32_t source_id, uint32_t dest_id) const;
+  bool check_location_live(uint32_t source_id, uint32_t dest_id) const;
 
-        void add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
+  void add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
-        void remove_location(int64_t trigger_time, uint32_t location_uid);
+  void remove_location(int64_t trigger_time, uint32_t location_uid);
 
-        void register_location(int64_t trigger_time, const longfist::types::Register &register_data);
+  void register_location(int64_t trigger_time, const longfist::types::Register &register_data);
 
-        void deregister_location(int64_t trigger_time, uint32_t location_uid);
+  void deregister_location(int64_t trigger_time, uint32_t location_uid);
 
-        void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+  void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-        void deregister_channel(uint32_t source_location_uid);
+  void deregister_channel(uint32_t source_location_uid);
 
-        void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
+  void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
-        void require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
+  void require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
-        void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
+  void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
-        virtual void react() = 0;
+  virtual void react() = 0;
 
-        virtual void on_active() = 0;
+  virtual void on_active() = 0;
 
-    private:
-        yijinjing::io_device_with_reply_ptr io_device_;
-        rx::composite_subscription cs_;
-        int64_t now_;
-        int64_t real_now_;
-        volatile bool continual_ = true;
-        volatile bool live_ = false;
+private:
+  yijinjing::io_device_with_reply_ptr io_device_;
+  rx::composite_subscription cs_;
+  int64_t now_;
+  int64_t real_now_;
+  volatile bool continual_ = true;
+  volatile bool live_ = false;
 
-        void produce(const rx::subscriber <event_ptr> &sb);
+  void produce(const rx::subscriber<event_ptr> &sb);
 
-        bool drain(const rx::subscriber <event_ptr> &sb);
+  bool drain(const rx::subscriber<event_ptr> &sb);
 
-        template<typename T>
-        std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer,
-                                                                int64_t trigger_time,
-                                                                uint32_t dest_id, uint32_t source_id,
-                                                                int64_t from_time)
-        {
-            if (check_location_exists(source_id, dest_id))
-            {
-                T &msg = writer->template open_data<T>(trigger_time);
-                msg.source_id = source_id;
-                msg.from_time = from_time;
-                writer->close_data();
-                SPDLOG_INFO("require {} read from {} from {}",
-                            get_location(dest_id)->uname, get_location(source_id)->uname, time::strftime(msg.from_time));
-            }
-        }
+  template <typename T>
+  std::enable_if_t<T::reflect, void> do_require_read_from(yijinjing::journal::writer_ptr &&writer, int64_t trigger_time,
+                                                          uint32_t dest_id, uint32_t source_id, int64_t from_time) {
+    if (check_location_exists(source_id, dest_id)) {
+      T &msg = writer->template open_data<T>(trigger_time);
+      msg.source_id = source_id;
+      msg.from_time = from_time;
+      writer->close_data();
+      SPDLOG_INFO("require {} read from {} from {}", get_location(dest_id)->uname, get_location(source_id)->uname,
+                  time::strftime(msg.from_time));
+    }
+  }
 
-        static void delegate_produce(hero *instance, const rx::subscriber <event_ptr> &sb);
-    };
-}
-#endif //KUNGFU_HERO_H
+  static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb);
+};
+} // namespace kungfu::yijinjing::practice
+#endif // KUNGFU_HERO_H
