@@ -1,5 +1,6 @@
-import { getAccountsStrategys } from '@/assets/scripts/actions';
+import { getAccountsStrategys } from '@/assets/scripts/base';
 import { parseToString } from '@/assets/scripts/utils';
+
 const colors = require('colors');
 
 export const listAccountsStrategys = async (): Promise<any> => {
@@ -13,7 +14,7 @@ export const listAccountsStrategys = async (): Promise<any> => {
         )
     })
 
-    const tdList = tds.map((a: Account): string => {
+    const tdList = tds.map((a: Td): string => {
         return parseToString(
             [colors.cyan('Td'), colors.bold(a.account_id),  a.config],
             [10, 15, 'auto'],

@@ -1,7 +1,8 @@
 
 import moment from 'moment';
 
-import { watcher, decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { history } from '__gUtils/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
@@ -83,7 +84,7 @@ export default {
             
             this.$nextTick()
                 .then(() => {
-                    const kungfuData = watcher.history.selectPeriod(from, to)
+                    const kungfuData = history.selectPeriod(from, to)
                     const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
                     const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
                     const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'

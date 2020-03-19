@@ -7,7 +7,7 @@ const path = require('path')
 
 //删除账户需要将所关联的数据库以及进程都关掉
 //判断task表和进程中是否存在，有则删除
-export const deleteTd = (row: Account): Promise<any> => {
+export const deleteTd = (row: Td): Promise<any> => {
     const { account_id } = row;
     const tdProcessId: string = `td_${account_id}`;
     
@@ -17,7 +17,7 @@ export const deleteTd = (row: Account): Promise<any> => {
     .then(() => ACCOUNT_API.deleteTd(account_id)) 
 }
 
-export const deleteMd = (row: Account): Promise<any> => {
+export const deleteMd = (row: Td): Promise<any> => {
     const { source_name } = row;
     const mdProcessId: string = `md_${source_name}`;
 
@@ -28,7 +28,7 @@ export const deleteMd = (row: Account): Promise<any> => {
 }
 
 //起停td
-export const switchTd = (account: Account, value: boolean): Promise<any> => {
+export const switchTd = (account: Td, value: boolean): Promise<any> => {
     const { account_id } = account
     const tdProcessId: string = `td_${account_id}`
     if(!value){
@@ -44,7 +44,7 @@ export const switchTd = (account: Account, value: boolean): Promise<any> => {
 }
 
 //起停md
-export const switchMd = (account: Account, value: boolean) => {
+export const switchMd = (account: Td, value: boolean) => {
     const { source_name } = account;
     const mdProcessId: string = `md_${source_name}`
     if(!value){

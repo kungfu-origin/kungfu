@@ -223,3 +223,14 @@ export const renderSelect = (configItem: AccountSettingItem) => {
     if(configItem.type === 'select') return `(${(configItem.data || []).map(item => item.value || "").join('|')})`
     else return ''
 }
+
+export const getKungfuTypeFromString = (typeString: string) => {
+    const isTd = typeString.toLocaleLowerCase().includes('td')
+    const isMd = typeString.toLocaleLowerCase().includes('md')
+    const isStrategy = typeString.toLocaleLowerCase().includes('strategy')
+    
+    if(isTd) return 'td';
+    else if(isMd) return 'md';
+    else if(isStrategy) return 'strategy'
+    else return ''
+}

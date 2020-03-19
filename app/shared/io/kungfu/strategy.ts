@@ -1,7 +1,7 @@
 import { getAllKfConfig, setKfConfig, getKfConfig, removeKfConfig } from '__gUtils/kungfuUtils';
 
 
-export const getStrategyList = () => {
+export const getStrategyList = (): Promise<Strategy[]> => {
     return new Promise(resolve => {
         const kfConfigList = getAllKfConfig();
         const strategyList = Object.values(kfConfigList || {})

@@ -9,7 +9,9 @@ if(currentPath.indexOf('/kungfuCodeEditor') !== -1) {
 }
 
 // debug export
-const { kungfu, watcher, longfist, kungfuConfigStore } = require('__gUtils/kungfuUtils')
+const { kungfu, longfist, kungfuConfigStore } = require('__gUtils/kungfuUtils')
+const { watcher } = require('__io/kungfu/watcher');
+
 window.watcher = watcher;
 window.longfist = longfist;
 window.kungfu = kungfu;

@@ -1,7 +1,15 @@
-import { Observable, Subscriber } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { startGetKungfuTradingData, startGetKungfuGlobalData, dealGatewayStates, transformTradingItemListToData, transformOrderTradeListToData, transformOrderStatListToData, transformAssetItemListToData } from '__gUtils/kungfuUtils';
+import { 
+    dealGatewayStates, 
+    transformTradingItemListToData, 
+    transformOrderTradeListToData, 
+    transformOrderStatListToData, 
+    transformAssetItemListToData 
+} from '__io/kungfu/watcher';
+
+import { startGetKungfuTradingData, startGetKungfuGlobalData } from '__io/kungfu/watcher';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     startGetKungfuTradingData((state: any) => {
@@ -51,7 +59,8 @@ export const buildKungfuGlobalDataPipe = () => {
 // insertTradingData()
 async function insertTradingData() {
     const moment = require('moment')
-    const { kungfu, watcher } = require('__gUtils/kungfuUtils');
+    const { kungfu } = require('__gUtils/kungfuUtils');
+    const { watcher } = require('__io/kungfu/watcher');
     const { delayMiliSeconds } = require('__gUtils/busiUtils');
     const longfist = kungfu.longfist;
     await delayMiliSeconds(10000)

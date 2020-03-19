@@ -1,4 +1,5 @@
-import { getAccountsStrategys, accountStrategyListStringify, getKungfuTypeFromString } from '@/assets/scripts/actions';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/base';
+import { getKungfuTypeFromString } from '@/assets/scripts/utils';
 import { deleteMd, deleteTd } from '__io/actions/account';
 import { deleteStrat } from '__io/actions/strategy';
 
@@ -35,7 +36,7 @@ export const removeAccountStrategy = async () => {
                 console.success(`Delete ${colors.yellow(type)} ${colors.bold(targetId)}`)
                 break;
             case 'td':
-                const targetTd = tds.filter((a: Account) => a.account_id === targetId)[0] || {}
+                const targetTd = tds.filter((a: Td) => a.account_id === targetId)[0] || {}
                 await deleteTd(targetTd)
                 console.success(`Delete ${colors.cyan(type)} ${colors.bold(targetId)}`)
                 break;

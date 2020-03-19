@@ -6,7 +6,7 @@ import MessageBox from '@/assets/components/MessageBox';
 
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale, processListObservable, switchProcess } from '@/assets/scripts/actions';
-import { nanoCancelAllOrder } from '__io/nano/nanoReq';
+// import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { throttleInsert } from '__gUtils/busiUtils';
 
 const blessed = require('blessed');
@@ -207,14 +207,14 @@ class TradingDataDashboard extends Dashboard {
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
-			nanoCancelAllOrder({
-				cancelType: t.type, 
-				id: t.targetId
-			})
-			.then(() => t.boards.message.log('Is cancelling orders, please wait...'))
-			.catch((err: Error) => {
-				t.boards.message.log(err.message)
-			})
+			// nanoCancelAllOrder({
+			// 	cancelType: t.type, 
+			// 	id: t.targetId
+			// })
+			// .then(() => t.boards.message.log('Is cancelling orders, please wait...'))
+			// .catch((err: Error) => {
+			// 	t.boards.message.log(err.message)
+			// })
 		})
 	}
 

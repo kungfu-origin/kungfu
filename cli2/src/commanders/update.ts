@@ -1,5 +1,6 @@
 import { accountConfigPrompt, addUpdateTdByPrompt, addUpdateMdByPrompt, addUpdateStrategyPrompt, filterAccountConfig } from '@/commanders/add';
-import { getAccountsStrategys, accountStrategyListStringify, getKungfuTypeFromString } from '@/assets/scripts/actions';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/base';
+import { getKungfuTypeFromString } from '@/assets/scripts/utils';
 import { getAccountSource } from '__gConfig/accountConfig';
 
 const inquirer = require('inquirer');
@@ -63,8 +64,8 @@ async function updateMd(targetSource: string, mds: Md[]) {
     )
 }
 
-async function updateTd(targetId: string, tds: Account[]) {
-    const targetTd = tds.filter((a: Account) => a.account_id === targetId)[0] || {};
+async function updateTd(targetId: string, tds: Td[]) {
+    const targetTd = tds.filter((a: Td) => a.account_id === targetId)[0] || {};
     const source = targetId.split('_')[0];
     const tdConfig = JSON.parse(targetTd.config || "{}");
     const { td } = await getAccountSource();

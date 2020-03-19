@@ -1,10 +1,10 @@
-// import './base';
+import './base';
 //@ts-ignore
 import { version } from '../package.json';
-// import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
-// import { listAccountsStrategys } from '@/commanders/list';
-// import { updateAccountStrategy } from '@/commanders/update';
-// import { removeAccountStrategy } from '@/commanders/remove';
+import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
+import { listAccountsStrategys } from '@/commanders/list';
+import { updateAccountStrategy } from '@/commanders/update';
+import { removeAccountStrategy } from '@/commanders/remove';
 // import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 // import { setSystemConfig } from '@/commanders/config';
 
@@ -49,58 +49,58 @@ program
 //         return monitPrompt(!!list)
 //     })
 
-// //list
-// program
-//     .command('list')
-//     .description('list mds, tds and strategies')
-//     .action(() => {
-//         return listAccountsStrategys()
-//             .catch((err: Error) => {
-//                 console.error(err)
-//                 process.exit(1)
-//             })
-//             .finally(() => process.exit(0));
-//     })
+//list
+program
+    .command('list')
+    .description('list mds, tds and strategies')
+    .action(() => {
+        return listAccountsStrategys()
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0));
+    })
 
-// //add
-// program
-//     .command('add')
-//     .description('add a md, td or strategy')
-//     .action(() => {
-//         return selectAccountOrStrategy()
-//             .then((type: string) => addAccountStrategy(type))
-//             .catch((err: Error) => {
-//                 console.error(err)
-//                 process.exit(1)
-//             })
-//             .finally(() => process.exit(0));
-//     })
+//add
+program
+    .command('add')
+    .description('add a md, td or strategy')
+    .action(() => {
+        return selectAccountOrStrategy()
+            .then((type: string) => addAccountStrategy(type))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0));
+    })
 
-// //update
-// program
-//     .command('update')
-//     .description('update a md, td or strategy')
-//     .action(() => {
-//         return updateAccountStrategy()
-//             .catch((err: Error) => {
-//                 console.error(err)
-//                 process.exit(1)
-//             })
-//             .finally(() => process.exit(0));
-//     })
+//update
+program
+    .command('update')
+    .description('update a md, td or strategy')
+    .action(() => {
+        return updateAccountStrategy()
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0));
+    })
 
-// //remove
-// program
-//     .command('remove')
-//     .description('remove a md, td or strategy')
-//     .action(() => {
-//         return removeAccountStrategy()
-//             .catch((err: Error) => {
-//                 console.error(err)
-//                 process.exit(1)
-//             })
-//             .finally(() => process.exit(0));
-//     })
+//remove
+program
+    .command('remove')
+    .description('remove a md, td or strategy')
+    .action(() => {
+        return removeAccountStrategy()
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0));
+    })
 
 // program
 //     .command('ext [options]')

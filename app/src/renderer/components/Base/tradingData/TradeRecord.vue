@@ -35,7 +35,7 @@ import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { debounce } from "__gUtils/busiUtils";
-import { dealTrade } from "__gUtils/kungfuUtils";
+import { dealTrade } from "__io/kungfu/watcher";
 import { writeCSV } from '__gUtils/fileUtils';
 
 export default {

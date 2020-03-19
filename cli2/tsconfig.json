@@ -8,9 +8,9 @@
         "src/*"
     ],
     "typeRoots": [
+        "node_modules/@types",
         "../app/shared/typings",
-        "./src/assets/typings",
-        "node_modules/@types"
+        "./src/assets/typings"
     ],
     "exclude": [
         "node_modules"

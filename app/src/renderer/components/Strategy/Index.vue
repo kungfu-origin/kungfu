@@ -66,7 +66,7 @@ import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
-import { buildTradingDataPipe } from '__io/kungfu/index';
+import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 
 export default {
     data(){

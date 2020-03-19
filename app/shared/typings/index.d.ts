@@ -72,7 +72,7 @@ interface SourceType {
     }
 }
 
-interface Account {
+interface Td {
     account_id: string;
     source_name: string;
     config?: any;

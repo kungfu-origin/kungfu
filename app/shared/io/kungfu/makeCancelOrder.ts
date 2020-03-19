@@ -1,5 +1,5 @@
-import { watcher, longfist, encodeKungfuLocation } from '__gUtils/kungfuUtils';
-
+import { longfist, encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { watcher } from '__io/kungfu/watcher';
 
 interface MakeOrderData {
     intrument_id: string,

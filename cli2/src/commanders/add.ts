@@ -1,9 +1,8 @@
 import { getAccountSource } from '__gConfig/accountConfig';
 import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '__assets/validator';
-import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '__io/db/account';
-import { getStrategyList, addStrategy, updateStrategyPath } from '__io/db/strategy';
-import { parseSources, renderSelect, getQuestionInputType } from '@/assets/scripts/utils';
-import { getKungfuTypeFromString } from '@/assets/scripts/actions';
+import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '__io/kungfu/account';
+import { getStrategyList, addStrategy, updateStrategyPath } from '__io/kungfu/strategy';
+import { parseSources, renderSelect, getQuestionInputType, getKungfuTypeFromString } from '@/assets/scripts/utils';
 
 const os = require('os');
 const colors = require('colors');
@@ -93,7 +92,7 @@ export const addUpdateTdByPrompt = async (source: string, key: string, config: a
             await updateTdConfig(accountId, JSON.stringify(config))
             console.success(`Update ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         } else {
-            await addTd(accountId, source, JSON.stringify(config))
+            await addTd(`${source}_${accountId}`, JSON.stringify(config))
             console.success(`Add ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }
     } catch(err) {
@@ -305,7 +304,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
 
 async function existedAccountIdValidator(value: any):Promise<any> {
     const accountList = await getTdList()
-    const existedIds = accountList.map((a: Account) => a.account_id.toAccountId());
+    const existedIds = accountList.map((a: Td) => a.account_id.toAccountId());
     if (existedIds.includes(value)) return new Error('AccountId has existed!');
 }
 

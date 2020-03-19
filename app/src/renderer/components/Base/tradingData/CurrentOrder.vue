@@ -51,7 +51,7 @@ import moment from "moment"
 import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { dealOrder } from "__gUtils/kungfuUtils";
+import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
 // import { nanoCancelAllOrder } from '__io/nano/nanoReq';

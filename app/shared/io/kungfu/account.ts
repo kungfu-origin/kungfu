@@ -1,17 +1,17 @@
 import { getAllKfConfig, setKfConfig, removeKfConfig } from '__gUtils/kungfuUtils';
 
 
-export const getTdList = () => {
+export const getTdList = (): Promise<Td[]> => {
     return new Promise(resolve => {
         const kfConfigList = getAllKfConfig();
-        const tdList = Object.values(kfConfigList || {})
+        const tdList: Td[] = Object.values(kfConfigList || {})
             .filter((tdData: any) => {
                 return +tdData.category === 1
             })
             .map((tdData: any) => {
                 return {
                     account_id: `${tdData.group}_${tdData.name}`,
-                    source_name: tdData.group,
+                    source_name: tdData.group.toString(),
                     config: tdData.value
                 }
             })

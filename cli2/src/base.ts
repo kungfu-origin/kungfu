@@ -21,5 +21,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 
-export const { app, initConfig } = require('__assets/base')
+export const { initConfig } = require('__assets/base')
 initConfig();
