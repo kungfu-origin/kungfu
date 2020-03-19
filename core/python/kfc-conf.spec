@@ -2,11 +2,6 @@ import os
 import glob
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
-# hack from https://github.com/pyinstaller/pyinstaller/issues/4064
-# to get pandas working
-import distutils
-if distutils.distutils_path.endswith('__init__.py'):
-    distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
 sep = os.path.sep
 src_dir = os.path.abspath(os.path.join(os.path.curdir, 'python'))
