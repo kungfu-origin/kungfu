@@ -1,5 +1,4 @@
 #include "ctrl-routine.h"
-#include "stdafx.h"
 #include <DbgHelp.h>
 
 namespace WindowsKillLibrary {

@@ -1,7 +1,6 @@
 #include "remote-process.h"
 #include "ctrl-routine.h"
 #include "signal.h"
-#include "stdafx.h"
 
 namespace WindowsKillLibrary {
 

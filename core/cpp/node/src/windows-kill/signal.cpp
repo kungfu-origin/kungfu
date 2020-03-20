@@ -1,5 +1,4 @@
 #include "signal.h"
-#include "stdafx.h"
 #include <tlhelp32.h>
 
 namespace WindowsKillLibrary {

@@ -54,7 +54,8 @@ class KungfuCoreConan(ConanFile):
             self.output.warn('clang-format not installed')
 
     def configure(self):
-        self.settings.compiler.libcxx = "libstdc++"
+        if tools.detected_os() != 'Windows':
+            self.settings.compiler.libcxx = "libstdc++"
 
     def build(self):
         build_type = self.__get_build_type()

@@ -1,7 +1,6 @@
 #include "windows-kill-library.h"
 #include "sender.h"
 #include "signal.h"
-#include "stdafx.h"
 
 namespace WindowsKillLibrary {
 
