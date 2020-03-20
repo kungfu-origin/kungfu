@@ -16,6 +16,7 @@ export const statusConfig: StatusConfig = {
     'stopped':   { name: isEnglish ? 'Stopped' : '已停止', color: 'bg-gray', level: 0 },
     'launching': { name: isEnglish ? 'Launching' : '启动中', color: 'bg-gray', level: 0 },
     'errored':   { name: isEnglish ? 'Errored' : '错误', color: 'bg-red', level: -1 },
+    '0':   { name: isEnglish ? 'Errored' : '错误', color: 'bg-red', level: -1 },
     '1':   { name: isEnglish ? 'NoData' : '无数据', color: 'bg-gray', level: 0 },
     '2':   { name: isEnglish ? 'Disconnected' : '断开', color: 'bg-red', level: -1 },
     '3':   { name: isEnglish ? 'Connecting' : '连接中', color: 'tr-dot-wave', level: 0 },
