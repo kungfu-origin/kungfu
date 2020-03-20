@@ -29,7 +29,7 @@ export const KUNGFU_GLOBAL_DATA_OBSERVER = new Observable(subscriber => {
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
-            const ledgerData = data.ledger;
+            const ledgerData = data.ledger || {};
             const orders = Object.values(ledgerData.Order || {});
             const trades = Object.values(ledgerData.Trade || {});
             const positions = Object.values(ledgerData.Position || {});

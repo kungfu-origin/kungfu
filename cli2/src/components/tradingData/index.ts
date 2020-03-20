@@ -5,7 +5,7 @@ import Dashboard from '@/assets/components/Dashboard';
 import MessageBox from '@/assets/components/MessageBox';
 
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
-// import { tradingDataObservale } from './node_modules/@/assets/scripts/actions/tradingDataActions';
+import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 // import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { throttleInsert } from '__gUtils/busiUtils';
@@ -224,7 +224,7 @@ class TradingDataDashboard extends Dashboard {
 		const t = this;
 		const orderThrottle = throttleInsert(1000);
 		const tradeThrottle = throttleInsert(1000);
-		// tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
+		tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
 		// 	const type = tradingData[0];
 		// 	const data = tradingData[1];
 
@@ -274,7 +274,7 @@ class TradingDataDashboard extends Dashboard {
 		// 			t.screen.render();
 		// 			break
 		// 	}
-		// })
+		})
 
 		processListObservable().subscribe((processList: any) => {
 			const t = this;
