@@ -93,7 +93,7 @@
         ]
       },
       {
-        "from": "../cli/build/cli",
+        "from": "../cli2/build/cli",
         "to": "kungfu-cli",
         "filter": [
           "kungfu-cli",
