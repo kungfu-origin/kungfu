@@ -66,7 +66,7 @@ private:
   const size_t size_;
   const page_header *header_;
 
-  page(const data::location_ptr &location, uint32_t dest_id, int page_id, size_t size, bool lazy, uintptr_t address);
+  page(data::location_ptr location, uint32_t dest_id, int page_id, size_t size, bool lazy, uintptr_t address);
 
   /**
    * update page header when new frame added

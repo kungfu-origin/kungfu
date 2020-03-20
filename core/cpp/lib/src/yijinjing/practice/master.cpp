@@ -6,7 +6,6 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/practice/master.h>
-#include <kungfu/yijinjing/practice/profile.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
@@ -19,9 +18,9 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::yijinjing::practice {
 
 master::master(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0) {
-  profile cs(get_locator());
-  for (const auto &config : cs.get_all(Config{})) {
+    : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0),
+      profile_(get_locator()) {
+  for (const auto &config : profile_.get_all(Config{})) {
     add_location(start_time_, location::make_shared(config, get_locator()));
   }
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());

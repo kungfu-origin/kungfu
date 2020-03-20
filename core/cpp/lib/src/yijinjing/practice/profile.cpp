@@ -4,18 +4,24 @@
 
 #include <kungfu/yijinjing/practice/profile.h>
 
-namespace kungfu::yijinjing::practice {
-using namespace longfist;
+using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
+using namespace kungfu::yijinjing::data;
 
-const std::string default_db_file(const yijinjing::data::locator_ptr &locator) {
-  auto location =
-      std::make_shared<yijinjing::data::location>(enums::mode::LIVE, enums::category::SYSTEM, "etc", "kungfu", locator);
-  return locator->layout_file(location, enums::layout::SQLITE, "config");
+namespace kungfu::yijinjing::practice {
+
+std::string default_db_file(const locator_ptr &locator) {
+  auto config_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
+  return locator->layout_file(config_location, enums::layout::SQLITE, "config");
 }
 
 profile::profile(const yijinjing::data::locator_ptr &locator) : profile(default_db_file(locator)) {}
 
-profile::profile(const std::string &profile_db_file) : profile_db_file_(profile_db_file) {}
+profile::profile(std::string profile_db_file) : profile_db_file_(std::move(profile_db_file)) {
+  if (not get_storage().sync_schema_simulate().empty()) {
+    get_storage().sync_schema();
+  }
+}
 
 longfist::sqlite::ProfileStorageType &profile::get_storage() {
   static auto storage = longfist::sqlite::make_storage(profile_db_file_, ProfileDataTypes);

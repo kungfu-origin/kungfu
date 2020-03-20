@@ -16,8 +16,6 @@ Napi::FunctionReference ConfigStore::constructor;
 ConfigStore::ConfigStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}
 
-ConfigStore::~ConfigStore() {}
-
 inline Config getConfigFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator) {
   Config query = {};
   auto config_location = ExtractLocation(info, 0, locator);

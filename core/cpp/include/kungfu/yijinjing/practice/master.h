@@ -10,6 +10,7 @@
 #include <kungfu/longfist/serialize/sql.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>
+#include <kungfu/yijinjing/practice/profile.h>
 
 namespace kungfu::yijinjing::practice {
 
@@ -48,6 +49,7 @@ protected:
 private:
   int64_t start_time_;
   int64_t last_check_;
+  profile profile_;
   std::unordered_map<uint32_t, uint32_t> app_locations_;
   std::unordered_map<uint32_t, longfist::sqlite::sqlizer_ptr> app_sqlizers_;
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;

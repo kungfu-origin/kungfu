@@ -18,9 +18,9 @@ public:
 
   template <typename DataType> DataType get(const DataType &query) {
     auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
-      auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
-                                       [&](auto it) { return pk == boost::hana::first(it); });
-      auto accessor = boost::hana::second(*just);
+      auto pk_member = boost::hana::find_if(boost::hana::accessors<DataType>(),
+                                            [&](auto it) { return pk == boost::hana::first(it); });
+      auto accessor = boost::hana::second(*pk_member);
       return accessor(query);
     });
     auto operation = [&](auto... ids) { return get_storage().get<DataType>(ids...); };
@@ -47,7 +47,7 @@ public:
 private:
   const std::string profile_db_file_;
 
-  explicit profile(const std::string &profile_db_file);
+  explicit profile(std::string profile_db_file);
 
   longfist::sqlite::ProfileStorageType &get_storage();
 };

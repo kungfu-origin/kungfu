@@ -16,8 +16,6 @@ Napi::FunctionReference CommissionStore::constructor;
 CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}
 
-CommissionStore::~CommissionStore() {}
-
 inline Commission getCommissionFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator) {
   Commission commission = {};
   try {

@@ -18,9 +18,9 @@
 #include <kungfu/yijinjing/util/os.h>
 
 namespace kungfu::yijinjing::journal {
-page::page(const data::location_ptr &location, uint32_t dest_id, const int id, const size_t size, const bool lazy,
+page::page(data::location_ptr location, uint32_t dest_id, const int id, const size_t size, const bool lazy,
            uintptr_t address)
-    : location_(location), dest_id_(dest_id), page_id_(id), size_(size), lazy_(lazy),
+    : location_(std::move(location)), dest_id_(dest_id), page_id_(id), size_(size), lazy_(lazy),
       header_(reinterpret_cast<page_header *>(address)) {
   assert(address > 0);
 }

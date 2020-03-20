@@ -21,7 +21,6 @@ datas = [
 
 def add_include(path):
     for include in glob.glob(path + sep + '**' + sep + 'include', recursive=True):
-        print(f'adding include {include}')
         datas.append((include, 'include'))
 
 add_include(cpp_dir)

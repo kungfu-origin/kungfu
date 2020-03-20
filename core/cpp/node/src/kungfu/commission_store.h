@@ -17,7 +17,7 @@ class CommissionStore : public Napi::ObjectWrap<CommissionStore> {
 public:
   explicit CommissionStore(const Napi::CallbackInfo &info);
 
-  ~CommissionStore();
+  ~CommissionStore() = default;
 
   Napi::Value SetCommission(const Napi::CallbackInfo &info);
 

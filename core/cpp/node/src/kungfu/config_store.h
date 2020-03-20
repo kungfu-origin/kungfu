@@ -17,7 +17,7 @@ class ConfigStore : public Napi::ObjectWrap<ConfigStore> {
 public:
   explicit ConfigStore(const Napi::CallbackInfo &info);
 
-  ~ConfigStore();
+  ~ConfigStore() = default;
 
   Napi::Value SetConfig(const Napi::CallbackInfo &info);
 

@@ -43,9 +43,7 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
     return [&](auto... tables) { return sqlite_orm::make_storage(state_db_file, tables...); };
   };
 
-  auto storage = boost::hana::unpack(tables, named_storage(state_db_file));
-  storage.sync_schema();
-  return storage;
+  return boost::hana::unpack(tables, named_storage(state_db_file));
 };
 
 using ProfileStorageType = decltype(make_storage(std::string(), ProfileDataTypes));
@@ -103,9 +101,8 @@ private:
   inline void ensure_storage(uint32_t dest) {
     if (storages_.find(dest) == storages_.end()) {
       auto db_file = location_->locator->layout_file(location_, enums::layout::SQLITE, fmt::format("{:08x}", dest));
-      auto storage = make_storage(db_file, StateDataTypes);
-      storage.sync_schema();
-      storages_.emplace(dest, storage);
+      storages_.emplace(dest, make_storage(db_file, StateDataTypes));
+      storages_.at(dest).sync_schema();
     }
   }
 };
@@ -185,9 +182,8 @@ template <typename V> struct row_extractor<std::vector<V>> {
     if (row_value) {
       auto len = ::strlen(row_value);
       return this->go(row_value, len);
-    } else {
-      return {};
     }
+    return {};
   }
 
   std::vector<V> extract(sqlite3_stmt *stmt, int columnIndex) {
@@ -203,9 +199,8 @@ protected:
       res.reserve(len / sizeof(V));
       std::copy(bytes, bytes + len, std::back_inserter(res));
       return res;
-    } else {
-      return {};
     }
+    return {};
   }
 };
 } // namespace sqlite_orm
