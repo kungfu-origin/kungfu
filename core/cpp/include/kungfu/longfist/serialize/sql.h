@@ -26,13 +26,13 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
       constexpr auto named_table = [](const std::string &table_name) {
         return [&](auto... columns) {
           auto pk_members = boost::hana::transform(DataType::primary_keys, [](auto pk) {
-            auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
-                                             [&](auto it) { return pk == boost::hana::first(it); });
+            auto filter = [&](auto it) { return pk == boost::hana::first(it); };
+            auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), filter);
             auto accessor = boost::hana::second(*just);
             return member_pointer_trait<decltype(accessor)>().pointer();
           });
-          auto primary_keys =
-              boost::hana::unpack(pk_members, [](auto... keys) { return sqlite_orm::primary_key(keys...); });
+          auto make_pk = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
+          auto primary_keys = boost::hana::unpack(pk_members, make_pk);
           return sqlite_orm::make_table(table_name, columns..., primary_keys);
         };
       };

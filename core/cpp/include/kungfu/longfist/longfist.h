@@ -12,15 +12,34 @@
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
 namespace kungfu::longfist {
-constexpr auto ProfileDataTypes = boost::hana::make_map(TYPE_PAIR(Config), TYPE_PAIR(Commission));
+constexpr auto ProfileDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(Config),                                   //
+    TYPE_PAIR(Commission)                                //
+);
 using ProfileDataTypesT = decltype(ProfileDataTypes);
 
-constexpr auto StateDataTypes = boost::hana::make_map(
-    TYPE_PAIR(Config), TYPE_PAIR(Commission), TYPE_PAIR(Instrument), TYPE_PAIR(Quote), TYPE_PAIR(Entrust),
-    TYPE_PAIR(Transaction), TYPE_PAIR(Bar), TYPE_PAIR(OrderInput), TYPE_PAIR(OrderAction), TYPE_PAIR(OrderActionError),
-    TYPE_PAIR(Order), TYPE_PAIR(Trade), TYPE_PAIR(Asset), TYPE_PAIR(AssetSnapshot), TYPE_PAIR(Position),
-    TYPE_PAIR(PositionEnd), TYPE_PAIR(PositionDetail), TYPE_PAIR(PositionDetailEnd),
-    TYPE_PAIR(InstrumentCommissionRate), TYPE_PAIR(OrderStat));
+constexpr auto StateDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(Config),                                 //
+    TYPE_PAIR(Commission),                             //
+    TYPE_PAIR(Instrument),                             //
+    TYPE_PAIR(Quote),                                  //
+    TYPE_PAIR(Entrust),                                //
+    TYPE_PAIR(Transaction),                            //
+    TYPE_PAIR(Bar),                                    //
+    TYPE_PAIR(OrderInput),                             //
+    TYPE_PAIR(OrderAction),                            //
+    TYPE_PAIR(OrderActionError),                       //
+    TYPE_PAIR(Order),                                  //
+    TYPE_PAIR(Trade),                                  //
+    TYPE_PAIR(Asset),                                  //
+    TYPE_PAIR(AssetSnapshot),                          //
+    TYPE_PAIR(Position),                               //
+    TYPE_PAIR(PositionEnd),                            //
+    TYPE_PAIR(PositionDetail),                         //
+    TYPE_PAIR(PositionDetailEnd),                      //
+    TYPE_PAIR(InstrumentCommissionRate),               //
+    TYPE_PAIR(OrderStat)                               //
+);
 using StateDataTypesT = decltype(StateDataTypes);
 
 constexpr auto build_profile_map = [](auto types) {
