@@ -57,8 +57,6 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
-      "**/kungfu-core/build/*/node_nanomsg.node",
-      "**/kungfu-core/build/*/node_sqlite3.node",
       "**/kungfu-core/build/*/node_windows_kill.node",
       "**/kungfu-core/build/*/node_kungfu.node",
       "**/kungfu-core/build/*/kungfu.dll",
@@ -100,8 +98,7 @@
         "filter": [
           "kungfu-cli",
           "kungfu-cli.*",
-          "node_nanomsg.node",
-          "node_sqlite3.node",
+          "node_windows_kill.node",
           "node_kungfu.node",
           "nanomsg.*",
           "libnanomsg.*",

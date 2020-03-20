@@ -31,56 +31,56 @@ template <typename DataType> struct JsMake {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>, void>
+  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
   InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::Number::New(obj.Env(), 0));
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::Boolean::New(obj.Env(), false));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_int_v<ValueType> or kungfu::is_unsigned_int_v<ValueType>, void>
+  std::enable_if_t<kungfu::is_signed_int_v<ValueType> or kungfu::is_unsigned_int_v<ValueType>>
   InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::Number::New(obj.Env(), 0));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::BigInt::New(obj.Env(), (int64_t)0));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::BigInt::New(obj.Env(), (uint64_t)0));
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_floating_point_v<ValueType>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<std::is_floating_point_v<ValueType>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::Number::New(obj.Env(), 0));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::String::New(obj.Env(), ""));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> InitValue(Napi::Object &obj, const char *name) {
     auto buffer = Napi::ArrayBuffer::New(obj.Env(), ValueType::length);
     obj.Set(name, buffer);
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_vector_v<ValueType>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<kungfu::is_vector_v<ValueType>> InitValue(Napi::Object &obj, const char *name) {
     auto buffer = Napi::ArrayBuffer::New(obj.Env(), 0);
     obj.Set(name, buffer);
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, std::string>, void> InitValue(Napi::Object &obj, const char *name) {
+  std::enable_if_t<std::is_same_v<ValueType, std::string>> InitValue(Napi::Object &obj, const char *name) {
     obj.Set(name, Napi::String::New(obj.Env(), ""));
   }
 };
@@ -96,44 +96,44 @@ struct JsSet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>, void>
+  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
   Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::Number::New(obj.Env(), static_cast<int>(value)));
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>, void> Set(Napi::Object &obj, const char *name,
-                                                              const ValueType &value) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>>
+  Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::Boolean::New(obj.Env(), value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_int_v<ValueType> or kungfu::is_unsigned_int_v<ValueType>, void>
+  std::enable_if_t<kungfu::is_signed_int_v<ValueType> or kungfu::is_unsigned_int_v<ValueType>>
   Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::Number::New(obj.Env(), value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType> or kungfu::is_unsigned_bigint_v<ValueType>, void>
+  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType> or kungfu::is_unsigned_bigint_v<ValueType>>
   Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::BigInt::New(obj.Env(), value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_floating_point_v<ValueType>, void> Set(Napi::Object &obj, const char *name,
-                                                                  const ValueType &value) {
+  std::enable_if_t<std::is_floating_point_v<ValueType>>
+  Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::Number::New(obj.Env(), value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>, void> Set(Napi::Object &obj, const char *name,
-                                                                     const ValueType &value) {
+  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>>
+  Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::String::New(obj.Env(), value.value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>, void> Set(Napi::Object &obj, const char *name,
-                                                                            const ValueType &value) {
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>>
+  Set(Napi::Object &obj, const char *name, const ValueType &value) {
     using ElementType = typename ValueType::element_type;
     size_t element_size = sizeof(ElementType);
     auto buffer = Napi::ArrayBuffer::New(obj.Env(), ValueType::length * element_size);
@@ -154,8 +154,7 @@ struct JsSet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, std::string>, void> Set(Napi::Object &obj, const char *name,
-                                                                     const ValueType &value) {
+  std::enable_if_t<std::is_same_v<ValueType, std::string>> Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::String::New(obj.Env(), value));
   }
 };
@@ -173,32 +172,28 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>, void>
+  std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
   Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = static_cast<ValueType>(obj.Get(name).ToNumber().Int32Value());
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>, void> Get(ValueType &value, const char *name,
-                                                              const Napi::Object &obj) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = obj.Get(name).ToBoolean().Value();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_int_v<ValueType>, void> Get(ValueType &value, const char *name,
-                                                                 const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_signed_int_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().Int32Value();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_unsigned_int_v<ValueType>, void> Get(ValueType &value, const char *name,
-                                                                   const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_unsigned_int_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().Uint32Value();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>, void> Get(ValueType &value, const char *name,
-                                                                    const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     if (obj.Get(name).IsNumber()) {
       value = obj.Get(name).ToNumber().Int32Value();
     }
@@ -209,8 +204,7 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>, void> Get(ValueType &value, const char *name,
-                                                                      const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     if (obj.Get(name).IsNumber()) {
       value = obj.Get(name).ToNumber().Uint32Value();
     }
@@ -221,21 +215,18 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_floating_point_v<ValueType>, void> Get(ValueType &value, const char *name,
-                                                                  const Napi::Object &obj) {
+  std::enable_if_t<std::is_floating_point_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().DoubleValue();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>, void> Get(ValueType &value, const char *name,
-                                                                     const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     auto v = obj.Get(name).ToString().Utf8Value();
     strcpy(value.value, v.c_str());
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>, void> Get(ValueType &value, const char *name,
-                                                                            const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     auto buf = obj.Get(name).As<Napi::ArrayBuffer>();
     memcpy(value.value, buf.Data(), buf.ByteLength());
   }
@@ -249,8 +240,7 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, std::string>, void> Get(ValueType &value, const char *name,
-                                                                     const Napi::Object &obj) {
+  std::enable_if_t<std::is_same_v<ValueType, std::string>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
     value = obj.Get(name).ToString().Utf8Value();
   }
 };
@@ -278,13 +268,10 @@ public:
             value = Napi::Object::New(state_.Env());
             auto valueObj = value.ToObject();
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-            valueObj.DefineProperty(
-                Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-            valueObj.DefineProperty(
-                Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
             valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
-            valueObj.DefineProperty(
-                Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
+            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
             table.Set(uid_key, value);
           }
           set(data, value);
@@ -311,15 +298,12 @@ public:
     Napi::Value value = state_.Get(uid);
     if (value.IsUndefined() or value.IsEmpty()) {
       value = Napi::Object::New(state_.Env());
-      value.ToObject().DefineProperty(
-          Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-      value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
-      value.ToObject().DefineProperty(
-          Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
-      value.ToObject().DefineProperty(
-          Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
-      value.ToObject().DefineProperty(
-          Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
+      Napi::Object valueObj = value.ToObject();
+      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
+      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
+      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
+      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
       table.Set(uid, value);
     }
     set(data, value);
@@ -345,11 +329,9 @@ public:
     Napi::Object valueObj = value.ToObject();
     valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
     valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-    value.ToObject().DefineProperty(
-        Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
-    value.ToObject().DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
-    value.ToObject().DefineProperty(
-        Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
+    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
+    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
+    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
     state_.Get(type_name).ToObject().Set(uid_key, valueObj);
     app_.write_to(0, data);
   }

@@ -92,7 +92,7 @@ struct sqlizer {
   }
 
   template <typename DataType>
-  std::enable_if_t<DataType::reflect, void> operator()(const std::string &name, boost::hana::basic_type<DataType> type,
+  std::enable_if_t<DataType::reflect> operator()(const std::string &name, boost::hana::basic_type<DataType> type,
                                                        const event_ptr &event) {
     ensure_storage(event->dest());
     storages_.at(event->dest()).replace(event->data<DataType>());

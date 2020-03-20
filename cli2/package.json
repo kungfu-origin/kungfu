@@ -28,7 +28,7 @@
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .config/webpack.cli.config.js",
     "test": " mocha",
     "cp": "yarn run cp-node",
-    "cp-node": "copyfiles -a -f ../core/build/*/node_kungfu.node ../core/build/*/node_nanomsg.node ../core/build/*/node_sqlite3.node ../core/build/*/libnanomsg.* ../core/build/*/libsqlite3.* ../core/build/*/libkungfu.* ../core/build/*/nanomsg.* ./build/cli"
+    "cp-node": "copyfiles -a -f ../core/build/*/node_windows_kill.node ../core/build/*/node_kungfu.node ../core/build/*/libnanomsg.* ../core/build/*/libsqlite3.* ../core/build/*/libkungfu.* ../core/build/*/nanomsg.* ./build/cli"
   },
   "bin": "./dist/cli/index.js",
   "pkg": {
