@@ -134,7 +134,7 @@ private:
 
   template <typename T>
   std::enable_if_t<T::reflect> do_require_read_from(yijinjing::journal::writer_ptr &&writer, int64_t trigger_time,
-                                                          uint32_t dest_id, uint32_t source_id, int64_t from_time) {
+                                                    uint32_t dest_id, uint32_t source_id, int64_t from_time) {
     if (check_location_exists(source_id, dest_id)) {
       T &msg = writer->template open_data<T>(trigger_time);
       msg.source_id = source_id;

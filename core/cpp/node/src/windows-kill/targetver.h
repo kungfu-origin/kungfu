@@ -7,12 +7,12 @@
 
 #include <WinSDKVer.h>
 
-#ifdef  WINVER
-#undef  WINVER
+#ifdef WINVER
+#undef WINVER
 #endif
 
-#ifdef  _WIN32_WINNT
-#undef  _WIN32_WINNT
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
 #endif
 
 #define WINVER _WIN32_WINNT_VISTA

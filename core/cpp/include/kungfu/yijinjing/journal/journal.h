@@ -187,8 +187,7 @@ public:
     close_frame(size);
   }
 
-  template <typename T>
-  std::enable_if_t<not kungfu::size_fixed_v<T>> write_with_time(int64_t gen_time, const T &data) {
+  template <typename T> std::enable_if_t<not kungfu::size_fixed_v<T>> write_with_time(int64_t gen_time, const T &data) {
     assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->page_->get_page_size());
     if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->page_->address_border()) {
       mark(gen_time, longfist::types::PageEnd::tag);

@@ -18,6 +18,7 @@
     "build": "yarn run build:cfg && yarn run build:cpp && yarn run freeze",
     "build:cfg": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o js_runtime=$npm_package_config_runtime -o node_version=$npm_package_config_node -o electron_version=$npm_package_config_electron",
     "build:cpp": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
+    "format": "cross-var pipenv run conan source .",
     "freeze": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
     "build-cli": "yarn run build",
     "clean": "cmake-js clean",

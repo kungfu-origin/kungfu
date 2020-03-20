@@ -102,8 +102,7 @@ struct JsSet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>>
-  Set(Napi::Object &obj, const char *name, const ValueType &value) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>> Set(Napi::Object &obj, const char *name, const ValueType &value) {
     obj.Set(name, Napi::Boolean::New(obj.Env(), value));
   }
 
@@ -120,20 +119,20 @@ struct JsSet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_floating_point_v<ValueType>>
-  Set(Napi::Object &obj, const char *name, const ValueType &value) {
+  std::enable_if_t<std::is_floating_point_v<ValueType>> Set(Napi::Object &obj, const char *name,
+                                                            const ValueType &value) {
     obj.Set(name, Napi::Number::New(obj.Env(), value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>>
-  Set(Napi::Object &obj, const char *name, const ValueType &value) {
+  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Set(Napi::Object &obj, const char *name,
+                                                               const ValueType &value) {
     obj.Set(name, Napi::String::New(obj.Env(), value.value));
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>>
-  Set(Napi::Object &obj, const char *name, const ValueType &value) {
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> Set(Napi::Object &obj, const char *name,
+                                                                      const ValueType &value) {
     using ElementType = typename ValueType::element_type;
     size_t element_size = sizeof(ElementType);
     auto buffer = Napi::ArrayBuffer::New(obj.Env(), ValueType::length * element_size);
@@ -154,7 +153,8 @@ struct JsSet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, std::string>> Set(Napi::Object &obj, const char *name, const ValueType &value) {
+  std::enable_if_t<std::is_same_v<ValueType, std::string>> Set(Napi::Object &obj, const char *name,
+                                                               const ValueType &value) {
     obj.Set(name, Napi::String::New(obj.Env(), value));
   }
 };
@@ -183,17 +183,20 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_int_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_signed_int_v<ValueType>> Get(ValueType &value, const char *name,
+                                                           const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().Int32Value();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_unsigned_int_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_unsigned_int_v<ValueType>> Get(ValueType &value, const char *name,
+                                                             const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().Uint32Value();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>> Get(ValueType &value, const char *name,
+                                                              const Napi::Object &obj) {
     if (obj.Get(name).IsNumber()) {
       value = obj.Get(name).ToNumber().Int32Value();
     }
@@ -204,7 +207,8 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_unsigned_bigint_v<ValueType>> Get(ValueType &value, const char *name,
+                                                                const Napi::Object &obj) {
     if (obj.Get(name).IsNumber()) {
       value = obj.Get(name).ToNumber().Uint32Value();
     }
@@ -215,18 +219,21 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_floating_point_v<ValueType>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<std::is_floating_point_v<ValueType>> Get(ValueType &value, const char *name,
+                                                            const Napi::Object &obj) {
     value = obj.Get(name).ToNumber().DoubleValue();
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Get(ValueType &value, const char *name,
+                                                               const Napi::Object &obj) {
     auto v = obj.Get(name).ToString().Utf8Value();
     strcpy(value.value, v.c_str());
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> Get(ValueType &value, const char *name,
+                                                                      const Napi::Object &obj) {
     auto buf = obj.Get(name).As<Napi::ArrayBuffer>();
     memcpy(value.value, buf.Data(), buf.ByteLength());
   }
@@ -240,7 +247,8 @@ struct JsGet {
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, std::string>> Get(ValueType &value, const char *name, const Napi::Object &obj) {
+  std::enable_if_t<std::is_same_v<ValueType, std::string>> Get(ValueType &value, const char *name,
+                                                               const Napi::Object &obj) {
     value = obj.Get(name).ToString().Utf8Value();
   }
 };
@@ -251,10 +259,11 @@ public:
       : state_(state), location_(std::move(location)) {}
 
   void operator()(int64_t from, int64_t to) {
+    auto source = location_->uid;
+    auto locator = location_->locator;
     auto now = yijinjing::time::now_in_nano();
-    for (auto dest : location_->locator->list_location_dest(location_)) {
-      auto db_file =
-          location_->locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
+    for (auto dest : locator->list_location_dest(location_)) {
+      auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
       auto storage = longfist::sqlite::make_storage(db_file, longfist::StateDataTypes);
       storage.sync_schema();
       boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
@@ -266,12 +275,12 @@ public:
           Napi::Value value = state_.Get(uid_key);
           if (value.IsUndefined() or value.IsEmpty()) {
             value = Napi::Object::New(state_.Env());
-            auto valueObj = value.ToObject();
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location_->uid)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
-            valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
+            auto vo = value.ToObject();
+            vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+            vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
+            vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), source)));
+            vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
+            vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), now)));
             table.Set(uid_key, value);
           }
           set(data, value);
@@ -298,12 +307,12 @@ public:
     Napi::Value value = state_.Get(uid);
     if (value.IsUndefined() or value.IsEmpty()) {
       value = Napi::Object::New(state_.Env());
-      Napi::Object valueObj = value.ToObject();
-      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
-      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
-      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
-      valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), event->gen_time())));
+      Napi::Object vo = value.ToObject();
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), event->gen_time())));
       table.Set(uid, value);
     }
     set(data, value);
@@ -326,13 +335,13 @@ public:
     auto now = yijinjing::time::now_in_nano();
     auto location = app_.get_io_device()->get_home();
     auto uid_key = fmt::format("{:016x}", data.uid());
-    Napi::Object valueObj = value.ToObject();
-    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
-    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
-    valueObj.DefineProperty(Napi::PropertyDescriptor::Value("state_update_time", Napi::BigInt::New(value.Env(), now)));
-    state_.Get(type_name).ToObject().Set(uid_key, valueObj);
+    Napi::Object vo = value.ToObject();
+    vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
+    vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
+    vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
+    vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
+    vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), now)));
+    state_.Get(type_name).ToObject().Set(uid_key, vo);
     app_.write_to(0, data);
   }
 

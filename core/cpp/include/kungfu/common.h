@@ -310,13 +310,11 @@ private:
 
   template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &v) {}
 
-  template <typename J, typename V>
-  static std::enable_if_t<std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
+  template <typename J, typename V> static std::enable_if_t<std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
     v = j;
   }
 
-  template <typename J, typename V>
-  static std::enable_if_t<not std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
+  template <typename J, typename V> static std::enable_if_t<not std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
     j.get_to(v);
   }
 };
