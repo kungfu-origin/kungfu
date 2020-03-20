@@ -106,8 +106,10 @@ export const TABLE_BASE_OPTIONS = {
  * @param  {} columnWidth
  * @param  {} pad=2
  */
-export const parseToString = (targetList: any[], columnWidth: any[], pad = 2) => {
+export const parseToString = (targetList: any[], columnWidth: any[], pad=2) => {
 	return targetList.map((item: string, i: number) => {
+
+		if (item + '' === '0') item = '0';
 		item = (item || '').toString();
 
 		const lw = item

@@ -7,8 +7,6 @@ import MessageBox from '@/assets/components/MessageBox';
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
-// import { nanoCancelAllOrder } from '__io/nano/nanoReq';
-import { throttleInsert } from '__gUtils/busiUtils';
 
 const blessed = require('blessed');
 
@@ -219,61 +217,47 @@ class TradingDataDashboard extends Dashboard {
 		})
 	}
 
+	freshAssets (assets: AssetData) {
+		if (this.type === 'account') {
+			delete assets.clientId
+		} else if (this.type === 'strategy') {
+			delete assets.accountId
+		}
+
+		return Object
+			.entries(assets)
+			.map((kvPair: any[]) => {
+				let key = kvPair[0]
+				let val = kvPair[1]
+				let theFirst = key[0]
+				key = theFirst.toUpperCase() + key.slice(1)
+				if(['UnRealizedPnl', 'RealizedPnl'].includes(key)) {
+					val = dealNum(+val)
+				}
+				return parseToString(
+					[key, val],
+					[16, 16]
+				)
+			})
+	}
 
 	bindData() {
-		const t = this;
-		const orderThrottle = throttleInsert(1000);
-		const tradeThrottle = throttleInsert(1000);
-		tradingDataObservale(t.type, t.targetId).subscribe((tradingData: any) => {
-		// 	const type = tradingData[0];
-		// 	const data = tradingData[1];
+		tradingDataObservale(this.type, this.targetId).subscribe((tradingData: any) => {
 
-		// 	switch (type) {
-		// 		case 'orderList':
-		// 			t.boards.orderTable.setItems(data)
-		// 			t.screen.render();
-		// 			break;
-		// 		case 'order':
-		// 			orderThrottle(data).then((dataList: OrderData[]) => {
-		// 				if(!dataList.length) return;
-		// 				t.boards.orderTable.setItems(dataList)
-		// 				t.screen.render();
-		// 			})
-		// 			break;
-		// 		case 'tradeList':
-		// 			t.boards.tradeTable.setItems(data)
-		// 			t.screen.render();
-		// 			break;
-		// 		case 'trade':
-		// 			tradeThrottle(data).then((dataList: TradeData[]) => {
-		// 				if(!dataList.length) return;
-		// 				t.boards.tradeTable.setItems(dataList)
-		// 				t.screen.render();					
-		// 			})
-		// 			break;
-		// 		case 'pos':
-		// 			t.boards.posTable.setItems(data);
-		// 			t.screen.render();
-		// 			break;
-		// 		case 'asset':
-		// 			const assetData = Object.entries(data)
-		// 				.map((kvPair: any[]) => {
-		// 					let key = kvPair[0]
-		// 					let val = kvPair[1]
-		// 					let theFirst = key[0]
-		// 					key = theFirst.toUpperCase() + key.slice(1)
-		// 					if(['UnRealizedPnl', 'RealizedPnl'].includes(key)) {
-		// 						val = dealNum(+val)
-		// 					}
-		// 					return parseToString(
-		// 						[key, val],
-		// 						[16, 16]
-		// 					)
-		// 				})
-		// 			t.boards.assetTable.setItems(assetData)
-		// 			t.screen.render();
-		// 			break
-		// 	}
+			const orders = tradingData.orders;
+			this.boards.orderTable.setItems(orders);
+
+			const trades = tradingData.trades;
+			this.boards.tradeTable.setItems(trades);
+			
+			const positions = tradingData.positions;
+			this.boards.posTable.setItems(positions);
+
+			const assets = this.freshAssets(tradingData.assets);
+			this.boards.assetTable.setItems(assets)
+			
+			this.screen.render();
+		
 		})
 
 		processListObservable().subscribe((processList: any) => {

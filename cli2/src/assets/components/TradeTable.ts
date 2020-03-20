@@ -7,7 +7,6 @@ class TradeTable extends Table {
 	type: string;
 	headers: string[];
 	columnWidth: number[];
-	tradeList: TradeData[];
 
 	constructor(type: string) {
 		super()
@@ -15,24 +14,19 @@ class TradeTable extends Table {
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Volume', 
 			type === 'account' ? 'Strate' : 'AccountId '
 		]
-		this.columnWidth = [18, 0, 0, 0, 8, 6, 9];
-		this.tradeList = [];
+		this.columnWidth = [10, 0, 0, 0, 8, 6, 9];
 	}
 
 	setItems(tradeDataList: TradeData[]) {
-		tradeDataList.kfForEach((tradeData: TradeData) => {
-			this.tradeList.unshift(tradeData)			
-		})
-		this.tradeList = this.tradeList.slice(0, 1000)
-		this.refresh()
+		this.refresh(tradeDataList.slice(0, 500))
 	}
 		/**
 	 * @param  {Object} accountData
 	 * @param  {Object} processStatus
 	 */
-	refresh(){
+	refresh (tradeList: TradeData[]) {
 		const t = this;
-		const tradeListData = t.tradeList.map((trade: TradeData) => {
+		const tradeListData = tradeList.map((trade: TradeData) => {
 			let side = trade.side;
 			if(side.toLowerCase() === 'buy') side = colors.red(side);
 			else if(side.toLowerCase() === 'sell') side = colors.green(side);
@@ -43,7 +37,7 @@ class TradeTable extends Table {
 			if(t.type === 'strategy') last = trade.accountId;
 			return parseToString(
 					[
-					trade.updateTime.slice(2),
+					trade.updateTime,
 					trade.instrumentId,
 					side,
 					offset,

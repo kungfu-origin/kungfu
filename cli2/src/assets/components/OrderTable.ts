@@ -10,7 +10,6 @@ interface OrdersData {
 class OrderTable extends Table {
 	type: string;
 	headers: string[];
-	ordersData: OrdersData;
 	ordersList: OrderData[];
 	columnWidth: number[];
 	constructor(type: string) {
@@ -19,28 +18,20 @@ class OrderTable extends Table {
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 
 			type === 'account' ? 'Strate' : 'AccountId'
 		]    
-		this.columnWidth = [18, 0, 0, 0, 8, 12, 8, 9];
-		this.ordersData = {};
+		this.columnWidth = [10, 0, 0, 0, 8, 12, 8, 9];
 		this.ordersList = []
 	}
 
 	setItems(orderDataList: OrderData[]) {
-		orderDataList.kfForEach((orderData: OrderData) => {
-			this.ordersData[orderData.id] = orderData;			
-		})
-		this.ordersList = Object.values(this.ordersData || {}).sort((a: OrderData, b: OrderData) => {
-			return  b.updateTimeNum - a.updateTimeNum
-		})
-		this.ordersList = this.ordersList.slice(0, 1000)
-		this.refresh();
+		this.refresh(orderDataList.slice(0, 500));
 	}
 	/**
 	 * @param  {Object} accountData
 	 * @param  {Object} processStatus
 	 */
-	refresh(){
+	refresh(ordersList: OrderData[]){
 		const t = this;
-		const orderListData = t.ordersList.map(o => {
+		const orderListData = ordersList.map(o => {
 			let side = o.side;
 			if(side.toLowerCase() === 'buy') side = colors.red(side);
 			else if(side.toLowerCase() === 'sell') side = colors.green(side);
@@ -58,7 +49,7 @@ class OrderTable extends Table {
 			};
 			return parseToString(
 				[
-					o.updateTime.slice(2),
+					o.updateTime,
 					o.instrumentId,
 					side,
 					offset,
@@ -72,6 +63,7 @@ class OrderTable extends Table {
 			)
 
 		})
+
 		t.table.setItems(orderListData)
 		if(!t.table.childList.focused) {
 			t.table.childList.select(0);

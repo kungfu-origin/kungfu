@@ -3,19 +3,17 @@ import Table from './Table';
 import { calcuHeaderWidth, parseToString, posDirection, dealNum } from '@/assets/scripts/utils';
 import { toDecimal } from '__gUtils/busiUtils';
 
-interface PosObject {
+interface StringToPosData {
 	[propName: string]: PosData
 }
 
 class PosTable extends Table {
 	headers: string[];
 	columnWidth: Array<number>;
-	posData: PosObject;
 	constructor(){
         super();
 		this.headers = ['Ticker', 'Dir', 'Yesterday', 'Today', 'Total', 'Open', 'Last', 'UnrealPnl']
 		this.columnWidth = [8, 4, 9, 9, 9, 9, 9, 12];
-		this.posData = {};
 	}
 
 
@@ -24,13 +22,11 @@ class PosTable extends Table {
 	 * @param  {Object} processStatus
 	 */
 
-	setItems(posData: PosData) {
-		const t = this;
-		t.posData[posData.id] = posData
-		t.refresh(t.posData)
+	setItems(posData: StringToPosData) {
+		this.refresh(posData)
 	}
 
-	refresh(posData: PosObject) {
+	refresh(posData: StringToPosData) {
 		const t = this;
 		const posListData = Object.values(posData || {}).map((p: PosData) => {
 			let direction = p.direction
