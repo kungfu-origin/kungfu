@@ -102,7 +102,7 @@ class KungfuCoreConan(ConanFile):
 
         for process in processes:
             try:
-                rc = process.wait(5)
+                rc = process.wait(30)
                 if rc is not None and rc != 0:
                     self.output.error(f'clang-format failed rc={rc}')
                     self.output.error(' '.join(process.cmdline()))

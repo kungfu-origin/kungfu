@@ -15,28 +15,25 @@ namespace kungfu::longfist::sqlite {
 constexpr auto make_storage = [](const std::string &state_db_file, const auto &types) {
   constexpr auto make_table = [](const auto &types) {
     return [&](auto key) {
-      auto value = types[key];
-      using DataType = typename decltype(+value)::type;
+      using DataType = typename decltype(+types[key])::type;
       auto columns = boost::hana::transform(boost::hana::accessors<DataType>(), [](auto it) {
         auto name = boost::hana::first(it);
         auto accessor = boost::hana::second(it);
         // MSVC bug: can not use static call
         return sqlite_orm::make_column(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
       });
-      constexpr auto named_table = [](const std::string &table_name) {
-        return [&](auto... columns) {
-          auto pk_members = boost::hana::transform(DataType::primary_keys, [](auto pk) {
-            auto filter = [&](auto it) { return pk == boost::hana::first(it); };
-            auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), filter);
-            auto accessor = boost::hana::second(*just);
-            return member_pointer_trait<decltype(accessor)>().pointer();
-          });
-          auto make_pk = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
-          auto primary_keys = boost::hana::unpack(pk_members, make_pk);
-          return sqlite_orm::make_table(table_name, columns..., primary_keys);
-        };
+      auto pk_members = boost::hana::transform(DataType::primary_keys, [](auto pk) {
+        auto filter = [&](auto it) { return pk == boost::hana::first(it); };
+        auto pk_member = boost::hana::find_if(boost::hana::accessors<DataType>(), filter);
+        auto accessor = boost::hana::second(*pk_member);
+        return member_pointer_trait<decltype(accessor)>().pointer();
+      });
+      auto make_primary_keys = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
+      auto primary_keys = boost::hana::unpack(pk_members, make_primary_keys);
+      constexpr auto named_table = [](const std::string &table_name, const auto &primary_keys) {
+        return [&](auto... columns) { return sqlite_orm::make_table(table_name, columns..., primary_keys); };
       };
-      return boost::hana::unpack(columns, named_table(key.c_str()));
+      return boost::hana::unpack(columns, named_table(key.c_str(), primary_keys));
     };
   };
 
@@ -45,6 +42,7 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
   constexpr auto named_storage = [](const std::string &state_db_file) {
     return [&](auto... tables) { return sqlite_orm::make_storage(state_db_file, tables...); };
   };
+
   auto storage = boost::hana::unpack(tables, named_storage(state_db_file));
   storage.sync_schema();
   return storage;
@@ -93,7 +91,7 @@ struct sqlizer {
 
   template <typename DataType>
   std::enable_if_t<DataType::reflect> operator()(const std::string &name, boost::hana::basic_type<DataType> type,
-                                                       const event_ptr &event) {
+                                                 const event_ptr &event) {
     ensure_storage(event->dest());
     storages_.at(event->dest()).replace(event->data<DataType>());
   }
