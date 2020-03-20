@@ -10,11 +10,11 @@ import { logger } from '../../utils/logUtils';
 export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE;
-        return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE, windowType].join('_'));
+        return kungfu.watcher(KF_HOME, [process.env.APP_TYPE, windowType].join(''));
     }
 
     if (process.env.RENDERER_TYPE !== 'app') return {}
-    return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
+    return kungfu.watcher(KF_HOME, [process.env.APP_TYPE].join(''));
 })()
 
 
