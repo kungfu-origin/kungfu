@@ -174,6 +174,7 @@ export class MonitorDashboard extends Dashboard {
         t.boards.processList.key(['enter'], () => {
             const selectedIndex: number = t.boards.processList.selected;
             const curProcessItem = t.globalData.processList[selectedIndex];
+            console.log(curProcessItem, '---')
             switchProcess(curProcessItem, t.boards.message)
         })
 

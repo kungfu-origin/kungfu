@@ -92,7 +92,7 @@ export const addUpdateTdByPrompt = async (source: string, key: string, config: a
             await updateTdConfig(accountId, JSON.stringify(config))
             console.success(`Update ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         } else {
-            await addTd(`${source}_${accountId}`, JSON.stringify(config))
+            await addTd(accountId, JSON.stringify(config))
             console.success(`Add ${colors.cyan('td')} ${colors.bold(accountId)} ${JSON.stringify(config, null , '')}`)   
         }
     } catch(err) {

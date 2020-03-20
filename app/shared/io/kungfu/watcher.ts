@@ -4,17 +4,22 @@ import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
 import moment from 'moment';
+import { logger } from '../../utils/logUtils';
 
 
 export const watcher: any = (() => {
+    if (process.env.APP_TYPE === 'cli') {
+        const windowType = process.env.CLI_WINDOW_TYPE;
+        return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE, windowType].join('_'));
+    }
+
     if (process.env.RENDERER_TYPE !== 'app') return {}
     return kungfu.watcher(KF_HOME, ['watcher', process.env.APP_TYPE].join('_'));
 })()
 
-console.log('Watcher::::::::', watcher)
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
-    if (process.env.RENDERER_TYPE !== 'app') return
+    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -35,7 +40,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
-    if (process.env.RENDERER_TYPE !== 'app') return
+    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {

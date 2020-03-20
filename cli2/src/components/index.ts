@@ -1,12 +1,15 @@
 // import tradingData from '@/components/tradingData/index'
-import monitor from '@/components/monitor/index';
 import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions/accountStrategyActions';
 const inquirer = require('inquirer');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 export const monitPrompt = async (list: boolean) => {  
 
-    if(!list) return monitor();
+    if(!list) {
+        process.env.CLI_WINDOW_TYPE = 'monit'
+        const monitor = require('@/components/monitor/index').default;
+        return monitor()
+    };
     
     // const { mds, tds, strategies } = await getAccountsStrategys();
     // const accountStrategyList = accountStrategyListStringify(mds, tds, strategies);

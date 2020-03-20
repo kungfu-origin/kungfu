@@ -10,16 +10,19 @@ import {
 } from '__io/kungfu/watcher';
 
 import { startGetKungfuTradingData, startGetKungfuGlobalData } from '__io/kungfu/watcher';
+import moment from 'moment';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
+    subscriber.next({})
     startGetKungfuTradingData((state: any) => {
         subscriber.next(state)
     })
 })   
 
-export const KUNGFU_GLOBAL_DATA_OBSERVER = new Observable(Subscriber => {
+export const KUNGFU_GLOBAL_DATA_OBSERVER = new Observable(subscriber => {
+    subscriber.next({})
     startGetKungfuGlobalData((state: any) => {
-        Subscriber.next(state)
+        subscriber.next(state)
     })
 })
        
@@ -49,8 +52,8 @@ export const buildKungfuGlobalDataPipe = () => {
     return KUNGFU_GLOBAL_DATA_OBSERVER.pipe(
         map((data: any): any => {
             return {
-                tradingDay: data.tradingDay,
-                gatewayStates: dealGatewayStates(data.appStates)
+                tradingDay: data.tradingDay || moment().format('YYYYMMDD'),
+                gatewayStates: dealGatewayStates(data.appStates || {})
             }
         })
     )

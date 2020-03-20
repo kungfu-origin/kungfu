@@ -147,6 +147,7 @@ export const calcuHeaderWidth = (target: string[], wish: any[]) => {
 }
 
 export const dealStatus = (status: string | number) => {
+	logger.info(status, '~~~~~~~~~~~~~~~~~~~~~~~')
 	if (status === '--') return status;
 	const name: string = statusConfig[status].name || '';
 	const level: number = statusConfig[status].level || 0;

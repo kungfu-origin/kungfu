@@ -13,6 +13,7 @@ import { getTdList, getMdList } from '__io/kungfu/account';
 import { getStrategyList } from '__io/kungfu/strategy';
 
 import { Observable, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 
 const colors = require('colors');
@@ -41,6 +42,7 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
             .catch((err: Error) => logger.error(err))
             break
         case 'td':
+            logger.info(proc)
             switchTd(proc, !status)
             .then(() => messageBoard.log(`${startOrStop} TD process success!`, 2))
             .catch((err: Error) => logger.error(err))
@@ -74,9 +76,18 @@ export const processStatusObservable = () => {
 }
 
 export const mdTdStateObservable = () => {
-    return new Observable(observer => {
-        observer.next({})
-    })
+    const { buildKungfuGlobalDataPipe } = require('__io/kungfu/tradingData');
+    return buildKungfuGlobalDataPipe().pipe(
+        map((item: any) => {
+            let gatewayStatesData: StringToMdTdState = {};
+            (item.gatewayStates || []).forEach((item: MdTdState) => {
+                if (item.processId) {
+                    gatewayStatesData[item.processId] = item;
+                }
+            });
+            return gatewayStatesData 
+        })
+    )
 }
 
 //系统所有进程列表
@@ -93,6 +104,7 @@ export const processListObservable = () => combineLatest(
         accountList: Td[], 
         strategyList: Strategy[]
     ) => {
+
         const mdData = [{}, ...mdList].reduce((a: any, b: any): any => {
             const mdProcessId = `md_${b.source_name}`
             a[mdProcessId] = {

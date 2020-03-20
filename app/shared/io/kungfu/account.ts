@@ -1,4 +1,5 @@
 import { getAllKfConfig, setKfConfig, removeKfConfig } from '__gUtils/kungfuUtils';
+import { logger } from '../../utils/logUtils';
 
 
 export const getTdList = (): Promise<Td[]> => {
