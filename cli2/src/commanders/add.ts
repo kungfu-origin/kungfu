@@ -77,11 +77,14 @@ export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule
     }, type))
 
     return inquirer.prompt(questions)
-        .then((answers: any) => ({
-            source,
-            key: idKey,
-            config: answers
-        }))
+        .then((answers: any) => {
+            answers = trimAnswers(answers)
+            return {
+                source,
+                key: idKey,
+                config: answers
+            }
+    })
 }
 
 export const addUpdateTdByPrompt = async (source: string, key: string, config: any, updateModule = false) => {
@@ -149,13 +152,15 @@ const addMdPrompt = (accountSource: Sources) => {
 export const addUpdateStrategyPrompt = async (strategyData?: any, updateModule?: boolean): Promise<any> => {
     const { strategy_id, strategy_path } = await inquirer.prompt(buildStrategyQuestion(strategyData, updateModule).filter(q => !!q))
 
+
+
     try {
         if(updateModule) {
             const strategyId = strategyData.strategy_id;
             await updateStrategyPath(strategyId, strategy_path)
             console.success(`Update ${colors.blue('strategy')} ${colors.bold(strategyId)} ${strategy_path}`)
         } else {
-            await addStrategy(strategy_id, strategy_path)
+            await addStrategy(strategy_id.trim(), strategy_path)
             console.success(`Add ${colors.blue('strategy')} ${colors.bold(strategy_id)} ${strategy_path}`)
         }
     }catch(err) {
@@ -317,4 +322,14 @@ export function filterAccountConfig(config: NormalObject) {
         }
     })
     return config
+}
+
+
+function trimAnswers (answers: any) {
+    Object.keys(answers || {}).forEach((key: string) => {
+        if (typeof answers[key] === 'string') {
+            answers[key] = answers[key].trim()
+        }
+    })
+    return answers
 }

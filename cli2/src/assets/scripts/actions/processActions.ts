@@ -42,7 +42,6 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
             .catch((err: Error) => logger.error(err))
             break
         case 'td':
-            logger.info(proc)
             switchTd(proc, !status)
             .then(() => messageBoard.log(`${startOrStop} TD process success!`, 2))
             .catch((err: Error) => logger.error(err))
