@@ -3,6 +3,7 @@
 //
 
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/util/util.h>
 
 #include "commission_store.h"
 #include "config_store.h"
@@ -31,6 +32,12 @@ Napi::Value FormatTime(const Napi::CallbackInfo &info) {
   return Napi::String::New(info.Env(), time::strftime(timestamp));
 }
 
+Napi::Value FormatStringToHashHex(const Napi::CallbackInfo &info) {
+  auto arg = info[0].ToString().Utf8Value();
+  uint32_t hash = hash_32((const unsigned char *)(arg.c_str()), arg.length());
+  return Napi::String::New(info.Env(), fmt::format("{:08x}", hash));
+}
+
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   ensure_sqlite_initilize();
 
@@ -45,6 +52,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   Watcher::Init(env, exports);
 
   exports.Set("formatTime", Napi::Function::New(env, FormatTime));
+  exports.Set("formatStringToHashHex", Napi::Function::New(env, FormatStringToHashHex));
 
   return exports;
 }
