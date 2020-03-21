@@ -6,6 +6,10 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# OS files
+.DS_Store
+*.log
+
 # IDE related
 *.VC.*
 *.sln
@@ -28,15 +32,9 @@ node_modules/
 */node_modules/
 dist/
 */dist/
-.clang-format
 .project
 package-lock.json
 Pipfile.lock
-.pythonVersion
-
-# OS files
-.DS_Store
-*.log
 
 #js third part
 */inquirer-path/lib/*
