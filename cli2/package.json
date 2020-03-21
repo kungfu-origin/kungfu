@@ -33,7 +33,12 @@
   "bin": "./dist/cli/index.js",
   "pkg": {
     "scripts": [
-      "../node_modules/bodec/bodec-node.js"
+      "../node_modules/pkg"
+    ],
+
+    "assets": [
+      "../core/node/*",
+      "../core/node/**/*"
     ]
   },
   "dependencies": {
