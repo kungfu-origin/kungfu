@@ -13,15 +13,10 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <nanomsg/nn.h>
-#include <nanomsg/pubsub.h>
-#include <nanomsg/reqrep.h>
-
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/util/os.h>
 
 #define DEFAULT_RECV_TIMEOUT 25
 #define DEFAULT_NOTICE_TIMEOUT 1000

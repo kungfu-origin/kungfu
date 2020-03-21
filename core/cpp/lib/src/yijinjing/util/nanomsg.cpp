@@ -8,8 +8,6 @@
 
 namespace kungfu::yijinjing::nanomsg {
 
-static const char *symbol(int i, int *value) { return nn_symbol(i, value); }
-
 static void term() { nn_term(); }
 
 const char *nn_exception::what() const throw() { return nn_strerror(errno_); }

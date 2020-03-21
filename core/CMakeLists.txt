@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 PROJECT(kungfu)
 
 ############################################################
@@ -51,55 +51,12 @@ if(WIN32)
     ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
 endif()
 
-include(build/conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
-
 ############################################################
 
-# to corporate clion with cmake-js:
-# https://github.com/cmake-js/cmake-js/issues/23
+include(cmake/clion.cmake)
 
-if(CLION)
-    function(PARSE_CMAKEJS_PROPERTIES)
-        function(GET_VARIABLE INPUT_STRING VARIABLE_TO_SELECT OUTPUT_VARIABLE)
-            set(SEARCH_STRING "${VARIABLE_TO_SELECT}=\"")
-            string(LENGTH "${SEARCH_STRING}" SEARCH_STRING_LENGTH)
-            string(LENGTH "${INPUT_STRING}" INPUT_STRING_LENGTH)
-
-            string(FIND "${INPUT_STRING}" "${VARIABLE_TO_SELECT}=\"" SEARCH_STRING_INDEX)
-
-            math(EXPR SEARCH_STRING_INDEX "${SEARCH_STRING_INDEX}+${SEARCH_STRING_LENGTH}")
-
-            string(SUBSTRING "${INPUT_STRING}" ${SEARCH_STRING_INDEX} ${INPUT_STRING_LENGTH} AFTER_SEARCH_STRING)
-            string(FIND "${AFTER_SEARCH_STRING}" "\"" QUOTE_INDEX)
-            string(SUBSTRING "${AFTER_SEARCH_STRING}" "0" "${QUOTE_INDEX}" RESULT_STRING)
-            set("${OUTPUT_VARIABLE}" "${RESULT_STRING}" PARENT_SCOPE)
-        endfunction(GET_VARIABLE)
-
-        string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
-        if (CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
-            exec_program(./node_modules/.bin/cmake-js ${CMAKE_CURRENT_SOURCE_DIR}
-                    ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure --debug
-                    OUTPUT_VARIABLE CMAKE_JS_OUTPUT
-                    )
-        else()
-            exec_program(./node_modules/.bin/cmake-js ${CMAKE_CURRENT_SOURCE_DIR}
-                    ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure
-                    OUTPUT_VARIABLE CMAKE_JS_OUTPUT
-                    )
-        endif ()
-
-        get_variable("${CMAKE_JS_OUTPUT}" "CMAKE_JS_INC" CMAKE_JS_INC)
-        set(CMAKE_JS_INC "${CMAKE_JS_INC}" PARENT_SCOPE)
-
-        get_variable("${CMAKE_JS_OUTPUT}" "CMAKE_LIBRARY_OUTPUT_DIRECTORY" CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}" PARENT_SCOPE)
-
-        message("-- Clion ready")
-    endfunction(PARSE_CMAKEJS_PROPERTIES)
-
-    PARSE_CMAKEJS_PROPERTIES()
-endif()
+include(build/conanbuildinfo.cmake)
+conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
 ############################################################
 
@@ -119,12 +76,18 @@ ADD_COMPILE_DEFINITIONS(SQLITE_DEFAULT_MMAP_SIZE=1048576)
 
 ############################################################
 
+OPTION(NNG_TESTS "" OFF)
+OPTION(NNG_TOOLS "" OFF)
+OPTION(NNG_ENABLE_NNGCAT "" OFF)
+
+############################################################
+
 INCLUDE_DIRECTORIES(deps/hana-1.6.0/include)
 INCLUDE_DIRECTORIES(deps/json-3.5.0/include)
 INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1/include)
 INCLUDE_DIRECTORIES(deps/sqlite_orm-1.5/include)
+INCLUDE_DIRECTORIES(deps/nng-1.3.0/include)
 INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/deps/nanomsg-1.1.5/include)
 
 ############################################################
 

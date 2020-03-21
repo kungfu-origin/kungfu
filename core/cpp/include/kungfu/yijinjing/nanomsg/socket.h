@@ -8,12 +8,11 @@
 #include <algorithm>
 #include <cstring>
 #include <exception>
-#include <nanomsg/nn.h>
-#include <nanomsg/pipeline.h>
-#include <nanomsg/pubsub.h>
-#include <nanomsg/reqrep.h>
-#include <nlohmann/json.hpp>
-#include <string>
+
+#include <nng/compat/nanomsg/nn.h>
+#include <nng/compat/nanomsg/pipeline.h>
+#include <nng/compat/nanomsg/pubsub.h>
+#include <nng/compat/nanomsg/reqrep.h>
 
 #include <kungfu/yijinjing/common.h>
 
@@ -76,8 +75,6 @@ public:
 };
 
 DECLARE_PTR(url_factory)
-
-static const char *symbol(int i, int *value);
 
 static void term();
 
