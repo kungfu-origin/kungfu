@@ -21,7 +21,7 @@ nodeModules['kungfu-core'] = 'commonjs kungfu-core';
 
 let cliConfig = {
   entry: {
-    index: path.join(__dirname, '../src/index2.ts')
+    index: path.join(__dirname, '../src/index.ts')
   },
   externals: {
     ...nodeModules,
