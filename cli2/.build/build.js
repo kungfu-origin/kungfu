@@ -16,10 +16,10 @@ switch (os.platform()) {
     case 'linux':
         childProcess.exec(`npm run build-linux`, (err, stdout) => {
             if(err) {
-                console.error(err)
+                console.error(err, '-----')
                 process.exit(1)
             }
-            console.log(stdout)
+            console.log(stdout, '!!!!!!!!!!')
         })
         return 'linux'
     default:
