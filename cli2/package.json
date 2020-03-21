@@ -33,9 +33,7 @@
   "bin": "./dist/cli/index.js",
   "pkg": {
     "scripts": [
-      "../node_modules/bodec/bodec-node.js",
-      "../core/node/*",
-      "../core/node/**/*"
+      "../node_modules/bodec/bodec-node.js"
     ]
   },
   "dependencies": {
