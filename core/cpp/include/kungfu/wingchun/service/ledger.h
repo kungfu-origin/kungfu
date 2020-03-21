@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2019-06-28.
 //
 
-#ifndef KUNGFU_WINGCHUN_LEDGER_H
-#define KUNGFU_WINGCHUN_LEDGER_H
+#ifndef WINGCHUN_LEDGER_H
+#define WINGCHUN_LEDGER_H
 
 #include <kungfu/longfist/serialize/journal.h>
 #include <kungfu/wingchun/book/book.h>
@@ -86,4 +86,4 @@ private:
 };
 } // namespace kungfu::wingchun::service
 
-#endif // KUNGFU_WINGCHUN_LEDGER_H
+#endif // WINGCHUN_LEDGER_H

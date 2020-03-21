@@ -2,8 +2,8 @@
 // Created by qlu on 2019-10-14.
 //
 
-#ifndef KUNGFU_WINGCHUN_BOOK_H
-#define KUNGFU_WINGCHUN_BOOK_H
+#ifndef WINGCHUN_BOOK_H
+#define WINGCHUN_BOOK_H
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/broker/client.h>
@@ -121,4 +121,4 @@ private:
 DECLARE_PTR(Bookkeeper)
 } // namespace kungfu::wingchun::book
 
-#endif // KUNGFU_WINGCHUN_BOOK_H
+#endif // WINGCHUN_BOOK_H

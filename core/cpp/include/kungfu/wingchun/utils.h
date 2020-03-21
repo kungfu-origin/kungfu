@@ -2,8 +2,8 @@
 // Created by qlu on 2019-09-04.
 //
 
-#ifndef KUNGFU_WINGCHUN_UTILS_H
-#define KUNGFU_WINGCHUN_UTILS_H
+#ifndef WINGCHUN_UTILS_H
+#define WINGCHUN_UTILS_H
 
 #include <hffix.hpp>
 #include <kungfu/common.h>
@@ -35,4 +35,4 @@ inline void write_subscribe_msg(const yijinjing::journal::writer_ptr &writer, in
 }
 } // namespace kungfu::wingchun
 
-#endif // KUNGFU_WINGCHUN_UTILS_H
+#endif // WINGCHUN_UTILS_H

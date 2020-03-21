@@ -2,8 +2,8 @@
 // Created by qlu on 2019-10-26.
 //
 
-#ifndef KUNGFU_WINGCHUN_ALGO_H
-#define KUNGFU_WINGCHUN_ALGO_H
+#ifndef WINGCHUN_ALGO_H
+#define WINGCHUN_ALGO_H
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
@@ -77,4 +77,4 @@ private:
 
 } // namespace kungfu::wingchun::algo
 
-#endif // KUNGFU_WINGCHUN_ALGO_H
+#endif // WINGCHUN_ALGO_H

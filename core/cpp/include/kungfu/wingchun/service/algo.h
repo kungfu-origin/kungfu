@@ -2,8 +2,8 @@
 // Created by qlu on 2019-10-31.
 //
 
-#ifndef KUNGFU_WINGCHUN_ALGO_SERVICE_H
-#define KUNGFU_WINGCHUN_ALGO_SERVICE_H
+#ifndef WINGCHUN_ALGO_SERVICE_H
+#define WINGCHUN_ALGO_SERVICE_H
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/algo/algo.h>
@@ -36,4 +36,4 @@ private:
 
 DECLARE_PTR(Algo)
 } // namespace kungfu::wingchun::service
-#endif // KUNGFU_WINGCHUN_ALGO_SERVICE_H
+#endif // WINGCHUN_ALGO_SERVICE_H

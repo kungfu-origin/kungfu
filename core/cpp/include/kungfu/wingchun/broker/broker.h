@@ -15,9 +15,9 @@ class Broker : public yijinjing::practice::apprentice {
 public:
   explicit Broker(yijinjing::data::location_ptr location, bool low_latency);
 
-  virtual ~Broker() = default;
+  ~Broker() override = default;
 
-  virtual void on_start() override;
+  void on_start() override;
 
   std::string get_runtime_folder();
 
