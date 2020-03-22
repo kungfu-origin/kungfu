@@ -76,13 +76,10 @@ struct sqlizer {
     for (auto dest : location_->locator->list_location_dest(location_)) {
       ensure_storage(dest);
     }
-    auto today = yijinjing::time::today_nano();
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       for (auto &pair : storages_) {
-        for (auto &data : time_spec<DataType>::get_all(pair.second, today, INT64_MAX)) {
-          app_cmd_writer->write(0, data);
-        }
+        restore<DataType>(app_cmd_writer, pair.second);
       }
     });
   }
@@ -98,15 +95,21 @@ private:
   const yijinjing::data::location_ptr location_;
   std::unordered_map<uint32_t, StateStorageType> storages_;
 
-  inline void ensure_storage(uint32_t dest) {
+  void ensure_storage(uint32_t dest) {
     if (storages_.find(dest) == storages_.end()) {
       auto db_file = location_->locator->layout_file(location_, enums::layout::SQLITE, fmt::format("{:08x}", dest));
       storages_.emplace(dest, make_storage(db_file, StateDataTypes));
       storages_.at(dest).sync_schema();
     }
   }
-};
 
+  template <typename DataType>
+  void restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {
+    for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_nano(), INT64_MAX)) {
+      app_cmd_writer->write(0, data);
+    }
+  }
+};
 DECLARE_PTR(sqlizer)
 } // namespace kungfu::longfist::sqlite
 
