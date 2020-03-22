@@ -89,7 +89,7 @@ protected:
 
 private:
   bool started_;
-  broker::Client broker_client_;
+  broker::EnrollmentClient broker_client_;
   book::Bookkeeper bookkeeper_;
   algo::AlgoContext_ptr algo_context_;
   yijinjing::data::location_ptr ledger_location_;
@@ -106,7 +106,7 @@ private:
 
   template <class DataType> bool is_subscribed(const event_ptr &event) {
     const DataType &data = event->data<DataType>();
-    return broker_client_.is_subscribed(app_.get_location(event->source()), data.exchange_id, data.instrument_id);
+    return broker_client_.is_subscribed(event->source(), data.exchange_id, data.instrument_id);
   }
 
   friend class Runner;

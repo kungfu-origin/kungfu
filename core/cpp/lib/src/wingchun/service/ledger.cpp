@@ -18,7 +18,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::service {
 Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      publish_state(state_map_), broker_client_(*this, true, true), bookkeeper_(*this, broker_client_),
+      publish_state(state_map_), broker_client_(*this), bookkeeper_(*this, broker_client_),
       assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
       order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>]) {
   log::copy_log_settings(get_io_device()->get_home(), "ledger");

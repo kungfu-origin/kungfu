@@ -50,7 +50,7 @@ private:
   longfist::journal::publisher publish_state;
 
   yijinjing::nanomsg::socket_ptr pub_sock_;
-  broker::Client broker_client_;
+  broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
 
   std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
