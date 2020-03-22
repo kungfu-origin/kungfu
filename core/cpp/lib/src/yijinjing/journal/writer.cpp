@@ -13,14 +13,11 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <mutex>
-
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/util/util.h>
 
 namespace kungfu::yijinjing::journal {
 constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
@@ -29,13 +26,13 @@ constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 writer::writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher)
     : publisher_(std::move(publisher)), size_to_write_(0) {
   frame_id_base_ = location->uid xor dest_id;
-  frame_id_base_ = frame_id_base_ << 32;
+  frame_id_base_ = frame_id_base_ << 32u;
   journal_ = std::make_shared<journal>(location, dest_id, true, lazy);
   journal_->seek_to_time(time::now_in_nano());
 }
 
 uint64_t writer::current_frame_uid() {
-  uint32_t page_part = (journal_->page_->page_id_ << 16) & PAGE_ID_TRANC;
+  uint32_t page_part = (journal_->page_->page_id_ << 16u) & PAGE_ID_TRANC;
   uint32_t frame_part = journal_->page_frame_nb_ & FRAME_ID_TRANC;
   return frame_id_base_ | (page_part | frame_part);
 }

@@ -52,13 +52,13 @@ using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
 template <typename, typename = void> struct time_spec;
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<not DataType::has_timestamp>> {
-  static inline std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to) {
+  static std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to) {
     return storage.get_all<DataType>();
   };
 };
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataType::has_timestamp>> {
-  static inline std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to) {
+  static std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to) {
     using namespace sqlite_orm;
     auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
                                      [](auto it) { return DataType::timestamp_key.value() == boost::hana::first(it); });
@@ -68,7 +68,8 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataTyp
   };
 };
 
-struct sqlizer {
+class sqlizer {
+public:
   explicit sqlizer(yijinjing::data::location_ptr location) : location_(std::move(location)) {}
 
   void restore(const yijinjing::journal::writer_ptr &app_cmd_writer) {

@@ -66,11 +66,9 @@ public:
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return string-formatted time
    */
-  static const std::string strftime(const int64_t nanotime, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
+  static std::string strftime(int64_t nanotime, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
-  static inline const std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT) {
-    return strftime(now_in_nano(), format);
-  }
+  static std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
   static inline int64_t next_minute_nano(int64_t nanotime) {
     return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
@@ -95,7 +93,7 @@ private:
 
   static const time &get_instance();
 
-  int64_t start_time_since_epoch_;
+  int64_t start_time_system_;
   int64_t start_time_steady_;
 };
 } // namespace kungfu::yijinjing

@@ -72,14 +72,6 @@ const std::unordered_map<uint32_t, longfist::types::Instrument> &Ledger::get_ins
   return broker_client_.get_instruments();
 }
 
-void Ledger::dump_asset_snapshot(const Asset &asset) {
-  auto writer = get_writer(location::PUBLIC);
-  AssetSnapshot &snapshot = writer->open_data<AssetSnapshot>();
-  memcpy(&snapshot, &asset, sizeof(snapshot));
-  snapshot.update_time = now();
-  writer->close_data();
-}
-
 void Ledger::on_ready() {
   events_ | is(Position::tag) | $([&](const event_ptr &event) {
     const Position &position = event->data<Position>();
@@ -93,9 +85,6 @@ void Ledger::on_ready() {
 }
 
 void Ledger::on_start() {
-  broker_client_.on_start(events_);
-  bookkeeper_.on_start(events_);
-
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
     auto app_location = get_location(register_data.location_uid);
@@ -170,15 +159,19 @@ void Ledger::on_start() {
     }
   });
 
-  bookkeeper_.restore(state_map_);
-  bookkeeper_.on_trading_day(get_trading_day());
-  publish_state(get_writer(location::PUBLIC), now());
-
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](const event_ptr &event) {
     for (auto &pair : bookkeeper_.get_books()) {
       pair.second->update(event->gen_time());
       get_writer(location::PUBLIC)->write(event->gen_time(), AssetSnapshot::tag, pair.second->asset);
     }
   });
+
+  broker_client_.on_start(events_);
+
+  bookkeeper_.on_start(events_);
+  bookkeeper_.on_trading_day(get_trading_day());
+  bookkeeper_.restore(state_map_);
+
+  publish_state(get_writer(location::PUBLIC), now());
 }
 } // namespace kungfu::wingchun::service

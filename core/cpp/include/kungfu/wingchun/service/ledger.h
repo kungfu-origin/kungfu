@@ -17,7 +17,7 @@ class Ledger : public yijinjing::practice::apprentice {
 public:
   explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
-  virtual ~Ledger() = default;
+  ~Ledger() override = default;
 
   book::Bookkeeper &get_bookkeeper();
 
@@ -32,8 +32,6 @@ public:
   longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location);
 
   const std::unordered_map<uint32_t, longfist::types::Instrument> &get_instruments() const;
-
-  void dump_asset_snapshot(const longfist::types::Asset &asset);
 
   virtual std::string handle_request(const event_ptr &event, const std::string &msg) = 0;
 

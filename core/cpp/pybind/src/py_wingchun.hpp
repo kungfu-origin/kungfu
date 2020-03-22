@@ -317,7 +317,6 @@ void bind(pybind11::module &&m) {
       .def("get_asset", &Ledger::get_asset)
       .def("get_positions", &Ledger::get_positions)
       .def("publish", &Ledger::publish)
-      .def("dump_asset_snapshot", &Ledger::dump_asset_snapshot)
       .def("cancel_order", &Ledger::cancel_order)
       .def("handle_request", &Ledger::handle_request)
       .def("handle_instrument_request", &Ledger::handle_instrument_request)

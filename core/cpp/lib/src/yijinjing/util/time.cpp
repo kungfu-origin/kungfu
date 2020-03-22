@@ -26,7 +26,7 @@ using namespace std::chrono;
 namespace kungfu::yijinjing {
 int64_t time::now_in_nano() {
   auto duration = steady_clock::now().time_since_epoch().count() - get_instance().start_time_steady_;
-  return get_instance().start_time_since_epoch_ + duration;
+  return get_instance().start_time_system_ + duration;
 }
 
 int64_t time::strptime(const std::string &timestr, const std::string &format) {
@@ -57,7 +57,7 @@ int64_t time::strptime(const std::string &timestr, const std::string &format) {
   return duration_cast<nanoseconds>(tp_system.time_since_epoch()).count() + nano;
 }
 
-const std::string time::strftime(const int64_t nanotime, const std::string &format) {
+std::string time::strftime(int64_t nanotime, const std::string &format) {
   time_point<steady_clock> tp_steady((nanoseconds(nanotime)));
   auto tp_epoch_steady = time_point<steady_clock>{};
   auto tp_diff = tp_steady - tp_epoch_steady;
@@ -84,18 +84,20 @@ const std::string time::strftime(const int64_t nanotime, const std::string &form
   }
 }
 
+std::string time::strfnow(const std::string &format) { return strftime(now_in_nano(), format); }
+
 /**
- * start_time_steady_ sample:       867884767983511
- * start_time_since_epoch_ sample:  1560144011373015000
+ * start_time_steady_ sample: 867884767983511
+ * start_time_system_ sample: 1560144011373015000
  */
 time::time() {
   auto now = system_clock::now();
   start_time_steady_ = steady_clock::now().time_since_epoch().count();
-  start_time_since_epoch_ = duration_cast<nanoseconds>(now.time_since_epoch()).count();
+  start_time_system_ = duration_cast<nanoseconds>(now.time_since_epoch()).count();
 }
 
 const kungfu::yijinjing::time &time::get_instance() {
-  static time t;
-  return t;
+  static time instance = {};
+  return instance;
 }
 } // namespace kungfu::yijinjing

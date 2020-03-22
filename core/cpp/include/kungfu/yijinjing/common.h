@@ -87,7 +87,7 @@ public:
 
   [[nodiscard]] virtual std::string default_to_system_db(location_ptr location, const std::string &name) const = 0;
 
-  [[nodiscard]] virtual std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
+  [[nodiscard]] virtual std::vector<uint32_t> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
 
   [[nodiscard]] virtual std::vector<location_ptr> list_locations(const std::string &category = "*",
                                                                  const std::string &group = "*",

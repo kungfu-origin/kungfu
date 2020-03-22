@@ -56,8 +56,8 @@ class PyLocator : public locator {
     PYBIND11_OVERLOAD_PURE(std::string, locator, default_to_system_db, location, name)
   }
 
-  [[nodiscard]] std::vector<int> list_page_id(location_ptr location, uint32_t dest_id) const override {
-    PYBIND11_OVERLOAD_PURE(std::vector<int>, locator, list_page_id, location, dest_id)
+  [[nodiscard]] std::vector<uint32_t> list_page_id(location_ptr location, uint32_t dest_id) const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, locator, list_page_id, location, dest_id)
   }
 
   [[nodiscard]] std::vector<location_ptr> list_locations(const std::string &category, const std::string &group,

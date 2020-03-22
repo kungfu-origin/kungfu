@@ -73,7 +73,7 @@ std::string Locator::default_to_system_db(location_ptr location, const std::stri
   throw yijinjing_error("not supported");
 }
 
-std::vector<int> Locator::list_page_id(location_ptr location, uint32_t dest_id) const {
+std::vector<uint32_t> Locator::list_page_id(location_ptr location, uint32_t dest_id) const {
   auto js_delegate = locator_ref_.Get("list_page_id").As<Napi::Function>();
   auto v = js_delegate.Call({Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),
                              Napi::String::New(locator_ref_.Env(), location->group),
@@ -81,10 +81,10 @@ std::vector<int> Locator::list_page_id(location_ptr location, uint32_t dest_id) 
                              Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),
                              Napi::Number::New(locator_ref_.Env(), dest_id)});
   Napi::Array r = v.As<Napi::Array>();
-  std::vector<int> result;
+  std::vector<uint32_t> result;
   for (int i = 0; i < r.Length(); i++) {
     Napi::Value e = r[i];
-    result.push_back(e.As<Napi::Number>());
+    result.push_back(e.ToNumber().Uint32Value());
   }
   return result;
 }

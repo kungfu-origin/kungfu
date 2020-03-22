@@ -33,7 +33,8 @@ public:
   [[nodiscard]] std::string default_to_system_db(yijinjing::data::location_ptr location,
                                                  const std::string &name) const override;
 
-  [[nodiscard]] std::vector<int> list_page_id(yijinjing::data::location_ptr location, uint32_t dest_id) const override;
+  [[nodiscard]] std::vector<uint32_t> list_page_id(yijinjing::data::location_ptr location,
+                                                   uint32_t dest_id) const override;
 
   [[nodiscard]] std::vector<yijinjing::data::location_ptr> list_locations(const std::string &category,
                                                                           const std::string &group,

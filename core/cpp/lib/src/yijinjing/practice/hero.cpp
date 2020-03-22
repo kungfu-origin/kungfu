@@ -20,7 +20,7 @@ using namespace kungfu::yijinjing::nanomsg;
 namespace kungfu::yijinjing::practice {
 
 hero::hero(yijinjing::io_device_with_reply_ptr io_device)
-    : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
+    : io_device_(std::move(io_device)), now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
   reader_ = io_device_->open_reader_to_subscribe();
@@ -96,21 +96,21 @@ void hero::set_begin_time(int64_t begin_time) { begin_time_ = begin_time; }
 
 void hero::set_end_time(int64_t end_time) { end_time_ = end_time; }
 
-const data::locator_ptr &hero::get_locator() const { return io_device_->get_locator(); }
+const locator_ptr &hero::get_locator() const { return io_device_->get_locator(); }
 
-yijinjing::io_device_with_reply_ptr hero::get_io_device() const { return io_device_; }
+io_device_with_reply_ptr hero::get_io_device() const { return io_device_; }
 
-const yijinjing::data::location_ptr &hero::get_home() const { return get_io_device()->get_home(); }
+const location_ptr &hero::get_home() const { return get_io_device()->get_home(); }
 
 uint32_t hero::get_home_uid() const { return get_io_device()->get_home()->uid; }
 
 const std::string &hero::get_home_uname() const { return get_io_device()->get_home()->uname; }
 
-const yijinjing::data::location_ptr &hero::get_live_home() const { return get_io_device()->get_live_home(); }
+const location_ptr &hero::get_live_home() const { return get_io_device()->get_live_home(); }
 
 uint32_t hero::get_live_home_uid() const { return get_io_device()->get_live_home()->uid; }
 
-yijinjing::journal::reader_ptr hero::get_reader() const { return reader_; }
+reader_ptr hero::get_reader() const { return reader_; }
 
 bool hero::has_writer(uint32_t dest_id) const { return writers_.find(dest_id) != writers_.end(); }
 
@@ -147,7 +147,7 @@ void hero::on_notify() {}
 void hero::on_exit() {}
 
 uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const {
-  return uint64_t(source_id) << 32 | uint64_t(dest_id);
+  return uint64_t(source_id) << 32u | uint64_t(dest_id);
 }
 
 bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
@@ -177,7 +177,7 @@ bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const {
   return true;
 }
 
-void hero::add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location) {
+void hero::add_location(int64_t trigger_time, const location_ptr &location) {
   if (not has_location(location->uid)) {
     locations_.emplace(location->uid, location);
     SPDLOG_INFO("added location {} [{:08x}]", location->uname, location->uid);
@@ -307,7 +307,7 @@ void hero::delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb)
 #ifdef _WINDOWS
   __try {
     instance->produce(sb);
-  } __except (yijinjing::util::print_stack_trace(GetExceptionInformation())) {
+  } __except (util::print_stack_trace(GetExceptionInformation())) {
   }
 #else
   instance->produce(sb);

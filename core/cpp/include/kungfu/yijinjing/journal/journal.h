@@ -37,7 +37,7 @@ class journal {
 public:
   journal(data::location_ptr location, uint32_t dest_id, bool is_writing, bool lazy)
       : location_(std::move(location)), dest_id_(dest_id), is_writing_(is_writing), lazy_(lazy),
-        frame_(std::shared_ptr<frame>(new frame())), page_frame_nb_(0) {}
+        frame_(std::shared_ptr<frame>(new frame())), page_frame_nb_(0u) {}
 
   ~journal();
 
@@ -64,7 +64,7 @@ private:
   const bool lazy_;
   page_ptr page_;
   frame_ptr frame_;
-  int page_frame_nb_;
+  uint64_t page_frame_nb_;
 
   void load_page(int page_id);
 
