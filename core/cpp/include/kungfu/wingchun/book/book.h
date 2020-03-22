@@ -33,14 +33,14 @@ struct Book {
   longfist::types::Position &get_position(longfist::enums::Direction direction, const DataType &data) {
     assert(asset.holder_uid != 0);
     PositionMap &positions = direction == longfist::enums::Direction::Long ? long_positions : short_positions;
-    auto position_id = get_symbol_id(data.instrument_id, data.exchange_id);
+    auto position_id = hash_instrument(data.exchange_id, data.instrument_id);
     auto pair = positions.try_emplace(position_id);
     auto &position = (*pair.first).second;
     if (pair.second) {
       position.trading_day = asset.trading_day;
       position.instrument_id = data.instrument_id;
       position.exchange_id = data.exchange_id;
-      position.instrument_type = get_instrument_type(position.instrument_id, position.exchange_id);
+      position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
       position.holder_uid = asset.holder_uid;
       position.ledger_category = asset.ledger_category;
       position.direction = direction;

@@ -53,8 +53,8 @@ class TraderSim(pywingchun.Trader):
         else:
             order_input = event.data
             order = pywingchun.utils.order_from_input(order_input)
-            min_vol = 100 if wc_utils.get_instrument_type(order_input.instrument_id,
-                                                          order_input.exchange_id) == pylongfist.enums.InstrumentType.Stock else 1
+            min_vol = 100 if wc_utils.get_instrument_type(order_input.exchange_id,
+                                                          order_input.instrument_id) == pylongfist.enums.InstrumentType.Stock else 1
             if order_input.volume < min_vol:
                 order.status = pylongfist.enums.OrderStatus.Error
             elif self.match_mode == MatchMode.Reject:

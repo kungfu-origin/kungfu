@@ -136,7 +136,7 @@ void Bookkeeper::restore(const longfist::StateMapType &state_map) {
     auto book = get_book(position.holder_uid);
     auto &positions =
         position.direction == longfist::enums::Direction::Long ? book->long_positions : book->short_positions;
-    positions[get_symbol_id(position.instrument_id, position.exchange_id)] = position;
+    positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
   }
   for (auto &pair : state_map[boost::hana::type_c<Asset>]) {
     auto &state = pair.second;

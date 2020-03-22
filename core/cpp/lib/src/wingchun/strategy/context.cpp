@@ -104,25 +104,25 @@ void Context::subscribe(const std::string &source, const std::vector<std::string
   }
 }
 
-uint64_t Context::insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
-                               double limit_price, int64_t volume, PriceType type, Side side, Offset offset,
-                               HedgeFlag hedge_flag) {
+uint64_t Context::insert_order(const std::string &instrument_id, const std::string &exchange_id,
+                               const std::string &account, double limit_price, int64_t volume, PriceType type,
+                               Side side, Offset offset, HedgeFlag hedge_flag) {
   auto account_location_uid = lookup_account_location_id(account);
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {} not ready", account);
     return 0;
   }
-  auto instrument_type = get_instrument_type(symbol, exchange);
+  auto instrument_type = get_instrument_type(exchange_id, instrument_id);
   if (instrument_type == InstrumentType::Unknown || instrument_type == InstrumentType::Repo) {
-    SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(instrument_type), symbol,
-                 exchange);
+    SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(instrument_type), instrument_id,
+                 exchange_id);
     return 0;
   }
   auto writer = app_.get_writer(account_location_uid);
   OrderInput &input = writer->open_data<OrderInput>(app_.real_now());
   input.order_id = writer->current_frame_uid();
-  strcpy(input.instrument_id, symbol.c_str());
-  strcpy(input.exchange_id, exchange.c_str());
+  strcpy(input.instrument_id, instrument_id.c_str());
+  strcpy(input.exchange_id, exchange_id.c_str());
   strcpy(input.account_id, account.c_str());
   input.instrument_type = instrument_type;
   input.limit_price = limit_price;

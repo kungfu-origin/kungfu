@@ -63,7 +63,7 @@ public:
   //@param side          买卖方向
   //@param offset        开平方向
   //@return              订单ID
-  virtual uint64_t insert_order(const std::string &symbol, const std::string &exchange, const std::string &account,
+  virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account,
                                 double limit_price, int64_t volume, longfist::enums::PriceType type,
                                 longfist::enums::Side side,
                                 longfist::enums::Offset offset = longfist::enums::Offset::Open,

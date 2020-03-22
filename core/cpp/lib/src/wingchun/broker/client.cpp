@@ -12,15 +12,9 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
-inline uint32_t hash_instrument(const longfist::types::Instrument &instrument) {
-  return get_symbol_id(instrument.exchange_id, instrument.instrument_id);
-}
-
 Client::Client(apprentice &app) : app_(app) {}
 
-const std::unordered_map<uint32_t, longfist::types::Instrument> &Client::get_instruments() const {
-  return instruments_;
-}
+const std::unordered_map<uint32_t, Instrument> &Client::get_instruments() const { return instruments_; }
 
 bool Client::is_ready(uint32_t broker_location_uid) const {
   if (app_.has_location(broker_location_uid) and app_.has_writer(broker_location_uid)) {
@@ -36,7 +30,7 @@ bool Client::is_ready(uint32_t broker_location_uid) const {
 
 bool Client::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                            const std::string &instrument_id) const {
-  return instruments_.find(get_symbol_id(exchange_id.c_str(), instrument_id.c_str())) != instruments_.end();
+  return instruments_.find(hash_instrument(exchange_id.c_str(), instrument_id.c_str())) != instruments_.end();
 }
 
 void Client::subscribe(const location_ptr &md_location, const std::string &exchange_id,
@@ -88,7 +82,7 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
   });
 }
 
-void Client::subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) {
+void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   auto writer = app_.get_writer(md_location->uid);
   for (auto &pair : instruments_) {
     auto instrument = pair.second;
@@ -98,7 +92,7 @@ void Client::subscribe_instruments(int64_t trigger_time, const yijinjing::data::
   }
 }
 
-void Client::connect(const longfist::types::Register &register_data) {
+void Client::connect(const Register &register_data) {
   auto app_location = app_.get_location(register_data.location_uid);
   if (app_location->category == category::MD and should_connect_md(app_location)) {
     app_.request_read_from_public(app_.now(), app_location->uid, register_data.checkin_time);
@@ -113,9 +107,9 @@ void Client::connect(const longfist::types::Register &register_data) {
 
 AutoClient::AutoClient(apprentice &app) : Client(app) {}
 
-bool AutoClient::should_connect_md(const yijinjing::data::location_ptr &md_location) const { return true; }
+bool AutoClient::should_connect_md(const location_ptr &md_location) const { return true; }
 
-bool AutoClient::should_connect_td(const yijinjing::data::location_ptr &td_location) const { return true; }
+bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
 
 EnrollmentClient::EnrollmentClient(apprentice &app) : Client(app) {}
 
@@ -140,19 +134,19 @@ void EnrollmentClient::subscribe_all(const location_ptr &md_location) {
   enrolled_md_locations_.emplace(md_location->uid, true);
 }
 
-void EnrollmentClient::enroll_account(const yijinjing::data::location_ptr &td_location) {
+void EnrollmentClient::enroll_account(const location_ptr &td_location) {
   enrolled_td_locations_.emplace(td_location->uid, true);
 }
 
-bool EnrollmentClient::should_connect_md(const yijinjing::data::location_ptr &md_location) const {
+bool EnrollmentClient::should_connect_md(const location_ptr &md_location) const {
   return enrolled_md_locations_.find(md_location->uid) != enrolled_md_locations_.end();
 }
 
-bool EnrollmentClient::should_connect_td(const yijinjing::data::location_ptr &td_location) const {
+bool EnrollmentClient::should_connect_td(const location_ptr &td_location) const {
   return enrolled_td_locations_.find(td_location->uid) != enrolled_td_locations_.end();
 }
 
-void EnrollmentClient::subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) {
+void EnrollmentClient::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   if (is_all_subscribed(md_location->uid)) {
     app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
   } else {

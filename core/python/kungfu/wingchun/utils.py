@@ -5,7 +5,7 @@ import re
 
 get_instrument_type = pywingchun.utils.get_instrument_type
 is_valid_price = pywingchun.utils.is_valid_price
-get_symbol_id = pywingchun.utils.get_symbol_id
+hash_instrument = pywingchun.utils.hash_instrument
 
 
 def is_final_status(order_status):

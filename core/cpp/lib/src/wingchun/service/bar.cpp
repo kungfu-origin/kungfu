@@ -53,8 +53,8 @@ bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
     }) | first() |
         $([=](const event_ptr &e) {
           for (const auto &inst : instruments) {
-            auto symbol_id = get_symbol_id(inst.instrument_id, inst.exchange_id);
-            if (bars_.find(symbol_id) == bars_.end()) {
+            auto instrument_key = hash_instrument(inst.exchange_id, inst.instrument_id);
+            if (bars_.find(instrument_key) == bars_.end()) {
               write_subscribe_msg(get_writer(source_location_->uid), 0, inst.exchange_id, inst.instrument_id);
               auto now_in_nano = now();
               auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
@@ -64,14 +64,14 @@ bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
               strncpy(bar.exchange_id, inst.exchange_id, EXCHANGE_ID_LEN);
               bar.start_time = start_time;
               bar.end_time = start_time + time_interval_;
-              bars_[symbol_id] = bar;
+              bars_[instrument_key] = bar;
             }
           }
         });
   } else {
     for (const auto &inst : instruments) {
-      auto symbol_id = get_symbol_id(inst.instrument_id, inst.exchange_id);
-      if (bars_.find(symbol_id) == bars_.end()) {
+      auto instrument_key = hash_instrument(inst.exchange_id, inst.instrument_id);
+      if (bars_.find(instrument_key) == bars_.end()) {
         write_subscribe_msg(get_writer(source_location_->uid), 0, inst.exchange_id, inst.instrument_id);
         auto now_in_nano = now();
         auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
@@ -81,7 +81,7 @@ bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
         strncpy(bar.exchange_id, inst.exchange_id, EXCHANGE_ID_LEN);
         bar.start_time = start_time;
         bar.end_time = start_time + time_interval_;
-        bars_[symbol_id] = bar;
+        bars_[instrument_key] = bar;
       }
     }
   }
@@ -102,11 +102,11 @@ void BarGenerator::on_start() {
 
   events_ | is(Quote::tag) | $([&](const event_ptr &event) {
     const auto &quote = event->data<Quote>();
-    auto symbol_id = get_symbol_id(quote.instrument_id, quote.exchange_id);
-    if (bars_.find(symbol_id) != bars_.end()) {
+    auto instrument_key = hash_instrument(quote.exchange_id, quote.instrument_id);
+    if (bars_.find(instrument_key) != bars_.end()) {
       SPDLOG_TRACE("{}.{} at {} vol {} price {}", quote.instrument_id, quote.exchange_id,
                    time::strftime(quote.data_time), quote.volume, quote.last_price);
-      auto &bar = bars_[symbol_id];
+      auto &bar = bars_[instrument_key];
       if (quote.data_time >= bar.start_time && quote.data_time <= bar.end_time) {
         if (bar.tick_count == 0) {
           bar.high = quote.last_price;

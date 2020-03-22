@@ -248,8 +248,8 @@ class AccountBook(pywingchun.Book):
             self.ctx.logger.debug("{} [{:08x}] receive duplicate trading_day message {}".format(self.location.uname, self.location.uid, trading_day))
 
     def get_ticker(self, instrument_id, exchange_id):
-        symbol_id = yjj.hash_str_32("{}.{}".format(instrument_id, exchange_id))
-        return self._tickers.get(symbol_id, None)
+        instrument_key = yjj.hash_str_32("{}.{}".format(instrument_id, exchange_id))
+        return self._tickers.get(instrument_key, None)
 
     def get_frozen_price(self, order_id):
         if order_id in self._orders:

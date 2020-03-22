@@ -233,7 +233,7 @@ void bind(pybind11::module &&m) {
   py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::Order>>(m, "OrderMap");
 
   auto m_utils = m.def_submodule("utils");
-  m_utils.def("get_symbol_id", &kungfu::wingchun::get_symbol_id);
+  m_utils.def("hash_instrument", py::overload_cast<const char *, const char *>(&kungfu::wingchun::hash_instrument));
   m_utils.def("is_valid_price", &kungfu::wingchun::is_valid_price);
   m_utils.def("is_final_status", &kungfu::wingchun::is_final_status);
   m_utils.def("get_instrument_type", &kungfu::wingchun::get_instrument_type);

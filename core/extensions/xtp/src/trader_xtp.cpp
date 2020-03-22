@@ -180,7 +180,7 @@ namespace kungfu::wingchun::xtp
         trade.trade_time = kungfu::yijinjing::time::now_in_nano();
         strcpy(trade.trading_day, trading_day_.c_str());
         strcpy(trade.account_id, this->get_account_id().c_str());
-        trade.instrument_type = get_instrument_type(trade.instrument_id, trade.exchange_id);
+        trade.instrument_type = get_instrument_type(trade.exchange_id, trade.instrument_id);
         writer->close_data();
     }
 
@@ -208,7 +208,7 @@ namespace kungfu::wingchun::xtp
             strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
             strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
             stock_pos.holder_uid = get_io_device()->get_home()->uid;
-            stock_pos.instrument_type = get_instrument_type(stock_pos.instrument_id, stock_pos.exchange_id);
+            stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
             stock_pos.direction = Direction::Long;
             strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
             stock_pos.update_time = kungfu::yijinjing::time::now_in_nano();

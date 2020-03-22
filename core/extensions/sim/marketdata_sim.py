@@ -37,13 +37,13 @@ class MarketDataSim(pywingchun.MarketData):
 
     def init_order_book(self, instrument_id, exchange_id):
         security = instrument_id + "." + exchange_id
-        symbol_id = pywingchun.utils.get_symbol_id(instrument_id, exchange_id)
+        instrument_key = pywingchun.utils.hash_instrument(instrument_id, exchange_id)
         book = mdmaker.OrderBook(security=security)
         for i in range(mdmaker.MAX_DEPTH):
             delta = (i+1) * 1.0
             book.order(mdmaker.Order(secid=book.security,side=mdmaker.Side.BUY, price=(self.config.base - delta), qty=1))
             book.order(mdmaker.Order(secid=book.security,side=mdmaker.Side.SELL, price=(self.config.base + delta), qty=1))
-        self.orderbooks[symbol_id] = book
+        self.orderbooks[instrument_key] = book
 
     def update_orderbooks(self):
         for book in self.orderbooks.values():
@@ -51,7 +51,7 @@ class MarketDataSim(pywingchun.MarketData):
             for orders, mid in order_generator:
                 for order in orders:
                     instrument_id, exchange_id = order.secid.split(".")
-                    if not pywingchun.utils.get_instrument_type(instrument_id, exchange_id) == pywingchun.constants.InstrumentType.Future:
+                    if not pywingchun.utils.get_instrument_type(exchange_id, instrument_id) == pywingchun.constants.InstrumentType.Future:
                         order.qty *= 100
                     trades = book.order(order)
             quote = self.quote_from_orderbook(book)
@@ -59,8 +59,8 @@ class MarketDataSim(pywingchun.MarketData):
 
     def subscribe(self, instruments):
         for inst in instruments:
-            symbol_id = pywingchun.utils.get_symbol_id(inst.instrument_id, inst.exchange_id)
-            if symbol_id not in self.orderbooks:
+            instrument_key = pywingchun.utils.hash_instrument(inst.instrument_id, inst.exchange_id)
+            if instrument_key not in self.orderbooks:
                 self.init_order_book(inst.instrument_id, inst.exchange_id)
         return True
 

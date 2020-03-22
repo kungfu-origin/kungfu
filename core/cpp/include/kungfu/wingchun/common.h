@@ -170,8 +170,8 @@ inline int get_reverse_repurchase_expire_days(const std::string &instrument_id) 
   }
 }
 
-inline longfist::enums::InstrumentType get_instrument_type(const std::string &instrument_id,
-                                                           const std::string &exchange_id) {
+inline longfist::enums::InstrumentType get_instrument_type(const std::string &exchange_id,
+                                                           const std::string &instrument_id) {
   if (string_equals(exchange_id, EXCHANGE_SSE)) {
     if (startswith(instrument_id, "00")) {
       return longfist::enums::InstrumentType::Index;
@@ -232,7 +232,7 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
 }
 
 inline std::string get_instrument_product(const char *instrument_id) {
-  std::string product = "";
+  std::string product = {};
   int i = 0;
   while (instrument_id[i] != 0) {
     if (instrument_id[i] < '0' || instrument_id[i] > '9') {
@@ -348,8 +348,12 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
   throw wingchun_error(fmt::format("invalid direction args {} {} {}", (int)instrument_type, (int)side, (int)offset));
 }
 
-inline uint32_t get_symbol_id(const char *instrument_id, const char *exchange_id) {
+inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
+}
+
+inline uint32_t hash_instrument(const longfist::types::Instrument &instrument) {
+  return hash_instrument(instrument.exchange_id, instrument.instrument_id);
 }
 
 inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order) {
