@@ -49,7 +49,7 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
 using ProfileStorageType = decltype(make_storage(std::string(), ProfileDataTypes));
 using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
 
-template <typename, typename = void> struct time_spec;
+template <typename, typename = void, bool = true> struct time_spec;
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<not DataType::has_timestamp>> {
   static std::vector<DataType> get_all(StateStorageType &storage, int64_t from, int64_t to) {
@@ -105,11 +105,16 @@ private:
   }
 
   template <typename DataType>
-  void restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {
+  std::enable_if_t<not std::is_same_v<DataType, types::DailyAsset>>
+  restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {
     for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_nano(), INT64_MAX)) {
       app_cmd_writer->write(0, data);
     }
   }
+
+  template <typename DataType>
+  std::enable_if_t<std::is_same_v<DataType, types::DailyAsset>>
+  restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {}
 };
 DECLARE_PTR(sqlizer)
 } // namespace kungfu::longfist::sqlite

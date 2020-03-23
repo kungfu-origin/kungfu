@@ -27,6 +27,13 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
   }
 }
 
+void Ledger::on_exit() { write_daily_assets(); }
+
+void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
+  bookkeeper_.on_trading_day(daytime);
+  write_daily_assets();
+}
+
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 
 void Ledger::publish(const std::string &msg) {
@@ -167,11 +174,17 @@ void Ledger::on_start() {
   });
 
   broker_client_.on_start(events_);
-
   bookkeeper_.on_start(events_);
-  bookkeeper_.on_trading_day(get_trading_day());
   bookkeeper_.restore(state_map_);
 
   publish_state(get_writer(location::PUBLIC), now());
+}
+
+void Ledger::write_daily_assets() {
+  for (auto &pair : bookkeeper_.get_books()) {
+    DailyAsset daily = {};
+    memcpy(&daily, &(pair.second->asset), sizeof(daily));
+    get_writer(location::PUBLIC)->write(now(), daily);
+  }
 }
 } // namespace kungfu::wingchun::service

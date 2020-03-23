@@ -13,10 +13,10 @@
 #include <napi.h>
 
 namespace kungfu::node::serialize {
-template <typename DataType> struct JsMake {
-  const char *type_name;
+template <typename DataType> class JsMake {
 
-  JsMake(const char *_type_name) : type_name(_type_name) {}
+public:
+  explicit JsMake(const char *_type_name) : type_name(_type_name) {}
 
   Napi::Value operator()(const Napi::CallbackInfo &info) {
     Napi::Object dataObj = Napi::Object::New(info.Env());
@@ -29,6 +29,9 @@ template <typename DataType> struct JsMake {
     });
     return dataObj;
   }
+
+private:
+  const char *type_name;
 
   template <typename ValueType>
   std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
@@ -85,7 +88,8 @@ template <typename DataType> struct JsMake {
   }
 };
 
-struct JsSet {
+class JsSet {
+public:
   template <typename DataType> void operator()(const DataType &data, Napi::Value &value) {
     Napi::Object valueObj = value.ToObject();
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
@@ -95,6 +99,7 @@ struct JsSet {
     });
   }
 
+private:
   template <typename ValueType>
   std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
   Set(Napi::Object &obj, const char *name, const ValueType &value) {
@@ -159,7 +164,8 @@ struct JsSet {
   }
 };
 
-struct JsGet {
+class JsGet {
+public:
   template <typename DataType> void operator()(const Napi::Value &value, DataType &data) {
     Napi::Object valueObj = value.ToObject();
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
@@ -171,6 +177,7 @@ struct JsGet {
     SPDLOG_TRACE("got data from node: {}", data.to_string());
   }
 
+private:
   template <typename ValueType>
   std::enable_if_t<std::is_enum_v<ValueType> and not std::is_convertible_v<ValueType, int>>
   Get(ValueType &value, const char *name, const Napi::Object &obj) {
@@ -265,7 +272,9 @@ public:
     for (auto dest : locator->list_location_dest(location_)) {
       auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
       auto storage = longfist::sqlite::make_storage(db_file, longfist::StateDataTypes);
-      storage.sync_schema();
+      if (not storage.sync_schema_simulate().empty()) {
+        storage.sync_schema();
+      }
       boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
         using DataType = typename decltype(+boost::hana::second(it))::type;
         auto type_name = boost::hana::first(it).c_str();

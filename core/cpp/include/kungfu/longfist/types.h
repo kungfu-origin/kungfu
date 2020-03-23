@@ -299,7 +299,7 @@ KF_DEFINE_PACK_TYPE(                                               //
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
-    OrderActionError, 202, PK(order_action_id), TIMESTAMP(insert_time), //
+    OrderActionError, 216, PK(order_action_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                               //订单ID
     (uint64_t, order_action_id),                                        //订单操作ID
     (int32_t, error_id),                                                //错误ID
@@ -425,9 +425,10 @@ KF_DEFINE_PACK_TYPE(                               //
     (uint32_t, holder_uid)                         //
 );
 
-KF_DEFINE_PACK_TYPE(                                                 //
-    Asset, 206, PK(holder_uid), PERPETUAL(), (int64_t, update_time), //更新时间
-    (kungfu::array<char, DATE_LEN>, trading_day),                    //交易日
+KF_DEFINE_PACK_TYPE(                              //
+    Asset, 206, PK(holder_uid), PERPETUAL(),      //
+    (int64_t, update_time),                       //更新时间
+    (kungfu::array<char, DATE_LEN>, trading_day), //交易日
 
     (uint32_t, holder_uid), (LedgerCategory, ledger_category),
 
@@ -463,6 +464,41 @@ KF_DEFINE_PACK_TYPE(                                                         //
     AssetSnapshot, 207, PK(holder_uid, update_time), TIMESTAMP(update_time), //
     (int64_t, update_time),                                                  //更新时间
     (kungfu::array<char, DATE_LEN>, trading_day),                            //交易日
+
+    (uint32_t, holder_uid), (LedgerCategory, ledger_category),
+
+    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
+    (kungfu::array<char, BROKER_ID_LEN>, broker_id),   // Broker ID
+    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
+    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // client ID
+
+    (double, initial_equity), //期初权益
+    (double, static_equity),  //静态权益
+    (double, dynamic_equity), //动态权益
+
+    (double, realized_pnl), //累计收益
+    (double, unrealized_pnl),
+
+    (double, avail),        //可用资金
+    (double, market_value), //市值(股票)
+
+    (double, margin), //保证金(期货)
+
+    (double, accumulated_fee), //累计手续费
+    (double, intraday_fee),    //当日手续费
+
+    (double, frozen_cash),   //冻结资金(股票: 买入挂单资金), 期货: 冻结保证金+冻结手续费)
+    (double, frozen_margin), //冻结保证金(期货)
+    (double, frozen_fee),    //冻结手续费(期货)
+
+    (double, position_pnl), //持仓盈亏(期货)
+    (double, close_pnl)     //平仓盈亏(期货)
+);
+
+KF_DEFINE_PACK_TYPE(                                           //
+    DailyAsset, 200, PK(holder_uid, trading_day), PERPETUAL(), //
+    (int64_t, update_time),                                    //更新时间
+    (kungfu::array<char, DATE_LEN>, trading_day),              //交易日
 
     (uint32_t, holder_uid), (LedgerCategory, ledger_category),
 

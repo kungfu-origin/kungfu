@@ -33,10 +33,9 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Trade),                                  //
     TYPE_PAIR(Asset),                                  //
     TYPE_PAIR(AssetSnapshot),                          //
+    TYPE_PAIR(DailyAsset),                             //
     TYPE_PAIR(Position),                               //
-    TYPE_PAIR(PositionEnd),                            //
     TYPE_PAIR(PositionDetail),                         //
-    TYPE_PAIR(PositionDetailEnd),                      //
     TYPE_PAIR(InstrumentCommissionRate),               //
     TYPE_PAIR(OrderStat)                               //
 );

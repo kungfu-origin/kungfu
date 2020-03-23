@@ -19,6 +19,10 @@ public:
 
   ~Ledger() override = default;
 
+  void on_exit() override;
+
+  void on_trading_day(const event_ptr &event, int64_t daytime) override;
+
   book::Bookkeeper &get_bookkeeper();
 
   void publish(const std::string &msg);
@@ -81,6 +85,8 @@ private:
       write_book(event->gen_time(), event->dest(), data, source->group, source->name, dest->name);
     }
   }
+
+  void write_daily_assets();
 };
 } // namespace kungfu::wingchun::service
 
