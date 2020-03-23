@@ -61,6 +61,7 @@ Watcher::~Watcher() {
   state_ref_.Unref();
   config_ref_.Unref();
   history_ref_.Unref();
+  apprentice::~apprentice();
 }
 
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {

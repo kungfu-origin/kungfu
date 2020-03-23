@@ -19,7 +19,7 @@ class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::ap
 public:
   explicit Watcher(const Napi::CallbackInfo &info);
 
-  ~Watcher();
+  ~Watcher() override;
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
