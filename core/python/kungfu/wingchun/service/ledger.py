@@ -79,6 +79,7 @@ class Ledger(pywingchun.Ledger):
         writer.write(event.gen_time, position_end)
 
     def on_trading_day(self, event, daytime):
+        pywingchun.Ledger.on_trading_day(self, event, daytime)
         self.ctx.trading_day = kft.to_datetime(daytime)
 
     def has_book(self, uid):

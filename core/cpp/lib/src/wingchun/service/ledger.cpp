@@ -27,7 +27,13 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
   }
 }
 
-void Ledger::on_exit() { write_daily_assets(); }
+void Ledger::on_exit() {
+//  write_daily_assets();
+  for (int i = 20 ; i > 0; i--) {
+    bookkeeper_.on_trading_day(get_trading_day() - i * time_unit::NANOSECONDS_PER_DAY);
+    write_daily_assets();
+  }
+}
 
 void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
   bookkeeper_.on_trading_day(daytime);
