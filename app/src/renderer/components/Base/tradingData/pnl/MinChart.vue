@@ -5,7 +5,7 @@
             <!-- <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div> -->
             <div v-if="intradayPnl !== ''">日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
         </div>
-        <tr-no-data v-if="(minPnl.length == 0) || !rendererPnl"/>
+        <tr-no-data v-if="(intradayPnl === '') || (minPnl.length == 0) || !rendererPnl"/>
         <div id="min-chart" v-else></div>
     </div>
 </template>
@@ -92,7 +92,8 @@ export default {
                 this.updateChart(timeList, pnlDataList)
             }
 
-            this.intradayPnl = pnlDataList[pnlDataList.length - 1];
+            pnlDataList.length && (this.intradayPnl = pnlDataList[pnlDataList.length - 1]);
+
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据

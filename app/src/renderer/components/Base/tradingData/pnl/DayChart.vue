@@ -5,7 +5,7 @@
             <!-- <div>累计收益率：<span :class="{'text-overflow': true, 'color-green': accumulatedPnlRatio < 0, 'color-red': accumulatedPnlRatio > 0}" :title="accumulatedPnlRatio + '%'">{{accumulatedPnlRatio + '%'}}</span> </div> -->
             <div v-if="accumulatedPnl !== ''">累计收益：<span :class="{'text-overflow': true, 'color-green': accumulatedPnl < 0, 'color-red': accumulatedPnl > 0}" :title="accumulatedPnl">{{accumulatedPnl}}</span></div>
         </div>
-        <tr-no-data v-if="(dailyPnl.length == 0) || !rendererPnl" />
+        <tr-no-data v-if="(accumulatedPnl === '') || (dailyPnl.length == 0) || !rendererPnl" />
         <div id="daily-chart" v-else></div>
     </div>
 </template>
@@ -90,13 +90,13 @@ export default {
 
         dailyPnl (dailyPnlList, oldPnlMinList) {
             const { timeList, pnlDataList } = this.dealDailyPnlList(dailyPnlList)
-            if (!oldPnlMinList.length && dailyPnlList.length) {
+            if ((!oldPnlMinList.length && dailyPnlList.length) || !this.myChart) {
                 this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
             } else if (oldPnlMinList.length && dailyPnlList.length) {
                 this.updateChart(timeList, pnlDataList)
             }
 
-            this.accumulatedPnl = pnlDataList[pnlDataList.length - 1]
+            pnlDataList.length && (this.accumulatedPnl = pnlDataList[pnlDataList.length - 1])
         }
     },
     methods:{
