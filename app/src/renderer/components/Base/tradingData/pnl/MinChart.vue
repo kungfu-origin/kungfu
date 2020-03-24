@@ -86,7 +86,7 @@ export default {
 
         minPnl (minPnlList, oldPnlMinList) {
             const { timeList, pnlDataList } = this.dealMinPnlList(minPnlList)
-            if (!oldPnlMinList.length && minPnlList.length) {
+            if ((!oldPnlMinList.length && minPnlList.length) || !this.myChart) {
                 this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
             } else if (oldPnlMinList.length && minPnlList.length) {
                 this.updateChart(timeList, pnlDataList)
