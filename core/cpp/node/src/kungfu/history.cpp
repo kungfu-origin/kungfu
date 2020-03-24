@@ -12,7 +12,7 @@ using namespace kungfu::rx;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
-using namespace kungfu::longfist::sqlite;
+using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 

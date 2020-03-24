@@ -74,7 +74,7 @@ class LedgerClient:
         return self._request(msg_type, data)
 
     def asset(self, ledger_category, source_id="", account_id="", client_id=""):
-        msg_type = msg.QryAsset
+        msg_type = msg.AssetRequest
         data = {"ledger_category": int(ledger_category), "account_id": account_id, "source_id": source_id, "client_id":client_id}
         return self._request(msg_type, data)
 

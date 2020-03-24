@@ -11,7 +11,7 @@
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/time.h>
 
-namespace kungfu::longfist::sqlite {
+namespace kungfu::yijinjing::cache {
 constexpr auto make_storage = [](const std::string &state_db_file, const auto &types) {
   constexpr auto make_table = [](const auto &types) {
     return [&](auto key) {
@@ -46,8 +46,8 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
   return boost::hana::unpack(tables, named_storage(state_db_file));
 };
 
-using ProfileStorageType = decltype(make_storage(std::string(), ProfileDataTypes));
-using StateStorageType = decltype(make_storage(std::string(), StateDataTypes));
+using ProfileStorageType = decltype(make_storage(std::string(), longfist::ProfileDataTypes));
+using StateStorageType = decltype(make_storage(std::string(), longfist::StateDataTypes));
 
 template <typename, typename = void, bool = true> struct time_spec;
 
@@ -68,56 +68,89 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataTyp
   };
 };
 
-class sqlizer {
+class shift {
 public:
-  explicit sqlizer(yijinjing::data::location_ptr location) : location_(std::move(location)) {}
+  shift() = default;
 
-  void restore(const yijinjing::journal::writer_ptr &app_cmd_writer) {
-    SPDLOG_INFO("restore for {}", location_->uname);
+  explicit shift(yijinjing::data::location_ptr location) : location_(std::move(location)), storage_map_() {}
+
+  shift(const shift &copy) : location_(copy.location_), storage_map_(copy.storage_map_) {}
+
+  void operator>>(const yijinjing::journal::writer_ptr &writer) {
     for (auto dest : location_->locator->list_location_dest(location_)) {
       ensure_storage(dest);
     }
-    boost::hana::for_each(StateDataTypes, [&](auto it) {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
-      for (auto &pair : storages_) {
-        restore<DataType>(app_cmd_writer, pair.second);
+      for (auto &pair : storage_map_) {
+        restore<DataType>(writer, pair.second);
       }
     });
   }
 
-  template <typename DataType>
-  std::enable_if_t<DataType::reflect> operator()(const std::string &name, boost::hana::basic_type<DataType> type,
-                                                 const event_ptr &event) {
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     ensure_storage(event->dest());
-    storages_.at(event->dest()).replace(event->data<DataType>());
+    storage_map_.at(event->dest()).replace(event->template data<DataType>());
+  }
+
+  template <typename DataType> void operator-=(const typed_event_ptr<DataType> &event) {
+    ensure_storage(event->dest());
+    storage_map_.at(event->dest()).template remove_all<DataType>();
+  }
+
+  template <typename DataType> void operator/=(const typed_event_ptr<DataType> &event) {
+    for (auto &pair : storage_map_) {
+      pair.second.template remove_all<DataType>();
+    }
   }
 
 private:
-  const yijinjing::data::location_ptr location_;
-  std::unordered_map<uint32_t, StateStorageType> storages_;
+  yijinjing::data::location_ptr location_;
+  std::unordered_map<uint32_t, StateStorageType> storage_map_;
 
   void ensure_storage(uint32_t dest) {
-    if (storages_.find(dest) == storages_.end()) {
-      auto db_file = location_->locator->layout_file(location_, enums::layout::SQLITE, fmt::format("{:08x}", dest));
-      storages_.emplace(dest, make_storage(db_file, StateDataTypes));
-      storages_.at(dest).sync_schema();
+    if (storage_map_.find(dest) == storage_map_.end()) {
+      auto locator = location_->locator;
+      auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
+      storage_map_.emplace(dest, make_storage(db_file, longfist::StateDataTypes));
+      storage_map_.at(dest).sync_schema();
     }
   }
 
   template <typename DataType>
-  std::enable_if_t<not std::is_same_v<DataType, types::DailyAsset>>
-  restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {
+  std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>
+  restore(const yijinjing::journal::writer_ptr &writer, StateStorageType &storage) {
     for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_nano(), INT64_MAX)) {
-      app_cmd_writer->write(0, data);
+      writer->write(0, data);
     }
   }
 
   template <typename DataType>
-  std::enable_if_t<std::is_same_v<DataType, types::DailyAsset>>
-  restore(const yijinjing::journal::writer_ptr &app_cmd_writer, StateStorageType &storage) {}
+  std::enable_if_t<std::is_same_v<DataType, longfist::types::DailyAsset>>
+  restore(const yijinjing::journal::writer_ptr &writer, StateStorageType &storage) {}
 };
-DECLARE_PTR(sqlizer)
-} // namespace kungfu::longfist::sqlite
+DECLARE_PTR(shift)
+
+class extract {
+public:
+  explicit extract(const longfist::StateMapType &state_map, int64_t trigger_time)
+      : state_map_(state_map), trigger_time_(trigger_time) {}
+
+  void operator>>(const yijinjing::journal::writer_ptr &writer) {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      auto type = boost::hana::second(it);
+      using DataType = typename decltype(+type)::type;
+      for (const auto &element : state_map_[type]) {
+        writer->write(trigger_time_, element.second.data);
+      }
+    });
+  }
+
+private:
+  const longfist::StateMapType &state_map_;
+  const int64_t trigger_time_;
+};
+} // namespace kungfu::yijinjing::cache
 
 namespace sqlite_orm {
 
@@ -145,16 +178,15 @@ template <size_t N> struct statement_binder<kungfu::array<char, N>> {
 
 template <typename V, size_t N> struct statement_binder<kungfu::array<V, N>> {
   int bind(sqlite3_stmt *stmt, int index, const kungfu::array<V, N> &value) {
-    return sqlite3_bind_blob(stmt, index, static_cast<const void *>(value.value), sizeof(value.value),
-                             SQLITE_TRANSIENT);
+    return sqlite3_bind_blob(stmt, index, value, sizeof(value.value), SQLITE_TRANSIENT);
   }
 };
 
 template <typename V> struct statement_binder<std::vector<V>, std::enable_if_t<not std::is_same_v<V, char>>> {
   int bind(sqlite3_stmt *stmt, int index, const std::vector<V> &value) {
     if (value.size()) {
-      return sqlite3_bind_blob(stmt, index, (const void *)&value.front(), int(value.size() * sizeof(V)),
-                               SQLITE_TRANSIENT);
+      int size = value.size() * sizeof(V);
+      return sqlite3_bind_blob(stmt, index, (const void *)&value.front(), size, SQLITE_TRANSIENT);
     } else {
       return sqlite3_bind_blob(stmt, index, "", 0, SQLITE_TRANSIENT);
     }

@@ -6,7 +6,7 @@
 #define KUNGFU_CONFIG_STORE_H
 
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/longfist/serialize/sql.h>
+#include <kungfu/yijinjing/cache.h>
 #include <kungfu/yijinjing/common.h>
 
 namespace kungfu::yijinjing::practice {
@@ -49,7 +49,7 @@ private:
 
   explicit profile(std::string profile_db_file);
 
-  longfist::sqlite::ProfileStorageType &get_storage();
+  yijinjing::cache::ProfileStorageType &get_storage();
 };
 } // namespace kungfu::yijinjing::practice
 

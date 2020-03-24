@@ -67,29 +67,19 @@ class recover {
 public:
   explicit recover(StateMapType &state_map) : state_map_(state_map) {}
 
-  template <typename DataType>
-  void operator()(const std::string &name, boost::hana::basic_type<DataType> type, const event_ptr &event) {
-    state_map_[boost::hana::type_c<DataType>].emplace(event->data<DataType>().uid(), event);
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
+    state_map_[boost::hana::type_c<DataType>].emplace(event->data<DataType>().uid(), *event);
   }
 
 private:
   StateMapType &state_map_;
 };
 
-constexpr auto cast_type_invoke = [](const std::string &type, auto &data, auto &handler) {
-  boost::hana::for_each(StateDataTypes, [&](auto it) {
-    if (strcmp(boost::hana::first(it).c_str(), type.c_str()) == 0) {
-      using T = typename decltype(+boost::hana::second(it))::type;
-      handler(boost::hana::first(it).c_str(), boost::hana::second(it), data);
-    }
-  });
-};
-
 constexpr auto cast_event_invoke = [](const event_ptr &event, auto &handler) {
   boost::hana::for_each(StateDataTypes, [&](auto it) {
-    using T = typename decltype(+boost::hana::second(it))::type;
-    if (T::tag == event->msg_type()) {
-      handler(boost::hana::first(it).c_str(), boost::hana::second(it), event);
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    if (DataType::tag == event->msg_type()) {
+      handler << typed_event_ptr<DataType>(event);
     }
   });
 };

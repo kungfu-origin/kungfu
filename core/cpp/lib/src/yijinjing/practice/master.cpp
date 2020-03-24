@@ -4,16 +4,16 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/longfist/serialize/sql.h>
+#include <kungfu/yijinjing/cache.h>
 #include <kungfu/yijinjing/practice/master.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
-using namespace kungfu::longfist::sqlite;
-using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::yijinjing::practice {
 
@@ -56,7 +56,7 @@ void master::register_app(const event_ptr &e) {
 
   auto now = time::now_in_nano();
   auto uid_str = fmt::format("{:08x}", app_location->uid);
-  auto master_cmd_location = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
+  auto master_cmd_location = location::make_shared(mode::LIVE, category::SYSTEM, "master", uid_str, home->locator);
   auto public_writer = get_writer(location::PUBLIC);
   auto app_cmd_writer = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
@@ -80,8 +80,8 @@ void master::register_app(const event_ptr &e) {
   write_trading_day(e->gen_time(), app_cmd_writer);
   write_locations(e->gen_time(), app_cmd_writer);
 
-  app_sqlizers_.emplace(app_location->uid, std::make_shared<sqlizer>(app_location));
-  app_sqlizers_.at(app_location->uid)->restore(app_cmd_writer);
+  app_cache_shift_.emplace(app_location->uid, app_location);
+  app_cache_shift_[app_location->uid] >> app_cmd_writer;
 
   app_cmd_writer->mark(start_time_, RequestStart::tag);
 
@@ -102,7 +102,7 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   registry_.erase(app_location_uid);
   writers_.erase(app_location_uid);
   timer_tasks_.erase(app_location_uid);
-  app_sqlizers_.erase(app_location_uid);
+  app_cache_shift_.erase(app_location_uid);
   get_writer(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
 }
 
@@ -113,7 +113,7 @@ void master::react() {
                          if (registry_.find(e->source()) != registry_.end()) {
                            auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
                            io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
-                           cast_event_invoke(e, *app_sqlizers_.at(e->source()));
+                           cast_event_invoke(e, app_cache_shift_[e->source()]);
                          }
                        });
 
@@ -187,6 +187,17 @@ void master::react() {
     SPDLOG_TRACE("time request from {} duration {} repeat {} at {}", get_location(e->source())->uname, request.duration,
                  request.repeat, time::strftime(e->gen_time()));
   });
+
+  events_ | is(CleanCacheRequest::tag) | $([&](const event_ptr &e) {
+    auto msg_type = e->data<CleanCacheRequest>().msg_type;
+    boost::hana::for_each(StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == msg_type) {
+        app_cache_shift_[e->source()] -= typed_event_ptr<DataType>(e);
+        app_cache_shift_[e->dest()] /= typed_event_ptr<DataType>(e);
+      }
+    });
+  });
 }
 
 void master::on_active() {
@@ -217,25 +228,25 @@ void master::on_active() {
   }
 }
 
-void master::write_trading_day(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer) {
+void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
   TradingDay &trading_day = writer->open_data<TradingDay>();
   trading_day.timestamp = acquire_trading_day();
   writer->close_data();
 }
 
-void master::write_locations(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer) {
+void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : locations_) {
     writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
   }
 }
 
-void master::write_registers(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer) {
+void master::write_registers(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : registry_) {
     writer->write(trigger_time, item.second);
   }
 }
 
-void master::write_channels(int64_t trigger_time, const yijinjing::journal::writer_ptr &writer) {
+void master::write_channels(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : channels_) {
     writer->write(trigger_time, item.second);
   }

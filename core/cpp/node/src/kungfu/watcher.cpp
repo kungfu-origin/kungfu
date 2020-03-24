@@ -12,7 +12,7 @@ using namespace kungfu::rx;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
-using namespace kungfu::longfist::sqlite;
+using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
@@ -61,7 +61,6 @@ Watcher::~Watcher() {
   state_ref_.Unref();
   config_ref_.Unref();
   history_ref_.Unref();
-  apprentice::~apprentice();
 }
 
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
@@ -133,12 +132,7 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
-  Napi::Object obj = info[0].ToObject();
-  try {
-    longfist::cast_type_invoke(obj.Get("type").ToString().Utf8Value(), obj, publish);
-  } catch (...) {
-    throw Napi::Error::New(info.Env(), "invalid state arguments");
-  }
+  publish(info[0]);
   return Napi::Value();
 }
 

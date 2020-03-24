@@ -23,8 +23,8 @@ profile::profile(std::string profile_db_file) : profile_db_file_(std::move(profi
   }
 }
 
-longfist::sqlite::ProfileStorageType &profile::get_storage() {
-  static auto storage = longfist::sqlite::make_storage(profile_db_file_, ProfileDataTypes);
+yijinjing::cache::ProfileStorageType &profile::get_storage() {
+  static auto storage = yijinjing::cache::make_storage(profile_db_file_, ProfileDataTypes);
   return storage;
 }
 } // namespace kungfu::yijinjing::practice

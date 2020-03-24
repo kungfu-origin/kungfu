@@ -60,7 +60,7 @@ class PyTrader : public Trader {
 public:
   using Trader::Trader;
 
-  const AccountType get_account_type() const override {
+  AccountType get_account_type() const override {
     PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type, );
   }
 

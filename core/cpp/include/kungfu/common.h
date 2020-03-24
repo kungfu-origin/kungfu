@@ -126,6 +126,8 @@ template <typename T, size_t N> struct array {
 
   operator const T *() const { return static_cast<const T *>(value); }
 
+  operator const void *() const { return static_cast<const void *>(value); }
+
   operator std::string() const { return array_to_string<T, N>{}(value); }
 
   T &operator[](int i) const { return const_cast<T &>(value[i]); }
@@ -365,6 +367,18 @@ struct event {
 };
 
 DECLARE_PTR(event)
+
+template <typename DataType> struct typed_event_ptr {
+  using type = DataType;
+
+  const event_ptr &event;
+
+  explicit typed_event_ptr(const event_ptr &e) : event(e) {}
+
+  const event_ptr &operator*() const { return event; }
+
+  const event_ptr &operator->() const { return event; }
+};
 
 template <typename DataType> struct state {
   const uint32_t source;

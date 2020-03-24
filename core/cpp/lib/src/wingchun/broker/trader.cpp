@@ -25,5 +25,9 @@ void Trader::on_start() {
   events_ | is(OrderInput::tag) | $([&](const event_ptr &event) { insert_order(event); });
 
   events_ | is(OrderAction::tag) | $([&](const event_ptr &event) { cancel_order(event); });
+
+  events_ | is(AssetRequest::tag) | $([&](const event_ptr &event) { req_account(); });
+
+  events_ | is(PositionRequest::tag) | $([&](const event_ptr &event) { req_position(); });
 }
 } // namespace kungfu::wingchun::broker

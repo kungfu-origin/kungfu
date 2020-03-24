@@ -13,7 +13,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/longfist/serialize/sql.h>
+#include <kungfu/yijinjing/cache.h>
 
 namespace pybind11::detail {
 template <size_t Size> struct type_caster<kungfu::array<char, Size>> {

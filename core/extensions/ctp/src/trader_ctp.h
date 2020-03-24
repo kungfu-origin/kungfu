@@ -22,9 +22,9 @@ namespace kungfu::wingchun::ctp {
         TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
                   const std::string &json_config);
 
-        ~TraderCTP() {};
+        ~TraderCTP() override = default;
 
-        const longfist::enums::AccountType get_account_type() const override { return longfist::enums::AccountType::Future; }
+        longfist::enums::AccountType get_account_type() const override { return longfist::enums::AccountType::Future; }
 
         bool insert_order(const event_ptr &event) override;
 

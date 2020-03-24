@@ -20,21 +20,23 @@
 
 namespace kungfu::yijinjing::journal {
 
-KF_DEFINE_PACK_TYPE(frame_header, 0, PK(gen_time), TIMESTAMP(gen_time),
-                    /** total frame length (including header and data body) */
-                    (volatile uint32_t, length),
-                    /** header length */
-                    (uint32_t, header_length),
-                    /** generate time of the frame data */
-                    (int64_t, gen_time),
-                    /** trigger time for this frame, use for latency stats */
-                    (int64_t, trigger_time),
-                    /** msg type of the data in frame */
-                    (volatile int32_t, msg_type),
-                    /** source of this frame */
-                    (uint32_t, source),
-                    /** dest of this frame */
-                    (uint32_t, dest));
+KF_DEFINE_PACK_TYPE(                                    //
+    frame_header, 0, PK(gen_time), TIMESTAMP(gen_time), //
+    /** total frame length (including header and data body) */
+    (volatile uint32_t, length), //
+    /** header length */
+    (uint32_t, header_length), //
+    /** generate time of the frame data */
+    (int64_t, gen_time), //
+    /** trigger time for this frame, use for latency stats */
+    (int64_t, trigger_time), //
+    /** msg type of the data in frame */
+    (volatile int32_t, msg_type), //
+    /** source of this frame */
+    (uint32_t, source), //
+    /** dest of this frame */
+    (uint32_t, dest) //
+);
 
 /**
  * Basic memory unit,

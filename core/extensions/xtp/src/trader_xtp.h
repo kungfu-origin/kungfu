@@ -24,7 +24,7 @@ namespace kungfu::wingchun::xtp
 
         ~TraderXTP() override;
 
-        const AccountType get_account_type() const override
+        AccountType get_account_type() const override
         { return AccountType::Stock; }
 
         bool insert_order(const event_ptr &event) override;

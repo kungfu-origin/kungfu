@@ -34,7 +34,8 @@ KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
 KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
 KF_DEFINE_MARK_TYPE(InstrumentRequest, 356);
-KF_DEFINE_MARK_TYPE(QryAsset, 402);
+KF_DEFINE_MARK_TYPE(AssetRequest, 402);
+KF_DEFINE_MARK_TYPE(PositionRequest, 403);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 210);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 211);
@@ -95,13 +96,6 @@ KF_DEFINE_DATA_TYPE(                                //
     (std::string, name)                             //
 );
 
-KF_DEFINE_PACK_TYPE(                         //
-    TimeRequest, 10004, PK(id), PERPETUAL(), //
-    (int32_t, id),                           //
-    (int64_t, duration),                     //
-    (int64_t, repeat)                        //
-);
-
 KF_DEFINE_PACK_TYPE(                                    //
     RequestReadFrom, 10021, PK(source_id), PERPETUAL(), //
     (uint32_t, source_id),                              //
@@ -128,6 +122,18 @@ KF_DEFINE_PACK_TYPE(                                     //
     Channel, 10028, PK(source_id, dest_id), PERPETUAL(), //
     (uint32_t, source_id),                               //
     (uint32_t, dest_id)                                  //
+);
+
+KF_DEFINE_PACK_TYPE(                         //
+    TimeRequest, 10004, PK(id), PERPETUAL(), //
+    (int32_t, id),                           //
+    (int64_t, duration),                     //
+    (int64_t, repeat)                        //
+);
+
+KF_DEFINE_PACK_TYPE(                                     //
+    CleanCacheRequest, 10013, PK(msg_type), PERPETUAL(), //
+    (int32_t, msg_type)                                  //
 );
 
 KF_DEFINE_PACK_TYPE(                                              //

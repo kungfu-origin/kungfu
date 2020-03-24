@@ -6,6 +6,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/utils.h>
+#include <kungfu/yijinjing/cache.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
@@ -14,11 +15,12 @@ using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::cache;
 
 namespace kungfu::wingchun::service {
 Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      publish_state(state_map_), broker_client_(*this), bookkeeper_(*this, broker_client_),
+      broker_client_(*this), bookkeeper_(*this, broker_client_),
       assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
       order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>]) {
   log::copy_log_settings(get_io_device()->get_home(), "ledger");
@@ -107,6 +109,18 @@ void Ledger::on_start() {
     if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
       reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
     }
+    if (get_location(channel.source_id)->category == category::TD and channel.dest_id == get_home_uid()) {
+      auto writer = get_writer(channel.source_id);
+
+      CleanCacheRequest request = {};
+      request.msg_type = Asset::tag;
+      writer->write(event->gen_time(), request);
+      request.msg_type = Position::tag;
+      writer->write(event->gen_time(), request);
+
+      writer->mark(event->gen_time(), AssetRequest::tag);
+      writer->mark(event->gen_time(), PositionRequest::tag);
+    }
   });
 
   events_ | is(Quote::tag) | $([&](const event_ptr &event) { const Quote &data = event->data<Quote>(); });
@@ -177,7 +191,7 @@ void Ledger::on_start() {
   bookkeeper_.on_start(events_);
   bookkeeper_.restore(state_map_);
 
-  publish_state(get_writer(location::PUBLIC), now());
+  extract(state_map_, now()) >> get_writer(location::PUBLIC);
 }
 
 void Ledger::write_daily_assets() {
