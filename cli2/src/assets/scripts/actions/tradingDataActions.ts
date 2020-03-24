@@ -17,7 +17,8 @@ export const tradingDataObservale = (type: string, processId: string) => {
         map((data: any) => {
 
             const orders = data.orders[processId] || [];
-            const ordersResolve = dealOrdersFromWatcher(orders);
+            const orderStat = data.orderStat;
+            const ordersResolve = dealOrdersFromWatcher(orders, orderStat);
 
             const trades = data.trades[processId] || [];
             const tradesResolve = dealTradesFromWathcer(trades);
@@ -38,12 +39,15 @@ export const tradingDataObservale = (type: string, processId: string) => {
 }
 
 
-function dealOrdersFromWatcher (orders: OrderInputData[]) {
+function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: any) {
     let orderDataByKey: { [propName: string]: OrderData } = {};
-
     orders.kfForEach((item: OrderInputData) => {
         let orderData = dealOrder(item);
-        orderDataByKey[orderData.id] = orderData;
+        let systemLatency = orderStat[orderData.id] || ''
+        orderDataByKey[orderData.id] = {
+            ...orderData,
+            systemLatency
+        };
     })
 
     return Object.freeze(Object.values(orderDataByKey).sort((a: OrderData, b: OrderData) =>{
