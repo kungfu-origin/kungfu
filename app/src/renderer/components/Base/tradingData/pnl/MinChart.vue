@@ -3,7 +3,7 @@
     <div class="min-chart">
         <div class="min-current pnl-statis">
             <!-- <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div> -->
-            <div>日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
+            <div v-if="intradayPnl !== ''">日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
         </div>
         <tr-no-data v-if="(minPnl.length == 0) || !rendererPnl"/>
         <div id="min-chart" v-else></div>
@@ -56,7 +56,8 @@ export default {
             },
         };
         return {
-            rendererPnl: false
+            rendererPnl: false,
+            intradayPnl: ''
         }
       
     },
@@ -64,12 +65,7 @@ export default {
     computed:{
         ...mapState({
             tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
-        }),
-
-        intradayPnl(){
-            if(!this.minPnl.length) return '--';
-            return this.calcuIntradayPnl(this.minPnl[this.minPnl.length - 1])
-        }
+        })
     },
 
     
@@ -95,6 +91,8 @@ export default {
             } else if (oldPnlMinList.length && minPnlList.length) {
                 this.updateChart(timeList, pnlDataList)
             }
+
+            this.intradayPnl = pnlDataList[pnlDataList.length - 1];
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据
@@ -137,7 +135,7 @@ export default {
         },
 
         calcuIntradayPnl (pnlData) {
-            return toDecimal(pnlData.unrealized_pnl + pnlData.realized_pnl)
+            return toDecimal(+pnlData.unrealized_pnl + +pnlData.realized_pnl)
         },
 
         updateChart (timeList, pnlDataList) {
