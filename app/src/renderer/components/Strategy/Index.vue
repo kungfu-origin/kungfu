@@ -11,7 +11,7 @@
                                 ref="pnl"
                                 :currentId="strategyId" 
                                 moduleType="strategy"
-                                :kungfuData="pnl"   
+                                :minPnl="pnl"   
                                 :dayMethod="getStrategyPnlDay"
                                 ></Pnl>
                         </el-col>
@@ -76,6 +76,7 @@ export default {
             trades: Object.freeze([]),
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
+            dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({})
         }
     },
@@ -91,6 +92,8 @@ export default {
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
             this.pnl = Object.freeze(pnl || []);
+            const dailyPnl = data['dailyPnl'][t.currentId];
+            this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {})
         })

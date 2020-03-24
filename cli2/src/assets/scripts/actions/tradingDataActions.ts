@@ -54,7 +54,7 @@ function dealOrdersFromWatcher (orders: OrderInputData[]) {
 function dealTradesFromWathcer (trades: TradeInputData[]) {
     return trades
         .map(item => dealTrade(item))
-        .sort((a: TradeData, b: TradeData) => (b.updateTimeNum - a.updateTimeNum))
+        .sort((a: TradeData, b: TradeData) => b.updateTimeNum - a.updateTimeNum)
 }
 
 function dealPosFromWatcher (positions: PosInputData[]) {

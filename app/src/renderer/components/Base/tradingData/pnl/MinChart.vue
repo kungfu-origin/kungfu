@@ -5,7 +5,7 @@
             <!-- <div>日内收益率：<span :class="{'text-overflow': true, 'color-green': intradayPnlRatio < 0, 'color-red': intradayPnlRatio > 0}" :title="intradayPnlRatio + '%'">{{intradayPnlRatio + '%'}}</span> </div> -->
             <div>日内盈亏：<span :class="{'text-overflow': true, 'color-green': intradayPnl < 0, 'color-red': intradayPnl > 0}" :title="intradayPnl">{{intradayPnl}}</span></div>
         </div>
-        <tr-no-data v-if="kungfuData.length == 0 && rendererPnl"/>
+        <tr-no-data v-if="(minPnl.length == 0) || !rendererPnl"/>
         <div id="min-chart" v-else></div>
     </div>
 </template>
@@ -32,7 +32,7 @@ export default {
             default: "",
         },
 
-        kungfuData: {
+        minPnl: {
             type: Array,
             default: () => ([])
         }
@@ -56,7 +56,6 @@ export default {
             },
         };
         return {
-            minData: [Object.freeze([]), Object.freeze([])],
             rendererPnl: false
         }
       
@@ -68,18 +67,16 @@ export default {
         }),
 
         intradayPnl(){
-            const t = this;
-            if(!t.kungfuData.length) return '--';
-            return t.calcuIntradayPnl(t.kungfuData[t.kungfuData.length - 1])
+            if(!this.minPnl.length) return '--';
+            return this.calcuIntradayPnl(this.minPnl[this.minPnl.length - 1])
         }
     },
 
     
     mounted() {
-        const t = this;
-        t.rendererPnl = true;
-        t.resetData();
-        t.initChart();
+        this.rendererPnl = true;
+        this.resetData();
+        this.$nextTick().then(() => this.initChart())
     },
 
     watch: {
@@ -91,44 +88,45 @@ export default {
             this.myChart && this.myChart.resize()
         },
 
-        kungfuData (pnlMinList, oldPnlMinList) {
-            const { timeList, pnlDataList } = this.dealMinPnlList(pnlMinList)
-            if (!oldPnlMinList.length && pnlMinList.length) {
+        minPnl (minPnlList, oldPnlMinList) {
+            const { timeList, pnlDataList } = this.dealMinPnlList(minPnlList)
+            if (!oldPnlMinList.length && minPnlList.length) {
                 this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
-            } else if (oldPnlMinList.length && pnlMinList.length) {
+            } else if (oldPnlMinList.length && minPnlList.length) {
                 this.updateChart(timeList, pnlDataList)
             }
         },
 
         //检测交易日的变化，当变化的时候，重新获取数据
         tradingDay() {
-            this.resetData();            
+            this.resetData();     
+            this.initChart();       
         }
     },
 
     methods:{
-        initChart(timeList, pnlDataList) {
-            const t = this
+
+        initChart (timeList=[], pnlDataList=[]) {
             const dom = document.getElementById('min-chart');
             if(!dom) return;
-            t.myChart = echarts.getInstanceByDom(dom)
-            if(t.myChart === undefined) t.myChart = echarts.init(dom);
+            this.myChart = echarts.getInstanceByDom(dom)
+            if(this.myChart === undefined) this.myChart = echarts.init(dom);
             let defaultConfig = deepClone(lineConfig)  
             defaultConfig.xAxis.data = timeList
-            defaultConfig.series = { data: pnlDataList, ...t.echartsSeries }
-            t.myChart.setOption(defaultConfig)
+            defaultConfig.series = { data: pnlDataList, ...this.echartsSeries }
+            this.myChart.setOption(defaultConfig)
         },
 
-        dealMinPnlList (pnlMinList) {
-            const t = this;
+        dealMinPnlList (minPnlList) {
             let timeList = [], pnlDataList = [];
 
-            pnlMinList
+            minPnlList
                 .filter(pnlData => pnlData.trading_day === this.tradingDay)
+                .sort((a, b) => a.update_time - b.update_time)
                 .kfForEach(pnlData => {
                     const updateTime = moment(Number(pnlData.update_time) / 1000000).format('HH:mm');
                     timeList.push(updateTime);
-                    const pnlValue = t.calcuIntradayPnl(pnlData)
+                    const pnlValue = this.calcuIntradayPnl(pnlData)
                     pnlDataList.push(pnlValue)
                 })
 
@@ -138,16 +136,15 @@ export default {
             }
         },
 
-        calcuIntradayPnl(pnlData) {
+        calcuIntradayPnl (pnlData) {
             return toDecimal(pnlData.unrealized_pnl + pnlData.realized_pnl)
         },
 
-        updateChart(timeList, pnlDataList) {
-            const t = this;
-            t.myChart && t.myChart.setOption({
+        updateChart (timeList, pnlDataList) {
+            this.myChart && this.myChart.setOption({
                 series: {
                     data: pnlDataList,
-                    ...t.echartsSeries
+                    ...this.echartsSeries
                 },
                 xAxis: {
                     data: timeList
@@ -156,10 +153,8 @@ export default {
         },
 
         resetData(){
-            const t = this;
-            t.myChart && t.myChart.clear();
-            t.myChart = null;
-            t.minData = [ Object.freeze([]), Object.freeze([]) ];
+            this.myChart && this.myChart.clear();
+            this.myChart = null;
             return true;
         },
     }

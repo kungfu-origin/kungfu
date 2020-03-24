@@ -16,7 +16,8 @@
                         :currentId="currentId" 
                         moduleType="account"
                         :dayMethod="getAccountPnlDay"
-                        :kungfuData="pnl"
+                        :minPnl="pnl"
+                        :dailyPnl="dailyPnl"
                         />
                     </el-col>
                 </el-row>
@@ -79,6 +80,7 @@ export default {
             trades: Object.freeze([]),
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
+            dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({}),
         }
     },
@@ -122,6 +124,8 @@ export default {
             this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             const pnl = data['pnl'][t.currentId];
             this.pnl = Object.freeze(pnl || []);
+            const dailyPnl = data['dailyPnl'][t.currentId];
+            this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {})
         })
