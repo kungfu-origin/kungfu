@@ -310,8 +310,7 @@ void bind(pybind11::module &&m) {
       .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"),
            py::arg("timeout") = 0)
       .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
-           py::arg("to") = INT64_MAX)
-      .def("trace", &io_device::trace);
+           py::arg("to") = INT64_MAX);
 
   py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
   io_device_with_reply.def(py::init<location_ptr, bool, bool>());
@@ -322,6 +321,10 @@ void bind(pybind11::module &&m) {
 
   py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
       .def(py::init<location_ptr, bool>());
+
+  py::class_<io_device_console>(m, "io_device_console", io_device)
+      .def(py::init<location_ptr, uint32_t, uint32_t>())
+      .def("trace", &io_device_console::trace);
 
   py::class_<master, PyMaster>(m, "master")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)

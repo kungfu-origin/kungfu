@@ -23,7 +23,7 @@ def journal(ctx, mode, category, group, name):
     ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'cli', ctx.locator)
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
 
-    (ctx.console_width, ctx.console_height) = shutil.get_terminal_size((-1, -1))
+    (ctx.console_width, ctx.console_height) = shutil.get_terminal_size((0, 0))
     yjj.setup_log(ctx.journal_util_location, 'journal')
 
 

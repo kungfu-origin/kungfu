@@ -8,6 +8,7 @@ import kungfu.yijinjing.time as kft
 import kungfu.yijinjing.journal as kfj
 
 SESSION_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+FRAME_TIME_FORMAT = '%H:%M:%S.%N'
 DURATION_FORMAT = '%H:%M:%S.%N'
 DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9)
 
@@ -23,8 +24,8 @@ DURATION_TZ_ADJUST = int(timedelta(hours=datetime.fromtimestamp(0).hour).total_s
 def show(ctx, session_id, io_type, tablefmt, pager):
     pass_ctx_from_parent(ctx)
     journal_df = kfj.show_journal(ctx, session_id, io_type)
-    journal_df['gen_time'] = journal_df['gen_time'].apply(lambda t: kft.strftime(t))
-    journal_df['trigger_time'] = journal_df['trigger_time'].apply(lambda t: kft.strftime(t))
+    journal_df['gen_time'] = journal_df['gen_time'].apply(lambda t: kft.strftime(t, FRAME_TIME_FORMAT))
+    journal_df['trigger_time'] = journal_df['trigger_time'].apply(lambda t: kft.strftime(t, FRAME_TIME_FORMAT))
 
     table = tabulate(journal_df.values, headers=journal_df.columns, tablefmt=tablefmt)
 

@@ -226,28 +226,32 @@ def read_session(ctx, session_id, io_type):
     locations = collect_journal_locations(ctx)
     location = locations[uid]
     home = make_location_from_dict(ctx, location)
-    io_device = yjj.io_device(home)
+    io_device = yjj.io_device_console(home, ctx.console_width, ctx.console_height)
+
+    show_in = (io_type == 'in' or io_type == 'all') and not (io_device.home.category == yjj.category.SYSTEM and io_device.home.group == 'master' and io_device.home.name == 'master')
+    show_out = io_type == 'out' or io_type == 'all'
+
+    return locations, session, io_device, show_in, show_out
+
+
+def show_journal(ctx, session_id, io_type):
+    locations, session, io_device, show_in, show_out = read_session(ctx, session_id, io_type)
+
     reader = io_device.open_reader_to_subscribe()
 
-    if io_type == 'out' or io_type == 'all':
-        for dest in location['readers']:
-            dest_id = int(dest, 16)
-            reader.join(home, dest_id, session['begin_time'])
+    if show_in:
+        for dest_id in ctx.locator.list_location_dest(io_device.home):
+            reader.join(io_device.home, dest_id, session['begin_time'])
 
-    if (io_type == 'in' or io_type == 'all') and not (home.category == yjj.category.SYSTEM and home.group == 'master' and home.name == 'master'):
+    if show_out:
         master_home_uid = yjj.hash_str_32('system/master/master/live')
         master_home_location = make_location_from_dict(ctx, locations[master_home_uid])
         reader.join(master_home_location, 0, session['begin_time'])
 
-        master_cmd_uid = yjj.hash_str_32('system/master/{:08x}/live'.format(location['uid']))
+        master_cmd_uid = yjj.hash_str_32('system/master/{:08x}/live'.format(io_device.home.uid))
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
-        reader.join(master_cmd_location, location['uid'], session['begin_time'])
+        reader.join(master_cmd_location, io_device.home.uid, session['begin_time'])
 
-    return locations, session, io_device, reader
-
-
-def show_journal(ctx, session_id, io_type):
-    locations, session, io_device, reader = read_session(ctx, session_id, io_type)
     journal_df = pd.DataFrame(columns=[
         'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
     ])
@@ -275,5 +279,5 @@ def show_journal(ctx, session_id, io_type):
 
 
 def trace_journal(ctx, session_id, io_type):
-    locations, session, io_device, reader = read_session(ctx, session_id, io_type)
-    io_device.trace(reader, session['end_time'], ctx.console_width, ctx.console_height)
+    locations, session, io_device, show_in, show_out = read_session(ctx, session_id, io_type)
+    io_device.trace(session['begin_time'], session['end_time'], show_in, show_out)

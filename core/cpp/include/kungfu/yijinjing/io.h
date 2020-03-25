@@ -78,8 +78,6 @@ public:
   [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0,
                                                        int64_t to = INT64_MAX) const;
 
-  void trace(journal::reader_ptr &reader, int64_t end_time, int32_t console_width, int32_t console_height);
-
 protected:
   data::location_ptr home_;
   data::location_ptr db_home_;
@@ -138,6 +136,19 @@ public:
 };
 
 DECLARE_PTR(io_device_client)
+
+class io_device_console : public io_device {
+public:
+  io_device_console(data::location_ptr home, int32_t console_width, int32_t console_height);
+
+  void trace(int64_t begin_time, int64_t end_time, bool in, bool out);
+
+private:
+  int32_t console_width_;
+  int32_t console_height_;
+};
+
+DECLARE_PTR(io_device_console)
 
 class session {
 public:

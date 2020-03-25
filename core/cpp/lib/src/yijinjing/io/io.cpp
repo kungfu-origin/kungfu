@@ -17,12 +17,10 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log/setup.h>
 #include <kungfu/yijinjing/time.h>
-#include <tabulate/table.hpp>
 
 #define DEFAULT_RECV_TIMEOUT 25
 #define DEFAULT_NOTICE_TIMEOUT 1000
 
-using namespace tabulate;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
@@ -276,67 +274,6 @@ std::vector<std::string> io_device::find_sessions(uint32_t source, int64_t from,
     SPDLOG_ERROR("error occurred when query sessions: {}", sqlite3_errmsg(index_db_));
   }
   return result;
-}
-
-void io_device::trace(journal::reader_ptr &reader, int64_t end_time, int32_t console_width, int32_t console_height) {
-  Table table;
-  table.add_row({"gen_time", "trigger_time", "source", "dest", "msg_type", "data"});
-  std::unordered_map<uint32_t, location_ptr> locations = {};
-  for (auto location : home_->locator->list_locations()) {
-    locations.emplace(location->uid, location);
-  }
-  while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
-    auto frame = reader->current_frame();
-    bool type_found = false;
-    boost::hana::for_each(AllTypes, [&](auto type) {
-      using DataType = typename decltype(+boost::hana::second(type))::type;
-      if (frame->msg_type() == DataType::tag) {
-        table.add_row({
-            time::strftime(frame->gen_time(), "%T.%N"),                                        //
-            time::strftime(frame->trigger_time(), "%T.%N"),                                    //
-            locations.at(frame->source())->uname,                                              //
-            frame->dest() == location::PUBLIC ? "public" : locations.at(frame->dest())->uname, //
-            DataType::type_name.c_str(),                                                       //
-            frame->data<DataType>().to_string()                                                //
-        });
-        type_found = true;
-      }
-    });
-    if (not type_found) {
-      table.add_row({
-          time::strftime(frame->gen_time(), "%T.%N"),                                        //
-          time::strftime(frame->trigger_time(), "%T.%N"),                                    //
-          locations.at(frame->source())->uname,                                              //
-          frame->dest() == location::PUBLIC ? "public" : locations.at(frame->dest())->uname, //
-          std::to_string(frame->msg_type()),                                                 //
-          ""                                                                                 //
-      });
-    }
-    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFrom::tag) {
-      auto request = frame->data<RequestReadFrom>();
-      auto source_location = locations.at(request.source_id);
-      reader->join(source_location, home_->uid, request.from_time);
-    }
-    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFromPublic::tag) {
-      auto request = frame->data<RequestReadFromPublic>();
-      auto source_location = locations.at(request.source_id);
-      reader->join(source_location, location::PUBLIC, request.from_time);
-    }
-    if (frame->dest() == home_->uid and frame->msg_type() == Deregister::tag) {
-      reader->disjoin(location::make_shared(frame->data<Deregister>(), get_locator())->uid);
-    }
-    reader->next();
-  }
-  table.format().padding(0).border(" ").hide_border_top().hide_border_bottom();
-  table.column(0).format().width(20).font_align(FontAlign::left);
-  table.column(1).format().width(20).font_align(FontAlign::left);
-  table.column(2).format().width(30).font_align(FontAlign::left);
-  table.column(3).format().width(30).font_align(FontAlign::left);
-  table.column(4).format().width(25).font_align(FontAlign::left);
-  if (console_width > 0) {
-    table.column(5).format().width(console_width - 140);
-  }
-  std::cout << table << std::endl;
 }
 
 io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy)
