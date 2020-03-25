@@ -127,10 +127,16 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     try_update_position(event->source(), data);
     try_update_position(event->dest(), data);
   });
+
+  events | is(PositionEnd::tag) | $([&](const event_ptr &event) {
+    const PositionEnd &data = event->data<PositionEnd>();
+    get_book(data.holder_uid)->update(event->gen_time());
+    SPDLOG_WARN("get position end asset {}", get_book(data.holder_uid)->asset.to_string());
+  });
 }
 
-void Bookkeeper::restore(const longfist::StateMapType &state_map) {
-  for (auto &pair : state_map[boost::hana::type_c<Position>]) {
+void Bookkeeper::restore(const yijinjing::cache::bank &state_bank) {
+  for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
     auto &position = state.data;
     auto book = get_book(position.holder_uid);
@@ -138,7 +144,7 @@ void Bookkeeper::restore(const longfist::StateMapType &state_map) {
         position.direction == longfist::enums::Direction::Long ? book->long_positions : book->short_positions;
     positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
   }
-  for (auto &pair : state_map[boost::hana::type_c<Asset>]) {
+  for (auto &pair : state_bank[boost::hana::type_c<Asset>]) {
     auto &state = pair.second;
     auto &asset = state.data;
     auto book = get_book(asset.holder_uid);

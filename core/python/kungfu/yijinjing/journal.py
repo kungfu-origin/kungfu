@@ -215,10 +215,7 @@ def make_location_from_dict(ctx, location):
     return yjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
 
 
-def trace_journal(ctx, session_id, io_type):
-    trace_df = pd.DataFrame(columns=[
-        'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
-    ])
+def read_session(ctx, session_id, io_type):
     session = find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
     uid = yjj.hash_str_32(uname)
@@ -246,24 +243,37 @@ def trace_journal(ctx, session_id, io_type):
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, location['uid'], session['begin_time'])
 
+    return locations, session, io_device, reader
+
+
+def show_journal(ctx, session_id, io_type):
+    locations, session, io_device, reader = read_session(ctx, session_id, io_type)
+    journal_df = pd.DataFrame(columns=[
+        'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
+    ])
     while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
         frame = reader.current_frame()
-        trace_df.loc[len(trace_df)] = [
+        journal_df.loc[len(journal_df)] = [
             frame.gen_time, frame.trigger_time,
             locations[frame.source]['uname'],
             'public' if frame.dest == 0 else locations[frame.dest]['uname'],
             frame.msg_type, frame.frame_length, frame.data_length
         ]
-        if frame.dest == home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
-            request = yjj.get_RequestReadFrom(frame)
+        if frame.dest == io_device.home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
+            request = frame.RequestReadFrom()
             source_location = make_location_from_dict(ctx, locations[request.source_id])
+            dest = io_device.home.uid if frame.msg_type == yjj_msg.RequestReadFrom else 0
             try:
-                reader.join(source_location, location['uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0, request.from_time)
+                reader.join(source_location, dest, request.from_time)
             except Exception as err:
-                ctx.logger.error("failed to join journal {}/{}, exception: {}".format(source_location.uname, location[
-                    'uid'] if frame.msg_type == yjj_msg.RequestReadFrom else 0), err)
-        if frame.dest == home.uid and frame.msg_type == yjj_msg.Deregister:
+                ctx.logger.error(f"failed to join journal {source_location.uname}/{dest}, exception: {err}")
+        if frame.dest == io_device.home.uid and frame.msg_type == yjj_msg.Deregister:
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc['uid'])
         reader.next()
-    return trace_df
+    return journal_df
+
+
+def trace_journal(ctx, session_id, io_type):
+    locations, session, io_device, reader = read_session(ctx, session_id, io_type)
+    io_device.trace(reader, session['end_time'], ctx.console_width, ctx.console_height)

@@ -120,6 +120,15 @@ protected:
 
   virtual void on_active() = 0;
 
+  static constexpr auto cast_event_invoke = [](const event_ptr &event, auto &handler) {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        handler << typed_event_ptr<DataType>(event);
+      }
+    });
+  };
+
 private:
   yijinjing::io_device_with_reply_ptr io_device_;
   rx::composite_subscription cs_;

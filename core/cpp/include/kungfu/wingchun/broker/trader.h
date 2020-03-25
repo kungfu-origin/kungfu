@@ -34,9 +34,9 @@ public:
   virtual bool req_account() = 0;
 
 protected:
-  std::unordered_map<uint64_t, state<longfist::types::Order>> &orders_;
-  std::unordered_map<uint64_t, state<longfist::types::OrderAction>> &actions_;
-  std::unordered_map<uint64_t, state<longfist::types::Trade>> &trades_;
+  std::unordered_map<uint64_t, state<longfist::types::Order>> orders_ = {};
+  std::unordered_map<uint64_t, state<longfist::types::OrderAction>> actions_ = {};
+  std::unordered_map<uint64_t, state<longfist::types::Trade>> trades_ = {};
 
 private:
   std::string source_;

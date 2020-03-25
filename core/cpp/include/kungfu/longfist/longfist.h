@@ -12,6 +12,95 @@
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
 namespace kungfu::longfist {
+constexpr auto AllTypes = boost::hana::make_map( //
+    TYPE_PAIR(PageEnd),                          //
+    TYPE_PAIR(SessionStart),                     //
+    TYPE_PAIR(SessionEnd),                       //
+    TYPE_PAIR(Time),                             //
+    TYPE_PAIR(Ping),                             //
+    TYPE_PAIR(Pong),                             //
+    TYPE_PAIR(RequestStart),                     //
+    TYPE_PAIR(Subscribe),                        //
+    TYPE_PAIR(SubscribeAll),                     //
+    TYPE_PAIR(NewOrderSingle),                   //
+    TYPE_PAIR(CancelOrder),                      //
+    TYPE_PAIR(CancelAllOrder),                   //
+    TYPE_PAIR(InstrumentRequest),                //
+    TYPE_PAIR(AssetRequest),                     //
+    TYPE_PAIR(PositionRequest),                  //
+    TYPE_PAIR(InstrumentEnd),                    //
+    TYPE_PAIR(AlgoOrderInput),                   //
+    TYPE_PAIR(AlgoOrderReport),                  //
+    TYPE_PAIR(AlgoOrderModify),                  //
+    TYPE_PAIR(Config),                           //
+    TYPE_PAIR(Commission),                       //
+    TYPE_PAIR(Register),                         //
+    TYPE_PAIR(Deregister),                       //
+    TYPE_PAIR(Location),                         //
+    TYPE_PAIR(RequestReadFrom),                  //
+    TYPE_PAIR(RequestReadFromPublic),            //
+    TYPE_PAIR(RequestWriteTo),                   //
+    TYPE_PAIR(TradingDay),                       //
+    TYPE_PAIR(Channel),                          //
+    TYPE_PAIR(TimeRequest),                      //
+    TYPE_PAIR(CleanCacheRequest),                //
+    TYPE_PAIR(Instrument),                       //
+    TYPE_PAIR(Quote),                            //
+    TYPE_PAIR(Entrust),                          //
+    TYPE_PAIR(Transaction),                      //
+    TYPE_PAIR(Bar),                              //
+    TYPE_PAIR(OrderInput),                       //
+    TYPE_PAIR(OrderAction),                      //
+    TYPE_PAIR(OrderActionError),                 //
+    TYPE_PAIR(Order),                            //
+    TYPE_PAIR(Trade),                            //
+    TYPE_PAIR(Asset),                            //
+    TYPE_PAIR(AssetSnapshot),                    //
+    TYPE_PAIR(DailyAsset),                       //
+    TYPE_PAIR(Position),                         //
+    TYPE_PAIR(PositionEnd),                      //
+    TYPE_PAIR(PositionDetail),                   //
+    TYPE_PAIR(PositionDetailEnd),                //
+    TYPE_PAIR(InstrumentCommissionRate),         //
+    TYPE_PAIR(OrderStat),                        //
+    TYPE_PAIR(BrokerStateUpdate)                 //
+);
+
+constexpr auto AllDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(Config),                               //
+    TYPE_PAIR(Commission),                           //
+    TYPE_PAIR(Register),                             //
+    TYPE_PAIR(Deregister),                           //
+    TYPE_PAIR(Location),                             //
+    TYPE_PAIR(RequestReadFrom),                      //
+    TYPE_PAIR(RequestReadFromPublic),                //
+    TYPE_PAIR(RequestWriteTo),                       //
+    TYPE_PAIR(TradingDay),                           //
+    TYPE_PAIR(Channel),                              //
+    TYPE_PAIR(TimeRequest),                          //
+    TYPE_PAIR(CleanCacheRequest),                    //
+    TYPE_PAIR(Instrument),                           //
+    TYPE_PAIR(Quote),                                //
+    TYPE_PAIR(Entrust),                              //
+    TYPE_PAIR(Transaction),                          //
+    TYPE_PAIR(Bar),                                  //
+    TYPE_PAIR(OrderInput),                           //
+    TYPE_PAIR(OrderAction),                          //
+    TYPE_PAIR(OrderActionError),                     //
+    TYPE_PAIR(Order),                                //
+    TYPE_PAIR(Trade),                                //
+    TYPE_PAIR(Asset),                                //
+    TYPE_PAIR(AssetSnapshot),                        //
+    TYPE_PAIR(DailyAsset),                           //
+    TYPE_PAIR(Position),                             //
+    TYPE_PAIR(PositionEnd),                          //
+    TYPE_PAIR(PositionDetail),                       //
+    TYPE_PAIR(PositionDetailEnd),                    //
+    TYPE_PAIR(InstrumentCommissionRate),             //
+    TYPE_PAIR(OrderStat),                            //
+    TYPE_PAIR(BrokerStateUpdate)                     //
+);
+
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                   //
     TYPE_PAIR(Commission)                                //
@@ -62,27 +151,6 @@ constexpr auto build_state_map = [](auto types) {
 
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
-
-class recover {
-public:
-  explicit recover(StateMapType &state_map) : state_map_(state_map) {}
-
-  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
-    state_map_[boost::hana::type_c<DataType>].emplace(event->data<DataType>().uid(), *event);
-  }
-
-private:
-  StateMapType &state_map_;
-};
-
-constexpr auto cast_event_invoke = [](const event_ptr &event, auto &handler) {
-  boost::hana::for_each(StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    if (DataType::tag == event->msg_type()) {
-      handler << typed_event_ptr<DataType>(event);
-    }
-  });
-};
 }; // namespace kungfu::longfist
 
 #endif // KUNGFU_LONGFIST_H

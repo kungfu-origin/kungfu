@@ -92,7 +92,7 @@ public:
 
   void on_start(const rx::connectable_observable<event_ptr> &events);
 
-  void restore(const longfist::StateMapType &state_map);
+  void restore(const yijinjing::cache::bank &state_bank);
 
 private:
   yijinjing::practice::apprentice &app_;

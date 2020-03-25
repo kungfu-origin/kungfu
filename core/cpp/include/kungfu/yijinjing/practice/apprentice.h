@@ -22,6 +22,7 @@
 
 #include <unordered_map>
 
+#include <kungfu/yijinjing/cache.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/time.h>
@@ -41,7 +42,7 @@ public:
 
   yijinjing::data::location_ptr get_config_location() const;
 
-  const longfist::StateMapType &get_state_map() const;
+  const cache::bank &get_state_bank() const;
 
   void request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
@@ -67,8 +68,10 @@ public:
   }
 
 protected:
-  longfist::StateMapType state_map_;
-  yijinjing::data::location_ptr config_location_;
+  cache::bank state_bank_;
+  const data::location_ptr config_location_;
+  const data::location_ptr master_home_location_;
+  const data::location_ptr master_commands_location_;
 
   void react() final;
 
@@ -174,11 +177,8 @@ protected:
 
 private:
   bool started_;
-  yijinjing::data::location_ptr master_home_location_;
-  yijinjing::data::location_ptr master_commands_location_;
   int64_t master_start_time_;
   int64_t trading_day_;
-  longfist::recover recover_state;
   int32_t timer_usage_count_;
   std::unordered_map<int, int64_t> timer_checkpoints_ = {};
 

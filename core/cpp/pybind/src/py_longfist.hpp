@@ -75,6 +75,26 @@ namespace kungfu::longfist {
 namespace py = pybind11;
 namespace hana = boost::hana;
 
+template <typename DataType> void bind_data_type(pybind11::module &m_types, const char *type_name) {
+  auto py_class = py::class_<DataType>(m_types, type_name);
+  py_class.def(py::init<>());
+
+  hana::for_each(hana::accessors<DataType>(), [&](auto it) {
+    auto name = hana::first(it);
+    auto accessor = hana::second(it);
+    py_class.def_readwrite(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
+  });
+
+  py_class.def("__repr__", &DataType::to_string);
+
+  py_class.def_property_readonly("uid", &DataType::uid);
+  py_class.def("__hash__", &DataType::uid);
+
+  py_class.def("__eq__", [&](DataType &a, DataType &b) { return a.uid() == b.uid(); });
+
+  py_class.def("__sizeof__", [&](DataType &target) { return sizeof(target); });
+}
+
 void bind(pybind11::module &&m) {
   using namespace kungfu::longfist::enums;
   auto m_enums = m.def_submodule("enums");
@@ -195,32 +215,20 @@ void bind(pybind11::module &&m) {
   auto m_types = m.def_submodule("types");
   auto m_state = m.def_submodule("state");
 
-  hana::for_each(StateDataTypes, [&](auto type) {
-    using DataType = typename decltype(+hana::second(type))::type;
+  hana::for_each(StateDataTypes, [&](auto pair) {
+    using DataType = typename decltype(+hana::second(pair))::type;
 
-    auto py_class = py::class_<DataType>(m_types, hana::first(type).c_str());
-    py_class.def(py::init<>());
+    bind_data_type<DataType>(m_types, hana::first(pair).c_str());
 
-    hana::for_each(hana::accessors<DataType>(), [&](auto it) {
-      auto name = hana::first(it);
-      auto accessor = hana::second(it);
-      py_class.def_readwrite(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
-    });
-
-    py_class.def("__repr__", &DataType::to_string);
-
-    py_class.def_property_readonly("uid", &DataType::uid);
-    py_class.def("__hash__", &DataType::uid);
-
-    py_class.def("__eq__", [&](DataType &a, DataType &b) { return a.uid() == b.uid(); });
-
-    py_class.def("__sizeof__", [&](DataType &target) { return sizeof(target); });
-
-    py::class_<kungfu::state<DataType>>(m_state, hana::first(type).c_str())
+    py::class_<kungfu::state<DataType>>(m_state, hana::first(pair).c_str())
         .def_readonly("source", &kungfu::state<DataType>::source)
         .def_readonly("update_time", &kungfu::state<DataType>::update_time)
         .def_readonly("data", &kungfu::state<DataType>::data);
   });
+
+  bind_data_type<types::RequestWriteTo>(m_types, "RequestWriteTo");
+  bind_data_type<types::RequestReadFrom>(m_types, "RequestReadFrom");
+  bind_data_type<types::RequestReadFromPublic>(m_types, "RequestReadFromPublic");
 }
 } // namespace kungfu::longfist
 

@@ -47,6 +47,7 @@ using namespace boost::hana::literals;
     static constexpr auto primary_keys = PRIMARY_KEYS;                                                                 \
     static constexpr auto timestamp_key = TIMESTAMP_KEY;                                                               \
     static constexpr bool has_timestamp = boost::hana::is_just(TIMESTAMP_KEY);                                         \
+    static constexpr bool has_data = true;                                                                             \
     NAME(){};                                                                                                          \
     explicit NAME(const char *address, const uint32_t length) { parse(address, length); };                             \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__);                                                                       \
@@ -62,6 +63,8 @@ using namespace boost::hana::literals;
     static constexpr auto primary_keys = boost::hana::make_tuple();                                                    \
     static constexpr auto timestamp_key = boost::hana::nothing;                                                        \
     static constexpr bool has_timestamp = false;                                                                       \
+    static constexpr bool has_data = false;                                                                            \
+    std::string to_string() const { return {}; };                                                                      \
   }
 
 #ifdef BOOST_HANA_WORKAROUND_MSVC_PREPROCESSOR_616033
@@ -184,7 +187,12 @@ struct size_fixed<DataType, std::enable_if_t<std::is_fundamental_v<DataType> or 
     : public std::true_type {};
 
 template <typename DataType>
-struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and DataType::tag>> {
+struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and not DataType::has_data>> {
+  static constexpr bool value = true;
+};
+
+template <typename DataType>
+struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and DataType::has_data>> {
   static constexpr bool value = boost::hana::fold(
       boost::hana::transform(boost::hana::accessors<DataType>(),
                              [](auto it) {
@@ -285,7 +293,7 @@ template <typename DataType> struct data {
   }
 
   [[nodiscard]] std::string to_string() const {
-    nlohmann::json j{};
+    nlohmann::json j = {};
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);

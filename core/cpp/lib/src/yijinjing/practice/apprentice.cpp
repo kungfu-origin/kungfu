@@ -33,19 +33,14 @@ using namespace std::chrono;
 
 namespace kungfu::yijinjing::practice {
 apprentice::apprentice(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_client>(home, low_latency)), started_(false), master_start_time_(0),
-      trading_day_(time::today_nano()), timer_usage_count_(0), state_map_(build_state_map(longfist::StateDataTypes)),
-      recover_state(state_map_) {
-  auto uid_str = fmt::format("{:08x}", get_live_home_uid());
-  auto locator = get_locator();
-
-  master_home_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", "master", locator);
+    : hero(std::make_shared<io_device_client>(home, low_latency)),
+      master_home_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master", "master", get_locator())),
+      master_commands_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
+                                                      fmt::format("{:08x}", get_live_home_uid()), get_locator())),
+      config_location_(location::make_shared(mode::LIVE, category::SYSTEM, "etc", "kungfu", get_locator())),
+      state_bank_(), started_(false), master_start_time_(0), trading_day_(time::today_nano()), timer_usage_count_(0) {
   add_location(0, master_home_location_);
-
-  master_commands_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "master", uid_str, locator);
   add_location(0, master_commands_location_);
-
-  config_location_ = std::make_shared<location>(mode::LIVE, category::SYSTEM, "etc", "kungfu", locator);
   add_location(0, config_location_);
 }
 
@@ -59,7 +54,7 @@ int64_t apprentice::get_trading_day() const { return trading_day_; }
 
 location_ptr apprentice::get_config_location() const { return config_location_; }
 
-const longfist::StateMapType &apprentice::get_state_map() const { return state_map_; }
+const cache::bank &apprentice::get_state_bank() const { return state_bank_; }
 
 void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
@@ -141,7 +136,7 @@ void apprentice::react() {
   });
 
   events_ | take_until(events_ | is(RequestStart::tag)) |
-      $([&](const event_ptr &event) { longfist::cast_event_invoke(event, recover_state); });
+      $([&](const event_ptr &event) { cast_event_invoke(event, state_bank_); });
 
   SPDLOG_INFO("on ready");
   on_ready();

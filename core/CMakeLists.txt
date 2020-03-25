@@ -88,6 +88,7 @@ INCLUDE_DIRECTORIES(deps/json-3.5.0/include)
 INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1/include)
 INCLUDE_DIRECTORIES(deps/sqlite_orm-1.5/include)
 INCLUDE_DIRECTORIES(deps/nng-1.3.0/include)
+INCLUDE_DIRECTORIES(deps/tabulate-1.0/include)
 INCLUDE_DIRECTORIES(deps/hffix-b67d404f/include)
 
 ############################################################

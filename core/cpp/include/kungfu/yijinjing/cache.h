@@ -131,24 +131,29 @@ private:
 };
 DECLARE_PTR(shift)
 
-class extract {
+class bank {
 public:
-  explicit extract(const longfist::StateMapType &state_map, int64_t trigger_time)
-      : state_map_(state_map), trigger_time_(trigger_time) {}
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
+    cache_[boost::hana::type_c<DataType>].emplace(event->template data<DataType>().uid(), *event);
+  }
 
-  void operator>>(const yijinjing::journal::writer_ptr &writer) {
+  void operator>>(const yijinjing::journal::writer_ptr &writer) const {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       auto type = boost::hana::second(it);
       using DataType = typename decltype(+type)::type;
-      for (const auto &element : state_map_[type]) {
-        writer->write(trigger_time_, element.second.data);
+      for (const auto &element : cache_[type]) {
+        writer->write(0, element.second.data);
       }
     });
   }
 
+  template <typename DataType>
+  const std::unordered_map<uint64_t, state<DataType>> &operator[](const boost::hana::basic_type<DataType> &type) const {
+    return cache_[type];
+  }
+
 private:
-  const longfist::StateMapType &state_map_;
-  const int64_t trigger_time_;
+  longfist::StateMapType cache_ = longfist::build_state_map(longfist::StateDataTypes);
 };
 } // namespace kungfu::yijinjing::cache
 

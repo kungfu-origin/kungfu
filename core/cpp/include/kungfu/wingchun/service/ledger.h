@@ -52,8 +52,8 @@ private:
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
 
-  std::unordered_map<uint64_t, state<longfist::types::Asset>> &assets_;
-  std::unordered_map<uint64_t, state<longfist::types::OrderStat>> &order_stats_;
+  std::unordered_map<uint64_t, state<longfist::types::Asset>> assets_ = {};
+  std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
   void write_daily_assets();
 

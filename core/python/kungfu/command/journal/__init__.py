@@ -1,6 +1,7 @@
-from pykungfu import yijinjing as yjj
-import kungfu.yijinjing.journal as kfj
 import click
+import shutil
+import kungfu.yijinjing.journal as kfj
+from pykungfu import yijinjing as yjj
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
 
@@ -21,6 +22,8 @@ def journal(ctx, mode, category, group, name):
     ctx.location = yjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.locator)
     ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'cli', ctx.locator)
     ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
+
+    (ctx.console_width, ctx.console_height) = shutil.get_terminal_size((-1, -1))
     yjj.setup_log(ctx.journal_util_location, 'journal')
 
 
@@ -35,3 +38,5 @@ def pass_ctx_from_parent(ctx):
     ctx.locator = ctx.parent.locator
     ctx.location = ctx.parent.location
     ctx.journal_util_location = ctx.parent.journal_util_location
+    ctx.console_width = ctx.parent.console_width
+    ctx.console_height = ctx.parent.console_height

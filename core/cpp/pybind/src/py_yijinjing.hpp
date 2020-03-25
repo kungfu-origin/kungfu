@@ -24,7 +24,9 @@ namespace kungfu::yijinjing {
 namespace py = pybind11;
 
 using namespace kungfu;
+using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
@@ -43,12 +45,11 @@ class PyLocator : public locator {
     PYBIND11_OVERLOAD_PURE(std::string, locator, get_env, name)
   }
 
-  [[nodiscard]] std::string layout_dir(location_ptr location, longfist::enums::layout l) const override {
+  [[nodiscard]] std::string layout_dir(location_ptr location, layout l) const override {
     PYBIND11_OVERLOAD_PURE(std::string, locator, layout_dir, location, l)
   }
 
-  [[nodiscard]] std::string layout_file(location_ptr location, longfist::enums::layout l,
-                                        const std::string &name) const override {
+  [[nodiscard]] std::string layout_file(location_ptr location, layout l, const std::string &name) const override {
     PYBIND11_OVERLOAD_PURE(std::string, locator, layout_file, location, l, name)
   }
 
@@ -126,7 +127,7 @@ public:
   }
 };
 
-RequestReadFrom get_RequestReadFrom(const frame_ptr &f) { return f->data<RequestReadFrom>(); }
+template <typename DataType> DataType event_to_data(const event &e) { return e.data<DataType>(); }
 
 void bind(pybind11::module &&m) {
   yijinjing::ensure_sqlite_initilize();
@@ -147,33 +148,33 @@ void bind(pybind11::module &&m) {
   m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
   m.def("get_page_path", &page::get_page_path);
 
-  py::enum_<longfist::enums::mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
-      .value("LIVE", longfist::enums::mode::LIVE)
-      .value("DATA", longfist::enums::mode::DATA)
-      .value("REPLAY", longfist::enums::mode::REPLAY)
-      .value("BACKTEST", longfist::enums::mode::BACKTEST)
+  py::enum_<mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
+      .value("LIVE", mode::LIVE)
+      .value("DATA", mode::DATA)
+      .value("REPLAY", mode::REPLAY)
+      .value("BACKTEST", mode::BACKTEST)
       .export_values();
-  m.def("get_mode_name", &longfist::enums::get_mode_name);
-  m.def("get_mode_by_name", &longfist::enums::get_mode_by_name);
+  m.def("get_mode_name", &get_mode_name);
+  m.def("get_mode_by_name", &get_mode_by_name);
 
-  py::enum_<longfist::enums::category>(m, "category", py::arithmetic(), "Kungfu Data Category")
-      .value("MD", longfist::enums::category::MD)
-      .value("TD", longfist::enums::category::TD)
-      .value("STRATEGY", longfist::enums::category::STRATEGY)
-      .value("SYSTEM", longfist::enums::category::SYSTEM)
+  py::enum_<category>(m, "category", py::arithmetic(), "Kungfu Data Category")
+      .value("MD", category::MD)
+      .value("TD", category::TD)
+      .value("STRATEGY", category::STRATEGY)
+      .value("SYSTEM", category::SYSTEM)
       .export_values();
-  m.def("get_category_name", &longfist::enums::get_category_name);
+  m.def("get_category_name", &get_category_name);
 
-  py::enum_<longfist::enums::layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
-      .value("JOURNAL", longfist::enums::layout::JOURNAL)
-      .value("SQLITE", longfist::enums::layout::SQLITE)
-      .value("NANOMSG", longfist::enums::layout::NANOMSG)
-      .value("LOG", longfist::enums::layout::LOG)
+  py::enum_<layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
+      .value("JOURNAL", layout::JOURNAL)
+      .value("SQLITE", layout::SQLITE)
+      .value("NANOMSG", layout::NANOMSG)
+      .value("LOG", layout::LOG)
       .export_values();
-  m.def("get_layout_name", &longfist::enums::get_layout_name);
+  m.def("get_layout_name", &get_layout_name);
 
-  py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event")
-      .def_property_readonly("gen_time", &event::gen_time)
+  auto event_class = py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event");
+  event_class.def_property_readonly("gen_time", &event::gen_time)
       .def_property_readonly("trigger_time", &event::trigger_time)
       .def_property_readonly("source", &event::source)
       .def_property_readonly("dest", &event::dest)
@@ -182,9 +183,16 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("data_as_bytes", &event::data_as_bytes)
       .def_property_readonly("data_as_string", &event::data_as_string)
       .def("to_string", &event::to_string);
+  boost::hana::for_each(StateDataTypes, [&](auto pair) {
+    using DataType = typename decltype(+boost::hana::second(pair))::type;
+    event_class.def(boost::hana::first(pair).c_str(), &event_to_data<DataType>);
+  });
+  event_class.def("RequestWriteTo", &event_to_data<RequestWriteTo>);
+  event_class.def("RequestReadFrom", &event_to_data<RequestReadFrom>);
+  event_class.def("RequestReadFromPublic", &event_to_data<RequestReadFromPublic>);
 
-  py::class_<frame, event, frame_ptr>(m, "frame")
-      .def_property_readonly("gen_time", &frame::gen_time)
+  auto frame_class = py::class_<frame, event, frame_ptr>(m, "frame");
+  frame_class.def_property_readonly("gen_time", &frame::gen_time)
       .def_property_readonly("trigger_time", &frame::trigger_time)
       .def_property_readonly("source", &frame::source)
       .def_property_readonly("dest", &frame::dest)
@@ -196,12 +204,20 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("data_as_bytes", &frame::data_as_bytes)
       .def_property_readonly("data_as_string", &frame::data_as_string)
       .def("has_data", &frame::has_data)
-      .def_property_readonly("data_address", [](const frame &f) { return f.address() + f.header_length(); });
+      .def_property_readonly("data_address", [](const frame &f) { return f.address() + f.header_length(); })
+      .def_property_readonly("detail", [](const frame &f) {
+        std::string result;
+        boost::hana::for_each(StateDataTypes, [&](auto pair) {
+          using DataType = typename decltype(+boost::hana::second(pair))::type;
+          if (f.msg_type() == DataType::tag) {
+            result = f.data<DataType>().to_string();
+          }
+        });
+        return result;
+      });
 
   auto location_class = py::class_<location, std::shared_ptr<location>>(m, "location");
-  location_class
-      .def(py::init<longfist::enums::mode, longfist::enums::category, const std::string &, const std::string &,
-                    locator_ptr>())
+  location_class.def(py::init<mode, category, const std::string &, const std::string &, locator_ptr>())
       .def_readonly("mode", &location::mode)
       .def_readonly("category", &location::category)
       .def_readonly("group", &location::group)
@@ -210,14 +226,10 @@ void bind(pybind11::module &&m) {
       .def_readonly("uid", &location::uid)
       .def_readonly("locator", &location::locator)
       .def("__repr__", [&](location &target) { return target.uname; });
-  location_class.def("to",
-                     py::overload_cast<longfist::types::Config &>(&location::to<longfist::types::Config>, py::const_));
-  location_class.def(
-      "to", py::overload_cast<longfist::types::Register &>(&location::to<longfist::types::Register>, py::const_));
-  location_class.def(
-      "to", py::overload_cast<longfist::types::Deregister &>(&location::to<longfist::types::Deregister>, py::const_));
-  location_class.def(
-      "to", py::overload_cast<longfist::types::Location &>(&location::to<longfist::types::Location>, py::const_));
+  location_class.def("to", py::overload_cast<Config &>(&location::to<Config>, py::const_));
+  location_class.def("to", py::overload_cast<Register &>(&location::to<Register>, py::const_));
+  location_class.def("to", py::overload_cast<Deregister &>(&location::to<Deregister>, py::const_));
+  location_class.def("to", py::overload_cast<Location &>(&location::to<Location>, py::const_));
 
   py::class_<locator, PyLocator, std::shared_ptr<locator>>(m, "locator")
       .def(py::init())
@@ -279,8 +291,8 @@ void bind(pybind11::module &&m) {
       .def("mark", &writer::mark)
       .def("mark_with_time", &writer::mark_with_time);
 
-  hana::for_each(longfist::StateDataTypes, [&](auto type) {
-    using DataType = typename decltype(+hana::second(type))::type;
+  boost::hana::for_each(StateDataTypes, [&](auto type) {
+    using DataType = typename decltype(+boost::hana::second(type))::type;
     py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
   });
 
@@ -298,7 +310,8 @@ void bind(pybind11::module &&m) {
       .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"),
            py::arg("timeout") = 0)
       .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
-           py::arg("to") = INT64_MAX);
+           py::arg("to") = INT64_MAX)
+      .def("trace", &io_device::trace);
 
   py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
   io_device_with_reply.def(py::init<location_ptr, bool, bool>());
@@ -339,8 +352,8 @@ void bind(pybind11::module &&m) {
 
   auto cs_class = py::class_<profile>(m, "profile");
   cs_class.def(py::init<const yijinjing::locator_ptr &>());
-  hana::for_each(longfist::ProfileDataTypes, [&](auto type) {
-    using DataType = typename decltype(+hana::second(type))::type;
+  boost::hana::for_each(longfist::ProfileDataTypes, [&](auto type) {
+    using DataType = typename decltype(+boost::hana::second(type))::type;
     cs_class.def("set", &profile::set<DataType>);
     cs_class.def("get", &profile::get<DataType>);
     cs_class.def("get_all", &profile::get_all<DataType>);

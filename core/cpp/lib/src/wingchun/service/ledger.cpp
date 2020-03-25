@@ -20,9 +20,7 @@ using namespace kungfu::yijinjing::cache;
 namespace kungfu::wingchun::service {
 Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      broker_client_(*this), bookkeeper_(*this, broker_client_),
-      assets_(state_map_[boost::hana::type_c<longfist::types::Asset>]),
-      order_stats_(state_map_[boost::hana::type_c<longfist::types::OrderStat>]) {
+      broker_client_(*this), bookkeeper_(*this, broker_client_) {
   log::copy_log_settings(get_io_device()->get_home(), "ledger");
   if (m == mode::LIVE) {
     pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
@@ -61,7 +59,7 @@ uint64_t Ledger::cancel_order(const event_ptr &event, uint32_t account_location_
 
 std::vector<longfist::types::Position> Ledger::get_positions(const yijinjing::data::location_ptr &location) {
   std::vector<longfist::types::Position> res = {};
-  for (const auto &pair : state_map_[boost::hana::type_c<longfist::types::Position>]) {
+  for (const auto &pair : state_bank_[boost::hana::type_c<longfist::types::Position>]) {
     if (pair.second.data.holder_uid == location->uid) {
       res.push_back(pair.second.data);
     }
@@ -155,6 +153,12 @@ void Ledger::on_start() {
     write_book(event, data);
   });
 
+  events_ | is(PositionEnd::tag) | $([&](const event_ptr &event) {
+    const PositionEnd &data = event->data<PositionEnd>();
+    auto book = bookkeeper_.get_book(data.holder_uid);
+    write_to(event->gen_time(), book->asset, data.holder_uid);
+  });
+
   events_ | is(InstrumentRequest::tag) | $([&](const event_ptr &event) {
     try {
       handle_instrument_request(event);
@@ -189,9 +193,9 @@ void Ledger::on_start() {
 
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
-  bookkeeper_.restore(state_map_);
+  bookkeeper_.restore(state_bank_);
 
-  extract(state_map_, now()) >> get_writer(location::PUBLIC);
+  state_bank_ >> get_writer(location::PUBLIC);
 }
 
 void Ledger::write_daily_assets() {

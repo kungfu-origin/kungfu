@@ -21,7 +21,7 @@ namespace kungfu::wingchun::strategy {
 Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events)
     : app_(app), events_(events), started_(false), broker_client_(app_), bookkeeper_(app_, broker_client_),
       algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
-      quotes_(app.get_state_map()[boost::hana::type_c<longfist::types::Quote>]),
+      quotes_(app.get_state_bank()[boost::hana::type_c<longfist::types::Quote>]),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())) {
   log::copy_log_settings(app_.get_home(), app_.get_home()->name);
 }
@@ -29,7 +29,7 @@ Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &e
 void Context::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
-  bookkeeper_.restore(app_.get_state_map());
+  bookkeeper_.restore(app_.get_state_bank());
 }
 
 int64_t Context::now() const { return app_.now(); }
