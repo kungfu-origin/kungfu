@@ -48,7 +48,6 @@ namespace kungfu::wingchun::xtp
         {
             update_broker_state(BrokerState::Ready);
             SPDLOG_INFO("login success");
-            req_account();
         } else
         {
             update_broker_state(BrokerState::LoggedInFailed);
@@ -243,7 +242,6 @@ namespace kungfu::wingchun::xtp
             account.holder_uid = get_io_device()->get_home()->uid;
             account.update_time = kungfu::yijinjing::time::now_in_nano();
             writer->close_data();
-            req_position();
         }
     }
 }

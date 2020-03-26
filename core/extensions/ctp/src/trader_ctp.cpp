@@ -373,8 +373,6 @@ namespace kungfu::wingchun::ctp
         account.update_time = time::now_in_nano();
         account.holder_uid = get_io_device()->get_home()->uid;
         writer->close_data();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        req_position();
     }
 
     void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
@@ -500,7 +498,6 @@ namespace kungfu::wingchun::ctp
         {
             writer->mark(0, InstrumentEnd::tag);
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            req_account();
         }
     }
 }
