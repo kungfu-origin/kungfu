@@ -92,7 +92,6 @@ uintptr_t load_mmap_buffer(const std::string &path, size_t size, bool is_writing
   close(fd);
 #endif // _WINDOWS
 
-  SPDLOG_DEBUG("mapped {} - {} - {}", path, is_writing ? "rw" : "r", lazy ? "lazy" : "lock");
   return reinterpret_cast<uintptr_t>(buffer);
 }
 

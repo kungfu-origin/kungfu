@@ -74,9 +74,9 @@ void hero::step() {
 }
 
 void hero::run() {
-  SPDLOG_INFO("{} [{:08x}] running", get_home_uname(), get_home_uid());
-  SPDLOG_INFO("from {} until {}", time::strftime(begin_time_),
-              end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
+  SPDLOG_INFO("{} [{:08x}] start running", get_home_uname(), get_home_uid());
+  SPDLOG_DEBUG("from {} until {}", time::strftime(begin_time_),
+               end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
   setup();
   continual_ = true;
   events_.connect(cs_);
@@ -180,13 +180,13 @@ bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const {
 void hero::add_location(int64_t trigger_time, const location_ptr &location) {
   if (not has_location(location->uid)) {
     locations_.emplace(location->uid, location);
-    SPDLOG_INFO("added location {} [{:08x}]", location->uname, location->uid);
+    SPDLOG_DEBUG("added location {} [{:08x}]", location->uname, location->uid);
   }
 }
 
 void hero::remove_location(int64_t trigger_time, uint32_t location_uid) {
   if (has_location(location_uid)) {
-    SPDLOG_INFO("removed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
+    SPDLOG_DEBUG("removed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
     locations_.erase(location_uid);
   }
 }
@@ -194,21 +194,22 @@ void hero::remove_location(int64_t trigger_time, uint32_t location_uid) {
 void hero::register_location(int64_t trigger_time, const longfist::types::Register &register_data) {
   if (not is_location_live(register_data.location_uid)) {
     registry_.emplace(register_data.location_uid, register_data);
-    SPDLOG_INFO("registered location {} [{:08x}]", register_data.to_string(), register_data.location_uid);
+    auto app_location = location::make_shared(register_data, get_locator());
+    SPDLOG_DEBUG("registered location {} [{:08x}]", app_location->uname, app_location->uid);
   }
 }
 
 void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid) {
   registry_.erase(location_uid);
-  SPDLOG_INFO("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
+  SPDLOG_DEBUG("deregister-ed location {} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
 }
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
   channels_.emplace(channel_uid, channel);
-  SPDLOG_INFO("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
-              has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
-              has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
+  SPDLOG_DEBUG("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
+               has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
+               has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
 }
 
 void hero::deregister_channel(uint32_t source_location_uid) {
@@ -217,10 +218,10 @@ void hero::deregister_channel(uint32_t source_location_uid) {
     if (channel_it->second.source_id == source_location_uid) {
       const auto &channel_uid = channel_it->first;
       const auto &channel = channel_it->second;
-      SPDLOG_INFO("deregister-ed channel [{:08x}] from {} [{:08x}] to {} [{:08x}]", channel_uid,
-                  has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown",
-                  channel.source_id, has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown",
-                  channel.dest_id);
+      SPDLOG_DEBUG("deregister-ed channel [{:08x}] from {} [{:08x}] to {} [{:08x}]", channel_uid,
+                   has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown",
+                   channel.source_id, has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown",
+                   channel.dest_id);
       channel_it = channels_.erase(channel_it);
       continue;
     }
@@ -244,8 +245,8 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
   RequestWriteTo &msg = writer->open_data<RequestWriteTo>(trigger_time);
   msg.dest_id = dest_id;
   writer->close_data();
-  SPDLOG_INFO("require {} [{:08x}] write to {} [{:08x}]", get_location(source_id)->uname, source_id,
-              dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
+  SPDLOG_DEBUG("require {} [{:08x}] write to {} [{:08x}]", get_location(source_id)->uname, source_id,
+               dest_id == 0 ? "public" : get_location(dest_id)->uname, dest_id);
 }
 
 void hero::produce(const rx::subscriber<event_ptr> &sb) {
