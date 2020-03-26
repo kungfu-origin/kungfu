@@ -205,7 +205,7 @@ void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
-  channels_[channel_uid] = channel;
+  channels_.emplace(channel_uid, channel);
   SPDLOG_INFO("registered channel [{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
               has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
               has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);

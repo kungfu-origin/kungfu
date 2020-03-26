@@ -41,9 +41,9 @@ public:
 
   ~journal();
 
-  [[nodiscard]] frame_ptr current_frame() const { return frame_; }
+  [[nodiscard]] frame_ptr &current_frame() { return frame_; }
 
-  [[nodiscard]] page_ptr current_page() const { return page_; }
+  [[nodiscard]] page_ptr &current_page() { return page_; }
 
   /**
    * move current frame to the next available one
@@ -109,7 +109,7 @@ public:
 private:
   const bool lazy_;
   journal *current_;
-  std::vector<journal_ptr> journals_;
+  std::unordered_map<uint64_t, journal> journals_;
 };
 
 class writer {

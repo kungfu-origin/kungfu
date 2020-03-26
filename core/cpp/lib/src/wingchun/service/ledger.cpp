@@ -104,10 +104,12 @@ void Ledger::on_start() {
 
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();
+    auto source_location = get_location(channel.source_id);
     if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
-      reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
+      reader_->join(source_location, channel.dest_id, event->gen_time());
     }
-    if (get_location(channel.source_id)->category == category::TD and channel.dest_id == get_home_uid()) {
+    if (source_location->category == category::TD and channel.dest_id == get_home_uid() and
+        has_writer(channel.source_id)) {
       auto writer = get_writer(channel.source_id);
 
       CleanCacheRequest request = {};

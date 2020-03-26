@@ -129,7 +129,7 @@ void master::react() {
 
   events_ | is(RequestWriteTo::tag) | $([&](const event_ptr &e) {
     const RequestWriteTo &request = e->data<RequestWriteTo>();
-    if (check_location_live(e->source(), request.dest_id) and not has_channel(e->source(), request.dest_id)) {
+    if (check_location_live(e->source(), request.dest_id)) {
       reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
       require_write_to(e->gen_time(), e->source(), request.dest_id);
       require_read_from(0, request.dest_id, e->source(), e->gen_time());
@@ -143,7 +143,7 @@ void master::react() {
 
   events_ | is(RequestReadFrom::tag) | $([&](const event_ptr &e) {
     const RequestReadFrom &request = e->data<RequestReadFrom>();
-    if (check_location_live(request.source_id, e->source()) and not has_channel(request.source_id, e->source())) {
+    if (check_location_live(request.source_id, e->source())) {
       reader_->join(get_location(request.source_id), e->source(), e->gen_time());
       require_write_to(e->gen_time(), request.source_id, e->source());
       require_read_from(e->gen_time(), e->source(), request.source_id, request.from_time);

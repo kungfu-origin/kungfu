@@ -94,8 +94,8 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
 
   while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
     auto frame = reader->current_frame();
-    bool type_found = false;
     auto dest_name = frame->dest() == location::PUBLIC ? "public" : locations.at(frame->dest())->uname;
+    bool type_found = false;
     boost::hana::for_each(AllTypes, [&](auto type) {
       using DataType = typename decltype(+boost::hana::second(type))::type;
       if (frame->msg_type() == DataType::tag) {
@@ -111,14 +111,10 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
       }
     });
     if (not type_found) {
-      table.add_row({
-          time::strftime(frame->gen_time(), TIME_FORMAT),     //
-          time::strftime(frame->trigger_time(), TIME_FORMAT), //
-          locations.at(frame->source())->uname,               //
-          dest_name,                                          //
-          std::to_string(frame->msg_type()),                  //
-          ""                                                  //
-      });
+      auto location_uname = reader->current_page()->get_location()->uname;
+      auto dest_id = reader->current_page()->get_dest_id();
+      SPDLOG_ERROR("{}/{:08x} msg_type {} not found", location_uname, dest_id, frame->msg_type());
+      break;
     }
     if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFrom::tag) {
       auto request = frame->data<RequestReadFrom>();
