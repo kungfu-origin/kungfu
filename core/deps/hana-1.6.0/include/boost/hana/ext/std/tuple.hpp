@@ -90,11 +90,7 @@ BOOST_HANA_NAMESPACE_BEGIN
         template <typename Xs, std::size_t ...i>
         static constexpr decltype(auto)
         flatten_helper(Xs&& xs, std::index_sequence<i...>) {
-#if defined(BOOST_HANA_CONFIG_LIBCPP_HAS_BUG_22806)
-            return std::tuple_cat(std::get<i>(xs)...);
-#else
             return std::tuple_cat(std::get<i>(static_cast<Xs&&>(xs))...);
-#endif
         }
 
         template <typename Xs>

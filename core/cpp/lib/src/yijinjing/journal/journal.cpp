@@ -18,7 +18,6 @@
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/journal/page.h>
 #include <kungfu/yijinjing/time.h>
-#include <kungfu/yijinjing/util/util.h>
 
 namespace kungfu::yijinjing::journal {
 

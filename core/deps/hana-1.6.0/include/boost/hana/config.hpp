@@ -49,20 +49,10 @@ Distributed under the Boost Software License, Version 1.0.
 #   define BOOST_HANA_CONFIG_CLANG BOOST_HANA_CONFIG_VERSION(               \
                     __clang_major__, __clang_minor__, __clang_patchlevel__)
 
-#   if BOOST_HANA_CONFIG_CLANG < BOOST_HANA_CONFIG_VERSION(3, 5, 0)
-#       warning "Versions of Clang prior to 3.5.0 are not supported by Hana."
-#   endif
-
-#   if _MSC_VER < 1900
-#       warning "Clang-cl is only supported with the -fms-compatibility-version parameter set to 19 and above."
-#   endif
-
 #elif defined(__clang__) && defined(__apple_build_version__) // Apple's Clang
 
 #   if __apple_build_version__ >= 6020049
 #       define BOOST_HANA_CONFIG_CLANG BOOST_HANA_CONFIG_VERSION(3, 6, 0)
-#   else
-#       warning "Versions of Apple's Clang prior to the one shipped with Xcode 6.3 are known not to be able to compile Hana."
 #   endif
 
 #elif defined(__clang__) // genuine Clang
@@ -70,22 +60,10 @@ Distributed under the Boost Software License, Version 1.0.
 #   define BOOST_HANA_CONFIG_CLANG BOOST_HANA_CONFIG_VERSION(               \
                 __clang_major__, __clang_minor__, __clang_patchlevel__)
 
-#   if BOOST_HANA_CONFIG_CLANG < BOOST_HANA_CONFIG_VERSION(3, 5, 0)
-#       warning "Versions of Clang prior to 3.5.0 are not supported by Hana."
-#   endif
-
 #elif defined(__GNUC__) // GCC
 
 #   define BOOST_HANA_CONFIG_GCC BOOST_HANA_CONFIG_VERSION(                 \
                             __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
-
-#   if BOOST_HANA_CONFIG_GCC < BOOST_HANA_CONFIG_VERSION(6, 0, 0)
-#       warning "Versions of GCC prior to 6.0.0 are not supported by Hana."
-#   endif
-
-#else
-
-#   warning "Your compiler is not officially supported by Hana or it was not detected properly."
 
 #endif
 
@@ -101,48 +79,6 @@ Distributed under the Boost Software License, Version 1.0.
 #       warning "Your compiler doesn't provide C++14 or higher capabilities. Try adding the compiler flag '-std=c++14' or '-std=c++1y'."
 #   endif
 #endif
-
-//////////////////////////////////////////////////////////////////////////////
-// Detect the standard library
-//////////////////////////////////////////////////////////////////////////////
-
-// We include this header, which normally defines the proper detection macros.
-// At least, libc++ and libstdc++ do.
-#include <cstddef>
-
-#if defined(_LIBCPP_VERSION)
-
-#   define BOOST_HANA_CONFIG_LIBCPP BOOST_HANA_CONFIG_VERSION(              \
-                ((_LIBCPP_VERSION) / 1000) % 10, 0, (_LIBCPP_VERSION) % 1000)
-
-#   if BOOST_HANA_CONFIG_LIBCPP < BOOST_HANA_CONFIG_VERSION(1, 0, 101)
-#       warning "Versions of libc++ prior to the one shipped with Clang 3.5.0 are not supported by Hana."
-#   endif
-
-#elif defined(__GLIBCXX__)
-
-// We do not define a macro to keep track of libstdc++'s version, because
-// we have no scalable way of associating a value of __GLIBCXX__ to the
-// corresponding GCC release. Instead, we just check that the release date
-// of the libstdc++ in use is recent enough, which should indicate that it
-// was released with a GCC >= 5.1, which in turn indicates good enough C++14
-// support.
-#   if __GLIBCXX__ < 20150422 // --> the libstdc++ shipped with GCC 5.1.0
-#       warning "Versions of libstdc++ prior to the one shipped with GCC 5.1.0 are not supported by Hana for lack of full C++14 support."
-#   endif
-
-#   define BOOST_HANA_CONFIG_LIBSTDCXX
-
-#elif defined(_MSC_VER)
-
-#   define BOOST_HANA_CONFIG_LIBMSVCCXX
-
-#else
-
-#   warning "Your standard library is not officially supported by Hana or it was not detected properly."
-
-#endif
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Caveats and other compiler-dependent options
@@ -166,12 +102,6 @@ Distributed under the Boost Software License, Version 1.0.
 #   define BOOST_HANA_CONSTEXPR_LAMBDA constexpr
 #else
 #   define BOOST_HANA_CONSTEXPR_LAMBDA /* nothing */
-#endif
-
-// There's a bug in std::tuple_cat in libc++ right now.
-// See http://llvm.org/bugs/show_bug.cgi?id=22806.
-#if defined(BOOST_HANA_CONFIG_LIBCPP)
-#   define BOOST_HANA_CONFIG_LIBCPP_HAS_BUG_22806
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

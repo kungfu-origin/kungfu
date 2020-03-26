@@ -123,9 +123,9 @@ public:
 
 private:
   std::unordered_map<uint32_t, session_ptr> sessions_;
-  sqlite3_stmt *stmt_clean_sessions_;
-  sqlite3_stmt *stmt_open_session_;
-  sqlite3_stmt *stmt_close_session_;
+  sqlite3_stmt *stmt_clean_sessions_{};
+  sqlite3_stmt *stmt_open_session_{};
+  sqlite3_stmt *stmt_close_session_{};
 };
 
 DECLARE_PTR(io_device_master)

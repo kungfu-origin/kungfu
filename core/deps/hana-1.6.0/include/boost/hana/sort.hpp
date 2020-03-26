@@ -68,81 +68,181 @@ BOOST_HANA_NAMESPACE_BEGIN
             ));
         };
 
-        template <typename Pred, std::size_t Insert, bool IsInsertionPoint,
-                  typename Left,
-                  std::size_t ...Right>
-        struct insert;
+        template <typename Left, typename Right>
+        struct concat;
 
-        // We did not find the insertion point; continue processing elements
-        // recursively.
+        template <std::size_t ...l, std::size_t ...r>
+        struct concat<std::index_sequence<l...>, std::index_sequence<r...>> {
+            using type = std::index_sequence<l..., r...>;
+        };
+
+        template <typename Pred, bool PickRight, typename Left, typename Right>
+        struct merge;
+
         template <
-            typename Pred, std::size_t Insert,
-            std::size_t ...Left,
-            std::size_t Right1, std::size_t Right2, std::size_t ...Right
-        >
-        struct insert<Pred, Insert, false,
-                      std::index_sequence<Left...>,
-                      Right1, Right2, Right...
+            typename Pred,
+            std::size_t l0,
+            std::size_t l1,
+            std::size_t ...l,
+            std::size_t r0,
+            std::size_t ...r>
+        struct merge<
+            Pred,
+            false,
+            std::index_sequence<l0, l1, l...>,
+            std::index_sequence<r0, r...>
         > {
-            using type = typename insert<
-                Pred, Insert, (bool)Pred::template apply<Insert, Right2>::value,
-                std::index_sequence<Left..., Right1>,
-                Right2, Right...
+            using type = typename concat<
+                std::index_sequence<l0>,
+                typename merge<
+                    Pred,
+                    (bool)Pred::template apply<r0, l1>::value,
+                    std::index_sequence<l1, l...>,
+                    std::index_sequence<r0, r...>
+                >::type
             >::type;
         };
 
-        // We did not find the insertion point, but there is only one element
-        // left. We insert at the end of the list, and we're done.
-        template <typename Pred, std::size_t Insert, std::size_t ...Left, std::size_t Last>
-        struct insert<Pred, Insert, false, std::index_sequence<Left...>, Last> {
-            using type = std::index_sequence<Left..., Last, Insert>;
+        template <
+            typename Pred,
+            std::size_t l0,
+            std::size_t r0,
+            std::size_t ...r>
+        struct merge<
+            Pred,
+            false,
+            std::index_sequence<l0>,
+            std::index_sequence<r0, r...>
+        > {
+            using type = std::index_sequence<l0, r0, r...>;
         };
 
-        // We found the insertion point, we're done.
-        template <typename Pred, std::size_t Insert, std::size_t ...Left, std::size_t ...Right>
-        struct insert<Pred, Insert, true, std::index_sequence<Left...>, Right...> {
-            using type = std::index_sequence<Left..., Insert, Right...>;
+        template <
+            typename Pred,
+            std::size_t l0,
+            std::size_t ...l,
+            std::size_t r0,
+            std::size_t r1,
+            std::size_t ...r>
+        struct merge<
+            Pred,
+            true,
+            std::index_sequence<l0, l...>,
+            std::index_sequence<r0, r1, r...>
+        > {
+            using type = typename concat<
+                std::index_sequence<r0>,
+                typename merge<
+                    Pred,
+                    (bool)Pred::template apply<r1, l0>::value,
+                    std::index_sequence<l0, l...>,
+                    std::index_sequence<r1, r...>
+                >::type
+            >::type;
         };
 
+        template <
+            typename Pred,
+            std::size_t l0,
+            std::size_t ...l,
+            std::size_t r0>
+        struct merge<
+            Pred,
+            true,
+            std::index_sequence<l0, l...>,
+            std::index_sequence<r0>
+        > {
+            using type = std::index_sequence<r0, l0, l...>;
+        };
 
-        template <typename Pred, typename Result, std::size_t ...T>
-        struct insertion_sort_impl;
+        template <typename Pred, typename Left, typename Right>
+        struct merge_helper;
 
-        template <typename Pred,
-                  std::size_t Result1, std::size_t ...Result,
-                  std::size_t T, std::size_t ...Ts>
-        struct insertion_sort_impl<Pred, std::index_sequence<Result1, Result...>, T, Ts...> {
-            using type = typename insertion_sort_impl<
+        template <
+            typename Pred,
+            std::size_t l0,
+            std::size_t ...l,
+            std::size_t r0,
+            std::size_t ...r>
+        struct merge_helper<
+            Pred,
+            std::index_sequence<l0, l...>,
+            std::index_sequence<r0, r...>
+        > {
+            using type = typename merge<
                 Pred,
-                typename insert<
-                    Pred, T, (bool)Pred::template apply<T, Result1>::value,
-                    std::index_sequence<>,
-                    Result1, Result...
-                >::type,
-                Ts...
+                (bool)Pred::template apply<r0, l0>::value,
+                std::index_sequence<l0, l...>,
+                std::index_sequence<r0, r...>
             >::type;
         };
 
-        template <typename Pred, std::size_t T, std::size_t ...Ts>
-        struct insertion_sort_impl<Pred, std::index_sequence<>, T, Ts...> {
-            using type = typename insertion_sort_impl<
-                Pred, std::index_sequence<T>, Ts...
+        // split templated structure, Nr represents the number of elements
+        // from Right to move to Left
+        // There are two specializations:
+        // The first handles the generic case (Nr > 0)
+        // The second handles the stop condition (Nr == 0)
+        // These two specializations are not strictly ordered as
+        //   the first cannot match Nr==0 && empty Right
+        //   the second cannot match Nr!=0
+        // std::enable_if<Nr!=0> is therefore required to make sure these two
+        // specializations will never both be candidates during an overload
+        // resolution (otherwise ambiguity occurs for Nr==0 and non-empty Right)
+        template <std::size_t Nr, typename Left, typename Right, typename=void>
+        struct split;
+
+        template <
+            std::size_t Nr,
+            std::size_t ...l,
+            std::size_t ...r,
+            std::size_t r0>
+        struct split<
+            Nr,
+            std::index_sequence<l...>,
+            std::index_sequence<r0, r...>,
+            typename std::enable_if<Nr!=0>::type
+        > {
+            using sp = split<
+                Nr-1,
+                std::index_sequence<l..., r0>,
+                std::index_sequence<r...>
+            >;
+            using left = typename sp::left;
+            using right = typename sp::right;
+        };
+
+        template <std::size_t ...l, std::size_t ...r>
+        struct split<0, std::index_sequence<l...>, std::index_sequence<r...>> {
+            using left = std::index_sequence<l...>;
+            using right = std::index_sequence<r...>;
+        };
+
+        template <typename Pred, typename Sequence>
+        struct merge_sort_impl;
+
+        template <typename Pred, std::size_t ...seq>
+        struct merge_sort_impl<Pred, std::index_sequence<seq...>> {
+            using sequence = std::index_sequence<seq...>;
+            using sp = split<
+                sequence::size() / 2,
+                std::index_sequence<>,
+                sequence
+            >;
+            using type = typename merge_helper<
+                Pred,
+                typename merge_sort_impl<Pred, typename sp::left>::type,
+                typename merge_sort_impl<Pred, typename sp::right>::type
             >::type;
         };
 
-        template <typename Pred, typename Result>
-        struct insertion_sort_impl<Pred, Result> {
-            using type = Result;
+        template <typename Pred, std::size_t x>
+        struct merge_sort_impl<Pred, std::index_sequence<x>> {
+            using type = std::index_sequence<x>;
         };
 
-        template <typename Pred, typename Indices>
-        struct sort_helper;
-
-        template <typename Pred, std::size_t ...i>
-        struct sort_helper<Pred, std::index_sequence<i...>> {
-            using type = typename insertion_sort_impl<
-                Pred, std::index_sequence<>, i...
-            >::type;
+        template <typename Pred>
+        struct merge_sort_impl<Pred, std::index_sequence<>> {
+            using type = std::index_sequence<>;
         };
     } // end namespace detail
 
@@ -156,7 +256,7 @@ BOOST_HANA_NAMESPACE_BEGIN
         template <typename Xs, typename Pred>
         static constexpr auto apply(Xs&& xs, Pred const&) {
             constexpr std::size_t Len = decltype(hana::length(xs))::value;
-            using Indices = typename detail::sort_helper<
+            using Indices = typename detail::merge_sort_impl<
                 detail::sort_predicate<Xs&&, Pred>,
                 std::make_index_sequence<Len>
             >::type;

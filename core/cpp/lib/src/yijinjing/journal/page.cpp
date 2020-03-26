@@ -87,7 +87,7 @@ uint32_t page::find_page_id(const data::location_ptr &location, uint32_t dest_id
   if (time == 0) {
     return page_ids.front();
   }
-  for (int i = page_ids.size() - 1; i >= 0; i--) {
+  for (size_t i = page_ids.size() - 1; i >= 0; i--) {
     auto page = page::load(location, dest_id, page_ids[i], false, true);
     auto page_begin_time = page->begin_time();
     if (page_begin_time < time) {

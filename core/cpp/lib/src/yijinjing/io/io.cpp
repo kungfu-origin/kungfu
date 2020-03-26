@@ -31,7 +31,7 @@ using namespace kungfu::yijinjing::nanomsg;
 namespace kungfu::yijinjing {
 class local_sqlite_session_keeper : public sqlite_session_keeper {
 public:
-  local_sqlite_session_keeper() {}
+  local_sqlite_session_keeper() = default;
 
   void open(sqlite3 *index_db) override {
     int rc;
@@ -64,11 +64,11 @@ private:
 
 class ipc_url_factory : public url_factory {
 public:
-  const std::string make_path_bind(data::location_ptr location, protocol p) const override {
+  [[nodiscard]] const std::string make_path_bind(data::location_ptr location, protocol p) const override {
     return location->locator->layout_file(location, layout::NANOMSG, get_protocol_name(p));
   }
 
-  const std::string make_path_connect(data::location_ptr location, protocol p) const override {
+  [[nodiscard]] const std::string make_path_connect(data::location_ptr location, protocol p) const override {
     return location->locator->layout_file(location, layout::NANOMSG, get_protocol_name(get_opposite_protol(p)));
   }
 };
@@ -141,7 +141,7 @@ public:
     socket_.setsockopt_int(NN_SOL_SOCKET, NN_RCVTIMEO, DEFAULT_RECV_TIMEOUT);
   }
 
-  virtual ~nanomsg_observer() { socket_.close(); }
+  ~nanomsg_observer() override { socket_.close(); }
 
   void setup() override {
     if (not low_latency_) {
@@ -192,7 +192,7 @@ io_device::io_device(data::location_ptr home, const bool low_latency, const bool
 
   auto index_db_file = home_->locator->layout_file(db_home_, layout::SQLITE, "index");
 
-  int rc = sqlite3_open_v2(index_db_file.c_str(), &index_db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+  int rc = sqlite3_open_v2(index_db_file.c_str(), &index_db_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
   handle_sql_error(rc, "failed to open index db");
 
   exec_sql(index_db_, &db_error_msg_, "PRAGMA journal_mode=WAL;", "failed to set index db to WAL");
@@ -287,17 +287,17 @@ io_device_master::io_device_master(data::location_ptr home, bool low_latency)
   publisher_ = std::make_shared<nanomsg_publisher_master>(*this, low_latency);
   observer_ = std::make_shared<nanomsg_observer_master>(*this, low_latency);
 
-  sqlite3_prepare_v2(index_db_, R"(delete from session;)", -1, &stmt_clean_sessions_, NULL);
+  sqlite3_prepare_v2(index_db_, R"(delete from session;)", -1, &stmt_clean_sessions_, nullptr);
   sqlite3_prepare_v2(
       index_db_,
       R"(insert into session (data) values (json_set('{}', '$.uid', ?1, '$.location', ?2, '$.begin_time', ?3, '$.end_time', 0));)",
-      -1, &stmt_open_session_, NULL);
+      -1, &stmt_open_session_, nullptr);
   sqlite3_prepare_v2(index_db_,
                      R"(
 update session set data = json_set(session.data, '$.end_time', ?3, '$.frame_count', ?4, '$.data_size', ?5)
 where json_extract(session.data, '$.uid') = ?1 and json_extract(session.data, '$.begin_time') = ?2;
 )",
-                     -1, &stmt_close_session_, NULL);
+                     -1, &stmt_close_session_, nullptr);
 }
 
 void io_device_master::open_session(const location_ptr &location, int64_t time) {
