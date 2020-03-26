@@ -32,6 +32,7 @@ SOFTWARE.
 */
 #pragma once
 #include <tabulate/table_internal.hpp>
+#include <utility>
 #include <variant>
 
 namespace tabulate {
@@ -90,6 +91,8 @@ public:
     return stream.str();
   }
 
+  std::pair<size_t, size_t> shape() { return table_->shape(); }
+
   class RowIterator {
   public:
     explicit RowIterator(std::vector<std::shared_ptr<Row>>::iterator ptr) : ptr(ptr) {}
@@ -109,13 +112,17 @@ public:
   auto end() { return RowIterator(table_->rows_.end()); }
 
 private:
+  friend class MarkdownExporter;
+  friend class LatexExporter;
+  friend class AsciiDocExporter;
+
   friend std::ostream &operator<<(std::ostream &stream, const Table &table);
   size_t rows_{0};
   size_t cols_{0};
   std::shared_ptr<TableInternal> table_;
 };
 
-std::ostream &operator<<(std::ostream &stream, const Table &table) {
+inline std::ostream &operator<<(std::ostream &stream, const Table &table) {
   const_cast<Table &>(table).print(stream);
   return stream;
 }

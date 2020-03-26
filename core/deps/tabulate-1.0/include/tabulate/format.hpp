@@ -32,6 +32,7 @@ SOFTWARE.
 */
 #pragma once
 #include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <optional>
 #include <sstream>
@@ -681,6 +682,9 @@ private:
   friend class Column;
   friend class TableInternal;
   friend class Printer;
+  friend class MarkdownExporter;
+  friend class LatexExporter;
+  friend class AsciiDocExporter;
 
   void set_defaults() {
     // NOTE: width and height are not set here
@@ -836,4 +840,4 @@ private:
   std::optional<std::string> locale_{};
 };
 
-}; // namespace tabulate
+} // namespace tabulate

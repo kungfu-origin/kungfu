@@ -83,6 +83,18 @@ public:
 
   size_t size() const { return rows_.size(); }
 
+  std::pair<size_t, size_t> shape() {
+    std::pair<size_t, size_t> result{0, 0};
+    std::stringstream stream;
+    print(stream);
+    auto buffer = stream.str();
+    auto lines = Format::split_lines(buffer, "\n", "", true);
+    if (lines.size()) {
+      result = {get_sequence_length(lines[0], "", true), lines.size()};
+    }
+    return result;
+  }
+
   Format &format() { return format_; }
 
   void print(std::ostream &stream) { Printer::print_table(stream, *this); }
@@ -98,6 +110,7 @@ public:
 
 private:
   friend class Table;
+  friend class MarkdownExporter;
 
   TableInternal() {}
   TableInternal &operator=(const TableInternal &);
@@ -107,7 +120,7 @@ private:
   Format format_;
 };
 
-Format &Cell::format() {
+inline Format &Cell::format() {
   std::shared_ptr<Row> parent = parent_.lock();
   if (!format_.has_value()) {   // no cell format
     format_ = parent->format(); // Use parent row format
@@ -119,11 +132,11 @@ Format &Cell::format() {
   return format_.value();
 }
 
-bool Cell::is_multi_byte_character_support_enabled() {
+inline bool Cell::is_multi_byte_character_support_enabled() {
   return format().multi_byte_characters_.value();
 }
 
-Format &Row::format() {
+inline Format &Row::format() {
   std::shared_ptr<TableInternal> parent = parent_.lock();
   if (!format_.has_value()) {   // no row format
     format_ = parent->format(); // Use parent table format
@@ -135,7 +148,7 @@ Format &Row::format() {
   return format_.value();
 }
 
-std::pair<std::vector<size_t>, std::vector<size_t>>
+inline std::pair<std::vector<size_t>, std::vector<size_t>>
 Printer::compute_cell_dimensions(TableInternal &table) {
   std::pair<std::vector<size_t>, std::vector<size_t>> result;
   size_t num_rows = table.size();
@@ -179,7 +192,7 @@ Printer::compute_cell_dimensions(TableInternal &table) {
   return result;
 }
 
-void Printer::print_table(std::ostream &stream, TableInternal &table) {
+inline void Printer::print_table(std::ostream &stream, TableInternal &table) {
   size_t num_rows = table.size();
   size_t num_columns = table.estimate_num_columns();
   auto dimensions = compute_cell_dimensions(table);
@@ -215,7 +228,6 @@ void Printer::print_table(std::ostream &stream, TableInternal &table) {
       for (size_t j = 0; j < num_columns; ++j) {
         auto cell = table[i][j];
         auto format = cell.format();
-        auto column_width = column_widths[j];
         auto corner = format.corner_bottom_left_.value();
         auto border_bottom = format.border_bottom_.value();
         if (corner == "" && border_bottom == "") {
@@ -237,11 +249,10 @@ void Printer::print_table(std::ostream &stream, TableInternal &table) {
   }
 }
 
-void Printer::print_row_in_cell(std::ostream &stream, TableInternal &table,
-                                const std::pair<size_t, size_t> &index,
-                                const std::pair<size_t, size_t> &dimension, size_t num_columns,
-                                size_t row_index) {
-  auto row_height = dimension.first;
+inline void Printer::print_row_in_cell(std::ostream &stream, TableInternal &table,
+                                       const std::pair<size_t, size_t> &index,
+                                       const std::pair<size_t, size_t> &dimension,
+                                       size_t num_columns, size_t row_index) {
   auto column_width = dimension.second;
   auto cell = table[index.first][index.second];
   auto locale = cell.locale();
@@ -253,7 +264,6 @@ void Printer::print_row_in_cell(std::ostream &stream, TableInternal &table,
       Format::word_wrap(text, column_width, locale, is_multi_byte_character_support_enabled);
   auto text_height = std::count(word_wrapped_text.begin(), word_wrapped_text.end(), '\n') + 1;
   auto padding_top = format.padding_top_.value();
-  auto padding_bottom = format.padding_bottom_.value();
 
   if (format.show_border_left_.value()) {
     apply_element_style(stream, format.border_left_color_.value(),
@@ -351,10 +361,10 @@ void Printer::print_row_in_cell(std::ostream &stream, TableInternal &table,
   }
 }
 
-bool Printer::print_cell_border_top(std::ostream &stream, TableInternal &table,
-                                    const std::pair<size_t, size_t> &index,
-                                    const std::pair<size_t, size_t> &dimension,
-                                    size_t num_columns) {
+inline bool Printer::print_cell_border_top(std::ostream &stream, TableInternal &table,
+                                           const std::pair<size_t, size_t> &index,
+                                           const std::pair<size_t, size_t> &dimension,
+                                           size_t num_columns) {
   auto cell = table[index.first][index.second];
   auto locale = cell.locale();
   std::locale::global(std::locale(locale));
@@ -393,10 +403,10 @@ bool Printer::print_cell_border_top(std::ostream &stream, TableInternal &table,
   return true;
 }
 
-bool Printer::print_cell_border_bottom(std::ostream &stream, TableInternal &table,
-                                       const std::pair<size_t, size_t> &index,
-                                       const std::pair<size_t, size_t> &dimension,
-                                       size_t num_columns) {
+inline bool Printer::print_cell_border_bottom(std::ostream &stream, TableInternal &table,
+                                              const std::pair<size_t, size_t> &index,
+                                              const std::pair<size_t, size_t> &dimension,
+                                              size_t num_columns) {
   auto cell = table[index.first][index.second];
   auto locale = cell.locale();
   std::locale::global(std::locale(locale));

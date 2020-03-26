@@ -162,7 +162,9 @@ private:
     auto newlines_in_wrapped_text =
         std::count(word_wrapped_text.begin(), word_wrapped_text.end(), '\n');
     auto estimated_row_height = newlines_in_wrapped_text;
-    if (word_wrapped_text[word_wrapped_text.size() - 1] != '\n') // text doesn't end with a newline
+
+    if (!word_wrapped_text.empty() &&
+        word_wrapped_text[word_wrapped_text.size() - 1] != '\n') // text doesn't end with a newline
       estimated_row_height += 1;
 
     result += estimated_row_height;

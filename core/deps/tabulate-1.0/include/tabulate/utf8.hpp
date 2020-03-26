@@ -45,7 +45,8 @@ SOFTWARE.
 namespace tabulate {
 
 #if defined(__unix__) || defined(__unix) || defined(__APPLE__)
-int get_wcswidth(const std::string &string, const std::string &locale, size_t max_column_width) {
+inline int get_wcswidth(const std::string &string, const std::string &locale,
+                        size_t max_column_width) {
   if (string.size() == 0)
     return 0;
 
@@ -65,8 +66,8 @@ int get_wcswidth(const std::string &string, const std::string &locale, size_t ma
 }
 #endif
 
-size_t get_sequence_length(const std::string &text, const std::string &locale,
-                           bool is_multi_byte_character_support_enabled) {
+inline size_t get_sequence_length(const std::string &text, const std::string &locale,
+                                  bool is_multi_byte_character_support_enabled) {
   if (!is_multi_byte_character_support_enabled)
     return text.length();
 
