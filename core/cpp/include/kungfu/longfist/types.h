@@ -97,7 +97,8 @@ KF_DEFINE_DATA_TYPE(                                //
     (std::string, group),                           //
     (std::string, name),                            //
     (int32_t, pid),                                 //
-    (int64_t, checkin_time)                         //
+    (int64_t, checkin_time),                        //
+    (int64_t, last_seen_time)                       //
 );
 
 KF_DEFINE_DATA_TYPE(                                  //

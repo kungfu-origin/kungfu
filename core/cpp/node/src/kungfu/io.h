@@ -55,8 +55,6 @@ public:
 
   Napi::Value ToString(const Napi::CallbackInfo &info);
 
-  Napi::Value FindSessions(const Napi::CallbackInfo &info);
-
   Napi::Value OpenReader(const Napi::CallbackInfo &info);
 
   static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);

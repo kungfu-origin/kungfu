@@ -20,10 +20,15 @@ using namespace kungfu::yijinjing::nanomsg;
 
 namespace kungfu::yijinjing::practice {
 
+std::string get_index_db_file(yijinjing::io_device_with_reply_ptr io_device) {
+  auto locator = io_device->get_locator();
+  auto index_location = location::make_shared(mode::LIVE, category::SYSTEM, "journal", "index", locator);
+  return locator->layout_file(index_location, layout::SQLITE, "index");
+}
+
 hero::hero(yijinjing::io_device_with_reply_ptr io_device)
-    : io_device_(std::move(io_device)), now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX),
-      index_location_(location::make_shared(mode::LIVE, category::SYSTEM, "journal", "index", get_locator())),
-      session_storage_(make_storage(get_index_db_file(), longfist::SessionDataTypes)) {
+    : session_storage_(make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)),
+      io_device_(std::move(io_device)), now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
   reader_ = io_device_->open_reader_to_subscribe();
@@ -102,10 +107,6 @@ void hero::set_end_time(int64_t end_time) { end_time_ = end_time; }
 const locator_ptr &hero::get_locator() const { return io_device_->get_locator(); }
 
 io_device_with_reply_ptr hero::get_io_device() const { return io_device_; }
-
-std::string hero::get_index_db_file() const {
-  return get_locator()->layout_file(index_location_, layout::SQLITE, "index");
-}
 
 const location_ptr &hero::get_home() const { return get_io_device()->get_home(); }
 

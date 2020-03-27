@@ -49,8 +49,6 @@ public:
 
   [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
 
-  std::string get_index_db_file() const;
-
   const yijinjing::data::location_ptr &get_home() const;
 
   uint32_t get_home_uid() const;
@@ -86,10 +84,9 @@ public:
   virtual void on_exit();
 
 protected:
+  cache::SessionStorageType session_storage_;
   int64_t begin_time_;
   int64_t end_time_;
-  data::location_ptr index_location_;
-  cache::SessionStorageType session_storage_;
   std::unordered_map<uint64_t, longfist::types::Channel> channels_;
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
   std::unordered_map<uint32_t, longfist::types::Register> registry_;

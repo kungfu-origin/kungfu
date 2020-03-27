@@ -28,19 +28,11 @@
 namespace kungfu::yijinjing {
 FORWARD_DECLARE_PTR(session)
 
-class sqlite_session_keeper {
-public:
-  virtual void open(sqlite3 *index_db) = 0;
-  virtual void close() = 0;
-};
-
-DECLARE_PTR(sqlite_session_keeper)
-
 class io_device : public resource {
 public:
   io_device(data::location_ptr home, bool low_latency, bool lazy);
 
-  virtual ~io_device();
+  virtual ~io_device() = default;
 
   bool is_usable() override { return publisher_ and observer_ and publisher_->is_usable() and observer_->is_usable(); }
 
@@ -75,24 +67,14 @@ public:
 
   [[nodiscard]] observer_ptr get_observer() { return observer_; }
 
-  [[nodiscard]] std::vector<std::string> find_sessions(uint32_t source = 0, int64_t from = 0,
-                                                       int64_t to = INT64_MAX) const;
-
 protected:
   data::location_ptr home_;
-  data::location_ptr db_home_;
   data::location_ptr live_home_;
   const bool low_latency_;
   const bool lazy_;
   nanomsg::url_factory_ptr url_factory_;
   publisher_ptr publisher_;
   observer_ptr observer_;
-
-  sqlite3 *index_db_ = nullptr;
-  char *db_error_msg_ = nullptr;
-  sqlite3_stmt *stmt_find_sessions_ = nullptr;
-
-  sqlite_session_keeper_ptr ssk_;
 };
 
 DECLARE_PTR(io_device)
@@ -112,20 +94,6 @@ DECLARE_PTR(io_device_with_reply)
 class io_device_master : public io_device_with_reply {
 public:
   io_device_master(data::location_ptr home, bool low_latency);
-
-  void open_session(const data::location_ptr &location, int64_t time);
-
-  void update_session(const journal::frame_ptr &frame);
-
-  void close_session(const data::location_ptr &location, int64_t time);
-
-  void rebuild_index_db();
-
-private:
-  std::unordered_map<uint32_t, session_ptr> sessions_;
-  sqlite3_stmt *stmt_clean_sessions_{};
-  sqlite3_stmt *stmt_open_session_{};
-  sqlite3_stmt *stmt_close_session_{};
 };
 
 DECLARE_PTR(io_device_master)

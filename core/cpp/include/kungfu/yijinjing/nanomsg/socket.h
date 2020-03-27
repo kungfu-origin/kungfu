@@ -69,9 +69,9 @@ inline protocol get_opposite_protol(protocol p) {
 
 class url_factory {
 public:
-  [[nodiscard]] virtual const std::string make_path_bind(data::location_ptr location, protocol p) const = 0;
+  [[nodiscard]] virtual std::string make_path_bind(data::location_ptr location, protocol p) const = 0;
 
-  [[nodiscard]] virtual const std::string make_path_connect(data::location_ptr location, protocol p) const = 0;
+  [[nodiscard]] virtual std::string make_path_connect(data::location_ptr location, protocol p) const = 0;
 };
 
 DECLARE_PTR(url_factory)

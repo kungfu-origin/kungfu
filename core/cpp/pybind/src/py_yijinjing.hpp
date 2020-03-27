@@ -308,16 +308,13 @@ void bind(pybind11::module &&m) {
       .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
       .def("open_writer", &io_device::open_writer)
       .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"),
-           py::arg("timeout") = 0)
-      .def("find_sessions", &io_device::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
-           py::arg("to") = INT64_MAX);
+           py::arg("timeout") = 0);
 
   py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
   io_device_with_reply.def(py::init<location_ptr, bool, bool>());
 
   py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
-      .def(py::init<location_ptr, bool>())
-      .def("rebuild_index_db", &io_device_master::rebuild_index_db);
+      .def(py::init<location_ptr, bool>());
 
   py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
       .def(py::init<location_ptr, bool>());

@@ -123,15 +123,6 @@ Napi::Value IODevice::ToString(const Napi::CallbackInfo &info) {
   return Napi::String::New(info.Env(), "IODevice.js@" + home_->uname);
 }
 
-Napi::Value IODevice::FindSessions(const Napi::CallbackInfo &info) {
-  auto sessions = find_sessions();
-  Napi::Array result = Napi::Array::New(info.Env(), sessions.size());
-  for (uint32_t i = 0; i < sessions.size(); i++) {
-    result[i] = Napi::String::New(info.Env(), sessions[i]);
-  }
-  return result;
-}
-
 Napi::Value IODevice::OpenReader(const Napi::CallbackInfo &info) { return Reader::NewInstance(info.This()); }
 
 locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index) {
@@ -152,7 +143,6 @@ void IODevice::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(env, "IODevice",
                                     {
                                         InstanceMethod("toString", &IODevice::ToString),
-                                        InstanceMethod("findSessions", &IODevice::FindSessions),
                                         InstanceMethod("openReader", &IODevice::OpenReader),
                                     });
 

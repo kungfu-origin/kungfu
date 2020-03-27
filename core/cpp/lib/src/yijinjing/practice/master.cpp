@@ -19,11 +19,15 @@ namespace kungfu::yijinjing::practice {
 master::master(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0),
       profile_(get_locator()) {
+  SPDLOG_WARN("master");
+  session_storage_.sync_schema();
+  for (const auto &session : session_storage_.get_all<Session>()) {
+    app_sessions_.emplace(location::make_shared(session, get_locator())->uid, session);
+  }
   for (const auto &config : profile_.get_all(Config{})) {
     add_location(start_time_, location::make_shared(config, get_locator()));
   }
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
-  io_device->open_session(io_device->get_home(), start_time_);
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
 }
@@ -31,7 +35,6 @@ master::master(location_ptr home, bool low_latency)
 void master::on_exit() {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto now = time::now_in_nano();
-  io_device->close_session(io_device->get_home(), now);
   get_writer(location::PUBLIC)->mark(now, SessionEnd::tag);
 }
 
@@ -67,11 +70,24 @@ void master::register_app(const event_ptr &e) {
   reader_->join(app_location, location::PUBLIC, now);
   reader_->join(app_location, master_cmd_location->uid, now);
 
+  if (app_sessions_.find(app_location->uid) == app_sessions_.end()) {
+    Session session = {};
+    session.location_uid = app_location->uid;
+    session.category = app_location->category;
+    session.group = app_location->group;
+    session.name = app_location->name;
+    session.mode = app_location->mode;
+    app_sessions_.emplace(session.location_uid, session);
+  }
+  Session &session = app_sessions_.at(app_location->uid);
+  register_data.last_seen_time = session.begin_time;
+  session.begin_time = e->gen_time();
+  session_storage_.replace(session);
+
+  app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
+
   public_writer->write(e->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(e->gen_time(), register_data);
-
-  io_device->open_session(app_location, e->gen_time());
-  app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
 
   require_write_to(e->gen_time(), app_location->uid, location::PUBLIC);
   require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
@@ -92,9 +108,8 @@ void master::register_app(const event_ptr &e) {
 
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   auto location = get_location(app_location_uid);
-  auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+  session_storage_.replace(app_sessions_.at(app_location_uid));
   get_writer(app_location_uid)->mark(trigger_time, SessionEnd::tag);
-  io_device->close_session(location, trigger_time);
   deregister_channel(app_location_uid);
   deregister_location(trigger_time, app_location_uid);
   reader_->disjoin(app_location_uid);
@@ -110,8 +125,10 @@ void master::publish_trading_day() { write_trading_day(0, get_writer(location::P
 void master::react() {
   events_ | instanceof <journal::frame>() | $([&](const event_ptr &e) {
                          if (registry_.find(e->source()) != registry_.end()) {
-                           auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
-                           io_device->update_session(std::dynamic_pointer_cast<journal::frame>(e));
+                           Session &session = app_sessions_.at(e->source());
+                           session.end_time = e->gen_time();
+                           session.frame_count++;
+                           session.data_size += std::dynamic_pointer_cast<journal::frame>(e)->frame_length();
                            cast_event_invoke(e, app_cache_shift_[e->source()]);
                          }
                        });

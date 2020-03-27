@@ -239,6 +239,7 @@ void apprentice::checkin() {
   data["location_uid"] = home->uid;
   data["pid"] = GETPID();
   data["checkin_time"] = now;
+  data["last_seen_time"] = now;
   request["data"] = data;
 
   get_io_device()->get_publisher()->publish(request.dump());
