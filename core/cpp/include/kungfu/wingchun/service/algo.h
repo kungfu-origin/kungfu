@@ -8,7 +8,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/algo/algo.h>
 #include <kungfu/yijinjing/io.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::service {

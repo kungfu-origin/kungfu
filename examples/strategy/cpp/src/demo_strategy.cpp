@@ -6,7 +6,7 @@
 #include <pybind11/stl.h>
 
 
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/wingchun/msg.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/strategy.h>

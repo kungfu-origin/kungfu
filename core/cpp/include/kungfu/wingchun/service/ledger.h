@@ -8,7 +8,7 @@
 #include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/io.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::service {

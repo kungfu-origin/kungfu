@@ -7,7 +7,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/yijinjing/cache.h>
+#include <kungfu/yijinjing/cache/backend.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/time.h>
 #include <napi.h>

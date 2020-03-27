@@ -4,7 +4,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/journal/journal.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/time.h>

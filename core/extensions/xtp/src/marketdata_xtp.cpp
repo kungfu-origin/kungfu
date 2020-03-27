@@ -3,7 +3,7 @@
 //
 
 #include <kungfu/common.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/wingchun/common.h>
 
 #include "marketdata_xtp.h"

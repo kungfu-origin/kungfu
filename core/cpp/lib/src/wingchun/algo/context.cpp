@@ -4,7 +4,7 @@
 
 #include <kungfu/wingchun/algo/algo.h>
 #include <kungfu/wingchun/utils.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;

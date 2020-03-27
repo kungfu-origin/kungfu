@@ -6,7 +6,7 @@
 
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/utils.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::yijinjing::practice;

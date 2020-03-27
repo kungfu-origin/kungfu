@@ -4,7 +4,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/io.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 #include <tabulate/table.hpp>
 

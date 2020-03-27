@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 
-#include <kungfu/yijinjing/cache.h>
+#include <kungfu/yijinjing/cache/backend.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/practice/profile.h>

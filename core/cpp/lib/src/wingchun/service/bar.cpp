@@ -1,7 +1,7 @@
 
 #include <kungfu/wingchun/service/bar.h>
 #include <kungfu/wingchun/utils.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <regex>
 
 using namespace kungfu::longfist::types;

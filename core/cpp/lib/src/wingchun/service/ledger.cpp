@@ -6,7 +6,6 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/utils.h>
-#include <kungfu/yijinjing/cache.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;

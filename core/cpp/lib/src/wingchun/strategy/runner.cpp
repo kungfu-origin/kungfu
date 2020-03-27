@@ -4,7 +4,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/wingchun/strategy/runner.h>
-#include <kungfu/yijinjing/log/setup.h>
+#include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;

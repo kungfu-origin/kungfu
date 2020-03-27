@@ -6,7 +6,7 @@
 #define KUNGFU_CONFIG_STORE_H
 
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/yijinjing/cache.h>
+#include <kungfu/yijinjing/cache/backend.h>
 #include <kungfu/yijinjing/common.h>
 
 namespace kungfu::yijinjing::practice {
