@@ -308,6 +308,7 @@ namespace kungfu::wingchun::xtp
         from_xtp(ori.market, des.exchange_id);
         des.volume = ori.total_qty;
         des.yesterday_volume = ori.sellable_qty;
+        des.avg_open_price = ori.avg_price;
         des.position_cost_price = ori.avg_price;
     }
 
