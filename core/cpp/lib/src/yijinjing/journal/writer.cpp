@@ -24,48 +24,47 @@ constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
 constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 
 writer::writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher)
-    : publisher_(std::move(publisher)), size_to_write_(0) {
+    : journal_(location, dest_id, true, lazy), publisher_(std::move(publisher)), size_to_write_(0) {
   frame_id_base_ = location->uid xor dest_id;
   frame_id_base_ = frame_id_base_ << 32u;
-  journal_ = std::make_shared<journal>(location, dest_id, true, lazy);
-  journal_->seek_to_time(time::now_in_nano());
+  journal_.seek_to_time(time::now_in_nano());
 }
 
 uint64_t writer::current_frame_uid() {
-  uint32_t page_part = (journal_->page_->page_id_ << 16u) & PAGE_ID_TRANC;
-  uint32_t frame_part = journal_->page_frame_nb_ & FRAME_ID_TRANC;
+  uint32_t page_part = (journal_.page_->page_id_ << 16u) & PAGE_ID_TRANC;
+  uint32_t frame_part = journal_.page_frame_nb_ & FRAME_ID_TRANC;
   return frame_id_base_ | (page_part | frame_part);
 }
 
 frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length) {
-  assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_->page_->get_page_size());
+  assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_.page_->get_page_size());
   int64_t t = time::now_in_nano();
   while (not writer_mtx_.try_lock()) {
     if (time::now_in_nano() - t > time_unit::NANOSECONDS_PER_MILLISECOND) {
-      throw journal_error("Can not lock writer for " + journal_->location_->uname);
+      throw journal_error("Can not lock writer for " + journal_.location_->uname);
     }
   }
-  if (journal_->current_frame()->address() + sizeof(frame_header) + data_length > journal_->page_->address_border()) {
+  if (journal_.current_frame()->address() + sizeof(frame_header) + data_length > journal_.page_->address_border()) {
     close_page(trigger_time);
   }
-  auto frame = journal_->current_frame();
+  auto frame = journal_.current_frame();
   frame->set_header_length();
   frame->set_trigger_time(trigger_time);
   frame->set_msg_type(msg_type);
-  frame->set_source(journal_->location_->uid);
-  frame->set_dest(journal_->dest_id_);
+  frame->set_source(journal_.location_->uid);
+  frame->set_dest(journal_.dest_id_);
   return frame;
 }
 
 void writer::close_frame(size_t data_length) {
-  auto frame = journal_->current_frame();
+  auto frame = journal_.current_frame();
   auto next_frame_address = frame->address() + frame->header_length() + data_length;
-  assert(next_frame_address < journal_->page_->address_border());
+  assert(next_frame_address < journal_.page_->address_border());
   memset(reinterpret_cast<void *>(next_frame_address), 0, sizeof(frame_header));
   frame->set_gen_time(time::now_in_nano());
   frame->set_data_length(data_length);
-  journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
-  journal_->next();
+  journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
+  journal_.next();
   writer_mtx_.unlock();
   publisher_->notify();
 }
@@ -76,22 +75,22 @@ void writer::mark(int64_t trigger_time, int32_t msg_type) {
 }
 
 void writer::mark_with_time(int64_t gen_time, int32_t msg_type) {
-  assert(sizeof(frame_header) + sizeof(frame_header) <= journal_->page_->get_page_size());
-  if (journal_->current_frame()->address() + sizeof(frame_header) > journal_->page_->address_border()) {
+  assert(sizeof(frame_header) + sizeof(frame_header) <= journal_.page_->get_page_size());
+  if (journal_.current_frame()->address() + sizeof(frame_header) > journal_.page_->address_border()) {
     mark(gen_time, longfist::types::PageEnd::tag);
-    journal_->load_next_page();
+    journal_.load_next_page();
   }
-  auto frame = journal_->current_frame();
+  auto frame = journal_.current_frame();
   frame->set_header_length();
   frame->set_trigger_time(gen_time);
   frame->set_msg_type(msg_type);
-  frame->set_source(journal_->location_->uid);
-  frame->set_dest(journal_->dest_id_);
+  frame->set_source(journal_.location_->uid);
+  frame->set_dest(journal_.dest_id_);
   memset(reinterpret_cast<void *>(frame->address() + frame->header_length()), 0, sizeof(frame_header));
   frame->set_gen_time(gen_time);
   frame->set_data_length(0);
-  journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
-  journal_->next();
+  journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
+  journal_.next();
 }
 
 void writer::write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length) {
@@ -105,8 +104,8 @@ template <> void writer::write(int64_t trigger_time, int32_t msg_type, const std
 }
 
 void writer::close_page(int64_t trigger_time) {
-  page_ptr last_page = journal_->page_;
-  journal_->load_next_page();
+  page_ptr last_page = journal_.page_;
+  journal_.load_next_page();
 
   frame last_page_frame;
   last_page_frame.set_address(last_page->last_frame_address());
@@ -114,8 +113,8 @@ void writer::close_page(int64_t trigger_time) {
   last_page_frame.set_header_length();
   last_page_frame.set_trigger_time(trigger_time);
   last_page_frame.set_msg_type(longfist::types::PageEnd::tag);
-  last_page_frame.set_source(journal_->location_->uid);
-  last_page_frame.set_dest(journal_->dest_id_);
+  last_page_frame.set_source(journal_.location_->uid);
+  last_page_frame.set_dest(journal_.dest_id_);
   last_page_frame.set_gen_time(time::now_in_nano());
   last_page_frame.set_data_length(0);
   last_page->set_last_frame_position(last_page_frame.address() - last_page->address());

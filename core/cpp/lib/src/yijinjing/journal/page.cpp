@@ -56,13 +56,11 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
 
   if (header->version != __JOURNAL_VERSION__) {
     uint32_t v = header->version;
-    throw journal_error(
-        fmt::format("version mismatch for page {}, required {}, found {}", path, __JOURNAL_VERSION__, v));
+    throw journal_error(fmt::format("{} version mismatch, required {}, found {}", path, __JOURNAL_VERSION__, v));
   }
   if (header->page_header_length != sizeof(page_header)) {
     uint32_t l = header->page_header_length;
-    throw journal_error(
-        fmt::format("header length mismatch for page {}, required {}, found {}", path, sizeof(page_header), l));
+    throw journal_error(fmt::format("{} header length mismatch, required {}, found {}", path, sizeof(page_header), l));
   }
   if (header->page_size != page_size) {
     uint32_t s = header->page_size;
@@ -73,8 +71,8 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
 }
 
 std::string page::get_page_path(const data::location_ptr &location, uint32_t dest_id, uint32_t page_id) {
-  return location->locator->layout_file(location, longfist::enums::layout::JOURNAL,
-                                        fmt::format("{:08x}.{}", dest_id, page_id));
+  auto page_name = fmt::format("{:08x}.{}", dest_id, page_id);
+  return location->locator->layout_file(location, longfist::enums::layout::JOURNAL, page_name);
 }
 
 uint32_t page::find_page_id(const data::location_ptr &location, uint32_t dest_id, int64_t time) {
@@ -86,9 +84,7 @@ uint32_t page::find_page_id(const data::location_ptr &location, uint32_t dest_id
     return page_ids.front();
   }
   for (int i = static_cast<int>(page_ids.size()) - 1; i >= 0; i--) {
-    auto page = page::load(location, dest_id, page_ids[i], false, true);
-    auto page_begin_time = page->begin_time();
-    if (page_begin_time < time) {
+    if (page::load(location, dest_id, page_ids[i], false, true)->begin_time() < time) {
       return page_ids[i];
     }
   }

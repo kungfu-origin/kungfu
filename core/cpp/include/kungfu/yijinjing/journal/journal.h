@@ -116,9 +116,9 @@ class writer {
 public:
   writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher);
 
-  [[nodiscard]] const data::location_ptr &get_location() const { return journal_->location_; }
+  [[nodiscard]] const data::location_ptr &get_location() const { return journal_.location_; }
 
-  [[nodiscard]] uint32_t get_dest() const { return journal_->dest_id_; }
+  [[nodiscard]] uint32_t get_dest() const { return journal_.dest_id_; }
 
   uint64_t current_frame_uid();
 
@@ -188,31 +188,31 @@ public:
   }
 
   template <typename T> std::enable_if_t<not kungfu::size_fixed_v<T>> write_with_time(int64_t gen_time, const T &data) {
-    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_->page_->get_page_size());
-    if (journal_->current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_->page_->address_border()) {
+    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_.page_->get_page_size());
+    if (journal_.current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_.page_->address_border()) {
       mark(gen_time, longfist::types::PageEnd::tag);
-      journal_->load_next_page();
+      journal_.load_next_page();
     }
-    auto frame = journal_->current_frame();
+    auto frame = journal_.current_frame();
     frame->set_header_length();
     frame->set_trigger_time(0);
     frame->set_msg_type(T::tag);
-    frame->set_source(journal_->location_->uid);
-    frame->set_dest(journal_->dest_id_);
+    frame->set_source(journal_.location_->uid);
+    frame->set_dest(journal_.dest_id_);
 
     frame->copy_data(data);
     frame->set_gen_time(gen_time);
     frame->set_data_length(sizeof(T));
-    journal_->page_->set_last_frame_position(frame->address() - journal_->page_->address());
-    journal_->next();
+    journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
+    journal_.next();
   }
 
   void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
 
 private:
-  std::mutex writer_mtx_;
-  journal_ptr journal_;
-  uint64_t frame_id_base_;
+  journal journal_;
+  std::mutex writer_mtx_ = {};
+  uint64_t frame_id_base_ = {};
   publisher_ptr publisher_;
   size_t size_to_write_;
 
