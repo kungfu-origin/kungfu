@@ -325,14 +325,18 @@ void bind(pybind11::module &&m) {
       .def(py::init<location_ptr, uint32_t, uint32_t>())
       .def("trace", &io_device_console::trace);
 
-  py::class_<session_keeper>(m, "session_keeper")
+  py::class_<session_finder, std::shared_ptr<session_finder>>(m, "session_finder")
       .def(py::init<io_device_ptr>())
       .def("find_sessions", &session_keeper::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
-           py::arg("to") = INT64_MAX)
+           py::arg("to") = INT64_MAX);
+
+  py::class_<session_keeper, session_finder, std::shared_ptr<session_keeper>>(m, "session_keeper")
+      .def(py::init<io_device_ptr>())
       .def("rebuild_index_db", &session_keeper::rebuild_index_db);
 
   py::class_<master, PyMaster>(m, "master")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+      .def_property_readonly("session_keeper", &master::get_session_keeper)
       .def_property_readonly("io_device", &master::get_io_device)
       .def("now", &master::now)
       .def("get_home_uid", &master::get_home_uid)
@@ -352,6 +356,7 @@ void bind(pybind11::module &&m) {
 
   py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
+      .def_property_readonly("session_finder", &apprentice::get_session_finder)
       .def_property_readonly("io_device", &apprentice::get_io_device)
       .def("set_begin_time", &apprentice::set_begin_time)
       .def("set_end_time", &apprentice::set_end_time)

@@ -24,6 +24,8 @@ class master : public hero {
 public:
   explicit master(yijinjing::data::location_ptr home, bool low_latency = false);
 
+  index::session_keeper &get_session_keeper();
+
   void on_exit() override;
 
   void on_notify() override;
@@ -48,6 +50,7 @@ protected:
 private:
   int64_t start_time_;
   int64_t last_check_;
+  index::session_keeper session_keeper_;
   profile profile_;
 
   std::unordered_map<uint32_t, uint32_t> app_locations_ = {};

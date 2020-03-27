@@ -19,8 +19,20 @@ std::string get_index_db_file(const io_device_ptr &io_device) {
   return locator->layout_file(index_location, layout::SQLITE, "index");
 }
 
-session_keeper::session_keeper(const io_device_ptr &io_device)
+session_finder::session_finder(const io_device_ptr &io_device)
     : session_storage_(make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)), io_device_(io_device) {
+  if (not session_storage_.sync_schema_simulate().empty()) {
+    session_storage_.sync_schema();
+  }
+}
+
+session_finder::~session_finder() { io_device_.reset(); }
+
+std::vector<Session> session_finder::find_sessions(uint32_t source, int64_t from, int64_t to) {
+  return session_storage_.get_all<Session>();
+}
+
+session_keeper::session_keeper(const io_device_ptr &io_device) : session_finder(io_device) {
   if (not session_storage_.sync_schema_simulate().empty()) {
     session_storage_.sync_schema();
   }
@@ -58,10 +70,6 @@ void session_keeper::update_session(uint32_t source, const frame_ptr &frame) {
   session.end_time = frame->gen_time();
   session.frame_count++;
   session.data_size += frame->frame_length();
-}
-
-std::vector<Session> session_keeper::find_sessions(uint32_t source, int64_t from, int64_t to) {
-  return session_storage_.get_all<Session>();
 }
 
 void session_keeper::rebuild_index_db() {

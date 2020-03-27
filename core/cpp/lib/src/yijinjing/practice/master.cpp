@@ -18,7 +18,7 @@ namespace kungfu::yijinjing::practice {
 
 master::master(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0),
-      profile_(get_locator()) {
+      session_keeper_(std::make_shared<io_device_master>(home, low_latency)), profile_(get_locator()) {
   for (const auto &config : profile_.get_all(Config{})) {
     add_location(start_time_, location::make_shared(config, get_locator()));
   }
@@ -26,6 +26,8 @@ master::master(location_ptr home, bool low_latency)
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
 }
+
+index::session_keeper &master::get_session_keeper() { return session_keeper_; }
 
 void master::on_exit() {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());

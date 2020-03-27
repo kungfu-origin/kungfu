@@ -191,12 +191,12 @@ def collect_journal_locations(ctx):
 
 def find_sessions(ctx):
     io_device = yjj.io_device(ctx.journal_util_location)
-    session_keeper = yjj.session_keeper(io_device)
+    session_finder = yjj.session_finder(io_device)
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
-    for session in session_keeper.find_sessions():
+    for session in session_finder.find_sessions():
         sessions_df.loc[len(sessions_df)] = [
             len(sessions_df) + 1, yjj.get_mode_name(session.mode), yjj.get_category_name(session.category), session.group, session.name,
             session.begin_time, session.end_time, session.end_time > 0,

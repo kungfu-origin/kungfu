@@ -77,7 +77,6 @@ public:
   virtual void on_exit();
 
 protected:
-  index::session_keeper session_keeper_;
   int64_t begin_time_;
   int64_t end_time_;
   std::unordered_map<uint64_t, longfist::types::Channel> channels_;

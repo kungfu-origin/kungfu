@@ -32,6 +32,8 @@ class apprentice : public hero {
 public:
   explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
+  index::session_finder &get_session_finder();
+
   bool is_started() const;
 
   uint32_t get_master_commands_uid() const;
@@ -180,6 +182,7 @@ private:
   int64_t trading_day_;
   int32_t timer_usage_count_;
   std::unordered_map<int, int64_t> timer_checkpoints_ = {};
+  index::session_finder session_finder_;
 
   void checkin();
 

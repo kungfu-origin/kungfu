@@ -38,11 +38,14 @@ apprentice::apprentice(location_ptr home, bool low_latency)
       master_commands_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
                                                       fmt::format("{:08x}", get_live_home_uid()), get_locator())),
       config_location_(location::make_shared(mode::LIVE, category::SYSTEM, "etc", "kungfu", get_locator())),
-      state_bank_(), started_(false), master_start_time_(0), trading_day_(time::today_nano()), timer_usage_count_(0) {
+      state_bank_(), started_(false), master_start_time_(0), trading_day_(time::today_nano()), timer_usage_count_(0),
+      session_finder_(std::make_shared<io_device_client>(home, low_latency)) {
   add_location(0, master_home_location_);
   add_location(0, master_commands_location_);
   add_location(0, config_location_);
 }
+
+index::session_finder &apprentice::get_session_finder() { return session_finder_; }
 
 bool apprentice::is_started() const { return started_; }
 
