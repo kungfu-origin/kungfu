@@ -216,14 +216,9 @@ void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<Requ
 
 void apprentice::on_write_to(const event_ptr &event) {
   const RequestWriteTo &request = event->data<RequestWriteTo>();
-  auto new_writer = writers_.find(request.dest_id) == writers_.end();
-  if (new_writer) {
+  if (writers_.find(request.dest_id) == writers_.end()) {
     writers_.emplace(request.dest_id, get_io_device()->open_writer(request.dest_id));
   }
-  SPDLOG_INFO("{} requires {} write to {}, {}", get_location(event->source())->uname,
-              get_location(event->dest())->uname,
-              request.dest_id == 0 ? "public" : get_location(request.dest_id)->uname,
-              new_writer ? "newly added" : "duplicated");
 }
 
 void apprentice::checkin() {
@@ -246,7 +241,6 @@ void apprentice::checkin() {
   data["checkin_time"] = now;
   request["data"] = data;
 
-  SPDLOG_DEBUG("checkin request: {}", request.dump());
   get_io_device()->get_publisher()->publish(request.dump());
 }
 

@@ -88,7 +88,6 @@ protected:
   void on_write_to(const event_ptr &event);
 
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime) {
-    SPDLOG_WARN("add timer {} at {}", time::strftime(nanotime), time::strftime(now()));
     auto writer = get_writer(master_commands_location_->uid);
     int32_t timer_usage_count = timer_usage_count_;
     int64_t duration_ns = nanotime - now();
@@ -188,9 +187,6 @@ private:
 
   template <typename DataType> void do_read_from(const event_ptr &event, uint32_t dest_id) {
     const DataType &request = event->data<DataType>();
-    SPDLOG_INFO("{} requires {} read from {} from {}", get_location(event->source())->uname,
-                get_location(event->dest())->uname, get_location(request.source_id)->uname,
-                time::strftime(request.from_time));
     reader_->join(get_location(request.source_id), dest_id, request.from_time);
   }
 };
