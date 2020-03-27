@@ -89,6 +89,7 @@ void session_keeper::rebuild_index_db() {
     auto uid = frame->dest() == 0 ? frame->source() : frame->dest();
     if (locations.find(uid) == locations.end()) {
       SPDLOG_WARN("location not found {:08x}", uid);
+      reader->next();
       continue;
     }
     auto location = locations.at(uid);
