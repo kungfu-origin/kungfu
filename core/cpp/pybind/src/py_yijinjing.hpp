@@ -328,7 +328,8 @@ void bind(pybind11::module &&m) {
   py::class_<session_keeper>(m, "session_keeper")
       .def(py::init<io_device_ptr>())
       .def("find_sessions", &session_keeper::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
-           py::arg("to") = INT64_MAX);
+           py::arg("to") = INT64_MAX)
+      .def("rebuild_index_db", &session_keeper::rebuild_index_db);
 
   py::class_<master, PyMaster>(m, "master")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)

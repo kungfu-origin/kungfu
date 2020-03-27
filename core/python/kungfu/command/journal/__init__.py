@@ -11,6 +11,7 @@ from kungfu.yijinjing.log import create_logger
 @click.option('-c', '--category', default='*', type=click.Choice(kfj.CATEGORIES.keys()), help='category')
 @click.option('-g', '--group', type=str, default='*', help='group')
 @click.option('-n', '--name', type=str, default='*', help='name')
+@click.help_option('-h', '--help')
 @click.pass_context
 def journal(ctx, mode, category, group, name):
     pass_ctx_from_root(ctx)

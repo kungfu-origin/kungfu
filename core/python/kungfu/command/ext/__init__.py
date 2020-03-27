@@ -6,6 +6,7 @@ from kungfu.yijinjing.log import create_logger
 
 
 @kfc.group()
+@click.help_option('-h', '--help')
 @click.pass_context
 def ext(ctx):
     pass_ctx_from_root(ctx)

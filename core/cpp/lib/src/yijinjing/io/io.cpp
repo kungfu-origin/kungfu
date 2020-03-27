@@ -202,47 +202,6 @@ io_device_master::io_device_master(data::location_ptr home, bool low_latency)
   observer_ = std::make_shared<nanomsg_observer_master>(*this, low_latency);
 }
 
-// void io_device_master::rebuild_index_db() {
-//  sqlite3_reset(stmt_clean_sessions_);
-//  sqlite3_step(stmt_clean_sessions_);
-//
-//  std::unordered_map<uint32_t, location_ptr> locations;
-//  std::unordered_set<uint32_t> master_cmd_uids;
-//  auto reader = open_reader_to_subscribe();
-//  for (const auto &location : home_->locator->list_locations()) {
-//    SPDLOG_TRACE("investigating location {}", location->uname);
-//    locations[location->uid] = location;
-//    if (location->category == longfist::enums::category::SYSTEM && location->group == "master" &&
-//        location->name != "master") {
-//      master_cmd_uids.insert(location->uid);
-//    }
-//    for (const auto dest_uid : home_->locator->list_location_dest(location)) {
-//      reader->join(location, dest_uid, 0);
-//    }
-//  }
-//  while (reader->data_available()) {
-//    auto &&frame = reader->current_frame();
-//    auto &&location = locations[frame->dest() == 0 ? frame->source() : frame->dest()];
-//    switch (frame->msg_type()) {
-//    case SessionStart::tag: {
-//      open_session(location, frame->gen_time());
-//      break;
-//    }
-//    case SessionEnd::tag: {
-//      close_session(location, frame->gen_time());
-//      break;
-//    }
-//    default: {
-//      if (master_cmd_uids.find(frame->source()) == master_cmd_uids.end()) {
-//        update_session(frame);
-//      }
-//      break;
-//    }
-//    }
-//    reader->next();
-//  }
-//}
-
 io_device_client::io_device_client(data::location_ptr home, bool low_latency)
     : io_device_with_reply(std::move(home), low_latency, true) {
   publisher_ = std::make_shared<nanomsg_publisher_client>(*this, low_latency);

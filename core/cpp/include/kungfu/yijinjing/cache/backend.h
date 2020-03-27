@@ -72,21 +72,11 @@ class shift {
 public:
   shift() = default;
 
-  explicit shift(yijinjing::data::location_ptr location) : location_(std::move(location)), storage_map_() {}
+  explicit shift(yijinjing::data::location_ptr location);
 
-  shift(const shift &copy) : location_(copy.location_), storage_map_(copy.storage_map_) {}
+  shift(const shift &copy);
 
-  void operator>>(const yijinjing::journal::writer_ptr &writer) {
-    for (auto dest : location_->locator->list_location_dest(location_)) {
-      ensure_storage(dest);
-    }
-    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-      using DataType = typename decltype(+boost::hana::second(it))::type;
-      for (auto &pair : storage_map_) {
-        restore<DataType>(writer, pair.second);
-      }
-    });
-  }
+  void operator>>(const yijinjing::journal::writer_ptr &writer);
 
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     ensure_storage(event->dest());
@@ -108,14 +98,7 @@ private:
   yijinjing::data::location_ptr location_;
   std::unordered_map<uint32_t, StateStorageType> storage_map_;
 
-  void ensure_storage(uint32_t dest) {
-    if (storage_map_.find(dest) == storage_map_.end()) {
-      auto locator = location_->locator;
-      auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
-      storage_map_.emplace(dest, make_storage(db_file, longfist::StateDataTypes));
-      storage_map_.at(dest).sync_schema();
-    }
-  }
+  void ensure_storage(uint32_t dest);
 
   template <typename DataType>
   std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>

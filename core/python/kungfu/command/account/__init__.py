@@ -6,6 +6,7 @@ from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, ACCOUNT_SCH
 
 @kfc.group(help_priority=2)
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_MD.names()), help='account source')
+@click.help_option('-h', '--help')
 @click.pass_context
 def account(ctx, source):
     pass_ctx_from_root(ctx)
