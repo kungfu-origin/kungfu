@@ -202,7 +202,7 @@ io_device_master::io_device_master(data::location_ptr home, bool low_latency)
   observer_ = std::make_shared<nanomsg_observer_master>(*this, low_latency);
 }
 
-//void io_device_master::rebuild_index_db() {
+// void io_device_master::rebuild_index_db() {
 //  sqlite3_reset(stmt_clean_sessions_);
 //  sqlite3_step(stmt_clean_sessions_);
 //
@@ -247,11 +247,5 @@ io_device_client::io_device_client(data::location_ptr home, bool low_latency)
     : io_device_with_reply(std::move(home), low_latency, true) {
   publisher_ = std::make_shared<nanomsg_publisher_client>(*this, low_latency);
   observer_ = std::make_shared<nanomsg_observer_client>(*this, low_latency);
-}
-
-void session::update(const frame_ptr &frame) {
-  end_time_ = frame->gen_time();
-  frame_count_++;
-  data_size_ += frame->frame_length();
 }
 } // namespace kungfu::yijinjing

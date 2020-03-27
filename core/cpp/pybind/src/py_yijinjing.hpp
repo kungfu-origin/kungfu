@@ -9,6 +9,7 @@
 #include <pybind11/stl.h>
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/yijinjing/index/session.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/journal.h>
@@ -29,6 +30,7 @@ using namespace kungfu::longfist::types;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::index;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::yijinjing::util;
@@ -322,6 +324,11 @@ void bind(pybind11::module &&m) {
   py::class_<io_device_console>(m, "io_device_console", io_device)
       .def(py::init<location_ptr, uint32_t, uint32_t>())
       .def("trace", &io_device_console::trace);
+
+  py::class_<session_keeper>(m, "session_keeper")
+      .def(py::init<io_device_ptr>())
+      .def("find_sessions", &session_keeper::find_sessions, py::arg("source") = 0, py::arg("from") = 0,
+           py::arg("to") = INT64_MAX);
 
   py::class_<master, PyMaster>(m, "master")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)

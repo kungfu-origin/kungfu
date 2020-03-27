@@ -20,8 +20,6 @@
 #ifndef KUNGFU_IO_H
 #define KUNGFU_IO_H
 
-#include <sqlite3.h>
-
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
@@ -118,28 +116,7 @@ private:
 
 DECLARE_PTR(io_device_console)
 
-class session {
-public:
-  explicit session(data::location_ptr location) : location_(std::move(location)) {}
-
-  ~session() = default;
-
-  void update(const journal::frame_ptr &frame);
-
-private:
-  const data::location_ptr location_;
-  int64_t begin_time_ = 0;
-  int64_t end_time_ = -1;
-  int frame_count_ = 0;
-  uint64_t data_size_ = 0;
-  std::vector<uint32_t> write_to_;
-  std::vector<uint32_t> read_from_;
-
-  friend io_device_master;
-};
-
 void handle_sql_error(int rc, const std::string &error_tip);
-void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip);
 void ensure_sqlite_initilize();
 void ensure_sqlite_shutdown();
 } // namespace kungfu::yijinjing

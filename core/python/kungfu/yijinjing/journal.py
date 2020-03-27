@@ -191,17 +191,16 @@ def collect_journal_locations(ctx):
 
 def find_sessions(ctx):
     io_device = yjj.io_device(ctx.journal_util_location)
+    session_keeper = yjj.session_keeper(io_device)
     ctx.session_count = 1
     sessions_df = pd.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
-    for raw_session in io_device.find_sessions():
-        session = json.loads(raw_session)
-        match = LOCATION_PATTERN.match(session['location'])
+    for session in session_keeper.find_sessions():
         sessions_df.loc[len(sessions_df)] = [
-            len(sessions_df) + 1, match.group(4), match.group(1), match.group(2), match.group(3),
-            session['begin_time'], session['end_time'], session['end_time'] > 0,
-            session['end_time'] - session['begin_time']
+            len(sessions_df) + 1, yjj.get_mode_name(session.mode), yjj.get_category_name(session.category), session.group, session.name,
+            session.begin_time, session.end_time, session.end_time > 0,
+            session.end_time - session.begin_time
         ]
     return sessions_df
 
@@ -218,6 +217,7 @@ def make_location_from_dict(ctx, location):
 def read_session(ctx, session_id, io_type):
     session = find_session(ctx, session_id)
     uname = '{}/{}/{}/{}'.format(session['category'], session['group'], session['name'], session['mode'])
+    print(uname)
     uid = yjj.hash_str_32(uname)
     ctx.category = '*'
     ctx.group = '*'

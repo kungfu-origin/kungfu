@@ -5,20 +5,13 @@
 #ifndef KUNGFU_HERO_H
 #define KUNGFU_HERO_H
 
-#include <unordered_map>
-
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/yijinjing/cache/backend.h>
+#include <kungfu/yijinjing/index/session.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::practice {
-
-constexpr auto location_handler = [](const yijinjing::data::location_ptr &location) {};
-
-constexpr auto register_handler = [](const longfist::types::Register &r) {};
-
 class hero : public resource {
 public:
   explicit hero(yijinjing::io_device_with_reply_ptr io_device);
@@ -84,7 +77,7 @@ public:
   virtual void on_exit();
 
 protected:
-  cache::SessionStorageType session_storage_;
+  index::session_keeper session_keeper_;
   int64_t begin_time_;
   int64_t end_time_;
   std::unordered_map<uint64_t, longfist::types::Channel> channels_;

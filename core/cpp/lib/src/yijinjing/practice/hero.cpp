@@ -20,15 +20,9 @@ using namespace kungfu::yijinjing::nanomsg;
 
 namespace kungfu::yijinjing::practice {
 
-std::string get_index_db_file(yijinjing::io_device_with_reply_ptr io_device) {
-  auto locator = io_device->get_locator();
-  auto index_location = location::make_shared(mode::LIVE, category::SYSTEM, "journal", "index", locator);
-  return locator->layout_file(index_location, layout::SQLITE, "index");
-}
-
-hero::hero(yijinjing::io_device_with_reply_ptr io_device)
-    : session_storage_(make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)),
-      io_device_(std::move(io_device)), now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
+hero::hero(io_device_with_reply_ptr io_device)
+    : session_keeper_(std::dynamic_pointer_cast<yijinjing::io_device>(io_device)), io_device_(std::move(io_device)),
+      now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
   reader_ = io_device_->open_reader_to_subscribe();

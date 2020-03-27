@@ -214,20 +214,18 @@ void bind(pybind11::module &&m) {
   auto m_types = m.def_submodule("types");
   auto m_state = m.def_submodule("state");
 
+  hana::for_each(AllDataTypes, [&](auto pair) {
+    using DataType = typename decltype(+hana::second(pair))::type;
+    bind_data_type<DataType>(m_types, hana::first(pair).c_str());
+  });
+
   hana::for_each(StateDataTypes, [&](auto pair) {
     using DataType = typename decltype(+hana::second(pair))::type;
-
-    bind_data_type<DataType>(m_types, hana::first(pair).c_str());
-
     py::class_<kungfu::state<DataType>>(m_state, hana::first(pair).c_str())
         .def_readonly("source", &kungfu::state<DataType>::source)
         .def_readonly("update_time", &kungfu::state<DataType>::update_time)
         .def_readonly("data", &kungfu::state<DataType>::data);
   });
-
-  bind_data_type<types::RequestWriteTo>(m_types, "RequestWriteTo");
-  bind_data_type<types::RequestReadFrom>(m_types, "RequestReadFrom");
-  bind_data_type<types::RequestReadFromPublic>(m_types, "RequestReadFromPublic");
 }
 } // namespace kungfu::longfist
 
