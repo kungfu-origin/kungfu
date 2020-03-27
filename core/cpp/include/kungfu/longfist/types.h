@@ -68,6 +68,28 @@ KF_DEFINE_PACK_TYPE(                                                //
 );
 
 KF_DEFINE_DATA_TYPE(                                //
+    Location, 10026, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                       //
+    (enums::category, category),                    //
+    (enums::mode, mode),                            //
+    (std::string, group),                           //
+    (std::string, name)                             //
+);
+
+KF_DEFINE_DATA_TYPE(                                                     //
+    Session, 10010, PK(location_uid, begin_time), TIMESTAMP(begin_time), //
+    (uint32_t, location_uid),                                            //
+    (enums::category, category),                                         //
+    (enums::mode, mode),                                                 //
+    (std::string, group),                                                //
+    (std::string, name),                                                 //
+    (int64_t, begin_time),                                               //
+    (int64_t, end_time),                                                 //
+    (uint32_t, frame_count),                                             //
+    (uint64_t, data_size)                                                //
+);
+
+KF_DEFINE_DATA_TYPE(                                //
     Register, 10011, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                       //
     (enums::category, category),                    //
@@ -85,15 +107,6 @@ KF_DEFINE_DATA_TYPE(                                  //
     (enums::mode, mode),                              //
     (std::string, group),                             //
     (std::string, name)                               //
-);
-
-KF_DEFINE_DATA_TYPE(                                //
-    Location, 10026, PK(location_uid), PERPETUAL(), //
-    (uint32_t, location_uid),                       //
-    (enums::category, category),                    //
-    (enums::mode, mode),                            //
-    (std::string, group),                           //
-    (std::string, name)                             //
 );
 
 KF_DEFINE_PACK_TYPE(                                    //

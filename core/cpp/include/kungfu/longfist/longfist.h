@@ -5,8 +5,6 @@
 #ifndef KUNGFU_LONGFIST_H
 #define KUNGFU_LONGFIST_H
 
-#include <kungfu/common.h>
-#include <kungfu/longfist/enums.h>
 #include <kungfu/longfist/types.h>
 
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
@@ -34,9 +32,10 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(AlgoOrderModify),                  //
     TYPE_PAIR(Config),                           //
     TYPE_PAIR(Commission),                       //
+    TYPE_PAIR(Location),                         //
+    TYPE_PAIR(Session),                          //
     TYPE_PAIR(Register),                         //
     TYPE_PAIR(Deregister),                       //
-    TYPE_PAIR(Location),                         //
     TYPE_PAIR(RequestReadFrom),                  //
     TYPE_PAIR(RequestReadFromPublic),            //
     TYPE_PAIR(RequestWriteTo),                   //
@@ -69,9 +68,10 @@ constexpr auto AllTypes = boost::hana::make_map( //
 constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                               //
     TYPE_PAIR(Commission),                           //
+    TYPE_PAIR(Location),                             //
+    TYPE_PAIR(Session),                              //
     TYPE_PAIR(Register),                             //
     TYPE_PAIR(Deregister),                           //
-    TYPE_PAIR(Location),                             //
     TYPE_PAIR(RequestReadFrom),                      //
     TYPE_PAIR(RequestReadFromPublic),                //
     TYPE_PAIR(RequestWriteTo),                       //
@@ -105,7 +105,10 @@ constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                   //
     TYPE_PAIR(Commission)                                //
 );
-using ProfileDataTypesT = decltype(ProfileDataTypes);
+
+constexpr auto SessionDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(Session)                                   //
+);
 
 constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                 //
@@ -128,18 +131,14 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(InstrumentCommissionRate),               //
     TYPE_PAIR(OrderStat)                               //
 );
-using StateDataTypesT = decltype(StateDataTypes);
 
-constexpr auto build_profile_map = [](auto types) {
+constexpr auto build_data_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
     using DataType = typename decltype(+value)::type;
     return boost::hana::make_pair(value, std::unordered_map<uint64_t, DataType>());
   });
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
-
-using ProfileMapType = decltype(build_profile_map(longfist::ProfileDataTypes));
-DECLARE_PTR(ProfileMapType)
 
 constexpr auto build_state_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
@@ -148,6 +147,9 @@ constexpr auto build_state_map = [](auto types) {
   });
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
+
+using ProfileMapType = decltype(build_data_map(longfist::ProfileDataTypes));
+DECLARE_PTR(ProfileMapType)
 
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)

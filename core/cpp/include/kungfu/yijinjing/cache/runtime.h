@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2020/3/27.
 //
 
-#ifndef KUNGFU_CACHE_MEMORY_H
-#define KUNGFU_CACHE_MEMORY_H
+#ifndef KUNGFU_CACHE_RUNTIME_H
+#define KUNGFU_CACHE_RUNTIME_H
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/journal/journal.h>
@@ -35,4 +35,4 @@ private:
 };
 } // namespace kungfu::yijinjing::cache
 
-#endif // KUNGFU_CACHE_MEMORY_H
+#endif // KUNGFU_CACHE_RUNTIME_H

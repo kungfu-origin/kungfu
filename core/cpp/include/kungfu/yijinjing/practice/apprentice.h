@@ -22,7 +22,7 @@
 
 #include <unordered_map>
 
-#include <kungfu/yijinjing/cache/memory.h>
+#include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/time.h>

@@ -7,7 +7,6 @@
 
 #include <unordered_map>
 
-#include <kungfu/yijinjing/cache/backend.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/practice/profile.h>
@@ -50,9 +49,11 @@ private:
   int64_t start_time_;
   int64_t last_check_;
   profile profile_;
-  std::unordered_map<uint32_t, uint32_t> app_locations_;
-  std::unordered_map<uint32_t, cache::shift> app_cache_shift_;
-  std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_;
+
+  std::unordered_map<uint32_t, uint32_t> app_locations_ = {};
+  std::unordered_map<uint32_t, cache::shift> app_cache_shift_ = {};
+  std::unordered_map<uint32_t, longfist::types::Session> app_sessions_ = {};
+  std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
