@@ -18,7 +18,7 @@ namespace kungfu::yijinjing::practice {
 
 master::master(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0),
-      session_keeper_(std::make_shared<io_device_master>(home, low_latency)), profile_(get_locator()) {
+      session_builder_(get_io_device()), profile_(get_locator()) {
   for (const auto &config : profile_.get_all(Config{})) {
     add_location(start_time_, location::make_shared(config, get_locator()));
   }
@@ -27,7 +27,7 @@ master::master(location_ptr home, bool low_latency)
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
 }
 
-index::session_keeper &master::get_session_keeper() { return session_keeper_; }
+index::session_builder &master::get_session_builder() { return session_builder_; }
 
 void master::on_exit() {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
@@ -62,13 +62,15 @@ void master::register_app(const event_ptr &e) {
   add_location(e->gen_time(), app_location);
   add_location(e->gen_time(), master_cmd_location);
   app_locations_.emplace(app_location->uid, master_cmd_location->uid);
+
+  register_data.last_seen_time = session_builder_.find_last_seen_time(app_location);
   register_location(e->gen_time(), register_data);
+
   writers_.emplace(app_location->uid, app_cmd_writer);
   reader_->join(app_location, location::PUBLIC, now);
   reader_->join(app_location, master_cmd_location->uid, now);
 
-  auto &session = session_keeper_.open_session(app_location, e->gen_time());
-  register_data.last_seen_time = session.begin_time;
+  session_builder_.open_session(app_location, e->gen_time());
 
   app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
 
@@ -94,7 +96,7 @@ void master::register_app(const event_ptr &e) {
 
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   auto location = get_location(app_location_uid);
-  session_keeper_.close_session(location, trigger_time);
+  session_builder_.close_session(location, trigger_time);
   get_writer(app_location_uid)->mark(trigger_time, SessionEnd::tag);
   deregister_channel(app_location_uid);
   deregister_location(trigger_time, app_location_uid);
@@ -111,8 +113,10 @@ void master::publish_trading_day() { write_trading_day(0, get_writer(location::P
 void master::react() {
   events_ | instanceof <journal::frame>() | $([&](const event_ptr &e) {
                          if (registry_.find(e->source()) != registry_.end()) {
-                           session_keeper_.update_session(e->source(), std::dynamic_pointer_cast<journal::frame>(e));
-                           cast_event_invoke(e, app_cache_shift_[e->source()]);
+                           session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(e));
+                           if (get_location(e->source())->category != category::MD) {
+                             cast_event_invoke(e, app_cache_shift_[e->source()]);
+                           }
                          }
                        });
 

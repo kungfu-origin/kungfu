@@ -3,7 +3,6 @@ import shutil
 import glob
 import re
 import json
-import pykungfu
 from pykungfu import yijinjing as yjj
 import pandas as pd
 import errno

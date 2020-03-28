@@ -12,28 +12,36 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::index {
+typedef std::vector<longfist::types::Session> SessionVector;
+
 class session_finder {
 public:
   explicit session_finder(const yijinjing::io_device_ptr &io_device);
 
   virtual ~session_finder();
 
-  std::vector<longfist::types::Session> find_sessions(uint32_t source, int64_t from, int64_t to);
+  virtual int64_t find_last_seen_time(const data::location_ptr &source_location);
+
+  SessionVector find_sessions(int64_t from = 0, int64_t to = INT64_MAX);
+
+  SessionVector find_sessions_for(const data::location_ptr &source_location, int64_t from = 0, int64_t to = INT64_MAX);
 
 protected:
   yijinjing::io_device_ptr io_device_;
   cache::SessionStorageType session_storage_;
 };
 
-class session_keeper : public session_finder {
+class session_builder : public session_finder {
 public:
-  explicit session_keeper(const yijinjing::io_device_ptr &io_device);
+  explicit session_builder(const yijinjing::io_device_ptr &io_device);
+
+  int64_t find_last_seen_time(const data::location_ptr &source_location) override;
 
   longfist::types::Session &open_session(const data::location_ptr &source_location, int64_t time);
 
   void close_session(const data::location_ptr &source_location, int64_t time);
 
-  void update_session(uint32_t source, const journal::frame_ptr &frame);
+  void update_session(const journal::frame_ptr &frame);
 
   void rebuild_index_db();
 

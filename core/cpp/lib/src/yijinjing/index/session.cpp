@@ -4,6 +4,7 @@
 
 #include <kungfu/yijinjing/index/session.h>
 
+using namespace sqlite_orm;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
@@ -20,7 +21,8 @@ std::string get_index_db_file(const io_device_ptr &io_device) {
 }
 
 session_finder::session_finder(const io_device_ptr &io_device)
-    : session_storage_(make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)), io_device_(io_device) {
+    : session_storage_(cache::make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)),
+      io_device_(io_device) {
   if (not session_storage_.sync_schema_simulate().empty()) {
     session_storage_.sync_schema();
   }
@@ -28,17 +30,34 @@ session_finder::session_finder(const io_device_ptr &io_device)
 
 session_finder::~session_finder() { io_device_.reset(); }
 
-std::vector<Session> session_finder::find_sessions(uint32_t source, int64_t from, int64_t to) {
-  return session_storage_.get_all<Session>();
+int64_t session_finder::find_last_seen_time(const data::location_ptr &source_location) {
+  auto sessions = session_storage_.get_all<Session>(where(eq(&Session::location_uid, source_location->uid)),
+                                                    order_by(&Session::begin_time).desc(), limit(1));
+  return sessions.empty() ? INT64_MAX : sessions.front().end_time;
 }
 
-session_keeper::session_keeper(const io_device_ptr &io_device) : session_finder(io_device) {
+SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
+  auto bt = &Session::begin_time;
+  return session_storage_.get_all<Session>(order_by(bt), where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)));
+}
+
+SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from, int64_t to) {
+  auto bt = &Session::begin_time;
+  return session_storage_.get_all<Session>(order_by(bt), where(eq(&Session::location_uid, source_location->uid) and
+                                                               greater_or_equal(bt, from) and lesser_or_equal(bt, to)));
+}
+
+session_builder::session_builder(const io_device_ptr &io_device) : session_finder(io_device) {
   if (not session_storage_.sync_schema_simulate().empty()) {
     session_storage_.sync_schema();
   }
 }
 
-Session &session_keeper::open_session(const location_ptr &source_location, int64_t time) {
+int64_t session_builder::find_last_seen_time(const data::location_ptr &source_location) {
+  return session_finder::find_last_seen_time(source_location);
+}
+
+Session &session_builder::open_session(const location_ptr &source_location, int64_t time) {
   if (live_sessions_.find(source_location->uid) == live_sessions_.end()) {
     Session session = {};
     session.location_uid = source_location->uid;
@@ -54,7 +73,7 @@ Session &session_keeper::open_session(const location_ptr &source_location, int64
   return session;
 }
 
-void session_keeper::close_session(const location_ptr &source_location, int64_t time) {
+void session_builder::close_session(const location_ptr &source_location, int64_t time) {
   if (live_sessions_.find(source_location->uid) == live_sessions_.end()) {
     return;
   }
@@ -62,17 +81,17 @@ void session_keeper::close_session(const location_ptr &source_location, int64_t 
   session_storage_.replace(session);
 }
 
-void session_keeper::update_session(uint32_t source, const frame_ptr &frame) {
-  if (live_sessions_.find(source) == live_sessions_.end()) {
+void session_builder::update_session(const frame_ptr &frame) {
+  if (live_sessions_.find(frame->source()) == live_sessions_.end()) {
     return;
   }
-  Session &session = live_sessions_.at(source);
+  Session &session = live_sessions_.at(frame->source());
   session.end_time = frame->gen_time();
   session.frame_count++;
   session.data_size += frame->frame_length();
 }
 
-void session_keeper::rebuild_index_db() {
+void session_builder::rebuild_index_db() {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   auto locator = io_device_->get_locator();
   auto reader = io_device_->open_reader_to_subscribe();
@@ -99,7 +118,7 @@ void session_keeper::rebuild_index_db() {
       } else if (frame->msg_type() == SessionEnd::tag) {
         close_session(location, frame->gen_time());
       } else if (location->category != category::SYSTEM or location->group != "master") {
-        update_session(frame->source(), frame);
+        update_session(frame);
       }
     } catch (const std::exception &ex) {
       SPDLOG_ERROR("problematic frame at {}, {}", location->uname, ex.what());
