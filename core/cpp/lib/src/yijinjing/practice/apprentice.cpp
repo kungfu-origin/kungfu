@@ -35,13 +35,12 @@ namespace kungfu::yijinjing::practice {
 apprentice::apprentice(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_client>(home, low_latency)),
       master_home_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master", "master", get_locator())),
-      master_commands_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
-                                                      fmt::format("{:08x}", get_live_home_uid()), get_locator())),
+      master_cmd_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
+                                                 fmt::format("{:08x}", get_live_home_uid()), get_locator())),
       config_location_(location::make_shared(mode::LIVE, category::SYSTEM, "etc", "kungfu", get_locator())),
-      state_bank_(), started_(false), master_start_time_(0), trading_day_(time::today_nano()), timer_usage_count_(0),
-      session_finder_(get_io_device()) {
+      state_bank_(), trading_day_(time::today_nano()), session_finder_(get_io_device()) {
   add_location(0, master_home_location_);
-  add_location(0, master_commands_location_);
+  add_location(0, master_cmd_location_);
   add_location(0, config_location_);
 }
 
@@ -49,9 +48,11 @@ index::session_finder &apprentice::get_session_finder() { return session_finder_
 
 bool apprentice::is_started() const { return started_; }
 
-uint32_t apprentice::get_master_commands_uid() const { return master_commands_location_->uid; }
+uint32_t apprentice::get_master_commands_uid() const { return master_cmd_location_->uid; }
 
 int64_t apprentice::get_master_start_time() const { return master_start_time_; }
+
+int64_t apprentice::get_last_session_end_time() const { return last_session_end_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
 
@@ -61,19 +62,19 @@ const cache::bank &apprentice::get_state_bank() const { return state_bank_; }
 
 void apprentice::request_read_from(int64_t trigger_time, uint32_t source_id, int64_t from_time) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
-    require_read_from(trigger_time, master_commands_location_->uid, source_id, from_time);
+    require_read_from(trigger_time, master_cmd_location_->uid, source_id, from_time);
   }
 }
 
 void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
-    require_read_from_public(trigger_time, master_commands_location_->uid, source_id, from_time);
+    require_read_from_public(trigger_time, master_cmd_location_->uid, source_id, from_time);
   }
 }
 
 void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
-    require_write_to(trigger_time, master_commands_location_->uid, dest_id);
+    require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
   }
 }
 
@@ -144,19 +145,7 @@ void apprentice::react() {
   SPDLOG_INFO("on ready");
   on_ready();
 
-  switch (get_io_device()->get_home()->mode) {
-  case mode::BACKTEST: {
-    // dest_id 0 should be configurable TODO
-    auto home = get_io_device()->get_home();
-    auto backtest_location =
-        std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
-    reader_->join(backtest_location, 0, begin_time_);
-    started_ = true;
-    SPDLOG_INFO("on start");
-    on_start();
-    break;
-  }
-  case mode::LIVE: {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
     auto self_register_event = events_ | skip_until(events_ | is(Register::tag) | filter([&](const event_ptr &event) {
                                                       auto uid = event->data<Register>().location_uid;
                                                       return uid == get_home_uid();
@@ -179,31 +168,27 @@ void apprentice::react() {
               }
             });
 
-    self_register_event | $(
-                              [&](const event_ptr &event) {
-                                reader_->join(master_commands_location_, get_live_home_uid(), event->gen_time());
-                              },
-                              [&](std::exception_ptr e) {
-                                try {
-                                  std::rethrow_exception(e);
-                                } catch (const std::exception &ex) {
-                                  SPDLOG_ERROR("Register failed: {}", ex.what());
-                                  hero::signal_stop();
-                                }
-                              });
+    self_register_event | $([&](const event_ptr &event) {
+      last_session_end_time_ = event->data<Register>().last_seen_time;
+      reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
+    });
 
     checkin();
     expect_start();
-    break;
   }
-  case mode::REPLAY: {
-    reader_->join(master_commands_location_, get_live_home_uid(), begin_time_);
+  if (get_io_device()->get_home()->mode == mode::REPLAY) {
+    reader_->join(master_cmd_location_, get_live_home_uid(), begin_time_);
     expect_start();
-    break;
   }
-  default: {
-    break;
-  }
+  if (get_io_device()->get_home()->mode == mode::BACKTEST) {
+    // dest_id 0 should be configurable TODO
+    auto home = get_io_device()->get_home();
+    auto backtest_location =
+        std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
+    reader_->join(backtest_location, 0, begin_time_);
+    started_ = true;
+    SPDLOG_INFO("on start");
+    on_start();
   }
 }
 

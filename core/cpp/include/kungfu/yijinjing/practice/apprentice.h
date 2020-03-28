@@ -40,6 +40,8 @@ public:
 
   int64_t get_master_start_time() const;
 
+  int64_t get_last_session_end_time() const;
+
   int64_t get_trading_day() const;
 
   yijinjing::data::location_ptr get_config_location() const;
@@ -70,10 +72,10 @@ public:
   }
 
 protected:
-  cache::bank state_bank_;
   const data::location_ptr config_location_;
   const data::location_ptr master_home_location_;
-  const data::location_ptr master_commands_location_;
+  const data::location_ptr master_cmd_location_;
+  cache::bank state_bank_;
 
   void react() final;
 
@@ -90,7 +92,7 @@ protected:
   void on_write_to(const event_ptr &event);
 
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime) {
-    auto writer = get_writer(master_commands_location_->uid);
+    auto writer = get_writer(master_cmd_location_->uid);
     int32_t timer_usage_count = timer_usage_count_;
     int64_t duration_ns = nanotime - now();
     longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
@@ -112,7 +114,7 @@ protected:
   template <typename Duration, typename Enabled = rx::is_duration<Duration>>
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> time_interval(Duration &&d) {
     auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
-    auto writer = get_writer(master_commands_location_->uid);
+    auto writer = get_writer(master_cmd_location_->uid);
     int32_t timer_usage_count = timer_usage_count_;
     longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
     r.id = timer_usage_count;
@@ -125,7 +127,7 @@ protected:
       return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                if (e->msg_type() == longfist::types::Time::tag &&
                    e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
-                 auto writer = get_writer(master_commands_location_->uid);
+                 auto writer = get_writer(master_cmd_location_->uid);
                  longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                  r.id = timer_usage_count;
                  r.duration = duration_ns;
@@ -143,7 +145,7 @@ protected:
   template <typename Duration, typename Enabled = rx::is_duration<Duration>>
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timeout(Duration &&d) {
     auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
-    auto writer = get_writer(master_commands_location_->uid);
+    auto writer = get_writer(master_cmd_location_->uid);
     int32_t timer_usage_count = timer_usage_count_;
     longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
     r.id = timer_usage_count;
@@ -155,7 +157,7 @@ protected:
     return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src) {
       return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                 if (e->msg_type() != longfist::types::Time::tag) {
-                  auto writer = get_writer(master_commands_location_->uid);
+                  auto writer = get_writer(master_cmd_location_->uid);
                   longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                   r.id = timer_usage_count;
                   r.duration = duration_ns;
@@ -177,12 +179,13 @@ protected:
   }
 
 private:
-  bool started_;
-  int64_t master_start_time_;
-  int64_t trading_day_;
-  int32_t timer_usage_count_;
-  std::unordered_map<int, int64_t> timer_checkpoints_ = {};
   index::session_finder session_finder_;
+  bool started_ = false;
+  int64_t master_start_time_ = 0;
+  int64_t last_session_end_time_ = 0;
+  int64_t trading_day_ = 0;
+  int32_t timer_usage_count_ = 0;
+  std::unordered_map<int, int64_t> timer_checkpoints_ = {};
 
   void checkin();
 

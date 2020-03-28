@@ -96,12 +96,12 @@ void Client::connect(const Register &register_data) {
   auto app_location = app_.get_location(register_data.location_uid);
   if (app_location->category == category::MD and should_connect_md(app_location)) {
     app_.request_write_to(app_.now(), app_location->uid);
-    app_.request_read_from_public(app_.now(), app_location->uid, register_data.checkin_time);
+    app_.request_read_from_public(app_.now(), app_location->uid, app_.get_last_session_end_time());
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_location->uid);
-    app_.request_read_from(app_.now(), app_location->uid, register_data.checkin_time);
-    app_.request_read_from_public(app_.now(), app_location->uid, register_data.checkin_time);
+    app_.request_read_from(app_.now(), app_location->uid, app_.get_last_session_end_time());
+    app_.request_read_from_public(app_.now(), app_location->uid, app_.get_last_session_end_time());
   }
 }
 
