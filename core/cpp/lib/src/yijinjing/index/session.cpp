@@ -38,7 +38,7 @@ int64_t session_finder::find_last_seen_time(const data::location_ptr &source_loc
 
 SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
-  return session_storage_.get_all<Session>(order_by(bt), where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)));
+  return session_storage_.get_all<Session>(where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)), order_by(bt));
 }
 
 SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from, int64_t to) {
