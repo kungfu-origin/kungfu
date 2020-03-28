@@ -192,8 +192,6 @@ class KungfuCoreConan(ConanFile):
                 os.chdir(os.path.join('build', 'kfc'))
                 os.rename('.Python', 'Python')
                 os.symlink('Python', '.Python')
-            if tools.detected_os() == 'Windows' and os.path.exists(os.path.join('build', build_type, 'sqlite3.dll')):
-                shutil.copy2(os.path.join('build', build_type, 'sqlite3.dll'), os.path.join('build', 'kfc'))
             if rc != 0:
                 self.output.error('PyInstaller failed')
                 sys.exit(rc)

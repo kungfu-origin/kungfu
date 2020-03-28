@@ -114,7 +114,7 @@ void master::react() {
   events_ | instanceof <journal::frame>() | $([&](const event_ptr &e) {
                          if (registry_.find(e->source()) != registry_.end()) {
                            session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(e));
-                           if (get_location(e->source())->category != category::MD) {
+                           if (has_location(e->source()) and get_location(e->source())->category != category::MD) {
                              cast_event_invoke(e, app_cache_shift_[e->source()]);
                            }
                          }
