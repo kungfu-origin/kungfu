@@ -30,7 +30,7 @@ session_finder::session_finder(const io_device_ptr &io_device)
 
 session_finder::~session_finder() { io_device_.reset(); }
 
-int64_t session_finder::find_last_seen_time(const data::location_ptr &source_location) {
+int64_t session_finder::find_last_active_time(const data::location_ptr &source_location) {
   auto sessions = session_storage_.get_all<Session>(where(eq(&Session::location_uid, source_location->uid)),
                                                     order_by(&Session::begin_time).desc(), limit(1));
   return sessions.empty() ? INT64_MAX : sessions.front().end_time;
@@ -53,8 +53,8 @@ session_builder::session_builder(const io_device_ptr &io_device) : session_finde
   }
 }
 
-int64_t session_builder::find_last_seen_time(const data::location_ptr &source_location) {
-  return session_finder::find_last_seen_time(source_location);
+int64_t session_builder::find_last_active_time(const data::location_ptr &source_location) {
+  return session_finder::find_last_active_time(source_location);
 }
 
 Session &session_builder::open_session(const location_ptr &source_location, int64_t time) {

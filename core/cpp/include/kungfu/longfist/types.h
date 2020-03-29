@@ -97,8 +97,8 @@ KF_DEFINE_DATA_TYPE(                                //
     (std::string, group),                           //
     (std::string, name),                            //
     (int32_t, pid),                                 //
-    (int64_t, checkin_time),                        //
-    (int64_t, last_seen_time)                       //
+    (int64_t, last_active_time),                    //
+    (int64_t, checkin_time)                         //
 );
 
 KF_DEFINE_DATA_TYPE(                                  //
@@ -145,10 +145,10 @@ KF_DEFINE_PACK_TYPE(                         //
     (int64_t, repeat)                        //
 );
 
-KF_DEFINE_PACK_TYPE(                        //
+KF_DEFINE_PACK_TYPE(                                                           //
     TimeReset, 10100, PK(system_clock_count, steady_clock_count), PERPETUAL(), //
-    (int64_t, system_clock_count),          //
-    (int64_t, steady_clock_count)           //
+    (int64_t, system_clock_count),                                             //
+    (int64_t, steady_clock_count)                                              //
 );
 
 KF_DEFINE_PACK_TYPE(                                     //

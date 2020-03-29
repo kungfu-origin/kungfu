@@ -43,10 +43,11 @@ int64_t time::next_trading_day_end(int64_t nanotime) {
   return trading_day;
 }
 
-int64_t time::today_start() {
-  int64_t now = time::now_in_nano();
-  return now - (now % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
+int64_t time::calendar_day_start(int64_t nanotime) {
+  return nanotime - (nanotime % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
 }
+
+int64_t time::today_start() { return calendar_day_start(time::now_in_nano()); }
 
 int64_t time::strptime(const std::string &timestr, const std::string &format) {
   int64_t nano = 0;

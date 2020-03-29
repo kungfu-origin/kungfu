@@ -12,6 +12,18 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::broker {
+struct ResumePolicy {
+  [[nodiscard]] virtual int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const = 0;
+};
+
+struct ContinuousResumePolicy : public ResumePolicy {
+  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const override;
+};
+
+struct IntradayResumePolicy : public ResumePolicy {
+  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const override;
+};
+
 class Client {
 public:
   explicit Client(yijinjing::practice::apprentice &app);
@@ -21,6 +33,8 @@ public:
   [[nodiscard]] const std::unordered_map<uint32_t, longfist::types::Instrument> &get_instruments() const;
 
   [[nodiscard]] virtual bool is_ready(uint32_t broker_location_uid) const;
+
+  [[nodiscard]] virtual const ResumePolicy &get_resume_policy() const = 0;
 
   [[nodiscard]] virtual bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                                            const std::string &instrument_id) const;
@@ -55,17 +69,22 @@ class AutoClient : public Client {
 public:
   explicit AutoClient(yijinjing::practice::apprentice &app);
 
+  [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
+
 protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
+  ContinuousResumePolicy resume_policy_ = {};
 };
 
-class EnrollmentClient : public Client {
+class ManualClient : public Client {
 public:
-  explicit EnrollmentClient(yijinjing::practice::apprentice &app);
+  explicit ManualClient(yijinjing::practice::apprentice &app);
+
+  [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
   [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                                    const std::string &instrument_id) const override;
@@ -87,6 +106,7 @@ protected:
   void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 
 private:
+  IntradayResumePolicy resume_policy_ = {};
   std::unordered_map<uint32_t, bool> enrolled_md_locations_ = {};
   std::unordered_map<uint32_t, bool> enrolled_td_locations_ = {};
 };

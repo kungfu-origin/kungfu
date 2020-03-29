@@ -72,6 +72,13 @@ public:
   static int64_t next_trading_day_end(int64_t nanotime);
 
   /**
+   * Given a timestamp, returns the start time of the corresponding calendar day.
+   * @param nanotime timesamp in nano seconds
+   * @return the start time point of the corresponding calendar day in nano seconds
+   */
+  static int64_t calendar_day_start(int64_t nanotime);
+
+  /**
    * Start time of today (00:00:00) in nano seconds.
    * @return start time of today in nano seconds
    */
@@ -100,8 +107,17 @@ public:
    */
   static std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
+  /**
+   * Gets time base point of current process.
+   * @return time base point which is set by the singleton method.
+   */
   static time_point_info get_base();
 
+  /**
+   * Reset time base point so that multiprocess application can have synced time.
+   * @param system_clock_count std::chrono::system_clock nano seconds count
+   * @param steady_clock_count std::chrono::steady_clock nano seconds count
+   */
   static void reset(int64_t system_clock_count, int64_t steady_clock_count);
 
 private:

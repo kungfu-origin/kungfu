@@ -95,8 +95,8 @@ void Ledger::on_start() {
     auto register_data = event->data<Register>();
     auto app_location = get_location(register_data.location_uid);
     if (app_location->category == category::STRATEGY) {
-      request_read_from_public(event->gen_time(), app_location->uid, get_last_seen_time());
-      request_read_from(event->gen_time(), app_location->uid, get_last_seen_time());
+      request_read_from_public(event->gen_time(), app_location->uid, get_last_active_time());
+      request_read_from(event->gen_time(), app_location->uid, get_last_active_time());
       request_write_to(event->gen_time(), app_location->uid);
     }
   });

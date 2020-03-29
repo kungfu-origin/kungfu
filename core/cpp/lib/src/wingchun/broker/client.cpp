@@ -12,6 +12,12 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
+int64_t ContinuousResumePolicy::get_resmue_time(const apprentice &app) const { return app.get_last_active_time(); }
+
+int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app) const {
+  return std::max(time::calendar_day_start(app.get_last_active_time()), time::calendar_day_start(app.now()));
+}
+
 Client::Client(apprentice &app) : app_(app) {}
 
 const std::unordered_map<uint32_t, Instrument> &Client::get_instruments() const { return instruments_; }
@@ -95,31 +101,36 @@ void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_
 void Client::connect(const Register &register_data) {
   auto app_uid = register_data.location_uid;
   auto app_location = app_.get_location(app_uid);
+  auto &resume_policy = get_resume_policy();
   if (app_location->category == category::MD and should_connect_md(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from_public(app_.now(), app_uid, app_.get_last_seen_time());
+    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_resmue_time(app_));
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from(app_.now(), app_uid, app_.get_last_seen_time());
-    app_.request_read_from_public(app_.now(), app_uid, app_.get_last_seen_time());
+    app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
+    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_resmue_time(app_));
   }
 }
 
 AutoClient::AutoClient(apprentice &app) : Client(app) {}
 
+const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy_; }
+
 bool AutoClient::should_connect_md(const location_ptr &md_location) const { return true; }
 
 bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
 
-EnrollmentClient::EnrollmentClient(apprentice &app) : Client(app) {}
+ManualClient::ManualClient(apprentice &app) : Client(app) {}
 
-bool EnrollmentClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
+const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }
+
+bool ManualClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                                      const std::string &instrument_id) const {
   return is_all_subscribed(md_location_uid) or Client::is_subscribed(md_location_uid, exchange_id, instrument_id);
 }
 
-void EnrollmentClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
+void ManualClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                                  const std::string &instrument_id) {
   if (not is_all_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
@@ -127,27 +138,27 @@ void EnrollmentClient::subscribe(const location_ptr &md_location, const std::str
   Client::subscribe(md_location, exchange_id, instrument_id);
 }
 
-bool EnrollmentClient::is_all_subscribed(uint32_t md_location_uid) const {
+bool ManualClient::is_all_subscribed(uint32_t md_location_uid) const {
   return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
 }
 
-void EnrollmentClient::subscribe_all(const location_ptr &md_location) {
+void ManualClient::subscribe_all(const location_ptr &md_location) {
   enrolled_md_locations_.emplace(md_location->uid, true);
 }
 
-void EnrollmentClient::enroll_account(const location_ptr &td_location) {
+void ManualClient::enroll_account(const location_ptr &td_location) {
   enrolled_td_locations_.emplace(td_location->uid, true);
 }
 
-bool EnrollmentClient::should_connect_md(const location_ptr &md_location) const {
+bool ManualClient::should_connect_md(const location_ptr &md_location) const {
   return enrolled_md_locations_.find(md_location->uid) != enrolled_md_locations_.end();
 }
 
-bool EnrollmentClient::should_connect_td(const location_ptr &td_location) const {
+bool ManualClient::should_connect_td(const location_ptr &td_location) const {
   return enrolled_td_locations_.find(td_location->uid) != enrolled_td_locations_.end();
 }
 
-void EnrollmentClient::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
+void ManualClient::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   if (is_all_subscribed(md_location->uid)) {
     app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
   } else {

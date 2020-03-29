@@ -52,7 +52,7 @@ uint32_t apprentice::get_master_commands_uid() const { return master_cmd_locatio
 
 int64_t apprentice::get_master_start_time() const { return master_start_time_; }
 
-int64_t apprentice::get_last_seen_time() const { return last_seen_time_; }
+int64_t apprentice::get_last_active_time() const { return last_active_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
 
@@ -174,7 +174,7 @@ void apprentice::react() {
             });
 
     self_register_event | $([&](const event_ptr &event) {
-      last_seen_time_ = event->data<Register>().last_seen_time;
+      last_active_time_ = event->data<Register>().last_active_time;
       reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
     });
 
@@ -232,7 +232,7 @@ void apprentice::checkin() {
   data["location_uid"] = home->uid;
   data["pid"] = GETPID();
   data["checkin_time"] = now;
-  data["last_seen_time"] = now;
+  data["last_active_time"] = now;
   request["data"] = data;
 
   get_io_device()->get_publisher()->publish(request.dump());

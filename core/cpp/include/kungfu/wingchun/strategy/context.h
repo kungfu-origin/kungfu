@@ -89,7 +89,7 @@ protected:
 
 private:
   bool started_;
-  broker::EnrollmentClient broker_client_;
+  broker::ManualClient broker_client_;
   book::Bookkeeper bookkeeper_;
   algo::AlgoContext_ptr algo_context_;
   yijinjing::data::location_ptr ledger_location_;

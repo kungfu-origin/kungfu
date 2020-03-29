@@ -20,7 +20,7 @@ public:
 
   virtual ~session_finder();
 
-  virtual int64_t find_last_seen_time(const data::location_ptr &source_location);
+  virtual int64_t find_last_active_time(const data::location_ptr &source_location);
 
   SessionVector find_sessions(int64_t from = 0, int64_t to = INT64_MAX);
 
@@ -35,7 +35,7 @@ class session_builder : public session_finder {
 public:
   explicit session_builder(const yijinjing::io_device_ptr &io_device);
 
-  int64_t find_last_seen_time(const data::location_ptr &source_location) override;
+  int64_t find_last_active_time(const data::location_ptr &source_location) override;
 
   longfist::types::Session &open_session(const data::location_ptr &source_location, int64_t time);
 
