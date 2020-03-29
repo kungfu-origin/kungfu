@@ -29,6 +29,24 @@ int64_t time::now_in_nano() {
   return get_instance().start_time_system_ + duration;
 }
 
+int64_t time::next_minute(int64_t nanotime) {
+  return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
+}
+
+int64_t time::next_trading_day_end(int64_t nanotime) {
+  int64_t end_offset = 15 * time_unit::NANOSECONDS_PER_HOUR + 30 * time_unit::NANOSECONDS_PER_MINUTE;
+  int64_t trading_day = nanotime - nanotime % time_unit::NANOSECONDS_PER_DAY - time_unit::UTC_OFFSET + end_offset;
+  if (trading_day < now_in_nano()) {
+    trading_day += time_unit::NANOSECONDS_PER_DAY;
+  }
+  return trading_day;
+}
+
+int64_t time::today_start() {
+  int64_t now = time::now_in_nano();
+  return now - (now % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
+}
+
 int64_t time::strptime(const std::string &timestr, const std::string &format) {
   int64_t nano = 0;
   std::string normal_timestr = timestr;
@@ -87,13 +105,14 @@ std::string time::strftime(int64_t nanotime, const std::string &format) {
 std::string time::strfnow(const std::string &format) { return strftime(now_in_nano(), format); }
 
 /**
- * start_time_steady_ sample: 867884767983511
  * start_time_system_ sample: 1560144011373015000
+ * start_time_steady_ sample: 867884767983511
  */
 time::time() {
-  auto now = system_clock::now();
-  start_time_steady_ = steady_clock::now().time_since_epoch().count();
-  start_time_system_ = duration_cast<nanoseconds>(now.time_since_epoch()).count();
+  auto system_clock_now = system_clock::now();
+  auto steady_clock_now = steady_clock::now();
+  start_time_system_ = duration_cast<nanoseconds>(system_clock_now.time_since_epoch()).count();
+  start_time_steady_ = steady_clock_now.time_since_epoch().count();
 }
 
 const kungfu::yijinjing::time &time::get_instance() {

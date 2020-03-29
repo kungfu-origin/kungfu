@@ -40,7 +40,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   serialize::InitStateMap(info, ledger_ref_);
   SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
-  auto today = time::today_nano();
+  auto today = time::today_start();
   for (const auto &config : ConfigStore::Unwrap(config_ref_.Value())->profile_.get_all(Config{})) {
     auto state_location = location::make_shared(config, get_locator());
     if (state_location->category == category::STRATEGY) {

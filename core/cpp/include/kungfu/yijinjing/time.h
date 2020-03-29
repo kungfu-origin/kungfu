@@ -13,17 +13,15 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#ifndef YIJINJING_TIMER_H
-#define YIJINJING_TIMER_H
+#ifndef YIJINJING_TIME_H
+#define YIJINJING_TIME_H
 
 #include <string>
 
 #define KUNGFU_DATETIME_FORMAT_DEFAULT "%F %T.%N"
 
 namespace kungfu::yijinjing {
-
-class time_unit {
-public:
+struct time_unit {
   static constexpr int64_t MILLISECONDS_PER_SECOND = 1000;
   static constexpr int64_t MICROSECONDS_PER_MILLISECOND = 1000;
   static constexpr int64_t NANOSECONDS_PER_MICROSECOND = 1000;
@@ -48,12 +46,34 @@ public:
 class time {
 public:
   /**
+   * Get timestamp in nano seconds.
    * @return current nano time in int64_t (unix-timestamp * 1e9 + nano-part)
    */
   static int64_t now_in_nano();
 
   /**
-   * parse string time to nano time
+   * Given a timestamp, returns the start point of next minute.
+   * @param nanotime timestamp in nano seconds
+   * @return start time point of next minute in nano seconds
+   */
+  static int64_t next_minute(int64_t nanotime);
+
+  /**
+   * Given a timestamp, returns the next end of trading time, i.e. 15:30 of today if the argument is before that,
+   * or 15:30 or tomorrow.
+   * @param nanotime timestamp in nano seconds
+   * @return the next trading session end time point in nano seconds
+   */
+  static int64_t next_trading_day_end(int64_t nanotime);
+
+  /**
+   * Start time of today (00:00:00) in nano seconds.
+   * @return start time of today in nano seconds
+   */
+  static int64_t today_start();
+
+  /**
+   * Parse string time to nano time.
    * @param timestr string-formatted time
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return nano time in int64_t
@@ -61,41 +81,28 @@ public:
   static int64_t strptime(const std::string &timestr, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
   /**
-   * dump int64_t time to string with format
+   * Format nano seconds to string.
    * @param nanotime nano time in int64_t
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return string-formatted time
    */
   static std::string strftime(int64_t nanotime, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
+  /**
+   * Format now to string.
+   * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
+   * @return string-formatted time
+   */
   static std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
-
-  static inline int64_t next_minute_nano(int64_t nanotime) {
-    return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
-  }
-
-  static inline int64_t next_day_nano(int64_t nanotime) {
-    int64_t day = nanotime - nanotime % time_unit::NANOSECONDS_PER_DAY + 7 * time_unit::NANOSECONDS_PER_HOUR +
-                  30 * time_unit::NANOSECONDS_PER_MINUTE;
-    if (day < now_in_nano()) {
-      day += time_unit::NANOSECONDS_PER_DAY;
-    }
-    return day;
-  }
-
-  static inline int64_t today_nano() {
-    int64_t now = time::now_in_nano();
-    return now - (now % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
-  }
 
 private:
   time();
 
   static const time &get_instance();
 
-  int64_t start_time_system_;
-  int64_t start_time_steady_;
+  int64_t start_time_system_ = 0;
+  int64_t start_time_steady_ = 0;
 };
 } // namespace kungfu::yijinjing
 
-#endif // YIJINJING_TIMER_H
+#endif // YIJINJING_TIME_H

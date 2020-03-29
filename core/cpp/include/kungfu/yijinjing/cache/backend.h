@@ -103,7 +103,7 @@ private:
   template <typename DataType>
   std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>
   restore(const yijinjing::journal::writer_ptr &writer, StateStorageType &storage) {
-    for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_nano(), INT64_MAX)) {
+    for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_start(), INT64_MAX)) {
       writer->write(0, data);
     }
   }

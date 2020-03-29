@@ -38,7 +38,7 @@ apprentice::apprentice(location_ptr home, bool low_latency)
       master_cmd_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
                                                  fmt::format("{:08x}", get_live_home_uid()), get_locator())),
       config_location_(location::make_shared(mode::LIVE, category::SYSTEM, "etc", "kungfu", get_locator())),
-      state_bank_(), trading_day_(time::today_nano()), session_finder_(get_io_device()) {
+      state_bank_(), trading_day_(time::today_start()), session_finder_(get_io_device()) {
   add_location(0, master_home_location_);
   add_location(0, master_cmd_location_);
   add_location(0, config_location_);
@@ -52,7 +52,7 @@ uint32_t apprentice::get_master_commands_uid() const { return master_cmd_locatio
 
 int64_t apprentice::get_master_start_time() const { return master_start_time_; }
 
-int64_t apprentice::get_last_session_end_time() const { return last_session_end_time_; }
+int64_t apprentice::get_last_seen_time() const { return last_seen_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
 
@@ -169,7 +169,7 @@ void apprentice::react() {
             });
 
     self_register_event | $([&](const event_ptr &event) {
-      last_session_end_time_ = event->data<Register>().last_seen_time;
+      last_seen_time_ = event->data<Register>().last_seen_time;
       reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
     });
 
