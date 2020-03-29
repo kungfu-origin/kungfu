@@ -58,6 +58,8 @@ private:
   std::unordered_map<uint32_t, longfist::types::Session> app_sessions_ = {};
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
+  void write_time_reset(int64_t trigger_time, const journal::writer_ptr &writer);
+
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);

@@ -21,7 +21,7 @@ using namespace kungfu::yijinjing::nanomsg;
 namespace kungfu::yijinjing::practice {
 
 hero::hero(io_device_with_reply_ptr io_device)
-    : io_device_(std::move(io_device)), now_(0), real_now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
+    : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
   reader_ = io_device_->open_reader_to_subscribe();
@@ -90,8 +90,6 @@ bool hero::is_live() const { return live_; }
 void hero::signal_stop() { live_ = false; }
 
 int64_t hero::now() const { return now_; }
-
-int64_t hero::real_now() const { return real_now_; }
 
 void hero::set_begin_time(int64_t begin_time) { begin_time_ = begin_time; }
 
@@ -268,7 +266,6 @@ bool hero::drain(const rx::subscriber<event_ptr> &sb) {
     if (io_device_->get_observer()->wait()) {
       const std::string &notice = io_device_->get_observer()->get_notice();
       now_ = time::now_in_nano();
-      real_now_ = time::now_in_nano();
       if (notice.length() > 2) {
         sb.on_next(std::make_shared<nanomsg_json>(notice));
       } else {
@@ -278,7 +275,6 @@ bool hero::drain(const rx::subscriber<event_ptr> &sb) {
     if (io_device_->get_rep_sock()->recv() > 0) {
       const std::string &msg = io_device_->get_rep_sock()->last_message();
       now_ = time::now_in_nano();
-      real_now_ = time::now_in_nano();
       sb.on_next(std::make_shared<nanomsg_json>(msg));
     }
   }
@@ -288,7 +284,6 @@ bool hero::drain(const rx::subscriber<event_ptr> &sb) {
       if (frame_time > now_) {
         now_ = frame_time;
       }
-      real_now_ = time::now_in_nano();
       sb.on_next(reader_->current_frame());
       reader_->next();
     } else {

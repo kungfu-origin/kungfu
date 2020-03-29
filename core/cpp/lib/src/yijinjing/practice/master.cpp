@@ -72,14 +72,15 @@ void master::register_app(const event_ptr &e) {
 
   session_builder_.open_session(app_location, e->gen_time());
 
-  app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
-
   public_writer->write(e->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(e->gen_time(), register_data);
 
   require_write_to(e->gen_time(), app_location->uid, location::PUBLIC);
   require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
 
+  app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
+
+  write_time_reset(e->gen_time(), app_cmd_writer);
   write_trading_day(e->gen_time(), app_cmd_writer);
   write_locations(e->gen_time(), app_cmd_writer);
 
@@ -229,6 +230,14 @@ void master::on_active() {
     on_interval_check(now);
     last_check_ = now;
   }
+}
+
+void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {
+  auto time_base = time::get_base();
+  TimeReset time_reset = {};
+  time_reset.system_clock_count = time_base.system_clock_count;
+  time_reset.steady_clock_count = time_base.steady_clock_count;
+  writer->write(trigger_time, time_reset);
 }
 
 void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {

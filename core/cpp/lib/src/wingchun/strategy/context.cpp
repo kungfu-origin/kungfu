@@ -119,7 +119,7 @@ uint64_t Context::insert_order(const std::string &instrument_id, const std::stri
     return 0;
   }
   auto writer = app_.get_writer(account_location_uid);
-  OrderInput &input = writer->open_data<OrderInput>(app_.real_now());
+  OrderInput &input = writer->open_data<OrderInput>(app_.now());
   input.order_id = writer->current_frame_uid();
   strcpy(input.instrument_id, instrument_id.c_str());
   strcpy(input.exchange_id, exchange_id.c_str());

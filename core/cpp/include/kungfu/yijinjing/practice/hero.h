@@ -32,8 +32,6 @@ public:
 
   int64_t now() const;
 
-  int64_t real_now() const;
-
   void set_begin_time(int64_t begin_time);
 
   void set_end_time(int64_t end_time);
@@ -127,7 +125,6 @@ private:
   yijinjing::io_device_with_reply_ptr io_device_;
   rx::composite_subscription cs_;
   int64_t now_;
-  int64_t real_now_;
   volatile bool continual_ = true;
   volatile bool live_ = false;
 

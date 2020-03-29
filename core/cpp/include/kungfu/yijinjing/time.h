@@ -43,6 +43,11 @@ struct time_unit {
   static constexpr int64_t UTC_OFFSET = NANOSECONDS_PER_HOUR * 8;
 };
 
+struct time_point_info {
+  int64_t system_clock_count;
+  int64_t steady_clock_count;
+};
+
 class time {
 public:
   /**
@@ -60,7 +65,7 @@ public:
 
   /**
    * Given a timestamp, returns the next end of trading time, i.e. 15:30 of today if the argument is before that,
-   * or 15:30 or tomorrow.
+   * otherwise 15:30 of tomorrow.
    * @param nanotime timestamp in nano seconds
    * @return the next trading session end time point in nano seconds
    */
@@ -95,13 +100,15 @@ public:
    */
   static std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
 
+  static time_point_info get_base();
+
+  static void reset(int64_t system_clock_count, int64_t steady_clock_count);
+
 private:
+  time_point_info base_;
   time();
 
   static const time &get_instance();
-
-  int64_t start_time_system_ = 0;
-  int64_t start_time_steady_ = 0;
 };
 } // namespace kungfu::yijinjing
 

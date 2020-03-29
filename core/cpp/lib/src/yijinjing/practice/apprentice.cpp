@@ -112,6 +112,11 @@ void apprentice::add_time_interval(int64_t duration, const std::function<void(co
 void apprentice::on_trading_day(const event_ptr &event, int64_t daytime) {}
 
 void apprentice::react() {
+  events_ | is(TimeReset::tag) | first() | $([&](const event_ptr &event) {
+    const TimeReset &time_reset = event->data<TimeReset>();
+    time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
+  });
+
   events_ | is(Location::tag) | $([&](const event_ptr &event) {
     add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator()));
   });

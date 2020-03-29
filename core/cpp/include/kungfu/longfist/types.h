@@ -67,15 +67,6 @@ KF_DEFINE_PACK_TYPE(                                                //
     (double, min_commission) //最小手续费
 );
 
-KF_DEFINE_DATA_TYPE(                                //
-    Location, 10026, PK(location_uid), PERPETUAL(), //
-    (uint32_t, location_uid),                       //
-    (enums::category, category),                    //
-    (enums::mode, mode),                            //
-    (std::string, group),                           //
-    (std::string, name)                             //
-);
-
 KF_DEFINE_DATA_TYPE(                                                     //
     Session, 10010, PK(location_uid, begin_time), TIMESTAMP(begin_time), //
     (uint32_t, location_uid),                                            //
@@ -87,6 +78,15 @@ KF_DEFINE_DATA_TYPE(                                                     //
     (int64_t, end_time),                                                 //
     (uint32_t, frame_count),                                             //
     (uint64_t, data_size)                                                //
+);
+
+KF_DEFINE_DATA_TYPE(                                //
+    Location, 10026, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                       //
+    (enums::category, category),                    //
+    (enums::mode, mode),                            //
+    (std::string, group),                           //
+    (std::string, name)                             //
 );
 
 KF_DEFINE_DATA_TYPE(                                //
@@ -143,6 +143,12 @@ KF_DEFINE_PACK_TYPE(                         //
     (int32_t, id),                           //
     (int64_t, duration),                     //
     (int64_t, repeat)                        //
+);
+
+KF_DEFINE_PACK_TYPE(                        //
+    TimeReset, 10100, PK(system_clock_count, steady_clock_count), PERPETUAL(), //
+    (int64_t, system_clock_count),          //
+    (int64_t, steady_clock_count)           //
 );
 
 KF_DEFINE_PACK_TYPE(                                     //

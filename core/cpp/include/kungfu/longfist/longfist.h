@@ -32,8 +32,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(AlgoOrderModify),                  //
     TYPE_PAIR(Config),                           //
     TYPE_PAIR(Commission),                       //
-    TYPE_PAIR(Location),                         //
     TYPE_PAIR(Session),                          //
+    TYPE_PAIR(Location),                         //
     TYPE_PAIR(Register),                         //
     TYPE_PAIR(Deregister),                       //
     TYPE_PAIR(RequestReadFrom),                  //
@@ -42,6 +42,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(TradingDay),                       //
     TYPE_PAIR(Channel),                          //
     TYPE_PAIR(TimeRequest),                      //
+    TYPE_PAIR(TimeReset),                        //
     TYPE_PAIR(CleanCacheRequest),                //
     TYPE_PAIR(Instrument),                       //
     TYPE_PAIR(Quote),                            //
@@ -68,8 +69,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
 constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                               //
     TYPE_PAIR(Commission),                           //
-    TYPE_PAIR(Location),                             //
     TYPE_PAIR(Session),                              //
+    TYPE_PAIR(Location),                             //
     TYPE_PAIR(Register),                             //
     TYPE_PAIR(Deregister),                           //
     TYPE_PAIR(RequestReadFrom),                      //
@@ -78,6 +79,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(TradingDay),                           //
     TYPE_PAIR(Channel),                              //
     TYPE_PAIR(TimeRequest),                          //
+    TYPE_PAIR(TimeReset),                            //
     TYPE_PAIR(CleanCacheRequest),                    //
     TYPE_PAIR(Instrument),                           //
     TYPE_PAIR(Quote),                                //
