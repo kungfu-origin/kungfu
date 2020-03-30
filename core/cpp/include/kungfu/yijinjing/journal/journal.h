@@ -138,16 +138,11 @@ public:
    * @return a casted reference to the underlying memory address in mmap file
    */
   template <typename T> std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0) {
-    size_to_write_ = sizeof(T);
-    auto frame = open_frame(trigger_time, T::tag, size_to_write_);
+    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
     return const_cast<T &>(frame->template data<T>());
   }
 
-  void close_data() {
-    size_t length = size_to_write_;
-    size_to_write_ = 0;
-    close_frame(length);
-  }
+  void close_data() { close_frame(size_to_write_); }
 
   template <typename T> std::enable_if_t<kungfu::size_fixed_v<T>> write(int64_t trigger_time, const T &data) {
     auto frame = open_frame(trigger_time, T::tag, sizeof(T));

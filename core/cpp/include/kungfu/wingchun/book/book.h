@@ -37,7 +37,6 @@ struct Book {
     auto pair = positions.try_emplace(position_id);
     auto &position = (*pair.first).second;
     if (pair.second) {
-      SPDLOG_WARN("new position {}@{}", data.instrument_id, data.exchange_id);
       position.trading_day = asset.trading_day;
       position.instrument_id = data.instrument_id;
       position.exchange_id = data.exchange_id;

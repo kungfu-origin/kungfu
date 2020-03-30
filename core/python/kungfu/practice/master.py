@@ -85,7 +85,7 @@ class Master(yjj.master):
     def on_register(self, event, app_location):
         data = json.loads(event.data_as_string)
         pid = data['pid']
-        self.ctx.logger.info('app %s %d checking in', app_location.uname, pid)
+        self.ctx.logger.info('app [%d] %s checking in', pid, app_location.uname)
         if pid not in self.ctx.apprentices:
             try:
                 self.ctx.apprentices[pid] = {
@@ -93,14 +93,18 @@ class Master(yjj.master):
                     'location': app_location
                 }
             except (psutil.AccessDenied, psutil.NoSuchProcess):
-                self.ctx.logger.warn("app %s %d does not exist", app_location.uname, pid)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
+                self.ctx.logger.error("app [%d] %s checkin failed: %s", pid, app_location.uname, err_msg)
+                self.deregister_app(event.gen_time, app_location.uid)
 
     def on_interval_check(self, nanotime):
         try:
             run_tasks(self.ctx)
-        except Exception as err:
+        except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.ctx.logger.error('task error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
+            err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
+            self.ctx.logger.error('task error [%s] %s', exc_type, err_msg)
 
     def acquire_trading_day(self):
         return self.ctx.calendar.trading_day_ns

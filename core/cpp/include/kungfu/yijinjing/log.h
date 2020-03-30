@@ -20,7 +20,7 @@ const std::string &setup_log(const data::location_ptr &location, const std::stri
 
 std::shared_ptr<spdlog::logger> get_main_logger();
 
-inline void copy_log_settings(const data::location_ptr& location, const std::string &name) {
+inline void copy_log_settings(const data::location_ptr &location, const std::string &name) {
   if (get_main_logger()->name().empty()) {
     setup_log(location, name);
   }

@@ -97,12 +97,13 @@ void master::register_app(const event_ptr &e) {
 
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   auto location = get_location(app_location_uid);
+  SPDLOG_INFO("app {} gone", location->uname);
   session_builder_.close_session(location, trigger_time);
   get_writer(app_location_uid)->mark(trigger_time, SessionEnd::tag);
   deregister_channel(app_location_uid);
   deregister_location(trigger_time, app_location_uid);
-  reader_->disjoin(app_location_uid);
   registry_.erase(app_location_uid);
+  reader_->disjoin(app_location_uid);
   writers_.erase(app_location_uid);
   timer_tasks_.erase(app_location_uid);
   app_cache_shift_.erase(app_location_uid);
@@ -188,8 +189,6 @@ void master::react() {
     task.duration = request.duration;
     task.repeat_count = 0;
     task.repeat_limit = request.repeat;
-    SPDLOG_TRACE("time request from {} duration {} repeat {} at {}", get_location(e->source())->uname, request.duration,
-                 request.repeat, time::strftime(e->gen_time()));
   });
 
   events_ | is(CleanCacheRequest::tag) | $([&](const event_ptr &e) {
@@ -214,7 +213,6 @@ void master::on_active() {
       auto &task = it->second;
       if (task.checkpoint <= now) {
         get_writer(app_id)->mark(0, Time::tag);
-        SPDLOG_DEBUG("sent time event to {}", get_location(app_id)->uname);
         task.checkpoint += task.duration;
         task.repeat_count++;
         if (task.repeat_count >= task.repeat_limit) {
