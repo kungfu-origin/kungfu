@@ -42,6 +42,8 @@ public:
 
   int64_t get_last_active_time() const;
 
+  int64_t get_checkin_time() const;
+
   int64_t get_trading_day() const;
 
   yijinjing::data::location_ptr get_config_location() const;
@@ -183,6 +185,7 @@ private:
   bool started_ = false;
   int64_t master_start_time_ = 0;
   int64_t last_active_time_ = INT64_MAX;
+  int64_t checkin_time_ = INT64_MAX;
   int64_t trading_day_ = 0;
   int32_t timer_usage_count_ = 0;
   std::unordered_map<int, int64_t> timer_checkpoints_ = {};

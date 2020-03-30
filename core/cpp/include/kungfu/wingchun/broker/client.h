@@ -13,15 +13,21 @@
 
 namespace kungfu::wingchun::broker {
 struct ResumePolicy {
-  [[nodiscard]] virtual int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const = 0;
+  [[nodiscard]] int64_t get_connect_time(const yijinjing::practice::apprentice &app,
+                                         const longfist::types::Register &broker) const;
+
+  [[nodiscard]] virtual int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+                                                const longfist::types::Register &broker) const = 0;
 };
 
 struct ContinuousResumePolicy : public ResumePolicy {
-  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const override;
+  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+                                        const longfist::types::Register &broker) const override;
 };
 
 struct IntradayResumePolicy : public ResumePolicy {
-  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app) const override;
+  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+                                        const longfist::types::Register &broker) const override;
 };
 
 class Client {

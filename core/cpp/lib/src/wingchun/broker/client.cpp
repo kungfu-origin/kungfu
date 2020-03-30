@@ -12,9 +12,21 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
-int64_t ContinuousResumePolicy::get_resmue_time(const apprentice &app) const { return app.get_last_active_time(); }
+int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &broker) const {
+  if (broker.checkin_time <= app.get_last_active_time()) {
+    return app.get_last_active_time();
+  }
+  if (broker.last_active_time <= app.get_last_active_time() and broker.checkin_time >= app.get_checkin_time()) {
+    return broker.checkin_time;
+  }
+  return get_resmue_time(app, broker);
+}
 
-int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app) const {
+int64_t ContinuousResumePolicy::get_resmue_time(const apprentice &app, const Register &broker) const {
+  return app.get_last_active_time();
+}
+
+int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app, const Register &broker) const {
   return std::max(time::calendar_day_start(app.get_last_active_time()), time::calendar_day_start(app.now()));
 }
 
@@ -104,12 +116,12 @@ void Client::connect(const Register &register_data) {
   auto &resume_policy = get_resume_policy();
   if (app_location->category == category::MD and should_connect_md(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_resmue_time(app_));
+    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_connect_time(app_, register_data));
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
     app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
-    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_resmue_time(app_));
+    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_connect_time(app_, register_data));
   }
 }
 
@@ -126,12 +138,12 @@ ManualClient::ManualClient(apprentice &app) : Client(app) {}
 const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }
 
 bool ManualClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                     const std::string &instrument_id) const {
+                                 const std::string &instrument_id) const {
   return is_all_subscribed(md_location_uid) or Client::is_subscribed(md_location_uid, exchange_id, instrument_id);
 }
 
 void ManualClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
-                                 const std::string &instrument_id) {
+                             const std::string &instrument_id) {
   if (not is_all_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
   }

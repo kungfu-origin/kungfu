@@ -52,6 +52,8 @@ uint32_t apprentice::get_master_commands_uid() const { return master_cmd_locatio
 
 int64_t apprentice::get_master_start_time() const { return master_start_time_; }
 
+int64_t apprentice::get_checkin_time() const { return checkin_time_; }
+
 int64_t apprentice::get_last_active_time() const { return last_active_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
@@ -174,7 +176,9 @@ void apprentice::react() {
             });
 
     self_register_event | $([&](const event_ptr &event) {
-      last_active_time_ = event->data<Register>().last_active_time;
+      auto data = event->data<Register>();
+      last_active_time_ = data.last_active_time;
+      checkin_time_ = data.checkin_time;
       reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
     });
 
