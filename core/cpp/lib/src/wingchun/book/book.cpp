@@ -55,7 +55,7 @@ void Book::update(int64_t update_time) {
   }
 }
 
-Bookkeeper::Bookkeeper(apprentice &app, const broker::Client &broker_client)
+Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
     : app_(app), broker_client_(broker_client), instruments_(), books_() {}
 
 const std::unordered_map<uint32_t, Book_ptr> &Bookkeeper::get_books() const { return books_; }
@@ -126,6 +126,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     const Position &data = event->data<Position>();
     try_update_position(event->source(), data);
     try_update_position(event->dest(), data);
+    try_subscribe_position(data);
   });
 
   events | is(PositionEnd::tag) | $([&](const event_ptr &event) {
@@ -140,9 +141,10 @@ void Bookkeeper::restore(const yijinjing::cache::bank &state_bank) {
     auto &state = pair.second;
     auto &position = state.data;
     auto book = get_book(position.holder_uid);
-    auto &positions =
-        position.direction == longfist::enums::Direction::Long ? book->long_positions : book->short_positions;
+    auto is_long = position.direction == longfist::enums::Direction::Long;
+    auto &positions = is_long ? book->long_positions : book->short_positions;
     positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
+    try_subscribe_position(position);
   }
   for (auto &pair : state_bank[boost::hana::type_c<Asset>]) {
     auto &state = pair.second;
@@ -180,6 +182,15 @@ void Bookkeeper::try_update_asset(uint32_t location_uid, const Asset &asset) {
 void Bookkeeper::try_update_position(uint32_t location_uid, const longfist::types::Position &position) {
   if (app_.has_location(location_uid) and app_.get_location(location_uid)->category == category::TD) {
     get_book(location_uid)->get_position(position.direction, position) = position;
+  }
+}
+
+void Bookkeeper::try_subscribe_position(const longfist::types::Position &position) {
+  auto holder_location = app_.get_location(position.holder_uid);
+  if (holder_location->category == category::TD) {
+    auto group = holder_location->group;
+    auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, app_.get_locator());
+    broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
   }
 }
 } // namespace kungfu::wingchun::book

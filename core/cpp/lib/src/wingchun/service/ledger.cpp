@@ -78,25 +78,13 @@ const std::unordered_map<uint32_t, longfist::types::Instrument> &Ledger::get_ins
   return broker_client_.get_instruments();
 }
 
-void Ledger::on_ready() {
-  events_ | is(Position::tag) | $([&](const event_ptr &event) {
-    const Position &position = event->data<Position>();
-    auto holder_location = get_location(position.holder_uid);
-    if (holder_location->category == category::TD) {
-      auto group = holder_location->group;
-      auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-      broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
-    }
-  });
-}
-
 void Ledger::on_start() {
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
     auto app_location = get_location(register_data.location_uid);
     if (app_location->category == category::STRATEGY) {
-      request_read_from_public(event->gen_time(), app_location->uid, get_last_active_time());
-      request_read_from(event->gen_time(), app_location->uid, get_last_active_time());
+      request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
+      request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
       request_write_to(event->gen_time(), app_location->uid);
     }
   });
@@ -111,6 +99,7 @@ void Ledger::on_start() {
         has_writer(channel.source_id)) {
       auto writer = get_writer(channel.source_id);
 
+      SPDLOG_WARN("reset cache for {}", get_location(channel.source_id)->uname);
       CleanCacheRequest request = {};
       request.msg_type = Asset::tag;
       writer->write(event->gen_time(), request);
@@ -152,6 +141,16 @@ void Ledger::on_start() {
   events_ | is(Trade::tag) | $([&](const event_ptr &event) {
     const Trade &data = event->data<Trade>();
     write_book(event, data);
+  });
+
+  events_ | is(Position::tag) | $([&](const event_ptr &event) {
+    const Position &position = event->data<Position>();
+    auto holder_location = get_location(position.holder_uid);
+    if (holder_location->category == category::TD) {
+      auto group = holder_location->group;
+      auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
+      broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+    }
   });
 
   events_ | is(PositionEnd::tag) | $([&](const event_ptr &event) {

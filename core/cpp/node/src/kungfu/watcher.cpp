@@ -35,7 +35,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      update_ledger(ledger_ref_), publish(*this, state_ref_) {
+      update_ledger(ledger_ref_), publish(*this, state_ref_), clean_cache(*this, ledger_ref_) {
   serialize::InitStateMap(info, state_ref_);
   serialize::InitStateMap(info, ledger_ref_);
   SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
@@ -224,6 +224,8 @@ void Watcher::on_start() {
     app_states_ref_.Set(format(app_location->uid),
                         Napi::Number::New(app_states_ref_.Env(), (int)event->data<BrokerStateUpdate>().state));
   });
+
+  events_ | is(CleanCacheRequest::tag) | $([&](const event_ptr &event) { clean_cache(event); });
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to) {

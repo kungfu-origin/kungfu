@@ -84,7 +84,10 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
 
     def _apply_buy(self, book, trade):
         position = book.get_position(trade)
-        position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) / (position.volume + trade.volume)
+        if position.volume + trade.volume > 0:
+            position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) / (position.volume + trade.volume)
+        else:
+            self.ctx.logger.error(f'position volume: {position.volume} trade volume: {trade.volume}')
         commission = self._calculate_commission(trade)
         tax = self._calculate_tax(trade)
         trade.commission = commission

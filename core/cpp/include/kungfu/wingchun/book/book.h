@@ -37,6 +37,7 @@ struct Book {
     auto pair = positions.try_emplace(position_id);
     auto &position = (*pair.first).second;
     if (pair.second) {
+      SPDLOG_WARN("new position {}@{}", data.instrument_id, data.exchange_id);
       position.trading_day = asset.trading_day;
       position.instrument_id = data.instrument_id;
       position.exchange_id = data.exchange_id;
@@ -78,7 +79,7 @@ DECLARE_PTR(AccountingMethod)
 
 class Bookkeeper {
 public:
-  explicit Bookkeeper(yijinjing::practice::apprentice &app, const broker::Client &broker_client);
+  explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client);
 
   virtual ~Bookkeeper() = default;
 
@@ -96,7 +97,7 @@ public:
 
 private:
   yijinjing::practice::apprentice &app_;
-  const broker::Client &broker_client_;
+  broker::Client &broker_client_;
 
   std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> accounting_methods_ = {};
   std::unordered_map<uint32_t, Book_ptr> books_ = {};
@@ -107,6 +108,8 @@ private:
   void try_update_asset(uint32_t location_uid, const longfist::types::Asset &asset);
 
   void try_update_position(uint32_t location_uid, const longfist::types::Position &position);
+
+  void try_subscribe_position(const longfist::types::Position &position);
 
   template <typename DataType>
   static constexpr auto is_own = [](const broker::Client &broker_client) {

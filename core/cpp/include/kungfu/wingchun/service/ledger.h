@@ -43,8 +43,6 @@ public:
   virtual void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) = 0;
 
 protected:
-  void on_ready() override;
-
   void on_start() override;
 
 private:
