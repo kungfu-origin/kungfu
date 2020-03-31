@@ -617,13 +617,14 @@ KF_DEFINE_PACK_TYPE(                                //
     (BrokerState, state)                            //
 );
 
-KF_DEFINE_DATA_TYPE(                                  //
+KF_DEFINE_PACK_TYPE(                                  //
     OrderStat, 215, PK(order_id), TIMESTAMP(md_time), //
     (uint64_t, order_id),                             //
     (int64_t, md_time),                               //
     (int64_t, insert_time),                           //
     (int64_t, ack_time),                              //
-    (std::vector<int64_t>, timestamps));
+    (int64_t, trade_time)                             //
+);
 } // namespace kungfu::longfist::types
 
 #endif // KUNGFU_LONGFIST_TYPES_H

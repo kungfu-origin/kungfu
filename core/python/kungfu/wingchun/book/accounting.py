@@ -103,13 +103,13 @@ class StockAccountingMethod(pywingchun.AccountingMethod):
         book.asset.accumulated_fee += (commission + tax)
 
     def _apply_sell(self, book, trade):
-        if self.yesterday_volume < trade.volume:
-            self.ctx.logger.error("{} current yesterday volume is {}, {} to sell".format(self.uname, self.yesterday_volume, trade.volume))
-            return
-        if self.frozen_total < trade.volume:
-            self.ctx.logger.error("{} current frozen volume is {}, {} to sell".format(self.uname, self.frozen_total, trade.volume))
-            return
         position = book.get_position(trade)
+        if position.yesterday_volume < trade.volume:
+            self.ctx.logger.error(f'{book.asset.account_id} position {position.instrument_id} yesterday volume {position.yesterday_volume}, {trade.volume} to sell')
+            return
+        if position.frozen_total < trade.volume:
+            self.ctx.logger.error(f'{book.asset.account_id} position {position.instrument_id} frozen volume {position.frozen_total}, {trade.volume} to sell')
+            return
         realized_pnl = self._calculate_realized_pnl(trade.price, trade.volume)
         commission = self._calculate_commission(trade)
         tax = self._calculate_tax(trade)

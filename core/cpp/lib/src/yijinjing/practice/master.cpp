@@ -235,7 +235,7 @@ void master::on_active() {
 
 void master::try_add_location(int64_t trigger_time, const data::location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
-    profile_.set(dynamic_cast<Location&>(*app_location));
+    profile_.set(dynamic_cast<Location &>(*app_location));
     add_location(trigger_time, app_location);
   }
 }

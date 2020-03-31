@@ -41,15 +41,18 @@ class KungfuCoreConan(ConanFile):
         "node_version": "10.16.0",
         "electron_version": "4.2.11"
     }
+    cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))
     build_dir = os.path.join(conanfile_dir, 'build')
     cpp_dir = os.path.join(conanfile_dir, "cpp")
-    cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
+    ext_dir = os.path.join(conanfile_dir, "extensions")
 
     def source(self):
         """Performs clang-format on all C++ files"""
         if tools.which('clang-format') is not None:
             self.__clang_format(self.cpp_dir, self.cpp_files_extensions)
+            self.__clang_format(os.path.join(self.ext_dir, 'xtp', 'src'), self.cpp_files_extensions)
+            self.__clang_format(os.path.join(self.ext_dir, 'ctp', 'src'), self.cpp_files_extensions)
         else:
             self.output.warn('clang-format not installed')
 

@@ -6,6 +6,7 @@
 #define WINGCHUN_BROKER_H
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/wingchun/common.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
