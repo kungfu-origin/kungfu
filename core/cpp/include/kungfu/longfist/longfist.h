@@ -105,6 +105,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                   //
+    TYPE_PAIR(Location),                                 //
     TYPE_PAIR(Commission)                                //
 );
 

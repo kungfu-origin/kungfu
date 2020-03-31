@@ -19,8 +19,11 @@ namespace kungfu::yijinjing::practice {
 master::master(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_master>(home, low_latency)), start_time_(time::now_in_nano()), last_check_(0),
       session_builder_(get_io_device()), profile_(get_locator()) {
+  for (const auto &app_location : profile_.get_all(Location{})) {
+    add_location(start_time_, location::make_shared(app_location, get_locator()));
+  }
   for (const auto &config : profile_.get_all(Config{})) {
-    add_location(start_time_, location::make_shared(config, get_locator()));
+    try_add_location(start_time_, location::make_shared(config, get_locator()));
   }
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
@@ -59,9 +62,9 @@ void master::register_app(const event_ptr &e) {
   auto public_writer = get_writer(location::PUBLIC);
   auto app_cmd_writer = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
-  add_location(e->gen_time(), app_location);
-  add_location(e->gen_time(), master_cmd_location);
-  app_locations_.emplace(app_location->uid, master_cmd_location->uid);
+  try_add_location(e->gen_time(), app_location);
+  try_add_location(e->gen_time(), master_cmd_location);
+  app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(e->gen_time(), register_data);
@@ -126,7 +129,7 @@ void master::react() {
 
   events_ | is(Location::tag) | $([&](const event_ptr &e) {
     Location data = e->data<Location>();
-    add_location(e->gen_time(), location::make_shared(data, get_locator()));
+    try_add_location(e->gen_time(), location::make_shared(data, get_locator()));
     get_writer(location::PUBLIC)->write(e->gen_time(), data);
   });
 
@@ -227,6 +230,13 @@ void master::on_active() {
   if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now) {
     on_interval_check(now);
     last_check_ = now;
+  }
+}
+
+void master::try_add_location(int64_t trigger_time, const data::location_ptr &app_location) {
+  if (not has_location(app_location->uid)) {
+    profile_.set(dynamic_cast<Location&>(*app_location));
+    add_location(trigger_time, app_location);
   }
 }
 
