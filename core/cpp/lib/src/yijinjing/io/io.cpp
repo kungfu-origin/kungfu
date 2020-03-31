@@ -86,19 +86,9 @@ public:
   nanomsg_publisher_client(const io_device &io_device, bool low_latency)
       : nanomsg_publisher(io_device, low_latency, protocol::PUSH) {
     socket_.connect(connect_path_);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  bool is_usable() override {
-    auto now = time::now_in_nano();
-    nlohmann::json ping;
-    ping["msg_type"] = Ping::tag;
-    ping["gen_time"] = now;
-    ping["trigger_time"] = now;
-    ping["source"] = 0;
-    ping["dest"] = 0;
-    return socket_.send(ping.dump()) > 0;
-  }
+  bool is_usable() override { return publish("{}") > 0; }
 };
 
 class nanomsg_observer : public observer, protected nanomsg_resource {
@@ -198,13 +188,22 @@ io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_lat
 
 io_device_master::io_device_master(data::location_ptr home, bool low_latency)
     : io_device_with_reply(std::move(home), low_latency, false) {
-  publisher_ = std::make_shared<nanomsg_publisher_master>(*this, low_latency);
-  observer_ = std::make_shared<nanomsg_observer_master>(*this, low_latency);
+  publisher_ = std::make_shared<nanomsg_publisher_master>(*this, is_low_latency());
+  observer_ = std::make_shared<nanomsg_observer_master>(*this, is_low_latency());
 }
 
 io_device_client::io_device_client(data::location_ptr home, bool low_latency)
-    : io_device_with_reply(std::move(home), low_latency, true) {
-  publisher_ = std::make_shared<nanomsg_publisher_client>(*this, low_latency);
-  observer_ = std::make_shared<nanomsg_observer_client>(*this, low_latency);
+    : io_device_with_reply(std::move(home), low_latency, true) {}
+
+bool io_device_client::is_usable() {
+  nanomsg_publisher_client publisher(*this, false);
+  nanomsg_observer_client observer(*this, false);
+  return publisher.is_usable() and observer.is_usable();
+}
+
+void io_device_client::setup() {
+  publisher_ = std::make_shared<nanomsg_publisher_client>(*this, is_low_latency());
+  observer_ = std::make_shared<nanomsg_observer_client>(*this, is_low_latency());
+  std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_RECV_TIMEOUT));
 }
 } // namespace kungfu::yijinjing

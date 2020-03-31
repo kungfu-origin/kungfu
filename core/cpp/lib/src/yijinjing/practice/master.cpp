@@ -125,8 +125,6 @@ void master::react() {
                          }
                        });
 
-  events_ | is(Ping::tag) | $([&](const event_ptr &e) { get_io_device()->get_publisher()->publish("{}"); });
-
   events_ | is(Location::tag) | $([&](const event_ptr &e) {
     Location data = e->data<Location>();
     try_add_location(e->gen_time(), location::make_shared(data, get_locator()));

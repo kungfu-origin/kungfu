@@ -306,6 +306,8 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("observer", &io_device::get_observer)
       .def_property_readonly("home", &io_device::get_home)
       .def_property_readonly("live_home", &io_device::get_live_home)
+      .def("is_usable", &io_device::is_usable)
+      .def("setup", &io_device::setup)
       .def("open_reader", &io_device::open_reader)
       .def("open_reader_to_subscribe", &io_device::open_reader_to_subscribe)
       .def("open_writer", &io_device::open_writer)

@@ -99,6 +99,10 @@ DECLARE_PTR(io_device_master)
 class io_device_client : public io_device_with_reply {
 public:
   io_device_client(data::location_ptr home, bool low_latency);
+
+  bool is_usable() override;
+
+  void setup() override;
 };
 
 DECLARE_PTR(io_device_client)
