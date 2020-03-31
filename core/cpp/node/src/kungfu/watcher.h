@@ -127,7 +127,7 @@ private:
         }
       };
       auto perform = [trigger_time, account_location, proxy_location, account_writer, action, id_ptr]() {
-        uint64_t id_left = (uint64_t)(proxy_location->uid xor account_location->uid) << 32;
+        uint64_t id_left = (uint64_t)(proxy_location->uid xor account_location->uid) << 32u;
         uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
         DataType data = action;
         data.*id_ptr = id_left | id_right;
@@ -150,8 +150,10 @@ private:
           $([perform](const event_ptr &event) { perform(); },
             error_handler_log(fmt::format("channel {} -> {}", account_location->uname, proxy_location->uname)));
       Channel request = {};
-      request.source_id = account_location->uid;
       request.dest_id = proxy_location->uid;
+      request.source_id = ledger_location_->uid;
+      master_cmd_writer->write(trigger_time, request);
+      request.source_id = account_location->uid;
       master_cmd_writer->write(trigger_time, request);
       return Napi::Boolean::New(info.Env(), true);
     } catch (const std::exception &ex) {
