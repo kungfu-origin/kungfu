@@ -199,16 +199,21 @@ void hero::register_location(int64_t trigger_time, const longfist::types::Regist
 }
 
 void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid) {
-  registry_.erase(location_uid);
-  SPDLOG_DEBUG("{} [{:08x}] down", locations_.at(location_uid)->uname, location_uid);
+  if (is_location_live(location_uid)) {
+    registry_.erase(location_uid);
+    SPDLOG_DEBUG("{} [{:08x}] down", locations_.at(location_uid)->uname, location_uid);
+  }
 }
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
-  channels_.emplace(channel_uid, channel);
-  SPDLOG_DEBUG("[{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
-               has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown", channel.source_id,
-               has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown", channel.dest_id);
+  if (channels_.find(channel_uid) == channels_.end()) {
+    channels_.emplace(channel_uid, channel);
+    SPDLOG_DEBUG("[{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
+                 has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown",
+                 channel.source_id, has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown",
+                 channel.dest_id);
+  }
 }
 
 void hero::deregister_channel(uint32_t source_location_uid) {
