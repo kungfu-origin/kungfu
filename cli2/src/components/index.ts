@@ -30,7 +30,7 @@ export const monitPrompt = async (list: boolean) => {
     ]);
 
 
-    //it is so damn important, because inquirer event will conflict with blessed
+    //it is so important, because inquirer event will conflict with blessed
     process.stdin.removeAllListeners('data'); 
 
     const { processName } = answers;
