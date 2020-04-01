@@ -264,12 +264,12 @@ export default {
                     makeOrderForm['instrument_type'] = instrumentType;
 
                     //sell
-                    if (t.makeOrderForm.side = 1) {
+                    if ((t.makeOrderForm.side = 1) && (instrumentType === 'Stock')) {
                         const instrumentId = t.makeOrderForm.instrument_id;
                         const targetVolume = t.makeOrderForm.volume;
                         const posItem = t.pos[instrumentId + '多'];
                         const totalVolume = posItem.totalVolume || 0;
-                        if ((totalVolume <= targetVolume) && (instrumentType === 'Stock')) {
+                        if (totalVolume <= targetVolume) {
                             t.$message.warning(`持仓不足！当前 ${instrumentId} 持仓 ${totalVolume}`)
                             return
                         }
