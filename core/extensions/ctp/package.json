@@ -3,7 +3,7 @@
         "type": "source",
         "config": {
             "name": "ctp",
-            "type": "future",
+            "type": "Future",
             "key": "account_id",
             "td_config": [
                 {

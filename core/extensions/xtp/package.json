@@ -3,7 +3,7 @@
         "type": "source",
         "config": {
             "name": "xtp",
-            "type": "stock",
+            "type": "Stock",
             "key": "user_id",
             "td_config": [{
                     "key": "user_id",

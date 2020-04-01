@@ -1,7 +1,7 @@
 
 import moment from 'moment';
 
-import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { history } from '__gUtils/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 

@@ -238,19 +238,17 @@ export default {
             const t = this;
             //买：0
             t.makeOrderForm.side = 0;
-            t.submit()
+            this.submit()
         },
 
         handleSell(){
-            const t = this;
             //卖：1
-            t.makeOrderForm.side = 1;
-            t.submit()
+            this.makeOrderForm.side = 1;
+            this.submit()
         },
 
         handleSelectAccount(account) {
-            const t = this;
-            t.currentAccount = account;
+            this.currentAccount = account;
         },
 
         submit(){
@@ -265,6 +263,9 @@ export default {
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
+
+                    console.log(t.currentAccountResolve, '---')
+                    return;
 
                     if (t.moduleType === 'account') {
                         kungfuMakeOrder(makeOrderForm, t.currentAccountResolve)
@@ -304,16 +305,14 @@ export default {
         },
 
         getAvailCash(accountId){
-            const t = this;
             if(!accountId) return 0;
-            const targetAccount = t.accountsAsset[accountId] || null
+            const targetAccount = this.accountsAsset[accountId] || null
             if(!targetAccount) return 0
             return targetAccount.avail || 0
         },
 
         getSourceName(accountId){
-            const t = this;
-            const targetAccount = t.tdList.filter(a => a.account_id.includes(accountId))
+            const targetAccount = this.tdList.filter(a => a.account_id.includes(accountId))
             if(!targetAccount.length) return ''
             return targetAccount[0].source_name;
         },
@@ -323,11 +322,10 @@ export default {
         },
         
         clearData(){
-            const t = this;
-            t.$emit('update:visible', false)
-            t.volumeRate = 0;
-            t.currentAccount = '';
-            t.makeOrderForm = {
+            this.$emit('update:visible', false)
+            this.volumeRate = 0;
+            this.currentAccount = '';
+            this.makeOrderForm = {
                 instrument_id: '',
                 account_id: '',
                 client_id: '',

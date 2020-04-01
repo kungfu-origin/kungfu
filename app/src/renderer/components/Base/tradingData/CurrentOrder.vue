@@ -53,7 +53,7 @@ import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
-import { decodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { decodeKungfuLocation } from '__io/kungfu/watcher';
 // import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
