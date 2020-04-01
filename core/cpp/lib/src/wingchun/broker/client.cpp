@@ -16,7 +16,10 @@ int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &br
   if (broker.checkin_time <= app.get_last_active_time()) {
     return app.get_last_active_time();
   }
-  if (broker.last_active_time <= app.get_last_active_time() and broker.checkin_time >= app.get_checkin_time()) {
+  if (broker.checkin_time >= app.get_checkin_time() and broker.last_active_time >= app.get_checkin_time()) {
+    return broker.checkin_time;
+  }
+  if (broker.checkin_time >= app.get_checkin_time() and broker.last_active_time <= app.get_last_active_time()) {
     return broker.checkin_time;
   }
   return get_resmue_time(app, broker);
@@ -27,7 +30,7 @@ int64_t ContinuousResumePolicy::get_resmue_time(const apprentice &app, const Reg
 }
 
 int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app, const Register &broker) const {
-  return std::max(time::calendar_day_start(app.get_last_active_time()), time::calendar_day_start(app.now()));
+  return std::max(app.get_last_active_time(), time::calendar_day_start(app.now()));
 }
 
 Client::Client(apprentice &app) : app_(app) {}
@@ -118,15 +121,17 @@ void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_
 void Client::connect(const Register &register_data) {
   auto app_uid = register_data.location_uid;
   auto app_location = app_.get_location(app_uid);
-  auto &resume_policy = get_resume_policy();
+  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
   if (app_location->category == category::MD and should_connect_md(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_connect_time(app_, register_data));
+    app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
+    SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
     app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
-    app_.request_read_from_public(app_.now(), app_uid, resume_policy.get_connect_time(app_, register_data));
+    app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
+    SPDLOG_INFO("resumed {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
 }
 
