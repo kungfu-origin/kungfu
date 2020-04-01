@@ -26,6 +26,7 @@
         :visible.sync="makeOrderDialogVisiblity"
         :moduleType="moduleType"
         :currentId="currentId"
+        :pos="dataByKey"
     >
     </make-order-dialog>
 </tr-dashboard>
@@ -51,7 +52,8 @@ export default {
     data() {
         return {
             tableData: Object.freeze([]),
-            makeOrderDialogVisiblity: false
+            makeOrderDialogVisiblity: false,
+            dataByKey: Object.freeze({})
         }
     },
 
@@ -110,9 +112,9 @@ export default {
 
     watch: {
         kungfuData (positions) {
-            const t = this;
-            const positionsResolve = t.dealPositionList(positions, t.searchKeyword);
-            (positionsResolve.length) && (t.tableData = positionsResolve);
+            const positionsResolve = this.dealPositionList(positions, this.searchKeyword);
+            (positionsResolve.dataList.length) && (this.tableData = positionsResolve.dataList);
+            this.dataByKey = positionsResolve.dataByKey;
         }
     },
 
@@ -156,9 +158,12 @@ export default {
                 positionDataByKey[poskey] = positionData;
             })
 
-            return Object.freeze(Object.values(positionDataByKey).sort((a, b) =>{
-                return a.instrumentId - b.instrumentId
-            }))
+            return {
+                dataByKey: Object.freeze(positionDataByKey),
+                dataList: Object.freeze(Object.values(positionDataByKey).sort((a, b) =>{
+                    return a.instrumentId - b.instrumentId
+                }))
+            }
         },
 
         //拼接key值

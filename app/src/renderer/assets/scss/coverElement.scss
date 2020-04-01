@@ -680,3 +680,11 @@ p.el-select-dropdown__empty{
     }
 }
 
+.el-scrollbar__bar {
+
+    &.is-vertical {
+        width: 14px;
+        border-radius: 0;
+        right: 0;
+    }  
+}

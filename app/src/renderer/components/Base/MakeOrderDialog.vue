@@ -158,6 +158,8 @@ export default {
             default: ''
         },
 
+        pos: Object
+
     },
 
     data(){
@@ -194,50 +196,44 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             tdList: state => state.ACCOUNT.tdList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-            processStatus: state => state.BASE.processStatus
+            processStatus: state => state.BASE.processStatus,
         }),
 
         accountType(){
-            const t = this;
-            const sourceName = t.currentSourceName;
-            if(!sourceName) return 'stock';
-            return t.tdAccountSource[sourceName].typeName
+            const sourceName = this.currentSourceName;
+            if (!sourceName) return 'stock';
+            return this.tdAccountSource[sourceName].typeName
         },
 
         currentAccountResolve () {
-            const t = this;
-            if(t.moduleType === 'account') {
-                return t.currentId
-            } else if(t.moduleType === 'strategy') {
-                return t.currentAccount
+            if (this.moduleType === 'account') {
+                return this.currentId
+            } else if (this.moduleType === 'strategy') {
+                return this.currentAccount
             }
         }, 
 
         currentAccountId() {
-            const t = this;
             return this.currentAccountResolve.toAccountId()
         },
 
         currentSourceName() {
-            const t = this;
-            if(t.moduleType === 'account') {
-                return t.currentId.toSourceName()
-            } else if(t.moduleType === 'strategy') {
-                return t.currentAccount.toSourceName();
+            if (this.moduleType === 'account') {
+                return this.currentId.toSourceName()
+            } else if (this.moduleType === 'strategy') {
+                return this.currentAccount.toSourceName();
             }
         }
     },
 
     methods: {
         handleClose(){
-            const t = this;
-            t.clearData();
+            this.clearData();
         },
 
         handleBuy(){
-            const t = this;
             //买：0
-            t.makeOrderForm.side = 0;
+            this.makeOrderForm.side = 0;
             this.submit()
         },
 
@@ -256,16 +252,28 @@ export default {
             t.$refs['make-order-form'].validate(valid => {
                 if(valid) {
                     //需要对account_id再处理
-                    const makeOrderForm = deepClone(t.makeOrderForm);
+                    let makeOrderForm = deepClone(t.makeOrderForm);
                     const gatewayName = `td_${t.currentSourceName}_${t.currentAccountId}`;
 
-                    if(!ifProcessRunning(gatewayName, t.processStatus)){
+                    if (!ifProcessRunning(gatewayName, t.processStatus)){
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
 
-                    console.log(t.currentAccountResolve, '---')
-                    return;
+                    const instrumentType = t.getInstrumentType(t.currentAccountResolve);
+                    makeOrderForm['instrument_type'] = instrumentType;
+
+                    //sell
+                    if (t.makeOrderForm.side = 1) {
+                        const instrumentId = t.makeOrderForm.instrument_id;
+                        const targetVolume = t.makeOrderForm.volume;
+                        const posItem = t.pos[instrumentId + '多'];
+                        const totalVolume = posItem.totalVolume || 0;
+                        if ((totalVolume <= targetVolume) && (instrumentType === 'Stock')) {
+                            t.$message.warning(`持仓不足！当前 ${instrumentId} 持仓 ${totalVolume}`)
+                            return
+                        }
+                    }
 
                     if (t.moduleType === 'account') {
                         kungfuMakeOrder(makeOrderForm, t.currentAccountResolve)
@@ -285,6 +293,13 @@ export default {
                     })
                 }
             })
+        },
+
+        getInstrumentType (accountId) {
+            const sourceName = accountId.split('_')[0] || '';
+            const config = this.tdAccountSource[sourceName] || '';
+            const typeName = config.typeName || '';
+            return typeName
         },
 
         querySearch(queryString, cb) {

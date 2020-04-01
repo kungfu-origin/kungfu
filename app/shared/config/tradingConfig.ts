@@ -58,25 +58,25 @@ export const orderStatus: NumberToStringObject = {
 export const aliveOrderStatusList = [1, 2, 7]
 
 export const sourceTypeConfig: SourceType = {
-    'stock': {
+    'Stock': {
         name: isEnglish ? 'stock' : '股票',
         kfId: 1,
         color: ''
     },
 
-    'future': {
+    'Future': {
         name: isEnglish ? 'future': '期货',
         kfId: 2,
         color: 'danger'
     },
 
-    'option': {
+    'Option': {
         name: isEnglish ? 'option' : '期权',
         kfId: 3,
         color: ''
     },
 
-    'sim': {
+    'Sim': {
         name: isEnglish ? 'simulation' : '模拟',
         kfId: 4,
         color: 'success'
