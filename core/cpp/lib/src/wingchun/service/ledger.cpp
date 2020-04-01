@@ -11,6 +11,7 @@
 using namespace kungfu::rx;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -56,9 +57,9 @@ uint64_t Ledger::cancel_order(const event_ptr &event, uint32_t account_location_
   return 0;
 }
 
-std::vector<longfist::types::Position> Ledger::get_positions(const yijinjing::data::location_ptr &location) {
-  std::vector<longfist::types::Position> res = {};
-  for (const auto &pair : state_bank_[boost::hana::type_c<longfist::types::Position>]) {
+std::vector<Position> Ledger::get_positions(const location_ptr &location) {
+  std::vector<Position> res = {};
+  for (const auto &pair : state_bank_[boost::hana::type_c<Position>]) {
     if (pair.second.data.holder_uid == location->uid) {
       res.push_back(pair.second.data);
     }
@@ -66,15 +67,15 @@ std::vector<longfist::types::Position> Ledger::get_positions(const yijinjing::da
   return res;
 }
 
-bool Ledger::has_asset(const yijinjing::data::location_ptr &location) {
+bool Ledger::has_asset(const location_ptr &location) {
   return assets_.find(location->uid) != assets_.end();
 }
 
-longfist::types::Asset Ledger::get_asset(const yijinjing::data::location_ptr &location) {
+Asset Ledger::get_asset(const location_ptr &location) {
   return assets_.at(location->uid).data;
 }
 
-const std::unordered_map<uint32_t, longfist::types::Instrument> &Ledger::get_instruments() const {
+const std::unordered_map<uint32_t, Instrument> &Ledger::get_instruments() const {
   return broker_client_.get_instruments();
 }
 
@@ -99,7 +100,6 @@ void Ledger::on_start() {
         has_writer(channel.source_id)) {
       auto writer = get_writer(channel.source_id);
 
-      SPDLOG_WARN("reset cache for {}", get_location(channel.source_id)->uname);
       CleanCacheRequest request = {};
       request.msg_type = Asset::tag;
       writer->write(event->gen_time(), request);

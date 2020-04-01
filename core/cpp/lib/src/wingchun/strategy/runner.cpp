@@ -8,14 +8,14 @@
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::strategy {
-Runner::Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name,
-               longfist::enums::mode m, bool low_latency)
+Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency) {}
 
 Context_ptr Runner::get_context() const { return context_; }

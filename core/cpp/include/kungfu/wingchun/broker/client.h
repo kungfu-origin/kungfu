@@ -31,6 +31,10 @@ struct IntradayResumePolicy : public ResumePolicy {
 };
 
 class Client {
+  typedef std::unordered_map<uint32_t, yijinjing::data::location_ptr> LocationMap;
+  typedef std::unordered_map<uint32_t, longfist::types::Instrument> InstrumentMap;
+  typedef std::unordered_map<uint32_t, longfist::enums::BrokerState> BrokerStateMap;
+
 public:
   explicit Client(yijinjing::practice::apprentice &app);
 
@@ -60,13 +64,13 @@ protected:
   virtual void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
 private:
-  std::unordered_map<uint32_t, longfist::enums::BrokerState> broker_states_;
+  BrokerStateMap broker_states_ = {};
 
-  std::unordered_map<uint32_t, yijinjing::data::location_ptr> ready_md_locations_;
-  std::unordered_map<uint32_t, yijinjing::data::location_ptr> ready_td_locations_;
+  LocationMap ready_md_locations_ = {};
+  LocationMap ready_td_locations_ = {};
 
-  std::unordered_map<uint32_t, yijinjing::data::location_ptr> instrument_md_locations_;
-  std::unordered_map<uint32_t, longfist::types::Instrument> instruments_;
+  LocationMap instrument_md_locations_ = {};
+  InstrumentMap instruments_ = {};
 
   void connect(const longfist::types::Register &register_data);
 };
@@ -87,6 +91,7 @@ private:
 };
 
 class ManualClient : public Client {
+  typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
 public:
   explicit ManualClient(yijinjing::practice::apprentice &app);
 
@@ -113,8 +118,8 @@ protected:
 
 private:
   IntradayResumePolicy resume_policy_ = {};
-  std::unordered_map<uint32_t, bool> enrolled_md_locations_ = {};
-  std::unordered_map<uint32_t, bool> enrolled_td_locations_ = {};
+  EnrollmentMap enrolled_md_locations_ = {};
+  EnrollmentMap enrolled_td_locations_ = {};
 };
 } // namespace kungfu::wingchun::broker
 
