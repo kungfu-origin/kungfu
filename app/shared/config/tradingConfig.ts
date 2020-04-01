@@ -99,3 +99,15 @@ export const exchangeIds: StringToStringObject = {
     "CFFEX": "中金所",
     "INE": "能源中心"
 }
+
+export const instrumentTypes: StringToNumberObject = {
+    Unknown         :0,
+    Stock           :1,
+    Future          :2,
+    Bond            :3,
+    StockOption     :4,
+    Fund            :5,
+    TechStock       :6,
+    Index           :7,
+    Repo            :8
+}

@@ -112,9 +112,10 @@ export default {
 
     watch: {
         kungfuData (positions) {
-            const positionsResolve = this.dealPositionList(positions, this.searchKeyword);
-            (positionsResolve.dataList.length) && (this.tableData = positionsResolve.dataList);
-            this.dataByKey = positionsResolve.dataByKey;
+            const positionsResolve = this.dealPositionList(positions, this.searchKeyword) || {};
+            const dataList = positionsResolve.dataList || []
+            (dataList.length) && (this.tableData = dataList);
+            this.dataByKey = positionsResolve.dataByKey || {};
         }
     },
 
@@ -149,7 +150,10 @@ export default {
             }
 
 
-            if (!positionsAfterFilter.length) return Object.freeze([]);
+            if (!positionsAfterFilter.length) return {
+                dataByKey: Object.freeze({}),
+                dataList: Object.freeze([])
+            };
 
             positionsAfterFilter.kfForEach(item => {
                 let positionData = dealPos(item);

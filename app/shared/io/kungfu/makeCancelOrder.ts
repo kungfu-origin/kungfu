@@ -3,6 +3,7 @@ import { watcher } from '__io/kungfu/watcher';
 
 interface MakeOrderData {
     intrument_id: string,
+    intrument_type: Number,
     exchange_id: string,
     limit_price: number,
     volume: number,

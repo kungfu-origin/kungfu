@@ -132,7 +132,7 @@ import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
-import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds } from '__gConfig/tradingConfig';
+import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 
@@ -267,7 +267,7 @@ export default {
                     if ((t.makeOrderForm.side = 1) && (instrumentType === 'Stock')) {
                         const instrumentId = t.makeOrderForm.instrument_id;
                         const targetVolume = t.makeOrderForm.volume;
-                        const posItem = t.pos[instrumentId + '多'];
+                        const posItem = t.pos[instrumentId + '多'] || {};
                         const totalVolume = posItem.totalVolume || 0;
                         if (totalVolume <= targetVolume) {
                             t.$message.warning(`持仓不足！当前 ${instrumentId} 持仓 ${totalVolume}`)
@@ -298,8 +298,8 @@ export default {
         getInstrumentType (accountId) {
             const sourceName = accountId.split('_')[0] || '';
             const config = this.tdAccountSource[sourceName] || '';
-            const typeName = config.typeName || '';
-            return typeName
+            const typeName = config.typeName || 'Unknow';
+            return instrumentTypes[typeName] || 0
         },
 
         querySearch(queryString, cb) {
