@@ -11,6 +11,7 @@
 #include <kungfu/yijinjing/util/os.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::cache;
@@ -75,7 +76,7 @@ void hero::step() {
 }
 
 void hero::run() {
-  SPDLOG_INFO("{} [{:08x}] start running", get_home_uname(), get_home_uid());
+  SPDLOG_INFO("[{:08x}] {} running", get_home_uid(), get_home_uname());
   SPDLOG_DEBUG("from {} until {}", time::strftime(begin_time_),
                end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
   setup();
@@ -115,8 +116,7 @@ bool hero::has_writer(uint32_t dest_id) const { return writers_.find(dest_id) !=
 
 writer_ptr hero::get_writer(uint32_t dest_id) const {
   if (writers_.find(dest_id) == writers_.end()) {
-    SPDLOG_ERROR("no writer for {}",
-                 has_location(dest_id) ? get_location(dest_id)->uname : fmt::format("{:08x}", dest_id));
+    SPDLOG_ERROR("no writer for {}", get_location_uname(dest_id));
   }
   return writers_.at(dest_id);
 }
@@ -126,6 +126,16 @@ bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != loc
 location_ptr hero::get_location(uint32_t uid) const {
   assert(has_location(uid));
   return locations_.at(uid);
+}
+
+std::string hero::get_location_uname(uint32_t uid) const {
+  if (uid == location::PUBLIC) {
+    return "public";
+  }
+  if (not has_location(uid)) {
+    return fmt::format("{:08x}", uid);
+  }
+  return get_location(uid)->uname;
 }
 
 bool hero::is_location_live(uint32_t uid) const { return registry_.find(uid) != registry_.end(); }
@@ -151,11 +161,11 @@ uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const {
 
 bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
   if (not has_location(source_id)) {
-    SPDLOG_ERROR("[{:08x}] -> [{:08x}] source does not exist", source_id, dest_id);
+    SPDLOG_ERROR("{} does not exist", get_location_uname(source_id));
     return false;
   }
   if (dest_id != 0 and not has_location(dest_id)) {
-    SPDLOG_ERROR("[{:08x}] -> [{:08x}] dest does not exist", source_id, dest_id);
+    SPDLOG_ERROR("{} does not exist", get_location_uname(dest_id));
     return false;
   }
   return true;
@@ -166,53 +176,39 @@ bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const {
     return false;
   }
   if (registry_.find(source_id) == registry_.end()) {
-    SPDLOG_ERROR("[{:08x}] -> [{:08x}] source is not live", source_id, dest_id);
+    SPDLOG_ERROR("{} is not live", get_location_uname(source_id));
     return false;
   }
   if (registry_.find(dest_id) == registry_.end()) {
-    SPDLOG_ERROR("[{:08x}] -> [{:08x}] dest is not live", source_id, dest_id);
+    SPDLOG_ERROR("{} is not live", get_location_uname(dest_id));
     return false;
   }
   return true;
 }
 
 void hero::add_location(int64_t trigger_time, const location_ptr &location) {
-  if (not has_location(location->uid)) {
-    locations_.emplace(location->uid, location);
-    SPDLOG_DEBUG("{} [{:08x}]", location->uname, location->uid);
-  }
+  locations_.try_emplace(location->uid, location);
 }
 
-void hero::remove_location(int64_t trigger_time, uint32_t location_uid) {
-  if (has_location(location_uid)) {
-    SPDLOG_DEBUG("{} [{:08x}]", locations_.at(location_uid)->uname, location_uid);
-    locations_.erase(location_uid);
-  }
-}
+void hero::remove_location(int64_t trigger_time, uint32_t location_uid) { locations_.erase(location_uid); }
 
 void hero::register_location(int64_t trigger_time, const longfist::types::Register &register_data) {
-  if (not is_location_live(register_data.location_uid)) {
-    registry_.emplace(register_data.location_uid, register_data);
-    auto app_location = location::make_shared(register_data, get_locator());
-    SPDLOG_DEBUG("{} [{:08x}] up", app_location->uname, app_location->uid);
-  }
+  uint32_t location_uid = register_data.location_uid;
+  registry_.try_emplace(location_uid, register_data);
+  SPDLOG_DEBUG("location [{:08x}] {} up", location_uid, get_location_uname(location_uid));
 }
 
 void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid) {
-  if (is_location_live(location_uid)) {
-    registry_.erase(location_uid);
-    SPDLOG_DEBUG("{} [{:08x}] down", locations_.at(location_uid)->uname, location_uid);
-  }
+  registry_.erase(location_uid);
+  SPDLOG_DEBUG("location [{:08x}] {} down", location_uid, get_location_uname(location_uid));
 }
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
   if (channels_.find(channel_uid) == channels_.end()) {
     channels_.emplace(channel_uid, channel);
-    SPDLOG_DEBUG("[{:08x}] from {} [{:08x}] to {} [{:08x}] ", channel_uid,
-                 has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown",
-                 channel.source_id, has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown",
-                 channel.dest_id);
+    SPDLOG_DEBUG("channel [{:08x}] {} -> {} up", channel_uid, get_location_uname(channel.source_id),
+                 get_location_uname(channel.dest_id));
   }
 }
 
@@ -222,10 +218,8 @@ void hero::deregister_channel(uint32_t source_location_uid) {
     if (channel_it->second.source_id == source_location_uid) {
       const auto &channel_uid = channel_it->first;
       const auto &channel = channel_it->second;
-      SPDLOG_DEBUG("[{:08x}] from {} [{:08x}] to {} [{:08x}]", channel_uid,
-                   has_location(channel.source_id) ? get_location(channel.source_id)->uname : "unknown",
-                   channel.source_id, has_location(channel.dest_id) ? get_location(channel.dest_id)->uname : "unknown",
-                   channel.dest_id);
+      SPDLOG_DEBUG("channel [{:08x}] {} -> {} down", channel_uid, get_location_uname(channel.source_id),
+                   get_location_uname(channel.dest_id));
       channel_it = channels_.erase(channel_it);
       continue;
     }

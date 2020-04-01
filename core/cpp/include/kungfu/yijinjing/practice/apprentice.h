@@ -83,7 +83,7 @@ protected:
 
   void on_active() override;
 
-  virtual void on_ready();
+  virtual void on_react();
 
   virtual void on_start();
 

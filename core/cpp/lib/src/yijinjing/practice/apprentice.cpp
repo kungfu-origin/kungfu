@@ -149,8 +149,8 @@ void apprentice::react() {
   events_ | take_until(events_ | is(RequestStart::tag)) |
       $([&](const event_ptr &event) { cast_event_invoke(event, state_bank_); });
 
-  SPDLOG_INFO("on ready");
-  on_ready();
+  SPDLOG_DEBUG("building reactive event handlers");
+  on_react();
 
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     auto self_register_event = events_ | skip_until(events_ | is(Register::tag) | filter([&](const event_ptr &event) {
@@ -192,18 +192,16 @@ void apprentice::react() {
   if (get_io_device()->get_home()->mode == mode::BACKTEST) {
     // dest_id 0 should be configurable TODO
     auto home = get_io_device()->get_home();
-    auto backtest_location =
-        std::make_shared<location>(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
-    reader_->join(backtest_location, 0, begin_time_);
+    auto bt_location = location::make_shared(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
+    reader_->join(bt_location, 0, begin_time_);
     started_ = true;
-    SPDLOG_INFO("on start");
     on_start();
   }
 }
 
 void apprentice::on_active() {}
 
-void apprentice::on_ready() {}
+void apprentice::on_react() {}
 
 void apprentice::on_start() {}
 
@@ -249,7 +247,7 @@ void apprentice::expect_start() {
           [&](const event_ptr &e) {
             master_start_time_ = e->trigger_time();
             started_ = true;
-            SPDLOG_INFO("on start");
+            SPDLOG_INFO("ready to start");
             on_start();
           },
           [&](const std::exception_ptr &e) {

@@ -71,24 +71,26 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
     bool state_ok = state == BrokerState::LoggedIn or state == BrokerState::Ready;
     bool state_reset = state == BrokerState::Connected or state == BrokerState::DisConnected;
 
-    if (broker_location->category == category::MD) {
-      bool ready = ready_md_locations_.find(broker_location->uid) != ready_md_locations_.end();
+    auto broker_switch = [&](auto ready_locations, auto broker_type) {
+      bool ready = ready_locations.find(broker_location->uid) != ready_locations.end();
       if (state_ok and not ready and app_.has_writer(broker_location->uid)) {
-        ready_md_locations_.emplace(broker_location->uid, broker_location);
+        ready_locations.emplace(broker_location->uid, broker_location);
+        SPDLOG_INFO("{} {} ready", broker_type, broker_location->uname);
         subscribe_instruments(event->gen_time(), broker_location);
       }
-      if (state_reset) {
-        ready_md_locations_.erase(broker_location->uid);
+      if (state_reset and ready_locations.find(broker_location->uid) != ready_locations.end()) {
+        ready_locations.erase(broker_location->uid);
+        SPDLOG_INFO("{} {} reset", broker_type, broker_location->uname);
       }
+    };
+
+    if (broker_location->category == category::MD) {
+      broker_switch(ready_md_locations_, "MD");
     }
     if (broker_location->category == category::TD) {
-      if (state_ok) {
-        ready_td_locations_.emplace(broker_location->uid, broker_location);
-      }
-      if (state_reset) {
-        ready_td_locations_.erase(broker_location->uid);
-      }
+      broker_switch(ready_md_locations_, "TD");
     }
+
     broker_states_.emplace(broker_location->uid, state);
   });
 

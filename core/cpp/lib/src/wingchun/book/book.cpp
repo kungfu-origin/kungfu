@@ -132,7 +132,6 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(PositionEnd::tag) | $([&](const event_ptr &event) {
     const PositionEnd &data = event->data<PositionEnd>();
     get_book(data.holder_uid)->update(event->gen_time());
-    SPDLOG_WARN("get position end asset {}", get_book(data.holder_uid)->asset.to_string());
   });
 }
 

@@ -35,29 +35,51 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 void Runner::on_init_context() {}
 
-void Runner::on_ready() {
+void Runner::on_react() {
   context_ = make_context();
   on_init_context();
 }
 
 void Runner::on_start() {
+  context_->on_start();
+
+  pre_start();
+
+  events_ | take_until(events_ | filter([&](const event_ptr &e) { return started_; })) | $([&](const event_ptr &e) {
+    for (const auto &pair : context_->list_accounts()) {
+      if (not context_->broker_client_.is_ready(pair.second->uid)) {
+        return;
+      }
+    }
+    started_ = true;
+    post_start();
+  });
+}
+
+void Runner::on_exit() {
+  for (const auto &strategy : strategies_) {
+    strategy->pre_stop(context_);
+  }
+
+  apprentice::on_exit();
+
+  for (const auto &strategy : strategies_) {
+    strategy->post_stop(context_);
+  }
+}
+
+void Runner::pre_start() {
   for (const auto &strategy : strategies_) {
     strategy->pre_start(context_);
   }
+}
 
-  events_ | take_until(events_ | filter([&](const event_ptr &e) { return context_->started_; })) |
-      $([&](const event_ptr &e) {
-        for (auto &account_location : context_->list_accounts()) {
-          if (not has_writer(account_location->uid)) {
-            return;
-          }
-        }
-        context_->started_ = true;
-        SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
-        for (const auto &strategy : strategies_) {
-          strategy->post_start(context_);
-        }
-      });
+void Runner::post_start() {
+  for (const auto &strategy : strategies_) {
+    strategy->post_start(context_);
+  }
+
+  SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
 
   events_ | is_own<Quote>(context_) | $([&](const event_ptr &event) {
     for (const auto &strategy : strategies_) {
@@ -100,20 +122,6 @@ void Runner::on_start() {
       strategy->on_trade(context_, event->data<Trade>());
     }
   });
-
-  context_->on_start();
-}
-
-void Runner::on_exit() {
-  for (const auto &strategy : strategies_) {
-    strategy->pre_stop(context_);
-  }
-
-  apprentice::on_exit();
-
-  for (const auto &strategy : strategies_) {
-    strategy->post_stop(context_);
-  }
 }
 
 } // namespace kungfu::wingchun::strategy

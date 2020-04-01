@@ -60,6 +60,8 @@ public:
 
   [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t uid) const;
 
+  [[nodiscard]] std::string get_location_uname(uint32_t uid) const;
+
   bool is_location_live(uint32_t uid) const;
 
   bool has_channel(uint32_t source, uint32_t dest) const;

@@ -7,7 +7,6 @@ from pykungfu import wingchun as pywingchun
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
 
-from kungfu.wingchun.book.book import AccountBook
 from kungfu.wingchun.book import accounting
 from kungfu.wingchun.utils import get_product_id
 
@@ -35,11 +34,6 @@ class Strategy(pywingchun.Strategy):
 
     def __add_account(self, source, account, cash_limit):
         self.wc_context.add_account(source, account, cash_limit)
-        # location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
-        # book = AccountBook(self.ctx, location)
-        # self.ctx.books[location.uid] = book
-        # self.book_manager.add_book(location, book)
-        # self.ctx.logger.info("added book {}@{}".format(account, source))
 
     def __get_account_book(self, source, account):
         location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
@@ -107,7 +101,6 @@ class Strategy(pywingchun.Strategy):
         self.wc_context.add_time_interval(duration, wrap_callback)
 
     def pre_start(self, wc_context):
-        self.ctx.logger.info("pre start")
         self.wc_context = wc_context
         self.bookkeeper = wc_context.bookkeeper
         self.bookkeeper.on_trading_day(wc_context.trading_day)
@@ -162,5 +155,4 @@ class Strategy(pywingchun.Strategy):
 
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
-        self.ctx.logger.info("assign trading day {} for ctx".format(self.ctx.trading_day))
         self._on_trading_day(self.ctx, daytime)

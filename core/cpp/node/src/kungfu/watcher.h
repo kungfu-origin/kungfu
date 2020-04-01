@@ -62,7 +62,7 @@ public:
   static void Init(Napi::Env env, Napi::Object exports);
 
 protected:
-  void on_ready() override;
+  void on_react() override;
 
   void on_start() override;
 

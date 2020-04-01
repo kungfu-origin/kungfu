@@ -38,7 +38,7 @@ public:
   virtual void add_account(const std::string &source, const std::string &account, double cash_limit);
 
   //获取交易账户列表
-  virtual std::vector<yijinjing::data::location_ptr> list_accounts();
+  virtual const std::unordered_map<uint32_t, yijinjing::data::location_ptr> &list_accounts() const;
 
   //获取交易账户可用资金限制
   //@param account_id  账户ID
@@ -88,7 +88,6 @@ protected:
   const std::unordered_map<uint64_t, state<longfist::types::Quote>> &quotes_;
 
 private:
-  bool started_;
   broker::ManualClient broker_client_;
   book::Bookkeeper bookkeeper_;
   algo::AlgoContext_ptr algo_context_;
@@ -101,8 +100,6 @@ private:
   uint32_t lookup_account_location_id(const std::string &account);
 
   const yijinjing::data::location_ptr &find_marketdata(const std::string &source);
-
-  void connect_account(const longfist::types::Register &register_data);
 
   template <class DataType> bool is_subscribed(const event_ptr &event) {
     const DataType &data = event->data<DataType>();

@@ -28,7 +28,7 @@ public:
 protected:
   std::vector<Strategy_ptr> strategies_;
 
-  void on_ready() override;
+  void on_react() override;
 
   void on_start() override;
 
@@ -36,7 +36,12 @@ protected:
 
   virtual Context_ptr make_context();
 
+  virtual void pre_start();
+
+  virtual void post_start();
+
 private:
+  bool started_ = false;
   Context_ptr context_;
 
   template <typename DataType>

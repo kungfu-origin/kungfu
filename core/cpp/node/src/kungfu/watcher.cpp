@@ -188,7 +188,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
   exports.Set("Watcher", func);
 }
 
-void Watcher::on_ready() {
+void Watcher::on_react() {
   events_ | $([&](const event_ptr &event) { cast_event_invoke(event, update_state); });
 }
 

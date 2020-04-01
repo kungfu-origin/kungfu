@@ -19,7 +19,7 @@ using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::strategy {
 Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events)
-    : app_(app), events_(events), started_(false), broker_client_(app_), bookkeeper_(app_, broker_client_),
+    : app_(app), events_(events), broker_client_(app_), bookkeeper_(app_, broker_client_),
       algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
       quotes_(app.get_state_bank()[boost::hana::type_c<longfist::types::Quote>]),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())) {
@@ -63,13 +63,7 @@ void Context::add_account(const std::string &source, const std::string &account,
   SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
 }
 
-std::vector<yijinjing::data::location_ptr> Context::list_accounts() {
-  std::vector<yijinjing::data::location_ptr> acc_locations;
-  for (auto &item : accounts_) {
-    acc_locations.push_back(item.second);
-  }
-  return acc_locations;
-}
+const std::unordered_map<uint32_t, location_ptr> &Context::list_accounts() const { return accounts_; }
 
 double Context::get_account_cash_limit(const std::string &account) {
   uint32_t account_id = yijinjing::util::hash_str_32(account);
@@ -136,7 +130,7 @@ uint64_t Context::insert_order(const std::string &instrument_id, const std::stri
 }
 
 uint64_t Context::cancel_order(uint64_t order_id) {
-  uint32_t account_location_uid = (order_id >> 32) xor (app_.get_home_uid());
+  uint32_t account_location_uid = (order_id >> 32u) xor (app_.get_home_uid());
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("invalid order_id {:16x}", order_id);
     return 0;
@@ -155,17 +149,5 @@ uint64_t Context::cancel_order(uint64_t order_id) {
 
 uint32_t Context::lookup_account_location_id(const std::string &account) {
   return account_location_ids_.at(hash_str_32(account));
-}
-
-void Context::connect_account(const longfist::types::Register &register_data) {
-  auto app_location = app_.get_location(register_data.location_uid);
-  auto key = hash_str_32(app_location->name);
-  SPDLOG_WARN("app_location {} key {:08x}, {}", app_location->uname, key, accounts_.find(key) != accounts_.end());
-  if (app_location->category == category::TD and accounts_.find(key) != accounts_.end()) {
-    SPDLOG_INFO("connecting account {}", app_location->uname);
-    app_.request_read_from_public(app_.now(), app_location->uid, register_data.checkin_time);
-    app_.request_read_from(app_.now(), app_location->uid, register_data.checkin_time);
-    app_.request_write_to(app_.now(), app_location->uid);
-  }
 }
 } // namespace kungfu::wingchun::strategy
