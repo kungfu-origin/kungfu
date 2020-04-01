@@ -13,14 +13,17 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
 int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &broker) const {
-  if (broker.checkin_time <= app.get_last_active_time()) {
-    return app.get_last_active_time();
+  if (app.get_last_active_time() == INT64_MAX) {
+    return app.get_checkin_time();
   }
   if (broker.checkin_time >= app.get_checkin_time() and broker.last_active_time >= app.get_checkin_time()) {
     return broker.checkin_time;
   }
   if (broker.checkin_time >= app.get_checkin_time() and broker.last_active_time <= app.get_last_active_time()) {
     return broker.checkin_time;
+  }
+  if (broker.checkin_time <= app.get_last_active_time()) {
+    return app.get_last_active_time();
   }
   return get_resmue_time(app, broker);
 }
@@ -131,7 +134,7 @@ void Client::connect(const Register &register_data) {
     app_.request_write_to(app_.now(), app_uid);
     app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
-    SPDLOG_INFO("resumed {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
+    SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
 }
 
