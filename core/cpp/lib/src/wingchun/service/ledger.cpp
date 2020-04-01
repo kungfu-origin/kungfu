@@ -83,10 +83,11 @@ void Ledger::on_start() {
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
     auto app_location = get_location(register_data.location_uid);
+    auto resume_time_point = broker_client_.get_resume_policy().get_connect_time(*this, register_data);
     if (app_location->category == category::STRATEGY) {
-      request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
-      request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
       request_write_to(event->gen_time(), app_location->uid);
+      request_read_from(event->gen_time(), app_location->uid, resume_time_point);
+      request_read_from_public(event->gen_time(), app_location->uid, resume_time_point);
     }
   });
 

@@ -135,9 +135,6 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
     strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
   }
   writer->close_data();
-  if (is_error) {
-    SPDLOG_ERROR("error_id: {} error_msg: {} session_id: {}", error_info->error_id, error_info->error_msg, session_id);
-  }
 }
 
 void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
