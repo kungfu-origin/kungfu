@@ -104,7 +104,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
       return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                return (e->msg_type() == longfist::types::Time::tag &&
                        e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns);
@@ -125,7 +125,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
       return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                if (e->msg_type() == longfist::types::Time::tag &&
                    e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
@@ -156,7 +156,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](rx::observable<event_ptr> src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
       return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                 if (e->msg_type() != longfist::types::Time::tag) {
                   auto writer = get_writer(master_cmd_location_->uid);

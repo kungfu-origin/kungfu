@@ -79,12 +79,12 @@ public:
 protected:
   int64_t begin_time_;
   int64_t end_time_;
-  std::unordered_map<uint64_t, longfist::types::Channel> channels_;
-  std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_;
-  std::unordered_map<uint32_t, longfist::types::Register> registry_;
   yijinjing::journal::reader_ptr reader_;
-  std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_;
-  rx::connectable_observable<event_ptr> events_;
+  std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_ = {};
+  std::unordered_map<uint64_t, longfist::types::Channel> channels_ = {};
+  std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
+  std::unordered_map<uint32_t, longfist::types::Register> registry_ = {};
+  rx::connectable_observable<event_ptr> events_ = {};
 
   uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
 

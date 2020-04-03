@@ -67,19 +67,21 @@ std::vector<Position> Ledger::get_positions(const location_ptr &location) {
   return res;
 }
 
-bool Ledger::has_asset(const location_ptr &location) {
-  return assets_.find(location->uid) != assets_.end();
-}
+bool Ledger::has_asset(const location_ptr &location) { return assets_.find(location->uid) != assets_.end(); }
 
-Asset Ledger::get_asset(const location_ptr &location) {
-  return assets_.at(location->uid).data;
-}
+Asset Ledger::get_asset(const location_ptr &location) { return assets_.at(location->uid).data; }
 
 const std::unordered_map<uint32_t, Instrument> &Ledger::get_instruments() const {
   return broker_client_.get_instruments();
 }
 
 void Ledger::on_start() {
+  broker_client_.on_start(events_);
+  bookkeeper_.on_start(events_);
+  bookkeeper_.restore(state_bank_);
+
+  state_bank_ >> get_writer(location::PUBLIC);
+
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
     auto app_location = get_location(register_data.location_uid);
@@ -97,18 +99,13 @@ void Ledger::on_start() {
     if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
       reader_->join(source_location, channel.dest_id, event->gen_time());
     }
-    if (source_location->category == category::TD and channel.dest_id == get_home_uid() and
-        has_writer(channel.source_id)) {
-      auto writer = get_writer(channel.source_id);
-
-      CleanCacheRequest request = {};
-      request.msg_type = Asset::tag;
-      writer->write(event->gen_time(), request);
-      request.msg_type = Position::tag;
-      writer->write(event->gen_time(), request);
-
-      writer->mark(event->gen_time(), AssetRequest::tag);
-      writer->mark(event->gen_time(), PositionRequest::tag);
+    bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
+    if (writable and source_location->category == category::TD) {
+      write_book_reset(event->gen_time(), channel.source_id);
+    }
+    if (writable and source_location->category == category::STRATEGY) {
+      write_book_reset(event->gen_time(), channel.source_id);
+      write_strategy_books(event->gen_time(), channel.source_id);
     }
   });
 
@@ -191,19 +188,48 @@ void Ledger::on_start() {
       get_writer(location::PUBLIC)->write(event->gen_time(), AssetSnapshot::tag, pair.second->asset);
     }
   });
+}
 
-  broker_client_.on_start(events_);
-  bookkeeper_.on_start(events_);
-  bookkeeper_.restore(state_bank_);
+void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
+  auto writer = get_writer(dest);
 
-  state_bank_ >> get_writer(location::PUBLIC);
+  writer->open_data<CacheReset>().msg_type = Asset::tag;
+  writer->close_data();
+  writer->mark(trigger_time, AssetRequest::tag);
+
+  writer->open_data<CacheReset>().msg_type = Position::tag;
+  writer->close_data();
+  writer->mark(trigger_time, PositionRequest::tag);
+  SPDLOG_INFO("reset book for {}", get_location_uname(dest));
+}
+
+void Ledger::write_strategy_books(int64_t trigger_time, uint32_t dest) {
+  auto book = bookkeeper_.get_book(dest);
+  auto writer = get_writer(dest);
+  auto write_positions = [&](auto positions) {
+    for (auto &pair : positions) {
+      if (book->has_position(pair.second)) {
+        writer->write(trigger_time, pair.second);
+      }
+    }
+  };
+  for (auto &pair : bookkeeper_.get_books()) {
+    auto &account_book = *pair.second;
+    writer->write(trigger_time, account_book.asset);
+    write_positions(account_book.long_positions);
+    write_positions(account_book.short_positions);
+  }
+  PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
+  end.holder_uid = dest;
+  writer->close_data();
 }
 
 void Ledger::write_daily_assets() {
+  auto writer = get_writer(location::PUBLIC);
   for (auto &pair : bookkeeper_.get_books()) {
-    DailyAsset daily = {};
+    DailyAsset &daily = writer->open_data<DailyAsset>();
     memcpy(&daily, &(pair.second->asset), sizeof(daily));
-    get_writer(location::PUBLIC)->write(now(), daily);
+    writer->close_data();
   }
 }
 } // namespace kungfu::wingchun::service

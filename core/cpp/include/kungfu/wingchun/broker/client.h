@@ -92,6 +92,7 @@ private:
 
 class ManualClient : public Client {
   typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
+
 public:
   explicit ManualClient(yijinjing::practice::apprentice &app);
 

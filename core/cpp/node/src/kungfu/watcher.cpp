@@ -35,7 +35,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      update_ledger(ledger_ref_), publish(*this, state_ref_), clean_cache(*this, ledger_ref_) {
+      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
   serialize::InitStateMap(info, state_ref_);
   serialize::InitStateMap(info, ledger_ref_);
   SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
@@ -209,11 +209,11 @@ void Watcher::on_start() {
     }
 
     auto app_location = location::make_shared(register_data, get_locator());
+    auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Connected);
     request_write_to(event->gen_time(), app_location->uid);
     request_read_from(event->gen_time(), app_location->uid, register_data.checkin_time);
     request_read_from_public(event->gen_time(), app_location->uid, register_data.checkin_time);
-    app_states_ref_.Set(format(app_location->uid),
-                        Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Connected));
+    app_states_ref_.Set(format(app_location->uid), state);
 
     if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
       MonitorMarketData(event->gen_time(), app_location);
@@ -222,16 +222,17 @@ void Watcher::on_start() {
 
   events_ | is(Deregister::tag) | $([&](const event_ptr &event) {
     auto app_location = location::make_shared(event->data<Deregister>(), get_locator());
-    app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Unknown));
+    auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Unknown);
+    app_states_ref_.Set(format(app_location->uid), state);
   });
 
   events_ | is(BrokerStateUpdate::tag) | $([&](const event_ptr &event) {
     auto app_location = get_location(event->source());
-    app_states_ref_.Set(format(app_location->uid),
-                        Napi::Number::New(app_states_ref_.Env(), (int)event->data<BrokerStateUpdate>().state));
+    auto state = (int)event->data<BrokerStateUpdate>().state;
+    app_states_ref_.Set(format(app_location->uid), Napi::Number::New(app_states_ref_.Env(), state));
   });
 
-  events_ | is(CleanCacheRequest::tag) | $([&](const event_ptr &event) { clean_cache(event); });
+  events_ | is(CacheReset::tag) | $([&](const event_ptr &event) { reset_cache(event); });
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to) {

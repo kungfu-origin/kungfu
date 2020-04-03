@@ -29,7 +29,6 @@ Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &e
 void Context::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
-  bookkeeper_.restore(app_.get_state_bank());
 }
 
 int64_t Context::now() const { return app_.now(); }

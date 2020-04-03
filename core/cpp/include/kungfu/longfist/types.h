@@ -151,9 +151,9 @@ KF_DEFINE_PACK_TYPE(                                                           /
     (int64_t, steady_clock_count)                                              //
 );
 
-KF_DEFINE_PACK_TYPE(                                     //
-    CleanCacheRequest, 10013, PK(msg_type), PERPETUAL(), //
-    (int32_t, msg_type)                                  //
+KF_DEFINE_PACK_TYPE(                              //
+    CacheReset, 10013, PK(msg_type), PERPETUAL(), //
+    (int32_t, msg_type)                           //
 );
 
 KF_DEFINE_PACK_TYPE(                                              //

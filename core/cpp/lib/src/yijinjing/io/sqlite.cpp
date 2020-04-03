@@ -51,7 +51,6 @@ struct sqlite_initilize {
 struct sqlite_shutdown {
   sqlite_shutdown() {
     sqlite3_shutdown();
-    SPDLOG_DEBUG("sqlite shutdown");
   }
 };
 

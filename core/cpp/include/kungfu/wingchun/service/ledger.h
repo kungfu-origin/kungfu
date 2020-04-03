@@ -53,6 +53,10 @@ private:
   std::unordered_map<uint64_t, state<longfist::types::Asset>> assets_ = {};
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
+  void write_book_reset(int64_t trigger_time, uint32_t dest);
+
+  void write_strategy_books(int64_t trigger_time, uint32_t dest);
+
   void write_daily_assets();
 
   template <typename DataType> void write_book(const event_ptr &event, const DataType &data) {

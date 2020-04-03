@@ -16,7 +16,8 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::strategy {
 Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
-    : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency) {}
+    : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency),
+      position_set_(m == mode::BACKTEST) {}
 
 Context_ptr Runner::get_context() const { return context_; }
 
@@ -45,7 +46,13 @@ void Runner::on_start() {
 
   pre_start();
 
-  events_ | take_until(events_ | filter([&](const event_ptr &e) { return started_; })) | $([&](const event_ptr &e) {
+  events_ | take_until(events_ | filter([&](const event_ptr &e) { return started_; })) | $([&](const event_ptr &event) {
+    if (event->msg_type() == PositionEnd::tag and get_location(event->source())->category == category::SYSTEM) {
+      position_set_ = true;
+    }
+    if (not position_set_) {
+      return;
+    }
     for (const auto &pair : context_->list_accounts()) {
       if (not context_->broker_client_.is_ready(pair.second->uid)) {
         return;

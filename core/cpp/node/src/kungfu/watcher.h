@@ -78,7 +78,7 @@ private:
   serialize::JsUpdateState update_state;
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
-  serialize::JsCleanCache clean_cache;
+  serialize::JsResetCache reset_cache;
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> proxy_locations_;
 
   void RestoreState(const yijinjing::data::location_ptr &config_location, int64_t from, int64_t to);

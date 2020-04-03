@@ -314,9 +314,9 @@ private:
   Napi::ObjectReference &state_;
 };
 
-class JsCleanCache {
+class JsResetCache {
 public:
-  JsCleanCache(yijinjing::practice::apprentice &app, Napi::ObjectReference &state);
+  JsResetCache(yijinjing::practice::apprentice &app, Napi::ObjectReference &state);
 
   void operator()(const event_ptr &event);
 

@@ -42,6 +42,7 @@ protected:
 
 private:
   bool started_ = false;
+  bool position_set_;
   Context_ptr context_;
 
   template <typename DataType>

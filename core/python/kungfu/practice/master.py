@@ -1,18 +1,14 @@
 import sys
-import traceback
 import json
 import time
 import psutil
 import functools
-from pykungfu import longfist
+import traceback
 from pykungfu import yijinjing as yjj
-import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.msg as yjj_msg
 import kungfu.yijinjing.journal as kfj
 from kungfu.yijinjing.log import create_logger
 
 from kungfu.wingchun.calendar import Calendar
-import kungfu.yijinjing.msg as yjj_msg
 
 SECOND_IN_NANO = int(1e9)
 TASKS = dict()
@@ -51,8 +47,6 @@ class Master(yjj.master):
         return info['process'].is_running() and location.category == yjj.category.SYSTEM and location.group == 'node'
 
     def on_exit(self):
-        self.ctx.logger.info('master checking on exit')
-
         for pid in self.ctx.apprentices:
             apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():

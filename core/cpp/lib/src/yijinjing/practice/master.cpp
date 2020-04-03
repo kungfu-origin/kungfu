@@ -192,8 +192,8 @@ void master::react() {
     task.repeat_limit = request.repeat;
   });
 
-  events_ | is(CleanCacheRequest::tag) | $([&](const event_ptr &e) {
-    auto msg_type = e->data<CleanCacheRequest>().msg_type;
+  events_ | is(CacheReset::tag) | $([&](const event_ptr &e) {
+    auto msg_type = e->data<CacheReset>().msg_type;
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == msg_type) {
@@ -240,10 +240,10 @@ void master::try_add_location(int64_t trigger_time, const data::location_ptr &ap
 
 void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {
   auto time_base = time::get_base();
-  TimeReset time_reset = {};
+  TimeReset &time_reset = writer->open_data<TimeReset>();
   time_reset.system_clock_count = time_base.system_clock_count;
   time_reset.steady_clock_count = time_base.steady_clock_count;
-  writer->write(trigger_time, time_reset);
+  writer->close_data();
 }
 
 void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {

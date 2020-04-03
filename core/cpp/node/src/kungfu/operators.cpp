@@ -10,6 +10,7 @@ using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::practice;
 
 namespace kungfu::node::serialize {
 JsRestoreState::JsRestoreState(Napi::ObjectReference &state, location_ptr location)
@@ -49,7 +50,7 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
   }
 }
 
-JsPublishState::JsPublishState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state)
+JsPublishState::JsPublishState(apprentice &app, Napi::ObjectReference &state)
     : app_(app), state_(state) {}
 
 void JsPublishState::operator()(const Napi::Value &value) {
@@ -75,11 +76,11 @@ void JsPublishState::operator()(const Napi::Value &value) {
   });
 }
 
-JsCleanCache::JsCleanCache(yijinjing::practice::apprentice &app, Napi::ObjectReference &state)
+JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state)
     : app_(app), state_(state) {}
 
-void JsCleanCache::operator()(const event_ptr &event) {
-  auto request = event->data<CleanCacheRequest>();
+void JsResetCache::operator()(const event_ptr &event) {
+  auto request = event->data<CacheReset>();
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == request.msg_type) {

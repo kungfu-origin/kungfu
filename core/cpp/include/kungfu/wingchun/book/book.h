@@ -11,10 +11,16 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::book {
-struct Book {
-  typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
-  typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
+FORWARD_DECLARE_PTR(Book)
+FORWARD_DECLARE_PTR(AccountingMethod)
 
+typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
+typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
+typedef std::unordered_map<uint32_t, Book_ptr> BookMap;
+typedef std::unordered_map<uint32_t, longfist::types::Instrument> InstrumentMap;
+typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> AccountingMethodMap;
+
+struct Book {
   longfist::types::Asset asset = {};
 
   PositionMap long_positions = {};
@@ -24,6 +30,20 @@ struct Book {
   PositionDetailMap short_position_details = {};
 
   std::unordered_map<uint64_t, longfist::types::Order> orders = {};
+
+  template <typename DataType> bool has_position(const DataType &data) {
+    return has_long_position(data) or has_short_position(data);
+  }
+
+  template <typename DataType> bool has_long_position(const DataType &data) {
+    auto position_id = hash_instrument(data.exchange_id, data.instrument_id);
+    return long_positions.find(position_id) != long_positions.end();
+  }
+
+  template <typename DataType> bool has_short_position(const DataType &data) {
+    auto position_id = hash_instrument(data.exchange_id, data.instrument_id);
+    return short_positions.find(position_id) != short_positions.end();
+  }
 
   longfist::types::Position &get_long_position(const longfist::types::Quote &quote);
 
@@ -55,8 +75,6 @@ struct Book {
   void update(int64_t update_time);
 };
 
-DECLARE_PTR(Book)
-
 class AccountingMethod {
 public:
   AccountingMethod() = default;
@@ -74,15 +92,13 @@ public:
   virtual void apply_trade(Book_ptr book, const longfist::types::Trade &trade) = 0;
 };
 
-DECLARE_PTR(AccountingMethod)
-
 class Bookkeeper {
 public:
   explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client);
 
   virtual ~Bookkeeper() = default;
 
-  [[nodiscard]] const std::unordered_map<uint32_t, Book_ptr> &get_books() const;
+  [[nodiscard]] const BookMap &get_books() const;
 
   Book_ptr get_book(uint32_t uid);
 
@@ -98,9 +114,9 @@ private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
 
-  std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> accounting_methods_ = {};
-  std::unordered_map<uint32_t, Book_ptr> books_ = {};
-  std::unordered_map<uint32_t, longfist::types::Instrument> instruments_ = {};
+  BookMap books_ = {};
+  InstrumentMap instruments_ = {};
+  AccountingMethodMap accounting_methods_ = {};
 
   Book_ptr make_book(uint32_t location_uid);
 

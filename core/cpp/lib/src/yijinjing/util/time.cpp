@@ -78,6 +78,9 @@ int64_t time::strptime(const std::string &timestr, const std::string &format) {
 }
 
 std::string time::strftime(int64_t nanotime, const std::string &format) {
+  if (nanotime == INT64_MAX) {
+    return "end of world";
+  }
   time_point<steady_clock> tp_steady((nanoseconds(nanotime)));
   auto tp_epoch_steady = time_point<steady_clock>{};
   auto tp_diff = tp_steady - tp_epoch_steady;
@@ -98,7 +101,7 @@ std::string time::strftime(int64_t nanotime, const std::string &format) {
   if (nanotime > 0) {
     return oss.str();
   } else if (nanotime == 0) {
-    return std::regex_replace(oss.str(), std::regex("\\d"), "0");
+    return std::regex_replace(oss.str(), std::regex("."), " ");
   } else {
     return std::regex_replace(oss.str(), std::regex("\\d"), "#");
   }

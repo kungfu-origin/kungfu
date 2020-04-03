@@ -77,13 +77,12 @@ void hero::step() {
 
 void hero::run() {
   SPDLOG_INFO("[{:08x}] {} running", get_home_uid(), get_home_uname());
-  SPDLOG_DEBUG("from {} until {}", time::strftime(begin_time_),
-               end_time_ == INT64_MAX ? "end of world" : time::strftime(end_time_));
+  SPDLOG_TRACE("from {} until {}", time::strftime(begin_time_), time::strftime(end_time_));
   setup();
   continual_ = true;
   events_.connect(cs_);
   on_exit();
-  SPDLOG_INFO("{} [{:08x}] finished", get_home_uname(), get_home_uid());
+  SPDLOG_INFO("[{:08x}] {} done", get_home_uid(), get_home_uname());
 }
 
 bool hero::is_live() const { return live_; }
@@ -194,21 +193,26 @@ void hero::remove_location(int64_t trigger_time, uint32_t location_uid) { locati
 
 void hero::register_location(int64_t trigger_time, const longfist::types::Register &register_data) {
   uint32_t location_uid = register_data.location_uid;
-  registry_.try_emplace(location_uid, register_data);
-  SPDLOG_DEBUG("location [{:08x}] {} up", location_uid, get_location_uname(location_uid));
+  auto result = registry_.try_emplace(location_uid, register_data);
+  if (result.second) {
+    SPDLOG_TRACE("location [{:08x}] {} up", location_uid, get_location_uname(location_uid));
+  }
 }
 
 void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid) {
-  registry_.erase(location_uid);
-  SPDLOG_DEBUG("location [{:08x}] {} down", location_uid, get_location_uname(location_uid));
+  auto result = registry_.erase(location_uid);
+  if (result) {
+    SPDLOG_TRACE("location [{:08x}] {} down", location_uid, get_location_uname(location_uid));
+  }
 }
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
-  if (channels_.find(channel_uid) == channels_.end()) {
-    channels_.emplace(channel_uid, channel);
-    SPDLOG_DEBUG("channel [{:08x}] {} -> {} up", channel_uid, get_location_uname(channel.source_id),
-                 get_location_uname(channel.dest_id));
+  auto result = channels_.try_emplace(channel_uid, channel);
+  if (result.second) {
+    auto source_uname = get_location_uname(channel.source_id);
+    auto dest_uname = get_location_uname(channel.dest_id);
+    SPDLOG_TRACE("channel [{:08x}] {} -> {} up", channel_uid, source_uname, dest_uname);
   }
 }
 
@@ -218,8 +222,9 @@ void hero::deregister_channel(uint32_t source_location_uid) {
     if (channel_it->second.source_id == source_location_uid) {
       const auto &channel_uid = channel_it->first;
       const auto &channel = channel_it->second;
-      SPDLOG_DEBUG("channel [{:08x}] {} -> {} down", channel_uid, get_location_uname(channel.source_id),
-                   get_location_uname(channel.dest_id));
+      auto source_uname = get_location_uname(channel.source_id);
+      auto dest_uname = get_location_uname(channel.dest_id);
+      SPDLOG_TRACE("channel [{:08x}] {} -> {} down", channel_uid, source_uname, dest_uname);
       channel_it = channels_.erase(channel_it);
       continue;
     }

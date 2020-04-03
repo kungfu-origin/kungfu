@@ -149,7 +149,7 @@ void apprentice::react() {
   events_ | take_until(events_ | is(RequestStart::tag)) |
       $([&](const event_ptr &event) { cast_event_invoke(event, state_bank_); });
 
-  SPDLOG_DEBUG("building reactive event handlers");
+  SPDLOG_TRACE("building reactive event handlers");
   on_react();
 
   if (get_io_device()->get_home()->mode == mode::LIVE) {

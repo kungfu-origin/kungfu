@@ -11,14 +11,9 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::book {
+Position &Book::get_long_position(const Quote &quote) { return get_position(Direction::Long, quote); }
 
-longfist::types::Position &Book::get_long_position(const longfist::types::Quote &quote) {
-  return get_position(Direction::Long, quote);
-}
-
-longfist::types::Position &Book::get_short_position(const longfist::types::Quote &quote) {
-  return get_position(Direction::Short, quote);
-}
+Position &Book::get_short_position(const Quote &quote) { return get_position(Direction::Short, quote); }
 
 void Book::update(int64_t update_time) {
   asset.update_time = update_time;
@@ -58,7 +53,7 @@ void Book::update(int64_t update_time) {
 Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
     : app_(app), broker_client_(broker_client), instruments_(), books_() {}
 
-const std::unordered_map<uint32_t, Book_ptr> &Bookkeeper::get_books() const { return books_; }
+const BookMap &Bookkeeper::get_books() const { return books_; }
 
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   if (books_.find(location_uid) == books_.end()) {
@@ -91,7 +86,10 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     const Quote &data = event->data<Quote>();
     auto accounting_method = accounting_methods_.at(data.instrument_type);
     for (const auto &item : books_) {
-      accounting_method->apply_quote(item.second, data);
+      auto &book = item.second;
+      if (book->has_position(data)) {
+        accounting_method->apply_quote(book, data);
+      }
     }
   });
 
@@ -178,7 +176,7 @@ void Bookkeeper::try_update_asset(uint32_t location_uid, const Asset &asset) {
   }
 }
 
-void Bookkeeper::try_update_position(uint32_t location_uid, const longfist::types::Position &position) {
+void Bookkeeper::try_update_position(uint32_t location_uid, const Position &position) {
   if (app_.has_location(location_uid) and app_.get_location(location_uid)->category == category::TD) {
     auto &target_position = get_book(location_uid)->get_position(position.direction, position);
     auto last_price = target_position.last_price;
@@ -187,7 +185,7 @@ void Bookkeeper::try_update_position(uint32_t location_uid, const longfist::type
   }
 }
 
-void Bookkeeper::try_subscribe_position(const longfist::types::Position &position) {
+void Bookkeeper::try_subscribe_position(const Position &position) {
   auto holder_location = app_.get_location(position.holder_uid);
   if (holder_location->category == category::TD) {
     auto group = holder_location->group;
