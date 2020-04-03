@@ -159,6 +159,7 @@ interface TradeData {
     offset: string;
     price: string;
     volume: Number;
+    orderId: string;
     clientId: string;
     accountId: string;
     sourceId: string;
@@ -170,6 +171,7 @@ interface TradeInputData {
     client_id: string;
     source_id: string;
     trade_id: bigint;
+    order_id: bigint;
     instrument_id: string;
     trade_time: bigint;
     offset: number;
@@ -235,6 +237,7 @@ interface OrderStatInputData {
     ack_time: bigint;
     insert_time: bigint;
     md_time: bigint;
+    trade_time: bigint;
     order_id: bigint;
     dest: string;
     source: string
@@ -248,6 +251,8 @@ interface OrderStatData {
     dest: string;
     source: string;
     systemLatency: string;
+    networkLatency: string;
+    tradeLatency: string;
 }
 
 

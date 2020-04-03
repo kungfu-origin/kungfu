@@ -134,7 +134,12 @@ export default {
                 type: 'number',
                 label: "系统延迟(μs)",
                 prop: "systemLatency", 
-                width: '70px'
+                width: '90px'
+            },{
+                type: 'number',
+                label: "网络延迟(μs)",
+                prop: "networkLatency", 
+                width: '90px'
             },{
                 type: "account-strategy",
                 label: this.moduleType == 'account' ? '策略' : '账户',
@@ -143,6 +148,7 @@ export default {
                 type: 'operation',
                 label: '',
                 prop: 'oper',
+                width: '40px'
             }]
         }
     },
@@ -253,6 +259,7 @@ export default {
                 let orderData = dealOrder(item);
                 orderData.update = true;
                 orderData.systemLatency = (t.orderStat[orderData.orderId] || {}).systemLatency || '';
+                orderData.networkLatency = (t.orderStat[orderData.orderId] || {}).networkLatency || '';
                 orderDataByKey[orderData.id] = orderData;
             })
 

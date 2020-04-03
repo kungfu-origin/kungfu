@@ -43,6 +43,13 @@ export default {
 
     mixins: [ tradingDataMixin ],
 
+    props: {
+        orderStat: {
+            type: Object,
+            default: () => ({})
+        }
+    },
+
     components: {
         DateRangeDialog
     },
@@ -86,6 +93,11 @@ export default {
                 prop: 'volume',
                 width: '60px'
             },{
+                type: 'number',
+                label: "交易延迟(ms)",
+                prop: "tradeLatency", 
+                width: '90px'
+            },{
                 type: 'account-strategy',
                 label: this.moduleType == 'account' ? '策略': '账户',
                 prop: this.moduleType == 'account' ? 'clientId': 'accountId',
@@ -126,7 +138,9 @@ export default {
             tradesAfterFilter = tradesAfterFilter
                 .map(item => {
                     let tradeData = dealTrade(item);
+                    let orderId = tradeData.orderId;
                     tradeData.update = !!t.tableData.length;
+                    tradeData.tradeLatency = (t.orderStat[orderId] || {}).tradeLatency || '';
                     return tradeData
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))

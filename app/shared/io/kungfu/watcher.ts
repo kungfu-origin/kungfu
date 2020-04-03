@@ -207,6 +207,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: moment(+updateTime / 1000000).format('HH:mm:ss'),
+        orderId: item.order_id.toString(),
         updateTimeNum: +updateTime,
         instrumentId: item.instrument_id,
         side: sideName[item.side],
@@ -258,12 +259,15 @@ export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
     const insertTime = Number(item.insert_time);
     const ackTime = Number(item.ack_time);
     const mdTime = Number(item.md_time);
+    const tradeTime = Number(item.trade_time);
 
     return {
         ackTime,
         insertTime,
         mdTime,
         systemLatency: toDecimal((insertTime - mdTime) / 1000),
+        networkLatency: Number((ackTime - insertTime) / 1000).toFixed(0), 
+        tradeLatency: Number((tradeTime - ackTime) / 1000000).toFixed(0),
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source

@@ -51,6 +51,7 @@
                     :currentId="currentId"
                     :tradingDay="tradingDay"
                     :kungfuData="trades"
+                    :orderStat="orderStat"
                     />
                 </el-row>
             </el-col>

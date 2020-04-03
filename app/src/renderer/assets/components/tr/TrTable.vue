@@ -1,6 +1,6 @@
 <template>
     <div class="tr-table">
-        <ul class="tr-table-header">
+        <ul class="tr-table-header tr-table-row">
             <li 
             :class="[
             'text-overflow', 
@@ -43,7 +43,7 @@
                         v-for="column in schema" 
                         :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
                         :style="{                             
-                                'max-width': headerWidth[column.prop] || column.width,
+                            'max-width': getHeaderWidth(column)
                         }">
                             <template v-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
@@ -83,7 +83,7 @@
                             v-for="column in schema" 
                             :key="`${column.prop}`"       
                             :style="{                             
-                                'max-width': headerWidth[column.prop] || column.width
+                                'max-width': getHeaderWidth(column)
                             }">
                                 <template v-if="column.type !== 'operation'">
                                     {{item[column.prop]}}
@@ -144,6 +144,7 @@ export default {
     data(){
         return {
             bodyWidth: 0,
+            isScroll: false,
             show: false
         }
     },
@@ -187,10 +188,10 @@ export default {
 
     mounted(){
         const t = this;
-        t.calcBodyWidth()
+        t.calcBodyWidthHeight()
         let $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
         window.addEventListener('resize', debounce(e => {
-            t.calcBodyWidth()
+            t.calcBodyWidthHeight()
                 if(!$scrollerTable) $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.forceUpdate && $scrollerTable.forceUpdate()              
         }, 300))
@@ -205,19 +206,19 @@ export default {
             })
         },
 
-        calcBodyWidth() {
-            const t = this;
-            const $target = t.$refs['tr-table-body']
+        calcBodyWidthHeight() {
+            const $target = this.$refs['tr-table-body']
             if(!$target) return;
-            t.bodyWidth = $target.clientWidth;
+            this.bodyWidth = $target.clientWidth;            
         },
 
         getHeaderWidth (column) {
             const prop = column.prop;
             const headerWidthByCalc = this.headerWidth[column.prop];
             const columnWidth = column.width;
-            if (columnWidth) {
-                return column.width 
+
+            if ((headerWidthByCalc <= 0) || !headerWidthByCalc) {
+                return columnWidth
             } else {
                 return headerWidthByCalc
             }
@@ -240,6 +241,9 @@ export default {
         line-height: 25px;
         background: $tab_header;
         white-space: nowrap;
+        padding-right: 16px;
+        box-sizing: border-box;
+
         .tr-table-cell{
             height: 25px;
             line-height: 25px;

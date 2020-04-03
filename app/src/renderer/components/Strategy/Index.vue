@@ -47,7 +47,8 @@
                             moduleType="strategy"
                             :kungfuData="trades"    
                             :tradingDay="tradingDay"          
-                            :addTime="addTime"                
+                            :addTime="addTime"    
+                            :orderStat="orderStat"
                             ></TradeRecord>
                     </el-row>
                 </el-col>
