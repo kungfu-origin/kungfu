@@ -101,6 +101,7 @@
                     <el-radio size="mini" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
                 </el-radio-group>
             </el-form-item>
+
             <el-form-item
             v-if="accountType === 'future'"
             label="套保"
@@ -113,7 +114,7 @@
                         v-for="key in Object.keys(hedgeFlag || {})"
                         :key="key"
                         :label="hedgeFlag[key]"
-                        :value="key">
+                        :value="+key">
                     </el-option>
                 </el-select>
             </el-form-item>
