@@ -181,7 +181,7 @@ void Bookkeeper::try_update_asset(uint32_t location_uid, const Asset &asset) {
 void Bookkeeper::try_update_position(uint32_t location_uid, const longfist::types::Position &position) {
   if (app_.has_location(location_uid) and app_.get_location(location_uid)->category == category::TD) {
     auto &target_position = get_book(location_uid)->get_position(position.direction, position);
-    auto &last_price = target_position.last_price;
+    auto last_price = target_position.last_price;
     target_position = position;
     target_position.last_price = last_price;
   }
