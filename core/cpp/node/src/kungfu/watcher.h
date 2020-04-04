@@ -10,6 +10,8 @@
 #include "io.h"
 #include "journal.h"
 #include "operators.h"
+#include <kungfu/wingchun/book/book.h>
+#include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::node {
@@ -69,6 +71,8 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   yijinjing::data::location_ptr ledger_location_;
+  wingchun::broker::AutoClient broker_client_;
+  wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference history_ref_;
   Napi::ObjectReference config_ref_;
   Napi::ObjectReference commission_ref_;
@@ -87,13 +91,46 @@ private:
 
   void MonitorMarketData(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
+  void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote) {
+    for (const auto &item : bookkeeper_.get_books()) {
+      auto &book = item.second;
+      auto ledger_uid = ledger_location_->uid;
+      auto holder_uid = book->asset.holder_uid;
+      auto has_long_position = book->has_long_position(quote);
+      auto has_short_position = book->has_short_position(quote);
+      if (has_long_position) {
+        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_long_position(quote));
+      }
+      if (has_short_position) {
+        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_short_position(quote));
+      }
+      if (has_long_position or has_short_position) {
+        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+      }
+    }
+  }
+
+  template <typename DataType> void UpdateBook(const event_ptr &event, const DataType &data) {
+    auto update = [&](uint32_t source, uint32_t dest) {
+      auto location = get_location(source);
+      auto book = bookkeeper_.get_book(source);
+      auto &position = book->get_position(data);
+      update_ledger(event->gen_time(), source, dest, position);
+      update_ledger(event->gen_time(), source, dest, book->asset);
+    };
+    update(event->source(), event->dest());
+    update(event->dest(), event->source());
+  }
+
   template <typename DataType, typename IdPtrType = uint64_t DataType::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr) {
     try {
       using namespace kungfu::rx;
       using namespace kungfu::longfist::types;
+      using namespace kungfu::yijinjing;
+      using namespace kungfu::yijinjing::data;
 
-      auto trigger_time = yijinjing::time::now_in_nano();
+      auto trigger_time = time::now_in_nano();
       Napi::Object obj = info[0].ToObject();
       DataType action = {};
       serialize::JsGet{}(obj, action);
@@ -116,9 +153,9 @@ private:
         return Napi::Boolean::New(info.Env(), false);
       }
 
-      auto proxy_location = yijinjing::data::location::make_shared(strategy_location->mode, strategy_location->category,
-                                                                   get_io_device()->get_home()->group,
-                                                                   strategy_location->name, strategy_location->locator);
+      auto proxy_location = location::make_shared(strategy_location->mode, strategy_location->category,
+                                                  get_io_device()->get_home()->group, strategy_location->name,
+                                                  strategy_location->locator);
 
       auto ensure_location = [&](auto location) {
         if (not has_location(location->uid)) {

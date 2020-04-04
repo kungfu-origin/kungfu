@@ -51,8 +51,6 @@ class Ledger(pywingchun.Ledger):
         self.ctx.get_inst_info = self.get_inst_info
         self.ctx.get_commission_info = self.get_commission_info
 
-        accounting.setup_bookkeeper(self.ctx, self.bookkeeper)
-
     def handle_request(self, event, msg):
         req = json.loads(msg)
         data = req['data']

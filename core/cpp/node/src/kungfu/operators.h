@@ -277,24 +277,28 @@ class JsUpdateState {
 public:
   explicit JsUpdateState(Napi::ObjectReference &state) : state_(state){};
 
-  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
-    auto data = event->template data<DataType>();
+  template <typename DataType>
+  void operator()(int64_t update_time, uint32_t source, uint32_t dest, const DataType &data) {
     auto type_name = DataType::type_name.c_str();
-    Napi::Object table = state_.Get(type_name).ToObject();
-    std::string uid = fmt::format("{:016x}", data.uid());
-    Napi::Value value = state_.Get(uid);
+    auto table = state_.Get(type_name).ToObject();
+    auto uid = fmt::format("{:016x}", data.uid());
+    auto value = state_.Get(uid);
     if (value.IsUndefined() or value.IsEmpty()) {
       value = Napi::Object::New(state_.Env());
-      Napi::Object vo = value.ToObject();
+      auto vo = value.ToObject();
       vo.DefineProperty(Napi::PropertyDescriptor::Value("tag", Napi::Number::New(value.Env(), DataType::tag)));
       vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
       vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), event->source())));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), event->dest())));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), event->gen_time())));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), source)));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
+      vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), update_time)));
       table.Set(uid, value);
     }
     set(data, value);
+  }
+
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
+    operator()(event->gen_time(), event->source(), event->dest(), event->template data<DataType>());
   }
 
 private:

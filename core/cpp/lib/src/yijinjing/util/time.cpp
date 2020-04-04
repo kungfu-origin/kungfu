@@ -101,7 +101,7 @@ std::string time::strftime(int64_t nanotime, const std::string &format) {
   if (nanotime > 0) {
     return oss.str();
   } else if (nanotime == 0) {
-    return std::regex_replace(oss.str(), std::regex("."), " ");
+    return std::regex_replace(oss.str(), std::regex("\\d"), "0");
   } else {
     return std::regex_replace(oss.str(), std::regex("\\d"), "#");
   }

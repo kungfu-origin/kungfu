@@ -13,6 +13,7 @@
 namespace kungfu::wingchun::book {
 FORWARD_DECLARE_PTR(Book)
 FORWARD_DECLARE_PTR(AccountingMethod)
+FORWARD_DECLARE_PTR(Bookkeeper)
 
 typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
@@ -90,6 +91,8 @@ public:
   virtual void apply_order(Book_ptr book, const longfist::types::Order &order) = 0;
 
   virtual void apply_trade(Book_ptr book, const longfist::types::Trade &trade) = 0;
+
+  static void setup_defaults(Bookkeeper &bookkeeper);
 };
 
 class Bookkeeper {
@@ -126,6 +129,19 @@ private:
 
   void try_subscribe_position(const longfist::types::Position &position);
 
+  template <typename DataType, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const DataType &)>
+  void update_book(const event_ptr &event, ApplyMethod apply) {
+    const DataType &data = event->data<DataType>();
+    AccountingMethod &accounting_method = *accounting_methods_.at(data.instrument_type);
+    auto apply_and_update = [&](uint32_t book_uid) {
+      auto book = get_book(book_uid);
+      (accounting_method.*apply)(book, data);
+      book->update(event->gen_time());
+    };
+    apply_and_update(event->source());
+    apply_and_update(event->dest());
+  }
+
   template <typename DataType>
   static constexpr auto is_own = [](const broker::Client &broker_client) {
     return rx::filter([&](const event_ptr &event) {
@@ -135,8 +151,6 @@ private:
     });
   };
 };
-
-DECLARE_PTR(Bookkeeper)
 } // namespace kungfu::wingchun::book
 
 #endif // WINGCHUN_BOOK_H

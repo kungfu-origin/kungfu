@@ -13,6 +13,9 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
 int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &broker) const {
+  if (app.get_last_active_time() == 0) {
+    return broker.checkin_time;
+  }
   if (app.get_last_active_time() == INT64_MAX) {
     return app.get_checkin_time();
   }

@@ -24,6 +24,7 @@ Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &e
       quotes_(app.get_state_bank()[boost::hana::type_c<longfist::types::Quote>]),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())) {
   log::copy_log_settings(app_.get_home(), app_.get_home()->name);
+  book::AccountingMethod::setup_defaults(bookkeeper_);
 }
 
 void Context::on_start() {

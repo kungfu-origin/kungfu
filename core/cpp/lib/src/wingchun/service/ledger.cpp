@@ -22,6 +22,7 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
       broker_client_(*this), bookkeeper_(*this, broker_client_) {
   log::copy_log_settings(get_io_device()->get_home(), "ledger");
+  book::AccountingMethod::setup_defaults(bookkeeper_);
   if (m == mode::LIVE) {
     pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
   }

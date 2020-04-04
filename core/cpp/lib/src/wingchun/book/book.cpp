@@ -89,30 +89,19 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
       auto &book = item.second;
       if (book->has_position(data)) {
         accounting_method->apply_quote(book, data);
+        book->update(event->gen_time());
       }
     }
   });
 
-  events | is(OrderInput::tag) | $([&](const event_ptr &event) {
-    const OrderInput &data = event->data<OrderInput>();
-    auto accounting_method = accounting_methods_.at(data.instrument_type);
-    accounting_method->apply_order_input(get_book(event->source()), data);
-    accounting_method->apply_order_input(get_book(event->dest()), data);
-  });
+  events | is(OrderInput::tag) |
+      $([&](const event_ptr &event) { update_book<OrderInput>(event, &AccountingMethod::apply_order_input); });
 
-  events | is(Order::tag) | $([&](const event_ptr &event) {
-    const Order &data = event->data<Order>();
-    auto accounting_method = accounting_methods_.at(data.instrument_type);
-    accounting_method->apply_order(get_book(event->source()), data);
-    accounting_method->apply_order(get_book(event->dest()), data);
-  });
+  events | is(Order::tag) |
+      $([&](const event_ptr &event) { update_book<Order>(event, &AccountingMethod::apply_order); });
 
-  events | is(Trade::tag) | $([&](const event_ptr &event) {
-    const Trade &data = event->data<Trade>();
-    auto accounting_method = accounting_methods_.at(data.instrument_type);
-    accounting_method->apply_trade(get_book(event->source()), data);
-    accounting_method->apply_trade(get_book(event->dest()), data);
-  });
+  events | is(Trade::tag) |
+      $([&](const event_ptr &event) { update_book<Trade>(event, &AccountingMethod::apply_trade); });
 
   events | is(Asset::tag) | $([&](const event_ptr &event) {
     const Asset &data = event->data<Asset>();

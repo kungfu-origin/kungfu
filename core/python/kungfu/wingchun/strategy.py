@@ -1,23 +1,17 @@
 import os
 import sys
 import importlib
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as pywingchun
-
 import kungfu.msg.utils as msg_utils
 import kungfu.yijinjing.time as kft
-
-from kungfu.wingchun.book import accounting
 from kungfu.wingchun.utils import get_product_id
+from pykungfu import yijinjing as yjj
+from pykungfu import wingchun as pywingchun
 
 
 class Runner(pywingchun.Runner):
     def __init__(self, ctx, mode):
         pywingchun.Runner.__init__(self, ctx.locator, ctx.group, ctx.name, mode, ctx.low_latency)
         self.ctx = ctx
-
-    def on_init_context(self):
-        accounting.setup_bookkeeper(self.ctx, self.context.bookkeeper)
 
 
 class Strategy(pywingchun.Strategy):
