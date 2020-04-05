@@ -11,6 +11,13 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::book {
+double Book::get_frozen_price(uint64_t order_id) {
+  if (orders.find(order_id) != orders.end()) {
+    return orders.at(order_id).frozen_price;
+  }
+  return 0;
+}
+
 Position &Book::get_long_position(const Quote &quote) { return get_position(Direction::Long, quote); }
 
 Position &Book::get_short_position(const Quote &quote) { return get_position(Direction::Short, quote); }

@@ -32,6 +32,8 @@ struct Book {
 
   std::unordered_map<uint64_t, longfist::types::Order> orders = {};
 
+  double get_frozen_price(uint64_t order_id);
+
   template <typename DataType> bool has_position(const DataType &data) {
     return has_long_position(data) or has_short_position(data);
   }
