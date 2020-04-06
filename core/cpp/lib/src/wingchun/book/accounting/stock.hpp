@@ -32,6 +32,7 @@ public:
       }
       position.yesterday_volume = position.volume;
       position.close_price = 0;
+      position.update_time = trading_day;
       position.trading_day = time::strftime(trading_day, KUNGFU_TRADING_DAY_FORMAT).c_str();
     }
   }

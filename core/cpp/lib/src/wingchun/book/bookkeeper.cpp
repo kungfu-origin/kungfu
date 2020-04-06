@@ -56,9 +56,17 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     auto accounting_method = accounting_methods_.at(data.instrument_type);
     for (const auto &item : books_) {
       auto &book = item.second;
-      if (book->has_position(data)) {
+      auto has_long_position = book->has_long_position(data);
+      auto has_short_position = book->has_short_position(data);
+      if (has_long_position or has_short_position) {
         accounting_method->apply_quote(book, data);
         book->update(event->gen_time());
+      }
+      if (has_long_position) {
+        book->get_long_position(data).update_time = event->gen_time();
+      }
+      if (has_short_position) {
+        book->get_short_position(data).update_time = event->gen_time();
       }
     }
   });
