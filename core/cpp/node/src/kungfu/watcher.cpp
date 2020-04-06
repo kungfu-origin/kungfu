@@ -61,8 +61,6 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   }
   RestoreState(ledger_location_, today, INT64_MAX);
   SPDLOG_INFO("watcher ledger restored");
-
-  book::AccountingMethod::setup_defaults(bookkeeper_);
 }
 
 Watcher::~Watcher() {
@@ -94,7 +92,7 @@ Napi::Value Watcher::GetLedger(const Napi::CallbackInfo &info) { return ledger_r
 Napi::Value Watcher::GetAppStates(const Napi::CallbackInfo &info) { return app_states_ref_.Value(); }
 
 Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info) {
-  return Napi::String::New(ledger_ref_.Env(), time::strftime(get_trading_day(), "%Y%m%d"));
+  return Napi::String::New(ledger_ref_.Env(), time::strftime(get_trading_day(), KUNGFU_TRADING_DAY_FORMAT));
 }
 
 Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_usable()); }

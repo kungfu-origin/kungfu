@@ -49,9 +49,7 @@ struct sqlite_initilize {
 };
 
 struct sqlite_shutdown {
-  sqlite_shutdown() {
-    sqlite3_shutdown();
-  }
+  sqlite_shutdown() { sqlite3_shutdown(); }
 };
 
 void ensure_sqlite_initilize() { static sqlite_initilize instance{}; }

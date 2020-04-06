@@ -43,7 +43,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Channel),                          //
     TYPE_PAIR(TimeRequest),                      //
     TYPE_PAIR(TimeReset),                        //
-    TYPE_PAIR(CacheReset),                //
+    TYPE_PAIR(CacheReset),                       //
     TYPE_PAIR(Instrument),                       //
     TYPE_PAIR(Quote),                            //
     TYPE_PAIR(Entrust),                          //
@@ -80,7 +80,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Channel),                              //
     TYPE_PAIR(TimeRequest),                          //
     TYPE_PAIR(TimeReset),                            //
-    TYPE_PAIR(CacheReset),                    //
+    TYPE_PAIR(CacheReset),                           //
     TYPE_PAIR(Instrument),                           //
     TYPE_PAIR(Quote),                                //
     TYPE_PAIR(Entrust),                              //

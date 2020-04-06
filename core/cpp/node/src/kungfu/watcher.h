@@ -10,7 +10,7 @@
 #include "io.h"
 #include "journal.h"
 #include "operators.h"
-#include <kungfu/wingchun/book/book.h>
+#include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 

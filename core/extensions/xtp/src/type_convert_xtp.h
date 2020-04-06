@@ -167,7 +167,7 @@ inline void to_xtp(XTPMarketDataStruct &des, const Quote &ori) {
 inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
   strcpy(des.source_id, SOURCE_XTP);
   des.data_time = nsec_from_xtp_timestamp(ori.data_time);
-  strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, "%Y%m%d").c_str());
+  strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, KUNGFU_TRADING_DAY_FORMAT).c_str());
   strcpy(des.instrument_id, ori.ticker);
   from_xtp(ori.exchange_id, des.exchange_id);
 

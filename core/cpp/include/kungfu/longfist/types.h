@@ -51,10 +51,10 @@ KF_DEFINE_DATA_TYPE(                              //
     (std::string, value)                          //
 );
 
-KF_DEFINE_PACK_TYPE(                                                //
-    Commission, 10006, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),        //合约代码
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),            //交易所代码
+KF_DEFINE_PACK_TYPE(                                             //
+    Commission, 10006, PK(product_id, exchange_id), PERPETUAL(), //
+    (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           //品种
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         //交易所
 
     (InstrumentType, instrument_type), //合约类型
 

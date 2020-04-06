@@ -20,7 +20,7 @@ inline Commission getCommissionFromJs(const Napi::CallbackInfo &info, const loca
   Commission commission = {};
   try {
     if (info[0].IsString()) {
-      strcpy(commission.instrument_id, info[0].ToString().Utf8Value().c_str());
+      strcpy(commission.product_id, info[0].ToString().Utf8Value().c_str());
       strcpy(commission.exchange_id, info[1].ToString().Utf8Value().c_str());
     }
     if (info[0].IsObject()) {

@@ -19,6 +19,7 @@
 #include <string>
 
 #define KUNGFU_DATETIME_FORMAT_DEFAULT "%F %T.%N"
+#define KUNGFU_TRADING_DAY_FORMAT "%Y%m%d"
 
 namespace kungfu::yijinjing {
 struct time_unit {

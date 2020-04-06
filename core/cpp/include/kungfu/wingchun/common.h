@@ -32,6 +32,7 @@
 #define DOUBLEMAX (1e16) // 一亿亿, 2018年A股总市值不到50万亿
 
 namespace kungfu::wingchun {
+constexpr int64_t VOLUME_ZERO = 0;
 
 class wingchun_error : public std::runtime_error {
 public:

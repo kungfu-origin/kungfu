@@ -25,7 +25,7 @@ History::History(const Napi::CallbackInfo &info)
       profile_(locator_) {}
 
 Napi::Value History::SelectPeriod(const Napi::CallbackInfo &info) {
-  auto parse_time = [&](auto i) { return time::strptime(info[i].ToString().Utf8Value(), "%Y%m%d"); };
+  auto parse_time = [&](auto i) { return time::strptime(info[i].ToString().Utf8Value(), KUNGFU_TRADING_DAY_FORMAT); };
   try {
     int64_t from = parse_time(0);
     int64_t to = info.Length() > 1 ? parse_time(1) : from + time_unit::NANOSECONDS_PER_DAY;

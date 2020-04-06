@@ -12,7 +12,7 @@
 
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/algo/algo.h>
-#include <kungfu/wingchun/book/book.h>
+#include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/common.h>
@@ -23,9 +23,11 @@
 #include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/yijinjing/common.h>
 
-PYBIND11_MAKE_OPAQUE(std::unordered_map<uint32_t, kungfu::longfist::types::Position>)
-PYBIND11_MAKE_OPAQUE(std::unordered_map<uint32_t, kungfu::longfist::types::PositionDetail>)
-PYBIND11_MAKE_OPAQUE(std::unordered_map<uint64_t, kungfu::longfist::types::Order>)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::CommissionMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::InstrumentMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionDetailMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::OrderMap)
 
 namespace kungfu::wingchun {
 namespace py = pybind11;
@@ -228,9 +230,11 @@ public:
 };
 
 void bind(pybind11::module &&m) {
-  py::bind_map<std::unordered_map<uint32_t, kungfu::longfist::types::Position>>(m, "PositionMap");
-  py::bind_map<std::unordered_map<uint32_t, kungfu::longfist::types::PositionDetail>>(m, "PositionDetailMap");
-  py::bind_map<std::unordered_map<uint64_t, kungfu::longfist::types::Order>>(m, "OrderMap");
+  py::bind_map<CommissionMap>(m, "CommissionMap");
+  py::bind_map<InstrumentMap>(m, "InstrumentMap");
+  py::bind_map<PositionMap>(m, "PositionMap");
+  py::bind_map<PositionDetailMap>(m, "PositionDetailMap");
+  py::bind_map<OrderMap>(m, "OrderMap");
 
   auto m_utils = m.def_submodule("utils");
   m_utils.def("hash_instrument", py::overload_cast<const char *, const char *>(&kungfu::wingchun::hash_instrument));
@@ -244,7 +248,9 @@ void bind(pybind11::module &&m) {
   });
 
   auto book_class = py::class_<Book, Book_ptr>(m, "Book");
-  book_class.def_readonly("asset", &Book::asset)
+  book_class.def_readonly("commissions", &Book::commissions)
+      .def_readonly("instruments", &Book::instruments)
+      .def_readonly("asset", &Book::asset)
       .def_readonly("long_positions", &Book::long_positions)
       .def_readonly("long_position_details", &Book::long_position_details)
       .def_readonly("short_positions", &Book::short_positions)
@@ -301,7 +307,6 @@ void bind(pybind11::module &&m) {
 
   py::class_<Ledger, PyLedger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
-      .def_property_readonly("config_location", &Ledger::get_config_location)
       .def_property_readonly("io_device", &Ledger::get_io_device)
       .def_property_readonly("usable", &Ledger::is_usable)
       .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper, py::return_value_policy::reference)

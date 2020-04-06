@@ -104,7 +104,7 @@ bool TraderXTP::cancel_order(const event_ptr &event) {
 }
 
 void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
-  this->trading_day_ = yijinjing::time::strftime(daytime, "%Y%m%d");
+  this->trading_day_ = yijinjing::time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
 }
 
 bool TraderXTP::req_position() { return api_->QueryPosition(nullptr, this->session_id_, ++request_id_) == 0; }

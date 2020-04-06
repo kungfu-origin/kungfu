@@ -22,7 +22,6 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
       broker_client_(*this), bookkeeper_(*this, broker_client_) {
   log::copy_log_settings(get_io_device()->get_home(), "ledger");
-  book::AccountingMethod::setup_defaults(bookkeeper_);
   if (m == mode::LIVE) {
     pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
   }
@@ -79,9 +78,6 @@ const std::unordered_map<uint32_t, Instrument> &Ledger::get_instruments() const 
 void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
-  bookkeeper_.restore(state_bank_);
-
-  state_bank_ >> get_writer(location::PUBLIC);
 
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
@@ -140,6 +136,13 @@ void Ledger::on_start() {
   events_ | is(Trade::tag) | $([&](const event_ptr &event) {
     const Trade &data = event->data<Trade>();
     write_book(event, data);
+
+    if (order_stats_.find(data.order_id) == order_stats_.end()) {
+      order_stats_.try_emplace(data.order_id, get_home_uid(), event->source(), event->gen_time(), OrderStat());
+    }
+    OrderStat &stat = order_stats_.at(data.order_id).data;
+    stat.trade_time = event->gen_time();
+    write_to(event->gen_time(), stat, event->source());
   });
 
   events_ | is(Position::tag) | $([&](const event_ptr &event) {
@@ -185,8 +188,12 @@ void Ledger::on_start() {
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](const event_ptr &event) {
     for (auto &pair : bookkeeper_.get_books()) {
-      pair.second->update(event->gen_time());
-      get_writer(location::PUBLIC)->write(event->gen_time(), AssetSnapshot::tag, pair.second->asset);
+      auto &book = pair.second;
+      auto &asset = book->asset;
+      if (has_writer(asset.holder_uid)) {
+        book->update(event->gen_time());
+        get_writer(asset.holder_uid)->write(event->gen_time(), AssetSnapshot::tag, asset);
+      }
     }
   });
 }
@@ -226,11 +233,15 @@ void Ledger::write_strategy_books(int64_t trigger_time, uint32_t dest) {
 }
 
 void Ledger::write_daily_assets() {
-  auto writer = get_writer(location::PUBLIC);
   for (auto &pair : bookkeeper_.get_books()) {
-    DailyAsset &daily = writer->open_data<DailyAsset>();
-    memcpy(&daily, &(pair.second->asset), sizeof(daily));
-    writer->close_data();
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (has_writer(asset.holder_uid)) {
+      auto writer = get_writer(asset.holder_uid);
+      DailyAsset &daily = writer->open_data<DailyAsset>();
+      memcpy(&daily, &asset, sizeof(daily));
+      writer->close_data();
+    }
   }
 }
 } // namespace kungfu::wingchun::service

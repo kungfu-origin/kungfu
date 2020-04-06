@@ -58,12 +58,6 @@ class Strategy(pywingchun.Strategy):
         self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
         self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
 
-    def __init_commission_info(self):
-        pass
-        # config_location = self.ctx.config_location
-        # self.ctx.commission_infos = {commission["product_id"]: commission for commission in
-        #                              CommissionDB(config_location, "commission").all_commission_info()}
-
     def __init_book(self):
         location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
         self.ctx.book = self.bookkeeper.get_book(location.uid)
@@ -112,7 +106,6 @@ class Strategy(pywingchun.Strategy):
         self.ctx.get_account_book = self.__get_account_book
         self.ctx.get_inst_info = self.__get_inst_info
         self.ctx.get_commission_info = self.__get_commission_info
-        self.__init_commission_info()
         self.__init_book()
         self.__init_algo()
         self._pre_start(self.ctx)

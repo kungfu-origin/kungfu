@@ -4,7 +4,7 @@ import {blankValidator, tcpUriValidator, o99Validator, intValidator} from '__ass
  */
 export const feeTemplate = (type) => {
     return {
-        instrument_id: {
+        product_id: {
             label: type === 'future' ? '代码/品种' : '代码',
             type: 'string',
             validate: []

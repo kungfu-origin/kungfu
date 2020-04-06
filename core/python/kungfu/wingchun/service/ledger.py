@@ -41,7 +41,6 @@ class Ledger(pywingchun.Ledger):
         pywingchun.Ledger.__init__(self, ctx.locator, ctx.mode, ctx.low_latency)
         self.ctx = ctx
         self.ctx.ledger = self
-        self.ctx.config_location = self.config_location
         self.ctx.logger = create_logger("ledger", ctx.log_level, self.io_device.home)
         self.ctx.calendar = Calendar(ctx)
         self.ctx.commission_infos = {}

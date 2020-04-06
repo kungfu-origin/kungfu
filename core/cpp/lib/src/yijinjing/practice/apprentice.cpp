@@ -32,16 +32,17 @@ using namespace kungfu::yijinjing::data;
 using namespace std::chrono;
 
 namespace kungfu::yijinjing::practice {
+inline location_ptr make_master_location(const std::string &name, const locator_ptr &locator) {
+  return location::make_shared(mode::LIVE, category::SYSTEM, "master", name, locator);
+}
+
 apprentice::apprentice(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_client>(home, low_latency)),
-      master_home_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master", "master", get_locator())),
-      master_cmd_location_(location::make_shared(mode::LIVE, category::SYSTEM, "master",
-                                                 fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      config_location_(location::make_shared(mode::LIVE, category::SYSTEM, "etc", "kungfu", get_locator())),
+      master_home_location_(make_master_location("master", get_locator())),
+      master_cmd_location_(make_master_location(fmt::format("{:08x}", get_live_home_uid()), get_locator())),
       state_bank_(), trading_day_(time::today_start()), session_finder_(get_io_device()) {
   add_location(0, master_home_location_);
   add_location(0, master_cmd_location_);
-  add_location(0, config_location_);
 }
 
 index::session_finder &apprentice::get_session_finder() { return session_finder_; }
@@ -50,15 +51,11 @@ bool apprentice::is_started() const { return started_; }
 
 uint32_t apprentice::get_master_commands_uid() const { return master_cmd_location_->uid; }
 
-int64_t apprentice::get_master_start_time() const { return master_start_time_; }
-
 int64_t apprentice::get_checkin_time() const { return checkin_time_; }
 
 int64_t apprentice::get_last_active_time() const { return last_active_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
-
-location_ptr apprentice::get_config_location() const { return config_location_; }
 
 const cache::bank &apprentice::get_state_bank() const { return state_bank_; }
 
@@ -142,7 +139,7 @@ void apprentice::react() {
 
   events_ | is(TradingDay::tag) | $([&](const event_ptr &event) {
     trading_day_ = event->data<TradingDay>().timestamp;
-    SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, "%Y%m%d"));
+    SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, KUNGFU_TRADING_DAY_FORMAT));
     on_trading_day(event, trading_day_);
   });
 
@@ -245,7 +242,6 @@ void apprentice::expect_start() {
   events_ | is(RequestStart::tag) | first() |
       $(
           [&](const event_ptr &e) {
-            master_start_time_ = e->trigger_time();
             started_ = true;
             SPDLOG_INFO("ready to start");
             on_start();

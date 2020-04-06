@@ -50,8 +50,7 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
   }
 }
 
-JsPublishState::JsPublishState(apprentice &app, Napi::ObjectReference &state)
-    : app_(app), state_(state) {}
+JsPublishState::JsPublishState(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
 void JsPublishState::operator()(const Napi::Value &value) {
   Napi::Object vo = value.ToObject();
@@ -76,8 +75,7 @@ void JsPublishState::operator()(const Napi::Value &value) {
   });
 }
 
-JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state)
-    : app_(app), state_(state) {}
+JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
 void JsResetCache::operator()(const event_ptr &event) {
   auto request = event->data<CacheReset>();

@@ -38,15 +38,11 @@ public:
 
   uint32_t get_master_commands_uid() const;
 
-  int64_t get_master_start_time() const;
-
   int64_t get_last_active_time() const;
 
   int64_t get_checkin_time() const;
 
   int64_t get_trading_day() const;
-
-  yijinjing::data::location_ptr get_config_location() const;
 
   const cache::bank &get_state_bank() const;
 
@@ -62,19 +58,12 @@ public:
 
   virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
-  template <typename HandlerType> void for_each_live_location(HandlerType handler) {
-    for (const auto &pair : registry_) {
-      handler(pair.second);
-    }
-  }
-
   template <typename DataType>
   void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC) {
     get_writer(dest_id)->write(trigger_time, data);
   }
 
 protected:
-  const data::location_ptr config_location_;
   const data::location_ptr master_home_location_;
   const data::location_ptr master_cmd_location_;
   cache::bank state_bank_;
@@ -104,7 +93,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
       return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                return (e->msg_type() == longfist::types::Time::tag &&
                        e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns);
@@ -125,7 +114,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
       return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                if (e->msg_type() == longfist::types::Time::tag &&
                    e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
@@ -156,7 +145,7 @@ protected:
     writer->close_data();
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
-    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr>& src) {
+    return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
       return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
                 if (e->msg_type() != longfist::types::Time::tag) {
                   auto writer = get_writer(master_cmd_location_->uid);
@@ -183,7 +172,6 @@ protected:
 private:
   index::session_finder session_finder_;
   bool started_ = false;
-  int64_t master_start_time_ = 0;
   int64_t last_active_time_ = INT64_MAX;
   int64_t checkin_time_ = INT64_MAX;
   int64_t trading_day_ = 0;
