@@ -1,11 +1,6 @@
 import os
 import tushare
 import plotly
-# hack from https://github.com/pyinstaller/pyinstaller/issues/4064
-# to get pandas working
-import distutils
-if distutils.distutils_path.endswith('__init__.py'):
-    distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
 block_cipher = None
 a = Analysis(['kungfu\\__main__.py'],

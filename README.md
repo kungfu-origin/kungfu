@@ -1,6 +1,6 @@
 # Intro 简介
 
-功夫是 [Taurus.ai](http://www.taurusai.com) 团队专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
+功夫是 [Taurus.ai](https://www.kungfu-trader.com) 团队专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
 * 低延迟交易 - 量化交易者对系统内响应速度有极高要求，功夫提供微秒级别的系统响应，支持带纳秒级时间戳的交易数据实时存储和盘后分析。
 * 开放的策略编写方式 - 功夫支持 Python 3 及 C++ 形式的策略编写，策略师可以不受限的自由使用第三方计算库，放飞创意。
 * 友好的使用方式 - 告别 Linux shell 小黑屋，功夫提供图形化操作界面，简化策略运维流程。而进阶用户仍然具备通过底层 API 以无界面形式使用系统的能力。
@@ -24,10 +24,10 @@
   * [electron-builder](https://www.electron.build) - 借助 Electron 技术，功夫可以提供本地化应用程序的安装使用体验。
 
 功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），目前功夫开源版仅提供 CTP 和 XTP 柜台对接的实现。
-如果需要接入更多柜台请通过 [Taurus.ai](http://www.taurusai.com) 官网联系我们。
+如果需要接入更多柜台请通过 [kungfu-trader](https://www.kungfu-trader.com) 官网联系我们。
 开发者也可根据长拳标准自行开发新的柜台接口。
 
-初次使用请参考 [功夫交易系统用户手册](https://taurusai.gitbook.io/kungfu-manual/)
+初次使用请参考 [功夫交易系统用户手册](https://www.kungfu-trader.com/manual/)
 
 更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
 
@@ -201,5 +201,5 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 # Contribute 开发
 
-开发文档即将上线，请关注 [Taurus.ai](http://www.taurusai.com) 官网。
+开发文档即将上线，请关注 [功夫](https://www.kungfu-trader.com) 官网。
 QQ 交流群 312745666，入群问题答案：kungfu.trader
