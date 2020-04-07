@@ -267,7 +267,7 @@ export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
         mdTime,
         systemLatency: toDecimal((insertTime - mdTime) / 1000),
         networkLatency: Number((ackTime - insertTime) / 1000).toFixed(0), 
-        tradeLatency: Number((tradeTime - ackTime) / 1000000).toFixed(0),
+        tradeLatency: Number((tradeTime - ackTime) / 1000).toFixed(0),
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source

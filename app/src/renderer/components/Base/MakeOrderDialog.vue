@@ -103,7 +103,7 @@
             </el-form-item>
 
             <el-form-item
-            v-if="accountType === 'future'"
+            v-if="accountType === 'future'"∏
             label="套保"
             prop="hedge_flag"
             :rules="[

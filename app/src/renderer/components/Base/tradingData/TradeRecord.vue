@@ -94,7 +94,7 @@ export default {
                 width: '60px'
             },{
                 type: 'number',
-                label: "交易延迟(ms)",
+                label: "交易延迟(μs)",
                 prop: "tradeLatency", 
                 width: '90px'
             },{
