@@ -7,6 +7,7 @@ sep = os.path.sep
 src_dir = os.path.abspath(os.path.join(os.path.curdir, 'python'))
 cpp_dir = os.path.abspath(os.path.join(os.path.curdir, 'cpp'))
 deps_dir = os.path.abspath(os.path.join(os.path.curdir, 'deps'))
+pybind_dir = os.path.abspath(os.path.join(deps_dir, 'pybind11*'))
 build_dir = os.path.abspath(os.path.join(os.path.curdir, 'build'))
 build_output_dir = os.path.join(build_dir, os.environ['CMAKE_BUILD_TYPE'])
 ext_dir = os.path.join(src_dir, 'extensions')
@@ -16,6 +17,7 @@ datas = [
     (build_output_dir + sep + '*', '.'),
     (ext_dir, 'extensions'),
     (ext_output_dir, 'extensions'),
+    (pybind_dir, 'pybind11'),
     (build_dir + sep + 'include', 'include')
 ]
 
