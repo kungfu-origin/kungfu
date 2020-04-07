@@ -172,8 +172,6 @@ public:
   void on_trading_day(const event_ptr &event, int64_t daytime) override {
     PYBIND11_OVERLOAD(void, strategy::Runner, on_trading_day, event, daytime);
   }
-
-  void on_init_context() override { PYBIND11_OVERLOAD(void, strategy::Runner, on_init_context); }
 };
 
 class PyStrategy : public strategy::Strategy {
@@ -248,9 +246,7 @@ void bind(pybind11::module &&m) {
   });
 
   auto book_class = py::class_<Book, Book_ptr>(m, "Book");
-  book_class.def_readonly("commissions", &Book::commissions)
-      .def_readonly("instruments", &Book::instruments)
-      .def_readonly("asset", &Book::asset)
+  book_class.def_readonly("asset", &Book::asset)
       .def_readonly("long_positions", &Book::long_positions)
       .def_readonly("long_position_details", &Book::long_position_details)
       .def_readonly("short_positions", &Book::short_positions)

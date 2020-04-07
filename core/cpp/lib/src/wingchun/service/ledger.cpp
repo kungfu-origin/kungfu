@@ -102,7 +102,7 @@ void Ledger::on_start() {
     }
     if (writable and source_location->category == category::STRATEGY) {
       write_book_reset(event->gen_time(), channel.source_id);
-      write_strategy_books(event->gen_time(), channel.source_id);
+      write_strategy_data(event->gen_time(), channel.source_id);
     }
   });
 
@@ -110,11 +110,10 @@ void Ledger::on_start() {
     const OrderInput &data = event->data<OrderInput>();
     write_book(event, data);
 
-    OrderStat stat = {};
+    OrderStat stat = get_order_stat(data.order_id, event);
     stat.order_id = data.order_id;
     stat.md_time = event->trigger_time();
     stat.insert_time = event->gen_time();
-    order_stats_.try_emplace(stat.order_id, get_home_uid(), event->dest(), event->gen_time(), stat);
     write_to(event->gen_time(), stat, event->dest());
   });
 
@@ -125,10 +124,7 @@ void Ledger::on_start() {
       write_book(event, data);
     }
 
-    if (order_stats_.find(data.order_id) == order_stats_.end()) {
-      order_stats_.try_emplace(data.order_id, get_home_uid(), event->source(), event->gen_time(), OrderStat());
-    }
-    OrderStat &stat = order_stats_.at(data.order_id).data;
+    OrderStat &stat = get_order_stat(data.order_id, event);
     stat.ack_time = event->gen_time();
     write_to(event->gen_time(), stat, event->source());
   });
@@ -137,10 +133,7 @@ void Ledger::on_start() {
     const Trade &data = event->data<Trade>();
     write_book(event, data);
 
-    if (order_stats_.find(data.order_id) == order_stats_.end()) {
-      order_stats_.try_emplace(data.order_id, get_home_uid(), event->source(), event->gen_time(), OrderStat());
-    }
-    OrderStat &stat = order_stats_.at(data.order_id).data;
+    OrderStat &stat = get_order_stat(data.order_id, event);
     stat.trade_time = event->gen_time();
     write_to(event->gen_time(), stat, event->source());
   });
@@ -161,13 +154,7 @@ void Ledger::on_start() {
     write_to(event->gen_time(), book->asset, data.holder_uid);
   });
 
-  events_ | is(InstrumentRequest::tag) | $([&](const event_ptr &event) {
-    try {
-      handle_instrument_request(event);
-    } catch (const std::exception &e) {
-      SPDLOG_ERROR("Unexpected exception {}", e.what());
-    }
-  });
+  events_ | is(InstrumentRequest::tag) | $([&](const event_ptr &event) { handle_instrument_request(event); });
 
   /**
    * process active query from clients
@@ -198,6 +185,13 @@ void Ledger::on_start() {
   });
 }
 
+OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
+  if (order_stats_.find(order_id) == order_stats_.end()) {
+    order_stats_.try_emplace(order_id, get_home_uid(), event->source(), event->gen_time(), OrderStat());
+  }
+  return order_stats_.at(order_id).data;
+}
+
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   auto writer = get_writer(dest);
 
@@ -211,9 +205,15 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   SPDLOG_INFO("reset book for {}", get_location_uname(dest));
 }
 
-void Ledger::write_strategy_books(int64_t trigger_time, uint32_t dest) {
+void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
   auto book = bookkeeper_.get_book(dest);
   auto writer = get_writer(dest);
+  for (auto &pair : bookkeeper_.get_instruments()) {
+    writer->write(trigger_time, pair.second);
+  }
+  for (auto &pair : bookkeeper_.get_commissions()) {
+    writer->write(trigger_time, pair.second);
+  }
   auto write_positions = [&](auto positions) {
     for (auto &pair : positions) {
       if (book->has_position(pair.second)) {

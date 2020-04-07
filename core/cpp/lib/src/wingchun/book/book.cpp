@@ -13,8 +13,8 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::book {
-Book::Book(CommissionMap commission_map, InstrumentMap instrument_map)
-    : commissions(std::move(commission_map)), instruments(std::move(instrument_map)) {}
+Book::Book(const CommissionMap &commissions_ref, const InstrumentMap &instruments_ref)
+    : commissions(commissions_ref), instruments(instruments_ref) {}
 
 double Book::get_frozen_price(uint64_t order_id) {
   if (orders.find(order_id) != orders.end()) {

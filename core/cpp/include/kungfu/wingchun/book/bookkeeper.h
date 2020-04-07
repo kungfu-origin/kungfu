@@ -21,11 +21,16 @@ public:
 
   virtual ~Bookkeeper() = default;
 
+  [[nodiscard]] const CommissionMap &get_commissions() const;
+
+  [[nodiscard]] const InstrumentMap &get_instruments() const;
+
   [[nodiscard]] const BookMap &get_books() const;
 
   Book_ptr get_book(uint32_t uid);
 
-  void set_accounting_method(longfist::enums::InstrumentType instrument_type, AccountingMethod_ptr accounting_method);
+  void set_accounting_method(longfist::enums::InstrumentType instrument_type,
+                             const AccountingMethod_ptr &accounting_method);
 
   void on_trading_day(int64_t daytime);
 
@@ -37,9 +42,9 @@ private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
 
-  BookMap books_ = {};
   CommissionMap commissions_ = {};
   InstrumentMap instruments_ = {};
+  BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
 
   Book_ptr make_book(uint32_t location_uid);

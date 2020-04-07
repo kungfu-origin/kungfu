@@ -17,6 +17,10 @@ Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
   book::AccountingMethod::setup_defaults(*this);
 }
 
+const CommissionMap &Bookkeeper::get_commissions() const { return commissions_; }
+
+const InstrumentMap &Bookkeeper::get_instruments() const { return instruments_; }
+
 const BookMap &Bookkeeper::get_books() const { return books_; }
 
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
@@ -26,7 +30,7 @@ Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   return books_.at(location_uid);
 }
 
-void Bookkeeper::set_accounting_method(InstrumentType instrument_type, AccountingMethod_ptr accounting_method) {
+void Bookkeeper::set_accounting_method(InstrumentType instrument_type, const AccountingMethod_ptr &accounting_method) {
   accounting_methods_.emplace(instrument_type, accounting_method);
 }
 
