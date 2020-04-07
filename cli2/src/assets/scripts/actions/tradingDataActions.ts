@@ -39,14 +39,18 @@ export const tradingDataObservale = (type: string, processId: string) => {
 }
 
 
-function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: any) {
+function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: string]: OrderStatData }) {
     let orderDataByKey: { [propName: string]: OrderData } = {};
     orders.kfForEach((item: OrderInputData) => {
-        let orderData = dealOrder(item);
-        let systemLatency = orderStat[orderData.id] || ''
+        const orderData = dealOrder(item);
+        const latencyData = orderStat[orderData.orderId];
+        const systemLatency = latencyData.systemLatency || '';
+        const networkLatency = latencyData.networkLatency || '';
+
         orderDataByKey[orderData.id] = {
             ...orderData,
-            systemLatency
+            systemLatency,
+            networkLatency
         };
     })
 

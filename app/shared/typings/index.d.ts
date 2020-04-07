@@ -127,7 +127,8 @@ interface OrderData {
     sourceId: string;
     exchangeId: string;
     source: string;
-    systemLatency?: string | number
+    systemLatency?: string | number;
+    networkLatency?: string | number;
 }
 
 interface OrderInputData {

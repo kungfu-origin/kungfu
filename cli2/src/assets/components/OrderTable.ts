@@ -17,9 +17,10 @@ class OrderTable extends Table {
 		this.type = type;
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 
 			type === 'account' ? 'Strate' : 'AccountId',
-			'Latency'
+			'System La',
+			'Network La'
 		]    
-		this.columnWidth = [10, 0, 0, 0, 8, 12, 8, 9, 8];
+		this.columnWidth = [10, 0, 0, 0, 8, 12, 8, 9, 10, 10];
 		this.ordersList = []
 	}
 
@@ -58,7 +59,8 @@ class OrderTable extends Table {
 					o.volumeTraded,
 					statusName,
 					last,
-					o.systemLatency
+					o.systemLatency,
+					o.networkLatency
 				], 
 				calcuHeaderWidth(t.headers, t.columnWidth), 
 				t.pad
