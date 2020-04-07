@@ -144,27 +144,6 @@ class PyAlgoService : public service::Algo {
   }
 };
 
-class PyLedger : public Ledger {
-public:
-  using Ledger::Ledger;
-
-  std::string handle_request(const event_ptr &event, const std::string &msg) override {
-    PYBIND11_OVERLOAD_PURE(std::string, Ledger, handle_request, event, msg)
-  }
-
-  void handle_instrument_request(const event_ptr &event) override {
-    PYBIND11_OVERLOAD_PURE(void, Ledger, handle_instrument_request, event)
-  }
-
-  void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) override {
-    PYBIND11_OVERLOAD_PURE(void, Ledger, handle_asset_request, event, app_location)
-  }
-
-  void on_trading_day(const event_ptr &event, int64_t daytime) override {
-    PYBIND11_OVERLOAD(void, Ledger, on_trading_day, event, daytime);
-  }
-};
-
 class PyRunner : public strategy::Runner {
 public:
   using strategy::Runner::Runner;
@@ -301,30 +280,13 @@ void bind(pybind11::module &&m) {
       .def("now", &Trader::now)
       .def("run", &Trader::run);
 
-  py::class_<Ledger, PyLedger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
+  py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
       .def_property_readonly("io_device", &Ledger::get_io_device)
       .def_property_readonly("usable", &Ledger::is_usable)
       .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper, py::return_value_policy::reference)
-      .def_property_readonly("instruments", &Ledger::get_instruments)
-      .def("now", &Ledger::now)
       .def("set_begin_time", &Ledger::set_begin_time)
       .def("set_end_time", &Ledger::set_end_time)
-      .def("has_location", &Ledger::has_location)
-      .def("get_location", &Ledger::get_location)
-      .def("has_writer", &Ledger::has_writer)
-      .def("get_writer", &Ledger::get_writer)
-      .def("has_asset", &Ledger::has_asset)
-      .def("get_asset", &Ledger::get_asset)
-      .def("get_positions", &Ledger::get_positions)
-      .def("publish", &Ledger::publish)
-      .def("cancel_order", &Ledger::cancel_order)
-      .def("handle_request", &Ledger::handle_request)
-      .def("handle_instrument_request", &Ledger::handle_instrument_request)
-      .def("handle_asset_request", &Ledger::handle_asset_request)
-      .def("on_trading_day", &Ledger::on_trading_day)
-      .def("add_timer", &Ledger::add_timer)
-      .def("add_time_interval", &Ledger::add_time_interval)
       .def("run", &Ledger::run);
 
   py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(

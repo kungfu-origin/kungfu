@@ -85,8 +85,7 @@ void master::register_app(const event_ptr &e) {
 
   write_time_reset(e->gen_time(), app_cmd_writer);
   write_trading_day(e->gen_time(), app_cmd_writer);
-  write_commissions(e->gen_time(), app_cmd_writer);
-  write_locations(e->gen_time(), app_cmd_writer);
+  write_profile_data(e->gen_time(), app_cmd_writer);
 
   app_cache_shift_.emplace(app_location->uid, app_location);
   app_cache_shift_[app_location->uid] >> app_cmd_writer;
@@ -253,10 +252,13 @@ void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
   writer->close_data();
 }
 
-void master::write_commissions(int64_t trigger_time, const journal::writer_ptr &writer) {
-  for (const auto &commission : profile_.get_all(Commission{})) {
-    writer->write(trigger_time, commission);
-  }
+void master::write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer) {
+  boost::hana::for_each(ProfileDataTypes, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    for (const auto &data : profile_.get_all(DataType{})) {
+      writer->write(trigger_time, data);
+    }
+  });
 }
 
 void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {

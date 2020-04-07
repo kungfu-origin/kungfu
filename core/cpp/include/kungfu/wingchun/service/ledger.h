@@ -24,29 +24,10 @@ public:
 
   book::Bookkeeper &get_bookkeeper();
 
-  void publish(const std::string &msg);
-
-  uint64_t cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id);
-
-  std::vector<longfist::types::Position> get_positions(const yijinjing::data::location_ptr &location);
-
-  bool has_asset(const yijinjing::data::location_ptr &location);
-
-  longfist::types::Asset get_asset(const yijinjing::data::location_ptr &location);
-
-  const std::unordered_map<uint32_t, longfist::types::Instrument> &get_instruments() const;
-
-  virtual std::string handle_request(const event_ptr &event, const std::string &msg) = 0;
-
-  virtual void handle_instrument_request(const event_ptr &event) = 0;
-
-  virtual void handle_asset_request(const event_ptr &event, const yijinjing::data::location_ptr &app_location) = 0;
-
 protected:
   void on_start() override;
 
 private:
-  yijinjing::nanomsg::socket_ptr pub_sock_;
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
 

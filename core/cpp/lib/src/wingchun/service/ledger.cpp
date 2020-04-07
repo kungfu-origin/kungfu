@@ -20,12 +20,7 @@ using namespace kungfu::yijinjing::cache;
 namespace kungfu::wingchun::service {
 Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      broker_client_(*this), bookkeeper_(*this, broker_client_) {
-  log::copy_log_settings(get_io_device()->get_home(), "ledger");
-  if (m == mode::LIVE) {
-    pub_sock_ = get_io_device()->bind_socket(nanomsg::protocol::PUBLISH);
-  }
-}
+      broker_client_(*this), bookkeeper_(*this, broker_client_) {}
 
 void Ledger::on_exit() { write_daily_assets(); }
 
@@ -35,45 +30,6 @@ void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
 }
 
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
-
-void Ledger::publish(const std::string &msg) {
-  if (get_io_device()->get_home()->mode == mode::LIVE) {
-    pub_sock_->send(msg);
-  }
-  SPDLOG_DEBUG("published {}", msg);
-}
-
-uint64_t Ledger::cancel_order(const event_ptr &event, uint32_t account_location_uid, uint64_t order_id) {
-  if (has_writer(account_location_uid)) {
-    SPDLOG_INFO("cancel order {}", order_id);
-    auto writer = get_writer(account_location_uid);
-    OrderAction &action = writer->open_data<OrderAction>(event->gen_time());
-    action.order_action_id = writer->current_frame_uid();
-    action.order_id = order_id;
-    action.action_flag = OrderActionFlag::Cancel;
-    writer->close_data();
-    return action.order_action_id;
-  }
-  return 0;
-}
-
-std::vector<Position> Ledger::get_positions(const location_ptr &location) {
-  std::vector<Position> res = {};
-  for (const auto &pair : state_bank_[boost::hana::type_c<Position>]) {
-    if (pair.second.data.holder_uid == location->uid) {
-      res.push_back(pair.second.data);
-    }
-  }
-  return res;
-}
-
-bool Ledger::has_asset(const location_ptr &location) { return assets_.find(location->uid) != assets_.end(); }
-
-Asset Ledger::get_asset(const location_ptr &location) { return assets_.at(location->uid).data; }
-
-const std::unordered_map<uint32_t, Instrument> &Ledger::get_instruments() const {
-  return broker_client_.get_instruments();
-}
 
 void Ledger::on_start() {
   broker_client_.on_start(events_);
@@ -110,7 +66,7 @@ void Ledger::on_start() {
     const OrderInput &data = event->data<OrderInput>();
     write_book(event, data);
 
-    OrderStat stat = get_order_stat(data.order_id, event);
+    auto &stat = get_order_stat(data.order_id, event);
     stat.order_id = data.order_id;
     stat.md_time = event->trigger_time();
     stat.insert_time = event->gen_time();
@@ -124,18 +80,22 @@ void Ledger::on_start() {
       write_book(event, data);
     }
 
-    OrderStat &stat = get_order_stat(data.order_id, event);
-    stat.ack_time = event->gen_time();
-    write_to(event->gen_time(), stat, event->source());
+    auto &stat = get_order_stat(data.order_id, event);
+    if (stat.ack_time == 0) {
+      stat.ack_time = event->gen_time();
+      write_to(event->gen_time(), stat, event->source());
+    }
   });
 
   events_ | is(Trade::tag) | $([&](const event_ptr &event) {
     const Trade &data = event->data<Trade>();
     write_book(event, data);
 
-    OrderStat &stat = get_order_stat(data.order_id, event);
-    stat.trade_time = event->gen_time();
-    write_to(event->gen_time(), stat, event->source());
+    auto &stat = get_order_stat(data.order_id, event);
+    if (stat.trade_time == 0) {
+      stat.trade_time = event->gen_time();
+      write_to(event->gen_time(), stat, event->source());
+    }
   });
 
   events_ | is(Position::tag) | $([&](const event_ptr &event) {
@@ -152,25 +112,6 @@ void Ledger::on_start() {
     const PositionEnd &data = event->data<PositionEnd>();
     auto book = bookkeeper_.get_book(data.holder_uid);
     write_to(event->gen_time(), book->asset, data.holder_uid);
-  });
-
-  events_ | is(InstrumentRequest::tag) | $([&](const event_ptr &event) { handle_instrument_request(event); });
-
-  /**
-   * process active query from clients
-   */
-  events_ | filter([&](const event_ptr &event) {
-    return dynamic_cast<nanomsg::nanomsg_json *>(event.get()) != nullptr and event->source() == 0;
-  }) | $([&](const event_ptr &event) {
-    // let python do the actual job, we just operate the I/O part
-    try {
-      const nlohmann::json &cmd = event->data<nlohmann::json>();
-      SPDLOG_INFO("handle command type {} data {}", event->msg_type(), cmd.dump());
-      std::string response = handle_request(event, event->to_string());
-      get_io_device()->get_rep_sock()->send(response);
-    } catch (const std::exception &e) {
-      SPDLOG_ERROR("Unexpected exception {}", e.what());
-    }
   });
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](const event_ptr &event) {
@@ -208,12 +149,6 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
   auto book = bookkeeper_.get_book(dest);
   auto writer = get_writer(dest);
-  for (auto &pair : bookkeeper_.get_instruments()) {
-    writer->write(trigger_time, pair.second);
-  }
-  for (auto &pair : bookkeeper_.get_commissions()) {
-    writer->write(trigger_time, pair.second);
-  }
   auto write_positions = [&](auto positions) {
     for (auto &pair : positions) {
       if (book->has_position(pair.second)) {

@@ -102,16 +102,21 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     get_book(data.holder_uid)->update(event->gen_time());
   });
 
-  events | is(Instrument::tag) | $([&](const event_ptr &event) {
-    const Instrument &data = event->data<Instrument>();
-    instruments_.emplace(hash_instrument(data.exchange_id, data.instrument_id), data);
-  });
-
   events | is(TradingDay::tag) |
       $([&](const event_ptr &event) { on_trading_day(event->data<TradingDay>().timestamp); });
 }
 
 void Bookkeeper::restore(const cache::bank &state_bank) {
+  for (auto &pair : state_bank[boost::hana::type_c<Instrument>]) {
+    auto &state = pair.second;
+    auto &instrument = state.data;
+    instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
+  }
+  for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
+    auto &state = pair.second;
+    auto &commission = state.data;
+    commissions_.emplace(yijinjing::util::hash_str_32(commission.product_id), commission);
+  }
   for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
     auto &position = state.data;
@@ -127,11 +132,6 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
     book->update(app_.now());
-  }
-  for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
-    auto &state = pair.second;
-    auto &commission = state.data;
-    commissions_.emplace(yijinjing::util::hash_str_32(commission.product_id), commission);
   }
 }
 
