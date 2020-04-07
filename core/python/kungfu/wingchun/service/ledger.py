@@ -12,7 +12,6 @@ import kungfu.wingchun.constants as wc_constants
 from kungfu.wingchun import msg
 from kungfu.yijinjing.log import create_logger
 from kungfu.wingchun.calendar import Calendar
-from kungfu.wingchun.book import accounting
 
 DEFAULT_INIT_CASH = 1e7
 HANDLERS = dict()

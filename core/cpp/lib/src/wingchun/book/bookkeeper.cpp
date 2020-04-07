@@ -5,6 +5,7 @@
 #include <kungfu/wingchun/book/bookkeeper.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
@@ -25,8 +26,7 @@ Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   return books_.at(location_uid);
 }
 
-void Bookkeeper::set_accounting_method(longfist::enums::InstrumentType instrument_type,
-                                       AccountingMethod_ptr accounting_method) {
+void Bookkeeper::set_accounting_method(InstrumentType instrument_type, AccountingMethod_ptr accounting_method) {
   accounting_methods_.emplace(instrument_type, accounting_method);
 }
 
@@ -107,7 +107,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
       $([&](const event_ptr &event) { on_trading_day(event->data<TradingDay>().timestamp); });
 }
 
-void Bookkeeper::restore(const yijinjing::cache::bank &state_bank) {
+void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
     auto &position = state.data;
