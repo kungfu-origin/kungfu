@@ -17,9 +17,9 @@ JsRestoreState::JsRestoreState(Napi::ObjectReference &state, location_ptr locati
     : state_(state), location_(std::move(location)) {}
 
 void JsRestoreState::operator()(int64_t from, int64_t to) {
+  auto now = time::now_in_nano();
   auto source = location_->uid;
   auto locator = location_->locator;
-  auto now = time::now_in_nano();
   for (auto dest : locator->list_location_dest(location_)) {
     auto db_file = locator->layout_file(location_, layout::SQLITE, fmt::format("{:08x}", dest));
     auto storage = cache::make_storage(db_file, longfist::StateDataTypes);
@@ -28,23 +28,8 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
     }
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
-      auto type_name = boost::hana::first(it).c_str();
-      for (auto &data : cache::time_spec<DataType>::get_all(storage, from, to)) {
-        Napi::Object table = state_.Get(type_name).ToObject();
-        std::string uid_key = fmt::format("{:016x}", data.uid());
-        Napi::Value value = state_.Get(uid_key);
-        if (value.IsUndefined() or value.IsEmpty()) {
-          value = Napi::Object::New(state_.Env());
-          auto vo = value.ToObject();
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("tag", Napi::Number::New(value.Env(), DataType::tag)));
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), source)));
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), dest)));
-          vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), now)));
-          table.Set(uid_key, value);
-        }
-        set(data, value);
+      for (const auto &data : cache::time_spec<DataType>::get_all(storage, from, to)) {
+        set(data, state_, source, dest, now);
       }
     });
   }
@@ -52,24 +37,24 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
 
 JsPublishState::JsPublishState(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
-void JsPublishState::operator()(const Napi::Value &value) {
-  Napi::Object vo = value.ToObject();
-  auto type_name = vo.Get("type").ToString().Utf8Value();
+void JsPublishState::operator()(Napi::Object &object) {
+  auto now = yijinjing::time::now_in_nano();
+  auto location = app_.get_io_device()->get_home();
+  auto type_name = object.Get("type").ToString().Utf8Value();
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (strcmp(DataType::type_name.c_str(), type_name.c_str()) == 0) {
       DataType data{};
-      get(value, data);
-      auto now = yijinjing::time::now_in_nano();
-      auto location = app_.get_io_device()->get_home();
+      get(object, data);
       auto uid_key = fmt::format("{:016x}", data.uid());
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("tag", Napi::Number::New(value.Env(), DataType::tag)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("type", Napi::String::New(value.Env(), type_name)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(value.Env(), uid_key)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("source", Napi::Number::New(value.Env(), location->uid)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("dest", Napi::Number::New(value.Env(), 0)));
-      vo.DefineProperty(Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(value.Env(), now)));
-      state_.Get(type_name).ToObject().Set(uid_key, vo);
+      object.DefineProperties(
+          {Napi::PropertyDescriptor::Value("tag", Napi::Number::New(object.Env(), DataType::tag)),
+           Napi::PropertyDescriptor::Value("type", Napi::String::New(object.Env(), type_name)),
+           Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(object.Env(), uid_key)),
+           Napi::PropertyDescriptor::Value("source", Napi::Number::New(object.Env(), location->uid)),
+           Napi::PropertyDescriptor::Value("dest", Napi::Number::New(object.Env(), 0)),
+           Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(object.Env(), now))});
+      state_.Get(type_name).ToObject().Set(uid_key, object);
       app_.write_to(0, data);
     }
   });
@@ -105,11 +90,11 @@ void JsResetCache::operator()(const event_ptr &event) {
   });
 }
 
-void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &ref) {
+void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     auto name = std::string(boost::hana::first(it).c_str());
-    ref.Set(name, DataTable::NewInstance(ref.Value()));
+    state.Set(name, DataTable::NewInstance(state.Value()));
   });
 }
 } // namespace kungfu::node::serialize

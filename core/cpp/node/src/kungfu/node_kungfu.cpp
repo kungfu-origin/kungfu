@@ -5,6 +5,7 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/util/util.h>
 
+#include "common.h"
 #include "commission_store.h"
 #include "config_store.h"
 #include "data_table.h"
@@ -22,21 +23,26 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
 Napi::Value FormatTime(const Napi::CallbackInfo &info) {
-  int64_t timestamp = 0;
-  if (info[0].IsNumber()) {
-    timestamp = info[0].ToNumber().Int32Value();
+  if (IsValid(info, 0, &Napi::Value::IsBigInt)) {
+    auto format = IsValid(info, 1, &Napi::Value::IsString) ? info[1].ToString().Utf8Value() : KUNGFU_DATETIME_FORMAT;
+    return Napi::String::New(info.Env(), time::strftime(GetBigInt(info, 0), format));
   }
-  if (info[0].IsBigInt()) {
-    bool lossless;
-    timestamp = info[0].As<Napi::BigInt>().Int64Value(&lossless);
-  }
-  return Napi::String::New(info.Env(), time::strftime(timestamp));
+  return Napi::Value();
 }
 
 Napi::Value FormatStringToHashHex(const Napi::CallbackInfo &info) {
   auto arg = info[0].ToString().Utf8Value();
   uint32_t hash = hash_32((const unsigned char *)(arg.c_str()), arg.length());
   return Napi::String::New(info.Env(), fmt::format("{:08x}", hash));
+}
+
+Napi::Value ParseTime(const Napi::CallbackInfo &info) {
+  if (IsValid(info, 0, &Napi::Value::IsString) and IsValid(info, 1, &Napi::Value::IsString)) {
+    auto time_string = info[0].ToString().Utf8Value();
+    auto format = info[1].ToString().Utf8Value();
+    return Napi::BigInt::New(info.Env(), time::strptime(time_string, format));
+  }
+  return Napi::BigInt::New(info.Env(), TryParseTime(info, 0));
 }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
@@ -55,6 +61,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
   exports.Set("formatTime", Napi::Function::New(env, FormatTime));
   exports.Set("formatStringToHashHex", Napi::Function::New(env, FormatStringToHashHex));
+  exports.Set("parseTime", Napi::Function::New(env, ParseTime));
 
   return exports;
 }

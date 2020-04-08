@@ -3,19 +3,20 @@
 //
 
 #include "data_table.h"
+#include "common.h"
+
+using namespace kungfu::yijinjing;
 
 namespace kungfu::node {
 Napi::FunctionReference DataTable::constructor;
+
 DataTable::DataTable(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
 Napi::Value DataTable::Filter(const Napi::CallbackInfo &info) {
-  if (info.Length() != 2) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
     return Napi::Value();
   }
-  if (not info[0].IsString()) {
-    return Napi::Value();
-  }
-  if (info[1].IsEmpty() or info[1].IsUndefined() or info[1].IsNull()) {
+  if (not IsValid(info, 1, &Napi::Value::IsString)) {
     return Napi::Value();
   }
   auto key = info[0].ToString().Utf8Value();
@@ -41,11 +42,8 @@ Napi::Value DataTable::List(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value DataTable::Merge(const Napi::CallbackInfo &info) {
-  if (info.Length() == 0) {
-    return Napi::Value();
-  }
   for (int i = 0; i < info.Length(); i++) {
-    if (info[i].IsEmpty() or info[i].IsUndefined() or info[i].IsNull() or not info[i].IsObject()) {
+    if (not IsValid(info, i, &Napi::Value::IsObject)) {
       return Napi::Value();
     }
   }
@@ -59,22 +57,18 @@ Napi::Value DataTable::Merge(const Napi::CallbackInfo &info) {
   };
   add_all(Value().ToObject());
   for (int i = 0; i < info.Length(); i++) {
-    add_all(info[i].ToObject());
+    if (info[i].IsObject()) {
+      add_all(info[i].ToObject());
+    }
   }
   return result;
 }
 
 Napi::Value DataTable::Range(const Napi::CallbackInfo &info) {
-  if (info.Length() < 2) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
     return Napi::Value();
   }
-  if (not info[0].IsString()) {
-    return Napi::Value();
-  }
-  if (info[1].IsEmpty() or info[1].IsUndefined() or info[1].IsNull()) {
-    return Napi::Value();
-  }
-  if (info[2].IsEmpty() or info[2].IsUndefined() or info[2].IsNull()) {
+  if (not IsValid(info, 1)) {
     return Napi::Value();
   }
   auto key = info[0].ToString().Utf8Value();
@@ -84,36 +78,42 @@ Napi::Value DataTable::Range(const Napi::CallbackInfo &info) {
     auto name = names.Get(i);
     auto data = Value().Get(name).ToObject();
     auto value = data.Get(key);
-    auto add = [&](auto &val, auto &upper_bound, auto &lower_bound) {
-      if (val >= lower_bound and val <= upper_bound) {
+    auto add = [&](auto &val, auto &lower_bound, auto &upper_bound) {
+      if (val >= lower_bound and (val <= upper_bound or upper_bound == lower_bound)) {
         result.Set(name, data);
       }
     };
-    if (value.IsNumber()) {
+    if (value.IsNumber() and IsValid(info, 1, &Napi::Value::IsNumber)) {
       auto val = value.ToNumber().Int32Value();
       auto lower_bound = info[1].ToNumber().Int32Value();
-      auto upper_bound = info[2].ToNumber().Int32Value();
-      add(val, upper_bound, lower_bound);
+      auto upper_bound = IsValid(info, 2, &Napi::Value::IsNumber) ? info[2].ToNumber().Int32Value() : INT32_MAX;
+      add(val, lower_bound, upper_bound);
     }
-    if (value.IsBigInt()) {
+    if (value.IsBigInt() and IsValid(info, 1, &Napi::Value::IsBigInt)) {
+      auto val = GetBigInt(value);
+      auto lower_bound = GetBigInt(info, 1);
+      auto upper_bound = IsValid(info, 2, &Napi::Value::IsBigInt) ? GetBigInt(info, 2) : INT64_MAX;
+      add(val, lower_bound, upper_bound);
+    }
+    if (value.IsBigInt() and IsValid(info, 1, &Napi::Value::IsString)) {
       bool lossless = {};
-      auto val = value.template As<Napi::BigInt>().Int64Value(&lossless);
-      auto lower_bound = info[1].template As<Napi::BigInt>().Int64Value(&lossless);
-      auto upper_bound = info[2].template As<Napi::BigInt>().Int64Value(&lossless);
-      add(val, upper_bound, lower_bound);
+      auto val = value.As<Napi::BigInt>().Int64Value(&lossless);
+      auto lower_bound = TryParseTime(info, 1);
+      auto upper_bound = IsValid(info, 2, &Napi::Value::IsString) ? TryParseTime(info, 2) : lower_bound;
+      add(val, lower_bound, upper_bound);
     }
-    if (value.IsString()) {
+    if (value.IsString() and IsValid(info, 1, &Napi::Value::IsString)) {
       auto val = value.ToString().Utf8Value();
       auto lower_bound = info[1].ToString().Utf8Value();
-      auto upper_bound = info[2].ToString().Utf8Value();
-      add(val, upper_bound, lower_bound);
+      auto upper_bound = IsValid(info, 2, &Napi::Value::IsString) ? info[2].ToString().Utf8Value() : lower_bound;
+      add(val, lower_bound, upper_bound);
     }
   }
   return result;
 }
 
 Napi::Value DataTable::Sort(const Napi::CallbackInfo &info) {
-  if (info.Length() != 1 or not info[0].IsString()) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
     return Napi::Value();
   }
 
@@ -123,17 +123,15 @@ Napi::Value DataTable::Sort(const Napi::CallbackInfo &info) {
     auto va = a.Get(key);
     auto vb = b.Get(key);
     if (va.IsNumber()) {
-      return va.ToNumber().Int32Value() > vb.ToNumber().Int32Value();
+      return va.ToNumber().Int32Value() < vb.ToNumber().Int32Value();
     }
     if (va.IsBigInt()) {
-      bool lossless = {};
-      return va.template As<Napi::BigInt>().Int64Value(&lossless) >
-             vb.template As<Napi::BigInt>().Int64Value(&lossless);
+      return GetBigInt(va) < GetBigInt(vb);
     }
     if (va.IsString()) {
-      return va.ToString().Utf8Value() > vb.ToString().Utf8Value();
+      return va.ToString().Utf8Value() < vb.ToString().Utf8Value();
     }
-    return va > vb;
+    return va < vb;
   };
 
   std::vector<Napi::Object> sorted = {};

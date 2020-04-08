@@ -140,9 +140,10 @@ void bind(pybind11::module &&m) {
 
   // nanosecond-time related
   m.def("now_in_nano", &time::now_in_nano);
-  m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
-  m.def("strptime", &time::strptime, py::arg("timestr"), py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
-  m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_DATETIME_FORMAT_DEFAULT);
+  m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
+  m.def("strptime", py::overload_cast<const std::string &, const std::string &>(&time::strptime), py::arg("timestr"),
+        py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
+  m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
 
   m.def("setup_log", &kungfu::yijinjing::log::setup_log);
 

@@ -7,6 +7,7 @@
 
 #include <napi.h>
 
+#include "common.h"
 #include "io.h"
 #include "journal.h"
 #include "operators.h"

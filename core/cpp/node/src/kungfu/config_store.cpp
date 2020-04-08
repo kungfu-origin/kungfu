@@ -51,10 +51,10 @@ Napi::Value ConfigStore::GetConfig(const Napi::CallbackInfo &info) {
 Napi::Value ConfigStore::GetAllConfig(const Napi::CallbackInfo &info) {
   auto table = Napi::Object::New(info.Env());
   for (const auto &config : profile_.get_all(Config{})) {
-    std::string uid = fmt::format("{:016x}", config.uid());
-    Napi::Value value = Napi::Object::New(info.Env());
-    table.Set(uid, value);
-    set(config, value);
+    auto uid = fmt::format("{:016x}", config.uid());
+    auto object = Napi::Object::New(info.Env());
+    set(config, object);
+    table.Set(uid, object);
   }
   return table;
 }

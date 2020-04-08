@@ -140,7 +140,10 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
-  publish(info[0]);
+  if (IsValid(info, 0, &Napi::Value::IsObject)) {
+    auto object = info[0].ToObject();
+    publish(object);
+  }
   return Napi::Value();
 }
 

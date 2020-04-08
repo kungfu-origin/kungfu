@@ -17,7 +17,7 @@ class ConfigStore : public Napi::ObjectWrap<ConfigStore> {
 public:
   explicit ConfigStore(const Napi::CallbackInfo &info);
 
-  ~ConfigStore() = default;
+  ~ConfigStore() override = default;
 
   Napi::Value SetConfig(const Napi::CallbackInfo &info);
 
@@ -29,7 +29,7 @@ public:
 
   static void Init(Napi::Env env, Napi::Object exports);
 
-  static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(Napi::Value arg);
 
 private:
   serialize::JsSet set;

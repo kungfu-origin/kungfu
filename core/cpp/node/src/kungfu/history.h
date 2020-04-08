@@ -15,13 +15,13 @@ class History : public Napi::ObjectWrap<History> {
 public:
   explicit History(const Napi::CallbackInfo &info);
 
-  ~History() = default;
+  ~History() override = default;
 
   static void Init(Napi::Env env, Napi::Object exports);
 
   Napi::Value SelectPeriod(const Napi::CallbackInfo &info);
 
-  static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(Napi::Value arg);
 
 private:
   yijinjing::data::locator_ptr locator_;
