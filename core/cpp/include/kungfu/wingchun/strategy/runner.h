@@ -23,8 +23,6 @@ public:
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
-  virtual void on_init_context();
-
 protected:
   std::vector<Strategy_ptr> strategies_;
 

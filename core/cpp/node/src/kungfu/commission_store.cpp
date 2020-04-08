@@ -16,30 +16,14 @@ Napi::FunctionReference CommissionStore::constructor;
 CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}
 
-inline Commission getCommissionFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator) {
-  Commission commission = {};
-  try {
-    if (info[0].IsString()) {
-      strcpy(commission.product_id, info[0].ToString().Utf8Value().c_str());
-      strcpy(commission.exchange_id, info[1].ToString().Utf8Value().c_str());
-    }
-    if (info[0].IsObject()) {
-      serialize::JsGet{}(info[0], commission);
-    }
-  } catch (const std::exception &ex) {
-    SPDLOG_ERROR("invalid argument commission: {}", ex.what());
-  }
-  return commission;
-}
-
 Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info) {
-  profile_.set(getCommissionFromJs(info, locator_));
+  profile_.set(ExtractCommission(info));
   return Napi::Value();
 }
 
 Napi::Value CommissionStore::GetCommission(const Napi::CallbackInfo &info) {
   auto result = Napi::Object::New(info.Env());
-  auto commission = profile_.get(getCommissionFromJs(info, locator_));
+  auto commission = profile_.get(ExtractCommission(info));
   set(commission, result);
   return result;
 }
@@ -51,7 +35,7 @@ Napi::Value CommissionStore::SetAllCommission(const Napi::CallbackInfo &info) {
       std::vector<Commission> commissions;
       for (int i = 0; i < args.Length(); i++) {
         Commission commission = {};
-        serialize::JsGet{}(args.Get(i), commission);
+        get(args.Get(i).ToObject(), commission);
         SPDLOG_INFO("got commission from node: {}", commission.to_string());
         commissions.push_back(commission);
       }
@@ -79,7 +63,7 @@ Napi::Value CommissionStore::GetAllCommission(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value CommissionStore::RemoveCommission(const Napi::CallbackInfo &info) {
-  profile_.remove(profile_.get(getCommissionFromJs(info, locator_)));
+  profile_.remove(profile_.get(ExtractCommission(info)));
   return Napi::Value();
 }
 
@@ -102,4 +86,20 @@ void CommissionStore::Init(Napi::Env env, Napi::Object exports) {
 }
 
 Napi::Value CommissionStore::NewInstance(const Napi::Value arg) { return constructor.New({arg}); }
+
+Commission CommissionStore::ExtractCommission(const Napi::CallbackInfo &info) {
+  Commission commission = {};
+  try {
+    if (info[0].IsString()) {
+      strcpy(commission.product_id, info[0].ToString().Utf8Value().c_str());
+      strcpy(commission.exchange_id, info[1].ToString().Utf8Value().c_str());
+    }
+    if (info[0].IsObject()) {
+      get(info[0].ToObject(), commission);
+    }
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("invalid argument commission: {}", ex.what());
+  }
+  return commission;
+}
 } // namespace kungfu::node

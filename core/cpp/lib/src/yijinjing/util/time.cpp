@@ -49,9 +49,9 @@ int64_t time::calendar_day_start(int64_t nanotime) {
 
 int64_t time::today_start() { return calendar_day_start(time::now_in_nano()); }
 
-int64_t time::strptime(const std::string &timestr, const std::string &format) {
+int64_t time::strptime(const std::string &time_string, const std::string &format) {
   int64_t nano = 0;
-  std::string normal_timestr = timestr;
+  std::string normal_timestr = time_string;
   std::string normal_format = format;
 
   std::regex nano_format_regex("%N");
@@ -65,16 +65,26 @@ int64_t time::strptime(const std::string &timestr, const std::string &format) {
     for (std::sregex_iterator i = nano_begin; i != nano_end; ++i) {
       std::smatch match = *i;
       nano = stol(match.str());
-      normal_timestr = std::regex_replace(timestr, nano_regex, "");
+      normal_timestr = std::regex_replace(time_string, nano_regex, "");
     }
   }
 
   std::tm result = {};
-  std::istringstream iss(timestr);
+  std::istringstream iss(time_string);
   iss >> std::get_time(&result, normal_format.c_str());
   std::time_t parsed_time = std::mktime(&result);
   auto tp_system = system_clock::from_time_t(parsed_time);
   return duration_cast<nanoseconds>(tp_system.time_since_epoch()).count() + nano;
+}
+
+int64_t time::strptime(const std::string &time_string, std::initializer_list<std::string> formats) {
+  for (const auto &format : formats) {
+    auto t = strptime(time_string, format);
+    if (strftime(t, format) == time_string) {
+      return t;
+    }
+  }
+  return -1;
 }
 
 std::string time::strftime(int64_t nanotime, const std::string &format) {

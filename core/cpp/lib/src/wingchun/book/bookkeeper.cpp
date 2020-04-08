@@ -5,6 +5,7 @@
 #include <kungfu/wingchun/book/bookkeeper.h>
 
 using namespace kungfu::rx;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
@@ -16,6 +17,10 @@ Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
   book::AccountingMethod::setup_defaults(*this);
 }
 
+const CommissionMap &Bookkeeper::get_commissions() const { return commissions_; }
+
+const InstrumentMap &Bookkeeper::get_instruments() const { return instruments_; }
+
 const BookMap &Bookkeeper::get_books() const { return books_; }
 
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
@@ -25,8 +30,7 @@ Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   return books_.at(location_uid);
 }
 
-void Bookkeeper::set_accounting_method(longfist::enums::InstrumentType instrument_type,
-                                       AccountingMethod_ptr accounting_method) {
+void Bookkeeper::set_accounting_method(InstrumentType instrument_type, const AccountingMethod_ptr &accounting_method) {
   accounting_methods_.emplace(instrument_type, accounting_method);
 }
 
@@ -98,16 +102,21 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
     get_book(data.holder_uid)->update(event->gen_time());
   });
 
-  events | is(Instrument::tag) | $([&](const event_ptr &event) {
-    const Instrument &data = event->data<Instrument>();
-    instruments_.emplace(hash_instrument(data.exchange_id, data.instrument_id), data);
-  });
-
   events | is(TradingDay::tag) |
       $([&](const event_ptr &event) { on_trading_day(event->data<TradingDay>().timestamp); });
 }
 
-void Bookkeeper::restore(const yijinjing::cache::bank &state_bank) {
+void Bookkeeper::restore(const cache::bank &state_bank) {
+  for (auto &pair : state_bank[boost::hana::type_c<Instrument>]) {
+    auto &state = pair.second;
+    auto &instrument = state.data;
+    instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
+  }
+  for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
+    auto &state = pair.second;
+    auto &commission = state.data;
+    commissions_.emplace(yijinjing::util::hash_str_32(commission.product_id), commission);
+  }
   for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
     auto &position = state.data;
@@ -123,11 +132,6 @@ void Bookkeeper::restore(const yijinjing::cache::bank &state_bank) {
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
     book->update(app_.now());
-  }
-  for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
-    auto &state = pair.second;
-    auto &commission = state.data;
-    commissions_.emplace(yijinjing::util::hash_str_32(commission.product_id), commission);
   }
 }
 

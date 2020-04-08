@@ -34,11 +34,8 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   }
 }
 
-void Runner::on_init_context() {}
-
 void Runner::on_react() {
   context_ = make_context();
-  on_init_context();
 }
 
 void Runner::on_start() {

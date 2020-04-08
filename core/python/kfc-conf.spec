@@ -9,6 +9,8 @@ cpp_dir = os.path.abspath(os.path.join(os.path.curdir, 'cpp'))
 deps_dir = os.path.abspath(os.path.join(os.path.curdir, 'deps'))
 pybind_dir = os.path.abspath(os.path.join(deps_dir, 'pybind11*'))
 build_dir = os.path.abspath(os.path.join(os.path.curdir, 'build'))
+build_cpp_dir = os.path.abspath(os.path.join(build_dir, 'cpp'))
+build_deps_dir = os.path.abspath(os.path.join(build_dir, 'deps'))
 build_output_dir = os.path.join(build_dir, os.environ['CMAKE_BUILD_TYPE'])
 ext_dir = os.path.join(src_dir, 'extensions')
 ext_output_dir = os.path.join(build_dir, 'build_extensions')
@@ -33,8 +35,8 @@ def add_lib(path):
     for lib in glob.glob(path + sep + '**' + sep + '*.lib', recursive=True):
         datas.append((lib, '.'))
 
-add_lib(cpp_dir)
-add_lib(deps_dir)
+add_lib(build_cpp_dir)
+add_lib(build_deps_dir)
 
 datas.extend(collect_data_files('tushare'))
 datas.extend(collect_data_files('plotly'))

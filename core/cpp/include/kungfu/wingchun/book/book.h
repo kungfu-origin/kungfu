@@ -28,8 +28,8 @@ typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDe
 typedef std::unordered_map<uint64_t, kungfu::longfist::types::Order> OrderMap;
 
 struct Book {
-  CommissionMap commissions;
-  InstrumentMap instruments;
+  const CommissionMap &commissions;
+  const InstrumentMap &instruments;
 
   longfist::types::Asset asset = {};
 
@@ -41,7 +41,7 @@ struct Book {
 
   OrderMap orders = {};
 
-  Book(CommissionMap commission_map, InstrumentMap instrument_map);
+  Book(const CommissionMap &commissions_ref, const InstrumentMap &instruments_ref);
 
   double get_frozen_price(uint64_t order_id);
 

@@ -63,7 +63,7 @@ private:
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
-  void write_commissions(int64_t trigger_time, const journal::writer_ptr &writer);
+  void write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);
 

@@ -9,9 +9,12 @@
 #include "type_convert_xtp.h"
 
 using namespace kungfu::longfist::enums;
+using namespace kungfu::longfist::types;
+using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::xtp {
-TraderXTP::TraderXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
+TraderXTP::TraderXTP(bool low_latency, locator_ptr locator, const std::string &account_id,
                      const std::string &json_config)
     : Trader(low_latency, std::move(locator), SOURCE_XTP, account_id), api_(nullptr), session_id_(0), request_id_(0),
       trading_day_("") {
@@ -180,7 +183,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
     stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
     stock_pos.direction = Direction::Long;
     strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
-    stock_pos.update_time = kungfu::yijinjing::time::now_in_nano();
+    stock_pos.update_time = time::now_in_nano();
     writer->close_data();
     if (is_last) {
       PositionEnd &end = writer->open_data<PositionEnd>(0);
@@ -206,7 +209,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     strncpy(account.source_id, SOURCE_XTP, SOURCE_ID_LEN);
     strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
     account.holder_uid = get_io_device()->get_home()->uid;
-    account.update_time = kungfu::yijinjing::time::now_in_nano();
+    account.update_time = time::now_in_nano();
     writer->close_data();
   }
 }

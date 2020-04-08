@@ -18,7 +18,8 @@
 
 #include <string>
 
-#define KUNGFU_DATETIME_FORMAT_DEFAULT "%F %T.%N"
+#define KUNGFU_DATETIME_FORMAT "%F %T"
+#define KUNGFU_TIMESTAMP_FORMAT "%F %T.%N"
 #define KUNGFU_TRADING_DAY_FORMAT "%Y%m%d"
 
 namespace kungfu::yijinjing {
@@ -87,11 +88,19 @@ public:
 
   /**
    * Parse string time to nano time.
-   * @param timestr string-formatted time
+   * @param time_string string-formatted time
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return nano time in int64_t
    */
-  static int64_t strptime(const std::string &timestr, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
+  static int64_t strptime(const std::string &time_string, const std::string &format = KUNGFU_TIMESTAMP_FORMAT);
+
+  /**
+   * Parse string time to nano time by matching one of the formats in list.
+   * @param time_string string-formatted time
+   * @param formats ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
+   * @return nano time in int64_t, -1 if no format matched
+   */
+  static int64_t strptime(const std::string &time_string, std::initializer_list<std::string> formats);
 
   /**
    * Format nano seconds to string.
@@ -99,14 +108,14 @@ public:
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return string-formatted time
    */
-  static std::string strftime(int64_t nanotime, const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
+  static std::string strftime(int64_t nanotime, const std::string &format = KUNGFU_TIMESTAMP_FORMAT);
 
   /**
    * Format now to string.
    * @param format ref: https://en.cppreference.com/w/cpp/io/manip/put_time + %N for nanoseconds {:09d}
    * @return string-formatted time
    */
-  static std::string strfnow(const std::string &format = KUNGFU_DATETIME_FORMAT_DEFAULT);
+  static std::string strfnow(const std::string &format = KUNGFU_TIMESTAMP_FORMAT);
 
   /**
    * Gets time base point of current process.

@@ -9,11 +9,13 @@
 #include <kungfu/wingchun/encoding.h>
 
 using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::ctp {
-TraderCTP::TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
+TraderCTP::TraderCTP(bool low_latency, locator_ptr locator, const std::string &account_id,
                      const std::string &json_config)
     : Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1), order_ref_(-1),
       request_id_(0), api_(nullptr) {
@@ -344,9 +346,9 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
       strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
       position.holder_uid = get_io_device()->get_home()->uid;
       position.direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
-      position_map[pInvestorPosition->InstrumentID] = position;
+      position_map.emplace(pInvestorPosition->InstrumentID, position);
     }
-    auto &position = position_map[pInvestorPosition->InstrumentID];
+    auto &position = position_map.at(pInvestorPosition->InstrumentID);
     auto &inst_info = instrument_map_[pInvestorPosition->InstrumentID];
     if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0) {
       if (pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0) {
@@ -363,6 +365,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
           pInvestorPosition->OpenCost;
       position.avg_open_price = cost / (position.volume * inst_info.contract_multiplier);
     }
+    position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
     SPDLOG_TRACE("RequestID {}", nRequestID);

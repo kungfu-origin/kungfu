@@ -17,7 +17,7 @@ class CommissionStore : public Napi::ObjectWrap<CommissionStore> {
 public:
   explicit CommissionStore(const Napi::CallbackInfo &info);
 
-  ~CommissionStore() = default;
+  ~CommissionStore() override = default;
 
   Napi::Value SetCommission(const Napi::CallbackInfo &info);
 
@@ -31,14 +31,17 @@ public:
 
   static void Init(Napi::Env env, Napi::Object exports);
 
-  static Napi::Value NewInstance(const Napi::Value arg);
+  static Napi::Value NewInstance(Napi::Value arg);
 
 private:
-  serialize::JsSet set;
+  serialize::JsGet get = {};
+  serialize::JsSet set = {};
   yijinjing::data::locator_ptr locator_;
   yijinjing::practice::profile profile_;
 
   static Napi::FunctionReference constructor;
+
+  longfist::types::Commission ExtractCommission(const Napi::CallbackInfo &info);
 
   friend class Watcher;
 };
