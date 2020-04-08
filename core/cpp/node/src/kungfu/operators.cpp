@@ -109,7 +109,7 @@ void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &ref) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     auto name = std::string(boost::hana::first(it).c_str());
-    ref.Set(name, Napi::Object::New(info.Env()));
+    ref.Set(name, DataTable::NewInstance(ref.Value()));
   });
 }
 } // namespace kungfu::node::serialize

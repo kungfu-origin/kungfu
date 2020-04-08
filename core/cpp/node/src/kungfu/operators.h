@@ -5,12 +5,13 @@
 #ifndef KUNGFU_NODE_SERIALIZE_H
 #define KUNGFU_NODE_SERIALIZE_H
 
+#include "data_table.h"
+
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/cache/backend.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/time.h>
-#include <napi.h>
 
 namespace kungfu::node::serialize {
 template <typename DataType> class JsMake {
@@ -282,7 +283,7 @@ public:
     auto type_name = DataType::type_name.c_str();
     auto table = state_.Get(type_name).ToObject();
     auto uid = fmt::format("{:016x}", data.uid());
-    auto value = state_.Get(uid);
+    auto value = table.Get(uid);
     if (value.IsUndefined() or value.IsEmpty()) {
       value = Napi::Object::New(state_.Env());
       auto vo = value.ToObject();
