@@ -256,18 +256,20 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 
 
 export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
-    const insertTime = Number(item.insert_time);
-    const ackTime = Number(item.ack_time);
-    const mdTime = Number(item.md_time);
-    const tradeTime = Number(item.trade_time);
+    const insertTime = item.insert_time;
+    const ackTime = item.ack_time;
+    const mdTime = item.md_time;
+    const tradeTime = item.trade_time;
+
+    const tradeLatency = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
 
     return {
-        ackTime,
-        insertTime,
-        mdTime,
-        systemLatency: toDecimal((insertTime - mdTime) / 1000),
-        networkLatency: Number((ackTime - insertTime) / 1000).toFixed(0), 
-        tradeLatency: Number((tradeTime - ackTime) / 1000).toFixed(0),
+        ackTime: Number(ackTime),
+        insertTime: Number(insertTime),
+        mdTime: Number(mdTime),
+        systemLatency: toDecimal(Number(insertTime - mdTime) / 1000),
+        networkLatency: Number(Number(ackTime - insertTime) / 1000).toFixed(0), 
+        tradeLatency: tradeLatency > 0 ? tradeLatency.toString() : '',
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source
