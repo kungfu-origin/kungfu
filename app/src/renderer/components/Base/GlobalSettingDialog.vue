@@ -237,7 +237,7 @@ data() {
 		},
 		tablesSaveMethods: {
 			commission: {
-				filters: ["instrument_id", "mode", "exchange_id"], //必填，且唯一
+				filters: ["product_id", "mode", "exchange_id"], //必填，且唯一
 				method: setKfCommission,
 			}
 		}
@@ -373,7 +373,9 @@ methods: {
 
 			//去重
 			const targetDataResolve = [{}, ...t.tables[key]].reduce((a, b) => {
-				const rowKey = filters.map(key => b[key].toString() || "").join("_");
+				const rowKey = filters.map(k => {
+					return b[k].toString() || "" 
+				}).join("_");
 				a[rowKey] = b;
 				return a;
 			});
