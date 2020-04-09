@@ -123,15 +123,15 @@ Napi::Value DataTable::Sort(const Napi::CallbackInfo &info) {
     auto va = a.Get(key);
     auto vb = b.Get(key);
     if (va.IsNumber()) {
-      return va.ToNumber().Int32Value() < vb.ToNumber().Int32Value();
+      return va.ToNumber().Int32Value() > vb.ToNumber().Int32Value();
     }
     if (va.IsBigInt()) {
-      return GetBigInt(va) < GetBigInt(vb);
+      return GetBigInt(va) > GetBigInt(vb);
     }
     if (va.IsString()) {
-      return va.ToString().Utf8Value() < vb.ToString().Utf8Value();
+      return va.ToString().Utf8Value() > vb.ToString().Utf8Value();
     }
-    return va < vb;
+    return va > vb;
   };
 
   std::vector<Napi::Object> sorted = {};
