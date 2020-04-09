@@ -621,6 +621,7 @@ KF_DEFINE_PACK_TYPE(                                  //
     OrderStat, 215, PK(order_id), TIMESTAMP(md_time), //
     (uint64_t, order_id),                             //
     (int64_t, md_time),                               //
+    (int64_t, input_time),                            //
     (int64_t, insert_time),                           //
     (int64_t, ack_time),                              //
     (int64_t, trade_time)                             //

@@ -69,7 +69,7 @@ void Ledger::on_start() {
     auto &stat = get_order_stat(data.order_id, event);
     stat.order_id = data.order_id;
     stat.md_time = event->trigger_time();
-    stat.insert_time = event->gen_time();
+    stat.input_time = event->gen_time();
     write_to(event->gen_time(), stat, event->dest());
   });
 
@@ -81,7 +81,11 @@ void Ledger::on_start() {
     }
 
     auto &stat = get_order_stat(data.order_id, event);
-    if (stat.ack_time == 0) {
+    if (stat.insert_time == 0) {
+      stat.insert_time = event->gen_time();
+      write_to(event->gen_time(), stat, event->source());
+    }
+    if (stat.insert_time > 0 and stat.ack_time == 0) {
       stat.ack_time = event->gen_time();
       write_to(event->gen_time(), stat, event->source());
     }
