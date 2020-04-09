@@ -11,7 +11,7 @@ using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 
 namespace kungfu::node {
-Napi::ObjectReference Longfist::constructor;
+Napi::ObjectReference Longfist::constructor = {};
 
 Longfist::Longfist(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 

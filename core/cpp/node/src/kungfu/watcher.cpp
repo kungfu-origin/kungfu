@@ -20,7 +20,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
-Napi::FunctionReference Watcher::constructor;
+Napi::FunctionReference Watcher::constructor = {};
 
 inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
   auto name = info[1].As<Napi::String>().Utf8Value();

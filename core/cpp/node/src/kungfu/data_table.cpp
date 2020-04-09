@@ -8,7 +8,7 @@
 using namespace kungfu::yijinjing;
 
 namespace kungfu::node {
-Napi::FunctionReference DataTable::constructor;
+Napi::FunctionReference DataTable::constructor = {};
 
 DataTable::DataTable(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
@@ -153,11 +153,11 @@ void DataTable::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "DataTable",
                                     {
-                                        InstanceMethod("filter", &DataTable::Filter),
-                                        InstanceMethod("list", &DataTable::List),
-                                        InstanceMethod("merge", &DataTable::Merge),
-                                        InstanceMethod("range", &DataTable::Range),
-                                        InstanceMethod("sort", &DataTable::Sort),
+                                        InstanceMethod("filter", &DataTable::Filter), //
+                                        InstanceMethod("list", &DataTable::List),     //
+                                        InstanceMethod("merge", &DataTable::Merge),   //
+                                        InstanceMethod("range", &DataTable::Range),   //
+                                        InstanceMethod("sort", &DataTable::Sort)      //
                                     });
 
   constructor = Napi::Persistent(func);

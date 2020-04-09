@@ -112,7 +112,7 @@ std::vector<uint32_t> Locator::list_location_dest(location_ptr location) const {
 
 Napi::Object Locator::get_js_locator() { return locator_ref_.Value(); }
 
-Napi::FunctionReference IODevice::constructor;
+Napi::FunctionReference IODevice::constructor = {};
 
 IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true) {
   Napi::Env env = info.Env();
@@ -152,7 +152,7 @@ void IODevice::Init(Napi::Env env, Napi::Object exports) {
   exports.Set("IODevice", func);
 }
 
-Napi::FunctionReference Session::constructor;
+Napi::FunctionReference Session::constructor = {};
 
 Session::Session(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   Napi::Env env = info.Env();

@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/practice/hero.h>
 #include <kungfu/yijinjing/practice/profile.h>
 
@@ -65,9 +66,7 @@ private:
 
   void write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer);
 
-  void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);
-
-  void write_registers(int64_t trigger_time, const journal::writer_ptr &writer);
+  void write_registries(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_channels(int64_t trigger_time, const journal::writer_ptr &writer);
 };

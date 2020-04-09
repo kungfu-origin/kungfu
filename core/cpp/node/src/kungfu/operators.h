@@ -22,9 +22,11 @@ public:
   Napi::Value operator()(const Napi::CallbackInfo &info) {
     auto now = yijinjing::time::now_in_nano();
     auto object = Napi::Object::New(info.Env());
-    object.DefineProperties({Napi::PropertyDescriptor::Value("tag", Napi::Number::New(info.Env(), DataType::tag)),
-                             Napi::PropertyDescriptor::Value("type", Napi::String::New(info.Env(), type_name)),
-                             Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(object.Env(), now))});
+    object.DefineProperties({
+        Napi::PropertyDescriptor::Value("tag", Napi::Number::New(info.Env(), DataType::tag)),
+        Napi::PropertyDescriptor::Value("type", Napi::String::New(info.Env(), type_name)),
+        Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(object.Env(), now)) // format keeper
+    });
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);
@@ -109,12 +111,14 @@ public:
     auto table = state.Get(type_name).ToObject();
     if (not table.Has(uid_key)) {
       auto object = Napi::Object::New(table.Env());
-      object.DefineProperties({Napi::PropertyDescriptor::Value("tag", Napi::Number::New(table.Env(), DataType::tag)),
-                               Napi::PropertyDescriptor::Value("type", Napi::String::New(table.Env(), type_name)),
-                               Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(table.Env(), uid_key)),
-                               Napi::PropertyDescriptor::Value("source", Napi::Number::New(table.Env(), source)),
-                               Napi::PropertyDescriptor::Value("dest", Napi::Number::New(table.Env(), dest)),
-                               Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(table.Env(), ts))});
+      object.DefineProperties({
+          Napi::PropertyDescriptor::Value("tag", Napi::Number::New(table.Env(), DataType::tag)),
+          Napi::PropertyDescriptor::Value("type", Napi::String::New(table.Env(), type_name)),
+          Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(table.Env(), uid_key)),
+          Napi::PropertyDescriptor::Value("source", Napi::Number::New(table.Env(), source)),
+          Napi::PropertyDescriptor::Value("dest", Napi::Number::New(table.Env(), dest)),
+          Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(table.Env(), ts)) // format keeper
+      });
       table.Set(uid_key, object);
     }
     auto object = table.Get(uid_key).ToObject();
@@ -133,7 +137,8 @@ private:
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>> Set(Napi::Object &object, const char *name, const ValueType &value) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>> Set(Napi::Object &object, const char *name,
+                                                        const ValueType &value) {
     object.Set(name, Napi::Boolean::New(object.Env(), value));
   }
 
@@ -209,7 +214,8 @@ private:
   }
 
   template <typename ValueType>
-  std::enable_if_t<std::is_same_v<ValueType, bool>> Get(ValueType &value, const char *name, const Napi::Object &object) {
+  std::enable_if_t<std::is_same_v<ValueType, bool>> Get(ValueType &value, const char *name,
+                                                        const Napi::Object &object) {
     value = object.Get(name).ToBoolean().Value();
   }
 

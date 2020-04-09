@@ -11,7 +11,7 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-Napi::FunctionReference CommissionStore::constructor;
+Napi::FunctionReference CommissionStore::constructor = {};
 
 CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}

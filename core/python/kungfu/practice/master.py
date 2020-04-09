@@ -61,40 +61,13 @@ class Master(yjj.master):
             commission.min_commission = default.min_commission
             self.profile.set(commission)
 
-    def is_live_watcher(self, pid):
+    def acquire_trading_day(self):
+        return self.ctx.calendar.trading_day_ns
+
+    def is_live_node_process(self, pid):
         info = self.ctx.apprentices[pid]
         location = info['location']
         return info['process'].is_running() and location.category == yjj.category.SYSTEM and location.group == 'node'
-
-    def on_exit(self):
-        for pid in self.ctx.apprentices:
-            apprentice = self.ctx.apprentices[pid]['process']
-            if apprentice.is_running():
-                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
-                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
-                apprentice.terminate()
-
-        count = 0
-        time_to_wait = 10
-        while count < time_to_wait:
-            remaining = list(
-                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.is_live_watcher(pid) else [],
-                    self.ctx.apprentices))
-            remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
-            if remaining:
-                self.ctx.logger.info('terminating apprentices, remaining %s, count down %ds', remaining, time_to_wait - count)
-                time.sleep(1)
-                count = count + 1
-            else:
-                break
-
-        for pid in self.ctx.apprentices:
-            apprentice = self.ctx.apprentices[pid]['process']
-            if apprentice.is_running():
-                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
-                apprentice.kill()
-
-        self.ctx.logger.info('master cleaned up')
 
     def on_register(self, event, register_data):
         pid = register_data.pid
@@ -123,8 +96,35 @@ class Master(yjj.master):
             err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
             self.ctx.logger.error('task error [%s] %s', exc_type, err_msg)
 
-    def acquire_trading_day(self):
-        return self.ctx.calendar.trading_day_ns
+    def on_exit(self):
+        for pid in self.ctx.apprentices:
+            apprentice = self.ctx.apprentices[pid]['process']
+            if apprentice.is_running():
+                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
+                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
+                apprentice.terminate()
+
+        count = 0
+        time_to_wait = 10
+        while count < time_to_wait:
+            remaining = list(
+                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.is_live_node_process(pid) else [],
+                    self.ctx.apprentices))
+            remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
+            if remaining:
+                self.ctx.logger.info('terminating apprentices, remaining %s, count down %ds', remaining, time_to_wait - count)
+                time.sleep(1)
+                count = count + 1
+            else:
+                break
+
+        for pid in self.ctx.apprentices:
+            apprentice = self.ctx.apprentices[pid]['process']
+            if apprentice.is_running():
+                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
+                apprentice.kill()
+
+        self.ctx.logger.info('master cleaned up')
 
 
 @task

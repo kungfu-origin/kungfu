@@ -20,7 +20,7 @@ int64_t GetTimestamp(Napi::Value arg) {
   throw yijinjing_error("timestamp argument must be bigint");
 }
 
-Napi::FunctionReference Frame::constructor;
+Napi::FunctionReference Frame::constructor = {};
 
 Frame::Frame(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
@@ -62,7 +62,7 @@ void Frame::Init(Napi::Env env, Napi::Object exports) {
 
 Napi::Value Frame::NewInstance(const Napi::Value arg) { return constructor.New({arg}); }
 
-Napi::FunctionReference Reader::constructor;
+Napi::FunctionReference Reader::constructor = {};
 
 Reader::Reader(const Napi::CallbackInfo &info)
     : ObjectWrap(info), reader(true),

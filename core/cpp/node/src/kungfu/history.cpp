@@ -17,7 +17,7 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-Napi::FunctionReference History::constructor;
+Napi::FunctionReference History::constructor = {};
 
 History::History(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(IODevice::GetLocator(info)),

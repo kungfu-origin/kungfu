@@ -92,7 +92,7 @@ void master::register_app(const event_ptr &e) {
 
   app_cmd_writer->mark(start_time_, RequestStart::tag);
 
-  write_registers(e->gen_time(), app_cmd_writer);
+  write_registries(e->gen_time(), app_cmd_writer);
   write_channels(e->gen_time(), app_cmd_writer);
 
   on_register(e, register_data);
@@ -231,7 +231,7 @@ void master::on_active() {
   }
 }
 
-void master::try_add_location(int64_t trigger_time, const data::location_ptr &app_location) {
+void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
     profile_.set(dynamic_cast<Location &>(*app_location));
     add_location(trigger_time, app_location);
@@ -252,7 +252,7 @@ void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
   writer->close_data();
 }
 
-void master::write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer) {
+void master::write_profile_data(int64_t trigger_time, const writer_ptr &writer) {
   boost::hana::for_each(ProfileDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     for (const auto &data : profile_.get_all(DataType{})) {
@@ -261,13 +261,7 @@ void master::write_profile_data(int64_t trigger_time, const journal::writer_ptr 
   });
 }
 
-void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
-  for (const auto &item : locations_) {
-    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
-  }
-}
-
-void master::write_registers(int64_t trigger_time, const writer_ptr &writer) {
+void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : registry_) {
     writer->write(trigger_time, item.second);
   }

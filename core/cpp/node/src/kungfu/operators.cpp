@@ -47,13 +47,14 @@ void JsPublishState::operator()(Napi::Object &object) {
       DataType data{};
       get(object, data);
       auto uid_key = fmt::format("{:016x}", data.uid());
-      object.DefineProperties(
-          {Napi::PropertyDescriptor::Value("tag", Napi::Number::New(object.Env(), DataType::tag)),
-           Napi::PropertyDescriptor::Value("type", Napi::String::New(object.Env(), type_name)),
-           Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(object.Env(), uid_key)),
-           Napi::PropertyDescriptor::Value("source", Napi::Number::New(object.Env(), location->uid)),
-           Napi::PropertyDescriptor::Value("dest", Napi::Number::New(object.Env(), 0)),
-           Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(object.Env(), now))});
+      object.DefineProperties({
+          Napi::PropertyDescriptor::Value("tag", Napi::Number::New(object.Env(), DataType::tag)),
+          Napi::PropertyDescriptor::Value("type", Napi::String::New(object.Env(), type_name)),
+          Napi::PropertyDescriptor::Value("uid_key", Napi::String::New(object.Env(), uid_key)),
+          Napi::PropertyDescriptor::Value("source", Napi::Number::New(object.Env(), location->uid)),
+          Napi::PropertyDescriptor::Value("dest", Napi::Number::New(object.Env(), 0)),
+          Napi::PropertyDescriptor::Value("ts", Napi::BigInt::New(object.Env(), now)) // format keeper
+      });
       state_.Get(type_name).ToObject().Set(uid_key, object);
       app_.write_to(0, data);
     }
