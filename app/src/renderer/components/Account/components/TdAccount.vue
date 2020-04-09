@@ -78,7 +78,7 @@
                         :class="{
                             'tr-table-cell': true,
                             'number': true,
-                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                            'nano': true,
                             'color-red': calcCash(props.row, 'realizedPnl') > 0,
                             'color-green': calcCash(props.row, 'realizedPnl') < 0,
                         }"
@@ -100,7 +100,7 @@
                         :class="{
                             'tr-table-cell': true,
                             'number': true,
-                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                            'nano': true,
                             'color-red': calcCash(props.row, 'unRealizedPnl') > 0,
                             'color-green': calcCash(props.row, 'unRealizedPnl') < 0,
                         }"
@@ -122,7 +122,7 @@
                         :class="{
                             'tr-table-cell': true,
                             'number': true,
-                            'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                            'nano': true,
                         }"
                         :key="`${props.row.account_id}_${calcCash(props.row, (isFuture(props.row) ? 'margin' : 'marketValue'))}`"                        
 
@@ -148,7 +148,7 @@
                             :class="{
                                 'tr-table-cell': true,
                                 'number': true,
-                                'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
+                                'nano': true
                             }"
                             :key="`${props.row.account_id}_${calcCash(props.row, 'avail')}`"                        
                             >

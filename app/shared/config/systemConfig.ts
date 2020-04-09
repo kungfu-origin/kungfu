@@ -213,8 +213,8 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
           "unique_key": "row_id",
           "row": [
             {
-              "key": "instrument_id",
-              "name": "代码           ",
+              "key": "product_id",
+              "name": "标的品种",
               "type": SystemConfigChildItemTypeEnum.Str,
               "default": "",
             },
