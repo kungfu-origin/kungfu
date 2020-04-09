@@ -263,12 +263,13 @@ export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
 
     const tradeLatency = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
     const networkLatency = +Number(Number(ackTime - insertTime) / 1000).toFixed(0);
+    const systemLatency = +toDecimal(Number(insertTime - mdTime) / 1000);
 
     return {
         ackTime: Number(ackTime),
         insertTime: Number(insertTime),
         mdTime: Number(mdTime),
-        systemLatency: toDecimal(Number(insertTime - mdTime) / 1000),
+        systemLatency: systemLatency > 0 ? systemLatency.toString() : '',
         networkLatency: networkLatency > 0 ? networkLatency.toString() : '',
         tradeLatency: tradeLatency > 0 ? tradeLatency.toString() : '',
         orderId: item.order_id.toString(),
