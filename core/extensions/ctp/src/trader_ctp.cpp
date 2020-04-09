@@ -23,57 +23,15 @@ TraderCTP::TraderCTP(bool low_latency, locator_ptr locator, const std::string &a
   config_ = nlohmann::json::parse(json_config);
 }
 
-void TraderCTP::on_start() {
-  broker::Trader::on_start();
-
-  if (api_ == nullptr) {
-    std::string runtime_folder = get_runtime_folder();
-    SPDLOG_INFO("create ctp td api with path: {}", runtime_folder);
-    api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
-    api_->RegisterSpi(this);
-    api_->RegisterFront((char *)config_.td_uri.c_str());
-    api_->SubscribePublicTopic(THOST_TERT_QUICK);
-    api_->SubscribePrivateTopic(THOST_TERT_QUICK);
-    api_->Init();
+TraderCTP::~TraderCTP() {
+  if (api_ != nullptr) {
+    api_->Release();
   }
 }
 
-bool TraderCTP::login() {
-  CThostFtdcReqUserLoginField login_field = {};
-  strcpy(login_field.TradingDay, "");
-  strcpy(login_field.UserID, config_.account_id.c_str());
-  strcpy(login_field.BrokerID, config_.broker_id.c_str());
-  strcpy(login_field.Password, config_.password.c_str());
-  int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
-  if (rtn != 0) {
-    SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID,
-                 login_field.BrokerID, rtn);
-  }
-  return rtn == 0;
-}
-
-bool TraderCTP::req_settlement_confirm() {
-  CThostFtdcSettlementInfoConfirmField req = {};
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  int rtn = api_->ReqSettlementInfoConfirm(&req, ++request_id_);
-  return rtn == 0;
-}
-
-bool TraderCTP::req_auth() {
-  struct CThostFtdcReqAuthenticateField req = {};
-  strcpy(req.UserID, config_.account_id.c_str());
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  if (config_.product_info.length() > 0) {
-    strcpy(req.UserProductInfo, config_.product_info.c_str());
-  }
-  strcpy(req.AppID, config_.app_id.c_str());
-  strcpy(req.AuthCode, config_.auth_code.c_str());
-  int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
-  if (rtn != 0) {
-    SPDLOG_ERROR("failed to req auth, error id = {}", rtn);
-  }
-  return rtn == 0;
+void TraderCTP::on_trading_day(const event_ptr &event, int64_t daytime) {
+  trading_day_ = yijinjing::time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
+  SPDLOG_WARN("set trading day to {}", trading_day_);
 }
 
 bool TraderCTP::req_account() {
@@ -94,20 +52,6 @@ bool TraderCTP::req_position() {
   return rtn == 0;
 }
 
-bool TraderCTP::req_position_detail() {
-  CThostFtdcQryInvestorPositionDetailField req = {};
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
-  return rtn == 0;
-}
-
-bool TraderCTP::req_qry_instrument() {
-  CThostFtdcQryInstrumentField req = {};
-  int rtn = api_->ReqQryInstrument(&req, ++request_id_);
-  return rtn == 0;
-}
-
 bool TraderCTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
 
@@ -122,23 +66,21 @@ bool TraderCTP::insert_order(const event_ptr &event) {
   strcpy(ctp_input.OrderRef, std::to_string(order_ref_).c_str());
 
   int error_id = api_->ReqOrderInsert(&ctp_input, ++request_id_);
-  SPDLOG_TRACE(to_string(ctp_input));
 
   auto nano = time::now_in_nano();
   auto writer = get_writer(event->source());
   Order &order = writer->open_data<Order>(event->gen_time());
   order_from_input(input, order);
+  strcpy(order.trading_day, trading_day_.c_str());
   order.insert_time = nano;
   order.update_time = nano;
 
   if (error_id == 0) {
     outbound_orders_[input.order_id] = order_ref_;
     inbound_order_refs_[ctp_input.OrderRef] = input.order_id;
-    SPDLOG_INFO("FrontID: {} SessionID: {} OrderRef: {}", front_id_, session_id_, ctp_input.OrderRef);
   } else {
     order.error_id = error_id;
     order.status = OrderStatus::Error;
-    SPDLOG_ERROR("failed to insert order {}, (error_id) {}", input.order_id, error_id);
   }
 
   orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
@@ -169,8 +111,6 @@ bool TraderCTP::cancel_order(const event_ptr &event) {
   if (error_id == 0) {
     inbound_actions_.emplace(request_id_, action.uid());
     actions_.emplace(action.uid(), state<OrderAction>(event->dest(), event->source(), event->gen_time(), action));
-    SPDLOG_TRACE("requested cancel order {}, order action id {}, request id {}", action.order_id,
-                 action.order_action_id, request_id_);
   } else {
     auto writer = get_writer(event->source());
     OrderActionError &error = writer->open_data<OrderActionError>(event->gen_time());
@@ -178,17 +118,17 @@ bool TraderCTP::cancel_order(const event_ptr &event) {
     error.order_id = action.order_id;
     error.order_action_id = action.order_action_id;
     writer->close_data();
-    SPDLOG_ERROR("failed to cancel order {}, error_id: {}", action.order_id, error_id);
   }
   return error_id == 0;
 }
 
 void TraderCTP::OnFrontConnected() {
-  SPDLOG_INFO("connected");
   req_auth();
+  SPDLOG_INFO("connected");
 }
 
 void TraderCTP::OnFrontDisconnected(int nReason) {
+  update_broker_state(BrokerState::DisConnected);
   SPDLOG_ERROR("disconnected [{}] {}", nReason, disconnected_reason(nReason));
 }
 
@@ -263,8 +203,6 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
         error.order_id = action.order_id;
         error.order_action_id = action.order_action_id;
         writer->close_data();
-      } else {
-        SPDLOG_ERROR("has no writer for [{:08x}]", source);
       }
     }
     SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {} (InputOrderAction) {} (nRequestID) {} (bIsLast) {}", pRspInfo->ErrorID,
@@ -285,6 +223,7 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
   auto order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   Order &order = writer->open_data<Order>(0);
+  memcpy(&order, &(order_state.data), sizeof(order));
   from_ctp(*pOrder, order);
   order.order_id = order_state.data.order_id;
   order.parent_id = order_state.data.parent_id;
@@ -304,11 +243,11 @@ void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
   auto writer = get_writer(order_state.dest);
   Trade &trade = writer->open_data<Trade>(0);
   from_ctp(*pTrade, trade);
-  strncpy(trade.trading_day, trading_day_.c_str(), DATE_LEN);
   uint64_t trade_id = writer->current_frame_uid();
   trade.trade_id = trade_id;
   trade.order_id = order_state.data.order_id;
   trade.parent_order_id = order_state.data.parent_id;
+  trade.trading_day = order_state.data.trading_day;
   inbound_trade_ids_[pTrade->TradeID] = trade.uid();
   trades_.emplace(trade.uid(), state<Trade>(order_state.source, order_state.dest, time::now_in_nano(), trade));
   writer->close_data();
@@ -368,7 +307,6 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
-    SPDLOG_TRACE("RequestID {}", nRequestID);
     auto writer = get_writer(0);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
@@ -393,7 +331,6 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
   } else {
     auto writer = get_writer(0);
     if (pInvestorPositionDetail != nullptr) {
-      SPDLOG_TRACE(to_string(*pInvestorPositionDetail));
       PositionDetail &pos_detail = writer->open_data<PositionDetail>(0);
       from_ctp(*pInvestorPositionDetail, pos_detail);
       pos_detail.update_time = time::now_in_nano();
@@ -409,7 +346,6 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
     }
   }
   if (bIsLast) {
-    SPDLOG_TRACE("RequestID {}", nRequestID);
     get_writer(0)->mark(0, PositionDetailEnd::tag);
   }
 }
@@ -420,7 +356,6 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  SPDLOG_TRACE(kungfu::wingchun::ctp::to_string(*pInstrument));
   auto writer = get_writer(0);
   if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
     Instrument &instrument = writer->open_data<Instrument>(0);
@@ -432,5 +367,71 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
     writer->mark(0, InstrumentEnd::tag);
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
+}
+
+void TraderCTP::on_start() {
+  broker::Trader::on_start();
+
+  if (api_ == nullptr) {
+    std::string runtime_folder = get_runtime_folder();
+    api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
+    api_->RegisterSpi(this);
+    api_->RegisterFront((char *)config_.td_uri.c_str());
+    api_->SubscribePublicTopic(THOST_TERT_QUICK);
+    api_->SubscribePrivateTopic(THOST_TERT_QUICK);
+    api_->Init();
+  }
+}
+
+bool TraderCTP::login() {
+  CThostFtdcReqUserLoginField login_field = {};
+  strcpy(login_field.TradingDay, "");
+  strcpy(login_field.UserID, config_.account_id.c_str());
+  strcpy(login_field.BrokerID, config_.broker_id.c_str());
+  strcpy(login_field.Password, config_.password.c_str());
+  int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
+  if (rtn != 0) {
+    SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID,
+                 login_field.BrokerID, rtn);
+  }
+  return rtn == 0;
+}
+
+bool TraderCTP::req_settlement_confirm() {
+  CThostFtdcSettlementInfoConfirmField req = {};
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  int rtn = api_->ReqSettlementInfoConfirm(&req, ++request_id_);
+  return rtn == 0;
+}
+
+bool TraderCTP::req_auth() {
+  struct CThostFtdcReqAuthenticateField req = {};
+  strcpy(req.UserID, config_.account_id.c_str());
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  if (config_.product_info.length() > 0) {
+    strcpy(req.UserProductInfo, config_.product_info.c_str());
+  }
+  strcpy(req.AppID, config_.app_id.c_str());
+  strcpy(req.AuthCode, config_.auth_code.c_str());
+  int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
+  if (rtn != 0) {
+    SPDLOG_ERROR("failed to req auth, error id = {}", rtn);
+  }
+  return rtn == 0;
+}
+
+bool TraderCTP::req_qry_instrument() {
+  CThostFtdcQryInstrumentField req = {};
+  int rtn = api_->ReqQryInstrument(&req, ++request_id_);
+  return rtn == 0;
+}
+
+bool TraderCTP::req_position_detail() {
+  CThostFtdcQryInvestorPositionDetailField req = {};
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
+  return rtn == 0;
 }
 } // namespace kungfu::wingchun::ctp

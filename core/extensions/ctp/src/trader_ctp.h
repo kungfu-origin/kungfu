@@ -22,19 +22,19 @@ public:
   TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
             const std::string &json_config);
 
-  ~TraderCTP() override = default;
+  ~TraderCTP() override;
 
   longfist::enums::AccountType get_account_type() const override { return longfist::enums::AccountType::Future; }
 
-  bool insert_order(const event_ptr &event) override;
-
-  bool cancel_order(const event_ptr &event) override;
+  void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
   bool req_position() override;
 
   bool req_account() override;
 
-  virtual bool req_position_detail();
+  bool insert_order(const event_ptr &event) override;
+
+  bool cancel_order(const event_ptr &event) override;
 
   virtual void OnFrontConnected();
 
@@ -110,6 +110,8 @@ private:
   bool req_auth();
 
   bool req_qry_instrument();
+
+  bool req_position_detail();
 };
 } // namespace kungfu::wingchun::ctp
 #endif // KUNGFU_CTP_EXT_TRADER_H

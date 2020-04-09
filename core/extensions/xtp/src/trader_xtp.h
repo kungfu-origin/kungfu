@@ -26,11 +26,11 @@ public:
 
   AccountType get_account_type() const override { return AccountType::Stock; }
 
+  void on_trading_day(const event_ptr &event, int64_t daytime) override;
+
   bool insert_order(const event_ptr &event) override;
 
   bool cancel_order(const event_ptr &event) override;
-
-  void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
   bool req_position() override;
 
