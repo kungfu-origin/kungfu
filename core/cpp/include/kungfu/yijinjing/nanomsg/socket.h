@@ -154,7 +154,7 @@ private:
 DECLARE_PTR(socket)
 
 struct nanomsg_json : event {
-  nanomsg_json(const std::string &msg) : binding_(nlohmann::json::parse(msg)), msg_(msg){};
+  explicit nanomsg_json(const std::string &msg) : binding_(nlohmann::json::parse(msg)), msg_(msg){};
 
   [[nodiscard]] int64_t gen_time() const override { return get_meta<int64_t>("gen_time", 0); }
 

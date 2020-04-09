@@ -88,7 +88,16 @@ public:
     socket_.connect(connect_path_);
   }
 
-  bool is_usable() override { return publish("{}") > 0; }
+  bool is_usable() override {
+    nlohmann::json ping = {};
+    ping["gen_time"] = time::now_in_nano();
+    ping["trigger_time"] = 0;
+    ping["msg_type"] = Ping::tag;
+    ping["source"] = io_device_.get_home()->uid;
+    ping["dest"] = 0;
+    ping["data"] = "";
+    return publish(ping.dump()) > 0;
+  }
 };
 
 class nanomsg_observer : public observer, protected nanomsg_resource {

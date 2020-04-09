@@ -192,6 +192,8 @@ void master::react() {
     task.repeat_limit = request.repeat;
   });
 
+  events_ | is(Ping::tag) | $([&](const event_ptr &e) { get_io_device()->get_publisher()->publish("{}"); });
+
   events_ | is(CacheReset::tag) | $([&](const event_ptr &e) {
     auto msg_type = e->data<CacheReset>().msg_type;
     boost::hana::for_each(StateDataTypes, [&](auto it) {

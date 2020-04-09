@@ -66,8 +66,8 @@ class Master(yjj.master):
 
     def is_live_node_process(self, pid):
         info = self.ctx.apprentices[pid]
-        location = info['location']
-        return info['process'].is_running() and location.category == yjj.category.SYSTEM and location.group == 'node'
+        register = info['register']
+        return info['process'].is_running() and register.category == yjj.category.SYSTEM and register.group == 'node'
 
     def on_register(self, event, register_data):
         pid = register_data.pid
@@ -80,7 +80,7 @@ class Master(yjj.master):
                 self.ctx.apprentices[pid] = {
                     'process': psutil.Process(pid),
                     'uname': uname,
-                    'location': register_data
+                    'register': register_data
                 }
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -100,15 +100,15 @@ class Master(yjj.master):
         for pid in self.ctx.apprentices:
             apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
-                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
-                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['location'].uid)
+                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['uname'], pid)
+                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['register'].uid)
                 apprentice.terminate()
 
         count = 0
         time_to_wait = 10
         while count < time_to_wait:
             remaining = list(
-                map(lambda pid: [self.ctx.apprentices[pid]['location'].uname] if self.is_live_node_process(pid) else [],
+                map(lambda pid: [self.ctx.apprentices[pid]['uname']] if self.is_live_node_process(pid) else [],
                     self.ctx.apprentices))
             remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
             if remaining:
@@ -121,7 +121,7 @@ class Master(yjj.master):
         for pid in self.ctx.apprentices:
             apprentice = self.ctx.apprentices[pid]['process']
             if apprentice.is_running():
-                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['location'].uname, pid)
+                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['uname'], pid)
                 apprentice.kill()
 
         self.ctx.logger.info('master cleaned up')
@@ -132,7 +132,7 @@ def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
             ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['uname'], pid)
-            ctx.master.deregister_app(yjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
+            ctx.master.deregister_app(yjj.now_in_nano(), ctx.apprentices[pid]['register'].uid)
             del ctx.apprentices[pid]
 
 
