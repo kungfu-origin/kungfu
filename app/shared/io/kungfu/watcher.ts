@@ -32,9 +32,8 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             if (watcher.isLive()) {
                 watcher.step();
             }
-
             callback({
-                ledger: Object.freeze(watcher.ledger),
+                ledger: watcher.ledger,
             });
             resolve();
         })
@@ -136,8 +135,9 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
                     ...b
                 }
             })
-        accountIdClientIdData[id] = valueData
+        accountIdClientIdData[id] = dealAsset(valueData)
     })
+
     return accountIdClientIdData
 }
 

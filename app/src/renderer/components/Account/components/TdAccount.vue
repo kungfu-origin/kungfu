@@ -79,12 +79,12 @@
                             'tr-table-cell': true,
                             'number': true,
                             'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
-                            'color-red': calcCash(props.row, 'realized_pnl') > 0,
-                            'color-green': calcCash(props.row, 'realized_pnl') < 0,
+                            'color-red': calcCash(props.row, 'realizedPnl') > 0,
+                            'color-green': calcCash(props.row, 'realizedPnl') < 0,
                         }"
-                        :key="`realized_pnl_${props.row.account_id}_${calcCash(props.row, 'realized_pnl')}`"                        
+                        :key="`realized_pnl_${props.row.account_id}_${calcCash(props.row, 'realizedPnl')}`"                        
                         >
-                        {{calcCash(props.row, 'realized_pnl') || '--'}}
+                        {{calcCash(props.row, 'realizedPnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
@@ -101,12 +101,12 @@
                             'tr-table-cell': true,
                             'number': true,
                             'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
-                            'color-red': calcCash(props.row, 'unrealized_pnl') > 0,
-                            'color-green': calcCash(props.row, 'unrealized_pnl') < 0,
+                            'color-red': calcCash(props.row, 'unRealizedPnl') > 0,
+                            'color-green': calcCash(props.row, 'unRealizedPnl') < 0,
                         }"
-                        :key="`unrealized_pnl_${props.row.account_id}_${calcCash(props.row, 'unrealized_pnl')}`"                        
+                        :key="`unrealized_pnl_${props.row.account_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
                         >
-                        {{calcCash(props.row, 'unrealized_pnl') || '--'}}
+                        {{calcCash(props.row, 'unRealizedPnl') || '--'}}
                         </span> 
                     </template>
                 </el-table-column>
@@ -124,14 +124,14 @@
                             'number': true,
                             'nano': !!(accountsAsset[props.row.account_id] || {}).nano,
                         }"
-                        :key="`${props.row.account_id}_${calcCash(props.row, (isFuture(props.row) ? 'margin' : 'market_value'))}`"                        
+                        :key="`${props.row.account_id}_${calcCash(props.row, (isFuture(props.row) ? 'margin' : 'marketValue'))}`"                        
 
                         >
                             <template v-if="isFuture(props.row)">
                                 {{calcCash(props.row, 'margin') || '--'}}
                             </template>
                             <template v-else>
-                                {{calcCash(props.row, 'market_value') || '--'}}
+                                {{calcCash(props.row, 'marketValue') || '--'}}
                             </template>  
                         </span>          
                     </template>
@@ -346,14 +346,7 @@ export default {
 
         //计算持仓盈亏
         calcCash(row, key){
-            const t = this;
-            return t.$utils.toDecimal((t.accountsAsset[row.account_id] || {})[key]) + ''
-        },
-
-        //计算持仓盈亏率
-        calcAccumulatedPnlRate(row){
-            const t = this;
-            return t.$utils.toDecimal((t.accountsAsset[row.account_id] || {}).accumulated_pnl_ratio, 6, 2) 
+            return this.$utils.toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
         }
     }
 }

@@ -133,8 +133,7 @@ export default {
     },
 
     destroyed(){
-        const t = this;
-        t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
+        this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
     },
  
     methods:{
