@@ -5,12 +5,11 @@
 #ifndef KUNGFU_NODE_COMMISSION_H
 #define KUNGFU_NODE_COMMISSION_H
 
-#include <napi.h>
+#include "common.h"
+#include "operators.h"
 
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/profile.h>
-
-#include "operators.h"
 
 namespace kungfu::node {
 class CommissionStore : public Napi::ObjectWrap<CommissionStore> {

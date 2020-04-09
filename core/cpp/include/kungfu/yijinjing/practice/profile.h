@@ -44,6 +44,10 @@ public:
 
   template <typename DataType> void remove_all() { get_storage().remove_all<DataType>(); }
 
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
+    get_storage().replace(event->template data<DataType>());
+  }
+
 private:
   const std::string profile_db_file_;
 

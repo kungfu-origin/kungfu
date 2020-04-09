@@ -5,7 +5,6 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#include "common.h"
 #include "commission_store.h"
 #include "config_store.h"
 #include "data_table.h"

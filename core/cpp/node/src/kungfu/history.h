@@ -5,7 +5,7 @@
 #ifndef KUNGFU_NODE_HISTORY_H
 #define KUNGFU_NODE_HISTORY_H
 
-#include <napi.h>
+#include "common.h"
 
 #include <kungfu/yijinjing/common.h>
 #include <kungfu/yijinjing/practice/profile.h>

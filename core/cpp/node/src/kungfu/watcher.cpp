@@ -194,14 +194,14 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | $([&](const event_ptr &event) { cast_event_invoke(event, update_state); });
+  events_ | $([&](const event_ptr &event) { feed_state_data(event, update_state); });
 }
 
 void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
 
-  events_ | $([&](const event_ptr &event) { cast_event_invoke(event, update_ledger); });
+  events_ | $([&](const event_ptr &event) { feed_state_data(event, update_ledger); });
 
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();

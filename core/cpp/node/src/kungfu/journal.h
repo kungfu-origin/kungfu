@@ -5,7 +5,7 @@
 #ifndef KUNGFU_NODE_JOURNAL_H
 #define KUNGFU_NODE_JOURNAL_H
 
-#include <napi.h>
+#include "common.h"
 
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/journal/journal.h>

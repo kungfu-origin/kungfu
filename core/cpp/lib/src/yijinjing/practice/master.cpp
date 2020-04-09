@@ -120,7 +120,8 @@ void master::react() {
                          if (registry_.find(e->source()) != registry_.end()) {
                            session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(e));
                            if (has_location(e->source()) and get_location(e->source())->category != category::MD) {
-                             cast_event_invoke(e, app_cache_shift_[e->source()]);
+                             feed_state_data(e, app_cache_shift_[e->source()]);
+                             feed_profile_data(e, profile_);
                            }
                          }
                        });

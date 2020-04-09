@@ -6,9 +6,9 @@
 #define WINGCHUN_COMMON_H
 
 #include <cmath>
-#include <fmt/format.h>
-#include <string>
+#include <locale>
 
+#include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/util/util.h>
@@ -85,26 +85,6 @@ inline bool endswith(const std::string &str, const std::string &suffix) {
 
 inline bool startswith(const std::string &str, const std::string &prefix) {
   return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
-}
-
-inline void to_upper(std::string &data) {
-  std::for_each(data.begin(), data.end(), [](char &c) { c = ::toupper(c); });
-}
-
-inline std::string to_upper_copy(const std::string &data) {
-  std::string rtn = data;
-  to_upper(rtn);
-  return rtn;
-}
-
-inline void to_lower(std::string &data) {
-  std::for_each(data.begin(), data.end(), [](char &c) { c = ::tolower(c); });
-}
-
-inline std::string to_lower_copy(const std::string &data) {
-  std::string rtn = data;
-  to_lower(rtn);
-  return rtn;
 }
 
 inline bool is_final_status(const longfist::enums::OrderStatus &status) {
@@ -237,7 +217,7 @@ inline std::string get_instrument_product(const char *instrument_id) {
   int i = 0;
   while (instrument_id[i] != 0) {
     if (instrument_id[i] < '0' || instrument_id[i] > '9') {
-      product.push_back(instrument_id[i]);
+      product.push_back(std::toupper(instrument_id[i]));
     }
     ++i;
   }

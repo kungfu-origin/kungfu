@@ -5,11 +5,10 @@
 #ifndef KUNGFU_NODE_CONFIGURATION_H
 #define KUNGFU_NODE_CONFIGURATION_H
 
-#include <napi.h>
-
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/profile.h>
 
+#include "common.h"
 #include "operators.h"
 
 namespace kungfu::node {

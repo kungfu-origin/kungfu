@@ -114,11 +114,20 @@ protected:
 
   virtual void on_active() = 0;
 
-  static constexpr auto cast_event_invoke = [](const event_ptr &event, auto &handler) {
+  static constexpr auto feed_profile_data = [](const event_ptr &event, auto &receiver) {
+    boost::hana::for_each(longfist::ProfileDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        receiver << typed_event_ptr<DataType>(event);
+      }
+    });
+  };
+
+  static constexpr auto feed_state_data = [](const event_ptr &event, auto &receiver) {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
-        handler << typed_event_ptr<DataType>(event);
+        receiver << typed_event_ptr<DataType>(event);
       }
     });
   };

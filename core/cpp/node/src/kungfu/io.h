@@ -5,9 +5,9 @@
 #ifndef KUNGFU_NODE_IO_H
 #define KUNGFU_NODE_IO_H
 
-#include <napi.h>
-
+#include "common.h"
 #include "journal.h"
+
 #include <kungfu/yijinjing/io.h>
 
 namespace kungfu::node {

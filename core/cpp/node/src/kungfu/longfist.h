@@ -5,8 +5,8 @@
 #ifndef KUNGFU_NODE_LONGFIST_H
 #define KUNGFU_NODE_LONGFIST_H
 
+#include "common.h"
 #include "operators.h"
-#include <napi.h>
 
 namespace kungfu::node {
 class Longfist : public Napi::ObjectWrap<Longfist> {

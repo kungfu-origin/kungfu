@@ -5,7 +5,7 @@
 #ifndef KUNGFU_NODE_DATA_TABLE_H
 #define KUNGFU_NODE_DATA_TABLE_H
 
-#include <napi.h>
+#include "common.h"
 
 namespace kungfu::node {
 class DataTable : public Napi::ObjectWrap<DataTable> {

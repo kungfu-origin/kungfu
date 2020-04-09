@@ -144,7 +144,7 @@ void apprentice::react() {
   });
 
   events_ | take_until(events_ | is(RequestStart::tag)) |
-      $([&](const event_ptr &event) { cast_event_invoke(event, state_bank_); });
+      $([&](const event_ptr &event) { feed_state_data(event, state_bank_); });
 
   SPDLOG_TRACE("building reactive event handlers");
   on_react();

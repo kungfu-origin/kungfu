@@ -5,6 +5,7 @@
 #ifndef KUNGFU_NODE_SERIALIZE_H
 #define KUNGFU_NODE_SERIALIZE_H
 
+#include "common.h"
 #include "data_table.h"
 
 #include <kungfu/common.h>
