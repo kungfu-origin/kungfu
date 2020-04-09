@@ -109,8 +109,8 @@ public:
 
   void on_exit() override { PYBIND11_OVERLOAD_PURE(void, master, on_exit); }
 
-  void on_register(const event_ptr &event, const location_ptr &app_location) override {
-    PYBIND11_OVERLOAD_PURE(void, master, on_register, event, app_location);
+  void on_register(const event_ptr &event, const Register &register_data) override {
+    PYBIND11_OVERLOAD_PURE(void, master, on_register, event, register_data);
   }
 
   void on_interval_check(int64_t nanotime) override {
@@ -175,6 +175,15 @@ void bind(pybind11::module &&m) {
       .value("LOG", layout::LOG)
       .export_values();
   m.def("get_layout_name", &get_layout_name);
+
+  py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
+      .value("REPLY", nanomsg::protocol::REPLY)
+      .value("REQUEST", nanomsg::protocol::REQUEST)
+      .value("PUSH", nanomsg::protocol::PUSH)
+      .value("PULL", nanomsg::protocol::PULL)
+      .value("PUBLISH", nanomsg::protocol::PUBLISH)
+      .value("SUBSCRIBE", nanomsg::protocol::SUBSCRIBE)
+      .export_values();
 
   auto event_class = py::class_<event, PyEvent, std::shared_ptr<event>>(m, "event");
   event_class.def_property_readonly("gen_time", &event::gen_time)
@@ -244,15 +253,6 @@ void bind(pybind11::module &&m) {
       .def("list_locations", &locator::list_locations, py::arg("category") = "*", py::arg("group") = "*",
            py::arg("name") = "*", py::arg("mode") = "*")
       .def("list_location_dest", &locator::list_location_dest);
-
-  py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
-      .value("REPLY", nanomsg::protocol::REPLY)
-      .value("REQUEST", nanomsg::protocol::REQUEST)
-      .value("PUSH", nanomsg::protocol::PUSH)
-      .value("PULL", nanomsg::protocol::PULL)
-      .value("PUBLISH", nanomsg::protocol::PUBLISH)
-      .value("SUBSCRIBE", nanomsg::protocol::SUBSCRIBE)
-      .export_values();
 
   py::class_<socket, socket_ptr>(m, "socket")
       .def(py::init<protocol>(), py::arg("protocol"))
@@ -338,18 +338,21 @@ void bind(pybind11::module &&m) {
       .def(py::init<io_device_ptr>())
       .def("rebuild_index_db", &session_builder::rebuild_index_db);
 
+  auto profile_class = py::class_<profile, std::shared_ptr<profile>>(m, "profile");
+  profile_class.def(py::init<const yijinjing::locator_ptr &>());
+  boost::hana::for_each(longfist::ProfileDataTypes, [&](auto type) {
+    using DataType = typename decltype(+boost::hana::second(type))::type;
+    profile_class.def("set", &profile::set<DataType>);
+    profile_class.def("get", &profile::get<DataType>);
+    profile_class.def("get_all", &profile::get_all<DataType>);
+    profile_class.def("remove", &profile::remove<DataType>);
+  });
+
   py::class_<master, PyMaster>(m, "master")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
       .def_property_readonly("session_builder", &master::get_session_builder)
       .def_property_readonly("io_device", &master::get_io_device)
       .def("now", &master::now)
-      .def("get_home_uid", &master::get_home_uid)
-      .def("get_live_home_uid", &master::get_live_home_uid)
-      .def("get_home_uname", &master::get_home_uname)
-      .def("has_location", &master::has_location)
-      .def("get_location", &master::get_location)
-      .def("has_writer", &master::has_writer)
-      .def("get_writer", &master::get_writer)
       .def("run", &master::run)
       .def("on_exit", &master::on_exit)
       .def("on_register", &master::on_register)
@@ -366,16 +369,6 @@ void bind(pybind11::module &&m) {
       .def("set_end_time", &apprentice::set_end_time)
       .def("on_trading_day", &apprentice::on_trading_day)
       .def("run", &apprentice::run);
-
-  auto cs_class = py::class_<profile>(m, "profile");
-  cs_class.def(py::init<const yijinjing::locator_ptr &>());
-  boost::hana::for_each(longfist::ProfileDataTypes, [&](auto type) {
-    using DataType = typename decltype(+boost::hana::second(type))::type;
-    cs_class.def("set", &profile::set<DataType>);
-    cs_class.def("get", &profile::get<DataType>);
-    cs_class.def("get_all", &profile::get_all<DataType>);
-    cs_class.def("remove", &profile::remove<DataType>);
-  });
 }
 } // namespace kungfu::yijinjing
 

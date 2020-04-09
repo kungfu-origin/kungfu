@@ -1,14 +1,15 @@
 import sys
-import json
 import time
 import psutil
 import functools
 import traceback
-from pykungfu import yijinjing as yjj
-import kungfu.yijinjing.journal as kfj
-from kungfu.yijinjing.log import create_logger
 
+from . import default_commissions
+from kungfu.yijinjing import journal as kfj
+from kungfu.yijinjing import log
 from kungfu.wingchun.calendar import Calendar
+from pykungfu import longfist as lf
+from pykungfu import yijinjing as yjj
 
 SECOND_IN_NANO = int(1e9)
 TASKS = dict()
@@ -33,13 +34,32 @@ class Master(yjj.master):
         yjj.master.__init__(self, yjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
         self.ctx = ctx
         self.ctx.master = self
-        self.ctx.logger = create_logger("master", ctx.log_level, self.io_device.home)
+        self.ctx.logger = log.create_logger("master", ctx.log_level, self.io_device.home)
         self.ctx.apprentices = {}
 
         self.ctx.calendar = Calendar(ctx)
         self.ctx.trading_day = ctx.calendar.trading_day
 
         self.ctx.master = self
+
+        self.profile = yjj.profile(ctx.locator)
+        self.commissions = {}
+        for commission in self.profile.get_all(lf.types.Commission()):
+            self.commissions[commission.product_id] = commission
+        default_commissions.apply(lambda default: self.set_default_commission(default), 1)
+
+    def set_default_commission(self, default):
+        if default.product_id not in self.commissions:
+            commission = lf.types.Commission()
+            commission.product_id = default.product_id
+            commission.exchange_id = default.exchange_id
+            commission.instrument_type = lf.enums.InstrumentType(default['instrument_type'])
+            commission.mode = lf.enums.CommissionRateMode(default['mode'])
+            commission.open_ratio = default.open_ratio
+            commission.close_ratio = default.close_ratio
+            commission.close_today_ratio = default.close_today_ratio
+            commission.min_commission = default.min_commission
+            self.profile.set(commission)
 
     def is_live_watcher(self, pid):
         info = self.ctx.apprentices[pid]
@@ -76,21 +96,24 @@ class Master(yjj.master):
 
         self.ctx.logger.info('master cleaned up')
 
-    def on_register(self, event, app_location):
-        data = json.loads(event.data_as_string)
-        pid = data['pid']
-        self.ctx.logger.info('app [%d] %s checking in', pid, app_location.uname)
+    def on_register(self, event, register_data):
+        pid = register_data.pid
+        category = yjj.get_category_name(register_data.category)
+        mode = yjj.get_mode_name(register_data.mode)
+        uname = f'{category}/{register_data.group}/{register_data.name}/{mode}'
+        self.ctx.logger.info(f'app {pid} {uname} checking in')
         if pid not in self.ctx.apprentices:
             try:
                 self.ctx.apprentices[pid] = {
                     'process': psutil.Process(pid),
-                    'location': app_location
+                    'uname': uname,
+                    'location': register_data
                 }
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
-                self.ctx.logger.error("app [%d] %s checkin failed: %s", pid, app_location.uname, err_msg)
-                self.deregister_app(event.gen_time, app_location.uid)
+                self.ctx.logger.error("app [%d] %s checkin failed: %s", pid, uname, err_msg)
+                self.deregister_app(event.gen_time, register_data.location_uid)
 
     def on_interval_check(self, nanotime):
         try:
@@ -108,7 +131,7 @@ class Master(yjj.master):
 def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
-            ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['location'].uname, pid)
+            ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['uname'], pid)
             ctx.master.deregister_app(yjj.now_in_nano(), ctx.apprentices[pid]['location'].uid)
             del ctx.apprentices[pid]
 

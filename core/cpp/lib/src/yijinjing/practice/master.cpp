@@ -95,7 +95,7 @@ void master::register_app(const event_ptr &e) {
   write_registers(e->gen_time(), app_cmd_writer);
   write_channels(e->gen_time(), app_cmd_writer);
 
-  on_register(e, app_location);
+  on_register(e, register_data);
 }
 
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {

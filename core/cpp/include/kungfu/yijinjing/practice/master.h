@@ -30,7 +30,7 @@ public:
 
   void on_notify() override;
 
-  virtual void on_register(const event_ptr &event, const data::location_ptr &app_location) = 0;
+  virtual void on_register(const event_ptr &event, const longfist::types::Register &register_data) = 0;
 
   virtual void on_interval_check(int64_t nanotime) = 0;
 
