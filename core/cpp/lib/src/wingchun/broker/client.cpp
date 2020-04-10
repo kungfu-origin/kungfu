@@ -3,7 +3,6 @@
 //
 
 #include <kungfu/wingchun/broker/client.h>
-#include <kungfu/wingchun/utils.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist::types;
@@ -62,12 +61,18 @@ bool Client::is_subscribed(uint32_t md_location_uid, const std::string &exchange
 
 void Client::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                        const std::string &instrument_id) {
+  uint32_t key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
+  if (instruments_.find(key) != instruments_.end()) {
+    return;
+  }
   Instrument instrument = {};
   strcpy(instrument.instrument_id, instrument_id.c_str());
   strcpy(instrument.exchange_id, exchange_id.c_str());
-  uint32_t key = hash_instrument(instrument);
   instruments_.emplace(key, instrument);
   instrument_md_locations_.emplace(key, md_location);
+  if (app_.has_writer(md_location->uid)) {
+    app_.get_writer(md_location->uid)->write(0, instrument);
+  }
 }
 
 void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
@@ -119,7 +124,7 @@ void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_
   for (auto &pair : instruments_) {
     auto instrument = pair.second;
     if (md_location->uid == instrument_md_locations_.at(hash_instrument(instrument))->uid) {
-      write_subscribe_msg(writer, trigger_time, instrument.exchange_id, instrument.instrument_id);
+      writer->write(trigger_time, instrument);
     }
   }
 }

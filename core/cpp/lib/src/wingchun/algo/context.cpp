@@ -3,7 +3,6 @@
 //
 
 #include <kungfu/wingchun/algo/algo.h>
-#include <kungfu/wingchun/utils.h>
 #include <kungfu/yijinjing/log.h>
 
 using namespace kungfu::rx;
@@ -98,7 +97,10 @@ void AlgoContext::subscribe(const std::string &source, const std::vector<std::st
   auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, app_.get_locator());
   auto writer = app_.get_writer(md_location->uid);
   for (const auto &inst : instruments) {
-    write_subscribe_msg(writer, app_.now(), exchange, inst);
+    Instrument instrument = {};
+    strcpy(instrument.instrument_id, inst.c_str());
+    strcpy(instrument.exchange_id, exchange.c_str());
+    writer->write(app_.now(), instrument);
   }
 }
 

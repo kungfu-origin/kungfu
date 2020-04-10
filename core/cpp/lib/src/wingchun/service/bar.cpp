@@ -1,6 +1,6 @@
 
+#include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/service/bar.h>
-#include <kungfu/wingchun/utils.h>
 #include <kungfu/yijinjing/log.h>
 #include <regex>
 
@@ -55,7 +55,7 @@ bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
           for (const auto &inst : instruments) {
             auto instrument_key = hash_instrument(inst.exchange_id, inst.instrument_id);
             if (bars_.find(instrument_key) == bars_.end()) {
-              write_subscribe_msg(get_writer(source_location_->uid), 0, inst.exchange_id, inst.instrument_id);
+              get_writer(source_location_->uid)->write(0, inst);
               auto now_in_nano = now();
               auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
               SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
@@ -72,7 +72,7 @@ bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
     for (const auto &inst : instruments) {
       auto instrument_key = hash_instrument(inst.exchange_id, inst.instrument_id);
       if (bars_.find(instrument_key) == bars_.end()) {
-        write_subscribe_msg(get_writer(source_location_->uid), 0, inst.exchange_id, inst.instrument_id);
+        get_writer(source_location_->uid)->write(0, inst);
         auto now_in_nano = now();
         auto start_time = now_in_nano - now_in_nano % time_interval_ + time_interval_;
         SPDLOG_INFO("subscribe {}.{}", inst.instrument_id, inst.exchange_id);
@@ -151,41 +151,7 @@ void BarGenerator::on_start() {
     }
   });
 
-  events_ | is(Subscribe::tag) | $([&](const event_ptr &event) {
-    SPDLOG_INFO("subscribe request");
-    std::vector<Instrument> symbols;
-    const char *buffer = &(event->data<char>());
-    hffix::message_reader reader(buffer, buffer + event->data_length());
-    for (; reader.is_complete(); reader = reader.next_message_reader()) {
-      if (reader.is_valid()) {
-        auto group_mdentry_begin =
-            std::find_if(reader.begin(), reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
-        hffix::message_reader::const_iterator group_mdentry_end;
-        for (; group_mdentry_begin != reader.end(); group_mdentry_begin = group_mdentry_end) {
-          group_mdentry_end =
-              std::find_if(group_mdentry_begin + 1, reader.end(), hffix::tag_equal(hffix::tag::MDEntryType));
-
-          auto group_instrument_begin =
-              std::find_if(group_mdentry_begin, group_mdentry_end, hffix::tag_equal(hffix::tag::Symbol));
-          hffix::message_reader::const_iterator group_instrument_end;
-
-          for (; group_instrument_begin != group_mdentry_end; group_instrument_begin = group_instrument_end) {
-            group_instrument_end =
-                std::find_if(group_instrument_begin + 1, group_mdentry_end, hffix::tag_equal(hffix::tag::Symbol));
-            hffix::message_reader::const_iterator symbol = group_instrument_begin;
-            hffix::message_reader::const_iterator exchange = group_instrument_begin;
-            reader.find_with_hint(hffix::tag::SecurityExchange, exchange);
-
-            Instrument instrument{};
-            strcpy(instrument.instrument_id, symbol->value().as_string().c_str());
-            strcpy(instrument.exchange_id, exchange->value().as_string().c_str());
-            symbols.push_back(instrument);
-          }
-        }
-      }
-    }
-    subscribe(symbols);
-  });
+  events_ | is(Instrument::tag) | $$$(subscribe({event->data<Instrument>()}));
 }
 
 } // namespace kungfu::wingchun::service

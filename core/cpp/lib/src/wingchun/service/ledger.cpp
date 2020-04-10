@@ -5,7 +5,6 @@
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/service/ledger.h>
-#include <kungfu/wingchun/utils.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
@@ -64,7 +63,7 @@ void Ledger::on_start() {
 
   events_ | is(OrderInput::tag) | $([&](const event_ptr &event) {
     const OrderInput &data = event->data<OrderInput>();
-    write_book(event, data);
+    //    write_book(event, data);
 
     auto &stat = get_order_stat(data.order_id, event);
     stat.order_id = data.order_id;
@@ -76,7 +75,7 @@ void Ledger::on_start() {
     const Order &data = event->data<Order>();
 
     if (data.error_id == 0) {
-      write_book(event, data);
+      //      write_book(event, data);
     }
 
     auto &stat = get_order_stat(data.order_id, event);
@@ -94,7 +93,7 @@ void Ledger::on_start() {
 
   events_ | is(Trade::tag) | $([&](const event_ptr &event) {
     const Trade &data = event->data<Trade>();
-    write_book(event, data);
+    //    write_book(event, data);
 
     auto &stat = get_order_stat(data.order_id, event);
     if (stat.trade_time == 0) {
@@ -158,10 +157,13 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
     }
   };
   for (auto &pair : bookkeeper_.get_books()) {
-    auto &account_book = *pair.second;
-    writer->write(trigger_time, account_book.asset);
-    write_positions(account_book.long_positions);
-    write_positions(account_book.short_positions);
+    auto holder_uid = pair.second->asset.holder_uid;
+    if (get_location(holder_uid)->category == category::TD and has_channel(holder_uid, dest)) {
+      auto &account_book = *pair.second;
+      writer->write(trigger_time, account_book.asset);
+      write_positions(account_book.long_positions);
+      write_positions(account_book.short_positions);
+    }
   }
   PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
   end.holder_uid = dest;

@@ -119,6 +119,9 @@ void Bookkeeper::try_update_position(const Position &position) {
     target_position = position;
     target_position.last_price = last_price;
     try_subscribe_position(target_position);
+    if (app_.get_home()->category == category::SYSTEM and target_position.client_id[0] > 0) {
+      SPDLOG_WARN("update position {}", target_position.to_string());
+    }
   }
 }
 

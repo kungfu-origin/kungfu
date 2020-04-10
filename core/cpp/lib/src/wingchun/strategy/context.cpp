@@ -5,7 +5,6 @@
 #include <fmt/format.h>
 
 #include <kungfu/wingchun/strategy/context.h>
-#include <kungfu/wingchun/utils.h>
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 
@@ -58,8 +57,6 @@ void Context::add_account(const std::string &source, const std::string &account,
   account_location_ids_.emplace(account_id, account_location->uid);
 
   broker_client_.enroll_account(account_location);
-
-  SPDLOG_INFO("added account {}@{} [{:08x}]", account, source, account_id);
 }
 
 const std::unordered_map<uint32_t, location_ptr> &Context::list_accounts() const { return accounts_; }
@@ -82,7 +79,6 @@ const location_ptr &Context::find_marketdata(const std::string &source) {
       throw wingchun_error(fmt::format("invalid md {}", source));
     }
     market_data_.emplace(source, md_location);
-    SPDLOG_INFO("added md {} at {} [{:08x}]", source, md_location->uname, md_location->uid);
   }
   return market_data_.at(source);
 }

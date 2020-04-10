@@ -3,7 +3,6 @@
 //
 
 #include <kungfu/wingchun/service/algo.h>
-#include <kungfu/wingchun/utils.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;

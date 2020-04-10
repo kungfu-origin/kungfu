@@ -17,9 +17,6 @@
 // Created by Keren Dong on 2019-06-01.
 //
 
-#include <csignal>
-#include <hffix.hpp>
-
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/util/os.h>
