@@ -83,8 +83,8 @@ bool TraderCTP::insert_order(const event_ptr &event) {
     order.status = OrderStatus::Error;
   }
 
-  orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
   writer->close_data();
+  orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
   return error_id == 0;
 }
 
@@ -179,6 +179,7 @@ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
       auto order_state = orders_.at(order_id);
       order_state.data.status = OrderStatus::Error;
       order_state.data.error_id = pRspInfo->ErrorID;
+      order_state.data.update_time = time::now_in_nano();
       strncpy(order_state.data.error_msg, gbk2utf8(pRspInfo->ErrorMsg).c_str(), ERROR_MSG_LEN);
       write_to(0, order_state.data, order_state.dest);
     }
@@ -205,9 +206,8 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
         writer->close_data();
       }
     }
-    SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {} (InputOrderAction) {} (nRequestID) {} (bIsLast) {}", pRspInfo->ErrorID,
-                 gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction),
-                 nRequestID, bIsLast);
+    SPDLOG_ERROR("ErrorId: {} ErrorMsg: {} InputOrderAction: {}", pRspInfo->ErrorID,
+                 gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction));
   }
 }
 
@@ -225,9 +225,6 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
   Order &order = writer->open_data<Order>(0);
   memcpy(&order, &(order_state.data), sizeof(order));
   from_ctp(*pOrder, order);
-  order.order_id = order_state.data.order_id;
-  order.parent_id = order_state.data.parent_id;
-  order.insert_time = order_state.data.insert_time;
   order.update_time = time::now_in_nano();
   writer->close_data();
 }

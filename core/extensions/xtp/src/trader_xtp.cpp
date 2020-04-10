@@ -110,6 +110,7 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
   Order &order = writer->open_data<Order>(0);
   memcpy(&order, &(order_state.data), sizeof(order));
   from_xtp(*order_info, order);
+  order.update_time = time::now_in_nano();
   if (is_error) {
     order.error_id = error_info->error_id;
     strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);

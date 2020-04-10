@@ -4,9 +4,9 @@ import psutil
 import functools
 import traceback
 
-from . import default_commissions
 from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing import log
+from kungfu.wingchun import default_commissions
 from kungfu.wingchun.calendar import Calendar
 from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
