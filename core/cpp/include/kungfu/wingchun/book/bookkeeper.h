@@ -21,10 +21,6 @@ public:
 
   virtual ~Bookkeeper() = default;
 
-  [[nodiscard]] const CommissionMap &get_commissions() const;
-
-  [[nodiscard]] const InstrumentMap &get_instruments() const;
-
   [[nodiscard]] const BookMap &get_books() const;
 
   Book_ptr get_book(uint32_t uid);
@@ -49,11 +45,13 @@ private:
 
   Book_ptr make_book(uint32_t location_uid);
 
-  void try_update_asset(uint32_t location_uid, const longfist::types::Asset &asset);
+  void try_update_asset(const longfist::types::Asset &asset);
 
-  void try_update_position(uint32_t location_uid, const longfist::types::Position &position);
+  void try_update_position(const longfist::types::Position &position);
 
   void try_subscribe_position(const longfist::types::Position &position);
+
+  void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
   template <typename DataType, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const DataType &)>
   void update_book(const event_ptr &event, ApplyMethod apply) {

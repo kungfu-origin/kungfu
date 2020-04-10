@@ -31,7 +31,6 @@ private:
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
 
-  std::unordered_map<uint64_t, state<longfist::types::Asset>> assets_ = {};
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
   longfist::types::OrderStat &get_order_stat(uint64_t order_id, const event_ptr &event);
@@ -40,7 +39,7 @@ private:
 
   void write_strategy_data(int64_t trigger_time, uint32_t dest);
 
-  void write_daily_assets();
+  void write_asset_snapshots(int32_t msg_type);
 
   template <typename DataType> void write_book(const event_ptr &event, const DataType &data) {
     auto source = get_location(event->source());

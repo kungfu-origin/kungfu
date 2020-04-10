@@ -15,7 +15,7 @@ public:
   Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name,
          longfist::enums::mode m, bool low_latency);
 
-  virtual ~Runner() = default;
+  ~Runner() override = default;
 
   Context_ptr get_context() const;
 

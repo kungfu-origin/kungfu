@@ -167,24 +167,24 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "Watcher",
                                     {
-                                        InstanceMethod("isUsable", &Watcher::IsUsable),
-                                        InstanceMethod("isLive", &Watcher::IsLive),
-                                        InstanceMethod("isStarted", &Watcher::IsStarted),
-                                        InstanceMethod("setup", &Watcher::Setup),
-                                        InstanceMethod("step", &Watcher::Step),
-                                        InstanceMethod("getLocation", &Watcher::GetLocation),
-                                        InstanceMethod("publishState", &Watcher::PublishState),
-                                        InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),
-                                        InstanceMethod("issueOrder", &Watcher::IssueOrder),
-                                        InstanceMethod("cancelOrder", &Watcher::CancelOrder),
-                                        InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),
-                                        InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),
-                                        InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),
-                                        InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet),
-                                        InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),
-                                        InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),
-                                        InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),
-                                        InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),
+                                        InstanceMethod("isUsable", &Watcher::IsUsable),                           //
+                                        InstanceMethod("isLive", &Watcher::IsLive),                               //
+                                        InstanceMethod("isStarted", &Watcher::IsStarted),                         //
+                                        InstanceMethod("setup", &Watcher::Setup),                                 //
+                                        InstanceMethod("step", &Watcher::Step),                                   //
+                                        InstanceMethod("getLocation", &Watcher::GetLocation),                     //
+                                        InstanceMethod("publishState", &Watcher::PublishState),                   //
+                                        InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),         //
+                                        InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
+                                        InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
+                                        InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
+                                        InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
+                                        InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //
+                                        InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet), //
+                                        InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),           //
+                                        InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),         //
+                                        InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),   //
+                                        InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet), //
                                     });
 
   constructor = Napi::Persistent(func);
@@ -201,7 +201,12 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
 
-  events_ | $([&](const event_ptr &event) { feed_state_data(event, update_ledger); });
+  events_ | $$$(feed_state_data(event, update_ledger));
+  events_ | is(Quote::tag) | $$$(UpdateBook(event, event->data<Quote>()));
+  events_ | is(OrderInput::tag) | $$$(UpdateBook(event, event->data<OrderInput>()));
+  events_ | is(Order::tag) | $$$(UpdateBook(event, event->data<Order>()));
+  events_ | is(Trade::tag) | $$$(UpdateBook(event, event->data<Trade>()));
+  events_ | is(CacheReset::tag) | $$$(reset_cache(event));
 
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();
@@ -246,16 +251,6 @@ void Watcher::on_start() {
     auto state = Napi::Number::New(app_states_ref_.Env(), (int)(event->data<BrokerStateUpdate>().state));
     app_states_ref_.Set(format(app_location->uid), state);
   });
-
-  events_ | is(CacheReset::tag) | $([&](const event_ptr &event) { reset_cache(event); });
-
-  events_ | is(Quote::tag) | $([&](const event_ptr &event) { UpdateBook(event, event->data<Quote>()); });
-
-  events_ | is(OrderInput::tag) | $([&](const event_ptr &event) { UpdateBook(event, event->data<OrderInput>()); });
-
-  events_ | is(Order::tag) | $([&](const event_ptr &event) { UpdateBook(event, event->data<Order>()); });
-
-  events_ | is(Trade::tag) | $([&](const event_ptr &event) { UpdateBook(event, event->data<Trade>()); });
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to) {

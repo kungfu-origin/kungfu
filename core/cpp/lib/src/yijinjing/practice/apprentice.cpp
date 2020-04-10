@@ -116,12 +116,10 @@ void apprentice::react() {
     time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
   });
 
-  events_ | is(Location::tag) | $([&](const event_ptr &event) {
-    add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator()));
-  });
+  events_ | is(Location::tag) |
+      $$$(add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator())));
 
-  events_ | is(Register::tag) |
-      $([&](const event_ptr &event) { register_location(event->trigger_time(), event->data<Register>()); });
+  events_ | is(Register::tag) | $$$(register_location(event->trigger_time(), event->data<Register>()));
 
   events_ | is(Deregister::tag) | $([&](const event_ptr &event) {
     uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
@@ -133,18 +131,10 @@ void apprentice::react() {
   events_ | is(RequestReadFrom::tag) | $$(on_read_from);
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
   events_ | is(RequestWriteTo::tag) | $$(on_write_to);
+  events_ | is(Channel::tag) | $$$(register_channel(event->gen_time(), event->data<Channel>()));
+  events_ | is(TradingDay::tag) | $$$(on_trading_day(event, event->data<TradingDay>().timestamp));
 
-  events_ | is(Channel::tag) |
-      $([&](const event_ptr &event) { register_channel(event->gen_time(), event->data<Channel>()); });
-
-  events_ | is(TradingDay::tag) | $([&](const event_ptr &event) {
-    trading_day_ = event->data<TradingDay>().timestamp;
-    SPDLOG_INFO("update trading day to {}", time::strftime(trading_day_, KUNGFU_TRADING_DAY_FORMAT));
-    on_trading_day(event, trading_day_);
-  });
-
-  events_ | take_until(events_ | is(RequestStart::tag)) |
-      $([&](const event_ptr &event) { feed_state_data(event, state_bank_); });
+  events_ | take_until(events_ | is(RequestStart::tag)) | $$$(feed_state_data(event, state_bank_));
 
   SPDLOG_TRACE("building reactive event handlers");
   on_react();

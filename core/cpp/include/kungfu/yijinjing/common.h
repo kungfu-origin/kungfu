@@ -284,6 +284,7 @@ std::function<Result(Observable)> holdon() {
 } // namespace rx
 } // namespace kungfu
 
-#define $$(f) $([&](const event_ptr &e) { f(e); })
+#define $$(handle) $([&](const event_ptr &event) { handle(event); })
+#define $$$(handler) $([&](const event_ptr &event) { handler; })
 
 #endif // KUNGFU_YIJINJING_COMMON_H

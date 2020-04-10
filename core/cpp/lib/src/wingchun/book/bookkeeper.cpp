@@ -10,16 +10,13 @@ using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
 Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
     : app_(app), broker_client_(broker_client), instruments_(), books_() {
   book::AccountingMethod::setup_defaults(*this);
 }
-
-const CommissionMap &Bookkeeper::get_commissions() const { return commissions_; }
-
-const InstrumentMap &Bookkeeper::get_instruments() const { return instruments_; }
 
 const BookMap &Bookkeeper::get_books() const { return books_; }
 
@@ -52,58 +49,14 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   restore(app_.get_state_bank());
   on_trading_day(app_.get_trading_day());
 
-  events | is_own<Quote>(broker_client_) | $([&](const event_ptr &event) {
-    const Quote &data = event->data<Quote>();
-    if (accounting_methods_.find(data.instrument_type) == accounting_methods_.end()) {
-      return;
-    }
-    auto accounting_method = accounting_methods_.at(data.instrument_type);
-    for (const auto &item : books_) {
-      auto &book = item.second;
-      auto has_long_position = book->has_long_position(data);
-      auto has_short_position = book->has_short_position(data);
-      if (has_long_position or has_short_position) {
-        accounting_method->apply_quote(book, data);
-        book->update(event->gen_time());
-      }
-      if (has_long_position) {
-        book->get_long_position(data).update_time = event->gen_time();
-      }
-      if (has_short_position) {
-        book->get_short_position(data).update_time = event->gen_time();
-      }
-    }
-  });
-
-  events | is(OrderInput::tag) |
-      $([&](const event_ptr &event) { update_book<OrderInput>(event, &AccountingMethod::apply_order_input); });
-
-  events | is(Order::tag) |
-      $([&](const event_ptr &event) { update_book<Order>(event, &AccountingMethod::apply_order); });
-
-  events | is(Trade::tag) |
-      $([&](const event_ptr &event) { update_book<Trade>(event, &AccountingMethod::apply_trade); });
-
-  events | is(Asset::tag) | $([&](const event_ptr &event) {
-    const Asset &data = event->data<Asset>();
-    try_update_asset(event->source(), data);
-    try_update_asset(event->dest(), data);
-  });
-
-  events | is(Position::tag) | $([&](const event_ptr &event) {
-    const Position &data = event->data<Position>();
-    try_update_position(event->source(), data);
-    try_update_position(event->dest(), data);
-    try_subscribe_position(data);
-  });
-
-  events | is(PositionEnd::tag) | $([&](const event_ptr &event) {
-    const PositionEnd &data = event->data<PositionEnd>();
-    get_book(data.holder_uid)->update(event->gen_time());
-  });
-
-  events | is(TradingDay::tag) |
-      $([&](const event_ptr &event) { on_trading_day(event->data<TradingDay>().timestamp); });
+  events | is_own<Quote>(broker_client_) | $$$(update_book(event, event->data<Quote>()));
+  events | is(OrderInput::tag) | $$$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
+  events | is(Order::tag) | $$$(update_book<Order>(event, &AccountingMethod::apply_order));
+  events | is(Trade::tag) | $$$(update_book<Trade>(event, &AccountingMethod::apply_trade));
+  events | is(Asset::tag) | $$$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | $$$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | $$$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+  events | is(TradingDay::tag) | $$$(on_trading_day(event->data<TradingDay>().timestamp));
 }
 
 void Bookkeeper::restore(const cache::bank &state_bank) {
@@ -115,7 +68,7 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
     auto &state = pair.second;
     auto &commission = state.data;
-    commissions_.emplace(yijinjing::util::hash_str_32(commission.product_id), commission);
+    commissions_.emplace(hash_str_32(commission.product_id), commission);
   }
   for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
@@ -153,18 +106,19 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   return book;
 }
 
-void Bookkeeper::try_update_asset(uint32_t location_uid, const Asset &asset) {
-  if (app_.has_location(location_uid) and app_.get_location(location_uid)->category == category::TD) {
-    get_book(location_uid)->asset = asset;
+void Bookkeeper::try_update_asset(const Asset &asset) {
+  if (app_.has_location(asset.holder_uid)) {
+    get_book(asset.holder_uid)->asset = asset;
   }
 }
 
-void Bookkeeper::try_update_position(uint32_t location_uid, const Position &position) {
-  if (app_.has_location(location_uid) and app_.get_location(location_uid)->category == category::TD) {
-    auto &target_position = get_book(location_uid)->get_position(position.direction, position);
+void Bookkeeper::try_update_position(const Position &position) {
+  if (app_.has_location(position.holder_uid)) {
+    auto &target_position = get_book(position.holder_uid)->get_position(position.direction, position);
     auto last_price = target_position.last_price;
     target_position = position;
     target_position.last_price = last_price;
+    try_subscribe_position(target_position);
   }
 }
 
@@ -174,6 +128,28 @@ void Bookkeeper::try_subscribe_position(const Position &position) {
     auto group = holder_location->group;
     auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, app_.get_locator());
     broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+  }
+}
+
+void Bookkeeper::update_book(const event_ptr &event, const longfist::types::Quote &quote) {
+  if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
+    return;
+  }
+  auto accounting_method = accounting_methods_.at(quote.instrument_type);
+  for (const auto &item : books_) {
+    auto &book = item.second;
+    auto has_long_position = book->has_long_position(quote);
+    auto has_short_position = book->has_short_position(quote);
+    if (has_long_position or has_short_position) {
+      accounting_method->apply_quote(book, quote);
+      book->update(event->gen_time());
+    }
+    if (has_long_position) {
+      book->get_long_position(quote).update_time = event->gen_time();
+    }
+    if (has_short_position) {
+      book->get_short_position(quote).update_time = event->gen_time();
+    }
   }
 }
 } // namespace kungfu::wingchun::book
