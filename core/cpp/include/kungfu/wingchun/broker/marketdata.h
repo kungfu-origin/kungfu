@@ -20,11 +20,11 @@ public:
 
   virtual void on_start() override;
 
-  virtual bool subscribe(const std::vector<longfist::types::Instrument> &instruments) = 0;
+  virtual bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) = 0;
 
   virtual bool subscribe_all() = 0;
 
-  virtual bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) = 0;
+  virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) = 0;
 };
 } // namespace kungfu::wingchun::broker
 

@@ -13,7 +13,7 @@ public:
   BarGenerator(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency,
                const std::string &json_config);
 
-  bool subscribe(const std::vector<longfist::types::Instrument> &instruments);
+  bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments);
 
   void on_start() override;
 

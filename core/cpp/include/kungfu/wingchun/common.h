@@ -333,7 +333,7 @@ inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }
 
-inline uint32_t hash_instrument(const longfist::types::Instrument &instrument) {
+inline uint32_t hash_instrument(const longfist::types::InstrumentKey &instrument) {
   return hash_instrument(instrument.exchange_id, instrument.instrument_id);
 }
 

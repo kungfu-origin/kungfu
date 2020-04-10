@@ -45,7 +45,7 @@ BarGenerator::BarGenerator(locator_ptr locator, mode m, bool low_latency, const 
   }
 }
 
-bool BarGenerator::subscribe(const std::vector<Instrument> &instruments) {
+bool BarGenerator::subscribe(const std::vector<InstrumentKey> &instruments) {
   if (not has_writer(source_location_->uid)) {
     events_ | is(RequestWriteTo::tag) | filter([=](const event_ptr &e) {
       const RequestWriteTo &data = e->data<RequestWriteTo>();
@@ -151,7 +151,7 @@ void BarGenerator::on_start() {
     }
   });
 
-  events_ | is(Instrument::tag) | $$$(subscribe({event->data<Instrument>()}));
+  events_ | is(InstrumentKey::tag) | $$$(subscribe({event->data<InstrumentKey>()}));
 }
 
 } // namespace kungfu::wingchun::service

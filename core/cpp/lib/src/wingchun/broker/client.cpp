@@ -40,7 +40,7 @@ int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app, const Regis
 
 Client::Client(apprentice &app) : app_(app) {}
 
-const std::unordered_map<uint32_t, Instrument> &Client::get_instruments() const { return instruments_; }
+const Client::InstrumentKeyMap &Client::get_instrument_keys() const { return instrument_keys_; }
 
 bool Client::is_ready(uint32_t broker_location_uid) const {
   if (app_.has_location(broker_location_uid) and app_.has_writer(broker_location_uid)) {
@@ -56,23 +56,21 @@ bool Client::is_ready(uint32_t broker_location_uid) const {
 
 bool Client::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                            const std::string &instrument_id) const {
-  return instruments_.find(hash_instrument(exchange_id.c_str(), instrument_id.c_str())) != instruments_.end();
+  return instrument_keys_.find(hash_instrument(exchange_id.c_str(), instrument_id.c_str())) != instrument_keys_.end();
 }
 
 void Client::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                        const std::string &instrument_id) {
   uint32_t key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
-  if (instruments_.find(key) != instruments_.end()) {
+  if (instrument_keys_.find(key) != instrument_keys_.end()) {
     return;
   }
-  Instrument instrument = {};
-  strcpy(instrument.instrument_id, instrument_id.c_str());
-  strcpy(instrument.exchange_id, exchange_id.c_str());
-  instruments_.emplace(key, instrument);
+  InstrumentKey instrument_key = {};
+  instrument_key.key = key;
+  strcpy(instrument_key.instrument_id, instrument_id.c_str());
+  strcpy(instrument_key.exchange_id, exchange_id.c_str());
+  instrument_keys_.emplace(key, instrument_key);
   instrument_md_locations_.emplace(key, md_location);
-  if (app_.has_writer(md_location->uid)) {
-    app_.get_writer(md_location->uid)->write(0, instrument);
-  }
 }
 
 void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
@@ -121,10 +119,9 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
 
 void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   auto writer = app_.get_writer(md_location->uid);
-  for (auto &pair : instruments_) {
-    auto instrument = pair.second;
-    if (md_location->uid == instrument_md_locations_.at(hash_instrument(instrument))->uid) {
-      writer->write(trigger_time, instrument);
+  for (auto &pair : instrument_keys_) {
+    if (md_location->uid == instrument_md_locations_.at(pair.second.key)->uid) {
+      writer->write(trigger_time, pair.second);
     }
   }
 }

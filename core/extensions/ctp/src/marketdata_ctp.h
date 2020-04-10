@@ -21,9 +21,9 @@ public:
 
   virtual ~MarketDataCTP(){};
 
-  bool subscribe(const std::vector<longfist::types::Instrument> &instruments) override;
+  bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) override;
 
-  bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) override;
+  bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) override;
 
   bool subscribe_all() override;
 

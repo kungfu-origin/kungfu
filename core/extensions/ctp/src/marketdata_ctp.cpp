@@ -39,7 +39,7 @@ bool MarketDataCTP::login() {
   return rtn == 0;
 }
 
-bool MarketDataCTP::subscribe(const std::vector<longfist::types::Instrument> &instruments) {
+bool MarketDataCTP::subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) {
   std::vector<std::string> insts;
   for (const auto &ins : instruments) {
     insts.push_back(ins.instrument_id);
@@ -49,7 +49,7 @@ bool MarketDataCTP::subscribe(const std::vector<longfist::types::Instrument> &in
 
 bool MarketDataCTP::subscribe_all() { return false; }
 
-bool MarketDataCTP::unsubscribe(const std::vector<longfist::types::Instrument> &instruments) {
+bool MarketDataCTP::unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) {
   std::vector<std::string> insts;
   for (const auto &ins : instruments) {
     insts.push_back(ins.instrument_id);

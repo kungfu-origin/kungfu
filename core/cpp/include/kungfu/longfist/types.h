@@ -37,9 +37,9 @@ KF_DEFINE_MARK_TYPE(InstrumentRequest, 356);
 KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
-KF_DEFINE_MARK_TYPE(AlgoOrderInput, 210);
-KF_DEFINE_MARK_TYPE(AlgoOrderReport, 211);
-KF_DEFINE_MARK_TYPE(AlgoOrderModify, 212);
+KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
+KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
+KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
 
 KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
@@ -178,6 +178,13 @@ KF_DEFINE_PACK_TYPE(                                              //
 
     (double, long_margin_ratio), //多头保证金率
     (double, short_margin_ratio) //空头保证金率
+);
+
+KF_DEFINE_PACK_TYPE(                                         //
+    InstrumentKey, 210, PK(key), PERPETUAL(),                //
+    (uint32_t, key),                                         //
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id)      //交易所ID
 );
 
 KF_DEFINE_PACK_TYPE(                                         //

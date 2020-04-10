@@ -44,7 +44,7 @@ void MarketDataXTP::on_start() {
   }
 }
 
-bool MarketDataXTP::subscribe(const std::vector<Instrument> &instruments) {
+bool MarketDataXTP::subscribe(const std::vector<InstrumentKey> &instruments) {
   bool result = true;
   std::vector<std::string> sse_tickers;
   std::vector<std::string> sze_tickers;
