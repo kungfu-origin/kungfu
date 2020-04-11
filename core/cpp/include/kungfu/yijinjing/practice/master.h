@@ -39,7 +39,7 @@ public:
 
   void publish_trading_day();
 
-  void register_app(const event_ptr &e);
+  void register_app(const event_ptr &event);
 
   void deregister_app(int64_t trigger_time, uint32_t app_location_uid);
 

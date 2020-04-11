@@ -94,9 +94,9 @@ protected:
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
     return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
-      return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
-               return (e->msg_type() == longfist::types::Time::tag &&
-                       e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns);
+      return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &event) {
+               return (event->msg_type() == longfist::types::Time::tag &&
+                       event->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns);
              }) |
              rx::first();
     };
@@ -115,9 +115,9 @@ protected:
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
     return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
-      return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
-               if (e->msg_type() == longfist::types::Time::tag &&
-                   e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
+      return events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &event) {
+               if (event->msg_type() == longfist::types::Time::tag &&
+                   event->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
                  auto writer = get_writer(master_cmd_location_->uid);
                  longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                  r.id = timer_usage_count;
@@ -146,8 +146,8 @@ protected:
     timer_checkpoints_[timer_usage_count] = now();
     timer_usage_count_++;
     return [&, duration_ns, timer_usage_count](const rx::observable<event_ptr> &src) {
-      return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
-                if (e->msg_type() != longfist::types::Time::tag) {
+      return (src | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &event) {
+                if (event->msg_type() != longfist::types::Time::tag) {
                   auto writer = get_writer(master_cmd_location_->uid);
                   longfist::types::TimeRequest &r = writer->open_data<longfist::types::TimeRequest>(0);
                   r.id = timer_usage_count;
@@ -160,8 +160,8 @@ protected:
                   return false;
                 }
               }))
-          .merge(events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &e) {
-                   if (e->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
+          .merge(events_ | rx::filter([&, duration_ns, timer_usage_count](const event_ptr &event) {
+                   if (event->gen_time() > timer_checkpoints_[timer_usage_count] + duration_ns) {
                      throw rx::timeout_error("timeout");
                    }
                    return false;

@@ -381,7 +381,7 @@ template <typename DataType> struct typed_event_ptr {
 
   const event_ptr &event;
 
-  explicit typed_event_ptr(const event_ptr &e) : event(e) {}
+  explicit typed_event_ptr(const event_ptr &orig) : event(orig) {}
 
   const event_ptr &operator*() const { return event; }
 

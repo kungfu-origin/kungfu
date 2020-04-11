@@ -161,9 +161,9 @@ using namespace rxcpp;
 using namespace rxcpp::operators;
 using namespace rxcpp::util;
 
-constexpr auto noop_event_handler = []() { return [](const event_ptr &e) {}; };
+static constexpr auto noop_event_handler = []() { return [](const event_ptr &event) {}; };
 
-constexpr auto error_handler_log = [](const std::string subscriber_name) {
+static constexpr auto error_handler_log = [](const std::string subscriber_name) {
   return [=](std::exception_ptr e) {
     try {
       std::rethrow_exception(e);
@@ -173,22 +173,22 @@ constexpr auto error_handler_log = [](const std::string subscriber_name) {
   };
 };
 
-constexpr auto complete_handler_log = [](const std::string subscriber_name) {
+static constexpr auto complete_handler_log = [](const std::string subscriber_name) {
   return [=]() { SPDLOG_DEBUG("subscriber {} completed", subscriber_name); };
 };
 
 template <typename EventType>
-constexpr auto instanceof
+static constexpr auto instanceof
     = []() { return filter([](const event_ptr &event) { return dynamic_cast<EventType *>(event.get()) != nullptr; }); };
 
 template <typename... Ts>
-constexpr auto event_filter_any = [](auto member) {
+static constexpr auto event_filter_any = [](auto member) {
   return [=](Ts... arg) {
     using T = std::result_of_t<decltype(member)(event *)>;
     type_check<T, Ts...>(arg...);
     auto args = boost::hana::make_tuple(arg...);
-    return filter([=](const event_ptr &e) {
-      auto check = [&](auto a) { return ((*e).*member)() == a; };
+    return filter([=](const event_ptr &event) {
+      auto check = [&](auto a) { return ((*event).*member)() == a; };
       return boost::hana::fold(boost::hana::transform(args, check), std::logical_or<bool>());
     });
   };
@@ -206,14 +206,7 @@ template <typename... Ts> constexpr decltype(auto) to(Ts... arg) {
   return event_filter_any<Ts...>(&event::dest)(arg...);
 };
 
-constexpr auto trace = []() {
-  return map([=](const event_ptr &e) {
-    SPDLOG_TRACE("rx event {}", e->msg_type());
-    return e;
-  });
-};
-
-constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
+static constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
   try {
     std::rethrow_exception(e);
   } catch (const std::exception &ex) {
@@ -224,11 +217,12 @@ constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
 };
 
 template <class Arg>
-constexpr auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error)) {
+static constexpr auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error)) {
   return subscribe<event_ptr>(std::forward<Arg>(an), interrupt_on_error);
 }
 
-template <class... ArgN> constexpr auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...)) {
+template <class... ArgN>
+static constexpr auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...)) {
   return subscribe<event_ptr>(std::forward<ArgN>(an)...);
 }
 
@@ -284,7 +278,6 @@ std::function<Result(Observable)> holdon() {
 } // namespace rx
 } // namespace kungfu
 
-#define $$(handle) $([&](const event_ptr &event) { handle(event); })
-#define $$$(handler) $([&](const event_ptr &event) { handler; })
+#define $$(handler) $([&](const event_ptr &event) { handler; })
 
 #endif // KUNGFU_YIJINJING_COMMON_H

@@ -22,8 +22,7 @@ Broker::Broker(yijinjing::data::location_ptr location, bool low_latency)
 }
 
 void Broker::on_start() {
-  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag) |
-      $$$(update_broker_state(state_));
+  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag) | $$(update_broker_state(state_));
 }
 
 std::string Broker::get_runtime_folder() { return get_locator()->layout_dir(get_home(), layout::LOG); }

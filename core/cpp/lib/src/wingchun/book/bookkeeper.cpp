@@ -49,14 +49,14 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   restore(app_.get_state_bank());
   on_trading_day(app_.get_trading_day());
 
-  events | is_own<Quote>(broker_client_) | $$$(update_book(event, event->data<Quote>()));
-  events | is(OrderInput::tag) | $$$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
-  events | is(Order::tag) | $$$(update_book<Order>(event, &AccountingMethod::apply_order));
-  events | is(Trade::tag) | $$$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | $$$(try_update_asset(event->data<Asset>()));
-  events | is(Position::tag) | $$$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | $$$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
-  events | is(TradingDay::tag) | $$$(on_trading_day(event->data<TradingDay>().timestamp));
+  events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
+  events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
+  events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
+  events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
+  events | is(Asset::tag) | $$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | $$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+  events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
 }
 
 void Bookkeeper::restore(const cache::bank &state_bank) {

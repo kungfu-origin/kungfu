@@ -77,9 +77,9 @@ void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
 void apprentice::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
   events_ | timer(nanotime) |
       $(
-          [&, callback](const event_ptr &e) {
+          [&, callback](const event_ptr &event) {
             try {
-              callback(e);
+              callback(event);
             } catch (const std::exception &e) {
               SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
             }
@@ -96,9 +96,9 @@ void apprentice::add_timer(int64_t nanotime, const std::function<void(const even
 }
 
 void apprentice::add_time_interval(int64_t duration, const std::function<void(const event_ptr &)> &callback) {
-  events_ | time_interval(std::chrono::nanoseconds(duration)) | $([&, callback](const event_ptr &e) {
+  events_ | time_interval(std::chrono::nanoseconds(duration)) | $([&, callback](const event_ptr &event) {
     try {
-      callback(e);
+      callback(event);
     } catch (const std::exception &e) {
       SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what());
     }
@@ -114,9 +114,9 @@ void apprentice::react() {
   });
 
   events_ | is(Location::tag) |
-      $$$(add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator())));
+      $$(add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator())));
 
-  events_ | is(Register::tag) | $$$(register_location(event->trigger_time(), event->data<Register>()));
+  events_ | is(Register::tag) | $$(register_location(event->trigger_time(), event->data<Register>()));
 
   events_ | is(Deregister::tag) | $([&](const event_ptr &event) {
     uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
@@ -125,13 +125,13 @@ void apprentice::react() {
     deregister_location(event->trigger_time(), location_uid);
   });
 
-  events_ | is(RequestReadFrom::tag) | $$(on_read_from);
-  events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public);
-  events_ | is(RequestWriteTo::tag) | $$(on_write_to);
-  events_ | is(Channel::tag) | $$$(register_channel(event->gen_time(), event->data<Channel>()));
-  events_ | is(TradingDay::tag) | $$$(on_trading_day(event, event->data<TradingDay>().timestamp));
+  events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
+  events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
+  events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
+  events_ | is(Channel::tag) | $$(register_channel(event->gen_time(), event->data<Channel>()));
+  events_ | is(TradingDay::tag) | $$(on_trading_day(event, event->data<TradingDay>().timestamp));
 
-  events_ | take_until(events_ | is(RequestStart::tag)) | $$$(feed_state_data(event, state_bank_));
+  events_ | take_until(events_ | is(RequestStart::tag)) | $$(feed_state_data(event, state_bank_));
 
   SPDLOG_TRACE("building reactive event handlers");
   on_react();
@@ -228,7 +228,7 @@ void apprentice::expect_start() {
   reader_->join(master_home_location_, 0, begin_time_);
   events_ | is(RequestStart::tag) | first() |
       $(
-          [&](const event_ptr &e) {
+          [&](const event_ptr &event) {
             started_ = true;
             SPDLOG_INFO("ready to start");
             on_start();

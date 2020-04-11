@@ -201,12 +201,12 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
 
-  events_ | $$$(feed_state_data(event, update_ledger));
-  events_ | is(Quote::tag) | $$$(UpdateBook(event, event->data<Quote>()));
-  events_ | is(OrderInput::tag) | $$$(UpdateBook(event, event->data<OrderInput>()));
-  events_ | is(Order::tag) | $$$(UpdateBook(event, event->data<Order>()));
-  events_ | is(Trade::tag) | $$$(UpdateBook(event, event->data<Trade>()));
-  events_ | is(CacheReset::tag) | $$$(reset_cache(event));
+  events_ | $$(feed_state_data(event, update_ledger));
+  events_ | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
+  events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
+  events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
+  events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
+  events_ | is(CacheReset::tag) | $$(reset_cache(event));
 
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();

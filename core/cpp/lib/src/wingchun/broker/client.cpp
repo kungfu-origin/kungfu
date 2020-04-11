@@ -74,7 +74,7 @@ void Client::subscribe(const location_ptr &md_location, const std::string &excha
 }
 
 void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
-  events | is(Register::tag) | $$$(connect(event->data<Register>()));
+  events | is(Register::tag) | $$(connect(event->data<Register>()));
 
   events | is(BrokerStateUpdate::tag) | $([&](const event_ptr &event) {
     auto state = event->data<BrokerStateUpdate>().state;

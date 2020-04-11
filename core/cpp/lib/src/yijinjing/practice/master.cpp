@@ -40,12 +40,12 @@ void master::on_exit() {
 
 void master::on_notify() { get_io_device()->get_publisher()->notify(); }
 
-void master::register_app(const event_ptr &e) {
+void master::register_app(const event_ptr &event) {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto home = io_device->get_home();
 
-  auto request_json = e->data<nlohmann::json>();
-  auto request_data = e->data_as_string();
+  auto request_json = event->data<nlohmann::json>();
+  auto request_data = event->data_as_string();
 
   Register register_data(request_data.c_str(), request_data.length());
 
@@ -62,40 +62,40 @@ void master::register_app(const event_ptr &e) {
   auto public_writer = get_writer(location::PUBLIC);
   auto app_cmd_writer = get_io_device()->open_writer_at(master_cmd_location, app_location->uid);
 
-  try_add_location(e->gen_time(), app_location);
-  try_add_location(e->gen_time(), master_cmd_location);
+  try_add_location(event->gen_time(), app_location);
+  try_add_location(event->gen_time(), master_cmd_location);
   app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
-  register_location(e->gen_time(), register_data);
+  register_location(event->gen_time(), register_data);
 
   writers_.emplace(app_location->uid, app_cmd_writer);
   reader_->join(app_location, location::PUBLIC, now);
   reader_->join(app_location, master_cmd_location->uid, now);
 
-  session_builder_.open_session(app_location, e->gen_time());
+  session_builder_.open_session(app_location, event->gen_time());
 
-  public_writer->write(e->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
-  public_writer->write(e->gen_time(), register_data);
+  public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
+  public_writer->write(event->gen_time(), register_data);
 
-  require_write_to(e->gen_time(), app_location->uid, location::PUBLIC);
-  require_write_to(e->gen_time(), app_location->uid, master_cmd_location->uid);
+  require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
+  require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
 
-  app_cmd_writer->mark(e->gen_time(), SessionStart::tag);
+  app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
-  write_time_reset(e->gen_time(), app_cmd_writer);
-  write_trading_day(e->gen_time(), app_cmd_writer);
-  write_profile_data(e->gen_time(), app_cmd_writer);
+  write_time_reset(event->gen_time(), app_cmd_writer);
+  write_trading_day(event->gen_time(), app_cmd_writer);
+  write_profile_data(event->gen_time(), app_cmd_writer);
 
   app_cache_shift_.emplace(app_location->uid, app_location);
   app_cache_shift_[app_location->uid] >> app_cmd_writer;
 
   app_cmd_writer->mark(start_time_, RequestStart::tag);
 
-  write_registries(e->gen_time(), app_cmd_writer);
-  write_channels(e->gen_time(), app_cmd_writer);
+  write_registries(event->gen_time(), app_cmd_writer);
+  write_channels(event->gen_time(), app_cmd_writer);
 
-  on_register(e, register_data);
+  on_register(event, register_data);
 }
 
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
@@ -116,73 +116,74 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
 void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
-  events_ | instanceof <journal::frame>() | $([&](const event_ptr &e) {
-                         if (registry_.find(e->source()) != registry_.end()) {
-                           session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(e));
-                           if (has_location(e->source()) and get_location(e->source())->category != category::MD) {
-                             feed_state_data(e, app_cache_shift_[e->source()]);
-                             feed_profile_data(e, profile_);
-                           }
-                         }
-                       });
+  events_ |
+      instanceof <journal::frame>() | $([&](const event_ptr &event) {
+                   if (registry_.find(event->source()) != registry_.end()) {
+                     session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
+                     if (has_location(event->source()) and get_location(event->source())->category != category::MD) {
+                       feed_state_data(event, app_cache_shift_[event->source()]);
+                       feed_profile_data(event, profile_);
+                     }
+                   }
+                 });
 
-  events_ | is(Location::tag) | $([&](const event_ptr &e) {
-    Location data = e->data<Location>();
-    try_add_location(e->gen_time(), location::make_shared(data, get_locator()));
-    get_writer(location::PUBLIC)->write(e->gen_time(), data);
+  events_ | is(Location::tag) | $([&](const event_ptr &event) {
+    Location data = event->data<Location>();
+    try_add_location(event->gen_time(), location::make_shared(data, get_locator()));
+    get_writer(location::PUBLIC)->write(event->gen_time(), data);
   });
 
-  events_ | is(Register::tag) | $$(register_app);
+  events_ | is(Register::tag) | $$(register_app(event));
 
-  events_ | is(RequestWriteTo::tag) | $([&](const event_ptr &e) {
-    const RequestWriteTo &request = e->data<RequestWriteTo>();
-    if (check_location_live(e->source(), request.dest_id)) {
-      reader_->join(get_location(e->source()), request.dest_id, e->gen_time());
-      require_write_to(e->gen_time(), e->source(), request.dest_id);
-      require_read_from(0, request.dest_id, e->source(), e->gen_time());
+  events_ | is(RequestWriteTo::tag) | $([&](const event_ptr &event) {
+    const RequestWriteTo &request = event->data<RequestWriteTo>();
+    if (check_location_live(event->source(), request.dest_id)) {
+      reader_->join(get_location(event->source()), request.dest_id, event->gen_time());
+      require_write_to(event->gen_time(), event->source(), request.dest_id);
+      require_read_from(0, request.dest_id, event->source(), event->gen_time());
       Channel channel = {};
-      channel.source_id = e->source();
+      channel.source_id = event->source();
       channel.dest_id = request.dest_id;
-      register_channel(e->gen_time(), channel);
-      get_writer(location::PUBLIC)->write(e->gen_time(), channel);
+      register_channel(event->gen_time(), channel);
+      get_writer(location::PUBLIC)->write(event->gen_time(), channel);
     }
   });
 
-  events_ | is(RequestReadFrom::tag) | $([&](const event_ptr &e) {
-    const RequestReadFrom &request = e->data<RequestReadFrom>();
-    if (check_location_live(request.source_id, e->source())) {
-      reader_->join(get_location(request.source_id), e->source(), e->gen_time());
-      require_write_to(e->gen_time(), request.source_id, e->source());
-      require_read_from(e->gen_time(), e->source(), request.source_id, request.from_time);
+  events_ | is(RequestReadFrom::tag) | $([&](const event_ptr &event) {
+    const RequestReadFrom &request = event->data<RequestReadFrom>();
+    if (check_location_live(request.source_id, event->source())) {
+      reader_->join(get_location(request.source_id), event->source(), event->gen_time());
+      require_write_to(event->gen_time(), request.source_id, event->source());
+      require_read_from(event->gen_time(), event->source(), request.source_id, request.from_time);
       Channel channel = {};
       channel.source_id = request.source_id;
-      channel.dest_id = e->source();
-      register_channel(e->gen_time(), channel);
-      get_writer(location::PUBLIC)->write(e->gen_time(), channel);
+      channel.dest_id = event->source();
+      register_channel(event->gen_time(), channel);
+      get_writer(location::PUBLIC)->write(event->gen_time(), channel);
     }
   });
 
-  events_ | is(RequestReadFromPublic::tag) | $([&](const event_ptr &e) {
-    const RequestReadFromPublic &request = e->data<RequestReadFromPublic>();
-    require_read_from_public(e->gen_time(), e->source(), request.source_id, request.from_time);
+  events_ | is(RequestReadFromPublic::tag) | $([&](const event_ptr &event) {
+    const RequestReadFromPublic &request = event->data<RequestReadFromPublic>();
+    require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
   });
 
-  events_ | is(Channel::tag) | $([&](const event_ptr &e) {
-    const Channel &request = e->data<Channel>();
+  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
+    const Channel &request = event->data<Channel>();
     if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
-      reader_->join(get_location(request.source_id), request.dest_id, e->gen_time());
-      require_write_to(e->gen_time(), request.source_id, request.dest_id);
-      register_channel(e->gen_time(), request);
-      get_writer(location::PUBLIC)->write(e->gen_time(), request);
+      reader_->join(get_location(request.source_id), request.dest_id, event->gen_time());
+      require_write_to(event->gen_time(), request.source_id, request.dest_id);
+      register_channel(event->gen_time(), request);
+      get_writer(location::PUBLIC)->write(event->gen_time(), request);
     }
   });
 
-  events_ | is(TimeRequest::tag) | $([&](const event_ptr &e) {
-    const TimeRequest &request = e->data<TimeRequest>();
-    if (timer_tasks_.find(e->source()) == timer_tasks_.end()) {
-      timer_tasks_[e->source()] = std::unordered_map<int32_t, timer_task>();
+  events_ | is(TimeRequest::tag) | $([&](const event_ptr &event) {
+    const TimeRequest &request = event->data<TimeRequest>();
+    if (timer_tasks_.find(event->source()) == timer_tasks_.end()) {
+      timer_tasks_[event->source()] = std::unordered_map<int32_t, timer_task>();
     }
-    std::unordered_map<int32_t, timer_task> &app_tasks = timer_tasks_[e->source()];
+    std::unordered_map<int32_t, timer_task> &app_tasks = timer_tasks_[event->source()];
     if (app_tasks.find(request.id) == app_tasks.end()) {
       app_tasks[request.id] = timer_task();
     }
@@ -193,15 +194,15 @@ void master::react() {
     task.repeat_limit = request.repeat;
   });
 
-  events_ | is(Ping::tag) | $([&](const event_ptr &e) { get_io_device()->get_publisher()->publish("{}"); });
+  events_ | is(Ping::tag) | $([&](const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); });
 
-  events_ | is(CacheReset::tag) | $([&](const event_ptr &e) {
-    auto msg_type = e->data<CacheReset>().msg_type;
+  events_ | is(CacheReset::tag) | $([&](const event_ptr &event) {
+    auto msg_type = event->data<CacheReset>().msg_type;
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == msg_type) {
-        app_cache_shift_[e->source()] -= typed_event_ptr<DataType>(e);
-        app_cache_shift_[e->dest()] /= typed_event_ptr<DataType>(e);
+        app_cache_shift_[event->source()] -= typed_event_ptr<DataType>(event);
+        app_cache_shift_[event->dest()] /= typed_event_ptr<DataType>(event);
       }
     });
   });

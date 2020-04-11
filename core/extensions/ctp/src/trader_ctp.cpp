@@ -206,8 +206,8 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
         writer->close_data();
       }
     }
-    SPDLOG_ERROR("ErrorId: {} ErrorMsg: {} InputOrderAction: {}", pRspInfo->ErrorID,
-                 gbk2utf8(pRspInfo->ErrorMsg), pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction));
+    SPDLOG_ERROR("ErrorId: {} ErrorMsg: {} InputOrderAction: {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg),
+                 pInputOrderAction == nullptr ? "" : to_string(*pInputOrderAction));
   }
 }
 

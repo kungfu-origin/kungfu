@@ -16,7 +16,7 @@ MarketData::MarketData(bool low_latency, locator_ptr locator, const std::string 
 
 void MarketData::on_start() {
   Broker::on_start();
-  events_ | is(SubscribeAll::tag) | $$$(subscribe_all());
-  events_ | is(InstrumentKey::tag) | $$$(subscribe({event->data<InstrumentKey>()}));
+  events_ | is(SubscribeAll::tag) | $$(subscribe_all());
+  events_ | is(InstrumentKey::tag) | $$(subscribe({event->data<InstrumentKey>()}));
 }
 } // namespace kungfu::wingchun::broker

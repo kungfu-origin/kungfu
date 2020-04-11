@@ -114,8 +114,7 @@ void Ledger::on_start() {
 
   events_ | is(PositionEnd::tag) | $([&](const event_ptr &event) {
     const PositionEnd &data = event->data<PositionEnd>();
-    auto book = bookkeeper_.get_book(data.holder_uid);
-    write_to(event->gen_time(), book->asset, data.holder_uid);
+    write_to(event->gen_time(), bookkeeper_.get_book(data.holder_uid)->asset, data.holder_uid);
   });
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE,
@@ -148,8 +147,8 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
     for (auto &pair : positions) {
       auto &account_position = pair.second;
       if (strategy_book->has_position(account_position)) {
-        auto &strategy_position = writer->open_data<Position>(trigger_time);
-        memcpy(&strategy_position, &account_position, sizeof(Position));
+        Position &strategy_position = writer->open_data<Position>(trigger_time);
+        longfist::copy(strategy_position, account_position);
         strategy_position.holder_uid = dest;
         writer->close_data();
       }

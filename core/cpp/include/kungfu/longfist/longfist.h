@@ -18,12 +18,10 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Ping),                             //
     TYPE_PAIR(Pong),                             //
     TYPE_PAIR(RequestStart),                     //
-    TYPE_PAIR(Subscribe),                        //
     TYPE_PAIR(SubscribeAll),                     //
     TYPE_PAIR(NewOrderSingle),                   //
     TYPE_PAIR(CancelOrder),                      //
     TYPE_PAIR(CancelAllOrder),                   //
-    TYPE_PAIR(InstrumentRequest),                //
     TYPE_PAIR(AssetRequest),                     //
     TYPE_PAIR(PositionRequest),                  //
     TYPE_PAIR(InstrumentEnd),                    //
@@ -159,6 +157,17 @@ DECLARE_PTR(ProfileMapType)
 
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
+
+template <typename DataType> std::enable_if_t<size_fixed_v<DataType>> copy(DataType &to, const DataType &from) {
+  memcpy(&to, &from, sizeof(DataType));
+}
+
+template <typename DataType> std::enable_if_t<not size_fixed_v<DataType>> copy(DataType &to, const DataType &from) {
+  boost::hana::for_each(boost::hana::accessors<DataType>(), [&](auto it) {
+    auto accessor = boost::hana::second(it);
+    accessor(to) = accessor(from);
+  });
+}
 }; // namespace kungfu::longfist
 
 #endif // KUNGFU_LONGFIST_H

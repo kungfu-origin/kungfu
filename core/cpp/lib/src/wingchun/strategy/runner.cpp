@@ -41,21 +41,22 @@ void Runner::on_start() {
 
   pre_start();
 
-  events_ | take_until(events_ | filter([&](const event_ptr &e) { return started_; })) | $([&](const event_ptr &event) {
-    if (event->msg_type() == PositionEnd::tag and get_location(event->source())->category == category::SYSTEM) {
-      position_set_ = true;
-    }
-    if (not position_set_) {
-      return;
-    }
-    for (const auto &pair : context_->list_accounts()) {
-      if (not context_->broker_client_.is_ready(pair.second->uid)) {
-        return;
-      }
-    }
-    started_ = true;
-    post_start();
-  });
+  events_ | take_until(events_ | filter([&](const event_ptr &event) { return started_; })) |
+      $([&](const event_ptr &event) {
+        if (event->msg_type() == PositionEnd::tag and get_location(event->source())->category == category::SYSTEM) {
+          position_set_ = true;
+        }
+        if (not position_set_) {
+          return;
+        }
+        for (const auto &pair : context_->list_accounts()) {
+          if (not context_->broker_client_.is_ready(pair.second->uid)) {
+            return;
+          }
+        }
+        started_ = true;
+        post_start();
+      });
 }
 
 void Runner::on_exit() {
