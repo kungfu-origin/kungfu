@@ -461,7 +461,8 @@ KF_DEFINE_PACK_TYPE(                              //
     (int64_t, update_time),                       //更新时间
     (kungfu::array<char, DATE_LEN>, trading_day), //交易日
 
-    (uint32_t, holder_uid), (LedgerCategory, ledger_category),
+    (uint32_t, holder_uid),            //
+    (LedgerCategory, ledger_category), //
 
     (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
     (kungfu::array<char, BROKER_ID_LEN>, broker_id),   // Broker ID
