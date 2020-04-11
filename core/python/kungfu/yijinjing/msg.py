@@ -6,7 +6,6 @@ Deregister = 10012
 RequestReadFrom = 10021
 RequestReadFromPublic = 10022
 RequestWriteTo = 10023
-RequestWriteAtTo = 10024
 RequestStart = 10025
 TradingDay = 10027
 

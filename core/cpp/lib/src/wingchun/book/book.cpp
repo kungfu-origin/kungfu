@@ -23,10 +23,6 @@ double Book::get_frozen_price(uint64_t order_id) {
   return 0;
 }
 
-Position &Book::get_long_position(const Quote &quote) { return get_position(Direction::Long, quote); }
-
-Position &Book::get_short_position(const Quote &quote) { return get_position(Direction::Short, quote); }
-
 void Book::update(int64_t update_time) {
   asset.update_time = update_time;
   asset.margin = 0;

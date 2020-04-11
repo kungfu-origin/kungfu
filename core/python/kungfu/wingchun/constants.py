@@ -1,4 +1,4 @@
-from pykungfu import longfist as pylongfist
+from pykungfu import longfist as lf
 
 
 class Source:
@@ -22,20 +22,20 @@ class Region:
     HK = 'HK'
 
 
-InstrumentType = pylongfist.enums.InstrumentType
-ExecType = pylongfist.enums.ExecType
-Side = pylongfist.enums.Side
-Offset = pylongfist.enums.Offset
-BsFlag = pylongfist.enums.BsFlag
-OrderStatus = pylongfist.enums.OrderStatus
-Direction = pylongfist.enums.Direction
-PriceType = pylongfist.enums.PriceType
-VolumeCondition = pylongfist.enums.VolumeCondition
-TimeCondition = pylongfist.enums.TimeCondition
-OrderActionFlag = pylongfist.enums.OrderActionFlag
-LedgerCategory = pylongfist.enums.LedgerCategory
-HedgeFlag = pylongfist.enums.HedgeFlag
-CommissionRateMode = pylongfist.enums.CommissionRateMode
+InstrumentType = lf.enums.InstrumentType
+ExecType = lf.enums.ExecType
+Side = lf.enums.Side
+Offset = lf.enums.Offset
+BsFlag = lf.enums.BsFlag
+OrderStatus = lf.enums.OrderStatus
+Direction = lf.enums.Direction
+PriceType = lf.enums.PriceType
+VolumeCondition = lf.enums.VolumeCondition
+TimeCondition = lf.enums.TimeCondition
+OrderActionFlag = lf.enums.OrderActionFlag
+LedgerCategory = lf.enums.LedgerCategory
+HedgeFlag = lf.enums.HedgeFlag
+CommissionRateMode = lf.enums.CommissionRateMode
 AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
 
 InstrumentTypeInStockAccount = [InstrumentType.Stock,

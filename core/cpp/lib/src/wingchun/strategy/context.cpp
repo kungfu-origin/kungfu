@@ -18,10 +18,7 @@ using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::strategy {
 Context::Context(apprentice &app, const rx::connectable_observable<event_ptr> &events)
-    : app_(app), events_(events), broker_client_(app_), bookkeeper_(app_, broker_client_),
-      algo_context_(std::make_shared<algo::AlgoContext>(app_, events_)),
-      quotes_(app.get_state_bank()[boost::hana::type_c<longfist::types::Quote>]),
-      ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", app_.get_locator())) {
+    : app_(app), events_(events), broker_client_(app_), bookkeeper_(app_, broker_client_) {
   log::copy_log_settings(app_.get_home(), app_.get_home()->name);
 }
 
@@ -59,32 +56,6 @@ void Context::add_account(const std::string &source, const std::string &account,
   broker_client_.enroll_account(account_location);
 }
 
-const std::unordered_map<uint32_t, location_ptr> &Context::list_accounts() const { return accounts_; }
-
-double Context::get_account_cash_limit(const std::string &account) {
-  uint32_t account_id = yijinjing::util::hash_str_32(account);
-  if (account_cash_limits_.find(account_id) == account_cash_limits_.end()) {
-    throw wingchun_error(fmt::format("invalid account {}", account));
-  }
-  return account_cash_limits_[account_id];
-}
-
-const location_ptr &Context::find_marketdata(const std::string &source) {
-  if (market_data_.find(source) == market_data_.end()) {
-    auto home = app_.get_home();
-    auto md_location = source == "bar"
-                           ? location::make_shared(mode::LIVE, category::SYSTEM, "service", source, home->locator)
-                           : location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
-    if (not app_.has_location(md_location->uid)) {
-      throw wingchun_error(fmt::format("invalid md {}", source));
-    }
-    market_data_.emplace(source, md_location);
-  }
-  return market_data_.at(source);
-}
-
-void Context::subscribe_all(const std::string &source) { broker_client_.subscribe_all(find_marketdata(source)); }
-
 void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols,
                         const std::string &exchange) {
   auto md_location = find_marketdata(source);
@@ -92,6 +63,8 @@ void Context::subscribe(const std::string &source, const std::vector<std::string
     broker_client_.subscribe(md_location, exchange, symbol);
   }
 }
+
+void Context::subscribe_all(const std::string &source) { broker_client_.subscribe_all(find_marketdata(source)); }
 
 uint64_t Context::insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                const std::string &account, double limit_price, int64_t volume, PriceType type,
@@ -142,7 +115,37 @@ uint64_t Context::cancel_order(uint64_t order_id) {
   return action.order_action_id;
 }
 
-uint32_t Context::lookup_account_location_id(const std::string &account) {
+const std::unordered_map<uint32_t, location_ptr> &Context::list_accounts() const { return accounts_; }
+
+double Context::get_account_cash_limit(const std::string &account) const {
+  uint32_t account_id = yijinjing::util::hash_str_32(account);
+  if (account_cash_limits_.find(account_id) == account_cash_limits_.end()) {
+    throw wingchun_error(fmt::format("invalid account {}", account));
+  }
+  return account_cash_limits_.at(account_id);
+}
+
+int64_t Context::get_trading_day() const { return app_.get_trading_day(); }
+
+broker::Client &Context::get_broker_client() { return broker_client_; }
+
+book::Bookkeeper &Context::get_bookkeeper() { return bookkeeper_; }
+
+uint32_t Context::lookup_account_location_id(const std::string &account) const {
   return account_location_ids_.at(hash_str_32(account));
+}
+
+const location_ptr &Context::find_marketdata(const std::string &source) {
+  if (market_data_.find(source) == market_data_.end()) {
+    auto home = app_.get_home();
+    auto md_location = source == "bar"
+                           ? location::make_shared(mode::LIVE, category::SYSTEM, "service", source, home->locator)
+                           : location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
+    if (not app_.has_location(md_location->uid)) {
+      throw wingchun_error(fmt::format("invalid md {}", source));
+    }
+    market_data_.emplace(source, md_location);
+  }
+  return market_data_.at(source);
 }
 } // namespace kungfu::wingchun::strategy

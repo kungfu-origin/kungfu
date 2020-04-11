@@ -21,9 +21,11 @@ public:
 
   virtual ~Bookkeeper() = default;
 
-  [[nodiscard]] const BookMap &get_books() const;
+  bool has_book(uint32_t location_uid);
 
   Book_ptr get_book(uint32_t uid);
+
+  [[nodiscard]] const BookMap &get_books() const;
 
   void set_accounting_method(longfist::enums::InstrumentType instrument_type,
                              const AccountingMethod_ptr &accounting_method);
@@ -50,6 +52,8 @@ private:
   void try_update_position(const longfist::types::Position &position);
 
   void try_subscribe_position(const longfist::types::Position &position);
+
+  void update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key);
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 

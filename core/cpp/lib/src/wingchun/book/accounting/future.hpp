@@ -73,8 +73,8 @@ public:
         position.pre_settlement_price = quote.pre_settlement_price;
       }
     };
-    apply(book->get_long_position(quote));
-    apply(book->get_short_position(quote));
+    apply(book->get_position(Direction::Long, quote));
+    apply(book->get_position(Direction::Short, quote));
   }
 
   void apply_order_input(Book_ptr book, const OrderInput &input) override {

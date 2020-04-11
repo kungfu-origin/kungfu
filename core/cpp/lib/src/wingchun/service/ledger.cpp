@@ -34,33 +34,6 @@ void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
 
-  events_ | is(Register::tag) | $([&](const event_ptr &event) {
-    auto register_data = event->data<Register>();
-    auto app_location = get_location(register_data.location_uid);
-    auto resume_time_point = broker_client_.get_resume_policy().get_connect_time(*this, register_data);
-    if (app_location->category == category::STRATEGY) {
-      request_write_to(event->gen_time(), app_location->uid);
-      request_read_from(event->gen_time(), app_location->uid, resume_time_point);
-      request_read_from_public(event->gen_time(), app_location->uid, resume_time_point);
-    }
-  });
-
-  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
-    const Channel &channel = event->data<Channel>();
-    auto source_location = get_location(channel.source_id);
-    if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
-      reader_->join(source_location, channel.dest_id, event->gen_time());
-    }
-    bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
-    if (writable and source_location->category == category::TD) {
-      write_book_reset(event->gen_time(), channel.source_id);
-    }
-    if (writable and source_location->category == category::STRATEGY) {
-      write_book_reset(event->gen_time(), channel.source_id);
-      write_strategy_data(event->gen_time(), channel.source_id);
-    }
-  });
-
   events_ | is(OrderInput::tag) | $([&](const event_ptr &event) {
     const OrderInput &data = event->data<OrderInput>();
     //    write_book(event, data);
@@ -117,6 +90,34 @@ void Ledger::on_start() {
     write_to(event->gen_time(), bookkeeper_.get_book(data.holder_uid)->asset, data.holder_uid);
   });
 
+  events_ | is(PositionRequest::tag) | $([&](const event_ptr &event) {
+    write_book_reset(event->gen_time(), event->source());
+    write_strategy_data(event->gen_time(), event->source());
+  });
+
+  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
+    const Channel &channel = event->data<Channel>();
+    auto source_location = get_location(channel.source_id);
+    if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
+      reader_->join(source_location, channel.dest_id, event->gen_time());
+    }
+    bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
+    if (writable and source_location->category == category::TD) {
+      write_book_reset(event->gen_time(), channel.source_id);
+    }
+  });
+
+  events_ | is(Register::tag) | $([&](const event_ptr &event) {
+    auto register_data = event->data<Register>();
+    auto app_location = get_location(register_data.location_uid);
+    auto resume_time_point = broker_client_.get_resume_policy().get_connect_time(*this, register_data);
+    if (app_location->category == category::STRATEGY) {
+      request_write_to(event->gen_time(), app_location->uid);
+      request_read_from(event->gen_time(), app_location->uid, resume_time_point);
+      request_read_from_public(event->gen_time(), app_location->uid, resume_time_point);
+    }
+  });
+
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE,
                     [&](const event_ptr &event) { write_asset_snapshots(AssetSnapshot::tag); });
 }
@@ -140,16 +141,16 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   writer->mark(trigger_time, PositionRequest::tag);
 }
 
-void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
-  auto strategy_book = bookkeeper_.get_book(dest);
-  auto writer = get_writer(dest);
+void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
+  auto strategy_book = bookkeeper_.get_book(strategy_uid);
+  auto writer = get_writer(strategy_uid);
   auto write_positions = [&](auto positions) {
     for (auto &pair : positions) {
       auto &account_position = pair.second;
       if (strategy_book->has_position(account_position)) {
         Position &strategy_position = writer->open_data<Position>(trigger_time);
         longfist::copy(strategy_position, account_position);
-        strategy_position.holder_uid = dest;
+        strategy_position.holder_uid = strategy_uid;
         writer->close_data();
       }
       writer->write(trigger_time, account_position);
@@ -157,7 +158,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
   };
   for (auto &pair : bookkeeper_.get_books()) {
     auto holder_uid = pair.second->asset.holder_uid;
-    if (get_location(holder_uid)->category == category::TD and has_channel(holder_uid, dest)) {
+    if (get_location(holder_uid)->category == category::TD and has_channel(holder_uid, strategy_uid)) {
       auto &account_book = *pair.second;
       writer->write(trigger_time, account_book.asset);
       write_positions(account_book.long_positions);
@@ -165,7 +166,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t dest) {
     }
   }
   PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
-  end.holder_uid = dest;
+  end.holder_uid = strategy_uid;
   writer->close_data();
 }
 

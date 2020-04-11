@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "common.h"
 #include "serialize_xtp.h"
 #include "trader_xtp.h"
 #include "type_convert_xtp.h"
@@ -195,7 +196,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
 void TraderXTP::on_start() {
   Trader::on_start();
   std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP TD for {} at {}:{}", config_.user_id, config_.td_ip, config_.td_port);
+  SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config_.user_id, config_.td_ip, config_.td_port);
   api_ = XTP::API::TraderApi::CreateTraderApi(config_.client_id, runtime_folder.c_str());
   api_->RegisterSpi(this);
   api_->SubscribePublicTopic(XTP_TERT_QUICK);
@@ -205,11 +206,10 @@ void TraderXTP::on_start() {
                             XTP_PROTOCOL_TCP);
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);
-    SPDLOG_INFO("login success");
+    SPDLOG_INFO("Login successfully");
   } else {
     update_broker_state(BrokerState::LoggedInFailed);
-    XTPRI *error_info = api_->GetApiLastError();
-    SPDLOG_ERROR("login failed, error_id: {}, error_msg: {}", error_info->error_id, error_info->error_msg);
+    SPDLOG_ERROR("Login failed [{}]: {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
   }
 }
 } // namespace kungfu::wingchun::xtp

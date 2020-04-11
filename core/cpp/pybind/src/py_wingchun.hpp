@@ -231,9 +231,9 @@ void bind(pybind11::module &&m) {
       .def_readonly("short_positions", &Book::short_positions)
       .def_readonly("short_position_details", &Book::short_position_details)
       .def_readonly("orders", &Book::orders)
-      .def("get_long_position", &Book::get_long_position, py::return_value_policy::reference)
-      .def("get_short_position", &Book::get_short_position, py::return_value_policy::reference)
       .def("update", &Book::update);
+  book_class.def("get_position", py::overload_cast<Direction, const Quote &>(&Book::get_position<Quote>),
+                 py::return_value_policy::reference);
   book_class.def("get_position", py::overload_cast<const OrderInput &>(&Book::get_position<OrderInput>),
                  py::return_value_policy::reference);
   book_class.def("get_position", py::overload_cast<const Order &>(&Book::get_position<Order>),
@@ -250,7 +250,9 @@ void bind(pybind11::module &&m) {
       .def("apply_trade", &AccountingMethod::apply_trade);
 
   py::class_<Bookkeeper, std::shared_ptr<Bookkeeper>>(m, "Bookkeeper")
+      .def("has_book", &Bookkeeper::has_book)
       .def("get_book", &Bookkeeper::get_book)
+      .def("get_books", &Bookkeeper::get_books)
       .def("set_accounting_method", &Bookkeeper::set_accounting_method)
       .def("on_trading_day", &Bookkeeper::on_trading_day);
 
@@ -303,7 +305,6 @@ void bind(pybind11::module &&m) {
   py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
       .def_property_readonly("trading_day", &strategy::Context::get_trading_day)
       .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper, py::return_value_policy::reference)
-      .def_property_readonly("algo_context", &strategy::Context::get_algo_context)
       .def("now", &strategy::Context::now)
       .def("add_timer", &strategy::Context::add_timer)
       .def("add_time_interval", &strategy::Context::add_time_interval)

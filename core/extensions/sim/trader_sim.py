@@ -1,14 +1,14 @@
-from pykungfu import longfist as pylongfist
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as pywingchun
 import json
-import kungfu.wingchun.utils as wc_utils
-import kungfu.wingchun.msg as wc_msg
 import os
 import sys
 import importlib
+import kungfu.wingchun.msg as wc_msg
+
 from dotted_dict import DottedDict
 from collections import namedtuple
+
+from pykungfu import longfist as lf
+from pykungfu import wingchun as wc
 
 
 class MatchMode:
@@ -24,9 +24,9 @@ class MatchMode:
 OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
 
 
-class TraderSim(pywingchun.Trader):
+class TraderSim(wc.Trader):
     def __init__(self, low_latency, locator, account_id, json_config):
-        pywingchun.Trader.__init__(self, low_latency, locator, "sim", account_id)
+        wc.Trader.__init__(self, low_latency, locator, "sim", account_id)
         config = json.loads(json_config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
 
@@ -45,32 +45,32 @@ class TraderSim(pywingchun.Trader):
             self.ctx.req_position = getattr(impl, "req_position", lambda ctx: False)
 
     def on_start(self):
-        pywingchun.Trader.on_start(self)
+        wc.Trader.on_start(self)
 
     def insert_order(self, event):
         if self.match_mode == MatchMode.Custom:
             return self.ctx.insert_order(self.ctx, event)
         else:
             order_input = event.data
-            order = pywingchun.utils.order_from_input(order_input)
-            min_vol = 100 if wc_utils.get_instrument_type(order_input.exchange_id,
-                                                          order_input.instrument_id) == pylongfist.enums.InstrumentType.Stock else 1
+            order = wc.utils.order_from_input(order_input)
+            min_vol = 100 if wc.utils.get_instrument_type(order_input.exchange_id,
+                                                          order_input.instrument_id) == lf.enums.InstrumentType.Stock else 1
             if order_input.volume < min_vol:
-                order.status = pylongfist.enums.OrderStatus.Error
+                order.status = lf.enums.OrderStatus.Error
             elif self.match_mode == MatchMode.Reject:
-                order.status = pylongfist.enums.OrderStatus.Error
+                order.status = lf.enums.OrderStatus.Error
             elif self.match_mode == MatchMode.Pend:
-                order.status = pylongfist.enums.OrderStatus.Pending
+                order.status = lf.enums.OrderStatus.Pending
             elif self.match_mode == MatchMode.Cancel:
-                order.status = pylongfist.enums.OrderStatus.Cancelled
+                order.status = lf.enums.OrderStatus.Cancelled
             elif self.match_mode == MatchMode.PartialFillAndCancel:
                 order.volume_traded = min_vol
-                order.status = pylongfist.enums.OrderStatus.Filled if order.volume_traded == order.volume \
-                    else pylongfist.enums.OrderStatus.PartialFilledNotActive
+                order.status = lf.enums.OrderStatus.Filled if order.volume_traded == order.volume \
+                    else lf.enums.OrderStatus.PartialFilledNotActive
             elif self.match_mode == MatchMode.PartialFill:
                 order.volume_traded = min_vol
-                order.status = pylongfist.enums.OrderStatus.Filled if order.volume_traded == order.volume \
-                    else pylongfist.enums.OrderStatus.PartialFilledActive
+                order.status = lf.enums.OrderStatus.Filled if order.volume_traded == order.volume \
+                    else lf.enums.OrderStatus.PartialFilledActive
             elif self.match_mode == MatchMode.Fill:
                 order.volume_traded = order_input.volume
             else:
@@ -78,7 +78,7 @@ class TraderSim(pywingchun.Trader):
             order.volume_left = order.volume - order.volume_traded
             self.get_writer(event.source).write_data(0, wc_msg.Order, order)
             if order.volume_traded > 0:
-                trade = pywingchun.Trade()
+                trade = wc.Trade()
                 trade.account_id = self.io_device.home.name
                 trade.order_id = order.order_id
                 trade.volume = order.volume_traded
@@ -99,8 +99,8 @@ class TraderSim(pywingchun.Trader):
             if order_action.order_id in self.ctx.orders:
                 record = self.ctx.orders.pop(order_action.order_id)
                 order = record.order
-                order.status = pylongfist.enums.OrderStatus.Cancelled if order.volume_traded == 0 \
-                    else pylongfist.enums.OrderStatus.PartialFilledNotActive
+                order.status = lf.enums.OrderStatus.Cancelled if order.volume_traded == 0 \
+                    else lf.enums.OrderStatus.PartialFilledNotActive
                 self.get_writer(event.source).write_data(0, wc_msg.Order, order)
             return True
 

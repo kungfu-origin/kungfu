@@ -87,12 +87,12 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
       bool ready_recorded = ready_locations.find(broker_location->uid) != ready_locations.end();
       if (state_ready and app_.has_writer(broker_location->uid) and not ready_recorded) {
         ready_locations.emplace(broker_location->uid, broker_location);
-        SPDLOG_INFO("{} {} ready", get_category_name(broker_category), broker_location->uname);
+        SPDLOG_INFO("{} {} ready, state {}", get_category_name(broker_category), broker_location->uname, (int)state);
         on_broker_ready();
       }
       if (state_reset and ready_recorded) {
         ready_locations.erase(broker_location->uid);
-        SPDLOG_INFO("{} {} reset", get_category_name(broker_category), broker_location->uname);
+        SPDLOG_INFO("{} {} reset, state {}", get_category_name(broker_category), broker_location->uname, (int)state);
       }
     };
 

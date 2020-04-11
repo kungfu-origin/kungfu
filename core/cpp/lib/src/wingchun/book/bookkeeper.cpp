@@ -18,7 +18,9 @@ Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
   book::AccountingMethod::setup_defaults(*this);
 }
 
-const BookMap &Bookkeeper::get_books() const { return books_; }
+bool Bookkeeper::has_book(uint32_t location_uid) {
+  return books_.find(location_uid) != books_.end();
+}
 
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   if (books_.find(location_uid) == books_.end()) {
@@ -26,6 +28,8 @@ Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   }
   return books_.at(location_uid);
 }
+
+const BookMap &Bookkeeper::get_books() const { return books_; }
 
 void Bookkeeper::set_accounting_method(InstrumentType instrument_type, const AccountingMethod_ptr &accounting_method) {
   accounting_methods_.emplace(instrument_type, accounting_method);
@@ -50,6 +54,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   on_trading_day(app_.get_trading_day());
 
   events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
+  events | is(InstrumentKey::tag) | $$(update_book(event, event->data<InstrumentKey>()));
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
@@ -134,6 +139,12 @@ void Bookkeeper::try_subscribe_position(const Position &position) {
   }
 }
 
+void Bookkeeper::update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key) {
+  auto book = get_book(event->source());
+  book->get_position(Direction::Long, instrument_key);
+  book->get_position(Direction::Short, instrument_key);
+}
+
 void Bookkeeper::update_book(const event_ptr &event, const longfist::types::Quote &quote) {
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
@@ -148,10 +159,10 @@ void Bookkeeper::update_book(const event_ptr &event, const longfist::types::Quot
       book->update(event->gen_time());
     }
     if (has_long_position) {
-      book->get_long_position(quote).update_time = event->gen_time();
+      book->get_position(Direction::Long, quote).update_time = event->gen_time();
     }
     if (has_short_position) {
-      book->get_short_position(quote).update_time = event->gen_time();
+      book->get_position(Direction::Short, quote).update_time = event->gen_time();
     }
   }
 }

@@ -59,10 +59,6 @@ struct Book {
     return short_positions.find(position_id) != short_positions.end();
   }
 
-  longfist::types::Position &get_long_position(const longfist::types::Quote &quote);
-
-  longfist::types::Position &get_short_position(const longfist::types::Quote &quote);
-
   template <typename DataType>
   longfist::types::Position &get_position(longfist::enums::Direction direction, const DataType &data) {
     assert(asset.holder_uid != 0);

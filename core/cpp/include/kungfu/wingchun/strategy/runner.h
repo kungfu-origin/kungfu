@@ -39,14 +39,19 @@ protected:
   virtual void post_start();
 
 private:
+  yijinjing::data::location ledger_location_;
   bool started_ = false;
   bool position_set_;
   Context_ptr context_;
 
+  void request_positions();
+
   template <typename DataType>
   static constexpr auto is_own = [](const Context_ptr &context) {
     return rx::filter([&](const event_ptr &event) {
-      return event->msg_type() == DataType::tag and context->is_subscribed<DataType>(event);
+      const DataType &data = event->data<DataType>();
+      return event->msg_type() == DataType::tag and
+             context->get_broker_client().is_subscribed(event->source(), data.exchange_id, data.instrument_id);
     });
   };
 };

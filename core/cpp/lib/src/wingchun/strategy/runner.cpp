@@ -17,6 +17,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::strategy {
 Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency),
+      ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator()),
       position_set_(m == mode::BACKTEST) {}
 
 Context_ptr Runner::get_context() const { return context_; }
@@ -27,7 +28,7 @@ void Runner::add_strategy(const Strategy_ptr &strategy) { strategies_.push_back(
 
 void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   if (context_) {
-    context_->bookkeeper_.on_trading_day(daytime);
+    context_->get_bookkeeper().on_trading_day(daytime);
   }
   for (const auto &strategy : strategies_) {
     strategy->on_trading_day(context_, daytime);
@@ -37,9 +38,17 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
 void Runner::on_react() { context_ = make_context(); }
 
 void Runner::on_start() {
-  context_->on_start();
+  enable(*context_);
 
   pre_start();
+
+  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
+    const Channel &channel = event->data<Channel>();
+    auto dest_location = get_location(channel.dest_id);
+    if (dest_location->uid == ledger_location_.uid and channel.source_id == get_home_uid()) {
+      request_positions();
+    }
+  });
 
   events_ | take_until(events_ | filter([&](const event_ptr &event) { return started_; })) |
       $([&](const event_ptr &event) {
@@ -50,7 +59,7 @@ void Runner::on_start() {
           return;
         }
         for (const auto &pair : context_->list_accounts()) {
-          if (not context_->broker_client_.is_ready(pair.second->uid)) {
+          if (not context_->get_broker_client().is_ready(pair.second->uid)) {
             return;
           }
         }
@@ -125,6 +134,16 @@ void Runner::post_start() {
       strategy->on_trade(context_, event->data<Trade>());
     }
   });
+}
+
+void Runner::request_positions() {
+  if (has_writer(ledger_location_.uid)) {
+    auto writer = get_writer(ledger_location_.uid);
+    for (const auto &pair : context_->get_broker_client().get_instrument_keys()) {
+      writer->write(now(), pair.second);
+    }
+    writer->mark(now(), PositionRequest::tag);
+  }
 }
 
 } // namespace kungfu::wingchun::strategy

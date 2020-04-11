@@ -37,7 +37,7 @@ private:
 
   void write_book_reset(int64_t trigger_time, uint32_t dest);
 
-  void write_strategy_data(int64_t trigger_time, uint32_t dest);
+  void write_strategy_data(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_asset_snapshots(int32_t msg_type);
 

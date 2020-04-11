@@ -38,7 +38,7 @@ public:
   }
 
   void apply_quote(Book_ptr book, const Quote &quote) override {
-    auto &position = book->get_long_position(quote);
+    auto &position = book->get_position(Direction::Long, quote);
     if (is_valid_price(quote.close_price)) {
       position.close_price = quote.close_price;
     }
