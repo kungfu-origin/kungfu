@@ -28,6 +28,8 @@ protected:
 
   void on_start() override;
 
+  void on_active() override;
+
   void on_exit() override;
 
   virtual Context_ptr make_context();
@@ -36,6 +38,10 @@ protected:
 
   virtual void post_start();
 
+  virtual void pre_stop();
+
+  virtual void post_stop();
+
 private:
   yijinjing::data::location ledger_location_;
   bool started_ = false;
@@ -43,7 +49,25 @@ private:
   std::vector<Strategy_ptr> strategies_ = {};
   Context_ptr context_;
 
+  void prepare(const event_ptr &event);
+
+  void inspect(const longfist::types::Channel &channel);
+
   void request_positions();
+
+  template <typename OnMethod = void (Strategy::*)(Context_ptr &)>
+  void invoke(OnMethod method) {
+    for (const auto &strategy : strategies_) {
+      (*strategy.*method)(context_);
+    }
+  }
+
+  template <typename TradingData, typename OnMethod = void (Strategy::*)(Context_ptr &, const TradingData &)>
+  void invoke(OnMethod method, const TradingData &data) {
+    for (const auto &strategy : strategies_) {
+      (*strategy.*method)(context_, data);
+    }
+  }
 
   template <typename DataType>
   static constexpr auto is_own = [](const Context_ptr &context) {

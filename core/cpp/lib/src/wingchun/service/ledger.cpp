@@ -85,15 +85,6 @@ void Ledger::on_start() {
     }
   });
 
-  events_ | is(PositionEnd::tag) | $([&](const event_ptr &event) {
-    const PositionEnd &data = event->data<PositionEnd>();
-    write_to(event->gen_time(), bookkeeper_.get_book(data.holder_uid)->asset, data.holder_uid);
-  });
-
-  events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
-
-  events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
-
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();
     auto source_location = get_location(channel.source_id);
@@ -105,6 +96,10 @@ void Ledger::on_start() {
       write_book_reset(event->gen_time(), channel.source_id);
     }
   });
+
+  events_ | is(PositionEnd::tag) | $$(write_asset(event->gen_time(), event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
+  events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
 }
@@ -126,6 +121,10 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   writer->open_data<CacheReset>().msg_type = Position::tag;
   writer->close_data();
   writer->mark(trigger_time, PositionRequest::tag);
+}
+
+void Ledger::write_asset(int64_t trigger_time, uint32_t dest) {
+  write_to(trigger_time, bookkeeper_.get_book(dest)->asset, dest);
 }
 
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {

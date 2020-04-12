@@ -57,9 +57,9 @@ private:
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
-  template <typename DataType, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const DataType &)>
-  void update_book(const event_ptr &event, ApplyMethod apply) {
-    const DataType &data = event->data<DataType>();
+  template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
+  void update_book(const event_ptr &event, ApplyMethod method) {
+    const TradingData &data = event->data<TradingData>();
     if (accounting_methods_.find(data.instrument_type) == accounting_methods_.end()) {
       SPDLOG_WARN("accounting method not found for {}: {}", data.type_name.c_str(), data.to_string());
       return;
@@ -68,7 +68,7 @@ private:
     auto apply_and_update = [&](uint32_t book_uid) {
       auto book = get_book(book_uid);
       auto &position = book->get_position(data);
-      (accounting_method.*apply)(book, data);
+      (accounting_method.*method)(book, data);
       position.update_time = event->gen_time();
       book->update(event->gen_time());
     };

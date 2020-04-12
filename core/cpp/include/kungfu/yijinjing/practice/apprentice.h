@@ -20,8 +20,6 @@
 #ifndef KUNGFU_APPRENTICE_H
 #define KUNGFU_APPRENTICE_H
 
-#include <unordered_map>
-
 #include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/hero.h>

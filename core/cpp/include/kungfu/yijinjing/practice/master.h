@@ -5,8 +5,6 @@
 #ifndef KUNGFU_MASTER_H
 #define KUNGFU_MASTER_H
 
-#include <unordered_map>
-
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/practice/hero.h>

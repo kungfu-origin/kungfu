@@ -2,10 +2,7 @@
 // Created by Keren Dong on 2019-06-20.
 //
 
-#include <kungfu/common.h>
 #include <kungfu/wingchun/strategy/runner.h>
-#include <kungfu/yijinjing/log.h>
-#include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist::enums;
@@ -30,110 +27,66 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   if (context_) {
     context_->get_bookkeeper().on_trading_day(daytime);
   }
-  for (const auto &strategy : strategies_) {
-    strategy->on_trading_day(context_, daytime);
-  }
+  invoke(&Strategy::on_trading_day, daytime);
 }
 
 void Runner::on_react() { context_ = make_context(); }
 
 void Runner::on_start() {
   enable(*context_);
-
   pre_start();
-
-  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
-    const Channel &channel = event->data<Channel>();
-    auto dest_location = get_location(channel.dest_id);
-    if (dest_location->uid == ledger_location_.uid and channel.source_id == get_home_uid()) {
-      request_positions();
-    }
-  });
-
-  events_ | take_until(events_ | filter([&](const event_ptr &event) { return started_; })) |
-      $([&](const event_ptr &event) {
-        if (event->msg_type() == PositionEnd::tag and get_location(event->source())->category == category::SYSTEM) {
-          position_set_ = true;
-        }
-        if (not position_set_) {
-          return;
-        }
-        for (const auto &pair : context_->list_accounts()) {
-          if (not context_->get_broker_client().is_ready(pair.second->uid)) {
-            return;
-          }
-        }
-        started_ = true;
-        post_start();
-      });
+  events_ | take_until(events_ | filter([this](auto e) { return started_; })) | $$(prepare(event));
+  events_ | is(Channel::tag) | $$(inspect(event->data<Channel>()));
 }
 
-void Runner::on_exit() {
-  for (const auto &strategy : strategies_) {
-    strategy->pre_stop(context_);
-  }
-
-  apprentice::on_exit();
-
-  for (const auto &strategy : strategies_) {
-    strategy->post_stop(context_);
+void Runner::on_active() {
+  if (not is_live()) {
+    pre_stop();
   }
 }
 
-void Runner::pre_start() {
-  for (const auto &strategy : strategies_) {
-    strategy->pre_start(context_);
-  }
-}
+void Runner::on_exit() { post_stop(); }
+
+void Runner::pre_start() { invoke(&Strategy::pre_start); }
 
 void Runner::post_start() {
-  for (const auto &strategy : strategies_) {
-    strategy->post_start(context_);
-  }
+  events_ | is(Quote::tag) | $$(invoke(&Strategy::on_quote, event->data<Quote>()));
+  events_ | is(Bar::tag) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
+  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
+  events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
+  events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>()));
+  events_ | is(Transaction::tag) | $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
+  events_ | is(OrderActionError::tag) | $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>()));
 
+  invoke(&Strategy::post_start);
   SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
+}
 
-  events_ | is_own<Quote>(context_) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_quote(context_, event->data<Quote>());
-    }
-  });
+void Runner::pre_stop() { invoke(&Strategy::pre_stop); }
 
-  events_ | is_own<Bar>(context_) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_bar(context_, event->data<Bar>());
-    }
-  });
+void Runner::post_stop() { invoke(&Strategy::post_stop); }
 
-  events_ | is_own<Entrust>(context_) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_entrust(context_, event->data<Entrust>());
+void Runner::prepare(const event_ptr &event) {
+  if (event->msg_type() == PositionEnd::tag and event->source() == ledger_location_.uid) {
+    position_set_ = true;
+  }
+  if (not position_set_) {
+    return;
+  }
+  for (const auto &pair : context_->list_accounts()) {
+    if (not context_->get_broker_client().is_ready(pair.second->uid)) {
+      return;
     }
-  });
+  }
+  started_ = true;
+  post_start();
+}
 
-  events_ | is_own<Transaction>(context_) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_transaction(context_, event->data<Transaction>());
-    }
-  });
-
-  events_ | is(Order::tag) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_order(context_, event->data<Order>());
-    }
-  });
-
-  events_ | is(OrderActionError::tag) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_order_action_error(context_, event->data<OrderActionError>());
-    }
-  });
-
-  events_ | is(Trade::tag) | $([&](const event_ptr &event) {
-    for (const auto &strategy : strategies_) {
-      strategy->on_trade(context_, event->data<Trade>());
-    }
-  });
+void Runner::inspect(const Channel &channel) {
+  auto dest_location = get_location(channel.dest_id);
+  if (dest_location->uid == ledger_location_.uid and channel.source_id == get_home_uid()) {
+    request_positions();
+  }
 }
 
 void Runner::request_positions() {

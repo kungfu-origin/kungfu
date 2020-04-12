@@ -157,51 +157,51 @@ class PyStrategy : public strategy::Strategy {
 public:
   using strategy::Strategy::Strategy; // Inherit constructors
 
-  void pre_start(strategy::Context_ptr context) override {
+  void pre_start(strategy::Context_ptr &context) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, pre_start, context);
   }
 
-  void post_start(strategy::Context_ptr context) override {
+  void post_start(strategy::Context_ptr &context) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, post_start, context);
   }
 
-  void pre_stop(strategy::Context_ptr context) override {
+  void pre_stop(strategy::Context_ptr &context) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, pre_stop, context);
   }
 
-  void post_stop(strategy::Context_ptr context) override {
+  void post_stop(strategy::Context_ptr &context) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, post_stop, context);
   }
 
-  void on_trading_day(strategy::Context_ptr context, int64_t daytime) override {
+  void on_trading_day(strategy::Context_ptr &context, int64_t daytime) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, daytime);
   }
 
-  void on_quote(strategy::Context_ptr context, const Quote &quote) override {
+  void on_quote(strategy::Context_ptr &context, const Quote &quote) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote);
   }
 
-  void on_bar(strategy::Context_ptr context, const Bar &bar) override {
+  void on_bar(strategy::Context_ptr &context, const Bar &bar) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar);
   }
 
-  void on_entrust(strategy::Context_ptr context, const Entrust &entrust) override {
+  void on_entrust(strategy::Context_ptr &context, const Entrust &entrust) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust);
   }
 
-  void on_transaction(strategy::Context_ptr context, const Transaction &transaction) override {
+  void on_transaction(strategy::Context_ptr &context, const Transaction &transaction) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, context, transaction);
   }
 
-  void on_order(strategy::Context_ptr context, const Order &order) override {
+  void on_order(strategy::Context_ptr &context, const Order &order) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order);
   }
 
-  void on_order_action_error(strategy::Context_ptr context, const OrderActionError &error) override {
+  void on_order_action_error(strategy::Context_ptr &context, const OrderActionError &error) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error);
   }
 
-  void on_trade(strategy::Context_ptr context, const Trade &trade) override {
+  void on_trade(strategy::Context_ptr &context, const Trade &trade) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
   }
 };

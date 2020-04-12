@@ -253,8 +253,8 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
 void hero::produce(const rx::subscriber<event_ptr> &sb) {
   try {
     do {
-      on_active();
       live_ = drain(sb) && live_;
+      on_active();
     } while (continual_ and live_);
   } catch (...) {
     live_ = false;

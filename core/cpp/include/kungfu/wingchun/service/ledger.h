@@ -37,14 +37,16 @@ private:
 
   void write_book_reset(int64_t trigger_time, uint32_t dest);
 
+  void write_asset(int64_t trigger_time, uint32_t dest);
+
   void write_strategy_data(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_asset_snapshots(int32_t msg_type);
 
-  template <typename DataType> void write_book(const event_ptr &event, const DataType &data) {
+  template <typename TradingData> void write_book(const event_ptr &event, const TradingData &data) {
     auto source = get_location(event->source());
     write_book(event->gen_time(), event->source(), data, source->group, source->name, "");
-    if (event->dest()) {
+    if (event->dest() and event->dest() != get_home_uid()) {
       auto dest = get_location(event->dest());
       write_book(event->gen_time(), event->dest(), data, source->group, source->name, dest->name);
     }
@@ -57,9 +59,9 @@ private:
     write_book(event->gen_time(), event->dest(), data, dest->group, dest->name, "");
   }
 
-  template <typename DataType>
-  void write_book(int64_t trigger_time, const uint32_t location_uid, const DataType &data, const std::string &source_id,
-                  const std::string &account_id, const std::string &client_id) {
+  template <typename TradingData>
+  void write_book(int64_t trigger_time, const uint32_t location_uid, const TradingData &data,
+                  const std::string &source_id, const std::string &account_id, const std::string &client_id) {
     auto book = bookkeeper_.get_book(location_uid);
     auto &position = book->get_position(data);
     strcpy(position.source_id, source_id.c_str());
