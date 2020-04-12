@@ -67,8 +67,8 @@ DECLARE_PTR(observer)
 
 namespace data {
 FORWARD_DECLARE_PTR(location)
-
 FORWARD_DECLARE_PTR(locator)
+typedef std::unordered_map<uint32_t, location_ptr> location_map;
 
 class locator {
 public:

@@ -56,7 +56,7 @@ public:
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);
 
-  Napi::Value isReadyToInteract(const Napi::CallbackInfo &info);
+  Napi::Value IsReadyToInteract(const Napi::CallbackInfo &info);
 
   Napi::Value IssueOrder(const Napi::CallbackInfo &info);
 
@@ -93,14 +93,14 @@ private:
   void MonitorMarketData(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote) {
+    using namespace kungfu::longfist::enums;
+    auto ledger_uid = ledger_location_->uid;
     for (const auto &item : bookkeeper_.get_books()) {
       auto &book = item.second;
-      auto ledger_uid = ledger_location_->uid;
       auto holder_uid = book->asset.holder_uid;
       auto not_ledger = holder_uid != ledger_uid;
       auto has_long_position = book->has_long_position(quote) and not_ledger;
       auto has_short_position = book->has_short_position(quote) and not_ledger;
-      using namespace kungfu::longfist::enums;
       if (has_long_position) {
         update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Long, quote));
       }

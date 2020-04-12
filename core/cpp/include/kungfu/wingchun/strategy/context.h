@@ -15,8 +15,6 @@
 #include <kungfu/wingchun/strategy/strategy.h>
 
 namespace kungfu::wingchun::strategy {
-typedef std::unordered_map<uint32_t, yijinjing::data::location_ptr> AccountLocationMap;
-
 class Context : public std::enable_shared_from_this<Context> {
 public:
   explicit Context(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events);
@@ -83,10 +81,16 @@ public:
   virtual uint64_t cancel_order(uint64_t order_id);
 
   /**
+   * 获取订阅行情列表
+   * @return 订阅行情列表
+   */
+  const yijinjing::data::location_map &list_md() const;
+
+  /**
    * 获取交易账户列表
    * @return 交易账户列表
    */
-  const AccountLocationMap &list_accounts() const;
+  const yijinjing::data::location_map &list_accounts() const;
 
   /**
    * 获取交易账户可用资金限制
@@ -114,10 +118,11 @@ protected:
 private:
   broker::ManualClient broker_client_;
   book::Bookkeeper bookkeeper_;
-  AccountLocationMap accounts_;
-  std::unordered_map<uint32_t, uint32_t> account_location_ids_;
-  std::unordered_map<uint32_t, double> account_cash_limits_;
-  std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_;
+  yijinjing::data::location_map md_locations_ = {};
+  yijinjing::data::location_map td_locations_ = {};
+  std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
+  std::unordered_map<uint32_t, double> account_cash_limits_ = {};
+  std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
 
   uint32_t lookup_account_location_id(const std::string &account) const;
 

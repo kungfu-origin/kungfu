@@ -31,7 +31,6 @@ struct IntradayResumePolicy : public ResumePolicy {
 };
 
 class Client {
-  typedef std::unordered_map<uint32_t, yijinjing::data::location_ptr> LocationMap;
   typedef std::unordered_map<uint32_t, longfist::types::InstrumentKey> InstrumentKeyMap;
   typedef std::unordered_map<uint32_t, longfist::enums::BrokerState> BrokerStateMap;
 
@@ -67,12 +66,10 @@ protected:
 
 private:
   BrokerStateMap broker_states_ = {};
-
-  LocationMap ready_md_locations_ = {};
-  LocationMap ready_td_locations_ = {};
-
-  LocationMap instrument_md_locations_ = {};
   InstrumentKeyMap instrument_keys_ = {};
+  yijinjing::data::location_map ready_md_locations_ = {};
+  yijinjing::data::location_map ready_td_locations_ = {};
+  yijinjing::data::location_map instrument_md_locations_ = {};
 
   void connect(const longfist::types::Register &register_data);
 };

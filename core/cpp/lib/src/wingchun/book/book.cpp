@@ -38,7 +38,6 @@ void Book::update(int64_t update_time) {
   asset.dynamic_equity = asset.avail;
 
   auto update_position = [&](Position &position) {
-    position.update_time = update_time;
     auto is_stock =
         position.instrument_type == InstrumentType::Stock or position.instrument_type == InstrumentType::Bond or
         position.instrument_type == InstrumentType::Fund or position.instrument_type == InstrumentType::StockOption or

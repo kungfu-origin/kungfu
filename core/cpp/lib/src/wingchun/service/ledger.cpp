@@ -137,6 +137,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
         Position &strategy_position = writer->open_data<Position>(trigger_time);
         longfist::copy(strategy_position, account_position);
         strategy_position.holder_uid = strategy_uid;
+        strategy_position.client_id = strategy_book->asset.client_id;
         writer->close_data();
       }
       writer->write(trigger_time, account_position);

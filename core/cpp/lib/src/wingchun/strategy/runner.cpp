@@ -15,7 +15,7 @@ namespace kungfu::wingchun::strategy {
 Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency),
       ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator()),
-      position_set_(m == mode::BACKTEST) {}
+      positions_set_(m == mode::BACKTEST) {}
 
 Context_ptr Runner::get_context() const { return context_; }
 
@@ -36,7 +36,6 @@ void Runner::on_start() {
   enable(*context_);
   pre_start();
   events_ | take_until(events_ | filter([this](auto e) { return started_; })) | $$(prepare(event));
-  events_ | is(Channel::tag) | $$(inspect(event->data<Channel>()));
 }
 
 void Runner::on_active() {
@@ -67,36 +66,33 @@ void Runner::pre_stop() { invoke(&Strategy::pre_stop); }
 void Runner::post_stop() { invoke(&Strategy::post_stop); }
 
 void Runner::prepare(const event_ptr &event) {
-  if (event->msg_type() == PositionEnd::tag and event->source() == ledger_location_.uid) {
-    position_set_ = true;
-  }
-  if (not position_set_) {
+  auto ready_test = [&](auto &locations) {
+    for (const auto &pair : locations) {
+      if (not context_->get_broker_client().is_ready(pair.second->uid)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  if (not ready_test(context_->list_accounts()) or not ready_test(context_->list_md())) {
     return;
   }
-  for (const auto &pair : context_->list_accounts()) {
-    if (not context_->get_broker_client().is_ready(pair.second->uid)) {
-      return;
-    }
-  }
-  started_ = true;
-  post_start();
-}
-
-void Runner::inspect(const Channel &channel) {
-  auto dest_location = get_location(channel.dest_id);
-  if (dest_location->uid == ledger_location_.uid and channel.source_id == get_home_uid()) {
-    request_positions();
-  }
-}
-
-void Runner::request_positions() {
-  if (has_writer(ledger_location_.uid)) {
+  if (not positions_requested_ and has_channel(get_home_uid(), ledger_location_.uid)) {
     auto writer = get_writer(ledger_location_.uid);
     for (const auto &pair : context_->get_broker_client().get_instrument_keys()) {
       writer->write(now(), pair.second);
     }
     writer->mark(now(), PositionRequest::tag);
+    positions_requested_ = true;
+    return;
   }
+  if (event->msg_type() == PositionEnd::tag and event->source() == ledger_location_.uid) {
+    positions_set_ = true;
+  }
+  if (not positions_set_) {
+    return;
+  }
+  started_ = true;
+  post_start();
 }
-
 } // namespace kungfu::wingchun::strategy

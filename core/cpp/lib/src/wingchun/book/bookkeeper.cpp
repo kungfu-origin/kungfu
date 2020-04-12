@@ -116,16 +116,17 @@ void Bookkeeper::try_update_asset(const Asset &asset) {
 }
 
 void Bookkeeper::try_update_position(const Position &position) {
-  if (app_.has_location(position.holder_uid)) {
-    auto &target_position = get_book(position.holder_uid)->get_position(position.direction, position);
-    auto last_price = target_position.last_price;
-    target_position = position;
-    target_position.last_price = last_price;
-    try_subscribe_position(target_position);
-    if (app_.get_home()->category == category::SYSTEM and target_position.client_id[0] > 0) {
-      SPDLOG_WARN("update position {}", target_position.to_string());
-    }
+  if (not app_.has_location(position.holder_uid)) {
+    return;
   }
+  auto &target_position = get_book(position.holder_uid)->get_position(position.direction, position);
+  if (target_position.update_time >= position.update_time) {
+    return;
+  }
+  auto last_price = target_position.last_price;
+  target_position = position;
+  target_position.last_price = last_price;
+  try_subscribe_position(target_position);
 }
 
 void Bookkeeper::try_subscribe_position(const Position &position) {

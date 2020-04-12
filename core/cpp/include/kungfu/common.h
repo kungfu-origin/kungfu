@@ -7,10 +7,10 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <unordered_map>
 #include <sstream>
 #include <string>
 #include <typeinfo>
+#include <unordered_map>
 #include <utility>
 
 #include <fmt/format.h>
@@ -136,21 +136,22 @@ template <typename T, size_t N> struct array {
 
   T &operator[](int i) const { return const_cast<T &>(value[i]); }
 
-  array<T, N> &operator=(const array<T, N> &v) {
-    memcpy(value, v.value, sizeof(value));
+  array<T, N> &operator=(const T *data) {
+    if (value == data) {
+      return *this;
+    }
+    if constexpr (std::is_same_v<T, char>) {
+      memcpy(value, data, strlen(data));
+    } else {
+      memcpy(value, data, sizeof(value));
+    }
     return *this;
   }
 
-  array<T, N> &operator=(const T *v) {
-    memcpy(value, v, sizeof(value));
-    return *this;
-  }
-} KF_PACK_TYPE_END
+  array<T, N> &operator=(const array<T, N> &other) { return operator=(other.value); }
+} KF_PACK_TYPE_END;
 
-    template <typename T, size_t N>
-    void to_json(nlohmann::json &j, const array<T, N> &value) {
-  j = value.value;
-}
+template <typename T, size_t N> void to_json(nlohmann::json &j, const array<T, N> &value) { j = value.value; }
 
 template <typename T, size_t N> void from_json(const nlohmann::json &j, array<T, N> &value) {
   for (int i = 0; i < N; i++) {
@@ -246,6 +247,12 @@ template <typename T> struct hash<T, std::enable_if_t<is_enum_class_v<T>>> {
 template <> struct hash<std::string> {
   uint64_t operator()(const std::string &value) {
     return hash_32(reinterpret_cast<const unsigned char *>(value.c_str()), value.length());
+  }
+};
+
+template <size_t N> struct hash<array<char, N>> {
+  uint64_t operator()(const array<char, N> &value) {
+    return hash_32(reinterpret_cast<const unsigned char *>(value.value), strlen(value));
   }
 };
 

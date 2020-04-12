@@ -84,16 +84,16 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
     bool state_ready = state == BrokerState::LoggedIn or state == BrokerState::Ready;
     bool state_reset = state == BrokerState::Connected or state == BrokerState::DisConnected;
 
-    auto switch_broker_state = [&](category broker_category, LocationMap &ready_locations, auto on_broker_ready) {
+    auto switch_broker_state = [&](category broker_category, location_map &ready_locations, auto on_broker_ready) {
       bool ready_recorded = ready_locations.find(broker_location->uid) != ready_locations.end();
       if (state_ready and app_.has_writer(broker_location->uid) and not ready_recorded) {
         ready_locations.emplace(broker_location->uid, broker_location);
-        SPDLOG_INFO("{} {} ready, state {}", get_category_name(broker_category), broker_location->uname, (int)state);
+        SPDLOG_INFO("{} ready, state {}", broker_location->uname, (int)state);
         on_broker_ready();
       }
       if (state_reset and ready_recorded) {
         ready_locations.erase(broker_location->uid);
-        SPDLOG_INFO("{} {} reset, state {}", get_category_name(broker_category), broker_location->uname, (int)state);
+        SPDLOG_INFO("{} reset, state {}", broker_location->uname, (int)state);
       }
     };
 
@@ -114,7 +114,6 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
     broker_states_.emplace(location_uid, BrokerState::DisConnected);
     ready_md_locations_.erase(location_uid);
     ready_td_locations_.erase(location_uid);
-    SPDLOG_INFO("{} {} reset", get_category_name(broker_location->category), broker_location->uname);
   });
 }
 

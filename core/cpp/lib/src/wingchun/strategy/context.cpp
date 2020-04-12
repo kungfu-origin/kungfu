@@ -39,7 +39,7 @@ void Context::add_time_interval(int64_t duration, const std::function<void(event
 
 void Context::add_account(const std::string &source, const std::string &account, double cash_limit) {
   uint32_t account_id = hash_str_32(account);
-  if (accounts_.find(account_id) != accounts_.end()) {
+  if (td_locations_.find(account_id) != td_locations_.end()) {
     throw wingchun_error(fmt::format("duplicated account {}@{}", account, source));
   }
 
@@ -49,7 +49,7 @@ void Context::add_account(const std::string &source, const std::string &account,
     throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
   }
 
-  accounts_.emplace(account_id, account_location);
+  td_locations_.emplace(account_id, account_location);
   account_cash_limits_.emplace(account_id, cash_limit);
   account_location_ids_.emplace(account_id, account_location->uid);
 
@@ -115,7 +115,9 @@ uint64_t Context::cancel_order(uint64_t order_id) {
   return action.order_action_id;
 }
 
-const std::unordered_map<uint32_t, location_ptr> &Context::list_accounts() const { return accounts_; }
+const location_map &Context::list_md() const { return md_locations_; }
+
+const location_map &Context::list_accounts() const { return td_locations_; }
 
 double Context::get_account_cash_limit(const std::string &account) const {
   uint32_t account_id = yijinjing::util::hash_str_32(account);

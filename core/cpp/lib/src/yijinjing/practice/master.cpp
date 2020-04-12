@@ -116,24 +116,15 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
 void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
-  events_ |
-      instanceof <journal::frame>() | $([&](const event_ptr &event) {
-                   if (registry_.find(event->source()) != registry_.end()) {
-                     session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
-                     if (has_location(event->source()) and get_location(event->source())->category != category::MD) {
-                       feed_state_data(event, app_cache_shift_[event->source()]);
-                       feed_profile_data(event, profile_);
-                     }
-                   }
-                 });
+  events_ | instanceof <journal::frame>() | $$(feed(event));
+  events_ | is(Register::tag) | $$(register_app(event));
+  events_ | is(Ping::tag) | $$(get_io_device()->get_publisher()->publish("{}"));
 
   events_ | is(Location::tag) | $([&](const event_ptr &event) {
     Location data = event->data<Location>();
     try_add_location(event->gen_time(), location::make_shared(data, get_locator()));
     get_writer(location::PUBLIC)->write(event->gen_time(), data);
   });
-
-  events_ | is(Register::tag) | $$(register_app(event));
 
   events_ | is(RequestWriteTo::tag) | $([&](const event_ptr &event) {
     const RequestWriteTo &request = event->data<RequestWriteTo>();
@@ -194,8 +185,6 @@ void master::react() {
     task.repeat_limit = request.repeat;
   });
 
-  events_ | is(Ping::tag) | $([&](const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); });
-
   events_ | is(CacheReset::tag) | $([&](const event_ptr &event) {
     auto msg_type = event->data<CacheReset>().msg_type;
     boost::hana::for_each(StateDataTypes, [&](auto it) {
@@ -240,6 +229,18 @@ void master::try_add_location(int64_t trigger_time, const location_ptr &app_loca
     profile_.set(dynamic_cast<Location &>(*app_location));
     add_location(trigger_time, app_location);
   }
+}
+
+void master::feed(const event_ptr &event) {
+  if (registry_.find(event->source()) == registry_.end()) {
+    return;
+  }
+  session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
+  if (get_location(event->source())->category == category::MD) {
+    return;
+  }
+  feed_state_data(event, app_cache_shift_[event->source()]);
+  feed_profile_data(event, profile_);
 }
 
 void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {

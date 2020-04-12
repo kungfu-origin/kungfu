@@ -38,6 +38,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
       update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
+  state_ref_.Set("name", "state");
+  ledger_ref_.Set("name", "ledger");
   serialize::InitStateMap(info, state_ref_);
   serialize::InitStateMap(info, ledger_ref_);
   SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
@@ -147,7 +149,7 @@ Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
   return Napi::Value();
 }
 
-Napi::Value Watcher::isReadyToInteract(const Napi::CallbackInfo &info) {
+Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
   auto account_location = ExtractLocation(info, 0, get_locator());
   return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
 }
@@ -174,7 +176,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("step", &Watcher::Step),                                   //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
-                                        InstanceMethod("isReadyToInteract", &Watcher::isReadyToInteract),         //
+                                        InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //

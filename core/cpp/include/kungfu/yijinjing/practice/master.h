@@ -58,6 +58,8 @@ private:
 
   void try_add_location(int64_t trigger_time, const data::location_ptr &app_location);
 
+  void feed(const event_ptr &event);
+
   void write_time_reset(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);

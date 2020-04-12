@@ -124,7 +124,6 @@ public:
     }
     auto object = table.Get(uid_key).ToObject();
     operator()(data, object);
-    object.Set("uid_key", Napi::String::New(table.Env(), uid_key));
     object.Set("source", Napi::Number::New(table.Env(), source));
     object.Set("dest", Napi::Number::New(table.Env(), dest));
     object.Set("ts", Napi::BigInt::New(table.Env(), ts));

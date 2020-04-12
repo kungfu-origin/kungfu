@@ -44,16 +44,13 @@ protected:
 
 private:
   yijinjing::data::location ledger_location_;
+  bool positions_requested_ = false;
+  bool positions_set_ = false;
   bool started_ = false;
-  bool position_set_ = false;
   std::vector<Strategy_ptr> strategies_ = {};
   Context_ptr context_;
 
   void prepare(const event_ptr &event);
-
-  void inspect(const longfist::types::Channel &channel);
-
-  void request_positions();
 
   template <typename OnMethod = void (Strategy::*)(Context_ptr &)>
   void invoke(OnMethod method) {
