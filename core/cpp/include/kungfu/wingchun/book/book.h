@@ -45,6 +45,8 @@ struct Book {
 
   double get_frozen_price(uint64_t order_id);
 
+  void ensure_position(const longfist::types::InstrumentKey &instrument_key);
+
   template <typename DataType> bool has_position(const DataType &data) {
     return has_long_position(data) or has_short_position(data);
   }

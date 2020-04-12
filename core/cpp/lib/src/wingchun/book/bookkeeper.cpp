@@ -18,9 +18,7 @@ Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
   book::AccountingMethod::setup_defaults(*this);
 }
 
-bool Bookkeeper::has_book(uint32_t location_uid) {
-  return books_.find(location_uid) != books_.end();
-}
+bool Bookkeeper::has_book(uint32_t location_uid) { return books_.find(location_uid) != books_.end(); }
 
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   if (books_.find(location_uid) == books_.end()) {
@@ -139,13 +137,11 @@ void Bookkeeper::try_subscribe_position(const Position &position) {
   }
 }
 
-void Bookkeeper::update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key) {
-  auto book = get_book(event->source());
-  book->get_position(Direction::Long, instrument_key);
-  book->get_position(Direction::Short, instrument_key);
+void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
+  get_book(event->source())->ensure_position(instrument_key);
 }
 
-void Bookkeeper::update_book(const event_ptr &event, const longfist::types::Quote &quote) {
+void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
   }

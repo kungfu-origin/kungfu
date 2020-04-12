@@ -302,14 +302,19 @@ inline std::string get_exchange_id_from_stock_instrument_id(const std::string &i
   }
 }
 
+inline bool is_shortable(longfist::enums::InstrumentType instrument_type) {
+  using namespace longfist::enums;
+  return not(instrument_type == InstrumentType::Stock or instrument_type == InstrumentType::Bond or
+             instrument_type == InstrumentType::Fund or instrument_type == InstrumentType::StockOption or
+             instrument_type == InstrumentType::TechStock or instrument_type == InstrumentType::Index or
+             instrument_type == InstrumentType::Repo);
+}
+
 inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType instrument_type,
                                                 longfist::enums::Side side, longfist::enums::Offset offset) {
   using namespace longfist::enums;
 
-  if (instrument_type == InstrumentType::Stock or instrument_type == InstrumentType::Bond or
-      instrument_type == InstrumentType::Fund or instrument_type == InstrumentType::StockOption or
-      instrument_type == InstrumentType::TechStock or instrument_type == InstrumentType::Index or
-      instrument_type == InstrumentType::Repo) {
+  if (not is_shortable(instrument_type)) {
     return Direction::Long;
   }
   if (side == Side::Buy and offset == Offset::Open) {
@@ -331,10 +336,6 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
 
 inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
-}
-
-inline uint32_t hash_instrument(const longfist::types::InstrumentKey &instrument) {
-  return hash_instrument(instrument.exchange_id, instrument.instrument_id);
 }
 
 inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order) {

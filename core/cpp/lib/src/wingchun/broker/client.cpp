@@ -69,6 +69,7 @@ void Client::subscribe(const location_ptr &md_location, const std::string &excha
   instrument_key.key = key;
   strcpy(instrument_key.instrument_id, instrument_id.c_str());
   strcpy(instrument_key.exchange_id, exchange_id.c_str());
+  instrument_key.instrument_type = get_instrument_type(exchange_id, instrument_id);
   instrument_keys_.emplace(key, instrument_key);
   instrument_md_locations_.emplace(key, md_location);
 }

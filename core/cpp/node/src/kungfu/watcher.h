@@ -97,8 +97,9 @@ private:
       auto &book = item.second;
       auto ledger_uid = ledger_location_->uid;
       auto holder_uid = book->asset.holder_uid;
-      auto has_long_position = book->has_long_position(quote);
-      auto has_short_position = book->has_short_position(quote);
+      auto not_ledger = holder_uid != ledger_uid;
+      auto has_long_position = book->has_long_position(quote) and not_ledger;
+      auto has_short_position = book->has_short_position(quote) and not_ledger;
       using namespace kungfu::longfist::enums;
       if (has_long_position) {
         update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Long, quote));

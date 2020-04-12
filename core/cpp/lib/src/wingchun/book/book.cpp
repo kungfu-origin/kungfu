@@ -23,6 +23,13 @@ double Book::get_frozen_price(uint64_t order_id) {
   return 0;
 }
 
+void Book::ensure_position(const InstrumentKey &instrument_key) {
+  if (is_shortable(instrument_key.instrument_type)) {
+    get_position(Direction::Short, instrument_key);
+  }
+  get_position(Direction::Long, instrument_key);
+}
+
 void Book::update(int64_t update_time) {
   asset.update_time = update_time;
   asset.margin = 0;
@@ -31,6 +38,7 @@ void Book::update(int64_t update_time) {
   asset.dynamic_equity = asset.avail;
 
   auto update_position = [&](Position &position) {
+    position.update_time = update_time;
     auto is_stock =
         position.instrument_type == InstrumentType::Stock or position.instrument_type == InstrumentType::Bond or
         position.instrument_type == InstrumentType::Fund or position.instrument_type == InstrumentType::StockOption or
