@@ -90,10 +90,9 @@ void Ledger::on_start() {
     write_to(event->gen_time(), bookkeeper_.get_book(data.holder_uid)->asset, data.holder_uid);
   });
 
-  events_ | is(PositionRequest::tag) | $([&](const event_ptr &event) {
-    write_book_reset(event->gen_time(), event->source());
-    write_strategy_data(event->gen_time(), event->source());
-  });
+  events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
+
+  events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
 
   events_ | is(Channel::tag) | $([&](const event_ptr &event) {
     const Channel &channel = event->data<Channel>();
@@ -107,19 +106,7 @@ void Ledger::on_start() {
     }
   });
 
-  events_ | is(Register::tag) | $([&](const event_ptr &event) {
-    auto register_data = event->data<Register>();
-    auto app_location = get_location(register_data.location_uid);
-    auto resume_time_point = broker_client_.get_resume_policy().get_connect_time(*this, register_data);
-    if (app_location->category == category::STRATEGY) {
-      request_write_to(event->gen_time(), app_location->uid);
-      request_read_from(event->gen_time(), app_location->uid, resume_time_point);
-      request_read_from_public(event->gen_time(), app_location->uid, resume_time_point);
-    }
-  });
-
-  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE,
-                    [&](const event_ptr &event) { write_asset_snapshots(AssetSnapshot::tag); });
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
 }
 
 OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {

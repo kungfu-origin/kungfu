@@ -61,6 +61,8 @@ protected:
 
   [[nodiscard]] virtual bool should_connect_td(const yijinjing::data::location_ptr &md_location) const = 0;
 
+  [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
+
   virtual void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
 private:
@@ -85,6 +87,8 @@ protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
+
+  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
   ContinuousResumePolicy resume_policy_ = {};
@@ -114,6 +118,8 @@ protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
+
+  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
   void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 

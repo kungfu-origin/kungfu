@@ -231,13 +231,6 @@ void Watcher::on_start() {
     if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
       MonitorMarketData(event->gen_time(), app_location);
     }
-
-    if (app_location->category == category::STRATEGY) {
-      auto resume_time_point = broker_client_.get_resume_policy().get_connect_time(*this, register_data);
-      request_write_to(event->gen_time(), app_location->uid);
-      request_read_from(event->gen_time(), app_location->uid, resume_time_point);
-      request_read_from_public(event->gen_time(), app_location->uid, resume_time_point);
-    }
   });
 
   events_ | is(Deregister::tag) | $([&](const event_ptr &event) {

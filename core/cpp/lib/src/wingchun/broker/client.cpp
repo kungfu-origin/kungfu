@@ -141,6 +141,12 @@ void Client::connect(const Register &register_data) {
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
+  if (app_location->category == category::STRATEGY and should_connect_strategy(app_location)) {
+    app_.request_write_to(app_.now(), app_location->uid);
+    app_.request_read_from(app_.now(), app_location->uid, resume_time_point);
+    app_.request_read_from_public(app_.now(), app_location->uid, resume_time_point);
+    SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
+  }
 }
 
 AutoClient::AutoClient(apprentice &app) : Client(app) {}
@@ -150,6 +156,8 @@ const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy
 bool AutoClient::should_connect_md(const location_ptr &md_location) const { return true; }
 
 bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
+
+bool AutoClient::should_connect_strategy(const location_ptr &td_location) const { return true; }
 
 ManualClient::ManualClient(apprentice &app) : Client(app) {}
 
@@ -187,6 +195,8 @@ bool ManualClient::should_connect_md(const location_ptr &md_location) const {
 bool ManualClient::should_connect_td(const location_ptr &td_location) const {
   return enrolled_td_locations_.find(td_location->uid) != enrolled_td_locations_.end();
 }
+
+bool ManualClient::should_connect_strategy(const location_ptr &td_location) const { return false; }
 
 void ManualClient::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   if (is_all_subscribed(md_location->uid)) {

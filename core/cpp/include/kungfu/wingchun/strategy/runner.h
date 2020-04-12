@@ -24,8 +24,6 @@ public:
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
 protected:
-  std::vector<Strategy_ptr> strategies_;
-
   void on_react() override;
 
   void on_start() override;
@@ -41,7 +39,8 @@ protected:
 private:
   yijinjing::data::location ledger_location_;
   bool started_ = false;
-  bool position_set_;
+  bool position_set_ = false;
+  std::vector<Strategy_ptr> strategies_ = {};
   Context_ptr context_;
 
   void request_positions();
