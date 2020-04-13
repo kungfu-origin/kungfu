@@ -132,15 +132,16 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto writer = get_writer(strategy_uid);
   auto write_positions = [&](auto positions) {
     for (auto &pair : positions) {
-      auto &account_position = pair.second;
-      if (strategy_book->has_position(account_position)) {
+      auto &position = pair.second;
+      if (strategy_book->has_position(position)) {
         Position &strategy_position = writer->open_data<Position>(trigger_time);
-        longfist::copy(strategy_position, account_position);
+        longfist::copy(strategy_position, position);
         strategy_position.holder_uid = strategy_uid;
         strategy_position.client_id = strategy_book->asset.client_id;
+        strategy_position.ledger_category = LedgerCategory::Strategy;
         writer->close_data();
       }
-      writer->write(trigger_time, account_position);
+      writer->write(trigger_time, position);
     }
   };
   for (auto &pair : bookkeeper_.get_books()) {
