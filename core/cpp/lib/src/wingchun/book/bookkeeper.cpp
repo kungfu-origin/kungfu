@@ -80,7 +80,6 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto is_long = position.direction == longfist::enums::Direction::Long;
     auto &positions = is_long ? book->long_positions : book->short_positions;
     positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
-    try_subscribe_position(position);
   }
   for (auto &pair : state_bank[boost::hana::type_c<Asset>]) {
     auto &state = pair.second;
@@ -126,16 +125,6 @@ void Bookkeeper::try_update_position(const Position &position) {
   auto last_price = target_position.last_price;
   target_position = position;
   target_position.last_price = last_price;
-  try_subscribe_position(target_position);
-}
-
-void Bookkeeper::try_subscribe_position(const Position &position) {
-  auto holder_location = app_.get_location(position.holder_uid);
-  if (holder_location->category == category::TD) {
-    auto group = holder_location->group;
-    auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, app_.get_locator());
-    broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
-  }
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {

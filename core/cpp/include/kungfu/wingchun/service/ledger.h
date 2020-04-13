@@ -30,10 +30,19 @@ protected:
 private:
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
-
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
   longfist::types::OrderStat &get_order_stat(uint64_t order_id, const event_ptr &event);
+
+  void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+
+  void try_subscribe_position(const longfist::types::Position &position);
+
+  void update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data);
+
+  void update_order_stat(const event_ptr &event, const longfist::types::Order &data);
+
+  void update_order_stat(const event_ptr &event, const longfist::types::Trade &data);
 
   void write_book_reset(int64_t trigger_time, uint32_t dest);
 

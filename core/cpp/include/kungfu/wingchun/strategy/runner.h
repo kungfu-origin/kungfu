@@ -52,8 +52,7 @@ private:
 
   void prepare(const event_ptr &event);
 
-  template <typename OnMethod = void (Strategy::*)(Context_ptr &)>
-  void invoke(OnMethod method) {
+  template <typename OnMethod = void (Strategy::*)(Context_ptr &)> void invoke(OnMethod method) {
     for (const auto &strategy : strategies_) {
       (*strategy.*method)(context_);
     }

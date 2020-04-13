@@ -34,69 +34,11 @@ void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
 
-  events_ | is(OrderInput::tag) | $([&](const event_ptr &event) {
-    const OrderInput &data = event->data<OrderInput>();
-    //    write_book(event, data);
-
-    auto &stat = get_order_stat(data.order_id, event);
-    stat.order_id = data.order_id;
-    stat.md_time = event->trigger_time();
-    stat.input_time = event->gen_time();
-  });
-
-  events_ | is(Order::tag) | $([&](const event_ptr &event) {
-    const Order &data = event->data<Order>();
-
-    if (data.error_id == 0) {
-      //      write_book(event, data);
-    }
-
-    auto &stat = get_order_stat(data.order_id, event);
-    auto inserted = stat.insert_time != 0;
-    auto acked = stat.ack_time != 0;
-    if (not inserted) {
-      stat.insert_time = event->gen_time();
-      write_to(event->gen_time(), stat, event->source());
-    }
-    if (inserted and not acked) {
-      stat.ack_time = event->gen_time();
-      write_to(event->gen_time(), stat, event->source());
-    }
-  });
-
-  events_ | is(Trade::tag) | $([&](const event_ptr &event) {
-    const Trade &data = event->data<Trade>();
-    //    write_book(event, data);
-
-    auto &stat = get_order_stat(data.order_id, event);
-    if (stat.trade_time == 0) {
-      stat.trade_time = event->gen_time();
-      write_to(event->gen_time(), stat, event->source());
-    }
-  });
-
-  events_ | is(Position::tag) | $([&](const event_ptr &event) {
-    const Position &position = event->data<Position>();
-    auto holder_location = get_location(position.holder_uid);
-    if (holder_location->category == category::TD) {
-      auto group = holder_location->group;
-      auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-      broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
-    }
-  });
-
-  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
-    const Channel &channel = event->data<Channel>();
-    auto source_location = get_location(channel.source_id);
-    if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
-      reader_->join(source_location, channel.dest_id, event->gen_time());
-    }
-    bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
-    if (writable and source_location->category == category::TD) {
-      write_book_reset(event->gen_time(), channel.source_id);
-    }
-  });
-
+  events_ | is(OrderInput::tag) | $$(update_order_stat(event, event->data<OrderInput>()));
+  events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
+  events_ | is(Trade::tag) | $$(update_order_stat(event, event->data<Trade>()));
+  events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
+  events_ | is(Position::tag) | $$(try_subscribe_position(event->data<Position>()));
   events_ | is(PositionEnd::tag) | $$(write_asset(event->gen_time(), event->data<PositionEnd>().holder_uid););
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
@@ -109,6 +51,58 @@ OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
     order_stats_.try_emplace(order_id, get_home_uid(), event->source(), event->gen_time(), OrderStat());
   }
   return order_stats_.at(order_id).data;
+}
+
+void Ledger::inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel) {
+  auto source_location = get_location(channel.source_id);
+  if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
+    reader_->join(source_location, channel.dest_id, trigger_time);
+  }
+  bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
+  if (writable and source_location->category == category::TD) {
+    write_book_reset(trigger_time, channel.source_id);
+  }
+}
+
+void Ledger::try_subscribe_position(const longfist::types::Position &position) {
+  auto holder_location = get_location(position.holder_uid);
+  auto group = holder_location->group;
+  auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
+  broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+}
+
+void Ledger::update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data) {
+  write_book(event, data);
+  auto &stat = get_order_stat(data.order_id, event);
+  stat.order_id = data.order_id;
+  stat.md_time = event->trigger_time();
+  stat.input_time = event->gen_time();
+}
+
+void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Order &data) {
+  if (data.error_id == 0) {
+    write_book(event, data);
+  }
+  auto &stat = get_order_stat(data.order_id, event);
+  auto inserted = stat.insert_time != 0;
+  auto acked = stat.ack_time != 0;
+  if (not inserted) {
+    stat.insert_time = event->gen_time();
+    write_to(event->gen_time(), stat, event->source());
+  }
+  if (inserted and not acked) {
+    stat.ack_time = event->gen_time();
+    write_to(event->gen_time(), stat, event->source());
+  }
+}
+
+void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Trade &data) {
+  write_book(event, data);
+  auto &stat = get_order_stat(data.order_id, event);
+  if (stat.trade_time == 0) {
+    stat.trade_time = event->gen_time();
+    write_to(event->gen_time(), stat, event->source());
+  }
 }
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
