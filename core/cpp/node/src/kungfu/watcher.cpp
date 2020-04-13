@@ -20,6 +20,13 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
+SilentAutoClient::SilentAutoClient(yijinjing::practice::apprentice &app) : AutoClient(app) {}
+
+bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
+                                     const std::string &instrument_id) const {
+  return true;
+}
+
 Napi::FunctionReference Watcher::constructor = {};
 
 inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {

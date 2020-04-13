@@ -53,6 +53,8 @@ public:
 
   virtual void on_start(const rx::connectable_observable<event_ptr> &events);
 
+  void try_subscribe(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+
 protected:
   yijinjing::practice::apprentice &app_;
 

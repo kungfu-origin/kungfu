@@ -80,9 +80,16 @@ void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(Deregister::tag) | $$(update_broker_state(event, event->data<Deregister>()));
 }
 
+void Client::try_subscribe(int64_t trigger_time, const location_ptr &md_location) {
+  if (ready_md_locations_.find(md_location->uid) == ready_md_locations_.end()) {
+    return;
+  }
+  subscribe_instruments(trigger_time, md_location);
+}
+
 void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
   auto writer = app_.get_writer(md_location->uid);
-  for (auto &pair : instrument_keys_) {
+  for (const auto &pair : instrument_keys_) {
     if (md_location->uid == instrument_md_locations_.at(pair.second.key)->uid) {
       writer->write(trigger_time, pair.second);
     }

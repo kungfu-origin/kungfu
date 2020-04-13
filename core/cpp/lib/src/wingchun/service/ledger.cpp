@@ -33,17 +33,23 @@ book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
+  restore_subscriptions();
 
   events_ | is(OrderInput::tag) | $$(update_order_stat(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(update_order_stat(event, event->data<Trade>()));
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
-  events_ | is(Position::tag) | $$(try_subscribe_position(event->data<Position>()));
-  events_ | is(PositionEnd::tag) | $$(write_asset(event->gen_time(), event->data<PositionEnd>().holder_uid););
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
+  events_ | is(PositionEnd::tag) | $$(refresh_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
+}
+
+void Ledger::restore_subscriptions() {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    refresh_account_book(now(), pair.first);
+  }
 }
 
 OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
@@ -98,11 +104,22 @@ void Ledger::inspect_channel(int64_t trigger_time, const longfist::types::Channe
   }
 }
 
-void Ledger::try_subscribe_position(const longfist::types::Position &position) {
-  auto holder_location = get_location(position.holder_uid);
-  auto group = holder_location->group;
-  auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-  broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+void Ledger::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
+  auto account_location = get_location(account_uid);
+  auto group = account_location->group;
+  auto md_location = location::make_shared(account_location->mode, category::MD, group, group, get_locator());
+  auto book = get_bookkeeper().get_book(account_uid);
+  auto subscribe_positions = [&](auto positions) {
+    for (const auto &pair : positions) {
+      auto &position = pair.second;
+      broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+    }
+  };
+  subscribe_positions(book->long_positions);
+  subscribe_positions(book->short_positions);
+  broker_client_.try_subscribe(trigger_time, md_location);
+  book->update(trigger_time);
+  write_to(trigger_time, bookkeeper_.get_book(account_uid)->asset, account_uid);
 }
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
@@ -115,10 +132,6 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   writer->open_data<CacheReset>().msg_type = Position::tag;
   writer->close_data();
   writer->mark(trigger_time, PositionRequest::tag);
-}
-
-void Ledger::write_asset(int64_t trigger_time, uint32_t dest) {
-  write_to(trigger_time, bookkeeper_.get_book(dest)->asset, dest);
 }
 
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {

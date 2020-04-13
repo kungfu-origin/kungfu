@@ -32,6 +32,8 @@ private:
   book::Bookkeeper bookkeeper_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
+  void restore_subscriptions();
+
   longfist::types::OrderStat &get_order_stat(uint64_t order_id, const event_ptr &event);
 
   void update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data);
@@ -42,11 +44,9 @@ private:
 
   void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-  void try_subscribe_position(const longfist::types::Position &position);
+  void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
 
   void write_book_reset(int64_t trigger_time, uint32_t dest);
-
-  void write_asset(int64_t trigger_time, uint32_t dest);
 
   void write_strategy_data(int64_t trigger_time, uint32_t strategy_uid);
 
