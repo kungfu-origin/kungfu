@@ -5,11 +5,16 @@ import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask } from '__gUtils/busiUtils'; 
 import { getProcesses } from 'getprocesses';
 
+
 const path = require('path');
 const fkill = require('fkill');
 const taskkill = require('taskkill');
+const physicalCpuCount = require('physical-cpu-count')
+
 //const windowsKill = require('windows-kill');
 export const pm2 = require('pm2');
+
+console.log(physicalCpuCount)
 
 //=========================== task kill =========================================
 export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
@@ -165,12 +170,22 @@ export const describeProcess = (name: string): Promise<any> => {
     })
 }
 
+function getRocketParams (name: String, ifRocket: Boolean) {
+    let rocket = ifRocket ? '-x' : '';
+    if ((name === 'master') || (name === 'ledger')) {
+        if (physicalCpuCount <= 4) {
+            rocket = '';
+        } 
+    }
+    return rocket
+}
+
 export const startProcess = async (options: any, no_ext=false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const rocket = ifRocket ? '-x' : '';
+    const rocket = getRocketParams(options.name, ifRocket);
     const args = [logLevel, options.args, rocket].join(' ')
 
     options = {

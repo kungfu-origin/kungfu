@@ -158,6 +158,8 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "bindings": "^1.5.0",
+    "electron-debug": "^1.4.0",
+    "electron-devtools-installer": "^2.2.0",
     "electron-updater": "^4.0.6",
     "fkill": "^6.1.0",
     "fs-extra": "7.0.1",
@@ -167,12 +169,11 @@
     "local-storage": "^2.0.0",
     "log4js": "^4.0.2",
     "monaco-editor": "0.18.1",
+    "physical-cpu-count": "^2.0.0",
     "pm2": "4.2.3",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
-    "vue": "^2.6.11",
-    "electron-debug": "^1.4.0",
-    "electron-devtools-installer": "^2.2.0"
+    "vue": "^2.6.11"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",
