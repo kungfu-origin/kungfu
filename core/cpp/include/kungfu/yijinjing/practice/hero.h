@@ -94,6 +94,8 @@ protected:
 
   void add_location(int64_t trigger_time, const yijinjing::data::location_ptr &location);
 
+  void add_location(int64_t trigger_time, const longfist::types::Location &location);
+
   void remove_location(int64_t trigger_time, uint32_t location_uid);
 
   void register_location(int64_t trigger_time, const longfist::types::Register &register_data);

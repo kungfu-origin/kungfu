@@ -90,7 +90,15 @@ private:
 
   yijinjing::data::location_ptr FindLocation(const Napi::CallbackInfo &info);
 
+  void InspectChannel(int64_t trigger_time, const longfist::types::Channel &channel);
+
   void MonitorMarketData(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+
+  void OnRegister(int64_t trigger_time, const longfist::types::Register &register_data);
+
+  void OnDeregister(int64_t trigger_time, const longfist::types::Deregister &deregister_data);
+
+  void UpdateBrokerState(uint32_t broker_uid, const longfist::types::BrokerStateUpdate &state);
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote) {
     using namespace kungfu::longfist::enums;

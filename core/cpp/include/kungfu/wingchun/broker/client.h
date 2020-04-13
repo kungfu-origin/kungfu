@@ -71,7 +71,11 @@ private:
   yijinjing::data::location_map ready_td_locations_ = {};
   yijinjing::data::location_map instrument_md_locations_ = {};
 
-  void connect(const longfist::types::Register &register_data);
+  void connect(const event_ptr &event, const longfist::types::Register &register_data);
+
+  void update_broker_state(const event_ptr &event, const longfist::types::BrokerStateUpdate &state);
+
+  void update_broker_state(const event_ptr &event, const longfist::types::Deregister &deregister_data);
 };
 
 class AutoClient : public Client {

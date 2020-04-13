@@ -60,6 +60,20 @@ private:
 
   void feed(const event_ptr &event);
 
+  void reset_cache(const event_ptr &event);
+
+  void on_write_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::RequestWriteTo &request);
+
+  void on_read_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::RequestReadFrom &request);
+
+  void on_read_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::RequestReadFromPublic &request);
+
+  void on_channel_request(int64_t trigger_time, const longfist::types::Channel &request);
+
+  void on_time_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::TimeRequest &request);
+
+  void on_new_location(int64_t trigger_time, const longfist::types::Location &location);
+
   void write_time_reset(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);

@@ -189,9 +189,13 @@ void hero::add_location(int64_t trigger_time, const location_ptr &location) {
   locations_.try_emplace(location->uid, location);
 }
 
+void hero::add_location(int64_t trigger_time, const Location &location) {
+  add_location(trigger_time, data::location::make_shared(location, get_locator()));
+}
+
 void hero::remove_location(int64_t trigger_time, uint32_t location_uid) { locations_.erase(location_uid); }
 
-void hero::register_location(int64_t trigger_time, const longfist::types::Register &register_data) {
+void hero::register_location(int64_t trigger_time, const Register &register_data) {
   uint32_t location_uid = register_data.location_uid;
   auto result = registry_.try_emplace(location_uid, register_data);
   if (result.second) {

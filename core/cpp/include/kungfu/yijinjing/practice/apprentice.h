@@ -74,11 +74,15 @@ protected:
 
   virtual void on_start();
 
+  void on_deregister(const event_ptr &event);
+
   void on_read_from(const event_ptr &event);
 
   void on_read_from_public(const event_ptr &event);
 
   void on_write_to(const event_ptr &event);
+
+  void reset_time(const longfist::types::TimeReset &time_reset);
 
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime) {
     auto writer = get_writer(master_cmd_location_->uid);

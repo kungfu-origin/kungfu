@@ -108,29 +108,15 @@ void apprentice::add_time_interval(int64_t duration, const std::function<void(co
 void apprentice::on_trading_day(const event_ptr &event, int64_t daytime) {}
 
 void apprentice::react() {
-  events_ | is(TimeReset::tag) | first() | $([&](const event_ptr &event) {
-    const TimeReset &time_reset = event->data<TimeReset>();
-    time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
-  });
-
-  events_ | is(Location::tag) |
-      $$(add_location(event->trigger_time(), location::make_shared(event->data<Location>(), get_locator())));
-
+  events_ | is(TimeReset::tag) | first() | $$(reset_time(event->data<TimeReset>()));
+  events_ | is(Location::tag) | $$(add_location(event->gen_time(), event->data<Location>()));
   events_ | is(Register::tag) | $$(register_location(event->trigger_time(), event->data<Register>()));
-
-  events_ | is(Deregister::tag) | $([&](const event_ptr &event) {
-    uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
-    reader_->disjoin(location_uid);
-    deregister_channel(location_uid);
-    deregister_location(event->trigger_time(), location_uid);
-  });
-
+  events_ | is(Deregister::tag) | $$(on_deregister(event));
   events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
   events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
   events_ | is(Channel::tag) | $$(register_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(TradingDay::tag) | $$(on_trading_day(event, event->data<TradingDay>().timestamp));
-
   events_ | take_until(events_ | is(RequestStart::tag)) | $$(feed_state_data(event, state_bank_));
 
   SPDLOG_TRACE("building reactive event handlers");
@@ -189,6 +175,13 @@ void apprentice::on_react() {}
 
 void apprentice::on_start() {}
 
+void apprentice::on_deregister(const event_ptr &event) {
+  uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
+  reader_->disjoin(location_uid);
+  deregister_channel(location_uid);
+  deregister_location(event->trigger_time(), location_uid);
+}
+
 void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestReadFrom>(event, get_live_home_uid()); }
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
@@ -198,6 +191,10 @@ void apprentice::on_write_to(const event_ptr &event) {
   if (writers_.find(request.dest_id) == writers_.end()) {
     writers_.emplace(request.dest_id, get_io_device()->open_writer(request.dest_id));
   }
+}
+
+void apprentice::reset_time(const longfist::types::TimeReset &time_reset) {
+  time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
 }
 
 void apprentice::checkin() {

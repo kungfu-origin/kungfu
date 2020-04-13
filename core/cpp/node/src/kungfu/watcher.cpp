@@ -208,44 +208,11 @@ void Watcher::on_start() {
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
+  events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
+  events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
+  events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
+  events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(reset_cache(event));
-
-  events_ | is(Channel::tag) | $([&](const event_ptr &event) {
-    const Channel &channel = event->data<Channel>();
-    if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
-      reader_->join(get_location(channel.source_id), channel.dest_id, event->gen_time());
-    }
-  });
-
-  events_ | is(Register::tag) | $([&](const event_ptr &event) {
-    auto register_data = event->data<Register>();
-    if (register_data.location_uid == get_home_uid()) {
-      return;
-    }
-
-    auto app_location = get_location(register_data.location_uid);
-
-    if (app_location->category == category::MD or app_location->category == category::TD) {
-      auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Connected);
-      app_states_ref_.Set(format(app_location->uid), state);
-    }
-
-    if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
-      MonitorMarketData(event->gen_time(), app_location);
-    }
-  });
-
-  events_ | is(Deregister::tag) | $([&](const event_ptr &event) {
-    auto app_location = location::make_shared(event->data<Deregister>(), get_locator());
-    auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Unknown);
-    app_states_ref_.Set(format(app_location->uid), state);
-  });
-
-  events_ | is(BrokerStateUpdate::tag) | $([&](const event_ptr &event) {
-    auto app_location = get_location(event->source());
-    auto state = Napi::Number::New(app_states_ref_.Env(), (int)(event->data<BrokerStateUpdate>().state));
-    app_states_ref_.Set(format(app_location->uid), state);
-  });
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to) {
@@ -275,6 +242,12 @@ location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
   return location_ptr();
 }
 
+void Watcher::InspectChannel(int64_t trigger_time, const Channel &channel) {
+  if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
+    reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
+  }
+}
+
 void Watcher::MonitorMarketData(int64_t trigger_time, const location_ptr &md_location) {
   events_ | is(Quote::tag) | from(md_location->uid) | first() |
       $(
@@ -291,5 +264,34 @@ void Watcher::MonitorMarketData(int64_t trigger_time, const location_ptr &md_loc
                 });
           },
           error_handler_log(fmt::format("monitor md {}", md_location->uname)));
+}
+
+void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
+  if (register_data.location_uid == get_home_uid()) {
+    return;
+  }
+
+  auto app_location = get_location(register_data.location_uid);
+
+  if (app_location->category == category::MD or app_location->category == category::TD) {
+    auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Connected);
+    app_states_ref_.Set(format(app_location->uid), state);
+  }
+
+  if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
+    MonitorMarketData(trigger_time, app_location);
+  }
+}
+
+void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
+  auto app_location = location::make_shared(deregister_data, get_locator());
+  auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Unknown);
+  app_states_ref_.Set(format(app_location->uid), state);
+}
+
+void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
+  auto app_location = get_location(broker_uid);
+  auto state_value = Napi::Number::New(app_states_ref_.Env(), (int)(state.state));
+  app_states_ref_.Set(format(app_location->uid), state_value);
 }
 } // namespace kungfu::node
