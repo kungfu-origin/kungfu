@@ -48,7 +48,9 @@ void Ledger::on_start() {
 
 void Ledger::restore_subscriptions() {
   for (const auto &pair : bookkeeper_.get_books()) {
-    refresh_account_book(now(), pair.first);
+    if(pair.second->asset.ledger_category == LedgerCategory::Account) {
+      refresh_account_book(now(), pair.first);
+    }
   }
 }
 
