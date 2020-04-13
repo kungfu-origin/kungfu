@@ -22,6 +22,3 @@ with open(os.path.join(os.path.dirname(os.path.abspath(pykungfu.__file__)), 'kun
     __build_info__ = json.load(build_info_file)
 
 __version__ = __build_info__['version']
-
-from .msg import monkey_patch
-monkey_patch()

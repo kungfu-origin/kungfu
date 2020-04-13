@@ -40,10 +40,9 @@ bool hero::is_usable() { return io_device_->is_usable(); }
 void hero::setup() {
   io_device_->setup();
 
-  events_ =
-      observable<>::create<event_ptr>([&, this](subscriber<event_ptr> sb) { delegate_produce(this, sb); }) | holdon();
+  events_ = observable<>::create<event_ptr>([this](auto &s) { delegate_produce(this, s); }) | holdon();
 
-  events_ | on_error_resume_next([&](std::exception_ptr e) -> observable<event_ptr> {
+  events_ | on_error_resume_next([&](const std::exception_ptr &e) -> observable<event_ptr> {
     SPDLOG_ERROR("on error resume next");
     try {
       std::rethrow_exception(e);
@@ -306,14 +305,14 @@ bool hero::drain(const rx::subscriber<event_ptr> &sb) {
   return true;
 }
 
-void hero::delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb) {
+void hero::delegate_produce(hero *instance, const rx::subscriber<event_ptr> &subscriber) {
 #ifdef _WINDOWS
   __try {
-    instance->produce(sb);
+    instance->produce(subscriber);
   } __except (util::print_stack_trace(GetExceptionInformation())) {
   }
 #else
-  instance->produce(sb);
+  instance->produce(subscriber);
 #endif
 }
 } // namespace kungfu::yijinjing::practice

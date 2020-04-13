@@ -1,4 +1,3 @@
-
 from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 import click
@@ -13,16 +12,16 @@ import traceback
 import pprint
 import importlib
 import os
-import kungfu.msg
+
 
 @journal.command()
 @click.option('-i', '--session_id', type=int, required=True, help='session id')
 @click.option('-t', '--io_type', type=click.Choice(['all', 'in', 'out']), default='all', help='input or output during this session')
 @click.option("--from-beginning", is_flag=True, help="start with the earliest message within this session")
 @click.option("--max-messages", type=int, default=sys.maxsize, help="The maximum number of messages to reader before exiting")
-@click.option('--msg', type=click.Choice(['all'] + kungfu.msg.Registry.type_names()), default='all',help="msg type to read")
+@click.option('--msg', type=click.Choice(['all']), default='all', help="msg type to read")
 @click.option("--continuous", is_flag=True, help="reader not to stop when no data avail util the session end")
-@click.option("-o", "--output", type=str,help="file path where you want to store the exported csv file")
+@click.option("-o", "--output", type=str, help="file path where you want to store the exported csv file")
 @click.option('--script', type=str, required=False, help="python script to process every frame data")
 @click.pass_context
 def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuous, output, script):
@@ -60,14 +59,16 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
         if msg not in kungfu.msg.Registry.type_names():
             raise ValueError("invalid msg {}, please choose from {}".format(kungfu.msg.Registry.type_names()))
         csv_writer = None
+
         def handle(frame):
             data_as_dict = frame["data"]
             dict_row = kungfu.msg.utils.flatten_json(data_as_dict)
             nonlocal csv_writer
             if not csv_writer:
-                csv_writer = csv.DictWriter(open(output, "w"), fieldnames = dict_row.keys())
+                csv_writer = csv.DictWriter(open(output, "w"), fieldnames=dict_row.keys())
                 csv_writer.writeheader()
             csv_writer.writerow(dict_row)
+
         frame_handler = handle
     elif script:
         dir = os.path.dirname(script)
@@ -92,13 +93,13 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
             if frame.msg_type == yjj_msg.SessionEnd:
                 ctx.logger.info("session reach end at %s", kft.strftime(frame.gen_time))
                 break
-            elif frame.gen_time >= start_time and (msg == "all" or msg_type_to_read ==  frame.msg_type):
+            elif frame.gen_time >= start_time and (msg == "all" or msg_type_to_read == frame.msg_type):
                 try:
                     frame_handler(frame.as_dict())
                 except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     ctx.logger.error('error [%s] %s', exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
-                msg_count +=1
+                msg_count += 1
             reader.next()
         elif msg_count >= max_messages:
             ctx.logger.info("reach max messages {}".format(max_messages))
@@ -109,4 +110,3 @@ def reader(ctx, session_id, io_type, from_beginning, max_messages, msg, continuo
                 break
             else:
                 time.sleep(0.1)
-

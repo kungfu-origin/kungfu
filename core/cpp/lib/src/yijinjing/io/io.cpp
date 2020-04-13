@@ -20,6 +20,7 @@
 
 #define DEFAULT_RECV_TIMEOUT 25
 #define DEFAULT_NOTICE_TIMEOUT 1000
+#define SETUP_TIMEOUT 100
 
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
@@ -213,6 +214,6 @@ bool io_device_client::is_usable() {
 void io_device_client::setup() {
   publisher_ = std::make_shared<nanomsg_publisher_client>(*this, is_low_latency());
   observer_ = std::make_shared<nanomsg_observer_client>(*this, is_low_latency());
-  std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_RECV_TIMEOUT));
+  std::this_thread::sleep_for(std::chrono::milliseconds(SETUP_TIMEOUT));
 }
 } // namespace kungfu::yijinjing

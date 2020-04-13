@@ -156,7 +156,7 @@ private:
     }
   }
 
-  static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &sb);
+  static void delegate_produce(hero *instance, const rx::subscriber<event_ptr> &subscriber);
 };
 } // namespace kungfu::yijinjing::practice
 #endif // KUNGFU_HERO_H
