@@ -34,6 +34,8 @@ private:
 
   void restore_subscriptions();
 
+  void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
+
   longfist::types::OrderStat &get_order_stat(uint64_t order_id, const event_ptr &event);
 
   void update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data);
@@ -42,9 +44,9 @@ private:
 
   void update_order_stat(const event_ptr &event, const longfist::types::Trade &data);
 
-  void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+  void update_account_book(int64_t trigger_time, uint32_t account_uid);
 
-  void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
+  void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
   void write_book_reset(int64_t trigger_time, uint32_t dest);
 
