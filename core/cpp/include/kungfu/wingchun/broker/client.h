@@ -129,6 +129,15 @@ private:
   EnrollmentMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
 };
+
+template <typename DataType>
+static constexpr auto is_own = [](const Client &broker_client) {
+  return rx::filter([&](const event_ptr &event) {
+    const DataType &data = event->data<DataType>();
+    return event->msg_type() == DataType::tag and
+           broker_client.is_subscribed(event->source(), data.exchange_id, data.instrument_id);
+  });
+};
 } // namespace kungfu::wingchun::broker
 
 #endif // WINGCHUN_BROKER_CLIENT_H

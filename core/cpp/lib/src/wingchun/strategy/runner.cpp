@@ -7,9 +7,10 @@
 using namespace kungfu::rx;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
-using namespace kungfu::yijinjing::practice;
+using namespace kungfu::wingchun::broker;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::practice;
 
 namespace kungfu::wingchun::strategy {
 Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
@@ -49,7 +50,7 @@ void Runner::on_exit() { post_stop(); }
 void Runner::pre_start() { invoke(&Strategy::pre_start); }
 
 void Runner::post_start() {
-  events_ | is(Quote::tag) | $$(invoke(&Strategy::on_quote, event->data<Quote>()));
+  events_ | is_own<Quote>(context_->get_broker_client()) | $$(invoke(&Strategy::on_quote, event->data<Quote>()));
   events_ | is(Bar::tag) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));

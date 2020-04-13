@@ -73,15 +73,6 @@ private:
     apply_and_update(event->source());
     apply_and_update(event->dest());
   }
-
-  template <typename DataType>
-  static constexpr auto is_own = [](const broker::Client &broker_client) {
-    return rx::filter([&](const event_ptr &event) {
-      const DataType &data = event->data<DataType>();
-      return event->msg_type() == DataType::tag and
-             broker_client.is_subscribed(event->source(), data.exchange_id, data.instrument_id);
-    });
-  };
 };
 } // namespace kungfu::wingchun::book
 #endif // WINGCHUN_BOOKKEEPER_H

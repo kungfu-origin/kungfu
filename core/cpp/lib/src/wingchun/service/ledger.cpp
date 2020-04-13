@@ -53,24 +53,6 @@ OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
   return order_stats_.at(order_id).data;
 }
 
-void Ledger::inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel) {
-  auto source_location = get_location(channel.source_id);
-  if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
-    reader_->join(source_location, channel.dest_id, trigger_time);
-  }
-  bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
-  if (writable and source_location->category == category::TD) {
-    write_book_reset(trigger_time, channel.source_id);
-  }
-}
-
-void Ledger::try_subscribe_position(const longfist::types::Position &position) {
-  auto holder_location = get_location(position.holder_uid);
-  auto group = holder_location->group;
-  auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
-  broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
-}
-
 void Ledger::update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data) {
   write_book(event, data);
   auto &stat = get_order_stat(data.order_id, event);
@@ -105,6 +87,24 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Tr
   }
 }
 
+void Ledger::inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel) {
+  auto source_location = get_location(channel.source_id);
+  if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
+    reader_->join(source_location, channel.dest_id, trigger_time);
+  }
+  bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
+  if (writable and source_location->category == category::TD) {
+    write_book_reset(trigger_time, channel.source_id);
+  }
+}
+
+void Ledger::try_subscribe_position(const longfist::types::Position &position) {
+  auto holder_location = get_location(position.holder_uid);
+  auto group = holder_location->group;
+  auto md_location = location::make_shared(holder_location->mode, category::MD, group, group, get_locator());
+  broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+}
+
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t dest) {
   auto writer = get_writer(dest);
 
@@ -125,7 +125,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
   auto write_positions = [&](auto positions) {
-    for (auto &pair : positions) {
+    for (const auto &pair : positions) {
       auto &position = pair.second;
       if (strategy_book->has_position(position)) {
         Position &strategy_position = writer->open_data<Position>(trigger_time);
@@ -138,7 +138,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
       writer->write(trigger_time, position);
     }
   };
-  for (auto &pair : bookkeeper_.get_books()) {
+  for (const auto &pair : bookkeeper_.get_books()) {
     auto holder_uid = pair.second->asset.holder_uid;
     if (get_location(holder_uid)->category == category::TD and has_channel(holder_uid, strategy_uid)) {
       auto &account_book = *pair.second;
@@ -153,7 +153,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
 }
 
 void Ledger::write_asset_snapshots(int32_t msg_type) {
-  for (auto &pair : bookkeeper_.get_books()) {
+  for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
     if (has_writer(asset.holder_uid)) {
