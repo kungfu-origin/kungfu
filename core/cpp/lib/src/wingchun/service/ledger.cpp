@@ -79,7 +79,7 @@ OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
 }
 
 void Ledger::update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data) {
-  write_book(event, data);
+  write_book(event->gen_time(), event->dest(), event->source(), data);
   auto &stat = get_order_stat(data.order_id, event);
   stat.order_id = data.order_id;
   stat.md_time = event->trigger_time();
@@ -88,7 +88,7 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Or
 
 void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Order &data) {
   if (data.error_id == 0) {
-    write_book(event, data);
+    write_book(event->gen_time(), event->source(), event->dest(), data);
   }
   auto &stat = get_order_stat(data.order_id, event);
   auto inserted = stat.insert_time != 0;
@@ -104,7 +104,7 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Or
 }
 
 void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Trade &data) {
-  write_book(event, data);
+  write_book(event->gen_time(), event->source(), event->dest(), data);
   auto &stat = get_order_stat(data.order_id, event);
   if (stat.trade_time == 0) {
     stat.trade_time = event->gen_time();

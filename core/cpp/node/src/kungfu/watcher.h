@@ -129,6 +129,17 @@ private:
   }
 
   template <typename DataType, typename IdPtrType = uint64_t DataType::*>
+  void WriteInstruction(int64_t trigger_time, DataType instruction, IdPtrType id_ptr,
+                        const yijinjing::data::location_ptr &account_location,
+                        const yijinjing::data::location_ptr &strategy_location) {
+    auto account_writer = get_writer(account_location->uid);
+    uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
+    uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
+    instruction.*id_ptr = id_left | id_right;
+    account_writer->write_as(trigger_time, instruction, strategy_location->uid);
+  }
+
+  template <typename DataType, typename IdPtrType = uint64_t DataType::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr) {
     try {
       using namespace kungfu::rx;
@@ -138,8 +149,8 @@ private:
 
       auto trigger_time = time::now_in_nano();
       Napi::Object obj = info[0].ToObject();
-      DataType action = {};
-      serialize::JsGet{}(obj, action);
+      DataType instruction = {};
+      serialize::JsGet{}(obj, instruction);
       auto account_location = ExtractLocation(info, 1, get_locator());
       if (not account_location or not has_writer(account_location->uid)) {
         return Napi::Boolean::New(info.Env(), false);
@@ -149,51 +160,36 @@ private:
       auto master_cmd_writer = get_writer(get_master_commands_uid());
 
       if (info.Length() == 2) {
-        action.*id_ptr = account_writer->current_frame_uid();
-        account_writer->write(trigger_time, action);
+        instruction.*id_ptr = account_writer->current_frame_uid();
+        account_writer->write(trigger_time, instruction);
         return Napi::Boolean::New(info.Env(), true);
       }
 
       auto strategy_location = ExtractLocation(info, 2, get_locator());
+
       if (not strategy_location or not has_location(strategy_location->uid)) {
         return Napi::Boolean::New(info.Env(), false);
       }
 
-      auto proxy_location = location::make_shared(strategy_location->mode, strategy_location->category,
-                                                  get_io_device()->get_home()->group, strategy_location->name,
-                                                  strategy_location->locator);
+      if (not has_location(strategy_location->uid)) {
+        add_location(trigger_time, strategy_location);
+        master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<Location>(strategy_location));
+      }
 
-      auto ensure_location = [&](auto location) {
-        if (not has_location(location->uid)) {
-          add_location(trigger_time, location);
-          master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<Location>(location));
-        }
-      };
-      auto perform = [trigger_time, account_location, proxy_location, account_writer, action, id_ptr]() {
-        uint64_t id_left = (uint64_t)(proxy_location->uid xor account_location->uid) << 32u;
-        uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
-        DataType data = action;
-        data.*id_ptr = id_left | id_right;
-        account_writer->write_as(trigger_time, data, proxy_location->uid);
-        SPDLOG_INFO("{} sent to {} order {}", proxy_location->uname, account_location->uname, data.to_string());
-      };
-
-      ensure_location(strategy_location);
-      ensure_location(proxy_location);
-
-      if (has_channel(account_location->uid, proxy_location->uid)) {
-        perform();
+      if (has_channel(account_location->uid, strategy_location->uid)) {
+        WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
         return Napi::Boolean::New(info.Env(), true);
       }
 
-      events_ | is(Channel::tag) | filter([account_location, proxy_location](const event_ptr &event) {
+      events_ | is(Channel::tag) | filter([account_location, strategy_location](const event_ptr &event) {
         const Channel &channel = event->data<Channel>();
-        return channel.source_id == account_location->uid and channel.dest_id == proxy_location->uid;
+        return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
       }) | first() |
-          $([perform](const event_ptr &event) { perform(); },
-            error_handler_log(fmt::format("channel {} -> {}", account_location->uname, proxy_location->uname)));
+          $([=, this](const auto &event) {
+            WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
+          });
       Channel request = {};
-      request.dest_id = proxy_location->uid;
+      request.dest_id = strategy_location->uid;
       request.source_id = ledger_location_->uid;
       master_cmd_writer->write(trigger_time, request);
       request.source_id = account_location->uid;

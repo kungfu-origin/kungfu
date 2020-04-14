@@ -54,25 +54,22 @@ private:
 
   void write_asset_snapshots(int32_t msg_type);
 
-  template <typename TradingData> void write_book(const event_ptr &event, const TradingData &data) {
-    auto source = get_location(event->source());
-    write_book(event->gen_time(), event->source(), data, source->group, source->name, "");
-    if (event->dest() and event->dest() != get_home_uid()) {
-      auto dest = get_location(event->dest());
-      write_book(event->gen_time(), event->dest(), data, source->group, source->name, dest->name);
-    }
-  }
-
-  void write_book(const event_ptr &event, const longfist::types::OrderInput &data) {
-    auto source = get_location(event->source());
-    auto dest = get_location(event->dest());
-    write_book(event->gen_time(), event->source(), data, dest->group, dest->name, source->name);
-    write_book(event->gen_time(), event->dest(), data, dest->group, dest->name, "");
+  template <typename TradingData>
+  void write_book(int64_t trigger_time, uint32_t account_uid, uint32_t strategy_uid, const TradingData &data) {
+    auto account_location = get_location(account_uid);
+    auto strategy_location = get_location(strategy_uid);
+    auto &source_id = account_location->group;
+    auto &account_id = account_location->name;
+    write_book(trigger_time, account_uid, data, source_id, account_id, "");
+    write_book(trigger_time, strategy_uid, data, source_id, account_id, strategy_location->name);
   }
 
   template <typename TradingData>
-  void write_book(int64_t trigger_time, const uint32_t location_uid, const TradingData &data,
-                  const std::string &source_id, const std::string &account_id, const std::string &client_id) {
+  void write_book(int64_t trigger_time, uint32_t location_uid, const TradingData &data, const std::string &source_id,
+                  const std::string &account_id, const std::string &client_id) {
+    if (not bookkeeper_.has_book(location_uid) or not has_writer(location_uid)) {
+      return;
+    }
     auto book = bookkeeper_.get_book(location_uid);
     auto &position = book->get_position(data);
     strcpy(position.source_id, source_id.c_str());

@@ -42,7 +42,6 @@ protected:
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
 
-
 private:
   std::string source_;
   std::string account_id_;
