@@ -203,7 +203,7 @@ struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and DataT
                                return std::is_arithmetic_v<AttrType> or std::is_enum_v<AttrType> or
                                       is_array_v<AttrType>;
                              }),
-      std::logical_and<bool>());
+      std::logical_and<>());
 };
 
 template <typename DataType> static constexpr bool size_fixed_v = size_fixed<DataType>::value;
@@ -274,7 +274,7 @@ template <typename T> struct type_tuple<T> {
 template <typename T, typename... Ts> constexpr void type_check(Ts... arg) {
   constexpr auto check =
       boost::hana::transform(type_tuple<Ts...>::value, [](auto t) { return t == boost::hana::type_c<T>; });
-  static_assert(boost::hana::fold(check, std::logical_and<bool>()), "type check of arguments failed");
+  static_assert(boost::hana::fold(check, std::logical_and<>()), "type check of arguments failed");
 }
 
 template <typename DataType> struct data {
@@ -320,7 +320,7 @@ template <typename DataType> struct data {
       auto value = accessor(*(reinterpret_cast<const DataType *>(this)));
       return hash<decltype(value)>{}(value);
     });
-    return boost::hana::fold(primary_keys, std::bit_xor<uint64_t>());
+    return boost::hana::fold(primary_keys, std::bit_xor<>());
   }
 
 private:

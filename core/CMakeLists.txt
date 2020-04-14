@@ -52,6 +52,10 @@ if(WIN32)
     ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
 endif()
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-backtrace-limit=0 -Wno-address-of-packed-member")
+endif()
+
 ############################################################
 
 include(cmake/clion.cmake)
