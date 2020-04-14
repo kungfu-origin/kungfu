@@ -13,8 +13,11 @@
 
 namespace kungfu::wingchun::broker {
 class Trader : public Broker {
-  typedef std::unordered_map<uint64_t, state<longfist::types::Order>> OrderMap;
 public:
+  typedef std::unordered_map<uint64_t, state<longfist::types::Order>> OrderMap;
+  typedef std::unordered_map<uint64_t, state<longfist::types::OrderAction>> OrderActionMap;
+  typedef std::unordered_map<uint64_t, state<longfist::types::Trade>> TradeMap;
+
   explicit Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source,
                   const std::string &account_id);
 
@@ -36,6 +39,9 @@ public:
 
 protected:
   OrderMap orders_ = {};
+  OrderActionMap actions_ = {};
+  TradeMap trades_ = {};
+
 
 private:
   std::string source_;
