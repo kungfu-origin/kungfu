@@ -108,28 +108,13 @@ private:
 
   void UpdateBrokerState(uint32_t broker_uid, const longfist::types::BrokerStateUpdate &state);
 
-  void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote) {
-    using namespace kungfu::longfist::enums;
-    auto ledger_uid = ledger_location_->uid;
-    for (const auto &item : bookkeeper_.get_books()) {
-      auto &book = item.second;
-      auto holder_uid = book->asset.holder_uid;
-      auto not_ledger = holder_uid != ledger_uid;
-      auto has_long_position = book->has_long_position(quote) and not_ledger;
-      auto has_short_position = book->has_short_position(quote) and not_ledger;
-      if (has_long_position) {
-        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Long, quote));
-      }
-      if (has_short_position) {
-        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Short, quote));
-      }
-      if (has_long_position or has_short_position) {
-        update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
-      }
-    }
-  }
+  void UpdateAccountBook(const event_ptr &event, uint32_t account_uid);
 
-  template <typename DataType> void UpdateBook(const event_ptr &event, const DataType &data) {
+  void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote);
+
+  void UpdateBook(const event_ptr &event, const longfist::types::Position &position);
+
+  template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
     auto update = [&](uint32_t source, uint32_t dest) {
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
@@ -138,7 +123,9 @@ private:
       update_ledger(event->gen_time(), source, dest, book->asset);
     };
     update(event->source(), event->dest());
-    update(event->dest(), event->source());
+    if (event->dest() != yijinjing::data::location::PUBLIC) {
+      update(event->dest(), event->source());
+    }
   }
 
   template <typename DataType, typename IdPtrType = uint64_t DataType::*>

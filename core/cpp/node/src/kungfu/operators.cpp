@@ -64,7 +64,7 @@ void JsPublishState::operator()(Napi::Object &object) {
 JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
 void JsResetCache::operator()(const event_ptr &event) {
-  auto request = event->data<CacheReset>();
+  const auto &request = event->data<CacheReset>();
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == request.msg_type) {
@@ -80,7 +80,7 @@ void JsResetCache::operator()(const event_ptr &event) {
         if (source == event->source() and dest == event->dest()) {
           delete_keys.push_back(name);
         }
-        if (source == event->dest() and dest == event->source()) {
+        if (source == event->dest()) {
           delete_keys.push_back(name);
         }
       }

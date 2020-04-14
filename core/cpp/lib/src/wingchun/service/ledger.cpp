@@ -147,16 +147,18 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
     for (const auto &pair : positions) {
       auto &position = pair.second;
       if (strategy_book->has_position(position)) {
-        Position &strategy_position = writer->open_data<Position>(trigger_time);
+        auto &strategy_position = strategy_book->get_position(position.direction, position);
         longfist::copy(strategy_position, position);
         strategy_position.holder_uid = strategy_uid;
         strategy_position.client_id = strategy_book->asset.client_id;
         strategy_position.ledger_category = LedgerCategory::Strategy;
-        writer->close_data();
+        writer->write(trigger_time, strategy_position);
       }
       writer->write(trigger_time, position);
     }
   };
+  writer->open_data<CacheReset>().msg_type = Position::tag;
+  writer->close_data();
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = *pair.second;
     auto holder_uid = book.asset.holder_uid;
@@ -166,6 +168,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
       write_positions(book.short_positions);
     }
   }
+  strategy_book->update(trigger_time);
   PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
   end.holder_uid = strategy_uid;
   writer->close_data();

@@ -119,13 +119,18 @@ void Bookkeeper::try_update_position(const Position &position) {
   if (not app_.has_location(position.holder_uid)) {
     return;
   }
-  auto &target_position = get_book(position.holder_uid)->get_position(position.direction, position);
+  auto book = get_book(position.holder_uid);
+  auto &target_position = book->get_position(position.direction, position);
   if (target_position.update_time >= position.update_time) {
     return;
   }
   auto last_price = target_position.last_price;
   target_position = position;
   target_position.last_price = last_price;
+  if (accounting_methods_.find(target_position.instrument_type) == accounting_methods_.end()) {
+    return;
+  }
+  accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
@@ -137,7 +142,7 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
     return;
   }
   auto accounting_method = accounting_methods_.at(quote.instrument_type);
-  for (const auto &item : books_) {
+  for (auto &item : books_) {
     auto &book = item.second;
     auto has_long_position = book->has_long_position(quote);
     auto has_short_position = book->has_short_position(quote);

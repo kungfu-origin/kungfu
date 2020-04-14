@@ -126,6 +126,9 @@ Napi::Value IODevice::ToString(const Napi::CallbackInfo &info) {
 Napi::Value IODevice::OpenReader(const Napi::CallbackInfo &info) { return Reader::NewInstance(info.This()); }
 
 locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index) {
+  if (not IsValid(info, index, &Napi::Value::IsObject)) {
+    throw Napi::Error::New(info.Env(), "Invalid location argument");
+  }
   return std::dynamic_pointer_cast<locator>(std::make_shared<Locator>(info[index].As<Napi::Object>()));
 }
 

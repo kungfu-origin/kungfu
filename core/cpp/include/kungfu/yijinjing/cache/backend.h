@@ -6,6 +6,7 @@
 #define KUNGFU_CACHE_BACKEND_H
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/cache/sqlite_orm_ext.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/time.h>
@@ -76,7 +77,17 @@ public:
 
   shift(const shift &copy);
 
-  void operator>>(const yijinjing::journal::writer_ptr &writer);
+  template <typename TargetType> void operator>>(TargetType &target) {
+    for (auto dest : location_->locator->list_location_dest(location_)) {
+      ensure_storage(dest);
+    }
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      for (auto &pair : storage_map_) {
+        restore<DataType>(target, pair.first, pair.second);
+      }
+    });
+  }
 
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     ensure_storage(event->dest());
@@ -102,7 +113,7 @@ private:
 
   template <typename DataType>
   std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>
-  restore(const yijinjing::journal::writer_ptr &writer, StateStorageType &storage) {
+  restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStorageType &storage) {
     for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_start(), INT64_MAX)) {
       writer->write(0, data);
     }
@@ -110,7 +121,14 @@ private:
 
   template <typename DataType>
   std::enable_if_t<std::is_same_v<DataType, longfist::types::DailyAsset>>
-  restore(const yijinjing::journal::writer_ptr &writer, StateStorageType &storage) {}
+  restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStorageType &storage) {}
+
+  template <typename DataType> void restore(yijinjing::cache::bank &bank, uint32_t dest, StateStorageType &storage) {
+    auto from = yijinjing::time::today_start();
+    for (auto &data : time_spec<DataType>::get_all(storage, from, INT64_MAX)) {
+      bank << state(location_->uid, dest, from, data);
+    }
+  }
 };
 DECLARE_PTR(shift)
 } // namespace kungfu::yijinjing::cache

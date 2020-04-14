@@ -19,7 +19,7 @@ class FutureAccountingMethod : public AccountingMethod {
 public:
   FutureAccountingMethod() = default;
 
-  void apply_trading_day(Book_ptr book, int64_t trading_day) override {
+  void apply_trading_day(Book_ptr &book, int64_t trading_day) override {
     auto apply = [&](PositionMap &positions) {
       for (auto &pair : positions) {
         auto &position = pair.second;
@@ -45,13 +45,14 @@ public:
         position.settlement_price = 0;
         position.yesterday_volume = position.volume;
         position.trading_day = time::strftime(trading_day, KUNGFU_TRADING_DAY_FORMAT).c_str();
+        update_position(book, position);
       }
     };
     apply(book->long_positions);
     apply(book->short_positions);
   }
 
-  void apply_quote(Book_ptr book, const Quote &quote) override {
+  void apply_quote(Book_ptr &book, const Quote &quote) override {
     auto apply = [&](Position &position) {
       auto instrument_key = hash_instrument(quote.exchange_id, quote.instrument_id);
       if (book->instruments.find(instrument_key) == book->instruments.end()) {
@@ -72,12 +73,13 @@ public:
       if (is_valid_price(quote.pre_settlement_price)) {
         position.pre_settlement_price = quote.pre_settlement_price;
       }
+      update_position(book, position);
     };
     apply(book->get_position(Direction::Long, quote));
     apply(book->get_position(Direction::Short, quote));
   }
 
-  void apply_order_input(Book_ptr book, const OrderInput &input) override {
+  void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     auto &position = book->get_position(input);
     auto instrument_key = hash_instrument(input.exchange_id, input.instrument_id);
     if (book->instruments.find(instrument_key) == book->instruments.end()) {
@@ -103,9 +105,10 @@ public:
     if (input.offset == Offset::CloseToday) {
       position.frozen_total += input.volume;
     }
+    update_position(book, position);
   }
 
-  void apply_order(Book_ptr book, const Order &order) override {
+  void apply_order(Book_ptr &book, const Order &order) override {
     if (order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
         order.status != OrderStatus::PartialFilledActive and order.volume_left > 0) {
       auto &position = book->get_position(order);
@@ -129,10 +132,11 @@ public:
       if (order.offset == Offset::CloseToday) {
         position.frozen_total -= order.volume_left;
       }
+      update_position(book, position);
     }
   }
 
-  void apply_trade(Book_ptr book, const Trade &trade) override {
+  void apply_trade(Book_ptr &book, const Trade &trade) override {
     if (book->instruments.find(hash_instrument(trade.exchange_id, trade.instrument_id)) == book->instruments.end()) {
       SPDLOG_WARN("instrument information missing for {}@{}", trade.instrument_id, trade.exchange_id);
       return;
@@ -145,8 +149,16 @@ public:
     }
   }
 
+  void update_position(Book_ptr &book, Position &position) override {
+    if (position.last_price > 0) {
+      auto &instrument = book->instruments.at(hash_instrument(position.exchange_id, position.instrument_id));
+      auto multiplier = instrument.contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
+      position.unrealized_pnl = (position.last_price - position.avg_open_price) * position.volume * multiplier;
+    }
+  }
+
 private:
-  static void apply_open(Book_ptr &book, const Trade &trade) {
+  void apply_open(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto margin = instrument.contract_multiplier * trade.price * trade.volume * margin_ratio(instrument, position);
@@ -157,6 +169,7 @@ private:
     position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                               (double)(position.volume + trade.volume);
     position.volume += trade.volume;
+    update_position(book, position);
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
     book->asset.avail -= commission;
@@ -164,7 +177,7 @@ private:
     book->asset.intraday_fee += commission;
   }
 
-  static void apply_close(Book_ptr &book, const Trade &trade) {
+  void apply_close(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto today_volume_pre = position.volume - position.yesterday_volume;
@@ -184,6 +197,7 @@ private:
       realized_pnl = -realized_pnl;
     }
     position.realized_pnl += realized_pnl;
+    update_position(book, position);
     book->asset.realized_pnl += realized_pnl;
     book->asset.avail += delta_margin;
     book->asset.avail -= commission;

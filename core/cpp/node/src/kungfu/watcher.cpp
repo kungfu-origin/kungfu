@@ -30,6 +30,9 @@ bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string
 Napi::FunctionReference Watcher::constructor = {};
 
 inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 1, &Napi::Value::IsString)) {
+    throw Napi::Error::New(info.Env(), "Invalid location argument");
+  }
   auto name = info[1].As<Napi::String>().Utf8Value();
   return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, IODevice::GetLocator(info));
 }
@@ -49,10 +52,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   ledger_ref_.Set("name", "ledger");
   serialize::InitStateMap(info, state_ref_);
   serialize::InitStateMap(info, ledger_ref_);
-  SPDLOG_INFO("watcher created at {}", get_io_device()->get_home()->uname);
 
   auto config_store = ConfigStore::Unwrap(config_ref_.Value());
-
   for (const auto &app_location : config_store->profile_.get_all(Location{})) {
     add_location(0, location::make_shared(app_location, get_locator()));
   }
@@ -69,7 +70,10 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     RestoreState(state_location, today, INT64_MAX);
   }
   RestoreState(ledger_location_, today, INT64_MAX);
-  SPDLOG_INFO("watcher ledger restored");
+
+  shift(ledger_location_) >> state_bank_;
+
+  SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
 }
 
 Watcher::~Watcher() {
@@ -215,6 +219,8 @@ void Watcher::on_start() {
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
+  events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()););
+  events_ | is(PositionEnd::tag) | $$(UpdateAccountBook(event, event->data<PositionEnd>().holder_uid););
   events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
@@ -300,5 +306,37 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
   auto app_location = get_location(broker_uid);
   auto state_value = Napi::Number::New(app_states_ref_.Env(), (int)(state.state));
   app_states_ref_.Set(format(app_location->uid), state_value);
+}
+
+void Watcher::UpdateAccountBook(const event_ptr &event, uint32_t account_uid) {
+  auto book = bookkeeper_.get_book(account_uid);
+  book->update(event->gen_time());
+  update_ledger(event->gen_time(), ledger_location_->uid, account_uid, book->asset);
+}
+
+void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
+  auto ledger_uid = ledger_location_->uid;
+  for (const auto &item : bookkeeper_.get_books()) {
+    auto &book = item.second;
+    auto holder_uid = book->asset.holder_uid;
+    auto not_ledger = holder_uid != ledger_uid;
+    auto has_long_position = book->has_long_position(quote) and not_ledger;
+    auto has_short_position = book->has_short_position(quote) and not_ledger;
+    if (has_long_position) {
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Long, quote));
+    }
+    if (has_short_position) {
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Short, quote));
+    }
+    if (has_long_position or has_short_position) {
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+    }
+  }
+}
+
+void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
+  auto book = bookkeeper_.get_book(position.holder_uid);
+  auto &book_position = book->get_position(position.direction, position);
+  update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
 }
 } // namespace kungfu::node

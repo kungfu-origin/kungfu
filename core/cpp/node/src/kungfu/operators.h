@@ -297,9 +297,9 @@ public:
   void operator()(int64_t from, int64_t to);
 
 private:
-  JsSet set;
   Napi::ObjectReference &state_;
   yijinjing::data::location_ptr location_;
+  JsSet set = {};
 };
 
 class JsUpdateState {
@@ -316,8 +316,8 @@ public:
   }
 
 private:
-  JsSet set;
   Napi::ObjectReference &state_;
+  JsSet set = {};
 };
 
 class JsPublishState {
@@ -327,9 +327,9 @@ public:
   void operator()(Napi::Object &object);
 
 private:
-  JsGet get;
   yijinjing::practice::apprentice &app_;
   Napi::ObjectReference &state_;
+  JsGet get = {};
 };
 
 class JsResetCache {

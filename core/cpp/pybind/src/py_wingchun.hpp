@@ -85,24 +85,28 @@ class PyAccountingMethod : public AccountingMethod {
 public:
   using AccountingMethod::AccountingMethod;
 
-  void apply_trading_day(Book_ptr book, int64_t trading_day) override {
+  void apply_trading_day(Book_ptr &book, int64_t trading_day) override {
     PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_trading_day, book, trading_day);
   }
 
-  void apply_quote(Book_ptr book, const Quote &quote) override {
+  void apply_quote(Book_ptr &book, const Quote &quote) override {
     PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_quote, book, quote);
   }
 
-  void apply_order_input(Book_ptr book, const OrderInput &input) override {
+  void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_order_input, book, input);
   }
 
-  void apply_order(Book_ptr book, const Order &order) override {
+  void apply_order(Book_ptr &book, const Order &order) override {
     PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_order, book, order);
   }
 
-  void apply_trade(Book_ptr book, const Trade &trade) override {
+  void apply_trade(Book_ptr &book, const Trade &trade) override {
     PYBIND11_OVERLOAD_PURE(void, AccountingMethod, apply_trade, book, trade);
+  }
+
+  void update_position(Book_ptr &book, Position &position) override {
+    PYBIND11_OVERLOAD_PURE(void, AccountingMethod, update_position, book, position);
   }
 };
 

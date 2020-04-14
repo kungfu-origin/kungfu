@@ -22,7 +22,7 @@ public:
 
   StockAccountingMethod() = default;
 
-  void apply_trading_day(Book_ptr book, int64_t trading_day) override {
+  void apply_trading_day(Book_ptr &book, int64_t trading_day) override {
     for (auto &pair : book->long_positions) {
       auto &position = pair.second;
       if (is_valid_price(position.close_price)) {
@@ -37,7 +37,7 @@ public:
     }
   }
 
-  void apply_quote(Book_ptr book, const Quote &quote) override {
+  void apply_quote(Book_ptr &book, const Quote &quote) override {
     auto &position = book->get_position(Direction::Long, quote);
     if (is_valid_price(quote.close_price)) {
       position.close_price = quote.close_price;
@@ -48,10 +48,10 @@ public:
     if (is_valid_price(quote.pre_close_price)) {
       position.pre_close_price = quote.pre_close_price;
     }
-    update_unrealized_pnl(position);
+    update_position(book, position);
   }
 
-  void apply_order_input(Book_ptr book, const OrderInput &input) override {
+  void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     auto &position = book->get_position(input);
     if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday > input.volume) {
       position.frozen_total += input.volume;
@@ -61,10 +61,10 @@ public:
       book->asset.frozen_cash += input.volume * input.frozen_price;
       book->asset.avail -= input.volume * input.frozen_price;
     }
-    update_unrealized_pnl(position);
+    update_position(book, position);
   }
 
-  void apply_order(Book_ptr book, const Order &order) override {
+  void apply_order(Book_ptr &book, const Order &order) override {
     auto &position = book->get_position(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
                      order.status != OrderStatus ::PartialFilledActive;
@@ -79,17 +79,23 @@ public:
         book->asset.avail += frozen_amount;
       }
     }
-    update_unrealized_pnl(position);
+    update_position(book, position);
   }
 
-  void apply_trade(Book_ptr book, const Trade &trade) override {
+  void apply_trade(Book_ptr &book, const Trade &trade) override {
     if (trade.side == Side::Sell) {
       apply_sell(book, trade);
     }
     if (trade.side == Side::Buy) {
       apply_buy(book, trade);
     }
-    update_unrealized_pnl(book->get_position(trade));
+    update_position(book, book->get_position(trade));
+  }
+
+  void update_position(Book_ptr &book, Position &position) override {
+    if (position.last_price > 0) {
+      position.unrealized_pnl = (position.last_price - position.avg_open_price) * position.volume;
+    }
   }
 
 private:
@@ -105,7 +111,7 @@ private:
     auto tax = calculate_tax(trade);
     position.volume += trade.volume;
 
-    update_unrealized_pnl(position);
+    update_position(book, position);
 
     book->asset.frozen_cash -= book->get_frozen_price(trade.order_id) * trade.volume;
     book->asset.avail -= commission;
@@ -131,7 +137,7 @@ private:
     position.volume -= trade.volume;
     position.realized_pnl += realized_pnl;
 
-    update_unrealized_pnl(position);
+    update_position(book, position);
 
     book->asset.realized_pnl += realized_pnl;
     book->asset.avail += trade.price * trade.volume;
@@ -168,12 +174,6 @@ private:
 
   static double calculate_tax(const Trade &trade) {
     return trade.side == Side::Sell ? trade.price * trade.volume * 0.001 : 0;
-  }
-
-  static void update_unrealized_pnl(Position &position) {
-    if (position.last_price > 0) {
-      position.unrealized_pnl = (position.last_price - position.avg_open_price) * position.volume;
-    }
   }
 };
 } // namespace kungfu::wingchun::book
