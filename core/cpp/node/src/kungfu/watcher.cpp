@@ -48,26 +48,14 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
       update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
-  state_ref_.Set("name", "state");
-  ledger_ref_.Set("name", "ledger");
   serialize::InitStateMap(info, state_ref_);
   serialize::InitStateMap(info, ledger_ref_);
 
-  auto config_store = ConfigStore::Unwrap(config_ref_.Value());
-  for (const auto &app_location : config_store->profile_.get_all(Location{})) {
-    add_location(0, location::make_shared(app_location, get_locator()));
-  }
-
   auto today = time::today_start();
-  for (const auto &config : config_store->profile_.get_all(Config{})) {
-    auto state_location = location::make_shared(config, get_locator());
-    if (state_location->category == category::STRATEGY) {
-      auto mode = state_location->mode;
-      auto strategy_name = state_location->name;
-      auto proxy_location = location::make_shared(mode, category::STRATEGY, "node", strategy_name, get_locator());
-      proxy_locations_.emplace(proxy_location->uid, proxy_location);
-    }
-    RestoreState(state_location, today, INT64_MAX);
+  auto config_store = ConfigStore::Unwrap(config_ref_.Value());
+  for (const auto &saved_location : config_store->profile_.get_all(Location{})) {
+    add_location(0, location::make_shared(saved_location, get_locator()));
+    RestoreState(location::make_shared(saved_location, get_locator()), today, INT64_MAX);
   }
   RestoreState(ledger_location_, today, INT64_MAX);
 
@@ -248,9 +236,6 @@ location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
   }
   if (has_location(uid)) {
     return get_location(uid);
-  }
-  if (proxy_locations_.find(uid) != proxy_locations_.end()) {
-    return proxy_locations_.at(uid);
   }
   return location_ptr();
 }

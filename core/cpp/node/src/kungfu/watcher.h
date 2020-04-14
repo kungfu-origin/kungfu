@@ -92,7 +92,6 @@ private:
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
-  std::unordered_map<uint32_t, yijinjing::data::location_ptr> proxy_locations_;
 
   void RestoreState(const yijinjing::data::location_ptr &config_location, int64_t from, int64_t to);
 
@@ -116,6 +115,9 @@ private:
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
     auto update = [&](uint32_t source, uint32_t dest) {
+      if (source == yijinjing::data::location::PUBLIC) {
+        return;
+      }
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
       auto &position = book->get_position(data);
@@ -123,9 +125,7 @@ private:
       update_ledger(event->gen_time(), source, dest, book->asset);
     };
     update(event->source(), event->dest());
-    if (event->dest() != yijinjing::data::location::PUBLIC) {
-      update(event->dest(), event->source());
-    }
+    update(event->dest(), event->source());
   }
 
   template <typename DataType, typename IdPtrType = uint64_t DataType::*>
