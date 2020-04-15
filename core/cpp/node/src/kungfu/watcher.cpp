@@ -249,12 +249,12 @@ void Watcher::MonitorMarketData(int64_t trigger_time, const location_ptr &md_loc
   events_ | is(Quote::tag) | from(md_location->uid) | first() |
       $(
           [&, trigger_time, md_location](const event_ptr &event) {
-            auto ready = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Ready);
+            auto ready = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Ready));
             app_states_ref_.Set(format(md_location->uid), ready);
             events_ | from(md_location->uid) | is(Quote::tag) | timeout(std::chrono::seconds(5)) |
                 $(noop_event_handler(), [&, trigger_time, md_location](std::exception_ptr e) {
                   if (is_location_live(md_location->uid)) {
-                    auto idle = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Idle);
+                    auto idle = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Idle));
                     app_states_ref_.Set(format(md_location->uid), idle);
                     MonitorMarketData(trigger_time, md_location);
                   }
@@ -271,7 +271,7 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   auto app_location = get_location(register_data.location_uid);
 
   if (app_location->category == category::MD or app_location->category == category::TD) {
-    auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Connected);
+    auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Connected));
     app_states_ref_.Set(format(app_location->uid), state);
   }
 
@@ -282,13 +282,13 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  auto state = Napi::Number::New(app_states_ref_.Env(), (int)BrokerState::Unknown);
+  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Unknown));
   app_states_ref_.Set(format(app_location->uid), state);
 }
 
 void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
   auto app_location = get_location(broker_uid);
-  auto state_value = Napi::Number::New(app_states_ref_.Env(), (int)(state.state));
+  auto state_value = Napi::Number::New(app_states_ref_.Env(), int(state.state));
   app_states_ref_.Set(format(app_location->uid), state_value);
 }
 
