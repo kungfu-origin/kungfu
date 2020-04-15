@@ -128,8 +128,8 @@ private:
     update(event->dest(), event->source());
   }
 
-  template <typename DataType, typename IdPtrType = uint64_t DataType::*>
-  void WriteInstruction(int64_t trigger_time, DataType instruction, IdPtrType id_ptr,
+  template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
+  void WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
                         const yijinjing::data::location_ptr &account_location,
                         const yijinjing::data::location_ptr &strategy_location) {
     auto account_writer = get_writer(account_location->uid);
@@ -139,7 +139,7 @@ private:
     account_writer->write_as(trigger_time, instruction, strategy_location->uid);
   }
 
-  template <typename DataType, typename IdPtrType = uint64_t DataType::*>
+  template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr) {
     try {
       using namespace kungfu::rx;
@@ -147,17 +147,17 @@ private:
       using namespace kungfu::yijinjing;
       using namespace kungfu::yijinjing::data;
 
-      auto trigger_time = time::now_in_nano();
-      Napi::Object obj = info[0].ToObject();
-      DataType instruction = {};
-      serialize::JsGet{}(obj, instruction);
       auto account_location = ExtractLocation(info, 1, get_locator());
-      if (not account_location or not has_writer(account_location->uid)) {
+      if (not is_location_live(account_location->uid) or not has_writer(account_location->uid)) {
         return Napi::Boolean::New(info.Env(), false);
       }
 
+      auto trigger_time = time::now_in_nano();
       auto account_writer = get_writer(account_location->uid);
       auto master_cmd_writer = get_writer(get_master_commands_uid());
+      auto instruction_object = info[0].ToObject();
+      Instruction instruction = {};
+      serialize::JsGet{}(instruction_object, instruction);
 
       if (info.Length() == 2) {
         instruction.*id_ptr = account_writer->current_frame_uid();
@@ -181,19 +181,21 @@ private:
         return Napi::Boolean::New(info.Env(), true);
       }
 
-      events_ | is(Channel::tag) | filter([account_location, strategy_location](const event_ptr &event) {
-        const Channel &channel = event->data<Channel>();
-        return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
-      }) | first() |
-          $([=, this](const auto &event) {
-            WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
-          });
       Channel request = {};
       request.dest_id = strategy_location->uid;
       request.source_id = ledger_location_->uid;
       master_cmd_writer->write(trigger_time, request);
       request.source_id = account_location->uid;
       master_cmd_writer->write(trigger_time, request);
+
+      events_ | is(Channel::tag) | filter([account_location, strategy_location](const event_ptr &event) {
+        const Channel &channel = event->data<Channel>();
+        return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
+      }) | first() |
+          $([this, trigger_time, instruction, id_ptr, account_location, strategy_location](auto event) {
+            WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
+          });
+
       return Napi::Boolean::New(info.Env(), true);
     } catch (const std::exception &ex) {
       throw Napi::Error::New(info.Env(), fmt::format("invalid order arguments: {}", ex.what()));

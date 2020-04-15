@@ -57,7 +57,6 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   Frame::Init(env, exports);
   Reader::Init(env, exports);
   IODevice::Init(env, exports);
-  Session::Init(env, exports);
   DataTable::Init(env, exports);
   Watcher::Init(env, exports);
 

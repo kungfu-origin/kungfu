@@ -37,7 +37,7 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
 
 JsPublishState::JsPublishState(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
-void JsPublishState::operator()(Napi::Object &object) {
+void JsPublishState::operator()(Napi::Object object) {
   auto now = yijinjing::time::now_in_nano();
   auto location = app_.get_io_device()->get_home();
   auto type_name = object.Get("type").ToString().Utf8Value();

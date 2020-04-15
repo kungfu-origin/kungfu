@@ -80,7 +80,7 @@ std::vector<uint32_t> Locator::list_page_id(location_ptr location, uint32_t dest
                              Napi::String::New(locator_ref_.Env(), location->name),
                              Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),
                              Napi::Number::New(locator_ref_.Env(), dest_id)});
-  Napi::Array r = v.As<Napi::Array>();
+  auto r = v.As<Napi::Array>();
   std::vector<uint32_t> result;
   for (int i = 0; i < r.Length(); i++) {
     Napi::Value e = r[i];
@@ -102,7 +102,7 @@ std::vector<uint32_t> Locator::list_location_dest(location_ptr location) const {
                              Napi::String::New(locator_ref_.Env(), location->group),
                              Napi::String::New(locator_ref_.Env(), location->name),
                              Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode))});
-  Napi::Array r = v.As<Napi::Array>();
+  auto r = v.As<Napi::Array>();
   for (int i = 0; i < r.Length(); i++) {
     Napi::Value e = r[i];
     result.push_back(e.As<Napi::Number>().Uint32Value());
@@ -117,10 +117,6 @@ Napi::FunctionReference IODevice::constructor = {};
 IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device(GetLocation(info), true, true) {
   Napi::Env env = info.Env();
   Napi::HandleScope scope(env);
-}
-
-Napi::Value IODevice::ToString(const Napi::CallbackInfo &info) {
-  return Napi::String::New(info.Env(), "IODevice.js@" + home_->uname);
 }
 
 Napi::Value IODevice::OpenReader(const Napi::CallbackInfo &info) { return Reader::NewInstance(info.This()); }
@@ -145,7 +141,6 @@ void IODevice::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "IODevice",
                                     {
-                                        InstanceMethod("toString", &IODevice::ToString),
                                         InstanceMethod("openReader", &IODevice::OpenReader),
                                     });
 
@@ -153,25 +148,5 @@ void IODevice::Init(Napi::Env env, Napi::Object exports) {
   constructor.SuppressDestruct();
 
   exports.Set("IODevice", func);
-}
-
-Napi::FunctionReference Session::constructor = {};
-
-Session::Session(const Napi::CallbackInfo &info) : ObjectWrap(info) {
-  Napi::Env env = info.Env();
-  Napi::HandleScope scope(env);
-}
-
-Napi::Value Session::ToString(const Napi::CallbackInfo &info) { return Napi::String::New(info.Env(), "Session.js"); }
-
-void Session::Init(Napi::Env env, Napi::Object exports) {
-  Napi::HandleScope scope(env);
-
-  Napi::Function func = DefineClass(env, "Session", {InstanceMethod("toString", &Session::ToString)});
-
-  constructor = Napi::Persistent(func);
-  constructor.SuppressDestruct();
-
-  exports.Set("Session", func);
 }
 } // namespace kungfu::node

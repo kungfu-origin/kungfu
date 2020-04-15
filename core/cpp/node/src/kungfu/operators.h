@@ -324,7 +324,7 @@ class JsPublishState {
 public:
   JsPublishState(yijinjing::practice::apprentice &app, Napi::ObjectReference &state);
 
-  void operator()(Napi::Object &object);
+  void operator()(Napi::Object object);
 
 private:
   yijinjing::practice::apprentice &app_;

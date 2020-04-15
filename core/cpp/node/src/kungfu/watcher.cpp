@@ -59,7 +59,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   }
   RestoreState(ledger_location_, today, INT64_MAX);
 
-  shift(ledger_location_) >> state_bank_;
+  shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
 
   SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
 }
@@ -142,8 +142,7 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
   if (IsValid(info, 0, &Napi::Value::IsObject)) {
-    auto object = info[0].ToObject();
-    publish(object);
+    publish(info[0].ToObject());
   }
   return Napi::Value();
 }

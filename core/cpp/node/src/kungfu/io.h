@@ -18,7 +18,7 @@ class Locator : public yijinjing::data::locator {
 public:
   explicit Locator(const Napi::Object &locator_obj);
 
-  ~Locator();
+  ~Locator() override;
 
   [[nodiscard]] bool has_env(const std::string &name) const override;
 
@@ -53,25 +53,11 @@ class IODevice : public Napi::ObjectWrap<IODevice>, public yijinjing::io_device 
 public:
   explicit IODevice(const Napi::CallbackInfo &info);
 
-  Napi::Value ToString(const Napi::CallbackInfo &info);
-
   Napi::Value OpenReader(const Napi::CallbackInfo &info);
 
   static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);
 
   static yijinjing::data::location_ptr GetLocation(const Napi::CallbackInfo &info);
-
-  static void Init(Napi::Env env, Napi::Object exports);
-
-private:
-  static Napi::FunctionReference constructor;
-};
-
-class Session : public Napi::ObjectWrap<Session> {
-public:
-  explicit Session(const Napi::CallbackInfo &info);
-
-  Napi::Value ToString(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
 
