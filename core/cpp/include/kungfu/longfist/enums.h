@@ -153,7 +153,8 @@ enum class OrderStatus : int8_t {
   Error,
   Filled,
   PartialFilledNotActive,
-  PartialFilledActive
+  PartialFilledActive,
+  Lost
 };
 
 inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << (int8_t)t; }

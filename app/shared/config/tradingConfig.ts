@@ -53,6 +53,7 @@ export const orderStatus: NumberToStringObject = {
     5: isEnglish ? 'Filled' : '已成交',
     6: isEnglish ? 'PartialCancel' : '部分撤单', 
     7: isEnglish ? 'Trading' : '正在交易', // ing
+    8: isEnglish ? 'Lost' : '丢失', // ing
 }
 
 export const aliveOrderStatusList = [1, 2, 7]

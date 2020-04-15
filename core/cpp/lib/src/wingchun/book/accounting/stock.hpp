@@ -67,7 +67,7 @@ public:
   void apply_order(Book_ptr &book, const Order &order) override {
     auto &position = book->get_position(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
-                     order.status != OrderStatus ::PartialFilledActive;
+                     order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost;
     if (status_ok and order.volume_left > 0) {
       if (order.side == Side::Sell) {
         position.frozen_total -= order.volume_left;

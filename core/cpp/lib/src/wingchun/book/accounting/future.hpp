@@ -110,7 +110,8 @@ public:
 
   void apply_order(Book_ptr &book, const Order &order) override {
     if (order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
-        order.status != OrderStatus::PartialFilledActive and order.volume_left > 0) {
+        order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
+        order.volume_left > 0) {
       auto &position = book->get_position(order);
       auto instrument_key = hash_instrument(order.exchange_id, order.instrument_id);
       if (book->instruments.find(instrument_key) == book->instruments.end()) {

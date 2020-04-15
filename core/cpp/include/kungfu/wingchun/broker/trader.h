@@ -45,6 +45,8 @@ protected:
 private:
   std::string source_;
   std::string account_id_;
+
+  void clean_orders();
 };
 } // namespace kungfu::wingchun::broker
 

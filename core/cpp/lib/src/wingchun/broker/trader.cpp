@@ -23,5 +23,35 @@ void Trader::on_start() {
   events_ | is(OrderAction::tag) | $$(cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(req_account());
   events_ | is(PositionRequest::tag) | $$(req_position());
+
+  clean_orders();
+}
+
+void Trader::clean_orders() {
+  std::set<uint32_t> strategy_uids = {};
+  auto master_cmd_writer = get_writer(get_master_commands_uid());
+  for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
+    auto &order_state = pair.second;
+    auto &order = const_cast<Order&>(order_state.data);
+    auto strategy_uid = order_state.dest;
+    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending) {
+      if (strategy_uid == location::PUBLIC) {
+        write_to(now(), order);
+        continue;
+      }
+      strategy_uids.emplace(strategy_uid);
+      order.status = OrderStatus::Lost;
+      events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
+        const Channel &channel = event->data<Channel>();
+        return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;
+      }) | first() |
+          $([this, order, strategy_uid](auto event) { write_to(now(), order, strategy_uid); });
+    }
+  }
+  for (auto uid : strategy_uids) {
+    if (not has_writer(uid)) {
+      request_write_to(now(), uid);
+    }
+  }
 }
 } // namespace kungfu::wingchun::broker
