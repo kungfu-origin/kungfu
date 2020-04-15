@@ -32,7 +32,7 @@ private:
   book::Bookkeeper bookkeeper_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
-  void restore_subscriptions();
+  void refresh_account_books();
 
   void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
 

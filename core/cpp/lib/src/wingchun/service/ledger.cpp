@@ -33,7 +33,6 @@ book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
-  restore_subscriptions();
 
   events_ | is(OrderInput::tag) | $$(update_order_stat(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
@@ -44,9 +43,12 @@ void Ledger::on_start() {
   events_ | is(PositionEnd::tag) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
+  add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
+
+  refresh_account_books();
 }
 
-void Ledger::restore_subscriptions() {
+void Ledger::refresh_account_books() {
   for (const auto &pair : bookkeeper_.get_books()) {
     if (pair.second->asset.ledger_category == LedgerCategory::Account) {
       refresh_account_book(now(), pair.first);
@@ -58,7 +60,7 @@ void Ledger::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
   auto account_location = get_location(account_uid);
   auto group = account_location->group;
   auto md_location = location::make_shared(account_location->mode, category::MD, group, group, get_locator());
-  auto book = get_bookkeeper().get_book(account_uid);
+  auto book = bookkeeper_.get_book(account_uid);
   auto subscribe_positions = [&](auto positions) {
     for (const auto &pair : positions) {
       auto &position = pair.second;
@@ -69,6 +71,7 @@ void Ledger::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
   subscribe_positions(book->short_positions);
   broker_client_.try_subscribe(trigger_time, md_location);
   book->update(trigger_time);
+  get_writer(account_uid)->write(trigger_time, DailyAsset::tag, book->asset);
 }
 
 OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
@@ -172,6 +175,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
   end.holder_uid = strategy_uid;
   writer->close_data();
+  writer->write(now(), DailyAsset::tag, strategy_book->asset);
 }
 
 void Ledger::write_asset_snapshots(int32_t msg_type) {

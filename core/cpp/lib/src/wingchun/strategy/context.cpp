@@ -93,6 +93,7 @@ uint64_t Context::insert_order(const std::string &instrument_id, const std::stri
   input.price_type = type;
   input.side = side;
   input.offset = offset;
+  input.hedge_flag = hedge_flag;
   writer->close_data();
   return input.order_id;
 }

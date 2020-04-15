@@ -20,7 +20,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
-SilentAutoClient::SilentAutoClient(yijinjing::practice::apprentice &app) : AutoClient(app) {}
+SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
 
 bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
                                      const std::string &instrument_id) const {
@@ -153,12 +153,12 @@ Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info) {
-  SPDLOG_INFO("issue order from node");
+  SPDLOG_INFO("issue order manually");
   return InteractWithTD<OrderInput>(info, &OrderInput::order_id);
 }
 
 Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info) {
-  SPDLOG_INFO("cancel order from node");
+  SPDLOG_INFO("cancel order manually");
   return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
 }
 

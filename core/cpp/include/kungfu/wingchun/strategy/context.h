@@ -63,15 +63,14 @@ public:
    * @param volume 交易量
    * @param type 报单价格类型
    * @param side 买卖方向
-   * @param offset 开平方向 Deprecated
-   * @param hedge_flag 对冲 Deprecated
+   * @param offset 开平方向 Deprecated, defaults to longfist::enums::Offset::Open
+   * @param hedge_flag 对冲 Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
    * @return 订单ID
    */
   virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                 const std::string &account, double limit_price, int64_t volume,
                                 longfist::enums::PriceType type, longfist::enums::Side side,
-                                longfist::enums::Offset offset = longfist::enums::Offset::Open,
-                                longfist::enums::HedgeFlag hedge_flag = longfist::enums::HedgeFlag::Speculation);
+                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag);
 
   /**
    * 撤单
