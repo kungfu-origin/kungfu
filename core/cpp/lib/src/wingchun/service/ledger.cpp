@@ -163,7 +163,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
         strategy_position.ledger_category = LedgerCategory::Strategy;
         writer->write(trigger_time, strategy_position);
       }
-      writer->write(trigger_time, position);
+      writer->write_as(trigger_time, position, get_home_uid(), position.holder_uid);
     }
   };
   writer->open_data<CacheReset>().msg_type = Position::tag;

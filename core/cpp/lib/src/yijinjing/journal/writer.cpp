@@ -24,9 +24,8 @@ constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
 constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 
 writer::writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher)
-    : journal_(location, dest_id, true, lazy), publisher_(std::move(publisher)), size_to_write_(0) {
-  frame_id_base_ = location->uid xor dest_id;
-  frame_id_base_ = frame_id_base_ << 32u;
+    : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u), journal_(location, dest_id, true, lazy),
+      publisher_(std::move(publisher)), size_to_write_(0) {
   journal_.seek_to_time(time::now_in_nano());
 }
 

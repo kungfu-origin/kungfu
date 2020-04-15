@@ -31,7 +31,7 @@ Napi::Value History::SelectPeriod(const Napi::CallbackInfo &info) {
     int64_t to = info.Length() > 1 ? parse_time(1) : from + time_unit::NANOSECONDS_PER_DAY;
     SPDLOG_INFO("select period from {} to {}", time::strftime(from), time::strftime(to));
     Napi::ObjectReference result_ref = Napi::ObjectReference::New(Napi::Object::New(info.Env()));
-    serialize::InitStateMap(info, result_ref);
+    serialize::InitStateMap(info, result_ref, "history");
     for (const auto &config : profile_.get_all(Config{})) {
       auto state_location = location::make_shared(config, locator_);
       serialize::JsRestoreState(result_ref, state_location)(from, to);

@@ -137,67 +137,76 @@ public:
    * @param msg_type
    * @return a casted reference to the underlying memory address in mmap file
    */
-  template <typename T> std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0) {
-    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
-    return const_cast<T &>(frame->template data<T>());
+  template <typename DataType>
+  std::enable_if_t<size_fixed_v<DataType>, DataType &> open_data(int64_t trigger_time = 0) {
+    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
+    return const_cast<DataType &>(frame->template data<DataType>());
   }
 
   void close_data() { close_frame(size_to_write_); }
 
-  template <typename T> std::enable_if_t<kungfu::size_fixed_v<T>> write(int64_t trigger_time, const T &data) {
-    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+  template <typename DataType>
+  std::enable_if_t<kungfu::size_fixed_v<DataType>> write(int64_t trigger_time, const DataType &data) {
+    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
     auto size = frame->copy_data(data);
     close_frame(size);
   }
 
-  template <typename T> std::enable_if_t<not kungfu::size_fixed_v<T>> write(int64_t trigger_time, const T &data) {
+  template <typename DataType>
+  std::enable_if_t<kungfu::size_unfixed_v<DataType>> write(int64_t trigger_time, const DataType &data) {
     auto s = data.to_string();
     auto size = s.length();
-    auto frame = open_frame(trigger_time, T::tag, s.length());
+    auto frame = open_frame(trigger_time, DataType::tag, s.length());
     memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
     close_frame(size);
   }
 
-  template <typename T> void write(int64_t trigger_time, int32_t msg_type, const T &data) {
-    auto frame = open_frame(trigger_time, msg_type, sizeof(T));
+  template <typename DataType> void write(int64_t trigger_time, int32_t msg_type, const DataType &data) {
+    auto frame = open_frame(trigger_time, msg_type, sizeof(DataType));
     auto size = frame->copy_data(data);
     close_frame(size);
   }
 
-  template <typename T>
-  std::enable_if_t<kungfu::size_fixed_v<T>> write_as(int64_t trigger_time, const T &data, uint32_t source) {
-    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+  template <typename DataType>
+  std::enable_if_t<kungfu::size_fixed_v<DataType>, void> write_as(int64_t trigger_time, const DataType &data,
+                                                                  uint32_t source, uint32_t dest) {
+    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
     auto size = frame->copy_data(data);
     frame->set_source(source);
+    frame->set_dest(dest);
     close_frame(size);
   }
 
-  template <typename T>
-  std::enable_if_t<not kungfu::size_fixed_v<T>> write_as(int64_t trigger_time, const T &data, uint32_t source) {
+  template <typename DataType>
+  std::enable_if_t<kungfu::size_unfixed_v<DataType>, void> write_as(int64_t trigger_time, const DataType &data,
+                                                                    uint32_t source, uint32_t dest) {
     auto s = data.to_string();
     auto size = s.length();
-    auto frame = open_frame(trigger_time, T::tag, s.length());
+    auto frame = open_frame(trigger_time, DataType::tag, s.length());
     memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
     frame->set_source(source);
+    frame->set_dest(dest);
     close_frame(size);
   }
 
-  template <typename T> std::enable_if_t<not kungfu::size_fixed_v<T>> write_with_time(int64_t gen_time, const T &data) {
-    assert(sizeof(frame_header) + sizeof(T) + sizeof(frame_header) <= journal_.page_->get_page_size());
-    if (journal_.current_frame()->address() + sizeof(frame_header) + sizeof(T) > journal_.page_->address_border()) {
+  template <typename DataType>
+  std::enable_if_t<kungfu::size_unfixed_v<DataType>> write_with_time(int64_t gen_time, const DataType &data) {
+    assert(sizeof(frame_header) + sizeof(DataType) + sizeof(frame_header) <= journal_.page_->get_page_size());
+    auto frame_end = journal_.current_frame()->address() + sizeof(frame_header) + sizeof(DataType);
+    if (frame_end > journal_.page_->address_border()) {
       mark(gen_time, longfist::types::PageEnd::tag);
       journal_.load_next_page();
     }
     auto frame = journal_.current_frame();
     frame->set_header_length();
     frame->set_trigger_time(0);
-    frame->set_msg_type(T::tag);
+    frame->set_msg_type(DataType::tag);
     frame->set_source(journal_.location_->uid);
     frame->set_dest(journal_.dest_id_);
 
     frame->copy_data(data);
     frame->set_gen_time(gen_time);
-    frame->set_data_length(sizeof(T));
+    frame->set_data_length(sizeof(DataType));
     journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
     journal_.next();
   }
@@ -205,9 +214,9 @@ public:
   void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
 
 private:
+  const uint64_t frame_id_base_;
   journal journal_;
   std::mutex writer_mtx_ = {};
-  uint64_t frame_id_base_ = {};
   publisher_ptr publisher_;
   size_t size_to_write_;
 

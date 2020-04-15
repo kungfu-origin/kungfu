@@ -136,7 +136,7 @@ private:
     uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
     uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
     instruction.*id_ptr = id_left | id_right;
-    account_writer->write_as(trigger_time, instruction, strategy_location->uid);
+    account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>

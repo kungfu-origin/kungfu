@@ -48,14 +48,15 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
       update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
-  serialize::InitStateMap(info, state_ref_);
-  serialize::InitStateMap(info, ledger_ref_);
+  serialize::InitStateMap(info, state_ref_, "state");
+  serialize::InitStateMap(info, ledger_ref_, "ledger");
 
   auto today = time::today_start();
   auto config_store = ConfigStore::Unwrap(config_ref_.Value());
-  for (const auto &saved_location : config_store->profile_.get_all(Location{})) {
-    add_location(0, location::make_shared(saved_location, get_locator()));
-    RestoreState(location::make_shared(saved_location, get_locator()), today, INT64_MAX);
+  for (const auto &item : config_store->profile_.get_all(Location{})) {
+    auto saved_location = location::make_shared(item, get_locator());
+    add_location(now(), saved_location);
+    RestoreState(saved_location, today, INT64_MAX);
   }
   RestoreState(ledger_location_, today, INT64_MAX);
 

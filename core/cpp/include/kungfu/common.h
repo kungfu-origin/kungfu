@@ -207,6 +207,7 @@ struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and DataT
 };
 
 template <typename DataType> static constexpr bool size_fixed_v = size_fixed<DataType>::value;
+template <typename DataType> static constexpr bool size_unfixed_v = not size_fixed<DataType>::value;
 
 template <typename ValueType>
 static constexpr bool is_signed_int_v = std::is_integral_v<ValueType> and (sizeof(ValueType) <= 4) and
