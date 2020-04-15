@@ -189,12 +189,14 @@ void master::reset_cache(const event_ptr &event) {
 }
 
 void master::on_write_request(int64_t trigger_time, uint32_t app_uid, const RequestWriteTo &request) {
-  if (not check_location_live(app_uid, request.dest_id)) {
+  if (not is_location_live(app_uid)) {
     return;
   }
   reader_->join(get_location(app_uid), request.dest_id, trigger_time);
   require_write_to(trigger_time, app_uid, request.dest_id);
-  require_read_from(0, request.dest_id, app_uid, trigger_time);
+  if (is_location_live(request.dest_id) and has_writer(request.dest_id)) {
+    require_read_from(0, request.dest_id, app_uid, trigger_time);
+  }
   Channel channel = {};
   channel.source_id = app_uid;
   channel.dest_id = request.dest_id;

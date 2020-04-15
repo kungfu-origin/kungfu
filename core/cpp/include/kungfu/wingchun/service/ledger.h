@@ -32,7 +32,7 @@ private:
   book::Bookkeeper bookkeeper_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
-  void refresh_account_books();
+  void refresh_books();
 
   void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
 
@@ -77,6 +77,12 @@ private:
     strcpy(position.client_id, client_id.c_str());
     write_to(trigger_time, position, location_uid);
     write_to(trigger_time, book->asset, location_uid);
+  }
+
+  template <typename Writer, typename Snapshot>
+  static void write_asset_snapshot(int64_t trigger_time, Writer &&writer, const Snapshot &snapshot) {
+    writer->write(trigger_time, longfist::types::AssetSnapshot::tag, snapshot);
+    writer->write(trigger_time, longfist::types::DailyAsset::tag, snapshot);
   }
 };
 } // namespace kungfu::wingchun::service

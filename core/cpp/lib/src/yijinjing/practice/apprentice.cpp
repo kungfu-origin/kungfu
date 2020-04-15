@@ -187,14 +187,10 @@ void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestRead
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
 
 void apprentice::on_write_to(const event_ptr &event) {
-  const RequestWriteTo &request = event->data<RequestWriteTo>();
-  if (writers_.find(request.dest_id) == writers_.end()) {
-    writers_.emplace(request.dest_id, get_io_device()->open_writer(request.dest_id));
+  auto dest_id = event->data<RequestWriteTo>().dest_id;
+  if (writers_.find(dest_id) == writers_.end()) {
+    writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
   }
-}
-
-void apprentice::reset_time(const longfist::types::TimeReset &time_reset) {
-  time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
 }
 
 void apprentice::checkin() {
@@ -239,5 +235,9 @@ void apprentice::expect_start() {
               SPDLOG_WARN("Unexpected exception before start {}", ex.what());
             }
           });
+}
+
+void apprentice::reset_time(const longfist::types::TimeReset &time_reset) {
+  time::reset(time_reset.system_clock_count, time_reset.steady_clock_count);
 }
 } // namespace kungfu::yijinjing::practice

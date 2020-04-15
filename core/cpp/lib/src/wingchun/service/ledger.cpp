@@ -45,14 +45,15 @@ void Ledger::on_start() {
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
   add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
 
-  refresh_account_books();
+  refresh_books();
 }
 
-void Ledger::refresh_account_books() {
+void Ledger::refresh_books() {
   for (const auto &pair : bookkeeper_.get_books()) {
     if (pair.second->asset.ledger_category == LedgerCategory::Account) {
       refresh_account_book(now(), pair.first);
     }
+    request_write_to(now(), pair.first);
   }
 }
 
@@ -71,7 +72,6 @@ void Ledger::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
   subscribe_positions(book->short_positions);
   broker_client_.try_subscribe(trigger_time, md_location);
   book->update(trigger_time);
-  get_writer(account_uid)->write(trigger_time, DailyAsset::tag, book->asset);
 }
 
 OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
@@ -81,7 +81,7 @@ OrderStat &Ledger::get_order_stat(uint64_t order_id, const event_ptr &event) {
   return order_stats_.at(order_id).data;
 }
 
-void Ledger::update_order_stat(const event_ptr &event, const longfist::types::OrderInput &data) {
+void Ledger::update_order_stat(const event_ptr &event, const OrderInput &data) {
   write_book(event->gen_time(), event->dest(), event->source(), data);
   auto &stat = get_order_stat(data.order_id, event);
   stat.order_id = data.order_id;
@@ -89,7 +89,7 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Or
   stat.input_time = event->gen_time();
 }
 
-void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Order &data) {
+void Ledger::update_order_stat(const event_ptr &event, const Order &data) {
   if (data.error_id == 0) {
     write_book(event->gen_time(), event->source(), event->dest(), data);
   }
@@ -106,7 +106,7 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Or
   }
 }
 
-void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Trade &data) {
+void Ledger::update_order_stat(const event_ptr &event, const Trade &data) {
   write_book(event->gen_time(), event->source(), event->dest(), data);
   auto &stat = get_order_stat(data.order_id, event);
   if (stat.trade_time == 0) {
@@ -117,17 +117,23 @@ void Ledger::update_order_stat(const event_ptr &event, const longfist::types::Tr
 
 void Ledger::update_account_book(int64_t trigger_time, uint32_t account_uid) {
   refresh_account_book(trigger_time, account_uid);
-  write_to(trigger_time, get_bookkeeper().get_book(account_uid)->asset, account_uid);
+  auto writer = get_writer(account_uid);
+  auto &asset = bookkeeper_.get_book(account_uid)->asset;
+  writer->write(trigger_time, asset);
+  write_asset_snapshot(trigger_time, writer, asset);
 }
 
-void Ledger::inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel) {
+void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
   auto source_location = get_location(channel.source_id);
+  auto is_from_account = source_location->category == category::TD;
   if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
     reader_->join(source_location, channel.dest_id, trigger_time);
   }
-  bool writable = channel.dest_id == get_home_uid() and has_writer(channel.source_id);
-  if (writable and source_location->category == category::TD) {
+  if (channel.dest_id == get_home_uid() and has_writer(channel.source_id) and is_from_account) {
     write_book_reset(trigger_time, channel.source_id);
+  }
+  if (channel.source_id == get_home_uid() and bookkeeper_.has_book(channel.dest_id)) {
+    write_asset_snapshot(trigger_time, get_writer(channel.dest_id), bookkeeper_.get_book(channel.dest_id)->asset);
   }
 }
 
@@ -175,7 +181,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
   end.holder_uid = strategy_uid;
   writer->close_data();
-  writer->write(now(), DailyAsset::tag, strategy_book->asset);
+  write_asset_snapshot(now(), writer, strategy_book->asset);
 }
 
 void Ledger::write_asset_snapshots(int32_t msg_type) {
