@@ -22,6 +22,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(NewOrderSingle),                   //
     TYPE_PAIR(CancelOrder),                      //
     TYPE_PAIR(CancelAllOrder),                   //
+    TYPE_PAIR(ResetBookRequest),                 //
+    TYPE_PAIR(MirrorPositionsRequest),           //
     TYPE_PAIR(AssetRequest),                     //
     TYPE_PAIR(PositionRequest),                  //
     TYPE_PAIR(InstrumentEnd),                    //
@@ -34,6 +36,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Location),                         //
     TYPE_PAIR(Register),                         //
     TYPE_PAIR(Deregister),                       //
+    TYPE_PAIR(CacheReset),                       //
+    TYPE_PAIR(BrokerStateUpdate),                //
     TYPE_PAIR(RequestReadFrom),                  //
     TYPE_PAIR(RequestReadFromPublic),            //
     TYPE_PAIR(RequestWriteTo),                   //
@@ -41,7 +45,6 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Channel),                          //
     TYPE_PAIR(TimeRequest),                      //
     TYPE_PAIR(TimeReset),                        //
-    TYPE_PAIR(CacheReset),                       //
     TYPE_PAIR(Instrument),                       //
     TYPE_PAIR(InstrumentKey),                    //
     TYPE_PAIR(Quote),                            //
@@ -61,8 +64,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(PositionDetail),                   //
     TYPE_PAIR(PositionDetailEnd),                //
     TYPE_PAIR(InstrumentCommissionRate),         //
-    TYPE_PAIR(OrderStat),                        //
-    TYPE_PAIR(BrokerStateUpdate)                 //
+    TYPE_PAIR(OrderStat)                         //
 );
 
 constexpr auto AllDataTypes = boost::hana::make_map( //
@@ -72,6 +74,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Location),                             //
     TYPE_PAIR(Register),                             //
     TYPE_PAIR(Deregister),                           //
+    TYPE_PAIR(CacheReset),                           //
+    TYPE_PAIR(BrokerStateUpdate),                    //
     TYPE_PAIR(RequestReadFrom),                      //
     TYPE_PAIR(RequestReadFromPublic),                //
     TYPE_PAIR(RequestWriteTo),                       //
@@ -79,7 +83,6 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Channel),                              //
     TYPE_PAIR(TimeRequest),                          //
     TYPE_PAIR(TimeReset),                            //
-    TYPE_PAIR(CacheReset),                           //
     TYPE_PAIR(Instrument),                           //
     TYPE_PAIR(InstrumentKey),                        //
     TYPE_PAIR(Quote),                                //
@@ -99,8 +102,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(PositionDetail),                       //
     TYPE_PAIR(PositionDetailEnd),                    //
     TYPE_PAIR(InstrumentCommissionRate),             //
-    TYPE_PAIR(OrderStat),                            //
-    TYPE_PAIR(BrokerStateUpdate)                     //
+    TYPE_PAIR(OrderStat)                             //
 );
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //

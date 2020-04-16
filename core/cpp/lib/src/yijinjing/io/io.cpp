@@ -18,7 +18,7 @@
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 
-#define DEFAULT_RECV_TIMEOUT 25
+#define DEFAULT_RECV_TIMEOUT 100
 #define DEFAULT_NOTICE_TIMEOUT 1000
 #define SETUP_TIMEOUT 100
 

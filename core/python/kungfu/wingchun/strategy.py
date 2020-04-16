@@ -79,6 +79,10 @@ class Strategy(wc.Strategy):
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
+        self.ctx.is_book_held = wc_context.is_book_held
+        self.ctx.is_positions_mirrored = wc_context.is_positions_mirrored
+        self.ctx.hold_book = wc_context.hold_book
+        self.ctx.hold_positions = wc_context.hold_positions
         self.ctx.get_account_book = self.__get_account_book
         self.__init_book()
         self._pre_start(self.ctx)

@@ -25,6 +25,8 @@ public:
 
   Book_ptr get_book(uint32_t uid);
 
+  void drop_book(uint32_t uid);
+
   [[nodiscard]] const BookMap &get_books() const;
 
   void set_accounting_method(longfist::enums::InstrumentType instrument_type,

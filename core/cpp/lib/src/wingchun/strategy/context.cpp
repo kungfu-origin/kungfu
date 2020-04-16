@@ -56,11 +56,11 @@ void Context::add_account(const std::string &source, const std::string &account,
   broker_client_.enroll_account(account_location);
 }
 
-void Context::subscribe(const std::string &source, const std::vector<std::string> &symbols,
-                        const std::string &exchange) {
+void Context::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
+                        const std::string &exchange_ids) {
   auto md_location = find_marketdata(source);
-  for (const auto &symbol : symbols) {
-    broker_client_.subscribe(md_location, exchange, symbol);
+  for (const auto &instrument_id : instrument_ids) {
+    broker_client_.subscribe(md_location, exchange_ids, instrument_id);
   }
 }
 
@@ -115,6 +115,14 @@ uint64_t Context::cancel_order(uint64_t order_id) {
   writer->close_data();
   return action.order_action_id;
 }
+
+bool Context::is_book_held() const { return book_held_; }
+
+bool Context::is_positions_mirrored() const { return positions_mirrored_; }
+
+void Context::hold_book() { book_held_ = true; }
+
+void Context::hold_positions() { positions_mirrored_ = false; }
 
 const location_map &Context::list_md() const { return md_locations_; }
 

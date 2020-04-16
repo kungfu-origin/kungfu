@@ -32,6 +32,8 @@ KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
 KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
+KF_DEFINE_MARK_TYPE(ResetBookRequest, 400);
+KF_DEFINE_MARK_TYPE(MirrorPositionsRequest, 401);
 KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
@@ -108,6 +110,16 @@ KF_DEFINE_DATA_TYPE(                                  //
     (std::string, name)                               //
 );
 
+KF_DEFINE_PACK_TYPE(                              //
+    CacheReset, 10013, PK(msg_type), PERPETUAL(), //
+    (int32_t, msg_type)                           //
+);
+
+KF_DEFINE_PACK_TYPE(                                  //
+    BrokerStateUpdate, 10014, PK(state), PERPETUAL(), //
+    (BrokerState, state)                              //
+);
+
 KF_DEFINE_PACK_TYPE(                                    //
     RequestReadFrom, 10021, PK(source_id), PERPETUAL(), //
     (uint32_t, source_id),                              //
@@ -147,11 +159,6 @@ KF_DEFINE_PACK_TYPE(                                                           /
     TimeReset, 10100, PK(system_clock_count, steady_clock_count), PERPETUAL(), //
     (int64_t, system_clock_count),                                             //
     (int64_t, steady_clock_count)                                              //
-);
-
-KF_DEFINE_PACK_TYPE(                              //
-    CacheReset, 10013, PK(msg_type), PERPETUAL(), //
-    (int32_t, msg_type)                           //
 );
 
 KF_DEFINE_PACK_TYPE(                                              //
@@ -617,11 +624,6 @@ KF_DEFINE_PACK_TYPE(                                                            
     (double, close_today_ratio), //平今费率
 
     (double, min_commission) //最小手续费
-);
-
-KF_DEFINE_PACK_TYPE(                                //
-    BrokerStateUpdate, 401, PK(state), PERPETUAL(), //
-    (BrokerState, state)                            //
 );
 
 KF_DEFINE_PACK_TYPE(                                  //
