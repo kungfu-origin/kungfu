@@ -2,7 +2,7 @@ import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { setTimerPromiseTask } from '__gUtils/busiUtils'; 
+import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 
@@ -23,23 +23,23 @@ export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
         processes.forEach(p => {
             const rawCommandLine = p.rawCommandLine
             tasks.forEach((task: string): void => {
-                if(rawCommandLine.includes(task)) {
+                if (rawCommandLine.includes(task)) {
                     pIdList.push(p.pid)
                 }
             })
         })
         return pIdList
-    }) 
+    })
 }
 
 const winKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
-        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        if (!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
         return taskkill(pIdList, {
             force: true,
             tree: true
-        })      
+        })
     } catch (err) {
         throw err
     }
@@ -56,20 +56,20 @@ const macKill = (tasks: string[]): any => {
 const linuxKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
-        if(!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        if (!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
         return fkill(pIdList, {
             force: true,
             silent: true,
             ignoreCase: true
-        })    
+        })
     } catch (err) {
         throw err
     }
 }
 
 export const kfKill = (tasks: string[]): any => {
-    if(platform === 'mac') return macKill(tasks)
-    else if(platform === 'linux') return linuxKill(tasks)
+    if (platform === 'mac') return macKill(tasks)
+    else if (platform === 'linux') return linuxKill(tasks)
     else return winKill(tasks)
 }
 
@@ -86,11 +86,11 @@ export const killExtra = () => kfKill([kfc, 'pm2'])
 
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-        try{
+        try {
             let noDaemon = platform === 'win' ? true : false
-            if(process.env.NODE_ENV !== 'production') noDaemon = false;
+            if (process.env.NODE_ENV !== 'production') noDaemon = false;
             pm2.connect(noDaemon, (err: Error): void => {
-                if(err) {
+                if (err) {
                     logger.error('[pm2Connect]', err);
                     pm2.disconnect();
                     reject(err);
@@ -98,26 +98,26 @@ const pm2Connect = (): Promise<void> => {
                 }
                 resolve()
             })
-        }catch(err){
+        } catch (err) {
             pm2.disconnect()
             logger.error('[TC pm2Connect]', err)
             reject(err)
-        }  
+        }
     })
 }
 
 const pm2List = (): Promise<any[]> => {
     return new Promise((resolve, reject) => {
-        try{
+        try {
             pm2.list((err: Error, pList: any[]): void => {
-                if(err){
+                if (err) {
                     logger.error('[pm2List]', err)
                     reject(err)
                     return;
                 }
                 resolve(pList)
             })
-        }catch(err){
+        } catch (err) {
             logger.error('[TC pm2List]', err)
             reject(err)
         }
@@ -127,16 +127,16 @@ const pm2List = (): Promise<any[]> => {
 const pm2Delete = async (target: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try{
+            try {
                 pm2.delete(target, (err: Error): void => {
-                    if(err) {
+                    if (err) {
                         logger.error('[pm2Delete]', err)
                         reject(err)
                         return;
                     }
-                    resolve()         
+                    resolve()
                 })
-            }catch(err){
+            } catch (err) {
                 logger.error('[TC pm2Delete]', err)
                 reject(err)
             }
@@ -153,16 +153,16 @@ const dealSpaceInPath = (pathname: string): string => {
 export const describeProcess = (name: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try{
+            try {
                 pm2.describe(name, (err: Error, res: object): void => {
-                    if(err){
+                    if (err) {
                         logger.error('[describeProcess]', err)
                         reject(err);
                         return;
                     }
                     resolve(res)
                 })
-            }catch(err){
+            } catch (err) {
                 logger.error('[TC describeProcess]', err)
                 reject(err)
             }
@@ -170,17 +170,17 @@ export const describeProcess = (name: string): Promise<any> => {
     })
 }
 
-function getRocketParams (name: String, ifRocket: Boolean) {
+function getRocketParams(name: String, ifRocket: Boolean) {
     let rocket = ifRocket ? '-x' : '';
     if ((name === 'master') || (name === 'ledger')) {
         if (physicalCpuCount <= 4) {
             rocket = '';
-        } 
+        }
     }
     return rocket
 }
 
-export const startProcess = async (options: any, no_ext=false): Promise<object> => {
+export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
@@ -190,9 +190,9 @@ export const startProcess = async (options: any, no_ext=false): Promise<object> 
 
     options = {
         ...options,
-        "args":             args,
-        "script":           `kfc${extensionName}`,
-        "cwd":              path.join(KUNGFU_ENGINE_PATH, 'kfc'),
+        "args": args,
+        "script": `kfc${extensionName}`,
+        "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
         "logType": "json",
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
@@ -201,26 +201,26 @@ export const startProcess = async (options: any, no_ext=false): Promise<object> 
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
-        "execMode" : "fork",
+        "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
         }
     };
 
-    if(no_ext) options['env']['KF_NO_EXT'] = 'on';
+    if (no_ext) options['env']['KF_NO_EXT'] = 'on';
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try{
-                pm2.start(options, (err: Error, apps: object): void => { 
-                    if(err) {
+            try {
+                pm2.start(options, (err: Error, apps: object): void => {
+                    if (err) {
                         logger.error('[startProcess]', JSON.stringify(options), err)
                         reject(err);
                         return;
                     };
                     resolve(apps);
                 })
-            }catch(err){
+            } catch (err) {
                 logger.error('[TC startProcess]', JSON.stringify(options), err)
                 reject(err)
             }
@@ -237,9 +237,9 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
 
     const options = {
         "name": name,
-        "interpreter":      'kfc',
-        "interpreterArgs":  args,
-        "script":           strategyPath,
+        "interpreter": 'kfc',
+        "interpreterArgs": args,
+        "script": strategyPath,
         "logType": "json",
         "output": buildProcessLogPath(name),
         "error": buildProcessLogPath(name),
@@ -248,7 +248,7 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
-        "execMode" : "fork",
+        "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
         },
@@ -257,16 +257,16 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try{
-                pm2.start(options, (err: Error, apps: object): void => { 
-                    if(err) {
+            try {
+                pm2.start(options, (err: Error, apps: object): void => {
+                    if (err) {
                         logger.error('[startProcess]', JSON.stringify(options), err)
                         reject(err);
                         return;
                     };
                     resolve(apps);
                 })
-            }catch(err){
+            } catch (err) {
                 logger.error('[TC startProcess]', JSON.stringify(options), err)
                 reject(err)
             }
@@ -275,13 +275,13 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
 }
 
 //启动pageEngine
-export const startMaster = async(force: boolean): Promise<void> => {
+export const startMaster = async (force: boolean): Promise<void> => {
     const processName = 'master';
     const master = await describeProcess(processName);
-    if(master instanceof Error) throw master
+    if (master instanceof Error) throw master
     const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
-    if(!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
-    try{ 
+    if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
+    try {
         await killKfc()
     } catch (err) {
         logger.error('[TC killKfc startMaster]', err)
@@ -293,12 +293,12 @@ export const startMaster = async(force: boolean): Promise<void> => {
 }
 
 //启动ledger
-export const startLedger = async(force: boolean): Promise<void> => {
+export const startLedger = async (force: boolean): Promise<void> => {
     const processName = 'ledger';
     const ledger = await describeProcess(processName);
-    if(ledger instanceof Error) throw ledger
+    if (ledger instanceof Error) throw ledger
     const ledgerStatus = ledger.filter((m: any): boolean => m.pm2_env.status === 'online')
-    if(!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
+    if (!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
         'args': 'ledger'
@@ -326,7 +326,7 @@ export const startTd = (accountId: string): Promise<void> => {
 //启动strategy
 export const startStrategy = (strategyId: string, strategyPath: string): Promise<void> => {
     strategyPath = dealSpaceInPath(strategyPath)
-    const kfSystemConfig:any = readJsonSync(KF_CONFIG_PATH)
+    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
 
     if (ifLocalPython) {
@@ -386,35 +386,36 @@ export const listProcessStatusWithDetail = () => {
 
 //删除进程
 export const deleteProcess = (processName: string) => {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         var processes = [];
-        try{
+        try {
             processes = await describeProcess(processName)
-        }catch(err){
+        } catch (err) {
             logger.error('[TC describeProcess deleteProcess]', err)
         }
 
         //如果進程不存在，會跳過刪除步驟
-        if(!processes || !processes.length) {
+        if (!processes || !processes.length) {
             resolve(true)
             return;
         }
 
         pm2Delete(processName)
-        .then(() => resolve(true))
-        .catch(err => reject(err))
-        .finally(async () => {
-            const processes = await describeProcess(processName)
-            const pids = processes
-                .map((prc: any): number => prc.pid)
-                .filter((pid: number): boolean => !!pid)
+            .then(() => resolve(true))
+            .catch(err => reject(err))
+            .finally(async () => {
+                const processes = await describeProcess(processName)
+                const pids = processes
+                    .map((prc: any): number => prc.pid)
+                    .filter((pid: number): boolean => !!pid)
 
-            if(!pids || !pids.length) return  
-            logger.info('[KILL PROCESS] by pids', pids)
-            kfKill(pids)
-            .then(() => logger.info('[KILL PROCESS] by pids success', pids)
-            .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
-        )})
+                if (!pids || !pids.length) return
+                logger.info('[KILL PROCESS] by pids', pids)
+                kfKill(pids)
+                    .then(() => logger.info('[KILL PROCESS] by pids success', pids)
+                        .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
+                    )
+            })
     })
 }
 
@@ -422,17 +423,17 @@ export const deleteProcess = (processName: string) => {
 export const killGodDaemon = () => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try{
+            try {
                 pm2.killDaemon((err: Error): void => {
                     pm2.disconnect()
-                    if(err) {
+                    if (err) {
                         logger.error(err)
                         reject(err)
                         return
                     }
                     resolve(true)
                 })
-            }catch(err){
+            } catch (err) {
                 pm2.disconnect()
                 logger.error(err)
                 reject(err)

@@ -1,5 +1,4 @@
 import { deleteStrategy, getStrategyById } from '__io/kungfu/strategy';
-// import { nanoReqRemoveStrategyPos } from '__io/nano/nanoReq';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { deleteProcess, startStrategy } from '__gUtils/processUtils';
 import { STRATEGY_DIR, LOG_DIR } from '__gConfig/pathConfig';
@@ -11,7 +10,6 @@ export const deleteStrat = (strategyId: string): Promise<void> => {
     return deleteStrategy(strategyId) //删除策略数据库
     .then(() => removeFileFolder(path.join(STRATEGY_DIR, strategyId))) //策略相关数据
     .then(() => removeFileFolder(path.join(LOG_DIR, strategyId + '.log')))//策略log
-    // .then(() => nanoReqRemoveStrategyPos(strategyId)) //删除对应pos
     .catch((err: Error) => console.error(err))
 }
 

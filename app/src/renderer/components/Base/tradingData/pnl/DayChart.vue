@@ -142,7 +142,6 @@ export default {
 
         getLastMinPnl () {
             const lastMinPnl = this.minPnl
-                .filter(pnlData => pnlData.trading_day === this.tradingDay)
                 .sort((a, b) => b.update_time - a.update_time)
                 [0];
             const lastMinPnlUpdateTime = moment(Number(lastMinPnl.update_time) / 1000000).format('MMDD');

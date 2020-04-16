@@ -234,7 +234,6 @@ export default {
             let orderDataByKey = {};
 
             let ordersAfterFilter = orders
-            .filter(item => (item.trading_day === tradingDay))
             .filter(item => {
                 if (searchKeyword.trim() === '') return true;
                 const { order_id, client_id, source_id, account_id, instrument_id } = item

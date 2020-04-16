@@ -120,7 +120,6 @@ export default {
         dealTradeList (trades, { tradingDay, searchKeyword}) {
             const t = this;
             let tradesAfterFilter = trades
-                .filter(item => (item.trading_day === tradingDay))
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
                     const { trade_id, client_id, account_id, source_id, instrument_id } = item
