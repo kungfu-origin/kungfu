@@ -169,6 +169,13 @@ bool AutoClient::should_connect_td(const location_ptr &td_location) const { retu
 
 bool AutoClient::should_connect_strategy(const location_ptr &td_location) const { return true; }
 
+SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
+
+bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
+                                     const std::string &instrument_id) const {
+  return true;
+}
+
 ManualClient::ManualClient(apprentice &app) : Client(app) {}
 
 const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }

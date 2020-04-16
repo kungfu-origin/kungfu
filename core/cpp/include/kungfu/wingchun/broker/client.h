@@ -12,6 +12,9 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::broker {
+/**
+ * Policy interface to decide the time point to resume when connecting to a broker.
+ */
 struct ResumePolicy {
   [[nodiscard]] int64_t get_connect_time(const yijinjing::practice::apprentice &app,
                                          const longfist::types::Register &broker) const;
@@ -20,16 +23,26 @@ struct ResumePolicy {
                                                 const longfist::types::Register &broker) const = 0;
 };
 
+/**
+ * Always resume from the last unread frame, is intended to be used by system services that needs continuity.
+ */
 struct ContinuousResumePolicy : public ResumePolicy {
   [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
                                         const longfist::types::Register &broker) const override;
 };
 
+/**
+ * Resumes from the last unread frame, or the start of today if the last unread frame was before it.
+ * This policy ensures the client does not look back data before today, is intended to be used by strategies.
+ */
 struct IntradayResumePolicy : public ResumePolicy {
   [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
                                         const longfist::types::Register &broker) const override;
 };
 
+/**
+ * Manage connections to brokers.
+ */
 class Client {
   typedef std::unordered_map<uint32_t, longfist::types::InstrumentKey> InstrumentKeyMap;
   typedef std::unordered_map<uint32_t, longfist::enums::BrokerState> BrokerStateMap;
@@ -80,6 +93,11 @@ private:
   void update_broker_state(const event_ptr &event, const longfist::types::Deregister &deregister_data);
 };
 
+/**
+ * Automatically connects all brokers, and subscribe only the instruments that has been explicitly added.
+ * In addition to brokers it also handle connections to strategies. This is intended to be used by system services like
+ * ledger, risk, watcher, etc.
+ */
 class AutoClient : public Client {
 public:
   explicit AutoClient(yijinjing::practice::apprentice &app);
@@ -97,6 +115,22 @@ private:
   ContinuousResumePolicy resume_policy_ = {};
 };
 
+/**
+ * Automatically connect all brokers and strategies.
+ * It differs from AutoClient in the sense that it does not issue any subscriptions, but assumes all instruments that
+ * seen is subscribed.
+ */
+class SilentAutoClient : public AutoClient {
+public:
+  explicit SilentAutoClient(yijinjing::practice::apprentice &app);
+
+  [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
+                                   const std::string &instrument_id) const override;
+};
+
+/**
+ * Only connects brokers that has been explicitly added. It supports subscribe_all for MD that has such ability.
+ */
 class ManualClient : public Client {
   typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
 

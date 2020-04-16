@@ -21,6 +21,8 @@ Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
 
 bool Bookkeeper::has_book(uint32_t location_uid) { return books_.find(location_uid) != books_.end(); }
 
+void Bookkeeper::drop_book(uint32_t uid) { books_.erase(uid); }
+
 Book_ptr Bookkeeper::get_book(uint32_t location_uid) {
   if (books_.find(location_uid) == books_.end()) {
     books_.emplace(location_uid, make_book(location_uid));
@@ -61,6 +63,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(Position::tag) | $$(try_update_position(event->data<Position>()));
   events | is(PositionEnd::tag) | $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
+  events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
 
 void Bookkeeper::restore(const cache::bank &state_bank) {

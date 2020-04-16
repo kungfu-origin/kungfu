@@ -18,14 +18,6 @@
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 
-class SilentAutoClient : public wingchun::broker::AutoClient {
-public:
-  explicit SilentAutoClient(yijinjing::practice::apprentice &app);
-
-  [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                   const std::string &instrument_id) const override;
-};
-
 class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice {
 public:
   explicit Watcher(const Napi::CallbackInfo &info);
@@ -80,7 +72,7 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   yijinjing::data::location_ptr ledger_location_;
-  SilentAutoClient broker_client_;
+  wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference history_ref_;
   Napi::ObjectReference config_ref_;
@@ -107,7 +99,7 @@ private:
 
   void UpdateBrokerState(uint32_t broker_uid, const longfist::types::BrokerStateUpdate &state);
 
-  void UpdateAccountBook(const event_ptr &event, uint32_t account_uid);
+  void UpdateAsset(const event_ptr &event, uint32_t book_uid);
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote);
 

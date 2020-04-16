@@ -44,6 +44,7 @@ protected:
 
 private:
   yijinjing::data::location ledger_location_;
+  bool book_reset_requested_ = false;
   bool positions_requested_ = false;
   bool positions_set_ = false;
   bool started_ = false;

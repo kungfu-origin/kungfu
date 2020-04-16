@@ -22,50 +22,59 @@ public:
   virtual ~Context() = default;
 
   /**
-   * 获取当前纳秒时间
-   * @return 当前纳秒时间
+   * Get current time in nano seconds.
+   * @return current time in nano seconds
    */
   virtual int64_t now() const;
 
+  /**
+   * Add one shot timer callback.
+   * @param nanotime when to call in nano seconds
+   * @param callback callback function
+   */
   virtual void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
 
+  /**
+   * Add periodically callback.
+   * @param duration duration in nano seconds
+   * @param callback callback function
+   */
   virtual void add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback);
 
   /**
-   * 添加策略使用的交易账户
-   * @param source 柜台ID
-   * @param account 账户ID
-   * @param cash_limit 可用资金限制
+   * Add account for strategy.
+   * @param source TD group
+   * @param account TD account ID
+   * @param cash_limit cash limit
    */
   virtual void add_account(const std::string &source, const std::string &account, double cash_limit);
 
   /**
-   * 订阅行情
-   * @param source 柜台ID
-   * @param instruments 合约列表
-   * @param exchange 交易所ID
+   * Subscribe market data.
+   * @param source MD group
+   * @param instrument_ids instrument IDs
+   * @param exchange_ids exchange IDs
    */
-  virtual void subscribe(const std::string &source, const std::vector<std::string> &instruments,
-                         const std::string &exchange);
+  virtual void subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
+                         const std::string &exchange_ids);
 
   /**
-   * 订阅全部行情
-   * @param source 柜台ID
+   * Subscribe all from given MD
+   * @param source MD group
    */
   virtual void subscribe_all(const std::string &source);
 
   /**
-   * 报单
-   * @param instrument_id 合约ID
-   * @param exchange_id 交易所ID
-   * @param account 账户ID
-   * @param limit_price 价格
-   * @param volume 交易量
-   * @param type 报单价格类型
-   * @param side 买卖方向
-   * @param offset 开平方向 Deprecated, defaults to longfist::enums::Offset::Open
-   * @param hedge_flag 对冲 Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
-   * @return 订单ID
+   * Insert order.
+   * @param instrument_id instrument ID
+   * @param exchange_id exchange ID
+   * @param account account ID
+   * @param volume trade volume
+   * @param type price type
+   * @param side side
+   * @param offset Deprecated, defaults to longfist::enums::Offset::Open
+   * @param hedge_flag Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
+   * @return inserted order ID
    */
   virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                 const std::string &account, double limit_price, int64_t volume,
@@ -73,39 +82,74 @@ public:
                                 longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag);
 
   /**
-   * 撤单
-   * @param order_id 订单ID
-   * @return 撤单操作ID
+   * Cancel order.
+   * @param order_id order ID
+   * @return order action ID
    */
   virtual uint64_t cancel_order(uint64_t order_id);
 
   /**
-   * 获取订阅行情列表
-   * @return 订阅行情列表
+   * Tells whether the book is held.
+   * If book is held, all traded positions will be recovered from ledger.
+   * If book is not held, ledger will use the information collected in pre_start to build a fresh book.
+   * @return true if book is held, false otherwise. Defaults to false.
+   */
+  [[nodiscard]] bool is_book_held() const;
+
+  /**
+   * Tells whether to mirror positions from enrolled accounts.
+   * If positions are mirrored, will always have positions equal to the corresponding positions under accounts.
+   * If positions are not mirrored, will set positions to 0 for newly added strategies, or the history values recorded
+   * by kungfu.
+   * @return true if positions are mirrored, false otherwise. Defaults to true.
+   */
+  [[nodiscard]] bool is_positions_mirrored() const;
+
+  /**
+   * Call to hold book.
+   */
+  void hold_book();
+
+  /**
+   * Call to hold positions, i.e. do not mirror positions.
+   */
+  void hold_positions();
+
+  /**
+   * Get subscribed MD locations.
+   * @return subscribed MD locations
    */
   const yijinjing::data::location_map &list_md() const;
 
   /**
-   * 获取交易账户列表
-   * @return 交易账户列表
+   * Get enrolled TD locations.
+   * @return enrolled TD locations
    */
   const yijinjing::data::location_map &list_accounts() const;
 
   /**
-   * 获取交易账户可用资金限制
-   * @param account 账户ID
-   * @return 账户可用资金限制
+   * Get cash limit for given account
+   * @param account account ID
+   * @return cash limit
    */
   double get_account_cash_limit(const std::string &account) const;
 
   /**
-   * 当前交易日时间
-   * @return 当前交易日时间
+   * Get current trading day.
+   * @return current trading day
    */
   int64_t get_trading_day() const;
 
+  /**
+   * Get broker client.
+   * @return broker client reference
+   */
   broker::Client &get_broker_client();
 
+  /**
+   * Get bookkeeper.
+   * @return bookkeeper reference
+   */
   book::Bookkeeper &get_bookkeeper();
 
 protected:
@@ -115,6 +159,8 @@ protected:
   virtual void on_start();
 
 private:
+  bool book_held_ = false;
+  bool positions_mirrored_ = true;
   broker::ManualClient broker_client_;
   book::Bookkeeper bookkeeper_;
   yijinjing::data::location_map md_locations_ = {};

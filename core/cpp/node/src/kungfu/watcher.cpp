@@ -20,13 +20,6 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
-SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
-
-bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                     const std::string &instrument_id) const {
-  return true;
-}
-
 Napi::FunctionReference Watcher::constructor = {};
 
 inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
@@ -208,7 +201,7 @@ void Watcher::on_start() {
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
   events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()););
-  events_ | is(PositionEnd::tag) | $$(UpdateAccountBook(event, event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionEnd::tag) | $$(UpdateAsset(event, event->data<PositionEnd>().holder_uid););
   events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
@@ -293,10 +286,10 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
   app_states_ref_.Set(format(app_location->uid), state_value);
 }
 
-void Watcher::UpdateAccountBook(const event_ptr &event, uint32_t account_uid) {
-  auto book = bookkeeper_.get_book(account_uid);
+void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
+  auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
-  update_ledger(event->gen_time(), ledger_location_->uid, account_uid, book->asset);
+  update_ledger(event->gen_time(), ledger_location_->uid, book_uid, book->asset);
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {

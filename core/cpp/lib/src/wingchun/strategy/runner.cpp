@@ -67,6 +67,7 @@ void Runner::pre_stop() { invoke(&Strategy::pre_stop); }
 void Runner::post_stop() { invoke(&Strategy::post_stop); }
 
 void Runner::prepare(const event_ptr &event) {
+  auto ledger_uid = ledger_location_.uid;
   auto ready_test = [&](auto &locations) {
     for (const auto &pair : locations) {
       if (not context_->get_broker_client().is_ready(pair.second->uid)) {
@@ -78,16 +79,23 @@ void Runner::prepare(const event_ptr &event) {
   if (not ready_test(context_->list_accounts()) or not ready_test(context_->list_md())) {
     return;
   }
-  if (not positions_requested_ and has_channel(get_home_uid(), ledger_location_.uid)) {
-    auto writer = get_writer(ledger_location_.uid);
+  if (not context_->is_book_held() and not book_reset_requested_) {
+    get_writer(ledger_uid)->mark(now(), ResetBookRequest::tag);
+    book_reset_requested_ = true;
+  }
+  if (not positions_requested_ and has_channel(get_home_uid(), ledger_uid)) {
+    auto writer = get_writer(ledger_uid);
     for (const auto &pair : context_->get_broker_client().get_instrument_keys()) {
       writer->write(now(), pair.second);
+    }
+    if (context_->is_positions_mirrored()) {
+      writer->mark(now(), MirrorPositionsRequest::tag);
     }
     writer->mark(now(), PositionRequest::tag);
     positions_requested_ = true;
     return;
   }
-  if (event->msg_type() == PositionEnd::tag and event->source() == ledger_location_.uid) {
+  if (event->msg_type() == PositionEnd::tag and event->source() == ledger_uid) {
     positions_set_ = true;
   }
   if (not positions_set_) {

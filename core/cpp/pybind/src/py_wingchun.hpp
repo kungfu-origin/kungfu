@@ -320,7 +320,11 @@ void bind(pybind11::module &&m) {
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),
            py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
-      .def("cancel_order", &strategy::Context::cancel_order);
+      .def("cancel_order", &strategy::Context::cancel_order)
+      .def("hold_book", &strategy::Context::hold_book)
+      .def("hold_positions", &strategy::Context::hold_positions)
+      .def("is_book_held", &strategy::Context::is_book_held)
+      .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored);
 
   py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
       .def(py::init())
