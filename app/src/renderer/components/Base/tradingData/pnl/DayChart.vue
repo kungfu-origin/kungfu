@@ -32,11 +32,6 @@ export default {
             default: "",
         },
 
-        minPnl: {
-            type: Array,
-            default: () => ([])
-        },
-
         dailyPnl: {
             type: Array,
             default: () => ([])
@@ -83,7 +78,7 @@ export default {
         },
 
         dailyPnl (dailyPnlList, oldPnlMinList) {
-            const { timeList, pnlDataList } = this.dealDailyPnlList(dailyPnlList)
+            const { timeList, pnlDataList } = this.dealDailyPnlList(dailyPnlList.slice(0))
             if ((!oldPnlMinList.length && dailyPnlList.length) || !this.myChart) {
                 this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
             } else if (oldPnlMinList.length && dailyPnlList.length) {
@@ -109,20 +104,10 @@ export default {
 
         dealDailyPnlList (dailyPnlList) {
             let timeList = [], pnlDataList = [];
-
-            const { lastMinPnlUpdateTime, lastMinPnlValue } = this.getLastMinPnl();
-            
             dailyPnlList
                 .sort((a, b) => a.update_time - b.update_time)
                 .kfForEach(pnlData => {
                     const updateTime = moment(Number(pnlData.update_time) / 1000000).format('MMDD');
-                    
-                    if (updateTime === lastMinPnlUpdateTime) {
-                        timeList.push(lastMinPnlUpdateTime);
-                        pnlDataList.push(lastMinPnlValue);
-                        return;
-                    }
-
                     timeList.push(updateTime);
                     const pnlValue = this.calcuAccumlatedPnl(pnlData)
                     pnlDataList.push(pnlValue)
@@ -131,19 +116,6 @@ export default {
             return {
                 timeList: Object.freeze(timeList), 
                 pnlDataList: Object.freeze(pnlDataList)
-            }
-        },
-
-        getLastMinPnl () {
-            const lastMinPnl = this.minPnl
-                .sort((a, b) => b.update_time - a.update_time)
-                [0];
-            const lastMinPnlUpdateTime = moment(Number(lastMinPnl.update_time) / 1000000).format('MMDD');
-            const lastMinPnlValue = this.calcuAccumlatedPnl(lastMinPnl)
-
-            return {
-                lastMinPnlUpdateTime,
-                lastMinPnlValue
             }
         },
 
