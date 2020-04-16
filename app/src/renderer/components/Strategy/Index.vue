@@ -35,8 +35,7 @@
                             <CurrentOrder
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :kungfuData="orders"     
-                            :tradingDay="tradingDay"              
+                            :kungfuData="orders"                 
                             :addTime="addTime"   
                             :orderStat="orderStat"             
                             ></CurrentOrder>                      
@@ -45,8 +44,7 @@
                             <TradeRecord 
                             :currentId="strategyId"
                             moduleType="strategy"
-                            :kungfuData="trades"    
-                            :tradingDay="tradingDay"          
+                            :kungfuData="trades"           
                             :addTime="addTime"    
                             :orderStat="orderStat"
                             ></TradeRecord>
@@ -107,7 +105,6 @@ export default {
    
     computed: {
         ...mapState({
-            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             currentStrategy: state => state.STRATEGY.currentStrategy,
         }),
 

@@ -14,10 +14,6 @@ export const setMdAccountSource = ({ commit }, mdAccountSource) => {
     commit('SET_MD_ACCOUNT_SOURCE', mdAccountSource)
 }
 
-export const setTradingDay = ({ commit }, tradingDay) => {
-    commit('SET_TRADING_DAY', tradingDay);
-}
-
 //初始化kfconfig
 export const setKungfuConfig = ({ commit }, kfConfig) => {
     commit('SET_KF_CONFIG', kfConfig)  

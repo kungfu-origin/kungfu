@@ -403,15 +403,6 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
     })
 }
 
-export const buildDateRange = (dateRange: string[], tradingDay?: string): Array<string|undefined> => {
-    if(dateRange.length === 2) {
-        return [moment(dateRange[0]).format('YYYYMMDD'), moment(dateRange[1]).format('YYYYMMDD')]
-    } else if (tradingDay) {
-        tradingDay = moment(tradingDay).format('YYYYMMDD')
-        return [tradingDay, tradingDay]
-    } else throw new Error('dateRange == [] and tradingDay undefined!')
-}
-
 export const getExtensions = (): Promise<any> => {
     return listDir(EXTENSION_DIR)
     .then(async (files: string[]) => {

@@ -10,7 +10,6 @@ export default {
         calendar: { //交易日等相关日期信息
            
         },
-        tradingDay: moment().format('YYYYMMDD'),
         processStatus: null,
         tdAccountSource: {}, //账户柜台信息
         mdAccountSource: {}, //账户柜台信息

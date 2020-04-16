@@ -61,13 +61,6 @@ export default {
         }
       
     },
-
-    computed:{
-        ...mapState({
-            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
-        })
-    },
-
     
     mounted() {
         this.rendererPnl = true;
@@ -94,12 +87,6 @@ export default {
 
             pnlDataList.length && (this.intradayPnl = pnlDataList[pnlDataList.length - 1]);
 
-        },
-
-        //检测交易日的变化，当变化的时候，重新获取数据
-        tradingDay() {
-            this.resetData();     
-            this.initChart();       
         }
     },
 

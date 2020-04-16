@@ -86,8 +86,6 @@ export default {
 
         subKungfuGlobalData () {
             return buildKungfuGlobalDataPipe().subscribe(data => {
-                const tradingDay = data.tradingDay;
-                this.$store.dispatch('setTradingDay', tradingDay);
                 data.gatewayStates.forEach(gatewayState => {
                     this.$store.dispatch('setOneMdTdState', {
                         id: gatewayState.processId,

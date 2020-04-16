@@ -55,7 +55,6 @@ export const buildKungfuGlobalDataPipe = () => {
     return KUNGFU_GLOBAL_DATA_OBSERVER.pipe(
         map((data: any): any => {
             return {
-                tradingDay: data.tradingDay || moment().format('YYYYMMDD'),
                 gatewayStates: dealGatewayStates(data.appStates || {})
             }
         })

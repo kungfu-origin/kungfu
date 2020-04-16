@@ -72,12 +72,6 @@ export default {
         this.$nextTick().then(() => this.initChart())
     },
 
-    computed: {
-        ...mapState({
-            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
-        })
-    },
-
     watch: {
         
         currentId (val) {

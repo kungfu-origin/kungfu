@@ -50,7 +50,5 @@ if(currentPath.indexOf('/kungfuCodeEditor') === -1) {
 }
 
 window.fileId = 0;
-window.setTradingDay = (targetDay) => store.dispatch('setTradingDay', targetDay);
-window.getTradingDay = () => store.state.BASE.tradingDay;
 
 

@@ -26,7 +26,6 @@
                         <CurrentOrder
                         moduleType="account" 
                         :currentId="currentId"
-                        :tradingDay="tradingDay"
                         :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
                         :orderStat="orderStat"
@@ -49,7 +48,6 @@
                     <TradeRecord
                     moduleType="account" 
                     :currentId="currentId"
-                    :tradingDay="tradingDay"
                     :kungfuData="trades"
                     :orderStat="orderStat"
                     />
@@ -93,7 +91,6 @@ export default {
 
     computed:{
         ...mapState({
-            tradingDay: state => state.BASE.tradingDay, //日期信息，包含交易日
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
             tdAccountSource: state => (state.BASE.tdAccountSource || {})
         }),

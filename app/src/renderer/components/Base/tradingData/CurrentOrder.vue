@@ -1,8 +1,5 @@
 <template>
   <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
-    <template v-slot:dashboard-header-left>
-        <span class="trading-day-header">交易日：{{tradingDay}}</span>    
-    </template>
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -157,7 +154,6 @@ export default {
         kungfuData (orders) {
             const t = this;
             const ordersResolve = t.dealOrderList(orders, {
-                tradingDay: t.tradingDay,
                 searchKeyword: t.searchKeyword,
                 todayFinish: t.todayFinish
             });
@@ -229,7 +225,7 @@ export default {
         },
 
         //对返回的数据进行处理
-        dealOrderList (orders, { tradingDay, searchKeyword, todayFinish }) {
+        dealOrderList (orders, { searchKeyword, todayFinish }) {
             const t = this
             let orderDataByKey = {};
 

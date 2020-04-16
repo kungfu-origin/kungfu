@@ -1,8 +1,5 @@
 <template>
 <tr-dashboard :title="`当日成交 ${currentTitle}`">
-    <template v-slot:dashboard-header-left>
-        <span class="trading-day-header">交易日：{{tradingDay}}</span>    
-    </template>
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -109,7 +106,6 @@ export default {
         kungfuData (trades) {
             const t = this;
             const tradesResolve = t.dealTradeList(trades, {
-                tradingDay: t.tradingDay,
                 searchKeyword: t.searchKeyword
             })
             tradesResolve.length && (t.tableData = tradesResolve)
@@ -117,7 +113,7 @@ export default {
     },
 
     methods:{
-        dealTradeList (trades, { tradingDay, searchKeyword}) {
+        dealTradeList (trades, { searchKeyword}) {
             const t = this;
             let tradesAfterFilter = trades
                 .filter(item => {

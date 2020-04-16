@@ -22,11 +22,6 @@ export default {
             default: () => {}
         },
 
-        tradingDay: {
-            type: String,
-            default: ''
-        },
-
         addTime: {
             type: Number,
             default: 0
@@ -65,11 +60,7 @@ export default {
     watch: {
         currentId() {
             this.resetData();
-        },
-
-        tradingDay () {
-            this.resetData();
-        },
+        }
     },
 
     methods: {

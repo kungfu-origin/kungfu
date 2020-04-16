@@ -54,7 +54,6 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
             }
 
             callback({
-                tradingDay: watcher.tradingDay,
                 appStates: watcher.appStates,
             });
             resolve();
