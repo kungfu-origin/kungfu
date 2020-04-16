@@ -1,14 +1,13 @@
 var path = require('path');
 
-var binary = require('node-pre-gyp');
+var bindings = require('bindings')('node_windows_kill.node');
 
-var bindingPath = binary.find(path.resolve(path.join(__dirname, '../package.json')));
 
 var Options = require('./options');
 var Signals = require('./signals');
 
 function WindowsKillClass(options) {
-    this._native = require(bindingPath);
+    this._native = bindings;
     this._nodeKill = process.kill;
 
     this._options = new Options(options);

@@ -11,10 +11,7 @@ const fkill = require('fkill');
 const taskkill = require('taskkill');
 const physicalCpuCount = require('physical-cpu-count')
 
-//const windowsKill = require('windows-kill');
 export const pm2 = require('pm2');
-
-console.log(physicalCpuCount)
 
 //=========================== task kill =========================================
 export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
@@ -127,7 +124,7 @@ const pm2List = (): Promise<any[]> => {
 const pm2Delete = async (target: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
-            try {
+            try{ 
                 pm2.delete(target, (err: Error): void => {
                     if (err) {
                         logger.error('[pm2Delete]', err)
@@ -398,6 +395,14 @@ export const deleteProcess = (processName: string) => {
         if (!processes || !processes.length) {
             resolve(true)
             return;
+        }
+
+        if (platform === 'win') {
+            const windowsKill = require('kungfu-core').windowsKill;
+            processes.forEach((item: any) => {
+                const pid = item.pid;
+                windowsKill(pid, 'SIGINT')
+            })
         }
 
         pm2Delete(processName)
