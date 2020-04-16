@@ -58,27 +58,18 @@ private:
 
   template <typename TradingData>
   void write_book(int64_t trigger_time, uint32_t account_uid, uint32_t strategy_uid, const TradingData &data) {
-    auto account_location = get_location(account_uid);
-    auto strategy_location = get_location(strategy_uid);
-    auto &source_id = account_location->group;
-    auto &account_id = account_location->name;
-    write_book(trigger_time, account_uid, data, source_id, account_id, "");
-    write_book(trigger_time, strategy_uid, data, source_id, account_id, strategy_location->name);
+    write_book(trigger_time, account_uid, data);
+    write_book(trigger_time, strategy_uid, data);
   }
 
   template <typename TradingData>
-  void write_book(int64_t trigger_time, uint32_t location_uid, const TradingData &data, const std::string &source_id,
-                  const std::string &account_id, const std::string &client_id) {
-    if (not bookkeeper_.has_book(location_uid) or not has_writer(location_uid)) {
+  void write_book(int64_t trigger_time, uint32_t book_uid, const TradingData &data) {
+    if (not bookkeeper_.has_book(book_uid) or not has_writer(book_uid)) {
       return;
     }
-    auto book = bookkeeper_.get_book(location_uid);
-    auto &position = book->get_position(data);
-    strcpy(position.source_id, source_id.c_str());
-    strcpy(position.account_id, account_id.c_str());
-    strcpy(position.client_id, client_id.c_str());
-    write_to(trigger_time, position, location_uid);
-    write_to(trigger_time, book->asset, location_uid);
+    auto book = bookkeeper_.get_book(book_uid);
+    write_to(trigger_time, book->get_position(data), book_uid);
+    write_to(trigger_time, book->asset, book_uid);
   }
 
   template <typename Writer, typename Snapshot>
