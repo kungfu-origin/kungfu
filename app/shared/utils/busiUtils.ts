@@ -200,6 +200,7 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
     const modalPath = process.env.NODE_ENV !== 'production'
     ? `http://localhost:9090/#${htmlPath}`
     : `file://${__dirname}/index.html#${htmlPath}`
+    const isDevelopment = process.env.NODE_ENV === "development"
     
     let win = new BrowserWindow({
         width: 1080, 
@@ -209,8 +210,15 @@ export const openWin = (htmlPath: string, BrowserWindow: any): void => {
             nodeIntegration: true
         },
     });
+    if(isDevelopment) {
+        win.webContents.on("did-frame-finish-load", () => {
+            win.webContents.once("devtools-opened", () => {
+                win.focus();
+            });
+            win.webContents.openDevTools();
+        });
+    }
     win.loadURL(modalPath)
-    win.webContents.openDevTools()
     win.show()
     win.on('close', () => win = null)
 }

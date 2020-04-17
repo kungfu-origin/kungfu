@@ -40,13 +40,16 @@ function createWindow () {
 	// and load the index.html of the app.
 	if(isDevelopment){
 		mainWindow.loadURL('http://localhost:9090')
+		mainWindow.webContents.on("did-frame-finish-load", () => {
+			mainWindow.webContents.once("devtools-opened", () => {
+				mainWindow.focus();
+			});
+			mainWindow.webContents.openDevTools();
+		});
 	}else{
 		const filePath = path.join(__dirname, "index.html");
 		mainWindow.loadFile(filePath)
 	}
-
-	// Open the DevTools.
-	mainWindow.webContents.openDevTools()
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
