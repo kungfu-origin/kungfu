@@ -14,7 +14,7 @@ export default function (CodeMirror) {
     var pythonBuiltinsL = pythonBuiltins.split(" ").join("() ").split(" ");
 
 
-    var taurusDefKeywords = [
+    var kungfuDefKeywords = [
       "pre_start(context)",
       "post_start(context)",
       "pre_stop(context)",
@@ -23,14 +23,15 @@ export default function (CodeMirror) {
       "on_order(context, order)",
       "on_trade(context, trade)"
     ] 
-    var taurusKeywords = [
+    var kungfuKeywords = [
+      "context.hold_book()",
+      "context.hold_positions()",
+      "context.is_book_held()",
+      "context.is_positions_mirrored()",
       "context.add_account(source_id, account_id, cash_limit)",
       "context.suscribe(source_id, instruments_id, exchange_id, is_level2)",
       "context.insert_order(instrument_id, exchange, account, limit_price, volume, PriceType, Side, Offset, HedgeFlag)",
       "context.cancel_order(order_id)",
-      "context.ledger.avail",
-      "context.ledger.positions",
-      "context.ledger.get_position(instrument_id, exchange, Direction)",
       "context.log.info(msg)",
       "context.log.warning(msg)",
       "context.log.error(msg)",
@@ -238,15 +239,16 @@ export default function (CodeMirror) {
       "SubPortfolioInfo",
       "context"
     ]// may the force be with you
-    var tarusPropertyKeywords = [
+    var kungfuPropertyKeywords = [
       "context",
+      "context.hold_book()",
+      "context.hold_positions()",
+      "context.is_book_held()",
+      "context.is_positions_mirrored()",
       "context.add_account(source_id, account_id, cash_limit)",
       "context.suscribe(source_id, instruments_id, exchange_id, is_level2)",
       "context.insert_order(instrument_id, exchange, account, limit_price, volume, PriceType, Side, Offset, HedgeFlag)",
       "context.cancel_order(order_id)",
-      "context.ledger.avail",
-      "context.ledger.positions",
-      "context.ledger.get_position(instrument_id, exchange, Direction)",
       "context.log.info(msg)",
       "context.log.warning(msg)",
       "context.log.error(msg)",
@@ -448,16 +450,16 @@ export default function (CodeMirror) {
       var completionList = [];
       switch(token.type){
         case 'variable': // 任意
-          completionList = getCompletions(token, context, [pythonKeywordsL, taurusKeywords, pythonBuiltinsL, taurusDefKeywords]);
+          completionList = getCompletions(token, context, [pythonKeywordsL, kungfuKeywords, pythonBuiltinsL, kungfuDefKeywords]);
         break;
         case "builtin":
           completionList = getCompletions(token, context, [pythonBuiltinsL])
         break
         case "def":
-          completionList = getCompletions(token, context, [taurusDefKeywords])
+          completionList = getCompletions(token, context, [kungfuDefKeywords])
         break
         case 'property': // “.” 之后
-          completionList = getCompletions(token, context, [tarusPropertyKeywords])
+          completionList = getCompletions(token, context, [kungfuPropertyKeywords])
         break;
       }
 

@@ -34,8 +34,8 @@ import 'codemirror/addon/dialog/dialog.js';
 import 'codemirror/addon/dialog/dialog.css'
 
 
-import pythonHintFunc from '../hint/taurus.python.hint.js';
-import cppHintFunc from '../hint/taurus.cpp.hint.js';
+import pythonHintFunc from '../hint/kungfu.python.hint.js';
+import cppHintFunc from '../hint/kungfu.cpp.hint.js';
 
 const pythonHint = pythonHintFunc(CodeMirror)
 const cppHint = cppHintFunc(CodeMirror)

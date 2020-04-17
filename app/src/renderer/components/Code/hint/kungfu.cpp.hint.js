@@ -9,8 +9,8 @@ export default function (CodeMirror) {
       var cppKeywordsL = cppKeywords.split(" ");
   
   
-      var taurusDefKeywords = []
-      var taurusKeywords = []
+      var kungfuDefKeywords = []
+      var kungfuKeywords = []
     
       function scriptHint(editor, getToken) {
 
@@ -30,16 +30,16 @@ export default function (CodeMirror) {
 
         switch(token.type){
           case 'variable': // 任意
-            completionList = getCompletions(token, context, [cppKeywordsL, taurusKeywords, taurusDefKeywords]);
+            completionList = getCompletions(token, context, [cppKeywordsL, kungfuKeywords, kungfuDefKeywords]);
           break;
           case "builtin":
             completionList = getCompletions(token, context, [cppKeywordsL])
           break
           case "def":
-            completionList = getCompletions(token, context, [taurusDefKeywords])
+            completionList = getCompletions(token, context, [kungfuDefKeywords])
           break
           case 'property': // “.” 之后
-            // completionList = getCompletions(token, context, [tarusPropertyKeywords])
+            // completionList = getCompletions(token, context, [kungfuPropertyKeywords])
           break;
         }
   
