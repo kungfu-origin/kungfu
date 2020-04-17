@@ -64,6 +64,7 @@
       "**/kungfu-core/build/*/node_windows_kill.node",
       "**/kungfu-core/build/*/kungfubuildinfo.json",
       "**/kungfu-core/node/*",
+      "**/kungfu-core/node/**/*",
       "**/kungfu-core/package.json"
     ],
     "extraResources": [
