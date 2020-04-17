@@ -37,10 +37,10 @@ void Bookkeeper::set_accounting_method(InstrumentType instrument_type, const Acc
 }
 
 void Bookkeeper::on_trading_day(int64_t daytime) {
-  auto trading_day = time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT).c_str();
+  auto trading_day = time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
   for (auto &book_pair : books_) {
     auto &book = book_pair.second;
-    strcpy(book->asset.trading_day, trading_day);
+    strcpy(book->asset.trading_day, trading_day.c_str());
     for (auto &pos_pair : book->long_positions) {
       pos_pair.second.trading_day = book->asset.trading_day;
     }
