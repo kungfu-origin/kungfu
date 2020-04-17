@@ -32,7 +32,7 @@ void Trader::clean_orders() {
   auto master_cmd_writer = get_writer(get_master_commands_uid());
   for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
     auto &order_state = pair.second;
-    auto &order = const_cast<Order&>(order_state.data);
+    auto &order = const_cast<Order &>(order_state.data);
     auto strategy_uid = order_state.dest;
     if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending) {
       if (strategy_uid == location::PUBLIC) {

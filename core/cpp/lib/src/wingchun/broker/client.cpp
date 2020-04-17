@@ -54,13 +54,11 @@ bool Client::is_ready(uint32_t broker_location_uid) const {
   return false;
 }
 
-bool Client::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                           const std::string &instrument_id) const {
+bool Client::is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const {
   return instrument_keys_.find(hash_instrument(exchange_id.c_str(), instrument_id.c_str())) != instrument_keys_.end();
 }
 
-void Client::subscribe(const location_ptr &md_location, const std::string &exchange_id,
-                       const std::string &instrument_id) {
+void Client::subscribe(const std::string &exchange_id, const std::string &instrument_id) {
   uint32_t key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
   if (instrument_keys_.find(key) != instrument_keys_.end()) {
     return;
@@ -71,29 +69,35 @@ void Client::subscribe(const location_ptr &md_location, const std::string &excha
   strcpy(instrument_key.exchange_id, exchange_id.c_str());
   instrument_key.instrument_type = get_instrument_type(exchange_id, instrument_id);
   instrument_keys_.emplace(key, instrument_key);
-  instrument_md_locations_.emplace(key, md_location);
 }
 
-void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
-  events | is(Register::tag) | $$(connect(event, event->data<Register>()));
-  events | is(BrokerStateUpdate::tag) | $$(update_broker_state(event, event->data<BrokerStateUpdate>()));
-  events | is(Deregister::tag) | $$(update_broker_state(event, event->data<Deregister>()));
+void Client::subscribe(const location_ptr &md_location, const std::string &exchange_id,
+                       const std::string &instrument_id) {
+  subscribe(exchange_id, instrument_id);
+  exchange_md_locations_.emplace(exchange_id, md_location);
+  instrument_md_locations_.emplace(hash_instrument(exchange_id.c_str(), instrument_id.c_str()), md_location);
 }
 
-void Client::try_subscribe(int64_t trigger_time, const location_ptr &md_location) {
-  if (ready_md_locations_.find(md_location->uid) == ready_md_locations_.end()) {
-    return;
-  }
-  subscribe_instruments(trigger_time, md_location);
-}
-
-void Client::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
+void Client::renew(int64_t trigger_time, const location_ptr &md_location) {
   auto writer = app_.get_writer(md_location->uid);
   for (const auto &pair : instrument_keys_) {
     if (md_location->uid == instrument_md_locations_.at(pair.second.key)->uid) {
       writer->write(trigger_time, pair.second);
     }
   }
+}
+
+void Client::try_renew(int64_t trigger_time, const location_ptr &md_location) {
+  if (ready_md_locations_.find(md_location->uid) == ready_md_locations_.end()) {
+    return;
+  }
+  renew(trigger_time, md_location);
+}
+
+void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
+  events | is(Register::tag) | $$(connect(event, event->data<Register>()));
+  events | is(BrokerStateUpdate::tag) | $$(update_broker_state(event, event->data<BrokerStateUpdate>()));
+  events | is(Deregister::tag) | $$(update_broker_state(event, event->data<Deregister>()));
 }
 
 void Client::connect(const event_ptr &event, const Register &register_data) {
@@ -140,9 +144,8 @@ void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate
   };
 
   if (broker_location->category == category::MD) {
-    switch_broker_state(category::MD, ready_md_locations_, [this, event, broker_location]() {
-      subscribe_instruments(event->gen_time(), broker_location);
-    });
+    switch_broker_state(category::MD, ready_md_locations_,
+                        [this, event, broker_location]() { renew(event->gen_time(), broker_location); });
   }
   if (broker_location->category == category::TD) {
     switch_broker_state(category::TD, ready_td_locations_, [&]() {});
@@ -163,6 +166,8 @@ AutoClient::AutoClient(apprentice &app) : Client(app) {}
 
 const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy_; }
 
+bool AutoClient::is_fully_subscribed(uint32_t md_location_uid) const { return false; }
+
 bool AutoClient::should_connect_md(const location_ptr &md_location) const { return true; }
 
 bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
@@ -171,8 +176,7 @@ bool AutoClient::should_connect_strategy(const location_ptr &td_location) const 
 
 SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
 
-bool SilentAutoClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                     const std::string &instrument_id) const {
+bool SilentAutoClient::is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const {
   return true;
 }
 
@@ -180,21 +184,16 @@ ManualClient::ManualClient(apprentice &app) : Client(app) {}
 
 const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }
 
-bool ManualClient::is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                 const std::string &instrument_id) const {
-  return is_all_subscribed(md_location_uid) or Client::is_subscribed(md_location_uid, exchange_id, instrument_id);
+bool ManualClient::is_fully_subscribed(uint32_t md_location_uid) const {
+  return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
 }
 
 void ManualClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                              const std::string &instrument_id) {
-  if (not is_all_subscribed(md_location->uid)) {
+  if (not is_fully_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
   }
   Client::subscribe(md_location, exchange_id, instrument_id);
-}
-
-bool ManualClient::is_all_subscribed(uint32_t md_location_uid) const {
-  return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
 }
 
 void ManualClient::subscribe_all(const location_ptr &md_location) {
@@ -215,11 +214,11 @@ bool ManualClient::should_connect_td(const location_ptr &td_location) const {
 
 bool ManualClient::should_connect_strategy(const location_ptr &td_location) const { return false; }
 
-void ManualClient::subscribe_instruments(int64_t trigger_time, const location_ptr &md_location) {
-  if (is_all_subscribed(md_location->uid)) {
+void ManualClient::renew(int64_t trigger_time, const location_ptr &md_location) {
+  if (is_fully_subscribed(md_location->uid)) {
     app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
   } else {
-    Client::subscribe_instruments(trigger_time, md_location);
+    Client::renew(trigger_time, md_location);
   }
 }
 } // namespace kungfu::wingchun::broker

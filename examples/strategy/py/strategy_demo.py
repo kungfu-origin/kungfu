@@ -15,7 +15,7 @@ def test_time_interval(context, event):
 
 def pre_start(context):
     # context.hold_book()
-    # context.hold_positions()
+    context.hold_positions()
     context.log.info(f"is_book_held: {context.is_book_held()}, is_positions_mirrored: {context.is_positions_mirrored()}")
     context.log.info("pre start")
     context.add_account(source, "15014990", 100000000.0)

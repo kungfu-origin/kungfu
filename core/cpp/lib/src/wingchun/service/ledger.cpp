@@ -71,7 +71,7 @@ void Ledger::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
   };
   subscribe_positions(book->long_positions);
   subscribe_positions(book->short_positions);
-  broker_client_.try_subscribe(trigger_time, md_location);
+  broker_client_.try_renew(trigger_time, md_location);
   book->update(trigger_time);
 }
 

@@ -171,7 +171,7 @@ private:
 
   uint32_t lookup_account_location_id(const std::string &account) const;
 
-  const yijinjing::data::location_ptr &find_marketdata(const std::string &source);
+  const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
   friend void enable(Context &context) { context.on_start(); }
 };

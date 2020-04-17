@@ -58,13 +58,13 @@ void Context::add_account(const std::string &source, const std::string &account,
 
 void Context::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
                         const std::string &exchange_ids) {
-  auto md_location = find_marketdata(source);
+  auto md_location = find_md_location(source);
   for (const auto &instrument_id : instrument_ids) {
     broker_client_.subscribe(md_location, exchange_ids, instrument_id);
   }
 }
 
-void Context::subscribe_all(const std::string &source) { broker_client_.subscribe_all(find_marketdata(source)); }
+void Context::subscribe_all(const std::string &source) { broker_client_.subscribe_all(find_md_location(source)); }
 
 uint64_t Context::insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                const std::string &account, double limit_price, int64_t volume, PriceType type,
@@ -146,7 +146,7 @@ uint32_t Context::lookup_account_location_id(const std::string &account) const {
   return account_location_ids_.at(hash_str_32(account));
 }
 
-const location_ptr &Context::find_marketdata(const std::string &source) {
+const location_ptr &Context::find_md_location(const std::string &source) {
   if (market_data_.find(source) == market_data_.end()) {
     auto home = app_.get_home();
     auto md_location = source == "bar"

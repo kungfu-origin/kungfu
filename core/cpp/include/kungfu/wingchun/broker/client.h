@@ -46,27 +46,34 @@ struct IntradayResumePolicy : public ResumePolicy {
 class Client {
   typedef std::unordered_map<uint32_t, longfist::types::InstrumentKey> InstrumentKeyMap;
   typedef std::unordered_map<uint32_t, longfist::enums::BrokerState> BrokerStateMap;
+  typedef std::unordered_map<std::string, yijinjing::data::location_ptr> ExchangeSourceMap;
+  typedef std::unordered_map<uint32_t, yijinjing::data::location_ptr> InstrumentSourceMap;
 
 public:
   explicit Client(yijinjing::practice::apprentice &app);
 
   virtual ~Client() = default;
 
+  [[nodiscard]] virtual const ResumePolicy &get_resume_policy() const = 0;
+
   [[nodiscard]] const InstrumentKeyMap &get_instrument_keys() const;
 
   [[nodiscard]] virtual bool is_ready(uint32_t broker_location_uid) const;
 
-  [[nodiscard]] virtual const ResumePolicy &get_resume_policy() const = 0;
+  [[nodiscard]] virtual bool is_fully_subscribed(uint32_t md_location_uid) const = 0;
 
-  [[nodiscard]] virtual bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                           const std::string &instrument_id) const;
+  [[nodiscard]] virtual bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const;
+
+  virtual void subscribe(const std::string &exchange_id, const std::string &instrument_id);
 
   virtual void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,
                          const std::string &instrument_id);
 
-  virtual void on_start(const rx::connectable_observable<event_ptr> &events);
+  virtual void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
-  void try_subscribe(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+  void try_renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+
+  virtual void on_start(const rx::connectable_observable<event_ptr> &events);
 
 protected:
   yijinjing::practice::apprentice &app_;
@@ -77,14 +84,13 @@ protected:
 
   [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
 
-  virtual void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
-
 private:
   BrokerStateMap broker_states_ = {};
   InstrumentKeyMap instrument_keys_ = {};
+  ExchangeSourceMap exchange_md_locations_ = {};
+  InstrumentSourceMap instrument_md_locations_ = {};
   yijinjing::data::location_map ready_md_locations_ = {};
   yijinjing::data::location_map ready_td_locations_ = {};
-  yijinjing::data::location_map instrument_md_locations_ = {};
 
   void connect(const event_ptr &event, const longfist::types::Register &register_data);
 
@@ -103,6 +109,8 @@ public:
   explicit AutoClient(yijinjing::practice::apprentice &app);
 
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
+
+  [[nodiscard]] bool is_fully_subscribed(uint32_t md_location_uid) const override;
 
 protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
@@ -124,8 +132,7 @@ class SilentAutoClient : public AutoClient {
 public:
   explicit SilentAutoClient(yijinjing::practice::apprentice &app);
 
-  [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                   const std::string &instrument_id) const override;
+  [[nodiscard]] bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const override;
 };
 
 /**
@@ -139,13 +146,10 @@ public:
 
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
-  [[nodiscard]] bool is_subscribed(uint32_t md_location_uid, const std::string &exchange_id,
-                                   const std::string &instrument_id) const override;
+  [[nodiscard]] bool is_fully_subscribed(uint32_t md_location_uid) const override;
 
   void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,
                  const std::string &instrument_id) override;
-
-  [[nodiscard]] bool is_all_subscribed(uint32_t md_location_uid) const;
 
   void subscribe_all(const yijinjing::data::location_ptr &md_location);
 
@@ -158,7 +162,7 @@ protected:
 
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
-  void subscribe_instruments(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
+  void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 
 private:
   IntradayResumePolicy resume_policy_ = {};
@@ -169,9 +173,12 @@ private:
 template <typename DataType>
 static constexpr auto is_own = [](const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
-    const DataType &data = event->data<DataType>();
-    return event->msg_type() == DataType::tag and
-           broker_client.is_subscribed(event->source(), data.exchange_id, data.instrument_id);
+    if (event->msg_type() == DataType::tag) {
+      const DataType &data = event->data<DataType>();
+      return broker_client.is_fully_subscribed(event->source()) or
+             broker_client.is_subscribed(data.exchange_id, data.instrument_id);
+    }
+    return false;
   });
 };
 } // namespace kungfu::wingchun::broker

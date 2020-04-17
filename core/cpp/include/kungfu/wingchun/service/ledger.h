@@ -62,8 +62,7 @@ private:
     write_book(trigger_time, strategy_uid, data);
   }
 
-  template <typename TradingData>
-  void write_book(int64_t trigger_time, uint32_t book_uid, const TradingData &data) {
+  template <typename TradingData> void write_book(int64_t trigger_time, uint32_t book_uid, const TradingData &data) {
     if (not bookkeeper_.has_book(book_uid) or not has_writer(book_uid)) {
       return;
     }
