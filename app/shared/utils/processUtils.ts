@@ -267,7 +267,9 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
                 logger.error('[TC startProcess]', JSON.stringify(options), err)
                 reject(err)
             }
-        }).catch(err => reject(err))
+        }).catch(err => {
+            reject(err)
+        })
     })
 }
 
@@ -321,14 +323,13 @@ export const startTd = (accountId: string): Promise<void> => {
 }
 
 //启动strategy
-export const startStrategy = (strategyId: string, strategyPath: string): Promise<void> => {
+export const startStrategy = (strategyId: string, strategyPath: string): Promise<any> => {
     strategyPath = dealSpaceInPath(strategyPath)
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
 
     if (ifLocalPython) {
         return startStrategyProcess(strategyId, strategyPath)
-            .catch(err => logger.error('[startStrategy local]', err))
     } else {
         return startProcess({
             "name": strategyId,

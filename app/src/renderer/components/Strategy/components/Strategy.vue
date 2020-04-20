@@ -301,7 +301,11 @@ export default {
         handleStrategySwitch(value, strategy){
             const t = this;
             const strategyId = strategy.strategy_id;
-            switchStrategy(strategyId, value).then(({ type, message }) => t.$message[type](message));
+            switchStrategy(strategyId, value)
+                .then(({ type, message }) => t.$message[type](message))
+                .catch((err) => {
+                    console.log(err)
+                })
             t.$store.dispatch('getStrategyList');
         },
 
