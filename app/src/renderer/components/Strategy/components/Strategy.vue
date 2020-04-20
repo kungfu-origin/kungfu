@@ -303,9 +303,7 @@ export default {
             const strategyId = strategy.strategy_id;
             switchStrategy(strategyId, value)
                 .then(({ type, message }) => t.$message[type](message))
-                .catch((err) => {
-                    console.log(err)
-                })
+                .catch((err) => t.$message['error'](err.message || '操作失败！'))
             t.$store.dispatch('getStrategyList');
         },
 

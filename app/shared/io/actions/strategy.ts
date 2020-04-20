@@ -30,6 +30,5 @@ export const switchStrategy = (strategyId: string, value: boolean): Promise<Mess
         if(!strategyPath) return new Promise(resolve => resolve(noStrategyPath))
         return startStrategy(strategyId, strategyPath)// 启动策略
         .then((): MessageData => ({ type: 'start', message: '正在启动...' }))       
-        .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))
     })
 }
