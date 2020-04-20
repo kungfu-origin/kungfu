@@ -13,6 +13,7 @@
                                 moduleType="strategy"
                                 :minPnl="pnl"   
                                 :dayMethod="getStrategyPnlDay"
+                                :addTime="addTime"                
                                 ></Pnl>
                         </el-col>
                     </el-row>

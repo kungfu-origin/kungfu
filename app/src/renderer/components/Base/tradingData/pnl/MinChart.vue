@@ -35,6 +35,11 @@ export default {
         minPnl: {
             type: Array,
             default: () => ([])
+        },
+
+        addTime: {
+            type: Number,
+            default: 0
         }
     },
 
@@ -107,6 +112,7 @@ export default {
             let timeList = [], pnlDataList = [];
 
             minPnlList
+                .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
                 .sort((a, b) => a.update_time - b.update_time)
                 .kfForEach(pnlData => {
                     const updateTime = moment(Number(pnlData.update_time) / 1000000).format('HH:mm');

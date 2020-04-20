@@ -35,6 +35,11 @@ export default {
         dailyPnl: {
             type: Array,
             default: () => ([])
+        },
+
+        addTime: {
+            type: Number,
+            default: 0
         }
     },
 
@@ -105,6 +110,7 @@ export default {
         dealDailyPnlList (dailyPnlList) {
             let timeList = [], pnlDataList = [];
             dailyPnlList
+                .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
                 .sort((a, b) => a.update_time - b.update_time)
                 .kfForEach(pnlData => {
                     const updateTime = moment(Number(pnlData.update_time) / 1000000).format('MMDD');
