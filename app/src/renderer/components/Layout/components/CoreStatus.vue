@@ -17,7 +17,7 @@
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="core-process-item switch"></span>
+                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
                     <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('master.log')" ></i>
                     </span>
@@ -34,8 +34,8 @@
                         :value="buildState('ledger')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="core-process-item switch">
-                        <el-switch :value="$utils.ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
+                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'">
+                        <el-switch  :value="$utils.ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
                     </span>
                      <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('ledger.log')" ></i>
@@ -67,7 +67,8 @@ export default {
         this.nasterErrController = false;
         this.ledgerErrController = false;
         return {
-            statusLevel
+            statusLevel,
+            NODE_ENV: process.env.NODE_ENV
         }
     },
 

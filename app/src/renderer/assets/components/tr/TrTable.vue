@@ -318,13 +318,13 @@ export default {
         color: $blue;
     }
     .tr-table-cell.update{
-        animation: nanoBlink 1.5s 1;
+        animation: nanoBlink 1.1s 1;
     }
     .tr-table-cell.update.number.red{
-        animation: nanoRedBlink 1.5s 1;
+        animation: nanoRedBlink 1.1s 1;
     }
     .tr-table-cell.update.number.green{
-        animation: nanoGreenBlink 1.5s 1;
+        animation: nanoGreenBlink 1.1s 1;
     }
 
 

@@ -6,6 +6,16 @@
             :visible.sync="globalSettingDialogVisiblity"
         >
         </GlobalSettingDialog>
+
+        <el-dialog
+        title="系统提示"
+        :visible.sync="watcherLoading"
+        :show-close="false"
+        :close-on-click-modal="false"
+        width="450px"
+        >
+            <div style="margin: 10px 0 20px">Kungfu 环境准备中...</div>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -21,12 +31,14 @@ import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe } from '__io/kungfu/tradingData';
 import { deleteProcess } from '__gUtils/processUtils';
+import { watcher } from '__io/kungfu/watcher';
 
 export default {
     name: 'app',
     data() {
         this.kungfuGloablDataObserver = null;
         return {
+            watcherLoading: false,
             globalSettingDialogVisiblity: false
         }
     },
@@ -40,6 +52,7 @@ export default {
         this.removeKeyDownEvent();
         //ipc event
         this.bindMainProcessEvent();
+        this.getWatcherStatus();
 
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
@@ -75,13 +88,27 @@ export default {
         }
     },
 
-    methods: {   
+    methods: {
+
         removeLoadingMask () {
             //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
             if(window.location.hash.includes('code')) return 
 
             //remove loading mask
             if(document.getElementById('loading')) document.getElementById('loading').remove();
+        },
+
+        getWatcherStatus () {
+            if(window.location.hash.includes('code')) return;
+
+            let timer = setInterval(() => {
+                const watcherStatus = watcher.isLive();
+                if (!watcherStatus) this.watcherLoading = true;
+                else {
+                    this.watcherLoading = false;
+                    clearInterval(timer)
+                }
+            }, 1000)
         },
 
         subKungfuGlobalData () {
