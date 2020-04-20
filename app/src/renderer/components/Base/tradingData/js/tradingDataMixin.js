@@ -74,8 +74,8 @@ export default {
 
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
-            const from = moment(dateRange[0]).format('YYYYMMDD');
-            const to = moment(dateRange[1]).format('YYYYMMDD');
+            const from = moment(dateRange[0]).format('YYYY-MM-DD');
+            const to = moment(dateRange[1]).format('YYYY-MM-DD');
             
             this.exportLoading = true;
             let timer = setTimeout(() => {
