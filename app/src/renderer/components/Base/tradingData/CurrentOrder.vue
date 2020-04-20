@@ -50,9 +50,8 @@ import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
-import { kungfuCancelOrder } from '__io/kungfu/makeCancelOrder';
+import { kungfuCancelOrder, kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
-// import { nanoCancelAllOrder } from '__io/nano/nanoReq';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
@@ -153,67 +152,66 @@ export default {
 
     watch: {
         kungfuData (orders) {
-            const t = this;
-            const ordersResolve = t.dealOrderList(orders, {
-                searchKeyword: t.searchKeyword,
-                todayFinish: t.todayFinish
+            const ordersResolve = this.dealOrderList(orders, {
+                searchKeyword: this.searchKeyword,
+                todayFinish: this.todayFinish
             });
 
-           t.tableData = ordersResolve
+           this.tableData = ordersResolve
         }
     },
 
     methods: {
         handleCancelOrder (props) {
-            const t = this;
             const kungfuLocation = decodeKungfuLocation(props.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
             const gatewayName = `td_${accountId}`;
-            if(t.processStatus[gatewayName] !== 'online') {
-                t.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
+            if(this.processStatus[gatewayName] !== 'online') {
+                this.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
                 return;
             }
             //撤单   
-            if (t.moduleType === 'strategy') {
-                kungfuCancelOrder( props.orderId, accountId, t.currentId)
-                    .then(() => t.$message.success('撤单指令已发送！'))
-                    .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
-            } else if (t.moduleType === 'account') {
+            if (this.moduleType === 'strategy') {
+                kungfuCancelOrder( props.orderId, accountId, this.currentId)
+                    .then(() => this.$message.success('撤单指令已发送！'))
+                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
+            } else if (this.moduleType === 'account') {
                 kungfuCancelOrder( props.orderId, accountId)
-                    .then(() => t.$message.success('撤单指令已发送！'))
-                    .catch(err => t.$message.error(err.message || '撤单指令发送失败！'))
+                    .then(() => this.$message.success('撤单指令已发送！'))
+                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
             }
-           
         },
 
         handleCancelAllOrders () {
-            const t = this;
 
             //先判断对应进程是否启动
-            if (!t.gatewayName.toAccountId()) {
-                return;
+            if (this.moduleType === 'account') {
+                if(this.processStatus[this.gatewayName] !== 'online'){
+                    this.$message.warning(`需要先启动 ${this.gatewayName.toAccountId()} 交易进程！`)
+                    return;
+                }
             }
 
-            if((t.moduleType === 'account') && (t.processStatus[t.gatewayName] !== 'online')){
-                t.$message.warning(`需要先启动 ${t.gatewayName.toAccountId()} 交易进程！`)
-                return;
-            }
-
-            t.$confirm(`确认全部撤单？`, '提示', {
+            this.$confirm(`确认全部撤单？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => t.$message.info('正在发送撤单指令...'))
-            // .then(() => nanoCancelAllOrder({
-            //     targetId: t.moduleType === 'account' ? t.gatewayName : t.currentId,
-            //     cancelType: t.moduleType,
-            //     id: t.currentId
-            // }))
-            .then(() => t.$message.success('撤单指令已发送！'))
-            .catch((err) => {
-                if(err == 'cancel') return
-                t.$message.error(err.message || '操作失败！')
+            .then(() => {
+                
+                const orderDataList = this.tableData
+                    .filter(item => {
+                            return aliveOrderStatusList.includes(+item.status)
+                    })
+
+                if (this.moduleType === 'strategy') {
+                    return kungfuCancelAllOrders(orderDataList, this.currentId)
+                } else {
+                    return kungfuCancelAllOrders(orderDataList)
+                }
+
             })
+            .then(() => this.$message.success('撤单指令已发送！'))
+            .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
         },
 
         //查看当日已完成
@@ -227,16 +225,14 @@ export default {
 
         //对返回的数据进行处理
         dealOrderList (orders, { searchKeyword, todayFinish }) {
-            const t = this
             let orderDataByKey = {};
-
             let ordersAfterFilter = orders
-            .filter(item => {
-                if (searchKeyword.trim() === '') return true;
-                const { order_id, client_id, source_id, account_id, instrument_id } = item
-                const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
-                return strings.includes(searchKeyword) 
-            });
+                .filter(item => {
+                    if (searchKeyword.trim() === '') return true;
+                    const { order_id, client_id, source_id, account_id, instrument_id } = item
+                    const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
+                    return strings.includes(searchKeyword) 
+                });
             
             if (!todayFinish) {
                 ordersAfterFilter = ordersAfterFilter
@@ -245,8 +241,8 @@ export default {
                     })
             }
 
-            if (t.moduleType === 'strategy') {
-                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+            if (this.moduleType === 'strategy') {
+                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= this.addTime )
             }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
@@ -254,8 +250,8 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = dealOrder(item);
                 orderData.update = true;
-                orderData.systemLatency = (t.orderStat[orderData.orderId] || {}).systemLatency || '';
-                orderData.networkLatency = (t.orderStat[orderData.orderId] || {}).networkLatency || '';
+                orderData.systemLatency = (this.orderStat[orderData.orderId] || {}).systemLatency || '';
+                orderData.networkLatency = (this.orderStat[orderData.orderId] || {}).networkLatency || '';
                 orderDataByKey[orderData.id] = orderData;
             })
 
