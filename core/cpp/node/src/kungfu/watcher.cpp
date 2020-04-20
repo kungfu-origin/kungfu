@@ -41,6 +41,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
       update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
+  log::copy_log_settings(get_home(), get_home()->name);
+
   serialize::InitStateMap(info, state_ref_, "state");
   serialize::InitStateMap(info, ledger_ref_, "ledger");
 
