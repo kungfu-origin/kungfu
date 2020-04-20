@@ -1,15 +1,6 @@
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { dealOrder, dealTrade, dealPos, dealAsset } from '__io/kungfu/watcher';
-
 import { map } from 'rxjs/operators';
-
-
-// orders: transformOrderTradeListToData(orders, type),
-// trades: transformOrderTradeListToData(trades, type),
-// positions: transformTradingItemListToData(positions, type),
-// assets: transformAssetItemListToData(assets, type),
-// pnl: transformTradingItemListToData(pnl, type),
-// orderStat: transformOrderStatListToData(orderStat)
 
 
 export const tradingDataObservale = (type: string, processId: string) => {
@@ -26,7 +17,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
             const positions = data.positions[processId] || [];
             const positionsResolve = dealPosFromWatcher(positions);
 
-            const assetsResolve = dealAsset(data.assets[processId] || []);
+            const assetsResolve = data.assets[processId] || [];
 
             return {
                 orders: ordersResolve,

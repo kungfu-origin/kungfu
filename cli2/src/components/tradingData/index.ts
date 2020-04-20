@@ -7,6 +7,8 @@ import MessageBox from '@/assets/components/MessageBox';
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
+import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
+import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 
 const blessed = require('blessed');
 
@@ -21,6 +23,7 @@ class TradingDataDashboard extends Dashboard {
 		processList: ProcessListItem[];
 	};
 	boards: any;
+	orders: OrderData[];
 
 	constructor(targetId: string, type: string){
 		super()
@@ -32,6 +35,7 @@ class TradingDataDashboard extends Dashboard {
 		};
 
 		this.boards = {};
+		this.orders = [];
 		this.init()
 
 	}
@@ -206,18 +210,21 @@ class TradingDataDashboard extends Dashboard {
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
-			// nanoCancelAllOrder({
-			// 	cancelType: t.type, 
-			// 	id: t.targetId
-			// })
-			// .then(() => t.boards.message.log('Is cancelling orders, please wait...'))
-			// .catch((err: Error) => {
-			// 	t.boards.message.log(err.message)
-			// })
+
+			const aliveOrders = this.orders.filter(item => aliveOrderStatusList.includes(+item.status))
+
+			if (this.type === 'account') {
+				kungfuCancelAllOrders(aliveOrders)
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+			} else if (this.type === 'strategy') {
+				kungfuCancelAllOrders(aliveOrders, this.targetId)
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+			}
 		})
 	}
 
 	freshAssets (assets: AssetData) {
+
 		if (this.type === 'account') {
 			delete assets.clientId
 		} else if (this.type === 'strategy') {
@@ -236,7 +243,7 @@ class TradingDataDashboard extends Dashboard {
 				}
 				return parseToString(
 					[key, val],
-					[16, 16]
+					[14, 14]
 				)
 			})
 	}
@@ -245,6 +252,7 @@ class TradingDataDashboard extends Dashboard {
 		tradingDataObservale(this.type, this.targetId).subscribe((tradingData: any) => {
 
 			const orders = tradingData.orders;
+			this.orders = orders;
 			this.boards.orderTable.setItems(orders);
 
 			const trades = tradingData.trades;

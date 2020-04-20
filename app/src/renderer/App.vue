@@ -108,7 +108,7 @@ export default {
                     this.watcherLoading = false;
                     clearInterval(timer)
                 }
-            }, 1000)
+            }, 500)
         },
 
         subKungfuGlobalData () {
