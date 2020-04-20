@@ -255,8 +255,9 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
-                pm2.start(options, (err: Error, apps: object): void => {
+                pm2.start(options, (err: any, apps: object): void => {
                     if (err) {
+                        err = err.length ? err[0] : err;
                         logger.error('[startProcess]', JSON.stringify(options), err)
                         reject(err);
                         return;
