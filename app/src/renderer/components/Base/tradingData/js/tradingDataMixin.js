@@ -36,8 +36,12 @@ export default {
                 id: '', //对id、代码id、策略id模糊查询
                 dateRange: null 
             },
+            
             dateRangeDialogVisiblity: false,
-            tableData: Object.freeze([])
+            exportLoading: false,
+            
+            tableData: Object.freeze([]),
+
         }
     },
 
@@ -70,36 +74,42 @@ export default {
 
         //选择日期以及保存
         handleConfirmDateRange(dateRange){
-            const from = moment(dateRange[0]).format('YYYYMMDD')
-            const to = moment(dateRange[1]).format('YYYYMMDD')
+            const from = moment(dateRange[0]).format('YYYYMMDD');
+            const to = moment(dateRange[1]).format('YYYYMMDD');
             
-            this.$nextTick()
-                .then(() => {
-                    const kungfuData = history.selectPeriod(from, to)
-                    const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
-                    const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
-                    const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'
+            this.exportLoading = true;
+            let timer = setTimeout(() => {
+                const kungfuData = history.selectPeriod(from, to)
+                const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
+                const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
+                const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'
 
-                    const targetListAfterFilter = targetList.filter(item => {
-                        const locationKey = item[kungfuIdKey];
-                        const kungfuLocation = decodeKungfuLocation(locationKey);
+                const targetListAfterFilter = targetList.filter(item => {
+                    const locationKey = item[kungfuIdKey];
+                    const kungfuLocation = decodeKungfuLocation(locationKey);
 
-                        if (this.moduleType === 'account') {
-                            return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
-                        } else if (this.moduleType === 'strategy') {
-                            return kungfuLocation.name === this.currentId
-                        }
-                        
-                        return false                
-                    })
-
-                    this.$saveFile({
-                        title: exportTitle,
-                    }).then(filename => {
-                        if(!filename) return;
-                        writeCSV(filename, targetListAfterFilter)
-                    })
+                    if (this.moduleType === 'account') {
+                        return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
+                    } else if (this.moduleType === 'strategy') {
+                        return kungfuLocation.name === this.currentId
+                    }
+                    
+                    return false                
                 })
+                
+                this.exportLoading = false;
+                this.dateRangeDialogVisiblity = false;
+
+                this.$saveFile({
+                    title: exportTitle,
+                }).then(filename => {
+                    if(!filename) return;
+                    writeCSV(filename, targetListAfterFilter)
+                })
+
+                clearTimeout(timer)
+            }, 100)
+
         },
 
         resetData() {

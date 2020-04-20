@@ -28,7 +28,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="handleClose" size="mini">取 消</el-button>
-            <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
+            <el-button :loading="loading" type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
         </div>
     </el-dialog>
 
@@ -41,6 +41,8 @@ export default {
             type: Boolean,
             default: false
         },
+
+        loading: Boolean
     },
 
     data(){
@@ -53,24 +55,20 @@ export default {
 
     methods: {
         handleClose(){
-            const t = this;
-            t.clearData();
+            this.clearData();
         },
 
         handleSubmitSetting(){
-            const t = this;
-            t.$refs['date-range-form'].validate(valid => {
+            this.$refs['date-range-form'].validate(valid => {
                 if(valid) {
-                    t.$emit('confirm', t.form.dateRange);
-                    t.clearData();
+                    this.$emit('confirm', this.form.dateRange);
                 }
             })
         },
         
         clearData(){
-            const t = this;
-            t.$emit('update:visible', false)
-            t.form.dateRange = [];
+            this.$emit('update:visible', false)
+            this.form.dateRange = [];
         },
     }
 }

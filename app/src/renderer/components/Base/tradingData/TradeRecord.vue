@@ -19,7 +19,8 @@
     ></tr-table>
     <date-range-dialog 
     @confirm="handleConfirmDateRange"
-    :visible.sync="dateRangeDialogVisiblity"    
+    :visible.sync="dateRangeDialogVisiblity"   
+    :loading="exportLoading" 
     ></date-range-dialog>
 </tr-dashboard>
 
