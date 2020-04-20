@@ -21,6 +21,7 @@
 #define KUNGFU_DATETIME_FORMAT "%F %T"
 #define KUNGFU_TIMESTAMP_FORMAT "%F %T.%N"
 #define KUNGFU_TRADING_DAY_FORMAT "%Y%m%d"
+#define KUNGFU_HISTORY_DAY_FORMAT "%Y-%m-%d"
 
 namespace kungfu::yijinjing {
 struct time_unit {
