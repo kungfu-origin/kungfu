@@ -159,21 +159,20 @@ export function decodeKungfuLocation(sourceOrDest: string): KungfuLocation {
 // ========================== 交易数据处理 start ===========================
 
 function resolveClientId(dest: string): string {
-    const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest)
-    if (!kungfuLocation) return ''
-
-    const group = kungfuLocation.group === 'node' ? '[手动]' : '';
-    const name = kungfuLocation.name === 'watcher_renderer' ? '' : kungfuLocation.name
-
-    return [group, name].join(' ')
+    const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest);
+    if (!kungfuLocation) return '';
+    if (kungfuLocation.group === 'node') return '手动'
+    const name = kungfuLocation.name;
+    return name
 }
 
 
 function resolveAccountId(source: string, dest: string): string {
     const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
     const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
+    
     const name = kungfuLocationSource.group + '_' + kungfuLocationSource.name;
-    const group = kungfuLocationDest.group === 'node' ? '[手动]' : '';
+    const group = kungfuLocationDest.group === 'node' ? '手动' : '';
     return [group, name].join(' ')
 }
 
