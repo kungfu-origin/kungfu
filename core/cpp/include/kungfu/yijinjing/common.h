@@ -89,10 +89,9 @@ public:
 
   [[nodiscard]] virtual std::vector<uint32_t> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
 
-  [[nodiscard]] virtual std::vector<location_ptr> list_locations(const std::string &category = "*",
-                                                                 const std::string &group = "*",
-                                                                 const std::string &name = "*",
-                                                                 const std::string &mode = "*") const = 0;
+  [[nodiscard]] virtual std::vector<location_ptr> list_locations(const std::string &category, const std::string &group,
+                                                                 const std::string &name,
+                                                                 const std::string &mode) const = 0;
 
   [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(location_ptr location) const = 0;
 };
@@ -163,8 +162,8 @@ using namespace rxcpp::util;
 
 static constexpr auto noop_event_handler = []() { return [](const event_ptr &event) {}; };
 
-static constexpr auto error_handler_log = [](const std::string subscriber_name) {
-  return [=](std::exception_ptr e) {
+static constexpr auto error_handler_log = [](const std::string &subscriber_name) {
+  return [=](const std::exception_ptr &e) {
     try {
       std::rethrow_exception(e);
     } catch (const std::exception &ex) {
@@ -173,7 +172,7 @@ static constexpr auto error_handler_log = [](const std::string subscriber_name) 
   };
 };
 
-static constexpr auto complete_handler_log = [](const std::string subscriber_name) {
+[[maybe_unused]] static constexpr auto complete_handler_log = [](const std::string &subscriber_name) {
   return [=]() { SPDLOG_DEBUG("subscriber {} completed", subscriber_name); };
 };
 
@@ -189,22 +188,22 @@ static constexpr auto event_filter_any = [](auto member) {
     auto args = boost::hana::make_tuple(arg...);
     return filter([=](const event_ptr &event) {
       auto check = [&](auto a) { return ((*event).*member)() == a; };
-      return boost::hana::fold(boost::hana::transform(args, check), std::logical_or<bool>());
+      return boost::hana::fold(boost::hana::transform(args, check), std::logical_or<>());
     });
   };
 };
 
 template <typename... Ts> constexpr decltype(auto) is(Ts... arg) {
   return event_filter_any<Ts...>(&event::msg_type)(arg...);
-};
+}
 
 template <typename... Ts> constexpr decltype(auto) from(Ts... arg) {
   return event_filter_any<Ts...>(&event::source)(arg...);
-};
+}
 
 template <typename... Ts> constexpr decltype(auto) to(Ts... arg) {
   return event_filter_any<Ts...>(&event::dest)(arg...);
-};
+}
 
 static constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
   try {

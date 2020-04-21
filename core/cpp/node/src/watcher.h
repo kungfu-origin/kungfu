@@ -52,6 +52,8 @@ public:
 
   Napi::Value Step(const Napi::CallbackInfo &info);
 
+  Napi::Value RequestStop(const Napi::CallbackInfo &info);
+
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);

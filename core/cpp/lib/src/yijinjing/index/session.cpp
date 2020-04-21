@@ -95,7 +95,7 @@ void session_builder::rebuild_index_db() {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   auto locator = io_device_->get_locator();
   auto reader = io_device_->open_reader_to_subscribe();
-  for (const auto &location : locator->list_locations()) {
+  for (const auto &location : locator->list_locations("*", "*", "*", "*")) {
     SPDLOG_TRACE("investigating journal for [{:08x}] {}", location->uid, location->uname);
     locations.emplace(location->uid, location);
     for (const auto dest_uid : locator->list_location_dest(location)) {

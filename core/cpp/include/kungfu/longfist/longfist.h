@@ -17,6 +17,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Time),                             //
     TYPE_PAIR(Ping),                             //
     TYPE_PAIR(Pong),                             //
+    TYPE_PAIR(RequestStop),                      //
     TYPE_PAIR(RequestStart),                     //
     TYPE_PAIR(SubscribeAll),                     //
     TYPE_PAIR(NewOrderSingle),                   //

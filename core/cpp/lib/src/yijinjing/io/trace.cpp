@@ -70,7 +70,7 @@ io_device_console::io_device_console(data::location_ptr home, int32_t console_wi
 
 void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, bool out) {
   std::unordered_map<uint32_t, location_ptr> locations = {};
-  for (auto location : home_->locator->list_locations()) {
+  for (auto location : home_->locator->list_locations("*", "*", "*", "*")) {
     locations.emplace(location->uid, location);
   }
 

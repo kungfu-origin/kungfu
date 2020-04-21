@@ -29,16 +29,7 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 
 ############################################################
 
-AUX_SOURCE_DIRECTORY(src/kungfu SOURCE_FILES_KUNGFU)
+AUX_SOURCE_DIRECTORY(src SOURCE_FILES_KUNGFU)
 ADD_LIBRARY(node_kungfu SHARED ${SOURCE_FILES_KUNGFU} ${CMAKE_JS_SRC})
 SET_TARGET_PROPERTIES(node_kungfu PROPERTIES PREFIX "" SUFFIX ".node")
 TARGET_LINK_LIBRARIES(node_kungfu kungfu ${CMAKE_JS_LIB})
-
-############################################################
-
-if(WIN32)
-    AUX_SOURCE_DIRECTORY(src/windows-kill SOURCE_FILES_WINDOWS_KILL)
-    ADD_LIBRARY(node_windows_kill SHARED ${SOURCE_FILES_WINDOWS_KILL} ${CMAKE_JS_SRC})
-    SET_TARGET_PROPERTIES(node_windows_kill PROPERTIES PREFIX "" SUFFIX ".node")
-    TARGET_LINK_LIBRARIES(node_windows_kill Dbghelp ${CMAKE_JS_LIB})
-endif()

@@ -1,2 +1,1 @@
-const kungfu = require('./kungfu.js');
-exports.kungfu = kungfu;
+exports.kungfu = require('./kungfu.js');

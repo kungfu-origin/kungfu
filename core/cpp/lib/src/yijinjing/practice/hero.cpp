@@ -39,32 +39,8 @@ bool hero::is_usable() { return io_device_->is_usable(); }
 
 void hero::setup() {
   io_device_->setup();
-
   events_ = observable<>::create<event_ptr>([this](auto &s) { delegate_produce(this, s); }) | holdon();
-
-  events_ | on_error_resume_next([&](const std::exception_ptr &e) -> observable<event_ptr> {
-    SPDLOG_ERROR("on error resume next");
-    try {
-      std::rethrow_exception(e);
-    } catch (const nn_exception &ex) {
-      switch (ex.num()) {
-      case EINTR:
-      case EAGAIN:
-      case ETIMEDOUT: {
-        SPDLOG_INFO("kungfu app quit because {}", ex.what());
-        return observable<>::empty<event_ptr>();
-      }
-      default: {
-        SPDLOG_ERROR("Unexpected nanomsg error: {}", ex.what());
-        return observable<>::error<event_ptr>(ex);
-      }
-      }
-    } catch (const std::exception &ex) {
-      SPDLOG_ERROR("Unexpected exception: {}", ex.what());
-      return observable<>::error<event_ptr>(ex);
-    }
-  });
-
+  events_ | is(RequestStop::tag) | $$(live_ = false);
   react();
   live_ = true;
 }

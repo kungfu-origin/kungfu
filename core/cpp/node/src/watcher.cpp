@@ -120,6 +120,11 @@ Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
   }
 }
 
+Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
+  auto app_location = ExtractLocation(info, 0, get_locator());
+  get_writer(app_location->uid)->mark(now(), RequestStop::tag);
+}
+
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
   if (not location) {
@@ -168,6 +173,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
                                         InstanceMethod("setup", &Watcher::Setup),                                 //
                                         InstanceMethod("step", &Watcher::Step),                                   //
+                                        InstanceMethod("requestStop", &Watcher::RequestStop),                                   //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
