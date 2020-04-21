@@ -1,5 +1,5 @@
 import os, shutil
-import extensions
+import kungfu_extensions
 import click
 from kungfu.command.ext import ext as kfext, pass_ctx_from_parent
 

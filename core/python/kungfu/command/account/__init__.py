@@ -1,7 +1,7 @@
 from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, ACCOUNT_SCHEMA
+from kungfu_extensions import EXTENSION_REGISTRY_MD, EXTENSION_REGISTRY_TD, ACCOUNT_SCHEMA
 
 
 @kfc.group(help_priority=2)

@@ -1,7 +1,7 @@
 import re
 import os, shutil
 import tarfile
-import extensions
+import kungfu_extensions
 import click
 from kungfu.command.ext import ext as kfext, pass_ctx_from_parent
 from runpy import run_path

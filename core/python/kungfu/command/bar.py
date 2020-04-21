@@ -2,7 +2,7 @@ from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as pywingchun
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from extensions import EXTENSION_REGISTRY_MD
+from kungfu_extensions import EXTENSION_REGISTRY_MD
 import json
 
 @kfc.command(help_priority=7)

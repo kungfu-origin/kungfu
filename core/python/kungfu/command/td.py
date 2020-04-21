@@ -2,7 +2,7 @@ from pykungfu import longfist
 from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from extensions import EXTENSION_REGISTRY_TD
+from kungfu_extensions import EXTENSION_REGISTRY_TD
 
 
 @kfc.command(help_priority=3)

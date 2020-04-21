@@ -205,6 +205,7 @@ class KungfuCoreConan(ConanFile):
         tools.rmdir(python_build_dir)
         shutil.copytree(build_type, python_build_dir, ignore=shutil.ignore_patterns('node*'))
         shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu'), os.path.join(python_build_dir, 'kungfu'))
+        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu_extensions'), os.path.join(python_build_dir, 'kungfu_extensions'))
         shutil.copy2(os.path.join(os.pardir, 'python', 'setup.py'), python_build_dir)
 
         with tools.chdir('python'):

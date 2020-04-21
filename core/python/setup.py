@@ -10,7 +10,7 @@ setup(
     version=build_info['version'],
     author="taurus.ai",
     license="Apache-2.0",
-    packages=[''] + find_packages(exclude=["hooks", "test", "extensions"]),
+    packages=[''] + find_packages(exclude=["test"]),
     package_data={
         '': ['*.so', '*.dylib', '*.dll', '*.pyd', '*.json']
     },
