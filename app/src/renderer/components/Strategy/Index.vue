@@ -93,7 +93,7 @@ export default {
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
             this.pnl = Object.freeze(pnl || []);
-            const dailyPnl = data['dailyPnl'][t.currentId];
+            const dailyPnl = data['dailyPnl'][t.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {})

@@ -109,19 +109,9 @@ export default {
 
         dealDailyPnlList (dailyPnlList) {
             let timeList = [], pnlDataList = [];
-            let existedTradingDays = [];
             dailyPnlList
                 .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
                 .sort((a, b) => a.update_time - b.update_time)
-                .filter(pnlData => {
-                    const tradingDay = pnlData.trading_day;
-                    if (existedTradingDays.includes(tradingDay)) {
-                        return false;
-                    } else {
-                        existedTradingDays.push(tradingDay)
-                        return true;
-                    }
-                })
                 .kfForEach(pnlData => {
                     const tradingDay = pnlData.trading_day.slice(4)
                     timeList.push(tradingDay);
