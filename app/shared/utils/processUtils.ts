@@ -86,8 +86,9 @@ const pm2Connect = (): Promise<void> => {
         try {
             let noDaemon = platform === 'win' ? true : false
             if (process.env.NODE_ENV !== 'production') noDaemon = false;
-            pm2.connect(noDaemon, (err: Error): void => {
+            pm2.connect(noDaemon, (err: any): void => {
                 if (err) {
+                    err = err.length ? err[0] : err;
                     logger.error('[pm2Connect]', err);
                     pm2.disconnect();
                     reject(err);
@@ -106,8 +107,9 @@ const pm2Connect = (): Promise<void> => {
 const pm2List = (): Promise<any[]> => {
     return new Promise((resolve, reject) => {
         try {
-            pm2.list((err: Error, pList: any[]): void => {
+            pm2.list((err: any, pList: any[]): void => {
                 if (err) {
+                    err = err.length ? err[0] : err;
                     logger.error('[pm2List]', err)
                     reject(err)
                     return;
@@ -125,8 +127,9 @@ const pm2Delete = async (target: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{ 
-                pm2.delete(target, (err: Error): void => {
+                pm2.delete(target, (err: any): void => {
                     if (err) {
+                        err = err.length ? err[0] : err;
                         logger.error('[pm2Delete]', err)
                         reject(err)
                         return;
@@ -151,8 +154,9 @@ export const describeProcess = (name: string): Promise<any> => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
-                pm2.describe(name, (err: Error, res: object): void => {
+                pm2.describe(name, (err: any, res: object): void => {
                     if (err) {
+                        err = err.length ? err[0] : err;
                         logger.error('[describeProcess]', err)
                         reject(err);
                         return;
@@ -201,56 +205,11 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
-        }
-    };
-
-    if (no_ext) options['env']['KF_NO_EXT'] = 'on';
-
-    return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try {
-                pm2.start(options, (err: Error, apps: object): void => {
-                    if (err) {
-                        logger.error('[startProcess]', JSON.stringify(options), err)
-                        reject(err);
-                        return;
-                    };
-                    resolve(apps);
-                })
-            } catch (err) {
-                logger.error('[TC startProcess]', JSON.stringify(options), err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
-    })
-}
-
-export const startStrategyProcess = async (name: string, strategyPath: string): Promise<object> => {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
-    const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const rocket = ifRocket ? '-x' : '';
-    const args = [logLevel, 'strategy', rocket, '-n', name, '-p'].join(' ')
-
-    const options = {
-        "name": name,
-        "interpreter": 'kfc',
-        "interpreterArgs": args,
-        "script": strategyPath,
-        "logType": "json",
-        "output": buildProcessLogPath(name),
-        "error": buildProcessLogPath(name),
-        "mergeLogs": true,
-        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
-        "autorestart": false,
-        "maxRestarts": 1,
-        "watch": false,
-        "execMode": "fork",
-        "env": {
-            "KF_HOME": dealSpaceInPath(KF_HOME),
         },
         "killTimeout": 16000
     };
+
+    if (no_ext) options['env']['KF_NO_EXT'] = 'on';
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -268,9 +227,64 @@ export const startStrategyProcess = async (name: string, strategyPath: string): 
                 logger.error('[TC startProcess]', JSON.stringify(options), err)
                 reject(err)
             }
-        }).catch(err => {
-            reject(err)
-        })
+        }).catch(err => reject(err))
+    })
+}
+
+export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
+    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
+    const rocket = ifRocket ? '-x' : '';
+    const args = ['-m kungfu', logLevel, 'strategy', '-n', name, '-p', strategyPath, rocket].join(' ')
+
+    if (!pythonPath.trim()) {
+        return Promise.reject(new Error('No local python path!'))
+    }
+
+    const fullPythonPathList = pythonPath.split('/');
+    const pythonFolder = fullPythonPathList.slice(0, fullPythonPathList.length - 1).join('/')
+    const pythonFile = fullPythonPathList.slice(fullPythonPathList.length - 1).join('/')
+
+    const optionsForPython = {
+        "name": name,
+        "args": args,
+        "cwd": pythonFolder,
+        "script": pythonFile,
+        "logType": "json",
+        "output": buildProcessLogPath(name),
+        "error": buildProcessLogPath(name),
+        "mergeLogs": true,
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "autorestart": false,
+        "maxRestarts": 1,
+        "watch": false,
+        "execMode": "fork",
+        "env": {
+            "KF_HOME": dealSpaceInPath(KF_HOME),
+        },
+        "killTimeout": 16000
+    };
+
+    console.log(optionsForPython)
+
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try {
+                pm2.start(optionsForPython, (err: any, apps: object): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[startProcess]', JSON.stringify(optionsForPython), err)
+                        reject(err);
+                        return;
+                    };
+                    resolve(apps);
+                })
+            } catch (err) {
+                logger.error('[TC startProcess]', JSON.stringify(optionsForPython), err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
     })
 }
 
@@ -328,9 +342,10 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     strategyPath = dealSpaceInPath(strategyPath)
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
+    const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
 
     if (ifLocalPython) {
-        return startStrategyProcess(strategyId, strategyPath)
+        return startStrategyProcess(strategyId, strategyPath, pythonPath)
     } else {
         return startProcess({
             "name": strategyId,
@@ -431,9 +446,10 @@ export const killGodDaemon = () => {
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
-                pm2.killDaemon((err: Error): void => {
+                pm2.killDaemon((err: any): void => {
                     pm2.disconnect()
                     if (err) {
+                        err = err.length ? err[0] : err;
                         logger.error(err)
                         reject(err)
                         return

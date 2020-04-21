@@ -123,4 +123,4 @@ export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingCo
 
 export const DEFUALT_DB_DIR = path.join(KUNGFU_RESOURCES_DIR, 'default')
 
-export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'extensions');
+export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');

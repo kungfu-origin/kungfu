@@ -97,7 +97,7 @@
 					</span>
 					<span 
 					v-if="config.type === 'file'"
-					style="word-break: initial;"
+					style="word-break: break-all;"
 					>{{ settingConfig[setting.key].value[item.key][config.key] }}</span>
 					
 

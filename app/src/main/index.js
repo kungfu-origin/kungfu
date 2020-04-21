@@ -74,7 +74,6 @@ function createWindow () {
 	})
 
 	mainWindow.on('ready-to-show', function() {
-		logger.info('mainWindow ready-to-show', mainWindow)
 		mainWindow.show();
 		mainWindow.focus();
 	});
