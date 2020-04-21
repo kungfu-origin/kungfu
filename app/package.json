@@ -61,7 +61,6 @@
       "**/kungfu-core/build/*/kungfu.*",
       "**/kungfu-core/build/*/pykungfu*",
       "**/kungfu-core/build/*/node_kungfu.node",
-      "**/kungfu-core/build/*/node_windows_kill.node",
       "**/kungfu-core/build/*/kungfubuildinfo.json",
       "**/kungfu-core/node/*",
       "**/kungfu-core/node/**/*",
@@ -95,7 +94,6 @@
         "filter": [
           "kungfu-cli",
           "kungfu-cli.*",
-          "node_windows_kill.node",
           "node_kungfu.node",
           "kungfu.dll",
           "kungfubuildinfo.json",

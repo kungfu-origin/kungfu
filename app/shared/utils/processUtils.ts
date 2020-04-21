@@ -412,14 +412,6 @@ export const deleteProcess = (processName: string) => {
             return;
         }
 
-        if (platform === 'win') {
-            const windowsKill = require('kungfu-core').windowsKill;
-            processes.forEach((item: any) => {
-                const pid = item.pid;
-                windowsKill(pid, 'SIGINT')
-            })
-        }
-
         pm2Delete(processName)
             .then(() => resolve(true))
             .catch(err => reject(err))
