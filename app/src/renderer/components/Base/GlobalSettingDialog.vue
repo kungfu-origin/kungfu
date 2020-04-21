@@ -88,6 +88,19 @@
 						<i class="el-icon-folder mouse-over"></i> 打开whl文件夹
 					</span>
 
+					<span 
+					class="tr-oper path-selector"
+					v-if="config.type === 'file'"
+					@click.stop="handleSelectFilePath(setting.key, item.key, config.key)"
+					>
+						<i class="el-icon-folder mouse-over "></i> 选择目标路径
+					</span>
+					<span 
+					v-if="config.type === 'file'"
+					style="word-break: initial;"
+					>{{ settingConfig[setting.key].value[item.key][config.key] }}</span>
+					
+
 					<el-select
 						:class="`${item.key}_${config.key}`"
 						v-if="config.type === 'select'"
@@ -210,7 +223,7 @@ import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getKfCommission, setKfCommission } from '__gUtils/kungfuUtils';
 
-const { shell }  = require('electron').remote 
+const { shell, dialog }  = require('electron').remote 
 const path = require("path");
 
 Vue.use(Collapse);
@@ -279,7 +292,7 @@ beforeDestroy() {
 },
 
 methods: {
-	handleClickSettingType(typeKey, itemKey) {
+	handleClickSettingType (typeKey, itemKey) {
 		const t = this;
 		t.activeSettingItem = `${typeKey}-${itemKey}`;
 		document
@@ -287,12 +300,23 @@ methods: {
 			.scrollIntoView();
 	},
 
-	handleCancel() {
+	handleSelectFilePath (settingKey, itemKey, configKey) {
+		const t = this;
+		dialog.showOpenDialog({
+			properties: ['openFile']
+		}, (filePath) => {
+			if(!filePath || !filePath[0]) return;
+			t.settingConfig[settingKey].value[itemKey][configKey] = filePath[0]
+			t.handleIuput(settingKey)
+		})
+	},
+
+	handleCancel () {
 		const t = this;
 		t.close();
 	},
 
-	handleIuput(settingKey) {
+	handleIuput (settingKey) {
 		const t = this;
 		const settingData = t.settingConfig[settingKey].value;
 		const outputPath = t.settingConfig[settingKey].outputPath;
@@ -300,12 +324,12 @@ methods: {
 			.then(() => outputJsonSync(outputPath, settingData || {}))
 			.then(() => readJsonSync(outputPath))
 			.then(config => {
-			if (!config) return;
-			t.$set(t.settingConfig[settingKey], "value", config);
+				if (!config) return;
+				t.$set(t.settingConfig[settingKey], "value", config);
 			});
 	},
 
-	handleSwitchProcess(value, config, settingData) {
+	handleSwitchProcess (value, config, settingData) {
 		const t = this;
 		//开启
 		if (value) {
@@ -316,18 +340,18 @@ methods: {
 	},
 
 	//打开日志
-	handleOpenLogFile(config) {
+	handleOpenLogFile (config) {
 		const logPath = path.join(LOG_DIR, `${config.target}.log`);
 		this.$showLog(logPath);
 	},
 
 	//打开文件夹 
-	handleOpenWhlFolder() {
+	handleOpenWhlFolder () {
 		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'python'));
 	},
 
 	//table 添加row
-	handleAddRow(target, row, index) {
+	handleAddRow (target, row, index) {
 		const t = this;
 		const tmp = [{}, ...row].reduce((a, b) => {
 			a[b.key] = b.default;
@@ -340,12 +364,12 @@ methods: {
 	},
 
 	//table remove row
-	handleRemoveRow(target, index) {
+	handleRemoveRow (target, index) {
 		const t = this;
 		t.tables[target].splice(index, 1);
 	},
 
-	setActiveMenu() {
+	setActiveMenu () {
 		const t = this;
 		const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
 		const visibleItems = $settingItems.filter(settingItem => {
@@ -360,12 +384,12 @@ methods: {
 		}
 	},
 
-	getSourceListOptions() {
+	getSourceListOptions () {
 		const t = this;
 		getSourceList().then(sourceList => (t.sourceList = sourceList));
 	},
 
-	saveTables() {
+	saveTables () {
 		const t = this;
 		Object.keys(t.tablesSaveMethods || {}).forEach(key => {
 			const filters = t.tablesSaveMethods[key].filters;
@@ -397,7 +421,7 @@ methods: {
 		});
 	},
 
-	close() {
+	close () {
 		this.$emit("update:visible", false);
 	}
 }
@@ -448,7 +472,9 @@ height: 88%;
 	overflow: auto;
 
 	.setting-type-item {
-	padding-bottom: 30px;
+		padding-bottom: 30px;
+		padding-right: 10px;
+		word-break: break-word;
 	}
 
 	.setting-type-item__header {
@@ -479,11 +505,17 @@ height: 88%;
 	}
 
 	.tr-oper {
-	padding-left: 20px;
-	vertical-align: middle;
-	i {
-		font-size: 14px !important;
-	}
+
+		&.path-selector {
+			padding: 0;
+			padding-right: 20px;
+		}
+
+		padding-left: 20px;
+		vertical-align: middle;
+			i {
+				font-size: 14px !important;
+			}
 	}
 }
 }
@@ -501,8 +533,6 @@ height: 88%;
 }
 .table-body {
 	width: 100%;
-	max-height: 400px;
-	overflow-y: auto;
 }
 .table-rows {
 	height: 45px;

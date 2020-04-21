@@ -89,6 +89,15 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
         "cli": true,
         "config": [
             {
+                "key": 'pythonPath',
+                "name": isEnglish ? 'Select Local Python Path' : '选择本地 Python 路径',
+                "cli": true,
+                "tip": isEnglish ? 'local python path is required to be selected, and kungfu*.whl should be installed in this path' : '只有选择了本地python路径，且kungfu*.whl 通过这个python安装，Kungfu才能使用本地python',
+                "default": '',
+                "type": SystemConfigChildItemTypeEnum.File,
+                "required": true
+            },
+            {
                 "key": "python",
                 "name": isEnglish ? "Use Local Python" : "使用本地python",
                 "cli": true,

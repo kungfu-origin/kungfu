@@ -12,6 +12,7 @@
                                 :currentId="strategyId" 
                                 moduleType="strategy"
                                 :minPnl="pnl"   
+                                :dailyPnl="dailyPnl"
                                 :dayMethod="getStrategyPnlDay"
                                 :addTime="addTime"                
                                 ></Pnl>
