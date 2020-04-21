@@ -266,8 +266,6 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
         "killTimeout": 16000
     };
 
-    console.log(optionsForPython)
-
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
