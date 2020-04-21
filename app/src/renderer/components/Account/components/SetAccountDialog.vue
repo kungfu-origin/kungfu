@@ -23,7 +23,7 @@
                 <el-col :span="19">
                     <el-input :class="item.key" v-if="item.type === 'str'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && (accountSource[source].key == item.key) && (type !== 'md')"></el-input>
                     <el-input :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model.trim="postForm[item.key]" :disabled="method == 'update' && (accountSource[source].key == item.key) && (type !== 'md')" show-password></el-input>
-                    <el-switch :class="item.key" v-if="item.type === 'bool'" v-model.trim="postForm[item.key]"></el-switch>
+                    <el-switch :class="item.key" v-if="item.type === 'bool'" :value="postForm[item.key]" @change="e => handleSwitchChange(item.key, e)"></el-switch>
                     <el-input-number :class="item.key" v-if="item.type === 'int'" :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
                     <el-input-number :class="item.key" v-if="item.type === 'float'" :controls="false" v-model.trim="postForm[item.key]"></el-input-number>
                     <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="postForm[item.key]">{{postForm[item.key]}}</span>                    
@@ -112,6 +112,11 @@ export default {
     },
 
     methods:{
+
+        handleSwitchChange (key, e) {
+            this.$set(this.postForm, key, e)
+        },
+
         handleCancel() {
             this.close()
         },
@@ -206,7 +211,9 @@ export default {
                 const key = item.key;
                 if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
                     if(item.default) {
-                        t.postForm[key] = item.default
+                        t.$set(t.postForm, key, item.default)
+                    } else {
+                        t.$set(t.postForm, key, '')
                     }
                 }
             })
