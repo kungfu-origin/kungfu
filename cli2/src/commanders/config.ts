@@ -48,9 +48,9 @@ const parseConfigItemQuestions = async (configItem: SystemConfigChildNormalItem,
     const existedValue = existedConfigData[key];
     return {
         type: targetType,
-        name: key,
+        name: name,
         choices: await buildChoices(configItem),
-        message: `[ ${key} ] ${tip}`,
+        message: `[ ${name} ] ${tip}`,
         default: existedValue,
         validate: async (value: string | number) => {
             let hasError: Error | null = null; 

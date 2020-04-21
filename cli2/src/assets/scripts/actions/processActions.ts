@@ -48,7 +48,7 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
             break;
         case 'strategy':
             switchStrategy(proc.processId, !status)
-            .then(() => {messageBoard.log(`${startOrStop} Strategy process success!`, 2)})
+            .then(() => { messageBoard.log(`${startOrStop} Strategy process success!`, 2) })
             .catch((err: Error) => logger.error(err))
             break;
         default:
