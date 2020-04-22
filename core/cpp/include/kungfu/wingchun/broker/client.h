@@ -71,7 +71,11 @@ public:
 
   virtual void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
-  void try_renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+  virtual bool try_renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
+
+  virtual void sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_location);
+
+  virtual bool try_sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_location);
 
   virtual void on_start(const rx::connectable_observable<event_ptr> &events);
 
@@ -133,6 +137,10 @@ public:
   explicit SilentAutoClient(yijinjing::practice::apprentice &app);
 
   [[nodiscard]] bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const override;
+
+  void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
+
+  void sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_location) override;
 };
 
 /**
@@ -153,6 +161,10 @@ public:
 
   void subscribe_all(const yijinjing::data::location_ptr &md_location);
 
+  void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
+
+  void sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_location) override;
+
   void enroll_account(const yijinjing::data::location_ptr &td_location);
 
 protected:
@@ -161,8 +173,6 @@ protected:
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
 
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
-
-  void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 
 private:
   IntradayResumePolicy resume_policy_ = {};
