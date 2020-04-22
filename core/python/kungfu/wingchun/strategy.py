@@ -3,6 +3,7 @@ import sys
 import importlib
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun import constants
+from kungfu.wingchun import msg
 from kungfu.wingchun import utils
 from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as wc

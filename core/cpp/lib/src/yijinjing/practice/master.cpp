@@ -127,7 +127,6 @@ void master::react() {
   events_ | is(Register::tag) | $$(register_app(event));
   events_ | is(Location::tag) | $$(on_new_location(event->gen_time(), event->data<Location>()));
   events_ | is(CacheReset::tag) | $$(reset_cache(event));
-  events_ | is(Ping::tag) | $$(SPDLOG_ERROR("ping received"));
   events_ | is(Ping::tag) | $$(get_io_device()->get_publisher()->publish("{}"));
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }

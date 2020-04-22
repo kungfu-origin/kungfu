@@ -64,11 +64,6 @@ class Master(yjj.master):
     def acquire_trading_day(self):
         return self.ctx.calendar.trading_day_ns
 
-    def is_live_node_process(self, pid):
-        info = self.ctx.apprentices[pid]
-        register = info['register']
-        return info['process'].is_running() and register.category == yjj.category.SYSTEM and register.group == 'node'
-
     def on_register(self, event, register_data):
         pid = register_data.pid
         category = yjj.get_category_name(register_data.category)
@@ -79,60 +74,78 @@ class Master(yjj.master):
             try:
                 self.ctx.apprentices[pid] = {
                     'process': psutil.Process(pid),
+                    'pid': pid,
                     'uname': uname,
                     'register': register_data
                 }
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
-                self.ctx.logger.error("app [%d] %s checkin failed: %s", pid, uname, err_msg)
+                self.ctx.logger.error(f'app [{pid}] {uname} checkin failed: {err_msg}')
                 self.deregister_app(event.gen_time, register_data.location_uid)
 
     def on_interval_check(self, nanotime):
         try:
             run_tasks(self.ctx)
-        except Exception:
+        except RuntimeError:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
             self.ctx.logger.error('task error [%s] %s', exc_type, err_msg)
 
     def on_exit(self):
-        for pid in self.ctx.apprentices:
-            apprentice = self.ctx.apprentices[pid]['process']
-            if apprentice.is_running():
-                self.ctx.logger.info('terminating apprentice %s pid %d', self.ctx.apprentices[pid]['uname'], pid)
-                self.deregister_app(yjj.now_in_nano(), self.ctx.apprentices[pid]['register'].uid)
-                apprentice.terminate()
+        for app in self.get_live_processes():
+            self.ctx.logger.info(f'terminating apprentice {app["uname"]} pid {app["pid"]}')
+            self.deregister_app(yjj.now_in_nano(), app['register'].uid)
+            try:
+                app['process'].terminate()
+            except psutil.Error:
+                self.ctx.logger.error(f'failed to terminate apprentice {app["uname"]} pid {app["pid"]}')
 
         count = 0
         time_to_wait = 10
         while count < time_to_wait:
-            remaining = list(
-                map(lambda pid: [self.ctx.apprentices[pid]['uname']] if self.is_live_node_process(pid) else [],
-                    self.ctx.apprentices))
-            remaining = functools.reduce(lambda x, y: x + y, remaining) if remaining else []
+            remaining = self.get_live_processes()
             if remaining:
-                self.ctx.logger.info('terminating apprentices, remaining %s, count down %ds', remaining, time_to_wait - count)
+                names = list(map(lambda app: app['uname'], remaining))
+                self.ctx.logger.info(f'terminating apprentices, remaining {names}, count down {time_to_wait - count}s')
                 time.sleep(1)
                 count = count + 1
             else:
                 break
 
-        for pid in self.ctx.apprentices:
-            apprentice = self.ctx.apprentices[pid]['process']
-            if apprentice.is_running():
-                self.ctx.logger.warn('killing apprentice %s pid %d', self.ctx.apprentices[pid]['uname'], pid)
-                apprentice.kill()
+        for app in self.get_live_processes():
+            self.ctx.logger.warn(f'killing apprentice {app["uname"]} pid {app["pid"]}')
+            try:
+                app['process'].kill()
+            except psutil.Error:
+                self.ctx.logger.error(f'failed to kill apprentice {app["uname"]} pid {app["pid"]}')
 
         self.ctx.logger.info('master cleaned up')
+
+    def is_live_process(self, pid):
+        return pid in self.ctx.apprentices and self.ctx.apprentices[pid]['process'].is_running()
+
+    def is_node_process(self, pid):
+        if pid not in self.ctx.apprentices:
+            return False
+        registry = self.ctx.apprentices[pid]['register']
+        return registry.category == yjj.category.SYSTEM and registry.group == 'node'
+
+    def filter_live_process(self, pid):
+        return [self.ctx.apprentices[pid]] if self.is_live_process(pid) and not self.is_node_process(pid) else []
+
+    def get_live_processes(self):
+        remaining = list(map(self.filter_live_process, self.ctx.apprentices))
+        return functools.reduce(lambda x, y: x + y, remaining) if remaining else []
 
 
 @task
 def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
         if not ctx.apprentices[pid]['process'].is_running():
-            ctx.logger.warn('cleaning up stale app %s with pid %d', ctx.apprentices[pid]['uname'], pid)
-            ctx.master.deregister_app(yjj.now_in_nano(), ctx.apprentices[pid]['register'].uid)
+            app = ctx.apprentices[pid]
+            ctx.logger.warn(f'cleaning up stale app {app["uname"]} with pid {pid}')
+            ctx.master.deregister_app(yjj.now_in_nano(), app['register'].uid)
             del ctx.apprentices[pid]
 
 

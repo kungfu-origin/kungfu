@@ -123,6 +123,7 @@ Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
   get_writer(app_location->uid)->mark(now(), RequestStop::tag);
+  return Napi::Value();
 }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {

@@ -22,6 +22,18 @@ def pre_start(context):
     context.subscribe(source, ["600000", "601988"], exchange)
 
 
+def post_start(context):
+    context.log.info('strategy post start')
+
+
+def pre_stop(context):
+    context.log.info('strategy going down')
+
+
+def post_stop(context):
+    context.log.info('strategy down')
+
+
 def on_quote(context, quote):
     # context.logger.info(f"quote: {quote}")
     side = random.choice([Side.Buy, Side.Sell])

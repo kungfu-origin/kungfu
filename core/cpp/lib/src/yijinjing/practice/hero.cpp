@@ -40,7 +40,6 @@ bool hero::is_usable() { return io_device_->is_usable(); }
 void hero::setup() {
   io_device_->setup();
   events_ = observable<>::create<event_ptr>([this](auto &s) { delegate_produce(this, s); }) | holdon();
-  events_ | is(RequestStop::tag) | $$(live_ = false);
   react();
   live_ = true;
 }
