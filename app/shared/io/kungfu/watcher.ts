@@ -9,7 +9,7 @@ import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
-        const windowType = process.env.CLI_WINDOW_TYPE;
+        const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
         return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id));
     }

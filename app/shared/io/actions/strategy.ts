@@ -1,5 +1,7 @@
 import { deleteStrategy, getStrategyById } from '__io/kungfu/strategy';
 import { removeFileFolder } from '__gUtils/fileUtils';
+import { watcher } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
 import { deleteProcess, startStrategy } from '__gUtils/processUtils';
 import { STRATEGY_DIR, LOG_DIR } from '__gConfig/pathConfig';
 
@@ -16,6 +18,8 @@ export const deleteStrat = (strategyId: string): Promise<void> => {
 
 export const switchStrategy = (strategyId: string, value: boolean): Promise<MessageData> => {
     if(!value){
+        const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+        watcher.requestStop(strategyLocation)
         return deleteProcess(strategyId)
         .then((): MessageData => ({ type: 'success', message: '操作成功！' }))       
         .catch((err: Error): MessageData => ({ type: 'error', message: err.message || '操作失败！' }))

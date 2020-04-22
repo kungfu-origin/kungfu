@@ -1,5 +1,5 @@
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { dealOrder, dealTrade, dealPos, dealAsset } from '__io/kungfu/watcher';
+import { dealOrder, dealTrade, dealPos } from '__io/kungfu/watcher';
 import { map } from 'rxjs/operators';
 
 
