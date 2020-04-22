@@ -132,7 +132,6 @@ export default {
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     
     .core-item{
-        width: 330px;
         margin: 10px;
 
         .core-status{
@@ -153,6 +152,7 @@ export default {
 
                 &.switch {
                     flex: 1;
+                    margin-right: 20px;
                 }
 
                 &.core-process-title{
