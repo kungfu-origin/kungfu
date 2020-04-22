@@ -165,10 +165,11 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
   auto writer = get_writer(book_uid);
-  writer->open_data<CacheReset>().msg_type = Asset::tag;
-  writer->close_data();
   writer->open_data<CacheReset>().msg_type = Position::tag;
   writer->close_data();
+  writer->open_data<CacheReset>().msg_type = Asset::tag;
+  writer->close_data();
+  writer->mark(trigger_time, ResetBookRequest::tag);
 }
 
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {

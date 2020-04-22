@@ -18,9 +18,9 @@
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/time.h>
 
+#define SETUP_TIMEOUT 50
 #define DEFAULT_RECV_TIMEOUT 100
 #define DEFAULT_NOTICE_TIMEOUT 1000
-#define SETUP_TIMEOUT 100
 
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::enums;
@@ -208,6 +208,7 @@ io_device_client::io_device_client(data::location_ptr home, bool low_latency)
 bool io_device_client::is_usable() {
   nanomsg_publisher_client publisher(*this, false);
   nanomsg_observer_client observer(*this, false);
+  std::this_thread::sleep_for(std::chrono::milliseconds(SETUP_TIMEOUT));
   return publisher.is_usable() and observer.is_usable();
 }
 

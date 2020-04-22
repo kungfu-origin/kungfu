@@ -62,6 +62,8 @@ private:
 
   void reset_cache(const event_ptr &event);
 
+  void pong(const event_ptr &event);
+
   void on_write_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::RequestWriteTo &request);
 
   void on_read_request(int64_t trigger_time, uint32_t app_uid, const longfist::types::RequestReadFrom &request);
