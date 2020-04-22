@@ -1,6 +1,6 @@
 import colors from 'colors';
 import Table from './Table';
-import { calcuHeaderWidth, parseToString, posDirection, dealNum } from '@/assets/scripts/utils';
+import { calcuHeaderWidth, parseToString, dealNum } from '@/assets/scripts/utils';
 import { toDecimal } from '__gUtils/busiUtils';
 
 interface StringToPosData {

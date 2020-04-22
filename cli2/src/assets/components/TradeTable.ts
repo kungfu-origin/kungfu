@@ -1,5 +1,5 @@
 import Table from '@/assets/components/Table';
-import { offsetName, orderStatus, sideName, calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
+import { calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
 const colors = require('colors');
 
 

@@ -28,7 +28,7 @@
     >
         <template v-slot:oper="{ oper }">
             <i 
-            v-if="[0,3,4,5,6,8].indexOf(+oper.status) === -1"
+            v-if="[0,1,3,4,5,6,8].indexOf(+oper.status) === -1"
             class="el-icon-close mouse-over" 
             title="撤单" 
             @click="handleCancelOrder(oper)"/>
