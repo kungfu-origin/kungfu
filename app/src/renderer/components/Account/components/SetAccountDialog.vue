@@ -209,7 +209,15 @@ export default {
 
             configItemList.forEach(item => {
                 const key = item.key;
+                const type = item.type;
+                const defaultVal = item.default;
                 if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
+                    if (type === int) {
+                        if (+defaultVal === 0) {
+                            t.$set(t.postForm, key, '')   
+                        }
+                    }
+                    
                     if(item.default) {
                         t.$set(t.postForm, key, item.default)
                     } else {
