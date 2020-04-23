@@ -53,6 +53,7 @@ export const getMdList = (): Promise<Md[]> => {
                 }
 
             })
+            
         resolve(mdList)
     })
 }
