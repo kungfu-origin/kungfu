@@ -62,7 +62,6 @@ export default {
             this.$refs['date-range-form'].validate(valid => {
                 if(valid) {
                     this.$emit('confirm', this.form.dateRange);
-                    this.clearData();
                 }
             })
         },
