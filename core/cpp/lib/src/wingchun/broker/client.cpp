@@ -126,7 +126,7 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
+    app_.request_read_from(app_.now(), app_uid, resume_time_point);
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
