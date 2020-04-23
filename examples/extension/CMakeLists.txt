@@ -12,43 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 PROJECT(kfextdemo)
-
-############################################################
-SET(CMAKE_CXX_STANDARD 17)
-
-if (UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-
-    SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-endif ()
-if (UNIX AND NOT APPLE)
-    SET(KFC_INSTALL_RPATH
-            "$ORIGIN"
-            "$ORIGIN/../../"
-            )
-    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
-endif ()
-if (APPLE)
-    SET(KFC_INSTALL_RPATH
-            "@executable_path/../Resources/kfc"
-            "@loader_path"
-            "@loader_path/../../"
-            )
-    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
-    SET(CMAKE_MACOSX_RPATH ON)
-endif ()
-if (WIN32)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w /permissive-")
-    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
-    SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
-    ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
-endif ()
 
 ############################################################
 
@@ -56,20 +21,11 @@ endif ()
 if (KF_SDK_HOME)
     MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
 else (KF_SDK_HOME)
-    SET(KFC_DEV_DIR "../../core/build/kfc")
-    GET_FILENAME_COMPONENT(KF_SDK_HOME ${KFC_DEV_DIR} ABSOLUTE)
+    GET_FILENAME_COMPONENT(KF_SDK_HOME "../../core/build/kfc" ABSOLUTE)
     MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
 endif (KF_SDK_HOME)
 
-INCLUDE_DIRECTORIES("${KF_SDK_HOME}/include")
-LINK_DIRECTORIES("${KF_SDK_HOME}")
-
-message("${KF_SDK_HOME}/include")
-
-############################################################
-
-# Use pybind11
-ADD_SUBDIRECTORY(../../core/deps/pybind11-2.4.3 "${PROJECT_BINARY_DIR}/pybind11")
+INCLUDE("${KF_SDK_HOME}/cmake/sdk.cmake")
 
 ############################################################
 

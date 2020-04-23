@@ -16,50 +16,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 PROJECT(kungfu)
 
 ############################################################
-SET(CMAKE_CXX_STANDARD 17)
 
-if(UNIX)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O0") # set -fPIC for nng
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    SET(CMAKE_CXX_FLAGS_DEBUG  "-g")
-    SET(CMAKE_CXX_FLAGS_RELEASE  "")
-
-    SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-endif()
-if(UNIX AND NOT APPLE)
-    SET(KFC_INSTALL_RPATH
-            "$ORIGIN"
-            "$ORIGIN/../../"
-            )
-    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
-endif()
-if(APPLE)
-    SET(KFC_INSTALL_RPATH
-        "@executable_path/../Resources/kfc"
-        "@loader_path"
-        "@loader_path/../../"
-    )
-    SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
-    SET(CMAKE_MACOSX_RPATH ON)
-endif()
-if(WIN32)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /permissive- /bigobj /MP /W0")
-    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
-    SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
-    ADD_COMPILE_DEFINITIONS(HAVE_SNPRINTF)
-endif()
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-backtrace-limit=0 -Wno-address-of-packed-member -Wno-deprecated")
-endif()
-
-############################################################
-
+include(cmake/compiler.cmake)
 include(cmake/clion.cmake)
-
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
@@ -94,6 +53,7 @@ INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1/include)
 INCLUDE_DIRECTORIES(deps/sqlite_orm-1.5/include)
 INCLUDE_DIRECTORIES(deps/nng-1.3.0/include)
 INCLUDE_DIRECTORIES(deps/tabulate-1.0/include)
+INCLUDE_DIRECTORIES(cpp/include)
 
 ############################################################
 

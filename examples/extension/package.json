@@ -10,11 +10,8 @@
     "build": "cmake-js build",
     "postbuild": "copyfiles -f package.json build/dist && copyfiles -f build/Release/* build/dist && copyfiles -f build/Debug/* build/dist && cd build/dist && yarn pack"
   },
-  "dependencies": {
-    "nan": "^2.14.0"
-  },
   "devDependencies": {
-    "cmake-js": "==5.3.2",
+    "cmake-js": "==6.0.0",
     "copyfiles": "^2.1.0",
     "cross-env": "^5.0.5",
     "cross-var": "^1.1.0"

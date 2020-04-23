@@ -5,6 +5,7 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 sep = os.path.sep
 src_dir = os.path.abspath(os.path.join(os.path.curdir, 'python'))
+cmake_dir = os.path.abspath(os.path.join(os.path.curdir, 'cmake'))
 cpp_dir = os.path.abspath(os.path.join(os.path.curdir, 'cpp'))
 deps_dir = os.path.abspath(os.path.join(os.path.curdir, 'deps'))
 pybind_dir = os.path.abspath(os.path.join(deps_dir, 'pybind11*'))
@@ -16,6 +17,7 @@ ext_dir = os.path.join(src_dir, 'kungfu_extensions')
 ext_output_dir = os.path.join(build_dir, 'build_extensions')
 
 datas = [
+    (cmake_dir, 'cmake'),
     (build_output_dir + sep + '*', '.'),
     (ext_dir, 'kungfu_extensions'),
     (ext_output_dir, 'kungfu_extensions'),
