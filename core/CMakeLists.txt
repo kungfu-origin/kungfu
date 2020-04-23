@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 PROJECT(kungfu)
 
 ############################################################
@@ -45,7 +45,7 @@ if(APPLE)
     SET(CMAKE_MACOSX_RPATH ON)
 endif()
 if(WIN32)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /w /permissive- /bigobj")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /permissive- /bigobj /MP /W0")
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /IGNORE:4199")
     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /IGNORE:4199")
