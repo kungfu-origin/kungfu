@@ -87,11 +87,26 @@ void Client::renew(int64_t trigger_time, const location_ptr &md_location) {
   }
 }
 
-void Client::try_renew(int64_t trigger_time, const location_ptr &md_location) {
+bool Client::try_renew(int64_t trigger_time, const location_ptr &md_location) {
   if (ready_md_locations_.find(md_location->uid) == ready_md_locations_.end()) {
-    return;
+    return false;
   }
   renew(trigger_time, md_location);
+  return true;
+}
+
+void Client::sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_location) {
+  auto writer = app_.get_writer(td_location->uid);
+  writer->mark(trigger_time, AssetRequest::tag);
+  writer->mark(trigger_time, PositionRequest::tag);
+}
+
+bool Client::try_sync(int64_t trigger_time, const location_ptr &td_location) {
+  if (ready_td_locations_.find(td_location->uid) == ready_td_locations_.end()) {
+    return false;
+  }
+  sync(trigger_time, td_location);
+  return true;
 }
 
 void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
@@ -111,7 +126,7 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
   }
   if (app_location->category == category::TD and should_connect_td(app_location)) {
     app_.request_write_to(app_.now(), app_uid);
-    app_.request_read_from(app_.now(), app_uid, app_.get_last_active_time());
+    app_.request_read_from(app_.now(), app_uid, resume_time_point);
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
@@ -144,11 +159,10 @@ void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate
   };
 
   if (broker_location->category == category::MD) {
-    switch_broker_state(category::MD, ready_md_locations_,
-                        [this, event, broker_location]() { renew(event->gen_time(), broker_location); });
+    switch_broker_state(category::MD, ready_md_locations_, [&]() { renew(event->gen_time(), broker_location); });
   }
   if (broker_location->category == category::TD) {
-    switch_broker_state(category::TD, ready_td_locations_, [&]() {});
+    switch_broker_state(category::TD, ready_td_locations_, [&]() { sync(event->gen_time(), broker_location); });
   }
 
   broker_states_.emplace(broker_location->uid, state_value);
@@ -180,6 +194,10 @@ bool SilentAutoClient::is_subscribed(const std::string &exchange_id, const std::
   return true;
 }
 
+void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location) {}
+
+void SilentAutoClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
+
 ManualClient::ManualClient(apprentice &app) : Client(app) {}
 
 const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }
@@ -200,6 +218,16 @@ void ManualClient::subscribe_all(const location_ptr &md_location) {
   enrolled_md_locations_.emplace(md_location->uid, true);
 }
 
+void ManualClient::renew(int64_t trigger_time, const location_ptr &md_location) {
+  if (is_fully_subscribed(md_location->uid)) {
+    app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
+  } else {
+    Client::renew(trigger_time, md_location);
+  }
+}
+
+void ManualClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
+
 void ManualClient::enroll_account(const location_ptr &td_location) {
   enrolled_td_locations_.emplace(td_location->uid, true);
 }
@@ -213,12 +241,4 @@ bool ManualClient::should_connect_td(const location_ptr &td_location) const {
 }
 
 bool ManualClient::should_connect_strategy(const location_ptr &td_location) const { return false; }
-
-void ManualClient::renew(int64_t trigger_time, const location_ptr &md_location) {
-  if (is_fully_subscribed(md_location->uid)) {
-    app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
-  } else {
-    Client::renew(trigger_time, md_location);
-  }
-}
 } // namespace kungfu::wingchun::broker

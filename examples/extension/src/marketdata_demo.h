@@ -1,27 +1,27 @@
 #ifndef MD_KFEXT_DEMO_H
 #define MD_KFEXT_DEMO_H
 
-#include <kungfu/yijinjing/common.h>
 #include <kungfu/wingchun/broker/marketdata.h>
+#include <kungfu/yijinjing/common.h>
 
-namespace kungfu::wingchun::kfext_demo
-{
-    class MarketDataDemo : public broker::MarketData
-    {
-    public:
-        MarketDataDemo(bool low_latency, yijinjing::data::locator_ptr locator,
-                       std::map<std::string, std::string> &config_str,
-                       std::map<std::string, int> &config_int,
-                       std::map<std::string, double> &config_double);
+namespace kungfu::wingchun::kfext_demo {
+class MarketDataDemo : public broker::MarketData {
+public:
+  MarketDataDemo(bool low_latency, yijinjing::data::locator_ptr locator,
+                 std::map<std::string, std::string> &config_str,
+                 std::map<std::string, int> &config_int,
+                 std::map<std::string, double> &config_double);
 
-        void on_start() override;
+  void on_start() override;
 
-        bool subscribe(const std::vector<longfist::types::Instrument> &instruments) override;
+  bool subscribe(
+      const std::vector<longfist::types::InstrumentKey> &instruments) override;
 
-        bool subscribe_all() override;
+  bool subscribe_all() override;
 
-        bool unsubscribe(const std::vector<longfist::types::Instrument> &instruments) override;
-    };
-}
+  bool unsubscribe(
+      const std::vector<longfist::types::InstrumentKey> &instruments) override;
+};
+} // namespace kungfu::wingchun::kfext_demo
 
-#endif //MD_KFEXT_DEMO_H
+#endif // MD_KFEXT_DEMO_H

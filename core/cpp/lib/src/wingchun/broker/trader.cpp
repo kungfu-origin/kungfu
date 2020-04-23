@@ -19,10 +19,12 @@ Trader::Trader(bool low_latency, locator_ptr locator, const std::string &source,
 
 void Trader::on_start() {
   Broker::on_start();
+
   events_ | is(OrderInput::tag) | $$(insert_order(event));
   events_ | is(OrderAction::tag) | $$(cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(req_account());
   events_ | is(PositionRequest::tag) | $$(req_position());
+  events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
   clean_orders();
 }

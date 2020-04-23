@@ -166,8 +166,6 @@ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
     SPDLOG_ERROR("failed confirm settlement info, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID,
                  gbk2utf8(pRspInfo->ErrorMsg));
   }
-  update_broker_state(BrokerState::Ready);
-  std::this_thread::sleep_for(std::chrono::seconds(1));
   req_qry_instrument();
 }
 
@@ -257,13 +255,14 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
     return;
   }
   SPDLOG_TRACE(to_string(*pTradingAccount));
-  auto writer = get_writer(0);
-  Asset &account = writer->open_data<Asset>(0);
+  auto writer = get_writer(location::PUBLIC);
+  Asset account = {};
   strcpy(account.account_id, get_account_id().c_str());
   from_ctp(*pTradingAccount, account);
   account.update_time = time::now_in_nano();
   account.holder_uid = get_io_device()->get_home()->uid;
-  writer->close_data();
+  writer->write(now(), account);
+  req_position();
 }
 
 void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
@@ -280,6 +279,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
       strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
       strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
       strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
+      strcpy(position.source_id, SOURCE_CTP);
       position.holder_uid = get_io_device()->get_home()->uid;
       position.direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
       position_map.emplace(pInvestorPosition->InstrumentID, position);
@@ -295,7 +295,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     }
     position.volume += pInvestorPosition->Position;
     position.margin += pInvestorPosition->ExchangeMargin;
-    if (position.volume > 0) {
+    if (position.volume > 0 and inst_info.contract_multiplier > 0) {
       double cost =
           position.avg_open_price * (position.volume - pInvestorPosition->Position) * inst_info.contract_multiplier +
           pInvestorPosition->OpenCost;
@@ -304,16 +304,16 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
-    auto writer = get_writer(0);
+    auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
-      writer->write(0, Position::tag, position);
+      writer->write(now(), Position::tag, position);
     }
     for (const auto &kv : short_position_map_) {
       const auto &position = kv.second;
-      writer->write(0, Position::tag, position);
+      writer->write(now(), Position::tag, position);
     }
-    PositionEnd &end = writer->open_data<PositionEnd>(0);
+    PositionEnd &end = writer->open_data<PositionEnd>(now());
     end.holder_uid = get_io_device()->get_home()->uid;
     writer->close_data();
     short_position_map_.clear();
@@ -326,9 +326,9 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
   } else {
-    auto writer = get_writer(0);
+    auto writer = get_writer(location::PUBLIC);
     if (pInvestorPositionDetail != nullptr) {
-      PositionDetail &pos_detail = writer->open_data<PositionDetail>(0);
+      PositionDetail pos_detail = {};
       from_ctp(*pInvestorPositionDetail, pos_detail);
       pos_detail.update_time = time::now_in_nano();
       if (inbound_trade_ids_.find(pInvestorPositionDetail->TradeID) != inbound_trade_ids_.end()) {
@@ -339,11 +339,11 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
       } else {
         pos_detail.trade_id = writer->current_frame_uid();
       }
-      writer->close_data();
+      writer->write(now(), pos_detail);
     }
   }
   if (bIsLast) {
-    get_writer(0)->mark(0, PositionDetailEnd::tag);
+    get_writer(location::PUBLIC)->mark(now(), PositionDetailEnd::tag);
   }
 }
 
@@ -353,7 +353,7 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  auto writer = get_writer(0);
+  auto writer = get_writer(location::PUBLIC);
   if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
     Instrument &instrument = writer->open_data<Instrument>(0);
     from_ctp(*pInstrument, instrument);
@@ -361,23 +361,21 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
     writer->close_data();
   }
   if (bIsLast) {
-    writer->mark(0, InstrumentEnd::tag);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    writer->mark(now(), InstrumentEnd::tag);
+    update_broker_state(BrokerState::Ready);
   }
 }
 
 void TraderCTP::on_start() {
   broker::Trader::on_start();
 
-  if (api_ == nullptr) {
-    std::string runtime_folder = get_runtime_folder();
-    api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
-    api_->RegisterSpi(this);
-    api_->RegisterFront((char *)config_.td_uri.c_str());
-    api_->SubscribePublicTopic(THOST_TERT_QUICK);
-    api_->SubscribePrivateTopic(THOST_TERT_QUICK);
-    api_->Init();
-  }
+  std::string runtime_folder = get_runtime_folder();
+  api_ = CThostFtdcTraderApi::CreateFtdcTraderApi(runtime_folder.c_str());
+  api_->RegisterSpi(this);
+  api_->RegisterFront((char *)config_.td_uri.c_str());
+  api_->SubscribePublicTopic(THOST_TERT_QUICK);
+  api_->SubscribePrivateTopic(THOST_TERT_QUICK);
+  api_->Init();
 }
 
 bool TraderCTP::login() {

@@ -127,7 +127,7 @@ void master::react() {
   events_ | is(Register::tag) | $$(register_app(event));
   events_ | is(Location::tag) | $$(on_new_location(event->gen_time(), event->data<Location>()));
   events_ | is(CacheReset::tag) | $$(reset_cache(event));
-  events_ | is(Ping::tag) | $$(get_io_device()->get_publisher()->publish("{}"));
+  events_ | is(Ping::tag) | $$(pong(event));
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
 
@@ -186,6 +186,11 @@ void master::reset_cache(const event_ptr &event) {
       app_cache_shift_[event->dest()] /= typed_event_ptr<DataType>(event);
     }
   });
+}
+
+void master::pong(const event_ptr &event) {
+  get_io_device()->get_publisher()->publish("{}");
+  SPDLOG_INFO("pong");
 }
 
 void master::on_write_request(int64_t trigger_time, uint32_t app_uid, const RequestWriteTo &request) {

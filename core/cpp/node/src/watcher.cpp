@@ -174,7 +174,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
                                         InstanceMethod("setup", &Watcher::Setup),                                 //
                                         InstanceMethod("step", &Watcher::Step),                                   //
-                                        InstanceMethod("requestStop", &Watcher::RequestStop),                                   //
+                                        InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //

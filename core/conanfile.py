@@ -165,21 +165,19 @@ class KungfuCoreConan(ConanFile):
         loglevel = spdlog_levels[str(self.options.log_level)]
         python_path = psutil.Popen(['pipenv', '--py'], stdout=subprocess.PIPE).stdout.read().decode().strip()
 
-        cmake_js_cmd = [
+        build_option = ['--toolset', 'host=' + str(self.options.arch)] if tools.detected_os() == 'Windows' else []
+        debug_option = ['--debug'] if self.settings.build_type == 'Debug' else []
+
+        return [
             tools.which('yarn'),
             'cmake-js',
-            '--debug' if self.settings.build_type == 'Debug' else '',
             '--arch', str(self.options.arch),
             '--runtime', str(self.options.js_runtime),
             '--runtime-version', self.__get_node_version(),
-            '--CDPYTHON_EXECUTABLE=' + python_path,
-            '--CDSPDLOG_LOG_LEVEL_COMPILE=' + loglevel
-        ]
-
-        if tools.detected_os() == 'Windows':
-            return cmake_js_cmd + ['--toolset', 'host=' + str(self.options.arch), cmd]
-        else:
-            return cmake_js_cmd + [cmd]
+            f'--CDPYTHON_EXECUTABLE={python_path}',
+            f'--CDSPDLOG_LOG_LEVEL_COMPILE={loglevel}',
+            f'--CDCMAKE_BUILD_PARALLEL_LEVEL={os.cpu_count()}'
+        ] + build_option + debug_option + [cmd]
 
     def __run_cmake_js(self, build_type, cmd):
         rc = psutil.Popen(self.__build_cmake_js_cmd(cmd)).wait()
