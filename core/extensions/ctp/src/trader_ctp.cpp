@@ -31,10 +31,11 @@ TraderCTP::~TraderCTP() {
 
 void TraderCTP::on_trading_day(const event_ptr &event, int64_t daytime) {
   trading_day_ = yijinjing::time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
-  SPDLOG_WARN("set trading day to {}", trading_day_);
+  SPDLOG_INFO("set trading day to {}", trading_day_);
 }
 
 bool TraderCTP::req_account() {
+  SPDLOG_INFO("request account asset");
   CThostFtdcQryTradingAccountField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
@@ -43,6 +44,7 @@ bool TraderCTP::req_account() {
 }
 
 bool TraderCTP::req_position() {
+  SPDLOG_INFO("request account positions");
   long_position_map_.clear();
   short_position_map_.clear();
   CThostFtdcQryInvestorPositionField req = {};
@@ -94,8 +96,15 @@ bool TraderCTP::cancel_order(const event_ptr &event) {
     SPDLOG_ERROR("failed to cancel order {}, can't find related ctp order id", action.order_id);
     return false;
   }
+
   auto ctp_order_ref = outbound_orders_[action.order_id];
   auto order_state = orders_.at(action.order_id);
+  auto status = order_state.data.status;
+
+  if (status != OrderStatus::Pending and status != OrderStatus::PartialFilledActive) {
+    SPDLOG_WARN("failed to cancel order {}, status {}", action.order_id, status);
+    return false;
+  }
 
   CThostFtdcInputOrderActionField ctp_action = {};
   strcpy(ctp_action.BrokerID, config_.broker_id.c_str());
@@ -174,7 +183,7 @@ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     auto order_id = inbound_order_refs_[pInputOrder->OrderRef];
     if (orders_.find(order_id) != orders_.end()) {
-      auto order_state = orders_.at(order_id);
+      auto &order_state = orders_.at(order_id);
       order_state.data.status = OrderStatus::Error;
       order_state.data.error_id = pRspInfo->ErrorID;
       order_state.data.update_time = time::now_in_nano();
@@ -183,6 +192,11 @@ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
     }
     SPDLOG_ERROR("failed to insert order, ErrorId: {} ErrorMsg: {}, InputOrder: {}", pRspInfo->ErrorID,
                  gbk2utf8(pRspInfo->ErrorMsg), pInputOrder == nullptr ? "" : to_string(*pInputOrder));
+  }
+  auto order_id = inbound_order_refs_[pInputOrder->OrderRef];
+  if (orders_.find(order_id) != orders_.end()) {
+    auto &order_state = orders_.at(order_id);
+    order_state.data.status = OrderStatus::Pending;
   }
 }
 
@@ -218,11 +232,12 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
                  pOrder->OrderRef);
     return;
   }
-  auto order_state = orders_.at(order_id);
+  auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   Order &order = writer->open_data<Order>(0);
   memcpy(&order, &(order_state.data), sizeof(order));
   from_ctp(*pOrder, order);
+  order_state.data.status = order.status;
   order.update_time = time::now_in_nano();
   writer->close_data();
 }
@@ -234,7 +249,7 @@ void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
     SPDLOG_ERROR("can't find order with OrderSysID: {}", pTrade->OrderSysID);
     return;
   }
-  auto order_state = orders_.at(order_id);
+  auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   Trade &trade = writer->open_data<Trade>(0);
   from_ctp(*pTrade, trade);
@@ -393,6 +408,7 @@ bool TraderCTP::login() {
 }
 
 bool TraderCTP::req_settlement_confirm() {
+  SPDLOG_INFO("request settlement confirm");
   CThostFtdcSettlementInfoConfirmField req = {};
   strcpy(req.InvestorID, config_.account_id.c_str());
   strcpy(req.BrokerID, config_.broker_id.c_str());
@@ -401,6 +417,7 @@ bool TraderCTP::req_settlement_confirm() {
 }
 
 bool TraderCTP::req_auth() {
+  SPDLOG_INFO("request auth");
   struct CThostFtdcReqAuthenticateField req = {};
   strcpy(req.UserID, config_.account_id.c_str());
   strcpy(req.BrokerID, config_.broker_id.c_str());
@@ -417,12 +434,14 @@ bool TraderCTP::req_auth() {
 }
 
 bool TraderCTP::req_qry_instrument() {
+  SPDLOG_INFO("request instruments");
   CThostFtdcQryInstrumentField req = {};
   int rtn = api_->ReqQryInstrument(&req, ++request_id_);
   return rtn == 0;
 }
 
 bool TraderCTP::req_position_detail() {
+  SPDLOG_INFO("request account positions detail");
   CThostFtdcQryInvestorPositionDetailField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
