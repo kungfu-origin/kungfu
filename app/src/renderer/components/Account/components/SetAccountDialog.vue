@@ -213,7 +213,7 @@ export default {
                 const defaultVal = item.default;
                 if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
                     if (type === 'int') {
-                        if (+defaultVal === 0) {
+                        if (!+defaultVal) {
                             t.$set(t.postForm, key, '')   
                         }
                     }
