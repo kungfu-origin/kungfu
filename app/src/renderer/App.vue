@@ -42,7 +42,7 @@ export default {
     data() {
         this.kungfuGloablDataObserver = null;
         return {
-            watcherLoading: true,
+            watcherLoading: false,
             globalSettingDialogVisiblity: false
         }
     },
@@ -56,7 +56,7 @@ export default {
         this.removeKeyDownEvent();
         //ipc event
         this.bindMainProcessEvent();
-        // this.getWatcherStatus();
+        this.getWatcherStatus();
 
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
