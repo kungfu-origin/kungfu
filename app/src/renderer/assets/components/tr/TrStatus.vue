@@ -1,6 +1,6 @@
 <template>
     <span class="tr-dot-content">
-        <span class="tr-dot" v-if="processName[value] " :class="processColor[value]"></span>
+        <span :class="[ 'tr-dot', processColor[value] ]" v-if="processName[value] " ></span>
         {{hasText ? (processName[value] ? processName[value] : '--') : ''}}
     </span>
 </template>
@@ -14,7 +14,7 @@ export default {
         hasText: {
             type: Boolean,
             default: true
-        }
+        },
     },
     data() {
         let processName = {};

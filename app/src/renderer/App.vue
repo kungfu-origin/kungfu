@@ -9,12 +9,16 @@
 
         <el-dialog
         title="系统提示"
+        class="system-prepare-dialog"
         :visible.sync="watcherLoading"
         :show-close="false"
         :close-on-click-modal="false"
         width="450px"
         >
-            <div style="margin: 10px 0 20px">Kungfu 环境准备中...</div>
+            <div style="margin: 10px 0 20px">
+                <tr-status value="3" :hasText="false"></tr-status>
+                Kungfu 环境准备中...
+            </div>
         </el-dialog>
     </div>
 </template>
@@ -38,7 +42,7 @@ export default {
     data() {
         this.kungfuGloablDataObserver = null;
         return {
-            watcherLoading: false,
+            watcherLoading: true,
             globalSettingDialogVisiblity: false
         }
     },
@@ -52,7 +56,7 @@ export default {
         this.removeKeyDownEvent();
         //ipc event
         this.bindMainProcessEvent();
-        this.getWatcherStatus();
+        // this.getWatcherStatus();
 
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
@@ -154,4 +158,11 @@ export default {
    height: 100%;
    background: $login-bg;
  }
+
+ .system-prepare-dialog {
+    .tr-dot-content {
+        margin-right: 5px;
+    }
+ }
+
 </style>

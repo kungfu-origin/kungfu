@@ -56,7 +56,7 @@
                     "validator": ["o99Validator", "intValidator"],
                     "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
                 }
-            ],
+              ],
           "md_config": [
             {
               "key": "user_id",
