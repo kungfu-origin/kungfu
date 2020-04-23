@@ -30,23 +30,21 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
       });
       auto make_primary_keys = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
       auto primary_keys = boost::hana::unpack(pk_members, make_primary_keys);
-      constexpr auto named_table = [](const std::string &table_name, const auto &primary_keys) {
+      constexpr auto table_maker = [](const std::string &table_name, const auto &primary_keys) {
         return [&](auto... columns) { return sqlite_orm::make_table(table_name, columns..., primary_keys); };
       };
-      return boost::hana::unpack(columns, named_table(key.c_str(), primary_keys));
+      return boost::hana::unpack(columns, table_maker(key.c_str(), primary_keys));
     };
   };
-
-  auto tables = boost::hana::transform(boost::hana::keys(types), make_table(types));
-
-  constexpr auto named_storage = [](const std::string &state_db_file) {
-    return [&](auto... tables) { return sqlite_orm::make_storage(state_db_file, tables...); };
+  constexpr auto storage_maker = [](const std::string &state_db_file) {
+    return [&](auto... tables) {
+      auto storage = sqlite_orm::make_storage(state_db_file, tables...);
+      storage.busy_timeout(100);
+      return storage;
+    };
   };
-
-  auto result = boost::hana::unpack(tables, named_storage(state_db_file));
-  result.busy_timeout(100);
-
-  return result;
+  auto tables = boost::hana::transform(boost::hana::keys(types), make_table(types));
+  return boost::hana::unpack(tables, storage_maker(state_db_file));
 };
 
 using ProfileStorageType = decltype(make_storage(std::string(), longfist::ProfileDataTypes));
