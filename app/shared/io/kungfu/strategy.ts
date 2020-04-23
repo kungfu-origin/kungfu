@@ -13,7 +13,10 @@ export const getStrategyList = (): Promise<Strategy[]> => {
                     ...JSON.parse(strategyData.value || '{}')
                 }
             })
-        
+            .sort((strategyData1: any, strategyData2: any) => {
+                return strategyData1.add_time - strategyData2.add_time
+            })
+                    
         resolve(strategyList)
     })
 }

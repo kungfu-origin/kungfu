@@ -16,7 +16,16 @@ export const getTdList = (): Promise<Td[]> => {
                     config: tdData.value
                 }
             })
-        
+            .sort((tdData1: any, tdData2: any) => {
+                if (tdData1.account_id > tdData2.account_id) {
+                    return 1
+                } else if (tdData1.account_id < tdData2.account_id) {
+                    return -1
+                } else {
+                    return 0
+                }
+            })
+
         resolve(tdList)
     })
 }
@@ -33,6 +42,16 @@ export const getMdList = (): Promise<Md[]> => {
                     source_name: mdData.group,
                     config: mdData.value
                 }
+            })
+            .sort((mdData1: any, mdData2: any) => {
+                if (mdData1.source_name > mdData2.source_name) {
+                    return 1
+                } else if (mdData1.source_name < mdData2.source_name) {
+                    return -1
+                } else {
+                    return 0
+                }
+
             })
         resolve(mdList)
     })
