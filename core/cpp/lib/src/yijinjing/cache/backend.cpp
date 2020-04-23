@@ -14,7 +14,6 @@ void shift::ensure_storage(uint32_t dest) {
     auto locator = location_->locator;
     auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
     storage_map_.emplace(dest, make_storage(db_file, longfist::StateDataTypes));
-    storage_map_.at(dest).busy_timeout(100);
     storage_map_.at(dest).sync_schema();
   }
 }

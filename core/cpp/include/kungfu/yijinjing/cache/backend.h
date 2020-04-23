@@ -43,7 +43,10 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
     return [&](auto... tables) { return sqlite_orm::make_storage(state_db_file, tables...); };
   };
 
-  return boost::hana::unpack(tables, named_storage(state_db_file));
+  auto result = boost::hana::unpack(tables, named_storage(state_db_file));
+  result.busy_timeout(100);
+
+  return result;
 };
 
 using ProfileStorageType = decltype(make_storage(std::string(), longfist::ProfileDataTypes));
