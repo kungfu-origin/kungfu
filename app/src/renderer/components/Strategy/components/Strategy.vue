@@ -127,6 +127,8 @@ import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
 import { openWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
+import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';
 import { debounce } from '__gUtils/busiUtils';
@@ -301,6 +303,8 @@ export default {
         handleStrategySwitch(value, strategy){
             const t = this;
             const strategyId = strategy.strategy_id;
+            const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+            watcher.requestStop(strategyLocation)
             switchStrategy(strategyId, value)
                 .then(({ type, message }) => t.$message[type](message))
                 .catch(err => t.$message['error'](err.message || '操作失败！'))
