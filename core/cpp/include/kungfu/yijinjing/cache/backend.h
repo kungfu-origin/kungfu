@@ -39,7 +39,7 @@ constexpr auto make_storage = [](const std::string &state_db_file, const auto &t
   constexpr auto storage_maker = [](const std::string &state_db_file) {
     return [&](auto... tables) {
       auto storage = sqlite_orm::make_storage(state_db_file, tables...);
-      storage.busy_timeout(100);
+      storage.busy_timeout(1000);
       return storage;
     };
   };
