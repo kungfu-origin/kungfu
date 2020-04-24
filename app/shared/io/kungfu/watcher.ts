@@ -3,7 +3,6 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
-import moment from 'moment';
 import { logger } from '../../utils/logUtils';
 
 
@@ -178,11 +177,11 @@ function resolveAccountId(source: string, dest: string): string {
 
 
 export const dealOrder = (item: OrderInputData): OrderData => {
-    const updateTime = +Number(item.update_time || item.insert_time || 0);
+    const updateTime = item.update_time || item.insert_time;
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
-        updateTime: moment(+updateTime / 1000000).format("HH:mm:ss"),
-        updateTimeNum: +updateTime,
+        updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
+        updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
@@ -201,12 +200,12 @@ export const dealOrder = (item: OrderInputData): OrderData => {
 
 
 export const dealTrade = (item: TradeInputData): TradeData => {
-    const updateTime = +Number(item.trade_time || item.update_time || 0);
+    const updateTime = item.trade_time || item.update_time;
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
-        updateTime: moment(+updateTime / 1000000).format('HH:mm:ss'),
+        updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         orderId: item.order_id.toString(),
-        updateTimeNum: +updateTime,
+        updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: sideName[item.side],
         offset: offsetName[item.offset],

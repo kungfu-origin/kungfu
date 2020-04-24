@@ -32,7 +32,6 @@
 
 <script>
 import { mapState } from 'vuex'
-import moment from 'moment'
 import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';

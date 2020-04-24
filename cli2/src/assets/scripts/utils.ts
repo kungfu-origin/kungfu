@@ -3,7 +3,6 @@ import { statusConfig } from '__gConfig/statusConfig';
 import { logger } from '__gUtils/logUtils';
 
 const colors = require('colors')
-const moment = require('moment')
 
 String.prototype.toAccountId = function(){
     return this.split('_').slice(1).join('_')
@@ -136,17 +135,6 @@ export const dealLog = (item: LogData) => {
 		[31, 5, 'auto'], 
 		0
 	)
-}
-
-export const buildTargetDateRange = () => {
-	const momentDay = moment();
-	const startDate = momentDay.add(-2, 'd').format('YYYYMMDD')
-	const endDate = momentDay.add(3,'d').format('YYYYMMDD')
-	return [startDate, endDate]
-}
-
-export const buildTradingDay = () => {
-	return moment().format('YYYYMMDD')
 }
 
 export const parseSources = (accountSource: Sources): string[] => {

@@ -12,7 +12,6 @@
 
 <script>
 import lineConfig from './config/lineEchart';
-import moment from 'moment';
 import { mapGetters, mapState } from 'vuex';
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')

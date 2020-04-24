@@ -25,7 +25,6 @@
 <script>
 import path from 'path';
 import { mapState } from 'vuex';
-import moment from 'moment';
 import { ipcRenderer } from 'electron';
 
 import GlobalSettingDialog from './components/Base/GlobalSettingDialog';

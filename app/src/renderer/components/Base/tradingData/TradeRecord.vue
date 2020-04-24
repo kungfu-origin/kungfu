@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 
 import DateRangeDialog from '../DateRangeDialog';
 import tradingDataMixin from './js/tradingDataMixin';

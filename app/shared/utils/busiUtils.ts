@@ -4,7 +4,6 @@ import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
 
 const path = require("path");
 const fs = require('fs-extra');
-const moment = require('moment');
 
 interface LogLineData {
     message: string;

@@ -148,7 +148,7 @@ class TradingDataDashboard extends Dashboard {
 		const t = this;
 		t.boards.orderTable = orderTable(t.type)
 		t.boards.orderTable.build({
-			label: ' Orders Records (3days)',
+			label: ' Orders Records ',
 			parent: t.screen,
 			top: '40%',
 			width: WIDTH_LEFT_PANEL - 5 + '%',
@@ -160,7 +160,7 @@ class TradingDataDashboard extends Dashboard {
 		const t = this;
 		t.boards.tradeTable = tradeTable(t.type)
 		t.boards.tradeTable.build({
-			label: ' Trades Records (3days)',
+			label: ' Trades Records ',
 			parent: t.screen,
 			top: '40%',
 			left: WIDTH_LEFT_PANEL - 5 + '%',

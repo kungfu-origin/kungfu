@@ -198,7 +198,7 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,
-        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        // "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
@@ -246,9 +246,6 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
     const pythonFolder = fullPythonPathList.slice(0, fullPythonPathList.length - 1).join('/')
     const pythonFile = fullPythonPathList.slice(fullPythonPathList.length - 1).join('/')
 
-
-    console.log(fullPythonPathList)
-
     const optionsForPython = {
         "name": name,
         "args": args,
@@ -258,7 +255,7 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
         "output": buildProcessLogPath(name),
         "error": buildProcessLogPath(name),
         "mergeLogs": true,
-        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        // "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
@@ -350,7 +347,7 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     } else {
         return startProcess({
             "name": strategyId,
-            "args": `strategy -n "${strategyId}" -p "${strategyPath}"`,
+            "args": `strategy -n '${strategyId}' -p '${strategyPath}'`,
         }, false).catch(err => logger.error('[startStrategy]', err))
     }
 }

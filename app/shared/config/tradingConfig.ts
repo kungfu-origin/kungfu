@@ -71,7 +71,7 @@ export const sourceTypeConfig: SourceType = {
         color: 'danger'
     },
 
-    'Option': {
+    'StockOption': {
         name: isEnglish ? 'option' : '期权',
         kfId: 3,
         color: ''
@@ -81,7 +81,7 @@ export const sourceTypeConfig: SourceType = {
         name: isEnglish ? 'simulation' : '模拟',
         kfId: 4,
         color: 'success'
-    }
+    },
 }
 
 export const hedgeFlag: NumberToStringObject = {
