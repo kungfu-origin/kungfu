@@ -104,12 +104,12 @@ export default {
                 type: "text",
                 label: "",
                 prop: "side",
-                width: '30px'
+                width: '35px'
             },{
                 type: "text",
                 label: "",
                 prop: "offset",
-                width: '30px'
+                width: '35px'
             },{
                 type: "number",
                 label: "委托价",

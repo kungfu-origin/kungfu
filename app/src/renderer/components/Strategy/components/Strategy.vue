@@ -303,8 +303,12 @@ export default {
         handleStrategySwitch(value, strategy){
             const t = this;
             const strategyId = strategy.strategy_id;
-            const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
-            watcher.requestStop(strategyLocation)
+            
+            if (!value) {
+                const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+                watcher.requestStop(strategyLocation)
+            }
+         
             switchStrategy(strategyId, value)
                 .then(({ type, message }) => t.$message[type](message))
                 .catch(err => t.$message['error'](err.message || '操作失败！'))

@@ -69,7 +69,7 @@ export default {
                     type: 'text',
                     label: '',
                     prop: 'direction',
-                    width: '50px'
+                    width: '35px'
                 },{
                     type: 'number',
                     label: '昨',
