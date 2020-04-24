@@ -3,6 +3,7 @@ import { LOG_DIR } from '__gConfig/pathConfig';
 import { addFileSync } from '__gUtils/fileUtils';
 import { getLog } from '__gUtils/busiUtils';
 
+
 import { Observable, forkJoin, merge, concat } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -36,7 +37,7 @@ const dealLogMessage = (line: string, processId: string) => {
         message = message.split('\n[').join('[')
 
         if(message.split('[').length < 4) {
-            const updateTime = moment(lineData.timestamp).format('MM/DD hh:mm:ss.000');
+            const updateTime = moment(lineData.timestamp).format('MM/DD HH:mm:ss.000');
             const type = 'error'.includes(lineData.type) ? 'error' : lineData.type;
             message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
         }

@@ -198,7 +198,7 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,
-        // "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
