@@ -13,6 +13,8 @@ const { Tail } = require('tail');
 const moment = require('moment');
 const colors = require('colors');
 
+var logWather: any = null;
+
 // // =============================== logs start ==================================================
 
 const dealUpdateTime = (updateTime: string): any => {
@@ -111,12 +113,16 @@ export const getMergedLogsObservable = (processIds: string[]) => {
 }
 
 const watchLogObservable = (processId: string) => {
+    logWather && (logWather.unwatch());
     return new Observable(observer => {
         const logPath = path.join(LOG_DIR, `${processId}.log`);
         addFileSync('', logPath, 'file');
         const watcher = new Tail(logPath, {
             useWatchFile: true
         });
+
+        logWather = watcher;
+        
         watcher.watch();
         watcher.on('line', (line: string) => {
             const logList: any = dealLogMessage(line, processId);
