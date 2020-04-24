@@ -28,7 +28,7 @@ public:
 
 protected:
   yijinjing::io_device_ptr io_device_;
-  cache::SessionStorageType session_storage_;
+  cache::SessionStoragePtr session_storage_;
 };
 
 class session_builder : public session_finder {

@@ -14,38 +14,38 @@ class profile {
 public:
   explicit profile(const yijinjing::data::locator_ptr &locator);
 
-  template <typename DataType> void set(const DataType &data) { get_storage().replace(data); }
+  template <typename DataType> void set(const DataType &data) { get_storage()->replace(data); }
 
   template <typename DataType> DataType get(const DataType &query) {
-    auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
-      auto pk_member = boost::hana::find_if(boost::hana::accessors<DataType>(),
-                                            [&](auto it) { return pk == boost::hana::first(it); });
-      auto accessor = boost::hana::second(*pk_member);
+    using namespace boost::hana;
+    auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
+      auto pk_member = find_if(accessors<DataType>(), [&](auto it) { return pk == first(it); });
+      auto accessor = second(*pk_member);
       return accessor(query);
     });
-    auto operation = [&](auto... ids) { return get_storage().get<DataType>(ids...); };
-    return boost::hana::unpack(pk_members, operation);
+    auto operation = [&](auto... ids) { return get_storage()->get<DataType>(ids...); };
+    return unpack(pk_members, operation);
   }
 
   template <typename DataType> std::vector<DataType> get_all(const DataType &query) {
-    return get_storage().get_all<DataType>();
+    return get_storage()->get_all<DataType>();
   }
 
   template <typename DataType> void remove(const DataType &query) {
-    auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
-      auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
-                                       [&](auto it) { return pk == boost::hana::first(it); });
-      auto accessor = boost::hana::second(*just);
+    using namespace boost::hana;
+    auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
+      auto just = find_if(accessors<DataType>(), [&](auto it) { return pk == first(it); });
+      auto accessor = second(*just);
       return accessor(query);
     });
-    auto operation = [&](auto... ids) { get_storage().remove<DataType>(ids...); };
-    boost::hana::unpack(pk_members, operation);
+    auto operation = [&](auto... ids) { get_storage()->remove<DataType>(ids...); };
+    unpack(pk_members, operation);
   }
 
-  template <typename DataType> void remove_all() { get_storage().remove_all<DataType>(); }
+  template <typename DataType> void remove_all() { get_storage()->remove_all<DataType>(); }
 
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
-    get_storage().replace(event->template data<DataType>());
+    get_storage()->replace(event->template data<DataType>());
   }
 
 private:
@@ -53,7 +53,7 @@ private:
 
   explicit profile(std::string profile_db_file);
 
-  yijinjing::cache::ProfileStorageType &get_storage();
+  yijinjing::cache::ProfileStoragePtr &get_storage();
 };
 } // namespace kungfu::yijinjing::practice
 

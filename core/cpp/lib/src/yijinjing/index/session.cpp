@@ -21,35 +21,35 @@ std::string get_index_db_file(const io_device_ptr &io_device) {
 }
 
 session_finder::session_finder(const io_device_ptr &io_device)
-    : session_storage_(cache::make_storage(get_index_db_file(io_device), longfist::SessionDataTypes)),
+    : session_storage_(cache::make_storage_ptr(get_index_db_file(io_device), longfist::SessionDataTypes)),
       io_device_(io_device) {
-  if (not session_storage_.sync_schema_simulate().empty()) {
-    session_storage_.sync_schema();
+  if (not session_storage_->sync_schema_simulate().empty()) {
+    session_storage_->sync_schema();
   }
 }
 
 session_finder::~session_finder() { io_device_.reset(); }
 
 int64_t session_finder::find_last_active_time(const data::location_ptr &source_location) {
-  auto sessions = session_storage_.get_all<Session>(where(eq(&Session::location_uid, source_location->uid)),
+  auto sessions = session_storage_->get_all<Session>(where(eq(&Session::location_uid, source_location->uid)),
                                                     order_by(&Session::begin_time).desc(), limit(1));
   return sessions.empty() ? INT64_MAX : sessions.front().end_time;
 }
 
 SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
-  return session_storage_.get_all<Session>(where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)), order_by(bt));
+  return session_storage_->get_all<Session>(where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)), order_by(bt));
 }
 
 SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
-  return session_storage_.get_all<Session>(order_by(bt), where(eq(&Session::location_uid, source_location->uid) and
+  return session_storage_->get_all<Session>(order_by(bt), where(eq(&Session::location_uid, source_location->uid) and
                                                                greater_or_equal(bt, from) and lesser_or_equal(bt, to)));
 }
 
 session_builder::session_builder(const io_device_ptr &io_device) : session_finder(io_device) {
-  if (not session_storage_.sync_schema_simulate().empty()) {
-    session_storage_.sync_schema();
+  if (not session_storage_->sync_schema_simulate().empty()) {
+    session_storage_->sync_schema();
   }
 }
 
@@ -69,7 +69,7 @@ Session &session_builder::open_session(const location_ptr &source_location, int6
   }
   Session &session = live_sessions_.at(source_location->uid);
   session.begin_time = time;
-  session_storage_.replace(session);
+  session_storage_->replace(session);
   return session;
 }
 
@@ -78,7 +78,7 @@ void session_builder::close_session(const location_ptr &source_location, int64_t
     return;
   }
   Session &session = live_sessions_.at(source_location->uid);
-  session_storage_.replace(session);
+  session_storage_->replace(session);
 }
 
 void session_builder::update_session(const frame_ptr &frame) {
@@ -102,7 +102,7 @@ void session_builder::rebuild_index_db() {
       reader->join(location, dest_uid, 0);
     }
   }
-  session_storage_.remove_all<Session>();
+  session_storage_->remove_all<Session>();
   while (reader->data_available()) {
     auto frame = reader->current_frame();
     auto uid = frame->dest() == 0 ? frame->source() : frame->dest();
@@ -126,7 +126,7 @@ void session_builder::rebuild_index_db() {
     reader->next();
   }
   for (const auto &pair : live_sessions_) {
-    session_storage_.replace(pair.second);
+    session_storage_->replace(pair.second);
   }
 }
 } // namespace kungfu::yijinjing::index

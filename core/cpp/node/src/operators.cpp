@@ -22,9 +22,9 @@ void JsRestoreState::operator()(int64_t from, int64_t to) {
   auto locator = location_->locator;
   for (auto dest : locator->list_location_dest(location_)) {
     auto db_file = locator->layout_file(location_, layout::SQLITE, fmt::format("{:08x}", dest));
-    auto storage = cache::make_storage(db_file, longfist::StateDataTypes);
-    if (not storage.sync_schema_simulate().empty()) {
-      storage.sync_schema();
+    auto storage = cache::make_storage_ptr(db_file, longfist::StateDataTypes);
+    if (not storage->sync_schema_simulate().empty()) {
+      storage->sync_schema();
     }
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
