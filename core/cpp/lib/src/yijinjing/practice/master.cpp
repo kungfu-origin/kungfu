@@ -116,17 +116,14 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
 void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
-  events_ | is(RequestWriteTo::tag) |
-      $$(on_write_request(event->gen_time(), event->source(), event->data<RequestWriteTo>()));
-  events_ | is(RequestReadFrom::tag) |
-      $$(on_read_request(event->gen_time(), event->source(), event->data<RequestReadFrom>()));
-  events_ | is(RequestReadFromPublic::tag) |
-      $$(on_read_request(event->gen_time(), event->source(), event->data<RequestReadFromPublic>()));
-  events_ | is(Channel::tag) | $$(on_channel_request(event->gen_time(), event->data<Channel>()));
-  events_ | is(TimeRequest::tag) | $$(on_time_request(event->gen_time(), event->source(), event->data<TimeRequest>()));
+  events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
+  events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
+  events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
+  events_ | is(Channel::tag) | $$(on_channel_request(event));
+  events_ | is(TimeRequest::tag) | $$(on_time_request(event));
+  events_ | is(Location::tag) | $$(on_new_location(event));
+  events_ | is(CacheReset::tag) | $$(on_cache_reset(event));
   events_ | is(Register::tag) | $$(register_app(event));
-  events_ | is(Location::tag) | $$(on_new_location(event->gen_time(), event->data<Location>()));
-  events_ | is(CacheReset::tag) | $$(reset_cache(event));
   events_ | is(Ping::tag) | $$(pong(event));
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
@@ -177,7 +174,12 @@ void master::feed(const event_ptr &event) {
   feed_profile_data(event, profile_);
 }
 
-void master::reset_cache(const event_ptr &event) {
+void master::pong(const event_ptr &event) {
+  get_io_device()->get_publisher()->publish("{}");
+  SPDLOG_INFO("pong");
+}
+
+void master::on_cache_reset(const event_ptr &event) {
   auto msg_type = event->data<CacheReset>().msg_type;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -188,12 +190,10 @@ void master::reset_cache(const event_ptr &event) {
   });
 }
 
-void master::pong(const event_ptr &event) {
-  get_io_device()->get_publisher()->publish("{}");
-  SPDLOG_INFO("pong");
-}
-
-void master::on_write_request(int64_t trigger_time, uint32_t app_uid, const RequestWriteTo &request) {
+void master::on_request_write_to(const event_ptr &event) {
+  const RequestWriteTo &request = event->data<RequestWriteTo>();
+  auto trigger_time = event->gen_time();
+  auto app_uid = event->source();
   if (not is_location_live(app_uid)) {
     return;
   }
@@ -209,7 +209,10 @@ void master::on_write_request(int64_t trigger_time, uint32_t app_uid, const Requ
   get_writer(location::PUBLIC)->write(trigger_time, channel);
 }
 
-void master::on_read_request(int64_t trigger_time, uint32_t app_uid, const RequestReadFrom &request) {
+void master::on_request_read_from(const event_ptr &event) {
+  const RequestReadFrom &request = event->data<RequestReadFrom>();
+  auto trigger_time = event->gen_time();
+  auto app_uid = event->source();
   if (not check_location_live(request.source_id, app_uid)) {
     return;
   }
@@ -223,11 +226,14 @@ void master::on_read_request(int64_t trigger_time, uint32_t app_uid, const Reque
   get_writer(location::PUBLIC)->write(trigger_time, channel);
 }
 
-void master::on_read_request(int64_t trigger_time, uint32_t app_uid, const RequestReadFromPublic &request) {
-  require_read_from_public(trigger_time, app_uid, request.source_id, request.from_time);
+void master::on_request_read_from_public(const event_ptr &event) {
+  const RequestReadFromPublic &request = event->data<RequestReadFromPublic>();
+  require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
-void master::on_channel_request(int64_t trigger_time, const Channel &request) {
+void master::on_channel_request(const event_ptr &event) {
+  const Channel &request = event->data<Channel>();
+  auto trigger_time = event->gen_time();
   if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
     reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
     require_write_to(trigger_time, request.source_id, request.dest_id);
@@ -236,9 +242,10 @@ void master::on_channel_request(int64_t trigger_time, const Channel &request) {
   }
 }
 
-void master::on_time_request(int64_t trigger_time, uint32_t app_uid, const TimeRequest &request) {
-  timer_tasks_.try_emplace(app_uid);
-  auto &app_tasks = timer_tasks_.at(app_uid);
+void master::on_time_request(const event_ptr &event) {
+  const TimeRequest &request = event->data<TimeRequest>();
+  timer_tasks_.try_emplace(event->source());
+  auto &app_tasks = timer_tasks_.at(event->source());
   app_tasks.try_emplace(request.id);
   auto &task = app_tasks.at(request.id);
   task.checkpoint = time::now_in_nano() + request.duration;
@@ -247,9 +254,10 @@ void master::on_time_request(int64_t trigger_time, uint32_t app_uid, const TimeR
   task.repeat_limit = request.repeat;
 }
 
-void master::on_new_location(int64_t trigger_time, const Location &location) {
-  try_add_location(trigger_time, data::location::make_shared(location, get_locator()));
-  get_writer(location::PUBLIC)->write(trigger_time, location);
+void master::on_new_location(const event_ptr &event) {
+  const Location &location = event->data<Location>();
+  try_add_location(event->gen_time(), data::location::make_shared(location, get_locator()));
+  get_writer(location::PUBLIC)->write(event->gen_time(), location);
 }
 
 void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {
