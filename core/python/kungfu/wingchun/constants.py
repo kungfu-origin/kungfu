@@ -2,6 +2,7 @@ from pykungfu import longfist as lf
 
 
 class Source:
+    SIM = "sim"
     CTP = "ctp"
     XTP = "xtp"
     OES = "oes"

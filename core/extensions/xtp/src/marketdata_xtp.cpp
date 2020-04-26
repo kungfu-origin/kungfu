@@ -39,7 +39,7 @@ void MarketDataXTP::on_start() {
     update_broker_state(BrokerState::LoggedIn);
     SPDLOG_INFO("login success! (user_id) {}", config_.user_id);
   } else {
-    update_broker_state(BrokerState::LoggedInFailed);
+    update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("failed to login, [{}] {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
   }
 }

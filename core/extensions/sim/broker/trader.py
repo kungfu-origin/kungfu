@@ -2,12 +2,14 @@ import json
 import os
 import sys
 import importlib
-import kungfu.wingchun.msg as wc_msg
 
 from dotted_dict import DottedDict
 from collections import namedtuple
 
+from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing import time as kft
 from pykungfu import longfist as lf
+from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as wc
 
 
@@ -29,6 +31,7 @@ class TraderSim(wc.Trader):
         wc.Trader.__init__(self, low_latency, locator, "sim", account_id)
         config = json.loads(json_config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
+        self.logger = create_logger("sim_td", "info", yjj.location(yjj.mode.LIVE, yjj.category.TD, "sim", account_id, locator))
 
         self.ctx = DottedDict()
         self.ctx.orders = {}
@@ -46,13 +49,18 @@ class TraderSim(wc.Trader):
 
     def on_start(self):
         wc.Trader.on_start(self)
+        self.update_broker_state(lf.enums.BrokerState.Ready)
 
     def insert_order(self, event):
         if self.match_mode == MatchMode.Custom:
             return self.ctx.insert_order(self.ctx, event)
         else:
-            order_input = event.data
+            writer = self.get_writer(event.source)
+            order_input = event.OrderInput()
             order = wc.utils.order_from_input(order_input)
+            order.insert_time = event.gen_time
+            order.update_time = event.gen_time
+            order.trading_day = kft.strfnow("%Y%m%d")
             min_vol = 100 if wc.utils.get_instrument_type(order_input.exchange_id,
                                                           order_input.instrument_id) == lf.enums.InstrumentType.Stock else 1
             if order_input.volume < min_vol:
@@ -73,38 +81,40 @@ class TraderSim(wc.Trader):
                     else lf.enums.OrderStatus.PartialFilledActive
             elif self.match_mode == MatchMode.Fill:
                 order.volume_traded = order_input.volume
+                order.status = lf.enums.OrderStatus.Filled
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - order.volume_traded
-            self.get_writer(event.source).write_data(0, wc_msg.Order, order)
+            writer.write(event.gen_time, order)
             if order.volume_traded > 0:
-                trade = wc.Trade()
+                trade = lf.types.Trade()
+                trade.trade_id = writer.current_frame_uid()
+                trade.source_id = self.io_device.home.group
                 trade.account_id = self.io_device.home.name
                 trade.order_id = order.order_id
                 trade.volume = order.volume_traded
                 trade.price = order.limit_price
                 trade.instrument_id = order.instrument_id
                 trade.exchange_id = order.exchange_id
-                trade.trade_id = self.get_writer(event.source).current_frame_uid()
-                self.get_writer(event.source).write_data(0, wc_msg.Trade, trade)
-            if order.active:
-                self.ctx.orders[order.order_id] = OrderRecord(source=event.source, dest=event.dest, order=order)
+                trade.trade_time = yjj.now_in_nano()
+                writer.write(event.gen_time, trade)
             return True
 
     def cancel_order(self, event):
         if self.match_mode == MatchMode.Custom:
             return self.ctx.cancel_order(self.ctx, event)
         else:
-            order_action = event.data
+            writer = self.get_writer(event.source)
+            order_action = event.OrderAction()
             if order_action.order_id in self.ctx.orders:
                 record = self.ctx.orders.pop(order_action.order_id)
                 order = record.order
                 order.status = lf.enums.OrderStatus.Cancelled if order.volume_traded == 0 \
                     else lf.enums.OrderStatus.PartialFilledNotActive
-                self.get_writer(event.source).write_data(0, wc_msg.Order, order)
+                writer.write(event.gen_time, order)
             return True
 
-    def re_account(self):
+    def req_account(self):
         if self.match_mode == MatchMode.Custom:
             return self.ctx.req_account(self.ctx)
         return False

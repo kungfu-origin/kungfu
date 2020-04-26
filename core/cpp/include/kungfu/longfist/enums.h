@@ -96,33 +96,33 @@ enum class InstrumentType : int8_t {
   Repo         //回购
 };
 
-inline std::ostream &operator<<(std::ostream &os, InstrumentType t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, InstrumentType t) { return os << int8_t(t); }
 
 enum class ExecType : int8_t { Unknown, Cancel, Trade };
 
-inline std::ostream &operator<<(std::ostream &os, ExecType t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, ExecType t) { return os << int8_t(t); }
 
 enum class BsFlag : int8_t { Unknown, Buy, Sell };
 
-inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << int8_t(t); }
 
 enum class Side : int8_t { Buy, Sell, Lock, Unlock, Exec, Drop };
 
-inline std::ostream &operator<<(std::ostream &os, Side t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, Side t) { return os << int8_t(t); }
 
 enum class Offset : int8_t { Open, Close, CloseToday, CloseYesterday };
 
-inline std::ostream &operator<<(std::ostream &os, Offset t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, Offset t) { return os << int8_t(t); }
 
 enum class HedgeFlag : int8_t { Speculation, Arbitrage, Hedge, Covered };
 
-inline std::ostream &operator<<(std::ostream &os, HedgeFlag t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, HedgeFlag t) { return os << int8_t(t); }
 
 enum class OrderActionFlag : int8_t {
   Cancel,
 };
 
-inline std::ostream &operator<<(std::ostream &os, OrderActionFlag t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, OrderActionFlag t) { return os << int8_t(t); }
 
 enum class PriceType : int8_t {
   Limit, //限价,证券通用
@@ -135,15 +135,15 @@ enum class PriceType : int8_t {
   UnKnown
 };
 
-inline std::ostream &operator<<(std::ostream &os, PriceType t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, PriceType t) { return os << int8_t(t); }
 
 enum class VolumeCondition : int8_t { Any, Min, All };
 
-inline std::ostream &operator<<(std::ostream &os, VolumeCondition t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, VolumeCondition t) { return os << int8_t(t); }
 
 enum class TimeCondition : int8_t { IOC, GFD, GTC };
 
-inline std::ostream &operator<<(std::ostream &os, TimeCondition t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, TimeCondition t) { return os << int8_t(t); }
 
 enum class OrderStatus : int8_t {
   Unknown,
@@ -157,43 +157,37 @@ enum class OrderStatus : int8_t {
   Lost
 };
 
-inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << int8_t(t); }
 
 enum class Direction : int8_t { Long, Short };
 
-inline std::ostream &operator<<(std::ostream &os, Direction t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, Direction t) { return os << int8_t(t); }
 
 enum class AccountType : int8_t { Stock, Credit, Future };
 
-inline std::ostream &operator<<(std::ostream &os, AccountType t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, AccountType t) { return os << int8_t(t); }
 
 enum class CommissionRateMode : int8_t { ByAmount, ByVolume };
 
-inline std::ostream &operator<<(std::ostream &os, CommissionRateMode t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, CommissionRateMode t) { return os << int8_t(t); }
 
 enum class LedgerCategory : int8_t {
   Account,
   Strategy,
 };
 
-inline std::ostream &operator<<(std::ostream &os, LedgerCategory t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, LedgerCategory t) { return os << int8_t(t); }
 
 enum class BrokerState : int8_t {
-  Unknown = 0,
+  Pending = 0,
   Idle = 1,
   DisConnected = 2,
   Connected = 3,
   LoggedIn = 4,
-  LoggedInFailed = 5,
-  AccConfirmed = 6,
-  AccFailed = 7,
-  CashConfirmed = 8,
-  CashErrored = 9,
-  PosConfirmed = 10,
-  PosErrored = 11,
+  LoginFailed = 5,
   Ready = 100
 };
 
-inline std::ostream &operator<<(std::ostream &os, BrokerState t) { return os << (int8_t)t; }
+inline std::ostream &operator<<(std::ostream &os, BrokerState t) { return os << int8_t(t); }
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H

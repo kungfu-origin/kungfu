@@ -132,7 +132,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   trade.trade_id = writer->current_frame_uid();
   trade.order_id = order_id;
   trade.parent_order_id = order_state.data.parent_id;
-  trade.trade_time = kungfu::yijinjing::time::now_in_nano();
+  trade.trade_time = time::now_in_nano();
   strcpy(trade.trading_day, trading_day_.c_str());
   strcpy(trade.account_id, this->get_account_id().c_str());
   trade.instrument_type = get_instrument_type(trade.exchange_id, trade.instrument_id);
@@ -208,7 +208,7 @@ void TraderXTP::on_start() {
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
   } else {
-    update_broker_state(BrokerState::LoggedInFailed);
+    update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("Login failed [{}]: {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
   }
 }

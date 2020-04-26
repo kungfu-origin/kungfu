@@ -285,7 +285,7 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Unknown));
+  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Pending));
   app_states_ref_.Set(format(app_location->uid), state);
 }
 

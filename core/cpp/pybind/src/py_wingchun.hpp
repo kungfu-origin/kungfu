@@ -277,14 +277,16 @@ void bind(pybind11::module &&m) {
   py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
       .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &, const std::string &>())
       .def_property_readonly("io_device", &Trader::get_io_device)
+      .def_property_readonly("trading_day", &Trader::get_trading_day)
+      .def("now", &Trader::now)
+      .def("get_location", &Trader::get_location)
+      .def("run", &Trader::run)
       .def("on_start", &Trader::on_start)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)
       .def("insert_order", &Trader::insert_order)
       .def("cancel_order", &Trader::cancel_order)
-      .def("update_broker_state", &Trader::update_broker_state)
-      .def("now", &Trader::now)
-      .def("run", &Trader::run);
+      .def("update_broker_state", &Trader::update_broker_state);
 
   py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
