@@ -40,8 +40,8 @@ constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &typ
     return [&](auto... tables) {
       using storage_type = decltype(sqlite_orm::make_storage(db_file, tables...));
       auto storage_ptr = std::make_shared<storage_type>(sqlite_orm::make_storage(db_file, tables...));
-      storage_ptr->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
       storage_ptr->busy_timeout(1000);
+      storage_ptr->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
       return storage_ptr;
     };
   };
@@ -63,10 +63,10 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<not Dat
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataType::has_timestamp>> {
   static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t from, int64_t to) {
+    using namespace boost::hana;
     using namespace sqlite_orm;
-    auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
-                                     [](auto it) { return DataType::timestamp_key.value() == boost::hana::first(it); });
-    auto accessor = boost::hana::second(*just);
+    auto just = find_if(accessors<DataType>(), [](auto it) { return DataType::timestamp_key.value() == first(it); });
+    auto accessor = second(*just);
     auto ts = member_pointer_trait<decltype(accessor)>().pointer();
     return storage->get_all<DataType>(where(greater_or_equal(ts, from) and lesser_or_equal(ts, to)));
   };
