@@ -123,7 +123,7 @@ void Bookkeeper::try_update_position(const Position &position) {
     return;
   }
   auto book = get_book(position.holder_uid);
-  auto &target_position = book->get_position(position.direction, position);
+  auto &target_position = book->get_position_for(position.direction, position);
   if (target_position.update_time >= position.update_time) {
     return;
   }
@@ -147,17 +147,17 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   auto accounting_method = accounting_methods_.at(quote.instrument_type);
   for (auto &item : books_) {
     auto &book = item.second;
-    auto has_long_position = book->has_long_position(quote);
-    auto has_short_position = book->has_short_position(quote);
+    auto has_long_position = book->has_long_position_for(quote);
+    auto has_short_position = book->has_short_position_for(quote);
     if (has_long_position or has_short_position) {
       accounting_method->apply_quote(book, quote);
       book->update(event->gen_time());
     }
     if (has_long_position) {
-      book->get_position(Direction::Long, quote).update_time = event->gen_time();
+      book->get_position_for(Direction::Long, quote).update_time = event->gen_time();
     }
     if (has_short_position) {
-      book->get_position(Direction::Short, quote).update_time = event->gen_time();
+      book->get_position_for(Direction::Short, quote).update_time = event->gen_time();
     }
   }
 }

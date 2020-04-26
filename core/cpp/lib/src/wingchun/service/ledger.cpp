@@ -143,8 +143,8 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
   auto copy_positions = [&](const auto &positions) {
     for (const auto &pair : positions) {
       auto &position = pair.second;
-      if (strategy_book->has_position(position)) {
-        auto &strategy_position = strategy_book->get_position(position.direction, position);
+      if (strategy_book->has_position_for(position)) {
+        auto &strategy_position = strategy_book->get_position_for(position.direction, position);
         longfist::copy(strategy_position, position);
         strategy_position.holder_uid = strategy_uid;
         strategy_position.client_id = strategy_book->asset.client_id;

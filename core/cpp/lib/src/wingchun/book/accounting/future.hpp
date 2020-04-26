@@ -75,12 +75,12 @@ public:
       }
       update_position(book, position);
     };
-    apply(book->get_position(Direction::Long, quote));
-    apply(book->get_position(Direction::Short, quote));
+    apply(book->get_position_for(Direction::Long, quote));
+    apply(book->get_position_for(Direction::Short, quote));
   }
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
-    auto &position = book->get_position(input);
+    auto &position = book->get_position_for(input);
     auto instrument_key = hash_instrument(input.exchange_id, input.instrument_id);
     if (book->instruments.find(instrument_key) == book->instruments.end()) {
       SPDLOG_WARN("instrument information missing for {}@{}", input.instrument_id, input.exchange_id);
@@ -112,7 +112,7 @@ public:
     if (order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
         order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
         order.volume_left > 0) {
-      auto &position = book->get_position(order);
+      auto &position = book->get_position_for(order);
       auto instrument_key = hash_instrument(order.exchange_id, order.instrument_id);
       if (book->instruments.find(instrument_key) == book->instruments.end()) {
         SPDLOG_WARN("instrument information missing for {}@{}", order.instrument_id, order.exchange_id);
@@ -160,7 +160,7 @@ public:
 
 private:
   void apply_open(Book_ptr &book, const Trade &trade) {
-    auto &position = book->get_position(trade);
+    auto &position = book->get_position_for(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto margin = instrument.contract_multiplier * trade.price * trade.volume * margin_ratio(instrument, position);
     auto commission = calculate_commission(book, trade, instrument, position, trade.close_today_volume);
@@ -179,7 +179,7 @@ private:
   }
 
   void apply_close(Book_ptr &book, const Trade &trade) {
-    auto &position = book->get_position(trade);
+    auto &position = book->get_position_for(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto today_volume_pre = position.volume - position.yesterday_volume;
     auto margin = instrument.contract_multiplier * trade.price * trade.volume * margin_ratio(instrument, position);

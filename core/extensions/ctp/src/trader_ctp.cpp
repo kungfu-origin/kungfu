@@ -311,10 +311,10 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.volume += pInvestorPosition->Position;
     position.margin += pInvestorPosition->ExchangeMargin;
     if (position.volume > 0 and inst_info.contract_multiplier > 0) {
-      double cost =
-          position.avg_open_price * (position.volume - pInvestorPosition->Position) * inst_info.contract_multiplier +
-          pInvestorPosition->OpenCost;
-      position.avg_open_price = cost / (position.volume * inst_info.contract_multiplier);
+      double cost = inst_info.contract_multiplier * position.avg_open_price *
+                    double(position.volume - pInvestorPosition->Position);
+      position.avg_open_price =
+          (cost + pInvestorPosition->OpenCost) / double(inst_info.contract_multiplier * position.volume);
     }
     position.update_time = time::now_in_nano();
   }

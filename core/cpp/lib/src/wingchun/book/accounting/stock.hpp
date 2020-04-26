@@ -38,7 +38,7 @@ public:
   }
 
   void apply_quote(Book_ptr &book, const Quote &quote) override {
-    auto &position = book->get_position(Direction::Long, quote);
+    auto &position = book->get_position_for(Direction::Long, quote);
     if (is_valid_price(quote.close_price)) {
       position.close_price = quote.close_price;
     }
@@ -52,7 +52,7 @@ public:
   }
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
-    auto &position = book->get_position(input);
+    auto &position = book->get_position_for(input);
     if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday > input.volume) {
       position.frozen_total += input.volume;
       position.frozen_yesterday += input.volume;
@@ -65,7 +65,7 @@ public:
   }
 
   void apply_order(Book_ptr &book, const Order &order) override {
-    auto &position = book->get_position(order);
+    auto &position = book->get_position_for(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
                      order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost;
     if (status_ok and order.volume_left > 0) {
@@ -89,7 +89,7 @@ public:
     if (trade.side == Side::Buy) {
       apply_buy(book, trade);
     }
-    update_position(book, book->get_position(trade));
+    update_position(book, book->get_position_for(trade));
   }
 
   void update_position(Book_ptr &book, Position &position) override {
@@ -102,7 +102,7 @@ private:
   std::unordered_map<uint64_t, double> commission_map_ = {};
 
   void apply_buy(Book_ptr &book, const Trade &trade) {
-    auto &position = book->get_position(trade);
+    auto &position = book->get_position_for(trade);
     if (position.volume + trade.volume > 0) {
       position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                                 (double)(position.volume + trade.volume);
@@ -121,7 +121,7 @@ private:
   }
 
   void apply_sell(Book_ptr &book, const Trade &trade) {
-    auto &position = book->get_position(trade);
+    auto &position = book->get_position_for(trade);
     if (position.yesterday_volume < trade.volume) {
       return;
     }
