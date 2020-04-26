@@ -17,18 +17,23 @@ if(CLION)
             set("${OUTPUT_VARIABLE}" "${RESULT_STRING}" PARENT_SCOPE)
         endfunction(GET_VARIABLE)
 
+        if(WIN32)
+            set(CMAKE_JS_CMD "./node_modules/.bin/cmake-js.cmd")
+        else()
+            set(CMAKE_JS_CMD "./node_modules/.bin/cmake-js")
+        endif()
+
         string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
         if (CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
-            exec_program(./node_modules/.bin/cmake-js ${CMAKE_CURRENT_SOURCE_DIR}
-                    ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure --debug
-                    OUTPUT_VARIABLE CMAKE_JS_OUTPUT
-                    )
+            set(DEBUG_OPTION "--debug")
         else()
-            exec_program(./node_modules/.bin/cmake-js ${CMAKE_CURRENT_SOURCE_DIR}
-                    ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure
-                    OUTPUT_VARIABLE CMAKE_JS_OUTPUT
-                    )
+            set(DEBUG_OPTION "")
         endif ()
+
+        exec_program(${CMAKE_JS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}
+                ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure ${DEBUG_OPTION}
+                OUTPUT_VARIABLE CMAKE_JS_OUTPUT
+                )
 
         get_variable("${CMAKE_JS_OUTPUT}" "CMAKE_JS_INC" CMAKE_JS_INC)
         set(CMAKE_JS_INC "${CMAKE_JS_INC}" PARENT_SCOPE)
