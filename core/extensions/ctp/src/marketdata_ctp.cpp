@@ -7,9 +7,13 @@
 #include "type_convert_ctp.h"
 #include <kungfu/yijinjing/time.h>
 
+using namespace kungfu::longfist::types;
+using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
+
 namespace kungfu::wingchun::ctp {
 
-MarketDataCTP::MarketDataCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config)
+MarketDataCTP::MarketDataCTP(bool low_latency, locator_ptr locator, const std::string &json_config)
     : MarketData(low_latency, std::move(locator), SOURCE_CTP), api_(nullptr), request_id_(0) {
   yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
   config_ = nlohmann::json::parse(json_config);
@@ -20,7 +24,6 @@ void MarketDataCTP::on_start() {
 
   if (api_ == nullptr) {
     std::string runtime_folder = get_runtime_folder();
-    SPDLOG_INFO("create ctp md api with path: {}", runtime_folder);
     api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
     api_->RegisterSpi(this);
     api_->RegisterFront((char *)config_.md_uri.c_str());
@@ -39,7 +42,7 @@ bool MarketDataCTP::login() {
   return rtn == 0;
 }
 
-bool MarketDataCTP::subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) {
+bool MarketDataCTP::subscribe(const std::vector<InstrumentKey> &instruments) {
   std::vector<std::string> insts;
   for (const auto &ins : instruments) {
     insts.push_back(ins.instrument_id);
@@ -49,7 +52,7 @@ bool MarketDataCTP::subscribe(const std::vector<longfist::types::InstrumentKey> 
 
 bool MarketDataCTP::subscribe_all() { return false; }
 
-bool MarketDataCTP::unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) {
+bool MarketDataCTP::unsubscribe(const std::vector<InstrumentKey> &instruments) {
   std::vector<std::string> insts;
   for (const auto &ins : instruments) {
     insts.push_back(ins.instrument_id);
@@ -59,7 +62,7 @@ bool MarketDataCTP::unsubscribe(const std::vector<longfist::types::InstrumentKey
 
 bool MarketDataCTP::subscribe(const std::vector<std::string> &instrument_ids) {
   if (api_ == nullptr) {
-    SPDLOG_ERROR("api is not initialized");
+    SPDLOG_ERROR("api has not been initialized");
     return false;
   }
 
@@ -87,7 +90,7 @@ void MarketDataCTP::OnFrontConnected() {
 
 void MarketDataCTP::OnFrontDisconnected(int nReason) {
   update_broker_state(BrokerState::DisConnected);
-  SPDLOG_ERROR("(nReason) {} (Info) {}", nReason, disconnected_reason(nReason));
+  SPDLOG_ERROR("disconnected {}", disconnected_reason(nReason));
 }
 
 void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
@@ -97,7 +100,7 @@ void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, C
     SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   } else {
     update_broker_state(BrokerState::LoggedIn);
-    SPDLOG_INFO("(BrokerID) {} (UserID) {} (TradingDay) {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID,
+    SPDLOG_INFO("login successfully with BrokerID {} UserID {} at TradingDay {} ", pRspUserLogin->BrokerID, pRspUserLogin->UserID,
                 pRspUserLogin->TradingDay);
   }
 }
@@ -107,29 +110,24 @@ void MarketDataCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CTho
 
 void MarketDataCTP::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
                                        CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+  SPDLOG_INFO("subscribed {}", pSpecificInstrument->InstrumentID);
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-  } else {
-    SPDLOG_INFO("(Inst) {} (bIsLast) {}",
-                pSpecificInstrument->InstrumentID == nullptr ? "" : pSpecificInstrument->InstrumentID, bIsLast);
+    SPDLOG_ERROR("failed to subscribe [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   }
 }
 
 void MarketDataCTP::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
                                          CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+  SPDLOG_INFO("unsubscribed {}", pSpecificInstrument->InstrumentID);
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-  } else {
-    SPDLOG_INFO("(Inst) {} (bIsLast) {}", pSpecificInstrument->InstrumentID, bIsLast);
+    SPDLOG_ERROR("failed to unsubscribe [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   }
 }
 
 void MarketDataCTP::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
-  if (pDepthMarketData != nullptr) {
-    SPDLOG_TRACE(to_string(*pDepthMarketData));
-    longfist::types::Quote &quote = get_writer(0)->open_data<longfist::types::Quote>(0);
-    from_ctp(*pDepthMarketData, quote);
-    get_writer(0)->close_data();
-  }
+  auto writer = get_writer(location::PUBLIC);
+  Quote &quote = writer->open_data<Quote>(now());
+  from_ctp(*pDepthMarketData, quote);
+  writer->close_data();
 }
 } // namespace kungfu::wingchun::ctp
