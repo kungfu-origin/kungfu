@@ -59,7 +59,17 @@ function dealTradesFromWathcer (trades: TradeInputData[]) {
 function dealPosFromWatcher (positions: PosInputData[]) {
     let positionDataByKey: { [propName: string]: PosData } = {};
     
-    positions.kfForEach((item: PosInputData) => {
+    positions
+    .sort((pos1: PosInputData, pos2: PosInputData) => {
+        if (pos1.instrument_id > pos2.instrument_id) {
+            return 1
+        } else if (pos1.instrument_id < pos2.instrument_id) {
+            return -1
+        } else {
+            return 0
+        };
+    })
+    .kfForEach((item: PosInputData) => {
         let positionData = dealPos(item);
         const poskey = positionData.instrumentId + positionData.direction
         positionDataByKey[poskey] = positionData;

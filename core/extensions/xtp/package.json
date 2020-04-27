@@ -11,7 +11,8 @@
                     "type": "str",
                     "errMsg": "请填写账户",
                     "required": true,
-                    "tip": "请填写账户，例如:1504091"
+                    "tip": "请填写账户，例如:1504091",
+                    "validator": ["noUnderlineValidator"]
                 },
                 {
                     "key": "password",

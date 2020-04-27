@@ -229,17 +229,20 @@ export default {
 
         buildValidators(item) {
             const t = this;
+            let validators = [];
             if((t.method == 'add') && (t.type === 'td') && (t.accountSource[t.source].key == item.key)){
-                return [
+                validators = [
                     { validator: t.validateAccountId, trigger: 'blur' },
-                    { required: true, message: item.errMsg, trigger: 'blur' }
                 ] 
-            }else{
-                let validators = [];
-                if(item.validator && item.validator.length) validators = item.validator.map(v => ({validator: v, trigger: 'blur'}))
-                if(item.required) validators.push({required: true, message: item.errMsg, trigger: 'blur'})
-                return validators
             }
+
+            if(item.validator && item.validator.length) {
+                validators = [...validators, ...item.validator.map(v => ({validator: v, trigger: 'blur'}))]
+            }
+
+            if(item.required) validators.push({required: true, message: item.errMsg, trigger: 'blur'})
+            
+            return validators
         },
 
         //关闭窗口的时候清空数据

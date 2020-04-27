@@ -139,11 +139,14 @@ export default {
             let positionDataByKey = {};
 
             let positionsAfterFilter = positions
-            .filter(item => {
-                if (searchKeyword.trim() === '') return true;
-                const { instrument_id } = item
-                return instrument_id.includes(searchKeyword) 
-            })
+                .filter(item => {
+                    if (searchKeyword.trim() === '') return true;
+                    const { instrument_id } = item
+                    return instrument_id.includes(searchKeyword) 
+                })
+                .sort((pos1, pos2) => {
+                    return pos1.instrument_id - pos2.instrument_id;
+                })
 
             if (t.moduleType === 'strategy') {
                 positionsAfterFilter = positionsAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
