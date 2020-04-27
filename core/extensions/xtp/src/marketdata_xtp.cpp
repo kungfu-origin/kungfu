@@ -37,6 +37,7 @@ void MarketDataXTP::on_start() {
   api_->RegisterSpi(this);
   if (api_->Login(md_ip, config_.md_port, user_id, password, protocol_type) == 0) {
     update_broker_state(BrokerState::LoggedIn);
+    update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("login success! (user_id) {}", config_.user_id);
   } else {
     update_broker_state(BrokerState::LoginFailed);

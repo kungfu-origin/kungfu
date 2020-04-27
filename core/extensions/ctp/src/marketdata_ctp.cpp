@@ -76,6 +76,7 @@ void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, C
     SPDLOG_ERROR("failed to login [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   } else {
     update_broker_state(BrokerState::LoggedIn);
+    update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("login successfully with BrokerID {} UserID {} at TradingDay {} ", pRspUserLogin->BrokerID,
                 pRspUserLogin->UserID, pRspUserLogin->TradingDay);
   }
