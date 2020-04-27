@@ -50,7 +50,8 @@ hiddenimports = [
     'plotly',
     "recordclass",
     "sortedcontainers",
-    "dotted_dict"
+    "dotted_dict",
+    "PyYAML"
 ]
 
 def extend_hiddenimports(pkg_name):

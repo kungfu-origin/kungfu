@@ -119,7 +119,10 @@ void Ledger::update_order_stat(const event_ptr &event, const Trade &data) {
 void Ledger::update_account_book(int64_t trigger_time, uint32_t account_uid) {
   refresh_account_book(trigger_time, account_uid);
   auto writer = get_writer(account_uid);
-  auto &asset = bookkeeper_.get_book(account_uid)->asset;
+  auto book = bookkeeper_.get_book(account_uid);
+  auto &asset = book->asset;
+  write_positions(trigger_time, account_uid, book->long_positions);
+  write_positions(trigger_time, account_uid, book->short_positions);
   writer->write(trigger_time, asset);
   write_asset_snapshot(trigger_time, writer, asset);
 }
@@ -165,9 +168,9 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
   auto writer = get_writer(book_uid);
-  writer->open_data<CacheReset>().msg_type = Position::tag;
+  writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
   writer->close_data();
-  writer->open_data<CacheReset>().msg_type = Asset::tag;
+  writer->open_data<CacheReset>(trigger_time).msg_type = Asset::tag;
   writer->close_data();
   writer->mark(trigger_time, ResetBookRequest::tag);
 }
@@ -175,31 +178,30 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
-  writer->open_data<CacheReset>().msg_type = Position::tag;
+  writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
   writer->close_data();
-  auto write_positions = [&](const auto &positions) {
-    for (const auto &pair : positions) {
-      writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
-    }
-  };
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = *pair.second;
-    auto holder_uid = book.asset.holder_uid;
-    if (pair.second->asset.ledger_category == LedgerCategory::Account and has_channel(holder_uid, strategy_uid)) {
-      write_positions(book.long_positions);
-      write_positions(book.short_positions);
-      writer->write(trigger_time, book.asset);
-    }
-    if (pair.second->asset.ledger_category == LedgerCategory::Strategy and holder_uid == strategy_uid) {
-      write_positions(book.long_positions);
-      write_positions(book.short_positions);
-      writer->write(trigger_time, book.asset);
+    auto &asset = book.asset;
+    auto book_uid = asset.holder_uid;
+    bool has_account = asset.ledger_category == LedgerCategory::Account and has_channel(book_uid, strategy_uid);
+    bool is_strategy = asset.ledger_category == LedgerCategory::Strategy and book_uid == strategy_uid;
+    if (has_account or is_strategy) {
+      write_positions(trigger_time, strategy_uid, book.long_positions);
+      write_positions(trigger_time, strategy_uid, book.short_positions);
+      writer->write(trigger_time, asset);
     }
   }
-  PositionEnd &end = writer->open_data<PositionEnd>(trigger_time);
-  end.holder_uid = strategy_uid;
+  writer->open_data<PositionEnd>(trigger_time).holder_uid = strategy_uid;
   writer->close_data();
-  write_asset_snapshot(now(), writer, strategy_book->asset);
+  write_asset_snapshot(trigger_time, writer, strategy_book->asset);
+}
+
+void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions) {
+  auto writer = get_writer(dest);
+  for (const auto &pair : positions) {
+    writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
+  }
 }
 
 void Ledger::write_asset_snapshots(int32_t msg_type) {

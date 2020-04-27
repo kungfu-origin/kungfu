@@ -54,6 +54,8 @@ private:
 
   void write_strategy_data(int64_t trigger_time, uint32_t strategy_uid);
 
+  void write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions);
+
   void write_asset_snapshots(int32_t msg_type);
 
   template <typename TradingData>

@@ -27,10 +27,6 @@ public:
 
   bool subscribe_all() override;
 
-  bool subscribe(const std::vector<std::string> &instrument_ids);
-
-  bool unsubscribe(const std::vector<std::string> &instrument_ids);
-
   bool login();
 
   ///当客户端与交易后台建立起通信连接时（还未登录前），该方法被调用。
