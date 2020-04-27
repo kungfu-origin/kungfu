@@ -51,7 +51,7 @@ hiddenimports = [
     "recordclass",
     "sortedcontainers",
     "dotted_dict",
-    "PyYAML"
+    "yaml"
 ]
 
 def extend_hiddenimports(pkg_name):
