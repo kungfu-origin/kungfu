@@ -12,7 +12,7 @@
 
 <script>
 import lineConfig from './config/lineEchart'
-import moment from 'moment'
+import { kungfu } from '__gUtils/kungfuUtils';
 import { mapState } from 'vuex'
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')
@@ -115,7 +115,7 @@ export default {
                 .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
                 .sort((a, b) => a.update_time - b.update_time)
                 .kfForEach(pnlData => {
-                    const updateTime = moment(Number(pnlData.update_time) / 1000000).format('HH:mm');
+                    const updateTime = kungfu.formatTime(pnlData.update_time, '%H:%M');
                     timeList.push(updateTime);
                     const pnlValue = this.calcuIntradayPnl(pnlData)
                     pnlDataList.push(pnlValue)
