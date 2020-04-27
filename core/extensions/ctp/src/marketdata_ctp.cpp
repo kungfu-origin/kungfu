@@ -93,7 +93,7 @@ void MarketDataCTP::OnFrontDisconnected(int nReason) {
 void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
                                    int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    update_broker_state(BrokerState::LoggedInFailed);
+    update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("(ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   } else {
     update_broker_state(BrokerState::LoggedIn);

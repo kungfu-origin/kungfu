@@ -228,21 +228,29 @@ void bind(pybind11::module &&m) {
     return order;
   });
 
-  auto book_class = py::class_<Book, Book_ptr>(m, "Book");
-  book_class.def_readonly("asset", &Book::asset)
+  py::class_<Book, Book_ptr>(m, "Book")
+      .def_readonly("asset", &Book::asset)
       .def_readonly("long_positions", &Book::long_positions)
-      .def_readonly("long_position_details", &Book::long_position_details)
       .def_readonly("short_positions", &Book::short_positions)
-      .def_readonly("short_position_details", &Book::short_position_details)
       .def_readonly("orders", &Book::orders)
-      .def("update", &Book::update);
-  book_class.def("get_position", py::overload_cast<Direction, const Quote &>(&Book::get_position<Quote>),
-                 py::return_value_policy::reference);
-  book_class.def("get_position", py::overload_cast<const OrderInput &>(&Book::get_position<OrderInput>),
-                 py::return_value_policy::reference);
-  book_class.def("get_position", py::overload_cast<const Order &>(&Book::get_position<Order>),
-                 py::return_value_policy::reference);
-  book_class.def("get_position", py::overload_cast<const Trade &>(&Book::get_position<Trade>),
+      .def("update", &Book::update)
+      .def("has_long_position", &Book::has_long_position)
+      .def("has_short_position", &Book::has_short_position)
+      .def("has_position", &Book::has_position)
+      .def("get_long_position", &Book::get_long_position)
+      .def("get_short_position", &Book::get_short_position)
+      .def("get_position", &Book::get_position)
+      .def("has_position_for", py::overload_cast<const Quote &>(&Book::has_position_for<Quote>, py::const_))
+      .def("has_position_for", py::overload_cast<const OrderInput &>(&Book::has_position_for<OrderInput>, py::const_))
+      .def("has_position_for", py::overload_cast<const Order &>(&Book::has_position_for<Order>, py::const_))
+      .def("has_position_for", py::overload_cast<const Trade &>(&Book::has_position_for<Trade>, py::const_))
+      .def("get_position_for", py::overload_cast<Direction, const Quote &>(&Book::get_position_for<Quote>),
+                 py::return_value_policy::reference)
+      .def("get_position_for", py::overload_cast<const OrderInput &>(&Book::get_position_for<OrderInput>),
+                 py::return_value_policy::reference)
+      .def("get_position_for", py::overload_cast<const Order &>(&Book::get_position_for<Order>),
+                 py::return_value_policy::reference)
+      .def("get_position_for", py::overload_cast<const Trade &>(&Book::get_position_for<Trade>),
                  py::return_value_policy::reference);
 
   py::class_<AccountingMethod, PyAccountingMethod, AccountingMethod_ptr>(m, "AccountingMethod")
@@ -277,14 +285,16 @@ void bind(pybind11::module &&m) {
   py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
       .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &, const std::string &>())
       .def_property_readonly("io_device", &Trader::get_io_device)
+      .def_property_readonly("trading_day", &Trader::get_trading_day)
+      .def("now", &Trader::now)
+      .def("get_location", &Trader::get_location)
+      .def("run", &Trader::run)
       .def("on_start", &Trader::on_start)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)
       .def("insert_order", &Trader::insert_order)
       .def("cancel_order", &Trader::cancel_order)
-      .def("update_broker_state", &Trader::update_broker_state)
-      .def("now", &Trader::now)
-      .def("run", &Trader::run);
+      .def("update_broker_state", &Trader::update_broker_state);
 
   py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())

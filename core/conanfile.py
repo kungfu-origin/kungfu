@@ -43,9 +43,11 @@ class KungfuCoreConan(ConanFile):
     }
     cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))
-    build_dir = os.path.join(conanfile_dir, 'build')
     cpp_dir = os.path.join(conanfile_dir, "cpp")
     ext_dir = os.path.join(conanfile_dir, "extensions")
+    build_dir = os.path.join(conanfile_dir, 'build')
+    build_python_dir = os.path.join(build_dir, 'python')
+    build_extensions_dir = os.path.join(build_dir, 'build_extensions')
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -180,6 +182,7 @@ class KungfuCoreConan(ConanFile):
         ] + build_option + debug_option + [cmd]
 
     def __run_cmake_js(self, build_type, cmd):
+        tools.rmdir(self.build_extensions_dir)
         rc = psutil.Popen(self.__build_cmake_js_cmd(cmd)).wait()
         if rc != 0:
             self.output.error(f'cmake-js {cmd} failed')
@@ -199,12 +202,11 @@ class KungfuCoreConan(ConanFile):
         self.output.success('PyInstaller done')
 
     def __run_setuptools(self, build_type):
-        python_build_dir = 'python'
-        tools.rmdir(python_build_dir)
-        shutil.copytree(build_type, python_build_dir, ignore=shutil.ignore_patterns('node*'))
-        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu'), os.path.join(python_build_dir, 'kungfu'))
-        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu_extensions'), os.path.join(python_build_dir, 'kungfu_extensions'))
-        shutil.copy2(os.path.join(os.pardir, 'python', 'setup.py'), python_build_dir)
+        tools.rmdir(self.build_python_dir)
+        shutil.copytree(build_type, self.build_python_dir, ignore=shutil.ignore_patterns('node*'))
+        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu'), os.path.join(self.build_python_dir, 'kungfu'))
+        shutil.copytree(os.path.join(os.pardir, 'python', 'kungfu_extensions'), os.path.join(self.build_python_dir, 'kungfu_extensions'))
+        shutil.copy2(os.path.join(os.pardir, 'python', 'setup.py'), self.build_python_dir)
 
         with tools.chdir('python'):
             rc = psutil.Popen(['pipenv', 'run', 'python', 'setup.py', 'bdist_wheel']).wait()

@@ -114,7 +114,7 @@ private:
       }
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
-      auto &position = book->get_position(data);
+      auto &position = book->get_position_for(data);
       update_ledger(event->gen_time(), source, dest, position);
       update_ledger(event->gen_time(), source, dest, book->asset);
     };

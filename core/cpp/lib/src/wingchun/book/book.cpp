@@ -25,9 +25,53 @@ double Book::get_frozen_price(uint64_t order_id) {
 
 void Book::ensure_position(const InstrumentKey &instrument_key) {
   if (is_shortable(instrument_key.instrument_type)) {
-    get_position(Direction::Short, instrument_key);
+    get_position_for(Direction::Short, instrument_key);
   }
-  get_position(Direction::Long, instrument_key);
+  get_position_for(Direction::Long, instrument_key);
+}
+
+
+bool Book::has_long_position(const char *exchange_id, const char *instrument_id) const {
+  auto position_id = hash_instrument(exchange_id, instrument_id);
+  return long_positions.find(position_id) != long_positions.end();
+}
+
+bool Book::has_short_position( const char *exchange_id, const char *instrument_id) const {
+  auto position_id = hash_instrument(exchange_id, instrument_id);
+  return short_positions.find(position_id) != short_positions.end();
+}
+
+bool Book::has_position(const char *exchange_id, const char *instrument_id) const {
+  return has_long_position(exchange_id, instrument_id) or has_short_position(exchange_id, instrument_id);
+}
+
+Position &Book::get_long_position(const char *exchange_id, const char *instrument_id) {
+  return get_position(Direction::Long, exchange_id, instrument_id);
+}
+
+Position &Book::get_short_position(const char *exchange_id, const char *instrument_id) {
+  return get_position(Direction::Short, exchange_id, instrument_id);
+}
+
+Position &Book::get_position(Direction direction, const char *exchange_id, const char *instrument_id) {
+  assert(asset.holder_uid != 0);
+  PositionMap &positions = direction == Direction::Long ? long_positions : short_positions;
+  auto position_id = hash_instrument(exchange_id, instrument_id);
+  auto pair = positions.try_emplace(position_id);
+  auto &position = (*pair.first).second;
+  if (pair.second) {
+    position.trading_day = asset.trading_day;
+    position.instrument_id = instrument_id;
+    position.exchange_id = exchange_id;
+    position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
+    position.holder_uid = asset.holder_uid;
+    position.ledger_category = asset.ledger_category;
+    position.source_id = asset.source_id;
+    position.account_id = asset.account_id;
+    position.client_id = asset.client_id;
+    position.direction = direction;
+  }
+  return position;
 }
 
 void Book::update(int64_t update_time) {

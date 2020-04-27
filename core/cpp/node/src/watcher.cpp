@@ -285,7 +285,7 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Unknown));
+  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Pending));
   app_states_ref_.Set(format(app_location->uid), state);
 }
 
@@ -307,13 +307,13 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
     auto &book = item.second;
     auto holder_uid = book->asset.holder_uid;
     auto not_ledger = holder_uid != ledger_uid;
-    auto has_long_position = book->has_long_position(quote) and not_ledger;
-    auto has_short_position = book->has_short_position(quote) and not_ledger;
+    auto has_long_position = book->has_long_position_for(quote) and not_ledger;
+    auto has_short_position = book->has_short_position_for(quote) and not_ledger;
     if (has_long_position) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Long, quote));
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position_for(Direction::Long, quote));
     }
     if (has_short_position) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position(Direction::Short, quote));
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position_for(Direction::Short, quote));
     }
     if (has_long_position or has_short_position) {
       update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
@@ -323,7 +323,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
-  auto &book_position = book->get_position(position.direction, position);
+  auto &book_position = book->get_position_for(position.direction, position);
   update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
 }
 } // namespace kungfu::node

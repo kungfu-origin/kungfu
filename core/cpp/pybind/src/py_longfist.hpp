@@ -211,6 +211,17 @@ void bind(pybind11::module &&m) {
       .export_values()
       .def("__eq__", [](const LedgerCategory &a, int b) { return static_cast<int>(a) == b; });
 
+  py::enum_<BrokerState>(m_enums, "BrokerState", py::arithmetic())
+      .value("Pending", BrokerState::Pending)
+      .value("Idle", BrokerState::Idle)
+      .value("DisConnected", BrokerState::DisConnected)
+      .value("Connected", BrokerState::Connected)
+      .value("LoggedIn", BrokerState::LoggedIn)
+      .value("LoginFailed", BrokerState::LoginFailed)
+      .value("Ready", BrokerState::Ready)
+      .export_values()
+      .def("__eq__", [](const BrokerState &a, int b) { return static_cast<int>(a) == b; });
+
   auto m_types = m.def_submodule("types");
   auto m_state = m.def_submodule("state");
 

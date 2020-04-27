@@ -67,7 +67,7 @@ private:
       return;
     }
     auto book = bookkeeper_.get_book(book_uid);
-    write_to(trigger_time, book->get_position(data), book_uid);
+    write_to(trigger_time, book->get_position_for(data), book_uid);
     write_to(trigger_time, book->asset, book_uid);
   }
 

@@ -67,7 +67,7 @@ private:
     AccountingMethod &accounting_method = *accounting_methods_.at(data.instrument_type);
     auto apply_and_update = [&](uint32_t book_uid) {
       auto book = get_book(book_uid);
-      auto &position = book->get_position(data);
+      auto &position = book->get_position_for(data);
       (accounting_method.*method)(book, data);
       position.update_time = event->gen_time();
       book->update(event->gen_time());
