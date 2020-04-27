@@ -91,7 +91,7 @@
                 ></el-input-number>                
             </el-form-item>
             <el-form-item
-            v-if="accountType === 'future'"
+            v-if="isFuture"
             label="开平"
             prop="offset"
             :rules="[
@@ -103,7 +103,7 @@
             </el-form-item>
 
             <el-form-item
-            v-if="accountType === 'future'"∏
+            v-if="isFuture"
             label="套保"
             prop="hedge_flag"
             :rules="[
@@ -204,6 +204,10 @@ export default {
             const sourceName = this.currentSourceName;
             if (!sourceName) return 'stock';
             return this.tdAccountSource[sourceName].typeName
+        },
+
+        isFuture () {
+            return this.accountType.toLowerCase() === 'future'
         },
 
         currentAccountResolve () {
