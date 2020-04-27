@@ -78,7 +78,7 @@ export default {
                 type: 'text',
                 label: '',
                 prop: 'offset',
-                width: '35px'
+                width: '40px'
             },{
                 type: 'number',
                 label: '成交价',
