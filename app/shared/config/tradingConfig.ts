@@ -96,7 +96,7 @@ export const exchangeIds: StringToStringObject = {
     "SZE": "深交所",
     "SHFE": "上期所",
     "DCE": "大商所",
-    "DZCE": "郑商所",
+    "CZCE": "郑商所",
     "CFFEX": "中金所",
     "INE": "能源中心"
 }
