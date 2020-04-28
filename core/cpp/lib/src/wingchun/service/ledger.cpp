@@ -210,7 +210,7 @@ void Ledger::write_asset_snapshots(int32_t msg_type) {
     auto &asset = book->asset;
     if (has_writer(asset.holder_uid)) {
       book->update(now());
-      get_writer(asset.holder_uid)->write(now(), msg_type, asset);
+      write_asset_snapshot(now(), get_writer(asset.holder_uid), asset);
     }
   }
 }

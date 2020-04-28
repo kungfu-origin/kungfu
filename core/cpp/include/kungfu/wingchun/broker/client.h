@@ -64,6 +64,8 @@ public:
 
   [[nodiscard]] virtual bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const;
 
+  virtual void subscribe(const longfist::types::InstrumentKey &instrument_key);
+
   virtual void subscribe(const std::string &exchange_id, const std::string &instrument_id);
 
   virtual void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,

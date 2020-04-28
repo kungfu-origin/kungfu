@@ -137,6 +137,7 @@ void Bookkeeper::try_update_position(const Position &position) {
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
+  broker_client_.subscribe(instrument_key);
   get_book(event->source())->ensure_position(instrument_key);
 }
 

@@ -75,8 +75,10 @@ private:
 
   template <typename Writer, typename Snapshot>
   static void write_asset_snapshot(int64_t trigger_time, Writer &&writer, const Snapshot &snapshot) {
-    writer->write(trigger_time, longfist::types::AssetSnapshot::tag, snapshot);
-    writer->write(trigger_time, longfist::types::DailyAsset::tag, snapshot);
+    if (snapshot.realized_pnl != 0 or snapshot.unrealized_pnl != 0) {
+      writer->write(trigger_time, longfist::types::AssetSnapshot::tag, snapshot);
+      writer->write(trigger_time, longfist::types::DailyAsset::tag, snapshot);
+    }
   }
 };
 } // namespace kungfu::wingchun::service
