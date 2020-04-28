@@ -208,10 +208,12 @@ template <typename... Ts> constexpr decltype(auto) to(Ts... arg) {
 static constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
   try {
     std::rethrow_exception(e);
+  } catch (const rx::empty_error &ex) {
+    SPDLOG_WARN("{}", ex.what());
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("Unexpected exception {} by rx:subscriber {}", typeid(ex).name(), ex.what());
+    yijinjing::util::print_stack_trace();
   }
-  yijinjing::util::print_stack_trace();
   raise(SIGINT);
 };
 

@@ -1,13 +1,15 @@
-from pykungfu import yijinjing as yjj
 import sys
 import click
-import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.journal as kfj
+from kungfu.yijinjing import time as kft
+from kungfu.yijinjing import journal as kfj
+from pykungfu import yijinjing as yjj
 
 from tabulate import tabulate
 
 
 def setup(ctx, session_id, cmd, instance):
+    home = instance.home
+    ctx.app_location = yjj.location(yjj.mode.LIVE, home.category, home.group, home.name, ctx.locator)
     ctx.mode = 'live'  # to get live data
     ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'journal', ctx.locator)
     if not session_id:
@@ -18,7 +20,7 @@ def setup(ctx, session_id, cmd, instance):
         click.echo(cmd.get_help(ctx))
         click.echo('please select sessions:')
         click.echo(tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt='simple'))
-        sys.exit(-1)
+        sys.exit()
     else:
         session = kfj.find_session(ctx, session_id)
         instance.set_begin_time(session['begin_time'])

@@ -31,20 +31,23 @@ session_finder::session_finder(const io_device_ptr &io_device)
 session_finder::~session_finder() { io_device_.reset(); }
 
 int64_t session_finder::find_last_active_time(const data::location_ptr &source_location) {
-  auto sessions = session_storage_->get_all<Session>(where(eq(&Session::location_uid, source_location->uid)),
-                                                    order_by(&Session::begin_time).desc(), limit(1));
+  auto range = where(eq(&Session::location_uid, source_location->uid));
+  auto order = order_by(&Session::begin_time).desc();
+  auto sessions = session_storage_->get_all<Session>(range, order, limit(1));
   return sessions.empty() ? INT64_MAX : sessions.front().end_time;
 }
 
 SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
-  return session_storage_->get_all<Session>(where(greater_or_equal(bt, from) and lesser_or_equal(bt, to)), order_by(bt));
+  auto range = where(greater_or_equal(bt, from) and lesser_or_equal(bt, to));
+  return session_storage_->get_all<Session>(range, order_by(bt));
 }
 
 SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
-  return session_storage_->get_all<Session>(order_by(bt), where(eq(&Session::location_uid, source_location->uid) and
-                                                               greater_or_equal(bt, from) and lesser_or_equal(bt, to)));
+  auto match_uid = eq(&Session::location_uid, source_location->uid);
+  auto range = where(match_uid and greater_or_equal(bt, from) and lesser_or_equal(bt, to));
+  return session_storage_->get_all<Session>(range, order_by(bt));
 }
 
 session_builder::session_builder(const io_device_ptr &io_device) : session_finder(io_device) {

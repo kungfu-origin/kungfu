@@ -243,7 +243,7 @@ location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::InspectChannel(int64_t trigger_time, const Channel &channel) {
-  if (channel.source_id != get_home_uid() and channel.dest_id != get_home_uid()) {
+  if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
   }
 }

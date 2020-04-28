@@ -1,12 +1,12 @@
 import os
-import shutil
-import glob
 import re
+import glob
 import json
-from pykungfu import yijinjing as yjj
-import pandas as pd
 import errno
-import kungfu.yijinjing.msg as yjj_msg
+import shutil
+import pandas
+from kungfu.yijinjing import msg as yjj_msg
+from pykungfu import yijinjing as yjj
 
 os_sep = re.escape(os.sep)
 JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}'.format(
@@ -192,10 +192,10 @@ def find_sessions(ctx):
     io_device = yjj.io_device(ctx.journal_util_location)
     session_finder = yjj.session_finder(io_device)
     ctx.session_count = 1
-    sessions_df = pd.DataFrame(columns=[
+    sessions_df = pandas.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
-    for session in session_finder.find_sessions():
+    for session in session_finder.find_sessions_for(ctx.app_location):
         sessions_df.loc[len(sessions_df)] = [
             len(sessions_df) + 1, yjj.get_mode_name(session.mode), yjj.get_category_name(session.category), session.group, session.name,
             session.begin_time, session.end_time, session.end_time > 0,
@@ -251,7 +251,7 @@ def show_journal(ctx, session_id, io_type):
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, io_device.home.uid, session['begin_time'])
 
-    journal_df = pd.DataFrame(columns=[
+    journal_df = pandas.DataFrame(columns=[
         'gen_time', 'trigger_time', 'source', 'dest', 'msg_type', 'frame_length', 'data_length'
     ])
     while reader.data_available() and reader.current_frame().gen_time <= session['end_time']:
