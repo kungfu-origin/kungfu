@@ -30,13 +30,12 @@ void Book::ensure_position(const InstrumentKey &instrument_key) {
   auto &long_position = get_position_for(Direction::Long, instrument_key);
 }
 
-
 bool Book::has_long_position(const char *exchange_id, const char *instrument_id) const {
   auto position_id = hash_instrument(exchange_id, instrument_id);
   return long_positions.find(position_id) != long_positions.end();
 }
 
-bool Book::has_short_position( const char *exchange_id, const char *instrument_id) const {
+bool Book::has_short_position(const char *exchange_id, const char *instrument_id) const {
   auto position_id = hash_instrument(exchange_id, instrument_id);
   return short_positions.find(position_id) != short_positions.end();
 }

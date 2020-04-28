@@ -67,7 +67,8 @@ struct Book {
   }
 
   template <typename TradingData>
-  [[nodiscard]] longfist::types::Position &get_position_for(longfist::enums::Direction direction, const TradingData &data) {
+  [[nodiscard]] longfist::types::Position &get_position_for(longfist::enums::Direction direction,
+                                                            const TradingData &data) {
     return get_position(direction, data.exchange_id, data.instrument_id);
   }
 

@@ -245,13 +245,13 @@ void bind(pybind11::module &&m) {
       .def("has_position_for", py::overload_cast<const Order &>(&Book::has_position_for<Order>, py::const_))
       .def("has_position_for", py::overload_cast<const Trade &>(&Book::has_position_for<Trade>, py::const_))
       .def("get_position_for", py::overload_cast<Direction, const Quote &>(&Book::get_position_for<Quote>),
-                 py::return_value_policy::reference)
+           py::return_value_policy::reference)
       .def("get_position_for", py::overload_cast<const OrderInput &>(&Book::get_position_for<OrderInput>),
-                 py::return_value_policy::reference)
+           py::return_value_policy::reference)
       .def("get_position_for", py::overload_cast<const Order &>(&Book::get_position_for<Order>),
-                 py::return_value_policy::reference)
+           py::return_value_policy::reference)
       .def("get_position_for", py::overload_cast<const Trade &>(&Book::get_position_for<Trade>),
-                 py::return_value_policy::reference);
+           py::return_value_policy::reference);
 
   py::class_<AccountingMethod, PyAccountingMethod, AccountingMethod_ptr>(m, "AccountingMethod")
       .def(py::init<>())

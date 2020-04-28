@@ -33,7 +33,7 @@ void MarketDataCTP::on_start() {
 
 bool MarketDataCTP::subscribe(const std::vector<InstrumentKey> &instruments) {
   auto length = instruments.size();
-  auto targets = new char*[length];
+  auto targets = new char *[length];
   for (int i = 0; i < length; i++) {
     targets[i] = const_cast<char *>(instruments[i].instrument_id.value);
   }
@@ -44,7 +44,7 @@ bool MarketDataCTP::subscribe(const std::vector<InstrumentKey> &instruments) {
 
 bool MarketDataCTP::unsubscribe(const std::vector<InstrumentKey> &instruments) {
   auto length = instruments.size();
-  auto targets = new char*[length];
+  auto targets = new char *[length];
   for (int i = 0; i < length; i++) {
     targets[i] = const_cast<char *>(instruments[i].instrument_id.value);
   }
