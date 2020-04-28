@@ -141,15 +141,12 @@ export default {
             let positionsAfterFilter = positions
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { instrument_id } = item
-                    return instrument_id.includes(searchKeyword) 
-                })
-                .sort((pos1, pos2) => {
-                    return pos1.instrument_id - pos2.instrument_id;
+                    const { instrument_id } = item;
+                    return instrument_id.includes(searchKeyword);
                 })
 
             if (t.moduleType === 'strategy') {
-                positionsAfterFilter = positionsAfterFilter.filter(item => Number(item.update_time) >= t.addTime )
+                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(t.addTime));
             }
 
 
@@ -161,16 +158,17 @@ export default {
             positionsAfterFilter.kfForEach(item => {
                 let positionData = dealPos(item);
                 positionData.update = true;
-                const poskey = t.getKey(positionData)
+                const poskey = t.getKey(positionData);
                 positionDataByKey[poskey] = positionData;
             })
 
             return {
                 dataByKey: Object.freeze(positionDataByKey),
-                dataList: Object.freeze(Object.values(positionDataByKey).sort((a, b) =>{
-                    return a.instrumentId - b.instrumentId
+                dataList: Object.freeze(Object.values(positionDataByKey).sort((a, b) => {
+                    const result = a.instrumentId.localeCompare(b.instrumentId);
+                    return result === 0 ? a.direction.localeCompare(b.direction) : result;
                 }))
-            }
+            };
         },
 
         //拼接key值

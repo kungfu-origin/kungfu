@@ -32,6 +32,8 @@ using namespace boost::hana::literals;
 #endif
 
 #ifdef _WINDOWS
+#define strcpy(dest, src) strcpy_s(dest, sizeof(dest), src)
+#define strncpy(dest, src, max_length) strncpy_s(dest, sizeof(dest), src, max_length)
 #define KF_PACK_TYPE_BEGIN __pragma(pack(push, 1))
 #define KF_PACK_TYPE_END                                                                                               \
   ;                                                                                                                    \

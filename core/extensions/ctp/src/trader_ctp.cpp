@@ -57,7 +57,7 @@ bool TraderCTP::req_position() {
 bool TraderCTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
 
-  CThostFtdcInputOrderField ctp_input;
+  CThostFtdcInputOrderField ctp_input = {};
   memset(&ctp_input, 0, sizeof(ctp_input));
 
   to_ctp(ctp_input, input);
@@ -161,7 +161,7 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
               pRspUserLogin->FrontID, pRspUserLogin->SessionID);
   session_id_ = pRspUserLogin->SessionID;
   front_id_ = pRspUserLogin->FrontID;
-  order_ref_ = atoi(pRspUserLogin->MaxOrderRef);
+  order_ref_ = std::stoi(pRspUserLogin->MaxOrderRef);
   trading_day_ = pRspUserLogin->TradingDay;
   req_settlement_confirm();
 }
@@ -207,7 +207,7 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
     if (actions_.find(action_id) != actions_.end()) {
       auto &action_state = actions_.at(action_id);
       auto &action = action_state.data;
-      uint32_t source = (action.order_action_id >> 32) xor get_home_uid();
+      uint32_t source = (action.order_action_id >> 32u) xor get_home_uid();
       if (has_writer(source)) {
         auto writer = get_writer(source);
         OrderActionError &error = writer->open_data<OrderActionError>(0);
@@ -285,9 +285,8 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
   } else if (pInvestorPosition != nullptr) {
-    SPDLOG_TRACE(to_string(*pInvestorPosition));
-    auto &position_map =
-        pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? long_position_map_ : short_position_map_;
+    auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
+    auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
       Position position = {};
       strncpy(position.trading_day, pInvestorPosition->TradingDay, DATE_LEN);
@@ -296,7 +295,8 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
       strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
       strcpy(position.source_id, SOURCE_CTP);
       position.holder_uid = get_io_device()->get_home()->uid;
-      position.direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
+      position.direction = direction;
+      position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
       position_map.emplace(pInvestorPosition->InstrumentID, position);
     }
     auto &position = position_map.at(pInvestorPosition->InstrumentID);
