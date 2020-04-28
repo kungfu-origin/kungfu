@@ -127,7 +127,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   auto order_id = inbound_orders_.at(trade_info->order_xtp_id);
   auto order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
-  Trade &trade = writer->open_data<Trade>(0);
+  Trade &trade = writer->open_data<Trade>(now());
   from_xtp(*trade_info, trade);
   trade.trade_id = writer->current_frame_uid();
   trade.order_id = order_id;
@@ -137,6 +137,12 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   strcpy(trade.account_id, this->get_account_id().c_str());
   trade.instrument_type = get_instrument_type(trade.exchange_id, trade.instrument_id);
   writer->close_data();
+  order_state.data.volume_traded += trade.volume;
+  order_state.data.volume_left -= trade.volume;
+  if (order_state.data.volume_left > 0) {
+    order_state.data.status = OrderStatus::PartialFilledActive;
+  }
+  writer->write(now(), order_state.data);
 }
 
 void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id) {
