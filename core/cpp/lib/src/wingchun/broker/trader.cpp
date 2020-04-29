@@ -36,7 +36,8 @@ void Trader::clean_orders() {
     auto &order_state = pair.second;
     auto &order = const_cast<Order &>(order_state.data);
     auto strategy_uid = order_state.dest;
-    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending) {
+    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
+        order.status == OrderStatus::PartialFilledActive) {
       if (strategy_uid == location::PUBLIC) {
         write_to(now(), order);
         continue;
