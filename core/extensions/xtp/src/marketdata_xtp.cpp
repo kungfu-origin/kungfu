@@ -45,11 +45,11 @@ void MarketDataXTP::on_start() {
   }
 }
 
-bool MarketDataXTP::subscribe(const std::vector<InstrumentKey> &instruments) {
+bool MarketDataXTP::subscribe(const std::vector<InstrumentKey> &instrument_keys) {
   bool result = true;
   std::vector<std::string> sse_tickers;
   std::vector<std::string> sze_tickers;
-  for (const auto &inst : instruments) {
+  for (const auto &inst : instrument_keys) {
     std::string ticker = inst.instrument_id;
     if (strcmp(inst.exchange_id, EXCHANGE_SSE) == 0) {
       sse_tickers.push_back(ticker);

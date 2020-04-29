@@ -146,7 +146,7 @@ void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate
   auto state_value = state.state;
   auto broker_location = app_.get_location(event->source());
 
-  bool state_ready = state_value == BrokerState::LoggedIn or state_value == BrokerState::Ready;
+  bool state_ready = state_value == BrokerState::Ready;
   bool state_reset = state_value == BrokerState::Connected or state_value == BrokerState::DisConnected;
 
   auto switch_broker_state = [&](category broker_category, location_map &ready_locations, auto on_broker_ready) {

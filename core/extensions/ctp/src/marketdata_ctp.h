@@ -19,15 +19,13 @@ class MarketDataCTP : public CThostFtdcMdSpi, public broker::MarketData {
 public:
   MarketDataCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config);
 
-  virtual ~MarketDataCTP(){};
+  ~MarketDataCTP() override = default;
 
   bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) override;
 
   bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) override;
 
   bool subscribe_all() override;
-
-  bool login();
 
   ///当客户端与交易后台建立起通信连接时（还未登录前），该方法被调用。
   virtual void OnFrontConnected();

@@ -4,22 +4,25 @@
 #include <unordered_set>
 
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/yijinjing/common.h>
-#include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/wingchun/broker/marketdata.h>
 
 namespace kungfu::wingchun::service {
-class BarGenerator : public yijinjing::practice::apprentice {
+class BarGenerator : public broker::MarketData {
 public:
-  BarGenerator(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency,
+  BarGenerator(const yijinjing::data::locator_ptr& locator, longfist::enums::mode m, bool low_latency,
                const std::string &json_config);
-
-  bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments);
 
   void on_start() override;
 
+  bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override;
+
+  bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override;
+
+  bool subscribe_all() override;
+
 private:
-  yijinjing::data::location_ptr source_location_;
   int64_t time_interval_;
+  yijinjing::data::location_ptr source_location_;
   std::unordered_map<uint32_t, longfist::types::Bar> bars_;
 };
 } // namespace kungfu::wingchun::service

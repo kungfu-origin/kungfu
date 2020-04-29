@@ -153,8 +153,22 @@ public:
   void update_position(Book_ptr &book, Position &position) override {
     if (position.last_price > 0) {
       auto &instrument = book->instruments.at(hash_instrument(position.exchange_id, position.instrument_id));
+      auto product_key = yijinjing::util::hash_str_32(get_instrument_product(instrument.instrument_id));
+      double cost = 0;
+      if (book->commissions.find(product_key) != book->commissions.end()) {
+        auto &commission = book->commissions.at(product_key);
+        auto close_today_volume = double(position.volume - position.yesterday_volume);
+        if (commission.mode == CommissionRateMode::ByAmount) {
+          cost = (position.last_price * position.yesterday_volume * commission.close_ratio) +
+                 (position.last_price * close_today_volume * commission.close_today_ratio);
+        } else {
+          cost = (position.yesterday_volume * commission.close_ratio) +
+                 (close_today_volume * commission.close_today_ratio);
+        }
+      }
       auto multiplier = instrument.contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
-      position.unrealized_pnl = (position.last_price - position.avg_open_price) * position.volume * multiplier;
+      auto price_diff = position.last_price - position.avg_open_price;
+      position.unrealized_pnl = (price_diff * position.volume - cost) * multiplier;
     }
   }
 
@@ -168,7 +182,7 @@ private:
                          margin_ratio(instrument, position);
     position.margin += margin;
     position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
-                              (double)(position.volume + trade.volume);
+                              double(position.volume + trade.volume);
     position.volume += trade.volume;
     update_position(book, position);
     book->asset.frozen_cash -= frozen_margin;
@@ -207,7 +221,7 @@ private:
   }
 
   static double calculate_commission(Book_ptr &book, const Trade &trade, const Instrument &instrument,
-                                     const Position &position, int64_t close_today_volume) {
+                                     const Position &position, double close_today_volume) {
     auto contract_multiplier = instrument.contract_multiplier;
     auto product_key = yijinjing::util::hash_str_32(get_instrument_product(instrument.instrument_id));
     if (book->commissions.find(product_key) == book->commissions.end()) {
@@ -219,17 +233,17 @@ private:
       if (trade.offset == Offset::Open) {
         return trade.price * trade.volume * contract_multiplier * commission.open_ratio;
       } else {
-        auto volume_left = (double)(trade.volume - close_today_volume);
+        auto volume_left = double(trade.volume) - close_today_volume;
         return (trade.price * volume_left * contract_multiplier * commission.close_ratio) +
                (trade.price * close_today_volume * contract_multiplier * commission.close_today_ratio);
       }
     } else {
       if (trade.offset == Offset::Open) {
-        return (double)trade.volume * contract_multiplier * commission.open_ratio;
+        return double(trade.volume) * contract_multiplier * commission.open_ratio;
       } else {
-        auto volume_left = (double)(trade.volume - close_today_volume);
+        auto volume_left = double(trade.volume - close_today_volume);
         return (volume_left * contract_multiplier * commission.close_ratio) +
-               ((double)close_today_volume * contract_multiplier * commission.close_today_ratio);
+               (close_today_volume * contract_multiplier * commission.close_today_ratio);
       }
     }
   }

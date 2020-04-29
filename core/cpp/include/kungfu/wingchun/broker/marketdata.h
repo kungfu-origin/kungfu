@@ -16,15 +16,15 @@ class MarketData : public Broker {
 public:
   explicit MarketData(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source);
 
-  virtual ~MarketData() = default;
+  ~MarketData() override = default;
 
-  virtual void on_start() override;
+  void on_start() override;
 
-  virtual bool subscribe(const std::vector<longfist::types::InstrumentKey> &instruments) = 0;
+  virtual bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
   virtual bool subscribe_all() = 0;
 
-  virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instruments) = 0;
+  virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 };
 } // namespace kungfu::wingchun::broker
 

@@ -322,7 +322,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-  if (book_position.volume > 0) {
+  if (book_position.volume > 0 or book_position.direction == Direction::Long) {
     update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
   }
 }

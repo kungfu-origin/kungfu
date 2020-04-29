@@ -54,6 +54,7 @@ void Context::add_account(const std::string &source, const std::string &account,
   account_location_ids_.emplace(account_id, account_location->uid);
 
   broker_client_.enroll_account(account_location);
+  td_locations_.emplace(account_location->uid, account_location);
 }
 
 void Context::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
@@ -62,6 +63,7 @@ void Context::subscribe(const std::string &source, const std::vector<std::string
   for (const auto &instrument_id : instrument_ids) {
     broker_client_.subscribe(md_location, exchange_ids, instrument_id);
   }
+  md_locations_.emplace(md_location->uid, md_location);
 }
 
 void Context::subscribe_all(const std::string &source) { broker_client_.subscribe_all(find_md_location(source)); }
@@ -149,9 +151,7 @@ uint32_t Context::lookup_account_location_id(const std::string &account) const {
 const location_ptr &Context::find_md_location(const std::string &source) {
   if (market_data_.find(source) == market_data_.end()) {
     auto home = app_.get_home();
-    auto md_location = source == "bar"
-                           ? location::make_shared(mode::LIVE, category::SYSTEM, "service", source, home->locator)
-                           : location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
+    auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
     if (not app_.has_location(md_location->uid)) {
       throw wingchun_error(fmt::format("invalid md {}", source));
     }

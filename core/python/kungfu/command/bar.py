@@ -8,7 +8,7 @@ import json
 @kfc.command(help_priority=7)
 @click.option('-s', '--source', required=True, type=click.Choice(EXTENSION_REGISTRY_MD.names()), help='data source')
 @click.option('-x', '--low_latency', is_flag=True, help='run in low latency mode')
-@click.option('--time-interval', default="1m", type=str, help="bar time interval")
+@click.option('-t', '--time-interval', default="1m", type=str, help="bar time interval, s/m/h/d, s=Second m=Minute h=Hour d=Day")
 @click.pass_context
 def bar(ctx, source, time_interval, low_latency):
     pass_ctx_from_parent(ctx)

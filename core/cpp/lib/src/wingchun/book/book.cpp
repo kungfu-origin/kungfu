@@ -57,7 +57,7 @@ Position &Book::get_position(Direction direction, const char *exchange_id, const
   PositionMap &positions = direction == Direction::Long ? long_positions : short_positions;
   auto position_id = hash_instrument(exchange_id, instrument_id);
   auto pair = positions.try_emplace(position_id);
-  auto &position = (*pair.first).second;
+  auto &position = pair.first->second;
   if (pair.second) {
     position.trading_day = asset.trading_day;
     position.instrument_id = instrument_id;

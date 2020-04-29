@@ -56,7 +56,7 @@ void Runner::post_start() {
   }
 
   events_ | is_own<Quote>(context_->get_broker_client()) | $$(invoke(&Strategy::on_quote, event->data<Quote>()));
-  events_ | is(Bar::tag) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
+  events_ | is_own<Bar>(context_->get_broker_client()) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
   events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>()));
