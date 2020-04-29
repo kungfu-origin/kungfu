@@ -34,7 +34,7 @@ function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: st
     let orderDataByKey: { [propName: string]: OrderData } = {};
     orders.kfForEach((item: OrderInputData) => {
         const orderData = dealOrder(item);
-        const latencyData = orderStat[orderData.orderId];
+        const latencyData = orderStat[orderData.orderId] || {};
         const systemLatency = latencyData.systemLatency || '';
         const networkLatency = latencyData.networkLatency || '';
 
