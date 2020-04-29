@@ -1,12 +1,11 @@
-from pykungfu import yijinjing as yjj
+import platform
+import click
 import shutil
 from tabulate import tabulate
-
-import click
+from kungfu.yijinjing import time as kft
+from kungfu.yijinjing import journal as kfj
 from kungfu.command.journal import journal, pass_ctx_from_parent
-
-import kungfu.yijinjing.time as kft
-import kungfu.yijinjing.journal as kfj
+from pykungfu import yijinjing as yjj
 
 
 @journal.command()
@@ -28,7 +27,7 @@ def sessions(ctx, sortby, ascending, tablefmt):
     table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=tablefmt)
 
     (term_width, term_height) = shutil.get_terminal_size()
-    if term_height < len(all_sessions) + 2:
+    if term_height < len(all_sessions) + 2 and platform.system() != 'Windows':
         click.echo_via_pager(table)
     else:
         click.echo(table)

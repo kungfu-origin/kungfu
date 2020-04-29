@@ -13,10 +13,10 @@ Napi::FunctionReference DataTable::constructor = {};
 DataTable::DataTable(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
 Napi::Value DataTable::Filter(const Napi::CallbackInfo &info) {
-  if (not IsValid(info, 0, &Napi::Value::IsString)) {
+  if (info.Length() != 2) {
     return Napi::Value();
   }
-  if (not IsValid(info, 1, &Napi::Value::IsString)) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
     return Napi::Value();
   }
   auto key = info[0].ToString().Utf8Value();

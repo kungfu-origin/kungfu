@@ -306,24 +306,24 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
   for (const auto &item : bookkeeper_.get_books()) {
     auto &book = item.second;
     auto holder_uid = book->asset.holder_uid;
-    auto not_ledger = holder_uid != ledger_uid;
-    auto has_long_position = book->has_long_position_for(quote) and not_ledger;
-    auto has_short_position = book->has_short_position_for(quote) and not_ledger;
-    if (has_long_position) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position_for(Direction::Long, quote));
+    if (holder_uid == ledger_uid) {
+      continue;
     }
-    if (has_short_position) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->get_position_for(Direction::Short, quote));
+    if (book->has_long_position_for(quote)) {
+      UpdateBook(event, book->get_position_for(Direction::Long, quote));
     }
-    if (has_long_position or has_short_position) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+    if (book->has_short_position_for(quote)) {
+      UpdateBook(event, book->get_position_for(Direction::Short, quote));
     }
+    update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
   }
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-  update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
+  if (book_position.volume > 0) {
+    update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
+  }
 }
 } // namespace kungfu::node

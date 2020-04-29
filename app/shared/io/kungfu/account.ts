@@ -17,13 +17,8 @@ export const getTdList = (): Promise<Td[]> => {
                 }
             })
             .sort((tdData1: any, tdData2: any) => {
-                if (tdData1.account_id > tdData2.account_id) {
-                    return 1
-                } else if (tdData1.account_id < tdData2.account_id) {
-                    return -1
-                } else {
-                    return 0
-                }
+                const result = tdData1.source_name.localeCompare(tdData2.source_name);
+                return result === 0 ? tdData1.account_id.localeCompare(tdData2.account_id) : result;
             })
 
         resolve(tdList)
@@ -44,14 +39,7 @@ export const getMdList = (): Promise<Md[]> => {
                 }
             })
             .sort((mdData1: any, mdData2: any) => {
-                if (mdData1.source_name > mdData2.source_name) {
-                    return 1
-                } else if (mdData1.source_name < mdData2.source_name) {
-                    return -1
-                } else {
-                    return 0
-                }
-
+                return mdData1.source_name.localeCompare(mdData2.source_name);
             })
             
         resolve(mdList)

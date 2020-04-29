@@ -152,6 +152,7 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
         strategy_position.holder_uid = strategy_uid;
         strategy_position.client_id = strategy_book->asset.client_id;
         strategy_position.ledger_category = LedgerCategory::Strategy;
+        strategy_position.update_time = trigger_time;
       }
     }
   };
@@ -200,7 +201,9 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
 void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions) {
   auto writer = get_writer(dest);
   for (const auto &pair : positions) {
-    writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
+    if (pair.second.volume > 0) {
+      writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
+    }
   }
 }
 

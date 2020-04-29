@@ -1,25 +1,25 @@
-
 import moment from 'moment';
 
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
-import { history } from '__gUtils/kungfuUtils';
-import { writeCSV } from '__gUtils/fileUtils';
+import {decodeKungfuLocation} from '__io/kungfu/watcher';
+import {history} from '__gUtils/kungfuUtils';
+import {writeCSV} from '__gUtils/fileUtils';
 
 export default {
     props: {
         currentId: {
             type: String,
-            default:''
+            default: ''
         },
-        
+
         moduleType: {
             type: String,
-            default:''
+            default: ''
         },
-        
+
         kungfuData: {
             type: Array,
-            default: () => {}
+            default: () => {
+            }
         },
 
         addTime: {
@@ -27,36 +27,36 @@ export default {
             default: 0
         }
     },
-    
-    data () {
+
+    data() {
         return {
             rendererTable: false,
             searchKeyword: "",
             filter: {
                 id: '', //对id、代码id、策略id模糊查询
-                dateRange: null 
+                dateRange: null
             },
-            
+
             dateRangeDialogVisiblity: false,
             exportLoading: false,
-            
+
             tableData: Object.freeze([]),
 
         }
     },
 
-    mounted () {
+    mounted() {
         this.rendererTable = true;
         this.resetData();
     },
 
     computed: {
 
-        schema () {
+        schema() {
             return []
         },
 
-        currentTitle () {
+        currentTitle() {
             return this.currentId ? `${this.currentId}` : ''
         },
     },
@@ -68,12 +68,12 @@ export default {
     },
 
     methods: {
-        handleRefresh(){
+        handleRefresh() {
             this.resetData();
         },
 
         //选择日期以及保存
-        handleConfirmDateRange(dateRange){
+        handleConfirmDateRange(dateRange) {
             const from = moment(dateRange[0]).format('YYYY-MM-DD');
             const to = moment(dateRange[1]).add(1, 'day').format('YYYY-MM-DD');
             this.exportLoading = true;
@@ -92,17 +92,17 @@ export default {
                     } else if (this.moduleType === 'strategy') {
                         return kungfuLocation.name === this.currentId
                     }
-                    
-                    return false                
+
+                    return false
                 })
-                
+
                 this.exportLoading = false;
                 this.dateRangeDialogVisiblity = false;
 
                 this.$saveFile({
                     title: exportTitle,
                 }).then(filename => {
-                    if(!filename) return;
+                    if (!filename) return;
                     writeCSV(filename, targetListAfterFilter)
                 })
 
@@ -118,41 +118,43 @@ export default {
             return true;
         },
 
-        renderCellClass (prop, item) {
-            switch(prop){
+        renderCellClass(prop, item) {
+            switch (prop) {
                 case 'side':
-                    if (item.side === '买') return 'red'
-                    else if (item.side === '卖') return 'green'
-                    break
+                    if (item.side === '买') return 'red';
+                    else if (item.side === '卖') return 'green';
+                    break;
                 case 'offset':
-                    if (item.offset === '开仓') return 'red'
-                    else if (item.offset === '平仓') return 'green'
-                    break
+                    if (item.offset === '开仓') return 'red';
+                    else if (item.offset === '平仓') return 'green';
+                    break;
                 case 'statusName':
-                    if (item.statusName === '错误') return 'red'
-                    else if (['已成交', '部分撤单', '已撤单'].indexOf(item.statusName) != -1) return 'green'
-                    else return 'gray'
+                    if (item.statusName === '错误') return 'red';
+                    else if (['已成交', '部分撤单', '已撤单'].indexOf(item.statusName) !== -1) return 'green';
+                    else return 'gray';
                 case 'direction':
-                    if (item.direction === '多') return 'red'
-                    else if (item.direction === '空') return 'green'
-                    break
+                    if (item.direction === '多') return 'red';
+                    else if (item.direction === '空') return 'green';
+                    break;
                 case 'realizedPnl':
-                    if (+item.realizedPnl > 0) return 'red'
-                    else if (+item.realizedPnl < 0) return 'green'
-                    break
+                    if (+item.realizedPnl > 0) return 'red';
+                    else if (+item.realizedPnl < 0) return 'green';
+                    break;
                 case 'unRealizedPnl':
-                    if (+item.unRealizedPnl > 0) return 'red'
-                    else if (+item.unRealizedPnl < 0) return 'green'
-                    break
+                    if (+item.unRealizedPnl > 0) return 'red';
+                    else if (+item.unRealizedPnl < 0) return 'green';
+                    break;
                 case 'lastPrice':
-                    if (+item.lastPrice > +item.avgPrice) return 'red'
-                    else if (+item.lastPrice < +item.avgPrice) return 'green'
+                    if (+item.lastPrice > +item.avgPrice) {
+                        return item.direction === '多' ? 'red' : 'green';
+                    } else if (+item.lastPrice < +item.avgPrice) {
+                        return item.direction === '多' ? 'green' : 'red';
+                    }
                     break;
                 case 'clientId':
                 case 'accountId':
-                    if (item.clientId.toLowerCase().includes('手动')) return 'blue'
-                    break
-
+                    if (item.clientId.toLowerCase().includes('手动')) return 'blue';
+                    break;
             }
         }
     }

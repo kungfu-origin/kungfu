@@ -129,7 +129,7 @@ void Bookkeeper::try_update_position(const Position &position) {
   }
   auto last_price = target_position.last_price;
   target_position = position;
-  target_position.last_price = last_price;
+  target_position.last_price = std::max(last_price, target_position.last_price);
   if (accounting_methods_.find(target_position.instrument_type) == accounting_methods_.end()) {
     return;
   }

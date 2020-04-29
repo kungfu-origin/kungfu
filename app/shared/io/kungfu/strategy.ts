@@ -14,7 +14,7 @@ export const getStrategyList = (): Promise<Strategy[]> => {
                 }
             })
             .sort((strategyData1: any, strategyData2: any) => {
-                return strategyData1.add_time - strategyData2.add_time
+                return strategyData1.strategy_id.localeCompare(strategyData2.strategy_id);
             })
                     
         resolve(strategyList)

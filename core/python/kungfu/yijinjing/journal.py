@@ -195,7 +195,9 @@ def find_sessions(ctx):
     sessions_df = pandas.DataFrame(columns=[
         'id', 'mode', 'category', 'group', 'name', 'begin_time', 'end_time', 'closed', 'duration'
     ])
-    for session in session_finder.find_sessions_for(ctx.app_location):
+    for_app = 'app_location' in dir(ctx)
+    sessions = session_finder.find_sessions_for(ctx.app_location) if for_app else session_finder.find_sessions()
+    for session in sessions:
         sessions_df.loc[len(sessions_df)] = [
             len(sessions_df) + 1, yjj.get_mode_name(session.mode), yjj.get_category_name(session.category), session.group, session.name,
             session.begin_time, session.end_time, session.end_time > 0,

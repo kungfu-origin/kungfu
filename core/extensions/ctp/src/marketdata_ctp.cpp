@@ -21,14 +21,10 @@ MarketDataCTP::MarketDataCTP(bool low_latency, locator_ptr locator, const std::s
 
 void MarketDataCTP::on_start() {
   broker::MarketData::on_start();
-
-  if (api_ == nullptr) {
-    std::string runtime_folder = get_runtime_folder();
-    api_ = CThostFtdcMdApi::CreateFtdcMdApi(runtime_folder.c_str());
-    api_->RegisterSpi(this);
-    api_->RegisterFront((char *)config_.md_uri.c_str());
-    api_->Init();
-  }
+  api_ = CThostFtdcMdApi::CreateFtdcMdApi(get_runtime_folder().c_str());
+  api_->RegisterSpi(this);
+  api_->RegisterFront((char *)config_.md_uri.c_str());
+  api_->Init();
 }
 
 bool MarketDataCTP::subscribe(const std::vector<InstrumentKey> &instruments) {
@@ -71,14 +67,14 @@ void MarketDataCTP::OnFrontDisconnected(int nReason) {
 
 void MarketDataCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
                                    int nRequestID, bool bIsLast) {
-  if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    update_broker_state(BrokerState::LoginFailed);
-    SPDLOG_ERROR("failed to login [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-  } else {
+  if (pRspInfo->ErrorID == 0) {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("login successfully with BrokerID {} UserID {} at TradingDay {} ", pRspUserLogin->BrokerID,
                 pRspUserLogin->UserID, pRspUserLogin->TradingDay);
+  } else {
+    update_broker_state(BrokerState::LoginFailed);
+    SPDLOG_ERROR("failed to login [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
   }
 }
 
@@ -87,18 +83,12 @@ void MarketDataCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CTho
 
 void MarketDataCTP::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
                                        CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  SPDLOG_INFO("subscribed {}", pSpecificInstrument->InstrumentID);
-  if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("failed to subscribe [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-  }
+  SPDLOG_INFO("subscribed {} [{}] {}", pSpecificInstrument->InstrumentID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 }
 
 void MarketDataCTP::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument,
                                          CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
-  SPDLOG_INFO("unsubscribed {}", pSpecificInstrument->InstrumentID);
-  if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("failed to unsubscribe [{}] {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-  }
+  SPDLOG_INFO("unsubscribed {} [{}] {}", pSpecificInstrument->InstrumentID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 }
 
 void MarketDataCTP::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
