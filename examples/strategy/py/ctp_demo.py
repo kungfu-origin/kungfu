@@ -21,10 +21,10 @@ EXCHANGE = Exchange.SHFE
 
 # 启动前回调，添加交易账户，订阅行情，策略初始化计算等
 def pre_start(context):
-    context.add_account(SOURCE, ACCOUNT, 100000.0)
-    context.subscribe(SOURCE, ["rb2005", "rb2010"], Exchange.SHFE)
-    context.subscribe(SOURCE, ["BB2005", "BB2006", "EG2005", "EG2006"], Exchange.DCE)
+    context.add_account(Source.CTP, ACCOUNT, 100000.0)
+    context.subscribe(Source.CTP, ["rb2005", "rb2010"], Exchange.SHFE)
     context.subscribe(Source.BAR, ["rb2005", "rb2010"], Exchange.SHFE)
+    context.subscribe(Source.CTP, ["BB2005", "BB2006", "EG2005", "EG2006"], Exchange.DCE)
 
 
 # 启动准备工作完成后回调，策略只能在本函数回调以后才能进行获取持仓和报单
