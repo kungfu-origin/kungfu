@@ -40,12 +40,14 @@ function createWindow () {
 	// and load the index.html of the app.
 	if(isDevelopment){
 		mainWindow.loadURL('http://localhost:9090')
-		mainWindow.webContents.on("did-frame-finish-load", () => {
-			mainWindow.webContents.once("devtools-opened", () => {
-				mainWindow.focus();
+		if (mainWindow && mainWindow.webContents) {
+			mainWindow.webContents.on("did-frame-finish-load", () => {
+				mainWindow.webContents.once("devtools-opened", () => {
+					mainWindow.focus();
+				});
+				mainWindow.webContents.openDevTools();
 			});
-			mainWindow.webContents.openDevTools();
-		});
+		}
 	}else{
 		const filePath = path.join(__dirname, "index.html");
 		mainWindow.loadFile(filePath)
@@ -210,8 +212,10 @@ function showKungfuInfo() {
 
 //开启发送renderprocess 打开设置弹窗
 function openSettingDialog() {
-	mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
-	mainWindow.focus()
+	if (mainWindow && mainWindow.webContents) {
+		mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
+		mainWindow.focus()
+	}
 }
 
 //退出提示
