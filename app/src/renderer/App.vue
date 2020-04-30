@@ -98,7 +98,7 @@ export default {
 
         bindOpenDevToolsEvent () {
 
-            remote.globalShortcut.register('CommandOrControl+I', () => {
+            remote.globalShortcut.register('CommandOrControl+Alt+I', () => {
                 remote.BrowserWindow.getFocusedWindow().webContents.openDevTools()
             })
 
