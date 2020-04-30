@@ -1,7 +1,7 @@
 
 // Modules to control application life and create native browser window
 const path = require('path');
-const { app, BrowserWindow, Menu, dialog } = require('electron');
+const { app, globalShortcut, BrowserWindow, Menu, dialog } = require('electron');
 const electron = require('electron');
 //base setting, init db
 const { initConfig } = require('__assets/base');
@@ -104,7 +104,11 @@ app.on('ready', () => {
 	appReady = true;
 	logger.info('app ready', 'appReady', appReady, 'killExtraFinished', killExtraFinished)
 
-	if(appReady && killExtraFinished) createWindow()
+	if(appReady && killExtraFinished) createWindow();
+
+	globalShortcut.register('CommandOrControl+Shift+I', () => {
+		BrowserWindow.getFocusedWindow().webContents.openDevTools()
+	})
 })
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
@@ -135,6 +139,9 @@ app.on('activate', function () {
 })
 
 app.on('will-quit', async (e) => {
+
+	globalShortcut.unregisterAll()
+
 	if(allowQuit) return
 	if(process.env.APP_TYPE === 'test') {
 		try {

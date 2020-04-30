@@ -24,7 +24,6 @@
 </template>
 <script>
 import path from 'path';
-import { remote } from 'electron'
 
 import { mapState } from 'vuex';
 import { ipcRenderer } from 'electron';
@@ -53,7 +52,6 @@ export default {
     },
 
     mounted(){
-        this.bindOpenDevToolsEvent();
         this.removeLoadingMask();
         this.removeKeyDownEvent();
         //ipc event
@@ -96,17 +94,6 @@ export default {
 
     methods: {
 
-        bindOpenDevToolsEvent () {
-
-            remote.globalShortcut.register('CommandOrControl+Shift+I', () => {
-                remote.BrowserWindow.getFocusedWindow().webContents.openDevTools()
-            })
-
-            window.addEventListener('beforeunload', () => {
-                remote.globalShortcut.unregisterAll()
-            })
-        },
-
         removeLoadingMask () {
             //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
             if(window.location.hash.includes('code')) return 
@@ -119,6 +106,13 @@ export default {
             if(window.location.hash.includes('code')) return;
 
             let timer = setInterval(() => {
+                // for coder
+                if (!watcher.isLive) {
+                    this.watcherLoading = false;
+                    clearInterval(timer)
+                    return;
+                }
+
                 const watcherStatus = watcher.isLive();
                 if (!watcherStatus) this.watcherLoading = true;
                 else {
