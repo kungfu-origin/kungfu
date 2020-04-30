@@ -32,8 +32,10 @@ def pre_stop(context):
 def post_stop(context):
     context.log.info('strategy down')
 
+
 def on_bar(context, bar):
     context.log.info("[on_bar] {}".format(bar))
+
 
 def on_quote(context, quote):
     # context.logger.info(f"quote: {quote}")

@@ -86,10 +86,14 @@ void Client::renew(int64_t trigger_time, const location_ptr &md_location) {
   auto writer = app_.get_writer(md_location->uid);
   for (const auto &pair : instrument_keys_) {
     auto &instrument_key = pair.second;
-    if (instrument_md_locations_.find(instrument_key.key) == instrument_md_locations_.end()) {
-      continue;
+    location_ptr source_location = {};
+    if (exchange_md_locations_.find(instrument_key.exchange_id) != exchange_md_locations_.end()) {
+      source_location = exchange_md_locations_.at(instrument_key.exchange_id);
     }
-    if (md_location->uid == instrument_md_locations_.at(instrument_key.key)->uid) {
+    if (instrument_md_locations_.find(instrument_key.key) != instrument_md_locations_.end()) {
+      source_location = instrument_md_locations_.at(instrument_key.key);
+    }
+    if (source_location and md_location->uid == source_location->uid) {
       writer->write(trigger_time, instrument_key);
     }
   }
