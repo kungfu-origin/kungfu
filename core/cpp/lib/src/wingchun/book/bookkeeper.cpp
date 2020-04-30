@@ -54,6 +54,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   restore(app_.get_state_bank());
   on_trading_day(app_.get_trading_day());
 
+  events | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
   events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
   events | is(InstrumentKey::tag) | $$(update_book(event, event->data<InstrumentKey>()));
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
@@ -68,9 +69,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
 
 void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Instrument>]) {
-    auto &state = pair.second;
-    auto &instrument = state.data;
-    instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
+    update_instrument(pair.second.data);
   }
   for (auto &pair : state_bank[boost::hana::type_c<Commission>]) {
     auto &state = pair.second;
@@ -112,28 +111,8 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   return book;
 }
 
-void Bookkeeper::try_update_asset(const Asset &asset) {
-  if (app_.has_location(asset.holder_uid)) {
-    get_book(asset.holder_uid)->asset = asset;
-  }
-}
-
-void Bookkeeper::try_update_position(const Position &position) {
-  if (not app_.has_location(position.holder_uid)) {
-    return;
-  }
-  auto book = get_book(position.holder_uid);
-  auto &target_position = book->get_position_for(position.direction, position);
-  if (target_position.update_time >= position.update_time) {
-    return;
-  }
-  auto last_price = target_position.last_price;
-  target_position = position;
-  target_position.last_price = std::max(last_price, target_position.last_price);
-  if (accounting_methods_.find(target_position.instrument_type) == accounting_methods_.end()) {
-    return;
-  }
-  accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
+void Bookkeeper::update_instrument(const longfist::types::Instrument &instrument) {
+  instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
@@ -161,5 +140,29 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
       book->get_position_for(Direction::Short, quote).update_time = event->gen_time();
     }
   }
+}
+
+void Bookkeeper::try_update_asset(const Asset &asset) {
+  if (app_.has_location(asset.holder_uid)) {
+    get_book(asset.holder_uid)->asset = asset;
+  }
+}
+
+void Bookkeeper::try_update_position(const Position &position) {
+  if (not app_.has_location(position.holder_uid)) {
+    return;
+  }
+  auto book = get_book(position.holder_uid);
+  auto &target_position = book->get_position_for(position.direction, position);
+  if (target_position.update_time >= position.update_time) {
+    return;
+  }
+  auto last_price = target_position.last_price;
+  target_position = position;
+  target_position.last_price = std::max(last_price, target_position.last_price);
+  if (accounting_methods_.find(target_position.instrument_type) == accounting_methods_.end()) {
+    return;
+  }
+  accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
 }
 } // namespace kungfu::wingchun::book
