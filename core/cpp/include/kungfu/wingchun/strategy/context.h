@@ -8,10 +8,8 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
-#include <kungfu/wingchun/algo/algo.h>
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
-#include <kungfu/wingchun/common.h>
 #include <kungfu/wingchun/strategy/strategy.h>
 
 namespace kungfu::wingchun::strategy {

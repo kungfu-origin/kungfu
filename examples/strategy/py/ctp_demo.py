@@ -9,7 +9,8 @@ import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
 
 SOURCE = Source.CTP
-ACCOUNT = "089270"
+# ACCOUNT = "089270"
+ACCOUNT = "115796"
 # tickers = ["AG2005", "AG2006", "ZN2006", "ZN2009"]
 # tickers = ["rb1911","rb1912"]
 # tickers = ["rb1911","c1911","MA1911","rb1912"]
@@ -22,14 +23,21 @@ EXCHANGE = Exchange.SHFE
 # 启动前回调，添加交易账户，订阅行情，策略初始化计算等
 def pre_start(context):
     context.add_account(Source.CTP, ACCOUNT, 100000.0)
-    context.subscribe(Source.CTP, ["rb2005", "rb2010"], Exchange.SHFE)
-    context.subscribe(Source.BAR, ["rb2005", "rb2010"], Exchange.SHFE)
-    context.subscribe(Source.CTP, ["BB2005", "BB2006", "EG2005", "EG2006"], Exchange.DCE)
+    context.subscribe(Source.CTP, ["rb2005"], Exchange.SHFE)
+    # context.subscribe(Source.BAR, ["rb2005", "rb2010"], Exchange.SHFE)
+    # context.subscribe(Source.CTP, ["BB2005", "BB2006", "EG2005", "EG2006"], Exchange.DCE)
 
 
 # 启动准备工作完成后回调，策略只能在本函数回调以后才能进行获取持仓和报单
 def post_start(context):
     context.log.warning("post_start")
+    for key in context.book.long_positions:
+        context.log.info(f'key {key}')
+        pos = context.book.long_positions[key]
+        context.log.info(f'close long position {pos}')
+        side = Side.Sell if pos.direction == Direction.Long else Side.Buy
+        context.insert_order(pos.instrument_id, pos.exchange_id, pos.account_id, pos.avg_open_price, pos.volume + 10, PriceType.Limit, side, Offset.Close)
+        context.log.info('closed')
     # context.add_timer(context.now() + 1*1000000000, log_book)
 
 

@@ -159,7 +159,7 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto holder_uid = book->asset.holder_uid;
-    if (book->asset.ledger_category == LedgerCategory::Account and has_channel(holder_uid, strategy_uid)) {
+    if (book->asset.ledger_category == LedgerCategory::Account and has_channel(strategy_uid, holder_uid)) {
       copy_positions(book->long_positions);
       copy_positions(book->short_positions);
     }
