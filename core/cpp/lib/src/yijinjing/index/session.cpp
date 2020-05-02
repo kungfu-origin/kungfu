@@ -34,7 +34,7 @@ int64_t session_finder::find_last_active_time(const data::location_ptr &source_l
   auto range = where(eq(&Session::location_uid, source_location->uid));
   auto order = order_by(&Session::begin_time).desc();
   auto sessions = session_storage_->get_all<Session>(range, order, limit(1));
-  return sessions.empty() ? INT64_MAX : sessions.front().end_time;
+  return sessions.empty() ? INT64_MIN : sessions.front().end_time;
 }
 
 SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
@@ -61,17 +61,17 @@ int64_t session_builder::find_last_active_time(const data::location_ptr &source_
 }
 
 Session &session_builder::open_session(const location_ptr &source_location, int64_t time) {
-  if (live_sessions_.find(source_location->uid) == live_sessions_.end()) {
-    Session session = {};
+  auto pair = live_sessions_.try_emplace(source_location->uid);
+  auto &session = pair.first->second;
+  if (pair.second) {
     session.location_uid = source_location->uid;
     session.category = source_location->category;
     session.group = source_location->group;
     session.name = source_location->name;
     session.mode = source_location->mode;
-    live_sessions_.emplace(session.location_uid, session);
   }
-  Session &session = live_sessions_.at(source_location->uid);
   session.begin_time = time;
+  session.end_time = time;
   session_storage_->replace(session);
   return session;
 }
@@ -80,8 +80,7 @@ void session_builder::close_session(const location_ptr &source_location, int64_t
   if (live_sessions_.find(source_location->uid) == live_sessions_.end()) {
     return;
   }
-  Session &session = live_sessions_.at(source_location->uid);
-  session_storage_->replace(session);
+  session_storage_->replace(live_sessions_.at(source_location->uid));
 }
 
 void session_builder::update_session(const frame_ptr &frame) {

@@ -172,8 +172,8 @@ protected:
 private:
   index::session_finder session_finder_;
   bool started_ = false;
-  int64_t last_active_time_ = INT64_MAX;
-  int64_t checkin_time_ = INT64_MAX;
+  int64_t last_active_time_ = INT64_MIN;
+  int64_t checkin_time_ = INT64_MIN;
   int64_t trading_day_ = 0;
   int32_t timer_usage_count_ = 0;
   std::unordered_map<int, int64_t> timer_checkpoints_ = {};
