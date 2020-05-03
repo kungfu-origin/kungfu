@@ -1,5 +1,6 @@
 const readline = require('readline');
 const fs = require('fs-extra'); 
+const iconv = require('iconv-lite');
 
 //清空文件内容
 function clearFileContent(filePath) {
@@ -90,6 +91,7 @@ function dealMessage(line, searchKeyword){
                 return false;
             }
         }
+
         return messageData
     })
 }
@@ -109,6 +111,8 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
                 input: fs.createReadStream(logPath, {
                     start: startSize
                 })
+                .pipe(iconv.decodeStream('gbk'))
+                .pipe(iconv.encodeStream('utf8'))
             })
 
             lineReader.on('line', line => {

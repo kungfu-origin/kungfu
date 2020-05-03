@@ -1,6 +1,7 @@
 import readline from 'readline';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
+import iconv from 'iconv-lite';
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -286,15 +287,19 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
         // console.error(err)
         return false;
     }
-    const message = lineData.message;
+
+    const message = iconv.encode(lineData.message, 'utf8').toString();
+
     //message 提取 ‘\n’ 再循环
     return message.split('\n[').map((m: string, i: number) => {
         if(!m.length) return false;
         if(i > 0) m = '[' + m;
+        
         const messageList = m.split(']')
         const len = messageList.length;
         let messageData: LogMessageData;
-        switch(len){
+        
+        switch (len) {
             case 5:
                 messageData = {
                     updateTime: messageList[0].trim().slice(1).trim(),
@@ -314,7 +319,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
                 }
                 break;
             default:
-                if(len < 4){
+                if(len < 4) {
                     const type = lineData.type === 'err' ? 'error' 
                         : lineData.type === 'out' ? 'info' : lineData.type;
                     messageData = {
@@ -324,7 +329,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
                         action: '',
                         message: messageList.slice(0).join(']').trim()
                     }
-                }else{
+                } else {
                     messageData = {
                         updateTime: messageList[0].trim().slice(1).trim(),
                         type: messageList[1].trim().slice(1).trim(),
@@ -334,11 +339,13 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
                     }
                 }
         }
+
         if(searchKeyword && messageData.message.indexOf(searchKeyword) === -1 ){
             if(messageData.type.indexOf(searchKeyword) === -1){
                 return false;
             }
         }
+
         return messageData
     })
 }
@@ -388,6 +395,8 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
                 input: fs.createReadStream(logPath, {
                     start: startSize
                 })
+                .pipe(iconv.decodeStream('gbk'))
+                .pipe(iconv.encodeStream('utf8'))
             })
 
             lineReader.on('line', line => {
