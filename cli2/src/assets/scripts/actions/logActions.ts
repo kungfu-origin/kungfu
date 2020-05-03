@@ -12,6 +12,7 @@ const path = require('path');
 const { Tail } = require('tail');
 const moment = require('moment');
 const colors = require('colors');
+const iconv = require('iconv-lite');
 
 var logWather: any = null;
 
@@ -34,7 +35,10 @@ const dealLogMessage = (line: string, processId: string) => {
     } catch (err) {
         return false
     }
-    let messages = lineData.message.split('\n').filter((m: string) => m !== '');
+    
+    const allMessage = iconv.encode(lineData.message, 'utf8').toString();
+
+    let messages = allMessage.split('\n').filter((m: string) => m !== '');
     return messages.map((message: string) => {
         message = message.split('\n[').join('[')
 
