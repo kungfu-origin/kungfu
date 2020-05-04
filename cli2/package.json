@@ -44,6 +44,7 @@
     "cfonts": "2.4.5",
     "colors": "^1.3.3",
     "commander": "^2.20.0",
+    "encoding": "^0.1.12",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
     "fs-extra": "7.0.1",

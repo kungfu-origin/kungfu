@@ -1,8 +1,8 @@
 import readline from 'readline';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
-import iconv from 'iconv-lite';
 
+const encoding = require('encoding');
 const path = require("path");
 const fs = require('fs-extra');
 
@@ -288,7 +288,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
         return false;
     }
 
-    const message = iconv.encode(lineData.message, 'utf8').toString();
+    const message = encoding.convert(lineData.message, "UTF8","GBK").toString()
 
     //message 提取 ‘\n’ 再循环
     return message.split('\n[').map((m: string, i: number) => {
@@ -395,12 +395,13 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
                 input: fs.createReadStream(logPath, {
                     start: startSize
                 })
-                .pipe(iconv.decodeStream('gbk'))
-                .pipe(iconv.encodeStream('utf8'))
             })
 
             lineReader.on('line', line => {
-                const messageData = dealLogMessageMethod(line, searchKeyword)
+                
+                line = encoding.convert(line, "UTF8","GBK").toString();
+                const messageData = dealLogMessageMethod(line, searchKeyword);
+
                 if(!messageData) return;
                 messageData.kfForEach((msg: LogMessageData): void => {
                     if(!msg) return;

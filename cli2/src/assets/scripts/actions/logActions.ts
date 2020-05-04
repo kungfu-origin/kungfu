@@ -12,7 +12,7 @@ const path = require('path');
 const { Tail } = require('tail');
 const moment = require('moment');
 const colors = require('colors');
-const iconv = require('iconv-lite');
+const encoding = require('encoding');
 
 var logWather: any = null;
 
@@ -35,8 +35,8 @@ const dealLogMessage = (line: string, processId: string) => {
     } catch (err) {
         return false
     }
-    
-    const allMessage = iconv.encode(lineData.message, 'utf8').toString();
+
+    const allMessage = encoding.convert(lineData.message, "UTF8","GBK").toString()
 
     let messages = allMessage.split('\n').filter((m: string) => m !== '');
     return messages.map((message: string) => {
