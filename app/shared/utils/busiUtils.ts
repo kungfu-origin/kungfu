@@ -281,14 +281,15 @@ export const sum = (list: number[]): number => {
 
 export const dealLogMessage = (line: string, searchKeyword?: string):any => {
     let lineData: LogLineData;
+
     try{
         lineData = JSON.parse(line);
     }catch(err){
-        // console.error(err)
+        console.error(err)
         return false;
     }
 
-    const message = encoding.convert(lineData.message, "UTF8","GBK").toString()
+    const message = encoding.convert(lineData.message, "UTF8","GBK").toString();
 
     //message 提取 ‘\n’ 再循环
     return message.split('\n[').map((m: string, i: number) => {

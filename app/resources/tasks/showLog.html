@@ -183,7 +183,8 @@
     <script type="text/javascript">
     const path = require('path');
     const fs = require('fs-extra');
-    const ipc = require('electron').ipcRenderer
+    const ipc = require('electron').ipcRenderer;
+    const encoding = require('encoding');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
     const gaze = require('gaze');
@@ -203,6 +204,8 @@
     }
 
     function dealMessage(line) {
+        line = encoding.convert(line, "UTF8","GBK").toString();
+        
         let lineData;
         try{
             lineData = JSON.parse(line);
