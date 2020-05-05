@@ -79,7 +79,7 @@ export default {
             type: String,
             default: 'add'
         },
-        //选中柜台下的所有账户，字段用于弹窗检查account_id或者user_id是否重名的
+        //选中柜台下的所有账户，字段用于弹窗检查account_id或者account_id是否重名的
         mdTdList: {
             type: Array,
             default: () => []
@@ -252,7 +252,7 @@ export default {
             this.$emit('refreshData')
         },
 
-        //检查account_id或者user_id是否重复
+        //检查account_id或者account_id是否重复
         validateAccountId(rule, value, callback) {
             const t = this
             const index = t.mdTdList.findIndex(a => {

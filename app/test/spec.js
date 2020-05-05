@@ -70,7 +70,7 @@ describe('test add account', function () {
 		})
 		.then(async () => {
 			const accounts0 = config.accounts.xtp[0]
-			const userId = accounts0.user_id;
+			const userId = accounts0.account_id;
 			const targetAccount = await t.app.client.$$(`.accounts-table .xtp_${userId}`)
 			return assert.equal(targetAccount.length, 1)
 		})

@@ -25,20 +25,20 @@ MarketDataXTP::~MarketDataXTP() {
 void MarketDataXTP::on_start() {
   MarketData::on_start();
   auto md_ip = config_.md_ip.c_str();
-  auto user_id = config_.user_id.c_str();
+  auto account_id = config_.account_id.c_str();
   auto password = config_.password.c_str();
   auto protocol_type = get_xtp_protocol_type(config_.protocol);
   std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", user_id, config_.protocol, md_ip, config_.md_port);
+  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", account_id, config_.protocol, md_ip, config_.md_port);
   api_ = XTP::API::QuoteApi::CreateQuoteApi(config_.client_id, runtime_folder.c_str());
   if (config_.protocol == "udp") {
     api_->SetUDPBufferSize(config_.buffer_size);
   }
   api_->RegisterSpi(this);
-  if (api_->Login(md_ip, config_.md_port, user_id, password, protocol_type) == 0) {
+  if (api_->Login(md_ip, config_.md_port, account_id, password, protocol_type) == 0) {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
-    SPDLOG_INFO("login success! (user_id) {}", config_.user_id);
+    SPDLOG_INFO("login success! (account_id) {}", config_.account_id);
   } else {
     update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("failed to login, [{}] {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);

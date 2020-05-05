@@ -10,7 +10,7 @@
 namespace kungfu::wingchun::xtp {
 struct TDConfiguration {
   int client_id;
-  std::string user_id;
+  std::string account_id;
   std::string password;
   std::string software_key;
   std::string td_ip;
@@ -19,7 +19,7 @@ struct TDConfiguration {
 
 inline void from_json(const nlohmann::json &j, TDConfiguration &c) {
   j.at("client_id").get_to(c.client_id);
-  j.at("user_id").get_to(c.user_id);
+  j.at("account_id").get_to(c.account_id);
   j.at("password").get_to(c.password);
   j.at("software_key").get_to(c.software_key);
   j.at("td_ip").get_to(c.td_ip);
@@ -28,7 +28,7 @@ inline void from_json(const nlohmann::json &j, TDConfiguration &c) {
 
 struct MDConfiguration {
   int client_id;
-  std::string user_id;
+  std::string account_id;
   std::string password;
   std::string md_ip;
   int md_port;
@@ -38,7 +38,7 @@ struct MDConfiguration {
 
 inline void from_json(const nlohmann::json &j, MDConfiguration &c) {
   j.at("client_id").get_to(c.client_id);
-  j.at("user_id").get_to(c.user_id);
+  j.at("account_id").get_to(c.account_id);
   j.at("password").get_to(c.password);
   j.at("md_ip").get_to(c.md_ip);
   j.at("md_port").get_to(c.md_port);

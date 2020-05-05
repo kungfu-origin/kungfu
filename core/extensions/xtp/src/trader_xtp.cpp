@@ -202,13 +202,13 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
 void TraderXTP::on_start() {
   Trader::on_start();
   std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config_.user_id, config_.td_ip, config_.td_port);
+  SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config_.account_id, config_.td_ip, config_.td_port);
   api_ = XTP::API::TraderApi::CreateTraderApi(config_.client_id, runtime_folder.c_str());
   api_->RegisterSpi(this);
   api_->SubscribePublicTopic(XTP_TERT_QUICK);
   api_->SetSoftwareVersion("1.1.0");
   api_->SetSoftwareKey(config_.software_key.c_str());
-  session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.user_id.c_str(), config_.password.c_str(),
+  session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.account_id.c_str(), config_.password.c_str(),
                             XTP_PROTOCOL_TCP);
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);

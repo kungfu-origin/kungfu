@@ -4,13 +4,13 @@
 		"config": {
 			"name": "sim",
 			"type": "Sim",
-			"key": "user_id",
+			"key": "account_id",
 			"td_config": [
 				{
-					"key": "user_id",
-					"name": "user_id",
+					"key": "account_id",
+					"name": "account_id",
 					"type": "str",
-					"errMsg": "请填写账户 user_id",
+					"errMsg": "请填写账户 account_id",
 					"required": true,
                     "validator": ["noUnderlineValidator"]
 				},

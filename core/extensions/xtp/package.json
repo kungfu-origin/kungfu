@@ -4,10 +4,10 @@
         "config": {
             "name": "xtp",
             "type": "Stock",
-            "key": "user_id",
+            "key": "account_id",
             "td_config": [{
-                    "key": "user_id",
-                    "name": "user_id",
+                    "key": "account_id",
+                    "name": "account_id",
                     "type": "str",
                     "errMsg": "请填写账户",
                     "required": true,
@@ -60,8 +60,8 @@
               ],
           "md_config": [
             {
-              "key": "user_id",
-              "name": "user_id",
+              "key": "account_id",
+              "name": "account_id",
               "type": "str",
               "errMsg": "请填写账户",
               "required": true,
