@@ -1,6 +1,5 @@
 const readline = require('readline');
 const fs = require('fs-extra'); 
-const encoding = require('encoding');
 
 //清空文件内容
 function clearFileContent(filePath) {
@@ -114,7 +113,6 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
             })
 
             lineReader.on('line', line => {
-                line = encoding.convert(line, "UTF8","GBK").toString()
                 const messageData = dealMessageFunc(line, searchKeyword)
                 if(!messageData || !messageData.length) return;
                 messageData.forEach(msg => {

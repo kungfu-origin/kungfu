@@ -160,7 +160,6 @@
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "electron-updater": "^4.0.6",
-    "encoding": "^0.1.12",
     "fkill": "^6.1.0",
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",

@@ -12,7 +12,6 @@ const path = require('path');
 const { Tail } = require('tail');
 const moment = require('moment');
 const colors = require('colors');
-const encoding = require('encoding');
 
 var logWather: any = null;
 
@@ -36,9 +35,7 @@ const dealLogMessage = (line: string, processId: string) => {
         return false
     }
 
-    const allMessage = encoding.convert(lineData.message, "UTF8","GBK").toString()
-
-    let messages = allMessage.split('\n').filter((m: string) => m !== '');
+    let messages = lineData.message.split('\n').filter((m: string) => m !== '');
     return messages.map((message: string) => {
         message = message.split('\n[').join('[')
 

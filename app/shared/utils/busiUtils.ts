@@ -2,7 +2,6 @@ import readline from 'readline';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
 
-const encoding = require('encoding');
 const path = require("path");
 const fs = require('fs-extra');
 
@@ -289,7 +288,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
         return false;
     }
 
-    const message = encoding.convert(lineData.message, "UTF8","GBK").toString();
+    const message = lineData.message;
 
     //message 提取 ‘\n’ 再循环
     return message.split('\n[').map((m: string, i: number) => {
@@ -399,8 +398,6 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
             })
 
             lineReader.on('line', line => {
-                
-                line = encoding.convert(line, "UTF8","GBK").toString();
                 const messageData = dealLogMessageMethod(line, searchKeyword);
 
                 if(!messageData) return;
