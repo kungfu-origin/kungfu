@@ -32,7 +32,7 @@ class Strategy(wc.Strategy):
 
     def __get_account_book(self, source, account):
         location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
-        return self.ctx.books[location.uid]
+        return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     def __init_strategy(self, path):
         strategy_dir = os.path.dirname(path)
