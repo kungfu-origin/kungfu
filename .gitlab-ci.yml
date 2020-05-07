@@ -6,6 +6,7 @@ build_win:
     - windows
   script:
     - yarn install
+    - yarn clean
     - yarn build
   only:
     - dev
@@ -23,6 +24,7 @@ build_centos:
       - app/build/app/*.rpm
   script:
     - yarn install
+    - yarn clean
     - yarn build
   only:
     - dev
@@ -33,6 +35,7 @@ build_macosx:
     - macosx
   script:
     - yarn install
+    - yarn clean
     - yarn build
   only:
     - dev
