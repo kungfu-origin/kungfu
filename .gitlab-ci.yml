@@ -9,9 +9,8 @@ build_win:
     - yarn clean
     - yarn build
   only:
-    - dev
-    - release
-    - 2.2
+    - branches
+    - tags
   artifacts:
     expire_in: 1 day
     paths:
@@ -29,9 +28,8 @@ build_centos:
     - yarn clean
     - yarn build
   only:
-    - dev
-    - release
-    - 2.2
+    - branches
+    - tags
 build_macosx:
   stage: build
   tags:
@@ -41,9 +39,8 @@ build_macosx:
     - yarn clean
     - yarn build
   only:
-    - dev
-    - release
-    - 2.2
+    - branches
+    - tags
   artifacts:
     expire_in: 1 day
     paths:
