@@ -10,6 +10,8 @@ build_win:
     - yarn build
   only:
     - dev
+    - release
+    - 2.2
   artifacts:
     expire_in: 1 day
     paths:
@@ -28,7 +30,8 @@ build_centos:
     - yarn build
   only:
     - dev
-    - cli2_dev
+    - release
+    - 2.2
 build_macosx:
   stage: build
   tags:
@@ -39,6 +42,8 @@ build_macosx:
     - yarn build
   only:
     - dev
+    - release
+    - 2.2
   artifacts:
     expire_in: 1 day
     paths:
