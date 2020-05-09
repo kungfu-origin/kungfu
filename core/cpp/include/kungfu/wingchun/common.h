@@ -257,7 +257,8 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
   } else if (product == "wh" || product == "pm" || product == "cf" || product == "sr" || product == "oi" ||
              product == "ri" || product == "rs" || product == "rm" || product == "jr" || product == "lr" ||
              product == "cy" || product == "ap" || product == "cj" || product == "ta" || product == "ma" ||
-             product == "zc" || product == "sf" || product == "sm" || product == "ur") {
+             product == "zc" || product == "sf" || product == "sm" || product == "ur" || product == "fg" ||
+             product == "sa") {
     return EXCHANGE_CZCE;
   } else if (product == "cu" || product == "al" || product == "zn" || product == "pb" || product == "ni" ||
              product == "sn" || product == "au" || product == "ag" || product == "rb" || product == "wr" ||
