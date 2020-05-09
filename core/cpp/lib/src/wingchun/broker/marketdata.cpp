@@ -18,5 +18,18 @@ void MarketData::on_start() {
   Broker::on_start();
   events_ | is(SubscribeAll::tag) | $$(subscribe_all());
   events_ | is(InstrumentKey::tag) | $$(subscribe({event->data<InstrumentKey>()}));
+  events_ | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
+}
+
+bool MarketData::has_instrument(const std::string& instrument_id) const {
+  return instruments_.find(instrument_id) != instruments_.end();
+}
+
+const Instrument &MarketData::get_instrument(const std::string& instrument_id) const {
+  return instruments_.at(instrument_id);
+}
+
+void MarketData::update_instrument(Instrument instrument) {
+  instruments_.emplace(instrument.instrument_id, instrument);
 }
 } // namespace kungfu::wingchun::broker

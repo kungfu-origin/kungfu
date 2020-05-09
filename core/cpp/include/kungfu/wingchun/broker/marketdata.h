@@ -25,6 +25,16 @@ public:
   virtual bool subscribe_all() = 0;
 
   virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
+
+protected:
+  bool has_instrument(const std::string& instrument_id) const;
+
+  const longfist::types::Instrument &get_instrument(const std::string& instrument_id) const;
+
+private:
+  std::unordered_map<std::string, longfist::types::Instrument> instruments_ = {};
+
+  void update_instrument(longfist::types::Instrument instrument);
 };
 } // namespace kungfu::wingchun::broker
 

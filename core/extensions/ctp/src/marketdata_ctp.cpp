@@ -94,6 +94,12 @@ void MarketDataCTP::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpe
 void MarketDataCTP::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
   auto writer = get_writer(location::PUBLIC);
   Quote &quote = writer->open_data<Quote>(now());
+  if (has_instrument(pDepthMarketData->InstrumentID)) {
+    auto &instrument = get_instrument(pDepthMarketData->InstrumentID);
+    quote.exchange_id = instrument.exchange_id;
+  } else {
+    strcpy(quote.exchange_id, get_exchange_id_from_future_instrument_id(pDepthMarketData->InstrumentID).c_str());
+  }
   from_ctp(*pDepthMarketData, quote);
   writer->close_data();
 }

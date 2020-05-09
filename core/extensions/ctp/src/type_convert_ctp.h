@@ -184,7 +184,6 @@ inline void from_ctp(const CThostFtdcDepthMarketDataField &ori, Quote &des) {
   strcpy(des.source_id, SOURCE_CTP);
   strcpy(des.trading_day, ori.TradingDay);
   strcpy(des.instrument_id, ori.InstrumentID);
-  strcpy(des.exchange_id, get_exchange_id_from_future_instrument_id(std::string(ori.InstrumentID)).c_str());
   des.instrument_type = InstrumentType::Future;
   des.data_time = nsec_from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec);
   des.last_price = ori.LastPrice;
