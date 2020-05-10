@@ -27,6 +27,8 @@ public:
   virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
 protected:
+  void on_react() override;
+
   bool has_instrument(const std::string& instrument_id) const;
 
   const longfist::types::Instrument &get_instrument(const std::string& instrument_id) const;

@@ -18,11 +18,12 @@ public:
 
   ~Broker() override = default;
 
-  void on_start() override;
-
   std::string get_runtime_folder();
 
   void update_broker_state(longfist::enums::BrokerState state);
+
+protected:
+  void on_start() override;
 
 private:
   volatile longfist::enums::BrokerState state_;

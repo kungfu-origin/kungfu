@@ -21,10 +21,6 @@ Broker::Broker(yijinjing::data::location_ptr location, bool low_latency)
   log::copy_log_settings(get_home(), get_home()->name);
 }
 
-void Broker::on_start() {
-  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag) | $$(update_broker_state(state_));
-}
-
 std::string Broker::get_runtime_folder() { return get_locator()->layout_dir(get_home(), layout::LOG); }
 
 void Broker::update_broker_state(BrokerState state) {
@@ -33,5 +29,9 @@ void Broker::update_broker_state(BrokerState state) {
   BrokerStateUpdate &update = writer->open_data<BrokerStateUpdate>();
   update.state = state_;
   writer->close_data();
+}
+
+void Broker::on_start() {
+  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag) | $$(update_broker_state(state_));
 }
 } // namespace kungfu::wingchun::broker
