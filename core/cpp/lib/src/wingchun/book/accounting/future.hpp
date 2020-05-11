@@ -109,6 +109,9 @@ public:
   }
 
   void apply_order(Book_ptr &book, const Order &order) override {
+    if (book->orders.find(order.order_id) == book->orders.end()) {
+      book->orders.emplace(order.order_id, order);
+    }
     if (order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
         order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
         order.volume_left > 0) {
@@ -188,6 +191,8 @@ private:
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
     book->asset.avail -= commission;
+    book->asset.avail += frozen_margin;
+    book->asset.avail -= margin;
     book->asset.accumulated_fee += commission;
     book->asset.intraday_fee += commission;
   }

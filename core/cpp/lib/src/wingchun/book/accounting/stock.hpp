@@ -65,6 +65,9 @@ public:
   }
 
   void apply_order(Book_ptr &book, const Order &order) override {
+    if (book->orders.find(order.order_id) == book->orders.end()) {
+      book->orders.emplace(order.order_id, order);
+    }
     auto &position = book->get_position_for(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
                      order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost;
@@ -116,6 +119,9 @@ private:
     book->asset.frozen_cash -= book->get_frozen_price(trade.order_id) * trade.volume;
     book->asset.avail -= commission;
     book->asset.avail -= tax;
+    book->asset.avail += book->get_frozen_price(trade.order_id) * trade.volume;
+    book->asset.avail -= trade.price * trade.volume;
+    SPDLOG_WARN("asset avail {} {} {} {} {}", book->asset.avail, commission, tax, book->get_frozen_price(trade.order_id) * trade.volume, trade.price * trade.volume);
     book->asset.intraday_fee += commission + tax;
     book->asset.accumulated_fee += commission + tax;
   }
