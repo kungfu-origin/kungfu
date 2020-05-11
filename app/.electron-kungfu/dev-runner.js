@@ -40,7 +40,7 @@ function logStats (proc, data) {
 
 function startRenderer () {
   return new Promise((resolve, reject) => {
-    rendererConfig.entry.renderer = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry.renderer)
+    rendererConfig.entry.renderer = [path.join(__dirname, 'dev-client'), ...Object.values(rendererConfig.entry || {})]
 
     const compiler = webpack(rendererConfig)
     hotMiddleware = webpackHotMiddleware(compiler, { 

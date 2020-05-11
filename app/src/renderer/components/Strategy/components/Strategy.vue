@@ -125,7 +125,7 @@
 import path from 'path';
 import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
-import { openWin } from '__gUtils/busiUtils';
+import { openVueWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
@@ -250,8 +250,7 @@ export default {
 
         //编辑策略
         handleEditStrategy(row){
-            const t = this;
-            t.$utils.openWin(`/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
+            this.$utils.openVueWin('code', `/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略

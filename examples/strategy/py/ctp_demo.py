@@ -137,3 +137,5 @@ def cancel_order(context, order_id):
     action_id = context.cancel_order(order_id)
     if action_id > 0:
         context.log.info("[cancel order] (action_id){} (rid){} ".format(action_id, order_id))
+
+print(111)

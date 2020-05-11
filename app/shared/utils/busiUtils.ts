@@ -195,10 +195,10 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openWin = (htmlPath: string, BrowserWindow: any): void => {
+export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any): void => {
     const modalPath = process.env.NODE_ENV !== 'production'
-    ? `http://localhost:9090/#${htmlPath}`
-    : `file://${__dirname}/index.html#${htmlPath}`
+    ? `http://localhost:9090/${htmlPath}.html#${routerPath}`
+    : `file://${__dirname}/${htmlPath}.html#${routerPath}`
     const isDevelopment = process.env.NODE_ENV === "development"
     
     let win = new BrowserWindow({

@@ -28,7 +28,7 @@ export default {
     
     computed: {
         ...mapState({
-            code: state => state.BASE.kfConfig.code   
+            code: state => state.BASE.kfConfig.code || {} 
         })
     },
 
@@ -36,7 +36,8 @@ export default {
         //点击选择缩进
         handleClick() {
             const t = this;
-            const type = t.code.tabSpaceType.toLowerCase();
+            const tabSpaceType = t.code.tabSpaceType || 'spaces';
+            const type = tabSpaceType.toLowerCase();
             t.$store.dispatch('getKungfuConfig')
             t.clearState()
             t.currentSettingInfoList = [

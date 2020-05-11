@@ -28,7 +28,7 @@ import path from 'path';
 import { mapState } from 'vuex';
 import { ipcRenderer } from 'electron';
 
-import GlobalSettingDialog from './components/Base/GlobalSettingDialog';
+import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
@@ -95,16 +95,10 @@ export default {
     methods: {
 
         removeLoadingMask () {
-            //code 模块，暂时不做成单页， 需要用这种方法来避免code模块出现问题
-            if(window.location.hash.includes('code')) return 
-
-            //remove loading mask
             if(document.getElementById('loading')) document.getElementById('loading').remove();
         },
 
         getWatcherStatus () {
-            if(window.location.hash.includes('code')) return;
-
             let timer = setInterval(() => {
                 // for coder
                 if (!watcher.isLive) {
@@ -136,7 +130,6 @@ export default {
         removeKeyDownEvent () {
             //解除回车带来的一些不好的影响
             //比如页面重新刷新的问题
-            if (window.location.hash.includes('kungfuCodeEditor')) return      
             document.body.addEventListener('keydown', (event) => {
                 if(event.keyCode == 13) {
                     event.preventDefault()
@@ -160,7 +153,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import './assets/scss/base.scss';
+@import '@/assets/scss/base.scss';
  #app{
    height: 100%;
    background: $login-bg;
