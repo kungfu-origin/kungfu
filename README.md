@@ -1,6 +1,6 @@
 # Intro 简介
 
-功夫是 [Taurus.ai](http://www.taurusai.com) 团队专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
+[功夫](https://www.kungfu-trader.com) 是专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
 * 低延迟交易 - 量化交易者对系统内响应速度有极高要求，功夫提供微秒级别的系统响应，支持带纳秒级时间戳的交易数据实时存储和盘后分析。
 * 开放的策略编写方式 - 功夫支持 Python 3 及 C++ 形式的策略编写，策略师可以不受限的自由使用第三方计算库，放飞创意。
 * 友好的使用方式 - 告别 Linux shell 小黑屋，功夫提供图形化操作界面，简化策略运维流程。而进阶用户仍然具备通过底层 API 以无界面形式使用系统的能力。
@@ -82,15 +82,7 @@ C:\> pip install pipenv
 
 #### Linux
 
-确保编译器支持 C++ 17，例如对于 CentOS，升级 gcc 到 8.x：
-
-```
-yum install -y centos-release-scl devtoolset-8
-echo "source /opt/rh/devtoolset-8/enable" >> /etc/profile
-source /etc/profile
-```
-
-或升级到 9.x：
+确保编译器支持 C++ 17，例如对于 CentOS 7，升级 gcc 到 9.x：
 ```
 yum install -y centos-release-scl
 yum-config-manager --enable centos-sclo-rh-testing
