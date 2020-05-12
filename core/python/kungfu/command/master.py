@@ -1,6 +1,7 @@
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.practice.master import Master
+from kungfu.practice.events import KungfuEventLoop
 
 
 @kfc.command(help_priority=1)
@@ -9,5 +10,4 @@ from kungfu.practice.master import Master
 def master(ctx, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
-    server = Master(ctx)
-    server.run()
+    KungfuEventLoop(ctx, Master(ctx)).run_forever()

@@ -237,7 +237,9 @@ void bind(pybind11::module &&m) {
       .def("get_writer", &MarketData::get_writer)
       .def("update_broker_state", &MarketData::update_broker_state)
       .def("now", &MarketData::now)
-      .def("run", &MarketData::run);
+      .def("run", &MarketData::run)
+      .def("setup", &MarketData::setup)
+      .def("step", &MarketData::step);
 
   py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
       .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &, const std::string &>())
@@ -246,6 +248,8 @@ void bind(pybind11::module &&m) {
       .def("now", &Trader::now)
       .def("get_location", &Trader::get_location)
       .def("run", &Trader::run)
+      .def("setup", &Trader::setup)
+      .def("step", &Trader::step)
       .def("on_start", &Trader::on_start)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)
@@ -270,6 +274,8 @@ void bind(pybind11::module &&m) {
       .def("set_begin_time", &strategy::Runner::set_begin_time)
       .def("set_end_time", &strategy::Runner::set_end_time)
       .def("run", &strategy::Runner::run)
+      .def("setup", &strategy::Runner::setup)
+      .def("step", &strategy::Runner::step)
       .def("on_trading_day", &strategy::Runner::on_trading_day)
       .def("add_strategy", &strategy::Runner::add_strategy);
 

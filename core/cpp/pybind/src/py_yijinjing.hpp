@@ -353,8 +353,11 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("session_builder", &master::get_session_builder)
       .def_property_readonly("io_device", &master::get_io_device)
       .def_property_readonly("home", &master::get_home)
+      .def_property_readonly("live", &master::is_live)
       .def("now", &master::now)
       .def("run", &master::run)
+      .def("setup", &master::setup)
+      .def("step", &master::step)
       .def("on_exit", &master::on_exit)
       .def("on_register", &master::on_register)
       .def("on_interval_check", &master::on_interval_check)
@@ -367,10 +370,13 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("session_finder", &apprentice::get_session_finder)
       .def_property_readonly("io_device", &apprentice::get_io_device)
       .def_property_readonly("home", &apprentice::get_home)
+      .def_property_readonly("live", &apprentice::is_live)
       .def("set_begin_time", &apprentice::set_begin_time)
       .def("set_end_time", &apprentice::set_end_time)
       .def("on_trading_day", &apprentice::on_trading_day)
-      .def("run", &apprentice::run);
+      .def("run", &apprentice::run)
+      .def("setup", &apprentice::setup)
+      .def("step", &apprentice::step);
 }
 } // namespace kungfu::yijinjing
 

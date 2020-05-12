@@ -8,6 +8,7 @@ from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
+from kungfu.practice.events import KungfuEventLoop
 
 
 @kfc.command(help_priority=4)
@@ -46,4 +47,4 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
         ctx.session_id = session_id
         replay_setup.setup(ctx, session_id, strategy, runner)
 
-    runner.run()
+    KungfuEventLoop(ctx, runner).run_forever()
