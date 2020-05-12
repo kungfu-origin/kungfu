@@ -103,8 +103,6 @@ let mainConfig = {
 const { getCommitVersion, getPythonVersion } = require('./utils');
 const gitCommitVersion = getCommitVersion() || 'latest'
 const pyVersion = getPythonVersion() || '3'
-console.log(gitCommitVersion)
-console.log('python version:', pyVersion)
 
 
 /**

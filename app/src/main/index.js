@@ -164,7 +164,7 @@ function setMenu() {
 	let applicationOptions = [
 		{ label: "About Kungfu", click: showKungfuInfo},
 		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: openSettingDialog },
-		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { BrowserWindow.getFocusedWindow().close() }}
 	]
 
 	if(platform === 'mac') {
