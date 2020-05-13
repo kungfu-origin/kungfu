@@ -28,7 +28,7 @@
         </el-container>
 
         <!-- 底部 -->
-        <el-footer height="30px">
+        <el-footer height="30px" v-if="ifFooter">
             <div class="footer-content" >
                 <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
                     <CoreStatus></CoreStatus>
@@ -57,6 +57,11 @@ export default {
     name: 'main-content',
     props: {
         ifSideBar: {
+            type: Boolean,
+            default: true
+        },
+
+        ifFooter: {
             type: Boolean,
             default: true
         }

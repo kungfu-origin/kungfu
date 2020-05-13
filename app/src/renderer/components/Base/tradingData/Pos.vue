@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="`持仓 ${currentTitle}`">
+<tr-dashboard :title="name ? name : `持仓 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -10,7 +10,7 @@
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
             <el-button size="mini" @click="makeOrderDialogVisiblity = true">下单</el-button>
         </tr-dashboard-header-item>
     </div>
@@ -48,6 +48,13 @@ export default {
     name: 'positions',
   
     mixins: [ tradingDataMixin ],
+
+    props: {
+        name: {
+            type: String,
+            default: ''
+        }
+    },
 
     data() {
         return {

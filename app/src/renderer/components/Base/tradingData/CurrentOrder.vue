@@ -1,5 +1,5 @@
 <template>
-  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
+  <tr-dashboard :title="title">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -10,13 +10,13 @@
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!todayFinish">
+        <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
             <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
+        <tr-dashboard-header-item v-else-if="!ifBacktest">
             <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
@@ -69,6 +69,11 @@ export default {
         orderStat: {
             type: Object,
             default: () => ({})
+        },
+
+        name: {
+            type: String,
+            default: ''
         }
     },
 
@@ -87,6 +92,11 @@ export default {
         ...mapState({
             processStatus: state => state.BASE.processStatus
         }),
+
+        title () {
+            if (this.name) return this.name;
+            return this.todayFinish ? `当日委托 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
+        },
 
         schema () {
             return  [

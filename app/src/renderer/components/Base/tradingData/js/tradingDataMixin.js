@@ -25,6 +25,11 @@ export default {
         addTime: {
             type: Number,
             default: 0
+        },
+
+        ifBacktest: {
+            type: Boolean,
+            default: false
         }
     },
 
