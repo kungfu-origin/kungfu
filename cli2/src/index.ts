@@ -36,8 +36,8 @@ const program = require('commander');
 program
     .version(version)
     .option('-l --list', 'list detail')
-    .option('-a --add', 'add')
-    .option('-r --remove', 'remove')
+    .option('-a --add', 'add [for ext]')
+    .option('-r --remove', 'remove [for ext]' )
     .option('-k --kill', 'kill [for monit]');
 
 program
@@ -45,7 +45,7 @@ program
     .description('monitor all process with merged logs OR monitor one trading process (with -l)')
     .action((type: any, commander: any) => {
         if (commander.parent.kill) {
-            return kfKill(['monit', 'pm2'])
+            return kfKill(['monit'])
                 .then(() => {
                     console.success(`Kill Monit Success!`)
                 })
