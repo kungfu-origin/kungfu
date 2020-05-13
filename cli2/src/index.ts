@@ -37,13 +37,20 @@ program
     .version(version)
     .option('-l --list', 'list detail')
     .option('-a --add', 'add')
-    .option('-r --remove', 'remove');
+    .option('-r --remove', 'remove')
+    .option('-k --kill', 'kill [for monit]');
 
 program
     .command('monit [options]')
     .description('monitor all process with merged logs OR monitor one trading process (with -l)')
     .action((type: any, commander: any) => {
-        const list = commander.parent.list
+        if (commander.parent.kill) {
+            return kfKill(['monit', 'pm2'])
+                .then(() => {
+                    console.success(`Kill Monit Success!`)
+                })
+        }
+        const list = commander.parent.list;
         return monitPrompt(!!list)
     })
 
