@@ -73,10 +73,49 @@ export default {
 
     computed:{
         schema(){
+            
+            if (this.dateRangeForHistory.length) {
+                return [{
+                    type: 'text',
+                    label: '成交时间',
+                    prop: "updateTimeMMDD",
+                    width: '140px'
+                },{
+                    type: 'text',
+                    label: '代码',
+                    prop: 'instrumentId',
+                    width: '60px'
+                },{
+                    type: 'text',
+                    label: '',
+                    prop: 'side',
+                    width: '35px'
+                },{
+                    type: 'text',
+                    label: '',
+                    prop: 'offset',
+                    width: '40px'
+                },{
+                    type: 'number',
+                    label: '成交价',
+                    prop: 'price',
+                    width: '80px'
+                },{
+                    type: 'number',
+                    label: '成交量',
+                    prop: 'volume',
+                    width: '60px'
+                },{
+                    type: 'account-strategy',
+                    label: this.moduleType == 'account' ? '策略': '账户',
+                    prop: this.moduleType == 'account' ? 'clientId': 'accountId',
+                }]
+            }
+
             return [{
                 type: 'text',
                 label: '成交时间',
-                prop: 'updateTime',
+                prop: "updateTime",
                 width: '70px'
             },{
                 type: 'text',

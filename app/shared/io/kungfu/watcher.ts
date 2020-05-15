@@ -181,6 +181,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: sideName[item.side] ? sideName[item.side] : '--',
@@ -204,6 +205,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,

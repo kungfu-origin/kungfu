@@ -108,6 +108,51 @@ export default {
         },
 
         schema () {
+             if (this.dateRangeForHistory.length) {
+                return [
+                {
+                    type: "text",
+                    label: "下单时间",
+                    prop: "updateTimeMMDD",
+                    width: "140px"
+                },{
+                    type: "text",
+                    label: "代码",
+                    prop: "instrumentId",
+                    width: '60px'
+                },{
+                    type: "text",
+                    label: "",
+                    prop: "side",
+                    width: '35px'
+                },{
+                    type: "text",
+                    label: "",
+                    prop: "offset",
+                    width: '40px'
+                },{
+                    type: "number",
+                    label: "委托价",
+                    prop: "limitPrice",
+                    width: '80px'
+                },{
+                    type: "text",
+                    align: "center",
+                    label: "已成交/全部",
+                    prop: "volumeTraded",
+                    width: '80px'
+                },{
+                    type: "text",
+                    label: "订单状态",
+                    prop: "statusName",
+                    width: '60px'
+                },{
+                    type: "account-strategy",
+                    label: this.moduleType == 'account' ? '策略' : '账户',
+                    prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
+                }]
+            }
+
             return  [
             {
                 type: "text",

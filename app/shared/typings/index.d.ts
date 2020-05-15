@@ -113,6 +113,7 @@ interface LogDataOrigin {
 interface OrderData {
     id: string;
     updateTime: string;
+    updateTimeMMDD: string;
     updateTimeNum: number;
     orderId: string;
     instrumentId: string;
@@ -155,6 +156,7 @@ interface TradeData {
     id: string;
     instrumentId: string;
     updateTime: string;
+    updateTimeMMDD: string;
     updateTimeNum: number;
     side: string;
     offset: string;
