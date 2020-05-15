@@ -12,7 +12,6 @@ export default {
         this.removeLoadingMask();
         this.$store.dispatch('getStrategyList');
         this.$store.dispatch('getKungfuConfig');
-
     },
 
     methods: {

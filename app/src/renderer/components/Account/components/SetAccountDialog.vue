@@ -214,7 +214,8 @@ export default {
                 if((t.postForm[key] === undefined) || (t.postForm[key] === '')) {
                     if (type === 'int') {
                         if (!+defaultVal) {
-                            t.$set(t.postForm, key, '')   
+                            // t.$set(t.postForm, key, '')   
+                            return
                         }
                     }
                     

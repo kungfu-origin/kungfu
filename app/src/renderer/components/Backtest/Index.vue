@@ -16,7 +16,6 @@
                                 moduleType="strategy"
                                 :minPnl="pnl"   
                                 :dailyPnl="dailyPnl"
-                                :dayMethod="getStrategyPnlDay"
                                 :addTime="addTime"                
                                 ></Pnl>
                         </el-col>
@@ -80,7 +79,6 @@ export default {
         this.tradingDataPipe = null;
         return {
 			addTime: 0,
-			getStrategyPnlDay: () => [],
 
             orders: Object.freeze([]),
             trades: Object.freeze([]),

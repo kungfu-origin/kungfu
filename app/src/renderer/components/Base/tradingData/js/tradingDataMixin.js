@@ -42,8 +42,11 @@ export default {
                 dateRange: null
             },
 
-            dateRangeDialogVisiblity: false,
-            exportLoading: false,
+            dateRangeDialogVisiblityForExport: false,
+            dateRangeDialogVisiblityForHistory: false,
+            dateRangeForHistory: [],
+            dateRangeExportLoading: false,
+            
 
             tableData: Object.freeze([]),
 
@@ -73,47 +76,86 @@ export default {
     },
 
     methods: {
-        handleRefresh() {
-            this.resetData();
+
+        handleClearHistory () {
+            this.dateRangeForHistory = [];
+            this.$emit('showHistory', {
+                dateRange: [],
+                data: [],
+                type: this.kungfuBoardType
+            })
+        },
+
+        handleConfirmDateRangeForHistory (dateRange) {
+
+            this.dateRangeForHistory = [
+                moment(dateRange[0]).format('MMDD'),
+                moment(dateRange[1]).format('MMDD')
+            ]
+
+            return this.getDataByDateRange(dateRange)
+                .then(data => {
+                    this.dateRangeDialogVisiblityForHistory = false;
+                    return data;
+                })
+                .then(data => {
+                    this.$emit('showHistory', {
+                        dateRange: dateRange || [],
+                        data: data,
+                        type: this.kungfuBoardType
+                    })
+                })
         },
 
         //选择日期以及保存
-        handleConfirmDateRange(dateRange) {
+        handleConfirmDateRangeForExport (dateRange) {
+
+            return this.getDataByDateRange(dateRange)
+                .then(data => {
+                    this.dateRangeDialogVisiblityForExport = false;
+                    return data;
+                })
+                .then(data => {
+                    const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'
+                    this.$saveFile({
+                        title: exportTitle,
+                    }).then(filename => {
+                        if (!filename) return;
+                        writeCSV(filename, data)
+                    })
+                })
+        },
+
+        getDataByDateRange (dateRange) {
             const from = moment(dateRange[0]).format('YYYY-MM-DD');
             const to = moment(dateRange[1]).add(1, 'day').format('YYYY-MM-DD');
-            this.exportLoading = true;
-            let timer = setTimeout(() => {
-                const kungfuData = history.selectPeriod(from, to)
-                const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
-                const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
-                const exportTitle = this.kungfuBoardType === 'order' ? '订单' : '成交'
+            this.dateRangeExportLoading = true;
 
-                const targetListAfterFilter = targetList.filter(item => {
-                    const locationKey = item[kungfuIdKey];
-                    const kungfuLocation = decodeKungfuLocation(locationKey);
+            return new Promise((resolve) => {
+                let timer = setTimeout(() => {
 
-                    if (this.moduleType === 'account') {
-                        return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
-                    } else if (this.moduleType === 'strategy') {
-                        return kungfuLocation.name === this.currentId
-                    }
+                    const kungfuData = history.selectPeriod(from, to)
+                    const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
+                    const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
+                    
+                    const targetListAfterFilter = targetList.filter(item => {
+                        const locationKey = item[kungfuIdKey];
+                        const kungfuLocation = decodeKungfuLocation(locationKey);
+                        if (this.moduleType === 'account') {
+                            return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
+                        } else if (this.moduleType === 'strategy') {
+                            return kungfuLocation.name === this.currentId
+                        }
 
-                    return false
-                })
+                        return false
+                    })
 
-                this.exportLoading = false;
-                this.dateRangeDialogVisiblity = false;
+                    this.dateRangeExportLoading = false;
 
-                this.$saveFile({
-                    title: exportTitle,
-                }).then(filename => {
-                    if (!filename) return;
-                    writeCSV(filename, targetListAfterFilter)
-                })
-
-                clearTimeout(timer)
-            }, 100)
-
+                    resolve(targetListAfterFilter)
+                    clearTimeout(timer)
+                }, 100)
+            })
         },
 
         resetData() {

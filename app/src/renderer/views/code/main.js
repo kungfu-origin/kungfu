@@ -9,6 +9,7 @@ import ElementUI from 'element-ui';
 import Components from '@/assets/components'
 import moment from 'moment';
 import App from './App.vue';
+
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 
@@ -35,5 +36,7 @@ new Vue({
 
 
 window.fileId = 0;
+
+window.store = store
 
 

@@ -15,7 +15,6 @@
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
-                        :dayMethod="getAccountPnlDay"
                         :minPnl="pnl"
                         :dailyPnl="dailyPnl"
                         />
@@ -29,6 +28,7 @@
                         :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
                         :orderStat="orderStat"
+                        @showHistory="handleShowHistory"
                         />   
                     </el-col>              
                 </el-row>
@@ -50,6 +50,7 @@
                     :currentId="currentId"
                     :kungfuData="trades"
                     :orderStat="orderStat"
+                    @showHistory="handleShowHistory"
                     />
                 </el-row>
             </el-col>
@@ -81,6 +82,8 @@ export default {
             pnl: Object.freeze([]),
             dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({}),
+
+            historyData: {}
         }
     },
 
@@ -112,10 +115,20 @@ export default {
     mounted(){
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-            const orders = data['orders'][t.currentId];
-            this.orders = Object.freeze(orders || []);
-            const trades = data['trades'][t.currentId];
-            this.trades = Object.freeze(trades || []);
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).dateRange.length !== 0)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'][t.currentId];
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).dateRange.length !== 0)) {
+                this.trades = Object.freeze(this.historyData['trade'].data)
+            } else {
+                const trades = data['trades'][t.currentId];
+                this.trades = Object.freeze(trades || []);
+            }
+      
             const positions = data['positions'][t.currentId];
             this.positions = Object.freeze(positions || []);
             const assets = data['assets'];
@@ -129,13 +142,20 @@ export default {
         })
     },
 
+    methods: {
+
+       handleShowHistory ({ dateRange, data, type }) {
+            this.$set(this.historyData, type, {
+                dateRange,
+                data
+            })
+        }
+    },
+
     destroyed(){
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
     },
  
-    methods:{
-        getAccountPnlDay: () => { return Promise.resolve([]) }
-    }
 }
 </script>
 

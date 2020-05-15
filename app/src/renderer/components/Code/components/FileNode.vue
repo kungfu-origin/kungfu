@@ -66,7 +66,7 @@
     </li>
 </template>
 <script>
-import {mapState} from 'vuex';
+import { mapState } from 'vuex';
 import iconFolderJSON from '../config/iconFolderConfig.json'
 import iconFileJSON from '../config/iconFileConfig.json'
 import path from 'path';

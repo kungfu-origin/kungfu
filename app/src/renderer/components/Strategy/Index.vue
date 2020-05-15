@@ -13,7 +13,6 @@
                                 moduleType="strategy"
                                 :minPnl="pnl"   
                                 :dailyPnl="dailyPnl"
-                                :dayMethod="getStrategyPnlDay"
                                 :addTime="addTime"                
                                 ></Pnl>
                         </el-col>
@@ -39,7 +38,8 @@
                             moduleType="strategy"
                             :kungfuData="orders"                 
                             :addTime="addTime"   
-                            :orderStat="orderStat"             
+                            :orderStat="orderStat"   
+                            @showHistory="handleShowHistory"          
                             ></CurrentOrder>                      
                     </el-row>
                     <el-row style="height: 33.333%">
@@ -49,6 +49,7 @@
                             :kungfuData="trades"           
                             :addTime="addTime"    
                             :orderStat="orderStat"
+                            @showHistory="handleShowHistory"          
                             ></TradeRecord>
                     </el-row>
                 </el-col>
@@ -78,17 +79,30 @@ export default {
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
             dailyPnl: Object.freeze([]),
-            orderStat: Object.freeze({})
+            orderStat: Object.freeze({}),
+
+            historyData: {}
         }
     },
 
     mounted(){
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
-            const orders = data['orders'][t.strategyId];
-            this.orders = Object.freeze(orders || []);
-            const trades = data['trades'][t.strategyId];
-            this.trades = Object.freeze(trades || []);
+            
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).dateRange.length !== 0)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'][t.strategyId];
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).dateRange.length !== 0)) {
+                this.trades = Object.freeze(this.historyData['trade'].data)
+            } else {
+                const trades = data['trades'][t.strategyId];
+                this.trades = Object.freeze(trades || []);
+            }
+           
             const positions = data['positions'][t.strategyId];
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
@@ -124,7 +138,13 @@ export default {
     },
 
     methods:{
-        getStrategyPnlDay: () => { return Promise.resolve([]) }
+
+        handleShowHistory ({ dateRange, data, type }) {
+            this.$set(this.historyData, type, {
+                dateRange,
+                data
+            })
+        }
     }
 }
 </script>

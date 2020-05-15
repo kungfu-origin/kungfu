@@ -1,14 +1,18 @@
 <template>
-<tr-dashboard :title="name ? name : `当日成交 ${currentTitle}`">
+<tr-dashboard :title="name ? name : `成交记录 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && !dateRangeForHistory.length">
+            <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && dateRangeForHistory.length">
+            <span>{{dateRangeForHistory[0]}}-{{dateRangeForHistory[1]}}</span>
+            <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
+            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -18,9 +22,14 @@
         :renderCellClass="renderCellClass"
     ></tr-table>
     <date-range-dialog 
-    @confirm="handleConfirmDateRange"
-    :visible.sync="dateRangeDialogVisiblity"   
-    :loading="exportLoading" 
+    @confirm="handleConfirmDateRangeForExport"
+    :visible.sync="dateRangeDialogVisiblityForExport"   
+    :loading="dateRangeExportLoading" 
+    ></date-range-dialog>
+    <date-range-dialog 
+    @confirm="handleConfirmDateRangeForHistory"
+    :visible.sync="dateRangeDialogVisiblityForHistory"   
+    :loading="dateRangeExportLoading" 
     ></date-range-dialog>
 </tr-dashboard>
 
@@ -113,7 +122,7 @@ export default {
             const tradesResolve = t.dealTradeList(trades, {
                 searchKeyword: t.searchKeyword
             })
-            tradesResolve.length && (t.tableData = tradesResolve)
+            t.tableData = tradesResolve
         }
     },
 

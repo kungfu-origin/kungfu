@@ -4,17 +4,21 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && !dateRangeForHistory.length">
+            <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && dateRangeForHistory.length">
+            <span>{{dateRangeForHistory[0]}}-{{dateRangeForHistory[1]}}</span>
+            <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
-            <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
+            <i class="el-icon-s-claim mouse-over" title="委托记录" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-else-if="!ifBacktest">
             <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
+            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest">
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
@@ -35,9 +39,14 @@
         </template>
     </tr-table>
     <date-range-dialog 
-    @confirm="handleConfirmDateRange"
-    :visible.sync="dateRangeDialogVisiblity"   
-    :loading="exportLoading" 
+    @confirm="handleConfirmDateRangeForExport"
+    :visible.sync="dateRangeDialogVisiblityForExport"   
+    :loading="dateRangeExportLoading" 
+    ></date-range-dialog>
+     <date-range-dialog 
+    @confirm="handleConfirmDateRangeForHistory"
+    :visible.sync="dateRangeDialogVisiblityForHistory"   
+    :loading="dateRangeExportLoading" 
     ></date-range-dialog>
   </tr-dashboard>
 </template>
@@ -95,7 +104,7 @@ export default {
 
         title () {
             if (this.name) return this.name;
-            return this.todayFinish ? `当日委托 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
+            return this.todayFinish ? `委托记录 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
         },
 
         schema () {
