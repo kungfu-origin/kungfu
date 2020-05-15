@@ -333,6 +333,7 @@ export default {
             .tr-table-cell{
                 height: auto;
                 line-height: 20px;
+                word-break: break-all;
             }
         }
     }

@@ -9,6 +9,7 @@ export default {
         currentFile: {}, //文件树高亮
         entryFile: {}, //入口文件
         fileTree: {}, //文件树
+        strategyiesAsset: {}
     },
     actions,
     mutations,

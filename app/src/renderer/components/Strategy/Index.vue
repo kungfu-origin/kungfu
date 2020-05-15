@@ -1,13 +1,21 @@
 <template>
     <main-content>
         <div class="trader-content">
-                <el-col :span="14">
-                    <el-row style="height: 33.33%">
-                        <el-col :span="14">
-                            <Strategy></Strategy>
-                        </el-col>
-                        <el-col :span="10">
-                            <Pnl
+                <template v-if="monitStrategies">
+                    <el-col :span="14">
+                        <el-row style="height: 66.66%">
+                            <el-col>
+                                <Strategy
+                                v-model="monitStrategies"
+                                ></Strategy>
+                            </el-col>
+                        </el-row>
+                        <el-row style="height: 33.33%">
+                            <el-col :span="14">
+                                <Log></Log>                         
+                            </el-col>
+                            <el-col :span="10">
+                                <Pnl
                                 ref="pnl"
                                 :currentId="strategyId" 
                                 moduleType="strategy"
@@ -15,14 +23,37 @@
                                 :dailyPnl="dailyPnl"
                                 :addTime="addTime"                
                                 ></Pnl>
-                        </el-col>
-                    </el-row>
-                    <el-row style="height: 66.66%">
-                        <el-col>
-                            <Log></Log>                         
-                        </el-col>
-                    </el-row>
-                </el-col>
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                </template>
+                <template v-else>
+                    <el-col :span="14">
+                        <el-row style="height: 33.33%">
+                            <el-col :span="14">
+                                <Strategy
+                                v-model="monitStrategies"
+                                ></Strategy>
+                            </el-col>
+                            <el-col :span="10">
+                                <Pnl
+                                ref="pnl"
+                                :currentId="strategyId" 
+                                moduleType="strategy"
+                                :minPnl="pnl"   
+                                :dailyPnl="dailyPnl"
+                                :addTime="addTime"                
+                                ></Pnl>
+                            </el-col>
+                        </el-row>
+                        <el-row style="height: 66.66%">
+                            <el-col>
+                                <Log></Log>                         
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                </template>
+                    
                 <el-col  :span="10">
                     <el-row style="height: 33.333%">
                             <Pos
@@ -81,7 +112,8 @@ export default {
             dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({}),
 
-            historyData: {}
+            historyData: {},
+            monitStrategies: false,
         }
     },
 
@@ -110,7 +142,10 @@ export default {
             const dailyPnl = data['dailyPnl'][t.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {})
+            this.orderStat = Object.freeze(orderStat || {});
+
+            const assets = data['assets'];
+            this.$store.dispatch('setStrategiesAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
         })
     },
 

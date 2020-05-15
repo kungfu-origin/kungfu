@@ -131,14 +131,15 @@ export default {
       
             const positions = data['positions'][t.currentId];
             this.positions = Object.freeze(positions || []);
-            const assets = data['assets'];
-            this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
             const pnl = data['pnl'][t.currentId];
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][t.currentId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {})
+            this.orderStat = Object.freeze(orderStat || {});
+
+            const assets = data['assets'];
+            this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
         })
     },
 

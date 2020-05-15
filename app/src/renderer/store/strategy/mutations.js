@@ -9,6 +9,9 @@ export const SET_STRATEGY_LIST = (state, strategyList) => {
     state.strategyList = strategyList
 }
 
+export const SET_STRATEGIES_ASSET = (state, strategiesAssets) => {
+    state.strategyiesAsset = strategiesAssets;
+}
 
 export const SET_CURRENT_FILE = (state, file) => {
     state.currentFile = file;
