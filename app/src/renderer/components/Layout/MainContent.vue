@@ -28,8 +28,8 @@
         </el-container>
 
         <!-- 底部 -->
-        <el-footer height="30px" v-if="ifFooter">
-            <div class="footer-content" >
+        <el-footer :height="!ifFooter ? '0' : '30px'">
+            <div class="footer-content" v-if="ifFooter">
                 <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
                     <CoreStatus></CoreStatus>
                 </tr-footer-item>

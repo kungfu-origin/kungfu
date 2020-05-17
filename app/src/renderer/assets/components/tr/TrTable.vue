@@ -5,7 +5,10 @@
             :class="[
             'text-overflow', 
             'tr-table-cell',
-            column.type === 'number' ? 'number' : ''
+            column.type === 'number' ? 'number' : '',
+            column.type === 'account-strategy' ? 'account-strategy' : '',
+            column.type === 'operation' ? 'oper' : '',
+            column.align === 'center' ? 'text-center' : ''
             ]" 
             v-for="column in schema" 
             :key="column.prop" 
