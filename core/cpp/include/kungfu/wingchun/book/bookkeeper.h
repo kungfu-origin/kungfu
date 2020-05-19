@@ -36,6 +36,8 @@ public:
 
   void on_start(const rx::connectable_observable<event_ptr> &events);
 
+  void on_order_input(int64_t update_time, uint32_t source, uint32_t dest, const longfist::types::OrderInput &input);
+
   void restore(const yijinjing::cache::bank &state_bank);
 
 private:
@@ -61,7 +63,11 @@ private:
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
-    const TradingData &data = event->data<TradingData>();
+    update_book(event->gen_time(), event->source(), event->dest(), event->data<TradingData>(), method);
+  }
+
+  template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
+  void update_book(int64_t update_time, uint32_t source, uint32_t dest, const TradingData &data, ApplyMethod method) {
     if (accounting_methods_.find(data.instrument_type) == accounting_methods_.end()) {
       SPDLOG_WARN("accounting method not found for {}: {}", data.type_name.c_str(), data.to_string());
       return;
@@ -71,11 +77,11 @@ private:
       auto book = get_book(book_uid);
       auto &position = book->get_position_for(data);
       (accounting_method.*method)(book, data);
-      position.update_time = event->gen_time();
-      book->update(event->gen_time());
+      position.update_time = update_time;
+      book->update(update_time);
     };
-    apply_and_update(event->source());
-    apply_and_update(event->dest());
+    apply_and_update(source);
+    apply_and_update(dest);
   }
 };
 } // namespace kungfu::wingchun::book

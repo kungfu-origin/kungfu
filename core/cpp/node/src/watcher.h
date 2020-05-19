@@ -122,6 +122,16 @@ private:
     update(event->dest(), event->source());
   }
 
+  template <typename TradingData>
+  std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>>
+  UpdateBook(uint32_t source, uint32_t dest, const TradingData &data) {
+    bookkeeper_.on_order_input(now(), source, dest, data);
+  }
+
+  template <typename TradingData>
+  std::enable_if_t<not std::is_same_v<TradingData, longfist::types::OrderInput>>
+  UpdateBook(uint32_t source, uint32_t dest, const TradingData &data) {}
+
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   void WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
                         const yijinjing::data::location_ptr &account_location,
@@ -131,6 +141,7 @@ private:
     uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
     instruction.*id_ptr = id_left | id_right;
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
+    UpdateBook(strategy_location->uid, account_location->uid, instruction);
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
@@ -156,6 +167,7 @@ private:
       if (info.Length() == 2) {
         instruction.*id_ptr = account_writer->current_frame_uid();
         account_writer->write(trigger_time, instruction);
+        UpdateBook(get_home_uid(), account_location->uid, instruction);
         return Napi::Boolean::New(info.Env(), true);
       }
 

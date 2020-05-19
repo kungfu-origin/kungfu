@@ -67,6 +67,10 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
 
+void Bookkeeper::on_order_input(int64_t update_time, uint32_t source, uint32_t dest, const OrderInput &input) {
+  update_book<OrderInput>(update_time, source, dest, input, &AccountingMethod::apply_order_input);
+}
+
 void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Instrument>]) {
     update_instrument(pair.second.data);
