@@ -25,7 +25,13 @@ typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
 
 // key = order_id
-typedef std::unordered_map<uint64_t, kungfu::longfist::types::Order> OrderMap;
+typedef std::unordered_map<uint64_t, longfist::types::OrderInput> OrderInputMap;
+
+// key = order_id
+typedef std::unordered_map<uint64_t, longfist::types::Order> OrderMap;
+
+// key = trade_id
+typedef std::unordered_map<uint64_t, longfist::types::Trade> TradeMap;
 
 struct Book {
   const CommissionMap &commissions;
@@ -33,7 +39,9 @@ struct Book {
   longfist::types::Asset asset = {};
   PositionMap long_positions = {};
   PositionMap short_positions = {};
+  OrderInputMap order_inputs = {};
   OrderMap orders = {};
+  TradeMap trades = {};
 
   Book(const CommissionMap &commissions_ref, const InstrumentMap &instruments_ref);
 
@@ -78,6 +86,12 @@ struct Book {
   }
 
   void update(int64_t update_time);
+
+  void replace(const longfist::types::OrderInput &input);
+
+  void replace(const longfist::types::Order &order);
+
+  void replace(const longfist::types::Trade &trade);
 };
 } // namespace kungfu::wingchun::book
 

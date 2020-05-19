@@ -1,9 +1,9 @@
+import asyncio
 import os
 import sys
 import importlib
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun import constants
-from kungfu.wingchun import msg
 from kungfu.wingchun import utils
 from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as wc
@@ -38,19 +38,19 @@ class Strategy(wc.Strategy):
         strategy_dir = os.path.dirname(path)
         name_no_ext = os.path.split(os.path.basename(path))
         sys.path.append(os.path.relpath(strategy_dir))
-        impl = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
-        self._pre_start = getattr(impl, 'pre_start', lambda ctx: None)
-        self._post_start = getattr(impl, 'post_start', lambda ctx: None)
-        self._pre_stop = getattr(impl, 'pre_stop', lambda ctx: None)
-        self._post_stop = getattr(impl, 'post_stop', lambda ctx: None)
-        self._on_trading_day = getattr(impl, "on_trading_day", lambda ctx, trading_day: None)
-        self._on_bar = getattr(impl, "on_bar", lambda ctx, bar: None)
-        self._on_quote = getattr(impl, 'on_quote', lambda ctx, quote: None)
-        self._on_entrust = getattr(impl, 'on_entrust', lambda ctx, entrust: None)
-        self._on_transaction = getattr(impl, "on_transaction", lambda ctx, transaction: None)
-        self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
-        self._on_trade = getattr(impl, 'on_trade', lambda ctx, trade: None)
-        self._on_order_action_error = getattr(impl, 'on_order_action_error', lambda ctx, error: None)
+        self._module = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
+        self._pre_start = getattr(self._module, 'pre_start', lambda ctx: None)
+        self._post_start = getattr(self._module, 'post_start', lambda ctx: None)
+        self._pre_stop = getattr(self._module, 'pre_stop', lambda ctx: None)
+        self._post_stop = getattr(self._module, 'post_stop', lambda ctx: None)
+        self._on_trading_day = getattr(self._module, "on_trading_day", lambda ctx, trading_day: None)
+        self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar: None)
+        self._on_quote = getattr(self._module, 'on_quote', lambda ctx, quote: None)
+        self._on_entrust = getattr(self._module, 'on_entrust', lambda ctx, entrust: None)
+        self._on_transaction = getattr(self._module, "on_transaction", lambda ctx, transaction: None)
+        self._on_order = getattr(self._module, 'on_order', lambda ctx, order: None)
+        self._on_trade = getattr(self._module, 'on_trade', lambda ctx, trade: None)
+        self._on_order_action_error = getattr(self._module, 'on_order_action_error', lambda ctx, error: None)
 
     def __init_book(self):
         location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
@@ -85,6 +85,7 @@ class Strategy(wc.Strategy):
         self.ctx.hold_book = wc_context.hold_book
         self.ctx.hold_positions = wc_context.hold_positions
         self.ctx.get_account_book = self.__get_account_book
+        self.ctx.buy = self.__buy
         self.__init_book()
         self._pre_start(self.ctx)
 
@@ -98,7 +99,10 @@ class Strategy(wc.Strategy):
         self._post_stop(self.ctx)
 
     def on_quote(self, wc_context, quote):
-        self._on_quote(self.ctx, quote)
+        async def wrap():
+            await self._on_quote(self.ctx, quote)
+
+        asyncio.ensure_future(wrap())
 
     def on_bar(self, wc_context, bar):
         self._on_bar(self.ctx, bar)
@@ -121,3 +125,38 @@ class Strategy(wc.Strategy):
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
         self._on_trading_day(self.ctx, daytime)
+
+    async def __buy(self, instrument_id, exchange_id, account_id, price, volume, price_type):
+        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, price_type, constants.Side.Buy)
+        await AsyncInsertOrder(self.ctx, order_id)
+        return self.ctx.book.orders[order_id]
+
+
+class AsyncInsertOrder:
+    def __init__(self, ctx, order_id):
+        self.ctx = ctx
+        self.order_id = order_id
+        self.future = ctx.loop.create_future()
+
+    def __await__(self):
+        return AsyncInsertOrderIter(self.ctx, self)
+
+
+class AsyncInsertOrderIter:
+    def __init__(self, ctx, action):
+        self.ctx = ctx
+        self.action = action
+        self.book = ctx.book
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.action.order_id in self.book.orders:
+            order = self.book.orders[self.action.order_id]
+            if order.status == constants.OrderStatus.Filled \
+                    or order.status == constants.OrderStatus.Cancelled \
+                    or order.status == constants.OrderStatus.Error:
+                self.ctx.loop._current = None
+                raise StopIteration
+        return next(iter(self.action.future))

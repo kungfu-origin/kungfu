@@ -1,14 +1,19 @@
 import heapq
 import asyncio
+from collections import deque
+
+
+# https://gist.github.com/damonjw/35aac361ca5d313ee9bf79e00261f4ea
 
 
 class KungfuEventLoop(asyncio.AbstractEventLoop):
     def __init__(self, ctx, hero):
         self._time = 0
         self._running = False
-        self._immediate = []
+        self._immediate = deque()
         self._scheduled = []
         self._exception = None
+        self._current = None
         self._ctx = ctx
         self._hero = hero
         self._hero.setup()
@@ -25,17 +30,19 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         self._ctx.logger.info('[{:08x}] {} running'.format(self._hero.home.uid, self._hero.home.uname))
         while self._hero.live:
             self._hero.step()
-            if self._immediate:
-                handle = self._immediate[0]
-                self._immediate = self._immediate[1:]
-            elif self._scheduled:
+            ready = deque()
+            while self._immediate:
+                ready.append(self._immediate.popleft())
+            while self._scheduled:
                 handle = heapq.heappop(self._scheduled)
-                self._time = handle._when
                 handle._scheduled = False  # just for asyncio.TimerHandle debugging?
-            else:
-                continue
-            if not handle._cancelled:
-                handle._run()
+                ready.append(handle)
+            while ready:
+                self._current = ready.popleft()
+                if not self._current._cancelled:
+                    self._current._run()
+                if self._current:
+                    self._immediate.append(self._current)
             if self._exception is not None:
                 raise self._exception
         self._ctx.logger.info('[{:08x}] {} done'.format(self._hero.home.uid, self._hero.home.uname))
@@ -63,7 +70,7 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     def shutdown_asyncgens(self):
         pass
 
-    def call_exceptioneption_handler(self, context):
+    def call_exception_handler(self, context):
         # If there is any exception in a callback, this method gets called.
         # I'll store the exception in self._exception, so that the main simulation loop picks it up.
         self._exception = context.get('exception', None)
@@ -86,10 +93,10 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     def call_later(self, delay, callback, *args, context=None):
         if delay < 0:
             raise Exception("Can't schedule in the past")
-        return self.call_at(self._time + delay, callback, *args, context=context)
+        return self.call_at(self._hero.now() + delay, callback, *args, context=context)
 
     def call_at(self, when, callback, *args, context=None):
-        if when < self._time:
+        if when < self._hero.now():
             raise Exception("Can't schedule in the past")
         handle = asyncio.TimerHandle(when, callback, args, self)
         heapq.heappush(self._scheduled, handle)
@@ -107,70 +114,3 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
 
     def create_future(self):
         return asyncio.Future(loop=self)
-
-
-class ProcessorSharingQueue:
-    def __init__(self, service_rate=1, loop=None):
-        self._service_rate = service_rate
-        self._queue = []
-        self._loop = loop if loop else asyncio.get_event_loop()
-        self._done = None
-        self._work_done = 0
-        self._last_time = self._loop.time()
-
-    def process(self, work):
-        t = self._advance_clock()
-        fut = self._loop.create_future()
-        w = work / self._service_rate
-        heapq.heappush(self._queue, (self._work_done + w, t, fut))
-        if self._done:
-            self._done.cancel()
-        self._schedule()
-        return fut
-
-    def complete(self):
-        t = self._advance_clock()
-        (_, tstart, fut) = heapq.heappop(self._queue)
-        fut.set_result(t - tstart)
-        self._schedule()
-
-    def _advance_clock(self):
-        t = self._loop.time()
-        if self._queue:
-            self._work_done += (t - self._last_time) / len(self._queue)
-        self._last_time = t
-        return t
-
-    def _schedule(self):
-        if not self._queue:
-            self._done = None
-        else:
-            w, _, _ = self._queue[0]
-            dt = (w - self._work_done) * len(self._queue)
-            self._done = self._loop.call_later(dt, self.complete)
-
-
-class FIFOQueue:
-    def __init__(self, service_rate=1, loop=None):
-        self._service_rate = service_rate
-        self._queue = []
-        self._loop = loop if loop else asyncio.get_event_loop()
-        self._done = None
-
-    def process(self, work):
-        fut = self._loop.create_future()
-        w = work / self._service_rate
-        self._queue.append((w, fut))
-        if not self._done:
-            self._done = self._loop.call_later(w, self.complete)
-        return fut
-
-    def complete(self):
-        w, fut = self._queue[0]
-        fut.set_result(w)
-        self._queue = self._queue[1:]
-        if self._queue:
-            w, _ = self._queue[0]
-            self._done = self._loop.call_later(w, self.complete)
-        else:
-            self._done = None

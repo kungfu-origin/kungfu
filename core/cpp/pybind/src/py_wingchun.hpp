@@ -22,7 +22,9 @@ PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::CommissionMap)
 PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::InstrumentMap)
 PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionMap)
 PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionDetailMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::OrderInputMap)
 PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::OrderMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::TradeMap)
 
 namespace kungfu::wingchun {
 namespace py = pybind11;
@@ -172,7 +174,9 @@ void bind(pybind11::module &&m) {
   py::bind_map<InstrumentMap>(m, "InstrumentMap");
   py::bind_map<PositionMap>(m, "PositionMap");
   py::bind_map<PositionDetailMap>(m, "PositionDetailMap");
+  py::bind_map<OrderInputMap>(m, "OrderInputMap");
   py::bind_map<OrderMap>(m, "OrderMap");
+  py::bind_map<TradeMap>(m, "TradeMap");
 
   auto m_utils = m.def_submodule("utils");
   m_utils.def("hash_instrument", py::overload_cast<const char *, const char *>(&kungfu::wingchun::hash_instrument));
@@ -186,10 +190,12 @@ void bind(pybind11::module &&m) {
   });
 
   py::class_<Book, Book_ptr>(m, "Book")
-      .def_readonly("asset", &Book::asset)
-      .def_readonly("long_positions", &Book::long_positions)
-      .def_readonly("short_positions", &Book::short_positions)
-      .def_readonly("orders", &Book::orders)
+      .def_readonly("asset", &Book::asset, py::return_value_policy::reference)
+      .def_readonly("long_positions", &Book::long_positions, py::return_value_policy::reference)
+      .def_readonly("short_positions", &Book::short_positions, py::return_value_policy::reference)
+      .def_readonly("order_inputs", &Book::order_inputs, py::return_value_policy::reference)
+      .def_readonly("orders", &Book::orders, py::return_value_policy::reference)
+      .def_readonly("trades", &Book::trades, py::return_value_policy::reference)
       .def("update", &Book::update)
       .def("has_long_position", &Book::has_long_position)
       .def("has_short_position", &Book::has_short_position)

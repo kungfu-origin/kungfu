@@ -72,6 +72,7 @@ private:
       auto &position = book->get_position_for(data);
       (accounting_method.*method)(book, data);
       position.update_time = event->gen_time();
+      book->replace(data);
       book->update(event->gen_time());
     };
     apply_and_update(event->source());

@@ -1,14 +1,15 @@
 import os
 import click
+import asyncio
 from importlib import util
-
-from pykungfu import yijinjing as yjj
 
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.practice.events import KungfuEventLoop
+
+from pykungfu import yijinjing as yjj
 
 
 @kfc.command(help_priority=4)
@@ -32,6 +33,10 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.location = yjj.location(mode, yjj.category.STRATEGY, group, name, ctx.locator)
     ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
+    runner = Runner(ctx, mode)
+    ctx.loop = KungfuEventLoop(ctx, runner)
+    asyncio.set_event_loop(ctx.loop)
+
     if path.endswith('.py'):
         ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
     else:
@@ -40,11 +45,10 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
         spec.loader.exec_module(cpp)
         ctx.strategy = cpp.Strategy(ctx.location)
 
-    runner = Runner(ctx, mode)
     runner.add_strategy(ctx.strategy)
 
     if replay:
         ctx.session_id = session_id
         replay_setup.setup(ctx, session_id, strategy, runner)
 
-    KungfuEventLoop(ctx, runner).run_forever()
+    ctx.loop.run_forever()
