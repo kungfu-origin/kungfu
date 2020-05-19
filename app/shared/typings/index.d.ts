@@ -258,14 +258,6 @@ interface OrderStatData {
     tradeLatency: string;
 }
 
-
-interface TradingDataFilter {
-    instrumentId?: string;
-    type?: string;
-    id?: string;
-    dateRange?: string[];
-}
-
 interface AccountSettingItem {
     key: string;
     name: string;

@@ -4,11 +4,11 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest && !dateRangeForHistory.length">
+        <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest && dateRangeForHistory.length">
-            <span>{{dateRangeForHistory[0]}}-{{dateRangeForHistory[1]}}</span>
+        <tr-dashboard-header-item v-if="!ifBacktest && dateForHistory">
+            <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
@@ -38,23 +38,25 @@
             @click="handleCancelOrder(oper)"/>
         </template>
     </tr-table>
-    <date-range-dialog 
+    <date-picker-dialog 
     @confirm="handleConfirmDateRangeForExport"
+    v-if="dateRangeDialogVisiblityForExport"
     :visible.sync="dateRangeDialogVisiblityForExport"   
     :loading="dateRangeExportLoading" 
-    ></date-range-dialog>
-     <date-range-dialog 
+    ></date-picker-dialog>
+     <date-picker-dialog 
     @confirm="handleConfirmDateRangeForHistory"
+    v-if="dateRangeDialogVisiblityForHistory"
     :visible.sync="dateRangeDialogVisiblityForHistory"   
     :loading="dateRangeExportLoading" 
-    ></date-range-dialog>
+    ></date-picker-dialog>
   </tr-dashboard>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 
-import DateRangeDialog from '../DateRangeDialog';
+import DatePickerDialog from '../DatePickerDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
@@ -94,7 +96,7 @@ export default {
     },
 
     components: {
-        DateRangeDialog
+        DatePickerDialog
     },
 
     computed: {
@@ -108,7 +110,7 @@ export default {
         },
 
         schema () {
-             if (this.dateRangeForHistory.length) {
+             if (this.dateForHistory) {
                 return [
                 {
                     type: "text",

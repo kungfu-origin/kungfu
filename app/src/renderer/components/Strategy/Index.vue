@@ -121,14 +121,14 @@ export default {
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
             
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).dateRange.length !== 0)) {
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
             } else {
                 const orders = data['orders'][t.strategyId];
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).dateRange.length !== 0)) {
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
                 this.trades = Object.freeze(this.historyData['trade'].data)
             } else {
                 const trades = data['trades'][t.strategyId];
@@ -174,9 +174,9 @@ export default {
 
     methods:{
 
-        handleShowHistory ({ dateRange, data, type }) {
+        handleShowHistory ({ date, data, type }) {
             this.$set(this.historyData, type, {
-                dateRange,
+                date,
                 data
             })
         }

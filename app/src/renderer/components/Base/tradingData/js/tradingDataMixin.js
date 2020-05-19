@@ -1,8 +1,8 @@
 import moment from 'moment';
 
-import {decodeKungfuLocation} from '__io/kungfu/watcher';
-import {history} from '__gUtils/kungfuUtils';
-import {writeCSV} from '__gUtils/fileUtils';
+import { decodeKungfuLocation } from '__io/kungfu/watcher';
+import { history } from '__gUtils/kungfuUtils';
+import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     props: {
@@ -39,12 +39,11 @@ export default {
             searchKeyword: "",
             filter: {
                 id: '', //对id、代码id、策略id模糊查询
-                dateRange: null
             },
 
             dateRangeDialogVisiblityForExport: false,
             dateRangeDialogVisiblityForHistory: false,
-            dateRangeForHistory: [],
+            dateForHistory: '',
             dateRangeExportLoading: false,
             
 
@@ -78,29 +77,24 @@ export default {
     methods: {
 
         handleClearHistory () {
-            this.dateRangeForHistory = [];
+            this.dateForHistory = '';
             this.$emit('showHistory', {
-                dateRange: [],
+                date: '',
                 data: [],
                 type: this.kungfuBoardType
             })
         },
 
-        handleConfirmDateRangeForHistory (dateRange) {
-
-            this.dateRangeForHistory = [
-                moment(dateRange[0]).format('MMDD'),
-                moment(dateRange[1]).format('MMDD')
-            ]
-
-            return this.getDataByDateRange(dateRange)
+        handleConfirmDateRangeForHistory (date) {
+            return this.getDataByDateRange(date)
                 .then(data => {
                     this.dateRangeDialogVisiblityForHistory = false;
+                    this.dateForHistory = moment(date).format('YYYY-MM-DD')
                     return data;
                 })
                 .then(data => {
                     this.$emit('showHistory', {
-                        dateRange: dateRange || [],
+                        date: date || '',
                         data: data,
                         type: this.kungfuBoardType
                     })
@@ -108,9 +102,9 @@ export default {
         },
 
         //选择日期以及保存
-        handleConfirmDateRangeForExport (dateRange) {
+        handleConfirmDateRangeForExport (date) {
 
-            return this.getDataByDateRange(dateRange)
+            return this.getDataByDateRange(date)
                 .then(data => {
                     this.dateRangeDialogVisiblityForExport = false;
                     return data;
@@ -126,9 +120,9 @@ export default {
                 })
         },
 
-        getDataByDateRange (dateRange) {
-            const from = moment(dateRange[0]).format('YYYY-MM-DD');
-            const to = moment(dateRange[1]).add(1, 'day').format('YYYY-MM-DD');
+        getDataByDateRange (date) {
+            const from = moment(date).format('YYYY-MM-DD');
+            const to = moment(date).add(1, 'day').format('YYYY-MM-DD');
             this.dateRangeExportLoading = true;
 
             return new Promise((resolve) => {
