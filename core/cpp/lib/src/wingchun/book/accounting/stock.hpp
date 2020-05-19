@@ -121,7 +121,6 @@ private:
     book->asset.avail -= tax;
     book->asset.avail += book->get_frozen_price(trade.order_id) * trade.volume;
     book->asset.avail -= trade.price * trade.volume;
-    SPDLOG_WARN("asset avail {} {} {} {} {}", book->asset.avail, commission, tax, book->get_frozen_price(trade.order_id) * trade.volume, trade.price * trade.volume);
     book->asset.intraday_fee += commission + tax;
     book->asset.accumulated_fee += commission + tax;
   }
