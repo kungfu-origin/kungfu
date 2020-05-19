@@ -14,6 +14,12 @@
         <tr-dashboard-header-item v-if="!ifBacktest">
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
+         <tr-dashboard-header-item v-if="!value">
+            <i class="el-icon-monitor mouse-over" title="打开监控" @click="handleMonitTrades"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-else>
+            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitTrades"></i>
+        </tr-dashboard-header-item>
     </div>
     <tr-table
         v-if="rendererTable"

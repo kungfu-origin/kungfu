@@ -1,13 +1,13 @@
 <template>
     <main-content>
         <div class="account-content">
-            <el-col :span="14">
+            <el-col :span="monitTrades ? 10 : 14">
                 <el-row style="height: 33.333%">
                     <el-col>
                        <TdAccount/>
                     </el-col>
                 </el-row>
-                <el-row style="height: 33.333%">
+                <el-row style="height: 33.333%" v-if="!monitOrders">
                     <el-col :span="14">
                         <MdAccount></MdAccount>
                     </el-col>
@@ -20,10 +20,11 @@
                         />
                     </el-col>
                 </el-row>
-                <el-row style="height: 33.333%">
+                <el-row :style="{ 'height': monitOrders ? '66.66%' : '33.333%' }">
                     <el-col>
                         <CurrentOrder
                         moduleType="account" 
+                        v-model="monitOrders"
                         :currentId="currentId"
                         :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
@@ -34,8 +35,8 @@
                 </el-row>
             </el-col>
 
-            <el-col :span="10">
-                <el-row style="height: 50%">
+            <el-col :span="monitTrades ? 14 : 10">
+                <el-row style="height: 50%" v-if="!monitTrades">
                     <Pos 
                     moduleType="account"
                     :currentId="currentId" 
@@ -44,9 +45,10 @@
                     />
                 </el-row>
                 
-                <el-row style="height: 50%">
+                <el-row :style="{ 'height': monitTrades ? '100%' : '50%' }">
                     <TradeRecord
                     moduleType="account" 
+                    v-model="monitTrades"
                     :currentId="currentId"
                     :kungfuData="trades"
                     :orderStat="orderStat"
@@ -83,7 +85,9 @@ export default {
             dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({}),
 
-            historyData: {}
+            historyData: {},
+            monitOrders: false,
+            monitTrades: false
         }
     },
 

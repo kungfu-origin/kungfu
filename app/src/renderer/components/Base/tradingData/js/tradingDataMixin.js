@@ -6,6 +6,11 @@ import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     props: {
+        value: {
+            type: Boolean,
+            default: false
+        },
+
         currentId: {
             type: String,
             default: ''
@@ -75,6 +80,14 @@ export default {
     },
 
     methods: {
+
+        handleMonitTrades () {
+            this.$emit('input', !this.value)
+        },
+
+        handleMonitOrders () {
+            this.$emit('input', !this.value)
+        },
 
         handleClearHistory () {
             this.dateForHistory = '';

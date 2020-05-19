@@ -1,90 +1,147 @@
 <template>
     <main-content>
-        <div class="trader-content">
-                <template v-if="monitStrategies">
-                    <el-col :span="14">
-                        <el-row style="height: 66.66%">
-                            <el-col>
-                                <Strategy
-                                v-model="monitStrategies"
-                                ></Strategy>
-                            </el-col>
-                        </el-row>
-                        <el-row style="height: 33.33%">
-                            <el-col :span="14">
-                                <Log></Log>                         
-                            </el-col>
-                            <el-col :span="10">
-                                <Pnl
-                                ref="pnl"
-                                :currentId="strategyId" 
-                                moduleType="strategy"
-                                :minPnl="pnl"   
-                                :dailyPnl="dailyPnl"
-                                :addTime="addTime"                
-                                ></Pnl>
-                            </el-col>
-                        </el-row>
-                    </el-col>
-                </template>
-                <template v-else>
-                    <el-col :span="14">
-                        <el-row style="height: 33.33%">
-                            <el-col :span="14">
-                                <Strategy
-                                v-model="monitStrategies"
-                                ></Strategy>
-                            </el-col>
-                            <el-col :span="10">
-                                <Pnl
-                                ref="pnl"
-                                :currentId="strategyId" 
-                                moduleType="strategy"
-                                :minPnl="pnl"   
-                                :dailyPnl="dailyPnl"
-                                :addTime="addTime"                
-                                ></Pnl>
-                            </el-col>
-                        </el-row>
-                        <el-row style="height: 66.66%">
-                            <el-col>
-                                <Log></Log>                         
-                            </el-col>
-                        </el-row>
-                    </el-col>
-                </template>
-                    
-                <el-col  :span="10">
-                    <el-row style="height: 33.333%">
-                            <Pos
-                            :currentId="strategyId"
+        <div class="trader-content" v-if="!(monitOrders || monitTrades)">
+            <template v-if="monitStrategies">
+                <el-col :span="14">
+                    <el-row style="height: 66.66%">
+                        <el-col>
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                    </el-row>
+                    <el-row style="height: 33.33%">
+                        <el-col :span="14">
+                            <Log></Log>                         
+                        </el-col>
+                        <el-col :span="10">
+                            <Pnl
+                            ref="pnl"
+                            :currentId="strategyId" 
                             moduleType="strategy"
-                            :kungfuData="positions"   
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
                             :addTime="addTime"                
-                            ></Pos>
-                    </el-row>
-                    <el-row  style="height: 33.333%">
-                            <CurrentOrder
-                            :currentId="strategyId"
-                            moduleType="strategy"
-                            :kungfuData="orders"                 
-                            :addTime="addTime"   
-                            :orderStat="orderStat"   
-                            @showHistory="handleShowHistory"          
-                            ></CurrentOrder>                      
-                    </el-row>
-                    <el-row style="height: 33.333%">
-                            <TradeRecord 
-                            :currentId="strategyId"
-                            moduleType="strategy"
-                            :kungfuData="trades"           
-                            :addTime="addTime"    
-                            :orderStat="orderStat"
-                            @showHistory="handleShowHistory"          
-                            ></TradeRecord>
+                            ></Pnl>
+                        </el-col>
                     </el-row>
                 </el-col>
+            </template>
+            <template v-else>
+                <el-col :span="14">
+                    <el-row style="height: 33.33%">
+                        <el-col :span="14">
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                        <el-col :span="10">
+                            <Pnl
+                            ref="pnl"
+                            :currentId="strategyId" 
+                            moduleType="strategy"
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
+                            :addTime="addTime"                
+                            ></Pnl>
+                        </el-col>
+                    </el-row>
+                    <el-row style="height: 66.66%">
+                        <el-col>
+                            <Log></Log>                         
+                        </el-col>
+                    </el-row>
+                </el-col>
+            </template>
+                
+            <el-col  :span="10">
+                <el-row style="height: 33.333%">
+                        <Pos
+                        :currentId="strategyId"
+                        moduleType="strategy"
+                        :kungfuData="positions"   
+                        :addTime="addTime"                
+                        ></Pos>
+                </el-row>
+                <el-row  style="height: 33.333%">
+                        <CurrentOrder
+                        moduleType="strategy"
+                        v-model="monitOrders"
+                        :currentId="strategyId"
+                        :kungfuData="orders"                 
+                        :addTime="addTime"   
+                        :orderStat="orderStat"   
+                        @showHistory="handleShowHistory"          
+                        ></CurrentOrder>                      
+                </el-row>
+                <el-row style="height: 33.333%">
+                        <TradeRecord 
+                        moduleType="strategy"
+                        v-model="monitTrades"
+                        :currentId="strategyId"
+                        :kungfuData="trades"           
+                        :addTime="addTime"    
+                        :orderStat="orderStat"
+                        @showHistory="handleShowHistory"          
+                        ></TradeRecord>
+                </el-row>
+            </el-col>
+        </div>
 
+        <div class="trader-content" v-else>
+            <template>
+                <el-col :span="10">
+                    <el-row style="height: 33.33%">
+                        <el-col>
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                    </el-row>
+                     <el-row style="height: 33.33%">
+                        <el-col>
+                            <Pnl
+                            ref="pnl"
+                            :currentId="strategyId" 
+                            moduleType="strategy"
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
+                            :addTime="addTime"                
+                            ></Pnl>                        
+                        </el-col>
+                    </el-row>
+                    <el-row style="height: 33.33%">
+                        <el-col>
+                            <Log></Log>                         
+                        </el-col>
+                    </el-row>
+                </el-col>
+            </template>
+                
+            <el-col  :span="14">
+                <el-row  style="height: 100%">
+                        <CurrentOrder
+                        v-if="monitOrders"
+                        moduleType="strategy"
+                        v-model="monitOrders"
+                        :currentId="strategyId"
+                        :kungfuData="orders"                 
+                        :addTime="addTime"   
+                        :orderStat="orderStat"   
+                        @showHistory="handleShowHistory"          
+                        ></CurrentOrder>    
+                        <TradeRecord 
+                        v-if="monitTrades"
+                        moduleType="strategy"
+                        v-model="monitTrades"
+                        :currentId="strategyId"
+                        :kungfuData="trades"           
+                        :addTime="addTime"    
+                        :orderStat="orderStat"
+                        @showHistory="handleShowHistory"          
+                        ></TradeRecord>                  
+                </el-row>
+            </el-col>
         </div>
     </main-content>
 </template>
@@ -114,6 +171,8 @@ export default {
 
             historyData: {},
             monitStrategies: false,
+            monitOrders: false,
+            monitTrades: false
         }
     },
 
