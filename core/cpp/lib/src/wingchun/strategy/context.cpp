@@ -97,6 +97,7 @@ uint64_t Context::insert_order(const std::string &instrument_id, const std::stri
   input.offset = offset;
   input.hedge_flag = hedge_flag;
   writer->close_data();
+  bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
   return input.order_id;
 }
 
