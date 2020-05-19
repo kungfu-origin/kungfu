@@ -11,7 +11,7 @@
     >
         <el-form ref="date-range-form" label-width="90px" :model="form">
             <el-form-item
-            label="日期范围"
+            label="选择日期"
             prop="date"
             :rules="[
                 { required: true, message: '日期范围不能为空！', trigger: 'blur' },
