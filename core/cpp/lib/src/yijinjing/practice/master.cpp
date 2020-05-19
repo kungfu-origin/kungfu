@@ -130,7 +130,15 @@ void master::react() {
 
 void master::on_active() {
   auto now = time::now_in_nano();
+  if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now) {
+    on_interval_check(now);
+    last_check_ = now;
+  }
+  handle_timer_tasks();
+}
 
+void master::handle_timer_tasks() {
+  auto now = time::now_in_nano();
   for (auto &app : timer_tasks_) {
     uint32_t app_id = app.first;
     auto &app_tasks = app.second;
@@ -148,11 +156,6 @@ void master::on_active() {
       it++;
     }
   }
-
-  if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now) {
-    on_interval_check(now);
-    last_check_ = now;
-  }
 }
 
 void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
@@ -163,6 +166,7 @@ void master::try_add_location(int64_t trigger_time, const location_ptr &app_loca
 }
 
 void master::feed(const event_ptr &event) {
+  handle_timer_tasks();
   if (registry_.find(event->source()) == registry_.end()) {
     return;
   }

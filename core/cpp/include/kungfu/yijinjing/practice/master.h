@@ -56,6 +56,8 @@ private:
   std::unordered_map<uint32_t, cache::shift> app_cache_shift_ = {};
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
+  void handle_timer_tasks();
+
   void try_add_location(int64_t trigger_time, const data::location_ptr &app_location);
 
   void feed(const event_ptr &event);
