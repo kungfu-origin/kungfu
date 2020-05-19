@@ -40,7 +40,7 @@ constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &typ
     return [&](auto... tables) {
       using storage_type = decltype(sqlite_orm::make_storage(db_file, tables...));
       auto storage_ptr = std::make_shared<storage_type>(sqlite_orm::make_storage(db_file, tables...));
-      storage_ptr->busy_timeout(30 * time_unit::MILLISECONDS_PER_SECOND);
+      storage_ptr->busy_timeout(300 * time_unit::MILLISECONDS_PER_SECOND);
       storage_ptr->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
       return storage_ptr;
     };
