@@ -35,13 +35,13 @@ function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: st
     orders.kfForEach((item: OrderInputData) => {
         const orderData = dealOrder(item);
         const latencyData = orderStat[orderData.orderId] || {};
-        const systemLatency = latencyData.systemLatency || '';
-        const networkLatency = latencyData.networkLatency || '';
+        const latencySystem = latencyData.latencySystem || '';
+        const latencyNetwork = latencyData.latencyNetwork || '';
 
         orderDataByKey[orderData.id] = {
             ...orderData,
-            systemLatency,
-            networkLatency
+            latencySystem,
+            latencyNetwork
         };
     })
 

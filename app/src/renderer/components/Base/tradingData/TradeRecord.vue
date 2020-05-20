@@ -153,7 +153,7 @@ export default {
             },{
                 type: 'number',
                 label: "交易延迟(μs)",
-                prop: "tradeLatency", 
+                prop: "latencyTrade", 
                 width: '90px'
             },{
                 type: 'account-strategy',
@@ -196,8 +196,8 @@ export default {
                     let tradeData = dealTrade(item);
                     let orderId = tradeData.orderId;
                     tradeData.update = !!t.tableData.length;
-                    tradeData.tradeLatency = (t.orderStat[orderId] || {}).tradeLatency || '';
-                    return tradeData
+                    tradeData.latencyTrade = (t.orderStat[orderId] || {}).latencyTrade || '';
+                    return Object.freeze(tradeData)
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
 

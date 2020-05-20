@@ -163,7 +163,7 @@ export default {
                 let positionData = dealPos(item);
                 positionData.update = true;
                 const poskey = t.getKey(positionData);
-                positionDataByKey[poskey] = positionData;
+                positionDataByKey[poskey] = Object.freeze(positionData);
             })
 
             return {

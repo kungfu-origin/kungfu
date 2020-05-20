@@ -22,11 +22,6 @@ export const posDirection: NumberToStringObject = {
     1: isEnglish ? 'Short' : '空' 
 }
 
-export const priceType: NumberToStringObject = {
-    1: isEnglish ? 'Limit' : '市价',
-    0: isEnglish ? 'Market' : '限价'
-}
-
 export const statusName: StringToStringObject = {
     all_traded: isEnglish ? 'AllTraded' : '全部成交',
     pending: isEnglish ? 'Pending' : '非最终状态',
@@ -112,3 +107,40 @@ export const instrumentTypes: StringToNumberObject = {
     Index           :7,
     Repo            :8
 }
+
+
+export const instrumentType: NumberToStringObject = {
+    0: isEnglish ? 'Unknown'     : '未知',
+    1: isEnglish ? 'Stock'       : '普通股票',
+    2: isEnglish ? 'Future'      : '期货',
+    3: isEnglish ? 'Bond'        : '债券',
+    4: isEnglish ? 'StockOption' : '股票期权',
+    5: isEnglish ? 'Fund'        : '基金',
+    6: isEnglish ? 'TechStock'   : '科创板股票',
+    7: isEnglish ? 'Index'       : '指数',
+    8: isEnglish ? 'Repo'        : '回购'
+}
+
+
+export const priceType: NumberToStringObject = {
+    0: isEnglish ? 'Limit'       : '限价',
+    1: isEnglish ? 'Market'      : '市价',
+    2: isEnglish ? 'FakBest5'    : '上海深圳最优五档即时成交剩余撤销，不需要报价',
+    3: isEnglish ? 'ForwardBest' : '深圳本方方最优价格申报', 
+    4: isEnglish ? 'ReverseBest' : '上海最优五档即时成交剩余转限价',
+    5: isEnglish ? 'Fak'         : '深圳即时成交剩余撤销',
+    6: isEnglish ? 'Fok'         : '深圳市价全额成交或者撤销',
+    7: isEnglish ? 'UnKnown'     : '未知'
+}
+
+export const volumeCondition: NumberToStringObject = {
+    0: isEnglish ? 'Any' : '任意', 
+    1: isEnglish ? 'Min' : '最小', 
+    2: isEnglish ? 'All' : '全部' 
+};
+
+export const timeCondition: NumberToStringObject = { 
+    0: isEnglish ? 'IOC' : 'IOC', 
+    1: isEnglish ? 'GFD' : 'GFD', 
+    2: isEnglish ? 'GTC' : 'GTC' 
+};

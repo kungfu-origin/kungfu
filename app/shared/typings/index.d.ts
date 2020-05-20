@@ -112,42 +112,90 @@ interface LogDataOrigin {
 
 interface OrderData {
     id: string;
+    
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
+
     orderId: string;
+    parentId: string;
+
     instrumentId: string;
+    instrumentType: string;
+    exchangeId: string;
+
     side: string;
     offset: string;
+    hedgeFlag: string;
+    priceType: string;
+    volumeCondition: string;
+    timeCondition: string;
+
     limitPrice: string;
+    frozenPrice: string;
+
+    volume: string;
+    volumeLeft: string;
     volumeTraded: string;
+
     statusName: string;
     status: string;
+
+    tax: number;
+    comission: number;
+
+    errorId: number;
+    errorMsg: string;
+
     clientId: string;
     accountId: string;
     sourceId: string;
-    exchangeId: string;
+
     source: string;
-    systemLatency?: string | number;
-    networkLatency?: string | number;
+    dest: string;
+    
+    latencySystem?: string | number;
+    latencyNetwork?: string | number;
 }
 
 interface OrderInputData {
     update_time: bigint;
     insert_time: bigint;
+
     order_id: bigint;
+    parent_id: bigint;
+
     instrument_id: string;
+    instrument_type: number;
+    exchange_id: string;
+
     side: number;
     offset: number;
+    hedge_flag: number;
+    price_type: number;
+    volume_condition: number;
+    time_condition: number;
+    
     volume: bigint;
     volume_left: bigint;
     volume_traded: bigint;
+    
     status: any;
+    
     limit_price: number;
+    frozen_price: number;
+
+    tax: number;
+    commission: number;
+
+    error_id: number;
+    error_msg: string;
+
+
     client_id: string;
     account_id: string;
     source_id: string;
-    exchange_id: string;
+
     source: string;
     dest: string;
 }
@@ -253,9 +301,9 @@ interface OrderStatData {
     orderId: string;
     dest: string;
     source: string;
-    systemLatency: string;
-    networkLatency: string;
-    tradeLatency: string;
+    latencySystem: string;
+    latencyNetwork: string;
+    latencyTrade: string;
 }
 
 interface AccountSettingItem {

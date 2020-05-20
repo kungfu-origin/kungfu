@@ -99,6 +99,50 @@
                 </template>
             </el-table-column>
             <el-table-column
+                class-name="blink-cell"
+                label="市值"
+                show-overflow-tooltip
+                align="right"
+                min-width="120"
+                >
+                <template slot-scope="props" >
+                    <span 
+                    :class="{
+                        'tr-table-cell': true,
+                        'number': true,
+                        'nano': true,
+                    }"
+                    :key="`${props.row.strategy_id}_${calcCash(props.row, 'marketValue')}`"                        
+                    >
+                        <template>
+                            {{calcCash(props.row, 'marketValue') || '--'}}
+                        </template>  
+                    </span>          
+                </template>
+            </el-table-column>
+            <el-table-column
+                    class-name="blink-cell"
+                    label="保证金"
+                    show-overflow-tooltip
+                    align="right"
+                    min-width="120"
+                    >
+                    <template slot-scope="props" >
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': true,
+                        }"
+                        :key="`${props.row.strategy_id}_${calcCash(props.row, 'margin')}`"                        
+                        >
+                            <template>
+                                {{calcCash(props.row, 'margin') || '--'}}
+                            </template>
+                        </span>          
+                    </template>
+                </el-table-column>
+            <el-table-column
                 label="路径"
                 sortable    
                 prop="strategy_path" 

@@ -35,13 +35,14 @@
     :data="tableData"
     :schema="schema"
     :renderCellClass="renderCellClass"
+    @dbclick="handleShowDetail"
     >
         <template v-slot:oper="{ oper }">
             <i 
             v-if="[0,1,3,4,5,6,8].indexOf(+oper.status) === -1"
             class="el-icon-close mouse-over" 
             title="撤单" 
-            @click="handleCancelOrder(oper)"/>
+            @click.stop="handleCancelOrder(oper)"/>
         </template>
     </tr-table>
     <date-picker-dialog 
@@ -201,12 +202,12 @@ export default {
             },{
                 type: 'number',
                 label: "系统延迟(μs)",
-                prop: "systemLatency", 
+                prop: "latencySystem", 
                 width: '90px'
             },{
                 type: 'number',
                 label: "网络延迟(μs)",
-                prop: "networkLatency", 
+                prop: "latencyNetwork", 
                 width: '90px'
             },{
                 type: "account-strategy",
@@ -228,11 +229,37 @@ export default {
                 todayFinish: this.todayFinish
             });
 
-           this.tableData = ordersResolve
+           this.tableData = ordersResolve;
         }
     },
 
     methods: {
+        handleShowDetail (row) {
+            let orderData = JSON.parse(JSON.stringify(row));
+            let orderMessage = '';
+
+            delete orderData.id;
+            delete orderData.source;
+            delete orderData.dest;
+            delete orderData.updateTimeNum;
+            delete orderData.updateTime;
+            delete orderData.update;
+            delete orderData.sourceId;
+            delete orderData.status;
+            
+            Object.keys(orderData || {}).forEach(key => {
+                const value = orderData[key];
+                orderMessage += `${key}: ${value} </br>`
+            })
+
+            this.$alert(orderMessage, `委托详情 ${orderData.orderId}`, {
+                confirmButtonText: '确定',
+                dangerouslyUseHTMLString: true,
+                closeOnPressEscape: true,
+                callback: () => {}
+            });
+        },
+
         handleCancelOrder (props) {
             const kungfuLocation = decodeKungfuLocation(props.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
@@ -321,9 +348,9 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = dealOrder(item);
                 orderData.update = true;
-                orderData.systemLatency = (this.orderStat[orderData.orderId] || {}).systemLatency || '';
-                orderData.networkLatency = (this.orderStat[orderData.orderId] || {}).networkLatency || '';
-                orderDataByKey[orderData.id] = orderData;
+                orderData.latencySystem = (this.orderStat[orderData.orderId] || {}).latencySystem || '';
+                orderData.latencyNetwork = (this.orderStat[orderData.orderId] || {}).latencyNetwork || '';
+                orderDataByKey[orderData.id] = Object.freeze(orderData);
             })
 
             return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{

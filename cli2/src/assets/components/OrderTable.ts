@@ -59,8 +59,8 @@ class OrderTable extends Table {
 					o.volumeTraded,
 					statusName,
 					last,
-					o.systemLatency,
-					o.networkLatency
+					o.latencySystem,
+					o.latencyNetwork
 				], 
 				calcuHeaderWidth(t.headers, t.columnWidth), 
 				t.pad
