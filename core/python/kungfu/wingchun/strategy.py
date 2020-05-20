@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import importlib
+import inspect
 import functools
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun import constants
@@ -69,6 +70,21 @@ class Strategy(wc.Strategy):
 
         self.ctx.wc_context.add_time_interval(duration, wrap_callback)
 
+    def __call_proxy(self, func, *args):
+        if inspect.iscoroutinefunction(func):
+            async def wrap():
+                await func(*args)
+                self.ctx.loop._current = None
+
+            asyncio.ensure_future(wrap())
+        else:
+            func(*args)
+
+    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume):
+        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, constants.PriceType.Any, side)
+        await AsyncInsertOrder(self.ctx, order_id)
+        return self.ctx.book.orders[order_id]
+
     def pre_start(self, wc_context):
         self.ctx.wc_context = wc_context
         self.ctx.now = wc_context.now
@@ -92,47 +108,38 @@ class Strategy(wc.Strategy):
         self._pre_start(self.ctx)
 
     def post_start(self, wc_context):
-        self._post_start(self.ctx)
+        self.__call_proxy(self._post_start, self.ctx)
 
     def pre_stop(self, wc_context):
-        self._pre_stop(self.ctx)
+        self.__call_proxy(self._pre_stop, self.ctx)
 
     def post_stop(self, wc_context):
         self._post_stop(self.ctx)
 
     def on_quote(self, wc_context, quote):
-        async def wrap():
-            await self._on_quote(self.ctx, quote)
-            self.ctx.loop._current = None
-
-        asyncio.ensure_future(wrap())
+        self.__call_proxy(self._on_quote, self.ctx, quote)
 
     def on_bar(self, wc_context, bar):
-        self._on_bar(self.ctx, bar)
+        self.__call_proxy(self._on_bar, self.ctx, bar)
 
     def on_entrust(self, wc_context, entrust):
-        self._on_entrust(self.ctx, entrust)
+        self.__call_proxy(self._on_entrust, self.ctx, entrust)
 
     def on_transaction(self, wc_context, transaction):
-        self._on_transaction(self.ctx, transaction)
+        self.__call_proxy(self._on_transaction, self.ctx, transaction)
 
     def on_order(self, wc_context, order):
-        self._on_order(self.ctx, order)
+        self.__call_proxy(self._on_order, self.ctx, order)
 
     def on_order_action_error(self, wc_context, error):
-        self._on_order_action_error(self.ctx, error)
+        self.__call_proxy(self._on_order_action_error, self.ctx, error)
 
     def on_trade(self, wc_context, trade):
-        self._on_trade(self.ctx, trade)
+        self.__call_proxy(self._on_trade, self.ctx, trade)
 
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
-        self._on_trading_day(self.ctx, daytime)
-
-    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume):
-        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, constants.PriceType.Any, side)
-        await AsyncInsertOrder(self.ctx, order_id)
-        return self.ctx.book.orders[order_id]
+        self.__call_proxy(self._on_trading_day, self.ctx, daytime)
 
 
 class AsyncInsertOrder:
