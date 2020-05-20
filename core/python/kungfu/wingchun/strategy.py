@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import importlib
+import functools
 import kungfu.yijinjing.time as kft
 from kungfu.wingchun import constants
 from kungfu.wingchun import utils
@@ -85,7 +86,8 @@ class Strategy(wc.Strategy):
         self.ctx.hold_book = wc_context.hold_book
         self.ctx.hold_positions = wc_context.hold_positions
         self.ctx.get_account_book = self.__get_account_book
-        self.ctx.buy = self.__buy
+        self.ctx.buy = functools.partial(self.__async_insert_order, constants.Side.Buy)
+        self.ctx.sell = functools.partial(self.__async_insert_order, constants.Side.Sell)
         self.__init_book()
         self._pre_start(self.ctx)
 
@@ -101,6 +103,7 @@ class Strategy(wc.Strategy):
     def on_quote(self, wc_context, quote):
         async def wrap():
             await self._on_quote(self.ctx, quote)
+            self.ctx.loop._current = None
 
         asyncio.ensure_future(wrap())
 
@@ -126,8 +129,8 @@ class Strategy(wc.Strategy):
         self.ctx.trading_day = kft.to_datetime(daytime)
         self._on_trading_day(self.ctx, daytime)
 
-    async def __buy(self, instrument_id, exchange_id, account_id, price, volume, price_type):
-        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, price_type, constants.Side.Buy)
+    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume):
+        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, constants.PriceType.Any, side)
         await AsyncInsertOrder(self.ctx, order_id)
         return self.ctx.book.orders[order_id]
 
@@ -155,8 +158,8 @@ class AsyncInsertOrderIter:
         if self.action.order_id in self.book.orders:
             order = self.book.orders[self.action.order_id]
             if order.status == constants.OrderStatus.Filled \
+                    or order.status == constants.OrderStatus.PartialFilledActive \
                     or order.status == constants.OrderStatus.Cancelled \
                     or order.status == constants.OrderStatus.Error:
-                self.ctx.loop._current = None
                 raise StopIteration
         return next(iter(self.action.future))

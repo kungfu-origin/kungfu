@@ -3,9 +3,6 @@ import asyncio
 from collections import deque
 
 
-# https://gist.github.com/damonjw/35aac361ca5d313ee9bf79e00261f4ea
-
-
 class KungfuEventLoop(asyncio.AbstractEventLoop):
     def __init__(self, ctx, hero):
         self._time = 0
@@ -30,19 +27,29 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         self._ctx.logger.info('[{:08x}] {} running'.format(self._hero.home.uid, self._hero.home.uname))
         while self._hero.live:
             self._hero.step()
+
             ready = deque()
             while self._immediate:
                 ready.append(self._immediate.popleft())
-            while self._scheduled:
-                handle = heapq.heappop(self._scheduled)
-                handle._scheduled = False  # just for asyncio.TimerHandle debugging?
-                ready.append(handle)
+
+            if self._scheduled:
+                scheduled = []
+                while self._scheduled:
+                    handle = heapq.heappop(self._scheduled)
+                    if handle._when > self._hero.now():
+                        handle._scheduled = False
+                        ready.append(handle)
+                    else:
+                        heapq.heappush(scheduled, handle)
+                self._scheduled = scheduled
+
             while ready:
                 self._current = ready.popleft()
                 if not self._current._cancelled:
                     self._current._run()
                 if self._current:
                     self._immediate.append(self._current)
+
             if self._exception is not None:
                 raise self._exception
         self._ctx.logger.info('[{:08x}] {} done'.format(self._hero.home.uid, self._hero.home.uname))
@@ -51,8 +58,6 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         raise NotImplementedError
 
     def _timer_handle_cancelled(self, handle):
-        # We could remove the handle from _scheduled, but instead we'll just skip
-        # over it in the "run_forever" method.
         pass
 
     def is_running(self):
@@ -71,21 +76,10 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         pass
 
     def call_exception_handler(self, context):
-        # If there is any exception in a callback, this method gets called.
-        # I'll store the exception in self._exception, so that the main simulation loop picks it up.
         self._exception = context.get('exception', None)
 
-    # Methods for scheduling jobs.
-    #
-    # If the job is a coroutine, the end-user should call asyncio.ensure_future(coro()).
-    # The asyncio machinery will invoke loop.create_task(). Asyncio will then
-    # run the coroutine in pieces, breaking it apart at async/await points, and every time it
-    # will construct an appropriate callback and call loop.call_soon(cb).
-    #
-    # If the job is a plain function, the end-user should call one of the loop.call_*()
-    # methods directly.
-
     def call_soon(self, callback, *args, context=None):
+        self._ctx.logger.info('call soon')
         handle = asyncio.Handle(callback, args, self)
         self._immediate.append(handle)
         return handle
@@ -100,7 +94,7 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
             raise Exception("Can't schedule in the past")
         handle = asyncio.TimerHandle(when, callback, args, self)
         heapq.heappush(self._scheduled, handle)
-        handle._scheduled = True  # perhaps just for debugging in asyncio.TimerHandle?
+        handle._scheduled = True
         return handle
 
     def create_task(self, coro):
