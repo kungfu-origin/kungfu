@@ -164,21 +164,17 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "5")) {
       return longfist::enums::InstrumentType::Fund;
-    } else if (startswith(instrument_id, "6")) {
-      return longfist::enums::InstrumentType::Stock;
     }
+    return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_SZE)) {
-    if (startswith(instrument_id, "0")) {
-      return longfist::enums::InstrumentType::Stock;
-    } else if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
+    if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
       return longfist::enums::InstrumentType::Fund;
     } else if (startswith(instrument_id, "13")) {
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "1")) {
       return longfist::enums::InstrumentType::Bond;
-    } else if (startswith(instrument_id, "30")) {
-      return longfist::enums::InstrumentType::Stock;
     }
+    return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) ||
              string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
              string_equals(exchange_id, EXCHANGE_INE)) {
