@@ -7,7 +7,7 @@ from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun import replay_setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
-from kungfu.practice.events import KungfuEventLoop
+from kungfu.practice.coloop import KungfuEventLoop
 
 from pykungfu import yijinjing as yjj
 
@@ -34,8 +34,6 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
     runner = Runner(ctx, mode)
-    ctx.loop = KungfuEventLoop(ctx, runner)
-    asyncio.set_event_loop(ctx.loop)
 
     if path.endswith('.py'):
         ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
@@ -51,4 +49,5 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
         ctx.session_id = session_id
         replay_setup.setup(ctx, session_id, strategy, runner)
 
+    ctx.loop = KungfuEventLoop(ctx, runner)
     ctx.loop.run_forever()

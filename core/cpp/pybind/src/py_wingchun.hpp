@@ -270,7 +270,9 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("bookkeeper", &Ledger::get_bookkeeper, py::return_value_policy::reference)
       .def("set_begin_time", &Ledger::set_begin_time)
       .def("set_end_time", &Ledger::set_end_time)
-      .def("run", &Ledger::run);
+      .def("now", &Ledger::now)
+      .def("run", &Ledger::run)
+      .def("on_exit", &Ledger::on_exit);
 
   py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(
       m, "Runner")
@@ -279,10 +281,12 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("context", &strategy::Runner::get_context)
       .def("set_begin_time", &strategy::Runner::set_begin_time)
       .def("set_end_time", &strategy::Runner::set_end_time)
+      .def("now", &strategy::Runner::now)
       .def("run", &strategy::Runner::run)
       .def("setup", &strategy::Runner::setup)
       .def("step", &strategy::Runner::step)
       .def("on_trading_day", &strategy::Runner::on_trading_day)
+      .def("on_exit", &strategy::Runner::on_exit)
       .def("add_strategy", &strategy::Runner::add_strategy);
 
   py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")

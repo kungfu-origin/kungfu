@@ -29,13 +29,6 @@ class Strategy(wc.Strategy):
         self.ctx.books = {}
         self.__init_strategy(ctx.path)
 
-    def __add_account(self, source, account, cash_limit):
-        self.ctx.wc_context.add_account(source, account, cash_limit)
-
-    def __get_account_book(self, source, account):
-        location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
-        return self.ctx.wc_context.bookkeeper.get_book(location.uid)
-
     def __init_strategy(self, path):
         strategy_dir = os.path.dirname(path)
         name_no_ext = os.path.split(os.path.basename(path))
@@ -54,22 +47,6 @@ class Strategy(wc.Strategy):
         self._on_trade = getattr(self._module, 'on_trade', lambda ctx, trade: None)
         self._on_order_action_error = getattr(self._module, 'on_order_action_error', lambda ctx, error: None)
 
-    def __init_book(self):
-        location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
-        self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
-
-    def __add_timer(self, nanotime, callback):
-        def wrap_callback(event):
-            callback(self.ctx, event)
-
-        self.ctx.wc_context.add_timer(nanotime, wrap_callback)
-
-    def __add_time_interval(self, duration, callback):
-        def wrap_callback(event):
-            callback(self.ctx, event)
-
-        self.ctx.wc_context.add_time_interval(duration, wrap_callback)
-
     def __call_proxy(self, func, *args):
         if inspect.iscoroutinefunction(func):
             async def wrap():
@@ -80,9 +57,32 @@ class Strategy(wc.Strategy):
         else:
             func(*args)
 
+    def __init_book(self):
+        location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.locator)
+        self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
+
+    def __add_timer(self, nanotime, callback):
+        def wrap_callback(event):
+            self.__call_proxy(callback, self.ctx, event)
+
+        self.ctx.wc_context.add_timer(nanotime, wrap_callback)
+
+    def __add_time_interval(self, duration, callback):
+        def wrap_callback(event):
+            self.__call_proxy(callback, self.ctx, event)
+
+        self.ctx.wc_context.add_time_interval(duration, wrap_callback)
+
+    def __add_account(self, source, account, cash_limit):
+        self.ctx.wc_context.add_account(source, account, cash_limit)
+
+    def __get_account_book(self, source, account):
+        location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
+        return self.ctx.wc_context.bookkeeper.get_book(location.uid)
+
     async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume):
         order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, constants.PriceType.Any, side)
-        await AsyncInsertOrder(self.ctx, order_id)
+        await AsyncOrderAction(self.ctx, order_id)
         return self.ctx.book.orders[order_id]
 
     def pre_start(self, wc_context):
@@ -105,7 +105,7 @@ class Strategy(wc.Strategy):
         self.ctx.buy = functools.partial(self.__async_insert_order, constants.Side.Buy)
         self.ctx.sell = functools.partial(self.__async_insert_order, constants.Side.Sell)
         self.__init_book()
-        self._pre_start(self.ctx)
+        self.__call_proxy(self._pre_start, self.ctx)
 
     def post_start(self, wc_context):
         self.__call_proxy(self._post_start, self.ctx)
@@ -114,7 +114,7 @@ class Strategy(wc.Strategy):
         self.__call_proxy(self._pre_stop, self.ctx)
 
     def post_stop(self, wc_context):
-        self._post_stop(self.ctx)
+        self.__call_proxy(self._post_stop, self.ctx)
 
     def on_quote(self, wc_context, quote):
         self.__call_proxy(self._on_quote, self.ctx, quote)
@@ -142,17 +142,17 @@ class Strategy(wc.Strategy):
         self.__call_proxy(self._on_trading_day, self.ctx, daytime)
 
 
-class AsyncInsertOrder:
+class AsyncOrderAction:
     def __init__(self, ctx, order_id):
         self.ctx = ctx
         self.order_id = order_id
         self.future = ctx.loop.create_future()
 
     def __await__(self):
-        return AsyncInsertOrderIter(self.ctx, self)
+        return AsyncOrderActionIter(self.ctx, self)
 
 
-class AsyncInsertOrderIter:
+class AsyncOrderActionIter:
     def __init__(self, ctx, action):
         self.ctx = ctx
         self.action = action

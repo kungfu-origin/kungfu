@@ -21,6 +21,8 @@ public:
 
   void add_strategy(const Strategy_ptr &strategy);
 
+  void on_exit() override;
+
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
 protected:
@@ -29,8 +31,6 @@ protected:
   void on_start() override;
 
   void on_active() override;
-
-  void on_exit() override;
 
   virtual Context_ptr make_context();
 

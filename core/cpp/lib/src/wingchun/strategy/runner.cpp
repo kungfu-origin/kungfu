@@ -24,6 +24,8 @@ Context_ptr Runner::make_context() { return std::make_shared<Context>(*this, eve
 
 void Runner::add_strategy(const Strategy_ptr &strategy) { strategies_.push_back(strategy); }
 
+void Runner::on_exit() { post_stop(); }
+
 void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   if (context_) {
     context_->get_bookkeeper().on_trading_day(daytime);
@@ -45,8 +47,6 @@ void Runner::on_active() {
     pre_stop();
   }
 }
-
-void Runner::on_exit() { post_stop(); }
 
 void Runner::pre_start() { invoke(&Strategy::pre_start); }
 
