@@ -5,8 +5,11 @@ import importlib
 import inspect
 import functools
 import kungfu.yijinjing.time as kft
+
 from kungfu.wingchun import constants
 from kungfu.wingchun import utils
+from kungfu.wingchun.constants import *
+
 from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as wc
 
@@ -80,9 +83,12 @@ class Strategy(wc.Strategy):
         location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.locator)
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
-    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume):
-        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, constants.PriceType.Any, side)
-        await AsyncOrderAction(self.ctx, order_id)
+    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume,
+                                   price_type=PriceType.Any, status_set=None):
+        if status_set is None:
+            status_set = [OrderStatus.Filled, OrderStatus.PartialFilledActive, OrderStatus.Cancelled, OrderStatus.Error]
+        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, price_type, side)
+        await AsyncOrderAction(self.ctx, order_id, status_set)
         return self.ctx.book.orders[order_id]
 
     def pre_start(self, wc_context):
@@ -102,8 +108,8 @@ class Strategy(wc.Strategy):
         self.ctx.hold_book = wc_context.hold_book
         self.ctx.hold_positions = wc_context.hold_positions
         self.ctx.get_account_book = self.__get_account_book
-        self.ctx.buy = functools.partial(self.__async_insert_order, constants.Side.Buy)
-        self.ctx.sell = functools.partial(self.__async_insert_order, constants.Side.Sell)
+        self.ctx.buy = functools.partial(self.__async_insert_order, Side.Buy)
+        self.ctx.sell = functools.partial(self.__async_insert_order, Side.Sell)
         self.__init_book()
         self.__call_proxy(self._pre_start, self.ctx)
 
@@ -143,9 +149,10 @@ class Strategy(wc.Strategy):
 
 
 class AsyncOrderAction:
-    def __init__(self, ctx, order_id):
+    def __init__(self, ctx, order_id, status_set):
         self.ctx = ctx
         self.order_id = order_id
+        self.status_set = status_set
         self.future = ctx.loop.create_future()
 
     def __await__(self):
@@ -164,9 +171,6 @@ class AsyncOrderActionIter:
     def __next__(self):
         if self.action.order_id in self.book.orders:
             order = self.book.orders[self.action.order_id]
-            if order.status == constants.OrderStatus.Filled \
-                    or order.status == constants.OrderStatus.PartialFilledActive \
-                    or order.status == constants.OrderStatus.Cancelled \
-                    or order.status == constants.OrderStatus.Error:
+            if order.status in self.action.status_set:
                 raise StopIteration
         return next(iter(self.action.future))
