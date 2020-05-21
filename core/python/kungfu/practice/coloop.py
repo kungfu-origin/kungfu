@@ -40,7 +40,6 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
                 while self._scheduled:
                     handle = heapq.heappop(self._scheduled)
                     if handle._when < self._hero.now():
-                        self._ctx.logger.info(f'when {handle._when}, now {self._hero.now()}, diff {handle._when - self._hero.now()}')
                         handle._scheduled = False
                         ready.append(handle)
                     else:
@@ -96,7 +95,6 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         handle = asyncio.TimerHandle(when, callback, args, self)
         heapq.heappush(self._scheduled, handle)
         handle._scheduled = True
-        self._ctx.logger.info(f'call at when {handle._when}, now {self._hero.now()}, diff {handle._when - self._hero.now()}')
         return handle
 
     def create_task(self, coro):
