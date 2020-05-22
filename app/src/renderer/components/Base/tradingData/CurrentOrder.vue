@@ -1,22 +1,32 @@
 <template>
-  <tr-dashboard :title="todayFinish ? `当日委托 ${currentTitle}` : `未完成委托 ${currentTitle}`">
+  <tr-dashboard :title="title">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
+            <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
-            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblity = true"></i>
+        <tr-dashboard-header-item v-if="!ifBacktest && dateForHistory">
+            <span>{{ dateForHistory }}</span>
+            <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!todayFinish">
-            <i class="el-icon-s-claim mouse-over" title="当日委托" @click="handleCheckTodayFinished"></i>
+        <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
+            <i class="el-icon-s-claim mouse-over" title="委托记录" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
+        <tr-dashboard-header-item v-else-if="!ifBacktest">
             <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
+            <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!value">
+            <i class="el-icon-monitor mouse-over" title="打开监控" @click="handleMonitOrders"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-else>
+            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitOrders"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!ifBacktest">
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
@@ -25,27 +35,35 @@
     :data="tableData"
     :schema="schema"
     :renderCellClass="renderCellClass"
+    @dbclick="handleShowDetail"
     >
         <template v-slot:oper="{ oper }">
             <i 
             v-if="[0,1,3,4,5,6,8].indexOf(+oper.status) === -1"
             class="el-icon-close mouse-over" 
             title="撤单" 
-            @click="handleCancelOrder(oper)"/>
+            @click.stop="handleCancelOrder(oper)"/>
         </template>
     </tr-table>
-    <date-range-dialog 
-    @confirm="handleConfirmDateRange"
-    :visible.sync="dateRangeDialogVisiblity"   
-    :loading="exportLoading" 
-    ></date-range-dialog>
+    <date-picker-dialog 
+    @confirm="handleConfirmDateRangeForExport"
+    v-if="dateRangeDialogVisiblityForExport"
+    :visible.sync="dateRangeDialogVisiblityForExport"   
+    :loading="dateRangeExportLoading" 
+    ></date-picker-dialog>
+     <date-picker-dialog 
+    @confirm="handleConfirmDateRangeForHistory"
+    v-if="dateRangeDialogVisiblityForHistory"
+    :visible.sync="dateRangeDialogVisiblityForHistory"   
+    :loading="dateRangeExportLoading" 
+    ></date-picker-dialog>
   </tr-dashboard>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 
-import DateRangeDialog from '../DateRangeDialog';
+import DatePickerDialog from '../DatePickerDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
@@ -69,6 +87,11 @@ export default {
         orderStat: {
             type: Object,
             default: () => ({})
+        },
+
+        name: {
+            type: String,
+            default: ''
         }
     },
 
@@ -80,7 +103,7 @@ export default {
     },
 
     components: {
-        DateRangeDialog
+        DatePickerDialog
     },
 
     computed: {
@@ -88,7 +111,57 @@ export default {
             processStatus: state => state.BASE.processStatus
         }),
 
+        title () {
+            if (this.name) return this.name;
+            return this.todayFinish ? `委托记录 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
+        },
+
         schema () {
+             if (this.dateForHistory) {
+                return [
+                {
+                    type: "text",
+                    label: "下单时间",
+                    prop: "updateTimeMMDD",
+                    width: "140px"
+                },{
+                    type: "text",
+                    label: "代码",
+                    prop: "instrumentId",
+                    width: '60px'
+                },{
+                    type: "text",
+                    label: "",
+                    prop: "side",
+                    width: '35px'
+                },{
+                    type: "text",
+                    label: "",
+                    prop: "offset",
+                    width: '40px'
+                },{
+                    type: "number",
+                    label: "委托价",
+                    prop: "limitPrice",
+                    width: '80px'
+                },{
+                    type: "text",
+                    align: "center",
+                    label: "已成交/全部",
+                    prop: "volumeTraded",
+                    width: '80px'
+                },{
+                    type: "text",
+                    label: "订单状态",
+                    prop: "statusName",
+                    width: '60px'
+                },{
+                    type: "account-strategy",
+                    label: this.moduleType == 'account' ? '策略' : '账户',
+                    prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
+                }]
+            }
+
             return  [
             {
                 type: "text",
@@ -129,12 +202,12 @@ export default {
             },{
                 type: 'number',
                 label: "系统延迟(μs)",
-                prop: "systemLatency", 
+                prop: "latencySystem", 
                 width: '90px'
             },{
                 type: 'number',
                 label: "网络延迟(μs)",
-                prop: "networkLatency", 
+                prop: "latencyNetwork", 
                 width: '90px'
             },{
                 type: "account-strategy",
@@ -156,11 +229,37 @@ export default {
                 todayFinish: this.todayFinish
             });
 
-           this.tableData = ordersResolve
+           this.tableData = ordersResolve;
         }
     },
 
     methods: {
+        handleShowDetail (row) {
+            let orderData = JSON.parse(JSON.stringify(row));
+            let orderMessage = '';
+
+            delete orderData.id;
+            delete orderData.source;
+            delete orderData.dest;
+            delete orderData.updateTimeNum;
+            delete orderData.updateTime;
+            delete orderData.update;
+            delete orderData.sourceId;
+            delete orderData.status;
+            
+            Object.keys(orderData || {}).forEach(key => {
+                const value = orderData[key];
+                orderMessage += `${key}: ${value} </br>`
+            })
+
+            this.$alert(orderMessage, `委托详情 ${orderData.orderId}`, {
+                confirmButtonText: '确定',
+                dangerouslyUseHTMLString: true,
+                closeOnPressEscape: true,
+                callback: () => {}
+            });
+        },
+
         handleCancelOrder (props) {
             const kungfuLocation = decodeKungfuLocation(props.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
@@ -249,9 +348,9 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = dealOrder(item);
                 orderData.update = true;
-                orderData.systemLatency = (this.orderStat[orderData.orderId] || {}).systemLatency || '';
-                orderData.networkLatency = (this.orderStat[orderData.orderId] || {}).networkLatency || '';
-                orderDataByKey[orderData.id] = orderData;
+                orderData.latencySystem = (this.orderStat[orderData.orderId] || {}).latencySystem || '';
+                orderData.latencyNetwork = (this.orderStat[orderData.orderId] || {}).latencyNetwork || '';
+                orderDataByKey[orderData.id] = Object.freeze(orderData);
             })
 
             return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{

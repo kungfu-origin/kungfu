@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="`交易日志 ${currentTitle}`">
+<tr-dashboard :title="name ? name : `交易日志 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <el-checkbox v-model="ifScrollToBottom">跟踪至底部</el-checkbox>
@@ -43,6 +43,14 @@ const BrowserWindow = require('electron').remote.BrowserWindow;
 
 export default {
     name: 'log',
+
+    props: {
+        name: {
+            type: String,
+            default: ''
+        }
+    },
+
     data() {
         this.logColor = {
             info: 'green',
@@ -90,8 +98,7 @@ export default {
         },
 
         logPath(){
-            const t = this;
-            return buildProcessLogPath(t.processId);
+            return buildProcessLogPath(this.processId);
         },
     },
 

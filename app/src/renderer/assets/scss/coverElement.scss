@@ -517,6 +517,8 @@ p.el-select-dropdown__empty{
 .el-message-box{
     background: $bg_card;
     border-color: $bg_card;
+    vertical-align: middle;
+
 }
 
 /* Notification
@@ -529,11 +531,6 @@ p.el-select-dropdown__empty{
 -------------------------- */
 .el-loading-mask{
     background: rgba(0, 0, 0, 0.6)
-}
-
-.el-message-box{
-    vertical-align: top;
-    margin-top: 20vh;
 }
 
 /* Dropdown

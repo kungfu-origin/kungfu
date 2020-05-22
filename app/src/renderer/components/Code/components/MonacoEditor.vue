@@ -39,7 +39,7 @@ export default {
         ...mapState({
             currentFile: state => state.STRATEGY.currentFile,
             fileTree: state => state.STRATEGY.fileTree,
-            code: state => state.BASE.kfConfig.code
+            code: state => state.BASE.kfConfig.code || {}
         })
     },
 
@@ -78,7 +78,7 @@ export default {
 
         code(spaceTabSetting) {
             const t = this;
-            t.updateSpaceTab(spaceTabSetting)
+            t.updateSpaceTab(spaceTabSetting || {})
         }
     },
 

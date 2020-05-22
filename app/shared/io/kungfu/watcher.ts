@@ -2,7 +2,7 @@ import { KF_HOME } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
-import { offsetName, orderStatus, sideName, posDirection } from "__gConfig/tradingConfig";
+import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 
@@ -181,20 +181,45 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         updateTimeNum: +Number(updateTime || 0),
+
+        orderId: item.order_id.toString(),
+        parentId: item.parent_id.toString(),
+        
         instrumentId: item.instrument_id,
+        instrumentType: instrumentType[item.instrument_type],
+        exchangeId: item.exchange_id,
+        
         side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        priceType: priceType[item.price_type],
+        volumeCondition: volumeCondition[item.volume_condition],
+        timeCondition: timeCondition[item.time_condition],
+
         limitPrice: toDecimal(item.limit_price, 3) || '--',
+        frozenPrice: toDecimal(item.frozen_price, 3) || '--',
+        
+        volume: item.volume.toString(),
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
+        volumeLeft: item.volume_left.toString(),
+
         statusName: orderStatus[item.status],
         status: item.status,
+
+        tax: item.tax,
+        comission: item.commission,
+
+        errorId: item.error_id,
+        errorMsg: item.error_msg.toString(),
+
         clientId: resolveClientId(item.dest || ''),
         accountId: resolveAccountId(item.source, item.dest),
         sourceId: item.source_id,
-        orderId: item.order_id.toString(),
-        exchangeId: item.exchange_id,
-        source: item.source
+       
+        source: item.source,
+        dest: item.dest
     }
 }
 
@@ -204,6 +229,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
@@ -258,17 +284,17 @@ export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
     const mdTime = item.md_time;
     const tradeTime = item.trade_time;
 
-    const tradeLatency = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
-    const networkLatency = +Number(Number(ackTime - insertTime) / 1000).toFixed(0);
-    const systemLatency = +toDecimal(Number(insertTime - mdTime) / 1000);
+    const latencyTrade = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
+    const latencyNetwork = +Number(Number(ackTime - insertTime) / 1000).toFixed(0);
+    const latencySystem = +toDecimal(Number(insertTime - mdTime) / 1000);
 
     return {
         ackTime: Number(ackTime),
         insertTime: Number(insertTime),
         mdTime: Number(mdTime),
-        systemLatency: systemLatency > 0 ? systemLatency.toString() : '',
-        networkLatency: networkLatency > 0 ? networkLatency.toString() : '',
-        tradeLatency: tradeLatency > 0 ? tradeLatency.toString() : '',
+        latencySystem: latencySystem > 0 ? latencySystem.toString() : '',
+        latencyNetwork: latencyNetwork > 0 ? latencyNetwork.toString() : '',
+        latencyTrade: latencyTrade > 0 ? latencyTrade.toString() : '',
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source

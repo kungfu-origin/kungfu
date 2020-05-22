@@ -39,7 +39,7 @@ function createWindow () {
 	const isDevelopment = process.env.NODE_ENV === "development" 
 	// and load the index.html of the app.
 	if(isDevelopment){
-		mainWindow.loadURL('http://localhost:9090')
+		mainWindow.loadURL('http://localhost:9090/index.html')
 		if (mainWindow && mainWindow.webContents) {
 			mainWindow.webContents.on("did-frame-finish-load", () => {
 				mainWindow.webContents.once("devtools-opened", () => {
@@ -164,7 +164,7 @@ function setMenu() {
 	let applicationOptions = [
 		{ label: "About Kungfu", click: showKungfuInfo},
 		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: openSettingDialog },
-		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { console.log(BrowserWindow.getFocusedWindow().close()); }}
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { BrowserWindow.getFocusedWindow().close() }}
 	]
 
 	if(platform === 'mac') {

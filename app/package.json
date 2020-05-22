@@ -172,7 +172,8 @@
     "pm2": "4.2.3",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vuex-electron": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",

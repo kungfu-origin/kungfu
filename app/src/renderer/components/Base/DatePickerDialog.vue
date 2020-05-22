@@ -1,7 +1,7 @@
 <template>
      <el-dialog 
-    width="360px" 
-    title="日期范围"  
+    width="300px" 
+    title="选择日期"  
     v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
@@ -11,18 +11,17 @@
     >
         <el-form ref="date-range-form" label-width="90px" :model="form">
             <el-form-item
-            label="日期范围"
-            prop="dateRange"
+            label="选择日期"
+            prop="date"
             :rules="[
                 { required: true, message: '日期范围不能为空！', trigger: 'blur' },
             ]">
                 <el-date-picker
-                    v-model.trim="form.dateRange"
+                    v-model.trim="form.date"
                     size="mini"
-                    type="daterange"
-                    range-separator="～"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期">
+                    type="date"
+                    placeholder="选择日期"
+                    >
                 </el-date-picker>      
             </el-form-item>
         </el-form>
@@ -48,7 +47,7 @@ export default {
     data(){
         return {
             form: {
-                dateRange: []
+                date: ''
             }
         }
     },
@@ -61,14 +60,14 @@ export default {
         handleSubmitSetting(){
             this.$refs['date-range-form'].validate(valid => {
                 if(valid) {
-                    this.$emit('confirm', this.form.dateRange);
+                    this.$emit('confirm', this.form.date);
                 }
             })
         },
         
         clearData(){
             this.$emit('update:visible', false)
-            this.form.dateRange = [];
+            this.form.date = [];
         },
     }
 }

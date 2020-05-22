@@ -7,18 +7,20 @@
 </main-content>
 </template>
 <script>
+
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import FileTree from './components/FileTree';
 import Editor from './components/MonacoEditor';
 import { setTimeout } from 'timers';
-const {dialog} = require('electron').remote;
+
+const { dialog } = require('electron').remote;
+
 export default {
     name: 'kungfu-code-editor',
     
     data(){
         return {
             strategy: {},
-
         }
     },
 
@@ -27,33 +29,10 @@ export default {
     },
 
     mounted(){
-        if(document.getElementById('loading')) document.getElementById('loading').remove();
-
-        const t = this;
-        const locationHash = window.location.hash.toString().split('/');
-        const strategyId = locationHash[locationHash.length - 1];
-        if(!strategyId) {
-            console.error('没有ID！')
-            return
-        }
-        t.updateStrategy(strategyId)
-
-        t.shouldClose = false;
-
-        window.onbeforeunload = (e) => {
-            e.preventDefault(e)
-            if(t.shouldClose) return undefined;
-            const $textareaList = document.querySelectorAll('textarea');
-            $textareaList.forEach($textarea => {
-                $textarea && $textarea.blur()
-            })
-            t.shouldClose = true;
-            setTimeout(() => {
-                window.close();
-            }, 100)
-            return false;
-        }
+        this.setCurrentStrategy();
+        this.bindCloseWindowEvent();
     },
+
 
     destroyed(){
         window.blur()
@@ -62,16 +41,37 @@ export default {
     methods: {
         //子组件对strategy做了更改，需要更新策略
         handleUpdateStrategy(){
-            const t = this;
-            if(!t.strategy.strategy_id) return;
-            t.updateStrategy(t.strategy.strategy_id)
+            if(!this.strategy.strategy_id) return;
+            this.updateStrategy(this.strategy.strategy_id)
+        },
+
+        setCurrentStrategy () {
+            const strategyId = this.$route.params.id;
+            this.updateStrategy(strategyId)
+        },
+
+        bindCloseWindowEvent () {
+            this.shouldClose = false;
+
+            window.onbeforeunload = (e) => {
+                e.preventDefault(e)
+                if(this.shouldClose) return undefined;
+                const $textareaList = document.querySelectorAll('textarea');
+                $textareaList.forEach($textarea => {
+                    $textarea && $textarea.blur()
+                })
+                this.shouldClose = true;
+                setTimeout(() => {
+                    window.close();
+                }, 100)
+                return false;
+            }
         },
 
         //更新strategy
         async updateStrategy(strategyId){
-            const t = this;
-            const strategies = await STRATEGY_API.getStrategyById(strategyId)
-            t.strategy = strategies[0]
+            const strategies = await STRATEGY_API.getStrategyById(strategyId);
+            this.strategy = strategies[0]
         }
     }
 

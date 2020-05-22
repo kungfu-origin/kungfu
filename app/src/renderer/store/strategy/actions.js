@@ -16,6 +16,10 @@ export const setCurrentFile = ({commit}, file) => {
     commit('SET_CURRENT_FILE', file)
 }
 
+export const setStrategiesAsset = ({ commit }, strategiesAsset) => {
+    commit('SET_STRATEGIES_ASSET', strategiesAsset)
+}
+
 //策略编辑，设置文件树
 export const setFileTree = ({commit}, fileTree) => {
     commit('SET_FILE_TREE', fileTree)    

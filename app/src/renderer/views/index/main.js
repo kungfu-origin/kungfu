@@ -2,11 +2,11 @@
 /* eslint-disable */
 import Vue from 'vue';
 import './setKungfuParamsOnWindow';
+import store from '@/store';
 import router from './routers';
-import store from './store';
 import * as utils from '__gUtils/busiUtils'
 import ElementUI from 'element-ui';
-import Components from './assets/components'
+import Components from '@/assets/components'
 import moment from 'moment';
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
@@ -34,21 +34,16 @@ new Vue({
 }).$mount('#app', true)
 
 
-const currentPath = window.location.hash;
-if(currentPath.indexOf('/kungfuCodeEditor') === -1) {
-    const { startGetProcessStatus, startMaster, startLedger } = require('__gUtils/processUtils');
-    //kungfu master 启动流程
-    startMaster(false)
-        .finally(() => {
-            startGetProcessStatus((processStatus) => {
-                Vue.store.dispatch('setProcessStatus', processStatus)
-            });
+const { startGetProcessStatus, startMaster, startLedger } = require('__gUtils/processUtils');
+//kungfu master 启动流程
+startMaster(false)
+    .finally(() => {
+        startGetProcessStatus((processStatus) => {
+            Vue.store.dispatch('setProcessStatus', processStatus)
+        });
 
-            utils.delayMiliSeconds(1000)
-            .then(() => startLedger(false))
-        })
-}
-
-window.fileId = 0;
+        utils.delayMiliSeconds(1000)
+        .then(() => startLedger(false))
+    })
 
 

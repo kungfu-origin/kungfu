@@ -1,21 +1,49 @@
 <template>
     <main-content>
-        <div class="trader-content">
+        <div class="trader-content" v-if="!(monitOrders || monitTrades)">
+            <template v-if="monitStrategies">
                 <el-col :span="14">
+                    <el-row style="height: 66.66%">
+                        <el-col>
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                    </el-row>
                     <el-row style="height: 33.33%">
                         <el-col :span="14">
-                            <Strategy></Strategy>
+                            <Log></Log>                         
                         </el-col>
                         <el-col :span="10">
                             <Pnl
-                                ref="pnl"
-                                :currentId="strategyId" 
-                                moduleType="strategy"
-                                :minPnl="pnl"   
-                                :dailyPnl="dailyPnl"
-                                :dayMethod="getStrategyPnlDay"
-                                :addTime="addTime"                
-                                ></Pnl>
+                            ref="pnl"
+                            :currentId="strategyId" 
+                            moduleType="strategy"
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
+                            :addTime="addTime"                
+                            ></Pnl>
+                        </el-col>
+                    </el-row>
+                </el-col>
+            </template>
+            <template v-else>
+                <el-col :span="14">
+                    <el-row style="height: 33.33%">
+                        <el-col :span="14">
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                        <el-col :span="10">
+                            <Pnl
+                            ref="pnl"
+                            :currentId="strategyId" 
+                            moduleType="strategy"
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
+                            :addTime="addTime"                
+                            ></Pnl>
                         </el-col>
                     </el-row>
                     <el-row style="height: 66.66%">
@@ -24,35 +52,96 @@
                         </el-col>
                     </el-row>
                 </el-col>
-                <el-col  :span="10">
-                    <el-row style="height: 33.333%">
-                            <Pos
-                            :currentId="strategyId"
+            </template>
+                
+            <el-col  :span="10">
+                <el-row style="height: 33.333%">
+                        <Pos
+                        :currentId="strategyId"
+                        moduleType="strategy"
+                        :kungfuData="positions"   
+                        :addTime="addTime"                
+                        ></Pos>
+                </el-row>
+                <el-row  style="height: 33.333%">
+                        <CurrentOrder
+                        moduleType="strategy"
+                        v-model="monitOrders"
+                        :currentId="strategyId"
+                        :kungfuData="orders"                 
+                        :addTime="addTime"   
+                        :orderStat="orderStat"   
+                        @showHistory="handleShowHistory"          
+                        ></CurrentOrder>                      
+                </el-row>
+                <el-row style="height: 33.333%">
+                        <TradeRecord 
+                        moduleType="strategy"
+                        v-model="monitTrades"
+                        :currentId="strategyId"
+                        :kungfuData="trades"           
+                        :addTime="addTime"    
+                        :orderStat="orderStat"
+                        @showHistory="handleShowHistory"          
+                        ></TradeRecord>
+                </el-row>
+            </el-col>
+        </div>
+
+        <div class="trader-content" v-else>
+            <template>
+                <el-col :span="10">
+                    <el-row style="height: 33.33%">
+                        <el-col>
+                            <Strategy
+                            v-model="monitStrategies"
+                            ></Strategy>
+                        </el-col>
+                    </el-row>
+                     <el-row style="height: 33.33%">
+                        <el-col>
+                            <Pnl
+                            ref="pnl"
+                            :currentId="strategyId" 
                             moduleType="strategy"
-                            :kungfuData="positions"   
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
                             :addTime="addTime"                
-                            ></Pos>
+                            ></Pnl>                        
+                        </el-col>
                     </el-row>
-                    <el-row  style="height: 33.333%">
-                            <CurrentOrder
-                            :currentId="strategyId"
-                            moduleType="strategy"
-                            :kungfuData="orders"                 
-                            :addTime="addTime"   
-                            :orderStat="orderStat"             
-                            ></CurrentOrder>                      
-                    </el-row>
-                    <el-row style="height: 33.333%">
-                            <TradeRecord 
-                            :currentId="strategyId"
-                            moduleType="strategy"
-                            :kungfuData="trades"           
-                            :addTime="addTime"    
-                            :orderStat="orderStat"
-                            ></TradeRecord>
+                    <el-row style="height: 33.33%">
+                        <el-col>
+                            <Log></Log>                         
+                        </el-col>
                     </el-row>
                 </el-col>
-
+            </template>
+                
+            <el-col  :span="14">
+                <el-row  style="height: 100%">
+                        <CurrentOrder
+                        v-if="monitOrders"
+                        moduleType="strategy"
+                        v-model="monitOrders"
+                        :currentId="strategyId"
+                        :kungfuData="orders"                 
+                        :addTime="addTime"   
+                        :orderStat="orderStat"   
+                        @showHistory="handleShowHistory"          
+                        ></CurrentOrder>    
+                        <TradeRecord 
+                        v-if="monitTrades"
+                        moduleType="strategy"
+                        v-model="monitTrades"
+                        :currentId="strategyId"
+                        :kungfuData="trades"           
+                        :addTime="addTime"    
+                        :orderStat="orderStat"
+                        @showHistory="handleShowHistory"          
+                        ></TradeRecord>                  
+                </el-row>
+            </el-col>
         </div>
     </main-content>
 </template>
@@ -78,17 +167,33 @@ export default {
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
             dailyPnl: Object.freeze([]),
-            orderStat: Object.freeze({})
+            orderStat: Object.freeze({}),
+
+            historyData: {},
+            monitStrategies: false,
+            monitOrders: false,
+            monitTrades: false
         }
     },
 
     mounted(){
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
-            const orders = data['orders'][t.strategyId];
-            this.orders = Object.freeze(orders || []);
-            const trades = data['trades'][t.strategyId];
-            this.trades = Object.freeze(trades || []);
+            
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'][t.strategyId];
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
+                this.trades = Object.freeze(this.historyData['trade'].data)
+            } else {
+                const trades = data['trades'][t.strategyId];
+                this.trades = Object.freeze(trades || []);
+            }
+           
             const positions = data['positions'][t.strategyId];
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][t.strategyId];
@@ -96,7 +201,10 @@ export default {
             const dailyPnl = data['dailyPnl'][t.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {})
+            this.orderStat = Object.freeze(orderStat || {});
+
+            const assets = data['assets'];
+            this.$store.dispatch('setStrategiesAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
         })
     },
 
@@ -124,7 +232,13 @@ export default {
     },
 
     methods:{
-        getStrategyPnlDay: () => { return Promise.resolve([]) }
+
+        handleShowHistory ({ date, data, type }) {
+            this.$set(this.historyData, type, {
+                date,
+                data
+            })
+        }
     }
 }
 </script>

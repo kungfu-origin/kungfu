@@ -1,13 +1,13 @@
 <template>
     <main-content>
         <div class="account-content">
-            <el-col :span="14">
+            <el-col :span="monitTrades ? 10 : 14">
                 <el-row style="height: 33.333%">
                     <el-col>
                        <TdAccount/>
                     </el-col>
                 </el-row>
-                <el-row style="height: 33.333%">
+                <el-row style="height: 33.333%" v-if="!monitOrders">
                     <el-col :span="14">
                         <MdAccount></MdAccount>
                     </el-col>
@@ -15,27 +15,28 @@
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
-                        :dayMethod="getAccountPnlDay"
                         :minPnl="pnl"
                         :dailyPnl="dailyPnl"
                         />
                     </el-col>
                 </el-row>
-                <el-row style="height: 33.333%">
+                <el-row :style="{ 'height': monitOrders ? '66.66%' : '33.333%' }">
                     <el-col>
                         <CurrentOrder
                         moduleType="account" 
+                        v-model="monitOrders"
                         :currentId="currentId"
                         :kungfuData="orders"
                         :gatewayName="`td_${currentAccount.account_id}`"
                         :orderStat="orderStat"
+                        @showHistory="handleShowHistory"
                         />   
                     </el-col>              
                 </el-row>
             </el-col>
 
-            <el-col :span="10">
-                <el-row style="height: 50%">
+            <el-col :span="monitTrades ? 14 : 10">
+                <el-row :style="{ 'height': monitTrades ? '33.33%' : '50%' }">
                     <Pos 
                     moduleType="account"
                     :currentId="currentId" 
@@ -44,12 +45,14 @@
                     />
                 </el-row>
                 
-                <el-row style="height: 50%">
+                <el-row :style="{ 'height': monitTrades ? '66.66%' : '50%' }">
                     <TradeRecord
                     moduleType="account" 
+                    v-model="monitTrades"
                     :currentId="currentId"
                     :kungfuData="trades"
                     :orderStat="orderStat"
+                    @showHistory="handleShowHistory"
                     />
                 </el-row>
             </el-col>
@@ -81,6 +84,10 @@ export default {
             pnl: Object.freeze([]),
             dailyPnl: Object.freeze([]),
             orderStat: Object.freeze({}),
+
+            historyData: {},
+            monitOrders: false,
+            monitTrades: false
         }
     },
 
@@ -112,30 +119,48 @@ export default {
     mounted(){
         const t = this;
         t.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-            const orders = data['orders'][t.currentId];
-            this.orders = Object.freeze(orders || []);
-            const trades = data['trades'][t.currentId];
-            this.trades = Object.freeze(trades || []);
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'][t.currentId];
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
+                this.trades = Object.freeze(this.historyData['trade'].data)
+            } else {
+                const trades = data['trades'][t.currentId];
+                this.trades = Object.freeze(trades || []);
+            }
+      
             const positions = data['positions'][t.currentId];
             this.positions = Object.freeze(positions || []);
-            const assets = data['assets'];
-            this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
             const pnl = data['pnl'][t.currentId];
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][t.currentId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {})
+            this.orderStat = Object.freeze(orderStat || {});
+
+            const assets = data['assets'];
+            this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
         })
+    },
+
+    methods: {
+
+       handleShowHistory ({ date, data, type }) {
+            this.$set(this.historyData, type, {
+                date,
+                data
+            })
+        }
     },
 
     destroyed(){
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
     },
  
-    methods:{
-        getAccountPnlDay: () => { return Promise.resolve([]) }
-    }
 }
 </script>
 

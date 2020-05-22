@@ -1,5 +1,6 @@
 // import Code from '@/components/Code/Index'
-const Code = () => import('@/components/Code/Index')
+import Code from '@/components/Code/Index';
+
 export default [
     { 
         path: '/kungfuCodeEditor/:id', 

@@ -9,7 +9,6 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
-const PreloadWebpackPlugin = require('preload-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
@@ -30,9 +29,18 @@ let whiteListedModules = [
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
+
   entry: {
-    renderer: path.join(__dirname, '../src/renderer/main.js')
+    index: path.join(__dirname, '../src/renderer/views/index/main.js'),
+    code: path.join(__dirname, '../src/renderer/views/code/main.js'),
   },
+
+  output: {
+    filename: '[name].js',
+    libraryTarget: 'commonjs2',
+    path: path.join(__dirname, '../dist/app')
+  },
+  
   externals: [
     ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
   ],
@@ -133,25 +141,33 @@ let rendererConfig = {
         removeAttributeQuotes: true,
         removeComments: true
       },
+      chunks: ['index'],
       nodeModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new PreloadWebpackPlugin({
-      rel: 'preload',
+    new HtmlWebpackPlugin({
+      filename: 'code.html',
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true
+      },
+      chunks: ['code'],
+      nodeModules: process.env.NODE_ENV !== 'production'
+        ? path.resolve(__dirname, '../node_modules')
+        : false
     }),
+
+    new webpack.NoEmitOnErrorsPlugin(),
     new MonacoWebpackPlugin({
       languages: [
         'python', 'cpp', 'shell', 'json', 'yaml'
       ]
     })
   ],
-  output: {
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
-    path: path.join(__dirname, '../dist/app')
-  },
+
   resolve: {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
@@ -163,6 +179,7 @@ let rendererConfig = {
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node']
   },
+
   target: 'electron-renderer'
 }
 

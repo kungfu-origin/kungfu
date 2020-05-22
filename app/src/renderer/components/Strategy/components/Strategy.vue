@@ -4,6 +4,12 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!value">
+            <i class="el-icon-monitor mouse-over" title="打开监控" @click="handleMonitStrategies"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-else>
+            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitStrategies"></i>
+        </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <el-button size="mini" @click="handleAddStrategy" title="添加">添加</el-button>
         </tr-dashboard-header-item>
@@ -49,16 +55,103 @@
                 </template>
             </el-table-column>
             <el-table-column
+                class-name="blink-cell"
+                label="实现盈亏"
+                show-overflow-tooltip
+                align="right"
+                min-width="100"
+                >
+                <template slot-scope="props">
+                    <span 
+                    :class="{
+                        'tr-table-cell': true,
+                        'number': true,
+                        'nano': true,
+                        'color-red': calcCash(props.row, 'realizedPnl') > 0,
+                        'color-green': calcCash(props.row, 'realizedPnl') < 0,
+                    }"
+                    :key="`realized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'realizedPnl')}`"                        
+                    >
+                    {{calcCash(props.row, 'realizedPnl') || '--'}}
+                    </span> 
+                </template>
+            </el-table-column>
+            <el-table-column
+                class-name="blink-cell"
+                label="浮动盈亏"
+                show-overflow-tooltip
+                align="right"
+                min-width="110"
+                >
+                <template slot-scope="props">
+                    <span 
+                    :class="{
+                        'tr-table-cell': true,
+                        'number': true,
+                        'nano': true,
+                        'color-red': calcCash(props.row, 'unRealizedPnl') > 0,
+                        'color-green': calcCash(props.row, 'unRealizedPnl') < 0,
+                    }"
+                    :key="`unrealized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
+                    >
+                    {{calcCash(props.row, 'unRealizedPnl') || '--'}}
+                    </span> 
+                </template>
+            </el-table-column>
+            <el-table-column
+                class-name="blink-cell"
+                label="市值"
+                show-overflow-tooltip
+                align="right"
+                min-width="120"
+                >
+                <template slot-scope="props" >
+                    <span 
+                    :class="{
+                        'tr-table-cell': true,
+                        'number': true,
+                        'nano': true,
+                    }"
+                    :key="`${props.row.strategy_id}_${calcCash(props.row, 'marketValue')}`"                        
+                    >
+                        <template>
+                            {{calcCash(props.row, 'marketValue') || '--'}}
+                        </template>  
+                    </span>          
+                </template>
+            </el-table-column>
+            <el-table-column
+                    class-name="blink-cell"
+                    label="保证金"
+                    show-overflow-tooltip
+                    align="right"
+                    min-width="120"
+                    >
+                    <template slot-scope="props" >
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': true,
+                        }"
+                        :key="`${props.row.strategy_id}_${calcCash(props.row, 'margin')}`"                        
+                        >
+                            <template>
+                                {{calcCash(props.row, 'margin') || '--'}}
+                            </template>
+                        </span>          
+                    </template>
+                </el-table-column>
+            <el-table-column
                 label="路径"
                 sortable    
                 prop="strategy_path" 
                 :show-overflow-tooltip="true"
             >
             </el-table-column>
-          
             <el-table-column
                 label="" 
-                width="110px"  
+                width="90px"  
                 align="right"       
             >
                 <template slot-scope="props">
@@ -125,7 +218,7 @@
 import path from 'path';
 import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
-import { openWin } from '__gUtils/busiUtils';
+import { openVueWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
@@ -138,6 +231,13 @@ import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywor
 const BrowserWindow = require('electron').remote.BrowserWindow
 
 export default {
+    props: {
+        value: {
+            type: Boolean,
+            default: false
+        }
+    },
+
     data(){
         this.chineseValidator = chineseValidator;
         this.specialStrValidator = specialStrValidator;
@@ -174,6 +274,7 @@ export default {
 
     computed: {
         ...mapState({
+            strategyiesAsset: state => state.STRATEGY.strategyiesAsset || {},
             currentStrategy: state => state.STRATEGY.currentStrategy,
             strategyList: state => state.STRATEGY.strategyList,
             processStatus: state => state.BASE.processStatus
@@ -187,6 +288,10 @@ export default {
     },
 
     methods: {
+        handleMonitStrategies () {
+            this.$emit('input', !this.value)
+        },
+
         //绑定策略路径
         handleBindStrategyFolder(){
             const t = this;
@@ -250,8 +355,7 @@ export default {
 
         //编辑策略
         handleEditStrategy(row){
-            const t = this;
-            t.$utils.openWin(`/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
+            this.$utils.openVueWin('code', `/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略
@@ -347,6 +451,11 @@ export default {
                     }
                 })
             }) 
+        },
+
+         //计算持仓盈亏
+        calcCash(row, key){
+            return this.$utils.toDecimal((this.strategyiesAsset[row.strategy_id] || {})[key]) + ''
         }
     }
 }
