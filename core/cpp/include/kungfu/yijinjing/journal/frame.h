@@ -108,6 +108,8 @@ private:
 
   void set_dest(uint32_t dest) { header_->dest = dest; }
 
+  void copy(frame &source) { memcpy(header_, source.header_, source.frame_length()); }
+
   friend class journal;
 
   friend class writer;

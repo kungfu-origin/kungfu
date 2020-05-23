@@ -71,6 +71,13 @@ void writer::close_frame(size_t data_length) {
   publisher_->notify();
 }
 
+void writer::copy_frame(const frame_ptr& source) {
+  auto frame = journal_.current_frame();
+  frame->copy(*source);
+  journal_.next();
+  publisher_->notify();
+}
+
 void writer::mark(int64_t trigger_time, int32_t msg_type) {
   open_frame(trigger_time, msg_type, 0);
   close_frame(0);

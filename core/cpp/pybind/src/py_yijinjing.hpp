@@ -11,6 +11,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/index/session.h>
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/journal/assemble.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/journal.h>
 #include <kungfu/yijinjing/log.h>
@@ -298,6 +299,14 @@ void bind(pybind11::module &&m) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
   });
+
+  py::class_<assemble, assemble_ptr>(m, "assemble")
+      .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,
+                    const std::string &, const std::string &>(),
+           py::arg("locators"), py::arg("mode") = "*", py::arg("category") = "*", py::arg("group") = "*",
+           py::arg("name") = "*")
+      .def("__plus__", &assemble::operator+)
+      .def("__rshift__", &assemble::operator>>);
 
   py::class_<io_device, io_device_ptr> io_device(m, "io_device");
   io_device
