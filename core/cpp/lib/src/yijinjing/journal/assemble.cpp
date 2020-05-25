@@ -3,6 +3,7 @@
 //
 
 #include <kungfu/yijinjing/journal/assemble.h>
+#include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::journal {
 struct noop_publisher : public publisher {
@@ -50,15 +51,18 @@ void assemble::operator>>(const data::locator_ptr &locator) {
     throw assemble_exception("assemble has already been used");
   }
   used_ = true;
-  std::unordered_map<uint32_t, writer_ptr> writers = {};
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
     auto page = current_reader_->current_page();
     auto location = page->get_location();
-    if (writers.find(location->uid) == writers.end()) {
+    auto dest_id = page->get_dest_id();
+    auto pair = writer_maps.try_emplace(location->uid);
+    auto &writers = pair.first->second;
+    if (writers.find(dest_id) == writers.end()) {
       auto target_location = data::location::make_shared(*location, locator);
-      writers.emplace(location->uid, std::make_shared<writer>(target_location, page->get_dest_id(), true, publisher_));
+      writers.emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, publisher_));
     }
-    auto writer = writers.at(location->uid);
+    auto writer = writers.at(dest_id);
     auto frame = current_reader_->current_frame();
     writer->copy_frame(frame);
     next();

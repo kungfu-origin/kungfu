@@ -45,7 +45,7 @@ public:
 
   [[nodiscard]] const data::location_ptr &get_live_home() const { return live_home_; }
 
-  [[nodiscard]] bool is_low_latency() { return low_latency_; }
+  [[nodiscard]] bool is_low_latency() const { return low_latency_; }
 
   journal::reader_ptr open_reader_to_subscribe();
 

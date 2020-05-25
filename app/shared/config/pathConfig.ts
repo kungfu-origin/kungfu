@@ -20,10 +20,6 @@ addFileSync('', KF_HOME, 'folder')
 export const SYSTEM_DIR = path.join(KF_HOME, 'system');
 addFileSync('', SYSTEM_DIR, 'folder')
 
-//runtime
-export const RUNTIME_DIR = path.join(KF_HOME, 'runtime');
-addFileSync('', RUNTIME_DIR, 'folder')
-
 //strategy
 export const STRATEGY_DIR = path.join(KF_HOME, 'strategy');
 addFileSync('', STRATEGY_DIR, 'folder')

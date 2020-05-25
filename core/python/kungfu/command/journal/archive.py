@@ -18,4 +18,10 @@ def archive(ctx):
     target_locator = kfj.Locator(target_dir)
     assemble = yjj.assemble([ctx.locator])
     assemble >> target_locator
+
+    index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', target_locator)
+    io_device = yjj.io_device(index_location, True, True)
+    session_builder = yjj.session_builder(io_device)
+    session_builder.rebuild_index_db()
+
     # shutil.make_archive("yjj_archive", "zip", target_dir)
