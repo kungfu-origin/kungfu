@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-05-22 11:55:44
+ * @LastEditTime: 2020-05-25 12:46:34
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /kungfu/cli2/src/assets/scripts/actions/tradingDataActions.ts
+ */ 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { dealOrder, dealTrade, dealPos } from '__io/kungfu/watcher';
 import { map } from 'rxjs/operators';
@@ -35,13 +43,13 @@ function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: st
     orders.kfForEach((item: OrderInputData) => {
         const orderData = dealOrder(item);
         const latencyData = orderStat[orderData.orderId] || {};
-        const systemLatency = latencyData.systemLatency || '';
-        const networkLatency = latencyData.networkLatency || '';
+        const latencySystem = latencyData.latencySystem || '';
+        const latencyNetwork = latencyData.latencyNetwork || '';
 
         orderDataByKey[orderData.id] = {
             ...orderData,
-            systemLatency,
-            networkLatency
+            latencySystem,
+            latencyNetwork
         };
     })
 
