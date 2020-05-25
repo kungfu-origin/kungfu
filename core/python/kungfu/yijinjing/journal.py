@@ -9,12 +9,13 @@ from kungfu.yijinjing import msg as yjj_msg
 from pykungfu import yijinjing as yjj
 
 os_sep = re.escape(os.sep)
+
 JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}'.format(
     r'(.*)', os_sep,  # category
     r'(.*)', os_sep,  # group
     r'(.*)', os_sep,  # name
-    r'journal', os_sep,  # mode
-    r'(.*)'
+    r'journal', os_sep,
+    r'(.*)'  # mode
 )
 JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
 
@@ -64,7 +65,7 @@ def find_category(c):
 
 def get_location_from_json(ctx, data):
     if 'mode' in data and 'category' in data and 'group' in data and 'name' in data:
-        return yjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.locator)
+        return yjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.runtime_locator)
     else:
         return None
 
@@ -212,7 +213,7 @@ def find_session(ctx, session_id):
 
 
 def make_location_from_dict(ctx, location):
-    return yjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.locator)
+    return yjj.location(MODES[location['mode']], CATEGORIES[location['category']], location['group'], location['name'], ctx.runtime_locator)
 
 
 def read_session(ctx, session_id, io_type):
@@ -229,7 +230,8 @@ def read_session(ctx, session_id, io_type):
     home = make_location_from_dict(ctx, location)
     io_device = yjj.io_device_console(home, ctx.console_width, ctx.console_height)
 
-    show_in = (io_type == 'in' or io_type == 'all') and not (io_device.home.category == yjj.category.SYSTEM and io_device.home.group == 'master' and io_device.home.name == 'master')
+    show_in = (io_type == 'in' or io_type == 'all') and not (
+            io_device.home.category == yjj.category.SYSTEM and io_device.home.group == 'master' and io_device.home.name == 'master')
     show_out = io_type == 'out' or io_type == 'all'
 
     return locations, session, io_device, show_in, show_out
@@ -241,7 +243,7 @@ def show_journal(ctx, session_id, io_type):
     reader = io_device.open_reader_to_subscribe()
 
     if show_in:
-        for dest_id in ctx.locator.list_location_dest(io_device.home):
+        for dest_id in ctx.runtime_locator.list_location_dest(io_device.home):
             reader.join(io_device.home, dest_id, session['begin_time'])
 
     if show_out:

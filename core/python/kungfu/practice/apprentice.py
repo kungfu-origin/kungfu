@@ -8,7 +8,7 @@ from . import os_signal
 
 class Apprentice(yjj.apprentice):
     def __init__(self, ctx):
-        yjj.apprentice.__init__(self, yjj.location(kfj.MODES[ctx.mode], kfj.CATEGORIES[ctx.category], ctx.group, ctx.name, ctx.locator),
+        yjj.apprentice.__init__(self, yjj.location(kfj.MODES[ctx.mode], kfj.CATEGORIES[ctx.category], ctx.group, ctx.name, ctx.runtime_locator),
                                   low_latency=ctx.low_latency)
         self.ctx = ctx
         self._process = psutil.Process()

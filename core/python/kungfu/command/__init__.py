@@ -1,6 +1,5 @@
 import os
 import platform
-import json
 import click
 import kungfu.yijinjing.journal as kfj
 from pykungfu import yijinjing as yjj
@@ -64,6 +63,13 @@ def recursive_help(cmd, parent=None):
         recursive_help(sub, ctx)
 
 
+def ensure_dir(ctx, name):
+    target = os.path.join(ctx.home, name)
+    if not os.path.exists(target):
+        os.makedirs(target)
+    return target
+
+
 @click.group(invoke_without_command=True, cls=SpecialHelpOrder)
 @click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
                                              "~/.config or $XDG_CONFIG_HOME (if set) on linux, ~/Library/Application Support on mac")
@@ -89,10 +95,15 @@ def kfc(ctx, home, log_level, name):
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
 
+    ctx.runtime_dir = ensure_dir(ctx, 'runtime')
+    ctx.archive_dir = ensure_dir(ctx, 'archive')
+
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
-    ctx.locator = kfj.Locator(home)
-    ctx.system_config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.locator)
+    ctx.runtime_locator = kfj.Locator(ctx.runtime_dir)
+    ctx.config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.runtime_locator)
+    ctx.index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', ctx.runtime_locator)
+
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
     else:
@@ -103,8 +114,10 @@ def kfc(ctx, home, log_level, name):
 def pass_ctx_from_parent(ctx):
     ctx.home = ctx.parent.home
     ctx.log_level = ctx.parent.log_level
-    ctx.locator = ctx.parent.locator
-    ctx.system_config_location = ctx.parent.system_config_location
+    ctx.runtime_dir = ctx.parent.runtime_dir
+    ctx.archive_dir = ctx.parent.archive_dir
+    ctx.runtime_locator = ctx.parent.runtime_locator
+    ctx.config_location = ctx.parent.config_location
     ctx.name = ctx.parent.name
 
 

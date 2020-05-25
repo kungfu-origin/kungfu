@@ -11,15 +11,11 @@ from pykungfu import yijinjing as yjj
 @click.pass_context
 def archive(ctx):
     pass_ctx_from_parent(ctx)
-    target_dir = os.path.join(os.path.dirname(ctx.home), 'archive')
-    if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
-    os.makedirs(target_dir)
-    target_locator = kfj.Locator(target_dir)
-    assemble = yjj.assemble([ctx.locator])
-    assemble >> target_locator
+    archive_locator = kfj.Locator(ctx.archive_dir)
+    assemble = yjj.assemble([ctx.runtime_locator])
+    assemble >> archive_locator
 
-    index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', target_locator)
+    index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', archive_locator)
     io_device = yjj.io_device(index_location, True, True)
     session_builder = yjj.session_builder(io_device)
     session_builder.rebuild_index_db()

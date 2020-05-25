@@ -25,7 +25,7 @@ def test(ctx, home, log_level):
 
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
-    ctx.locator = kfj.Locator(home)
+    ctx.runtime_locator = kfj.Locator(home)
 
     if ctx.invoked_subcommand is None:
         click.echo(test.get_help(ctx))
@@ -34,4 +34,4 @@ def test(ctx, home, log_level):
 
 def pass_ctx_from_parent(ctx):
     ctx.log_level = ctx.parent.log_level
-    ctx.locator = ctx.parent.locator
+    ctx.runtime_locator = ctx.parent.runtime_locator

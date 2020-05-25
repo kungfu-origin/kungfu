@@ -30,7 +30,7 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.category = 'strategy'
     mode = yjj.mode.REPLAY if ctx.replay else yjj.mode.LIVE
     ctx.mode = yjj.get_mode_name(mode)
-    ctx.location = yjj.location(mode, yjj.category.STRATEGY, group, name, ctx.locator)
+    ctx.location = yjj.location(mode, yjj.category.STRATEGY, group, name, ctx.runtime_locator)
     ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
     runner = Runner(ctx, mode)

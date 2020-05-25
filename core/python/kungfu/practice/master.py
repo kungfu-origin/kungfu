@@ -31,7 +31,7 @@ def run_tasks(*args, **kwargs):
 
 class Master(yjj.master):
     def __init__(self, ctx):
-        yjj.master.__init__(self, yjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.locator), ctx.low_latency)
+        yjj.master.__init__(self, yjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.runtime_locator), ctx.low_latency)
         self.ctx = ctx
         self.ctx.master = self
         self.ctx.logger = log.create_logger("master", ctx.log_level, self.io_device.home)
@@ -42,7 +42,7 @@ class Master(yjj.master):
 
         self.ctx.master = self
 
-        self.profile = yjj.profile(ctx.locator)
+        self.profile = yjj.profile(ctx.runtime_locator)
         self.commissions = {}
         for commission in self.profile.get_all(lf.types.Commission()):
             self.commissions[commission.product_id] = commission

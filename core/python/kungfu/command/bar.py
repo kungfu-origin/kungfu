@@ -14,5 +14,5 @@ def bar(ctx, source, time_interval, low_latency):
     pass_ctx_from_parent(ctx)
     ctx.mode = yjj.mode.LIVE
     args = {"source": source, "time_interval": time_interval}
-    instance = pywingchun.BarGenerator(ctx.locator, ctx.mode, low_latency, json.dumps(args))
+    instance = pywingchun.BarGenerator(ctx.runtime_locator, ctx.mode, low_latency, json.dumps(args))
     instance.run()

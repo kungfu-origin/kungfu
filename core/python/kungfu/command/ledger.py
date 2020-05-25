@@ -19,7 +19,7 @@ def ledger(ctx, low_latency, replay, session_id):
     ctx.group = 'service'
     ctx.name = 'ledger'
     ctx.session_id = session_id
-    ledger_instance = pywingchun.Ledger(ctx.locator, ctx.mode, ctx.low_latency)
+    ledger_instance = pywingchun.Ledger(ctx.runtime_locator, ctx.mode, ctx.low_latency)
     if replay:
         ctx.category = 'system'
         replay_setup.setup(ctx, session_id, ledger, ledger_instance)

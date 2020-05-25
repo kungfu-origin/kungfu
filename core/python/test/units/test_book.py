@@ -24,12 +24,12 @@ class TestStockPosition(unittest.TestCase):
         if osname == 'Windows':
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
-        self.ctx.locator = kfj.Locator(home)
+        self.ctx.runtime_locator = kfj.Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
+        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.runtime_locator)
         self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
 
     def test_buy(self):
@@ -279,12 +279,12 @@ class TestFuturePosition(unittest.TestCase):
         if osname == 'Windows':
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
-        self.ctx.locator = kfj.Locator(home)
+        self.ctx.runtime_locator = kfj.Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.locator)
+        self.ctx.util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'test', self.ctx.runtime_locator)
         self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
         self.ctx.get_inst_info = lambda instrument_id: {"contract_multiplier": 10, "long_margin_ratio": 0.1, "short_margin_ratio": 0.1}
         self.ctx.get_commission_info = lambda instrument_id: {"mode": 0, "open_ratio": 0.000045, "close_ratio": 0.000045, "close_today_ratio": 0.0}
