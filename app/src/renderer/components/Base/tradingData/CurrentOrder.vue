@@ -4,7 +4,7 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
+        <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory && todayFinish">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest && dateForHistory">
@@ -14,7 +14,7 @@
         <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
             <i class="el-icon-s-claim mouse-over" title="委托记录" @click="handleCheckTodayFinished"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else-if="!ifBacktest">
+        <tr-dashboard-header-item v-else-if="todayFinish && !ifBacktest && !dateForHistory">
             <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest">
