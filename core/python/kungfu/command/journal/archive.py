@@ -13,7 +13,7 @@ def archive(ctx):
     pass_ctx_from_parent(ctx)
     archive_locator = kfj.Locator(ctx.archive_dir)
     assemble = yjj.assemble([ctx.runtime_locator])
-    assemble >> archive_locator
+    assemble >> yjj.fixed_sink(archive_locator)
 
     index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', archive_locator)
     io_device = yjj.io_device(index_location, True, True)

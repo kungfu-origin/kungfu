@@ -5,7 +5,7 @@ import json
 import errno
 import shutil
 import pandas
-from kungfu.yijinjing import msg as yjj_msg
+from pykungfu.longfist.types import *
 from pykungfu import yijinjing as yjj
 
 os_sep = re.escape(os.sep)
@@ -47,27 +47,6 @@ CATEGORIES = {
     'system': yjj.category.SYSTEM,
     '*': yjj.category.SYSTEM
 }
-
-
-def find_mode(m):
-    for k in MODES:
-        if int(MODES[k]) == m:
-            return MODES[k]
-    return yjj.mode.LIVE
-
-
-def find_category(c):
-    for k in CATEGORIES:
-        if int(CATEGORIES[k]) == c:
-            return CATEGORIES[k]
-    return yjj.category.SYSTEM
-
-
-def get_location_from_json(ctx, data):
-    if 'mode' in data and 'category' in data and 'group' in data and 'name' in data:
-        return yjj.location(MODES[data['mode']], CATEGORIES[data['category']], data['group'], data['name'], ctx.runtime_locator)
-    else:
-        return None
 
 
 class Locator(yjj.locator):
@@ -153,10 +132,10 @@ class Locator(yjj.locator):
 
 
 def collect_journal_locations(ctx):
-    search_path = os.path.join(ctx.home, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
+    search_path = os.path.join(ctx.runtime_dir, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
     locations = {}
     for journal in glob.glob(search_path):
-        match = JOURNAL_PAGE_PATTERN.match(journal[len(ctx.home) + 1:])
+        match = JOURNAL_PAGE_PATTERN.match(journal[len(ctx.runtime_dir) + 1:])
         if match:
             category = match.group(1)
             group = match.group(2)
@@ -266,15 +245,15 @@ def show_journal(ctx, session_id, io_type):
             'public' if frame.dest == 0 else locations[frame.dest]['uname'],
             frame.msg_type, frame.frame_length, frame.data_length
         ]
-        if frame.dest == io_device.home.uid and (frame.msg_type == yjj_msg.RequestReadFrom or frame.msg_type == yjj_msg.RequestReadFromPublic):
+        if frame.dest == io_device.home.uid and (frame.msg_type == RequestReadFrom.tag or frame.msg_type == RequestReadFromPublic.tag):
             request = frame.RequestReadFrom()
             source_location = make_location_from_dict(ctx, locations[request.source_id])
-            dest = io_device.home.uid if frame.msg_type == yjj_msg.RequestReadFrom else 0
+            dest = io_device.home.uid if frame.msg_type == RequestReadFrom.tag else 0
             try:
                 reader.join(source_location, dest, request.from_time)
             except Exception as err:
                 ctx.logger.error(f"failed to join journal {source_location.uname}/{dest}, exception: {err}")
-        if frame.dest == io_device.home.uid and frame.msg_type == yjj_msg.Deregister:
+        if frame.dest == io_device.home.uid and frame.msg_type == Deregister.tag:
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc['uid'])
         reader.next()

@@ -46,25 +46,14 @@ assemble assemble::operator+(assemble &other) {
   return assemble(merged_locators, mode_, category_, group_, name_);
 }
 
-void assemble::operator>>(const data::locator_ptr &locator) {
+void assemble::operator>>(const sink_ptr &sink) {
   if (used_) {
     throw assemble_exception("assemble has already been used");
   }
   used_ = true;
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
-    auto page = current_reader_->current_page();
-    auto location = page->get_location();
-    auto dest_id = page->get_dest_id();
-    auto pair = writer_maps.try_emplace(location->uid);
-    auto &writers = pair.first->second;
-    if (writers.find(dest_id) == writers.end()) {
-      auto target_location = data::location::make_shared(*location, locator);
-      writers.emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, publisher_));
-    }
-    auto writer = writers.at(dest_id);
-    auto frame = current_reader_->current_frame();
-    writer->copy_frame(frame);
+    get_writer(sink)->copy_frame(current_reader_->current_frame());
     next();
   }
 }
@@ -93,5 +82,19 @@ void assemble::sort() {
       current_reader_ = reader;
     }
   }
+}
+
+writer_ptr &assemble::get_writer(const sink_ptr &sink) {
+  auto page = current_reader_->current_page();
+  auto location = page->get_location();
+  auto dest_id = page->get_dest_id();
+  auto pair = writer_maps_.try_emplace(location->uid);
+  auto &writers = pair.first->second;
+  if (writers.find(dest_id) == writers.end()) {
+    auto target_locator = sink->get_target_locator(current_reader_->current_frame());
+    auto target_location = data::location::make_shared(*location, target_locator);
+    writers.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, publisher_));
+  }
+  return writers.at(dest_id);
 }
 } // namespace kungfu::yijinjing::journal

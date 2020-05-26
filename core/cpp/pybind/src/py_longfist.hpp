@@ -84,6 +84,8 @@ template <typename DataType> void bind_data_type(pybind11::module &m_types, cons
     py_class.def_readwrite(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
   });
 
+  py_class.def_readonly_static("tag", &DataType::tag);
+
   py_class.def("__repr__", &DataType::to_string);
 
   py_class.def_property_readonly("uid", &DataType::uid);

@@ -8,6 +8,24 @@
 #include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::yijinjing::journal {
+class sink {
+public:
+  virtual ~sink() = default;
+
+  [[nodiscard]] virtual data::locator_ptr get_target_locator(const frame_ptr &frame) = 0;
+};
+DECLARE_PTR(sink)
+
+class fixed_sink : public sink {
+public:
+  explicit fixed_sink(data::locator_ptr locator) : locator_(std::move(locator)) {}
+
+  [[nodiscard]] data::locator_ptr get_target_locator(const frame_ptr &frame) override { return locator_; }
+
+private:
+  data::locator_ptr locator_;
+};
+
 class assemble {
 public:
   explicit assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode = "*",
@@ -17,7 +35,7 @@ public:
 
   assemble operator+(assemble &other);
 
-  void operator>>(const data::locator_ptr &locator);
+  void operator>>(const sink_ptr &sink);
 
 private:
   const std::string &mode_;
@@ -29,10 +47,12 @@ private:
   std::vector<data::locator_ptr> locators_ = {};
   std::vector<reader_ptr> readers_ = {};
   reader_ptr current_reader_ = {};
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps_;
 
   bool data_available();
   void next();
   void sort();
+  writer_ptr &get_writer(const sink_ptr &sink);
 };
 DECLARE_PTR(assemble)
 } // namespace kungfu::yijinjing::journal

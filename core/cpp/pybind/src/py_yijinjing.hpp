@@ -104,6 +104,13 @@ public:
   const std::string &get_notice() override { PYBIND11_OVERLOAD_PURE(const std::string &, observer, get_notice, ) }
 };
 
+class PySink : public sink {
+public:
+  [[nodiscard]] data::locator_ptr get_target_locator(const frame_ptr &frame) override {
+    PYBIND11_OVERLOAD_PURE(data::locator_ptr, sink, get_target_locator, frame)
+  }
+};
+
 class PyMaster : public master {
 public:
   using master::master;
@@ -229,7 +236,7 @@ void bind(pybind11::module &&m) {
         return result;
       });
 
-  auto location_class = py::class_<location, std::shared_ptr<location>>(m, "location");
+  auto location_class = py::class_<location, location_ptr>(m, "location");
   location_class.def(py::init<mode, category, const std::string &, const std::string &, locator_ptr>())
       .def_readonly("mode", &location::mode)
       .def_readonly("category", &location::category)
@@ -244,7 +251,7 @@ void bind(pybind11::module &&m) {
   location_class.def("to", py::overload_cast<Deregister &>(&location::to<Deregister>, py::const_));
   location_class.def("to", py::overload_cast<Location &>(&location::to<Location>, py::const_));
 
-  py::class_<locator, PyLocator, std::shared_ptr<locator>>(m, "locator")
+  py::class_<locator, PyLocator, locator_ptr>(m, "locator")
       .def(py::init())
       .def("has_env", &locator::has_env)
       .def("get_env", &locator::get_env)
@@ -299,6 +306,12 @@ void bind(pybind11::module &&m) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
   });
+
+  py::class_<sink, PySink, sink_ptr>(m, "sink").def(py::init()).def("get_target_locator", &sink::get_target_locator);
+
+  py::class_<fixed_sink, sink, std::shared_ptr<fixed_sink>>(m, "fixed_sink")
+      .def(py::init<data::locator_ptr>())
+      .def("get_target_locator", &fixed_sink::get_target_locator);
 
   py::class_<assemble, assemble_ptr>(m, "assemble")
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,
