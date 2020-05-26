@@ -126,7 +126,7 @@ public:
 
   void close_frame(size_t data_length);
 
-  void copy_frame(const frame_ptr& source);
+  void copy_frame(const frame_ptr &source);
 
   void mark(int64_t trigger_time, int32_t msg_type);
 

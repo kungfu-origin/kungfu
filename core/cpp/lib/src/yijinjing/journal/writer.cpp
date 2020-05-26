@@ -71,7 +71,7 @@ void writer::close_frame(size_t data_length) {
   publisher_->notify();
 }
 
-void writer::copy_frame(const frame_ptr& source) {
+void writer::copy_frame(const frame_ptr &source) {
   auto frame = journal_.current_frame();
   frame->copy(*source);
   journal_.next();

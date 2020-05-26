@@ -101,8 +101,9 @@ def kfc(ctx, home, log_level, name):
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.runtime_locator = kfj.Locator(ctx.runtime_dir)
-    ctx.config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.runtime_locator)
+    ctx.assemble_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'assemble', ctx.runtime_locator)
     ctx.index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', ctx.runtime_locator)
+    ctx.config_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'etc', 'kungfu', ctx.runtime_locator)
 
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
@@ -117,6 +118,8 @@ def pass_ctx_from_parent(ctx):
     ctx.runtime_dir = ctx.parent.runtime_dir
     ctx.archive_dir = ctx.parent.archive_dir
     ctx.runtime_locator = ctx.parent.runtime_locator
+    ctx.assemble_location = ctx.parent.assemble_location
+    ctx.index_location = ctx.parent.index_location
     ctx.config_location = ctx.parent.config_location
     ctx.name = ctx.parent.name
 

@@ -18,6 +18,20 @@ struct assemble_exception : std::runtime_error {
   explicit assemble_exception(const std::string &msg) : std::runtime_error(msg){};
 };
 
+sink::sink() : publisher_(std::make_shared<noop_publisher>()) {}
+
+publisher_ptr sink::get_publisher() { return publisher_; }
+
+fixed_sink::fixed_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
+
+writer_ptr fixed_sink::get_writer(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
+  if (writers_.find(dest_id) == writers_.end()) {
+    auto target_location = data::location::make_shared(*location, locator_);
+    writers_.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, get_publisher()));
+  }
+  return writers_.at(dest_id);
+}
+
 assemble::assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode, const std::string &category,
                    const std::string &group, const std::string &name)
     : publisher_(std::make_shared<noop_publisher>()), mode_(mode), category_(category), group_(group), name_(name) {
@@ -53,7 +67,12 @@ void assemble::operator>>(const sink_ptr &sink) {
   used_ = true;
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
-    get_writer(sink)->copy_frame(current_reader_->current_frame());
+    auto page = current_reader_->current_page();
+    auto location = page->get_location();
+    auto dest_id = page->get_dest_id();
+    auto frame = current_reader_->current_frame();
+    auto writer = sink->get_writer(location, dest_id, frame);
+    writer->copy_frame(frame);
     next();
   }
 }
@@ -82,19 +101,5 @@ void assemble::sort() {
       current_reader_ = reader;
     }
   }
-}
-
-writer_ptr &assemble::get_writer(const sink_ptr &sink) {
-  auto page = current_reader_->current_page();
-  auto location = page->get_location();
-  auto dest_id = page->get_dest_id();
-  auto pair = writer_maps_.try_emplace(location->uid);
-  auto &writers = pair.first->second;
-  if (writers.find(dest_id) == writers.end()) {
-    auto target_locator = sink->get_target_locator(current_reader_->current_frame());
-    auto target_location = data::location::make_shared(*location, target_locator);
-    writers.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, publisher_));
-  }
-  return writers.at(dest_id);
 }
 } // namespace kungfu::yijinjing::journal

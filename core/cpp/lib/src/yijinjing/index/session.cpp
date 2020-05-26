@@ -106,14 +106,8 @@ void session_builder::rebuild_index_db() {
   }
   session_storage_->remove_all<Session>();
   while (reader->data_available()) {
+    auto location = reader->current_page()->get_location();
     auto frame = reader->current_frame();
-    auto uid = frame->dest() == 0 ? frame->source() : frame->dest();
-    if (locations.find(uid) == locations.end()) {
-      SPDLOG_WARN("location not found {:08x}", uid);
-      reader->next();
-      continue;
-    }
-    auto location = locations.at(uid);
     try {
       if (frame->msg_type() == SessionStart::tag) {
         open_session(location, frame->gen_time());

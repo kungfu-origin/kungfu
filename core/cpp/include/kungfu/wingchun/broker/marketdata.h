@@ -29,9 +29,9 @@ public:
 protected:
   void on_react() override;
 
-  bool has_instrument(const std::string& instrument_id) const;
+  bool has_instrument(const std::string &instrument_id) const;
 
-  const longfist::types::Instrument &get_instrument(const std::string& instrument_id) const;
+  const longfist::types::Instrument &get_instrument(const std::string &instrument_id) const;
 
 private:
   std::unordered_map<std::string, longfist::types::Instrument> instruments_ = {};

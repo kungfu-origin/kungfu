@@ -10,20 +10,27 @@
 namespace kungfu::yijinjing::journal {
 class sink {
 public:
+  sink();
   virtual ~sink() = default;
+  [[nodiscard]] publisher_ptr get_publisher();
+  [[nodiscard]] virtual writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
+                                              const frame_ptr &frame) = 0;
 
-  [[nodiscard]] virtual data::locator_ptr get_target_locator(const frame_ptr &frame) = 0;
+private:
+  publisher_ptr publisher_;
 };
 DECLARE_PTR(sink)
 
 class fixed_sink : public sink {
 public:
-  explicit fixed_sink(data::locator_ptr locator) : locator_(std::move(locator)) {}
-
-  [[nodiscard]] data::locator_ptr get_target_locator(const frame_ptr &frame) override { return locator_; }
+  explicit fixed_sink(data::locator_ptr locator);
+  [[nodiscard]] writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
+                                      const frame_ptr &frame) override;
 
 private:
+  publisher_ptr publisher_;
   data::locator_ptr locator_;
+  std::unordered_map<uint32_t, writer_ptr> writers_ = {};
 };
 
 class assemble {
@@ -52,7 +59,6 @@ private:
   bool data_available();
   void next();
   void sort();
-  writer_ptr &get_writer(const sink_ptr &sink);
 };
 DECLARE_PTR(assemble)
 } // namespace kungfu::yijinjing::journal

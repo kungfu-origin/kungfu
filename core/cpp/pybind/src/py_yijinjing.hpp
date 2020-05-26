@@ -106,8 +106,9 @@ public:
 
 class PySink : public sink {
 public:
-  [[nodiscard]] data::locator_ptr get_target_locator(const frame_ptr &frame) override {
-    PYBIND11_OVERLOAD_PURE(data::locator_ptr, sink, get_target_locator, frame)
+  [[nodiscard]] writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
+                                      const frame_ptr &frame) override {
+    PYBIND11_OVERLOAD_PURE(writer_ptr, sink, get_writer, location, dest_id, frame)
   }
 };
 
@@ -293,7 +294,8 @@ void bind(pybind11::module &&m) {
       .def("disjoin", &reader::disjoin);
 
   auto py_writer = py::class_<writer, writer_ptr>(m, "writer");
-  py_writer.def("write_raw", &writer::write_raw)
+  py_writer.def(py::init<const data::location_ptr &, uint32_t, bool, publisher_ptr>())
+      .def("write_raw", &writer::write_raw)
       .def("write_str",
            [](const writer_ptr &w, int64_t trigger_time, int32_t msg_type, const std::string &data) {
              w->write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
@@ -307,11 +309,14 @@ void bind(pybind11::module &&m) {
     py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
   });
 
-  py::class_<sink, PySink, sink_ptr>(m, "sink").def(py::init()).def("get_target_locator", &sink::get_target_locator);
+  py::class_<sink, PySink, sink_ptr>(m, "sink")
+      .def(py::init())
+      .def_property_readonly("publisher", &sink::get_publisher)
+      .def("get_writer", &sink::get_writer);
 
   py::class_<fixed_sink, sink, std::shared_ptr<fixed_sink>>(m, "fixed_sink")
       .def(py::init<data::locator_ptr>())
-      .def("get_target_locator", &fixed_sink::get_target_locator);
+      .def("get_writer", &fixed_sink::get_writer);
 
   py::class_<assemble, assemble_ptr>(m, "assemble")
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,

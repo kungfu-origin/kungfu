@@ -208,8 +208,8 @@ void TraderXTP::on_start() {
   api_->SubscribePublicTopic(XTP_TERT_QUICK);
   api_->SetSoftwareVersion("1.1.0");
   api_->SetSoftwareKey(config_.software_key.c_str());
-  session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.account_id.c_str(), config_.password.c_str(),
-                            XTP_PROTOCOL_TCP);
+  session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.account_id.c_str(),
+                            config_.password.c_str(), XTP_PROTOCOL_TCP);
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
