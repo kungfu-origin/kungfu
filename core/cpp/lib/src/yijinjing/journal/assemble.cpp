@@ -22,9 +22,9 @@ sink::sink() : publisher_(std::make_shared<noop_publisher>()) {}
 
 publisher_ptr sink::get_publisher() { return publisher_; }
 
-fixed_sink::fixed_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
+single_sink::single_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
 
-writer_ptr fixed_sink::get_writer(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
+writer_ptr single_sink::get_writer(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
   if (writers_.find(dest_id) == writers_.end()) {
     auto target_location = data::location::make_shared(*location, locator_);
     writers_.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, get_publisher()));

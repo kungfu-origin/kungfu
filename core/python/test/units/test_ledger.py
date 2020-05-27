@@ -1,18 +1,15 @@
-
-from pykungfu import yijinjing as yjj
 import json
-from kungfu.wingchun import msg
-import kungfu.yijinjing.msg as yjj_msg
-import kungfu.yijinjing.journal as kfj
 import datetime
 import time
 import unittest
 import os
 import platform
 import http
-import traceback
-import sys
+import kungfu.yijinjing.msg as yjj_msg
+from kungfu.yijinjing.locator import Locator
+from kungfu.wingchun import msg
 from kungfu.wingchun.constants import *
+from pykungfu import yijinjing as yjj
 
 class LedgerClient:
     def __init__(self, name="tester"):
@@ -26,7 +23,7 @@ class LedgerClient:
         if osname == 'Windows':
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
-        self.locator = kfj.Locator(home)
+        self.locator = Locator(home)
         self.commander_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'service', 'ledger', self.locator)
         io_device = yjj.io_device(self.commander_location)
         self.cmd_sock = io_device.connect_socket(self.commander_location, yjj.protocol.REQUEST, 10000)

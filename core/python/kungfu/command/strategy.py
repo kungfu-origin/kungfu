@@ -1,10 +1,9 @@
 import os
 import click
-import asyncio
 from importlib import util
 
 from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.wingchun import replay_setup
+from kungfu.wingchun.replay import setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.practice.coloop import KungfuEventLoop
@@ -47,7 +46,7 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
 
     if replay:
         ctx.session_id = session_id
-        replay_setup.setup(ctx, session_id, strategy, runner)
+        setup(ctx, session_id, strategy, runner)
 
     ctx.loop = KungfuEventLoop(ctx, runner)
     ctx.loop.run_forever()

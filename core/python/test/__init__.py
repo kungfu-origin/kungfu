@@ -1,8 +1,7 @@
-
 import os
 import platform
 import click
-import kungfu.yijinjing.journal as kfj
+from kungfu.yijinjing.locator import Locator
 
 @click.group(invoke_without_command=True)
 @click.option('-H', '--home', type=str, help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
@@ -25,7 +24,7 @@ def test(ctx, home, log_level):
 
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level
-    ctx.runtime_locator = kfj.Locator(home)
+    ctx.runtime_locator = Locator(home)
 
     if ctx.invoked_subcommand is None:
         click.echo(test.get_help(ctx))

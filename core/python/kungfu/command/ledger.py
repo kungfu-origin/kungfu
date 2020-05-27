@@ -1,7 +1,7 @@
 from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.wingchun import replay_setup
+from kungfu.wingchun.replay import setup
 from pykungfu import wingchun as pywingchun
 
 
@@ -22,5 +22,5 @@ def ledger(ctx, low_latency, replay, session_id):
     ledger_instance = pywingchun.Ledger(ctx.runtime_locator, ctx.mode, ctx.low_latency)
     if replay:
         ctx.category = 'system'
-        replay_setup.setup(ctx, session_id, ledger, ledger_instance)
+        setup(ctx, session_id, ledger, ledger_instance)
     ledger_instance.run()

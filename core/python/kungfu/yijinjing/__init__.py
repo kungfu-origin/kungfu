@@ -1,10 +1,6 @@
 import os
 import re
-import glob
-import shutil
-from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
-from . import journal as kfj
 
 os_sep = re.escape(os.sep)
 
@@ -14,28 +10,46 @@ LAYOUT_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
     r'(.*)', os_sep,  # name
     r'(.*)', os_sep,  # layout
     r'(.*)', os_sep,  # mode
-    r'(.*)'           # filename
+    r'(.*)'  # filename
 )
 LAYOUT_LOCATION_PATTERN = re.compile(LAYOUT_LOCATION_REGEX)
 
+JOURNAL_LOCATION_REGEX = '{}{}{}{}{}{}{}{}{}'.format(
+    r'(.*)', os_sep,  # category
+    r'(.*)', os_sep,  # group
+    r'(.*)', os_sep,  # name
+    r'journal', os_sep,
+    r'(.*)'  # mode
+)
+JOURNAL_LOCATION_PATTERN = re.compile(JOURNAL_LOCATION_REGEX)
 
-def migrate_to_2_3(ctx):
-    if len(os.listdir(ctx.runtime_dir)) != 0:
-        print(f'runtime {ctx.runtime_dir} is not empty')
+JOURNAL_PAGE_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
+    r'(.*)', os_sep,  # category
+    r'(.*)', os_sep,  # group
+    r'(.*)', os_sep,  # name
+    r'journal', os_sep,  # mode
+    r'(.*)', os_sep,  # mode
+    r'(\w+).(\d+).journal',  # hash + page_id
+)
+JOURNAL_PAGE_PATTERN = re.compile(JOURNAL_PAGE_REGEX)
 
-    for category_value in yjj.category.__members__:
-        category_name = yjj.get_category_name(yjj.category.__members__[category_value])
-        category_dir = os.path.join(ctx.home, category_name)
-        if os.path.exists(category_dir):
-            shutil.move(category_dir, ctx.runtime_dir)
+LOCATION_UNAME_REGEX = r'(.*)/(.*)/(.*)/(.*)'
+LOCATION_PATTERN = re.compile(LOCATION_UNAME_REGEX)
 
-    search_path = os.path.join(ctx.runtime_dir, '*', '*', '*', '*', '*', '*.*')
-    for file in glob.glob(search_path):
-        match = LAYOUT_LOCATION_PATTERN.match(file[len(ctx.runtime_dir) + 1:])
-        if match:
-            category = match.group(1)
-            group = match.group(2)
-            name = match.group(3)
-            layout = match.group(4)
-            mode = match.group(5)
-            filename = match.group(6)
+MODES = {
+    'live': yjj.mode.LIVE,
+    'data': yjj.mode.DATA,
+    'replay': yjj.mode.REPLAY,
+    'backtest': yjj.mode.BACKTEST,
+    '*': yjj.mode.LIVE
+}
+
+CATEGORIES = {
+    'md': yjj.category.MD,
+    'td': yjj.category.TD,
+    'strategy': yjj.category.STRATEGY,
+    'system': yjj.category.SYSTEM,
+    '*': yjj.category.SYSTEM
+}
+
+ARCHIVE_PREFIX = 'KFA'

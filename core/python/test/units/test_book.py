@@ -3,12 +3,13 @@ import os
 import platform
 import datetime
 from dotted_dict import DottedDict
+import kungfu.yijinjing.journal as kfj
+from kungfu.wingchun.book.book import AccountBook
+from kungfu.wingchun.constants import *
+from kungfu.yijinjing.locator import Locator
+from kungfu.yijinjing.log import create_logger
 from pykungfu import longfist as pylongfist
 from pykungfu import yijinjing as yjj
-from kungfu.wingchun.book.book import AccountBook
-import kungfu.yijinjing.journal as kfj
-from kungfu.yijinjing.log import create_logger
-from kungfu.wingchun.constants import *
 
 
 class TestStockPosition(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestStockPosition(unittest.TestCase):
         if osname == 'Windows':
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
-        self.ctx.runtime_locator = kfj.Locator(home)
+        self.ctx.runtime_locator = Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano
@@ -279,7 +280,7 @@ class TestFuturePosition(unittest.TestCase):
         if osname == 'Windows':
             home = os.getenv('APPDATA')
         home = os.path.join(home, 'kungfu', 'app')
-        self.ctx.runtime_locator = kfj.Locator(home)
+        self.ctx.runtime_locator = Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano

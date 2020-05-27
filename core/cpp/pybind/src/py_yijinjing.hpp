@@ -314,9 +314,9 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("publisher", &sink::get_publisher)
       .def("get_writer", &sink::get_writer);
 
-  py::class_<fixed_sink, sink, std::shared_ptr<fixed_sink>>(m, "fixed_sink")
+  py::class_<single_sink, sink, std::shared_ptr<single_sink>>(m, "single_sink")
       .def(py::init<data::locator_ptr>())
-      .def("get_writer", &fixed_sink::get_writer);
+      .def("get_writer", &single_sink::get_writer);
 
   py::class_<assemble, assemble_ptr>(m, "assemble")
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,

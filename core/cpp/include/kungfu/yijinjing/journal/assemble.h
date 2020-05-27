@@ -21,14 +21,13 @@ private:
 };
 DECLARE_PTR(sink)
 
-class fixed_sink : public sink {
+class single_sink : public sink {
 public:
-  explicit fixed_sink(data::locator_ptr locator);
+  explicit single_sink(data::locator_ptr locator);
   [[nodiscard]] writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
                                       const frame_ptr &frame) override;
 
 private:
-  publisher_ptr publisher_;
   data::locator_ptr locator_;
   std::unordered_map<uint32_t, writer_ptr> writers_ = {};
 };
