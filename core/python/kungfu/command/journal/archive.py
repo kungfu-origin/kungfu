@@ -1,14 +1,15 @@
 import click
 import functools
+import glob
 import os
 import shutil
 from collections import deque
 from kungfu.command.journal import journal, pass_ctx_from_parent
-from kungfu.yijinjing import ARCHIVE_PREFIX
+from kungfu.yijinjing import LOG_PATTERN, ARCHIVE_PREFIX
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.log import create_logger
-from kungfu.yijinjing.journal import prune_journals
 from kungfu.yijinjing.sinks import ArchiveSink
+from kungfu.yijinjing.utils import prune_layout_files
 
 from pykungfu import yijinjing as yjj
 
@@ -18,24 +19,63 @@ from pykungfu import yijinjing as yjj
 @click.pass_context
 def archive(ctx, format):
     pass_ctx_from_parent(ctx)
-    ctx.logger = create_logger('archive', ctx.log_level, ctx.assemble_location)
+    ctx.logger = create_logger('archive', ctx.log_level, ctx.console_location)
 
     os.chdir(ctx.archive_dir)
 
-    ctx.logger.info('cleaning up archive folder')
+    today_date = yjj.strftime(yjj.now_in_nano(), '%Y-%m-%d')
+    today_archive_name = f'{ARCHIVE_PREFIX}-{today_date}.{format}'
+    today_archive_path = os.path.join(ctx.archive_dir, today_archive_name)
+    today_temp_path = os.path.join(ctx.archive_dir, '.today')
+
+    ctx.logger.info('preparing archive folder')
     deque(map(shutil.rmtree, filter(os.path.isdir, os.listdir(os.curdir))), maxlen=0)
 
-    ctx.logger.info('exporting archive journals')
-    assemble = yjj.assemble([ctx.runtime_locator])
-    assemble >> ArchiveSink(ctx)
+    if os.path.exists(today_archive_path):
+        shutil.unpack_archive(today_archive_path, today_temp_path)
+        export_logs(ctx, today_temp_path, ctx.archive_dir)
+
+    ctx.logger.info('exporting journals')
+    yjj.assemble([ctx.runtime_locator, Locator(today_temp_path)]) >> ArchiveSink(ctx)
+    shutil.rmtree(today_temp_path)
+
+    ctx.logger.info('exporting logs')
+    export_logs(ctx, ctx.runtime_dir, ctx.archive_dir)
 
     ctx.logger.info('compressing archive files')
     deque(map(functools.partial(make, ctx, format), filter(os.path.isdir, sorted(os.listdir(os.curdir)))), maxlen=0)
 
+    ctx.logger.info('pruning runtime logs')
+    prune_layout_files(ctx.runtime_dir, 'log', 'live')
     ctx.logger.info('pruning runtime journals')
-    prune_journals(ctx, ctx.runtime_dir)
+    prune_layout_files(ctx.runtime_dir, 'journal', 'live')
 
+    if os.path.exists(today_archive_path):
+        shutil.unpack_archive(today_archive_path, ctx.runtime_dir)
     ctx.logger.info('archive done')
+
+
+def export_logs(ctx, src_dir, dst_dir):
+    search_path = os.path.join(src_dir, '*', '*', '*', 'log', 'live', '*.log')
+    for log_file in glob.glob(search_path):
+        match = LOG_PATTERN.match(log_file[len(src_dir) + 1:])
+        if match:
+            category = match.group(1)
+            group = match.group(2)
+            name = match.group(3)
+            mode = match.group(4)
+            date = match.group(6)
+            archive_path = os.path.join(dst_dir, date, category, group, name, 'log', mode)
+            if not os.path.exists(archive_path):
+                os.makedirs(archive_path)
+            archive_log = os.path.join(archive_path, os.path.basename(log_file))
+            if os.path.exists(archive_log):
+                with open(log_file, 'rb') as src, open(archive_log, 'ab') as dst:
+                    shutil.copyfileobj(src, dst)
+            else:
+                shutil.copy2(log_file, archive_path)
+        else:
+            ctx.logger.warn('unable to match log file %s', log_file)
 
 
 def make(ctx, archive_format, archive_date):

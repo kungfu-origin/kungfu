@@ -1,3 +1,4 @@
+import glob
 import json
 import pandas
 from kungfu.yijinjing import *
@@ -43,7 +44,7 @@ def collect_journal_locations(ctx):
 
 
 def find_sessions(ctx):
-    io_device = yjj.io_device(ctx.journal_util_location)
+    io_device = yjj.io_device(ctx.console_location)
     session_finder = yjj.session_finder(io_device)
     ctx.session_count = 1
     sessions_df = pandas.DataFrame(columns=[
@@ -137,18 +138,3 @@ def show_journal(ctx, session_id, io_type):
 def trace_journal(ctx, session_id, io_type):
     locations, session, io_device, show_in, show_out = read_session(ctx, session_id, io_type)
     io_device.trace(session['begin_time'], session['end_time'], show_in, show_out)
-
-def prune_journals(ctx, base_dir):
-    search_path = os.path.join(base_dir, ctx.category, ctx.group, ctx.name, 'journal', ctx.mode, '*.journal')
-    for journal in glob.glob(search_path):
-        match = JOURNAL_PAGE_PATTERN.match(journal[len(base_dir) + 1:])
-        if match:
-            category = match.group(1)
-            group = match.group(2)
-            name = match.group(3)
-            mode = match.group(4)
-            dest = match.group(5)
-            page_id = match.group(6)
-            print(f'pruning {category}/{group}/{name}/{mode}')
-        else:
-            ctx.logger.warn('unable to match journal file %s to pattern %s', journal, JOURNAL_PAGE_REGEX)

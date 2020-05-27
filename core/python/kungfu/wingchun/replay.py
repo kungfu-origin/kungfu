@@ -11,7 +11,6 @@ def setup(ctx, session_id, cmd, instance):
     home = instance.home
     ctx.app_location = yjj.location(yjj.mode.LIVE, home.category, home.group, home.name, ctx.runtime_locator)
     ctx.mode = 'live'  # to get live data
-    ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'util', 'journal', ctx.runtime_locator)
     if not session_id:
         all_sessions = kfj.find_sessions(ctx)
         all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))

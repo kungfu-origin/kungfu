@@ -21,11 +21,10 @@ def journal(ctx, mode, category, group, name):
     ctx.group = group
     ctx.name = name
     ctx.location = yjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator)
-    ctx.journal_util_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'cli', ctx.runtime_locator)
-    ctx.logger = create_logger('journal', ctx.log_level, ctx.journal_util_location)
+    ctx.logger = create_logger('journal', ctx.log_level, ctx.console_location)
 
     (ctx.console_width, ctx.console_height) = shutil.get_terminal_size((0, 0))
-    yjj.setup_log(ctx.journal_util_location, 'journal')
+    yjj.setup_log(ctx.console_location, 'journal')
 
 
 def pass_ctx_from_parent(ctx):
@@ -39,7 +38,9 @@ def pass_ctx_from_parent(ctx):
     ctx.runtime_dir = ctx.parent.runtime_dir
     ctx.archive_dir = ctx.parent.archive_dir
     ctx.runtime_locator = ctx.parent.runtime_locator
+    ctx.config_location = ctx.parent.config_location
+    ctx.console_location = ctx.parent.console_location
+    ctx.index_location = ctx.parent.index_location
     ctx.location = ctx.parent.location
-    ctx.journal_util_location = ctx.parent.journal_util_location
     ctx.console_width = ctx.parent.console_width
     ctx.console_height = ctx.parent.console_height

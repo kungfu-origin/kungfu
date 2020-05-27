@@ -37,7 +37,7 @@ def sessions(ctx, sortby, ascending, tablefmt):
 @click.pass_context
 def rebuild_index(ctx):
     pass_ctx_from_parent(ctx)
-    io_device = yjj.io_device(ctx.journal_util_location)
+    io_device = yjj.io_device(ctx.console_location)
     session_builder = yjj.session_builder(io_device)
     click.echo("rebuild sqlite db")
     session_builder.rebuild_index_db()

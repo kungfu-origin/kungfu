@@ -33,6 +33,16 @@ JOURNAL_PAGE_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
 )
 JOURNAL_PAGE_PATTERN = re.compile(JOURNAL_PAGE_REGEX)
 
+LOG_REGEX = '{}{}{}{}{}{}{}{}{}{}{}'.format(
+    r'(.*)', os_sep,  # category
+    r'(.*)', os_sep,  # group
+    r'(.*)', os_sep,  # name
+    r'log', os_sep,  # mode
+    r'(.*)', os_sep,  # mode
+    r'(\w+)_(\d+-\d+-\d+).log',  # log_name + date
+)
+LOG_PATTERN = re.compile(LOG_REGEX)
+
 LOCATION_UNAME_REGEX = r'(.*)/(.*)/(.*)/(.*)'
 LOCATION_PATTERN = re.compile(LOCATION_UNAME_REGEX)
 

@@ -1,4 +1,6 @@
 import errno
+import glob
+import shutil
 from kungfu.yijinjing import *
 from pykungfu import yijinjing as yjj
 
