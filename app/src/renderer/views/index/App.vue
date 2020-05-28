@@ -17,11 +17,12 @@
         >
             <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
-                kungfu 归档中...
+                {{ loadingData.archive ? 'kungfu 归档完成 ✓' : 'kungfu 归档中...' }}
             </div>
             <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
                 Kungfu 环境准备中...
+                {{ loadingData.archive ? 'kungfu 环境准备完成 ✓' : 'Kungfu 环境准备中...' }}
             </div>
         </el-dialog>
     </div>
