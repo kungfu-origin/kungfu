@@ -186,10 +186,10 @@ function setMenu() {
 	},{
 		label: "Help",
 		submenu: [
-			{ label: "官网", accelerator: "", click: () => openUrl("https://www.taurusai.com/") },
-			{ label: "用户手册", accelerator: "", click: () => openUrl("https://www.taurusai.com/manual/")},
-			{ label: "策略API文档", accelerator: "", click: () => openUrl("https://www.taurusai.com/api-doc/") },
-			{ label: "Kungfu 论坛", accelerator: "", click: () => openUrl("https://www.taurusai.com/community/") }
+			{ label: "官网", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/") },
+			{ label: "用户手册", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/manual/")},
+			{ label: "策略API文档", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/api-doc/") },
+			{ label: "Kungfu 论坛", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/community/") }
 		]
 	}];
 	
