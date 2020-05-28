@@ -76,7 +76,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": "rocket",
                 "name": isEnglish ? "Open Rocket Model" : "开启极速模式",
                 "cli": true,
-                "tip": isEnglish ? "Use CPU 100%, restart is required" : "开启极速模式会使 CPU 达到100%，开启后请重启 Kungfu",
+                "tip": isEnglish ? "Use CPU 100%, restart is required" : "开启极速模式会使 CPU 达到100%，开启后请重启功夫交易系统",
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
@@ -141,7 +141,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
             {
                 "key": "tabSpaceType",
                 "name": "缩进类别",
-                "tip": "kungfu 编辑器缩进类别",
+                "tip": "功夫编辑器缩进类别",
                 "type": SystemConfigChildItemTypeEnum.Select,
                 "data": [
                     {"value": "Spaces", "name": "Spaces"},
@@ -151,7 +151,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
             {
                 "key": "tabSpaceSize",
                 "name": "缩进大小",
-                "tip": "kungfu 编辑器缩进大小（空格）",
+                "tip": "功夫编辑器缩进大小（空格）",
                 "type": SystemConfigChildItemTypeEnum.Select,
                 "data": [
                     {"value": 2, "name": 2},
