@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-05-28 15:00:46
+ * @LastEditTime: 2020-05-28 15:46:55
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: /kungfu/app/shared/config/pathConfig.ts
+ */ 
 const path = require('path');
 const { addFileSync } = require('__gUtils/fileUtils');
 
@@ -50,49 +58,18 @@ addFileSync('', LOG_DIR, 'folder')
 //BASE_DB_DIR strategys, accounts, tasks
 export const BASE_DB_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
 
-//strategy
-export const STRATEGYS_DB = path.join(BASE_DB_DIR, 'strategys.db')
-
-//accounts(td)
-export const ACCOUNTS_DB = path.join(BASE_DB_DIR, 'accounts.db')
-
-//================= global db end =================================
 
 //================= account related start ==========================
-
 //gateway
 export const buildGatewayPath = (gatewayName: string) => path.join(KF_HOME, ...gatewayName.split('_'))
 
-//gateway data
-export const buildGatewayLiveDBPath = (gatewayName: string) => path.join(buildGatewayPath(gatewayName), 'db', 'live')
-
-//account commission 手续费
-export const buildAccountCommissionDBPath = (accountId: string) => path.join(buildGatewayLiveDBPath(`td_${accountId}`), 'commission.db')    
-
-//================= account related end ==========================
-
-//================= live trading start ===========================
-
-//trading data
-export const LIVE_TRADING_DB_DIR = path.join(LEDGER_DIR, 'db', 'live');
-
-export const LIVE_TRADING_DATA_DB = path.join(LIVE_TRADING_DB_DIR, 'ledger.db')
-
-//================= live trading end =============================
 
 //================== others start =================================
-
-//global commission 手续费
-export const GLOBAL_COMMISSION_DB = path.join(BASE_DB_DIR, 'commission.db');
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${processId}.log`)
 
-//获取 ledger nano pub 地址
-export const NMSG_PUB_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'live', 'pub.nn')
 
-//获取 ledger nano rep 地址
-export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'live', 'rep.nn')
 
 //================== others end ===================================
 

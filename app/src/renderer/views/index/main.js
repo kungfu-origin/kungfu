@@ -34,7 +34,10 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startMaster, startLedger } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startArchiveMake } = require('__gUtils/processUtils');
+
+startArchiveMake();
+
 //kungfu master 启动流程
 startMaster(false)
     .finally(() => {

@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-04-24 16:36:28
+ * @LastEditTime: 2020-05-28 15:51:21
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /kungfu/app/shared/utils/processUtils.ts
+ */ 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
@@ -229,6 +237,15 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
             }
         }).catch(err => reject(err))
     })
+}
+
+export const startArchiveMake = () => {
+    return startProcess({
+        "name": 'archive',
+        "args": "make"
+    }, true)
+    .then(res => console.log(res))
+    .catch(err => logger.error('[startArchiveMake]', err))
 }
 
 export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {

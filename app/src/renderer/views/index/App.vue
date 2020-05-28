@@ -30,7 +30,7 @@ import { ipcRenderer } from 'electron';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
-import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
+import { KF_HOME } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe } from '__io/kungfu/tradingData';
