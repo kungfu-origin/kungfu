@@ -34,19 +34,18 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startMaster, startLedger, startArchiveMake } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startArchiveMakeTask } = require('__gUtils/processUtils');
 
-startArchiveMake();
+startArchiveMakeTask((archiveStatus) => {
+    window.archiveStatus = archiveStatus
+})
+.then(res => startMaster(false))
+.finally(() => {
+    startGetProcessStatus((processStatus) => {
+        Vue.store.dispatch('setProcessStatus', processStatus)
+    });
 
-//kungfu master 启动流程
-startMaster(false)
-    .finally(() => {
-        startGetProcessStatus((processStatus) => {
-            Vue.store.dispatch('setProcessStatus', processStatus)
-        });
-
-        utils.delayMiliSeconds(1000)
-        .then(() => startLedger(false))
-    })
-
+    utils.delayMiliSeconds(1000)
+    .then(() => startLedger(false))
+})
 

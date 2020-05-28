@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-04-24 16:36:28
- * @LastEditTime: 2020-05-28 15:51:21
+ * @LastEditTime: 2020-05-28 17:12:25
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/app/shared/utils/processUtils.ts
@@ -239,15 +239,6 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
     })
 }
 
-export const startArchiveMake = () => {
-    return startProcess({
-        "name": 'archive',
-        "args": "make"
-    }, true)
-    .then(res => console.log(res))
-    .catch(err => logger.error('[startArchiveMake]', err))
-}
-
 export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
@@ -300,6 +291,32 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
                 reject(err)
             }
         }).catch(err => reject(err))
+    })
+}
+
+
+export const startArchiveMake = () => {
+    return startProcess({
+        "name": 'archive',
+        "args": "archive make"
+    }, true)
+    .then(res => res)
+    .catch(err => logger.error('[startArchiveMake]', err))
+}
+
+export function startArchiveMakeTask (cb: Function) {
+    return new Promise(resolve => {
+        startArchiveMake()
+        .then(() => {
+            const timer = startGetProcessStatusByName('archive', (res: any[]) => {
+                const archiveStatus = res[0].pm2_env.status;
+                cb(archiveStatus)
+                if (archiveStatus !== 'online') {
+                    timer.clearLoop();
+                    resolve(archiveStatus)
+                }
+            })
+        });
     })
 }
 
@@ -486,6 +503,20 @@ export const startGetProcessStatus = (callback: Function) => {
             .catch(err => console.error(err))
     }, 1000)
 }
+
+//循环获取processStatus
+export const startGetProcessStatusByName = (name: string, callback: Function) => {
+    const timer = setTimerPromiseTask(() => {
+        return describeProcess(name)
+            .then(res => {
+                callback(res)
+            })
+            .catch(err => console.error(err))
+    }, 1000)
+
+    return timer
+}
+
 
 
 

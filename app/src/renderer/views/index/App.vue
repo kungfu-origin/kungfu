@@ -16,7 +16,11 @@
         width="450px"
         >
             <div style="margin: 10px 0 20px">
-                <tr-status value="3" :hasText="false"></tr-status>
+                <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
+                kungfu 归档中...
+            </div>
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
                 Kungfu 环境准备中...
             </div>
         </el-dialog>
@@ -43,7 +47,12 @@ export default {
         this.kungfuGloablDataObserver = null;
         return {
             watcherLoading: false,
-            globalSettingDialogVisiblity: false
+            globalSettingDialogVisiblity: false,
+
+            loadingData: {
+                archive: false,
+                watcher: false
+            }
         }
     },
 
@@ -100,15 +109,14 @@ export default {
 
         getWatcherStatus () {
             let timer = setInterval(() => {
-                // for coder
-                if (!watcher.isLive) {
-                    this.watcherLoading = false;
-                    clearInterval(timer)
-                    return;
-                }
-
                 const watcherStatus = watcher.isLive();
-                if (!watcherStatus) this.watcherLoading = true;
+                const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
+
+                this.$set(this.loadingData, 'archive', archiveFinished);
+                this.$set(this.loadingData, 'watcher', watcherStatus);
+
+                if (!archiveFinished) this.watcherLoading = true;
+                else if (!watcherStatus) this.watcherLoading = true;
                 else {
                     this.watcherLoading = false;
                     clearInterval(timer)
