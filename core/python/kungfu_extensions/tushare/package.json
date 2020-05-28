@@ -1,0 +1,10 @@
+{
+  "kungfuConfig": {
+    "type": "data",
+    "config": {
+      "name": "tushare",
+      "type": "Network",
+      "key": "account_id"
+    }
+  }
+}
