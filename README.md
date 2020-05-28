@@ -95,7 +95,7 @@ source /etc/profile
 安装 cmake3 及 nodejs
 ```
 $ # install rpm-build cmake3 node.js pipenv
-$ yum install -y centos-release-scl rpm-build cmake3 rh-nodejs10
+$ yum install -y rpm-build centos-release-scl rh-nodejs10
 $ pip3 install pipenv --index http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
 ```
 
@@ -163,6 +163,10 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 # Version 版本
 
+* 2.2.1:
+    * 支持查看历史委托及成交
+    * 支持查看委托详情
+    * 支持调整页面布局
 * 2.2.0:
     * 优化前后端通信方式
     * 添加实时延迟统计功能
