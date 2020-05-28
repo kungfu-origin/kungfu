@@ -90,7 +90,7 @@ def kfc(ctx, home, log_level, name):
             home = os.path.join(user_home, 'Library', 'Application Support')
         if osname == 'Windows':
             home = os.getenv('APPDATA')
-        home = os.path.join(home, 'kungfu', 'app')
+        home = os.path.join(home, 'kungfu', 'home')
 
     os.environ['KF_HOME'] = ctx.home = home
     os.environ['KF_LOG_LEVEL'] = ctx.log_level = log_level

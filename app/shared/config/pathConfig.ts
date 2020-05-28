@@ -13,26 +13,30 @@ addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
 //BASE
-export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'app')
+export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'home')
 addFileSync('', KF_HOME, 'folder')
 
+//RUNTIME
+export const KF_RUNTIME_DIR = path.join(KF_HOME, 'runtime')
+addFileSync('', KF_RUNTIME_DIR, 'folder')
+
 //system
-export const SYSTEM_DIR = path.join(KF_HOME, 'system');
+export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder')
 
 //strategy
-export const STRATEGY_DIR = path.join(KF_HOME, 'strategy');
+export const STRATEGY_DIR = path.join(KF_RUNTIME_DIR, 'strategy');
 addFileSync('', STRATEGY_DIR, 'folder')
 
 //td
-export const TD_DIR = path.join(KF_HOME, 'td');
+export const TD_DIR = path.join(KF_RUNTIME_DIR, 'td');
 addFileSync('', TD_DIR, 'folder')
 
 //md
-export const MD_DIR = path.join(KF_HOME, 'md');
+export const MD_DIR = path.join(KF_RUNTIME_DIR, 'md');
 addFileSync('', MD_DIR, 'folder')
 
-//ledger 
+//ledger
 export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 

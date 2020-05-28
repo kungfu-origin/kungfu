@@ -4,19 +4,20 @@ import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
+import {KF_RUNTIME_DIR} from "../../config/pathConfig";
 
 
 export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
-        return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id));
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id));
     }
 
     if (process.env.RENDERER_TYPE !== 'app') return {}
 
     const id = [process.env.APP_TYPE].join('');
-    return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id));
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id));
 })()
 
 

@@ -4,23 +4,20 @@ import glob
 import os
 import shutil
 from collections import deque
-from kungfu.command.journal import journal, pass_ctx_from_parent
+from kungfu.command.archive import archive, pass_ctx_from_parent
 from kungfu.yijinjing import LOG_PATTERN, ARCHIVE_PREFIX
 from kungfu.yijinjing.locator import Locator
-from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing.sinks import ArchiveSink
 from kungfu.yijinjing.utils import prune_layout_files
 
 from pykungfu import yijinjing as yjj
 
 
-@journal.command()
+@archive.command()
 @click.option('-f', '--format', type=click.Choice(['zip', 'tar']), default='zip', help='archive format')
 @click.pass_context
-def archive(ctx, format):
+def make(ctx, format):
     pass_ctx_from_parent(ctx)
-    ctx.logger = create_logger('archive', ctx.log_level, ctx.console_location)
-
     os.chdir(ctx.archive_dir)
 
     today_date = yjj.strftime(yjj.now_in_nano(), '%Y-%m-%d')
@@ -29,11 +26,13 @@ def archive(ctx, format):
     today_temp_path = os.path.join(ctx.archive_dir, '.today')
 
     ctx.logger.info('preparing archive folder')
-    deque(map(shutil.rmtree, filter(os.path.isdir, os.listdir(os.curdir))), maxlen=0)
+    deque(map(shutil.rmtree, filter(os.path.isdir, os.listdir(os.curdir))))
 
     if os.path.exists(today_archive_path):
         shutil.unpack_archive(today_archive_path, today_temp_path)
         export_logs(ctx, today_temp_path, ctx.archive_dir)
+    else:
+        os.makedirs(today_temp_path)
 
     ctx.logger.info('exporting journals')
     yjj.assemble([ctx.runtime_locator, Locator(today_temp_path)]) >> ArchiveSink(ctx)
@@ -43,7 +42,7 @@ def archive(ctx, format):
     export_logs(ctx, ctx.runtime_dir, ctx.archive_dir)
 
     ctx.logger.info('compressing archive files')
-    deque(map(functools.partial(make, ctx, format), filter(os.path.isdir, sorted(os.listdir(os.curdir)))), maxlen=0)
+    deque(map(functools.partial(make_archive, ctx, format), filter(os.path.isdir, sorted(os.listdir(os.curdir)))))
 
     ctx.logger.info('pruning runtime logs')
     prune_layout_files(ctx.runtime_dir, 'log', 'live')
@@ -78,7 +77,7 @@ def export_logs(ctx, src_dir, dst_dir):
             ctx.logger.warn('unable to match log file %s', log_file)
 
 
-def make(ctx, archive_format, archive_date):
+def make_archive(ctx, archive_format, archive_date):
     archive_locator = Locator(archive_date)
     index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', archive_locator)
     io_device = yjj.io_device(index_location, True, True)
