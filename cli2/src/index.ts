@@ -11,7 +11,7 @@ import { setSystemConfig } from '@/commanders/config';
 import { monitPrompt } from '@/components/index';
 import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
-import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
+import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
 
 const CFonts = require('cfonts');
@@ -184,9 +184,6 @@ program
                 break;
             case 'log':
                 console.log(LOG_DIR)
-                break;
-            case 'ledger':
-                console.log(LIVE_TRADING_DB_DIR)
                 break;
             case 'base':
                 console.log(BASE_DB_DIR)
