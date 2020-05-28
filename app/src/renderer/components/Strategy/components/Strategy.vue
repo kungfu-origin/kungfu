@@ -151,8 +151,8 @@
             </el-table-column>
             <el-table-column
                 label="" 
-                width="135px"  
-                align="right"       
+                width="135px"
+                align="right"
             >
                 <template slot-scope="props">
                     <span class="tr-oper" @click.stop="handleSetStrategy(props.row)"><i class="mouse-over el-icon-setting"></i></span>

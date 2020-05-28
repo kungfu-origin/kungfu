@@ -141,6 +141,18 @@ const ls = require('local-storage');
 
 Vue.use(Autocomplete)
 
+function filterPriceType (priceType) {
+    let filterPriceType = {};
+
+    Object.keys(priceType || {}).forEach(key => {
+        if (key <= 1) {
+            filterPriceType[key] = priceType[key]
+        }
+    })
+
+    return filterPriceType
+}
+
 export default {
     name: 'make-order-dialog',
     props: {
@@ -167,7 +179,7 @@ export default {
 
         this.sourceTypeConfig = sourceTypeConfig;
         this.offsetName = offsetName;
-        this.priceType = priceType;
+        this.priceType = filterPriceType(priceType)
         this.hedgeFlag = hedgeFlag;
         this.exchangeIds = exchangeIds;
 
