@@ -23,8 +23,10 @@ sortedcontainers = "==2.1.0"
 recordclass = "==0.12.0.1"
 dotted_dict = "==1.1.2"
 plotly = "==4.0.0"
-tushare = "==1.2.39"
 PyYAML = "==5.3.1"
+tushare = "==1.2.59"
+rqalpha = "==4.1.2"
+backtrader = "==1.9.75.123"
 
 [dev-packages]
 clang-format = "==9.0.0"

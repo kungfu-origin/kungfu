@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 import pkgutil
 from pykungfu import yijinjing as yjj
 import traceback
@@ -44,9 +43,8 @@ class ExtensionRegistry:
 
 EXTENSION_REGISTRY_MD = ExtensionRegistry('MD')
 EXTENSION_REGISTRY_TD = ExtensionRegistry('TD')
-EXTENSION_REGISTRY_BT = ExtensionRegistry('BT')
+EXTENSION_REGISTRY_DATA = ExtensionRegistry('DATA')
 EXTENSIONS = {}
-ACCOUNT_SCHEMA = {}
 
 extension_path = __path__
 __path__ = pkgutil.extend_path(__path__, __name__)
@@ -57,13 +55,6 @@ if not os.getenv('KF_NO_EXT'):
             ext_name = modname[len(__name__)+1:]
             extension_path = importer.path
             EXTENSIONS[ext_name] = extension_path
-            package_json_path = os.path.join(extension_path, ext_name, 'package.json')
-            if os.path.exists(package_json_path):
-                with open(package_json_path, encoding='utf-8') as package_json_file:
-                    package_json = json.load(package_json_file)
-                    if 'kungfuConfig' in package_json and 'config' in package_json['kungfuConfig']:
-                        ACCOUNT_SCHEMA[ext_name] = package_json['kungfuConfig']['config']
-                    package_json_file.close()
             kfext_logger.info('Loaded extension %s', ext_name)
         except:
             exc_type, exc_obj, exc_tb = sys.exc_info()

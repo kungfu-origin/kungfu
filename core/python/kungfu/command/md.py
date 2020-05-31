@@ -1,8 +1,8 @@
-from pykungfu import longfist
-from pykungfu import yijinjing as yjj
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu_extensions import EXTENSION_REGISTRY_MD
+from pykungfu import longfist
+from pykungfu import yijinjing as yjj
 
 
 @kfc.command(help_priority=3)

@@ -49,7 +49,7 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-export const LOG_DIR = path.join(KF_HOME, 'log');
+export const LOG_DIR = path.join(KF_HOME, 'logview');
 addFileSync('', LOG_DIR, 'folder')
 
 
