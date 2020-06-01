@@ -24,12 +24,12 @@ publisher_ptr sink::get_publisher() { return publisher_; }
 
 single_sink::single_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
 
-writer_ptr single_sink::get_writer(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
+void single_sink::put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
   if (writers_.find(dest_id) == writers_.end()) {
     auto target_location = data::location::make_shared(*location, locator_);
     writers_.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, get_publisher()));
   }
-  return writers_.at(dest_id);
+  writers_.at(dest_id)->copy_frame(frame);
 }
 
 assemble::assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode, const std::string &category,
@@ -68,11 +68,7 @@ void assemble::operator>>(const sink_ptr &sink) {
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
     auto page = current_reader_->current_page();
-    auto location = page->get_location();
-    auto dest_id = page->get_dest_id();
-    auto frame = current_reader_->current_frame();
-    auto writer = sink->get_writer(location, dest_id, frame);
-    writer->copy_frame(frame);
+    sink->put(page->get_location(), page->get_dest_id(), current_reader_->current_frame());
     next();
   }
 }

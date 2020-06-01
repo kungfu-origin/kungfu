@@ -12,9 +12,9 @@ class sink {
 public:
   sink();
   virtual ~sink() = default;
+  virtual void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) = 0;
+  virtual void close(){};
   [[nodiscard]] publisher_ptr get_publisher();
-  [[nodiscard]] virtual writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
-                                              const frame_ptr &frame) = 0;
 
 private:
   publisher_ptr publisher_;
@@ -24,8 +24,7 @@ DECLARE_PTR(sink)
 class single_sink : public sink {
 public:
   explicit single_sink(data::locator_ptr locator);
-  [[nodiscard]] writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
-                                      const frame_ptr &frame) override;
+  void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override;
 
 private:
   data::locator_ptr locator_;

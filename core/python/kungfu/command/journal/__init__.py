@@ -37,6 +37,7 @@ def pass_ctx_from_parent(ctx):
     ctx.name = ctx.parent.name
     ctx.runtime_dir = ctx.parent.runtime_dir
     ctx.archive_dir = ctx.parent.archive_dir
+    ctx.inbox_dir = ctx.parent.inbox_dir
     ctx.runtime_locator = ctx.parent.runtime_locator
     ctx.config_location = ctx.parent.config_location
     ctx.console_location = ctx.parent.console_location

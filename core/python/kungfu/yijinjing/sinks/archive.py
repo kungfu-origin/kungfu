@@ -1,8 +1,7 @@
 import os
+from kungfu.yijinjing.time import DAY_IN_NANO
 from kungfu.yijinjing.locator import Locator
 from pykungfu import yijinjing as yjj
-
-DAY_IN_NANO = int(24 * 60 * 60 * 1e9)
 
 
 class ArchiveSink(yjj.sink):
@@ -14,7 +13,7 @@ class ArchiveSink(yjj.sink):
         self.locator = None
         self.writer_maps = {}
 
-    def get_writer(self, location, dest_id, frame):
+    def put(self, location, dest_id, frame):
         date = int(frame.gen_time / DAY_IN_NANO)
         if date > self.last_day:
             date_str = yjj.strftime(date * DAY_IN_NANO, '%Y-%m-%d')
@@ -28,4 +27,4 @@ class ArchiveSink(yjj.sink):
         if dest_id not in writers:
             target_location = yjj.location(location.mode, location.category, location.group, location.name, self.locator)
             writers[dest_id] = yjj.writer(target_location, dest_id, True, self.publisher)
-        return writers[dest_id]
+        writers[dest_id].copy_frame(frame)

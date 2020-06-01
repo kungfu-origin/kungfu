@@ -97,6 +97,7 @@ def kfc(ctx, home, log_level, name):
 
     ctx.runtime_dir = ensure_dir(ctx, 'runtime')
     ctx.archive_dir = ensure_dir(ctx, 'archive')
+    ctx.inbox_dir = ensure_dir(ctx, 'inbox')
 
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
@@ -117,6 +118,7 @@ def pass_ctx_from_parent(ctx):
     ctx.log_level = ctx.parent.log_level
     ctx.runtime_dir = ctx.parent.runtime_dir
     ctx.archive_dir = ctx.parent.archive_dir
+    ctx.inbox_dir = ctx.parent.inbox_dir
     ctx.runtime_locator = ctx.parent.runtime_locator
     ctx.config_location = ctx.parent.config_location
     ctx.console_location = ctx.parent.console_location

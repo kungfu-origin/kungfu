@@ -7,7 +7,7 @@ from collections import deque
 from kungfu.command.archive import archive, pass_ctx_from_parent
 from kungfu.yijinjing import LOG_PATTERN, ARCHIVE_PREFIX
 from kungfu.yijinjing.locator import Locator
-from kungfu.yijinjing.sinks import ArchiveSink
+from kungfu.yijinjing.sinks.archive import ArchiveSink
 from kungfu.yijinjing.utils import prune_layout_files
 
 from pykungfu import yijinjing as yjj

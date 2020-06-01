@@ -106,10 +106,10 @@ public:
 
 class PySink : public sink {
 public:
-  [[nodiscard]] writer_ptr get_writer(const data::location_ptr &location, uint32_t dest_id,
-                                      const frame_ptr &frame) override {
-    PYBIND11_OVERLOAD_PURE(writer_ptr, sink, get_writer, location, dest_id, frame)
+  void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override {
+    PYBIND11_OVERLOAD_PURE(void, sink, put, location, dest_id, frame)
   }
+  void close() override { PYBIND11_OVERLOAD(void, sink, close, ); }
 };
 
 class PyMaster : public master {
@@ -204,13 +204,10 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("data_as_bytes", &event::data_as_bytes)
       .def_property_readonly("data_as_string", &event::data_as_string)
       .def("to_string", &event::to_string);
-  boost::hana::for_each(StateDataTypes, [&](auto pair) {
+  boost::hana::for_each(AllDataTypes, [&](auto pair) {
     using DataType = typename decltype(+boost::hana::second(pair))::type;
     event_class.def(boost::hana::first(pair).c_str(), &event_to_data<DataType>);
   });
-  event_class.def("RequestWriteTo", &event_to_data<RequestWriteTo>);
-  event_class.def("RequestReadFrom", &event_to_data<RequestReadFrom>);
-  event_class.def("RequestReadFromPublic", &event_to_data<RequestReadFromPublic>);
 
   auto frame_class = py::class_<frame, event, frame_ptr>(m, "frame");
   frame_class.def_property_readonly("gen_time", &frame::gen_time)
@@ -224,7 +221,6 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("address", &frame::address)
       .def_property_readonly("data_as_bytes", &frame::data_as_bytes)
       .def_property_readonly("data_as_string", &frame::data_as_string)
-      .def("has_data", &frame::has_data)
       .def_property_readonly("data_address", [](const frame &f) { return f.address() + f.header_length(); })
       .def_property_readonly("detail", [](const frame &f) {
         std::string result;
@@ -235,7 +231,8 @@ void bind(pybind11::module &&m) {
           }
         });
         return result;
-      });
+      })
+      .def("has_data", &frame::has_data);
 
   auto location_class = py::class_<location, location_ptr>(m, "location");
   location_class.def(py::init<mode, category, const std::string &, const std::string &, locator_ptr>())
@@ -295,6 +292,7 @@ void bind(pybind11::module &&m) {
 
   auto py_writer = py::class_<writer, writer_ptr>(m, "writer");
   py_writer.def(py::init<const data::location_ptr &, uint32_t, bool, publisher_ptr>())
+      .def("copy_frame", &writer::copy_frame)
       .def("write_raw", &writer::write_raw)
       .def("write_str",
            [](const writer_ptr &w, int64_t trigger_time, int32_t msg_type, const std::string &data) {
@@ -312,11 +310,12 @@ void bind(pybind11::module &&m) {
   py::class_<sink, PySink, sink_ptr>(m, "sink")
       .def(py::init())
       .def_property_readonly("publisher", &sink::get_publisher)
-      .def("get_writer", &sink::get_writer);
+      .def("put", &sink::put)
+      .def("close", &sink::close);
 
   py::class_<single_sink, sink, std::shared_ptr<single_sink>>(m, "single_sink")
       .def(py::init<data::locator_ptr>())
-      .def("get_writer", &single_sink::get_writer);
+      .def("put", &single_sink::put);
 
   py::class_<assemble, assemble_ptr>(m, "assemble")
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,
