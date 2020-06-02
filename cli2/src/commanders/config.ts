@@ -48,7 +48,7 @@ const parseConfigItemQuestions = async (configItem: SystemConfigChildNormalItem,
     const existedValue = existedConfigData[key];
     return {
         type: targetType,
-        name: name,
+        name: key,
         choices: await buildChoices(configItem),
         message: `[ ${name} ] ${tip}`,
         default: existedValue,
