@@ -42,12 +42,14 @@ add_lib(build_deps_dir)
 
 datas.extend(collect_data_files('tushare'))
 datas.extend(collect_data_files('plotly'))
+datas.extend(collect_data_files('wcwidth'))
 
 hiddenimports = [
     'numpy',
     'pandas',
     'tushare',
     'plotly',
+    'wcwidth',
     "recordclass",
     "sortedcontainers",
     "dotted_dict",
@@ -70,7 +72,7 @@ a = Analysis(['kungfu' + os.path.sep + '__main__.py'],
      hiddenimports=hiddenimports,
      hookspath=[],
      runtime_hooks=None,
-     excludes=['kungfu_extensions'],
+     excludes=['kungfu_extensions', 'matplotlib'],
      cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
      cipher=block_cipher)
