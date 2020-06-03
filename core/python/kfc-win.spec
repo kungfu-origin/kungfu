@@ -1,6 +1,7 @@
 import os
 import tushare
 import plotly
+from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 a = Analysis(['kungfu\\__main__.py'],
@@ -28,7 +29,7 @@ a = Analysis(['kungfu\\__main__.py'],
         ('..\\deps\\pybind11-2.2.4', 'pybind11'),
         (os.path.join(tushare.__path__[0], 'VERSION.txt'), 'tushare'),
         (os.path.join(plotly.__path__[0], 'package_data'), 'plotly/package_data')
-     ],
+     ] + collect_data_files('wcwidth'),
      hiddenimports=[
           'pkg_resources.py2_warn',
           'numpy',
@@ -38,11 +39,12 @@ a = Analysis(['kungfu\\__main__.py'],
           'plotly.graph_objects',
           "recordclass",
           "sortedcontainers",
+          'wcwidth',
           "dotted_dict"
           ],
      hookspath=["python/hooks"],
      runtime_hooks=None,
-     excludes=['extensions'],
+     excludes=['extensions', 'matplotlib'],
      cipher=block_cipher)
 pyz = PYZ(a.pure, a.zipped_data,
      cipher=block_cipher)
