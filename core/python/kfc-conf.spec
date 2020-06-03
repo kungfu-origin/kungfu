@@ -42,12 +42,14 @@ add_lib(build_deps_dir)
 
 datas.extend(collect_data_files('tushare'))
 datas.extend(collect_data_files('plotly'))
+datas.extend(collect_data_files('wcwidth'))
 
 hiddenimports = [
     'numpy',
     'pandas',
     'tushare',
     'plotly',
+    'wcwidth',
     "recordclass",
     "sortedcontainers",
     "dotted_dict",
