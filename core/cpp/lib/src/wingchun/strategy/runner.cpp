@@ -112,6 +112,7 @@ void Runner::prepare(const event_ptr &event) {
   if (not positions_set_) {
     return;
   }
+  context_->get_bookkeeper().guard_positions();
   started_ = true;
   post_start();
 }

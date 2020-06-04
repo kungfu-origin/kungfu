@@ -40,10 +40,13 @@ public:
 
   void restore(const yijinjing::cache::bank &state_bank);
 
+  void guard_positions();
+
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
 
+  bool positions_guarded_ = false;
   CommissionMap commissions_ = {};
   InstrumentMap instruments_ = {};
   BookMap books_ = {};
