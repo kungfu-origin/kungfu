@@ -15,7 +15,7 @@ using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
 Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
-    : app_(app), broker_client_(broker_client), instruments_(), books_() {
+    : app_(app), broker_client_(broker_client) {
   book::AccountingMethod::setup_defaults(*this);
 }
 
@@ -97,6 +97,8 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
   }
 }
 
+void Bookkeeper::guard_positions() { positions_guarded_ = true; }
+
 Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   auto location = app_.get_location(location_uid);
   auto book = std::make_shared<Book>(commissions_, instruments_);
@@ -158,7 +160,7 @@ void Bookkeeper::try_update_position(const Position &position) {
   }
   auto book = get_book(position.holder_uid);
   auto &target_position = book->get_position_for(position.direction, position);
-  if (target_position.update_time >= position.update_time) {
+  if (positions_guarded_ and target_position.update_time >= position.update_time) {
     return;
   }
   auto last_price = target_position.last_price;

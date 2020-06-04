@@ -33,6 +33,7 @@ book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
+  bookkeeper_.guard_positions();
 
   events_ | is(OrderInput::tag) | $$(update_order_stat(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));

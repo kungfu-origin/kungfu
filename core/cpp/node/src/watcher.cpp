@@ -203,6 +203,7 @@ void Watcher::on_react() {
 void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
+  bookkeeper_.guard_positions();
 
   events_ | $$(feed_state_data(event, update_ledger));
   events_ | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
