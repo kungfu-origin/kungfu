@@ -40,14 +40,14 @@ const dealLogMessage = (line: string, processId: string) => {
         message = message.split('\n[').join('[')
 
         if(message.split('[').length < 4) {
-            const updateTime = moment(lineData.timestamp).format('MM/DD HH:mm:ss.000');
+            const updateTime = `[${moment(lineData.timestamp).format('MM/DD HH:mm:ss.000')}]`;
             const type = 'error'.includes(lineData.type) ? 'error' : lineData.type;
-            message = `[${updateTime}] [ ${type}  ] ${message.trim()}`
+            message = `${colors.cyan(updateTime)} [ ${type}  ] ${message.trim()}`
         }
 
         const msgList = message.split(']');
         const updateTime = msgList[0].slice(1)
-        const updateTimeResolve = dealUpdateTime(updateTime)
+        const updateTimeResolve = `[${dealUpdateTime(updateTime)}]`
         const typeResolve = `[${msgList[1].trim().slice(1).trim()}]`;
         
         let lastInfo = ''
@@ -57,7 +57,7 @@ const dealLogMessage = (line: string, processId: string) => {
             lastInfo = msgList.slice(2).join(']')
         }
 
-        const messageResolve = `[${updateTimeResolve}]${typeResolve}${lastInfo}`
+        const messageResolve = `${colors.cyan(updateTimeResolve)} ${typeResolve} ${lastInfo}`
 
         message = messageResolve
             .replace(/\[info\]/g, `[ ${colors[logColor.info]('info')}    ] `)
@@ -67,11 +67,14 @@ const dealLogMessage = (line: string, processId: string) => {
             .replace(/\[warning\]/g, `[ ${colors[logColor.warning]('warning')} ] `)
             .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
             .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
+
+        const isCritical = message.includes('critical');
     
-        if(message.includes('critical')) message = `${colors[logColor.critical](message)}`
+        if(isCritical) message = `${colors[logColor.critical](message)}`
         
         return { 
             message,
+            isCritical,
             updateTime: lineData.timestamp
         }
     })
@@ -89,12 +92,15 @@ const getLogObservable = (pid: string) => {
 }
 
 
-export const getMergedLogsObservable = (processIds: string[]) => {
+export const getMergedLogsObservable = (processIds: string[], boardWidth: number) => {
     return forkJoin(
         ...processIds
         .map((logPath: string) => getLogObservable(logPath))        
     ).pipe(
-        map((list: any[]) => {
+        map((list: any[]): any[] => {
+
+            let listResolved: any = []
+
             list = list
                 .map((l: any) => l.list)
                 .reduce((a: any, b: any): any => a.concat(b))
@@ -102,18 +108,35 @@ export const getMergedLogsObservable = (processIds: string[]) => {
                 .map((l: any) => {
                     return l
                 })
+
             if(list.length) {
-                list = list
-                    .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
-                    .map((l: any) => l.message)  
-            }
-                          
-            return list
+                list
+                .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
+                .map((l: any) => l)  
+                .forEach((l: any) => {
+                    const message = l.message;
+                    const isCritical = l.isCritical;
+
+                    if (message.length < boardWidth) {
+                        listResolved.push(message)
+                    } else {
+                        splitStrByLength(message, boardWidth).forEach(splitLine => {
+                            if (isCritical) {
+                                listResolved.push(colors.red(splitLine))
+                            } else {
+                                listResolved.push(splitLine)
+                            }
+                        })
+                    }
+                })
+                    
+            }       
+            return listResolved
         })
     )
 }
 
-const watchLogObservable = (processId: string) => {
+const watchLogObservable = (processId: string, boardWidth: number) => {
     logWather && (logWather.unwatch());
     return new Observable(observer => {
         const logPath = path.join(LOG_DIR, `${processId}.log`);
@@ -127,22 +150,55 @@ const watchLogObservable = (processId: string) => {
         watcher.watch();
         watcher.on('line', (line: string) => {
             const logList: any = dealLogMessage(line, processId);
-            logList.kfForEach((l: any) => observer.next(l.message || ''))
+
+            logList.kfForEach((l: any) => {
+                if (l.message.length < boardWidth) {
+                    observer.next(l.message || '')                    
+                } else {
+                    splitStrByLength(l.message, boardWidth).forEach(m => {
+                        const isCritical = l.isCritical;
+
+                        if (isCritical) {
+                            observer.next(colors.red(m || ''))
+                        } else {
+                            observer.next(m || '')
+                        }
+                    })
+                }
+            })
         })
         watcher.on('error', () => watcher.unwatch())
     })
     
 }
 
-export const watchLogsObservable = (processIds: string[]) => {
-    return merge(...processIds.map(pid => watchLogObservable(pid)))
+export const watchLogsObservable = (processIds: string[], boardWidth: number) => {
+    return merge(...processIds.map(pid => watchLogObservable(pid, boardWidth)))
 }
 
-export const LogsAndWatcherConcatObservable = (processIds: string[]) => {
+export const LogsAndWatcherConcatObservable = (processIds: string[], boardWidth: number) => {
     return concat(
-        getMergedLogsObservable(processIds),
-        watchLogsObservable(processIds)
+        getMergedLogsObservable(processIds, boardWidth),
+        watchLogsObservable(processIds, boardWidth)
     )
 }
 
+
+function splitStrByLength (str: string, len: number): String[] {
+
+    const strLen = str.length;
+    const groupNum = Math.ceil(strLen / len);
+    
+    let i = 0, strList = []; 
+    for (i; i < groupNum; i++) {
+        const start = i * len;
+        const end = (i + 1) * len;
+        strList.push(str.slice(start, end).trim())
+    }
+
+    return strList
+}
+
 // // =============================== logs end ==================================================
+
+
