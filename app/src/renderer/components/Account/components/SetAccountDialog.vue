@@ -255,10 +255,9 @@ export default {
 
         //检查account_id或者account_id是否重复
         validateAccountId(rule, value, callback) {
-            const t = this
-            const index = t.mdTdList.findIndex(a => {
+            const index = this.mdTdList.findIndex(a => {
                const account_id = a.account_id
-               return account_id == `${t.source}_${value}`
+               return account_id === `${this.source}_${value}`
             })
             if(index != -1) {
                 callback('已存在该账户ID！')
