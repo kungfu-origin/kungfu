@@ -66,10 +66,12 @@ const selectSourcePrompt = async (accountSource: Sources, existedSource: string[
 export const accountConfigPrompt = (accountSetting: AccountSetting, updateModule?: boolean, accountData?: any, type?: string): Promise<any> => {
     const idKey = accountSetting.key;
     const accountOptions: AccountSettingItem[] = accountSetting.config;
-    const source = accountSetting.name;
+    const source = accountSetting.source;
+
     const questions = accountOptions
     .filter((a: AccountSettingItem) => (type === 'md') || !(updateModule && a.key === idKey))
     .map((a: AccountSettingItem) => paresAccountQuestion({
+        source,
         idKey,
         configItem: a,
         updateModule,
@@ -265,7 +267,8 @@ function getDefaultValue(updateModule: boolean | undefined, existedValue: any, t
 
 
 
-function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: { idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }, type?: string) {
+function paresAccountQuestion({ source, idKey, configItem, updateModule, accountData }: { source: string, idKey: string, configItem: AccountSettingItem, updateModule?: boolean, accountData?: any }, type?: string) {
+    
     const { validator, required, key } = configItem;
     const targetType = getQuestionInputType(configItem.type);
     const existedValue = (accountData || {})[key] || '';
@@ -287,7 +290,7 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
 
             //判断是否关键字重复, 仅td
             if((idKey === key) && (type !== 'md')) {
-                const existedAccountError = await existedAccountIdValidator(value)
+                const existedAccountError = await existedAccountIdValidator(source, value)
                 if(existedAccountError) hasError = existedAccountError;
             }
 
@@ -307,10 +310,11 @@ function paresAccountQuestion({ idKey, configItem, updateModule, accountData }: 
     return questions;
 }
 
-async function existedAccountIdValidator(value: any):Promise<any> {
+async function existedAccountIdValidator(source: string, value: any):Promise<any> {
     const accountList = await getTdList()
-    const existedIds = accountList.map((a: Td) => a.account_id.toAccountId());
-    if (existedIds.includes(value)) return new Error('AccountId has existed!');
+    const existedIds = accountList.map((a: Td) => a.account_id);
+    const currentAccountId = `${source}_${value}`;
+    if (existedIds.includes(currentAccountId)) return new Error(`AccountId ${currentAccountId} has existed!`);
 }
 
 export function filterAccountConfig(config: NormalObject) {
