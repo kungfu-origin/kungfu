@@ -194,9 +194,11 @@ export class MonitorDashboard extends Dashboard {
         t.boards.mergedLogs.setItems([]) //clear
         t.boards.mergedLogs.setLabel(` Logs (${processId}) `)
         t.boards.loader.load('Loading the logs, please wait...')
+        
+        const boardWidth = t.boards.mergedLogs.width;
 
-        t.oldLogObservable = LogsAndWatcherConcatObservable(processIds).subscribe((l: any) => {
-            
+        t.oldLogObservable = LogsAndWatcherConcatObservable(processIds, boardWidth).subscribe((l: any) => {
+
             t.boards.loader.stop()
 
             //obserable
