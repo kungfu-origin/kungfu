@@ -244,7 +244,7 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const rocket = ifRocket ? '-x' : '';
-    const args = ['-m kungfu', logLevel, 'strategy', '-n', name, '-p', `'${strategyPath}'`, rocket].join(' ')
+    const args = ['-m', 'kungfu', logLevel, 'strategy', '-n', name, '-p', `'${strategyPath}'`, rocket].join(' ')
 
     if (!pythonPath.trim()) {
         return Promise.reject(new Error('No local python path!'))
