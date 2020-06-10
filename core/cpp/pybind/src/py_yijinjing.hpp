@@ -209,29 +209,8 @@ void bind(pybind11::module &&m) {
     event_class.def(boost::hana::first(pair).c_str(), &event_to_data<DataType>);
   });
 
-  auto frame_class = py::class_<frame, event, frame_ptr>(m, "frame");
-  frame_class.def_property_readonly("gen_time", &frame::gen_time)
-      .def_property_readonly("trigger_time", &frame::trigger_time)
-      .def_property_readonly("source", &frame::source)
-      .def_property_readonly("dest", &frame::dest)
-      .def_property_readonly("msg_type", &frame::msg_type)
+  py::class_<frame, event, frame_ptr>(m, "frame")
       .def_property_readonly("frame_length", &frame::frame_length)
-      .def_property_readonly("header_length", &frame::header_length)
-      .def_property_readonly("data_length", &frame::data_length)
-      .def_property_readonly("address", &frame::address)
-      .def_property_readonly("data_as_bytes", &frame::data_as_bytes)
-      .def_property_readonly("data_as_string", &frame::data_as_string)
-      .def_property_readonly("data_address", [](const frame &f) { return f.address() + f.header_length(); })
-      .def_property_readonly("detail", [](const frame &f) {
-        std::string result;
-        boost::hana::for_each(StateDataTypes, [&](auto pair) {
-          using DataType = typename decltype(+boost::hana::second(pair))::type;
-          if (f.msg_type() == DataType::tag) {
-            result = f.data<DataType>().to_string();
-          }
-        });
-        return result;
-      })
       .def("has_data", &frame::has_data);
 
   auto location_class = py::class_<location, location_ptr>(m, "location");

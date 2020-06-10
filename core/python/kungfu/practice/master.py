@@ -95,7 +95,7 @@ class Master(yjj.master):
     def on_exit(self):
         for app in self.get_live_processes():
             self.ctx.logger.info(f'terminating apprentice {app["uname"]} pid {app["pid"]}')
-            self.deregister_app(yjj.now_in_nano(), app['register'].uid)
+            self.deregister_app(yjj.now_in_nano(), app['register'].__uid__)
             try:
                 app['process'].terminate()
             except psutil.Error:
@@ -145,7 +145,7 @@ def health_check(ctx):
         if not ctx.apprentices[pid]['process'].is_running():
             app = ctx.apprentices[pid]
             ctx.logger.warn(f'cleaning up stale app {app["uname"]} with pid {pid}')
-            ctx.master.deregister_app(yjj.now_in_nano(), app['register'].uid)
+            ctx.master.deregister_app(yjj.now_in_nano(), app['register'].__uid__)
             del ctx.apprentices[pid]
 
 

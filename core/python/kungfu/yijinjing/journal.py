@@ -120,15 +120,15 @@ def show_journal(ctx, session_id, io_type):
             'public' if frame.dest == 0 else locations[frame.dest]['uname'],
             frame.msg_type, frame.frame_length, frame.data_length
         ]
-        if frame.dest == io_device.home.uid and (frame.msg_type == RequestReadFrom.tag or frame.msg_type == RequestReadFromPublic.tag):
+        if frame.dest == io_device.home.uid and (frame.msg_type == RequestReadFrom.__tag__ or frame.msg_type == RequestReadFromPublic.__tag__):
             request = frame.RequestReadFrom()
             source_location = make_location_from_dict(ctx, locations[request.source_id])
-            dest = io_device.home.uid if frame.msg_type == RequestReadFrom.tag else 0
+            dest = io_device.home.uid if frame.msg_type == RequestReadFrom.__tag__ else 0
             try:
                 reader.join(source_location, dest, request.from_time)
             except Exception as err:
                 ctx.logger.error(f"failed to join journal {source_location.uname}/{dest}, exception: {err}")
-        if frame.dest == io_device.home.uid and frame.msg_type == Deregister.tag:
+        if frame.dest == io_device.home.uid and frame.msg_type == Deregister.__tag__:
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc['uid'])
         reader.next()

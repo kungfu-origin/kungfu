@@ -14,8 +14,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
-Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client)
-    : app_(app), broker_client_(broker_client) {
+Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client) : app_(app), broker_client_(broker_client) {
   book::AccountingMethod::setup_defaults(*this);
 }
 

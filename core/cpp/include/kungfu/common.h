@@ -53,6 +53,7 @@ using namespace boost::hana::literals;
     static constexpr bool has_data = true;                                                                             \
     NAME(){};                                                                                                          \
     explicit NAME(const char *address, const uint32_t length) { parse(address, length); };                             \
+    explicit NAME(const std::string &text) : NAME(text.c_str(), text.length()){};                                      \
     BOOST_HANA_DEFINE_STRUCT(NAME, __VA_ARGS__);                                                                       \
   }
 
@@ -331,11 +332,18 @@ private:
 
   template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &v) {}
 
-  template <typename J, typename V> static std::enable_if_t<std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
+  template <typename J, typename V>
+  static std::enable_if_t<std::is_arithmetic_v<V> or is_array_of_others_v<V, char>> restore_from_json(J &j, V &v) {
     v = j;
   }
 
-  template <typename J, typename V> static std::enable_if_t<not std::is_arithmetic_v<V>> restore_from_json(J &j, V &v) {
+  template <typename J, typename V> static std::enable_if_t<is_array_of_v<V, char>> restore_from_json(J &j, V &v) {
+    std::string value = j;
+    v = value.c_str();
+  }
+
+  template <typename J, typename V>
+  static std::enable_if_t<not std::is_arithmetic_v<V> and not is_array_v<V>> restore_from_json(J &j, V &v) {
     j.get_to(v);
   }
 };
