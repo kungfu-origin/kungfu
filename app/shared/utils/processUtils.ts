@@ -202,6 +202,7 @@ export const startProcess = async (options: any, no_ext = false): Promise<object
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
+        "force": true,
         "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
@@ -255,10 +256,11 @@ export const startStrategyProcess = async (name: string, strategyPath: string, p
         "output": buildProcessLogPath(name),
         "error": buildProcessLogPath(name),
         "mergeLogs": true,
-        // "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": false,
         "maxRestarts": 1,
         "watch": false,
+        "force": true,
         "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
