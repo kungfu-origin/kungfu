@@ -7,9 +7,10 @@ import { updateAccountStrategy } from '@/commanders/update';
 import { removeAccountStrategy } from '@/commanders/remove';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { setSystemConfig } from '@/commanders/config';
+import { shutdown } from '@/commanders/shutdown';
 
 import { monitPrompt } from '@/components/index';
-import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
+import { kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { LIVE_TRADING_DB_DIR, LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
@@ -147,18 +148,8 @@ program
 program
     .command('shutdown')
     .description('shutdown all kungfu processes')
-    .action(async () => {
-        try {
-            await killKfc();
-            await killGodDaemon();
-            await kfKill(['pm2']);
-            await killExtra();
-            console.success(`Shutdown kungfu`)
-            process.exit(0)
-        } catch (err) {
-            console.error(err)
-            process.exit(1)
-        }
+    .action(() => {
+        shutdown()
     })
 
 program
