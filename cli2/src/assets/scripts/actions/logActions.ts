@@ -66,7 +66,6 @@ const dealLogMessage = (line: string, processId: string) => {
             .replace(/\[error\]/g, `[ ${colors[logColor.error]('error')}   ] `)
             .replace(/\[warning\]/g, `[ ${colors[logColor.warning]('warning')} ] `)
             .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
-            .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
 
         const isCritical = message.includes('critical');
     
