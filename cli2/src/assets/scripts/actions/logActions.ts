@@ -42,7 +42,7 @@ const dealLogMessage = (line: string, processId: string) => {
         if(message.split('[').length < 4) {
             const updateTime = `[${moment(lineData.timestamp).format('MM/DD HH:mm:ss.000')}]`;
             const type = 'error'.includes(lineData.type) ? 'error' : lineData.type;
-            message = `${colors.cyan(updateTime)} [ ${type}  ] ${message.trim()}`
+            message = `${updateTime} [ ${type}  ] ${message.trim()}`
         }
 
         const msgList = message.split(']');
@@ -66,7 +66,6 @@ const dealLogMessage = (line: string, processId: string) => {
             .replace(/\[error\]/g, `[ ${colors[logColor.error]('error')}   ] `)
             .replace(/\[warning\]/g, `[ ${colors[logColor.warning]('warning')} ] `)
             .replace(/\[debug\]/g, `[ ${colors[logColor.debug]('debug')}   ] `)
-            .replace(/\[critical\]/g, `[ ${colors[logColor.critical]('critical')}] `)
 
         const isCritical = message.includes('critical');
     

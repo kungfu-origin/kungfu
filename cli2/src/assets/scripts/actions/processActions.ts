@@ -20,7 +20,7 @@ const colors = require('colors');
 
 
 export const switchProcess = (proc: any, messageBoard: any) =>{
-    const status = proc.status === 'online';
+    const status = proc.status !== '--';
     const startOrStop = !!status ? 'Stop' : 'Start';
     const startOrStopMaster = !!status ? 'Restart' : 'Start';
     switch(proc.type) {
