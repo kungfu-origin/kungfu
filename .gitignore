@@ -35,6 +35,7 @@ dist/
 .project
 package-lock.json
 Pipfile.lock
+yarn.lock
 
 #js third part
 */inquirer-path/lib/*
