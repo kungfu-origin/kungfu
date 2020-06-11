@@ -176,6 +176,7 @@ void bind(pybind11::module &&m) {
       .value("SYSTEM", category::SYSTEM)
       .export_values();
   m.def("get_category_name", &get_category_name);
+  m.def("get_category_by_name", &get_category_by_name);
 
   py::enum_<layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
       .value("JOURNAL", layout::JOURNAL)
@@ -291,6 +292,8 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("publisher", &sink::get_publisher)
       .def("put", &sink::put)
       .def("close", &sink::close);
+
+  py::class_<null_sink, sink, std::shared_ptr<null_sink>>(m, "null_sink").def(py::init<>());
 
   py::class_<single_sink, sink, std::shared_ptr<single_sink>>(m, "single_sink")
       .def(py::init<data::locator_ptr>())

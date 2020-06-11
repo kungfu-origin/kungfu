@@ -3,7 +3,6 @@ from kungfu.command.data import data, pass_ctx_from_parent
 from kungfu_extensions import EXTENSION_REGISTRY_DATA
 from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
-import json
 
 
 @data.command()

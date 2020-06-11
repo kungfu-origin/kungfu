@@ -18,7 +18,8 @@ class CsvSink(yjj.sink):
             return
         data_type = self.tagged_types[frame.msg_type]
         header = [m for m in vars(data_type) if not m.startswith('_')]
-        output = os.path.join(self.ctx.inbox_dir, f'{data_type.__name__}.csv')
+        location_part = f'{yjj.get_category_name(location.category)}.{location.group}.{location.name}'
+        output = os.path.join(self.ctx.inbox_dir, f'{location_part}.{data_type.__name__}.csv')
         if output not in self.writers:
             self.files[output] = open(output, 'w', newline='')
             self.writers[output] = csv.writer(self.files[output])

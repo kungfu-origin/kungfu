@@ -45,8 +45,11 @@ datas.extend(collect_data_files('plotly'))
 datas.extend(collect_data_files('wcwidth'))
 
 hiddenimports = [
+    'kungfu.data.adapter',
+    'kungfu.yijinjing.sinks.csv',
     'numpy',
     'pandas',
+    'rqalpha',
     'tushare',
     'plotly',
     'wcwidth',
