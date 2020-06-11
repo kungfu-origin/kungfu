@@ -131,6 +131,18 @@ void bind(pybind11::module &&m) {
       .value("Unlock", Side::Unlock)
       .value("Exec", Side::Exec)
       .value("Drop", Side::Drop)
+      .value("Purchase", Side::Purchase)
+      .value("Pedemption", Side::Pedemption)
+      .value("Split", Side::Split)
+      .value("Merge", Side::Merge)
+      .value("MarginTrade", Side::MarginTrade)
+      .value("ShortSell", Side::ShortSell)
+      .value("RepayMargen", Side::RepayMargen)
+      .value("RepayStock", Side::RepayStock)
+      .value("StockRepayStock", Side::StockRepayStock)
+      .value("SurStkTrans", Side::SurStkTrans)
+      .value("GrtStkTransIn", Side::GrtStkTransIn)
+      .value("GrtStkTranOut", Side::GrtStkTranOut)
       .export_values()
       .def("__eq__", [](const Side &a, int b) { return static_cast<int>(a) == b; });
 

@@ -106,7 +106,7 @@ enum class BsFlag : int8_t { Unknown, Buy, Sell };
 
 inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << int8_t(t); }
 
-enum class Side : int8_t { Buy, Sell, Lock, Unlock, Exec, Drop };
+enum class Side : int8_t { Buy, Sell, Lock, Unlock, Exec, Drop, Purchase, Pedemption, Split, Merge, MarginTrade, ShortSell, RepayMargen, RepayStock, StockRepayStock, SurStkTrans, GrtStkTransIn, GrtStkTranOut};
 
 inline std::ostream &operator<<(std::ostream &os, Side t) { return os << int8_t(t); }
 
