@@ -169,7 +169,7 @@
     "log4js": "^4.0.2",
     "monaco-editor": "0.18.1",
     "physical-cpu-count": "^2.0.0",
-    "pm2": "4.2.3",
+    "pm2": "4.4.0",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
     "vue": "^2.6.11",

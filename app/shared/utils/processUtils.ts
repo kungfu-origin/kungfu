@@ -2,7 +2,7 @@ import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 
@@ -345,7 +345,9 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
 
     if (ifLocalPython) {
-        return startStrategyProcess(strategyId, strategyPath, pythonPath)
+        return deleteProcess(strategyId)
+            .then(() => delayMiliSeconds(2000))
+            .then(() => startStrategyProcess(strategyId, strategyPath, pythonPath))
     } else {
         return startProcess({
             "name": strategyId,
