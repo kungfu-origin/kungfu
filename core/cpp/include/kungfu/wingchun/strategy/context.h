@@ -156,6 +156,10 @@ protected:
 
   virtual void on_start();
 
+  uint32_t lookup_account_location_id(const std::string &account) const;
+
+  const yijinjing::data::location_ptr &find_md_location(const std::string &source);
+
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
@@ -166,10 +170,6 @@ private:
   std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
   std::unordered_map<uint32_t, double> account_cash_limits_ = {};
   std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
-
-  uint32_t lookup_account_location_id(const std::string &account) const;
-
-  const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
   friend void enable(Context &context) { context.on_start(); }
 };
