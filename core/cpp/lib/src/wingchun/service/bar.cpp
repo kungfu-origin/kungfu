@@ -81,7 +81,7 @@ void BarGenerator::on_start() {
       bar.close = quote.last_price;
     }
     if (quote.data_time >= bar.end_time) {
-      get_writer(location::PUBLIC)->write(event->gen_time(), Bar::tag, bar);
+      get_writer(location::PUBLIC)->write(event->gen_time(), bar);
       bar.start_time = bar.end_time;
       while (bar.start_time + time_interval_ < quote.data_time) {
         bar.start_time += time_interval_;

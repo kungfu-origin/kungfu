@@ -23,9 +23,9 @@ class CsvSink(yjj.sink):
         if output not in self.writers:
             self.files[output] = open(output, 'w', newline='')
             self.writers[output] = csv.writer(self.files[output])
-            self.writers[output].writerow(header)
+            self.writers[output].writerow(['gen_time'] + header)
         data = getattr(frame, data_type.__name__)()
-        self.writers[output].writerow([extract(data, m) for m in header])
+        self.writers[output].writerow([frame.gen_time] + [extract(data, m) for m in header])
 
     def close(self):
         [file.close() for file in self.files.values()]

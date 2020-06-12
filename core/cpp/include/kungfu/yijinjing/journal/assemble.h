@@ -24,7 +24,7 @@ DECLARE_PTR(sink)
 class null_sink : public sink {
 public:
   null_sink() = default;
-  void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override {};
+  void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override{};
 };
 
 class single_sink : public sink {

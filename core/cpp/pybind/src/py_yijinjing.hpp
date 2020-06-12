@@ -244,21 +244,18 @@ void bind(pybind11::module &&m) {
       .def("join", &reader::join)
       .def("disjoin", &reader::disjoin);
 
-  auto py_writer = py::class_<writer, writer_ptr>(m, "writer");
-  py_writer.def(py::init<const data::location_ptr &, uint32_t, bool, publisher_ptr>())
-      .def("copy_frame", &writer::copy_frame)
-      .def("write_raw", &writer::write_raw)
-      .def("write_str",
-           [](const writer_ptr &w, int64_t trigger_time, int32_t msg_type, const std::string &data) {
-             w->write_raw(trigger_time, msg_type, reinterpret_cast<uintptr_t>(data.c_str()), data.length());
-           })
+  auto writer_class = py::class_<writer, writer_ptr>(m, "writer");
+  writer_class.def(py::init<const data::location_ptr &, uint32_t, bool, publisher_ptr>())
       .def("current_frame_uid", &writer::current_frame_uid)
+      .def("copy_frame", &writer::copy_frame)
       .def("mark", &writer::mark)
-      .def("mark_with_time", &writer::mark_with_time);
-
+      .def("mark_at", &writer::mark_at);
   boost::hana::for_each(StateDataTypes, [&](auto type) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
-    py_writer.def("write", py::overload_cast<int64_t, const DataType &>(&writer::write<DataType>));
+    writer_class.def("write", py::overload_cast<int64_t, const DataType &, int32_t>(&writer::write<DataType>),
+                     py::arg("trigger_time"), py::arg("data"), py::arg("msg_type") = DataType::tag);
+    writer_class.def("write_at", py::overload_cast<int64_t, int64_t, const DataType &>(&writer::write_at<DataType>),
+                     py::arg("gen_time"), py::arg("trigger_time"), py::arg("data"));
   });
 
   py::class_<sink, PySink, sink_ptr>(m, "sink")

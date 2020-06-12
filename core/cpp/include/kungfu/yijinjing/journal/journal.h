@@ -23,13 +23,9 @@
 #include <kungfu/yijinjing/journal/common.h>
 #include <kungfu/yijinjing/journal/frame.h>
 #include <kungfu/yijinjing/journal/page.h>
+#include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::journal {
-
-FORWARD_DECLARE_PTR(page_provider)
-
-FORWARD_DECLARE_PTR(page_provider_factory)
-
 /**
  * Journal class, the abstraction of continuous memory access
  */
@@ -124,13 +120,15 @@ public:
 
   frame_ptr open_frame(int64_t trigger_time, int32_t msg_type, uint32_t length);
 
-  void close_frame(size_t data_length);
+  void close_frame(size_t data_length, int64_t gen_time = time::now_in_nano());
 
   void copy_frame(const frame_ptr &source);
 
   void mark(int64_t trigger_time, int32_t msg_type);
 
-  void mark_with_time(int64_t trigger_time, int32_t msg_type);
+  void mark_at(int64_t gen_time, int64_t trigger_time, int32_t msg_type);
+
+  void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
 
   /**
    * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
@@ -139,81 +137,64 @@ public:
    * @param msg_type
    * @return a casted reference to the underlying memory address in mmap file
    */
-  template <typename DataType>
-  std::enable_if_t<size_fixed_v<DataType>, DataType &> open_data(int64_t trigger_time = 0) {
-    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
-    return const_cast<DataType &>(frame->template data<DataType>());
+  template <typename T> std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0) {
+    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+    return const_cast<T &>(frame->template data<T>());
   }
 
-  void close_data() { close_frame(size_to_write_); }
+  void close_data();
 
-  template <typename DataType>
-  std::enable_if_t<kungfu::size_fixed_v<DataType>> write(int64_t trigger_time, const DataType &data) {
-    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
+  template <typename T>
+  std::enable_if_t<size_fixed_v<T>> write(int64_t trigger_time, const T &data, int32_t msg_type = T::tag) {
+    auto frame = open_frame(trigger_time, msg_type, sizeof(T));
     auto size = frame->copy_data(data);
     close_frame(size);
   }
 
-  template <typename DataType>
-  std::enable_if_t<kungfu::size_unfixed_v<DataType>> write(int64_t trigger_time, const DataType &data) {
+  template <typename T>
+  std::enable_if_t<size_unfixed_v<T>> write(int64_t trigger_time, const T &data, int32_t msg_type = T::tag) {
     auto s = data.to_string();
     auto size = s.length();
-    auto frame = open_frame(trigger_time, DataType::tag, s.length());
+    auto frame = open_frame(trigger_time, msg_type, size);
     memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
     close_frame(size);
   }
 
-  template <typename DataType> void write(int64_t trigger_time, int32_t msg_type, const DataType &data) {
-    auto frame = open_frame(trigger_time, msg_type, sizeof(DataType));
-    auto size = frame->copy_data(data);
-    close_frame(size);
-  }
-
-  template <typename DataType>
-  std::enable_if_t<kungfu::size_fixed_v<DataType>, void> write_as(int64_t trigger_time, const DataType &data,
-                                                                  uint32_t source, uint32_t dest) {
-    auto frame = open_frame(trigger_time, DataType::tag, sizeof(DataType));
+  template <typename T>
+  std::enable_if_t<size_fixed_v<T>> write_as(int64_t trigger_time, const T &data, uint32_t source, uint32_t dest) {
+    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
     auto size = frame->copy_data(data);
     frame->set_source(source);
     frame->set_dest(dest);
     close_frame(size);
   }
 
-  template <typename DataType>
-  std::enable_if_t<kungfu::size_unfixed_v<DataType>, void> write_as(int64_t trigger_time, const DataType &data,
-                                                                    uint32_t source, uint32_t dest) {
+  template <typename T>
+  std::enable_if_t<size_unfixed_v<T>> write_as(int64_t trigger_time, const T &data, uint32_t source, uint32_t dest) {
     auto s = data.to_string();
     auto size = s.length();
-    auto frame = open_frame(trigger_time, DataType::tag, s.length());
+    auto frame = open_frame(trigger_time, T::tag, size);
     memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
     frame->set_source(source);
     frame->set_dest(dest);
     close_frame(size);
   }
 
-  template <typename DataType>
-  std::enable_if_t<kungfu::size_unfixed_v<DataType>> write_with_time(int64_t gen_time, const DataType &data) {
-    assert(sizeof(frame_header) + sizeof(DataType) + sizeof(frame_header) <= journal_.page_->get_page_size());
-    auto frame_end = journal_.current_frame()->address() + sizeof(frame_header) + sizeof(DataType);
-    if (frame_end > journal_.page_->address_border()) {
-      mark(gen_time, longfist::types::PageEnd::tag);
-      journal_.load_next_page();
-    }
-    auto frame = journal_.current_frame();
-    frame->set_header_length();
-    frame->set_trigger_time(0);
-    frame->set_msg_type(DataType::tag);
-    frame->set_source(journal_.location_->uid);
-    frame->set_dest(journal_.dest_id_);
-
-    frame->copy_data(data);
-    frame->set_gen_time(gen_time);
-    frame->set_data_length(sizeof(DataType));
-    journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
-    journal_.next();
+  template <typename T>
+  std::enable_if_t<size_fixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
+    auto frame = open_frame(trigger_time, T::tag, sizeof(T));
+    auto size = frame->copy_data(data);
+    close_frame(size, gen_time);
   }
 
-  void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
+  template <typename T>
+  std::enable_if_t<size_unfixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
+    auto s = data.to_string();
+    auto size = s.length();
+    auto frame = open_frame(trigger_time, T::tag, size);
+    memcpy(const_cast<void *>(frame->data_address()), s.c_str(), size);
+    close_frame(size, gen_time);
+  }
 
 private:
   const uint64_t frame_id_base_;
