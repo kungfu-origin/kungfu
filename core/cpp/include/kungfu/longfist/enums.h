@@ -106,7 +106,27 @@ enum class BsFlag : int8_t { Unknown, Buy, Sell };
 
 inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << int8_t(t); }
 
-enum class Side : int8_t { Buy, Sell, Lock, Unlock, Exec, Drop };
+enum class Side : int8_t { 
+  Buy,//买入
+  Sell,//卖出
+  Lock,//锁仓
+  Unlock,//解锁
+  Exec,//行权
+  Drop,//放弃行权
+  Purchase,//申购
+  Redemption,//赎回
+  Split,//拆分
+  Merge,//合并
+  MarginTrade,//融资买入
+  ShortSell,//融券卖出
+  RepayMargin,//卖券还款
+  RepayStock,//买券还券
+  CashRepayMargin,//现金还款
+  StockRepayStock,//现券还券
+  SurplusStockTransfer,//余券划转
+  GuaranteeStockTransferIn,//担保品转入
+  GuaranteeStockTransferOut//担保品转出
+  };
 
 inline std::ostream &operator<<(std::ostream &os, Side t) { return os << int8_t(t); }
 
