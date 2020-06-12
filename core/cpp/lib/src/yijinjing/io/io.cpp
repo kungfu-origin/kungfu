@@ -190,20 +190,14 @@ socket_ptr io_device::bind_socket(const protocol &p, int timeout) {
   return s;
 }
 
-io_device_with_reply::io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy)
-    : io_device(std::move(home), low_latency, lazy) {
-  rep_sock_ = std::make_shared<nanomsg::socket>(protocol::REPLY);
-  rep_sock_->bind(url_factory_->make_path_bind(home_, protocol::REPLY));
-}
-
 io_device_master::io_device_master(data::location_ptr home, bool low_latency)
-    : io_device_with_reply(std::move(home), low_latency, false) {
+    : io_device(std::move(home), low_latency, false) {
   publisher_ = std::make_shared<nanomsg_publisher_master>(*this, is_low_latency());
   observer_ = std::make_shared<nanomsg_observer_master>(*this, is_low_latency());
 }
 
 io_device_client::io_device_client(data::location_ptr home, bool low_latency)
-    : io_device_with_reply(std::move(home), low_latency, true) {}
+    : io_device(std::move(home), low_latency, true) {}
 
 bool io_device_client::is_usable() {
   nanomsg_publisher_client publisher(*this, false);

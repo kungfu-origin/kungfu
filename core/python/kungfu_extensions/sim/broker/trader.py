@@ -31,7 +31,7 @@ class TraderSim(wc.Trader):
         wc.Trader.__init__(self, low_latency, locator, "sim", account_id)
         config = json.loads(json_config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
-        self.logger = create_logger("sim_td", "info", yjj.location(yjj.mode.LIVE, yjj.category.TD, "sim", account_id, locator))
+        self.logger = create_logger("sim_td", "info", yjj.location(lf.enums.mode.LIVE, lf.enums.category.TD, "sim", account_id, locator))
 
         self.ctx = DottedDict()
         self.ctx.orders = {}

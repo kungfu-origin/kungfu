@@ -8,6 +8,7 @@ from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.practice.coloop import KungfuEventLoop
 
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
 
@@ -27,9 +28,9 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     ctx.low_latency = low_latency if not replay else True
     ctx.replay = replay
     ctx.category = 'strategy'
-    mode = yjj.mode.REPLAY if ctx.replay else yjj.mode.LIVE
-    ctx.mode = yjj.get_mode_name(mode)
-    ctx.location = yjj.location(mode, yjj.category.STRATEGY, group, name, ctx.runtime_locator)
+    mode = lf.enums.mode.REPLAY if ctx.replay else lf.enums.mode.LIVE
+    ctx.mode = lf.enums.get_mode_name(mode)
+    ctx.location = yjj.location(mode, lf.enums.category.STRATEGY, group, name, ctx.runtime_locator)
     ctx.logger = create_logger(name, ctx.log_level, ctx.location)
 
     runner = Runner(ctx, mode)

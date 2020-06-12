@@ -2,7 +2,9 @@ import errno
 import glob
 import shutil
 from kungfu.yijinjing import *
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
+
 
 class Locator(yjj.locator):
     def __init__(self, home):
@@ -16,9 +18,9 @@ class Locator(yjj.locator):
         return os.getenv(name)
 
     def layout_dir(self, location, layout):
-        mode = yjj.get_mode_name(location.mode)
-        category = yjj.get_category_name(location.category)
-        p = os.path.join(self._home, category, location.group, location.name, yjj.get_layout_name(layout), mode)
+        mode = lf.enums.get_mode_name(location.mode)
+        category = lf.enums.get_category_name(location.category)
+        p = os.path.join(self._home, category, location.group, location.name, lf.enums.get_layout_name(layout), mode)
         try:
             os.makedirs(p)
         except OSError as e:
@@ -27,22 +29,22 @@ class Locator(yjj.locator):
         return p
 
     def layout_file(self, location, layout, name):
-        return os.path.join(self.layout_dir(location, layout), "{}.{}".format(name, yjj.get_layout_name(layout)))
+        return os.path.join(self.layout_dir(location, layout), "{}.{}".format(name, lf.enums.get_layout_name(layout)))
 
     def default_to_system_db(self, location, name):
-        file = os.path.join(self.layout_dir(location, yjj.layout.SQLITE), "{}.{}".format(name, yjj.get_layout_name(yjj.layout.SQLITE)))
+        file = os.path.join(self.layout_dir(location, lf.enums.layout.SQLITE), "{}.{}".format(name, lf.enums.get_layout_name(lf.enums.layout.SQLITE)))
         if os.path.exists(file):
             return file
         else:
-            system_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, "etc", "kungfu", self)
-            system_file = os.path.join(self.layout_dir(system_location, yjj.layout.SQLITE),
-                                       "{}.{}".format(name, yjj.get_layout_name(yjj.layout.SQLITE)))
+            system_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, "etc", "kungfu", self)
+            system_file = os.path.join(self.layout_dir(system_location, lf.enums.layout.SQLITE),
+                                       "{}.{}".format(name, lf.enums.get_layout_name(lf.enums.layout.SQLITE)))
             shutil.copy(system_file, file)
             return file
 
     def list_page_id(self, location, dest_id):
         page_ids = []
-        for journal in glob.glob(os.path.join(self.layout_dir(location, yjj.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
+        for journal in glob.glob(os.path.join(self.layout_dir(location, lf.enums.layout.JOURNAL), hex(dest_id)[2:] + '.*.journal')):
             match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])
             if match:
                 page_id = match.group(6)
@@ -64,9 +66,9 @@ class Locator(yjj.locator):
         return locations
 
     def list_location_dest(self, location):
-        search_path = os.path.join(self._home, yjj.get_category_name(location.category),
+        search_path = os.path.join(self._home, lf.enums.get_category_name(location.category),
                                    location.group, location.name, 'journal',
-                                   yjj.get_mode_name(location.mode), '*.journal')
+                                   lf.enums.get_mode_name(location.mode), '*.journal')
         readers = {}
         for journal in glob.glob(search_path):
             match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1:])

@@ -1,5 +1,6 @@
 import os
 import re
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
 os_sep = re.escape(os.sep)
@@ -47,19 +48,19 @@ LOCATION_UNAME_REGEX = r'(.*)/(.*)/(.*)/(.*)'
 LOCATION_PATTERN = re.compile(LOCATION_UNAME_REGEX)
 
 MODES = {
-    'live': yjj.mode.LIVE,
-    'data': yjj.mode.DATA,
-    'replay': yjj.mode.REPLAY,
-    'backtest': yjj.mode.BACKTEST,
-    '*': yjj.mode.LIVE
+    'live': lf.enums.mode.LIVE,
+    'data': lf.enums.mode.DATA,
+    'replay': lf.enums.mode.REPLAY,
+    'backtest': lf.enums.mode.BACKTEST,
+    '*': lf.enums.mode.LIVE
 }
 
 CATEGORIES = {
-    'md': yjj.category.MD,
-    'td': yjj.category.TD,
-    'strategy': yjj.category.STRATEGY,
-    'system': yjj.category.SYSTEM,
-    '*': yjj.category.SYSTEM
+    'md': lf.enums.category.MD,
+    'td': lf.enums.category.TD,
+    'strategy': lf.enums.category.STRATEGY,
+    'system': lf.enums.category.SYSTEM,
+    '*': lf.enums.category.SYSTEM
 }
 
 ARCHIVE_PREFIX = 'KFA'

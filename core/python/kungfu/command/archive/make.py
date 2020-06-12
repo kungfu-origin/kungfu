@@ -10,6 +10,7 @@ from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.sinks.archive import ArchiveSink
 from kungfu.yijinjing.utils import prune_layout_files
 
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
 
@@ -79,7 +80,7 @@ def export_logs(ctx, src_dir, dst_dir):
 
 def make_archive(ctx, archive_format, archive_date):
     archive_locator = Locator(archive_date)
-    index_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'journal', 'index', archive_locator)
+    index_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'journal', 'index', archive_locator)
     io_device = yjj.io_device(index_location, True, True)
     session_builder = yjj.session_builder(io_device)
     session_builder.rebuild_index_db()

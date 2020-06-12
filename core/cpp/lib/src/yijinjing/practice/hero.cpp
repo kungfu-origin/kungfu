@@ -21,7 +21,7 @@ using namespace kungfu::yijinjing::nanomsg;
 
 namespace kungfu::yijinjing::practice {
 
-hero::hero(io_device_with_reply_ptr io_device)
+hero::hero(io_device_ptr io_device)
     : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
@@ -71,7 +71,7 @@ void hero::set_end_time(int64_t end_time) { end_time_ = end_time; }
 
 const locator_ptr &hero::get_locator() const { return io_device_->get_locator(); }
 
-io_device_with_reply_ptr hero::get_io_device() const { return io_device_; }
+io_device_ptr hero::get_io_device() const { return io_device_; }
 
 const location_ptr &hero::get_home() const { return get_io_device()->get_home(); }
 
@@ -244,20 +244,13 @@ void hero::produce(const rx::subscriber<event_ptr> &sb) {
 }
 
 bool hero::drain(const rx::subscriber<event_ptr> &sb) {
-  if (io_device_->get_home()->mode == mode::LIVE) {
-    if (io_device_->get_observer()->wait()) {
-      const std::string &notice = io_device_->get_observer()->get_notice();
-      now_ = time::now_in_nano();
-      if (notice.length() > 2) {
-        sb.on_next(std::make_shared<nanomsg_json>(notice));
-      } else {
-        on_notify();
-      }
-    }
-    if (io_device_->get_rep_sock()->recv() > 0) {
-      const std::string &msg = io_device_->get_rep_sock()->last_message();
-      now_ = time::now_in_nano();
-      sb.on_next(std::make_shared<nanomsg_json>(msg));
+  if (io_device_->get_home()->mode == mode::LIVE and io_device_->get_observer()->wait()) {
+    const std::string &notice = io_device_->get_observer()->get_notice();
+    now_ = time::now_in_nano();
+    if (notice.length() > 2) {
+      sb.on_next(std::make_shared<nanomsg_json>(notice));
+    } else {
+      on_notify();
     }
   }
   while (live_ and reader_->data_available()) {

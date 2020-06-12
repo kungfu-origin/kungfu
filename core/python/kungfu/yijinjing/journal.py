@@ -1,8 +1,11 @@
 import glob
 import json
 import pandas
+
 from kungfu.yijinjing import *
+
 from pykungfu.longfist.types import *
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
 
@@ -54,7 +57,7 @@ def find_sessions(ctx):
     sessions = session_finder.find_sessions_for(ctx.app_location) if for_app else session_finder.find_sessions()
     for session in sessions:
         sessions_df.loc[len(sessions_df)] = [
-            len(sessions_df) + 1, yjj.get_mode_name(session.mode), yjj.get_category_name(session.category), session.group, session.name,
+            len(sessions_df) + 1, lf.enums.get_mode_name(session.mode), lf.enums.get_category_name(session.category), session.group, session.name,
             session.begin_time, session.end_time, session.end_time > 0,
             session.end_time - session.begin_time
         ]

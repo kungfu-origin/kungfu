@@ -160,32 +160,6 @@ void bind(pybind11::module &&m) {
   m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
   m.def("get_page_path", &page::get_page_path);
 
-  py::enum_<mode>(m, "mode", py::arithmetic(), "Kungfu Run Mode")
-      .value("LIVE", mode::LIVE)
-      .value("DATA", mode::DATA)
-      .value("REPLAY", mode::REPLAY)
-      .value("BACKTEST", mode::BACKTEST)
-      .export_values();
-  m.def("get_mode_name", &get_mode_name);
-  m.def("get_mode_by_name", &get_mode_by_name);
-
-  py::enum_<category>(m, "category", py::arithmetic(), "Kungfu Data Category")
-      .value("MD", category::MD)
-      .value("TD", category::TD)
-      .value("STRATEGY", category::STRATEGY)
-      .value("SYSTEM", category::SYSTEM)
-      .export_values();
-  m.def("get_category_name", &get_category_name);
-  m.def("get_category_by_name", &get_category_by_name);
-
-  py::enum_<layout>(m, "layout", py::arithmetic(), "Kungfu Data Layout")
-      .value("JOURNAL", layout::JOURNAL)
-      .value("SQLITE", layout::SQLITE)
-      .value("NANOMSG", layout::NANOMSG)
-      .value("LOG", layout::LOG)
-      .export_values();
-  m.def("get_layout_name", &get_layout_name);
-
   py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
       .value("REPLY", nanomsg::protocol::REPLY)
       .value("REQUEST", nanomsg::protocol::REQUEST)
@@ -307,9 +281,8 @@ void bind(pybind11::module &&m) {
       .def("__plus__", &assemble::operator+)
       .def("__rshift__", &assemble::operator>>);
 
-  py::class_<io_device, io_device_ptr> io_device(m, "io_device");
-  io_device
-      .def(py::init<location_ptr, bool, bool>(), py::arg("location"), py::arg("low_latency") = false,
+  py::class_<io_device, io_device_ptr>(m, "io_device")
+      .def(py::init<location_ptr, bool, bool>(), py::arg("home"), py::arg("low_latency") = false,
            py::arg("lazy") = true)
       .def_property_readonly("publisher", &io_device::get_publisher)
       .def_property_readonly("observer", &io_device::get_observer)
@@ -323,17 +296,14 @@ void bind(pybind11::module &&m) {
       .def("connect_socket", &io_device::connect_socket, py::arg("location"), py::arg("protocol"),
            py::arg("timeout") = 0);
 
-  py::class_<io_device_with_reply, io_device_with_reply_ptr> io_device_with_reply(m, "io_device_with_reply", io_device);
-  io_device_with_reply.def(py::init<location_ptr, bool, bool>());
+  py::class_<io_device_master, io_device, io_device_master_ptr>(m, "io_device_master")
+      .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency"));
 
-  py::class_<io_device_master, io_device_master_ptr>(m, "io_device_master", io_device_with_reply)
-      .def(py::init<location_ptr, bool>());
+  py::class_<io_device_client, io_device, io_device_client_ptr>(m, "io_device_client")
+      .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency"));
 
-  py::class_<io_device_client, io_device_client_ptr>(m, "io_device_client", io_device_with_reply)
-      .def(py::init<location_ptr, bool>());
-
-  py::class_<io_device_console>(m, "io_device_console", io_device)
-      .def(py::init<location_ptr, uint32_t, uint32_t>())
+  py::class_<io_device_console, io_device, io_device_console_ptr>(m, "io_device_console")
+      .def(py::init<location_ptr, uint32_t, uint32_t>(), py::arg("home"), py::arg("width"), py::arg("height"))
       .def("trace", &io_device_console::trace);
 
   py::class_<session_finder, std::shared_ptr<session_finder>>(m, "session_finder")

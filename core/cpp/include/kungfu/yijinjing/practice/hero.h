@@ -14,7 +14,7 @@
 namespace kungfu::yijinjing::practice {
 class hero : public resource {
 public:
-  explicit hero(yijinjing::io_device_with_reply_ptr io_device);
+  explicit hero(yijinjing::io_device_ptr io_device);
 
   virtual ~hero();
 
@@ -38,7 +38,7 @@ public:
 
   [[nodiscard]] const data::locator_ptr &get_locator() const;
 
-  [[nodiscard]] yijinjing::io_device_with_reply_ptr get_io_device() const;
+  [[nodiscard]] yijinjing::io_device_ptr get_io_device() const;
 
   const yijinjing::data::location_ptr &get_home() const;
 
@@ -135,7 +135,7 @@ protected:
   };
 
 private:
-  yijinjing::io_device_with_reply_ptr io_device_;
+  yijinjing::io_device_ptr io_device_;
   rx::composite_subscription cs_;
   int64_t now_;
   volatile bool continual_ = true;

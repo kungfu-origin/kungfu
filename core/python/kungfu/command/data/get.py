@@ -11,7 +11,7 @@ from pykungfu import yijinjing as yjj
 @click.pass_context
 def get(ctx, source, name):
     pass_ctx_from_parent(ctx)
-    # config = yjj.location(yjj.mode.LIVE, yjj.category.MD, source, source, ctx.runtime_locator).to(lf.types.Config())
+    # config = yjj.location(lf.enums.mode.LIVE, lf.enums.category.MD, source, source, ctx.runtime_locator).to(lf.types.Config())
     # config = yjj.profile(ctx.runtime_locator).get(config)
     ext = EXTENSION_REGISTRY_DATA.get_extension(source)(ctx)
     ext.run()

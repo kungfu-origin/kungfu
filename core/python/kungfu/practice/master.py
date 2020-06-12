@@ -8,6 +8,7 @@ from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing import log
 from kungfu.wingchun import default_commissions
 from kungfu.wingchun.calendar import Calendar
+
 from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
@@ -66,8 +67,8 @@ class Master(yjj.master):
 
     def on_register(self, event, register_data):
         pid = register_data.pid
-        category = yjj.get_category_name(register_data.category)
-        mode = yjj.get_mode_name(register_data.mode)
+        category = lf.enums.get_category_name(register_data.category)
+        mode = lf.enums.get_mode_name(register_data.mode)
         uname = f'{category}/{register_data.group}/{register_data.name}/{mode}'
         self.ctx.logger.info(f'app {pid} {uname} checking in')
         if pid not in self.ctx.apprentices:

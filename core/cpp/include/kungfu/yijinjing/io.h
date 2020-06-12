@@ -77,26 +77,14 @@ protected:
 
 DECLARE_PTR(io_device)
 
-class io_device_with_reply : public io_device {
-public:
-  io_device_with_reply(data::location_ptr home, bool low_latency, bool lazy);
-
-  [[nodiscard]] nanomsg::socket_ptr get_rep_sock() const { return rep_sock_; }
-
-protected:
-  nanomsg::socket_ptr rep_sock_;
-};
-
-DECLARE_PTR(io_device_with_reply)
-
-class io_device_master : public io_device_with_reply {
+class io_device_master : public io_device {
 public:
   io_device_master(data::location_ptr home, bool low_latency);
 };
 
 DECLARE_PTR(io_device_master)
 
-class io_device_client : public io_device_with_reply {
+class io_device_client : public io_device {
 public:
   io_device_client(data::location_ptr home, bool low_latency);
 

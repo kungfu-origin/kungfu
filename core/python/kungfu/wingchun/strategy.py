@@ -10,6 +10,7 @@ from kungfu.wingchun import constants
 from kungfu.wingchun import utils
 from kungfu.wingchun.constants import *
 
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 from pykungfu import wingchun as wc
 
@@ -61,7 +62,7 @@ class Strategy(wc.Strategy):
             func(*args)
 
     def __init_book(self):
-        location = yjj.location(yjj.mode.LIVE, yjj.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.runtime_locator)
+        location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.runtime_locator)
         self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     def __add_timer(self, nanotime, callback):
@@ -80,7 +81,7 @@ class Strategy(wc.Strategy):
         self.ctx.wc_context.add_account(source, account, cash_limit)
 
     def __get_account_book(self, source, account):
-        location = yjj.location(yjj.mode.LIVE, yjj.category.TD, source, account, self.ctx.runtime_locator)
+        location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.TD, source, account, self.ctx.runtime_locator)
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume,

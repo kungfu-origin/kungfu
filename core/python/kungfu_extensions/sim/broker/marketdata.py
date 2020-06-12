@@ -13,7 +13,7 @@ class MarketDataSim(wc.MarketData):
         wc.MarketData.__init__(self, low_latency, locator, "sim")
         self.config = MakerConfig(base=200.0, bound=1000, samples=1000, variation=4, randseed=6)
         self.orderbooks = {}
-        self.logger = create_logger("sim_md", "info", yjj.location(yjj.mode.LIVE, yjj.category.MD, "sim", "sim", locator))
+        self.logger = create_logger("sim_md", "info", yjj.location(lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", locator))
 
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())

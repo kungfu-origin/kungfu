@@ -4,6 +4,7 @@ import os
 import shutil
 from kungfu.yijinjing import LAYOUT_LOCATION_PATTERN
 from kungfu.command import kfc, pass_ctx_from_parent
+from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
 
@@ -19,7 +20,7 @@ def migrate_to_2_3(ctx):
         print(f'runtime {ctx.runtime_dir} is not empty')
 
     for category_value in yjj.category.__members__:
-        category_name = yjj.get_category_name(yjj.category.__members__[category_value])
+        category_name = lf.enums.get_category_name(yjj.category.__members__[category_value])
         category_dir = os.path.join(ctx.home, category_name)
         if os.path.exists(category_dir):
             shutil.move(category_dir, ctx.runtime_dir)

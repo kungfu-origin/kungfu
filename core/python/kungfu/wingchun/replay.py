@@ -1,15 +1,16 @@
 import sys
 import click
+from tabulate import tabulate
 from kungfu.yijinjing import time as kft
 from kungfu.yijinjing import journal as kfj
-from pykungfu import yijinjing as yjj
 
-from tabulate import tabulate
+from pykungfu import longfist as lf
+from pykungfu import yijinjing as yjj
 
 
 def setup(ctx, session_id, cmd, instance):
     home = instance.home
-    ctx.app_location = yjj.location(yjj.mode.LIVE, home.category, home.group, home.name, ctx.runtime_locator)
+    ctx.app_location = yjj.location(lf.enums.mode.LIVE, home.category, home.group, home.name, ctx.runtime_locator)
     ctx.mode = 'live'  # to get live data
     if not session_id:
         all_sessions = kfj.find_sessions(ctx)

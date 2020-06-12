@@ -1,10 +1,11 @@
 import os
 import sys
 import pkgutil
-from pykungfu import yijinjing as yjj
 import traceback
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.log import create_logger
+from pykungfu import longfist as lf
+from pykungfu import yijinjing as yjj
 
 
 kf_home = os.getenv('KF_HOME')
@@ -16,7 +17,7 @@ if not kfext_log_level:
 kfext_logger = None
 if kf_home:
     kfext_log_locator = Locator(os.path.join(kf_home, 'runtime'))
-    kfext_log_location = yjj.location(yjj.mode.LIVE, yjj.category.SYSTEM, 'service', 'extensions', kfext_log_locator)
+    kfext_log_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'service', 'extensions', kfext_log_locator)
     kfext_logger = create_logger('extensions', kfext_log_level, kfext_log_location)
 else:
     kfext_logger = create_logger('extensions', kfext_log_level, None)

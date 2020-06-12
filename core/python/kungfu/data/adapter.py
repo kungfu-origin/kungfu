@@ -40,7 +40,7 @@ class Adapter:
             if writer_key not in writers:
                 locator = Locator(self.ctx.dataset_dir)
                 locators[writer_key] = locator
-                home = yjj.location(yjj.mode.DATA, yjj.get_category_by_name(category), group, name, locator)
+                home = yjj.location(lf.enums.mode.DATA, lf.enums.get_category_by_name(category), group, name, locator)
                 writers[writer_key] = yjj.writer(home, 0, True, sink.publisher)
             writer = writers[writer_key]
             data_type = self.named_types[type_name]
@@ -51,14 +51,3 @@ class Adapter:
                     json_text = '{' + ','.join([f'"{t[0]}":{t[1]}' for t in zip(header, row)]) + '}'
                     data = data_type(json_text)
                     writer.write(0, data)
-
-
-class NoopPublisher(yjj.publisher):
-    def __init__(self):
-        yjj.publisher.__init__(self)
-
-    def notify(self):
-        return 0
-
-    def publish(self, msg):
-        return 0

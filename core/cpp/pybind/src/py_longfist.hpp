@@ -101,6 +101,32 @@ void bind(pybind11::module &&m) {
   using namespace kungfu::longfist::enums;
   auto m_enums = m.def_submodule("enums");
 
+  py::enum_<mode>(m_enums, "mode", py::arithmetic(), "Kungfu Run Mode")
+      .value("LIVE", mode::LIVE)
+      .value("DATA", mode::DATA)
+      .value("REPLAY", mode::REPLAY)
+      .value("BACKTEST", mode::BACKTEST)
+      .export_values();
+  m_enums.def("get_mode_name", &get_mode_name);
+  m_enums.def("get_mode_by_name", &get_mode_by_name);
+
+  py::enum_<category>(m_enums, "category", py::arithmetic(), "Kungfu Data Category")
+      .value("MD", category::MD)
+      .value("TD", category::TD)
+      .value("STRATEGY", category::STRATEGY)
+      .value("SYSTEM", category::SYSTEM)
+      .export_values();
+  m_enums.def("get_category_name", &get_category_name);
+  m_enums.def("get_category_by_name", &get_category_by_name);
+
+  py::enum_<layout>(m_enums, "layout", py::arithmetic(), "Kungfu Data Layout")
+      .value("JOURNAL", layout::JOURNAL)
+      .value("SQLITE", layout::SQLITE)
+      .value("NANOMSG", layout::NANOMSG)
+      .value("LOG", layout::LOG)
+      .export_values();
+  m_enums.def("get_layout_name", &get_layout_name);
+
   py::enum_<InstrumentType>(m_enums, "InstrumentType", py::arithmetic())
       .value("Unknown", InstrumentType::Unknown)
       .value("Stock", InstrumentType::Stock)

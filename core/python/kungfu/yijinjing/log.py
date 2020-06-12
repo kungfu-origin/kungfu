@@ -1,7 +1,10 @@
 import logging
-import os, sys, platform
-from pykungfu import yijinjing as yjj
+import sys
+import platform
 from kungfu.yijinjing.time import *
+
+from pykungfu import longfist as lf
+from pykungfu import yijinjing as yjj
 
 LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
 LOG_FILE_DATEEXT_FORMAT = '%Y-%m-%d'
@@ -113,7 +116,7 @@ def create_logger(name, level, location):
     if location is not None:
         log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
         log_name = '{}_py_{}'.format(name, log_dateext)
-        log_path = location.locator.layout_file(location, yjj.layout.LOG, log_name)
+        log_path = location.locator.layout_file(location, lf.enums.layout.LOG, log_name)
 
         file_handler = logging.FileHandler(log_path)
         file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
