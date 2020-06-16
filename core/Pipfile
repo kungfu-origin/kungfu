@@ -29,5 +29,3 @@ tushare = "==1.2.59"
 rqalpha = "==4.1.2"
 backtrader = "==1.9.75.123"
 
-[dev-packages]
-clang-format = "==9.0.0"
