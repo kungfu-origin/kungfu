@@ -27,14 +27,14 @@ public:
   void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override{};
 };
 
-class single_sink : public sink {
+class copy_sink : public sink {
 public:
-  explicit single_sink(data::locator_ptr locator);
+  explicit copy_sink(data::locator_ptr locator);
   void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override;
 
 private:
   data::locator_ptr locator_;
-  std::unordered_map<uint32_t, writer_ptr> writers_ = {};
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writers_ = {};
 };
 
 class assemble {

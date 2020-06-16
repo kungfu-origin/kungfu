@@ -266,9 +266,9 @@ void bind(pybind11::module &&m) {
 
   py::class_<null_sink, sink, std::shared_ptr<null_sink>>(m, "null_sink").def(py::init<>());
 
-  py::class_<single_sink, sink, std::shared_ptr<single_sink>>(m, "single_sink")
+  py::class_<copy_sink, sink, std::shared_ptr<copy_sink>>(m, "copy_sink")
       .def(py::init<data::locator_ptr>())
-      .def("put", &single_sink::put);
+      .def("put", &copy_sink::put);
 
   py::class_<assemble, assemble_ptr>(m, "assemble")
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,

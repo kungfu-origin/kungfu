@@ -22,14 +22,16 @@ sink::sink() : publisher_(std::make_shared<noop_publisher>()) {}
 
 publisher_ptr sink::get_publisher() { return publisher_; }
 
-single_sink::single_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
+copy_sink::copy_sink(data::locator_ptr locator) : sink(), locator_(std::move(locator)) {}
 
-void single_sink::put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
-  if (writers_.find(dest_id) == writers_.end()) {
+void copy_sink::put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) {
+  auto pair = writers_.try_emplace(location->uid);
+  auto &writers = pair.first->second;
+  if (writers.find(dest_id) == writers.end()) {
     auto target_location = data::location::make_shared(*location, locator_);
-    writers_.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, get_publisher()));
+    writers.try_emplace(dest_id, std::make_shared<writer>(target_location, dest_id, true, get_publisher()));
   }
-  writers_.at(dest_id)->copy_frame(frame);
+  writers.at(dest_id)->copy_frame(frame);
 }
 
 assemble::assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode, const std::string &category,
