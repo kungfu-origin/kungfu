@@ -37,6 +37,10 @@ public:
   //@param bar               bar 数据
   virtual void on_bar(Context_ptr &context, const longfist::types::Bar &bar){};
 
+  // top of book 数据更新回调
+  //@param top_of_book   top_of_book 数据
+  virtual void on_top_of_book(Context_ptr &context, const longfist::types::TopOfBook &top_of_book){};
+
   //逐笔委托更新回调
   //@param entrust           逐笔委托数据
   virtual void on_entrust(Context_ptr &context, const longfist::types::Entrust &entrust){};

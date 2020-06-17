@@ -115,6 +115,12 @@ void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int
   Quote &quote = get_writer(0)->open_data<Quote>(0);
   from_xtp(*market_data, quote);
   get_writer(0)->close_data();
+  if (max_bid1_count + max_ask1_count != 0)
+  {
+    TopOfBook &top_of_book = get_writer(0)->open_data<TopOfBook>(0);
+    from_xtp(*market_data, bid1_qty, bid1_count, max_bid1_count, ask1_qty, ask1_count, max_ask1_count, top_of_book);
+    get_writer(0)->close_data();
+  } 
 }
 
 void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {

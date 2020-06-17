@@ -46,6 +46,7 @@ class Strategy(wc.Strategy):
         self._on_trading_day = getattr(impl, "on_trading_day", lambda ctx, trading_day: None)
         self._on_bar = getattr(impl, "on_bar", lambda ctx, bar: None)
         self._on_quote = getattr(impl, 'on_quote', lambda ctx, quote: None)
+        self._on_top_of_book = getattr(impl, 'on_top_of_book', lambda ctx, top_of_book: None)
         self._on_entrust = getattr(impl, 'on_entrust', lambda ctx, entrust: None)
         self._on_transaction = getattr(impl, "on_transaction", lambda ctx, transaction: None)
         self._on_order = getattr(impl, 'on_order', lambda ctx, order: None)
@@ -99,6 +100,9 @@ class Strategy(wc.Strategy):
 
     def on_quote(self, wc_context, quote):
         self._on_quote(self.ctx, quote)
+
+    def on_top_of_book(self, wc_context, top_of_book):
+        self._on_top_of_book(self.ctx, top_of_book)
 
     def on_bar(self, wc_context, bar):
         self._on_bar(self.ctx, bar)

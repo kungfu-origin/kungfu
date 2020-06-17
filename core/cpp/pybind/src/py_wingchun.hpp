@@ -146,6 +146,10 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar);
   }
 
+  void on_top_of_book(strategy::Context_ptr &context, const TopOfBook &top_of_book) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_top_of_book, context, top_of_book);
+  }
+
   void on_entrust(strategy::Context_ptr &context, const Entrust &entrust) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust);
   }
@@ -302,6 +306,7 @@ void bind(pybind11::module &&m) {
       .def("on_trading_day", &strategy::Strategy::on_trading_day)
       .def("on_quote", &strategy::Strategy::on_quote)
       .def("on_bar", &strategy::Strategy::on_bar)
+      .def("on_top_of_book", &strategy::Strategy::on_top_of_book)
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)

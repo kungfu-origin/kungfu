@@ -298,6 +298,33 @@ KF_DEFINE_PACK_TYPE(                                                 //
     (int32_t, tick_count) //区间有效tick数
 );
 
+KF_DEFINE_PACK_TYPE(                                             //
+    TopOfBook, 111, PK(instrument_id, exchange_id), PERPETUAL(), //
+    (kungfu::array<char, SOURCE_ID_LEN>, source_id),             //柜台ID
+    (kungfu::array<char, DATE_LEN>, trading_day),                //交易日
+
+    (int64_t, data_time),                                        //数据生成时间
+
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),     //合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         //交易所ID
+
+    (InstrumentType, instrument_type),                           //合约类型
+
+    (double, last_price),                                        //最新价
+    (double, bid_price1),                                        //买一价
+    (int64_t, bid_volume1),                                      //买一量
+    (double, ask_price1),                                        //卖一价
+    (int64_t, ask_volume1),                                      //卖一量
+
+    (int64_t, bid_count1),                                       //买一有效委托笔数
+    (int64_t, max_bid_count1),                                   //买一队列总委托笔数
+    (int64_t, ask_count1),                                       //卖一有效委托笔数
+    (int64_t, max_ask_count1),                                   //卖一队列总委托笔数
+
+    (kungfu::array<int64_t, 50>, bid_qty1),                      //买一队列排队列表
+    (kungfu::array<int64_t, 50>, ask_qty1)                       //卖一队列排队列表
+);
+
 KF_DEFINE_PACK_TYPE(                                       //
     OrderInput, 201, PK(order_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                  //订单ID
