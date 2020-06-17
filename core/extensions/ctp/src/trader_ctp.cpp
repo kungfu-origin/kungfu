@@ -322,11 +322,11 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
-      writer->write(now(), Position::tag, position);
+      writer->write(now(), position);
     }
     for (const auto &kv : short_position_map_) {
       const auto &position = kv.second;
-      writer->write(now(), Position::tag, position);
+      writer->write(now(), position);
     }
     PositionEnd &end = writer->open_data<PositionEnd>(now());
     end.holder_uid = get_io_device()->get_home()->uid;
