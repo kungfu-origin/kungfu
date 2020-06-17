@@ -1,5 +1,5 @@
 [[source]]
-url = "http://mirrors.aliyun.com/pypi/simple/"
+url = "http://pypi.taurusai.com/simple/"
 verify_ssl = false
 name = "pypi"
 
@@ -26,6 +26,3 @@ plotly = "==4.0.0"
 tushare = "==1.2.39"
 wcwidth = "==0.2.2"
 PyYAML = "==5.3.1"
-
-[dev-packages]
-clang-format = "==9.0.0"
