@@ -56,6 +56,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   CommissionStore::Init(env, exports);
   Frame::Init(env, exports);
   Reader::Init(env, exports);
+  Assemble::Init(env, exports);
   IODevice::Init(env, exports);
   DataTable::Init(env, exports);
   Watcher::Init(env, exports);

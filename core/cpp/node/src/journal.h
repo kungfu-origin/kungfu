@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <kungfu/yijinjing/io.h>
+#include <kungfu/yijinjing/journal/assemble.h>
 #include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::node {
@@ -29,6 +30,8 @@ public:
 
   Napi::Value Dest(const Napi::CallbackInfo &info);
 
+  Napi::Value Data(const Napi::CallbackInfo &info);
+
   Napi::Value ToString(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
@@ -42,6 +45,7 @@ private:
   void SetFrame(yijinjing::journal::frame_ptr frame);
 
   friend class Reader;
+  friend class Assemble;
 };
 
 class Reader : public Napi::ObjectWrap<Reader>, public yijinjing::journal::reader {
@@ -69,6 +73,26 @@ public:
 private:
   yijinjing::io_device_ptr io_device_;
   static Napi::FunctionReference constructor;
+};
+
+class Assemble : public Napi::ObjectWrap<Assemble>, public yijinjing::journal::assemble {
+public:
+  explicit Assemble(const Napi::CallbackInfo &info);
+
+  Napi::Value CurrentFrame(const Napi::CallbackInfo &info);
+
+  Napi::Value SeekToTime(const Napi::CallbackInfo &info);
+
+  Napi::Value DataAvailable(const Napi::CallbackInfo &info);
+
+  Napi::Value Next(const Napi::CallbackInfo &info);
+
+  static void Init(Napi::Env env, Napi::Object exports);
+
+private:
+  static Napi::FunctionReference constructor;
+
+  static std::vector<yijinjing::data::locator_ptr> ExtractLocator(const Napi::CallbackInfo &info);
 };
 } // namespace kungfu::node
 #endif // KUNGFU_NODE_JOURNAL_H

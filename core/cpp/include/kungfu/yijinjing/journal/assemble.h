@@ -48,20 +48,24 @@ public:
 
   void operator>>(const sink_ptr &sink);
 
+  bool data_available();
+
+  void next();
+
+  frame_ptr current_frame();
+
+protected:
+  std::vector<reader_ptr> readers_ = {};
+  reader_ptr current_reader_ = {};
+
 private:
   const std::string &mode_;
   const std::string &category_;
   const std::string &group_;
   const std::string &name_;
-  bool used_ = false;
   publisher_ptr publisher_;
   std::vector<data::locator_ptr> locators_ = {};
-  std::vector<reader_ptr> readers_ = {};
-  reader_ptr current_reader_ = {};
-  std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps_;
 
-  bool data_available();
-  void next();
   void sort();
 };
 DECLARE_PTR(assemble)

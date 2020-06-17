@@ -4,9 +4,11 @@
 
 #include "journal.h"
 #include "io.h"
+#include "operators.h"
 
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::node {
 int64_t GetTimestamp(Napi::Value arg) {
@@ -42,17 +44,32 @@ Napi::Value Frame::Source(const Napi::CallbackInfo &info) { return Napi::Number:
 
 Napi::Value Frame::Dest(const Napi::CallbackInfo &info) { return Napi::Number::New(info.Env(), frame_->dest()); }
 
+Napi::Value Frame::Data(const Napi::CallbackInfo &info) {
+  auto result = Napi::Object::New(info.Env());
+  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    if (frame_->msg_type() == DataType::tag) {
+      serialize::JsGet{}(result, frame_->data<DataType>());
+    }
+  });
+  return result;
+}
+
 Napi::Value Frame::ToString(const Napi::CallbackInfo &info) { return Napi::String::New(info.Env(), "Frame.js"); }
 
 void Frame::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
-  Napi::Function func =
-      DefineClass(env, "Frame",
-                  {InstanceMethod("dataLength", &Frame::DataLength), InstanceMethod("genTime", &Frame::GenTime),
-                   InstanceMethod("triggerTime", &Frame::TriggerTime), InstanceMethod("msgType", &Frame::MsgType),
-                   InstanceMethod("source", &Frame::Source), InstanceMethod("dest", &Frame::Dest),
-                   InstanceMethod("toString", &Frame::ToString)});
+  Napi::Function func = DefineClass(env, "Frame",
+                                    {
+                                        InstanceMethod("dataLength", &Frame::DataLength),   //
+                                        InstanceMethod("genTime", &Frame::GenTime),         //
+                                        InstanceMethod("triggerTime", &Frame::TriggerTime), //
+                                        InstanceMethod("msgType", &Frame::MsgType),         //
+                                        InstanceMethod("source", &Frame::Source),           //
+                                        InstanceMethod("dest", &Frame::Dest),               //
+                                        InstanceMethod("toString", &Frame::ToString)        //
+                                    });
 
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
@@ -112,13 +129,13 @@ void Reader::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "Reader",
                                     {
-                                        InstanceMethod("toString", &Reader::ToString),
-                                        InstanceMethod("currentFrame", &Reader::CurrentFrame),
-                                        InstanceMethod("seekToTime", &Reader::SeekToTime),
-                                        InstanceMethod("dataAvailable", &Reader::DataAvailable),
-                                        InstanceMethod("next", &Reader::Next),
-                                        InstanceMethod("join", &Reader::Join),
-                                        InstanceMethod("disjoin", &Reader::Disjoin),
+                                        InstanceMethod("toString", &Reader::ToString),           //
+                                        InstanceMethod("currentFrame", &Reader::CurrentFrame),   //
+                                        InstanceMethod("seekToTime", &Reader::SeekToTime),       //
+                                        InstanceMethod("dataAvailable", &Reader::DataAvailable), //
+                                        InstanceMethod("next", &Reader::Next),                   //
+                                        InstanceMethod("join", &Reader::Join),                   //
+                                        InstanceMethod("disjoin", &Reader::Disjoin),             //
                                     });
 
   constructor = Napi::Persistent(func);
@@ -128,4 +145,59 @@ void Reader::Init(Napi::Env env, Napi::Object exports) {
 }
 
 Napi::Value Reader::NewInstance(const Napi::Value arg) { return constructor.New({arg}); }
+
+Napi::FunctionReference Assemble::constructor = {};
+
+Assemble::Assemble(const Napi::CallbackInfo &info) : ObjectWrap(info), assemble(ExtractLocator(info)) {}
+
+Napi::Value Assemble::CurrentFrame(const Napi::CallbackInfo &info) {
+  auto frame = Frame::NewInstance(info.This());
+  Napi::ObjectWrap<Frame>::Unwrap(frame.As<Napi::Object>())->SetFrame(current_frame());
+  return frame;
+}
+
+Napi::Value Assemble::SeekToTime(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 0, &Napi::Value::IsBigInt)) {
+    return Napi::Value();
+  }
+  auto time = GetBigInt(info, 0);
+  for (auto &reader : readers_) {
+    reader->seek_to_time(time);
+  }
+  return Napi::Value();
+}
+
+Napi::Value Assemble::DataAvailable(const Napi::CallbackInfo &info) {
+  return Napi::Boolean::New(info.Env(), data_available());
+}
+
+Napi::Value Assemble::Next(const Napi::CallbackInfo &info) {
+  next();
+  return Napi::Value();
+}
+
+void Assemble::Init(Napi::Env env, Napi::Object exports) {
+  Napi::HandleScope scope(env);
+
+  Napi::Function func = DefineClass(env, "Assemble",
+                                    {
+                                        InstanceMethod("currentFrame", &Assemble::CurrentFrame),   //
+                                        InstanceMethod("seekToTime", &Assemble::SeekToTime),       //
+                                        InstanceMethod("dataAvailable", &Assemble::DataAvailable), //
+                                        InstanceMethod("next", &Assemble::Next),                   //
+                                    });
+
+  constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
+
+  exports.Set("Assemble", func);
+}
+
+std::vector<locator_ptr> Assemble::ExtractLocator(const Napi::CallbackInfo &info) {
+  std::vector<locator_ptr> result = {};
+  for (int i = 0; i < info.Length(); i++) {
+    result.push_back(IODevice::GetLocator(info, i));
+  }
+  return result;
+}
 } // namespace kungfu::node

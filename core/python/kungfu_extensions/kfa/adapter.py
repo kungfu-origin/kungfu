@@ -8,5 +8,5 @@ class KfaAdapter(Adapter):
         super().__init__(ctx)
 
     def write_data(self):
-        with open_csv_sink(self.ctx, self.tagged_types) as sink:
-            yjj.assemble([self.ctx.runtime_locator]) >> sink
+        with open_csv_sink(self.ctx, self.tagged_types) as csv_sink:
+            yjj.assemble([self.ctx.runtime_locator]) >> csv_sink

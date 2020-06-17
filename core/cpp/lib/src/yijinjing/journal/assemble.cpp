@@ -63,14 +63,10 @@ assemble assemble::operator+(assemble &other) {
 }
 
 void assemble::operator>>(const sink_ptr &sink) {
-  if (used_) {
-    throw assemble_exception("assemble has already been used");
-  }
-  used_ = true;
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
     auto page = current_reader_->current_page();
-    sink->put(page->get_location(), page->get_dest_id(), current_reader_->current_frame());
+    sink->put(page->get_location(), page->get_dest_id(), current_frame());
     next();
   }
 }
@@ -90,6 +86,8 @@ void assemble::next() {
   }
   sort();
 }
+
+frame_ptr assemble::current_frame() { return current_reader_->current_frame(); }
 
 void assemble::sort() {
   int64_t min_time = INT64_MAX;

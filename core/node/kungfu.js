@@ -61,6 +61,16 @@ exports.formatStringToHashHex = bindings.formatStringToHashHex;
 
 exports.parseTime = bindings.parseTime;
 
+exports.Assemble = function (arg) {
+    if (Array.isArray(arg)) {
+        return new bindings.Assemble(arg.map(function (home) {
+            return locator(home);
+        }));
+    } else {
+        return new bindings.Assemble([locator(arg)]);
+    }
+};
+
 exports.IODevice = function (category, group, name, mode, home) {
     return new bindings.IODevice(category, group, name, mode, locator(home));
 };
