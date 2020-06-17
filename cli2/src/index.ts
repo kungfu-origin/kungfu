@@ -8,6 +8,7 @@ import { removeAccountStrategy } from '@/commanders/remove';
 import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { setSystemConfig } from '@/commanders/config';
 import { shutdown } from '@/commanders/shutdown';
+import { monitKill } from '@/commanders/monitKill';
 
 import { monitPrompt } from '@/components/index';
 import { kfKill } from '__gUtils/processUtils';
@@ -46,10 +47,7 @@ program
     .description('monitor all process with merged logs OR monitor one trading process (with -l)')
     .action((type: any, commander: any) => {
         if (commander.parent.kill) {
-            return kfKill(['monit'])
-                .then(() => {
-                    console.success(`Kill Monit Success!`)
-                })
+            return monitKill()
         }
         const list = commander.parent.list;
         return monitPrompt(!!list)

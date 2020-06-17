@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-06-11 16:09:35
- * @LastEditTime: 2020-06-11 16:27:03
+ * @LastEditTime: 2020-06-16 20:27:36
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/cli2/src/commanders/shutdown.ts
@@ -16,18 +16,18 @@ const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
 
-function deleteNNFiles () {
+export function deleteNNFiles (rootPathName = KF_HOME) {
     return new Promise((resolve, reject) => {
         glob('**/*.nn', {
-            cwd: KF_HOME
+            cwd: rootPathName
         }, (err: Error, files: any) => {
             if (err) {
                 reject(err)
             }
     
             files.forEach((file: any) => {
-                console.log('Deleting ', path.join(KF_HOME, file))
-                fs.unlinkSync(path.join(KF_HOME, file))
+                console.log('Deleting ', path.join(rootPathName, file))
+                fs.unlinkSync(path.join(rootPathName, file))
             });
 
             resolve(true)

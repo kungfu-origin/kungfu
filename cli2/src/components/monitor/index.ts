@@ -209,19 +209,21 @@ export class MonitorDashboard extends Dashboard {
                     const len = t.globalData.logList.length;
                     t.globalData.logList = t.globalData.logList.slice(len < 2000 ? 0 : (len - 2000))
                     t.boards.mergedLogs.setItems(t.globalData.logList)
-                    if (!t.boards.mergedLogs.focused) {
-                        t.boards.mergedLogs.select(t.globalData.logList.length - 1)
-                        t.boards.mergedLogs.setScrollPerc(100)
-                    }
                 })
-                t.screen.render();
-                return
+                
+            } else {
+                //get 
+                t.globalData.logList = l;
+                t.boards.mergedLogs.setItems(t.globalData.logList)
+            }
+    
+            if (!t.boards.mergedLogs.focused) {
+                t.boards.mergedLogs.select(t.globalData.logList.length - 1)
+                t.boards.mergedLogs.setScrollPerc(100)
             }
 
-            //get 
-            t.globalData.logList = l;
-            t.boards.mergedLogs.setItems(t.globalData.logList)
             t.screen.render();
+
         })
     }
 
