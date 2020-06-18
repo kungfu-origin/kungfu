@@ -4,6 +4,9 @@ import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scr
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 import { LogsAndWatcherConcatObservable } from '@/assets/scripts/actions/logActions';
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
+import { logger } from '__gUtils/logUtils';
+
+
 const blessed = require('blessed');
 
 const WIDTH_LEFT_PANEL = 44;
@@ -167,7 +170,7 @@ export class MonitorDashboard extends Dashboard {
         });
 
         t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: any) => {
-            console.log('qqq', ch, key)
+            logger.info('qqq', ch, key)
 
             const keyName = key.full;
             if (!keyName) return;            
@@ -185,7 +188,7 @@ export class MonitorDashboard extends Dashboard {
 
         t.boards.processList.key(['up', 'down'], debounce((ch: string, key: any) => {
 
-            console.log('up / down', ch, key)
+            logger.info('up / down', ch, key)
 
             const selectedIndex: number = t.boards.processList.selected;
             const curProcessItem = t.globalData.processList[selectedIndex];
