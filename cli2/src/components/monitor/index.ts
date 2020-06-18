@@ -166,9 +166,15 @@ export class MonitorDashboard extends Dashboard {
             t.boards[nameKey].focus();
         });
 
-        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: string) => {
-            t.screen.destroy();
-            process.exit(0);
+        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: any) => {
+            console.log('qqq', ch, key)
+
+            const keyName = key.full;
+            if (!keyName) return;            
+            if ((keyName === 'escape') || (keyName === 'C-c') || (keyName === 'q')) {
+                t.screen.destroy();
+                process.exit(0);
+            }
         });
 
         t.boards.processList.key(['enter'], () => {
@@ -177,7 +183,10 @@ export class MonitorDashboard extends Dashboard {
             switchProcess(curProcessItem, t.boards.message)
         })
 
-        t.boards.processList.key(['up', 'down'], debounce(() => {
+        t.boards.processList.key(['up', 'down'], debounce((ch: string, key: any) => {
+
+            console.log('up / down', ch, key)
+
             const selectedIndex: number = t.boards.processList.selected;
             const curProcessItem = t.globalData.processList[selectedIndex];
             t._getLogs(curProcessItem)
