@@ -49,13 +49,15 @@ Napi::Value Frame::Data(const Napi::CallbackInfo &info) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (frame_->msg_type() == DataType::tag) {
-      serialize::JsGet{}(result, frame_->data<DataType>());
+      serialize::JsSet{}(frame_->data<DataType>(), result);
+      result.DefineProperties({
+          Napi::PropertyDescriptor::Value("tag", Napi::Number::New(result.Env(), DataType::tag)),
+          Napi::PropertyDescriptor::Value("type", Napi::String::New(result.Env(), DataType::type_name.c_str())) //
+      });
     }
   });
   return result;
 }
-
-Napi::Value Frame::ToString(const Napi::CallbackInfo &info) { return Napi::String::New(info.Env(), "Frame.js"); }
 
 void Frame::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
@@ -68,7 +70,7 @@ void Frame::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("msgType", &Frame::MsgType),         //
                                         InstanceMethod("source", &Frame::Source),           //
                                         InstanceMethod("dest", &Frame::Dest),               //
-                                        InstanceMethod("toString", &Frame::ToString)        //
+                                        InstanceMethod("data", &Frame::Data)                //
                                     });
 
   constructor = Napi::Persistent(func);
@@ -194,9 +196,13 @@ void Assemble::Init(Napi::Env env, Napi::Object exports) {
 }
 
 std::vector<locator_ptr> Assemble::ExtractLocator(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 0, &Napi::Value::IsArray)) {
+    throw Napi::Error::New(info.Env(), "Invalid locators argument");
+  }
   std::vector<locator_ptr> result = {};
-  for (int i = 0; i < info.Length(); i++) {
-    result.push_back(IODevice::GetLocator(info, i));
+  auto locators = info[0].As<Napi::Array>();
+  for (int i = 0; i < locators.Length(); i++) {
+    result.push_back(IODevice::GetLocator(locators, i));
   }
   return result;
 }

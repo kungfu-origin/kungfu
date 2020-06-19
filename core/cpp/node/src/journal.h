@@ -32,8 +32,6 @@ public:
 
   Napi::Value Data(const Napi::CallbackInfo &info);
 
-  Napi::Value ToString(const Napi::CallbackInfo &info);
-
   static void Init(Napi::Env env, Napi::Object exports);
 
   static Napi::Value NewInstance(Napi::Value arg);

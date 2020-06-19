@@ -38,7 +38,14 @@ const locator = function (home) {
             return pages.map(p => parseInt(p.substr(dest_dir.length + 10, p.length - dest_dir.length - 10 - suffix.length)));
         },
         list_locations: function (category, group, name, mode) {
-            return [];
+            const locations = [];
+            const search_path = path.join(home, category, group, name, "journal", mode);
+            glob.sync(search_path).map(p => {
+                const dirs = p.split(path.sep);
+                const m = dirs.slice(dirs.length - 5);
+                locations.push({'category': m[0], 'group': m[1], 'name': m[2], 'mode': m[4]});
+            });
+            return locations;
         },
         list_location_dest: function (category, group, name, mode) {
             const dest_dir = layout_dir_from_home(home, category, group, name, mode, "journal");

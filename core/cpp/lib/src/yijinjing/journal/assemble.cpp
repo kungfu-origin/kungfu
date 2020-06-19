@@ -63,7 +63,6 @@ assemble assemble::operator+(assemble &other) {
 }
 
 void assemble::operator>>(const sink_ptr &sink) {
-  std::unordered_map<uint32_t, std::unordered_map<uint32_t, writer_ptr>> writer_maps = {};
   while (data_available()) {
     auto page = current_reader_->current_page();
     sink->put(page->get_location(), page->get_dest_id(), current_frame());
