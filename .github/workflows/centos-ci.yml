@@ -1,0 +1,16 @@
+name: Centos CI
+
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:latest'
+    steps:
+    - uses: actions/checkout@v1
+    - run: |
+        yarn env-pypi
+        yarn install
+        yarn build
+    - uses: actions/upload-artifact@v2
+      with:
+          path: app/build/app/*.rpm
