@@ -201,6 +201,37 @@ inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
   memcpy(des.bid_volume, ori.bid_qty, sizeof(des.ask_price));
 }
 
+inline void from_xtp(const XTPMarketDataStruct &ori, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
+                                      int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count, TopOfBook &des){
+    strcpy(des.source_id, SOURCE_XTP);
+    des.data_time = nsec_from_xtp_timestamp(ori.data_time);
+    strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, KUNGFU_TRADING_DAY_FORMAT).c_str());
+    strcpy(des.instrument_id, ori.ticker);
+    from_xtp(ori.exchange_id, des.exchange_id);
+    if (ori.data_type == XTP_MARKETDATA_OPTION) {
+      des.instrument_type = InstrumentType::StockOption;
+    } else {
+      // 目前除逆回购之外的债券均当做股票
+      if (is_reverse_repurchase(des.instrument_id, des.exchange_id)) {
+        des.instrument_type = InstrumentType::Bond;
+      } else {
+        des.instrument_type = InstrumentType::Stock;
+      }
+    }
+    des.last_price = ori.last_price;
+    des.bid_price1 = ori.bid[0]; 
+    des.bid_volume1 = ori.bid_qty[0];
+    des.ask_price1 = ori.ask[0];
+    des.ask_volume1 = ori.ask_qty[0];
+
+    des.bid_count1 = bid1_count;
+    des.max_bid_count1 = max_bid1_count;
+    des.ask_count1 = ask1_count;
+    des.max_ask_count1 = max_ask1_count;
+    memcpy(des.bid_qty1, bid1_qty, bid1_count);
+    memcpy(des.ask_qty1, ask1_qty, ask1_count);
+}
+
 inline void to_xtp(XTPOrderInsertInfo &des, const OrderInput &ori) {
   strcpy(des.ticker, ori.instrument_id);
   to_xtp(des.market, ori.exchange_id);

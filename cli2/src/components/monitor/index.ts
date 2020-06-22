@@ -4,6 +4,9 @@ import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scr
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 import { LogsAndWatcherConcatObservable } from '@/assets/scripts/actions/logActions';
 import { throttleInsert, debounce } from '__gUtils/busiUtils';
+import { logger } from '__gUtils/logUtils';
+
+
 const blessed = require('blessed');
 
 const WIDTH_LEFT_PANEL = 44;
@@ -166,9 +169,15 @@ export class MonitorDashboard extends Dashboard {
             t.boards[nameKey].focus();
         });
 
-        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: string) => {
-            t.screen.destroy();
-            process.exit(0);
+        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: any) => {
+            logger.info('qqq', ch, key)
+
+            const keyName = key.full;
+            if (!keyName) return;            
+            if ((keyName === 'escape') || (keyName === 'C-c') || (keyName === 'q')) {
+                t.screen.destroy();
+                process.exit(0);
+            }
         });
 
         t.boards.processList.key(['enter'], () => {
@@ -177,7 +186,10 @@ export class MonitorDashboard extends Dashboard {
             switchProcess(curProcessItem, t.boards.message)
         })
 
-        t.boards.processList.key(['up', 'down'], debounce(() => {
+        t.boards.processList.key(['up', 'down'], debounce((ch: string, key: any) => {
+
+            logger.info('up / down', ch, key)
+
             const selectedIndex: number = t.boards.processList.selected;
             const curProcessItem = t.globalData.processList[selectedIndex];
             t._getLogs(curProcessItem)

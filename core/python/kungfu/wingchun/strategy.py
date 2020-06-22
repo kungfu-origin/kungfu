@@ -126,6 +126,9 @@ class Strategy(wc.Strategy):
     def on_quote(self, wc_context, quote):
         self.__call_proxy(self._on_quote, self.ctx, quote)
 
+    def on_top_of_book(self, wc_context, top_of_book):
+        self._on_top_of_book(self.ctx, top_of_book)
+
     def on_bar(self, wc_context, bar):
         self.__call_proxy(self._on_bar, self.ctx, bar)
 
