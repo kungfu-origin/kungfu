@@ -7,7 +7,12 @@
  * @FilePath: /kungfu/app/src/renderer/components/DataManagement/components/dataView.vue
 --> 
 <template>
-    <tr-dashboard title="数据预览">
+    <tr-dashboard :noHeader="true">
+        <el-tabs type="border-card">
+            <el-tab-pane label="概览">概览</el-tab-pane>
+            <el-tab-pane label="列表">列表</el-tab-pane>
+            <el-tab-pane label="可视化">可视化</el-tab-pane>
+        </el-tabs>
     </tr-dashboard>
 </template>
 

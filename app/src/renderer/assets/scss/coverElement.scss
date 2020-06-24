@@ -682,3 +682,32 @@ p.el-select-dropdown__empty{
         right: 0;
     }  
 }
+
+.el-tabs {
+
+    &.el-tabs--border-card {
+        background: $bg_card;
+        border: 0;
+
+        .el-tabs__header {
+            background: $bg_card;
+            border-bottom: 1px solid $icon;
+
+            .el-tabs__item {
+                height: 36px;
+                line-height: 36px;
+                border-left-color: $icon;
+                border-right-color: $icon;
+                box-sizing: border-box;
+
+                &.is-active {
+                    background: $tab_header;
+                }
+            }
+        }
+
+        .el-tabs__content {
+            box-sizing: border-box;
+        }
+    }
+}

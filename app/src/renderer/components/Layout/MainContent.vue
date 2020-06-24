@@ -23,7 +23,7 @@
                     <tr-menu-item
                     route="/data-management"
                     >
-                        <i class="el-icon-s-order" ></i>
+                        <i class="el-icon-s-data" ></i>
                         <template slot="title">数据</template>
                     </tr-menu-item>
                 </tr-menu>

@@ -92,6 +92,7 @@
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 import { makeDataSeriesDir, getDataSeriesIdFromDataset } from '__io/actions/dataManagement';
 import { importDatasetByDataSeriesId } from '__gUtils/processUtils';
+import { mapState } from 'vuex';
 
 export default {
 
@@ -111,8 +112,6 @@ export default {
                 dataSeriesId: ''
             },
 
-            currentDataSeriesId: '',
-
             setDataSeriesIdDialogVisiblity: false
         }
     },
@@ -120,6 +119,14 @@ export default {
     mounted () {
         this.renderTable = true;
         this.getDataSeriesId();
+    },
+
+    computed: {
+
+        ...mapState({
+            currentDataSeriesId: state => state.DATA_MANAGEMENT.currentDataSeriesId
+        })
+
     },
 
     methods: {
@@ -137,7 +144,7 @@ export default {
 
         //设置当前strategy
         handleRowClick(row) {
-            this.currentDataSeriesId = row.dataSeriesId
+            this.setCurrentDataSeriesId(row.dataSeriesId)
         },
         
         handleSelectRow (row) {
@@ -182,10 +189,15 @@ export default {
 
                     if (this.currentDataSeriesId === ''){
                         if (this.dataList.length) {
-                            this.currentDataSeriesId = this.dataList[0].dataSeriesId || ''
+                            const currentDataSeriesId = this.dataList[0].dataSeriesId || '';
+                            this.setCurrentDataSeriesId(currentDataSeriesId);
                         }
                     }
                 })
+        },
+
+        setCurrentDataSeriesId (currentDataSeriesId) {
+            this.$store.dispatch('setCurrentDataSeriesId', currentDataSeriesId)
         },
 
         clearData () {

@@ -4,7 +4,7 @@ import baseModule from './base';
 import accountModule from './account';
 import strategyModule from './strategy';
 import tradingDataMoudle from './tradingData';
-// import { createPersistedState, createSharedMutations } from 'vuex-electron'
+import dataManagement from './dataManagement';
 
 Vue.use(Vuex)
 
@@ -14,6 +14,7 @@ export default new Vuex.Store({
 		BASE: baseModule,
 		ACCOUNT: accountModule,
 		STRATEGY: strategyModule,
-		TRADING_DATA: tradingDataMoudle
+		TRADING_DATA: tradingDataMoudle,
+		DATA_MANAGEMENT: dataManagement
 	},
 })
