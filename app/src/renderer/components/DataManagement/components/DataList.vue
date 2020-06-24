@@ -26,27 +26,19 @@
                 :row-class-name="handleSelectRow"
                 >
                 <el-table-column
-                    prop="data_name"
+                    prop="dataSeriesId"
                     label="名称"
                     show-overflow-tooltip
                     min-width="80"
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="add_time"
-                    label="添加时间"
-                    min-width="80"
-                    >
-                </el-table-column>
-·
-                <el-table-column
                     label=""
                     align="right"
                     min-width="120"
                 >
-                    <template>
-                        <span class="tr-oper"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper"><i class="el-icon-setting mouse-over" title="TD 设置"></i></span>
+                    <template  slot-scope="props">
+                        <span class="tr-oper" @click="handleImportData(props.row)"><i class="el-icon-upload2 mouse-over" title="添加数据"></i></span>
                         <span :class="['tr-oper-delete']"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
                     </template>
                 </el-table-column>
@@ -71,6 +63,7 @@
                 :rules="[
                 { required: true, message: '请输入数据集Id', trigger: 'blur' },
                 { min: 1, max: 20, message: '长度不能超过 20 个字符', trigger: 'blur' },
+                { validator: validateDuplicateDataSeriesId, trigger: 'blur' },
                 { validator: chineseValidator, trigger: 'blur' },
                 { validator: specialStrValidator, trigger: 'blur' },
                 { validator: noZeroAtFirstValidator, trigger: 'blur' },
@@ -97,6 +90,8 @@
 <script>
 
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
+import { makeDataSeriesDir, getDataSeriesIdFromDataset } from '__io/actions/dataManagement';
+import { importDatasetByDataSeriesId } from '__gUtils/processUtils';
 
 export default {
 
@@ -116,29 +111,88 @@ export default {
                 dataSeriesId: ''
             },
 
+            currentDataSeriesId: '',
+
             setDataSeriesIdDialogVisiblity: false
         }
     },
 
     mounted () {
         this.renderTable = true;
+        this.getDataSeriesId();
     },
 
     methods: {
+
+        handleImportData (row) {
+            const dataSeriesId = row.dataSeriesId;
+            console.log(dataSeriesId)
+            return importDatasetByDataSeriesId(dataSeriesId)
+        },
+
         handleAdd () {
             this.setDataSeriesDialogType = 'add';
             this.setDataSeriesIdDialogVisiblity = true;
         },
 
-        handleRowClick () {},
+        //设置当前strategy
+        handleRowClick(row) {
+            this.currentDataSeriesId = row.dataSeriesId
+        },
+        
+        handleSelectRow (row) {
+            if(row.row.dataSeriesId == this.currentDataSeriesId) {
+                return 'selected-bg'
+            }
+        },
 
-        handleSelectRow () {},
+        handleClearAddDataSeriesDialog () {
+            this.clearData();
+        },
 
-        handleClearAddDataSeriesDialog () {},
+        handleConfirmAddDataSeries () {
+            this.$refs['setDataSeriesIdForm'].validate(valid => {
+                if (valid) {
+                    const dataSeriesId = this.setDataSeriesIdForm.dataSeriesId;
+                    makeDataSeriesDir(dataSeriesId)
+                        .then(() => {
+                            this.getDataSeriesId();
+                            this.clearData();
+                        })
+                }
+            })
+        },
 
-        handleConfirmAddDataSeries () {},
+         //check策略是否重复
+        validateDuplicateDataSeriesId(rule, value, callback){
+            const ifDuplicate = this.dataList.filter(s => (s.dataSeriesId === value)).length !== 0
+            if(ifDuplicate){
+                callback(new Error('该数据集ID已存在！'))
+            }else{
+                callback()
+            }
+        },
+
+        getDataSeriesId () {
+            return getDataSeriesIdFromDataset()
+                .then(res => {
+                    this.dataList = res
+                        .filter(file => !file.includes('.'))
+                        .map(file => ({ dataSeriesId: file }))
+
+                    if (this.currentDataSeriesId === ''){
+                        if (this.dataList.length) {
+                            this.currentDataSeriesId = this.dataList[0].dataSeriesId || ''
+                        }
+                    }
+                })
+        },
+
+        clearData () {
+            this.$set(this.setDataSeriesIdForm, 'dataSeriesId', '');
+            this.setDataSeriesIdDialogVisiblity = false;
+        },
     }
-
 }
 </script>
 

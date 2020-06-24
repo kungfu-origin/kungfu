@@ -28,6 +28,10 @@ addFileSync('', KF_HOME, 'folder')
 export const KF_RUNTIME_DIR = path.join(KF_HOME, 'runtime')
 addFileSync('', KF_RUNTIME_DIR, 'folder')
 
+//DATASET
+export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset')
+addFileSync('', KF_DATASET_DIR, 'folder')
+
 //system
 export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder')

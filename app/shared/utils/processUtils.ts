@@ -521,6 +521,11 @@ export const startGetProcessStatusByName = (name: string, callback: Function) =>
     return timer
 }
 
-
-
+//import dataset
+export const importDatasetByDataSeriesId = (dataSeriesId: string) => {
+    return startProcess({
+        "name": 'import-dataset-' + dataSeriesId,
+        "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
+    }, true).catch(err => logger.error('[startMaster]', err))
+} 
 
