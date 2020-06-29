@@ -12,6 +12,8 @@ import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
+import { resolve } from 'dns';
+import { stat } from 'fs';
 
 
 const path = require('path');
@@ -306,19 +308,42 @@ export const startArchiveMake = () => {
     .catch(err => logger.error('[startArchiveMake]', err))
 }
 
+
 export function startArchiveMakeTask (cb: Function) {
     return new Promise(resolve => {
         startArchiveMake()
-        .then(() => {
-            const timer = startGetProcessStatusByName('archive', (res: any[]) => {
-                const archiveStatus = res[0].pm2_env.status;
-                cb(archiveStatus)
-                if (archiveStatus !== 'online') {
-                    timer.clearLoop();
-                    resolve(archiveStatus)
-                }
+            .then(() => {
+                let timer = startGetProcessStatusByName('archive', (res: any[]) => {
+                    const archiveStatus = res[0].pm2_env.status;
+                    cb && cb(archiveStatus);
+                    if (archiveStatus !== 'online') {
+                        timer.clearLoop();
+                        resolve(archiveStatus)
+                    }
+                })
+            });
+    })
+}
+
+
+interface Pm2Options {
+    name: string;
+    args: string;
+}
+
+export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
+    return new Promise(resolve => {
+        startProcess({ ...options })
+            .then(() => {
+                let timer = startGetProcessStatusByName(options.name, (res: any[]) => {
+                    const status = res[0].pm2_env.status;
+                    cb && cb(status);
+                    if (status !== 'online') {
+                        timer.clearLoop();
+                        resolve(status)
+                    }
+                })
             })
-        });
     })
 }
 
@@ -521,11 +546,9 @@ export const startGetProcessStatusByName = (name: string, callback: Function) =>
     return timer
 }
 
-//import dataset
-export const importDatasetByDataSeriesId = (dataSeriesId: string) => {
-    return startProcess({
-        "name": 'import-dataset-' + dataSeriesId,
+export const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSeriesId: string): Pm2Options => {
+    return {
+        "name": namespace + dataSeriesId,
         "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
-    }, true).catch(err => logger.error('[startMaster]', err))
-} 
-
+    }
+}

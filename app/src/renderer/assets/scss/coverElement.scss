@@ -691,17 +691,20 @@ p.el-select-dropdown__empty{
 
         .el-tabs__header {
             background: $bg_card;
-            border-bottom: 1px solid $icon;
+            border-bottom: 1px solid $bg_light;
 
             .el-tabs__item {
                 height: 36px;
                 line-height: 36px;
-                border-left-color: $icon;
-                border-right-color: $icon;
+                border-left-color: $bg_light;
+                border-right-color: $bg_light;
                 box-sizing: border-box;
+                font-size: 12px;
 
                 &.is-active {
+                    font-size: 14px;
                     background: $tab_header;
+                    border-bottom-color: $bg_light;
                 }
             }
         }

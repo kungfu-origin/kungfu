@@ -2,10 +2,10 @@
      <main-content>
         <div class="kungfu-data-management__warp">
             <el-col :span="10">
-                <DataList></DataList>
+                <DataList @dataImportFinished="handleDataImportFinished"></DataList>
             </el-col>
             <el-col :span="14">
-                <DataView></DataView>
+                <DataView :currentId="currentDataSeriesId"></DataView>
             </el-col>
         </div>
     </main-content>
@@ -18,9 +18,21 @@ import DataView from './components/DataView';
 
 export default {
 
+    data () {
+        return {
+            currentDataSeriesId: ''
+        }
+    },
+
     components: {
         DataView,
         DataList
+    },
+
+    methods: {
+        handleDataImportFinished (currentId) {
+            this.currentDataSeriesId = currentId
+        }
     }
 }
 

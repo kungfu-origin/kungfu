@@ -45,53 +45,70 @@
             </el-table>
         </div>
 
-    <el-dialog 
-    width="340px" 
-    :title="setDataSeriesDialogType == 'add' ? '添加数据集' : '设置数据集'"  
-    v-if="setDataSeriesIdDialogVisiblity"
-    :visible.sync="setDataSeriesIdDialogVisiblity" 
-    :close-on-click-modal="false"
-    :close-on-press-escape="true"
-    @close="handleClearAddDataSeriesDialog"
-    @keyup.enter.native="handleConfirmAddDataSeries"
-    >
-        <el-form ref="setDataSeriesIdForm" label-width="90px" :model="setDataSeriesIdForm">
-            <!-- 自定义部分 -->
-            <el-form-item
-                label="数据集ID"
-                prop="dataSeriesId"
-                :rules="[
-                { required: true, message: '请输入数据集Id', trigger: 'blur' },
-                { min: 1, max: 20, message: '长度不能超过 20 个字符', trigger: 'blur' },
-                { validator: validateDuplicateDataSeriesId, trigger: 'blur' },
-                { validator: chineseValidator, trigger: 'blur' },
-                { validator: specialStrValidator, trigger: 'blur' },
-                { validator: noZeroAtFirstValidator, trigger: 'blur' },
-                { validator: noKeywordValidatorBuilder('all'), trigger: 'blur' },
-                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' }
-                ]"
-            >
-                <el-input 
-                v-model.trim="setDataSeriesIdForm.dataSeriesId" 
-                :disabled="setDataSeriesDialogType == 'set'"
-                 placeholder="请输入数据集名称"
-                 ></el-input>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button  size="mini" @click="handleClearAddDataSeriesDialog">取 消</el-button>
-            <el-button type="primary" size="mini" @click="handleConfirmAddDataSeries">确 定</el-button>
-        </div>
-    </el-dialog>
+        <el-dialog 
+        width="340px" 
+        :title="setDataSeriesDialogType == 'add' ? '添加数据集' : '设置数据集'"  
+        v-if="setDataSeriesIdDialogVisiblity"
+        :visible.sync="setDataSeriesIdDialogVisiblity" 
+        :close-on-click-modal="false"
+        :close-on-press-escape="true"
+        @close="handleClearAddDataSeriesDialog"
+        @keyup.enter.native="handleConfirmAddDataSeries"
+        >
+            <el-form ref="setDataSeriesIdForm" label-width="90px" :model="setDataSeriesIdForm">
+                <!-- 自定义部分 -->
+                <el-form-item
+                    label="数据集ID"
+                    prop="dataSeriesId"
+                    :rules="[
+                    { required: true, message: '请输入数据集Id', trigger: 'blur' },
+                    { min: 1, max: 20, message: '长度不能超过 20 个字符', trigger: 'blur' },
+                    { validator: validateDuplicateDataSeriesId, trigger: 'blur' },
+                    { validator: chineseValidator, trigger: 'blur' },
+                    { validator: specialStrValidator, trigger: 'blur' },
+                    { validator: noZeroAtFirstValidator, trigger: 'blur' },
+                    { validator: noKeywordValidatorBuilder('all'), trigger: 'blur' },
+                    { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' }
+                    ]"
+                >
+                    <el-input 
+                    v-model.trim="setDataSeriesIdForm.dataSeriesId" 
+                    :disabled="setDataSeriesDialogType == 'set'"
+                    placeholder="请输入数据集名称"
+                    ></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button  size="mini" @click="handleClearAddDataSeriesDialog">取 消</el-button>
+                <el-button type="primary" size="mini" @click="handleConfirmAddDataSeries">确 定</el-button>
+            </div>
+        </el-dialog>
+
+        <el-dialog
+        :title="`${dataimportStatusData.currentId} 数据导入`"
+        class="data-set-import-data-dialog"
+        :visible.sync="dataImportDialogVisiblity"
+        :show-close="false"
+        :close-on-click-modal="false"
+        width="450px"
+        >
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="dataImportStatus" :hasText="false"></tr-status>
+                {{ dataImportStatus === '100' ? '数据导入完成 ✓' : '数据导入中...' }}
+            </div>
+        </el-dialog>
 
     </tr-dashboard>
+
+    
 </template>
 
 <script>
 
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 import { makeDataSeriesDir, getDataSeriesIdFromDataset } from '__io/actions/dataManagement';
-import { importDatasetByDataSeriesId } from '__gUtils/processUtils';
+import { buildStartDatasetByDataSeriesIdOptions, startProcessLoopGetStatus } from '__gUtils/processUtils';
+import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { mapState } from 'vuex';
 
 export default {
@@ -112,6 +129,12 @@ export default {
                 dataSeriesId: ''
             },
 
+            dataimportStatusData: {
+                currentId: '',
+                status: ''
+            },
+
+            dataImportDialogVisiblity: false,
             setDataSeriesIdDialogVisiblity: false
         }
     },
@@ -125,7 +148,14 @@ export default {
 
         ...mapState({
             currentDataSeriesId: state => state.DATA_MANAGEMENT.currentDataSeriesId
-        })
+        }),
+
+        dataImportStatus () {
+            const status = this.dataimportStatusData.status
+            if (status === 'online') return '3'
+            if (status === 'stopped') return '100'
+            return status
+        }
 
     },
 
@@ -133,8 +163,18 @@ export default {
 
         handleImportData (row) {
             const dataSeriesId = row.dataSeriesId;
-            console.log(dataSeriesId)
-            return importDatasetByDataSeriesId(dataSeriesId)
+            const startOptions = buildStartDatasetByDataSeriesIdOptions('dataSeries-import-', dataSeriesId)
+            this.$set(this.dataimportStatusData, 'currentId', dataSeriesId);
+            this.dataImportDialogVisiblity = true;
+            return  startProcessLoopGetStatus(startOptions, (res) => {
+                this.$set(this.dataimportStatusData, 'status', res)
+            })
+            .then(() => delayMiliSeconds(1000))
+            .catch(err => {
+                this.$set(this.dataimportStatusData, 'status', 'errored')
+            })
+            .finally(() => this.clearDataImportStatus())
+            
         },
 
         handleAdd () {
@@ -204,7 +244,20 @@ export default {
             this.$set(this.setDataSeriesIdForm, 'dataSeriesId', '');
             this.setDataSeriesIdDialogVisiblity = false;
         },
+
+        clearDataImportStatus () {
+            this.dataImportDialogVisiblity = false;
+            this.$emit('dataImportFinished', this.dataimportStatusData.currentId)
+            return this.$nextTick().then(() => {
+                this.dataimportStatusData = {
+                    currentId: '',
+                    status: ''
+                }
+
+            })
+        }
     }
+
 }
 </script>
 
