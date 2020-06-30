@@ -26,7 +26,7 @@
             class="tr-table-scroller"
             :items="data"
             :item-size="20"
-            key-field="id"
+            :key-field="keyField"
             :buffer="100"
             >
                 <template v-slot="{item}">
@@ -64,7 +64,7 @@
             class="tr-table-scroller tr-table-dynamic-scroller"            
             :items="data"
             :min-item-size="50"
-            key-field="id"
+            :key-field="keyField"
             :buffer="100"
             >
                 <template v-slot="{ item, index, active }">
@@ -141,6 +141,11 @@ export default {
             default: () => {
                 return ''
             }
+        },
+
+        keyField: {
+            type: String,
+            default: 'id'
         }
     },
 

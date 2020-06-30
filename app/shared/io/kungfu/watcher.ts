@@ -329,6 +329,35 @@ export const dealGatewayStates = (gatewayStates: StringToStringObject): Array<Md
 }
 
 
+export const dealQuote = (quote: QuoteDataInput): QuoteData => {
+    return {
+        id: quote.exchange_id + quote.source_id + quote.instrument_id.toString() + String(quote.data_time),
+        closePrice: toDecimal(quote.close_price, 3),
+        dataTime: Number(quote.data_time),
+        exchangeId: quote.exchange_id,
+        highPrice: toDecimal(quote.high_price, 3),
+        instrumentId: quote.instrument_id,
+        instrumentType: instrumentType[quote.instrument_type],
+        lastPrice: toDecimal(quote.last_price, 3),
+        lowPrice: toDecimal(quote.low_price, 3),
+        lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),
+        openInterest: quote.open_interest,
+        openPrice: toDecimal(quote.open_price, 3),
+        preClosePrice: toDecimal(quote.pre_close_price, 3),
+        preOpenInterest: quote.pre_open_interest,
+        preSettlementPrice: toDecimal(quote.pre_settlement_price, 3),
+        settlementPrice: toDecimal(quote.settlement_price, 3),
+        sourceId: quote.source_id,
+        tradingDay: quote.trading_day,
+        turnover: quote.turnover,
+        upperLimitPrice: toDecimal(quote.upper_limit_price, 3),
+        volume: Number(quote.volume),
+    }
+       
+
+}
+
+
 
 // ========================== 交易数据处理 end ===========================
 

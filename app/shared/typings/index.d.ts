@@ -392,3 +392,52 @@ interface KungfuLocation {
     name: string;
     mode: string
 }
+
+interface QuoteDataInput {
+    close_price: number
+    data_time: bigint
+    exchange_id: string
+    high_price: number
+    instrument_id: string
+    instrument_type: number
+    last_price: number
+    low_price: number
+    lower_limit_price: number
+    open_interest: number
+    open_price: number
+    pre_close_price: number
+    pre_open_interest: number
+    pre_settlement_price: number
+    settlement_price: number
+    source_id: string
+    trading_day: string
+    turnover: number
+    upper_limit_price: number
+    volume: bigint
+}
+
+
+
+interface QuoteData {
+    id: string,
+    closePrice: string
+    dataTime: number
+    exchangeId: string
+    highPrice: string
+    instrumentId: string
+    instrumentType: string
+    lastPrice: string
+    lowPrice: string
+    lowerLimitPrice: string
+    openInterest: number
+    openPrice: string
+    preClosePrice: string
+    preOpenInterest: number
+    preSettlementPrice: string
+    settlementPrice: string
+    sourceId: string
+    tradingDay: string
+    turnover: number
+    upperLimitPrice: string
+    volume: number
+}

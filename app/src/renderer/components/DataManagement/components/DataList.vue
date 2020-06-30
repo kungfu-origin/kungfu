@@ -38,7 +38,7 @@
                     min-width="120"
                 >
                     <template  slot-scope="props">
-                        <span class="tr-oper" @click="handleImportData(props.row)"><i class="el-icon-upload2 mouse-over" title="添加数据"></i></span>
+                        <span class="tr-oper" @click.stop="handleImportData(props.row)"><i class="el-icon-upload2 mouse-over" title="添加数据"></i></span>
                         <span :class="['tr-oper-delete']"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
                     </template>
                 </el-table-column>

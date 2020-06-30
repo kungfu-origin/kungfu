@@ -1,10 +1,10 @@
 <template>
      <main-content>
         <div class="kungfu-data-management__warp">
-            <el-col :span="10">
+            <el-col style="width: 300px">
                 <DataList @dataImportFinished="handleDataImportFinished"></DataList>
             </el-col>
-            <el-col :span="14">
+            <el-col style="flex: 1">
                 <DataView :currentId="currentDataSeriesId"></DataView>
             </el-col>
         </div>
@@ -42,6 +42,7 @@ export default {
 
 .kungfu-data-management__warp {
     height: 100%;
+    display: flex;
 
     .el-col {
         height: 100%;
