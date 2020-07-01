@@ -333,7 +333,7 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
     return {
         id: quote.exchange_id + quote.source_id + quote.instrument_id.toString() + String(quote.data_time),
         closePrice: toDecimal(quote.close_price, 3),
-        dataTime: Number(quote.data_time),
+        dataTime: kungfu.formatTime(quote.data_time, '%Y-%m-%d %H:%M:%S'),
         exchangeId: quote.exchange_id,
         highPrice: toDecimal(quote.high_price, 3),
         instrumentId: quote.instrument_id,

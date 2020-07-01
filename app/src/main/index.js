@@ -281,3 +281,9 @@ function killAllBeforeQuit() {
 function openUrl(url) {
 	electron.shell.openExternal(url)
 }
+
+
+
+process.on('uncaughtException', function(err) {
+    logger.error('[MASTER] Error caught in uncaughtException event:', err);
+});

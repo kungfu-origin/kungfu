@@ -44,21 +44,30 @@ export default {
                 type: 'text',
                 label: '数据生成时间',
                 prop: "dataTime",
+                width: '160px'
+            }, 
+            {
+                type: 'text',
+                label: '合约ID',
+                prop: "instrumentId",
             }, 
             {
                 type: 'text',
                 label: '合约类型',
                 prop: "instrumentType",
+                width: '60px'
             }, 
             {
                 type: 'text',
                 label: '柜台ID',
                 prop: "sourceId",
+                width: '60px'
             }, 
             {
                 type: 'text',
                 label: '交易所ID',
                 prop: "exchangeId",
+                width: '70px'
             }, 
             {
                 type: 'number',
@@ -69,13 +78,7 @@ export default {
                 type: 'number',
                 label: '最高价',
                 prop: "highPrice",
-            }, 
-            {
-                type: 'text',
-                label: '合约ID',
-                prop: "instrumentId",
-            }, 
-           
+            },  
             {
                 type: 'number',
                 label: '最新价',
