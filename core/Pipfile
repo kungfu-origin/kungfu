@@ -1,5 +1,5 @@
 [[source]]
-url = "http://pypi.taurusai.com/simple/"
+url = "http://mirrors.aliyun.com/pypi/simple/"
 verify_ssl = false
 name = "pypi"
 
