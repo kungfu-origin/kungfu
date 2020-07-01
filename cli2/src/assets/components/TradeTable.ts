@@ -27,10 +27,10 @@ class TradeTable extends Table {
 	refresh (tradeList: TradeData[]) {
 		const t = this;
 		const tradeListData = tradeList.map((trade: TradeData) => {
-			let side = trade.side;
+			let side = trade.side || '';
 			if(side.toLowerCase() === 'buy') side = colors.red(side);
 			else if(side.toLowerCase() === 'sell') side = colors.green(side);
-			let offset = trade.offset
+			let offset = trade.offset || '';
 			if(offset.toLowerCase() === 'open') offset = colors.red(offset);
 			else if(offset.toLowerCase() === 'close') offset = colors.green(offset);
 			let last = trade.clientId;

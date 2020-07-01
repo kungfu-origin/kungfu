@@ -233,7 +233,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
-        side: sideName[item.side],
+        side: sideName[item.side] ? sideName[item.side] : '--',
         offset: offsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),

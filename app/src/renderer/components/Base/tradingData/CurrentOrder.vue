@@ -133,7 +133,7 @@ export default {
                     type: "text",
                     label: "",
                     prop: "side",
-                    width: '35px'
+                    width: '60px'
                 },{
                     type: "text",
                     label: "",
