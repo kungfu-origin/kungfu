@@ -169,7 +169,7 @@ export class MonitorDashboard extends Dashboard {
             t.boards[nameKey].focus();
         });
 
-        t.screen.key(['escape', 'q', 'C-c'], (ch: any, key: any) => {
+        t.screen.key(['C-c'], (ch: any, key: any) => {
             logger.info('qqq', ch, key)
 
             const keyName = key.full;

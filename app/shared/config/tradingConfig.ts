@@ -13,9 +13,28 @@ export const offsetName: NumberToStringObject = {
 }
 
 export const sideName: NumberToStringObject = {
-    0: isEnglish ? 'Buy' : '买',
-    1: isEnglish ? 'Sell' : '卖'
+    0: isEnglish ? 'Buy'                                : '买',
+    1: isEnglish ? 'Sell'                               : '卖',
+    2: isEnglish ? 'Lock'                               : '锁仓',
+    3: isEnglish ? 'Unlock'                             : '解锁',
+    4: isEnglish ? 'Exec'                               : '行权',
+    5: isEnglish ? 'Drop'                               : '放弃行权',
+    6: isEnglish ? 'Purchase'                           : '申购',
+    7: isEnglish ? 'Redemption'                         : '赎回',
+    8: isEnglish ? 'Split'                              : '拆分',
+    9: isEnglish ? 'Merge'                              : '合并',
+    10:isEnglish ? 'MarginTrade'                        : '融资买入',
+    11:isEnglish ? 'ShortSell'                          : '融券卖出',
+    12:isEnglish ? 'RepayMargin'                        : '卖券还款',
+    13:isEnglish ? 'RepayStock'                         : '买券还券',
+    14:isEnglish ? 'CashRepayMargin'                    : '现金还款',
+    15:isEnglish ? 'StockRepayStock'                    : '现券还券',
+    16:isEnglish ? 'SurplusStockTransfer'               : '余券划转',
+    17:isEnglish ? 'GuaranteeStockTransferIn'           : '担保品转入',
+    18:isEnglish ? 'GuaranteeStockTransferOut'          : '担保品转出',
+    
 }
+
 
 export const posDirection: NumberToStringObject = {
     0: isEnglish ? 'Long' : '多',
