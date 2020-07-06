@@ -39,7 +39,7 @@
                 >
                     <template  slot-scope="props">
                         <span class="tr-oper" @click.stop="handleImportData(props.row)"><i class="el-icon-upload2 mouse-over" title="添加数据"></i></span>
-                        <span :class="['tr-oper-delete']"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
+                        <span :class="['tr-oper-delete']" @click.stop="handleRemoveDataset(props.row)"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -106,7 +106,7 @@
 <script>
 
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
-import { makeDataSeriesDir, getDataSeriesIdFromDataset } from '__io/actions/dataManagement';
+import { makeDataSeriesDir, removeDataseriesFolder, getDataSeriesIdFromDataset } from '__io/actions/dataManagement';
 import { buildStartDatasetByDataSeriesIdOptions, startProcessLoopGetStatus } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { mapState } from 'vuex';
@@ -161,6 +161,22 @@ export default {
 
     methods: {
 
+        handleRemoveDataset (row) {
+            const dataSeriesId = row.dataSeriesId;
+            return this.$confirm(`删除数据集 ${dataSeriesId} 会删除所有相关信息，确认删除吗？`, '提示', { confirmButtonText: '确 定', cancelButtonText: '取 消' })
+                .then(() => removeDataseriesFolder(dataSeriesId))
+                .then(() => this.$message.success('操作成功！'))
+                .then(() => {
+                    this.getDataSeriesId();
+                    this.clearData();
+                })
+                .catch((err) => {
+                    if(err == 'cancel') return
+                    this.$message.error(err.message || '操作失败！')
+                })
+
+        },
+
         handleImportData (row) {
             const dataSeriesId = row.dataSeriesId;
             const startOptions = buildStartDatasetByDataSeriesIdOptions('dataSeries-import-', dataSeriesId)
@@ -202,9 +218,14 @@ export default {
                 if (valid) {
                     const dataSeriesId = this.setDataSeriesIdForm.dataSeriesId;
                     makeDataSeriesDir(dataSeriesId)
+                        .then(() => this.$message.success('操作成功！'))
                         .then(() => {
                             this.getDataSeriesId();
                             this.clearData();
+                        })
+                        .catch((err) => {
+                            if(err == 'cancel') return
+                            this.$message.error(err.message || '操作失败！')
                         })
                 }
             })

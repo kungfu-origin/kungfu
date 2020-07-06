@@ -1,7 +1,8 @@
 
 
 import { KF_DATASET_DIR } from '__gConfig/pathConfig';
-import { listDir } from '__gUtils/fileUtils';
+import { listDir, removeFileFolder } from '__gUtils/fileUtils';
+
 
 const path = require('path');
 const fse = require('fs-extra')
@@ -13,4 +14,8 @@ export const makeDataSeriesDir = (dirname: string) => {
 
 export const getDataSeriesIdFromDataset = () => {
     return listDir(KF_DATASET_DIR)
+}
+
+export const removeDataseriesFolder = (dirname: string) => {
+    return removeFileFolder(path.join(KF_DATASET_DIR, dirname))
 }

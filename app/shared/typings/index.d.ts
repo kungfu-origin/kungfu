@@ -422,6 +422,7 @@ interface QuoteData {
     id: string,
     closePrice: string
     dataTime: number
+    dataTimeNumber: string,
     exchangeId: string
     highPrice: string
     instrumentId: string

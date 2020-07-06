@@ -283,7 +283,6 @@ function openUrl(url) {
 }
 
 
-
 process.on('uncaughtException', function(err) {
     logger.error('[MASTER] Error caught in uncaughtException event:', err);
 });
