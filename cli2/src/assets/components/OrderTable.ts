@@ -34,13 +34,13 @@ class OrderTable extends Table {
 	refresh(ordersList: OrderData[]){
 		const t = this;
 		const orderListData = ordersList.map(o => {
-			let side = o.side;
+			let side = o.side || '';
 			if(side.toLowerCase() === 'buy') side = colors.red(side);
 			else if(side.toLowerCase() === 'sell') side = colors.green(side);
-			let offset = o.offset
+			let offset = o.offset || ''
 			if(offset.toLowerCase() === 'open') offset = colors.red(offset);
 			else if(offset.toLowerCase() === 'close') offset = colors.green(offset);
-			let statusName = o.statusName
+			let statusName = o.statusName || ''
 			if([3, 5, 6].includes(+o.status)) statusName = colors.green(statusName);
 			else if(+o.status === 4) statusName = colors.red(statusName);
 			else statusName = statusName;

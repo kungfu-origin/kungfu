@@ -199,7 +199,7 @@ class TradingDataDashboard extends Dashboard {
 			t.boards[boards[i]].focus();
 		});
 	
-		t.screen.key(['escape', 'q', 'C-c'], function(ch: any, key: any) {
+		t.screen.key(['C-c'], function(ch: any, key: any) {
 			t.screen.destroy();
 			process.exit(0);
 		});	
