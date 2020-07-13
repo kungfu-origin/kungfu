@@ -183,9 +183,9 @@ private:
 };
 
 template <typename DataType>
-static constexpr auto is_own = [](const Client &broker_client) {
+static constexpr auto is_own = [](const Client &broker_client, bool enabled = true) {
   return rx::filter([&](const event_ptr &event) {
-    if (event->msg_type() == DataType::tag) {
+    if (enabled and event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
       return broker_client.is_fully_subscribed(event->source()) or
              broker_client.is_subscribed(data.exchange_id, data.instrument_id);

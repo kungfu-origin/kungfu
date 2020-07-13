@@ -77,6 +77,6 @@ exports.CommissionStore = function (home) {
     return new bindings.CommissionStore(locator(home));
 };
 
-exports.watcher = function (home, name) {
-    return new bindings.Watcher(locator(home), name);
+exports.watcher = function (home, name, bypassQuotes) {
+    return new bindings.Watcher(locator(home), name, bypassQuotes);
 };
