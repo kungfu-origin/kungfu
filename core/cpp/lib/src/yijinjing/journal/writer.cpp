@@ -42,7 +42,7 @@ frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t da
       throw journal_error("Can not lock writer for " + journal_.location_->uname);
     }
   }
-  if (journal_.current_frame()->address() + sizeof(frame_header) + data_length > journal_.page_->address_border()) {
+  if (journal_.current_frame()->address() + sizeof(frame_header) + data_length >= journal_.page_->address_border()) {
     close_page(trigger_time);
   }
   auto frame = journal_.current_frame();
