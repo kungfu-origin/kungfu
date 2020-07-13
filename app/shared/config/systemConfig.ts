@@ -80,6 +80,15 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
+            },
+            {
+                "key": "closePnl",
+                "name": isEnglish ? "Close Pnl Calculation" : "关闭Pnl计算",
+                "cli": true,
+                "tip": isEnglish ? "Close Pnl Calculation" : "在订阅一定数量（上千）支Ticker时，由行情推送触发pnl计算会导致性能问题，需关闭",
+                "default": false,
+                "type": SystemConfigChildItemTypeEnum.Bool,
+                "required": true
             }
         ]
     },
