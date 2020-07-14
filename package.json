@@ -1,7 +1,7 @@
 {
   "name": "kungfu",
   "author": "taurus.ai",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,

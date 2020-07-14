@@ -1,23 +1,28 @@
-import { KF_HOME } from '__gConfig/pathConfig';
+import { KF_HOME, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
+import { readJsonSync } from '__gUtils/fileUtils';
 import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 import {KF_RUNTIME_DIR} from "../../config/pathConfig";
 
 
+
 export const watcher: any = (() => {
+    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
+    const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
+
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id));
+        return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
     }
 
     if (process.env.RENDERER_TYPE !== 'app') return {}
 
     const id = [process.env.APP_TYPE].join('');
-    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id));
+    return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
 })()
 
 

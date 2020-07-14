@@ -30,10 +30,17 @@ inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
   return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, IODevice::GetLocator(info));
 }
 
+inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 2, &Napi::Value::IsBoolean)) {
+    throw Napi::Error::New(info.Env(), "Invalid bypass argument");
+  }
+  return info[2].As<Napi::Boolean>().Value();
+}
+
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info), apprentice(GetWatcherLocation(info), true),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
-      broker_client_(*this), bookkeeper_(*this, broker_client_),
+      broker_client_(*this), bookkeeper_(*this, broker_client_, GetBypassQuotes(info)),
       history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),
       config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
       commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),
