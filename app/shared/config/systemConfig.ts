@@ -76,7 +76,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": "rocket",
                 "name": isEnglish ? "Open Rocket Model" : "开启极速模式",
                 "cli": true,
-                "tip": isEnglish ? "Use CPU 100%, restart is required" : "开启极速模式会使 CPU 达到100%，开启后请重启 Kungfu",
+                "tip": isEnglish ? "Use CPU 100%, restart is required" : "开启极速模式会使 CPU 达到100%，开启后请重启功夫交易系统",
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
@@ -85,7 +85,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": "bypassQuote",
                 "name": isEnglish ? "Close Quote Listener" : "关闭Quote监听",
                 "cli": true,
-                "tip": isEnglish ? "Close Quote Listener" : "在订阅一定数量（上千）支Ticker时，由行情推送触发pnl计算会导致性能问题，需关闭（在发生交易的时候才会触发pnl更新）",
+                "tip": isEnglish ? "Close Quote Listener" : "在订阅一定数量（上千）支Ticker时，由行情推送触发pnl计算会导致性能问题，需关闭（在发生交易的时候才会触发pnl更新）后重启功夫交易系统",
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
